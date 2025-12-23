@@ -48,7 +48,7 @@ export default function TimelinePage() {
     <div className="px-4 py-6 sm:px-0">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-          Timeline d'écoute
+          Timeline d&apos;écoute
         </h1>
         <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
           Évolution de vos écoutes au fil du temps

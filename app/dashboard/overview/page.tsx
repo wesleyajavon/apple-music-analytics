@@ -3,7 +3,7 @@ export default function OverviewPage() {
     <div className="px-4 py-6 sm:px-0">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-          Vue d'ensemble
+          Vue d&apos;ensemble
         </h1>
         <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
           Statistiques générales de votre écoute musicale
@@ -20,7 +20,7 @@ export default function OverviewPage() {
               <div className="ml-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
-                    Total d'écoutes
+                    Total d&apos;écoutes
                   </dt>
                   <dd className="text-lg font-medium text-gray-900 dark:text-white">
                     Chargement...

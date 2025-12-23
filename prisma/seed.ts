@@ -112,7 +112,6 @@ async function main() {
       prisma.artist.create({
         data: {
           name: artistData.name,
-          nameLower: artistData.name.toLowerCase(),
         },
       })
     )
@@ -127,7 +126,6 @@ async function main() {
       const track = await prisma.track.create({
         data: {
           title,
-          titleLower: title.toLowerCase(),
           artistId: artist.id,
           duration: Math.floor(Math.random() * 240) + 120, // 2-6 minutes
         },

@@ -9,6 +9,12 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  // ⚠️ IGNORER L'ERREUR DU LINTER - Cette URL est REQUISE pour Prisma CLI
+  // Le linter signale une erreur car Prisma 7+ recommande d'utiliser l'adapter,
+  // mais Prisma CLI (generate, migrate, db push) nécessite toujours cette URL.
+  // L'application utilise POSTGRES_PRISMA_URL via prisma/config.ts (avec pooler)
+  // Pour les migrations, définissez DATABASE_URL=POSTGRES_URL_NON_POOLING dans .env
+  url = env("DATABASE_URL") // NOLINT: Required for Prisma CLI
 }
 
 // User model represents a single user in this single-user app

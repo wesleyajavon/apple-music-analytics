@@ -2,89 +2,63 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider   = "prisma-client-js"
-  output     = "../generated/prisma"
-  engineType = "client" // enable Prisma ORM without Rust
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
-  // ⚠️ IGNORER L'ERREUR DU LINTER - Cette URL est REQUISE pour Prisma CLI
-  // Le linter signale une erreur car Prisma 7+ recommande d'utiliser l'adapter,
-  // mais Prisma CLI (generate, migrate, db push) nécessite toujours cette URL.
-  // L'application utilise POSTGRES_PRISMA_URL via prisma/config.ts (avec pooler)
-  // Pour les migrations, définissez DATABASE_URL=POSTGRES_URL_NON_POOLING dans .env
-  url = env("DATABASE_URL") // NOLINT: Required for Prisma CLI
+  url      = env("DATABASE_URL")
 }
 
-// User model represents a single user in this single-user app
-// For future multi-user support, this can be extended with authentication
 model User {
   id        String   @id @default(cuid())
-  email     String?  @unique // Optional email for future authentication
-  name      String? // Display name for the user
+  email     String?  @unique
+  name      String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  listens Listen[] // All listening history for this user
-
-  @@index([email]) // Index for potential email-based lookups
+  listens Listen[]
 }
 
-// Artist model stores normalized artist information
-// Normalized to avoid duplication and enable efficient queries
 model Artist {
   id        String   @id @default(cuid())
-  name      String   @unique // Normalized artist name (case-sensitive, unique)
-  nameLower String   @unique // Lowercase version for case-insensitive searches
-  mbid      String?  @unique // MusicBrainz ID for external data enrichment
-  imageUrl  String? // Artist image URL for UI display
+  name      String   @unique
+  mbid      String?  // MusicBrainz ID
+  imageUrl  String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  tracks Track[] // All tracks by this artist
-
-  @@index([nameLower]) // Index for case-insensitive name searches
-  @@index([mbid]) // Index for MusicBrainz ID lookups
+  tracks Track[]
 }
 
-// Track model stores normalized track information
-// Normalized with Artist relation to avoid data duplication
 model Track {
-  id         String   @id @default(cuid())
-  title      String // Track title
-  titleLower String // Lowercase version for case-insensitive searches
-  artistId   String // Foreign key to Artist (normalized relation)
-  artist     Artist   @relation(fields: [artistId], references: [id], onDelete: Cascade)
-  mbid       String?  @unique // MusicBrainz ID for external data enrichment
-  duration   Int? // Duration in seconds for analytics (playtime calculations)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id        String   @id @default(cuid())
+  title     String
+  artistId  String
+  artist    Artist   @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  mbid      String?  // MusicBrainz ID
+  duration  Int?     // Duration in seconds
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  listens Listen[] // All listen events for this track
+  listens Listen[]
 
-  @@unique([title, artistId]) // Ensures unique track per artist (handles same title by different artists)
-  @@index([artistId]) // Index for queries filtering by artist
-  @@index([titleLower]) // Index for case-insensitive title searches
-  @@index([mbid]) // Index for MusicBrainz ID lookups
+  @@unique([title, artistId])
+  @@index([artistId])
 }
 
-// Listen model represents a single listening event
-// Core data model for all analytics queries
 model Listen {
   id        String   @id @default(cuid())
-  userId    String // Foreign key to User (who listened)
+  userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  trackId   String // Foreign key to Track (what was listened to)
+  trackId   String
   track     Track    @relation(fields: [trackId], references: [id], onDelete: Cascade)
-  playedAt  DateTime // Timestamp of when the track was played (critical for time-based analytics)
-  source    String   @default("lastfm") // Data source: 'lastfm' or 'apple_music_replay' (for data provenance)
-  createdAt DateTime @default(now()) // When this record was created in the database
+  playedAt  DateTime // Timestamp of when the track was played
+  source    String   @default("lastfm") // 'lastfm' or 'apple_music_replay'
+  createdAt DateTime @default(now())
 
-  // Composite indexes for common time-based query patterns
-  @@index([userId, playedAt]) // Optimizes queries like "user's listens in date range"
-  @@index([trackId, playedAt]) // Optimizes queries like "track's play history over time"
-  @@index([playedAt]) // Optimizes general time-based queries and sorting
-  @@index([userId, trackId, playedAt]) // Optimizes queries for specific user-track combinations over time
-  @@index([source, playedAt]) // Optimizes queries filtering by data source and time
+  @@index([userId])
+  @@index([trackId])
+  @@index([playedAt])
+  @@index([userId, playedAt])
 }

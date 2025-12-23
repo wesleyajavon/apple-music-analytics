@@ -27,6 +27,7 @@ yarn-error.log*
 # local env files
 .env*.local
 .env
+.env.production
 
 # vercel
 .vercel
@@ -38,3 +39,8 @@ next-env.d.ts
 # prisma
 /prisma/migrations
 
+# generated
+/generated*
+
+# local settings
+.vscode/

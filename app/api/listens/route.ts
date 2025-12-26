@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { getListens, getAggregatedListens } from "@/lib/services/listening";
 import { ListensResponse, AggregatedListensResponse } from "@/lib/dto/listening";
 
+// Force dynamic rendering since we use request.url
+export const dynamic = "force-dynamic";
+
 /**
  * GET /api/listens
  * 

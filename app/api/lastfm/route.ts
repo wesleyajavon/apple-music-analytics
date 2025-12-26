@@ -5,6 +5,9 @@ import {
   isLastFmConfigured,
 } from "@/lib/services/lastfm";
 
+// Force dynamic rendering since we use request.url
+export const dynamic = "force-dynamic";
+
 /**
  * GET /api/lastfm
  * 

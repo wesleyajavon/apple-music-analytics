@@ -23,6 +23,7 @@ export const listeningKeys = {
   timeline: (params?: {
     startDate?: string;
     endDate?: string;
+    period?: "day" | "week" | "month";
     userId?: string;
   }) => [...listeningKeys.all, "timeline", params] as const,
 } as const;

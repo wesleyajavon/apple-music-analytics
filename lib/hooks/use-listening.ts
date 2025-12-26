@@ -70,12 +70,14 @@ async function fetchAggregatedListens(
 async function fetchTimeline(
   startDate?: string,
   endDate?: string,
+  period?: "day" | "week" | "month",
   userId?: string
 ): Promise<TimelineDataPoint[]> {
   const searchParams = new URLSearchParams();
   
   if (startDate) searchParams.append("startDate", startDate);
   if (endDate) searchParams.append("endDate", endDate);
+  if (period) searchParams.append("period", period);
   if (userId) searchParams.append("userId", userId);
 
   const queryString = searchParams.toString();
@@ -128,6 +130,7 @@ export function useAggregatedListens(
 export function useTimeline(
   startDate?: string,
   endDate?: string,
+  period?: "day" | "week" | "month",
   userId?: string,
   options?: Omit<
     UseQueryOptions<TimelineDataPoint[], Error>,
@@ -135,8 +138,8 @@ export function useTimeline(
   >
 ) {
   return useQuery<TimelineDataPoint[], Error>({
-    queryKey: listeningKeys.timeline({ startDate, endDate, userId }),
-    queryFn: () => fetchTimeline(startDate, endDate, userId),
+    queryKey: listeningKeys.timeline({ startDate, endDate, period, userId }),
+    queryFn: () => fetchTimeline(startDate, endDate, period, userId),
     ...options,
   });
 }

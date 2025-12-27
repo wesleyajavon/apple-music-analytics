@@ -3,6 +3,7 @@
  * Handles database queries and data aggregation
  */
 
+import { Prisma } from "@prisma/client";
 import { prisma } from "../prisma";
 import {
   ListenDto,
@@ -306,72 +307,41 @@ export async function getGenreDistribution(
 
 /**
  * Get overview statistics (total listens, unique artists, unique tracks, total play time)
+ * Optimized with a single SQL query using aggregations
  */
 export async function getOverviewStats(
   startDate?: Date,
   endDate?: Date,
   userId?: string
 ): Promise<OverviewStatsDto> {
-  const where: any = {};
+  // Build the query with conditional filters using Prisma.sql fragments
+  const query = Prisma.sql`
+    SELECT 
+      COUNT(*)::bigint as total_listens,
+      COUNT(DISTINCT l."trackId")::bigint as unique_tracks,
+      COUNT(DISTINCT t."artistId")::bigint as unique_artists,
+      COALESCE(SUM(t.duration), 0)::bigint as total_play_time
+    FROM "Listen" l
+    JOIN "Track" t ON l."trackId" = t.id
+    WHERE 1=1
+      ${startDate ? Prisma.sql`AND l."playedAt" >= ${startDate}` : Prisma.sql``}
+      ${endDate ? Prisma.sql`AND l."playedAt" <= ${endDate}` : Prisma.sql``}
+      ${userId ? Prisma.sql`AND l."userId" = ${userId}` : Prisma.sql``}
+  `;
 
-  if (startDate || endDate) {
-    where.playedAt = {};
-    if (startDate) {
-      where.playedAt.gte = startDate;
-    }
-    if (endDate) {
-      where.playedAt.lte = endDate;
-    }
-  }
+  const result = await prisma.$queryRaw<Array<{
+    total_listens: bigint;
+    unique_tracks: bigint;
+    unique_artists: bigint;
+    total_play_time: bigint;
+  }>>(query);
 
-  if (userId) {
-    where.userId = userId;
-  }
-
-  // Get total listens count
-  const totalListens = await prisma.listen.count({ where });
-
-  // Get unique tracks (distinct trackIds)
-  const uniqueTrackIds = await prisma.listen.findMany({
-    where,
-    select: { trackId: true },
-    distinct: ['trackId'],
-  });
-
-  const uniqueTracksCount = uniqueTrackIds.length;
-
-  // Get unique artists from the unique tracks
-  const tracksWithArtists = await prisma.track.findMany({
-    where: {
-      id: { in: uniqueTrackIds.map(l => l.trackId) },
-    },
-    select: { artistId: true },
-  });
-
-  const uniqueArtistIds = new Set(tracksWithArtists.map(t => t.artistId));
-  const uniqueArtistsCount = uniqueArtistIds.size;
-
-  // Get total play time by summing track durations for all listens
-  const listensWithTracks = await prisma.listen.findMany({
-    where,
-    select: {
-      track: {
-        select: {
-          duration: true,
-        },
-      },
-    },
-  });
-
-  const totalPlayTime = listensWithTracks.reduce((sum, listen) => {
-    return sum + (listen.track.duration || 0);
-  }, 0);
-
+  // Convert bigint to number and return
   return {
-    totalListens,
-    uniqueArtists: uniqueArtistsCount,
-    uniqueTracks: uniqueTracksCount,
-    totalPlayTime,
+    totalListens: Number(result[0].total_listens),
+    uniqueTracks: Number(result[0].unique_tracks),
+    uniqueArtists: Number(result[0].unique_artists),
+    totalPlayTime: Number(result[0].total_play_time),
   };
 }
 

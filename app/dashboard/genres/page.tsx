@@ -19,7 +19,6 @@ import { useGenres } from "@/lib/hooks/use-listening";
 import { LoadingState } from "@/lib/components/loading-state";
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState } from "@/lib/components/empty-state";
-import { DateRangeFilter } from "@/lib/components/date-range-filter";
 
 type ChartType = "pie" | "bar";
 
@@ -96,11 +95,6 @@ function GenresContent() {
 
   return (
     <>
-      {/* Date range filter bar */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3">
-        <DateRangeFilter />
-      </div>
-
       {/* Page content */}
       <div className="mt-6">
         <div className="mb-8">
@@ -288,11 +282,7 @@ export default function GenresPage() {
   return (
     <Suspense
       fallback={
-        <>
-          <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3">
-            <div className="h-10 bg-gray-100 dark:bg-gray-700 rounded animate-pulse" />
-          </div>
-          <div className="mt-6">
+        <div className="mt-6">
             <div className="mb-8">
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
                 Genres
@@ -303,7 +293,6 @@ export default function GenresPage() {
             </div>
             <LoadingState />
           </div>
-        </>
       }
     >
       <GenresContent />

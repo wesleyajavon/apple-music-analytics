@@ -1,9 +1,9 @@
 "use client";
 
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { useCallback } from "react";
+import { useCallback, useRef, useEffect, useState } from "react";
 
-export type DateRangePreset = "7d" | "30d" | "90d" | "1y" | "all";
+export type DateRangePreset = "7d" | "30d" | "ytd" | "all";
 
 interface DateRange {
   label: string;
@@ -11,9 +11,19 @@ interface DateRange {
   endDate: Date | null;
 }
 
+const getYearToDateRange = (): DateRange => {
+  const now = new Date();
+  const startOfYear = new Date(now.getFullYear(), 0, 1);
+  return {
+    label: "YTD",
+    startDate: startOfYear,
+    endDate: now,
+  };
+};
+
 const presets: Record<DateRangePreset, DateRange> = {
   "7d": {
-    label: "7 derniers jours",
+    label: "7d",
     startDate: (() => {
       const date = new Date();
       date.setDate(date.getDate() - 7);
@@ -22,7 +32,7 @@ const presets: Record<DateRangePreset, DateRange> = {
     endDate: new Date(),
   },
   "30d": {
-    label: "30 derniers jours",
+    label: "30d",
     startDate: (() => {
       const date = new Date();
       date.setDate(date.getDate() - 30);
@@ -30,26 +40,9 @@ const presets: Record<DateRangePreset, DateRange> = {
     })(),
     endDate: new Date(),
   },
-  "90d": {
-    label: "90 derniers jours",
-    startDate: (() => {
-      const date = new Date();
-      date.setDate(date.getDate() - 90);
-      return date;
-    })(),
-    endDate: new Date(),
-  },
-  "1y": {
-    label: "1 an",
-    startDate: (() => {
-      const date = new Date();
-      date.setFullYear(date.getFullYear() - 1);
-      return date;
-    })(),
-    endDate: new Date(),
-  },
+  ytd: getYearToDateRange(),
   all: {
-    label: "Tout",
+    label: "All",
     startDate: null,
     endDate: null,
   },
@@ -62,12 +55,48 @@ export function DateRangeFilter() {
 
   const currentPreset =
     (searchParams.get("preset") as DateRangePreset) || "30d";
-  const startDateParam = searchParams.get("startDate");
-  const endDateParam = searchParams.get("endDate");
+  const [indicatorStyle, setIndicatorStyle] = useState<{
+    left: number;
+    width: number;
+  } | null>(null);
+  const buttonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Calcule la position de l'indicateur actif
+  useEffect(() => {
+    const activeButton = buttonRefs.current[currentPreset];
+    if (activeButton && containerRef.current) {
+      const containerRect = containerRef.current.getBoundingClientRect();
+      const buttonRect = activeButton.getBoundingClientRect();
+      setIndicatorStyle({
+        left: buttonRect.left - containerRect.left,
+        width: buttonRect.width,
+      });
+    }
+  }, [currentPreset]);
+
+  // Recalculer la position lors du redimensionnement de la fenêtre
+  useEffect(() => {
+    const handleResize = () => {
+      const activeButton = buttonRefs.current[currentPreset];
+      if (activeButton && containerRef.current) {
+        const containerRect = containerRef.current.getBoundingClientRect();
+        const buttonRect = activeButton.getBoundingClientRect();
+        setIndicatorStyle({
+          left: buttonRect.left - containerRect.left,
+          width: buttonRect.width,
+        });
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [currentPreset]);
 
   const updateDateRange = useCallback(
     (preset: DateRangePreset) => {
-      const range = presets[preset];
+      // Recalculer YTD au moment du clic pour avoir la date actuelle
+      const range =
+        preset === "ytd" ? getYearToDateRange() : presets[preset];
       const params = new URLSearchParams(searchParams.toString());
 
       if (preset === "all") {
@@ -89,31 +118,55 @@ export function DateRangeFilter() {
     [router, pathname, searchParams]
   );
 
+  const presetEntries = Object.entries(presets) as [
+    DateRangePreset,
+    DateRange,
+  ][];
+
   return (
     <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3">
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-sm font-medium text-gray-700 dark:text-gray-300 mr-2">
           Période :
         </span>
-        {Object.entries(presets).map(([key, preset]) => {
-          const isActive = currentPreset === key;
-          return (
-            <button
-              key={key}
-              onClick={() => updateDateRange(key as DateRangePreset)}
-              className={`
-                px-3 py-1.5 text-sm font-medium rounded-md transition-colors
-                ${
-                  isActive
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
-                }
-              `}
-            >
-              {preset.label}
-            </button>
-          );
-        })}
+        <div
+          ref={containerRef}
+          className="relative flex items-center gap-2"
+        >
+          {/* Indicateur animé pour le bouton actif */}
+          {indicatorStyle && (
+            <div
+              className="absolute h-8 bg-blue-600 rounded-md transition-all duration-300 ease-out"
+              style={{
+                left: `${indicatorStyle.left}px`,
+                width: `${indicatorStyle.width}px`,
+              }}
+            />
+          )}
+          {presetEntries.map(([key, preset]) => {
+            const isActive = currentPreset === key;
+            return (
+              <button
+                key={key}
+                ref={(el) => {
+                  buttonRefs.current[key] = el;
+                }}
+                onClick={() => updateDateRange(key)}
+                className={`
+                  relative z-10 px-4 py-1.5 text-sm font-medium rounded-md
+                  transition-all duration-200 ease-out
+                  ${
+                    isActive
+                      ? "text-white"
+                      : "text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  }
+                `}
+              >
+                {preset.label}
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

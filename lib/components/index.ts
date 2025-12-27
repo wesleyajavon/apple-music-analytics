@@ -8,4 +8,5 @@ export * from "./empty-state";
 export * from "./sidebar";
 export * from "./date-range-filter";
 export * from "./period-selector";
+export * from "./artist-network-graph";
 

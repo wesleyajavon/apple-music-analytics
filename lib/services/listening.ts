@@ -374,3 +374,77 @@ export async function getAggregatedListens(
   }
 }
 
+/**
+ * Mapping simplifié des artistes vers les genres
+ * À remplacer par une vraie API de genres (Last.fm, MusicBrainz, etc.) dans le futur
+ */
+const ARTIST_TO_GENRE_MAP: Record<string, string> = {
+  "The Weeknd": "R&B",
+  "Dua Lipa": "Pop",
+  "Taylor Swift": "Pop",
+  "Arctic Monkeys": "Indie Rock",
+  "Kendrick Lamar": "Hip-Hop",
+  "Daft Punk": "Electronic",
+  "Bon Iver": "Indie Folk",
+  "Beach House": "Dream Pop",
+  // Ajoutez plus de mappings selon vos besoins
+};
+
+/**
+ * Fonction helper pour obtenir le genre d'un artiste
+ * Retourne "Unknown" si l'artiste n'est pas dans le mapping
+ */
+function getGenreForArtist(artistName: string): string {
+  return ARTIST_TO_GENRE_MAP[artistName] || "Unknown";
+}
+
+/**
+ * Get genre distribution for listens within a date range
+ */
+export async function getGenreDistribution(
+  startDate?: Date,
+  endDate?: Date,
+  userId?: string
+): Promise<Array<{ genre: string; count: number }>> {
+  const where: any = {};
+
+  if (startDate || endDate) {
+    where.playedAt = {};
+    if (startDate) {
+      where.playedAt.gte = startDate;
+    }
+    if (endDate) {
+      where.playedAt.lte = endDate;
+    }
+  }
+
+  if (userId) {
+    where.userId = userId;
+  }
+
+  // Récupérer toutes les écoutes avec les artistes
+  const listens = await prisma.listen.findMany({
+    where,
+    include: {
+      track: {
+        include: {
+          artist: true,
+        },
+      },
+    },
+  });
+
+  // Agréger par genre
+  const genreCounts: Record<string, number> = {};
+
+  for (const listen of listens) {
+    const genre = getGenreForArtist(listen.track.artist.name);
+    genreCounts[genre] = (genreCounts[genre] || 0) + 1;
+  }
+
+  // Convertir en tableau et trier par count décroissant
+  return Object.entries(genreCounts)
+    .map(([genre, count]) => ({ genre, count }))
+    .sort((a, b) => b.count - a.count);
+}
+

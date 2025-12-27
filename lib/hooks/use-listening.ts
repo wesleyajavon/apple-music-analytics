@@ -9,6 +9,7 @@ import {
   ListenDto,
   AggregatedListenDto,
 } from "@/lib/dto/listening";
+import { GenreDistributionResponse } from "@/lib/dto/genres";
 import { listeningKeys } from "./query-keys";
 
 /**
@@ -158,6 +159,45 @@ export function useListen(
       return apiClient.get<ListenDto>(`/listens/${id}`);
     },
     enabled: !!id,
+    ...options,
+  });
+}
+
+/**
+ * Fonction pour récupérer la distribution des genres
+ */
+async function fetchGenreDistribution(
+  startDate?: string,
+  endDate?: string,
+  userId?: string
+): Promise<GenreDistributionResponse> {
+  const searchParams = new URLSearchParams();
+  
+  if (startDate) searchParams.append("startDate", startDate);
+  if (endDate) searchParams.append("endDate", endDate);
+  if (userId) searchParams.append("userId", userId);
+
+  const queryString = searchParams.toString();
+  const endpoint = `/genres${queryString ? `?${queryString}` : ""}`;
+  
+  return apiClient.get<GenreDistributionResponse>(endpoint);
+}
+
+/**
+ * Hook pour récupérer la distribution des genres
+ */
+export function useGenres(
+  startDate?: string,
+  endDate?: string,
+  userId?: string,
+  options?: Omit<
+    UseQueryOptions<GenreDistributionResponse, Error>,
+    "queryKey" | "queryFn"
+  >
+) {
+  return useQuery<GenreDistributionResponse, Error>({
+    queryKey: listeningKeys.genres({ startDate, endDate, userId }),
+    queryFn: () => fetchGenreDistribution(startDate, endDate, userId),
     ...options,
   });
 }

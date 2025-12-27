@@ -26,5 +26,10 @@ export const listeningKeys = {
     period?: "day" | "week" | "month";
     userId?: string;
   }) => [...listeningKeys.all, "timeline", params] as const,
+  genres: (params?: {
+    startDate?: string;
+    endDate?: string;
+    userId?: string;
+  }) => [...listeningKeys.all, "genres", params] as const,
 } as const;
 

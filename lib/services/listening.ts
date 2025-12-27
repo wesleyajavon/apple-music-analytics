@@ -14,6 +14,7 @@ import {
   OverviewStatsDto,
 } from "../dto/listening";
 import { getGenreForArtist } from "./genre-service";
+import { executeDateAggregation } from "./listening-aggregation";
 
 /**
  * Fetch listens with optional filters
@@ -88,68 +89,13 @@ export async function getDailyAggregatedListens(
   endDate: Date,
   userId?: string
 ): Promise<DailyListenDto[]> {
-  const where: any = {
-    playedAt: {
-      gte: startDate,
-      lte: endDate,
-    },
-  };
-
-  if (userId) {
-    where.userId = userId;
-  }
-
-  // Use raw SQL for efficient date aggregation
-  const query = userId
-    ? prisma.$queryRaw<
-        Array<{
-          date: string;
-          listens: bigint;
-          unique_tracks: bigint;
-          unique_artists: bigint;
-        }>
-      >`
-        SELECT 
-          DATE("playedAt") as date,
-          COUNT(*)::int as listens,
-          COUNT(DISTINCT "trackId")::int as unique_tracks,
-          COUNT(DISTINCT t."artistId")::int as unique_artists
-        FROM "Listen" l
-        JOIN "Track" t ON l."trackId" = t.id
-        WHERE l."playedAt" >= ${startDate}
-          AND l."playedAt" <= ${endDate}
-          AND l."userId" = ${userId}
-        GROUP BY DATE("playedAt")
-        ORDER BY date ASC
-      `
-    : prisma.$queryRaw<
-        Array<{
-          date: string;
-          listens: bigint;
-          unique_tracks: bigint;
-          unique_artists: bigint;
-        }>
-      >`
-        SELECT 
-          DATE("playedAt") as date,
-          COUNT(*)::int as listens,
-          COUNT(DISTINCT "trackId")::int as unique_tracks,
-          COUNT(DISTINCT t."artistId")::int as unique_artists
-        FROM "Listen" l
-        JOIN "Track" t ON l."trackId" = t.id
-        WHERE l."playedAt" >= ${startDate}
-          AND l."playedAt" <= ${endDate}
-        GROUP BY DATE("playedAt")
-        ORDER BY date ASC
-      `;
-
-  const result = await query;
+  const result = await executeDateAggregation(startDate, endDate, 'day', userId);
 
   return result.map((row) => ({
-    date: row.date,
-    listens: Number(row.listens),
-    uniqueTracks: Number(row.unique_tracks),
-    uniqueArtists: Number(row.unique_artists),
+    date: row.date as string,
+    listens: row.listens,
+    uniqueTracks: row.unique_tracks,
+    uniqueArtists: row.unique_artists,
   }));
 }
 
@@ -161,67 +107,12 @@ export async function getWeeklyAggregatedListens(
   endDate: Date,
   userId?: string
 ): Promise<WeeklyListenDto[]> {
-  const where: any = {
-    playedAt: {
-      gte: startDate,
-      lte: endDate,
-    },
-  };
-
-  if (userId) {
-    where.userId = userId;
-  }
-
-  // Get weekly aggregates using date_trunc
-  const query = userId
-    ? prisma.$queryRaw<
-        Array<{
-          week_start: Date;
-          listens: bigint;
-          unique_tracks: bigint;
-          unique_artists: bigint;
-        }>
-      >`
-        SELECT 
-          DATE_TRUNC('week', "playedAt")::date as week_start,
-          COUNT(*)::int as listens,
-          COUNT(DISTINCT "trackId")::int as unique_tracks,
-          COUNT(DISTINCT t."artistId")::int as unique_artists
-        FROM "Listen" l
-        JOIN "Track" t ON l."trackId" = t.id
-        WHERE l."playedAt" >= ${startDate}
-          AND l."playedAt" <= ${endDate}
-          AND l."userId" = ${userId}
-        GROUP BY DATE_TRUNC('week', "playedAt")
-        ORDER BY week_start ASC
-      `
-    : prisma.$queryRaw<
-        Array<{
-          week_start: Date;
-          listens: bigint;
-          unique_tracks: bigint;
-          unique_artists: bigint;
-        }>
-      >`
-        SELECT 
-          DATE_TRUNC('week', "playedAt")::date as week_start,
-          COUNT(*)::int as listens,
-          COUNT(DISTINCT "trackId")::int as unique_tracks,
-          COUNT(DISTINCT t."artistId")::int as unique_artists
-        FROM "Listen" l
-        JOIN "Track" t ON l."trackId" = t.id
-        WHERE l."playedAt" >= ${startDate}
-          AND l."playedAt" <= ${endDate}
-        GROUP BY DATE_TRUNC('week', "playedAt")
-        ORDER BY week_start ASC
-      `;
-
-  const result = await query;
+  const result = await executeDateAggregation(startDate, endDate, 'week', userId);
 
   // Get daily breakdown for each week
   const weeklyData: WeeklyListenDto[] = await Promise.all(
     result.map(async (row) => {
-      const weekStart = new Date(row.week_start);
+      const weekStart = row.date instanceof Date ? row.date : new Date(row.date);
       const weekEnd = new Date(weekStart);
       weekEnd.setDate(weekEnd.getDate() + 6); // Sunday
 
@@ -234,9 +125,9 @@ export async function getWeeklyAggregatedListens(
       return {
         weekStart: weekStart.toISOString().split("T")[0],
         weekEnd: weekEnd.toISOString().split("T")[0],
-        listens: Number(row.listens),
-        uniqueTracks: Number(row.unique_tracks),
-        uniqueArtists: Number(row.unique_artists),
+        listens: row.listens,
+        uniqueTracks: row.unique_tracks,
+        uniqueArtists: row.unique_artists,
         dailyBreakdown,
       };
     })
@@ -253,69 +144,15 @@ export async function getMonthlyAggregatedListens(
   endDate: Date,
   userId?: string
 ): Promise<MonthlyListenDto[]> {
-  const where: any = {
-    playedAt: {
-      gte: startDate,
-      lte: endDate,
-    },
-  };
-
-  if (userId) {
-    where.userId = userId;
-  }
-
-  // Get monthly aggregates
-  const query = userId
-    ? prisma.$queryRaw<
-        Array<{
-          month: string;
-          listens: bigint;
-          unique_tracks: bigint;
-          unique_artists: bigint;
-        }>
-      >`
-        SELECT 
-          TO_CHAR("playedAt", 'YYYY-MM') as month,
-          COUNT(*)::int as listens,
-          COUNT(DISTINCT "trackId")::int as unique_tracks,
-          COUNT(DISTINCT t."artistId")::int as unique_artists
-        FROM "Listen" l
-        JOIN "Track" t ON l."trackId" = t.id
-        WHERE l."playedAt" >= ${startDate}
-          AND l."playedAt" <= ${endDate}
-          AND l."userId" = ${userId}
-        GROUP BY TO_CHAR("playedAt", 'YYYY-MM')
-        ORDER BY month ASC
-      `
-    : prisma.$queryRaw<
-        Array<{
-          month: string;
-          listens: bigint;
-          unique_tracks: bigint;
-          unique_artists: bigint;
-        }>
-      >`
-        SELECT 
-          TO_CHAR("playedAt", 'YYYY-MM') as month,
-          COUNT(*)::int as listens,
-          COUNT(DISTINCT "trackId")::int as unique_tracks,
-          COUNT(DISTINCT t."artistId")::int as unique_artists
-        FROM "Listen" l
-        JOIN "Track" t ON l."trackId" = t.id
-        WHERE l."playedAt" >= ${startDate}
-          AND l."playedAt" <= ${endDate}
-        GROUP BY TO_CHAR("playedAt", 'YYYY-MM')
-        ORDER BY month ASC
-      `;
-
-  const result = await query;
+  const result = await executeDateAggregation(startDate, endDate, 'month', userId);
 
   // Get daily breakdown for each month
   const monthlyData: MonthlyListenDto[] = await Promise.all(
     result.map(async (row) => {
-      const [year, month] = row.month.split("-");
-      const monthStart = new Date(parseInt(year), parseInt(month) - 1, 1);
-      const monthEnd = new Date(parseInt(year), parseInt(month), 0); // Last day of month
+      const month = row.date as string;
+      const [year, monthNum] = month.split("-");
+      const monthStart = new Date(parseInt(year), parseInt(monthNum) - 1, 1);
+      const monthEnd = new Date(parseInt(year), parseInt(monthNum), 0); // Last day of month
 
       const dailyBreakdown = await getDailyAggregatedListens(
         monthStart,
@@ -324,10 +161,10 @@ export async function getMonthlyAggregatedListens(
       );
 
       return {
-        month: row.month,
-        listens: Number(row.listens),
-        uniqueTracks: Number(row.unique_tracks),
-        uniqueArtists: Number(row.unique_artists),
+        month,
+        listens: row.listens,
+        uniqueTracks: row.unique_tracks,
+        uniqueArtists: row.unique_artists,
         dailyBreakdown,
       };
     })

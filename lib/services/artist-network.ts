@@ -139,8 +139,19 @@ function createGenreEdges(nodes: ArtistNode[]): ArtistEdge[] {
 }
 
 /**
+ * Helper function to create a normalized edge key
+ * Ensures consistent ordering (smaller ID first)
+ */
+function createEdgeKey(artistId1: string, artistId2: string): string {
+  return artistId1 < artistId2
+    ? `${artistId1}|${artistId2}`
+    : `${artistId2}|${artistId1}`;
+}
+
+/**
  * Create edges based on listening proximity
  * Two artists are connected if they were listened to within a time window
+ * Optimized with sliding window algorithm for O(n) complexity
  */
 async function createProximityEdges(
   nodes: ArtistNode[],
@@ -184,48 +195,39 @@ async function createProximityEdges(
 
   // Track proximity connections
   const proximityMap = new Map<string, number>(); // "artistId1|artistId2" -> count
+  const windowMs = proximityWindowMinutes * 60 * 1000;
 
-  // Calculate proximity: artists listened within the time window
-  for (let i = 0; i < listens.length; i++) {
-    const currentListen = listens[i];
-    const currentArtistId = currentListen.track.artistId;
+  // Sliding window algorithm: O(n) complexity
+  // Use two pointers (left and right) to maintain a time window
+  let left = 0;
+  for (let right = 0; right < listens.length; right++) {
+    const rightTime = listens[right].playedAt.getTime();
+    const rightArtistId = listens[right].track.artistId;
 
     // Skip if artist is not in our node set
-    if (!relevantArtistIds.has(currentArtistId)) {
+    if (!relevantArtistIds.has(rightArtistId)) {
       continue;
     }
 
-    const currentTime = currentListen.playedAt.getTime();
-    const windowMs = proximityWindowMinutes * 60 * 1000;
+    // Advance left pointer until it's within the time window
+    while (left < right && (rightTime - listens[left].playedAt.getTime()) > windowMs) {
+      left++;
+    }
 
-    // Look ahead for listens within the time window
-    for (let j = i + 1; j < listens.length; j++) {
-      const nextListen = listens[j];
-      const nextTime = nextListen.playedAt.getTime();
-      const timeDiff = nextTime - currentTime;
-
-      // If we've exceeded the time window, stop looking
-      if (timeDiff > windowMs) {
-        break;
-      }
-
-      const nextArtistId = nextListen.track.artistId;
+    // Compare right with all listens in the current window
+    for (let i = left; i < right; i++) {
+      const leftArtistId = listens[i].track.artistId;
 
       // Skip if same artist or artist not in our node set
       if (
-        currentArtistId === nextArtistId ||
-        !relevantArtistIds.has(nextArtistId)
+        rightArtistId === leftArtistId ||
+        !relevantArtistIds.has(leftArtistId)
       ) {
         continue;
       }
 
-      // Create edge key (normalized: smaller ID first)
-      const edgeKey =
-        currentArtistId < nextArtistId
-          ? `${currentArtistId}|${nextArtistId}`
-          : `${nextArtistId}|${currentArtistId}`;
-
-      // Increment proximity count
+      // Create edge key and increment proximity count
+      const edgeKey = createEdgeKey(leftArtistId, rightArtistId);
       proximityMap.set(edgeKey, (proximityMap.get(edgeKey) || 0) + 1);
     }
   }

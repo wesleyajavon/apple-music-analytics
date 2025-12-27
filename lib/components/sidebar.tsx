@@ -16,6 +16,7 @@ const navItems: NavItem[] = [
   { href: "/dashboard/genres", label: "Genres", icon: "🎵" },
   { href: "/dashboard/replay", label: "Replay", icon: "🎬" },
   { href: "/dashboard/network", label: "Réseau", icon: "🕸️" },
+  { href: "/dashboard/insights", label: "Insights", icon: "💡" },
 ];
 
 export function Sidebar() {

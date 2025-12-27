@@ -14,7 +14,7 @@ import {
   OverviewStatsDto,
 } from "../dto/listening";
 import { getGenreForArtist } from "./genre-service";
-import { executeDateAggregation } from "./listening-aggregation";
+import { executeDateAggregation, AggregationResult } from "./listening-aggregation";
 
 /**
  * Fetch listens with optional filters
@@ -100,6 +100,45 @@ export async function getDailyAggregatedListens(
 }
 
 /**
+ * Helper function to group daily data by week
+ */
+function groupDailyIntoWeekly(
+  dailyData: DailyListenDto[],
+  weeklyAggregations: AggregationResult[]
+): WeeklyListenDto[] {
+  const dailyMap = new Map(dailyData.map(d => [d.date, d]));
+
+  return weeklyAggregations.map((row) => {
+    // For week aggregations, date is always a Date object
+    const weekStart = row.date instanceof Date ? row.date : new Date(row.date);
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekEnd.getDate() + 6); // Sunday
+
+    // Extract daily breakdown for this week from the daily data
+    const dailyBreakdown: DailyListenDto[] = [];
+    const currentDate = new Date(weekStart);
+    
+    while (currentDate <= weekEnd) {
+      const dateStr = currentDate.toISOString().split("T")[0];
+      const dailyData = dailyMap.get(dateStr);
+      if (dailyData) {
+        dailyBreakdown.push(dailyData);
+      }
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    return {
+      weekStart: weekStart.toISOString().split("T")[0],
+      weekEnd: weekEnd.toISOString().split("T")[0],
+      listens: row.listens,
+      uniqueTracks: row.unique_tracks,
+      uniqueArtists: row.unique_artists,
+      dailyBreakdown,
+    };
+  });
+}
+
+/**
  * Aggregate listens by week
  */
 export async function getWeeklyAggregatedListens(
@@ -107,33 +146,53 @@ export async function getWeeklyAggregatedListens(
   endDate: Date,
   userId?: string
 ): Promise<WeeklyListenDto[]> {
-  const result = await executeDateAggregation(startDate, endDate, 'week', userId);
+  // Récupérer toutes les données quotidiennes une seule fois
+  const allDailyData = await getDailyAggregatedListens(startDate, endDate, userId);
+  
+  // Récupérer les agrégations hebdomadaires
+  const weeklyAggregations = await executeDateAggregation(startDate, endDate, 'week', userId);
 
-  // Get daily breakdown for each week
-  const weeklyData: WeeklyListenDto[] = await Promise.all(
-    result.map(async (row) => {
-      const weekStart = row.date instanceof Date ? row.date : new Date(row.date);
-      const weekEnd = new Date(weekStart);
-      weekEnd.setDate(weekEnd.getDate() + 6); // Sunday
+  // Grouper en semaines en mémoire
+  return groupDailyIntoWeekly(allDailyData, weeklyAggregations);
+}
 
-      const dailyBreakdown = await getDailyAggregatedListens(
-        weekStart,
-        weekEnd,
-        userId
-      );
+/**
+ * Helper function to group daily data by month
+ */
+function groupDailyIntoMonthly(
+  dailyData: DailyListenDto[],
+  monthlyAggregations: AggregationResult[]
+): MonthlyListenDto[] {
+  const dailyMap = new Map(dailyData.map(d => [d.date, d]));
 
-      return {
-        weekStart: weekStart.toISOString().split("T")[0],
-        weekEnd: weekEnd.toISOString().split("T")[0],
-        listens: row.listens,
-        uniqueTracks: row.unique_tracks,
-        uniqueArtists: row.unique_artists,
-        dailyBreakdown,
-      };
-    })
-  );
+  return monthlyAggregations.map((row) => {
+    // For month aggregations, date is always a string in format YYYY-MM
+    const month = typeof row.date === 'string' ? row.date : row.date.toISOString().slice(0, 7);
+    const [year, monthNum] = month.split("-");
+    const monthStart = new Date(parseInt(year), parseInt(monthNum) - 1, 1);
+    const monthEnd = new Date(parseInt(year), parseInt(monthNum), 0); // Last day of month
 
-  return weeklyData;
+    // Extract daily breakdown for this month from the daily data
+    const dailyBreakdown: DailyListenDto[] = [];
+    const currentDate = new Date(monthStart);
+    
+    while (currentDate <= monthEnd) {
+      const dateStr = currentDate.toISOString().split("T")[0];
+      const dailyData = dailyMap.get(dateStr);
+      if (dailyData) {
+        dailyBreakdown.push(dailyData);
+      }
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    return {
+      month,
+      listens: row.listens,
+      uniqueTracks: row.unique_tracks,
+      uniqueArtists: row.unique_artists,
+      dailyBreakdown,
+    };
+  });
 }
 
 /**
@@ -144,33 +203,14 @@ export async function getMonthlyAggregatedListens(
   endDate: Date,
   userId?: string
 ): Promise<MonthlyListenDto[]> {
-  const result = await executeDateAggregation(startDate, endDate, 'month', userId);
+  // Récupérer toutes les données quotidiennes une seule fois
+  const allDailyData = await getDailyAggregatedListens(startDate, endDate, userId);
+  
+  // Récupérer les agrégations mensuelles
+  const monthlyAggregations = await executeDateAggregation(startDate, endDate, 'month', userId);
 
-  // Get daily breakdown for each month
-  const monthlyData: MonthlyListenDto[] = await Promise.all(
-    result.map(async (row) => {
-      const month = row.date as string;
-      const [year, monthNum] = month.split("-");
-      const monthStart = new Date(parseInt(year), parseInt(monthNum) - 1, 1);
-      const monthEnd = new Date(parseInt(year), parseInt(monthNum), 0); // Last day of month
-
-      const dailyBreakdown = await getDailyAggregatedListens(
-        monthStart,
-        monthEnd,
-        userId
-      );
-
-      return {
-        month,
-        listens: row.listens,
-        uniqueTracks: row.unique_tracks,
-        uniqueArtists: row.unique_artists,
-        dailyBreakdown,
-      };
-    })
-  );
-
-  return monthlyData;
+  // Grouper en mois en mémoire
+  return groupDailyIntoMonthly(allDailyData, monthlyAggregations);
 }
 
 /**

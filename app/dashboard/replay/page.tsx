@@ -128,17 +128,23 @@ function ReplayComparisonContent() {
   );
 
   if (isLoading) {
-    return <LoadingState />;
+    return <LoadingState message="Chargement des données Replay..." />;
   }
 
   if (error) {
-    return <ErrorState error={error} onRetry={refetch} />;
+    return (
+      <ErrorState
+        error={error}
+        message="Impossible de charger les données Replay"
+        onRetry={refetch}
+      />
+    );
   }
 
   if (!summaries || summaries.length === 0) {
     return (
       <EmptyState
-        message="Aucune donnée Replay disponible. Importez vos données Apple Music Replay pour commencer la comparaison"
+        message="Aucune donnée Replay disponible. Importez vos données Apple Music Replay pour commencer la comparaison entre les années."
         icon="📊"
       />
     );

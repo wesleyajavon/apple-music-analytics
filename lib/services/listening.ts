@@ -11,6 +11,7 @@ import {
   WeeklyListenDto,
   MonthlyListenDto,
   ListensQueryParams,
+  OverviewStatsDto,
 } from "../dto/listening";
 
 /**
@@ -446,5 +447,76 @@ export async function getGenreDistribution(
   return Object.entries(genreCounts)
     .map(([genre, count]) => ({ genre, count }))
     .sort((a, b) => b.count - a.count);
+}
+
+/**
+ * Get overview statistics (total listens, unique artists, unique tracks, total play time)
+ */
+export async function getOverviewStats(
+  startDate?: Date,
+  endDate?: Date,
+  userId?: string
+): Promise<OverviewStatsDto> {
+  const where: any = {};
+
+  if (startDate || endDate) {
+    where.playedAt = {};
+    if (startDate) {
+      where.playedAt.gte = startDate;
+    }
+    if (endDate) {
+      where.playedAt.lte = endDate;
+    }
+  }
+
+  if (userId) {
+    where.userId = userId;
+  }
+
+  // Get total listens count
+  const totalListens = await prisma.listen.count({ where });
+
+  // Get unique tracks (distinct trackIds)
+  const uniqueTrackIds = await prisma.listen.findMany({
+    where,
+    select: { trackId: true },
+    distinct: ['trackId'],
+  });
+
+  const uniqueTracksCount = uniqueTrackIds.length;
+
+  // Get unique artists from the unique tracks
+  const tracksWithArtists = await prisma.track.findMany({
+    where: {
+      id: { in: uniqueTrackIds.map(l => l.trackId) },
+    },
+    select: { artistId: true },
+  });
+
+  const uniqueArtistIds = new Set(tracksWithArtists.map(t => t.artistId));
+  const uniqueArtistsCount = uniqueArtistIds.size;
+
+  // Get total play time by summing track durations for all listens
+  const listensWithTracks = await prisma.listen.findMany({
+    where,
+    select: {
+      track: {
+        select: {
+          duration: true,
+        },
+      },
+    },
+  });
+
+  const totalPlayTime = listensWithTracks.reduce((sum, listen) => {
+    return sum + (listen.track.duration || 0);
+  }, 0);
+
+  return {
+    totalListens,
+    uniqueArtists: uniqueArtistsCount,
+    uniqueTracks: uniqueTracksCount,
+    totalPlayTime,
+  };
 }
 

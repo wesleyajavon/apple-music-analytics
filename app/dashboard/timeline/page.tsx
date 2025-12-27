@@ -95,11 +95,18 @@ function TimelineContent() {
         </div>
 
         {isLoading ? (
-          <LoadingState />
+          <LoadingState message="Chargement de la timeline d'écoute..." />
         ) : error ? (
-          <ErrorState error={error} onRetry={() => refetch()} />
+          <ErrorState
+            error={error}
+            message="Impossible de charger la timeline d'écoute"
+            onRetry={() => refetch()}
+          />
         ) : !data || data.length === 0 ? (
-          <EmptyState message="Aucune donnée d'écoute disponible pour cette période" />
+          <EmptyState
+            message="Aucune donnée d'écoute disponible pour cette période. Essayez de modifier la période ou les dates de filtrage."
+            icon="📈"
+          />
         ) : (
           <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
             <ResponsiveContainer width="100%" height={500}>
@@ -188,7 +195,7 @@ export default function TimelinePage() {
                 Évolution de vos écoutes au fil du temps
               </p>
             </div>
-            <LoadingState />
+            <LoadingState message="Chargement de la timeline d'écoute..." />
           </div>
         </>
       }

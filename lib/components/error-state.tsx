@@ -16,21 +16,23 @@ export function ErrorState({
   className = "",
 }: ErrorStateProps) {
   return (
-    <div className={`flex items-center justify-center py-12 ${className}`}>
-      <div className="text-center">
-        <div className="text-4xl mb-4">⚠️</div>
-        <p className="text-red-600 dark:text-red-400 font-medium mb-2">
+    <div className={`flex items-center justify-center py-16 ${className}`}>
+      <div className="text-center max-w-md mx-auto px-4">
+        <div className="text-6xl mb-6">⚠️</div>
+        <h3 className="text-lg font-semibold text-red-600 dark:text-red-400 mb-3">
           {message}
-        </p>
+        </h3>
         {error && (
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-            {error.message}
-          </p>
+          <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+            <p className="text-sm text-red-700 dark:text-red-300 font-mono break-words">
+              {error.message}
+            </p>
+          </div>
         )}
         {onRetry && (
           <button
             onClick={onRetry}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-500 transition-colors font-medium shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
           >
             Réessayer
           </button>

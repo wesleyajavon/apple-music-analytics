@@ -49,11 +49,18 @@ function NetworkContent() {
       </div>
 
       {isLoading ? (
-        <LoadingState />
+        <LoadingState message="Chargement du réseau d'artistes..." />
       ) : error ? (
-        <ErrorState error={error} onRetry={() => refetch()} />
+        <ErrorState
+          error={error}
+          message="Impossible de charger le réseau d'artistes"
+          onRetry={() => refetch()}
+        />
       ) : !data || data.nodes.length === 0 ? (
-        <EmptyState message="Aucune donnée disponible pour visualiser le réseau d'artistes" />
+        <EmptyState
+          message="Aucune donnée disponible pour visualiser le réseau d'artistes. Assurez-vous d'avoir des écoutes avec des connexions entre artistes."
+          icon="🕸️"
+        />
       ) : (
         <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
           <div className="mb-4 text-sm text-gray-600 dark:text-gray-400">
@@ -94,7 +101,7 @@ export default function NetworkPage() {
               Visualisation des connexions entre vos artistes écoutés
             </p>
           </div>
-          <LoadingState />
+          <LoadingState message="Chargement du réseau d'artistes..." />
         </div>
       }
     >

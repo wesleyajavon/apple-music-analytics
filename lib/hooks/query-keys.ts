@@ -31,6 +31,11 @@ export const listeningKeys = {
     endDate?: string;
     userId?: string;
   }) => [...listeningKeys.all, "genres", params] as const,
+  overview: (params?: {
+    startDate?: string;
+    endDate?: string;
+    userId?: string;
+  }) => [...listeningKeys.all, "overview", params] as const,
 } as const;
 
 export const networkKeys = {

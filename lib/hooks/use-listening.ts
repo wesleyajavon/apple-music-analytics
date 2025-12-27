@@ -8,6 +8,7 @@ import {
   ListensQueryParams,
   ListenDto,
   AggregatedListenDto,
+  OverviewStatsDto,
 } from "@/lib/dto/listening";
 import { GenreDistributionResponse } from "@/lib/dto/genres";
 import { listeningKeys } from "./query-keys";
@@ -198,6 +199,45 @@ export function useGenres(
   return useQuery<GenreDistributionResponse, Error>({
     queryKey: listeningKeys.genres({ startDate, endDate, userId }),
     queryFn: () => fetchGenreDistribution(startDate, endDate, userId),
+    ...options,
+  });
+}
+
+/**
+ * Fonction pour récupérer les statistiques d'overview
+ */
+async function fetchOverviewStats(
+  startDate?: string,
+  endDate?: string,
+  userId?: string
+): Promise<OverviewStatsDto> {
+  const searchParams = new URLSearchParams();
+  
+  if (startDate) searchParams.append("startDate", startDate);
+  if (endDate) searchParams.append("endDate", endDate);
+  if (userId) searchParams.append("userId", userId);
+
+  const queryString = searchParams.toString();
+  const endpoint = `/overview${queryString ? `?${queryString}` : ""}`;
+  
+  return apiClient.get<OverviewStatsDto>(endpoint);
+}
+
+/**
+ * Hook pour récupérer les statistiques d'overview
+ */
+export function useOverviewStats(
+  startDate?: string,
+  endDate?: string,
+  userId?: string,
+  options?: Omit<
+    UseQueryOptions<OverviewStatsDto, Error>,
+    "queryKey" | "queryFn"
+  >
+) {
+  return useQuery<OverviewStatsDto, Error>({
+    queryKey: listeningKeys.overview({ startDate, endDate, userId }),
+    queryFn: () => fetchOverviewStats(startDate, endDate, userId),
     ...options,
   });
 }

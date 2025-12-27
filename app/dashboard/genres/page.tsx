@@ -107,11 +107,18 @@ function GenresContent() {
         </div>
 
         {isLoading ? (
-          <LoadingState />
+          <LoadingState message="Chargement de la répartition des genres..." />
         ) : error ? (
-          <ErrorState error={error} onRetry={() => refetch()} />
+          <ErrorState
+            error={error}
+            message="Impossible de charger la répartition des genres"
+            onRetry={() => refetch()}
+          />
         ) : !data || data.data.length === 0 ? (
-          <EmptyState message="Aucune donnée d'écoute disponible pour cette période" />
+          <EmptyState
+            message="Aucune donnée de genre disponible pour cette période. Essayez de modifier les dates de filtrage."
+            icon="🎵"
+          />
         ) : (
           <div className="space-y-6">
             {/* Chart type selector */}
@@ -291,7 +298,7 @@ export default function GenresPage() {
                 Répartition de vos écoutes par genre musical
               </p>
             </div>
-            <LoadingState />
+            <LoadingState message="Chargement de la répartition des genres..." />
           </div>
       }
     >

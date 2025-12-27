@@ -89,3 +89,13 @@ export interface AggregatedListensResponse {
   endDate: string;
 }
 
+/**
+ * Statistics for overview page
+ */
+export interface OverviewStatsDto {
+  totalListens: number;
+  uniqueArtists: number;
+  uniqueTracks: number;
+  totalPlayTime: number; // Total play time in seconds
+}
+

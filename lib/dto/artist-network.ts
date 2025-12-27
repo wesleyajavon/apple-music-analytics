@@ -56,3 +56,4 @@ export interface ArtistNetworkQueryParams {
   minEdgeWeight?: number; // Minimum edge weight to include (default: 1)
 }
 
+

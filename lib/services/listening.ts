@@ -109,16 +109,16 @@ export async function getDailyAggregatedListens(
         }>
       >`
         SELECT 
-          DATE(played_at) as date,
+          DATE("playedAt") as date,
           COUNT(*)::int as listens,
-          COUNT(DISTINCT track_id)::int as unique_tracks,
-          COUNT(DISTINCT t.artist_id)::int as unique_artists
+          COUNT(DISTINCT "trackId")::int as unique_tracks,
+          COUNT(DISTINCT t."artistId")::int as unique_artists
         FROM "Listen" l
-        JOIN "Track" t ON l.track_id = t.id
-        WHERE l.played_at >= ${startDate}
-          AND l.played_at <= ${endDate}
-          AND l.user_id = ${userId}
-        GROUP BY DATE(played_at)
+        JOIN "Track" t ON l."trackId" = t.id
+        WHERE l."playedAt" >= ${startDate}
+          AND l."playedAt" <= ${endDate}
+          AND l."userId" = ${userId}
+        GROUP BY DATE("playedAt")
         ORDER BY date ASC
       `
     : prisma.$queryRaw<
@@ -130,15 +130,15 @@ export async function getDailyAggregatedListens(
         }>
       >`
         SELECT 
-          DATE(played_at) as date,
+          DATE("playedAt") as date,
           COUNT(*)::int as listens,
-          COUNT(DISTINCT track_id)::int as unique_tracks,
-          COUNT(DISTINCT t.artist_id)::int as unique_artists
+          COUNT(DISTINCT "trackId")::int as unique_tracks,
+          COUNT(DISTINCT t."artistId")::int as unique_artists
         FROM "Listen" l
-        JOIN "Track" t ON l.track_id = t.id
-        WHERE l.played_at >= ${startDate}
-          AND l.played_at <= ${endDate}
-        GROUP BY DATE(played_at)
+        JOIN "Track" t ON l."trackId" = t.id
+        WHERE l."playedAt" >= ${startDate}
+          AND l."playedAt" <= ${endDate}
+        GROUP BY DATE("playedAt")
         ORDER BY date ASC
       `;
 
@@ -182,16 +182,16 @@ export async function getWeeklyAggregatedListens(
         }>
       >`
         SELECT 
-          DATE_TRUNC('week', played_at)::date as week_start,
+          DATE_TRUNC('week', "playedAt")::date as week_start,
           COUNT(*)::int as listens,
-          COUNT(DISTINCT track_id)::int as unique_tracks,
-          COUNT(DISTINCT t.artist_id)::int as unique_artists
+          COUNT(DISTINCT "trackId")::int as unique_tracks,
+          COUNT(DISTINCT t."artistId")::int as unique_artists
         FROM "Listen" l
-        JOIN "Track" t ON l.track_id = t.id
-        WHERE l.played_at >= ${startDate}
-          AND l.played_at <= ${endDate}
-          AND l.user_id = ${userId}
-        GROUP BY DATE_TRUNC('week', played_at)
+        JOIN "Track" t ON l."trackId" = t.id
+        WHERE l."playedAt" >= ${startDate}
+          AND l."playedAt" <= ${endDate}
+          AND l."userId" = ${userId}
+        GROUP BY DATE_TRUNC('week', "playedAt")
         ORDER BY week_start ASC
       `
     : prisma.$queryRaw<
@@ -203,15 +203,15 @@ export async function getWeeklyAggregatedListens(
         }>
       >`
         SELECT 
-          DATE_TRUNC('week', played_at)::date as week_start,
+          DATE_TRUNC('week', "playedAt")::date as week_start,
           COUNT(*)::int as listens,
-          COUNT(DISTINCT track_id)::int as unique_tracks,
-          COUNT(DISTINCT t.artist_id)::int as unique_artists
+          COUNT(DISTINCT "trackId")::int as unique_tracks,
+          COUNT(DISTINCT t."artistId")::int as unique_artists
         FROM "Listen" l
-        JOIN "Track" t ON l.track_id = t.id
-        WHERE l.played_at >= ${startDate}
-          AND l.played_at <= ${endDate}
-        GROUP BY DATE_TRUNC('week', played_at)
+        JOIN "Track" t ON l."trackId" = t.id
+        WHERE l."playedAt" >= ${startDate}
+          AND l."playedAt" <= ${endDate}
+        GROUP BY DATE_TRUNC('week', "playedAt")
         ORDER BY week_start ASC
       `;
 
@@ -274,16 +274,16 @@ export async function getMonthlyAggregatedListens(
         }>
       >`
         SELECT 
-          TO_CHAR(played_at, 'YYYY-MM') as month,
+          TO_CHAR("playedAt", 'YYYY-MM') as month,
           COUNT(*)::int as listens,
-          COUNT(DISTINCT track_id)::int as unique_tracks,
-          COUNT(DISTINCT t.artist_id)::int as unique_artists
+          COUNT(DISTINCT "trackId")::int as unique_tracks,
+          COUNT(DISTINCT t."artistId")::int as unique_artists
         FROM "Listen" l
-        JOIN "Track" t ON l.track_id = t.id
-        WHERE l.played_at >= ${startDate}
-          AND l.played_at <= ${endDate}
-          AND l.user_id = ${userId}
-        GROUP BY TO_CHAR(played_at, 'YYYY-MM')
+        JOIN "Track" t ON l."trackId" = t.id
+        WHERE l."playedAt" >= ${startDate}
+          AND l."playedAt" <= ${endDate}
+          AND l."userId" = ${userId}
+        GROUP BY TO_CHAR("playedAt", 'YYYY-MM')
         ORDER BY month ASC
       `
     : prisma.$queryRaw<
@@ -295,15 +295,15 @@ export async function getMonthlyAggregatedListens(
         }>
       >`
         SELECT 
-          TO_CHAR(played_at, 'YYYY-MM') as month,
+          TO_CHAR("playedAt", 'YYYY-MM') as month,
           COUNT(*)::int as listens,
-          COUNT(DISTINCT track_id)::int as unique_tracks,
-          COUNT(DISTINCT t.artist_id)::int as unique_artists
+          COUNT(DISTINCT "trackId")::int as unique_tracks,
+          COUNT(DISTINCT t."artistId")::int as unique_artists
         FROM "Listen" l
-        JOIN "Track" t ON l.track_id = t.id
-        WHERE l.played_at >= ${startDate}
-          AND l.played_at <= ${endDate}
-        GROUP BY TO_CHAR(played_at, 'YYYY-MM')
+        JOIN "Track" t ON l."trackId" = t.id
+        WHERE l."playedAt" >= ${startDate}
+          AND l."playedAt" <= ${endDate}
+        GROUP BY TO_CHAR("playedAt", 'YYYY-MM')
         ORDER BY month ASC
       `;
 

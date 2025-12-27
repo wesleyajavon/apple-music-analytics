@@ -136,12 +136,13 @@ export function useTimeline(
   userId?: string,
   options?: Omit<
     UseQueryOptions<TimelineDataPoint[], Error>,
-    "queryKey" | "queryFn"
+    "queryKey" | "queryFn" | "staleTime"
   >
 ) {
   return useQuery<TimelineDataPoint[], Error>({
     queryKey: listeningKeys.timeline({ startDate, endDate, period, userId }),
     queryFn: () => fetchTimeline(startDate, endDate, period, userId),
+    staleTime: 2 * 60 * 1000, // 2 minutes - données dépendantes des filtres mais relativement stables
     ...options,
   });
 }
@@ -193,12 +194,13 @@ export function useGenres(
   userId?: string,
   options?: Omit<
     UseQueryOptions<GenreDistributionResponse, Error>,
-    "queryKey" | "queryFn"
+    "queryKey" | "queryFn" | "staleTime"
   >
 ) {
   return useQuery<GenreDistributionResponse, Error>({
     queryKey: listeningKeys.genres({ startDate, endDate, userId }),
     queryFn: () => fetchGenreDistribution(startDate, endDate, userId),
+    staleTime: 5 * 60 * 1000, // 5 minutes - distribution de genres qui change peu
     ...options,
   });
 }
@@ -232,12 +234,13 @@ export function useOverviewStats(
   userId?: string,
   options?: Omit<
     UseQueryOptions<OverviewStatsDto, Error>,
-    "queryKey" | "queryFn"
+    "queryKey" | "queryFn" | "staleTime"
   >
 ) {
   return useQuery<OverviewStatsDto, Error>({
     queryKey: listeningKeys.overview({ startDate, endDate, userId }),
     queryFn: () => fetchOverviewStats(startDate, endDate, userId),
+    staleTime: 5 * 60 * 1000, // 5 minutes - statistiques qui changent peu
     ...options,
   });
 }

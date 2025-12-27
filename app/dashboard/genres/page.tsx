@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useState, useMemo, useCallback, memo } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   PieChart,
@@ -36,6 +36,29 @@ const COLORS = [
   "#14b8a6", // teal
 ];
 
+// Custom tooltip mémorisé pour éviter les re-créations
+const CustomTooltip = memo(({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div className="bg-white dark:bg-gray-800 p-3 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
+        <p className="font-semibold text-gray-900 dark:text-white">
+          {data.name}
+        </p>
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          {data.count.toLocaleString("fr-FR")} écoutes
+        </p>
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          {data.percentage.toFixed(1)}%
+        </p>
+      </div>
+    );
+  }
+  return null;
+});
+
+CustomTooltip.displayName = "CustomTooltip";
+
 function GenresContent() {
   const searchParams = useSearchParams();
   // Par défaut, utiliser les 30 derniers jours si aucune date n'est spécifiée
@@ -43,9 +66,12 @@ function GenresContent() {
   const endDateParam = searchParams.get("endDate");
   
   // Si aucune date n'est spécifiée, utiliser les 30 derniers jours par défaut
-  const defaultEndDate = new Date();
-  const defaultStartDate = new Date();
-  defaultStartDate.setDate(defaultStartDate.getDate() - 30);
+  const defaultEndDate = useMemo(() => new Date(), []);
+  const defaultStartDate = useMemo(() => {
+    const date = new Date();
+    date.setDate(date.getDate() - 30);
+    return date;
+  }, []);
   
   const startDate = startDateParam || defaultStartDate.toISOString().split("T")[0];
   const endDate = endDateParam || defaultEndDate.toISOString().split("T")[0];
@@ -54,44 +80,26 @@ function GenresContent() {
 
   const { data, isLoading, error, refetch } = useGenres(startDate, endDate);
 
-  // Formater les données pour les graphiques
-  const chartData =
-    data?.data.map((item) => ({
-      name: item.genre,
-      value: item.count,
-      percentage: item.percentage,
-      count: item.count,
-    })) || [];
+  // Formater les données pour les graphiques - mémorisé pour éviter les recalculs
+  const chartData = useMemo(
+    () =>
+      data?.data.map((item) => ({
+        name: item.genre,
+        value: item.count,
+        percentage: item.percentage,
+        count: item.count,
+      })) || [],
+    [data]
+  );
 
-  // Custom tooltip pour afficher les pourcentages et comptages
-  const CustomTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      return (
-        <div className="bg-white dark:bg-gray-800 p-3 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
-          <p className="font-semibold text-gray-900 dark:text-white">
-            {data.name}
-          </p>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            {data.count.toLocaleString("fr-FR")} écoutes
-          </p>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            {data.percentage.toFixed(1)}%
-          </p>
-        </div>
-      );
-    }
-    return null;
-  };
-
-  // Label pour le pie chart (simplifié pour éviter la surcharge)
-  const renderCustomLabel = (entry: any) => {
+  // Label pour le pie chart (simplifié pour éviter la surcharge) - mémorisé
+  const renderCustomLabel = useCallback((entry: any) => {
     // Afficher seulement le pourcentage si > 5% pour éviter le surchargement
     if (entry.percentage > 5) {
       return `${entry.percentage.toFixed(1)}%`;
     }
     return "";
-  };
+  }, []);
 
   return (
     <>
@@ -189,7 +197,7 @@ function GenresContent() {
                         />
                       ))}
                     </Pie>
-                    <Tooltip content={<CustomTooltip />} />
+                    <Tooltip content={CustomTooltip} />
                     <Legend
                       verticalAlign="bottom"
                       height={36}
@@ -222,7 +230,7 @@ function GenresContent() {
                       stroke="#6b7280"
                       className="dark:stroke-gray-400"
                     />
-                    <Tooltip content={<CustomTooltip />} />
+                    <Tooltip content={CustomTooltip} />
                     <Legend />
                     <Bar
                       dataKey="count"

@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   LineChart,
@@ -19,6 +19,7 @@ import { PeriodSelector, PeriodType } from "@/lib/components/period-selector";
 
 /**
  * Formate une date selon le type de période
+ * Fonction pure, peut être mémorisée si nécessaire
  */
 function formatDate(date: string, period: PeriodType): string {
   switch (period) {
@@ -69,12 +70,15 @@ function TimelineContent() {
     period
   );
 
-  // Format data for chart with proper date formatting
-  const chartData =
-    data?.map((point) => ({
-      ...point,
-      formattedDate: formatDate(point.date, period),
-    })) || [];
+  // Format data for chart with proper date formatting - mémorisé pour éviter les recalculs
+  const chartData = useMemo(
+    () =>
+      data?.map((point) => ({
+        ...point,
+        formattedDate: formatDate(point.date, period),
+      })) || [],
+    [data, period]
+  );
 
   return (
     <>

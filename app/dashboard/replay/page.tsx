@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, memo } from "react";
 import { useReplaySummaries } from "@/lib/hooks/use-replay";
 import { LoadingState } from "@/lib/components/loading-state";
 import { ErrorState } from "@/lib/components/error-state";
@@ -17,8 +17,9 @@ function formatMinutes(seconds: number): string {
 
 /**
  * Composant pour afficher une carte d'année individuelle
+ * Mémorisé pour éviter les re-renders inutiles
  */
-function YearCard({ summary }: { summary: ReplayYearlySummaryDto }) {
+const YearCard = memo(({ summary }: { summary: ReplayYearlySummaryDto }) => {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
       {/* En-tête avec l'année */}
@@ -98,7 +99,9 @@ function YearCard({ summary }: { summary: ReplayYearlySummaryDto }) {
       </div>
     </div>
   );
-}
+});
+
+YearCard.displayName = "YearCard";
 
 /**
  * Composant principal de comparaison

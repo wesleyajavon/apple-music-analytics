@@ -17,7 +17,8 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  listens Listen[]
+  listens       Listen[]
+  replayYearly  ReplayYearly[]
 }
 
 model Artist {
@@ -28,7 +29,8 @@ model Artist {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  tracks Track[]
+  tracks              Track[]
+  replayTopArtists    ReplayTopArtist[]
 }
 
 model Track {
@@ -41,9 +43,10 @@ model Track {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  listens Listen[]
+  listens          Listen[]
+  replayTopTracks  ReplayTopTrack[]
 
-  @@unique([title, artistId])
+  @@unique([title, artistId], name: "unique_title_artist")
   @@index([artistId])
 }
 
@@ -61,4 +64,68 @@ model Listen {
   @@index([trackId])
   @@index([playedAt])
   @@index([userId, playedAt])
+}
+
+model ReplayYearly {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  year            Int      // Year (e.g., 2024)
+  totalPlayTime   Int      // Total play time in seconds
+  totalPlays      Int      // Total number of plays
+  importedAt      DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  topArtists  ReplayTopArtist[]
+  topTracks   ReplayTopTrack[]
+  topAlbums   ReplayTopAlbum[]
+
+  @@unique([userId, year])
+  @@index([userId])
+  @@index([year])
+}
+
+model ReplayTopArtist {
+  id            String        @id @default(cuid())
+  replayYearlyId String
+  replayYearly  ReplayYearly  @relation(fields: [replayYearlyId], references: [id], onDelete: Cascade)
+  artistId      String
+  artist        Artist        @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  rank          Int           // Position in top list (1, 2, 3, ...)
+  playCount     Int           // Number of plays for this artist
+  createdAt     DateTime      @default(now())
+
+  @@unique([replayYearlyId, rank])
+  @@index([replayYearlyId])
+  @@index([artistId])
+}
+
+model ReplayTopTrack {
+  id            String        @id @default(cuid())
+  replayYearlyId String
+  replayYearly  ReplayYearly  @relation(fields: [replayYearlyId], references: [id], onDelete: Cascade)
+  trackId       String
+  track         Track         @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  rank          Int           // Position in top list (1, 2, 3, ...)
+  playCount     Int           // Number of plays for this track
+  createdAt     DateTime      @default(now())
+
+  @@unique([replayYearlyId, rank])
+  @@index([replayYearlyId])
+  @@index([trackId])
+}
+
+model ReplayTopAlbum {
+  id            String        @id @default(cuid())
+  replayYearlyId String
+  replayYearly  ReplayYearly  @relation(fields: [replayYearlyId], references: [id], onDelete: Cascade)
+  albumName     String        // Album name (no separate Album model for now)
+  artistName    String        // Artist name for the album
+  rank          Int           // Position in top list (1, 2, 3, ...)
+  playCount     Int           // Number of plays for this album
+  createdAt     DateTime      @default(now())
+
+  @@unique([replayYearlyId, rank])
+  @@index([replayYearlyId])
 }

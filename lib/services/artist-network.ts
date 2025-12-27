@@ -11,31 +11,8 @@ import {
   ArtistEdge,
   ArtistNetworkQueryParams,
 } from "../dto/artist-network";
+import { getGenreForArtist } from "./genre-service";
 
-/**
- * Mapping simplifié des artistes vers les genres
- * Réutilise le mapping existant du service listening
- * À remplacer par une vraie API de genres (Last.fm, MusicBrainz, etc.) dans le futur
- */
-const ARTIST_TO_GENRE_MAP: Record<string, string> = {
-  "The Weeknd": "R&B",
-  "Dua Lipa": "Pop",
-  "Taylor Swift": "Pop",
-  "Arctic Monkeys": "Indie Rock",
-  "Kendrick Lamar": "Hip-Hop",
-  "Daft Punk": "Electronic",
-  "Bon Iver": "Indie Folk",
-  "Beach House": "Dream Pop",
-  // Ajoutez plus de mappings selon vos besoins
-};
-
-/**
- * Fonction helper pour obtenir le genre d'un artiste
- * Retourne "Unknown" si l'artiste n'est pas dans le mapping
- */
-function getGenreForArtist(artistName: string): string {
-  return ARTIST_TO_GENRE_MAP[artistName] || "Unknown";
-}
 
 /**
  * Build artist nodes from listening history

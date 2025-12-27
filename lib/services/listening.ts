@@ -13,6 +13,7 @@ import {
   ListensQueryParams,
   OverviewStatsDto,
 } from "../dto/listening";
+import { getGenreForArtist } from "./genre-service";
 
 /**
  * Fetch listens with optional filters
@@ -375,29 +376,6 @@ export async function getAggregatedListens(
   }
 }
 
-/**
- * Mapping simplifié des artistes vers les genres
- * À remplacer par une vraie API de genres (Last.fm, MusicBrainz, etc.) dans le futur
- */
-const ARTIST_TO_GENRE_MAP: Record<string, string> = {
-  "The Weeknd": "R&B",
-  "Dua Lipa": "Pop",
-  "Taylor Swift": "Pop",
-  "Arctic Monkeys": "Indie Rock",
-  "Kendrick Lamar": "Hip-Hop",
-  "Daft Punk": "Electronic",
-  "Bon Iver": "Indie Folk",
-  "Beach House": "Dream Pop",
-  // Ajoutez plus de mappings selon vos besoins
-};
-
-/**
- * Fonction helper pour obtenir le genre d'un artiste
- * Retourne "Unknown" si l'artiste n'est pas dans le mapping
- */
-function getGenreForArtist(artistName: string): string {
-  return ARTIST_TO_GENRE_MAP[artistName] || "Unknown";
-}
 
 /**
  * Get genre distribution for listens within a date range

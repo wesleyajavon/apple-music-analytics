@@ -3,5 +3,6 @@
  */
 
 export * from "./use-listening";
+export * from "./use-replay";
 export * from "./query-keys";
 

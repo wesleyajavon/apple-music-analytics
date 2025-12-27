@@ -64,6 +64,51 @@ export interface ReplayValidationResult {
 }
 
 /**
+ * Response DTO for Replay yearly summary (from API)
+ */
+export interface ReplayYearlySummaryDto {
+  id: string;
+  userId: string;
+  year: number;
+  totalPlayTime: number; // Total play time in seconds
+  totalPlays: number;
+  importedAt: string;
+  createdAt: string;
+  updatedAt: string;
+  topArtists: Array<{
+    id: string;
+    rank: number;
+    playCount: number;
+    artist: {
+      id: string;
+      name: string;
+      imageUrl: string | null;
+    };
+  }>;
+  topTracks: Array<{
+    id: string;
+    rank: number;
+    playCount: number;
+    track: {
+      id: string;
+      title: string;
+      duration: number | null;
+      artist: {
+        id: string;
+        name: string;
+      };
+    };
+  }>;
+  topAlbums: Array<{
+    id: string;
+    albumName: string;
+    artistName: string;
+    rank: number;
+    playCount: number;
+  }>;
+}
+
+/**
  * Validates a Replay yearly input
  */
 export function validateReplayYearlyInput(
@@ -324,4 +369,3 @@ export function validateReplayYearlyInput(
     errors,
   };
 }
-

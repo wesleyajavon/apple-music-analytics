@@ -67,14 +67,17 @@ export async function importReplayYearly(
       // Create or find artists from topArtists
       const artistMap = new Map<string, string>(); // artistName -> artistId
       for (const artistInput of input.topArtists) {
+        const artistNameLower = artistInput.name.toLowerCase();
         const artist = await tx.artist.upsert({
           where: { name: artistInput.name },
           update: {
+            nameLower: artistNameLower, // Always update nameLower
             // Update imageUrl if provided
             ...(artistInput.imageUrl && { imageUrl: artistInput.imageUrl }),
           },
           create: {
             name: artistInput.name,
+            nameLower: artistNameLower,
             ...(artistInput.imageUrl && { imageUrl: artistInput.imageUrl }),
           },
         });
@@ -87,11 +90,15 @@ export async function importReplayYearly(
         // Ensure artist exists
         let artistId = artistMap.get(trackInput.artistName);
         if (!artistId) {
+          const artistNameLower = trackInput.artistName.toLowerCase();
           const artist = await tx.artist.upsert({
             where: { name: trackInput.artistName },
-            update: {},
+            update: {
+              nameLower: artistNameLower, // Always update nameLower
+            },
             create: {
               name: trackInput.artistName,
+              nameLower: artistNameLower,
             },
           });
           artistId = artist.id;
@@ -99,6 +106,7 @@ export async function importReplayYearly(
         }
 
         // Create or find track
+        const trackTitleLower = trackInput.title.toLowerCase();
         const track = await tx.track.upsert({
           where: {
             unique_title_artist: {
@@ -107,11 +115,13 @@ export async function importReplayYearly(
             },
           },
           update: {
+            titleLower: trackTitleLower, // Always update titleLower
             // Update duration if provided
             ...(trackInput.duration && { duration: trackInput.duration }),
           },
           create: {
             title: trackInput.title,
+            titleLower: trackTitleLower,
             artistId,
             ...(trackInput.duration && { duration: trackInput.duration }),
           },

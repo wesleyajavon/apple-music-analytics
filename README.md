@@ -18,7 +18,7 @@ Tableau de bord d'analyse personnel pour visualiser votre comportement d'écoute
 
 Cette application permet de centraliser et visualiser vos données d'écoute musicale provenant de différentes sources :
 
-- **Last.fm** : Import automatique de votre historique d'écoute (avec API ou données mockées)
+- **Last.fm** : Import automatique de votre historique d'écoute via l'API Last.fm réelle
 - **Apple Music Replay** : Import manuel des résumés annuels Apple Music
 
 Le dashboard offre des visualisations interactives pour analyser vos habitudes d'écoute : statistiques générales, timeline, répartition par genres, comparaison annuelle, et graphique de réseau d'artistes.
@@ -207,9 +207,9 @@ POSTGRES_PRISMA_URL="postgres://default:xxx@xxx.pooler.supabase.com:6543/postgre
 POSTGRES_URL_NON_POOLING="postgres://default:xxx@xxx.pooler.supabase.com:5432/postgres"
 ```
 
-#### Last.fm API (Optionnel)
+#### Last.fm API (Requis pour utiliser vos vraies données)
 
-Pour activer l'intégration Last.fm réelle (sinon des données mockées seront utilisées) :
+Pour utiliser vos vraies données Last.fm :
 
 1. Créez un compte sur [https://www.last.fm/api/account/create](https://www.last.fm/api/account/create)
 2. Créez une application API
@@ -219,6 +219,8 @@ Pour activer l'intégration Last.fm réelle (sinon des données mockées seront 
 LASTFM_API_KEY="votre_lastfm_api_key"
 LASTFM_API_SECRET="votre_lastfm_api_secret"
 ```
+
+**Note** : Si les clés API ne sont pas configurées, l'application utilisera des données mockées (utile uniquement pour le développement).
 
 #### Variables automatiques
 
@@ -243,7 +245,12 @@ npm run db:push          # Appliquer le schéma directement (dev)
 npm run db:migrate       # Appliquer les migrations (production)
 npm run db:migrate:dev   # Créer une nouvelle migration (dev)
 npm run db:studio        # Ouvrir Prisma Studio
-npm run db:seed          # Exécuter le seed de la base de données
+npm run db:seed          # Exécuter le seed de la base de données (données de test)
+
+# Last.fm
+npm run user:create      # Créer un utilisateur dans la base
+npm run lastfm:import    # Importer les données Last.fm
+npm run db:reseed:lastfm # Nettoyer et réensemencer avec Last.fm
 
 # Utilitaires
 npm run lint             # Linter le code
@@ -339,7 +346,7 @@ GET /api/timeline?startDate=2024-01-01&endDate=2024-01-31&period=week
 
 #### GET `/api/lastfm`
 
-Récupère l'historique Last.fm (ou données mockées si non configuré).
+Récupère l'historique Last.fm depuis l'API réelle (ou données mockées si non configuré).
 
 **Query parameters** :
 - `username` (optionnel) : Nom d'utilisateur Last.fm
@@ -352,6 +359,25 @@ Récupère l'historique Last.fm (ou données mockées si non configuré).
 **Exemple** :
 ```bash
 GET /api/lastfm?username=johndoe&limit=100&page=1&format=normalized
+```
+
+#### POST `/api/lastfm/import`
+
+Importe les données Last.fm dans la base de données.
+
+**Body** :
+```json
+{
+  "userId": "user_123",
+  "username": "lastfm_username",
+  "limit": 200,
+  "page": 1
+}
+```
+
+**Note** : Utilisez les scripts officiels pour importer tout l'historique :
+```bash
+npm run lastfm:import -- --userId "USER_ID" --username "LASTFM_USERNAME"
 ```
 
 #### POST `/api/replay/import`

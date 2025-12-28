@@ -11,10 +11,10 @@ export const dynamic = "force-dynamic";
 /**
  * GET /api/lastfm
  * 
- * Fetch recent tracks from Last.fm (currently mocked)
+ * Fetch recent tracks from Last.fm API (uses real API if configured, otherwise falls back to mock data)
  * 
  * Query parameters:
- * - username: Last.fm username (optional, defaults to mock_user)
+ * - username: Last.fm username (required for real data)
  * - limit: Number of tracks per page (default: 50, max: 200)
  * - page: Page number (default: 1)
  * - from: Unix timestamp - start date (optional)

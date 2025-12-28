@@ -24,21 +24,26 @@ model User {
 model Artist {
   id        String   @id @default(cuid())
   name      String   @unique
-  mbid      String?  // MusicBrainz ID
+  nameLower String   @unique // Lowercase version for case-insensitive searches
+  mbid      String?  @unique // MusicBrainz ID
   imageUrl  String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   tracks              Track[]
   replayTopArtists    ReplayTopArtist[]
+
+  @@index([nameLower])
+  @@index([mbid])
 }
 
 model Track {
   id        String   @id @default(cuid())
   title     String
+  titleLower String  // Lowercase version for case-insensitive searches
   artistId  String
   artist    Artist   @relation(fields: [artistId], references: [id], onDelete: Cascade)
-  mbid      String?  // MusicBrainz ID
+  mbid      String?  @unique // MusicBrainz ID
   duration  Int?     // Duration in seconds
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -48,6 +53,8 @@ model Track {
 
   @@unique([title, artistId], name: "unique_title_artist")
   @@index([artistId])
+  @@index([titleLower])
+  @@index([mbid])
 }
 
 model Listen {

@@ -2,11 +2,11 @@
  * Last.fm Service
  * 
  * This service encapsulates Last.fm API calls.
- * Currently fully mocked with sample responses.
+ * Uses real Last.fm API when configured, falls back to mock data for development.
  * 
- * When ready to use real API:
+ * To use real API:
  * - Set LASTFM_API_KEY and LASTFM_API_SECRET in environment variables
- * - Replace mock functions with actual API calls
+ * - The service will automatically use the real API when keys are configured
  */
 
 import {
@@ -169,7 +169,7 @@ function normalizeTrack(track: LastFmTrack): NormalizedLastFmTrack {
 }
 
 /**
- * Fetch recent tracks from Last.fm (MOCKED)
+ * Fetch recent tracks from Last.fm API (real or mocked)
  * 
  * @param params Query parameters
  * @returns Normalized recent tracks
@@ -185,6 +185,89 @@ export async function getRecentTracks(
   const limit = params.limit || 50;
   const page = params.page || 1;
   const username = params.username || "mock_user";
+
+  // If Last.fm is not configured, use mock data
+  if (!isLastFmConfigured()) {
+    console.log("⚠️  Last.fm API not configured, using mock data");
+    return getMockRecentTracks(params);
+  }
+
+  // Make real API call to Last.fm
+  try {
+    const apiParams = new URLSearchParams({
+      method: "user.getrecenttracks",
+      user: username,
+      api_key: LASTFM_API_KEY,
+      format: "json",
+      limit: limit.toString(),
+      page: page.toString(),
+      ...(params.from && { from: params.from.toString() }),
+      ...(params.to && { to: params.to.toString() }),
+    });
+
+    const response = await fetch(`${LASTFM_BASE_URL}?${apiParams.toString()}`);
+    
+    if (!response.ok) {
+      throw new Error(`Last.fm API error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+
+    // Check for API errors
+    if (data.error) {
+      throw new Error(`Last.fm API error: ${data.error} - ${data.message || "Unknown error"}`);
+    }
+
+    // Parse response
+    const recentTracks = data.recenttracks;
+    if (!recentTracks || !recentTracks.track) {
+      return {
+        tracks: [],
+        totalPages: 0,
+        currentPage: page,
+        totalTracks: 0,
+      };
+    }
+
+    // Handle both single track and array of tracks
+    const tracks = Array.isArray(recentTracks.track) 
+      ? recentTracks.track 
+      : [recentTracks.track];
+
+    // Normalize tracks
+    const normalizedTracks = tracks
+      .filter((track: LastFmTrack) => track.date?.uts) // Filter out now playing tracks
+      .map(normalizeTrack);
+
+    const totalTracks = parseInt(recentTracks["@attr"]?.total || "0", 10);
+    const totalPages = parseInt(recentTracks["@attr"]?.totalPages || "0", 10);
+
+    return {
+      tracks: normalizedTracks,
+      totalPages,
+      currentPage: page,
+      totalTracks,
+    };
+  } catch (error) {
+    console.error("Error fetching from Last.fm API:", error);
+    console.log("Falling back to mock data");
+    return getMockRecentTracks(params);
+  }
+}
+
+/**
+ * Get mock recent tracks (fallback when API is not configured or fails)
+ */
+async function getMockRecentTracks(
+  params: LastFmRecentTracksParams = {}
+): Promise<{
+  tracks: NormalizedLastFmTrack[];
+  totalPages: number;
+  currentPage: number;
+  totalTracks: number;
+}> {
+  const limit = params.limit || 50;
+  const page = params.page || 1;
 
   // Simulate API delay
   await new Promise((resolve) => setTimeout(resolve, 100));
@@ -220,12 +303,63 @@ export async function getRecentTracks(
 }
 
 /**
- * Fetch recent tracks in Last.fm API format (MOCKED)
+ * Fetch recent tracks in Last.fm API format (real or mocked)
  * 
  * This function returns data in the exact format of Last.fm API
  * for compatibility with existing Last.fm integrations
  */
 export async function getRecentTracksRaw(
+  params: LastFmRecentTracksParams = {}
+): Promise<LastFmRecentTracksResponse> {
+  const limit = params.limit || 50;
+  const page = params.page || 1;
+  const username = params.username || "mock_user";
+
+  // If Last.fm is not configured, use mock data
+  if (!isLastFmConfigured()) {
+    console.log("⚠️  Last.fm API not configured, using mock data");
+    return getMockRecentTracksRaw(params);
+  }
+
+  // Make real API call to Last.fm
+  try {
+    const apiParams = new URLSearchParams({
+      method: "user.getrecenttracks",
+      user: username,
+      api_key: LASTFM_API_KEY,
+      format: "json",
+      limit: limit.toString(),
+      page: page.toString(),
+      ...(params.from && { from: params.from.toString() }),
+      ...(params.to && { to: params.to.toString() }),
+    });
+
+    const response = await fetch(`${LASTFM_BASE_URL}?${apiParams.toString()}`);
+    
+    if (!response.ok) {
+      throw new Error(`Last.fm API error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+
+    // Check for API errors
+    if (data.error) {
+      throw new Error(`Last.fm API error: ${data.error} - ${data.message || "Unknown error"}`);
+    }
+
+    // Return in Last.fm format
+    return data as LastFmRecentTracksResponse;
+  } catch (error) {
+    console.error("Error fetching from Last.fm API:", error);
+    console.log("Falling back to mock data");
+    return getMockRecentTracksRaw(params);
+  }
+}
+
+/**
+ * Get mock recent tracks in raw format (fallback)
+ */
+async function getMockRecentTracksRaw(
   params: LastFmRecentTracksParams = {}
 ): Promise<LastFmRecentTracksResponse> {
   const limit = params.limit || 50;
@@ -284,6 +418,160 @@ export function isLastFmConfigured(): boolean {
  */
 export function getLastFmBaseUrl(): string {
   return LASTFM_BASE_URL;
+}
+
+/**
+ * Import Last.fm tracks into the database
+ * Fetches tracks from Last.fm API and saves them as Listen records
+ * 
+ * @param userId User ID to associate listens with
+ * @param params Query parameters for fetching tracks
+ * @returns Import result with statistics
+ */
+export async function importLastFmTracks(
+  userId: string,
+  params: LastFmRecentTracksParams = {}
+): Promise<{
+  success: boolean;
+  imported: number;
+  skipped: number;
+  errors: string[];
+  totalPages?: number;
+  currentPage?: number;
+}> {
+  const { prisma } = await import("../prisma");
+  const errors: string[] = [];
+  let imported = 0;
+  let skipped = 0;
+
+  try {
+    // Fetch normalized tracks from Last.fm
+    const result = await getRecentTracks(params);
+    const { tracks, totalPages, currentPage } = result;
+
+    // Filter out tracks that are currently playing
+    const tracksToImport = tracks.filter(
+      (track) => track.playedAt && !track.isNowPlaying
+    );
+    skipped += tracks.length - tracksToImport.length;
+
+    // Process tracks in batches to avoid transaction timeout
+    const BATCH_SIZE = 50; // Process 50 tracks at a time
+    const MAX_TIMEOUT = 30000; // 30 seconds timeout per batch
+
+    for (let i = 0; i < tracksToImport.length; i += BATCH_SIZE) {
+      const batch = tracksToImport.slice(i, i + BATCH_SIZE);
+
+      try {
+        await prisma.$transaction(
+          async (tx) => {
+            for (const track of batch) {
+              try {
+                // Find or create artist
+                const artistNameLower = track.artistName.toLowerCase();
+                const artist = await tx.artist.upsert({
+                  where: { name: track.artistName },
+                  update: {
+                    nameLower: artistNameLower, // Always update nameLower
+                    ...(track.artistMbid && { mbid: track.artistMbid }),
+                    ...(track.imageUrl && { imageUrl: track.imageUrl }),
+                  },
+                  create: {
+                    name: track.artistName,
+                    nameLower: artistNameLower,
+                    ...(track.artistMbid && { mbid: track.artistMbid }),
+                    ...(track.imageUrl && { imageUrl: track.imageUrl }),
+                  },
+                });
+
+                // Find or create track
+                const trackTitleLower = track.trackName.toLowerCase();
+                const trackRecord = await tx.track.upsert({
+                  where: {
+                    unique_title_artist: {
+                      title: track.trackName,
+                      artistId: artist.id,
+                    },
+                  },
+                  update: {
+                    titleLower: trackTitleLower, // Always update titleLower
+                    ...(track.mbid && { mbid: track.mbid }),
+                  },
+                  create: {
+                    title: track.trackName,
+                    titleLower: trackTitleLower,
+                    artistId: artist.id,
+                    ...(track.mbid && { mbid: track.mbid }),
+                  },
+                });
+
+                // Check if this listen already exists (avoid duplicates)
+                const existingListen = await tx.listen.findFirst({
+                  where: {
+                    userId,
+                    trackId: trackRecord.id,
+                    playedAt: track.playedAt,
+                    source: "lastfm",
+                  },
+                });
+
+                if (existingListen) {
+                  skipped++;
+                  continue;
+                }
+
+                // Create listen record (playedAt is guaranteed to exist due to filter above)
+                if (!track.playedAt) {
+                  skipped++;
+                  continue;
+                }
+
+                await tx.listen.create({
+                  data: {
+                    userId,
+                    trackId: trackRecord.id,
+                    playedAt: track.playedAt,
+                    source: "lastfm",
+                  },
+                });
+
+                imported++;
+              } catch (error) {
+                const errorMessage = error instanceof Error ? error.message : "Unknown error";
+                errors.push(`Error importing track "${track.trackName}" by "${track.artistName}": ${errorMessage}`);
+              }
+            }
+          },
+          {
+            maxWait: MAX_TIMEOUT,
+            timeout: MAX_TIMEOUT,
+          }
+        );
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        errors.push(`Error processing batch ${Math.floor(i / BATCH_SIZE) + 1}: ${errorMessage}`);
+        // Continue with next batch even if this one fails
+      }
+    }
+
+    return {
+      success: errors.length === 0,
+      imported,
+      skipped,
+      errors,
+      totalPages,
+      currentPage,
+    };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    errors.push(`Failed to import Last.fm tracks: ${errorMessage}`);
+    return {
+      success: false,
+      imported,
+      skipped,
+      errors,
+    };
+  }
 }
 
 

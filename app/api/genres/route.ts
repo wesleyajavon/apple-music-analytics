@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getGenreDistribution } from "@/lib/services/listening";
 import { GenreDistributionResponse } from "@/lib/dto/genres";
-import { handleApiError, createValidationError } from "@/lib/utils/error-handler";
+import { handleApiError } from "@/lib/utils/error-handler";
+import {
+  extractOptionalDateRange,
+  extractOptionalUserId,
+} from "@/lib/middleware/validation";
 
 // Force dynamic rendering since we use request.url
 export const dynamic = "force-dynamic";
@@ -19,29 +23,8 @@ export const dynamic = "force-dynamic";
  */
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-
-    const startDate = searchParams.get("startDate")
-      ? new Date(searchParams.get("startDate")!)
-      : undefined;
-    const endDate = searchParams.get("endDate")
-      ? new Date(searchParams.get("endDate")!)
-      : undefined;
-    const userId = searchParams.get("userId") || undefined;
-
-    if (startDate && isNaN(startDate.getTime())) {
-      throw createValidationError(
-        "Invalid startDate format. Use ISO 8601 format (YYYY-MM-DD)",
-        { startDate: searchParams.get("startDate") }
-      );
-    }
-
-    if (endDate && isNaN(endDate.getTime())) {
-      throw createValidationError(
-        "Invalid endDate format. Use ISO 8601 format (YYYY-MM-DD)",
-        { endDate: searchParams.get("endDate") }
-      );
-    }
+    const { startDate, endDate } = extractOptionalDateRange(request);
+    const userId = extractOptionalUserId(request);
 
     // Récupérer la distribution des genres
     const genreCounts = await getGenreDistribution(startDate, endDate, userId);

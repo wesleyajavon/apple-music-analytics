@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { buildArtistNetworkGraph } from "@/lib/services/artist-network";
 import { ArtistNetworkQueryParams } from "@/lib/dto/artist-network";
-import { handleApiError, createValidationError } from "@/lib/utils/error-handler";
+import { handleApiError } from "@/lib/utils/error-handler";
+import {
+  extractOptionalDateRange,
+  extractOptionalUserId,
+  extractOptionalInteger,
+  extractOptionalFloat,
+  extractOptionalString,
+} from "@/lib/middleware/validation";
 
 // Force dynamic rendering since we use request.url
 export const dynamic = "force-dynamic";
@@ -23,86 +30,56 @@ export const dynamic = "force-dynamic";
  */
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-
     const params: ArtistNetworkQueryParams = {};
 
-    const startDate = searchParams.get("startDate");
-    const endDate = searchParams.get("endDate");
-    const userId = searchParams.get("userId");
-    const minPlayCount = searchParams.get("minPlayCount");
-    const maxArtists = searchParams.get("maxArtists");
-    const proximityWindowMinutes = searchParams.get("proximityWindowMinutes");
-    const minEdgeWeight = searchParams.get("minEdgeWeight");
+    const { startDate, endDate } = extractOptionalDateRange(request);
+    const userId = extractOptionalUserId(request);
 
     if (startDate) {
-      const date = new Date(startDate);
-      if (isNaN(date.getTime())) {
-        throw createValidationError(
-          "Invalid startDate format. Use ISO 8601 format (YYYY-MM-DD)",
-          { startDate }
-        );
-      }
-      params.startDate = startDate;
+      params.startDate = startDate.toISOString().split("T")[0];
     }
-
     if (endDate) {
-      const date = new Date(endDate);
-      if (isNaN(date.getTime())) {
-        throw createValidationError(
-          "Invalid endDate format. Use ISO 8601 format (YYYY-MM-DD)",
-          { endDate }
-        );
-      }
-      params.endDate = endDate;
+      params.endDate = endDate.toISOString().split("T")[0];
     }
-
     if (userId) {
       params.userId = userId;
     }
 
-    if (minPlayCount) {
-      const count = parseInt(minPlayCount, 10);
-      if (isNaN(count) || count < 0) {
-        throw createValidationError(
-          "Invalid minPlayCount. Must be a non-negative integer",
-          { minPlayCount }
-        );
-      }
-      params.minPlayCount = count;
+    const minPlayCount = extractOptionalInteger(request, "minPlayCount", {
+      min: 0,
+      errorMessage: "Invalid minPlayCount. Must be a non-negative integer",
+    });
+    if (minPlayCount !== undefined) {
+      params.minPlayCount = minPlayCount;
     }
 
-    if (maxArtists) {
-      const max = parseInt(maxArtists, 10);
-      if (isNaN(max) || max < 1) {
-        throw createValidationError(
-          "Invalid maxArtists. Must be a positive integer",
-          { maxArtists }
-        );
-      }
-      params.maxArtists = max;
+    const maxArtists = extractOptionalInteger(request, "maxArtists", {
+      min: 1,
+      errorMessage: "Invalid maxArtists. Must be a positive integer",
+    });
+    if (maxArtists !== undefined) {
+      params.maxArtists = maxArtists;
     }
 
-    if (proximityWindowMinutes) {
-      const window = parseInt(proximityWindowMinutes, 10);
-      if (isNaN(window) || window < 1) {
-        throw createValidationError(
+    const proximityWindowMinutes = extractOptionalInteger(
+      request,
+      "proximityWindowMinutes",
+      {
+        min: 1,
+        errorMessage:
           "Invalid proximityWindowMinutes. Must be a positive integer",
-          { proximityWindowMinutes }
-        );
       }
-      params.proximityWindowMinutes = window;
+    );
+    if (proximityWindowMinutes !== undefined) {
+      params.proximityWindowMinutes = proximityWindowMinutes;
     }
 
-    if (minEdgeWeight) {
-      const weight = parseFloat(minEdgeWeight);
-      if (isNaN(weight) || weight < 0) {
-        throw createValidationError(
-          "Invalid minEdgeWeight. Must be a non-negative number",
-          { minEdgeWeight }
-        );
-      }
-      params.minEdgeWeight = weight;
+    const minEdgeWeight = extractOptionalFloat(request, "minEdgeWeight", {
+      min: 0,
+      errorMessage: "Invalid minEdgeWeight. Must be a non-negative number",
+    });
+    if (minEdgeWeight !== undefined) {
+      params.minEdgeWeight = minEdgeWeight;
     }
 
     const graph = await buildArtistNetworkGraph(params);

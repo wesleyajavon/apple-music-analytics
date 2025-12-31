@@ -4,7 +4,12 @@ import {
   getWeeklyAggregatedListens,
   getMonthlyAggregatedListens,
 } from "@/lib/services/listening";
-import { handleApiError, createValidationError } from "@/lib/utils/error-handler";
+import { handleApiError } from "@/lib/utils/error-handler";
+import {
+  extractDateRangeWithDefaults,
+  extractPeriod,
+  extractOptionalUserId,
+} from "@/lib/middleware/validation";
 
 // Force dynamic rendering since we use request.url
 export const dynamic = "force-dynamic";
@@ -23,39 +28,18 @@ export const dynamic = "force-dynamic";
  */
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-
     // Default to last 30 days if no dates provided
-    const endDate = searchParams.get("endDate")
-      ? new Date(searchParams.get("endDate")!)
-      : new Date();
-    const startDate = searchParams.get("startDate")
-      ? new Date(searchParams.get("startDate")!)
-      : (() => {
-          const date = new Date(endDate);
-          date.setDate(date.getDate() - 30);
-          return date;
-        })();
+    const defaultEndDate = new Date();
+    const defaultStartDate = new Date(defaultEndDate);
+    defaultStartDate.setDate(defaultStartDate.getDate() - 30);
 
-    const period = (searchParams.get("period") || "day") as
-      | "day"
-      | "week"
-      | "month";
-    const userId = searchParams.get("userId") || undefined;
-
-    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-      throw createValidationError(
-        "Invalid date format. Use ISO 8601 format (YYYY-MM-DD)",
-        { startDate: searchParams.get("startDate"), endDate: searchParams.get("endDate") }
-      );
-    }
-
-    if (!["day", "week", "month"].includes(period)) {
-      throw createValidationError(
-        "Invalid period. Must be 'day', 'week', or 'month'",
-        { period }
-      );
-    }
+    const { startDate, endDate } = extractDateRangeWithDefaults(
+      request,
+      defaultStartDate,
+      defaultEndDate
+    );
+    const period = extractPeriod(request, "day");
+    const userId = extractOptionalUserId(request);
 
     let chartData: Array<{
       date: string;

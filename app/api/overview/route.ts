@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getOverviewStats } from "@/lib/services/listening";
 import { OverviewStatsDto } from "@/lib/dto/listening";
-import { handleApiError, createValidationError } from "@/lib/utils/error-handler";
+import { handleApiError } from "@/lib/utils/error-handler";
+import {
+  extractOptionalDateRange,
+  extractOptionalUserId,
+} from "@/lib/middleware/validation";
 
 // Force dynamic rendering since we use request.url
 export const dynamic = "force-dynamic";
@@ -18,28 +22,8 @@ export const dynamic = "force-dynamic";
  */
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-
-    const startDateParam = searchParams.get("startDate");
-    const endDateParam = searchParams.get("endDate");
-    const userId = searchParams.get("userId") || undefined;
-
-    const startDate = startDateParam ? new Date(startDateParam) : undefined;
-    const endDate = endDateParam ? new Date(endDateParam) : undefined;
-
-    if (startDate && isNaN(startDate.getTime())) {
-      throw createValidationError(
-        "Invalid startDate format. Use ISO 8601 format (YYYY-MM-DD)",
-        { startDate: startDateParam }
-      );
-    }
-
-    if (endDate && isNaN(endDate.getTime())) {
-      throw createValidationError(
-        "Invalid endDate format. Use ISO 8601 format (YYYY-MM-DD)",
-        { endDate: endDateParam }
-      );
-    }
+    const { startDate, endDate } = extractOptionalDateRange(request);
+    const userId = extractOptionalUserId(request);
 
     const stats = await getOverviewStats(startDate, endDate, userId);
 

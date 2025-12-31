@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getListens, getAggregatedListens } from "@/lib/services/listening";
 import { ListensResponse, AggregatedListensResponse } from "@/lib/dto/listening";
-import { handleApiError, createValidationError } from "@/lib/utils/error-handler";
+import { handleApiError } from "@/lib/utils/error-handler";
+import {
+  extractOptionalDateRange,
+  extractRequiredDateRange,
+  extractOptionalUserId,
+  extractOptionalInteger,
+  extractOptionalString,
+} from "@/lib/middleware/validation";
 
 // Force dynamic rendering since we use request.url
 export const dynamic = "force-dynamic";
@@ -22,16 +29,6 @@ export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-
-    const startDate = searchParams.get("startDate");
-    const endDate = searchParams.get("endDate");
-    const userId = searchParams.get("userId") || undefined;
-    const limit = parseInt(searchParams.get("limit") || "100", 10);
-    const offset = parseInt(searchParams.get("offset") || "0", 10);
-    const source = searchParams.get("source") as
-      | "lastfm"
-      | "apple_music_replay"
-      | null;
     const aggregate =
       searchParams.get("aggregate") ||
       searchParams.get("period") ||
@@ -39,25 +36,12 @@ export async function GET(request: NextRequest) {
 
     // If aggregate is requested, return aggregated data
     if (aggregate && ["day", "week", "month"].includes(aggregate)) {
-      if (!startDate || !endDate) {
-        throw createValidationError(
-          "startDate and endDate are required when using aggregate parameter"
-        );
-      }
-
-      const start = new Date(startDate);
-      const end = new Date(endDate);
-
-      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-        throw createValidationError(
-          "Invalid date format. Use ISO 8601 format (YYYY-MM-DD)",
-          { startDate, endDate }
-        );
-      }
+      const { startDate, endDate } = extractRequiredDateRange(request);
+      const userId = extractOptionalUserId(request);
 
       const aggregatedData = await getAggregatedListens(
-        start,
-        end,
+        startDate,
+        endDate,
         aggregate as "day" | "week" | "month",
         userId
       );
@@ -65,21 +49,40 @@ export async function GET(request: NextRequest) {
       const response: AggregatedListensResponse = {
         data: aggregatedData,
         period: aggregate as "day" | "week" | "month",
-        startDate: startDate,
-        endDate: endDate,
+        startDate: startDate.toISOString().split("T")[0],
+        endDate: endDate.toISOString().split("T")[0],
       };
 
       return NextResponse.json(response);
     }
 
     // Otherwise, return raw listens
+    const { startDate: startDateObj, endDate: endDateObj } = extractOptionalDateRange(request);
+    const userId = extractOptionalUserId(request);
+    const limit = extractOptionalInteger(request, "limit", {
+      min: 1,
+      errorMessage: "Invalid limit. Must be a positive integer",
+    }) || 100;
+    const offset = extractOptionalInteger(request, "offset", {
+      min: 0,
+      errorMessage: "Invalid offset. Must be a non-negative integer",
+    }) || 0;
+    const source = extractOptionalString(request, "source") as
+      | "lastfm"
+      | "apple_music_replay"
+      | undefined;
+
+    // Convert dates to ISO strings for getListens
+    const startDate = startDateObj?.toISOString().split("T")[0];
+    const endDate = endDateObj?.toISOString().split("T")[0];
+
     const { data, total } = await getListens({
-      startDate: startDate || undefined,
-      endDate: endDate || undefined,
+      startDate,
+      endDate,
       userId,
       limit,
       offset,
-      source: source || undefined,
+      source,
     });
 
     const response: ListensResponse = {

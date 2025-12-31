@@ -45,6 +45,7 @@ model Track {
   artist    Artist   @relation(fields: [artistId], references: [id], onDelete: Cascade)
   mbid      String?  @unique // MusicBrainz ID
   duration  Int?     // Duration in seconds
+  genre     String?  // Genre musical (from Last.fm API)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -55,6 +56,7 @@ model Track {
   @@index([artistId])
   @@index([titleLower])
   @@index([mbid])
+  @@index([genre])
 }
 
 model Listen {

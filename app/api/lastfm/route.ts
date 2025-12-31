@@ -13,6 +13,12 @@ export const dynamic = "force-dynamic";
  * 
  * Fetch recent tracks from Last.fm API (uses real API if configured, otherwise falls back to mock data)
  * 
+ * ⚠️  IMPORTANT: This endpoint makes direct calls to Last.fm API.
+ * Please respect Last.fm's API usage guidelines:
+ * - Don't make excessive calls (avoid calling on every page load)
+ * - Don't make several calls per second
+ * - Use this endpoint for manual imports or admin operations, not for regular user interactions
+ * 
  * Query parameters:
  * - username: Last.fm username (required for real data)
  * - limit: Number of tracks per page (default: 50, max: 200)

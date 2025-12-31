@@ -38,6 +38,10 @@ async function importAllTracks() {
   let totalImported = 0;
   let totalSkipped = 0;
   const allErrors = [];
+  
+  // Limite de sécurité : ne pas importer plus de 1000 pages par exécution
+  // pour éviter de surcharger l'API Last.fm
+  const MAX_PAGES = 1000;
 
   console.log('🚀 Démarrage de l\'import Last.fm\n');
   console.log(`📋 Configuration:`);
@@ -46,6 +50,7 @@ async function importAllTracks() {
   console.log(`   Base URL: ${BASE_URL}`);
   if (FROM) console.log(`   Date début: ${new Date(FROM * 1000).toLocaleString()}`);
   if (TO) console.log(`   Date fin: ${new Date(TO * 1000).toLocaleString()}`);
+  console.log(`   ⚠️  Limite de sécurité: ${MAX_PAGES} pages maximum par exécution`);
   console.log('');
 
   // Vérifier que le serveur est accessible
@@ -125,9 +130,19 @@ async function importAllTracks() {
 
       page++;
       
-      // Attendre un peu entre les requêtes pour ne pas surcharger l'API
+      // Vérifier la limite de sécurité
+      if (page > MAX_PAGES) {
+        console.warn(`\n⚠️  Limite de sécurité atteinte (${MAX_PAGES} pages)`);
+        console.warn(`   Pour importer plus de pages, relancez le script avec les mêmes paramètres`);
+        console.warn(`   Les pages déjà importées seront ignorées (déduplication automatique)`);
+        break;
+      }
+      
+      // Attendre entre les requêtes pour respecter les bonnes pratiques de l'API Last.fm
+      // Délai de 2 secondes pour éviter de faire plusieurs appels par seconde
+      // Last.fm recommande de ne pas faire d'appels excessifs
       if (page <= totalPages) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 2000));
       }
       
     } catch (error) {
@@ -137,7 +152,7 @@ async function importAllTracks() {
       break;
     }
     
-  } while (page <= totalPages);
+  } while (page <= totalPages && page <= MAX_PAGES);
 
   console.log('\n' + '='.repeat(50));
   console.log('🎉 Import terminé !');

@@ -292,10 +292,13 @@ export async function getGenreDistribution(
   });
 
   // Agréger par genre
+  // Utiliser le genre du track s'il existe, sinon fallback sur le mapping artiste
   const genreCounts: Record<string, number> = {};
 
   for (const listen of listens) {
-    const genre = getGenreForArtist(listen.track.artist.name);
+    // Type assertion temporaire jusqu'à ce que Prisma soit régénéré avec le nouveau schéma
+    const trackGenre = (listen.track as any).genre;
+    const genre = trackGenre || getGenreForArtist(listen.track.artist.name);
     genreCounts[genre] = (genreCounts[genre] || 0) + 1;
   }
 
@@ -315,6 +318,7 @@ export async function getOverviewStats(
   userId?: string
 ): Promise<OverviewStatsDto> {
   // Build the query with conditional filters using Prisma.sql fragments
+  // Note: SUM(t.duration) returns NULL when all durations are NULL, so we use COALESCE to return 0
   const query = Prisma.sql`
     SELECT 
       COUNT(*)::bigint as total_listens,

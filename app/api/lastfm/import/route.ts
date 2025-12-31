@@ -9,6 +9,13 @@ export const dynamic = "force-dynamic";
  * 
  * Import Last.fm tracks into the database
  * 
+ * ⚠️  IMPORTANT: This endpoint makes direct calls to Last.fm API.
+ * Please respect Last.fm's API usage guidelines:
+ * - Don't make excessive calls (avoid calling on every page load)
+ * - Don't make several calls per second
+ * - Use this endpoint for manual imports or admin operations, not for regular user interactions
+ * - The import script includes rate limiting (2 seconds between pages)
+ * 
  * Request body:
  * {
  *   userId: string (required)

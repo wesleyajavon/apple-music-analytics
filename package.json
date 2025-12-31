@@ -17,6 +17,8 @@
     "user:create": "node scripts/create-user.js",
     "lastfm:import": "node scripts/import-lastfm.js",
     "db:reseed:lastfm": "node scripts/reseed-from-lastfm.js",
+    "tracks:fetch-durations": "node scripts/fetch-track-durations.js",
+    "tracks:fetch-genres": "node scripts/fetch-track-genres.js",
     "vercel:env:pull": "npx vercel env pull .env.local"
   },
   "prisma": {

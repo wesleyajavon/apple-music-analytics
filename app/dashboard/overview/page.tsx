@@ -8,9 +8,14 @@ import { EmptyState } from "@/lib/components/empty-state";
 
 /**
  * Formate les secondes en format lisible (heures, minutes)
+ * Retourne "Non disponible" si seconds est 0 ou négatif
  * Fonction pure, peut être utilisée sans mémorisation
  */
 function formatTime(seconds: number): string {
+  if (seconds <= 0) {
+    return "Non disponible";
+  }
+  
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
   

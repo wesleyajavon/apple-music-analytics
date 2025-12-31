@@ -16,6 +16,7 @@
     "db:seed": "tsx prisma/seed.ts",
     "user:create": "node scripts/create-user.js",
     "lastfm:import": "node scripts/import-lastfm.js",
+    "lastfm:update": "node scripts/update-lastfm.js",
     "db:reseed:lastfm": "node scripts/reseed-from-lastfm.js",
     "tracks:fetch-durations": "node scripts/fetch-track-durations.js",
     "tracks:fetch-genres": "node scripts/fetch-track-genres.js",

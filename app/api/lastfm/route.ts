@@ -4,6 +4,7 @@ import {
   getRecentTracksRaw,
   isLastFmConfigured,
 } from "@/lib/services/lastfm";
+import { handleApiError, createValidationError } from "@/lib/utils/error-handler";
 
 // Force dynamic rendering since we use request.url
 export const dynamic = "force-dynamic";
@@ -47,16 +48,16 @@ export async function GET(request: NextRequest) {
 
     // Validate parameters
     if (limit < 1 || limit > 200) {
-      return NextResponse.json(
-        { error: "Limit must be between 1 and 200" },
-        { status: 400 }
+      throw createValidationError(
+        "Limit must be between 1 and 200",
+        { limit }
       );
     }
 
     if (page < 1) {
-      return NextResponse.json(
-        { error: "Page must be greater than 0" },
-        { status: 400 }
+      throw createValidationError(
+        "Page must be greater than 0",
+        { page }
       );
     }
 
@@ -102,11 +103,7 @@ export async function GET(request: NextRequest) {
       });
     }
   } catch (error) {
-    console.error("Error fetching Last.fm data:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch Last.fm data" },
-      { status: 500 }
-    );
+    return handleApiError(error, { route: '/api/lastfm' });
   }
 }
 

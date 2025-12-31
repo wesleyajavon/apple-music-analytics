@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getListens, getAggregatedListens } from "@/lib/services/listening";
 import { ListensResponse, AggregatedListensResponse } from "@/lib/dto/listening";
+import { handleApiError, createValidationError } from "@/lib/utils/error-handler";
 
 // Force dynamic rendering since we use request.url
 export const dynamic = "force-dynamic";
@@ -39,12 +40,8 @@ export async function GET(request: NextRequest) {
     // If aggregate is requested, return aggregated data
     if (aggregate && ["day", "week", "month"].includes(aggregate)) {
       if (!startDate || !endDate) {
-        return NextResponse.json(
-          {
-            error:
-              "startDate and endDate are required when using aggregate parameter",
-          },
-          { status: 400 }
+        throw createValidationError(
+          "startDate and endDate are required when using aggregate parameter"
         );
       }
 
@@ -52,9 +49,9 @@ export async function GET(request: NextRequest) {
       const end = new Date(endDate);
 
       if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-        return NextResponse.json(
-          { error: "Invalid date format. Use ISO 8601 format (YYYY-MM-DD)" },
-          { status: 400 }
+        throw createValidationError(
+          "Invalid date format. Use ISO 8601 format (YYYY-MM-DD)",
+          { startDate, endDate }
         );
       }
 
@@ -94,11 +91,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(response);
   } catch (error) {
-    console.error("Error fetching listens:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch listens data" },
-      { status: 500 }
-    );
+    return handleApiError(error, { route: '/api/listens' });
   }
 }
 

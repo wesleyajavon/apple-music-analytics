@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { buildArtistNetworkGraph } from "@/lib/services/artist-network";
 import { ArtistNetworkQueryParams } from "@/lib/dto/artist-network";
+import { handleApiError, createValidationError } from "@/lib/utils/error-handler";
 
 // Force dynamic rendering since we use request.url
 export const dynamic = "force-dynamic";
@@ -37,9 +38,9 @@ export async function GET(request: NextRequest) {
     if (startDate) {
       const date = new Date(startDate);
       if (isNaN(date.getTime())) {
-        return NextResponse.json(
-          { error: "Invalid startDate format. Use ISO 8601 format (YYYY-MM-DD)" },
-          { status: 400 }
+        throw createValidationError(
+          "Invalid startDate format. Use ISO 8601 format (YYYY-MM-DD)",
+          { startDate }
         );
       }
       params.startDate = startDate;
@@ -48,9 +49,9 @@ export async function GET(request: NextRequest) {
     if (endDate) {
       const date = new Date(endDate);
       if (isNaN(date.getTime())) {
-        return NextResponse.json(
-          { error: "Invalid endDate format. Use ISO 8601 format (YYYY-MM-DD)" },
-          { status: 400 }
+        throw createValidationError(
+          "Invalid endDate format. Use ISO 8601 format (YYYY-MM-DD)",
+          { endDate }
         );
       }
       params.endDate = endDate;
@@ -63,9 +64,9 @@ export async function GET(request: NextRequest) {
     if (minPlayCount) {
       const count = parseInt(minPlayCount, 10);
       if (isNaN(count) || count < 0) {
-        return NextResponse.json(
-          { error: "Invalid minPlayCount. Must be a non-negative integer" },
-          { status: 400 }
+        throw createValidationError(
+          "Invalid minPlayCount. Must be a non-negative integer",
+          { minPlayCount }
         );
       }
       params.minPlayCount = count;
@@ -74,9 +75,9 @@ export async function GET(request: NextRequest) {
     if (maxArtists) {
       const max = parseInt(maxArtists, 10);
       if (isNaN(max) || max < 1) {
-        return NextResponse.json(
-          { error: "Invalid maxArtists. Must be a positive integer" },
-          { status: 400 }
+        throw createValidationError(
+          "Invalid maxArtists. Must be a positive integer",
+          { maxArtists }
         );
       }
       params.maxArtists = max;
@@ -85,9 +86,9 @@ export async function GET(request: NextRequest) {
     if (proximityWindowMinutes) {
       const window = parseInt(proximityWindowMinutes, 10);
       if (isNaN(window) || window < 1) {
-        return NextResponse.json(
-          { error: "Invalid proximityWindowMinutes. Must be a positive integer" },
-          { status: 400 }
+        throw createValidationError(
+          "Invalid proximityWindowMinutes. Must be a positive integer",
+          { proximityWindowMinutes }
         );
       }
       params.proximityWindowMinutes = window;
@@ -96,9 +97,9 @@ export async function GET(request: NextRequest) {
     if (minEdgeWeight) {
       const weight = parseFloat(minEdgeWeight);
       if (isNaN(weight) || weight < 0) {
-        return NextResponse.json(
-          { error: "Invalid minEdgeWeight. Must be a non-negative number" },
-          { status: 400 }
+        throw createValidationError(
+          "Invalid minEdgeWeight. Must be a non-negative number",
+          { minEdgeWeight }
         );
       }
       params.minEdgeWeight = weight;
@@ -108,11 +109,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(graph);
   } catch (error) {
-    console.error("Error fetching artist network data:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch artist network data" },
-      { status: 500 }
-    );
+    return handleApiError(error, { route: '/api/network' });
   }
 }
 

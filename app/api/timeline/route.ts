@@ -4,6 +4,7 @@ import {
   getWeeklyAggregatedListens,
   getMonthlyAggregatedListens,
 } from "@/lib/services/listening";
+import { handleApiError, createValidationError } from "@/lib/utils/error-handler";
 
 // Force dynamic rendering since we use request.url
 export const dynamic = "force-dynamic";
@@ -43,16 +44,16 @@ export async function GET(request: NextRequest) {
     const userId = searchParams.get("userId") || undefined;
 
     if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-      return NextResponse.json(
-        { error: "Invalid date format. Use ISO 8601 format (YYYY-MM-DD)" },
-        { status: 400 }
+      throw createValidationError(
+        "Invalid date format. Use ISO 8601 format (YYYY-MM-DD)",
+        { startDate: searchParams.get("startDate"), endDate: searchParams.get("endDate") }
       );
     }
 
     if (!["day", "week", "month"].includes(period)) {
-      return NextResponse.json(
-        { error: "Invalid period. Must be 'day', 'week', or 'month'" },
-        { status: 400 }
+      throw createValidationError(
+        "Invalid period. Must be 'day', 'week', or 'month'",
+        { period }
       );
     }
 
@@ -110,11 +111,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(chartData);
   } catch (error) {
-    console.error("Error fetching timeline data:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch timeline data" },
-      { status: 500 }
-    );
+    return handleApiError(error, { route: '/api/timeline' });
   }
 }
 

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getReplayYearlySummaries } from "@/lib/services/replay";
+import { handleApiError } from "@/lib/utils/error-handler";
 
 // Force dynamic rendering
 export const dynamic = "force-dynamic";
@@ -21,15 +22,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(summaries);
   } catch (error) {
-    console.error("Error fetching Replay summaries:", error);
-    return NextResponse.json(
-      {
-        error: "Failed to fetch Replay summaries",
-        message:
-          error instanceof Error ? error.message : "Unknown error occurred",
-      },
-      { status: 500 }
-    );
+    return handleApiError(error, { route: '/api/replay' });
   }
 }
 

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { importLastFmTracks, isLastFmConfigured } from "@/lib/services/lastfm";
+import { handleApiError, createValidationError } from "@/lib/utils/error-handler";
 
 // Force dynamic rendering
 export const dynamic = "force-dynamic";
@@ -27,26 +28,29 @@ export const dynamic = "force-dynamic";
  * }
  */
 export async function POST(request: Request) {
+  let userId: string | undefined;
   try {
     const body = await request.json();
+    userId = body?.userId;
 
     // Validate request body
     if (!body.userId || typeof body.userId !== "string") {
-      return NextResponse.json(
-        { error: "userId is required and must be a string" },
-        { status: 400 }
+      throw createValidationError(
+        "userId is required and must be a string",
+        { body }
       );
     }
 
-    const { userId, username, limit, page, from, to } = body;
+    const { userId: validatedUserId, username, limit, page, from, to } = body;
+    userId = validatedUserId;
 
     // Validate limit if provided
     if (limit !== undefined) {
       const limitNum = parseInt(String(limit), 10);
       if (isNaN(limitNum) || limitNum < 1 || limitNum > 200) {
-        return NextResponse.json(
-          { error: "limit must be a number between 1 and 200" },
-          { status: 400 }
+        throw createValidationError(
+          "limit must be a number between 1 and 200",
+          { limit }
         );
       }
     }
@@ -55,9 +59,9 @@ export async function POST(request: Request) {
     if (page !== undefined) {
       const pageNum = parseInt(String(page), 10);
       if (isNaN(pageNum) || pageNum < 1) {
-        return NextResponse.json(
-          { error: "page must be a number greater than 0" },
-          { status: 400 }
+        throw createValidationError(
+          "page must be a number greater than 0",
+          { page }
         );
       }
     }
@@ -66,7 +70,7 @@ export async function POST(request: Request) {
     const isMocked = !isLastFmConfigured();
 
     // Import tracks
-    const result = await importLastFmTracks(userId, {
+    const result = await importLastFmTracks(validatedUserId, {
       username,
       limit: limit ? parseInt(String(limit), 10) : undefined,
       page: page ? parseInt(String(page), 10) : undefined,
@@ -89,15 +93,7 @@ export async function POST(request: Request) {
       },
     });
   } catch (error) {
-    console.error("Error importing Last.fm tracks:", error);
-    return NextResponse.json(
-      {
-        error: "Failed to import Last.fm tracks",
-        message:
-          error instanceof Error ? error.message : "Unknown error occurred",
-      },
-      { status: 500 }
-    );
+    return handleApiError(error, { route: '/api/lastfm/import', userId });
   }
 }
 

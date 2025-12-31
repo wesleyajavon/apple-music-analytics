@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getOverviewStats } from "@/lib/services/listening";
 import { OverviewStatsDto } from "@/lib/dto/listening";
+import { handleApiError, createValidationError } from "@/lib/utils/error-handler";
 
 // Force dynamic rendering since we use request.url
 export const dynamic = "force-dynamic";
@@ -27,16 +28,16 @@ export async function GET(request: NextRequest) {
     const endDate = endDateParam ? new Date(endDateParam) : undefined;
 
     if (startDate && isNaN(startDate.getTime())) {
-      return NextResponse.json(
-        { error: "Invalid startDate format. Use ISO 8601 format (YYYY-MM-DD)" },
-        { status: 400 }
+      throw createValidationError(
+        "Invalid startDate format. Use ISO 8601 format (YYYY-MM-DD)",
+        { startDate: startDateParam }
       );
     }
 
     if (endDate && isNaN(endDate.getTime())) {
-      return NextResponse.json(
-        { error: "Invalid endDate format. Use ISO 8601 format (YYYY-MM-DD)" },
-        { status: 400 }
+      throw createValidationError(
+        "Invalid endDate format. Use ISO 8601 format (YYYY-MM-DD)",
+        { endDate: endDateParam }
       );
     }
 
@@ -46,11 +47,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(response);
   } catch (error) {
-    console.error("Error fetching overview stats:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch overview statistics" },
-      { status: 500 }
-    );
+    return handleApiError(error, { route: '/api/overview' });
   }
 }
 

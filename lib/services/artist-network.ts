@@ -12,6 +12,7 @@ import {
   ArtistNetworkQueryParams,
 } from "../dto/artist-network";
 import { getGenreForArtist } from "./genre-service";
+import { getRedisClient } from "../redis";
 
 
 /**
@@ -280,18 +281,60 @@ function mergeEdges(genreEdges: ArtistEdge[], proximityEdges: ArtistEdge[]): Art
 }
 
 /**
+ * Generate a cache key from query parameters
+ * Ensures consistent keys for the same set of parameters
+ */
+function generateCacheKey(params: ArtistNetworkQueryParams): string {
+  // Sort keys to ensure consistent ordering
+  const sortedParams = Object.keys(params)
+    .sort()
+    .reduce((acc, key) => {
+      const value = params[key as keyof ArtistNetworkQueryParams];
+      if (value !== undefined) {
+        acc[key] = value;
+      }
+      return acc;
+    }, {} as Record<string, unknown>);
+
+  const paramsStr = JSON.stringify(sortedParams);
+  return `network:${paramsStr}`;
+}
+
+/**
  * Main function to build the artist network graph
+ * Implements Redis caching with 1 hour TTL to improve performance
  */
 export async function buildArtistNetworkGraph(
   params: ArtistNetworkQueryParams = {}
 ): Promise<ArtistNetworkGraph> {
   const { startDate, endDate, minEdgeWeight = 1 } = params;
 
+  // Try to get from cache
+  const redis = getRedisClient();
+  if (redis) {
+    try {
+      const cacheKey = generateCacheKey(params);
+      const cached = await redis.get(cacheKey);
+
+      if (cached) {
+        return JSON.parse(cached) as ArtistNetworkGraph;
+      }
+    } catch (error) {
+      // If cache fails, continue with normal computation
+      // Don't throw - cache is optional
+      // Only log in development to avoid noise in production
+      if (process.env.NODE_ENV === "development") {
+        console.debug("Redis cache read failed, continuing without cache:", error instanceof Error ? error.message : error);
+      }
+    }
+  }
+
   // Build nodes
   const nodes = await buildArtistNodes(params);
 
+  // Handle empty result
   if (nodes.length === 0) {
-    return {
+    const emptyResult: ArtistNetworkGraph = {
       nodes: [],
       edges: [],
       metadata: {
@@ -307,6 +350,21 @@ export async function buildArtistNetworkGraph(
           : {}),
       },
     };
+
+    // Cache empty result too (shorter TTL: 5 minutes)
+    if (redis) {
+      try {
+        const cacheKey = generateCacheKey(params);
+        await redis.setex(cacheKey, 300, JSON.stringify(emptyResult));
+      } catch (error) {
+        // Silently fail - cache is optional
+        if (process.env.NODE_ENV === "development") {
+          console.debug("Redis cache write failed for empty result:", error instanceof Error ? error.message : error);
+        }
+      }
+    }
+
+    return emptyResult;
   }
 
   // Create edges based on genres
@@ -321,7 +379,7 @@ export async function buildArtistNetworkGraph(
   // Filter by minimum edge weight
   edges = edges.filter((edge) => edge.weight >= minEdgeWeight);
 
-  return {
+  const result: ArtistNetworkGraph = {
     nodes,
     edges,
     metadata: {
@@ -337,5 +395,21 @@ export async function buildArtistNetworkGraph(
         : {}),
     },
   };
+
+  // Store in cache (TTL: 1 hour = 3600 seconds)
+  if (redis) {
+    try {
+      const cacheKey = generateCacheKey(params);
+      await redis.setex(cacheKey, 3600, JSON.stringify(result));
+    } catch (error) {
+      // If cache write fails, continue - cache is optional
+      // Only log in development to avoid noise in production
+      if (process.env.NODE_ENV === "development") {
+        console.debug("Redis cache write failed, continuing:", error instanceof Error ? error.message : error);
+      }
+    }
+  }
+
+  return result;
 }
 

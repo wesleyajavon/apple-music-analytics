@@ -32,7 +32,7 @@ export async function getListens(
     source,
   } = params;
 
-  const where: any = {};
+  const where: Prisma.ListenWhereInput = {};
 
   if (startDate || endDate) {
     where.playedAt = {};
@@ -263,7 +263,7 @@ export async function getGenreDistribution(
   endDate?: Date,
   userId?: string
 ): Promise<Array<{ genre: string; count: number }>> {
-  const where: any = {};
+  const where: Prisma.ListenWhereInput = {};
 
   if (startDate || endDate) {
     where.playedAt = {};

@@ -4,6 +4,7 @@
  * shared genres and listening proximity
  */
 
+import { Prisma } from "@prisma/client";
 import { prisma } from "../prisma";
 import {
   ArtistNetworkGraph,
@@ -30,7 +31,7 @@ async function buildArtistNodes(
     maxArtists,
   } = params;
 
-  const where: any = {};
+  const where: Prisma.ListenWhereInput = {};
 
   if (userId) {
     where.userId = userId;
@@ -160,7 +161,7 @@ async function createProximityEdges(
 ): Promise<ArtistEdge[]> {
   const { userId, startDate, endDate, proximityWindowMinutes = 30 } = params;
 
-  const where: any = {};
+  const where: Prisma.ListenWhereInput = {};
 
   if (userId) {
     where.userId = userId;

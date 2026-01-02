@@ -26,3 +26,5 @@ export function getGenreForArtist(artistName: string): string {
   return ARTIST_TO_GENRE_MAP[artistName] || "Unknown";
 }
 
+
+

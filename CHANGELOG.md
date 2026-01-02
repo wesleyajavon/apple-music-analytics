@@ -45,3 +45,5 @@
 - Pour utiliser vos vraies données, configurez `LASTFM_API_KEY` et `LASTFM_API_SECRET` dans `.env.local`
 - Redémarrez toujours le serveur après avoir modifié `.env.local`
 
+
+

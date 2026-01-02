@@ -12,6 +12,7 @@ import {
 } from "@/lib/dto/listening";
 import { GenreDistributionResponse } from "@/lib/dto/genres";
 import { listeningKeys } from "./query-keys";
+import { CACHE_STALE_TIME } from "@/lib/constants/config";
 
 /**
  * Type pour les données de timeline (format simplifié pour les graphiques)
@@ -142,7 +143,7 @@ export function useTimeline(
   return useQuery<TimelineDataPoint[], Error>({
     queryKey: listeningKeys.timeline({ startDate, endDate, period, userId }),
     queryFn: () => fetchTimeline(startDate, endDate, period, userId),
-    staleTime: 2 * 60 * 1000, // 2 minutes - données dépendantes des filtres mais relativement stables
+    staleTime: CACHE_STALE_TIME.TIMELINE,
     ...options,
   });
 }
@@ -200,7 +201,7 @@ export function useGenres(
   return useQuery<GenreDistributionResponse, Error>({
     queryKey: listeningKeys.genres({ startDate, endDate, userId }),
     queryFn: () => fetchGenreDistribution(startDate, endDate, userId),
-    staleTime: 5 * 60 * 1000, // 5 minutes - distribution de genres qui change peu
+    staleTime: CACHE_STALE_TIME.GENRES,
     ...options,
   });
 }
@@ -240,7 +241,7 @@ export function useOverviewStats(
   return useQuery<OverviewStatsDto, Error>({
     queryKey: listeningKeys.overview({ startDate, endDate, userId }),
     queryFn: () => fetchOverviewStats(startDate, endDate, userId),
-    staleTime: 5 * 60 * 1000, // 5 minutes - statistiques qui changent peu
+    staleTime: CACHE_STALE_TIME.OVERVIEW,
     ...options,
   });
 }

@@ -12,6 +12,7 @@ import {
   ArtistNetworkQueryParams,
 } from "../dto/artist-network";
 import { getGenreForArtist } from "./genre-service";
+import { DEFAULT_PROXIMITY_WINDOW_MINUTES } from "../constants/config";
 
 /**
  * Build an artist network graph based on listening data
@@ -25,7 +26,7 @@ export async function buildArtistNetworkGraph(
     endDate,
     minPlayCount = 1,
     maxArtists,
-    proximityWindowMinutes = 30,
+    proximityWindowMinutes = DEFAULT_PROXIMITY_WINDOW_MINUTES,
     minEdgeWeight = 1,
   } = params;
 

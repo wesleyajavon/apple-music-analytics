@@ -15,9 +15,10 @@ function NetworkContent() {
   const minPlayCount = searchParams.get("minPlayCount")
     ? parseInt(searchParams.get("minPlayCount")!, 10)
     : undefined;
+  // Default to 15 artists max for better visualization and debugging
   const maxArtists = searchParams.get("maxArtists")
     ? parseInt(searchParams.get("maxArtists")!, 10)
-    : undefined;
+    : 15;
 
   const { data, isLoading, error, refetch } = useArtistNetwork({
     startDate,
@@ -25,6 +26,19 @@ function NetworkContent() {
     minPlayCount,
     maxArtists,
   });
+
+  // Debug logging
+  if (data) {
+    console.log("[NetworkPage] Data received:", {
+      nodeCount: data.nodes.length,
+      edgeCount: data.edges.length,
+      metadata: data.metadata,
+    });
+  }
+  if (error) {
+    console.error("[NetworkPage] Error:", error);
+  }
+  console.log("[NetworkPage] State:", { isLoading, hasData: !!data, hasError: !!error });
 
   return (
     <div className="px-4 py-6 sm:px-0">
@@ -75,7 +89,7 @@ function NetworkContent() {
               <li>Glissez un nœud pour le repositionner</li>
             </ul>
           </div>
-          <div className="w-full overflow-auto">
+          <div className="w-full" style={{ height: "800px", minHeight: "600px" }}>
             <ArtistNetworkGraphComponent
               data={data}
               width={1200}

@@ -279,7 +279,7 @@ export async function getGenreDistribution(
         ${startDate ? Prisma.sql`AND l."playedAt" >= ${startDate}` : Prisma.sql``}
         ${endDate ? Prisma.sql`AND l."playedAt" <= ${endDate}` : Prisma.sql``}
         ${userId ? Prisma.sql`AND l."userId" = ${userId}` : Prisma.sql``}
-      GROUP BY genre
+      GROUP BY COALESCE(t.genre, 'Unknown')
       ORDER BY count DESC
     `;
 
@@ -315,7 +315,7 @@ export async function getGenreDistribution(
       ${startDate ? Prisma.sql`AND l."playedAt" >= ${startDate}` : Prisma.sql``}
       ${endDate ? Prisma.sql`AND l."playedAt" <= ${endDate}` : Prisma.sql``}
       ${userId ? Prisma.sql`AND l."userId" = ${userId}` : Prisma.sql``}
-    GROUP BY genre
+    GROUP BY COALESCE(t.genre, genre_map.genre, 'Unknown')
     ORDER BY count DESC
   `;
 

@@ -2,6 +2,7 @@
   "name": "apple-music-analytics",
   "version": "0.1.0",
   "private": true,
+  "_cacheBust": "2026-01-03",
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",

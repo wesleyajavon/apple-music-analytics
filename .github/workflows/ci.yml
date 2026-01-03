@@ -56,6 +56,11 @@ jobs:
       
       # ÉTAPE 3: Installer les dépendances
       # npm ci est plus rapide et fiable que npm install pour CI
+      # Nettoyer le cache npm si nécessaire pour éviter les problèmes de versions
+      - name: Clear npm cache
+        run: npm cache clean --force
+        continue-on-error: true
+      
       - name: Install dependencies
         run: npm ci
       
@@ -88,6 +93,10 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
+      
+      - name: Clear npm cache
+        run: npm cache clean --force
+        continue-on-error: true
       
       - name: Install dependencies
         run: npm ci
@@ -135,6 +144,10 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
+      
+      - name: Clear npm cache
+        run: npm cache clean --force
+        continue-on-error: true
       
       - name: Install dependencies
         run: npm ci

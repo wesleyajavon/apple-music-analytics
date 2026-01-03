@@ -29,7 +29,7 @@ on:
 
 # Variables d'environnement partagées par tous les jobs
 env:
-  NODE_VERSION: '24'  # Version de Node.js à utiliser
+  NODE_VERSION: '20'  # Version de Node.js à utiliser
 
 # ============================================
 # JOBS - Tâches à exécuter

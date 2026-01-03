@@ -18,7 +18,27 @@ import { getGenreForArtist, ARTIST_TO_GENRE_MAP } from "./genre-service";
 import { executeDateAggregation, AggregationResult } from "./listening-aggregation";
 
 /**
- * Fetch listens with optional filters
+ * Récupère les écoutes avec des filtres optionnels.
+ * 
+ * @param params - Paramètres de requête pour filtrer et paginer les écoutes
+ * @param params.startDate - Date de début au format ISO 8601 (optionnel)
+ * @param params.endDate - Date de fin au format ISO 8601 (optionnel)
+ * @param params.userId - ID de l'utilisateur (optionnel)
+ * @param params.limit - Nombre maximum d'écoutes à retourner (défaut: 100)
+ * @param params.offset - Nombre d'écoutes à ignorer pour la pagination (défaut: 0)
+ * @param params.source - Source des écoutes ('lastfm' ou 'apple_music_replay', optionnel)
+ * 
+ * @returns Objet contenant les données des écoutes et le total
+ * 
+ * @example
+ * ```typescript
+ * const { data, total } = await getListens({
+ *   userId: 'user123',
+ *   startDate: '2024-01-01',
+ *   limit: 50,
+ *   offset: 0
+ * });
+ * ```
  */
 export async function getListens(
   params: ListensQueryParams = {}
@@ -83,7 +103,13 @@ export async function getListens(
 }
 
 /**
- * Aggregate listens by day
+ * Agrège les écoutes par jour.
+ * 
+ * @param startDate - Date de début de la plage
+ * @param endDate - Date de fin de la plage
+ * @param userId - ID de l'utilisateur (optionnel)
+ * 
+ * @returns Tableau de données agrégées par jour avec le nombre d'écoutes, titres uniques et artistes uniques
  */
 export async function getDailyAggregatedListens(
   startDate: Date,
@@ -140,7 +166,16 @@ function groupDailyIntoWeekly(
 }
 
 /**
- * Aggregate listens by week
+ * Agrège les écoutes par semaine.
+ * 
+ * Les semaines commencent le lundi et se terminent le dimanche.
+ * Inclut une décomposition quotidienne pour chaque semaine.
+ * 
+ * @param startDate - Date de début de la plage
+ * @param endDate - Date de fin de la plage
+ * @param userId - ID de l'utilisateur (optionnel)
+ * 
+ * @returns Tableau de données agrégées par semaine avec décomposition quotidienne
  */
 export async function getWeeklyAggregatedListens(
   startDate: Date,
@@ -197,7 +232,15 @@ function groupDailyIntoMonthly(
 }
 
 /**
- * Aggregate listens by month
+ * Agrège les écoutes par mois.
+ * 
+ * Inclut une décomposition quotidienne pour chaque mois.
+ * 
+ * @param startDate - Date de début de la plage
+ * @param endDate - Date de fin de la plage
+ * @param userId - ID de l'utilisateur (optionnel)
+ * 
+ * @returns Tableau de données agrégées par mois avec décomposition quotidienne
  */
 export async function getMonthlyAggregatedListens(
   startDate: Date,
@@ -215,7 +258,14 @@ export async function getMonthlyAggregatedListens(
 }
 
 /**
- * Get aggregated listens for a specific period type
+ * Récupère les écoutes agrégées pour un type de période spécifique.
+ * 
+ * @param startDate - Date de début de la plage
+ * @param endDate - Date de fin de la plage
+ * @param period - Type de période ('day', 'week', ou 'month')
+ * @param userId - ID de l'utilisateur (optionnel)
+ * 
+ * @returns Tableau de données agrégées selon la période spécifiée
  */
 export async function getAggregatedListens(
   startDate: Date,
@@ -255,8 +305,26 @@ export async function getAggregatedListens(
 }
 
 /**
- * Get genre distribution for listens within a date range
- * Optimized with SQL aggregation to avoid loading all listens in memory
+ * Calcule la répartition des genres musicaux pour les écoutes dans une plage de dates.
+ * 
+ * Utilise une agrégation SQL optimisée pour éviter de charger toutes les écoutes en mémoire.
+ * Priorise le genre stocké dans la track, puis le mapping artiste->genre, puis 'Unknown'.
+ * 
+ * @param startDate - Date de début pour filtrer les écoutes (optionnel)
+ * @param endDate - Date de fin pour filtrer les écoutes (optionnel)
+ * @param userId - ID de l'utilisateur pour filtrer les écoutes (optionnel)
+ * 
+ * @returns Tableau de paires genre/compte, trié par compte décroissant
+ * 
+ * @example
+ * ```typescript
+ * const distribution = await getGenreDistribution(
+ *   new Date('2024-01-01'),
+ *   new Date('2024-12-31'),
+ *   'user123'
+ * );
+ * // [{ genre: 'Rock', count: 500 }, { genre: 'Pop', count: 300 }, ...]
+ * ```
  */
 export async function getGenreDistribution(
   startDate?: Date,
@@ -328,8 +396,25 @@ export async function getGenreDistribution(
 }
 
 /**
- * Get overview statistics (total listens, unique artists, unique tracks, total play time)
- * Optimized with a single SQL query using aggregations
+ * Récupère les statistiques d'aperçu (total d'écoutes, artistes uniques, titres uniques, temps total d'écoute).
+ * 
+ * Utilise une requête SQL unique avec agrégations pour optimiser les performances.
+ * 
+ * @param startDate - Date de début pour filtrer les écoutes (optionnel)
+ * @param endDate - Date de fin pour filtrer les écoutes (optionnel)
+ * @param userId - ID de l'utilisateur pour filtrer les écoutes (optionnel)
+ * 
+ * @returns Statistiques d'aperçu avec le nombre total d'écoutes, artistes uniques, titres uniques et temps total en secondes
+ * 
+ * @example
+ * ```typescript
+ * const stats = await getOverviewStats(
+ *   new Date('2024-01-01'),
+ *   new Date('2024-12-31'),
+ *   'user123'
+ * );
+ * // { totalListens: 1000, uniqueArtists: 200, uniqueTracks: 500, totalPlayTime: 360000 }
+ * ```
  */
 export async function getOverviewStats(
   startDate?: Date,

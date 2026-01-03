@@ -15,7 +15,28 @@ import { getGenreForArtist } from "./genre-service";
 import { DEFAULT_PROXIMITY_WINDOW_MINUTES } from "../constants/config";
 
 /**
- * Build an artist network graph based on listening data
+ * Calcule le réseau d'artistes basé sur les habitudes d'écoute.
+ * 
+ * @param params - Paramètres de requête pour filtrer les données
+ * @param params.userId - ID de l'utilisateur (optionnel)
+ * @param params.startDate - Date de début au format ISO 8601 (optionnel)
+ * @param params.endDate - Date de fin au format ISO 8601 (optionnel)
+ * @param params.minPlayCount - Nombre minimum d'écoutes pour inclure un artiste (défaut: 1)
+ * @param params.maxArtists - Nombre maximum d'artistes à inclure (optionnel)
+ * @param params.proximityWindowMinutes - Fenêtre temporelle pour les connexions de proximité (défaut: 30)
+ * @param params.minEdgeWeight - Poids minimum des arêtes à inclure (défaut: 1)
+ * 
+ * @returns Graphe d'artistes avec nœuds et arêtes
+ * 
+ * @example
+ * ```typescript
+ * const graph = await buildArtistNetworkGraph({
+ *   userId: 'user123',
+ *   startDate: '2024-01-01',
+ *   endDate: '2024-12-31',
+ *   minPlayCount: 5
+ * });
+ * ```
  */
 export async function buildArtistNetworkGraph(
   params: ArtistNetworkQueryParams = {}

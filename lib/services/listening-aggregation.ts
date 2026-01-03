@@ -18,8 +18,28 @@ export interface AggregationResult {
 }
 
 /**
- * Execute a date-based aggregation query
- * Handles different periods (day, week, month) and optional user filtering
+ * Exécute une requête d'agrégation basée sur les dates.
+ * 
+ * Gère différents périodes (jour, semaine, mois) et un filtrage optionnel par utilisateur.
+ * Utilise des agrégations SQL natives pour de meilleures performances.
+ * 
+ * @param startDate - Date de début de la plage d'agrégation
+ * @param endDate - Date de fin de la plage d'agrégation
+ * @param period - Type de période pour l'agrégation ('day', 'week', ou 'month')
+ * @param userId - ID de l'utilisateur pour filtrer les écoutes (optionnel)
+ * 
+ * @returns Tableau de résultats d'agrégation avec la date, le nombre d'écoutes, titres uniques et artistes uniques
+ * 
+ * @example
+ * ```typescript
+ * const daily = await executeDateAggregation(
+ *   new Date('2024-01-01'),
+ *   new Date('2024-01-31'),
+ *   'day',
+ *   'user123'
+ * );
+ * // [{ date: '2024-01-01', listens: 50, unique_tracks: 30, unique_artists: 20 }, ...]
+ * ```
  */
 export async function executeDateAggregation(
   startDate: Date,

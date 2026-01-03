@@ -14,17 +14,120 @@ import {
 export const dynamic = "force-dynamic";
 
 /**
- * GET /api/listens
- * 
- * Query parameters:
- * - startDate: ISO 8601 date string (optional)
- * - endDate: ISO 8601 date string (optional)
- * - userId: User ID (optional)
- * - limit: Number of results (default: 100)
- * - offset: Pagination offset (default: 0)
- * - source: 'lastfm' | 'apple_music_replay' (optional)
- * - aggregate: 'day' | 'week' | 'month' (optional) - If provided, returns aggregated data
- * - period: 'day' | 'week' | 'month' (optional) - Alias for aggregate
+ * @swagger
+ * /api/listens:
+ *   get:
+ *     summary: Récupère les écoutes ou les données agrégées
+ *     description: |
+ *       Récupère la liste des écoutes avec pagination, ou les données agrégées si le paramètre aggregate/period est fourni.
+ *       Deux modes de fonctionnement:
+ *       - Sans aggregate: Retourne les écoutes individuelles avec pagination
+ *       - Avec aggregate: Retourne les données agrégées par période
+ *     tags:
+ *       - Listens
+ *     parameters:
+ *       - in: query
+ *         name: startDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Date de début au format ISO 8601 (optionnel, requis si aggregate est fourni)
+ *       - in: query
+ *         name: endDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Date de fin au format ISO 8601 (optionnel, requis si aggregate est fourni)
+ *       - in: query
+ *         name: userId
+ *         schema:
+ *           type: string
+ *         description: ID de l'utilisateur (optionnel)
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           default: 100
+ *         description: Nombre de résultats (mode liste uniquement)
+ *       - in: query
+ *         name: offset
+ *         schema:
+ *           type: integer
+ *           minimum: 0
+ *           default: 0
+ *         description: Décalage pour la pagination (mode liste uniquement)
+ *       - in: query
+ *         name: source
+ *         schema:
+ *           type: string
+ *           enum: [lastfm, apple_music_replay]
+ *         description: Source des écoutes (mode liste uniquement)
+ *       - in: query
+ *         name: aggregate
+ *         schema:
+ *           type: string
+ *           enum: [day, week, month]
+ *         description: Période d'agrégation (alias: period)
+ *       - in: query
+ *         name: period
+ *         schema:
+ *           type: string
+ *           enum: [day, week, month]
+ *         description: Alias pour aggregate
+ *     responses:
+ *       200:
+ *         description: Liste des écoutes ou données agrégées
+ *         content:
+ *           application/json:
+ *             schema:
+ *               oneOf:
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/ListenDto'
+ *                     total:
+ *                       type: integer
+ *                     limit:
+ *                       type: integer
+ *                     offset:
+ *                       type: integer
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           date:
+ *                             type: string
+ *                           count:
+ *                             type: integer
+ *                           uniqueTracks:
+ *                             type: integer
+ *                           uniqueArtists:
+ *                             type: integer
+ *                     period:
+ *                       type: string
+ *                       enum: [day, week, month]
+ *                     startDate:
+ *                       type: string
+ *                     endDate:
+ *                       type: string
+ *       400:
+ *         description: Erreur de validation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Erreur serveur
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 export async function GET(request: NextRequest) {
   try {

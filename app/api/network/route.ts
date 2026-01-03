@@ -14,19 +14,77 @@ import {
 export const dynamic = "force-dynamic";
 
 /**
- * GET /api/network
- * 
- * Route API pour récupérer les données du réseau d'artistes
- * Retourne un graphe avec les nœuds (artistes) et les arêtes (connexions)
- * 
- * Query parameters:
- * - startDate: ISO 8601 date string (optional)
- * - endDate: ISO 8601 date string (optional)
- * - userId: User ID (optional)
- * - minPlayCount: Minimum play count to include an artist (optional, default: 1)
- * - maxArtists: Maximum number of artists to include (optional)
- * - proximityWindowMinutes: Time window for proximity-based edges (optional, default: 30)
- * - minEdgeWeight: Minimum edge weight to include (optional, default: 1)
+ * @swagger
+ * /api/network:
+ *   get:
+ *     summary: Récupère le réseau d'artistes
+ *     description: Retourne un graphe avec les nœuds (artistes) et les arêtes (connexions basées sur les genres et la proximité temporelle)
+ *     tags:
+ *       - Network
+ *     parameters:
+ *       - in: query
+ *         name: startDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Date de début au format ISO 8601 (optionnel)
+ *       - in: query
+ *         name: endDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Date de fin au format ISO 8601 (optionnel)
+ *       - in: query
+ *         name: userId
+ *         schema:
+ *           type: string
+ *         description: ID de l'utilisateur (optionnel)
+ *       - in: query
+ *         name: minPlayCount
+ *         schema:
+ *           type: integer
+ *           minimum: 0
+ *           default: 1
+ *         description: Nombre minimum d'écoutes pour inclure un artiste
+ *       - in: query
+ *         name: maxArtists
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *         description: Nombre maximum d'artistes à inclure
+ *       - in: query
+ *         name: proximityWindowMinutes
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           default: 30
+ *         description: Fenêtre temporelle en minutes pour les connexions de proximité
+ *       - in: query
+ *         name: minEdgeWeight
+ *         schema:
+ *           type: number
+ *           minimum: 0
+ *           default: 1
+ *         description: Poids minimum des arêtes à inclure
+ *     responses:
+ *       200:
+ *         description: Graphe du réseau d'artistes
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ArtistNetworkGraph'
+ *       400:
+ *         description: Erreur de validation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Erreur serveur
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 export async function GET(request: NextRequest) {
   try {

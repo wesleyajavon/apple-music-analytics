@@ -21,9 +21,29 @@ export interface ReplayImportResult {
 }
 
 /**
- * Import a yearly Replay summary
- * This function validates the input and creates/updates the ReplayYearly record
- * along with all related top artists, tracks, and albums
+ * Importe un résumé annuel Apple Music Replay.
+ * 
+ * Valide les données d'entrée et crée/met à jour l'enregistrement ReplayYearly
+ * ainsi que tous les top artistes, titres et albums associés.
+ * Utilise une transaction pour assurer la cohérence des données.
+ * 
+ * @param userId - ID de l'utilisateur pour associer le résumé
+ * @param data - Données du résumé Replay (format ReplayYearlyInput)
+ * 
+ * @returns Résultat de l'import avec succès, ID du résumé créé/mis à jour, ou erreurs de validation
+ * 
+ * @example
+ * ```typescript
+ * const result = await importReplayYearly('user123', {
+ *   year: 2024,
+ *   totalPlayTime: 360000,
+ *   totalPlays: 1000,
+ *   topArtists: [...],
+ *   topTracks: [...],
+ *   topAlbums: [...]
+ * });
+ * // { success: true, replayYearlyId: 'id123' } ou { success: false, errors: [...] }
+ * ```
  */
 export async function importReplayYearly(
   userId: string,
@@ -193,7 +213,17 @@ export async function importReplayYearly(
 }
 
 /**
- * Get all Replay yearly summaries for a user
+ * Récupère tous les résumés annuels Apple Music Replay pour un utilisateur.
+ * 
+ * @param userId - ID de l'utilisateur
+ * 
+ * @returns Tableau de résumés annuels avec les top artistes, top titres et top albums, triés par année décroissante
+ * 
+ * @example
+ * ```typescript
+ * const summaries = await getReplayYearlySummaries('user123');
+ * // [{ year: 2024, topArtists: [...], topTracks: [...], ... }, ...]
+ * ```
  */
 export async function getReplayYearlySummaries(userId: string) {
   return await prisma.replayYearly.findMany({
@@ -234,7 +264,18 @@ export async function getReplayYearlySummaries(userId: string) {
 }
 
 /**
- * Get a specific Replay yearly summary
+ * Récupère un résumé annuel Apple Music Replay spécifique pour un utilisateur et une année.
+ * 
+ * @param userId - ID de l'utilisateur
+ * @param year - Année du résumé (ex: 2024)
+ * 
+ * @returns Résumé annuel avec les top artistes, top titres et top albums pour l'année spécifiée, ou null si non trouvé
+ * 
+ * @example
+ * ```typescript
+ * const summary = await getReplayYearlySummary('user123', 2024);
+ * // { year: 2024, topArtists: [...], topTracks: [...], ... } ou null
+ * ```
  */
 export async function getReplayYearlySummary(
   userId: string,

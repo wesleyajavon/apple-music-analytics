@@ -11,14 +11,50 @@ import {
 export const dynamic = "force-dynamic";
 
 /**
- * GET /api/overview
- * 
- * Route API pour récupérer les statistiques d'overview
- * 
- * Query parameters:
- * - startDate: ISO 8601 date string (optional)
- * - endDate: ISO 8601 date string (optional)
- * - userId: User ID (optional)
+ * @swagger
+ * /api/overview:
+ *   get:
+ *     summary: Récupère les statistiques d'aperçu
+ *     description: Retourne les statistiques globales d'écoute (total d'écoutes, artistes uniques, titres uniques, temps total)
+ *     tags:
+ *       - Overview
+ *     parameters:
+ *       - in: query
+ *         name: startDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Date de début au format ISO 8601 (optionnel)
+ *       - in: query
+ *         name: endDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Date de fin au format ISO 8601 (optionnel)
+ *       - in: query
+ *         name: userId
+ *         schema:
+ *           type: string
+ *         description: ID de l'utilisateur (optionnel)
+ *     responses:
+ *       200:
+ *         description: Statistiques d'aperçu
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/OverviewStats'
+ *       400:
+ *         description: Erreur de validation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Erreur serveur
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 export async function GET(request: NextRequest) {
   try {

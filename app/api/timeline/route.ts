@@ -15,16 +15,68 @@ import {
 export const dynamic = "force-dynamic";
 
 /**
- * GET /api/timeline
- * 
- * Route API pour récupérer les données de timeline d'écoute
- * Retourne des données agrégées par jour/semaine/mois, optimisées pour les graphiques
- * 
- * Query parameters:
- * - startDate: ISO 8601 date string (optional, defaults to 30 days ago)
- * - endDate: ISO 8601 date string (optional, defaults to today)
- * - period: "day" | "week" | "month" (optional, defaults to "day")
- * - userId: User ID (optional)
+ * @swagger
+ * /api/timeline:
+ *   get:
+ *     summary: Récupère les données de timeline d'écoute
+ *     description: Retourne des données agrégées par jour/semaine/mois, optimisées pour les graphiques
+ *     tags:
+ *       - Timeline
+ *     parameters:
+ *       - in: query
+ *         name: startDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Date de début au format ISO 8601 (optionnel, défaut: 30 jours avant)
+ *       - in: query
+ *         name: endDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Date de fin au format ISO 8601 (optionnel, défaut: aujourd'hui)
+ *       - in: query
+ *         name: period
+ *         schema:
+ *           type: string
+ *           enum: [day, week, month]
+ *           default: day
+ *         description: Période d'agrégation (jour, semaine ou mois)
+ *       - in: query
+ *         name: userId
+ *         schema:
+ *           type: string
+ *         description: ID de l'utilisateur (optionnel)
+ *     responses:
+ *       200:
+ *         description: Données agrégées de timeline
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   date:
+ *                     type: string
+ *                   listens:
+ *                     type: integer
+ *                   uniqueTracks:
+ *                     type: integer
+ *                   uniqueArtists:
+ *                     type: integer
+ *       400:
+ *         description: Erreur de validation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Erreur serveur
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 export async function GET(request: NextRequest) {
   try {

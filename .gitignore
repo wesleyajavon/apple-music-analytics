@@ -48,3 +48,6 @@ next-env.d.ts
 
 # Documentation files (optional - uncomment if you don't want to commit)
  CODE_REVIEW.md
+
+# Generated documentation
+/docs

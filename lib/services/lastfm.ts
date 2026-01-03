@@ -421,12 +421,30 @@ export function getLastFmBaseUrl(): string {
 }
 
 /**
- * Import Last.fm tracks into the database
- * Fetches tracks from Last.fm API and saves them as Listen records
+ * Importe les pistes Last.fm dans la base de données.
  * 
- * @param userId User ID to associate listens with
- * @param params Query parameters for fetching tracks
- * @returns Import result with statistics
+ * Récupère les pistes depuis l'API Last.fm et les enregistre comme des enregistrements Listen.
+ * Traite les pistes par lots pour éviter les timeouts de transaction.
+ * 
+ * @param userId - ID de l'utilisateur pour associer les écoutes
+ * @param params - Paramètres de requête pour récupérer les pistes depuis l'API Last.fm
+ * @param params.from - Timestamp Unix de début (optionnel)
+ * @param params.to - Timestamp Unix de fin (optionnel)
+ * @param params.page - Numéro de page pour la pagination (optionnel, défaut: 1)
+ * @param params.limit - Nombre de pistes par page (optionnel, défaut: 50)
+ * 
+ * @returns Résultat de l'import avec les statistiques (success, imported, skipped, errors, totalPages, currentPage)
+ * 
+ * @example
+ * ```typescript
+ * const result = await importLastFmTracks('user123', {
+ *   from: 1609459200, // 1er janvier 2021
+ *   to: 1640995200,   // 1er janvier 2022
+ *   page: 1,
+ *   limit: 200
+ * });
+ * // { success: true, imported: 500, skipped: 10, errors: [], totalPages: 5, currentPage: 1 }
+ * ```
  */
 export async function importLastFmTracks(
   userId: string,

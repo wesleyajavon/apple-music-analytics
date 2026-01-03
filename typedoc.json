@@ -1,0 +1,22 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": [
+    "lib/services/**/*.ts",
+    "lib/dto/**/*.ts"
+  ],
+  "out": "docs",
+  "exclude": [
+    "**/*.test.ts",
+    "**/__tests__/**",
+    "node_modules/**"
+  ],
+  "theme": "default",
+  "name": "Apple Music Analytics - Documentation API",
+  "readme": "README.md",
+  "includeVersion": true,
+  "gitRevision": "main",
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "excludeExternals": true
+}
+

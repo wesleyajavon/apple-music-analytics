@@ -2,6 +2,16 @@
  * Data Transfer Objects (DTOs) for artist network graph data
  */
 
+// Re-export Zod schemas and validation functions for convenience
+export {
+  ArtistNodeSchema,
+  ArtistEdgeSchema,
+  ArtistNetworkGraphSchema,
+  ArtistNetworkQueryParamsSchema,
+  validateDto,
+  safeValidateDto,
+} from './schemas';
+
 /**
  * Represents a node (artist) in the network graph
  */

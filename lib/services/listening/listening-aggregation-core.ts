@@ -5,6 +5,7 @@
 
 import { Prisma } from "@prisma/client";
 import { prisma } from "../../prisma";
+import { transformBigIntToNumber } from "../../dto/transformers";
 
 /**
  * Result type for date aggregations
@@ -77,12 +78,14 @@ export async function executeDateAggregation(
     unique_artists: bigint;
   }>>(query);
 
-  // Convert bigint to number and return
+  // Convert bigint to number using centralized transformer
   return result.map((row) => ({
     date: row.date,
-    listens: Number(row.listens),
-    unique_tracks: Number(row.unique_tracks),
-    unique_artists: Number(row.unique_artists),
+    ...transformBigIntToNumber({
+      listens: row.listens,
+      unique_tracks: row.unique_tracks,
+      unique_artists: row.unique_artists,
+    }),
   }));
 }
 

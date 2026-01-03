@@ -7,6 +7,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "../../prisma";
 import { OverviewStatsDto } from "../../dto/listening";
 import { ARTIST_TO_GENRE_MAP } from "../genre/genre-service";
+import { transformBigIntToNumber } from "../../dto/transformers";
 
 /**
  * Récupère les statistiques d'aperçu (total d'écoutes, artistes uniques, titres uniques, temps total d'écoute).
@@ -57,12 +58,13 @@ export async function getOverviewStats(
     total_play_time: bigint;
   }>>(query);
 
-  // Convert bigint to number and return
+  // Convert bigint to number using centralized transformer
+  const transformed = transformBigIntToNumber(result[0]);
   return {
-    totalListens: Number(result[0].total_listens),
-    uniqueTracks: Number(result[0].unique_tracks),
-    uniqueArtists: Number(result[0].unique_artists),
-    totalPlayTime: Number(result[0].total_play_time),
+    totalListens: transformed.total_listens,
+    uniqueTracks: transformed.unique_tracks,
+    uniqueArtists: transformed.unique_artists,
+    totalPlayTime: transformed.total_play_time,
   };
 }
 
@@ -117,7 +119,7 @@ export async function getGenreDistribution(
 
     return result.map(row => ({
       genre: row.genre,
-      count: Number(row.count),
+      count: transformBigIntToNumber({ count: row.count }).count,
     }));
   }
 
@@ -153,7 +155,7 @@ export async function getGenreDistribution(
 
   return result.map(row => ({
     genre: row.genre,
-    count: Number(row.count),
+    count: transformBigIntToNumber({ count: row.count }).count,
   }));
 }
 

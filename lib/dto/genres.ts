@@ -2,6 +2,14 @@
  * Data Transfer Objects (DTOs) for genre distribution data
  */
 
+// Re-export Zod schemas and validation functions for convenience
+export {
+  GenreDistributionDtoSchema,
+  GenreDistributionResponseSchema,
+  validateDto,
+  safeValidateDto,
+} from './schemas';
+
 /**
  * Represents genre distribution data
  */

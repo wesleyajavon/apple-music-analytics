@@ -108,8 +108,21 @@ export interface ReplayYearlySummaryDto {
   }>;
 }
 
+// Re-export Zod schemas and validation functions for convenience
+export {
+  ReplayTopArtistInputSchema,
+  ReplayTopTrackInputSchema,
+  ReplayTopAlbumInputSchema,
+  ReplayYearlyInputSchema,
+  validateDto,
+  safeValidateDto,
+} from './schemas';
+
 /**
  * Validates a Replay yearly input
+ * 
+ * @deprecated Consider using ReplayYearlyInputSchema with validateDto or safeValidateDto from './schemas'
+ * This function is kept for backward compatibility
  */
 export function validateReplayYearlyInput(
   data: unknown

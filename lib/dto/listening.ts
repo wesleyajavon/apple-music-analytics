@@ -3,6 +3,21 @@
  * These DTOs provide a clean API surface without exposing Prisma models directly
  */
 
+// Re-export Zod schemas and validation functions for convenience
+export {
+  ListenDtoSchema,
+  AggregatedListenDtoSchema,
+  DailyListenDtoSchema,
+  WeeklyListenDtoSchema,
+  MonthlyListenDtoSchema,
+  OverviewStatsDtoSchema,
+  ListensQueryParamsSchema,
+  ListensResponseSchema,
+  AggregatedListensResponseSchema,
+  validateDto,
+  safeValidateDto,
+} from './schemas';
+
 /**
  * Represents a single listen entry
  */

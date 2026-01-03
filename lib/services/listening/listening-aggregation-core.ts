@@ -1,10 +1,10 @@
 /**
- * Utility functions for date-based listening aggregations
- * Centralizes SQL aggregation logic to reduce duplication
+ * Core SQL aggregation functions for date-based listening aggregations
+ * Low-level utilities used by listening-aggregation.ts
  */
 
 import { Prisma } from "@prisma/client";
-import { prisma } from "../prisma";
+import { prisma } from "../../prisma";
 
 /**
  * Result type for date aggregations

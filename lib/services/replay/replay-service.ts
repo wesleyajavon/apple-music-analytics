@@ -3,12 +3,12 @@
  * Handles import, validation, and storage of yearly Replay summaries
  */
 
-import { prisma } from "../prisma";
+import { prisma } from "../../prisma";
 import {
   ReplayYearlyInput,
   validateReplayYearlyInput,
   ReplayValidationResult,
-} from "../dto/replay";
+} from "../../dto/replay";
 
 /**
  * Result of Replay import operation

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { importReplayYearly } from "@/lib/services/replay";
+import { importReplayYearly } from "@/lib/services/replay/replay-service";
 import { handleApiError, createValidationError, AppError } from "@/lib/utils/error-handler";
 
 // Force dynamic rendering

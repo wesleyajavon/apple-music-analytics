@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { buildArtistNetworkGraph } from '../artist-network';
+import { buildArtistNetworkGraph } from '../artist-network/network-builder';
 import { prisma } from '../../prisma';
-import { getGenreForArtist } from '../genre-service';
+import { getGenreForArtist } from '../genre/genre-service';
 
 // Mock Prisma
 vi.mock('../../prisma', () => ({
@@ -16,7 +16,7 @@ vi.mock('../../prisma', () => ({
   },
 }));
 
-vi.mock('../genre-service', () => ({
+vi.mock('../genre/genre-service', () => ({
   getGenreForArtist: vi.fn(),
 }));
 

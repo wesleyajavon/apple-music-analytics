@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getGenreForArtist, ARTIST_TO_GENRE_MAP } from '../genre-service';
+import { getGenreForArtist, ARTIST_TO_GENRE_MAP } from '../genre/genre-service';
 
 describe('genre-service', () => {
   describe('getGenreForArtist', () => {

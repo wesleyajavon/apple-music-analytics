@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { executeDateAggregation, AggregationResult } from '../listening-aggregation';
+import { executeDateAggregation, AggregationResult } from '../listening/listening-aggregation-core';
 import { prisma } from '../../prisma';
 
 // Mock Prisma

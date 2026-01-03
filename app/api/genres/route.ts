@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getGenreDistribution } from "@/lib/services/listening";
+import { getGenreDistribution } from "@/lib/services/listening/listening-stats";
 import { GenreDistributionResponse } from "@/lib/dto/genres";
 import { handleApiError } from "@/lib/utils/error-handler";
 import {

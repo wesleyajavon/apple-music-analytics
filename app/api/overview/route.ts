@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getOverviewStats } from "@/lib/services/listening";
+import { getOverviewStats } from "@/lib/services/listening/listening-stats";
 import { OverviewStatsDto } from "@/lib/dto/listening";
 import { handleApiError } from "@/lib/utils/error-handler";
 import {

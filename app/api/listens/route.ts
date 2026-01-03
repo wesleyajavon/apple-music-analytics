@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getListens, getAggregatedListens } from "@/lib/services/listening";
+import { getListens } from "@/lib/services/listening/listening-service";
+import { getAggregatedListens } from "@/lib/services/listening/listening-aggregation";
 import { ListensResponse, AggregatedListensResponse } from "@/lib/dto/listening";
 import { handleApiError } from "@/lib/utils/error-handler";
 import {

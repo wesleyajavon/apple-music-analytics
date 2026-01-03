@@ -3,7 +3,7 @@ import {
   getDailyAggregatedListens,
   getWeeklyAggregatedListens,
   getMonthlyAggregatedListens,
-} from "@/lib/services/listening";
+} from "@/lib/services/listening/listening-aggregation";
 import { handleApiError } from "@/lib/utils/error-handler";
 import {
   extractDateRangeWithDefaults,

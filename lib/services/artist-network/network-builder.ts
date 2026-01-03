@@ -4,15 +4,16 @@
  */
 
 import { Prisma } from "@prisma/client";
-import { prisma } from "../prisma";
+import { prisma } from "../../prisma";
 import {
   ArtistNetworkGraph,
   ArtistNode,
   ArtistEdge,
   ArtistNetworkQueryParams,
-} from "../dto/artist-network";
-import { getGenreForArtist } from "./genre-service";
-import { DEFAULT_PROXIMITY_WINDOW_MINUTES } from "../constants/config";
+} from "../../dto/artist-network";
+import { getGenreForArtist } from "../genre/genre-service";
+import { DEFAULT_PROXIMITY_WINDOW_MINUTES } from "../../constants/config";
+import { buildProximityEdges } from "./network-algorithms";
 
 /**
  * Calcule le réseau d'artistes basé sur les habitudes d'écoute.
@@ -200,72 +201,24 @@ export async function buildArtistNetworkGraph(
   }
 
   // Proximity-based edges (artists listened to close in time)
-  const proximityWindowMs = proximityWindowMinutes * 60 * 1000;
+  const proximityEdges = await buildProximityEdges(
+    where,
+    nodeIds,
+    proximityWindowMinutes
+  );
 
-  // Get all listens ordered by time for proximity calculation
-  const allListens = await prisma.listen.findMany({
-    where: {
-      ...where,
-      track: {
-        artistId: {
-          in: Array.from(nodeIds),
-        },
-      },
-    },
-    include: {
-      track: {
-        include: {
-          artist: true,
-        },
-      },
-    },
-    orderBy: {
-      playedAt: "asc",
-    },
-  });
+  // Merge proximity edges into edgeMap
+  for (const edge of proximityEdges) {
+    const edgeKey = [edge.source, edge.target].sort().join("|");
+    const existingEdge = edgeMap.get(edgeKey);
 
-  // Group listens by time windows to find proximity
-  for (let i = 0; i < allListens.length; i++) {
-    const currentListen = allListens[i];
-    const currentTime = currentListen.playedAt.getTime();
-    const currentArtistId = currentListen.track.artistId;
-
-    if (!nodeIds.has(currentArtistId)) continue;
-
-    // Look ahead for listens within the proximity window
-    for (let j = i + 1; j < allListens.length; j++) {
-      const nextListen = allListens[j];
-      const nextTime = nextListen.playedAt.getTime();
-      const timeDiff = nextTime - currentTime;
-
-      if (timeDiff > proximityWindowMs) {
-        break; // Beyond the window, stop looking
-      }
-
-      const nextArtistId = nextListen.track.artistId;
-      if (!nodeIds.has(nextArtistId)) continue;
-
-      // Don't create self-loops
-      if (currentArtistId === nextArtistId) continue;
-
-      const edgeKey = [currentArtistId, nextArtistId].sort().join("|");
-      const existingEdge = edgeMap.get(edgeKey);
-
-      if (existingEdge) {
-        // Update existing edge to include proximity
-        existingEdge.weight += 1;
-        existingEdge.type = "both";
-        existingEdge.proximityScore = (existingEdge.proximityScore || 0) + 1;
-      } else {
-        // Create new proximity edge
-        edgeMap.set(edgeKey, {
-          source: currentArtistId,
-          target: nextArtistId,
-          weight: 1,
-          type: "proximity",
-          proximityScore: 1,
-        });
-      }
+    if (existingEdge) {
+      // Update existing edge to include proximity
+      existingEdge.weight += edge.weight;
+      existingEdge.type = "both";
+      existingEdge.proximityScore = (existingEdge.proximityScore || 0) + (edge.proximityScore || 0);
+    } else {
+      edgeMap.set(edgeKey, edge);
     }
   }
 
@@ -294,3 +247,4 @@ export async function buildArtistNetworkGraph(
     metadata,
   };
 }
+

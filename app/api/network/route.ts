@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { buildArtistNetworkGraph } from "@/lib/services/artist-network";
+import { buildArtistNetworkGraph } from "@/lib/services/artist-network/network-builder";
 import { ArtistNetworkQueryParams } from "@/lib/dto/artist-network";
 import { handleApiError } from "@/lib/utils/error-handler";
 import {

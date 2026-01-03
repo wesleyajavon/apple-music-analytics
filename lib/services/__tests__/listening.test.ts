@@ -3,10 +3,9 @@ import {
   getDailyAggregatedListens,
   getWeeklyAggregatedListens,
   getMonthlyAggregatedListens,
-  getGenreDistribution,
-  getOverviewStats,
-} from '../listening';
-import { executeDateAggregation } from '../listening-aggregation';
+} from '../listening/listening-aggregation';
+import { getGenreDistribution, getOverviewStats } from '../listening/listening-stats';
+import { executeDateAggregation } from '../listening/listening-aggregation-core';
 import { prisma } from '../../prisma';
 
 // Mock dependencies
@@ -16,7 +15,7 @@ vi.mock('../../prisma', () => ({
   },
 }));
 
-vi.mock('../listening-aggregation', () => ({
+vi.mock('../listening/listening-aggregation-core', () => ({
   executeDateAggregation: vi.fn(),
 }));
 

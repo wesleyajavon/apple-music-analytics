@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getReplayYearlySummaries } from "@/lib/services/replay";
+import { getReplayYearlySummaries } from "@/lib/services/replay/replay-service";
 import { handleApiError } from "@/lib/utils/error-handler";
 
 // Force dynamic rendering

@@ -660,6 +660,430 @@ Le codebase est globalement bien structuré avec une séparation claire des couc
 
 Les refactorisations proposées amélioreront significativement la maintenabilité, la performance et la robustesse de l'application.
 
+---
 
+## 🚀 Prochaines Étapes Recommandées
 
+Tous les points de la revue de code initiale ont été traités avec succès. Voici les prochaines étapes pour continuer à améliorer le projet :
 
+### Priorité 1 : Qualité et Fiabilité 🔴
+
+#### 1. CI/CD avec GitHub Actions
+
+**Objectif** : Automatiser les vérifications de qualité et les déploiements
+
+**Actions à implémenter** :
+- Workflow de tests automatiques sur chaque PR
+- Linting et type checking (ESLint + TypeScript)
+- Build de vérification avant merge
+- Déploiement automatique sur Vercel (staging/production)
+- Tests de régression automatiques
+
+**Fichiers à créer** :
+```
+.github/
+  workflows/
+    ci.yml          # Tests, lint, type-check
+    deploy.yml       # Déploiement automatique
+    test-coverage.yml # Rapport de couverture
+```
+
+**Bénéfices** :
+- Détection précoce des bugs
+- Qualité de code garantie
+- Déploiements fiables et automatisés
+- Historique des builds et tests
+
+---
+
+#### 2. Améliorer la Couverture de Tests
+
+**État actuel** : Tests unitaires présents pour les services critiques
+
+**Objectif** : Atteindre >80% de couverture avec tests d'intégration et E2E
+
+**Actions à implémenter** :
+- Tests d'intégration pour les routes API (`app/api/**/route.ts`)
+  - Tester les validations de paramètres
+  - Tester les réponses HTTP
+  - Tester la gestion d'erreurs
+- Tests E2E avec Playwright
+  - Parcours utilisateur complets
+  - Tests de visualisation
+  - Tests de performance frontend
+- Tests de performance
+  - Benchmarks pour les requêtes SQL
+  - Tests de charge pour les endpoints critiques
+
+**Exemple de test d'intégration** :
+```typescript
+// __tests__/api/timeline.test.ts
+import { describe, it, expect } from 'vitest';
+import { GET } from '@/app/api/timeline/route';
+import { NextRequest } from 'next/server';
+
+describe('GET /api/timeline', () => {
+  it('should return timeline data with valid dates', async () => {
+    const request = new NextRequest(
+      'http://localhost/api/timeline?startDate=2024-01-01&endDate=2024-01-31&period=day'
+    );
+    const response = await GET(request);
+    expect(response.status).toBe(200);
+    const data = await response.json();
+    expect(Array.isArray(data)).toBe(true);
+  });
+
+  it('should return 400 for invalid date format', async () => {
+    const request = new NextRequest(
+      'http://localhost/api/timeline?startDate=invalid'
+    );
+    const response = await GET(request);
+    expect(response.status).toBe(400);
+  });
+});
+```
+
+---
+
+#### 3. Monitoring et Observabilité
+
+**Objectif** : Visibilité complète sur l'application en production
+
+**Actions à implémenter** :
+- **Sentry** pour le tracking d'erreurs
+  - Capture automatique des erreurs frontend/backend
+  - Stack traces détaillés
+  - Alertes en temps réel
+  - Performance monitoring (APM)
+- **Métriques de performance**
+  - Web Vitals (LCP, FID, CLS)
+  - Temps de réponse des APIs
+  - Utilisation de la base de données
+  - Utilisation du cache Redis
+- **Logging structuré**
+  - Centralisation des logs (ex: Logtail, Datadog)
+  - Corrélation des logs avec les erreurs
+  - Alertes sur patterns d'erreurs
+
+**Configuration Sentry** :
+```typescript
+// lib/utils/sentry.ts
+import * as Sentry from '@sentry/nextjs';
+
+Sentry.init({
+  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+  environment: process.env.NODE_ENV,
+  tracesSampleRate: 1.0,
+  integrations: [
+    new Sentry.BrowserTracing(),
+  ],
+});
+```
+
+---
+
+### Priorité 2 : Performance et Expérience Utilisateur 🟡
+
+#### 4. Optimisations Frontend
+
+**Objectif** : Améliorer les performances et le temps de chargement
+
+**Actions à implémenter** :
+- **Lazy loading des composants lourds**
+  - Composants de visualisation (Recharts, react-force-graph-2d)
+  - Pages dashboard avec `next/dynamic`
+- **Code splitting**
+  - Séparation des bundles par route
+  - Chargement à la demande des dépendances lourdes
+- **Optimisation des images** (si ajoutées)
+  - Utilisation de `next/image` avec optimisation automatique
+  - Formats modernes (WebP, AVIF)
+- **Service Worker pour cache offline**
+  - Cache des données statiques
+  - Mode offline pour consultation des données déjà chargées
+
+**Exemple de lazy loading** :
+```typescript
+// app/dashboard/network/page.tsx
+import dynamic from 'next/dynamic';
+
+const ArtistNetworkGraph = dynamic(
+  () => import('@/lib/components/artist-network-graph'),
+  { 
+    loading: () => <LoadingState />,
+    ssr: false // Composant client uniquement
+  }
+);
+```
+
+---
+
+#### 5. Améliorations UX
+
+**Objectif** : Améliorer l'expérience utilisateur et les feedbacks
+
+**Actions à implémenter** :
+- **Skeleton loaders** au lieu de spinners génériques
+  - Skeleton adapté à chaque type de contenu
+  - Meilleure perception de performance
+- **Optimistic updates**
+  - Mise à jour immédiate de l'UI lors des actions
+  - Rollback automatique en cas d'erreur
+- **Toast notifications**
+  - Feedback pour les actions réussies/échouées
+  - Notifications non-intrusives
+- **États vides améliorés**
+  - Messages contextuels selon la situation
+  - Actions suggérées (ex: "Importer vos données")
+  - Illustrations ou icônes
+
+**Exemple avec react-hot-toast** :
+```typescript
+import toast from 'react-hot-toast';
+
+// Dans un hook ou composant
+const { mutate } = useMutation({
+  mutationFn: importData,
+  onSuccess: () => {
+    toast.success('Données importées avec succès !');
+  },
+  onError: (error) => {
+    toast.error(`Erreur : ${error.message}`);
+  },
+});
+```
+
+---
+
+### Priorité 3 : Fonctionnalités Avancées 🟢
+
+#### 6. Authentification Multi-Utilisateurs
+
+**Objectif** : Support de plusieurs utilisateurs avec isolation des données
+
+**Actions à implémenter** :
+- **Système d'authentification** (NextAuth.js)
+  - Support OAuth (Google, GitHub, etc.)
+  - Authentification par email/mot de passe
+  - Gestion de sessions sécurisées
+- **Isolation des données**
+  - Filtrage automatique par `userId` dans toutes les requêtes
+  - Middleware de vérification d'autorisation
+  - Protection des routes API
+- **Gestion de profils**
+  - Page de profil utilisateur
+  - Préférences utilisateur
+  - Historique des imports
+
+**Architecture proposée** :
+```typescript
+// middleware.ts
+export function middleware(request: NextRequest) {
+  const session = await getServerSession();
+  if (!session) {
+    return NextResponse.redirect('/login');
+  }
+  // Ajouter userId aux headers pour les routes API
+}
+
+// lib/services/listening/listening-service.ts
+export async function getListens(userId: string, ...) {
+  // userId toujours requis et vérifié
+}
+```
+
+---
+
+#### 7. Export de Données
+
+**Objectif** : Permettre aux utilisateurs d'exporter leurs données
+
+**Actions à implémenter** :
+- **Export CSV**
+  - Export des écoutes avec filtres
+  - Export des statistiques agrégées
+  - Export des genres
+- **Export JSON**
+  - Export complet des données utilisateur
+  - Format structuré pour réutilisation
+- **Génération de rapports PDF**
+  - Rapport annuel personnalisé
+  - Visualisations intégrées
+  - Statistiques détaillées
+- **Partage de visualisations**
+  - URLs publiques temporaires pour partager des graphiques
+  - Export d'images (PNG/SVG)
+
+**Exemple d'export CSV** :
+```typescript
+// app/api/export/csv/route.ts
+export async function GET(request: NextRequest) {
+  const listens = await getListens(userId, ...);
+  const csv = convertToCSV(listens);
+  return new NextResponse(csv, {
+    headers: {
+      'Content-Type': 'text/csv',
+      'Content-Disposition': `attachment; filename="listens-${date}.csv"`,
+    },
+  });
+}
+```
+
+---
+
+#### 8. Nouvelles Visualisations
+
+**Objectif** : Enrichir les analyses disponibles
+
+**Actions à implémenter** :
+- **Heatmap d'écoute** (calendrier)
+  - Visualisation des habitudes d'écoute par jour
+  - Identification des patterns temporels
+  - Comparaison jour/semaine/mois
+- **Graphique de tendances par genre**
+  - Évolution des genres dans le temps
+  - Comparaison multi-genres
+  - Prédictions de tendances
+- **Comparaison avec d'autres utilisateurs** (si multi-user)
+  - Statistiques comparatives anonymisées
+  - Classements et badges
+  - Découverte de nouveaux artistes
+
+**Exemple de heatmap** :
+```typescript
+// Utiliser react-calendar-heatmap ou créer un composant custom
+import CalendarHeatmap from 'react-calendar-heatmap';
+
+<CalendarHeatmap
+  startDate={startDate}
+  endDate={endDate}
+  values={listeningData}
+  classForValue={(value) => {
+    if (!value) return 'color-empty';
+    return `color-scale-${value.count}`;
+  }}
+/>
+```
+
+---
+
+### Priorité 4 : Infrastructure 🔵
+
+#### 9. Optimisations Base de Données
+
+**Objectif** : Garantir des performances optimales à grande échelle
+
+**Actions à implémenter** :
+- **Analyse des index existants**
+  - Vérifier l'utilisation des index avec `EXPLAIN ANALYZE`
+  - Identifier les index manquants
+  - Supprimer les index inutilisés
+- **Partitioning des tables Listen** (si volumineuses)
+  - Partition par date (mensuelle/annuelle)
+  - Amélioration des performances de requêtes
+  - Facilite l'archivage
+- **Backup automatique**
+  - Sauvegardes quotidiennes
+  - Rétention configurable
+  - Tests de restauration réguliers
+- **Connection pooling**
+  - Optimisation des connexions Prisma
+  - Monitoring de l'utilisation
+
+**Exemple de partitioning** :
+```sql
+-- Partition par mois
+CREATE TABLE "Listen_2024_01" PARTITION OF "Listen"
+FOR VALUES FROM ('2024-01-01') TO ('2024-02-01');
+```
+
+---
+
+#### 10. Documentation Avancée
+
+**Objectif** : Faciliter la contribution et la maintenance
+
+**Actions à implémenter** :
+- **Guide de contribution** (`CONTRIBUTING.md`)
+  - Processus de développement
+  - Standards de code
+  - Guide de commit
+  - Processus de PR
+- **Architecture Decision Records (ADRs)** (`docs/adr/`)
+  - Documenter les décisions architecturales importantes
+  - Historique des choix techniques
+  - Alternatives considérées
+- **Guide de déploiement détaillé** (`DEPLOYMENT.md`)
+  - Procédures de déploiement
+  - Rollback procedures
+  - Checklist pré-déploiement
+  - Troubleshooting commun
+
+**Exemple d'ADR** :
+```markdown
+# ADR-001: Utilisation de Prisma pour l'ORM
+
+## Statut
+Accepté
+
+## Contexte
+Besoin d'un ORM type-safe pour PostgreSQL...
+
+## Décision
+Utiliser Prisma pour...
+
+## Conséquences
+- Avantages: ...
+- Inconvénients: ...
+```
+
+---
+
+## 📊 Roadmap Résumé
+
+### Phase 1 (1-2 semaines) - Qualité
+- ✅ CI/CD avec GitHub Actions
+- ✅ Amélioration de la couverture de tests
+- ✅ Monitoring avec Sentry
+
+### Phase 2 (2-3 semaines) - Performance
+- ✅ Optimisations frontend
+- ✅ Améliorations UX
+- ✅ Tests de performance
+
+### Phase 3 (3-4 semaines) - Fonctionnalités
+- ✅ Authentification multi-utilisateurs
+- ✅ Export de données
+- ✅ Nouvelles visualisations
+
+### Phase 4 (1-2 semaines) - Infrastructure
+- ✅ Optimisations base de données
+- ✅ Documentation avancée
+- ✅ Backup automatique
+
+---
+
+## 🎯 Métriques de Succès
+
+Pour mesurer l'amélioration continue :
+
+- **Qualité** :
+  - Couverture de tests >80%
+  - 0 erreurs critiques en production
+  - Temps de build <5 minutes
+
+- **Performance** :
+  - LCP <2.5s
+  - Temps de réponse API <200ms (p95)
+  - Score Lighthouse >90
+
+- **Fiabilité** :
+  - Uptime >99.9%
+  - MTTR <1 heure
+  - Taux d'erreur <0.1%
+
+---
+
+## 📝 Notes
+
+Ces recommandations sont des suggestions basées sur les meilleures pratiques. Priorisez selon vos besoins spécifiques et la taille de votre équipe. Commencez par les items de Priorité 1 pour établir une base solide avant d'ajouter de nouvelles fonctionnalités.

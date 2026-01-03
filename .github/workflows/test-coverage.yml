@@ -1,0 +1,75 @@
+# ============================================
+# WORKFLOW: Rapport de Couverture de Tests
+# ============================================
+# Ce workflow génère un rapport de couverture
+# et le commente automatiquement sur les Pull Requests.
+#
+# DÉCLENCHEMENT :
+# - Sur chaque Pull Request
+# - Génère un commentaire avec le rapport
+# ============================================
+
+name: Test Coverage
+
+on:
+  pull_request:
+    branches: ['**']
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  coverage:
+    name: Generate Coverage Report
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Generate Prisma Client
+        run: npx prisma generate
+      
+      # ÉTAPE: Lancer les tests avec couverture
+      - name: Run tests with coverage
+        run: npm run test:coverage
+      
+      # ÉTAPE: Commenter la PR avec le rapport
+      # Utilise une action pour créer un commentaire automatique avec le rapport de couverture
+      - name: Comment PR with coverage
+        if: always()
+        uses: romeovs/lcov-reporter-action@v0.3.1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}  # Token automatique fourni par GitHub
+          lcov-file: ./coverage/lcov.info  # Fichier de couverture généré par Vitest
+          delete-old-comments: true  # Supprime les anciens commentaires pour garder la PR propre
+          fail-on-coverage-decrease: false  # Ne bloque pas la PR si couverture diminue
+      
+      # ÉTAPE: Uploader le rapport de couverture pour visualisation
+      - name: Upload coverage to artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 7  # Garde les rapports pendant 7 jours
+
+# ============================================
+# NOTES
+# ============================================
+# Ce workflow utilise GITHUB_TOKEN qui est automatiquement
+# fourni par GitHub - pas besoin de le configurer manuellement.
+#
+# Le rapport de couverture apparaîtra comme un commentaire
+# sur votre Pull Request, mis à jour à chaque nouveau commit.
+# ============================================
+

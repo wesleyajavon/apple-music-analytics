@@ -1,0 +1,171 @@
+# ============================================
+# WORKFLOW CI (Continuous Integration)
+# ============================================
+# Ce workflow s'exécute automatiquement pour :
+# - Vérifier que le code TypeScript compile
+# - Détecter les erreurs de style (ESLint)
+# - Exécuter les tests unitaires
+# - Générer un rapport de couverture de tests
+#
+# DÉCLENCHEMENT :
+# - À chaque push sur n'importe quelle branche
+# - À chaque Pull Request
+# ============================================
+
+name: CI
+
+# QUAND déclencher ce workflow ?
+on:
+  # Sur chaque push de code
+  push:
+    branches: ['**']  # Toutes les branches
+  
+  # Sur chaque Pull Request
+  pull_request:
+    branches: ['**']  # Vers toutes les branches
+  
+  # Permet aussi de déclencher manuellement depuis l'interface GitHub
+  workflow_dispatch:
+
+# Variables d'environnement partagées par tous les jobs
+env:
+  NODE_VERSION: '20'  # Version de Node.js à utiliser
+
+# ============================================
+# JOBS - Tâches à exécuter
+# ============================================
+jobs:
+  # Job 1: Vérification du code (linting, types)
+  lint-and-typecheck:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest  # Machine virtuelle Ubuntu (gratuite)
+    
+    steps:
+      # ÉTAPE 1: Cloner le code du repository
+      # Cette action est nécessaire pour accéder au code
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      # ÉTAPE 2: Installer Node.js
+      # Configure l'environnement Node.js avec la version spécifiée
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'  # Cache les node_modules pour accélérer
+      
+      # ÉTAPE 3: Installer les dépendances
+      # npm ci est plus rapide et fiable que npm install pour CI
+      - name: Install dependencies
+        run: npm ci
+      
+      # ÉTAPE 4: Générer le client Prisma
+      # Nécessaire avant de vérifier les types TypeScript
+      - name: Generate Prisma Client
+        run: npx prisma generate
+      
+      # ÉTAPE 5: Vérifier les types TypeScript
+      # Détecte les erreurs de types sans compiler
+      - name: Type check
+        run: npx tsc --noEmit
+      
+      # ÉTAPE 6: Lancer ESLint
+      # Détecte les erreurs de style et les problèmes de code
+      - name: Run ESLint
+        run: npm run lint
+
+  # Job 2: Tests unitaires
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Generate Prisma Client
+        run: npx prisma generate
+      
+      # ÉTAPE: Lancer les tests avec Vitest
+      # --coverage génère un rapport de couverture
+      # --reporter=junit crée un format compatible avec GitHub
+      - name: Run tests
+        run: npm run test:run -- --coverage --reporter=junit --outputFile=test-results.xml
+      
+      # ÉTAPE: Publier les résultats des tests
+      # Permet de voir les résultats directement dans l'interface GitHub
+      - name: Publish test results
+        if: always()  # S'exécute même si les tests échouent
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        with:
+          files: test-results.xml
+      
+      # ÉTAPE: Publier le rapport de couverture
+      # Crée un badge et un rapport visuel de la couverture
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage/coverage-final.json
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false  # Ne bloque pas le CI si Codecov échoue
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}  # Optionnel, pour les repos privés
+
+  # Job 3: Build de vérification
+  build:
+    name: Build Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Generate Prisma Client
+        run: npx prisma generate
+      
+      # ÉTAPE: Build de production
+      # Vérifie que le projet compile correctement
+      # Ne déploie pas, juste vérifie que c'est possible
+      - name: Build production
+        run: npm run build
+        env:
+          # Variables d'environnement minimales pour le build
+          # (Next.js peut nécessiter certaines variables)
+          DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://localhost:5432/test' }}
+          NODE_ENV: production
+
+# ============================================
+# NOTES IMPORTANTES
+# ============================================
+# 1. Les jobs s'exécutent en parallèle par défaut
+#    (plus rapide, mais peut consommer plus de minutes)
+#
+# 2. Si un job échoue, le workflow s'arrête
+#    (sauf si vous utilisez continue-on-error: true)
+#
+# 3. Les secrets (secrets.CODECOV_TOKEN) sont configurés
+#    dans Settings > Secrets and variables > Actions
+#
+# 4. Le cache npm accélère les builds en réutilisant
+#    les node_modules entre les runs
+# ============================================
+

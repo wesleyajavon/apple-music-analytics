@@ -46,8 +46,6 @@ jobs:
     runs-on: ubuntu-latest  # Machine virtuelle Ubuntu (gratuite)
     
     steps:
-      - name: Fail CI on purpose
-        run: exit 1
       # ÉTAPE 1: Cloner le code du repository
       # Cette action est nécessaire pour accéder au code
       - name: Checkout code

@@ -76,6 +76,14 @@ export function validateOptionalDateRange(
     }
   }
 
+  // Vérifier que endDate est après startDate si les deux sont fournis
+  if (startDate && endDate && endDate < startDate) {
+    return {
+      success: false,
+      error: "endDate must be after or equal to startDate",
+    };
+  }
+
   return {
     success: true,
     start: startDate,
@@ -124,6 +132,14 @@ export function validateRequiredDateRange(
     return {
       success: false,
       error: "Invalid endDate format. Use ISO 8601 format (YYYY-MM-DD)",
+    };
+  }
+
+  // Vérifier que endDate est après startDate
+  if (endDate < startDate) {
+    return {
+      success: false,
+      error: "endDate must be after or equal to startDate",
     };
   }
 
@@ -177,6 +193,14 @@ export function validateDateRangeWithDefaults(
     return {
       success: false,
       error: "Invalid endDate format. Use ISO 8601 format (YYYY-MM-DD)",
+    };
+  }
+
+  // Vérifier que endDate est après startDate
+  if (endDate < startDate) {
+    return {
+      success: false,
+      error: "endDate must be after or equal to startDate",
     };
   }
 

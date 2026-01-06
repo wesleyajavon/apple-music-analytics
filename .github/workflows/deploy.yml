@@ -1,0 +1,89 @@
+# ============================================
+# WORKFLOW: Déploiement Conditionnel sur Vercel
+# ============================================
+# Ce workflow déploie sur Vercel UNIQUEMENT si CI passe.
+#
+# MÉTHODE : Utilise un Deploy Hook Vercel
+# - Attend que CI passe
+# - Déclenche Vercel via webhook
+#
+# DÉCLENCHEMENT :
+# - Seulement sur la branche main
+# - Après que CI réussisse
+# ============================================
+
+name: Deploy to Vercel
+
+# QUAND déclencher ce workflow ?
+on:
+  # Seulement sur la branche principale
+  push:
+    branches:
+      - main
+      - master
+  
+  # Permet de déclencher manuellement depuis GitHub
+  workflow_dispatch:
+
+# ============================================
+# JOBS
+# ============================================
+jobs:
+  # Job: Vérifier CI puis déployer
+  deploy:
+    name: Deploy to Vercel
+    runs-on: ubuntu-latest
+    
+    steps:
+      # ÉTAPE 1: Attendre que CI passe
+      - name: Wait for CI to complete
+        uses: lewagon/wait-on-check-action@v1.3.4
+        with:
+          ref: ${{ github.ref }}
+          check-name: 'CI'  # Nom du workflow CI
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 10  # Vérifie toutes les 10 secondes
+          allowed-conclusions: success  # Accepte seulement le succès
+      
+      # ÉTAPE 2: Déclencher le déploiement Vercel via webhook
+      - name: Trigger Vercel Deployment
+        if: success()  # Seulement si CI a réussi
+        run: |
+          echo "🚀 Triggering Vercel deployment..."
+          curl -X POST "${{ secrets.VERCEL_DEPLOY_HOOK_URL }}"
+          echo "✅ Deployment triggered successfully"
+      
+      # ÉTAPE 3: Confirmation
+      - name: Deployment initiated
+        if: success()
+        run: |
+          echo "✅ CI checks passed"
+          echo "✅ Vercel deployment triggered"
+          echo "Check Vercel dashboard for deployment status"
+
+# ============================================
+# CONFIGURATION REQUISE
+# ============================================
+# Pour que ce workflow fonctionne, vous devez :
+#
+# 1. Créer un Deploy Hook dans Vercel :
+#    - Vercel Dashboard > Votre Projet > Settings > Git > Deploy Hooks
+#    - Créez un hook pour la branche "main"
+#    - Copiez l'URL du hook
+#
+# 2. Ajouter le hook comme secret GitHub :
+#    - GitHub > Repository > Settings > Secrets and variables > Actions
+#    - Ajoutez un secret nommé : VERCEL_DEPLOY_HOOK_URL
+#    - Collez l'URL du hook
+#
+# 3. (Optionnel) Désactiver auto-deploy dans Vercel :
+#    - Vercel Dashboard > Settings > Git
+#    - Désactivez "Automatic deployments" pour main
+#    - Maintenant seul ce workflow déclenchera les déploiements
+#
+# ALTERNATIVE (Plus Simple) :
+# Si vous préférez garder l'auto-deploy Vercel, utilisez plutôt
+# GitHub Branch Protection Rules pour empêcher les merges si CI échoue.
+# Voir SETUP_VERCEL_WAIT_FOR_CI.md pour les deux méthodes.
+# ============================================
+

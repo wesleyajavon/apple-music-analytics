@@ -176,3 +176,5 @@ R: Oui, dans l'onglet "Actions", vous verrez tous les workflows passés.
 
 **Félicitations ! 🎉 Vous avez maintenant CI/CD configuré !**
 
+
+

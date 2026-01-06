@@ -115,3 +115,5 @@ Pour votre projet, je recommande **Option 2** (Vercel + Check) car :
 
 Mais si vous préférez la simplicité, **Option 1** fonctionne aussi très bien !
 
+
+

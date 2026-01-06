@@ -17,12 +17,16 @@ describe('GET /api/network', () => {
   it('should return network graph without parameters', async () => {
     const mockGraph = {
       nodes: [
-        { id: 'Artist 1', name: 'Artist 1', playCount: 50 },
-        { id: 'Artist 2', name: 'Artist 2', playCount: 30 },
+        { id: 'Artist 1', name: 'Artist 1', genre: 'Rock', playCount: 50 },
+        { id: 'Artist 2', name: 'Artist 2', genre: 'Pop', playCount: 30 },
       ],
-      links: [
-        { source: 'Artist 1', target: 'Artist 2', weight: 10 },
+      edges: [
+        { source: 'Artist 1', target: 'Artist 2', weight: 10, type: 'proximity' as const },
       ],
+      metadata: {
+        totalArtists: 2,
+        totalConnections: 1,
+      },
     };
 
     vi.mocked(buildArtistNetworkGraph).mockResolvedValue(mockGraph);
@@ -33,14 +37,22 @@ describe('GET /api/network', () => {
     expect(response.status).toBe(200);
     const data = await response.json();
     expect(data).toHaveProperty('nodes');
-    expect(data).toHaveProperty('links');
+    expect(data).toHaveProperty('edges');
+    expect(data).toHaveProperty('metadata');
     expect(Array.isArray(data.nodes)).toBe(true);
-    expect(Array.isArray(data.links)).toBe(true);
+    expect(Array.isArray(data.edges)).toBe(true);
     expect(buildArtistNetworkGraph).toHaveBeenCalledWith({});
   });
 
   it('should return network graph with date range', async () => {
-    const mockGraph = { nodes: [], links: [] };
+    const mockGraph = {
+      nodes: [],
+      edges: [],
+      metadata: {
+        totalArtists: 0,
+        totalConnections: 0,
+      },
+    };
     vi.mocked(buildArtistNetworkGraph).mockResolvedValue(mockGraph);
 
     const request = new NextRequest(
@@ -49,13 +61,20 @@ describe('GET /api/network', () => {
     const response = await GET(request);
     
     expect(response.status).toBe(200);
-    const callArgs = vi.mocked(buildArtistNetworkGraph).mock.calls[0][0];
-    expect(callArgs.startDate).toBe('2024-01-01');
-    expect(callArgs.endDate).toBe('2024-01-31');
+    const callArgs = vi.mocked(buildArtistNetworkGraph).mock.calls[0]?.[0];
+    expect(callArgs?.startDate).toBe('2024-01-01');
+    expect(callArgs?.endDate).toBe('2024-01-31');
   });
 
   it('should handle minPlayCount parameter', async () => {
-    const mockGraph = { nodes: [], links: [] };
+    const mockGraph = {
+      nodes: [],
+      edges: [],
+      metadata: {
+        totalArtists: 0,
+        totalConnections: 0,
+      },
+    };
     vi.mocked(buildArtistNetworkGraph).mockResolvedValue(mockGraph);
 
     const request = new NextRequest(
@@ -64,12 +83,19 @@ describe('GET /api/network', () => {
     const response = await GET(request);
     
     expect(response.status).toBe(200);
-    const callArgs = vi.mocked(buildArtistNetworkGraph).mock.calls[0][0];
-    expect(callArgs.minPlayCount).toBe(10);
+    const callArgs = vi.mocked(buildArtistNetworkGraph).mock.calls[0]?.[0];
+    expect(callArgs?.minPlayCount).toBe(10);
   });
 
   it('should handle maxArtists parameter', async () => {
-    const mockGraph = { nodes: [], links: [] };
+    const mockGraph = {
+      nodes: [],
+      edges: [],
+      metadata: {
+        totalArtists: 0,
+        totalConnections: 0,
+      },
+    };
     vi.mocked(buildArtistNetworkGraph).mockResolvedValue(mockGraph);
 
     const request = new NextRequest(
@@ -78,12 +104,19 @@ describe('GET /api/network', () => {
     const response = await GET(request);
     
     expect(response.status).toBe(200);
-    const callArgs = vi.mocked(buildArtistNetworkGraph).mock.calls[0][0];
-    expect(callArgs.maxArtists).toBe(50);
+    const callArgs = vi.mocked(buildArtistNetworkGraph).mock.calls[0]?.[0];
+    expect(callArgs?.maxArtists).toBe(50);
   });
 
   it('should handle proximityWindowMinutes parameter', async () => {
-    const mockGraph = { nodes: [], links: [] };
+    const mockGraph = {
+      nodes: [],
+      edges: [],
+      metadata: {
+        totalArtists: 0,
+        totalConnections: 0,
+      },
+    };
     vi.mocked(buildArtistNetworkGraph).mockResolvedValue(mockGraph);
 
     const request = new NextRequest(
@@ -92,12 +125,19 @@ describe('GET /api/network', () => {
     const response = await GET(request);
     
     expect(response.status).toBe(200);
-    const callArgs = vi.mocked(buildArtistNetworkGraph).mock.calls[0][0];
-    expect(callArgs.proximityWindowMinutes).toBe(60);
+    const callArgs = vi.mocked(buildArtistNetworkGraph).mock.calls[0]?.[0];
+    expect(callArgs?.proximityWindowMinutes).toBe(60);
   });
 
   it('should handle minEdgeWeight parameter', async () => {
-    const mockGraph = { nodes: [], links: [] };
+    const mockGraph = {
+      nodes: [],
+      edges: [],
+      metadata: {
+        totalArtists: 0,
+        totalConnections: 0,
+      },
+    };
     vi.mocked(buildArtistNetworkGraph).mockResolvedValue(mockGraph);
 
     const request = new NextRequest(
@@ -106,8 +146,8 @@ describe('GET /api/network', () => {
     const response = await GET(request);
     
     expect(response.status).toBe(200);
-    const callArgs = vi.mocked(buildArtistNetworkGraph).mock.calls[0][0];
-    expect(callArgs.minEdgeWeight).toBe(0.5);
+    const callArgs = vi.mocked(buildArtistNetworkGraph).mock.calls[0]?.[0];
+    expect(callArgs?.minEdgeWeight).toBe(0.5);
   });
 
   it('should return 400 for invalid minPlayCount', async () => {

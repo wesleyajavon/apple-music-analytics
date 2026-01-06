@@ -60,9 +60,11 @@ describe('GET /api/timeline', () => {
     const mockData = [
       {
         weekStart: '2024-01-01',
+        weekEnd: '2024-01-07',
         listens: 50,
         uniqueTracks: 20,
         uniqueArtists: 10,
+        dailyBreakdown: [],
       },
     ];
 
@@ -92,6 +94,7 @@ describe('GET /api/timeline', () => {
         listens: 200,
         uniqueTracks: 80,
         uniqueArtists: 40,
+        dailyBreakdown: [],
       },
     ];
 

@@ -20,6 +20,7 @@ describe('GET /api/overview', () => {
       uniqueArtists: 150,
       uniqueTracks: 500,
       totalDuration: 3600000, // 1 hour in milliseconds
+      totalPlayTime: 3600, // 1 hour in seconds
     };
 
     vi.mocked(getOverviewStats).mockResolvedValue(mockStats);
@@ -39,6 +40,7 @@ describe('GET /api/overview', () => {
       uniqueArtists: 75,
       uniqueTracks: 250,
       totalDuration: 1800000,
+      totalPlayTime: 1800, // 30 minutes in seconds
     };
 
     vi.mocked(getOverviewStats).mockResolvedValue(mockStats);
@@ -87,6 +89,7 @@ describe('GET /api/overview', () => {
       uniqueArtists: 30,
       uniqueTracks: 100,
       totalDuration: 720000,
+      totalPlayTime: 720, // 12 minutes in seconds
     };
 
     vi.mocked(getOverviewStats).mockResolvedValue(mockStats);

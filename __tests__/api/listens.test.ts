@@ -25,9 +25,9 @@ describe('GET /api/listens', () => {
         data: [
           {
             id: '1',
-            trackName: 'Track 1',
+            trackTitle: 'Track 1',
             artistName: 'Artist 1',
-            playedAt: new Date('2024-01-01'),
+            playedAt: '2024-01-01T00:00:00.000Z',
             source: 'lastfm' as const,
           },
         ],
@@ -58,9 +58,9 @@ describe('GET /api/listens', () => {
       const response = await GET(request);
       
       expect(response.status).toBe(200);
-      const callArgs = vi.mocked(getListens).mock.calls[0][0];
-      expect(callArgs.limit).toBe(100);
-      expect(callArgs.offset).toBe(0);
+      const callArgs = vi.mocked(getListens).mock.calls[0]?.[0];
+      expect(callArgs?.limit).toBe(100);
+      expect(callArgs?.offset).toBe(0);
     });
 
     it('should filter by date range', async () => {
@@ -73,9 +73,9 @@ describe('GET /api/listens', () => {
       const response = await GET(request);
       
       expect(response.status).toBe(200);
-      const callArgs = vi.mocked(getListens).mock.calls[0][0];
-      expect(callArgs.startDate).toBe('2024-01-01');
-      expect(callArgs.endDate).toBe('2024-01-31');
+      const callArgs = vi.mocked(getListens).mock.calls[0]?.[0];
+      expect(callArgs?.startDate).toBe('2024-01-01');
+      expect(callArgs?.endDate).toBe('2024-01-31');
     });
 
     it('should filter by source', async () => {
@@ -88,8 +88,8 @@ describe('GET /api/listens', () => {
       const response = await GET(request);
       
       expect(response.status).toBe(200);
-      const callArgs = vi.mocked(getListens).mock.calls[0][0];
-      expect(callArgs.source).toBe('lastfm');
+      const callArgs = vi.mocked(getListens).mock.calls[0]?.[0];
+      expect(callArgs?.source).toBe('lastfm');
     });
 
     it('should return 400 for invalid limit', async () => {

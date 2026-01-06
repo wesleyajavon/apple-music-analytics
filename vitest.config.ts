@@ -5,6 +5,15 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
+    exclude: [
+      'node_modules/',
+      'dist/',
+      '.idea/',
+      '.git/',
+      '.cache/',
+      '**/e2e/**', // Exclure les tests Playwright E2E
+      '__tests__/e2e/**', // Exclure les tests Playwright E2E (pattern alternatif)
+    ],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'], // lcov pour GitHub Actions
@@ -15,6 +24,7 @@ export default defineConfig({
         '**/prisma/**',
         '**/scripts/**',
         '**/*.d.ts',
+        '__tests__/e2e/**', // Exclure les tests Playwright E2E de la couverture
       ],
     },
   },

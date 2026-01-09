@@ -385,7 +385,7 @@ Sentry Event: {`{ type: 'error', ... }`}
 </pre>
           </div>
           <div>
-            <p className="font-semibold text-gray-900 dark:text-white mb-1">2. Vérifiez l'onglet Network :</p>
+            <p className="font-semibold text-gray-900 dark:text-white mb-1">2. Vérifiez l&apos;onglet Network :</p>
             <p className="ml-4">Dans les outils de développement, allez dans l&apos;onglet <strong>&quot;Network&quot;</strong>, rafraîchissez, puis cliquez à nouveau sur un bouton. Vous devriez voir une requête vers <code className="bg-gray-100 dark:bg-gray-700 px-1 rounded">sentry.io/api/.../store/</code> avec un statut 200.</p>
           </div>
           <div>

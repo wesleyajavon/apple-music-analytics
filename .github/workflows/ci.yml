@@ -35,6 +35,15 @@ on:
 # Variables d'environnement partagées par tous les jobs
 env:
   NODE_VERSION: '20'  # Version de Node.js à utiliser
+  # Configuration Prisma pour éviter les erreurs réseau dans CI
+  PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING: '1'
+  PRISMA_CLI_BINARY_TYPE: 'binary'
+  # Timeouts réseau plus longs pour les téléchargements
+  NPM_CONFIG_FETCH_TIMEOUT: '300000'
+  NPM_CONFIG_FETCH_RETRY_MINTIMEOUT: '20000'
+  NPM_CONFIG_FETCH_RETRY_MAXTIMEOUT: '120000'
+  NPM_CONFIG_FETCH_RETRY_FACTOR: '10'
+  NPM_CONFIG_FETCH_RETRIES: '5'
 
 # ============================================
 # JOBS - Tâches à exécuter
@@ -67,7 +76,26 @@ jobs:
         continue-on-error: true
       
       - name: Install dependencies
-        run: npm ci
+        run: |
+          # Retry logic pour gérer les erreurs réseau intermittentes avec Prisma
+          MAX_ATTEMPTS=3
+          ATTEMPT=1
+          while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
+            echo "Tentative $ATTEMPT sur $MAX_ATTEMPTS d'installation des dépendances..."
+            if npm ci; then
+              echo "Installation réussie !"
+              exit 0
+            else
+              if [ $ATTEMPT -lt $MAX_ATTEMPTS ]; then
+                echo "Échec de l'installation. Nouvelle tentative dans 10 secondes..."
+                sleep 10
+                npm cache clean --force || true
+              fi
+            fi
+            ATTEMPT=$((ATTEMPT + 1))
+          done
+          echo "Échec après $MAX_ATTEMPTS tentatives"
+          exit 1
       
       # ÉTAPE 4: Générer le client Prisma
       # Nécessaire avant de vérifier les types TypeScript
@@ -104,7 +132,26 @@ jobs:
         continue-on-error: true
       
       - name: Install dependencies
-        run: npm ci
+        run: |
+          # Retry logic pour gérer les erreurs réseau intermittentes avec Prisma
+          MAX_ATTEMPTS=3
+          ATTEMPT=1
+          while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
+            echo "Tentative $ATTEMPT sur $MAX_ATTEMPTS d'installation des dépendances..."
+            if npm ci; then
+              echo "Installation réussie !"
+              exit 0
+            else
+              if [ $ATTEMPT -lt $MAX_ATTEMPTS ]; then
+                echo "Échec de l'installation. Nouvelle tentative dans 10 secondes..."
+                sleep 10
+                npm cache clean --force || true
+              fi
+            fi
+            ATTEMPT=$((ATTEMPT + 1))
+          done
+          echo "Échec après $MAX_ATTEMPTS tentatives"
+          exit 1
       
       - name: Generate Prisma Client
         run: npx prisma generate
@@ -155,7 +202,26 @@ jobs:
         continue-on-error: true
       
       - name: Install dependencies
-        run: npm ci
+        run: |
+          # Retry logic pour gérer les erreurs réseau intermittentes avec Prisma
+          MAX_ATTEMPTS=3
+          ATTEMPT=1
+          while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
+            echo "Tentative $ATTEMPT sur $MAX_ATTEMPTS d'installation des dépendances..."
+            if npm ci; then
+              echo "Installation réussie !"
+              exit 0
+            else
+              if [ $ATTEMPT -lt $MAX_ATTEMPTS ]; then
+                echo "Échec de l'installation. Nouvelle tentative dans 10 secondes..."
+                sleep 10
+                npm cache clean --force || true
+              fi
+            fi
+            ATTEMPT=$((ATTEMPT + 1))
+          done
+          echo "Échec après $MAX_ATTEMPTS tentatives"
+          exit 1
       
       - name: Generate Prisma Client
         run: npx prisma generate

@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { WebVitals } from "@/lib/components/web-vitals";
+import { SentryInit } from "@/lib/components/sentry-init";
 
 export const metadata: Metadata = {
   title: "Apple Music Analytics Dashboard",
@@ -13,7 +15,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr">
-      <body>{children}</body>
+      <body>
+        <SentryInit />
+        <WebVitals />
+        {children}
+      </body>
     </html>
   );
 }

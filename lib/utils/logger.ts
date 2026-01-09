@@ -1,7 +1,8 @@
 /**
  * Système de logging structuré pour l'application
  * 
- * Fournit des méthodes de logging avec différents niveaux et contexte structuré
+ * Fournit des méthodes de logging avec différents niveaux et contexte structuré.
+ * Intègre Sentry pour le tracking d'erreurs en production.
  */
 
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
@@ -11,6 +12,20 @@ interface LogContext {
 }
 
 class Logger {
+  private getSentry(): typeof import('@sentry/nextjs') | null {
+    try {
+      // Côté serveur
+      if (typeof window === 'undefined') {
+        return require('@sentry/nextjs');
+      }
+      // Côté client
+      return require('@sentry/nextjs');
+    } catch {
+      // Sentry non disponible ou non configuré
+      return null;
+    }
+  }
+
   private formatMessage(level: LogLevel, message: string, context?: LogContext): string {
     const timestamp = new Date().toISOString();
     const contextStr = context ? ` ${JSON.stringify(context)}` : '';
@@ -41,12 +56,33 @@ class Logger {
   warn(message: string, context?: LogContext): void {
     if (this.shouldLog('warn')) {
       console.warn(this.formatMessage('warn', message, context));
+      
+      // Envoie les warnings à Sentry en production
+      if (process.env.NODE_ENV === 'production') {
+        const Sentry = this.getSentry();
+        if (Sentry) {
+          Sentry.captureMessage(message, 'warning');
+        }
+      }
     }
   }
 
   error(message: string, context?: LogContext): void {
     if (this.shouldLog('error')) {
       console.error(this.formatMessage('error', message, context));
+      
+      // Envoie les erreurs à Sentry
+      const Sentry = this.getSentry();
+      if (Sentry && context) {
+        Sentry.withScope((scope) => {
+          Object.entries(context).forEach(([key, value]) => {
+            scope.setContext(key, { value });
+          });
+          Sentry.captureMessage(message, 'error');
+        });
+      } else if (Sentry) {
+        Sentry.captureMessage(message, 'error');
+      }
     }
   }
 
@@ -62,7 +98,23 @@ class Logger {
         stack: error.stack,
       } : error,
     };
+    
     this.error(message, errorContext);
+    
+    // Envoie l'erreur à Sentry avec le contexte
+    const Sentry = this.getSentry();
+    if (Sentry) {
+      if (context) {
+        Sentry.withScope((scope) => {
+          Object.entries(context).forEach(([key, value]) => {
+            scope.setContext(key, { value });
+          });
+          Sentry.captureException(error instanceof Error ? error : new Error(String(error)));
+        });
+      } else {
+        Sentry.captureException(error instanceof Error ? error : new Error(String(error)));
+      }
+    }
   }
 }
 

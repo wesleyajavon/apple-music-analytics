@@ -41,6 +41,21 @@ const nextConfig = {
   // Optimisation du build
   experimental: {
     optimizePackageImports: ['@tanstack/react-query', 'recharts', 'd3'],
+    // Active le hook d'instrumentation pour Sentry
+    instrumentationHook: true,
+  },
+  
+  // Configuration Webpack pour ignorer les avertissements liés à Sentry/OpenTelemetry
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.ignoreWarnings = [
+        {
+          module: /require-in-the-middle/,
+          message: /Critical dependency: require function is used in a way in which dependencies cannot be statically extracted/,
+        },
+      ];
+    }
+    return config;
   },
 }
 

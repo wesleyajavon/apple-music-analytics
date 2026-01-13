@@ -16,6 +16,7 @@ import {
   NormalizedLastFmTrack,
   LastFmRecentTracksParams,
 } from "../dto/lastfm";
+import { prisma } from "../prisma";
 
 /**
  * Mock Last.fm API key (not used in mocked mode)
@@ -457,7 +458,6 @@ export async function importLastFmTracks(
   totalPages?: number;
   currentPage?: number;
 }> {
-  const { prisma } = await import("../prisma");
   const errors: string[] = [];
   let imported = 0;
   let skipped = 0;
@@ -474,8 +474,9 @@ export async function importLastFmTracks(
     skipped += tracks.length - tracksToImport.length;
 
     // Process tracks in batches to avoid transaction timeout
-    const BATCH_SIZE = 50; // Process 50 tracks at a time
-    const MAX_TIMEOUT = 30000; // 30 seconds timeout per batch
+    // Reduced batch size to prevent transaction timeouts
+    const BATCH_SIZE = 20; // Process 20 tracks at a time (reduced from 50)
+    const MAX_TIMEOUT = 60000; // 60 seconds timeout per batch (increased from 30)
 
     for (let i = 0; i < tracksToImport.length; i += BATCH_SIZE) {
       const batch = tracksToImport.slice(i, i + BATCH_SIZE);

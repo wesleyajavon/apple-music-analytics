@@ -11,7 +11,7 @@ Les fichiers de workflow sont déjà créés dans `.github/workflows/`. Il suffi
 ```bash
 # Ajouter les nouveaux fichiers
 git add .github/
-git add GUIDE_CI_CD.md SETUP_CI_CD.md
+git add docs/guides/GUIDE_CI_CD.md docs/setup/SETUP_CI_CD.md
 
 # Commit
 git commit -m "feat: add CI/CD workflows with GitHub Actions"

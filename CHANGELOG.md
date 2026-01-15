@@ -11,9 +11,9 @@
 #### Documentation
 
 - ✅ `README.md` - Mis à jour pour refléter l'utilisation de l'API Last.fm réelle
-- ✅ `DATA_SOURCES.md` - Clarifié que Last.fm utilise maintenant l'API réelle par défaut
-- ✅ `GUIDE_IMPORT_LASTFM.md` - Supprimé les références à l'ancien script, ajouté les nouveaux scripts officiels
-- ✅ `QUICK_START_LASTFM.md` - Ajouté section sur le nettoyage et réensemencement
+- ✅ `docs/DATA_SOURCES.md` - Clarifié que Last.fm utilise maintenant l'API réelle par défaut
+- ✅ `docs/guides/GUIDE_IMPORT_LASTFM.md` - Supprimé les références à l'ancien script, ajouté les nouveaux scripts officiels
+- ✅ `docs/quick-start/QUICK_START_LASTFM.md` - Ajouté section sur le nettoyage et réensemencement
 
 #### Code
 

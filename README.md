@@ -323,7 +323,7 @@ Le fichier `next.config.js` est configuré avec :
 - ✅ **Optimisation des images** : Support AVIF et WebP
 - ✅ **Tree-shaking** : Optimisation des imports de packages
 
-Consultez `DEPLOYMENT.md` pour un guide détaillé de déploiement.
+Consultez les guides dans `docs/setup/` pour des guides détaillés de configuration et de déploiement.
 
 ## 🔌 API
 
@@ -509,14 +509,31 @@ apple-music-analytics/
 │   ├── schema.prisma             # Schéma de base de données
 │   └── seed.ts                   # Script de seed
 │
+├── docs/                         # Documentation
+│   ├── guides/                   # Guides d'utilisation
+│   │   ├── GUIDE_CI_CD.md
+│   │   ├── GUIDE_IMPORT_LASTFM.md
+│   │   └── GUIDE_REDIS.md
+│   ├── setup/                    # Guides de configuration
+│   │   ├── SETUP_BRANCH_PROTECTION.md
+│   │   ├── SETUP_CI_CD.md
+│   │   ├── SETUP_GEMINI_DESIGN_MCP.md
+│   │   ├── SETUP_SWAGGER.md
+│   │   └── SETUP_VERCEL_WAIT_FOR_CI.md
+│   ├── quick-start/              # Guides de démarrage rapide
+│   │   └── QUICK_START_LASTFM.md
+│   ├── CODE_REVIEW.md            # Guide de code review
+│   ├── DATA_SOURCES.md           # Documentation des sources de données
+│   └── DOCUMENTATION.md          # Documentation générale
+│
 ├── .env.example                  # Exemple de variables d'environnement
 ├── .gitignore                    # Fichiers ignorés par Git
 ├── next.config.js                # Configuration Next.js
 ├── package.json                  # Dépendances et scripts
 ├── tailwind.config.ts            # Configuration Tailwind
 ├── tsconfig.json                 # Configuration TypeScript
-├── README.md                     # Documentation principale
-└── DEPLOYMENT.md                 # Guide de déploiement détaillé
+├── CHANGELOG.md                  # Journal des modifications
+└── README.md                     # Documentation principale
 ```
 
 ## 🔒 Sécurité

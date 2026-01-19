@@ -50,10 +50,18 @@ export async function getListens(
   if (startDate || endDate) {
     where.playedAt = {};
     if (startDate) {
-      where.playedAt.gte = new Date(startDate);
+      // Pour startDate, utiliser le début de la journée en UTC pour éviter les problèmes de fuseau horaire
+      // Format attendu: YYYY-MM-DD
+      const [year, month, day] = startDate.split("-").map(Number);
+      const start = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
+      where.playedAt.gte = start;
     }
     if (endDate) {
-      where.playedAt.lte = new Date(endDate);
+      // Pour endDate, utiliser la fin de la journée en UTC (23:59:59.999)
+      // Cela permet d'inclure toutes les écoutes de la journée quelle que soit l'heure locale
+      const [year, month, day] = endDate.split("-").map(Number);
+      const end = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
+      where.playedAt.lte = end;
     }
   }
 

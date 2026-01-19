@@ -11,6 +11,50 @@
  *   node scripts/update-lastfm.js --userId "user_123" --username "lastfm_user" --baseUrl "http://localhost:3000"
  */
 
+// Load environment variables from .env.local if available
+const fs = require('fs');
+const path = require('path');
+
+function loadEnvFile() {
+  const envLocalPath = path.join(__dirname, '..', '.env.local');
+  const envPath = path.join(__dirname, '..', '.env');
+  
+  // Try .env.local first, then .env
+  const envFile = fs.existsSync(envLocalPath) ? envLocalPath : 
+                  (fs.existsSync(envPath) ? envPath : null);
+  
+  if (envFile) {
+    const envContent = fs.readFileSync(envFile, 'utf8');
+    envContent.split('\n').forEach(line => {
+      const trimmedLine = line.trim();
+      if (trimmedLine && !trimmedLine.startsWith('#')) {
+        const [key, ...valueParts] = trimmedLine.split('=');
+        if (key && valueParts.length > 0) {
+          const value = valueParts.join('=').trim();
+          // Remove quotes if present
+          const cleanValue = value.replace(/^["']|["']$/g, '');
+          if (!process.env[key.trim()]) {
+            process.env[key.trim()] = cleanValue;
+          }
+        }
+      }
+    });
+  }
+}
+
+// Load environment variables
+loadEnvFile();
+
+// Debug: vérifier que DATABASE_URL est chargée (masquer les informations sensibles)
+if (process.env.DATABASE_URL) {
+  const maskedUrl = process.env.DATABASE_URL.replace(/:[^:@]+@/, ':****@');
+  console.log(`✓ DATABASE_URL chargée: ${maskedUrl.substring(0, 50)}...`);
+} else {
+  console.error('❌ DATABASE_URL non trouvée dans les variables d\'environnement');
+  console.error('   Vérifiez que le fichier .env.local existe et contient DATABASE_URL');
+  process.exit(1);
+}
+
 const { PrismaClient } = require('@prisma/client');
 
 // Parse command line arguments (supports both --key=value and --key value formats)

@@ -11,6 +11,7 @@ interface CalendarHeatmapProps {
   data: HeatmapDataPoint[];
   startDate?: string;
   endDate?: string;
+  selectedDate?: string | null;
   onDayClick?: (date: string, count: number) => void;
 }
 
@@ -91,6 +92,7 @@ export function CalendarHeatmap({
   data,
   startDate,
   endDate,
+  selectedDate,
   onDayClick,
 }: CalendarHeatmapProps) {
   // Créer un Map pour un accès rapide aux données par date
@@ -101,12 +103,6 @@ export function CalendarHeatmap({
       const normalizedDate = point.date.split("T")[0]; // Enlever l'heure si présente
       map.set(normalizedDate, point.count);
     });
-    // Debug: afficher quelques exemples de dates chargées
-    if (data.length > 0) {
-      const sampleDates = Array.from(map.entries()).slice(0, 5);
-      console.log("[Heatmap] Sample dates in dataMap:", sampleDates);
-      console.log("[Heatmap] Total data points:", data.length, "Total map entries:", map.size);
-    }
     return map;
   }, [data]);
 
@@ -378,15 +374,16 @@ export function CalendarHeatmap({
                     style={{ gap: `${SQUARE_GAP}px` }}
                   >
                     {week.map((date, dayIndex) => {
+                      // Formater la date en utilisant UTC pour éviter les problèmes de fuseau horaire
                       const dateStr = formatDateString(date);
                       const count = dataMap.get(dateStr) || 0;
                       const intensity = getIntensityLevel(count, maxCount);
                       
+                      // Comparer les dates en utilisant UTC pour éviter les décalages
                       const today = new Date();
-                      today.setHours(0, 0, 0, 0);
-                      const dateOnly = new Date(date);
-                      dateOnly.setHours(0, 0, 0, 0);
-                      const isFuture = dateOnly > today;
+                      const todayStr = formatDateString(today);
+                      const isFuture = dateStr > todayStr;
+                      const isSelected = selectedDate === dateStr;
                       
                       // Couleurs exactes style GitHub (comme sur github.com)
                       const getGitHubStyle = () => {
@@ -441,24 +438,39 @@ export function CalendarHeatmap({
                             borderRadius: "2px", // GitHub utilise des coins légèrement arrondis
                             ...getGitHubStyle(),
                             opacity: isFuture ? 0.25 : 1,
-                            cursor: isFuture ? "default" : "pointer",
+                            cursor: isFuture || count === 0 ? "default" : "pointer",
                             transition: "all 0.1s ease",
+                            ...(isSelected && {
+                              outline: "2px solid #2563eb",
+                              outlineOffset: "2px",
+                              zIndex: 20,
+                            }),
                           }}
-                          title={`${formatDateForDisplay(date)}: ${count.toLocaleString("fr-FR")} écoute${count > 1 ? "s" : ""}`}
-                          onClick={() => !isFuture && onDayClick?.(dateStr, count)}
-                          role="button"
-                          tabIndex={isFuture ? -1 : 0}
+                          title={count > 0 
+                            ? `${formatDateForDisplay(date)}: ${count.toLocaleString("fr-FR")} écoute${count > 1 ? "s" : ""}`
+                            : `${formatDateForDisplay(date)}: Aucune écoute`}
+                          onClick={(e) => {
+                            if (!isFuture && count > 0 && onDayClick) {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              onDayClick(dateStr, count);
+                            }
+                          }}
+                          role={count > 0 && !isFuture ? "button" : undefined}
+                          tabIndex={isFuture || count === 0 ? -1 : 0}
                           onKeyDown={(e) => {
-                            if ((e.key === "Enter" || e.key === " ") && !isFuture) {
+                            if ((e.key === "Enter" || e.key === " ") && !isFuture && count > 0) {
                               e.preventDefault();
                               onDayClick?.(dateStr, count);
                             }
                           }}
                           onMouseEnter={(e) => {
-                            if (!isFuture) {
+                            if (!isFuture && count > 0) {
                               e.currentTarget.style.transform = "scale(1.15)";
                               e.currentTarget.style.zIndex = "10";
                               e.currentTarget.style.boxShadow = "0 0 0 2px rgba(27, 31, 35, 0.2)";
+                            } else if (!isFuture && count === 0) {
+                              e.currentTarget.style.cursor = "default";
                             }
                           }}
                           onMouseLeave={(e) => {
@@ -466,7 +478,9 @@ export function CalendarHeatmap({
                             e.currentTarget.style.zIndex = "auto";
                             e.currentTarget.style.boxShadow = "none";
                           }}
-                          aria-label={`${formatDateForDisplay(date)}: ${count.toLocaleString("fr-FR")} écoute${count > 1 ? "s" : ""}`}
+                          aria-label={count > 0 
+                            ? `${formatDateForDisplay(date)}: ${count.toLocaleString("fr-FR")} écoute${count > 1 ? "s" : ""} - Cliquer pour voir les détails`
+                            : `${formatDateForDisplay(date)}: Aucune écoute`}
                         />
                       );
                     })}

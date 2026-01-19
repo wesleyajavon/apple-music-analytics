@@ -108,7 +108,11 @@ function TimelineContent() {
           />
         ) : !data || data.length === 0 ? (
           <EmptyState
-            message="Aucune donnée d'écoute disponible pour cette période. Essayez de modifier la période ou les dates de filtrage."
+            message={
+              startDate && endDate && startDate === endDate
+                ? `Aucune donnée d'écoute disponible pour le ${new Date(startDate).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}. Essayez de sélectionner une autre date ou une période plus large.`
+                : "Aucune donnée d'écoute disponible pour cette période. Essayez de modifier la période ou les dates de filtrage."
+            }
             icon="📈"
           />
         ) : (

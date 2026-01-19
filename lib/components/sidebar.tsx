@@ -13,6 +13,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { href: "/dashboard/overview", label: "Vue d'ensemble", icon: "📊" },
   { href: "/dashboard/timeline", label: "Timeline", icon: "📈" },
+  { href: "/dashboard/heatmap", label: "Heatmap", icon: "🔥" },
   { href: "/dashboard/genres", label: "Genres", icon: "🎵" },
   { href: "/dashboard/replay", label: "Replay", icon: "🎬" },
   { href: "/dashboard/network", label: "Réseau", icon: "🕸️" },

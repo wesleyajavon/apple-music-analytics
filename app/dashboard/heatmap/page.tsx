@@ -435,7 +435,7 @@ function HeatmapContent() {
               {/* Statistiques du jour */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
                 <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Total d'écoutes</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">Total d&apos;écoutes</div>
                   <div className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
                     {dayListensData.total.toLocaleString("fr-FR")}
                   </div>

@@ -195,16 +195,16 @@ export function AnnualReportPDF({ data }: { data: AnnualReportData }) {
         <View style={styles.header}>
           <Text style={styles.title}>Rapport Annuel {data.year}</Text>
           <Text style={styles.subtitle}>
-            Analyse de vos habitudes d'écoute musicale
+            Analyse de vos habitudes d&apos;écoute musicale
           </Text>
         </View>
 
         {/* Statistiques globales */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Vue d'ensemble</Text>
+          <Text style={styles.sectionTitle}>Vue d&apos;ensemble</Text>
           <View style={styles.statsGrid}>
             <View style={styles.statCard}>
-              <Text style={styles.statLabel}>Total d'écoutes</Text>
+              <Text style={styles.statLabel}>Total d&apos;écoutes</Text>
               <Text style={styles.statValue}>
                 {formatNumber(data.overview.totalListens)}
               </Text>
@@ -222,7 +222,7 @@ export function AnnualReportPDF({ data }: { data: AnnualReportData }) {
               </Text>
             </View>
             <View style={styles.statCard}>
-              <Text style={styles.statLabel}>Temps d'écoute</Text>
+              <Text style={styles.statLabel}>Temps d&apos;écoute</Text>
               <Text style={styles.statValue}>
                 {formatTime(data.overview.totalPlayTime)}
               </Text>

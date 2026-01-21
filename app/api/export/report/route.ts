@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { renderToStream } from "@react-pdf/renderer";
+import { renderToStream, DocumentProps } from "@react-pdf/renderer";
 import React from "react";
 import { AnnualReportPDF, AnnualReportData } from "@/lib/components/pdf/annual-report";
 import { getOverviewStats, getGenreDistribution } from "@/lib/services/listening/listening-stats";
@@ -162,9 +162,10 @@ export async function GET(request: NextRequest) {
       },
     };
 
-    // Générer le PDF
+    // Générer le PDF - créer l'élément et le caster pour TypeScript
+    const pdfElement = React.createElement(AnnualReportPDF, { data: reportData });
     const pdfStream = await renderToStream(
-      React.createElement(AnnualReportPDF, { data: reportData })
+      pdfElement as React.ReactElement<DocumentProps>
     );
 
     // Convertir le stream en buffer

@@ -169,9 +169,14 @@ export async function GET(request: NextRequest) {
     );
 
     // Convertir le stream en buffer
-    const chunks: Uint8Array[] = [];
+    const chunks: Buffer[] = [];
     for await (const chunk of pdfStream) {
-      chunks.push(chunk);
+      // Le stream peut retourner des strings ou des Buffers
+      if (typeof chunk === 'string') {
+        chunks.push(Buffer.from(chunk, 'utf-8'));
+      } else {
+        chunks.push(Buffer.from(chunk));
+      }
     }
     const pdfBuffer = Buffer.concat(chunks);
 

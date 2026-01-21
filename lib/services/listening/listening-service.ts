@@ -103,5 +103,105 @@ export async function getListens(
   return { data, total };
 }
 
+/**
+ * Interface pour les données d'écoute avec genre (pour export)
+ */
+export interface ListenExportDto {
+  date: string; // ISO 8601 date string (YYYY-MM-DD)
+  artistName: string;
+  trackTitle: string;
+  genre: string | null;
+  source: "lastfm" | "apple_music_replay";
+}
+
+/**
+ * Paramètres de requête pour l'export des écoutes
+ */
+export interface ListensExportParams {
+  startDate?: string; // ISO 8601 date string
+  endDate?: string; // ISO 8601 date string
+  userId?: string;
+  source?: "lastfm" | "apple_music_replay";
+}
+
+/**
+ * Récupère toutes les écoutes avec genre pour l'export CSV.
+ * Cette fonction ne pagine pas et retourne toutes les écoutes correspondant aux filtres.
+ * 
+ * @param params - Paramètres de requête pour filtrer les écoutes
+ * @param params.startDate - Date de début au format ISO 8601 (optionnel)
+ * @param params.endDate - Date de fin au format ISO 8601 (optionnel)
+ * @param params.userId - ID de l'utilisateur (optionnel)
+ * @param params.source - Source des écoutes ('lastfm' ou 'apple_music_replay', optionnel)
+ * 
+ * @returns Tableau des écoutes avec genre pour export
+ * 
+ * @example
+ * ```typescript
+ * const listens = await getAllListensForExport({
+ *   userId: 'user123',
+ *   startDate: '2024-01-01',
+ *   endDate: '2024-12-31'
+ * });
+ * ```
+ */
+export async function getAllListensForExport(
+  params: ListensExportParams = {}
+): Promise<ListenExportDto[]> {
+  const {
+    startDate,
+    endDate,
+    userId,
+    source,
+  } = params;
+
+  const where: Prisma.ListenWhereInput = {};
+
+  if (startDate || endDate) {
+    where.playedAt = {};
+    if (startDate) {
+      const [year, month, day] = startDate.split("-").map(Number);
+      const start = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
+      where.playedAt.gte = start;
+    }
+    if (endDate) {
+      const [year, month, day] = endDate.split("-").map(Number);
+      const end = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
+      where.playedAt.lte = end;
+    }
+  }
+
+  if (userId) {
+    where.userId = userId;
+  }
+
+  if (source) {
+    where.source = source;
+  }
+
+  const listens = await prisma.listen.findMany({
+    where,
+    include: {
+      track: {
+        include: {
+          artist: true,
+        },
+      },
+    },
+    orderBy: {
+      playedAt: "desc",
+    },
+    // Pas de limite pour l'export complet
+  });
+
+  return listens.map((listen) => ({
+    date: listen.playedAt.toISOString().split("T")[0], // Format YYYY-MM-DD
+    artistName: listen.track.artist.name,
+    trackTitle: listen.track.title,
+    genre: listen.track.genre,
+    source: listen.source as "lastfm" | "apple_music_replay",
+  }));
+}
+
 
 

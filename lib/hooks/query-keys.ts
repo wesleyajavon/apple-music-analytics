@@ -31,6 +31,13 @@ export const listeningKeys = {
     endDate?: string;
     userId?: string;
   }) => [...listeningKeys.all, "genres", params] as const,
+  genreTrends: (params?: {
+    startDate?: string;
+    endDate?: string;
+    period?: "day" | "week" | "month";
+    genres?: string[];
+    userId?: string;
+  }) => [...listeningKeys.all, "genreTrends", params] as const,
   overview: (params?: {
     startDate?: string;
     endDate?: string;

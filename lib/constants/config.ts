@@ -16,6 +16,7 @@ export const DEFAULT_PROXIMITY_WINDOW_MINUTES = 30;
 export const CACHE_STALE_TIME = {
   TIMELINE: 2 * 60 * 1000, // 2 minutes - data depends on filters but relatively stable
   GENRES: 5 * 60 * 1000,   // 5 minutes - genre distribution changes infrequently
+  GENRE_TRENDS: 2 * 60 * 1000, // 2 minutes - same as timeline
   OVERVIEW: 5 * 60 * 1000, // 5 minutes - overview statistics change infrequently
 } as const;
 

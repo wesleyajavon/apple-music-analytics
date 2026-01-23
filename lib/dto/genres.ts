@@ -27,6 +27,24 @@ export interface GenreDistributionResponse {
   totalListens: number;
 }
 
+/**
+ * Point de données pour le graphique multi-lignes des tendances de genres.
+ * date + formattedDate + une clé par genre (nom du genre → nombre d'écoutes).
+ */
+export interface GenreTrendsDataPoint {
+  date: string;
+  formattedDate: string;
+  [genre: string]: string | number;
+}
+
+/**
+ * Réponse de l'API des tendances de genres dans le temps
+ */
+export interface GenreTrendsResponse {
+  data: GenreTrendsDataPoint[];
+  availableGenres: string[];
+}
+
 
 
 

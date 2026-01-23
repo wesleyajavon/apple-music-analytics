@@ -10,7 +10,10 @@ import {
   AggregatedListenDto,
   OverviewStatsDto,
 } from "@/lib/dto/listening";
-import { GenreDistributionResponse } from "@/lib/dto/genres";
+import {
+  GenreDistributionResponse,
+  GenreTrendsResponse,
+} from "@/lib/dto/genres";
 import { listeningKeys } from "./query-keys";
 import { CACHE_STALE_TIME } from "@/lib/constants/config";
 
@@ -202,6 +205,59 @@ export function useGenres(
     queryKey: listeningKeys.genres({ startDate, endDate, userId }),
     queryFn: () => fetchGenreDistribution(startDate, endDate, userId),
     staleTime: CACHE_STALE_TIME.GENRES,
+    ...options,
+  });
+}
+
+/**
+ * Récupère les tendances de genres dans le temps
+ */
+async function fetchGenreTrends(
+  startDate?: string,
+  endDate?: string,
+  period?: "day" | "week" | "month",
+  genres?: string[],
+  userId?: string
+): Promise<GenreTrendsResponse> {
+  const searchParams = new URLSearchParams();
+  if (startDate) searchParams.append("startDate", startDate);
+  if (endDate) searchParams.append("endDate", endDate);
+  if (period) searchParams.append("period", period);
+  if (userId) searchParams.append("userId", userId);
+  if (genres?.length) {
+    genres.forEach((g) => searchParams.append("genres", g));
+  }
+  const qs = searchParams.toString();
+  return apiClient.get<GenreTrendsResponse>(
+    `/genres/trends${qs ? `?${qs}` : ""}`
+  );
+}
+
+/**
+ * Hook pour récupérer les tendances de genres dans le temps
+ */
+export function useGenreTrends(
+  startDate?: string,
+  endDate?: string,
+  period?: "day" | "week" | "month",
+  genres?: string[],
+  userId?: string,
+  options?: Omit<
+    UseQueryOptions<GenreTrendsResponse, Error>,
+    "queryKey" | "queryFn" | "staleTime"
+  >
+) {
+  return useQuery<GenreTrendsResponse, Error>({
+    queryKey: listeningKeys.genreTrends({
+      startDate,
+      endDate,
+      period,
+      genres,
+      userId,
+    }),
+    queryFn: () =>
+      fetchGenreTrends(startDate, endDate, period, genres, userId),
+    staleTime: CACHE_STALE_TIME.GENRE_TRENDS,
     ...options,
   });
 }

@@ -159,3 +159,116 @@ export async function getGenreDistribution(
   }));
 }
 
+export type GenreTrendPeriod = "day" | "week" | "month";
+
+export interface GenreTrendRow {
+  date: string;
+  genre: string;
+  count: number;
+}
+
+/**
+ * Récupère l'évolution des écoutes par genre dans le temps.
+ *
+ * Agrège les écoutes par (date_bucket, genre) avec la même résolution de genre
+ * que getGenreDistribution (track.genre > artist map > 'Unknown').
+ *
+ * @param startDate - Date de début
+ * @param endDate - Date de fin
+ * @param period - Agrégation : jour, semaine ou mois
+ * @param userId - ID utilisateur (optionnel)
+ * @returns Tableau { date, genre, count } trié par date puis genre
+ */
+export async function getGenreTrends(
+  startDate: Date,
+  endDate: Date,
+  period: GenreTrendPeriod,
+  userId?: string
+): Promise<GenreTrendRow[]> {
+  const genreMapEntries = Object.entries(ARTIST_TO_GENRE_MAP);
+
+  const dateExpr =
+    period === "day"
+      ? Prisma.raw('DATE(l."playedAt")')
+      : period === "week"
+        ? Prisma.raw('DATE_TRUNC(\'week\', l."playedAt")::date')
+        : Prisma.raw('TO_CHAR(l."playedAt", \'YYYY-MM\')');
+
+  if (genreMapEntries.length === 0) {
+    const query = Prisma.sql`
+      SELECT 
+        ${dateExpr}::text as date,
+        COALESCE(t.genre, 'Unknown') as genre,
+        COUNT(*)::int as count
+      FROM "Listen" l
+      JOIN "Track" t ON l."trackId" = t.id
+      WHERE l."playedAt" >= ${startDate}
+        AND l."playedAt" <= ${endDate}
+        ${userId ? Prisma.sql`AND l."userId" = ${userId}` : Prisma.sql``}
+      GROUP BY ${dateExpr}, COALESCE(t.genre, 'Unknown')
+      ORDER BY ${dateExpr} ASC, count DESC
+    `;
+
+    const result = await prisma.$queryRaw<
+      Array<{ date: string | Date; genre: string; count: bigint }>
+    >(query);
+
+    return result.map((row) => ({
+      date: normalizeTrendDate(row.date, period),
+      genre: row.genre,
+      count: transformBigIntToNumber({ count: row.count }).count,
+    }));
+  }
+
+  const valuesParts = genreMapEntries.map(([artist, genre]) =>
+    Prisma.sql`(${artist}, ${genre})`
+  );
+
+  const query = Prisma.sql`
+    WITH genre_resolved AS (
+      SELECT 
+        ${dateExpr} as bucket,
+        COALESCE(t.genre, genre_map.genre, 'Unknown') as genre
+      FROM "Listen" l
+      JOIN "Track" t ON l."trackId" = t.id
+      JOIN "Artist" a ON t."artistId" = a.id
+      LEFT JOIN (VALUES ${Prisma.join(valuesParts)}) AS genre_map(artist_name, genre)
+        ON a.name = genre_map.artist_name
+      WHERE l."playedAt" >= ${startDate}
+        AND l."playedAt" <= ${endDate}
+        ${userId ? Prisma.sql`AND l."userId" = ${userId}` : Prisma.sql``}
+    )
+    SELECT 
+      bucket::text as date,
+      genre,
+      COUNT(*)::int as count
+    FROM genre_resolved
+    GROUP BY bucket, genre
+    ORDER BY bucket ASC, count DESC
+  `;
+
+  const result = await prisma.$queryRaw<
+    Array<{ date: string | Date; genre: string; count: bigint }>
+  >(query);
+
+  return result.map((row) => ({
+    date: normalizeTrendDate(row.date, period),
+    genre: row.genre,
+    count: transformBigIntToNumber({ count: row.count }).count,
+  }));
+}
+
+function normalizeTrendDate(
+  value: string | Date,
+  period: GenreTrendPeriod
+): string {
+  if (typeof value === "string") {
+    return value;
+  }
+  const d = new Date(value);
+  if (period === "month") {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+  }
+  return d.toISOString().slice(0, 10);
+}
+

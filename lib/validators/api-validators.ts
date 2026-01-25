@@ -1,120 +1,77 @@
-import { createValidationError } from "@/lib/utils/error-handler";
+/**
+ * Validateurs pour les paramètres d'API
+ */
 
 /**
- * Options pour la validation d'une plage de dates
+ * Résultat de validation pour les plages de dates
  */
-export interface DateRangeOptions {
-  /**
-   * Si true, les dates sont requises
-   * Si false, les dates sont optionnelles
-   */
-  required?: boolean;
-  /**
-   * Date de début par défaut si non fournie
-   */
-  defaultStartDate?: Date;
-  /**
-   * Date de fin par défaut si non fournie
-   */
-  defaultEndDate?: Date;
-}
-
-/**
- * Résultat de la validation d'une plage de dates optionnelle
- */
-export type OptionalDateRangeResult =
+type DateRangeResult =
   | { success: true; start?: Date; end?: Date }
   | { success: false; error: string };
 
 /**
- * Résultat de la validation d'une plage de dates requise
+ * Résultat de validation pour les plages de dates avec valeurs par défaut
  */
-export type RequiredDateRangeResult =
+type DateRangeWithDefaultsResult =
   | { success: true; start: Date; end: Date }
   | { success: false; error: string };
 
 /**
- * Valide une plage de dates optionnelle depuis les query parameters
- * 
- * @param startDateParam - Valeur du paramètre startDate (peut être null)
- * @param endDateParam - Valeur du paramètre endDate (peut être null)
- * @returns Résultat de validation avec dates parsées ou erreur
- * 
- * @example
- * ```typescript
- * const result = validateOptionalDateRange(startDate, endDate);
- * if (!result.success) {
- *   throw createValidationError(result.error);
- * }
- * const { start, end } = result; // start et end peuvent être undefined
- * ```
+ * Valide une plage de dates optionnelle
  */
 export function validateOptionalDateRange(
   startDateParam: string | null,
   endDateParam: string | null
-): OptionalDateRangeResult {
-  let startDate: Date | undefined;
-  let endDate: Date | undefined;
-
-  if (startDateParam) {
-    startDate = new Date(startDateParam);
-    if (isNaN(startDate.getTime())) {
-      return {
-        success: false,
-        error: "Invalid startDate format. Use ISO 8601 format (YYYY-MM-DD)",
-      };
-    }
+): DateRangeResult {
+  if (!startDateParam && !endDateParam) {
+    return { success: true };
   }
 
-  if (endDateParam) {
-    endDate = new Date(endDateParam);
-    if (isNaN(endDate.getTime())) {
-      return {
-        success: false,
-        error: "Invalid endDate format. Use ISO 8601 format (YYYY-MM-DD)",
-      };
-    }
-  }
-
-  // Vérifier que endDate est après startDate si les deux sont fournis
-  if (startDate && endDate && endDate < startDate) {
+  if ((startDateParam && !endDateParam) || (!startDateParam && endDateParam)) {
     return {
       success: false,
-      error: "endDate must be after or equal to startDate",
+      error: "Les deux paramètres startDate et endDate doivent être fournis ensemble",
     };
   }
 
-  return {
-    success: true,
-    start: startDate,
-    end: endDate,
-  };
+  const startDate = startDateParam ? new Date(startDateParam) : undefined;
+  const endDate = endDateParam ? new Date(endDateParam) : undefined;
+
+  if (startDate && isNaN(startDate.getTime())) {
+    return {
+      success: false,
+      error: `Date de début invalide: ${startDateParam}`,
+    };
+  }
+
+  if (endDate && isNaN(endDate.getTime())) {
+    return {
+      success: false,
+      error: `Date de fin invalide: ${endDateParam}`,
+    };
+  }
+
+  if (startDate && endDate && startDate > endDate) {
+    return {
+      success: false,
+      error: "La date de début doit être antérieure à la date de fin",
+    };
+  }
+
+  return { success: true, start: startDate, end: endDate };
 }
 
 /**
- * Valide une plage de dates requise depuis les query parameters
- * 
- * @param startDateParam - Valeur du paramètre startDate (peut être null)
- * @param endDateParam - Valeur du paramètre endDate (peut être null)
- * @returns Résultat de validation avec dates parsées ou erreur
- * 
- * @example
- * ```typescript
- * const result = validateRequiredDateRange(startDate, endDate);
- * if (!result.success) {
- *   throw createValidationError(result.error);
- * }
- * const { start, end } = result; // start et end sont garantis d'être définis
- * ```
+ * Valide une plage de dates requise
  */
 export function validateRequiredDateRange(
   startDateParam: string | null,
   endDateParam: string | null
-): RequiredDateRangeResult {
+): DateRangeWithDefaultsResult {
   if (!startDateParam || !endDateParam) {
     return {
       success: false,
-      error: "startDate and endDate are required",
+      error: "Les paramètres startDate et endDate sont requis",
     };
   }
 
@@ -124,98 +81,76 @@ export function validateRequiredDateRange(
   if (isNaN(startDate.getTime())) {
     return {
       success: false,
-      error: "Invalid startDate format. Use ISO 8601 format (YYYY-MM-DD)",
+      error: `Date de début invalide: ${startDateParam}`,
     };
   }
 
   if (isNaN(endDate.getTime())) {
     return {
       success: false,
-      error: "Invalid endDate format. Use ISO 8601 format (YYYY-MM-DD)",
+      error: `Date de fin invalide: ${endDateParam}`,
     };
   }
 
-  // Vérifier que endDate est après startDate
-  if (endDate < startDate) {
+  if (startDate > endDate) {
     return {
       success: false,
-      error: "endDate must be after or equal to startDate",
+      error: "La date de début doit être antérieure à la date de fin",
     };
   }
 
-  return {
-    success: true,
-    start: startDate,
-    end: endDate,
-  };
+  return { success: true, start: startDate, end: endDate };
 }
 
 /**
  * Valide une plage de dates avec valeurs par défaut
- * 
- * @param startDateParam - Valeur du paramètre startDate (peut être null)
- * @param endDateParam - Valeur du paramètre endDate (peut être null)
- * @param defaultStartDate - Date de début par défaut
- * @param defaultEndDate - Date de fin par défaut
- * @returns Résultat de validation avec dates parsées ou erreur
- * 
- * @example
- * ```typescript
- * const result = validateDateRangeWithDefaults(
- *   startDate, 
- *   endDate,
- *   new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
- *   new Date()
- * );
- * if (!result.success) {
- *   throw createValidationError(result.error);
- * }
- * const { start, end } = result; // start et end sont toujours définis
- * ```
  */
 export function validateDateRangeWithDefaults(
   startDateParam: string | null,
   endDateParam: string | null,
   defaultStartDate: Date,
   defaultEndDate: Date
-): RequiredDateRangeResult {
+): DateRangeWithDefaultsResult {
+  if (!startDateParam && !endDateParam) {
+    return { success: true, start: defaultStartDate, end: defaultEndDate };
+  }
+
+  if ((startDateParam && !endDateParam) || (!startDateParam && endDateParam)) {
+    return {
+      success: false,
+      error: "Les deux paramètres startDate et endDate doivent être fournis ensemble",
+    };
+  }
+
   const startDate = startDateParam ? new Date(startDateParam) : defaultStartDate;
   const endDate = endDateParam ? new Date(endDateParam) : defaultEndDate;
 
   if (isNaN(startDate.getTime())) {
     return {
       success: false,
-      error: "Invalid startDate format. Use ISO 8601 format (YYYY-MM-DD)",
+      error: `Date de début invalide: ${startDateParam}`,
     };
   }
 
   if (isNaN(endDate.getTime())) {
     return {
       success: false,
-      error: "Invalid endDate format. Use ISO 8601 format (YYYY-MM-DD)",
+      error: `Date de fin invalide: ${endDateParam}`,
     };
   }
 
-  // Vérifier que endDate est après startDate
-  if (endDate < startDate) {
+  if (startDate > endDate) {
     return {
       success: false,
-      error: "endDate must be after or equal to startDate",
+      error: "La date de début doit être antérieure à la date de fin",
     };
   }
 
-  return {
-    success: true,
-    start: startDate,
-    end: endDate,
-  };
+  return { success: true, start: startDate, end: endDate };
 }
 
 /**
  * Valide une date optionnelle
- * 
- * @param dateParam - Valeur du paramètre date (peut être null)
- * @returns Date parsée ou undefined, ou erreur
  */
 export function validateOptionalDate(
   dateParam: string | null
@@ -227,7 +162,7 @@ export function validateOptionalDate(
   const date = new Date(dateParam);
   if (isNaN(date.getTime())) {
     return {
-      error: `Invalid date format. Use ISO 8601 format (YYYY-MM-DD)`,
+      error: `Date invalide: ${dateParam}`,
     };
   }
 
@@ -235,161 +170,145 @@ export function validateOptionalDate(
 }
 
 /**
- * Valide une période d'agrégation
- * 
- * @param periodParam - Valeur du paramètre period (peut être null)
- * @param defaultValue - Valeur par défaut si non fournie
- * @returns Période validée ou erreur
+ * Valide une période (day, week, month)
  */
 export function validatePeriod(
   periodParam: string | null,
   defaultValue: "day" | "week" | "month" = "day"
 ): "day" | "week" | "month" | { error: string } {
-  const period = (periodParam || defaultValue) as string;
+  if (!periodParam) {
+    return defaultValue;
+  }
 
-  if (!["day", "week", "month"].includes(period)) {
+  const validPeriods = ["day", "week", "month"] as const;
+  if (!validPeriods.includes(periodParam as typeof validPeriods[number])) {
     return {
-      error: "Invalid period. Must be 'day', 'week', or 'month'",
+      error: `Période invalide: ${periodParam}. Valeurs acceptées: ${validPeriods.join(", ")}`,
     };
   }
 
-  return period as "day" | "week" | "month";
+  return periodParam as "day" | "week" | "month";
+}
+
+/**
+ * Options de validation pour les nombres
+ */
+export interface NumberValidationOptions {
+  min?: number;
+  max?: number;
+  errorMessage?: string;
 }
 
 /**
  * Valide un entier optionnel
- * 
- * @param intParam - Valeur du paramètre (peut être null)
- * @param options - Options de validation
- * @returns Entier parsé ou undefined, ou erreur
  */
 export function validateOptionalInteger(
   intParam: string | null,
-  options: {
-    min?: number;
-    max?: number;
-    errorMessage?: string;
-  } = {}
+  options: NumberValidationOptions = {}
 ): number | undefined | { error: string } {
   if (!intParam) {
     return undefined;
   }
 
-  const value = parseInt(intParam, 10);
-  if (isNaN(value)) {
+  const num = parseInt(intParam, 10);
+  if (isNaN(num)) {
     return {
-      error: options.errorMessage || `Invalid integer: ${intParam}`,
+      error: options.errorMessage || `Entier invalide: ${intParam}`,
     };
   }
 
-  if (options.min !== undefined && value < options.min) {
+  if (options.min !== undefined && num < options.min) {
     return {
-      error: options.errorMessage || `Value must be >= ${options.min}`,
+      error: options.errorMessage || `La valeur doit être supérieure ou égale à ${options.min}`,
     };
   }
 
-  if (options.max !== undefined && value > options.max) {
+  if (options.max !== undefined && num > options.max) {
     return {
-      error: options.errorMessage || `Value must be <= ${options.max}`,
+      error: options.errorMessage || `La valeur doit être inférieure ou égale à ${options.max}`,
     };
   }
 
-  return value;
+  return num;
 }
 
 /**
  * Valide un entier requis
- * 
- * @param intParam - Valeur du paramètre (peut être null)
- * @param options - Options de validation
- * @returns Entier parsé ou erreur
  */
 export function validateRequiredInteger(
   intParam: string | null,
-  options: {
-    min?: number;
-    max?: number;
-    errorMessage?: string;
-  } = {}
+  options: NumberValidationOptions = {}
 ): number | { error: string } {
   if (!intParam) {
     return {
-      error: options.errorMessage || "Integer parameter is required",
+      error: options.errorMessage || "Paramètre requis",
     };
   }
 
-  const value = parseInt(intParam, 10);
-  if (isNaN(value)) {
+  const num = parseInt(intParam, 10);
+  if (isNaN(num)) {
     return {
-      error: options.errorMessage || `Invalid integer: ${intParam}`,
+      error: options.errorMessage || `Entier invalide: ${intParam}`,
     };
   }
 
-  if (options.min !== undefined && value < options.min) {
+  if (options.min !== undefined && num < options.min) {
     return {
-      error: options.errorMessage || `Value must be >= ${options.min}`,
+      error: options.errorMessage || `La valeur doit être supérieure ou égale à ${options.min}`,
     };
   }
 
-  if (options.max !== undefined && value > options.max) {
+  if (options.max !== undefined && num > options.max) {
     return {
-      error: options.errorMessage || `Value must be <= ${options.max}`,
+      error: options.errorMessage || `La valeur doit être inférieure ou égale à ${options.max}`,
     };
   }
 
-  return value;
+  return num;
 }
 
 /**
  * Valide un nombre décimal optionnel
- * 
- * @param floatParam - Valeur du paramètre (peut être null)
- * @param options - Options de validation
- * @returns Nombre parsé ou undefined, ou erreur
  */
 export function validateOptionalFloat(
   floatParam: string | null,
-  options: {
-    min?: number;
-    max?: number;
-    errorMessage?: string;
-  } = {}
+  options: NumberValidationOptions = {}
 ): number | undefined | { error: string } {
   if (!floatParam) {
     return undefined;
   }
 
-  const value = parseFloat(floatParam);
-  if (isNaN(value)) {
+  const num = parseFloat(floatParam);
+  if (isNaN(num)) {
     return {
-      error: options.errorMessage || `Invalid number: ${floatParam}`,
+      error: options.errorMessage || `Nombre invalide: ${floatParam}`,
     };
   }
 
-  if (options.min !== undefined && value < options.min) {
+  if (options.min !== undefined && num < options.min) {
     return {
-      error: options.errorMessage || `Value must be >= ${options.min}`,
+      error: options.errorMessage || `La valeur doit être supérieure ou égale à ${options.min}`,
     };
   }
 
-  if (options.max !== undefined && value > options.max) {
+  if (options.max !== undefined && num > options.max) {
     return {
-      error: options.errorMessage || `Value must be <= ${options.max}`,
+      error: options.errorMessage || `La valeur doit être inférieure ou égale à ${options.max}`,
     };
   }
 
-  return value;
+  return num;
 }
 
 /**
  * Valide un userId optionnel
- * 
- * @param userIdParam - Valeur du paramètre userId (peut être null)
- * @returns userId ou undefined
  */
 export function validateOptionalUserId(
   userIdParam: string | null
 ): string | undefined {
-  return userIdParam || undefined;
-}
+  if (!userIdParam || userIdParam.trim() === "") {
+    return undefined;
+  }
 
+  return userIdParam.trim();
+}

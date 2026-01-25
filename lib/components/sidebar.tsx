@@ -16,6 +16,7 @@ const navItems: NavItem[] = [
   { href: "/dashboard/heatmap", label: "Heatmap", icon: "🔥" },
   { href: "/dashboard/genres", label: "Genres", icon: "🎵" },
   { href: "/dashboard/genres/trends", label: "Tendances Genres", icon: "📉" },
+  { href: "/dashboard/temporal-analysis", label: "Analyse Temporelle", icon: "⏰" },
   { href: "/dashboard/replay", label: "Replay", icon: "🎬" },
   { href: "/dashboard/network", label: "Réseau", icon: "🕸️" },
   { href: "/dashboard/insights", label: "Insights", icon: "💡" },

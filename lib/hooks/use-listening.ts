@@ -9,6 +9,7 @@ import {
   ListenDto,
   AggregatedListenDto,
   OverviewStatsDto,
+  TemporalAnalysisDto,
 } from "@/lib/dto/listening";
 import {
   GenreDistributionResponse,
@@ -298,6 +299,46 @@ export function useOverviewStats(
     queryKey: listeningKeys.overview({ startDate, endDate, userId }),
     queryFn: () => fetchOverviewStats(startDate, endDate, userId),
     staleTime: CACHE_STALE_TIME.OVERVIEW,
+    ...options,
+  });
+}
+
+/**
+ * Fonction pour récupérer l'analyse temporelle
+ */
+async function fetchTemporalAnalysis(
+  startDate?: string,
+  endDate?: string,
+  userId?: string
+): Promise<TemporalAnalysisDto> {
+  const searchParams = new URLSearchParams();
+  
+  if (startDate) searchParams.append("startDate", startDate);
+  if (endDate) searchParams.append("endDate", endDate);
+  if (userId) searchParams.append("userId", userId);
+
+  const queryString = searchParams.toString();
+  const endpoint = `/temporal-analysis${queryString ? `?${queryString}` : ""}`;
+  
+  return apiClient.get<TemporalAnalysisDto>(endpoint);
+}
+
+/**
+ * Hook pour récupérer l'analyse temporelle avancée
+ */
+export function useTemporalAnalysis(
+  startDate?: string,
+  endDate?: string,
+  userId?: string,
+  options?: Omit<
+    UseQueryOptions<TemporalAnalysisDto, Error>,
+    "queryKey" | "queryFn" | "staleTime"
+  >
+) {
+  return useQuery<TemporalAnalysisDto, Error>({
+    queryKey: listeningKeys.temporalAnalysis({ startDate, endDate, userId }),
+    queryFn: () => fetchTemporalAnalysis(startDate, endDate, userId),
+    staleTime: CACHE_STALE_TIME.TIMELINE, // Utiliser le même staleTime que timeline
     ...options,
   });
 }

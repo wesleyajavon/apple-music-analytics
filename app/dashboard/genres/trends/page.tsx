@@ -143,8 +143,14 @@ function TrendsContent() {
     period
   );
 
-  const availableGenres = data?.availableGenres ?? [];
-  const chartData = data?.data ?? [];
+  const availableGenres = useMemo(
+    () => data?.availableGenres ?? [],
+    [data?.availableGenres]
+  );
+  const chartData = useMemo(
+    () => data?.data ?? [],
+    [data?.data]
+  );
 
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
 

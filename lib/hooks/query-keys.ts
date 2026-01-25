@@ -43,6 +43,11 @@ export const listeningKeys = {
     endDate?: string;
     userId?: string;
   }) => [...listeningKeys.all, "overview", params] as const,
+  temporalAnalysis: (params?: {
+    startDate?: string;
+    endDate?: string;
+    userId?: string;
+  }) => [...listeningKeys.all, "temporalAnalysis", params] as const,
 } as const;
 
 export const networkKeys = {

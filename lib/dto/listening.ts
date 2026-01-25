@@ -114,3 +114,34 @@ export interface OverviewStatsDto {
   totalPlayTime: number; // Total play time in seconds
 }
 
+/**
+ * Represents temporal analysis data (day of week and hour of day aggregations)
+ */
+export interface TemporalAnalysisDto {
+  byDayOfWeek: DayOfWeekAggregationDto[];
+  byHourOfDay: HourOfDayAggregationDto[];
+  peakDay: DayOfWeekAggregationDto | null;
+  peakHour: HourOfDayAggregationDto | null;
+}
+
+/**
+ * Aggregation by day of week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+ */
+export interface DayOfWeekAggregationDto {
+  dayOfWeek: number; // 0-6 (0 = dimanche, 1 = lundi, etc.)
+  dayName: string; // Nom du jour en français
+  listens: number;
+  uniqueTracks: number;
+  uniqueArtists: number;
+}
+
+/**
+ * Aggregation by hour of day (0-23)
+ */
+export interface HourOfDayAggregationDto {
+  hour: number; // 0-23
+  listens: number;
+  uniqueTracks: number;
+  uniqueArtists: number;
+}
+

@@ -204,19 +204,27 @@ export async function getTemporalAnalysis(
   ]);
 
   // Identifier le jour de pic (celui avec le plus d'écoutes)
+  // Retourne null si toutes les valeurs sont à 0
   const peakDay =
     byDayOfWeek.length > 0
-      ? byDayOfWeek.reduce((max, day) =>
-          day.listens > max.listens ? day : max
-        )
+      ? (() => {
+          const maxDay = byDayOfWeek.reduce((max, day) =>
+            day.listens > max.listens ? day : max
+          );
+          return maxDay.listens > 0 ? maxDay : null;
+        })()
       : null;
 
   // Identifier l'heure de pic (celle avec le plus d'écoutes)
+  // Retourne null si toutes les valeurs sont à 0
   const peakHour =
     byHourOfDay.length > 0
-      ? byHourOfDay.reduce((max, hour) =>
-          hour.listens > max.listens ? hour : max
-        )
+      ? (() => {
+          const maxHour = byHourOfDay.reduce((max, hour) =>
+            hour.listens > max.listens ? hour : max
+          );
+          return maxHour.listens > 0 ? maxHour : null;
+        })()
       : null;
 
   return {

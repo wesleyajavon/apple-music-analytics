@@ -19,6 +19,7 @@ import { useGenres } from "@/lib/hooks/use-listening";
 import { LoadingState } from "@/lib/components/loading-state";
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState } from "@/lib/components/empty-state";
+import { GenresSkeleton } from "@/lib/components/skeleton-loaders";
 
 type ChartType = "pie" | "bar";
 
@@ -115,7 +116,7 @@ function GenresContent() {
         </div>
 
         {isLoading ? (
-          <LoadingState message="Chargement de la répartition des genres..." />
+          <GenresSkeleton />
         ) : error ? (
           <ErrorState
             error={error}
@@ -306,7 +307,7 @@ export default function GenresPage() {
                 Répartition de vos écoutes par genre musical
               </p>
             </div>
-            <LoadingState message="Chargement de la répartition des genres..." />
+            <GenresSkeleton />
           </div>
       }
     >

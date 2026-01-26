@@ -21,6 +21,7 @@ import { useTemporalAnalysis } from "@/lib/hooks/use-listening";
 import { LoadingState } from "@/lib/components/loading-state";
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState } from "@/lib/components/empty-state";
+import { TemporalAnalysisSkeleton } from "@/lib/components/skeleton-loaders";
 
 // Custom tooltip mémorisé pour éviter les re-créations
 const CustomTooltip = memo(({ active, payload }: any) => {
@@ -116,7 +117,7 @@ function TemporalAnalysisContent() {
         </div>
 
         {isLoading ? (
-          <LoadingState message="Chargement de l&apos;analyse temporelle..." />
+          <TemporalAnalysisSkeleton />
         ) : error ? (
           <ErrorState
             error={error}
@@ -355,7 +356,7 @@ export default function TemporalAnalysisPage() {
               Patterns d&apos;écoute détaillés par jour de la semaine et par heure de la journée
             </p>
           </div>
-          <LoadingState message="Chargement de l&apos;analyse temporelle..." />
+          <TemporalAnalysisSkeleton />
         </div>
       }
     >

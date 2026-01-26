@@ -18,6 +18,7 @@ import { useOverviewStats, useTimeline, useGenres } from "@/lib/hooks/use-listen
 import { LoadingState } from "@/lib/components/loading-state";
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState } from "@/lib/components/empty-state";
+import { OverviewSkeleton } from "@/lib/components/skeleton-loaders";
 
 /**
  * Formate les secondes en format lisible (heures, minutes)
@@ -212,7 +213,7 @@ function OverviewContent() {
   );
 
   if (isLoading) {
-    return <LoadingState message="Chargement des statistiques..." />;
+    return <OverviewSkeleton />;
   }
 
   if (error) {
@@ -453,9 +454,7 @@ export default function OverviewPage() {
         </p>
       </div>
 
-      <Suspense
-        fallback={<LoadingState message="Chargement des statistiques..." />}
-      >
+      <Suspense fallback={<OverviewSkeleton />}>
         <OverviewContent />
       </Suspense>
     </div>

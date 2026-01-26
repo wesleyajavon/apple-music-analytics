@@ -7,6 +7,7 @@ import { ArtistNetworkGraphComponent } from "@/lib/components/artist-network-gra
 import { LoadingState } from "@/lib/components/loading-state";
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState } from "@/lib/components/empty-state";
+import { NetworkGraphSkeleton } from "@/lib/components/skeleton-loaders";
 
 function NetworkContent() {
   const searchParams = useSearchParams();
@@ -63,7 +64,7 @@ function NetworkContent() {
       </div>
 
       {isLoading ? (
-        <LoadingState message="Chargement du réseau d'artistes..." />
+        <NetworkGraphSkeleton />
       ) : error ? (
         <ErrorState
           error={error}
@@ -115,7 +116,7 @@ export default function NetworkPage() {
               Visualisation des connexions entre vos artistes écoutés
             </p>
           </div>
-          <LoadingState message="Chargement du réseau d'artistes..." />
+          <NetworkGraphSkeleton />
         </div>
       }
     >

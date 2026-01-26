@@ -7,6 +7,7 @@ import { useTimeline, useListens } from "@/lib/hooks/use-listening";
 import { LoadingState } from "@/lib/components/loading-state";
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState } from "@/lib/components/empty-state";
+import { HeatmapSkeleton, DayDetailsSkeleton } from "@/lib/components/skeleton-loaders";
 
 type ViewMode = "year" | "month" | "weekday";
 
@@ -180,7 +181,7 @@ function HeatmapContent() {
   }, [refetch]);
 
   if (isLoading) {
-    return <LoadingState message="Chargement du calendrier d'écoute..." />;
+    return <HeatmapSkeleton />;
   }
 
   if (error) {
@@ -429,7 +430,7 @@ function HeatmapContent() {
           </div>
 
           {isLoadingDayListens ? (
-            <LoadingState message="Chargement des détails..." />
+            <DayDetailsSkeleton />
           ) : dayListensData && dayListensData.data.length > 0 ? (
             <div className="space-y-4">
               {/* Statistiques du jour */}
@@ -542,7 +543,7 @@ function HeatmapContent() {
 export default function HeatmapPage() {
   return (
     <div className="px-4 py-6 sm:px-0">
-      <Suspense fallback={<LoadingState message="Chargement du calendrier..." />}>
+      <Suspense fallback={<HeatmapSkeleton />}>
         <HeatmapContent />
       </Suspense>
     </div>

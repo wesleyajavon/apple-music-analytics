@@ -25,6 +25,7 @@ import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState } from "@/lib/components/empty-state";
 import { PeriodSelector, PeriodType } from "@/lib/components/period-selector";
 import type { GenreTrendsDataPoint } from "@/lib/dto/genres";
+import { GenreTrendsSkeleton } from "@/lib/components/skeleton-loaders";
 
 const COLORS = [
   "#3b82f6",
@@ -207,7 +208,7 @@ function TrendsContent() {
               Évolution de vos préférences musicales dans le temps
             </p>
           </div>
-          <LoadingState message="Chargement des tendances de genres..." />
+          <GenreTrendsSkeleton />
         </div>
       </>
     );
@@ -458,7 +459,7 @@ export default function GenreTrendsPage() {
                 Évolution de vos préférences musicales dans le temps
               </p>
             </div>
-            <LoadingState message="Chargement des tendances de genres..." />
+            <GenreTrendsSkeleton />
           </div>
         </>
       }

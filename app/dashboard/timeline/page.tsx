@@ -16,6 +16,7 @@ import { LoadingState } from "@/lib/components/loading-state";
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState } from "@/lib/components/empty-state";
 import { PeriodSelector, PeriodType } from "@/lib/components/period-selector";
+import { LineChartSkeleton } from "@/lib/components/skeleton-loaders";
 
 /**
  * Formate une date selon le type de période
@@ -99,7 +100,7 @@ function TimelineContent() {
         </div>
 
         {isLoading ? (
-          <LoadingState message="Chargement de la timeline d'écoute..." />
+          <LineChartSkeleton height={500} />
         ) : error ? (
           <ErrorState
             error={error}
@@ -203,7 +204,7 @@ export default function TimelinePage() {
                 Évolution de vos écoutes au fil du temps
               </p>
             </div>
-            <LoadingState message="Chargement de la timeline d'écoute..." />
+            <LineChartSkeleton height={500} />
           </div>
         </>
       }

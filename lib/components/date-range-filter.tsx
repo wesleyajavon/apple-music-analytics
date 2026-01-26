@@ -2,6 +2,7 @@
 
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useCallback, useRef, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export type DateRangePreset = "7d" | "30d" | "ytd" | "all";
 
@@ -114,6 +115,13 @@ export function DateRangeFilter() {
       }
 
       router.push(`${pathname}?${params.toString()}`);
+      
+      // Afficher un toast de confirmation pour le changement de filtre
+      const presetLabel = presets[preset].label;
+      toast.success("Filtre mis à jour", {
+        description: `Période sélectionnée : ${presetLabel}`,
+        duration: 2000,
+      });
     },
     [router, pathname, searchParams]
   );
@@ -124,11 +132,13 @@ export function DateRangeFilter() {
   ][];
 
   // Fonction générique pour télécharger un fichier
-  const downloadFile = useCallback(async (url: string, defaultFilename: string) => {
+  const downloadFile = useCallback(async (url: string, defaultFilename: string, exportType: string) => {
+    const toastId = toast.loading(`Export ${exportType} en cours...`);
     try {
       const response = await fetch(url);
       if (!response.ok) {
-        throw new Error("Erreur lors de l'export");
+        const errorText = await response.text();
+        throw new Error(errorText || "Erreur lors de l'export");
       }
 
       const blob = await response.blob();
@@ -146,9 +156,18 @@ export function DateRangeFilter() {
       a.click();
       document.body.removeChild(a);
       window.URL.revokeObjectURL(downloadUrl);
+      
+      toast.success(`Export ${exportType} réussi`, {
+        id: toastId,
+        description: `Le fichier ${filename} a été téléchargé avec succès`,
+      });
     } catch (error) {
       console.error("Erreur lors de l'export:", error);
-      alert("Une erreur est survenue lors de l'export. Veuillez réessayer.");
+      const errorMessage = error instanceof Error ? error.message : "Une erreur est survenue lors de l'export";
+      toast.error(`Erreur lors de l'export ${exportType}`, {
+        id: toastId,
+        description: errorMessage,
+      });
     }
   }, []);
 
@@ -169,7 +188,7 @@ export function DateRangeFilter() {
     }
 
     const exportUrl = `/api/export/listens?${params.toString()}`;
-    await downloadFile(exportUrl, "listens.csv");
+    await downloadFile(exportUrl, "listens.csv", "CSV");
   }, [searchParams, downloadFile]);
 
   // Fonction pour exporter les statistiques en JSON
@@ -189,7 +208,7 @@ export function DateRangeFilter() {
     }
 
     const exportUrl = `/api/export/stats?${params.toString()}`;
-    await downloadFile(exportUrl, "stats.json");
+    await downloadFile(exportUrl, "stats.json", "JSON");
   }, [searchParams, downloadFile]);
 
   // Fonction pour générer le rapport PDF annuel
@@ -227,7 +246,7 @@ export function DateRangeFilter() {
     }
 
     const exportUrl = `/api/export/report?${params.toString()}`;
-    await downloadFile(exportUrl, "rapport.pdf");
+    await downloadFile(exportUrl, "rapport.pdf", "PDF");
   }, [searchParams, downloadFile]);
 
   return (

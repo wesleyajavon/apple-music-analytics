@@ -2,6 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
+import { Toaster } from "sonner";
 
 // Provider TanStack Query avec configuration optimisée pour un dashboard analytique
 // staleTime: 60s pour réduire les requêtes inutiles sur des données qui changent peu
@@ -26,7 +27,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <QueryClientProvider client={queryClient}>
+      {children}
+      <Toaster 
+        position="top-right"
+        richColors
+        closeButton
+      />
+    </QueryClientProvider>
   );
 }
 

@@ -4,7 +4,6 @@ import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useArtistNetwork } from "@/lib/hooks/use-network";
 import { ArtistNetworkGraphComponent } from "@/lib/components/artist-network-graph";
-import { LoadingState } from "@/lib/components/loading-state";
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState } from "@/lib/components/empty-state";
 import { NetworkGraphSkeleton } from "@/lib/components/skeleton-loaders";

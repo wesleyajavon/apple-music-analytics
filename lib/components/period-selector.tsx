@@ -2,6 +2,7 @@
 
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useCallback } from "react";
+import { useOptimisticFilters } from "@/lib/hooks/use-optimistic-filters";
 
 export type PeriodType = "day" | "week" | "month";
 
@@ -20,16 +21,38 @@ export function PeriodSelector() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { prefetchWithOptimisticUpdate } = useOptimisticFilters();
 
   const currentPeriod = (searchParams.get("period") as PeriodType) || "day";
+  const startDate = searchParams.get("startDate") || undefined;
+  const endDate = searchParams.get("endDate") || undefined;
 
   const updatePeriod = useCallback(
     (period: PeriodType) => {
+      const oldPeriod = currentPeriod;
       const params = new URLSearchParams(searchParams.toString());
       params.set("period", period);
+      
+      // Mettre à jour le cache de manière optimiste AVANT la navigation
+      // Cela permet d'afficher immédiatement les anciennes données pendant le chargement
+      if (startDate && endDate) {
+        // Ne pas attendre la fin du préchargement pour naviguer
+        // Cela permet une mise à jour immédiate de l'UI
+        prefetchWithOptimisticUpdate(
+          startDate,
+          endDate,
+          oldPeriod,
+          startDate,
+          endDate,
+          period
+        ).catch((error) => {
+          console.error("Erreur lors du préchargement optimiste:", error);
+        });
+      }
+
       router.push(`${pathname}?${params.toString()}`);
     },
-    [router, pathname, searchParams]
+    [router, pathname, searchParams, prefetchWithOptimisticUpdate, startDate, endDate, currentPeriod]
   );
 
   return (

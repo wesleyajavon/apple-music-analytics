@@ -50,23 +50,15 @@ const CustomTooltip = memo(({ active, payload }: any) => {
 CustomTooltip.displayName = "CustomTooltip";
 
 function TemporalAnalysisContent() {
-  const searchParams = useSearchParams();
-  // Par défaut, utiliser les 30 derniers jours si aucune date n'est spécifiée
-  const startDateParam = searchParams.get("startDate");
-  const endDateParam = searchParams.get("endDate");
+  // IMPORTANT: L'analyse temporelle utilise TOUTES les données historiques
+  // pour calculer des patterns fiables (jour de la semaine, heure de la journée).
+  // Les filtres de date sont ignorés car ils donneraient des résultats trompeurs
+  // (ex: patterns basés sur seulement 7 jours ne sont pas représentatifs).
+  // 
+  // Si vous voulez analyser une période spécifique, utilisez la page Timeline.
   
-  // Si aucune date n'est spécifiée, utiliser les 30 derniers jours par défaut
-  const defaultEndDate = useMemo(() => new Date(), []);
-  const defaultStartDate = useMemo(() => {
-    const date = new Date();
-    date.setDate(date.getDate() - 30);
-    return date;
-  }, []);
-  
-  const startDate = startDateParam || defaultStartDate.toISOString().split("T")[0];
-  const endDate = endDateParam || defaultEndDate.toISOString().split("T")[0];
-  
-  const { data, isLoading, error, refetch } = useTemporalAnalysis(startDate, endDate);
+  // Ne pas utiliser de filtres de date - toujours utiliser toutes les données
+  const { data, isLoading, error, refetch } = useTemporalAnalysis(undefined, undefined);
 
   // Formater les données pour les graphiques - mémorisé pour éviter les recalculs
   const dayOfWeekData = useMemo(
@@ -114,6 +106,15 @@ function TemporalAnalysisContent() {
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
             Patterns d&apos;écoute détaillés par jour de la semaine et par heure de la journée
           </p>
+          <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <p className="text-sm text-blue-800 dark:text-blue-200">
+              <strong>ℹ️ Note importante :</strong> Cette analyse utilise{" "}
+              <strong>toutes vos données historiques</strong> pour calculer des patterns
+              fiables. Les filtres de date sont ignorés car ils donneraient des résultats
+              non représentatifs (par exemple, analyser seulement 7 jours ne refléterait
+              pas vos habitudes générales).
+            </p>
+          </div>
         </div>
 
         {isLoading ? (
@@ -126,7 +127,7 @@ function TemporalAnalysisContent() {
           />
         ) : !data || (data.byDayOfWeek.length === 0 && data.byHourOfDay.length === 0) ? (
           <EmptyState
-            message="Aucune donnée disponible pour cette période. Essayez de modifier les dates de filtrage."
+            message="Aucune donnée disponible. Importez vos données d'écoute pour voir l'analyse temporelle."
             icon="⏰"
           />
         ) : (

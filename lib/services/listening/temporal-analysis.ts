@@ -57,8 +57,8 @@ const DAY_NAMES = [
  * Récupère les écoutes agrégées par jour de la semaine
  */
 async function getListensByDayOfWeek(
-  startDate: Date,
-  endDate: Date,
+  startDate: Date | undefined,
+  endDate: Date | undefined,
   userId?: string
 ): Promise<DayOfWeekAggregation[]> {
   const query = Prisma.sql`
@@ -69,8 +69,9 @@ async function getListensByDayOfWeek(
       COUNT(DISTINCT t."artistId")::bigint as unique_artists
     FROM "Listen" l
     JOIN "Track" t ON l."trackId" = t.id
-    WHERE l."playedAt" >= ${startDate}
-      AND l."playedAt" <= ${endDate}
+    WHERE 1=1
+      ${startDate ? Prisma.sql`AND l."playedAt" >= ${startDate}` : Prisma.sql``}
+      ${endDate ? Prisma.sql`AND l."playedAt" <= ${endDate}` : Prisma.sql``}
       ${userId ? Prisma.sql`AND l."userId" = ${userId}` : Prisma.sql``}
     GROUP BY day_of_week
     ORDER BY day_of_week ASC
@@ -127,8 +128,8 @@ async function getListensByDayOfWeek(
  * Récupère les écoutes agrégées par heure de la journée
  */
 async function getListensByHourOfDay(
-  startDate: Date,
-  endDate: Date,
+  startDate: Date | undefined,
+  endDate: Date | undefined,
   userId?: string
 ): Promise<HourOfDayAggregation[]> {
   const query = Prisma.sql`
@@ -139,8 +140,9 @@ async function getListensByHourOfDay(
       COUNT(DISTINCT t."artistId")::bigint as unique_artists
     FROM "Listen" l
     JOIN "Track" t ON l."trackId" = t.id
-    WHERE l."playedAt" >= ${startDate}
-      AND l."playedAt" <= ${endDate}
+    WHERE 1=1
+      ${startDate ? Prisma.sql`AND l."playedAt" >= ${startDate}` : Prisma.sql``}
+      ${endDate ? Prisma.sql`AND l."playedAt" <= ${endDate}` : Prisma.sql``}
       ${userId ? Prisma.sql`AND l."userId" = ${userId}` : Prisma.sql``}
     GROUP BY hour
     ORDER BY hour ASC
@@ -187,15 +189,15 @@ async function getListensByHourOfDay(
 /**
  * Calcule l'analyse temporelle complète des écoutes
  * 
- * @param startDate - Date de début de la plage d'analyse
- * @param endDate - Date de fin de la plage d'analyse
+ * @param startDate - Date de début de la plage d'analyse (optionnel, si non fourni utilise toutes les données)
+ * @param endDate - Date de fin de la plage d'analyse (optionnel, si non fourni utilise toutes les données)
  * @param userId - ID de l'utilisateur (optionnel)
  * 
  * @returns Résultat complet avec agrégations par jour de semaine et par heure, plus les moments de pic
  */
 export async function getTemporalAnalysis(
-  startDate: Date,
-  endDate: Date,
+  startDate: Date | undefined,
+  endDate: Date | undefined,
   userId?: string
 ): Promise<TemporalAnalysisResult> {
   const [byDayOfWeek, byHourOfDay] = await Promise.all([

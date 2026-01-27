@@ -2,9 +2,9 @@
 
 import { useState, useMemo, useEffect, memo } from "react";
 import { useReplaySummaries } from "@/lib/hooks/use-replay";
-import { LoadingState } from "@/lib/components/loading-state";
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState } from "@/lib/components/empty-state";
+import { ReplaySkeleton } from "@/lib/components/skeleton-loaders";
 import { ReplayYearlySummaryDto } from "@/lib/dto/replay";
 
 /**
@@ -131,7 +131,7 @@ function ReplayComparisonContent() {
   );
 
   if (isLoading) {
-    return <LoadingState message="Chargement des données Replay..." />;
+    return <ReplaySkeleton />;
   }
 
   if (error) {

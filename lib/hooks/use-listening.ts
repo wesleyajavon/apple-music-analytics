@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery, UseQueryOptions } from "@tanstack/react-query";
+import { useQuery, UseQueryOptions, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
 import {
   ListensResponse,
@@ -132,7 +132,31 @@ export function useAggregatedListens(
 }
 
 /**
+ * Helper pour trouver les données les plus récentes dans le cache pour une clé de requête similaire
+ */
+function findLatestCachedData<T>(
+  queryClient: ReturnType<typeof useQueryClient>,
+  baseKey: readonly unknown[]
+): T | undefined {
+  // Chercher toutes les requêtes qui commencent par la même base
+  // Par exemple, pour ["listening", "timeline", {...}], on cherche ["listening", "timeline"]
+  const baseKeyWithoutParams = baseKey.slice(0, -1);
+  const queries = queryClient.getQueriesData<T>({
+    queryKey: baseKeyWithoutParams,
+    exact: false,
+  });
+
+  // Retourner les données de la première requête trouvée (la plus récente)
+  // Les requêtes sont triées par ordre de dernière utilisation
+  if (queries.length > 0) {
+    return queries[0][1];
+  }
+  return undefined;
+}
+
+/**
  * Hook pour récupérer les données de timeline (optimisé pour les graphiques)
+ * Utilise placeholderData pour les optimistic updates lors des changements de filtres
  */
 export function useTimeline(
   startDate?: string,
@@ -141,13 +165,24 @@ export function useTimeline(
   userId?: string,
   options?: Omit<
     UseQueryOptions<TimelineDataPoint[], Error>,
-    "queryKey" | "queryFn" | "staleTime"
+    "queryKey" | "queryFn" | "staleTime" | "placeholderData"
   >
 ) {
+  const queryClient = useQueryClient();
+  const queryKey = listeningKeys.timeline({ startDate, endDate, period, userId });
+  
+  // Récupérer les données précédentes du cache pour les utiliser comme placeholder
+  // Cherche dans toutes les requêtes timeline pour trouver des données similaires
+  const previousData = findLatestCachedData<TimelineDataPoint[]>(
+    queryClient,
+    queryKey
+  );
+
   return useQuery<TimelineDataPoint[], Error>({
-    queryKey: listeningKeys.timeline({ startDate, endDate, period, userId }),
+    queryKey,
     queryFn: () => fetchTimeline(startDate, endDate, period, userId),
     staleTime: CACHE_STALE_TIME.TIMELINE,
+    placeholderData: previousData,
     ...options,
   });
 }
@@ -192,6 +227,7 @@ async function fetchGenreDistribution(
 
 /**
  * Hook pour récupérer la distribution des genres
+ * Utilise placeholderData pour les optimistic updates lors des changements de filtres
  */
 export function useGenres(
   startDate?: string,
@@ -199,13 +235,23 @@ export function useGenres(
   userId?: string,
   options?: Omit<
     UseQueryOptions<GenreDistributionResponse, Error>,
-    "queryKey" | "queryFn" | "staleTime"
+    "queryKey" | "queryFn" | "staleTime" | "placeholderData"
   >
 ) {
+  const queryClient = useQueryClient();
+  const queryKey = listeningKeys.genres({ startDate, endDate, userId });
+  
+  // Récupérer les données précédentes du cache pour les utiliser comme placeholder
+  const previousData = findLatestCachedData<GenreDistributionResponse>(
+    queryClient,
+    queryKey
+  );
+
   return useQuery<GenreDistributionResponse, Error>({
-    queryKey: listeningKeys.genres({ startDate, endDate, userId }),
+    queryKey,
     queryFn: () => fetchGenreDistribution(startDate, endDate, userId),
     staleTime: CACHE_STALE_TIME.GENRES,
+    placeholderData: previousData,
     ...options,
   });
 }
@@ -236,6 +282,7 @@ async function fetchGenreTrends(
 
 /**
  * Hook pour récupérer les tendances de genres dans le temps
+ * Utilise placeholderData pour les optimistic updates lors des changements de filtres
  */
 export function useGenreTrends(
   startDate?: string,
@@ -245,20 +292,30 @@ export function useGenreTrends(
   userId?: string,
   options?: Omit<
     UseQueryOptions<GenreTrendsResponse, Error>,
-    "queryKey" | "queryFn" | "staleTime"
+    "queryKey" | "queryFn" | "staleTime" | "placeholderData"
   >
 ) {
+  const queryClient = useQueryClient();
+  const queryKey = listeningKeys.genreTrends({
+    startDate,
+    endDate,
+    period,
+    genres,
+    userId,
+  });
+  
+  // Récupérer les données précédentes du cache pour les utiliser comme placeholder
+  const previousData = findLatestCachedData<GenreTrendsResponse>(
+    queryClient,
+    queryKey
+  );
+
   return useQuery<GenreTrendsResponse, Error>({
-    queryKey: listeningKeys.genreTrends({
-      startDate,
-      endDate,
-      period,
-      genres,
-      userId,
-    }),
+    queryKey,
     queryFn: () =>
       fetchGenreTrends(startDate, endDate, period, genres, userId),
     staleTime: CACHE_STALE_TIME.GENRE_TRENDS,
+    placeholderData: previousData,
     ...options,
   });
 }
@@ -285,6 +342,7 @@ async function fetchOverviewStats(
 
 /**
  * Hook pour récupérer les statistiques d'overview
+ * Utilise placeholderData pour les optimistic updates lors des changements de filtres
  */
 export function useOverviewStats(
   startDate?: string,
@@ -292,13 +350,23 @@ export function useOverviewStats(
   userId?: string,
   options?: Omit<
     UseQueryOptions<OverviewStatsDto, Error>,
-    "queryKey" | "queryFn" | "staleTime"
+    "queryKey" | "queryFn" | "staleTime" | "placeholderData"
   >
 ) {
+  const queryClient = useQueryClient();
+  const queryKey = listeningKeys.overview({ startDate, endDate, userId });
+  
+  // Récupérer les données précédentes du cache pour les utiliser comme placeholder
+  const previousData = findLatestCachedData<OverviewStatsDto>(
+    queryClient,
+    queryKey
+  );
+
   return useQuery<OverviewStatsDto, Error>({
-    queryKey: listeningKeys.overview({ startDate, endDate, userId }),
+    queryKey,
     queryFn: () => fetchOverviewStats(startDate, endDate, userId),
     staleTime: CACHE_STALE_TIME.OVERVIEW,
+    placeholderData: previousData,
     ...options,
   });
 }
@@ -325,6 +393,8 @@ async function fetchTemporalAnalysis(
 
 /**
  * Hook pour récupérer l'analyse temporelle avancée
+ * Note: Ne pas utiliser placeholderData car cette analyse utilise toutes les données
+ * et ne devrait pas être filtrée par date (les filtres sont ignorés)
  */
 export function useTemporalAnalysis(
   startDate?: string,
@@ -335,8 +405,10 @@ export function useTemporalAnalysis(
     "queryKey" | "queryFn" | "staleTime"
   >
 ) {
+  const queryKey = listeningKeys.temporalAnalysis({ startDate, endDate, userId });
+
   return useQuery<TemporalAnalysisDto, Error>({
-    queryKey: listeningKeys.temporalAnalysis({ startDate, endDate, userId }),
+    queryKey,
     queryFn: () => fetchTemporalAnalysis(startDate, endDate, userId),
     staleTime: CACHE_STALE_TIME.TIMELINE, // Utiliser le même staleTime que timeline
     ...options,

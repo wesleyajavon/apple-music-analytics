@@ -3,6 +3,7 @@
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useCallback, useRef, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useOptimisticFilters } from "@/lib/hooks/use-optimistic-filters";
 
 export type DateRangePreset = "7d" | "30d" | "ytd" | "all";
 
@@ -53,9 +54,18 @@ export function DateRangeFilter() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { prefetchWithOptimisticUpdate } = useOptimisticFilters();
 
-  const currentPreset =
-    (searchParams.get("preset") as DateRangePreset) || "30d";
+  // Déterminer le preset actif : si pas de preset dans l'URL et pas de dates, c'est "all"
+  const presetFromUrl = searchParams.get("preset") as DateRangePreset | null;
+  const hasStartDate = searchParams.has("startDate");
+  const hasEndDate = searchParams.has("endDate");
+  
+  const currentPreset: DateRangePreset = presetFromUrl 
+    ? presetFromUrl 
+    : (!hasStartDate && !hasEndDate) 
+      ? "all" 
+      : "30d";
   const [indicatorStyle, setIndicatorStyle] = useState<{
     left: number;
     width: number;
@@ -94,11 +104,18 @@ export function DateRangeFilter() {
   }, [currentPreset]);
 
   const updateDateRange = useCallback(
-    (preset: DateRangePreset) => {
+    async (preset: DateRangePreset) => {
+      // Récupérer les dates actuelles (anciennes)
+      const oldStartDate = searchParams.get("startDate") || undefined;
+      const oldEndDate = searchParams.get("endDate") || undefined;
+
       // Recalculer YTD au moment du clic pour avoir la date actuelle
       const range =
         preset === "ytd" ? getYearToDateRange() : presets[preset];
       const params = new URLSearchParams(searchParams.toString());
+
+      let newStartDate: string | undefined;
+      let newEndDate: string | undefined;
 
       if (preset === "all") {
         params.delete("preset");
@@ -107,11 +124,30 @@ export function DateRangeFilter() {
       } else {
         params.set("preset", preset);
         if (range.startDate) {
-          params.set("startDate", range.startDate.toISOString().split("T")[0]);
+          newStartDate = range.startDate.toISOString().split("T")[0];
+          params.set("startDate", newStartDate);
         }
         if (range.endDate) {
-          params.set("endDate", range.endDate.toISOString().split("T")[0]);
+          newEndDate = range.endDate.toISOString().split("T")[0];
+          params.set("endDate", newEndDate);
         }
+      }
+
+      // Mettre à jour le cache de manière optimiste AVANT la navigation
+      // Cela permet d'afficher immédiatement les anciennes données pendant le chargement
+      if (newStartDate && newEndDate) {
+        // Ne pas attendre la fin du préchargement pour naviguer
+        // Cela permet une mise à jour immédiate de l'UI
+        prefetchWithOptimisticUpdate(
+          oldStartDate,
+          oldEndDate,
+          undefined, // oldPeriod non utilisé pour DateRangeFilter
+          newStartDate,
+          newEndDate,
+          undefined // newPeriod non utilisé pour DateRangeFilter
+        ).catch((error) => {
+          console.error("Erreur lors du préchargement optimiste:", error);
+        });
       }
 
       router.push(`${pathname}?${params.toString()}`);
@@ -123,7 +159,7 @@ export function DateRangeFilter() {
         duration: 2000,
       });
     },
-    [router, pathname, searchParams]
+    [router, pathname, searchParams, prefetchWithOptimisticUpdate]
   );
 
   const presetEntries = Object.entries(presets) as [

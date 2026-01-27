@@ -564,3 +564,130 @@ export function DayDetailsSkeleton() {
     </div>
   );
 }
+
+/**
+ * Skeleton pour une carte d'année Replay
+ */
+export function ReplayYearCardSkeleton() {
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+      {/* En-tête avec l'année */}
+      <div className="mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="h-8 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+      </div>
+
+      {/* Statistiques principales */}
+      <div className="grid grid-cols-2 gap-4 mb-6">
+        <div>
+          <div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-2" />
+          <div className="h-6 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+        </div>
+        <div>
+          <div className="h-4 w-28 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-2" />
+          <div className="h-6 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+        </div>
+      </div>
+
+      {/* Top Artists */}
+      <div className="mb-6">
+        <div className="h-5 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-3" />
+        <div className="space-y-2">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div
+              key={i}
+              className="flex items-center justify-between"
+            >
+              <div className="h-4 w-40 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+              <div className="h-4 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Top Tracks */}
+      <div>
+        <div className="h-5 w-28 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-3" />
+        <div className="space-y-2">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div
+              key={i}
+              className="flex items-center justify-between"
+            >
+              <div className="flex-1 min-w-0 space-y-1">
+                <div className="h-4 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                <div className="h-3 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+              </div>
+              <div className="h-4 w-12 bg-gray-200 dark:bg-gray-700 rounded animate-pulse ml-2" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Skeleton pour la page Replay complète
+ */
+export function ReplaySkeleton() {
+  return (
+    <div className="space-y-8">
+      {/* Sélecteur d'années */}
+      <div className="mb-8">
+        <div className="h-6 w-64 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-4" />
+        <div className="flex flex-wrap gap-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div
+              key={i}
+              className="h-10 w-20 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse"
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Grille de cartes d'années */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {Array.from({ length: 2 }).map((_, i) => (
+          <ReplayYearCardSkeleton key={i} />
+        ))}
+      </div>
+
+      {/* Statistiques comparatives */}
+      <div className="mt-8 space-y-8">
+        <div className="h-6 w-64 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-6" />
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <div className="h-5 w-40 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-4" />
+              <div className="space-y-3">
+                {Array.from({ length: 2 }).map((_, i) => (
+                  <div key={i}>
+                    <div className="flex justify-between mb-1">
+                      <div className="h-4 w-12 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                      <div className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                    </div>
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 animate-pulse" />
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <div className="h-5 w-40 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-4" />
+              <div className="space-y-3">
+                {Array.from({ length: 2 }).map((_, i) => (
+                  <div key={i}>
+                    <div className="flex justify-between mb-1">
+                      <div className="h-4 w-12 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                      <div className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                    </div>
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 animate-pulse" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getTemporalAnalysis } from "@/lib/services/listening/temporal-analysis";
 import { handleApiError } from "@/lib/utils/error-handler";
 import {
-  extractDateRangeWithDefaults,
+  extractOptionalDateRange,
   extractOptionalUserId,
 } from "@/lib/middleware/validation";
 import { TemporalAnalysisDto } from "@/lib/dto/listening";
@@ -24,13 +24,13 @@ export const dynamic = "force-dynamic";
  *         schema:
  *           type: string
  *           format: date
- *         description: Date de début au format ISO 8601 (optionnel, défaut: 30 jours avant)
+ *         description: Date de début au format ISO 8601 (optionnel, si non fourni utilise toutes les données historiques)
  *       - in: query
  *         name: endDate
  *         schema:
  *           type: string
  *           format: date
- *         description: Date de fin au format ISO 8601 (optionnel, défaut: aujourd'hui)
+ *         description: Date de fin au format ISO 8601 (optionnel, si non fourni utilise toutes les données historiques)
  *       - in: query
  *         name: userId
  *         schema:
@@ -93,16 +93,9 @@ export const dynamic = "force-dynamic";
  */
 export async function GET(request: NextRequest) {
   try {
-    // Default to last 30 days if no dates provided
-    const defaultEndDate = new Date();
-    const defaultStartDate = new Date(defaultEndDate);
-    defaultStartDate.setDate(defaultStartDate.getDate() - 30);
-
-    const { startDate, endDate } = extractDateRangeWithDefaults(
-      request,
-      defaultStartDate,
-      defaultEndDate
-    );
+    // Pour l'analyse temporelle, on utilise toutes les données si aucune date n'est fournie
+    // Cela permet d'avoir des patterns fiables basés sur l'historique complet
+    const { startDate, endDate } = extractOptionalDateRange(request);
     const userId = extractOptionalUserId(request);
 
     const result = await getTemporalAnalysis(startDate, endDate, userId);

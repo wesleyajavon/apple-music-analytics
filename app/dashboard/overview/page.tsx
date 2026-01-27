@@ -172,8 +172,10 @@ function OverviewContent() {
     "day"
   );
 
-  // Top genres (top 6)
-  const { data: genresData } = useGenres(startDate, endDate);
+  // Top genres (top 6) - utiliser les mêmes dates par défaut que la timeline
+  const genresStartDate = startDate || timelineStartDate;
+  const genresEndDate = endDate || timelineEndDate;
+  const { data: genresData } = useGenres(genresStartDate, genresEndDate);
 
   const handleRetry = useCallback(() => {
     refetch();

@@ -463,6 +463,19 @@ export async function importLastFmTracks(
   let skipped = 0;
 
   try {
+    // Prevent importing mock data - Last.fm must be configured
+    if (!isLastFmConfigured()) {
+      const errorMsg = "Last.fm API is not configured. Please set LASTFM_API_KEY and LASTFM_API_SECRET in your environment variables and restart the server.";
+      errors.push(errorMsg);
+      console.error("❌", errorMsg);
+      return {
+        success: false,
+        imported: 0,
+        skipped: 0,
+        errors,
+      };
+    }
+
     // Fetch normalized tracks from Last.fm
     const result = await getRecentTracks(params);
     const { tracks, totalPages, currentPage } = result;

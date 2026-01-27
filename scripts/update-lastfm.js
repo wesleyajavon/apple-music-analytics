@@ -206,7 +206,10 @@ async function importNewTracks(fromTimestamp) {
       }
 
       if (result._meta?.mocked) {
-        console.warn('   ⚠️  Utilisation de données mockées (Last.fm non configuré)');
+        console.warn('\n   ⚠️  ⚠️  ⚠️  ATTENTION: Utilisation de données mockées ! ⚠️  ⚠️  ⚠️');
+        console.warn('   Les clés API Last.fm ne sont pas configurées ou le serveur ne les a pas chargées.');
+        console.warn('   Vérifiez que LASTFM_API_KEY et LASTFM_API_SECRET sont définies dans .env.local');
+        console.warn('   et redémarrez le serveur Next.js avec: npm run dev\n');
       }
 
       page++;

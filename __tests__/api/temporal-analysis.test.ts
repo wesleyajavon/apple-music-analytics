@@ -101,26 +101,26 @@ describe('GET /api/temporal-analysis', () => {
     expect(getTemporalAnalysis).toHaveBeenCalledOnce();
   });
 
-  it('should use default dates (last 30 days) when no dates provided', async () => {
+  it('should use full history (undefined dates) when no dates provided', async () => {
     const mockData = {
       byDayOfWeek: [],
       byHourOfDay: [],
       peakDay: null,
       peakHour: null,
     };
-    
+
     vi.mocked(getTemporalAnalysis).mockResolvedValue(mockData);
 
     const request = new NextRequest('http://localhost/api/temporal-analysis');
     const response = await GET(request);
-    
+
     expect(response.status).toBe(200);
     expect(getTemporalAnalysis).toHaveBeenCalledOnce();
-    
-    // Vérifier que les dates par défaut sont utilisées (approximativement)
+
+    // Sans startDate/endDate, l'API passe undefined pour utiliser tout l'historique
     const callArgs = vi.mocked(getTemporalAnalysis).mock.calls[0];
-    expect(callArgs[0]).toBeInstanceOf(Date);
-    expect(callArgs[1]).toBeInstanceOf(Date);
+    expect(callArgs[0]).toBeUndefined();
+    expect(callArgs[1]).toBeUndefined();
   });
 
   it('should handle userId parameter', async () => {

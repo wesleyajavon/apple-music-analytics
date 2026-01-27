@@ -8,7 +8,7 @@ import {
   useEffect,
   memo,
 } from "react";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import {
   LineChart,
   Line,
@@ -22,7 +22,7 @@ import {
 import { useGenreTrends } from "@/lib/hooks/use-listening";
 import { LoadingState } from "@/lib/components/loading-state";
 import { ErrorState } from "@/lib/components/error-state";
-import { EmptyState } from "@/lib/components/empty-state";
+import { EmptyState, emptyStatePresets } from "@/lib/components/empty-state";
 import { PeriodSelector, PeriodType } from "@/lib/components/period-selector";
 import type { GenreTrendsDataPoint } from "@/lib/dto/genres";
 import { GenreTrendsSkeleton } from "@/lib/components/skeleton-loaders";
@@ -122,6 +122,7 @@ function computeRiseDecline(
 }
 
 function TrendsContent() {
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const startDateParam = searchParams.get("startDate");
   const endDateParam = searchParams.get("endDate");
@@ -255,8 +256,9 @@ function TrendsContent() {
             </p>
           </div>
           <EmptyState
-            message="Aucune donnée de genre disponible pour cette période. Modifiez les dates ou la période d'agrégation."
-            icon="📈"
+            {...emptyStatePresets.changeDates(pathname)}
+            message="Aucune donnée de genre pour cette période"
+            description="Modifiez les dates ou la période d'agrégation dans la barre de filtres."
           />
         </div>
       </>

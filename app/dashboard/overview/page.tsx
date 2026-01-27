@@ -17,7 +17,7 @@ import {
 import { useOverviewStats, useTimeline, useGenres } from "@/lib/hooks/use-listening";
 import { LoadingState } from "@/lib/components/loading-state";
 import { ErrorState } from "@/lib/components/error-state";
-import { EmptyState } from "@/lib/components/empty-state";
+import { EmptyState, emptyStatePresets } from "@/lib/components/empty-state";
 import { OverviewSkeleton } from "@/lib/components/skeleton-loaders";
 
 /**
@@ -231,8 +231,9 @@ function OverviewContent() {
   if (!data || data.totalListens === 0) {
     return (
       <EmptyState
-        message="Aucune donnée d'écoute disponible. Importez vos données pour voir vos statistiques."
-        icon="📊"
+        {...emptyStatePresets.importData}
+        message="Aucune donnée d'écoute disponible"
+        description="Importez vos données Last.fm ou Apple Music Replay pour voir vos statistiques."
       />
     );
   }

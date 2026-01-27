@@ -20,7 +20,7 @@ import {
 import { useTemporalAnalysis } from "@/lib/hooks/use-listening";
 import { LoadingState } from "@/lib/components/loading-state";
 import { ErrorState } from "@/lib/components/error-state";
-import { EmptyState } from "@/lib/components/empty-state";
+import { EmptyState, emptyStatePresets } from "@/lib/components/empty-state";
 import { TemporalAnalysisSkeleton } from "@/lib/components/skeleton-loaders";
 
 // Custom tooltip mémorisé pour éviter les re-créations
@@ -127,8 +127,9 @@ function TemporalAnalysisContent() {
           />
         ) : !data || (data.byDayOfWeek.length === 0 && data.byHourOfDay.length === 0) ? (
           <EmptyState
-            message="Aucune donnée disponible. Importez vos données d'écoute pour voir l'analyse temporelle."
-            icon="⏰"
+            {...emptyStatePresets.importData}
+            message="Aucune donnée disponible"
+            description="Importez vos données d'écoute pour voir l'analyse temporelle (jours et heures de pic)."
           />
         ) : (
           <div className="space-y-8">

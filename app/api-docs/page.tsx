@@ -1,8 +1,24 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import SwaggerUI from 'swagger-ui-react';
+import dynamic from 'next/dynamic';
 import 'swagger-ui-react/swagger-ui.css';
+
+// Chargement différé du JS Swagger UI pour ne pas alourdir le bundle des autres pages
+const SwaggerUI = dynamic(
+  () => import('swagger-ui-react').then((mod) => mod.default),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4" />
+          <p className="text-gray-600 dark:text-gray-400">Chargement de la documentation...</p>
+        </div>
+      </div>
+    ),
+  }
+);
 
 /**
  * Page de documentation Swagger UI
@@ -31,7 +47,7 @@ export default function ApiDocsPage() {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4" />
           <p className="text-gray-600 dark:text-gray-400">Chargement de la documentation...</p>
         </div>
       </div>

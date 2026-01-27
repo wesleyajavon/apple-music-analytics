@@ -1,17 +1,18 @@
 "use client";
 
 import { useMemo, useCallback, Suspense, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { CalendarHeatmap, HeatmapDataPoint } from "@/lib/components/calendar-heatmap";
 import { useTimeline, useListens } from "@/lib/hooks/use-listening";
 import { LoadingState } from "@/lib/components/loading-state";
 import { ErrorState } from "@/lib/components/error-state";
-import { EmptyState } from "@/lib/components/empty-state";
+import { EmptyState, emptyStatePresets } from "@/lib/components/empty-state";
 import { HeatmapSkeleton, DayDetailsSkeleton } from "@/lib/components/skeleton-loaders";
 
 type ViewMode = "year" | "month" | "weekday";
 
 function HeatmapContent() {
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const [viewMode, setViewMode] = useState<ViewMode>("year");
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -197,8 +198,9 @@ function HeatmapContent() {
   if (!timelineData || timelineData.length === 0) {
     return (
       <EmptyState
-        message="Aucune donnée d'écoute disponible pour cette période. Importez vos données pour voir le calendrier."
-        icon="📅"
+        {...emptyStatePresets.importData}
+        message="Aucune donnée d'écoute pour cette période"
+        description="Importez vos données Last.fm ou Replay pour afficher le calendrier d'écoute."
       />
     );
   }
@@ -528,10 +530,7 @@ function HeatmapContent() {
               </div>
             </div>
           ) : dayListensData && dayListensData.data.length === 0 ? (
-            <EmptyState
-              message="Aucune écoute trouvée pour cette date"
-              icon="🎵"
-            />
+            <EmptyState {...emptyStatePresets.noDayDetail} />
           ) : null}
         </div>
       </div>

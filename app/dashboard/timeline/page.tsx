@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useMemo } from "react";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import {
   LineChart,
   Line,
@@ -14,7 +14,7 @@ import {
 import { useTimeline } from "@/lib/hooks/use-listening";
 import { LoadingState } from "@/lib/components/loading-state";
 import { ErrorState } from "@/lib/components/error-state";
-import { EmptyState } from "@/lib/components/empty-state";
+import { EmptyState, emptyStatePresets } from "@/lib/components/empty-state";
 import { PeriodSelector, PeriodType } from "@/lib/components/period-selector";
 import { LineChartSkeleton } from "@/lib/components/skeleton-loaders";
 
@@ -60,6 +60,7 @@ function formatDate(date: string, period: PeriodType): string {
 }
 
 function TimelineContent() {
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const startDate = searchParams.get("startDate") || undefined;
   const endDate = searchParams.get("endDate") || undefined;
@@ -109,12 +110,17 @@ function TimelineContent() {
           />
         ) : !data || data.length === 0 ? (
           <EmptyState
+            {...emptyStatePresets.changeDates(pathname)}
             message={
               startDate && endDate && startDate === endDate
-                ? `Aucune donnée d'écoute disponible pour le ${new Date(startDate).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}. Essayez de sélectionner une autre date ou une période plus large.`
-                : "Aucune donnée d'écoute disponible pour cette période. Essayez de modifier la période ou les dates de filtrage."
+                ? `Aucune donnée d'écoute pour le ${new Date(startDate).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}`
+                : "Aucune donnée d'écoute disponible pour cette période"
             }
-            icon="📈"
+            description={
+              startDate && endDate && startDate === endDate
+                ? "Essayez de sélectionner une autre date ou une période plus large."
+                : "Modifiez la période ou les dates dans la barre de filtres pour afficher des résultats."
+            }
           />
         ) : (
           <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">

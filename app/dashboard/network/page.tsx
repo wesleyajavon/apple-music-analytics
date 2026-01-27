@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useArtistNetwork } from "@/lib/hooks/use-network";
 import { ArtistNetworkGraphComponent } from "@/lib/components/artist-network-graph";
 import { ErrorState } from "@/lib/components/error-state";
-import { EmptyState } from "@/lib/components/empty-state";
+import { EmptyState, emptyStatePresets } from "@/lib/components/empty-state";
 import { NetworkGraphSkeleton } from "@/lib/components/skeleton-loaders";
 
 function NetworkContent() {
@@ -71,10 +71,7 @@ function NetworkContent() {
           onRetry={() => refetch()}
         />
       ) : !data || data.nodes.length === 0 ? (
-        <EmptyState
-          message="Aucune donnée disponible pour visualiser le réseau d'artistes. Assurez-vous d'avoir des écoutes avec des connexions entre artistes."
-          icon="🕸️"
-        />
+        <EmptyState {...emptyStatePresets.noNetwork} />
       ) : (
         <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
           <div className="mb-4 text-sm text-gray-600 dark:text-gray-400">

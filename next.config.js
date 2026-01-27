@@ -40,12 +40,15 @@ const nextConfig = {
   
   // Optimisation du build
   experimental: {
-    optimizePackageImports: ['@tanstack/react-query', 'recharts', 'd3'],
+    optimizePackageImports: ['@tanstack/react-query', 'recharts', 'd3', 'swagger-ui-react'],
     // Active le hook d'instrumentation pour Sentry
     instrumentationHook: true,
+    // Turbopack (dev avec --turbo) : évite l'avertissement
+    // « Webpack is configured while Turbopack is not ». Pas de règles custom nécessaires.
+    turbo: {},
   },
-  
-  // Configuration Webpack pour ignorer les avertissements liés à Sentry/OpenTelemetry
+
+  // Configuration Webpack pour next build : ignorer les avertissements Sentry/require-in-the-middle
   webpack: (config, { isServer }) => {
     if (isServer) {
       config.ignoreWarnings = [

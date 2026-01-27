@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect, memo } from "react";
 import { useReplaySummaries } from "@/lib/hooks/use-replay";
 import { ErrorState } from "@/lib/components/error-state";
-import { EmptyState } from "@/lib/components/empty-state";
+import { EmptyState, emptyStatePresets } from "@/lib/components/empty-state";
 import { ReplaySkeleton } from "@/lib/components/skeleton-loaders";
 import { ReplayYearlySummaryDto } from "@/lib/dto/replay";
 
@@ -147,8 +147,8 @@ function ReplayComparisonContent() {
   if (!summaries || summaries.length === 0) {
     return (
       <EmptyState
-        message="Aucune donnée Replay disponible. Importez vos données Apple Music Replay pour commencer la comparaison entre les années."
-        icon="📊"
+        {...emptyStatePresets.importReplay}
+        description="Importez vos données Apple Music Replay pour commencer la comparaison entre les années."
       />
     );
   }

@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useState, useMemo, useCallback, memo } from "react";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import {
   PieChart,
   Pie,
@@ -18,7 +18,7 @@ import {
 import { useGenres } from "@/lib/hooks/use-listening";
 import { LoadingState } from "@/lib/components/loading-state";
 import { ErrorState } from "@/lib/components/error-state";
-import { EmptyState } from "@/lib/components/empty-state";
+import { EmptyState, emptyStatePresets } from "@/lib/components/empty-state";
 import { GenresSkeleton } from "@/lib/components/skeleton-loaders";
 
 type ChartType = "pie" | "bar";
@@ -61,6 +61,7 @@ const CustomTooltip = memo(({ active, payload }: any) => {
 CustomTooltip.displayName = "CustomTooltip";
 
 function GenresContent() {
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   // Par défaut, utiliser les 30 derniers jours si aucune date n'est spécifiée
   const startDateParam = searchParams.get("startDate");
@@ -125,8 +126,9 @@ function GenresContent() {
           />
         ) : !data || data.data.length === 0 ? (
           <EmptyState
-            message="Aucune donnée de genre disponible pour cette période. Essayez de modifier les dates de filtrage."
-            icon="🎵"
+            {...emptyStatePresets.changeDates(pathname)}
+            message="Aucune donnée de genre pour cette période"
+            description="Modifiez les dates dans la barre de filtres pour afficher la répartition des genres."
           />
         ) : (
           <div className="space-y-6">

@@ -2,16 +2,18 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { GET } from '@/app/api/overview/route';
 import { NextRequest } from 'next/server';
 
-// Mock des services
+// Mock des services (getOverviewStats + getTopArtists car la route appelle les deux)
 vi.mock('@/lib/services/listening/listening-stats', () => ({
   getOverviewStats: vi.fn(),
+  getTopArtists: vi.fn(),
 }));
 
-import { getOverviewStats } from '@/lib/services/listening/listening-stats';
+import { getOverviewStats, getTopArtists } from '@/lib/services/listening/listening-stats';
 
 describe('GET /api/overview', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(getTopArtists).mockResolvedValue([]);
   });
 
   it('should return overview stats without date range', async () => {

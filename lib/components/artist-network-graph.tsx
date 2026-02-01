@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState, useEffect, useRef, useCallback } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
+import type { ForceGraphMethods } from "react-force-graph-2d";
 import { ArtistNetworkGraph } from "../dto/artist-network";
 import * as d3 from "d3";
 
@@ -87,13 +88,13 @@ export function ArtistNetworkGraphComponent({
   fitViewTrigger = 0,
 }: ArtistNetworkGraphProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const fgRef = useRef<{ zoomToFit?: (durationMs?: number, padding?: number) => void } | null>(null);
+  const fgRef = useRef<ForceGraphMethods | undefined>(undefined);
   const [dimensions, setDimensions] = useState({ width, height });
 
   // Vue d'ensemble au clic sur le bouton (trigger évite ref + dynamic)
   useEffect(() => {
     if (fitViewTrigger > 0) {
-      (fgRef.current as any)?.zoomToFit?.(400, 40);
+      fgRef.current?.zoomToFit?.(400, 40);
     }
   }, [fitViewTrigger]);
 
@@ -180,10 +181,6 @@ export function ArtistNetworkGraphComponent({
     return { nodes, links };
   }, [limitedData]);
 
-  const handleRef = useCallback((instance: unknown) => {
-    fgRef.current = instance as { zoomToFit?: (d?: number, p?: number) => void } | null;
-  }, []);
-
   if (!graphData.nodes.length) {
     return (
       <div className="flex items-center justify-center h-full min-h-[600px] text-gray-500 dark:text-gray-400">
@@ -198,29 +195,30 @@ export function ArtistNetworkGraphComponent({
       className="relative w-full h-full min-h-[600px] border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 overflow-hidden"
     >
       <ForceGraph2D
-        ref={handleRef}
+        ref={fgRef}
         graphData={graphData}
         width={dimensions.width}
         height={dimensions.height}
-        nodeLabel={(node: GraphNode) => {
-          const hub = node.degree >= 5 ? " • Hub" : "";
+        nodeLabel={(node) => {
+          const n = node as GraphNode;
+          const hub = n.degree >= 5 ? " • Hub" : "";
           const conn =
-            node.degree > 0
-              ? ` • ${node.degree} connexion(s) (${node.edgeCountByGenre} genre, ${node.edgeCountByProximity} proximité)`
+            n.degree > 0
+              ? ` • ${n.degree} connexion(s) (${n.edgeCountByGenre} genre, ${n.edgeCountByProximity} proximité)`
               : "";
           return `<div style="padding: 8px; background: rgba(0,0,0,0.88); color: white; border-radius: 4px; max-width: 220px;">
-            <strong>${node.name}</strong>${hub}<br/>
-            Genre : ${node.genre}<br/>
-            Écoutes : ${node.playCount}${conn}
+            <strong>${n.name}</strong>${hub}<br/>
+            Genre : ${n.genre}<br/>
+            Écoutes : ${n.playCount}${conn}
           </div>`;
         }}
-        nodeColor={(node: GraphNode) => node.color}
-        nodeVal={(node: GraphNode) => node.size}
-        linkColor={(link: GraphLink) => EDGE_COLORS[link.type]}
-        linkWidth={(link: GraphLink) => link.strokeWidth}
-        linkLabel={(link: GraphLink) =>
+        nodeColor={(node) => (node as GraphNode).color}
+        nodeVal={(node) => (node as GraphNode).size}
+        linkColor={(link) => EDGE_COLORS[(link as GraphLink).type]}
+        linkWidth={(link) => (link as GraphLink).strokeWidth}
+        linkLabel={(link) =>
           `<div style="padding: 6px 8px; background: rgba(0,0,0,0.88); color: white; border-radius: 4px; max-width: 260px;">
-            ${formatLinkLabel(link, proximityWindowMinutes)}
+            ${formatLinkLabel(link as GraphLink, proximityWindowMinutes)}
           </div>`
         }
         linkDirectionalArrowLength={3}

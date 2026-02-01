@@ -286,129 +286,82 @@ export function DateRangeFilter() {
   }, [searchParams, downloadFile]);
 
   return (
-    <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3">
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="text-sm font-medium text-gray-700 dark:text-gray-300 mr-2">
-          Période :
-        </span>
-        <div
-          ref={containerRef}
-          className="relative flex items-center gap-2"
-        >
-          {/* Indicateur animé pour le bouton actif */}
-          {indicatorStyle && (
-            <div
-              className="absolute h-8 bg-blue-600 rounded-md transition-all duration-300 ease-out"
-              style={{
-                left: `${indicatorStyle.left}px`,
-                width: `${indicatorStyle.width}px`,
-              }}
-            />
-          )}
-          {presetEntries.map(([key, preset]) => {
-            const isActive = currentPreset === key;
-            return (
-              <button
-                key={key}
-                ref={(el) => {
-                  buttonRefs.current[key] = el;
+    <div className="bg-white dark:bg-gray-800/95 border-b border-gray-100 dark:border-gray-700/50 px-4 sm:px-6 py-3 backdrop-blur-sm">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 shrink-0">
+            Période
+          </span>
+          <div
+            ref={containerRef}
+            className="relative flex items-center bg-gray-50 dark:bg-gray-800/80 p-1.5 rounded-xl border border-gray-100 dark:border-gray-700/50"
+          >
+            {indicatorStyle && (
+              <div
+                className="absolute h-[calc(100%-12px)] top-1.5 bg-accent-violet rounded-lg transition-all duration-300 ease-out shadow-sm"
+                style={{
+                  left: `${indicatorStyle.left}px`,
+                  width: `${indicatorStyle.width}px`,
                 }}
-                onClick={() => updateDateRange(key)}
-                className={`
-                  relative z-10 px-4 py-1.5 text-sm font-medium rounded-md
-                  transition-all duration-200 ease-out
-                  ${
-                    isActive
-                      ? "text-white"
-                      : "text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  }
-                `}
-              >
-                {preset.label}
-              </button>
-            );
-          })}
+              />
+            )}
+            {presetEntries.map(([key, preset]) => {
+              const isActive = currentPreset === key;
+              return (
+                <button
+                  key={key}
+                  ref={(el) => {
+                    buttonRefs.current[key] = el;
+                  }}
+                  onClick={() => updateDateRange(key)}
+                  className={`
+                    relative z-10 px-4 py-2 text-sm font-semibold rounded-md
+                    transition-all duration-200
+                    ${
+                      isActive
+                        ? "text-white"
+                        : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                    }
+                  `}
+                >
+                  {preset.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
-        
-        {/* Boutons d'export */}
-        <div className="ml-auto flex items-center gap-2">
+
+        {/* Groupe d'export */}
+        <div className="flex items-center gap-1 pl-4 border-l border-gray-100 dark:border-gray-700/50">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mr-2 hidden sm:inline">
+            Export
+          </span>
           <button
             onClick={handleExportCsv}
-            className="
-              px-4 py-1.5 text-sm font-medium rounded-md
-              bg-green-600 hover:bg-green-700 text-white
-              transition-colors duration-200 ease-out
-              flex items-center gap-2
-            "
+            className="p-2.5 text-gray-500 dark:text-gray-400 hover:text-accent-emerald dark:hover:text-accent-emerald hover:bg-accent-emerald/10 dark:hover:bg-accent-emerald/10 rounded-lg transition-colors"
             title="Exporter les écoutes en CSV"
           >
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-              />
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            CSV
           </button>
           <button
             onClick={handleExportStats}
-            className="
-              px-4 py-1.5 text-sm font-medium rounded-md
-              bg-blue-600 hover:bg-blue-700 text-white
-              transition-colors duration-200 ease-out
-              flex items-center gap-2
-            "
+            className="p-2.5 text-gray-500 dark:text-gray-400 hover:text-accent-indigo dark:hover:text-accent-indigo hover:bg-accent-indigo/10 dark:hover:bg-accent-indigo/10 rounded-lg transition-colors"
             title="Exporter les statistiques en JSON"
           >
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
-              />
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
             </svg>
-            JSON
           </button>
           <button
             onClick={handleExportPdf}
-            className="
-              px-4 py-1.5 text-sm font-medium rounded-md
-              bg-red-600 hover:bg-red-700 text-white
-              transition-colors duration-200 ease-out
-              flex items-center gap-2
-            "
+            className="p-2.5 text-gray-500 dark:text-gray-400 hover:text-accent-rose dark:hover:text-accent-rose hover:bg-accent-rose/10 dark:hover:bg-accent-rose/10 rounded-lg transition-colors"
             title="Générer le rapport PDF annuel"
           >
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
-              />
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
             </svg>
-            PDF
           </button>
         </div>
       </div>

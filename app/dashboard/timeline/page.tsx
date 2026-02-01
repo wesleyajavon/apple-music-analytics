@@ -12,6 +12,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { useTimeline } from "@/lib/hooks/use-listening";
+import { CHART_TOOLTIP_STYLES } from "@/lib/constants/config";
 import { LoadingState } from "@/lib/components/loading-state";
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, emptyStatePresets } from "@/lib/components/empty-state";
@@ -84,8 +85,8 @@ function TimelineContent() {
 
   return (
     <>
-      {/* Period selector bar */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3">
+      {/* Period selector bar - flush with DateRangeFilter above */}
+      <div className="bg-white dark:bg-gray-800/95 border-b border-gray-100 dark:border-gray-700/50 -mx-4 -mt-4 sm:-mx-6 sm:-mt-6 lg:-mx-8 lg:-mt-8 px-4 sm:px-6 lg:px-8 py-3 backdrop-blur-sm">
         <PeriodSelector />
       </div>
 
@@ -155,20 +156,9 @@ function TimelineContent() {
                   className="dark:stroke-gray-400"
                 />
                 <Tooltip
-                  contentStyle={{
-                    backgroundColor: "rgba(255, 255, 255, 0.98)",
-                    border: "1px solid #e5e7eb",
-                    borderRadius: "8px",
-                    boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-                  }}
-                  labelStyle={{
-                    color: "#374151",
-                    fontWeight: 600,
-                    marginBottom: "4px",
-                  }}
-                  itemStyle={{
-                    color: "#374151",
-                  }}
+                  contentStyle={CHART_TOOLTIP_STYLES.contentStyle}
+                  labelStyle={CHART_TOOLTIP_STYLES.labelStyle}
+                  itemStyle={CHART_TOOLTIP_STYLES.itemStyle}
                   formatter={(value: number) => [
                     `${value.toLocaleString("fr-FR")} écoutes`,
                     "Écoutes",
@@ -198,8 +188,8 @@ export default function TimelinePage() {
     <Suspense
       fallback={
         <>
-          <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3">
-            <div className="h-10 bg-gray-100 dark:bg-gray-700 rounded animate-pulse" />
+          <div className="bg-white dark:bg-gray-800/95 border-b border-gray-100 dark:border-gray-700/50 -mx-4 -mt-4 sm:-mx-6 sm:-mt-6 lg:-mx-8 lg:-mt-8 px-4 sm:px-6 lg:px-8 py-3 backdrop-blur-sm">
+            <div className="h-10 bg-gray-100 dark:bg-gray-700 rounded-xl animate-pulse w-64" />
           </div>
           <div className="mt-6">
             <div className="mb-8">

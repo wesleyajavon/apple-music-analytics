@@ -18,12 +18,12 @@ export default function DashboardLayout({
         <Sidebar />
 
         {/* Main content area */}
-        <div className="flex-1 flex flex-col lg:ml-64">
+        <div className="flex-1 flex flex-col min-w-0">
           {/* Date range filter bar */}
           <Suspense
             fallback={
-              <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3">
-                <div className="h-10 bg-gray-100 dark:bg-gray-700 rounded animate-pulse" />
+              <div className="bg-white dark:bg-gray-800/95 border-b border-gray-100 dark:border-gray-700/50 px-4 sm:px-6 py-3">
+                <div className="h-10 bg-gray-100 dark:bg-gray-700 rounded-xl animate-pulse w-64" />
               </div>
             }
           >

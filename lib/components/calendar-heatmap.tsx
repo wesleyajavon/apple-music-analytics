@@ -441,7 +441,7 @@ export function CalendarHeatmap({
                             cursor: isFuture || count === 0 ? "default" : "pointer",
                             transition: "all 0.1s ease",
                             ...(isSelected && {
-                              outline: "2px solid #2563eb",
+                              outline: "2px solid rgb(139 92 246)",
                               outlineOffset: "2px",
                               zIndex: 20,
                             }),
@@ -468,7 +468,7 @@ export function CalendarHeatmap({
                             if (!isFuture && count > 0) {
                               e.currentTarget.style.transform = "scale(1.15)";
                               e.currentTarget.style.zIndex = "10";
-                              e.currentTarget.style.boxShadow = "0 0 0 2px rgba(27, 31, 35, 0.2)";
+                              e.currentTarget.style.boxShadow = "0 0 0 2px rgba(139, 92, 246, 0.4)";
                             } else if (!isFuture && count === 0) {
                               e.currentTarget.style.cursor = "default";
                             }

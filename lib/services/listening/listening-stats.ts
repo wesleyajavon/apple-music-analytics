@@ -272,3 +272,60 @@ function normalizeTrendDate(
   return d.toISOString().slice(0, 10);
 }
 
+/**
+ * Récupère les artistes les plus écoutés avec leur nombre d'écoutes.
+ * 
+ * @param startDate - Date de début pour filtrer les écoutes (optionnel)
+ * @param endDate - Date de fin pour filtrer les écoutes (optionnel)
+ * @param userId - ID de l'utilisateur pour filtrer les écoutes (optionnel)
+ * @param limit - Nombre maximum d'artistes à retourner (par défaut: 10)
+ * 
+ * @returns Tableau d'artistes avec leur nombre d'écoutes, trié par nombre d'écoutes décroissant
+ * 
+ * @example
+ * ```typescript
+ * const topArtists = await getTopArtists(
+ *   new Date('2024-01-01'),
+ *   new Date('2024-12-31'),
+ *   'user123',
+ *   10
+ * );
+ * // [{ artistId: '1', artistName: 'Artist Name', listenCount: 500 }, ...]
+ * ```
+ */
+export async function getTopArtists(
+  startDate?: Date,
+  endDate?: Date,
+  userId?: string,
+  limit: number = 10
+): Promise<Array<{ artistId: string; artistName: string; listenCount: number }>> {
+  const query = Prisma.sql`
+    SELECT 
+      a.id as artist_id,
+      a.name as artist_name,
+      COUNT(*)::bigint as listen_count
+    FROM "Listen" l
+    JOIN "Track" t ON l."trackId" = t.id
+    JOIN "Artist" a ON t."artistId" = a.id
+    WHERE 1=1
+      ${startDate ? Prisma.sql`AND l."playedAt" >= ${startDate}` : Prisma.sql``}
+      ${endDate ? Prisma.sql`AND l."playedAt" <= ${endDate}` : Prisma.sql``}
+      ${userId ? Prisma.sql`AND l."userId" = ${userId}` : Prisma.sql``}
+    GROUP BY a.id, a.name
+    ORDER BY listen_count DESC
+    LIMIT ${limit}
+  `;
+
+  const result = await prisma.$queryRaw<Array<{
+    artist_id: string;
+    artist_name: string;
+    listen_count: bigint;
+  }>>(query);
+
+  return result.map(row => ({
+    artistId: row.artist_id,
+    artistName: row.artist_name,
+    listenCount: transformBigIntToNumber({ count: row.listen_count }).count,
+  }));
+}
+

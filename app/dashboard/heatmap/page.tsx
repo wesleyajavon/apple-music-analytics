@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useCallback, Suspense, useState } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { CalendarHeatmap, HeatmapDataPoint } from "@/lib/components/calendar-heatmap";
 import { useTimeline, useListens } from "@/lib/hooks/use-listening";
 import { LoadingState } from "@/lib/components/loading-state";
@@ -9,12 +9,8 @@ import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, emptyStatePresets } from "@/lib/components/empty-state";
 import { HeatmapSkeleton, DayDetailsSkeleton } from "@/lib/components/skeleton-loaders";
 
-type ViewMode = "year" | "month" | "weekday";
-
 function HeatmapContent() {
-  const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [viewMode, setViewMode] = useState<ViewMode>("year");
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   // Calculer les dates par défaut (décembre 2025 à décembre 2026)
@@ -109,45 +105,6 @@ function HeatmapContent() {
     };
   }, [timelineData]);
 
-  // Filtrer les données selon le mode d'affichage
-  const filteredData = useMemo(() => {
-    if (viewMode === "year") {
-      return heatmapData;
-    }
-
-    if (viewMode === "month") {
-      // Afficher uniquement le mois courant
-      const today = new Date();
-      const currentMonth = today.getMonth();
-      const currentYear = today.getFullYear();
-      
-      return heatmapData.filter((point) => {
-        const date = new Date(point.date);
-        return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
-      });
-    }
-
-    if (viewMode === "weekday") {
-      // Afficher tous les lundis, puis tous les mardis, etc.
-      return heatmapData;
-    }
-
-    return heatmapData;
-  }, [heatmapData, viewMode]);
-
-  // Calculer les dates de début/fin filtrées
-  const filteredDateRange = useMemo(() => {
-    if (viewMode === "month") {
-      const today = new Date();
-      const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-      const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-      return {
-        startDate: firstDay.toISOString().split("T")[0],
-        endDate: lastDay.toISOString().split("T")[0],
-      };
-    }
-    return { startDate, endDate };
-  }, [viewMode, startDate, endDate]);
 
   const handleDayClick = useCallback((date: string, count: number) => {
     if (count === 0) {
@@ -208,89 +165,57 @@ function HeatmapContent() {
   return (
     <>
     <div className="space-y-6">
-      {/* En-tête avec sélecteur de vue */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Heatmap d&apos;écoute
-          </h1>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            Visualisez vos patterns d&apos;écoute quotidiens avec un calendrier interactif
-          </p>
-        </div>
-
-        {/* Sélecteur de mode de vue */}
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            Vue :
-          </span>
-          <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
-            {[
-              { value: "year" as ViewMode, label: "Annuelle" },
-              { value: "month" as ViewMode, label: "Mensuelle" },
-              { value: "weekday" as ViewMode, label: "Jour semaine" },
-            ].map((option) => (
-              <button
-                key={option.value}
-                onClick={() => setViewMode(option.value)}
-                className={`
-                  px-3 py-1.5 text-sm font-medium rounded-md transition-colors
-                  ${
-                    viewMode === option.value
-                      ? "bg-blue-600 text-white"
-                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
-                  }
-                `}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
+      <header>
+        <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
+          Heatmap d&apos;écoute
+        </h1>
+        <p className="mt-2 text-base text-gray-500 dark:text-gray-400 max-w-2xl">
+          Visualisez vos patterns d&apos;écoute quotidiens avec un calendrier interactif style GitHub. Cliquez sur un jour pour voir les détails.
+        </p>
+      </header>
 
       {/* Statistiques principales */}
       {stats && (
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg p-5">
+          <div className="overflow-hidden rounded-xl border border-l-4 border-gray-100 dark:border-gray-700/50 border-l-accent-rose bg-white dark:bg-gray-800/90 shadow-card p-5 transition-all duration-300 hover:shadow-card-hover">
             <dl>
               <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
                 Jours actifs
               </dt>
-              <dd className="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">
+              <dd className="mt-1 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
                 {stats.daysWithListens.toLocaleString("fr-FR")} / {stats.totalDays.toLocaleString("fr-FR")}
               </dd>
-              <dd className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <dd className="text-xs text-gray-500 dark:text-gray-400 mt-1.5">
                 {Math.round((stats.daysWithListens / stats.totalDays) * 100)}% des jours
               </dd>
             </dl>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg p-5">
+          <div className="overflow-hidden rounded-xl border border-l-4 border-gray-100 dark:border-gray-700/50 border-l-accent-violet bg-white dark:bg-gray-800/90 shadow-card p-5 transition-all duration-300 hover:shadow-card-hover">
             <dl>
               <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
                 Moyenne quotidienne
               </dt>
-              <dd className="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">
+              <dd className="mt-1 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
                 {stats.averageListens.toLocaleString("fr-FR")}
               </dd>
-              <dd className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <dd className="text-xs text-gray-500 dark:text-gray-400 mt-1.5">
                 écoutes par jour
               </dd>
             </dl>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg p-5">
+          <div className="overflow-hidden rounded-xl border border-l-4 border-gray-100 dark:border-gray-700/50 border-l-accent-indigo bg-white dark:bg-gray-800/90 shadow-card p-5 transition-all duration-300 hover:shadow-card-hover">
             <dl>
               <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
                 Jour le plus actif
               </dt>
               {stats.maxDay ? (
                 <>
-                  <dd className="mt-1 text-lg font-semibold text-gray-900 dark:text-white">
+                  <dd className="mt-1 text-xl font-bold tracking-tight text-gray-900 dark:text-white">
                     {stats.maxDay.listens.toLocaleString("fr-FR")} écoutes
                   </dd>
-                  <dd className="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">
+                  <dd className="text-xs text-gray-500 dark:text-gray-400 mt-1.5 truncate">
                     {stats.maxDay.formatted}
                   </dd>
                 </>
@@ -302,15 +227,15 @@ function HeatmapContent() {
             </dl>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg p-5">
+          <div className="overflow-hidden rounded-xl border border-l-4 border-gray-100 dark:border-gray-700/50 border-l-accent-cyan bg-white dark:bg-gray-800/90 shadow-card p-5 transition-all duration-300 hover:shadow-card-hover">
             <dl>
               <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
                 Jour préféré
               </dt>
-              <dd className="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">
+              <dd className="mt-1 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
                 {stats.mostActiveWeekday}
               </dd>
-              <dd className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <dd className="text-xs text-gray-500 dark:text-gray-400 mt-1.5">
                 jour de la semaine le plus actif
               </dd>
             </dl>
@@ -319,43 +244,50 @@ function HeatmapContent() {
       )}
 
       {/* Calendrier heatmap */}
-      <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-        <div className="mb-4">
+      <div className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card">
+        <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
             Calendrier d&apos;écoute
           </h2>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
             Cliquez sur un jour pour voir les détails des écoutes
           </p>
-          {filteredData.length === 0 && (
+          {heatmapData.length === 0 && (
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
               Aucune donnée disponible pour cette période
             </p>
           )}
         </div>
+        <div className="p-6">
         
-        {filteredData.length > 0 ? (
+        {heatmapData.length > 0 ? (
           <CalendarHeatmap
-            data={filteredData}
-            startDate={filteredDateRange.startDate}
-            endDate={filteredDateRange.endDate}
+            data={heatmapData}
+            startDate={startDate}
+            endDate={endDate}
             selectedDate={selectedDate}
             onDayClick={handleDayClick}
           />
         ) : (
           <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-            <p>Aucune donnée disponible pour cette période</p>
+            <p>Aucune donnée disponible pour cette période.</p>
           </div>
         )}
+        </div>
       </div>
 
       {/* Distribution par jour de la semaine */}
-      {stats && viewMode === "year" && (
-        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            Distribution par jour de la semaine
-          </h2>
-          <div className="space-y-3">
+      {stats && (
+        <div className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card">
+          <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Distribution par jour de la semaine
+            </h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+              Répartition de vos écoutes selon les jours
+            </p>
+          </div>
+          <div className="p-6 space-y-4">
             {[
               { name: "Lundi", index: 1 },
               { name: "Mardi", index: 2 },
@@ -371,18 +303,18 @@ function HeatmapContent() {
               
               return (
                 <div key={name} className="flex items-center gap-4">
-                  <div className="w-20 text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <div className="w-20 text-sm font-medium text-gray-700 dark:text-gray-300 shrink-0">
                     {name}
                   </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-6 overflow-hidden">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-3">
+                      <div className="flex-1 h-2.5 bg-gray-100 dark:bg-gray-700/50 rounded-full overflow-hidden">
                         <div
-                          className="bg-blue-600 dark:bg-blue-500 h-full rounded-full transition-all"
+                          className="h-full rounded-full bg-gradient-to-r from-accent-violet to-accent-indigo transition-all duration-500 ease-out"
                           style={{ width: `${percentage}%` }}
                         />
                       </div>
-                      <div className="w-16 text-sm font-semibold text-gray-900 dark:text-white text-right">
+                      <div className="w-14 text-sm font-semibold text-gray-900 dark:text-white text-right tabular-nums shrink-0">
                         {count.toLocaleString("fr-FR")}
                       </div>
                     </div>
@@ -395,15 +327,14 @@ function HeatmapContent() {
       )}
     </div>
 
-    {/* Détails du jour sélectionné - Composant séparé complètement en bas */}
+    {/* Détails du jour sélectionné */}
     {selectedDate && (
       <div className="mt-8">
-        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-          <div className="flex items-center justify-between mb-4">
+        <div className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card">
+          <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4 flex items-center justify-between">
             <div>
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                 Détails du {(() => {
-                  // Parser la date YYYY-MM-DD sans problème de fuseau horaire
                   const [year, month, day] = selectedDate.split("-").map(Number);
                   const date = new Date(year, month - 1, day);
                   return date.toLocaleDateString("fr-FR", {
@@ -415,43 +346,45 @@ function HeatmapContent() {
                 })()}
               </h2>
               {dayListensData && (
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
                   {dayListensData.total} écoute{dayListensData.total > 1 ? "s" : ""} au total
                 </p>
               )}
             </div>
             <button
               onClick={() => setSelectedDate(null)}
-              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              className="p-2 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
               aria-label="Fermer les détails"
             >
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
 
           {isLoadingDayListens ? (
-            <DayDetailsSkeleton />
+            <div className="p-6">
+              <DayDetailsSkeleton />
+            </div>
           ) : dayListensData && dayListensData.data.length > 0 ? (
-            <div className="space-y-4">
+            <div className="p-6 space-y-6">
               {/* Statistiques du jour */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Total d&apos;écoutes</div>
-                  <div className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="rounded-xl bg-gray-50 dark:bg-gray-800/80 border border-gray-100 dark:border-gray-700/50 p-4">
+                  <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Total d&apos;écoutes</div>
+                  <div className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white mt-1">
                     {dayListensData.total.toLocaleString("fr-FR")}
                   </div>
                 </div>
-                <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Artistes uniques</div>
-                  <div className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
+                <div className="rounded-xl bg-gray-50 dark:bg-gray-800/80 border border-gray-100 dark:border-gray-700/50 p-4">
+                  <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Artistes uniques</div>
+                  <div className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white mt-1">
                     {new Set(dayListensData.data.map(l => l.artistName)).size.toLocaleString("fr-FR")}
                   </div>
                 </div>
-                <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Titres uniques</div>
-                  <div className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
+                <div className="rounded-xl bg-gray-50 dark:bg-gray-800/80 border border-gray-100 dark:border-gray-700/50 p-4">
+                  <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Titres uniques</div>
+                  <div className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white mt-1">
                     {new Set(dayListensData.data.map(l => `${l.trackTitle}-${l.artistName}`)).size.toLocaleString("fr-FR")}
                   </div>
                 </div>
@@ -459,7 +392,7 @@ function HeatmapContent() {
 
               {/* Top artistes du jour */}
               <div>
-                <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-3">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
                   Top artistes
                 </h3>
                 <div className="space-y-2">
@@ -471,56 +404,66 @@ function HeatmapContent() {
                   )
                     .sort((a, b) => b[1] - a[1])
                     .slice(0, 5)
-                    .map(([artist, count], index) => (
-                      <div
-                        key={artist}
-                        className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg"
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className="text-lg font-semibold text-gray-400 dark:text-gray-500 w-6">
-                            #{index + 1}
-                          </span>
-                          <span className="text-sm font-medium text-gray-900 dark:text-white">
-                            {artist}
+                    .map(([artist, count], index) => {
+                      const rankColors = ["text-amber-500", "text-slate-400", "text-amber-700"];
+                      const rankBg = ["bg-amber-500/15", "bg-slate-400/15", "bg-amber-700/15"];
+                      const rankStyle = index < 3 ? rankColors[index] : "text-gray-400 dark:text-gray-500";
+                      const rankBgStyle = index < 3 ? rankBg[index] : "bg-gray-100 dark:bg-gray-800";
+                      return (
+                        <div
+                          key={artist}
+                          className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50"
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold ${rankStyle} ${rankBgStyle}`}>
+                              {index + 1}
+                            </span>
+                            <span className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                              {artist}
+                            </span>
+                          </div>
+                          <span className="text-sm font-semibold text-gray-900 dark:text-white tabular-nums shrink-0 ml-3">
+                            {count} écoute{count > 1 ? "s" : ""}
                           </span>
                         </div>
-                        <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                          {count} écoute{count > 1 ? "s" : ""}
-                        </span>
-                      </div>
-                    ))}
+                      );
+                    })}
                 </div>
               </div>
 
               {/* Liste des écoutes */}
               <div>
-                <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-3">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
                   Écoutes détaillées
                 </h3>
                 <div className="space-y-2 max-h-96 overflow-y-auto">
                   {dayListensData.data
                     .sort((a, b) => new Date(b.playedAt).getTime() - new Date(a.playedAt).getTime())
-                    .map((listen, index) => (
+                    .map((listen) => (
                       <div
                         key={listen.id}
-                        className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                        className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50 hover:border-gray-200 dark:hover:border-gray-600/50 transition-colors"
                       >
                         <div className="flex-1 min-w-0">
                           <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
                             {listen.trackTitle}
                           </div>
-                          <div className="text-xs text-gray-600 dark:text-gray-400 truncate">
+                          <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
                             {listen.artistName}
                           </div>
                         </div>
-                        <div className="flex items-center gap-4 ml-4">
-                          <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                        <div className="flex items-center gap-4 ml-4 shrink-0">
+                          <span className="text-xs text-gray-500 dark:text-gray-400 tabular-nums">
                             {new Date(listen.playedAt).toLocaleTimeString("fr-FR", {
                               hour: "2-digit",
                               minute: "2-digit",
                             })}
                           </span>
-                          <span className="text-xs px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded">
+                          <span className={`text-xs px-2 py-1 rounded-lg font-medium ${
+                            listen.source === "lastfm"
+                              ? "bg-accent-violet/15 text-accent-violet"
+                              : "bg-accent-rose/15 text-accent-rose"
+                          }`}>
                             {listen.source === "lastfm" ? "Last.fm" : "Apple Music"}
                           </span>
                         </div>
@@ -530,7 +473,9 @@ function HeatmapContent() {
               </div>
             </div>
           ) : dayListensData && dayListensData.data.length === 0 ? (
-            <EmptyState {...emptyStatePresets.noDayDetail} />
+            <div className="p-6">
+              <EmptyState {...emptyStatePresets.noDayDetail} />
+            </div>
           ) : null}
         </div>
       </div>

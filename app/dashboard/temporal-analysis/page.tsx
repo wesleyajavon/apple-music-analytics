@@ -1,7 +1,6 @@
 "use client";
 
-import { Suspense, useMemo, memo } from "react";
-import { useSearchParams } from "next/navigation";
+import { Suspense, useMemo } from "react";
 import {
   BarChart,
   Bar,
@@ -18,36 +17,31 @@ import {
   Radar,
 } from "recharts";
 import { useTemporalAnalysis } from "@/lib/hooks/use-listening";
+import { CHART_TOOLTIP_STYLES } from "@/lib/constants/config";
 import { LoadingState } from "@/lib/components/loading-state";
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, emptyStatePresets } from "@/lib/components/empty-state";
 import { TemporalAnalysisSkeleton } from "@/lib/components/skeleton-loaders";
 
-// Custom tooltip mémorisé pour éviter les re-créations
-const CustomTooltip = memo(({ active, payload }: any) => {
-  if (active && payload && payload.length) {
-    const data = payload[0].payload;
-    return (
-      <div className="bg-white dark:bg-gray-800 p-3 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
-        <p className="font-semibold text-gray-900 dark:text-white">
-          {data.name || data.dayName || `${data.hour}h`}
-        </p>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
-          {data.listens.toLocaleString("fr-FR")} écoutes
-        </p>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
-          {data.uniqueTracks.toLocaleString("fr-FR")} titres uniques
-        </p>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
-          {data.uniqueArtists.toLocaleString("fr-FR")} artistes uniques
-        </p>
-      </div>
-    );
+// Formatter tooltip - même approche que overview
+function formatTemporalTooltip(
+  value: number,
+  _name: string,
+  props: { payload?: { uniqueTracks?: number; uniqueArtists?: number } }
+) {
+  const p = props?.payload;
+  const listens = value;
+  const tracks = p?.uniqueTracks;
+  const artists = p?.uniqueArtists;
+  const parts = [`${listens.toLocaleString("fr-FR")} écoutes`];
+  if (tracks != null && !Number.isNaN(tracks)) {
+    parts.push(`${tracks.toLocaleString("fr-FR")} titres`);
   }
-  return null;
-});
-
-CustomTooltip.displayName = "CustomTooltip";
+  if (artists != null && !Number.isNaN(artists)) {
+    parts.push(`${artists.toLocaleString("fr-FR")} artistes`);
+  }
+  return [parts.join(" · "), "Écoutes"];
+}
 
 function TemporalAnalysisContent() {
   // IMPORTANT: L'analyse temporelle utilise TOUTES les données historiques
@@ -97,25 +91,21 @@ function TemporalAnalysisContent() {
 
   return (
     <>
-      {/* Page content */}
       <div className="mt-6">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Analyse Temporelle Avancée
+        <header className="mb-8">
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
+            Analyse Temporelle
           </h1>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            Patterns d&apos;écoute détaillés par jour de la semaine et par heure de la journée
+          <p className="mt-2 text-base text-gray-500 dark:text-gray-400 max-w-2xl">
+            Patterns d&apos;écoute détaillés par jour de la semaine et par heure de la journée. Identifiez vos moments de pic.
           </p>
-          <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-            <p className="text-sm text-blue-800 dark:text-blue-200">
-              <strong>ℹ️ Note importante :</strong> Cette analyse utilise{" "}
-              <strong>toutes vos données historiques</strong> pour calculer des patterns
-              fiables. Les filtres de date sont ignorés car ils donneraient des résultats
-              non représentatifs (par exemple, analyser seulement 7 jours ne refléterait
-              pas vos habitudes générales).
+          <div className="mt-4 p-4 rounded-xl bg-accent-violet/10 dark:bg-accent-violet/20 border border-accent-violet/20">
+            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+              <strong className="text-accent-violet dark:text-accent-violet">Note :</strong> Cette analyse utilise{" "}
+              <strong>toutes vos données historiques</strong> pour des patterns fiables. Les filtres de période sont ignorés car une courte période ne refléterait pas vos habitudes générales.
             </p>
           </div>
-        </div>
+        </header>
 
         {isLoading ? (
           <TemporalAnalysisSkeleton />
@@ -135,29 +125,43 @@ function TemporalAnalysisContent() {
           <div className="space-y-8">
             {/* Moments de pic */}
             {(data.peakDay || data.peakHour) && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {data.peakDay && (
-                  <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                      📅 Jour de pic
-                    </h3>
-                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                  <div className="overflow-hidden rounded-xl border border-l-4 border-gray-100 dark:border-gray-700/50 border-l-accent-violet bg-white dark:bg-gray-800/90 shadow-card p-6 transition-all duration-300 hover:shadow-card-hover">
+                    <div className="flex items-center gap-3 mb-3">
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent-violet/15 text-accent-violet">
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+                        </svg>
+                      </span>
+                      <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Jour de pic
+                      </h3>
+                    </div>
+                    <p className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
                       {data.peakDay.dayName}
                     </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1.5">
                       {data.peakDay.listens.toLocaleString("fr-FR")} écoutes
                     </p>
                   </div>
                 )}
                 {data.peakHour && (
-                  <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                      🕐 Heure de pic
-                    </h3>
-                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                  <div className="overflow-hidden rounded-xl border border-l-4 border-gray-100 dark:border-gray-700/50 border-l-accent-indigo bg-white dark:bg-gray-800/90 shadow-card p-6 transition-all duration-300 hover:shadow-card-hover">
+                    <div className="flex items-center gap-3 mb-3">
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent-indigo/15 text-accent-indigo">
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                        </svg>
+                      </span>
+                      <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Heure de pic
+                      </h3>
+                    </div>
+                    <p className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
                       {data.peakHour.hour}h
                     </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1.5">
                       {data.peakHour.listens.toLocaleString("fr-FR")} écoutes
                     </p>
                   </div>
@@ -166,176 +170,164 @@ function TemporalAnalysisContent() {
             )}
 
             {/* Graphique par jour de la semaine - Barres */}
-            <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-              <div className="mb-4">
+            <div className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card">
+              <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                   Écoutes par jour de la semaine
                 </h2>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
                   Répartition de vos écoutes sur les 7 jours de la semaine
                 </p>
               </div>
-
-              <ResponsiveContainer width="100%" height={400}>
-                <BarChart
-                  data={dayOfWeekData}
-                  margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-                >
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    stroke="#e5e7eb"
-                    className="dark:stroke-gray-700"
-                  />
-                  <XAxis
-                    dataKey="name"
-                    tick={{ fill: "currentColor", fontSize: 12 }}
-                    stroke="#6b7280"
-                    className="dark:stroke-gray-400"
-                  />
-                  <YAxis
-                    tick={{ fill: "currentColor", fontSize: 12 }}
-                    stroke="#6b7280"
-                    className="dark:stroke-gray-400"
-                  />
-                  <Tooltip content={CustomTooltip} />
-                  <Legend />
-                  <Bar
-                    dataKey="listens"
-                    name="Écoutes"
-                    fill="#3b82f6"
-                    radius={[8, 8, 0, 0]}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
+              <div className="p-6">
+                <ResponsiveContainer width="100%" height={400}>
+                  <BarChart data={dayOfWeekData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                    <defs>
+                      <linearGradient id="dayBarGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#8b5cf6" />
+                        <stop offset="100%" stopColor="#6366f1" />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+                    <XAxis dataKey="name" tick={{ fill: "#64748b", fontSize: 12 }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fill: "#64748b", fontSize: 12 }} axisLine={false} tickLine={false} width={40} />
+                    <Tooltip
+                      contentStyle={CHART_TOOLTIP_STYLES.contentStyle}
+                      labelStyle={CHART_TOOLTIP_STYLES.labelStyle}
+                      itemStyle={CHART_TOOLTIP_STYLES.itemStyle}
+                      formatter={formatTemporalTooltip}
+                    />
+                    <Legend />
+                    <Bar dataKey="listens" name="Écoutes" fill="url(#dayBarGradient)" radius={[6, 6, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             </div>
 
             {/* Graphique par jour de la semaine - Radar */}
-            <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-              <div className="mb-4">
+            <div className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card">
+              <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                   Pattern hebdomadaire (Radar)
                 </h2>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
                   Visualisation radar des écoutes par jour de la semaine
                 </p>
               </div>
-
-              <ResponsiveContainer width="100%" height={400}>
-                <RadarChart data={radarData}>
-                  <PolarGrid />
-                  <PolarAngleAxis
-                    dataKey="day"
-                    tick={{ fill: "currentColor", fontSize: 12 }}
-                  />
-                  <PolarRadiusAxis
-                    angle={90}
-                    domain={[0, "auto"]}
-                    tick={{ fill: "currentColor", fontSize: 10 }}
-                  />
-                  <Radar
-                    name="Écoutes"
-                    dataKey="listens"
-                    stroke="#3b82f6"
-                    fill="#3b82f6"
-                    fillOpacity={0.6}
-                  />
-                  <Tooltip content={CustomTooltip} />
-                  <Legend />
-                </RadarChart>
-              </ResponsiveContainer>
+              <div className="p-6">
+                <ResponsiveContainer width="100%" height={400}>
+                  <RadarChart data={radarData}>
+                    <PolarGrid stroke="#e2e8f0" />
+                    <PolarAngleAxis dataKey="day" tick={{ fill: "#64748b", fontSize: 12 }} />
+                    <PolarRadiusAxis angle={90} domain={[0, "auto"]} tick={{ fill: "#64748b", fontSize: 10 }} />
+                    <Radar name="Écoutes" dataKey="listens" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.4} strokeWidth={2} />
+                    <Tooltip
+                      contentStyle={CHART_TOOLTIP_STYLES.contentStyle}
+                      labelStyle={CHART_TOOLTIP_STYLES.labelStyle}
+                      itemStyle={CHART_TOOLTIP_STYLES.itemStyle}
+                      formatter={formatTemporalTooltip}
+                    />
+                    <Legend />
+                  </RadarChart>
+                </ResponsiveContainer>
+              </div>
             </div>
 
             {/* Graphique par heure de la journée */}
-            <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-              <div className="mb-4">
+            <div className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card">
+              <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                   Écoutes par heure de la journée
                 </h2>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
                   Répartition de vos écoutes sur les 24 heures de la journée
                 </p>
               </div>
-
-              <ResponsiveContainer width="100%" height={400}>
-                <BarChart
-                  data={hourOfDayData}
-                  margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
-                >
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    stroke="#e5e7eb"
-                    className="dark:stroke-gray-700"
-                  />
-                  <XAxis
-                    dataKey="name"
-                    angle={-45}
-                    textAnchor="end"
-                    height={100}
-                    tick={{ fill: "currentColor", fontSize: 11 }}
-                    stroke="#6b7280"
-                    className="dark:stroke-gray-400"
-                  />
-                  <YAxis
-                    tick={{ fill: "currentColor", fontSize: 12 }}
-                    stroke="#6b7280"
-                    className="dark:stroke-gray-400"
-                  />
-                  <Tooltip content={CustomTooltip} />
-                  <Legend />
-                  <Bar
-                    dataKey="listens"
-                    name="Écoutes"
-                    fill="#8b5cf6"
-                    radius={[8, 8, 0, 0]}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
+              <div className="p-6">
+                <ResponsiveContainer width="100%" height={400}>
+                  <BarChart data={hourOfDayData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+                    <defs>
+                      <linearGradient id="hourBarGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#06b6d4" />
+                        <stop offset="100%" stopColor="#8b5cf6" />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+                    <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} tick={{ fill: "#64748b", fontSize: 11 }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fill: "#64748b", fontSize: 12 }} axisLine={false} tickLine={false} width={40} />
+                    <Tooltip
+                      contentStyle={CHART_TOOLTIP_STYLES.contentStyle}
+                      labelStyle={CHART_TOOLTIP_STYLES.labelStyle}
+                      itemStyle={CHART_TOOLTIP_STYLES.itemStyle}
+                      formatter={formatTemporalTooltip}
+                    />
+                    <Legend />
+                    <Bar dataKey="listens" name="Écoutes" fill="url(#hourBarGradient)" radius={[6, 6, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             </div>
 
-            {/* Tableau détaillé par jour de la semaine */}
-            <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                Détails par jour de la semaine
-              </h2>
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                  <thead className="bg-gray-50 dark:bg-gray-900">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Jour
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Nombre d&apos;écoutes
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Titres uniques
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Artistes uniques
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                    {dayOfWeekData.map((item) => (
-                      <tr key={item.name}>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="text-sm font-medium text-gray-900 dark:text-white">
-                            {item.name}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
-                          {item.listens.toLocaleString("fr-FR")}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
-                          {item.uniqueTracks.toLocaleString("fr-FR")}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
-                          {item.uniqueArtists.toLocaleString("fr-FR")}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+            {/* Détails par jour de la semaine - card list */}
+            <div className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card">
+              <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Détails par jour de la semaine
+                </h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                  Écoutes, titres et artistes uniques par jour
+                </p>
+              </div>
+              <div className="p-6">
+                <div className="space-y-4">
+                  {dayOfWeekData.map((item, index) => {
+                    const maxListens = Math.max(...dayOfWeekData.map((d) => d.listens), 1);
+                    const widthPercent = (item.listens / maxListens) * 100;
+                    return (
+                      <div
+                        key={item.name}
+                        className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50"
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-accent-violet/15 text-accent-violet text-xs font-bold">
+                              {index + 1}
+                            </span>
+                            <span className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                              {item.name}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-6 shrink-0">
+                            <div className="text-right">
+                              <span className="block text-xs text-gray-500 dark:text-gray-400">Écoutes</span>
+                              <span className="text-sm font-semibold text-gray-900 dark:text-white tabular-nums">
+                                {item.listens.toLocaleString("fr-FR")}
+                              </span>
+                            </div>
+                            <div className="text-right min-w-[52px]">
+                              <span className="block text-xs text-gray-500 dark:text-gray-400">Titres</span>
+                              <span className="text-sm font-semibold text-gray-900 dark:text-white tabular-nums">
+                                {item.uniqueTracks.toLocaleString("fr-FR")}
+                              </span>
+                            </div>
+                            <div className="text-right min-w-[52px]">
+                              <span className="block text-xs text-gray-500 dark:text-gray-400">Artistes</span>
+                              <span className="text-sm font-semibold text-gray-900 dark:text-white tabular-nums">
+                                {item.uniqueArtists.toLocaleString("fr-FR")}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="ml-10 h-1.5 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700/50">
+                          <div
+                            className="h-full rounded-full bg-gradient-to-r from-accent-violet to-accent-indigo transition-all duration-500 ease-out"
+                            style={{ width: `${widthPercent}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </div>
@@ -350,14 +342,14 @@ export default function TemporalAnalysisPage() {
     <Suspense
       fallback={
         <div className="mt-6">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              Analyse Temporelle Avancée
+          <header className="mb-8">
+            <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+              Analyse Temporelle
             </h1>
-            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+            <p className="mt-2 text-base text-gray-500 dark:text-gray-400 max-w-2xl">
               Patterns d&apos;écoute détaillés par jour de la semaine et par heure de la journée
             </p>
-          </div>
+          </header>
           <TemporalAnalysisSkeleton />
         </div>
       }

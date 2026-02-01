@@ -4,6 +4,29 @@
  */
 
 /**
+ * Shared Recharts tooltip styles
+ * Explicit colors for readability in both light and dark mode
+ */
+export const CHART_TOOLTIP_STYLES = {
+  contentStyle: {
+    backgroundColor: "#ffffff",
+    border: "1px solid #e5e7eb",
+    borderRadius: "12px",
+    boxShadow: "0 10px 40px -10px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+    padding: "12px 16px",
+  },
+  labelStyle: {
+    color: "#111827",
+    fontWeight: 600,
+    marginBottom: "6px",
+  },
+  itemStyle: {
+    color: "#374151",
+    fontSize: "13px",
+  },
+} as const;
+
+/**
  * Default proximity window in minutes for artist network graph
  * Used to determine if two artists were listened to close in time
  */

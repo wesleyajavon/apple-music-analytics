@@ -40,7 +40,16 @@ const nextConfig = {
   
   // Optimisation du build
   experimental: {
-    optimizePackageImports: ['@tanstack/react-query', 'recharts', 'd3', 'swagger-ui-react'],
+    optimizePackageImports: [
+      '@tanstack/react-query',
+      'recharts',
+      'd3',
+      'swagger-ui-react',
+      '@react-pdf/renderer',
+      'react-force-graph-2d',
+      '@sentry/nextjs',
+      'sonner',
+    ],
     // Active le hook d'instrumentation pour Sentry
     instrumentationHook: true,
     // Turbopack (dev avec --turbo) : évite l'avertissement

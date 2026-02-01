@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useOptimisticFilters } from "@/lib/hooks/use-optimistic-filters";
 
 export type PeriodType = "day" | "week" | "month";
@@ -27,17 +27,52 @@ export function PeriodSelector() {
   const startDate = searchParams.get("startDate") || undefined;
   const endDate = searchParams.get("endDate") || undefined;
 
+  const [indicatorStyle, setIndicatorStyle] = useState<{
+    left: number;
+    width: number;
+  } | null>(null);
+  const buttonRefs = useRef<Record<PeriodType, HTMLButtonElement | null>>({
+    day: null,
+    week: null,
+    month: null,
+  });
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const activeButton = buttonRefs.current[currentPeriod];
+    if (activeButton && containerRef.current) {
+      const containerRect = containerRef.current.getBoundingClientRect();
+      const buttonRect = activeButton.getBoundingClientRect();
+      setIndicatorStyle({
+        left: buttonRect.left - containerRect.left,
+        width: buttonRect.width,
+      });
+    }
+  }, [currentPeriod]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const activeButton = buttonRefs.current[currentPeriod];
+      if (activeButton && containerRef.current) {
+        const containerRect = containerRef.current.getBoundingClientRect();
+        const buttonRect = activeButton.getBoundingClientRect();
+        setIndicatorStyle({
+          left: buttonRect.left - containerRect.left,
+          width: buttonRect.width,
+        });
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [currentPeriod]);
+
   const updatePeriod = useCallback(
     (period: PeriodType) => {
       const oldPeriod = currentPeriod;
       const params = new URLSearchParams(searchParams.toString());
       params.set("period", period);
-      
-      // Mettre à jour le cache de manière optimiste AVANT la navigation
-      // Cela permet d'afficher immédiatement les anciennes données pendant le chargement
+
       if (startDate && endDate) {
-        // Ne pas attendre la fin du préchargement pour naviguer
-        // Cela permet une mise à jour immédiate de l'UI
         prefetchWithOptimisticUpdate(
           startDate,
           endDate,
@@ -56,29 +91,47 @@ export function PeriodSelector() {
   );
 
   return (
-    <div className="flex items-center gap-2">
-      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-        Agrégation :
+    <div className="flex items-center gap-4">
+      <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 shrink-0">
+        Agrégation
       </span>
-      {periods.map((period) => {
-        const isActive = currentPeriod === period.value;
-        return (
-          <button
-            key={period.value}
-            onClick={() => updatePeriod(period.value)}
-            className={`
-              px-3 py-1.5 text-sm font-medium rounded-md transition-colors
-              ${
-                isActive
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
-              }
-            `}
-          >
-            {period.label}
-          </button>
-        );
-      })}
+      <div
+        ref={containerRef}
+        className="relative flex items-center bg-gray-50 dark:bg-gray-800/80 p-1.5 rounded-xl border border-gray-100 dark:border-gray-700/50"
+      >
+        {indicatorStyle && (
+          <div
+            className="absolute h-[calc(100%-12px)] top-1.5 bg-accent-violet rounded-lg transition-all duration-300 ease-out shadow-sm"
+            style={{
+              left: `${indicatorStyle.left}px`,
+              width: `${indicatorStyle.width}px`,
+            }}
+          />
+        )}
+        {periods.map((period) => {
+          const isActive = currentPeriod === period.value;
+          return (
+            <button
+              key={period.value}
+              ref={(el) => {
+                buttonRefs.current[period.value] = el;
+              }}
+              onClick={() => updatePeriod(period.value)}
+              className={`
+                relative z-10 px-4 py-2 text-sm font-semibold rounded-md
+                transition-all duration-200
+                ${
+                  isActive
+                    ? "text-white"
+                    : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                }
+              `}
+            >
+              {period.label}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }

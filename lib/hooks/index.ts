@@ -5,6 +5,7 @@
 export * from "./use-listening";
 export * from "./use-replay";
 export * from "./use-network";
+export * from "./use-artists";
 export * from "./use-optimistic-filters";
 export * from "./query-keys";
 

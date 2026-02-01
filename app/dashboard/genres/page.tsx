@@ -37,20 +37,15 @@ const COLORS = [
   "#14b8a6", // teal
 ];
 
-// Custom tooltip mémorisé pour éviter les re-créations
+// Custom tooltip - classe chart-tooltip-accessible pour contraste forcé
 const CustomTooltip = memo(({ active, payload }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
-      <div className="bg-white dark:bg-gray-800 p-3 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
-        <p className="font-semibold text-gray-900 dark:text-white">
-          {data.name}
-        </p>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
-          {data.count.toLocaleString("fr-FR")} écoutes
-        </p>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
-          {data.percentage.toFixed(1)}%
+      <div className="chart-tooltip-accessible min-w-[180px] p-4">
+        <p className="font-semibold">{data.name}</p>
+        <p className="chart-tooltip-secondary text-sm mt-1">
+          {data.count.toLocaleString("fr-FR")} écoutes · {data.percentage.toFixed(1)}%
         </p>
       </div>
     );
@@ -105,16 +100,15 @@ function GenresContent() {
 
   return (
     <>
-      {/* Page content */}
       <div className="mt-6">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+        <header className="mb-8">
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
             Genres
           </h1>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            Répartition de vos écoutes par genre musical
+          <p className="mt-2 text-base text-gray-500 dark:text-gray-400 max-w-2xl">
+            Répartition de vos écoutes par genre musical. Visualisez vos préférences en camembert ou en barres.
           </p>
-        </div>
+        </header>
 
         {isLoading ? (
           <GenresSkeleton />
@@ -133,53 +127,43 @@ function GenresContent() {
         ) : (
           <div className="space-y-6">
             {/* Chart type selector */}
-            <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Type de graphique :
-                </span>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setChartType("pie")}
-                    className={`
-                      px-4 py-2 text-sm font-medium rounded-md transition-colors
-                      ${
-                        chartType === "pie"
-                          ? "bg-blue-600 text-white"
-                          : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
-                      }
-                    `}
-                  >
-                    Camembert
-                  </button>
-                  <button
-                    onClick={() => setChartType("bar")}
-                    className={`
-                      px-4 py-2 text-sm font-medium rounded-md transition-colors
-                      ${
-                        chartType === "bar"
-                          ? "bg-blue-600 text-white"
-                          : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
-                      }
-                    `}
-                  >
-                    Barres
-                  </button>
-                </div>
+            <div className="flex items-center gap-4">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 shrink-0">
+                Graphique
+              </span>
+              <div className="flex items-center bg-gray-50 dark:bg-gray-800/80 p-1.5 rounded-xl border border-gray-100 dark:border-gray-700/50">
+                <button
+                  onClick={() => setChartType("pie")}
+                  className={`
+                    px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200
+                    ${chartType === "pie" ? "bg-accent-violet text-white shadow-sm" : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"}
+                  `}
+                >
+                  Camembert
+                </button>
+                <button
+                  onClick={() => setChartType("bar")}
+                  className={`
+                    px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200
+                    ${chartType === "bar" ? "bg-accent-violet text-white shadow-sm" : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"}
+                  `}
+                >
+                  Barres
+                </button>
               </div>
             </div>
 
             {/* Chart */}
-            <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-              <div className="mb-4">
+            <div className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card">
+              <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                   Distribution des genres
                 </h2>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
                   Total: {data.totalListens.toLocaleString("fr-FR")} écoutes
                 </p>
               </div>
-
+              <div className="p-6">
               {chartType === "pie" ? (
                 <ResponsiveContainer width="100%" height={500}>
                   <PieChart>
@@ -216,8 +200,8 @@ function GenresContent() {
                   >
                     <CartesianGrid
                       strokeDasharray="3 3"
-                      stroke="#e5e7eb"
-                      className="dark:stroke-gray-700"
+                      stroke="#e2e8f0"
+                      vertical={false}
                     />
                     <XAxis
                       dataKey="name"
@@ -233,60 +217,76 @@ function GenresContent() {
                       stroke="#6b7280"
                       className="dark:stroke-gray-400"
                     />
+                    <defs>
+                      <linearGradient id="genreBarGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#8b5cf6" />
+                        <stop offset="100%" stopColor="#6366f1" />
+                      </linearGradient>
+                    </defs>
                     <Tooltip content={CustomTooltip} />
                     <Legend />
                     <Bar
                       dataKey="count"
                       name="Écoutes"
-                      fill="#3b82f6"
-                      radius={[8, 8, 0, 0]}
+                      fill="url(#genreBarGradient)"
+                      radius={[6, 6, 0, 0]}
                     />
                   </BarChart>
                 </ResponsiveContainer>
               )}
 
-              {/* Table avec les détails */}
-              <div className="mt-8 overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                  <thead className="bg-gray-50 dark:bg-gray-900">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Genre
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Nombre d&apos;écoutes
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Pourcentage
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                    {chartData.map((item, index) => (
-                      <tr key={item.name}>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
+              {/* Liste des genres avec barres de progression - design moderne */}
+              <div className="mt-8 pt-8 border-t border-gray-100 dark:border-gray-700/50">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">
+                  Détail par genre
+                </h3>
+                <div className="space-y-4">
+                  {chartData.map((item, index) => {
+                    const maxCount = chartData[0]?.count ?? 1;
+                    const widthPercent = (item.count / maxCount) * 100;
+                    const rankColors = ["text-amber-500", "text-slate-400", "text-amber-700"];
+                    const rankBg = ["bg-amber-500/15", "bg-slate-400/15", "bg-amber-700/15"];
+                    const rankStyle = index < 3 ? rankColors[index] : "text-gray-400 dark:text-gray-500";
+                    const rankBgStyle = index < 3 ? rankBg[index] : "bg-gray-100 dark:bg-gray-800";
+                    return (
+                      <div key={item.name} className="group">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold ${rankStyle} ${rankBgStyle}`}>
+                              {index + 1}
+                            </span>
                             <div
-                              className="w-4 h-4 rounded-full mr-3"
-                              style={{
-                                backgroundColor: COLORS[index % COLORS.length],
-                              }}
+                              className="w-3 h-3 shrink-0 rounded-full"
+                              style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                              aria-hidden
                             />
-                            <span className="text-sm font-medium text-gray-900 dark:text-white">
+                            <span className="text-sm font-medium text-gray-900 dark:text-white truncate">
                               {item.name}
                             </span>
                           </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
-                          {item.count.toLocaleString("fr-FR")}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
-                          {item.percentage.toFixed(1)}%
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                          <div className="flex items-center gap-4 ml-2 shrink-0">
+                            <span className="text-sm font-semibold text-gray-900 dark:text-white tabular-nums">
+                              {item.count.toLocaleString("fr-FR")}
+                            </span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400 w-12 text-right tabular-nums">
+                              {item.percentage.toFixed(1)}%
+                            </span>
+                          </div>
+                        </div>
+                        <div className="ml-10 h-1.5 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-700/50">
+                          <div
+                            className="h-full rounded-full transition-all duration-500 ease-out"
+                            style={{
+                              width: `${widthPercent}%`,
+                              backgroundColor: COLORS[index % COLORS.length],
+                            }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
               </div>
             </div>
           </div>
@@ -301,14 +301,14 @@ export default function GenresPage() {
     <Suspense
       fallback={
         <div className="mt-6">
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            <header className="mb-8">
+              <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
                 Genres
               </h1>
-              <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+              <p className="mt-2 text-base text-gray-500 dark:text-gray-400 max-w-2xl">
                 Répartition de vos écoutes par genre musical
               </p>
-            </div>
+            </header>
             <GenresSkeleton />
           </div>
       }

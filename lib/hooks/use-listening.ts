@@ -10,6 +10,7 @@ import {
   AggregatedListenDto,
   OverviewStatsDto,
   TemporalAnalysisDto,
+  TopArtistDto,
 } from "@/lib/dto/listening";
 import {
   GenreDistributionResponse,
@@ -17,6 +18,13 @@ import {
 } from "@/lib/dto/genres";
 import { listeningKeys } from "./query-keys";
 import { CACHE_STALE_TIME } from "@/lib/constants/config";
+
+/**
+ * Type pour les statistiques d'overview avec les artistes les plus écoutés
+ */
+export type OverviewStatsWithTopArtists = OverviewStatsDto & {
+  topArtists: TopArtistDto[];
+};
 
 /**
  * Type pour les données de timeline (format simplifié pour les graphiques)
@@ -327,7 +335,7 @@ async function fetchOverviewStats(
   startDate?: string,
   endDate?: string,
   userId?: string
-): Promise<OverviewStatsDto> {
+): Promise<OverviewStatsWithTopArtists> {
   const searchParams = new URLSearchParams();
   
   if (startDate) searchParams.append("startDate", startDate);
@@ -337,7 +345,7 @@ async function fetchOverviewStats(
   const queryString = searchParams.toString();
   const endpoint = `/overview${queryString ? `?${queryString}` : ""}`;
   
-  return apiClient.get<OverviewStatsDto>(endpoint);
+  return apiClient.get<OverviewStatsWithTopArtists>(endpoint);
 }
 
 /**
@@ -349,7 +357,7 @@ export function useOverviewStats(
   endDate?: string,
   userId?: string,
   options?: Omit<
-    UseQueryOptions<OverviewStatsDto, Error>,
+    UseQueryOptions<OverviewStatsWithTopArtists, Error>,
     "queryKey" | "queryFn" | "staleTime" | "placeholderData"
   >
 ) {
@@ -357,12 +365,12 @@ export function useOverviewStats(
   const queryKey = listeningKeys.overview({ startDate, endDate, userId });
   
   // Récupérer les données précédentes du cache pour les utiliser comme placeholder
-  const previousData = findLatestCachedData<OverviewStatsDto>(
+  const previousData = findLatestCachedData<OverviewStatsWithTopArtists>(
     queryClient,
     queryKey
   );
 
-  return useQuery<OverviewStatsDto, Error>({
+  return useQuery<OverviewStatsWithTopArtists, Error>({
     queryKey,
     queryFn: () => fetchOverviewStats(startDate, endDate, userId),
     staleTime: CACHE_STALE_TIME.OVERVIEW,

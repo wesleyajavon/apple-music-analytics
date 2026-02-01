@@ -56,15 +56,13 @@ const TrendsTooltip = memo(
   }) => {
     if (!active || !payload?.length || !label) return null;
     return (
-      <div className="bg-white dark:bg-gray-800 p-3 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg min-w-[160px]">
-        <p className="font-semibold text-gray-900 dark:text-white mb-2">
-          {label}
-        </p>
-        <ul className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
+      <div className="chart-tooltip-accessible min-w-[180px] p-4">
+        <p className="font-semibold mb-2">{label}</p>
+        <ul className="space-y-1.5 text-sm">
           {payload.map((entry) => (
             <li key={entry.name} className="flex justify-between gap-4">
               <span style={{ color: entry.color }}>{entry.name}</span>
-              <span className="font-medium tabular-nums">
+              <span className="chart-tooltip-secondary font-medium tabular-nums">
                 {Number(entry.value).toLocaleString("fr-FR")} écoutes
               </span>
             </li>
@@ -126,7 +124,7 @@ function TrendsContent() {
   const searchParams = useSearchParams();
   const startDateParam = searchParams.get("startDate");
   const endDateParam = searchParams.get("endDate");
-  const period = (searchParams.get("period") || "month") as PeriodType;
+  const period = (searchParams.get("period") || "day") as PeriodType;
 
   const defaultEnd = useMemo(() => new Date(), []);
   const defaultStart = useMemo(() => {
@@ -197,8 +195,8 @@ function TrendsContent() {
   if (isLoading) {
     return (
       <>
-        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3">
-          <div className="h-10 bg-gray-100 dark:bg-gray-700 rounded animate-pulse" />
+        <div className="bg-white dark:bg-gray-800/95 border-b border-gray-100 dark:border-gray-700/50 -mx-4 -mt-4 sm:-mx-6 sm:-mt-6 lg:-mx-8 lg:-mt-8 px-4 sm:px-6 lg:px-8 py-3 backdrop-blur-sm">
+          <div className="h-10 bg-gray-100 dark:bg-gray-700 rounded-xl animate-pulse w-64" />
         </div>
         <div className="mt-6">
           <div className="mb-8">
@@ -218,7 +216,7 @@ function TrendsContent() {
   if (error) {
     return (
       <>
-        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3">
+        <div className="bg-white dark:bg-gray-800/95 border-b border-gray-100 dark:border-gray-700/50 -mx-4 -mt-4 sm:-mx-6 sm:-mt-6 lg:-mx-8 lg:-mt-8 px-4 sm:px-6 lg:px-8 py-3 backdrop-blur-sm">
           <div className="h-10" />
         </div>
         <div className="mt-6">
@@ -243,7 +241,7 @@ function TrendsContent() {
   if (!data || (chartData.length === 0 && availableGenres.length === 0)) {
     return (
       <>
-        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3">
+        <div className="bg-white dark:bg-gray-800/95 border-b border-gray-100 dark:border-gray-700/50 -mx-4 -mt-4 sm:-mx-6 sm:-mt-6 lg:-mx-8 lg:-mt-8 px-4 sm:px-6 lg:px-8 py-3 backdrop-blur-sm">
           <PeriodSelector />
         </div>
         <div className="mt-6">
@@ -267,7 +265,7 @@ function TrendsContent() {
 
   return (
     <>
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3">
+      <div className="bg-white dark:bg-gray-800/95 border-b border-gray-100 dark:border-gray-700/50 -mx-4 -mt-4 sm:-mx-6 sm:-mt-6 lg:-mx-8 lg:-mt-8 px-4 sm:px-6 lg:px-8 py-3 backdrop-blur-sm">
         <PeriodSelector />
       </div>
 
@@ -449,8 +447,8 @@ export default function GenreTrendsPage() {
     <Suspense
       fallback={
         <>
-          <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3">
-            <div className="h-10 bg-gray-100 dark:bg-gray-700 rounded animate-pulse" />
+          <div className="bg-white dark:bg-gray-800/95 border-b border-gray-100 dark:border-gray-700/50 -mx-4 -mt-4 sm:-mx-6 sm:-mt-6 lg:-mx-8 lg:-mt-8 px-4 sm:px-6 lg:px-8 py-3 backdrop-blur-sm">
+            <div className="h-10 bg-gray-100 dark:bg-gray-700 rounded-xl animate-pulse w-64" />
           </div>
           <div className="mt-6">
             <div className="mb-8">

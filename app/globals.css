@@ -17,12 +17,28 @@
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-inter), system-ui, sans-serif;
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
+}
+
+/* Chart tooltips: forcer contraste max, ignorer héritage dark mode */
+.chart-tooltip-accessible {
+  background: #ffffff !important;
+  color: #111827 !important;
+  border: 2px solid #d1d5db !important;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.35) !important;
+}
+.chart-tooltip-accessible p,
+.chart-tooltip-accessible li {
+  color: #111827 !important;
+}
+.chart-tooltip-accessible .chart-tooltip-secondary {
+  color: #374151 !important;
 }
 

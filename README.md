@@ -10,6 +10,7 @@ Tableau de bord d'analyse personnel pour visualiser votre comportement d'écoute
 - [Architecture](#architecture)
 - [Installation](#installation)
 - [Configuration](#configuration)
+- [Tests](#tests)
 - [Déploiement](#déploiement)
 - [API](#api)
 - [Structure du Projet](#structure-du-projet)
@@ -21,7 +22,7 @@ Cette application permet de centraliser et visualiser vos données d'écoute mus
 - **Last.fm** : Import automatique de votre historique d'écoute via l'API Last.fm réelle
 - **Apple Music Replay** : Import manuel des résumés annuels Apple Music
 
-Le dashboard offre des visualisations interactives pour analyser vos habitudes d'écoute : statistiques générales, timeline, répartition par genres, comparaison annuelle, et graphique de réseau d'artistes.
+Le dashboard offre des visualisations interactives pour analyser vos habitudes d'écoute : statistiques générales, timeline, heatmap calendaire, répartition par genres et artistes, tendances, analyse temporelle, et graphique de réseau d'artistes.
 
 ## ✨ Fonctionnalités
 
@@ -38,12 +39,30 @@ Le dashboard offre des visualisations interactives pour analyser vos habitudes d
 - Visualisation avec Recharts
 - Filtrage par période personnalisée
 
+### 🔥 Heatmap (`/dashboard/heatmap`)
+- Calendrier heatmap de vos écoutes par jour
+- Visualisation type GitHub Contributions
+- Identification des périodes d'écoute intense
+
 ### 🎵 Genres (`/dashboard/genres`)
 - Répartition de vos écoutes par genre musical
 - Visualisations : graphique en camembert et graphiques en barres
 - Pourcentage et nombre d'écoutes par genre
 - Tableau détaillé avec tri
 - Filtrage par période de dates
+
+### 📊 Tendances Genres (`/dashboard/genres/trends`)
+- Évolution des genres dans le temps
+- Comparaison des tendances par période
+
+### 👤 Artistes (`/dashboard/artists`)
+- Top artistes par nombre d'écoutes
+- Statistiques détaillées par artiste
+- Filtrage par période
+
+### ⏱️ Analyse Temporelle (`/dashboard/temporal-analysis`)
+- Analyse des habitudes d'écoute par heure et jour de la semaine
+- Identification des moments préférés pour écouter de la musique
 
 ### 📅 Comparaison Replay (`/dashboard/replay`)
 - Comparaison des statistiques Apple Music Replay entre plusieurs années
@@ -56,8 +75,19 @@ Le dashboard offre des visualisations interactives pour analyser vos habitudes d
 ### 🕸️ Réseau d'artistes (`/dashboard/network`)
 - Visualisation interactive du réseau de connexions entre artistes
 - Basé sur vos habitudes d'écoute
-- Graphique de force avec D3.js
+- Graphique de force avec react-force-graph-2d
 - Exploration interactive des relations
+
+### ⚡ Insights (`/dashboard/insights`)
+- Synthèse et insights personnalisés sur vos habitudes d'écoute
+
+### 📤 Export
+- Export CSV des écoutes
+- Rapport PDF annuel
+- Export des statistiques
+
+### 📚 Documentation API (`/api-docs`)
+- Documentation Swagger interactive de tous les endpoints
 
 ### 🎚️ Filtres globaux
 - Filtrage par période de dates (disponible sur toutes les pages)
@@ -71,9 +101,16 @@ Le dashboard offre des visualisations interactives pour analyser vos habitudes d
 - **Styling** : Tailwind CSS avec support du mode sombre
 - **État serveur** : TanStack Query (React Query) v5
 - **Base de données** : PostgreSQL avec Prisma ORM
+- **Cache** : Redis (ioredis) — optionnel, améliore les performances
+- **Validation** : Zod pour les schémas et la validation des API
 - **Visualisations** :
   - Recharts (graphiques linéaires, barres, camemberts)
-  - D3.js (graphiques de réseau avancés)
+  - react-force-graph-2d (réseau d'artistes)
+  - D3.js (utilitaires)
+- **Monitoring** : Sentry pour le suivi des erreurs (optionnel)
+- **Documentation API** : Swagger (OpenAPI)
+- **Export** : @react-pdf/renderer pour les rapports PDF
+- **Tests** : Vitest (unitaires/intégration), Playwright (E2E)
 - **Déploiement** : Optimisé pour Vercel
 
 ## 🏗️ Architecture
@@ -84,9 +121,10 @@ L'application suit les principes du **App Router de Next.js** avec une séparati
 
 1. **Couche Présentation** (`app/dashboard/`) : Pages et composants React
 2. **Couche API** (`app/api/`) : Routes API Next.js (Serverless Functions)
-3. **Couche Business Logic** (`lib/services/`) : Services métier réutilisables
-4. **Couche Données** (`lib/prisma.ts`, `prisma/schema.prisma`) : Accès à la base de données
+3. **Couche Business Logic** (`lib/services/`) : Services métier réutilisables (artist, genre, listening, artist-network, replay)
+4. **Couche Données** (`lib/prisma.ts`, `lib/redis.ts`, `prisma/schema.prisma`) : Accès à la base de données et au cache
 5. **Couche DTO** (`lib/dto/`) : Types et transformations de données
+6. **Couche Validation** (`lib/validators/`, `lib/middleware/`) : Validation des entrées API
 
 ### Décisions architecturales
 
@@ -142,7 +180,7 @@ L'application suit les principes du **App Router de Next.js** avec une séparati
 
 ### Prérequis
 
-- Node.js 18+ 
+- Node.js 20+ (voir `.nvmrc`)
 - PostgreSQL (local ou service cloud)
 - npm ou yarn
 
@@ -222,6 +260,20 @@ LASTFM_API_SECRET="votre_lastfm_api_secret"
 
 **Note** : Si les clés API ne sont pas configurées, l'application utilisera des données mockées (utile uniquement pour le développement).
 
+#### Redis (Optionnel — pour le cache)
+
+```env
+REDIS_URL="redis://localhost:6379/0"
+# Ou Upstash : REDIS_URL="redis://default:xxxxx@xxxxx.upstash.io:6379"
+```
+
+#### Sentry (Optionnel — pour le monitoring d'erreurs)
+
+```env
+SENTRY_DSN="https://xxxxx@xxxxx.ingest.sentry.io/xxxxx"
+NEXT_PUBLIC_SENTRY_DSN="https://xxxxx@xxxxx.ingest.sentry.io/xxxxx"
+```
+
 #### Variables automatiques
 
 Ces variables sont définies automatiquement par Next.js/Vercel :
@@ -234,10 +286,22 @@ Ces variables sont définies automatiquement par Next.js/Vercel :
 ```bash
 # Développement
 npm run dev              # Lancer le serveur de développement
+npm run dev:turbo        # Lancer avec Turbopack
 
 # Build & Production
 npm run build            # Construire l'application pour la production
 npm run start            # Lancer le serveur de production
+
+# Tests
+npm test                 # Tests Vitest (watch mode)
+npm run test:run         # Tests Vitest (single run)
+npm run test:ui          # Interface graphique Vitest
+npm run test:coverage    # Couverture de code
+npm run test:integration # Tests d'intégration API uniquement
+npm run test:e2e         # Tests E2E Playwright
+npm run test:e2e:ui      # Tests E2E avec interface
+npm run test:performance # Benchmarks de performance
+npm run test:all         # Tous les tests (unitaires + E2E)
 
 # Base de données
 npm run db:generate      # Générer le client Prisma
@@ -250,12 +314,30 @@ npm run db:seed          # Exécuter le seed de la base de données (données de
 # Last.fm
 npm run user:create      # Créer un utilisateur dans la base
 npm run lastfm:import    # Importer les données Last.fm
+npm run lastfm:update    # Mettre à jour les données Last.fm
 npm run db:reseed:lastfm # Nettoyer et réensemencer avec Last.fm
+
+# Tracks (durées, genres)
+npm run tracks:fetch-durations  # Récupérer les durées des pistes
+npm run tracks:fetch-genres    # Récupérer les genres des pistes
+npm run tracks:update-genres   # Mettre à jour les genres
 
 # Utilitaires
 npm run lint             # Linter le code
 npm run vercel:env:pull  # Récupérer les variables d'environnement Vercel
+npm run docs:generate    # Générer la documentation TypeDoc
 ```
+
+## 🧪 Tests
+
+Le projet inclut une suite de tests complète :
+
+- **Tests d'intégration API** (`__tests__/api/`) : Vitest avec mocks des services
+- **Tests E2E** (`__tests__/e2e/`) : Playwright pour les parcours utilisateur
+- **Tests de performance** (`__tests__/performance/`) : Benchmarks des routes API
+- **Tests unitaires des services** (`lib/services/__tests__/`)
+
+Voir `__tests__/README.md` pour plus de détails.
 
 ## 🚀 Déploiement
 
@@ -276,6 +358,8 @@ Dans **Settings** → **Environment Variables**, ajoutez :
 
 - `LASTFM_API_KEY` (si vous utilisez Last.fm)
 - `LASTFM_API_SECRET` (si vous utilisez Last.fm)
+- `REDIS_URL` (optionnel, pour le cache)
+- `SENTRY_DSN` et `NEXT_PUBLIC_SENTRY_DSN` (optionnel, pour le monitoring)
 
 Les variables de base de données sont créées automatiquement.
 
@@ -323,9 +407,11 @@ Le fichier `next.config.js` est configuré avec :
 - ✅ **Optimisation des images** : Support AVIF et WebP
 - ✅ **Tree-shaking** : Optimisation des imports de packages
 
-Consultez les guides dans `docs/setup/` pour des guides détaillés de configuration et de déploiement.
+Consultez `.github/workflows/` pour la configuration CI/CD et les options de déploiement.
 
 ## 🔌 API
+
+La documentation Swagger interactive est disponible sur `/api-docs`.
 
 ### Endpoints disponibles
 
@@ -426,6 +512,29 @@ Récupère les données du réseau d'artistes.
 - `endDate` (optionnel) : Date de fin (ISO 8601)
 - `userId` (optionnel) : ID de l'utilisateur
 
+#### GET `/api/artists`
+
+Récupère le top des artistes par nombre d'écoutes.
+
+**Query parameters** :
+- `startDate`, `endDate`, `userId` (optionnels)
+- `limit` (optionnel) : Nombre d'artistes à retourner
+
+#### GET `/api/artists/trends`
+
+Récupère les tendances des artistes dans le temps.
+
+#### GET `/api/genres/trends`
+
+Récupère les tendances des genres dans le temps.
+
+#### GET `/api/temporal-analysis`
+
+Récupère l'analyse temporelle (écoutes par heure et jour de la semaine).
+
+**Query parameters** :
+- `startDate`, `endDate`, `userId` (optionnels)
+
 #### GET `/api/replay`
 
 Récupère les résumés Replay disponibles.
@@ -433,107 +542,86 @@ Récupère les résumés Replay disponibles.
 **Query parameters** :
 - `userId` (optionnel) : ID de l'utilisateur
 
+#### Export
+
+- `GET /api/export/listens` : Export CSV des écoutes
+- `GET /api/export/stats` : Export des statistiques
+- `GET /api/export/report` : Rapport PDF annuel
+
+#### Documentation
+
+- `GET /api/swagger` : Spécification OpenAPI (JSON)
+
 ## 📁 Structure du Projet
 
 ```
 apple-music-analytics/
 ├── app/
 │   ├── api/                      # Routes API Next.js
-│   │   ├── genres/
-│   │   │   └── route.ts          # Endpoint genres
-│   │   ├── lastfm/
-│   │   │   └── route.ts          # Endpoint Last.fm
-│   │   ├── listens/
-│   │   │   └── route.ts          # Endpoint écoutes
-│   │   ├── network/
-│   │   │   └── route.ts          # Endpoint réseau
-│   │   ├── overview/
-│   │   │   └── route.ts          # Endpoint vue d'ensemble
-│   │   ├── replay/
-│   │   │   ├── route.ts          # Endpoint Replay (GET)
-│   │   │   └── import/
-│   │   │       └── route.ts      # Endpoint import Replay (POST)
-│   │   └── timeline/
-│   │       └── route.ts          # Endpoint timeline
+│   │   ├── artists/              # Artistes et tendances
+│   │   ├── export/               # Export CSV, PDF, stats
+│   │   ├── genres/               # Genres et tendances
+│   │   ├── lastfm/               # Last.fm et import
+│   │   ├── listens/              # Écoutes
+│   │   ├── network/              # Réseau d'artistes
+│   │   ├── overview/             # Vue d'ensemble
+│   │   ├── replay/               # Replay et import
+│   │   ├── swagger/              # Spécification OpenAPI
+│   │   ├── temporal-analysis/    # Analyse temporelle
+│   │   └── timeline/             # Timeline
+│   ├── api-docs/                 # Page documentation Swagger
 │   ├── dashboard/                # Pages du dashboard
-│   │   ├── genres/
-│   │   │   └── page.tsx          # Page genres
-│   │   ├── network/
-│   │   │   └── page.tsx          # Page réseau
-│   │   ├── overview/
-│   │   │   └── page.tsx          # Page vue d'ensemble
-│   │   ├── replay/
-│   │   │   └── page.tsx          # Page comparaison Replay
-│   │   ├── timeline/
-│   │   │   └── page.tsx          # Page timeline
-│   │   ├── layout.tsx            # Layout partagé du dashboard
-│   │   └── page.tsx              # Redirection vers overview
-│   ├── globals.css               # Styles globaux
-│   ├── layout.tsx                # Layout racine
-│   ├── page.tsx                  # Page d'accueil
+│   │   ├── artists/              # Top artistes
+│   │   ├── genres/               # Genres + tendances
+│   │   ├── heatmap/              # Calendrier heatmap
+│   │   ├── insights/             # Insights personnalisés
+│   │   ├── network/              # Réseau d'artistes
+│   │   ├── overview/             # Vue d'ensemble
+│   │   ├── replay/               # Comparaison Replay
+│   │   ├── temporal-analysis/    # Analyse temporelle
+│   │   ├── timeline/             # Timeline
+│   │   └── layout.tsx            # Layout partagé
+│   ├── error.tsx                 # Gestion d'erreurs
+│   ├── global-error.tsx          # Erreur globale
 │   └── providers.tsx             # Providers (TanStack Query)
 │
 ├── lib/
 │   ├── components/               # Composants réutilisables
 │   │   ├── artist-network-graph.tsx
+│   │   ├── calendar-heatmap.tsx
 │   │   ├── date-range-filter.tsx
-│   │   ├── empty-state.tsx
-│   │   ├── error-state.tsx
-│   │   ├── loading-state.tsx
-│   │   ├── period-selector.tsx
+│   │   ├── pdf/                  # Génération PDF
 │   │   ├── sidebar.tsx
-│   │   └── index.ts
+│   │   └── ...
+│   ├── constants/                # Configuration
 │   ├── dto/                      # Data Transfer Objects
-│   │   ├── artist-network.ts
-│   │   ├── genres.ts
-│   │   ├── lastfm.ts
-│   │   ├── listening.ts
-│   │   └── replay.ts
-│   ├── hooks/                    # React Hooks personnalisés
-│   │   ├── use-listening.ts
-│   │   ├── use-network.ts
-│   │   ├── use-replay.ts
-│   │   ├── query-keys.ts
-│   │   └── index.ts
+│   ├── hooks/                    # React Hooks (use-artists, use-listening, etc.)
+│   ├── middleware/               # Validation des requêtes
 │   ├── services/                 # Services métier
-│   │   ├── artist-network.ts
+│   │   ├── artist/               # Service artistes
+│   │   ├── artist-network/       # Réseau (algorithms, builder)
+│   │   ├── genre/                # Service genres
+│   │   ├── listening/            # Écoutes, agrégation, temporal
 │   │   ├── lastfm.ts
-│   │   ├── listening.ts
-│   │   └── replay.ts
-│   ├── api-client.ts             # Client API réutilisable
-│   └── prisma.ts                 # Client Prisma (singleton)
+│   │   └── replay/
+│   ├── utils/                    # Utilitaires (logger, csv, sentry)
+│   ├── validators/               # Validation API (Zod)
+│   ├── api-client.ts
+│   ├── prisma.ts
+│   └── redis.ts                  # Client Redis (cache)
 │
+├── __tests__/                    # Tests
+│   ├── api/                      # Tests d'intégration API
+│   ├── e2e/                      # Tests Playwright
+│   └── performance/              # Benchmarks
+│
+├── .github/workflows/            # CI/CD (ci.yml, test-coverage.yml)
 ├── prisma/
-│   ├── config.ts                 # Configuration Prisma (production)
-│   ├── migrations/               # Migrations Prisma
-│   ├── schema.prisma             # Schéma de base de données
-│   └── seed.ts                   # Script de seed
-│
-├── docs/                         # Documentation
-│   ├── guides/                   # Guides d'utilisation
-│   │   ├── GUIDE_CI_CD.md
-│   │   ├── GUIDE_IMPORT_LASTFM.md
-│   │   └── GUIDE_REDIS.md
-│   ├── setup/                    # Guides de configuration
-│   │   ├── SETUP_BRANCH_PROTECTION.md
-│   │   ├── SETUP_CI_CD.md
-│   │   ├── SETUP_GEMINI_DESIGN_MCP.md
-│   │   ├── SETUP_SWAGGER.md
-│   │   └── SETUP_VERCEL_WAIT_FOR_CI.md
-│   ├── quick-start/              # Guides de démarrage rapide
-│   │   └── QUICK_START_LASTFM.md
-│   ├── CODE_REVIEW.md            # Guide de code review
-│   ├── DATA_SOURCES.md           # Documentation des sources de données
-│   └── DOCUMENTATION.md          # Documentation générale
-│
-├── .env.example                  # Exemple de variables d'environnement
-├── .gitignore                    # Fichiers ignorés par Git
-├── next.config.js                # Configuration Next.js
-├── package.json                  # Dépendances et scripts
-├── tailwind.config.ts            # Configuration Tailwind
-├── tsconfig.json                 # Configuration TypeScript
-├── CHANGELOG.md                  # Journal des modifications
-└── README.md                     # Documentation principale
+├── scripts/                      # Scripts (import-lastfm, update-lastfm, etc.)
+├── .nvmrc                        # Node 20
+├── vitest.config.ts
+├── playwright.config.ts
+└── typedoc.json                  # Documentation TypeDoc
 ```
 
 ## 🔒 Sécurité
@@ -550,19 +638,21 @@ apple-music-analytics/
 
 1. **Nouvelle page dashboard** :
    - Créer `app/dashboard/ma-page/page.tsx`
-   - Ajouter le lien dans `lib/components/sidebar.tsx`
+   - Ajouter le lien dans `lib/components/sidebar.tsx` (tableau `navItems`)
 
 2. **Nouvelle route API** :
    - Créer `app/api/ma-route/route.ts`
-   - Exporter `GET`, `POST`, etc.
+   - Documenter dans `swagger.config.js` pour la doc Swagger
+   - Valider les paramètres avec `lib/validators/api-validators.ts`
 
 3. **Nouveau service** :
-   - Créer `lib/services/mon-service.ts`
+   - Créer dans `lib/services/` (ou sous-dossier dédié)
    - Utiliser `prisma` depuis `lib/prisma.ts`
+   - Ajouter des tests dans `lib/services/__tests__/`
 
 4. **Nouveau hook** :
    - Créer `lib/hooks/use-mon-hook.ts`
-   - Utiliser TanStack Query avec les clés de `query-keys.ts`
+   - Utiliser TanStack Query avec les clés de `lib/hooks/query-keys.ts`
 
 ## 🤝 Contribution
 

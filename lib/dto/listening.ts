@@ -133,9 +133,7 @@ export interface DayOfWeekAggregationDto {
   listens: number;
   uniqueTracks: number;
   uniqueArtists: number;
-}
-
-/**
+}/**
  * Aggregation by hour of day (0-23)
  */
 export interface HourOfDayAggregationDto {

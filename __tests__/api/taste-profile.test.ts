@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { NextRequest } from "next/server";
 
 /**
  * API tests for POST /api/ai/taste-profile
@@ -31,7 +32,7 @@ describe("POST /api/ai/taste-profile", () => {
   it("should return 400 for missing dateRange", async () => {
     const { POST } = await import("@/app/api/ai/taste-profile/route");
     const body = { ...validInput, dateRange: undefined };
-    const request = new Request("http://localhost/api/ai/taste-profile", {
+    const request = new NextRequest("http://localhost/api/ai/taste-profile", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -45,7 +46,7 @@ describe("POST /api/ai/taste-profile", () => {
   it("should return 400 for invalid tone", async () => {
     const { POST } = await import("@/app/api/ai/taste-profile/route");
     const body = { ...validInput, tone: "invalid" };
-    const request = new Request("http://localhost/api/ai/taste-profile", {
+    const request = new NextRequest("http://localhost/api/ai/taste-profile", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -59,7 +60,7 @@ describe("POST /api/ai/taste-profile", () => {
   it("should accept analytical tone", async () => {
     const { POST } = await import("@/app/api/ai/taste-profile/route");
     const body = { ...validInput, tone: "analytical" };
-    const request = new Request("http://localhost/api/ai/taste-profile", {
+    const request = new NextRequest("http://localhost/api/ai/taste-profile", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -72,7 +73,7 @@ describe("POST /api/ai/taste-profile", () => {
   it("should accept poetic tone", async () => {
     const { POST } = await import("@/app/api/ai/taste-profile/route");
     const body = { ...validInput, tone: "poetic" };
-    const request = new Request("http://localhost/api/ai/taste-profile", {
+    const request = new NextRequest("http://localhost/api/ai/taste-profile", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -84,7 +85,7 @@ describe("POST /api/ai/taste-profile", () => {
   it("should default tone to casual when omitted", async () => {
     const { POST } = await import("@/app/api/ai/taste-profile/route");
     const { tone: _tone, ...bodyWithoutTone } = validInput;
-    const request = new Request("http://localhost/api/ai/taste-profile", {
+    const request = new NextRequest("http://localhost/api/ai/taste-profile", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(bodyWithoutTone),
@@ -102,7 +103,7 @@ describe("POST /api/ai/taste-profile", () => {
       uniqueArtists: 50,
       uniqueTracks: 200,
     };
-    const request = new Request("http://localhost/api/ai/taste-profile", {
+    const request = new NextRequest("http://localhost/api/ai/taste-profile", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),

@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { NextRequest } from "next/server";
 
 /**
  * API tests for POST /api/ai/insights
@@ -30,7 +31,7 @@ describe("POST /api/ai/insights", () => {
   it("should return 400 for missing dateRange", async () => {
     const { POST } = await import("@/app/api/ai/insights/route");
     const body = { ...validInput, dateRange: undefined };
-    const request = new Request("http://localhost/api/ai/insights", {
+    const request = new NextRequest("http://localhost/api/ai/insights", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -47,7 +48,7 @@ describe("POST /api/ai/insights", () => {
       ...validInput,
       dateRange: { start: "invalid", end: "2024-01-31" },
     };
-    const request = new Request("http://localhost/api/ai/insights", {
+    const request = new NextRequest("http://localhost/api/ai/insights", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -61,7 +62,7 @@ describe("POST /api/ai/insights", () => {
   it("should accept empty genreDistribution (valid schema)", async () => {
     const { POST } = await import("@/app/api/ai/insights/route");
     const body = { ...validInput, genreDistribution: [] };
-    const request = new Request("http://localhost/api/ai/insights", {
+    const request = new NextRequest("http://localhost/api/ai/insights", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -77,7 +78,7 @@ describe("POST /api/ai/insights", () => {
       ...validInput,
       listeningByTimeOfDay: [{ hour: 25, listens: 10 }], // hour must be 0-23
     };
-    const request = new Request("http://localhost/api/ai/insights", {
+    const request = new NextRequest("http://localhost/api/ai/insights", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -91,7 +92,7 @@ describe("POST /api/ai/insights", () => {
     delete process.env.GROQ_API_KEY;
 
     const { POST } = await import("@/app/api/ai/insights/route");
-    const request = new Request("http://localhost/api/ai/insights", {
+    const request = new NextRequest("http://localhost/api/ai/insights", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(validInput),

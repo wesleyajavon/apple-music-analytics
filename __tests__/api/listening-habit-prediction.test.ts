@@ -108,7 +108,16 @@ describe("GET /api/predictions/listening-habit", () => {
       timeWindow: { startHour: 21, endHour: 23, label: "21h–23h" },
       confidenceScore: 65,
       predictedGenre: "Rock",
-      supportingMetrics: {},
+      supportingMetrics: {
+        totalListensAnalyzed: 500,
+        daysOfData: 90,
+        listensInWindow: 325,
+        peakHour: 22,
+        dayOfWeek: 1,
+        dayName: "Lundi",
+        genreDistributionInWindow: { Rock: 200, Pop: 125 },
+        assumptions: [],
+      },
     };
 
     vi.mocked(getListeningHabitPrediction).mockResolvedValue(mockPrediction);

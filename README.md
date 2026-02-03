@@ -64,6 +64,12 @@ Le dashboard offre des visualisations interactives pour analyser vos habitudes d
 - Analyse des habitudes d'écoute par heure et jour de la semaine
 - Identification des moments préférés pour écouter de la musique
 
+### 🕐 Quand vais-je écouter ? (`/dashboard/when-will-i-listen`)
+- Prédiction du créneau horaire et du genre les plus probables pour aujourd'hui
+- Basée sur des heuristiques statistiques déterministes (pas de ML)
+- Score de confiance et explication IA optionnelle
+- Widget intégré sur la vue d'ensemble
+
 ### 📅 Comparaison Replay (`/dashboard/replay`)
 - Comparaison des statistiques Apple Music Replay entre plusieurs années
 - Sélection flexible des années à comparer
@@ -78,8 +84,14 @@ Le dashboard offre des visualisations interactives pour analyser vos habitudes d
 - Graphique de force avec react-force-graph-2d
 - Exploration interactive des relations
 
-### ⚡ Insights (`/dashboard/insights`)
-- Synthèse et insights personnalisés sur vos habitudes d'écoute
+### 🤖 AI Insights (`/dashboard/ai-insights`)
+- Génération d'insights en langage naturel à partir des analytics agrégés
+- 3 à 5 points factuels basés sur : distribution des genres, écoute par heure, top artistes, évolution vs période précédente
+- Cache par hash des données (pas de régénération si les analytics sont inchangés)
+- Requiert `GROQ_API_KEY` (voir [Configuration](#configuration), tier gratuit)
+
+### 📖 Méthodologie (`/dashboard/insights`)
+- Documentation sur les patterns, calculs et limitations du système
 
 ### 📤 Export
 - Export CSV des écoutes
@@ -273,6 +285,20 @@ REDIS_URL="redis://localhost:6379/0"
 SENTRY_DSN="https://xxxxx@xxxxx.ingest.sentry.io/xxxxx"
 NEXT_PUBLIC_SENTRY_DSN="https://xxxxx@xxxxx.ingest.sentry.io/xxxxx"
 ```
+
+#### Groq (Optionnel — pour AI Insights)
+
+Pour activer la génération d'insights IA à partir de vos analytics (tier gratuit disponible) :
+
+1. Créez un compte sur [https://console.groq.com](https://console.groq.com)
+2. Générez une clé API
+3. Ajoutez-la à `.env.local` :
+
+```env
+GROQ_API_KEY="gsk_..."
+```
+
+**Fonctionnement** : Le client envoie les analytics agrégés (genres, heures d'écoute, top artistes, évolution) à `POST /api/ai/insights`. Le serveur résume les données de façon déterministe, calcule un hash pour le cache, et appelle l'LLM (Llama 3.1 8B via Groq) uniquement en cas de cache miss. Les réponses sont mises en cache (Redis ou mémoire) pendant 24h.
 
 #### Variables automatiques
 

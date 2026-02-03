@@ -1,17 +1,30 @@
 "use client";
 
-import { useMemo, useCallback, Suspense, useState } from "react";
+import { useMemo, useCallback, Suspense, useState, useRef, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { CalendarHeatmap, HeatmapDataPoint } from "@/lib/components/calendar-heatmap";
-import { useTimeline, useListens } from "@/lib/hooks/use-listening";
+import { useTimeline, useListens, useTemporalAnalysis } from "@/lib/hooks/use-listening";
 import { LoadingState } from "@/lib/components/loading-state";
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, emptyStatePresets } from "@/lib/components/empty-state";
 import { HeatmapSkeleton, DayDetailsSkeleton } from "@/lib/components/skeleton-loaders";
 
+/** Normalise une date (string ou Date) en YYYY-MM-DD pour éviter Invalid Date */
+function toDateOnly(date: string | Date): string {
+  if (typeof date === "string") return date.split("T")[0];
+  return date.toISOString().split("T")[0];
+}
+
 function HeatmapContent() {
   const searchParams = useSearchParams();
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const dayDetailsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (selectedDate && dayDetailsRef.current) {
+      dayDetailsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [selectedDate]);
 
   // Calculer les dates par défaut (décembre 2025 à décembre 2026)
   const defaultStartDate = useMemo(() => {
@@ -33,6 +46,12 @@ function HeatmapContent() {
     endDate,
     "day"
   );
+
+  // Utiliser l'analyse temporelle pour "Jour préféré" - même logique que temporal-analysis
+  // (EXTRACT(DOW FROM playedAt) en SQL), évite les bugs de timezone de getDay() côté client
+  const { data: temporalData } = useTemporalAnalysis(startDate, endDate, undefined, {
+    enabled: !!startDate && !!endDate,
+  });
 
   // Transformer les données pour le heatmap
   const heatmapData: HeatmapDataPoint[] = useMemo(() => {
@@ -61,17 +80,25 @@ function HeatmapContent() {
     const maxDay = sortedByListens[0];
     const minDay = timelineData.filter((p) => p.listens > 0).sort((a, b) => a.listens - b.listens)[0];
 
-    // Calculer la distribution par jour de la semaine
-    const weekdayDistribution = [0, 0, 0, 0, 0, 0, 0]; // Dimanche à Samedi
-    timelineData.forEach((point) => {
-      const date = new Date(point.date);
-      const dayOfWeek = date.getDay(); // 0 = Dimanche, 6 = Samedi
-      weekdayDistribution[dayOfWeek] += point.listens;
-    });
-
-    // Trouver le jour de la semaine avec le plus d'écoutes
-    const maxWeekdayIndex = weekdayDistribution.indexOf(Math.max(...weekdayDistribution));
-    const weekdays = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
+    // Distribution par jour : utiliser temporalData (EXTRACT(DOW) en SQL) si dispo,
+    // sinon fallback sur timeline (évite bugs timezone de getDay())
+    // weekdayDistribution: index 0=Dimanche, 1=Lundi, ..., 6=Samedi (pour le chart)
+    const weekdayDistribution = [0, 0, 0, 0, 0, 0, 0];
+    let mostActiveWeekday = "—";
+    if (temporalData?.byDayOfWeek?.length) {
+      temporalData.byDayOfWeek.forEach((d, i) => {
+        weekdayDistribution[(i + 1) % 7] = d.listens; // temporal: Lun=0..Dim=6 → 0=Dim,1=Lun..
+      });
+      mostActiveWeekday = temporalData.peakDay?.dayName ?? "—";
+    } else {
+      timelineData.forEach((point) => {
+        const dayOfWeek = new Date(toDateOnly(point.date) + "T12:00:00Z").getUTCDay();
+        weekdayDistribution[dayOfWeek] += point.listens;
+      });
+      const weekdays = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
+      const maxWeekdayIndex = weekdayDistribution.indexOf(Math.max(...weekdayDistribution));
+      mostActiveWeekday = weekdays[maxWeekdayIndex];
+    }
 
     return {
       totalListens,
@@ -83,7 +110,7 @@ function HeatmapContent() {
       maxDay: maxDay ? {
         date: maxDay.date,
         listens: maxDay.listens,
-        formatted: new Date(maxDay.date).toLocaleDateString("fr-FR", {
+        formatted: new Date(toDateOnly(maxDay.date) + "T12:00:00Z").toLocaleDateString("fr-FR", {
           weekday: "long",
           year: "numeric",
           month: "long",
@@ -93,17 +120,17 @@ function HeatmapContent() {
       minDay: minDay ? {
         date: minDay.date,
         listens: minDay.listens,
-        formatted: new Date(minDay.date).toLocaleDateString("fr-FR", {
+        formatted: new Date(toDateOnly(minDay.date) + "T12:00:00Z").toLocaleDateString("fr-FR", {
           weekday: "long",
           year: "numeric",
           month: "long",
           day: "numeric",
         }),
       } : null,
-      mostActiveWeekday: weekdays[maxWeekdayIndex],
+      mostActiveWeekday,
       weekdayDistribution,
     };
-  }, [timelineData]);
+  }, [timelineData, temporalData]);
 
 
   const handleDayClick = useCallback((date: string, count: number) => {
@@ -236,7 +263,7 @@ function HeatmapContent() {
                 {stats.mostActiveWeekday}
               </dd>
               <dd className="text-xs text-gray-500 dark:text-gray-400 mt-1.5">
-                jour de la semaine le plus actif
+                jour le plus actif (période sélectionnée)
               </dd>
             </dl>
           </div>
@@ -329,7 +356,7 @@ function HeatmapContent() {
 
     {/* Détails du jour sélectionné */}
     {selectedDate && (
-      <div className="mt-8">
+      <div ref={dayDetailsRef} className="mt-8 scroll-mt-4">
         <div className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card">
           <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4 flex items-center justify-between">
             <div>

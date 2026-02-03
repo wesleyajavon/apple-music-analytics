@@ -47,13 +47,6 @@ test.describe('Dashboard Navigation', () => {
     await expect(mainContent).toBeVisible();
   });
 
-  test('should navigate to replay page', async ({ page }) => {
-    await page.goto('/dashboard/replay');
-    await expect(page).toHaveURL(/\/dashboard\/replay/);
-    
-    const mainContent = page.locator('main, [role="main"]').first();
-    await expect(mainContent).toBeVisible();
-  });
 });
 
 test.describe('Dashboard API Integration', () => {

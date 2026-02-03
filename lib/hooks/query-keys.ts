@@ -50,6 +50,30 @@ export const listeningKeys = {
   }) => [...listeningKeys.all, "temporalAnalysis", params] as const,
 } as const;
 
+export const tasteProfileKeys = {
+  all: ["ai", "taste-profile"] as const,
+  list: (params?: {
+    startDate?: string;
+    endDate?: string;
+    tone?: "analytical" | "casual" | "poetic";
+  }) => [...tasteProfileKeys.all, params] as const,
+} as const;
+
+export const predictionKeys = {
+  all: ["predictions"] as const,
+  listeningHabit: (params?: { userId?: string; explain?: boolean }) =>
+    [...predictionKeys.all, "listening-habit", params] as const,
+} as const;
+
+export const tasteEvolutionKeys = {
+  all: ["analytics", "taste-evolution"] as const,
+  list: (params?: {
+    startDate?: string;
+    endDate?: string;
+    userId?: string;
+  }) => [...tasteEvolutionKeys.all, params] as const,
+} as const;
+
 export const networkKeys = {
   all: ["network"] as const,
   graph: (params?: {

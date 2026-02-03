@@ -15,6 +15,10 @@ import {
   Bar,
 } from "recharts";
 import { useOverviewStats, useTimeline, useGenres } from "@/lib/hooks/use-listening";
+import { WhenWillIListenWidget } from "@/lib/components/when-will-i-listen-widget";
+import { TasteEvolutionSummaryWidget } from "@/lib/components/taste-evolution-summary-widget";
+import { TasteProfileSummaryWidget } from "@/lib/components/taste-profile-summary-widget";
+import { AiInsightsSummaryWidget } from "@/lib/components/ai-insights-summary-widget";
 import { CHART_TOOLTIP_STYLES } from "@/lib/constants/config";
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, emptyStatePresets } from "@/lib/components/empty-state";
@@ -317,6 +321,12 @@ function OverviewContent() {
           value={formatTime(data.totalPlayTime)}
           change={changes?.totalPlayTime}
         />
+      </div>
+
+      {/* AI Insights & Explain My Taste - side by side on larger screens */}
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 [&>*:only-child]:sm:col-span-2">
+        <AiInsightsSummaryWidget />
+        <TasteProfileSummaryWidget />
       </div>
 
       {/* Mini-graphique de timeline */}
@@ -638,6 +648,12 @@ function OverviewContent() {
           </div>
         </div>
       )}
+
+      {/* When Will I Listen? widget */}
+      <WhenWillIListenWidget includeExplanation />
+
+      {/* Taste Evolution summary */}
+      <TasteEvolutionSummaryWidget />
     </div>
   );
 }

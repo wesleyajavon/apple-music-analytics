@@ -203,5 +203,37 @@ export async function getAllListensForExport(
   }));
 }
 
+/**
+ * Récupère la plage de dates réelle des écoutes en base (min et max playedAt).
+ * Utile pour le filtre "All" qui doit afficher toutes les données du premier au dernier jour.
+ *
+ * @param userId - ID de l'utilisateur (optionnel)
+ * @returns Objet avec minDate et maxDate, ou null si aucune écoute en base
+ */
+export async function getListenDateRange(userId?: string): Promise<{
+  minDate: Date;
+  maxDate: Date;
+} | null> {
+  const where: Prisma.ListenWhereInput = {};
+  if (userId) {
+    where.userId = userId;
+  }
+
+  const result = await prisma.listen.aggregate({
+    where,
+    _min: { playedAt: true },
+    _max: { playedAt: true },
+  });
+
+  const minDate = result._min.playedAt;
+  const maxDate = result._max.playedAt;
+
+  if (!minDate || !maxDate) {
+    return null;
+  }
+
+  return { minDate, maxDate };
+}
+
 
 

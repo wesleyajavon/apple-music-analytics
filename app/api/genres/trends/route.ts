@@ -4,6 +4,7 @@ import {
   type GenreTrendPeriod,
   type GenreTrendRow,
 } from "@/lib/services/listening/listening-stats";
+import { getListenDateRange } from "@/lib/services/listening/listening-service";
 import type { GenreTrendsDataPoint, GenreTrendsResponse } from "@/lib/dto/genres";
 import { handleApiError } from "@/lib/utils/error-handler";
 import {
@@ -127,15 +128,33 @@ function extractGenresFilter(request: NextRequest): string[] | undefined {
  */
 export async function GET(request: NextRequest) {
   try {
-    const defaultEndDate = new Date();
-    const defaultStartDate = new Date(defaultEndDate);
-    defaultStartDate.setDate(defaultStartDate.getDate() - 30);
+    const { searchParams } = new URL(request.url);
+    const hasStartDate = searchParams.has("startDate");
+    const hasEndDate = searchParams.has("endDate");
 
-    const { startDate, endDate } = extractDateRangeWithDefaults(
-      request,
-      defaultStartDate,
-      defaultEndDate
-    );
+    let startDate: Date;
+    let endDate: Date;
+
+    if (!hasStartDate && !hasEndDate) {
+      const userId = extractOptionalUserId(request);
+      const range = await getListenDateRange(userId);
+      if (!range) {
+        return NextResponse.json({ data: [], availableGenres: [] });
+      }
+      startDate = range.minDate;
+      endDate = range.maxDate;
+    } else {
+      const defaultEndDate = new Date();
+      const defaultStartDate = new Date(defaultEndDate);
+      defaultStartDate.setDate(defaultStartDate.getDate() - 30);
+      const extracted = extractDateRangeWithDefaults(
+        request,
+        defaultStartDate,
+        defaultEndDate
+      );
+      startDate = extracted.startDate;
+      endDate = extracted.endDate;
+    }
     const period = extractPeriod(request, "month") as GenreTrendPeriod;
     const userId = extractOptionalUserId(request);
     const genresFilter = extractGenresFilter(request);

@@ -14,6 +14,7 @@ import {
   extractDateRangeWithDefaults,
   extractOptionalUserId,
 } from "@/lib/middleware/validation";
+import { getListenDateRange } from "@/lib/services/listening/listening-service";
 import { getTasteEvolutionTrends } from "@/lib/services/taste-evolution/taste-evolution-service";
 import { generateTasteEvolutionCommentary } from "@/lib/services/ai/taste-evolution-commentary";
 import {
@@ -29,15 +30,37 @@ export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   try {
-    const defaultEndDate = new Date();
-    const defaultStartDate = new Date(defaultEndDate);
-    defaultStartDate.setDate(defaultStartDate.getDate() - 56); // 8 weeks default
+    const { searchParams } = new URL(request.url);
+    const hasStartDate = searchParams.has("startDate");
+    const hasEndDate = searchParams.has("endDate");
 
-    const { startDate, endDate } = extractDateRangeWithDefaults(
-      request,
-      defaultStartDate,
-      defaultEndDate
-    );
+    let startDate: Date;
+    let endDate: Date;
+
+    if (!hasStartDate && !hasEndDate) {
+      const userId = extractOptionalUserId(request);
+      const range = await getListenDateRange(userId);
+      if (!range) {
+        return NextResponse.json({
+          trends: [],
+          commentary: null,
+          skippedWeeks: [],
+        });
+      }
+      startDate = range.minDate;
+      endDate = range.maxDate;
+    } else {
+      const defaultEndDate = new Date();
+      const defaultStartDate = new Date(defaultEndDate);
+      defaultStartDate.setDate(defaultStartDate.getDate() - 56); // 8 weeks default
+      const extracted = extractDateRangeWithDefaults(
+        request,
+        defaultStartDate,
+        defaultEndDate
+      );
+      startDate = extracted.startDate;
+      endDate = extracted.endDate;
+    }
     const userId = extractOptionalUserId(request);
 
     const startStr = startDate.toISOString().slice(0, 10);

@@ -126,16 +126,10 @@ function TrendsContent() {
   const endDateParam = searchParams.get("endDate");
   const period = (searchParams.get("period") || "day") as PeriodType;
 
-  const defaultEnd = useMemo(() => new Date(), []);
-  const defaultStart = useMemo(() => {
-    const d = new Date();
-    d.setDate(d.getDate() - 30);
-    return d;
-  }, []);
-
-  const startDate =
-    startDateParam || defaultStart.toISOString().split("T")[0];
-  const endDate = endDateParam || defaultEnd.toISOString().split("T")[0];
+  // Quand "All" est sélectionné (pas de dates dans l'URL), passer undefined
+  // pour que l'API utilise la plage réelle min/max de la DB
+  const startDate = startDateParam || undefined;
+  const endDate = endDateParam || undefined;
 
   const { data, isLoading, error, refetch } = useGenreTrends(
     startDate,

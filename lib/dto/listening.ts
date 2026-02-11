@@ -141,9 +141,7 @@ export interface HourOfDayAggregationDto {
   listens: number;
   uniqueTracks: number;
   uniqueArtists: number;
-}
-
-/**
+}/**
  * Represents a top artist with listen count
  */
 export interface TopArtistDto {

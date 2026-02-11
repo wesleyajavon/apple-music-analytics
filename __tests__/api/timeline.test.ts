@@ -8,12 +8,16 @@ vi.mock('@/lib/services/listening/listening-aggregation', () => ({
   getWeeklyAggregatedListens: vi.fn(),
   getMonthlyAggregatedListens: vi.fn(),
 }));
+vi.mock('@/lib/services/listening/listening-service', () => ({
+  getListenDateRange: vi.fn(),
+}));
 
 import {
   getDailyAggregatedListens,
   getWeeklyAggregatedListens,
   getMonthlyAggregatedListens,
 } from '@/lib/services/listening/listening-aggregation';
+import { getListenDateRange } from '@/lib/services/listening/listening-service';
 
 describe('GET /api/timeline', () => {
   beforeEach(() => {
@@ -117,7 +121,11 @@ describe('GET /api/timeline', () => {
     expect(getMonthlyAggregatedListens).toHaveBeenCalledOnce();
   });
 
-  it('should use default dates (last 30 days) when no dates provided', async () => {
+  it('should use DB date range when no dates provided (All filter)', async () => {
+    const minDate = new Date('2023-01-01');
+    const maxDate = new Date('2024-12-31');
+    vi.mocked(getListenDateRange).mockResolvedValue({ minDate, maxDate });
+
     const mockData: never[] = [];
     vi.mocked(getDailyAggregatedListens).mockResolvedValue(mockData);
 
@@ -125,11 +133,25 @@ describe('GET /api/timeline', () => {
     const response = await GET(request);
     
     expect(response.status).toBe(200);
-    expect(getDailyAggregatedListens).toHaveBeenCalledOnce();
-    // Vérifier que les dates par défaut sont utilisées (approximativement)
-    const callArgs = vi.mocked(getDailyAggregatedListens).mock.calls[0];
-    expect(callArgs[0]).toBeInstanceOf(Date);
-    expect(callArgs[1]).toBeInstanceOf(Date);
+    expect(getListenDateRange).toHaveBeenCalledWith(undefined);
+    expect(getDailyAggregatedListens).toHaveBeenCalledWith(
+      minDate,
+      maxDate,
+      undefined
+    );
+  });
+
+  it('should return empty array when no dates provided and no listens in DB', async () => {
+    vi.mocked(getListenDateRange).mockResolvedValue(null);
+
+    const request = new NextRequest('http://localhost/api/timeline');
+    const response = await GET(request);
+    
+    expect(response.status).toBe(200);
+    const data = await response.json();
+    expect(data).toEqual([]);
+    expect(getListenDateRange).toHaveBeenCalledOnce();
+    expect(getDailyAggregatedListens).not.toHaveBeenCalled();
   });
 
   it('should return 400 for invalid date format', async () => {

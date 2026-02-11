@@ -211,15 +211,10 @@ function OverviewContent() {
     { enabled: !!previousPeriod }
   );
 
-  // Timeline pour le mini-graphique (30 derniers jours par défaut)
-  const timelineStartDate = useMemo(() => {
-    if (startDate) return startDate;
-    const date = new Date();
-    date.setDate(date.getDate() - 30);
-    return date.toISOString().split("T")[0];
-  }, [startDate]);
-
-  const timelineEndDate = endDate || new Date().toISOString().split("T")[0];
+  // Timeline pour le mini-graphique. Quand "All" (pas de dates), passer undefined
+  // pour que l'API utilise la plage réelle min/max de la DB.
+  const timelineStartDate = startDate;
+  const timelineEndDate = endDate;
 
   const { data: timelineData } = useTimeline(
     timelineStartDate,
@@ -227,10 +222,8 @@ function OverviewContent() {
     "day"
   );
 
-  // Top genres (top 6) - utiliser les mêmes dates par défaut que la timeline
-  const genresStartDate = startDate || timelineStartDate;
-  const genresEndDate = endDate || timelineEndDate;
-  const { data: genresData } = useGenres(genresStartDate, genresEndDate);
+  // Top genres (top 6) - mêmes dates que la timeline (undefined = All)
+  const { data: genresData } = useGenres(timelineStartDate, timelineEndDate);
 
   const handleRetry = useCallback(() => {
     refetch();

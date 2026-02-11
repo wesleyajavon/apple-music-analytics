@@ -5,12 +5,20 @@ import { NextRequest } from "next/server";
 vi.mock("@/lib/services/listening/listening-stats", () => ({
   getGenreTrends: vi.fn(),
 }));
+vi.mock("@/lib/services/listening/listening-service", () => ({
+  getListenDateRange: vi.fn(),
+}));
 
 import { getGenreTrends } from "@/lib/services/listening/listening-stats";
+import { getListenDateRange } from "@/lib/services/listening/listening-service";
 
 describe("GET /api/genres/trends", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(getListenDateRange).mockResolvedValue({
+      minDate: new Date("2024-01-01"),
+      maxDate: new Date("2024-02-29"),
+    });
   });
 
   it("should return genre trends with default period (month)", async () => {

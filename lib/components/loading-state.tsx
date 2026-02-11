@@ -2,15 +2,23 @@
  * Composant réutilisable pour afficher un état de chargement
  */
 
+"use client";
+
+import { useTranslations } from "next-intl";
+
 interface LoadingStateProps {
   message?: string;
   className?: string;
 }
 
 export function LoadingState({
-  message = "Chargement des données...",
+  message,
   className = "",
 }: LoadingStateProps) {
+  const t = useTranslations("components.loadingState");
+  const displayMessage = message ?? t("defaultMessage");
+  const pleaseWait = t("pleaseWait");
+
   return (
     <div className={`flex items-center justify-center py-16 ${className}`}>
       <div className="text-center">
@@ -20,12 +28,11 @@ export function LoadingState({
             <div className="h-6 w-6 rounded-full bg-blue-600 dark:bg-blue-500 opacity-75"></div>
           </div>
         </div>
-        <p className="text-base font-medium text-gray-700 dark:text-gray-300">{message}</p>
+        <p className="text-base font-medium text-gray-700 dark:text-gray-300">{displayMessage}</p>
         <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-          Veuillez patienter...
+          {pleaseWait}
         </p>
       </div>
     </div>
   );
 }
-

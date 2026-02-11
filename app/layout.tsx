@@ -1,8 +1,11 @@
-import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { headers } from "next/headers";
 import "./globals.css";
 import { WebVitals } from "@/lib/components/web-vitals";
 import { SentryInit } from "@/lib/components/sentry-init";
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages } from "next-intl/server";
+import { routing } from "@/i18n/routing";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -10,24 +13,26 @@ const inter = Inter({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: "Apple Music Analytics Dashboard",
-  description: "Personal analytics dashboard for Apple Music listening behavior",
-};
-
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const headersList = await headers();
+  const locale =
+    headersList.get("x-next-intl-locale") || routing.defaultLocale;
+
+  const messages = await getMessages();
+
   return (
-    <html lang="fr" className={inter.variable}>
+    <html lang={locale} className={inter.variable}>
       <body className="font-sans antialiased">
         <SentryInit />
         <WebVitals />
-        {children}
+        <NextIntlClientProvider messages={messages}>
+          {children}
+        </NextIntlClientProvider>
       </body>
     </html>
   );
 }
-

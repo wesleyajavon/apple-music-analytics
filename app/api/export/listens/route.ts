@@ -15,11 +15,11 @@ export const dynamic = "force-dynamic";
  * @swagger
  * /api/export/listens:
  *   get:
- *     summary: Exporte les écoutes au format CSV
+ *     summary: Exports listens in CSV format
  *     description: |
- *       Exporte toutes les écoutes correspondant aux filtres appliqués au format CSV.
- *       Les colonnes incluent : Date, Artiste, Titre, Genre, Source.
- *       Les filtres de date et de source sont appliqués si fournis.
+ *       Exports all listens matching the applied filters in CSV format.
+ *       Columns include Date, Artist, Title, Genre, Source.
+ *       Date and source filters are applied when provided.
  *     tags:
  *       - Export
  *     parameters:
@@ -29,49 +29,49 @@ export const dynamic = "force-dynamic";
  *           type: string
  *           enum: [csv]
  *           default: csv
- *         description: Format d'export (actuellement seul CSV est supporté)
+ *         description: Export format (currently only CSV is supported)
  *       - in: query
  *         name: startDate
  *         schema:
  *           type: string
  *           format: date
- *         description: Date de début au format ISO 8601 (YYYY-MM-DD, optionnel)
+ *         description: Start date in ISO 8601 format (YYYY-MM-DD, optional)
  *       - in: query
  *         name: endDate
  *         schema:
  *           type: string
  *           format: date
- *         description: Date de fin au format ISO 8601 (YYYY-MM-DD, optionnel)
+ *         description: End date in ISO 8601 format (YYYY-MM-DD, optional)
  *       - in: query
  *         name: source
  *         schema:
  *           type: string
  *           enum: [lastfm, apple_music_replay]
- *         description: Source des écoutes à exporter (optionnel)
+ *         description: Source of listens to export (optional)
  *       - in: query
  *         name: userId
  *         schema:
  *           type: string
- *         description: ID de l'utilisateur (optionnel)
+ *         description: User ID (optional)
  *     responses:
  *       200:
- *         description: Fichier CSV des écoutes
+ *         description: Listens CSV file
  *         content:
  *           text/csv:
  *             schema:
  *               type: string
  *             example: |
- *               Date,Artiste,Titre,Genre,Source
+ *               Date,Artist,Title,Genre,Source
  *               2024-01-15,Artist Name,Track Title,Rock,lastfm
  *               2024-01-14,Another Artist,Another Track,Pop,lastfm
  *       400:
- *         description: Erreur de validation
+ *         description: Validation error
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Error'
  *       500:
- *         description: Erreur serveur
+ *         description: Server error
  *         content:
  *           application/json:
  *             schema:
@@ -86,8 +86,8 @@ export async function GET(request: NextRequest) {
     if (format !== "csv") {
       return NextResponse.json(
         {
-          error: "Format non supporté",
-          message: `Le format "${format}" n'est pas supporté. Seul "csv" est disponible.`,
+          error: "Unsupported format",
+          message: `Format "${format}" is not supported. Only "csv" is available.`,
         },
         { status: 400 }
       );

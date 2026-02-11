@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useTranslations, useLocale } from "next-intl";
 
 export interface HeatmapDataPoint {
   date: string; // YYYY-MM-DD
@@ -13,6 +14,7 @@ interface CalendarHeatmapProps {
   endDate?: string;
   selectedDate?: string | null;
   onDayClick?: (date: string, count: number) => void;
+  locale?: string;
 }
 
 /**
@@ -58,8 +60,8 @@ function formatDateString(date: Date): string {
 /**
  * Formate une date pour l'affichage
  */
-function formatDateForDisplay(date: Date): string {
-  return date.toLocaleDateString("fr-FR", {
+function formatDateForDisplay(date: Date, locale: string): string {
+  return date.toLocaleDateString(locale, {
     weekday: "long",
     year: "numeric",
     month: "long",
@@ -68,10 +70,10 @@ function formatDateForDisplay(date: Date): string {
 }
 
 /**
- * Obtient le nom du jour de la semaine
+ * Obtient le nom du jour de la semaine (narrow, 1-2 chars)
  */
-function getDayName(date: Date): string {
-  return date.toLocaleDateString("fr-FR", { weekday: "short" }).substring(0, 2);
+function getDayName(date: Date, locale: string): string {
+  return date.toLocaleDateString(locale, { weekday: "narrow" }).substring(0, 2);
 }
 
 /**
@@ -94,7 +96,13 @@ export function CalendarHeatmap({
   endDate,
   selectedDate,
   onDayClick,
+  locale: localeProp,
 }: CalendarHeatmapProps) {
+  const defaultLocale = useLocale();
+  const locale = localeProp ?? defaultLocale;
+  const t = useTranslations("heatmap");
+  const tCommon = useTranslations("common");
+
   // Créer un Map pour un accès rapide aux données par date
   const dataMap = useMemo(() => {
     const map = new Map<string, number>();
@@ -184,7 +192,7 @@ export function CalendarHeatmap({
             weekIndex,
             month,
             year,
-            label: firstDay.toLocaleDateString("fr-FR", { 
+            label: firstDay.toLocaleDateString(locale, { 
               month: "short",
               year: year !== lastYear ? "numeric" : undefined
             }),
@@ -217,7 +225,7 @@ export function CalendarHeatmap({
     });
     
     return filteredLabels;
-  }, [weeks]);
+  }, [weeks, locale]);
 
   // Grouper les jours de la semaine (lundi = 0, dimanche = 6)
   const dayOfWeekGroups = useMemo(() => {
@@ -234,7 +242,7 @@ export function CalendarHeatmap({
   if (!dates || dates.length === 0) {
     return (
       <div className="w-full text-center py-8 text-gray-500 dark:text-gray-400">
-        <p>Aucune date à afficher</p>
+        <p>{t("noDateToDisplay")}</p>
       </div>
     );
   }
@@ -250,7 +258,7 @@ export function CalendarHeatmap({
       <div className="inline-block">
         {/* Légende d'intensité - style GitHub exact */}
         <div className="flex items-center justify-end gap-1 mb-3 text-xs text-gray-600 dark:text-gray-400">
-          <span className="mr-2 text-xs" style={{ fontSize: "10px" }}>Moins</span>
+          <span className="mr-2 text-xs" style={{ fontSize: "10px" }}>{tCommon("less")}</span>
           <div className="flex gap-1">
             <div 
               style={{ 
@@ -303,7 +311,7 @@ export function CalendarHeatmap({
               }} 
             />
           </div>
-          <span className="ml-2 text-xs" style={{ fontSize: "10px" }}>Plus</span>
+          <span className="ml-2 text-xs" style={{ fontSize: "10px" }}>{tCommon("more")}</span>
         </div>
 
         {/* Calendrier - structure GitHub */}
@@ -311,7 +319,15 @@ export function CalendarHeatmap({
           {/* Labels des jours de la semaine - à gauche, alignés avec les carrés */}
           {/* Le paddingTop doit correspondre exactement à la hauteur des labels de mois + un petit espace */}
           <div className="flex flex-col" style={{ paddingTop: "18px", gap: `${SQUARE_GAP}px`, width: "15px", flexShrink: 0 }}>
-            {["L", "M", "M", "J", "V", "S", "D"].map((day, index) => (
+            {[
+              new Date(2024, 0, 7), // Sun
+              new Date(2024, 0, 1), // Mon
+              new Date(2024, 0, 2), // Tue
+              new Date(2024, 0, 3), // Wed
+              new Date(2024, 0, 4), // Thu
+              new Date(2024, 0, 5), // Fri
+              new Date(2024, 0, 6), // Sat
+            ].map((d, index) => (
               <div
                 key={index}
                 className="text-xs text-gray-600 dark:text-gray-400 text-right leading-none"
@@ -325,7 +341,7 @@ export function CalendarHeatmap({
                   justifyContent: "flex-end"
                 }}
               >
-                {day}
+                {getDayName(d, locale)}
               </div>
             ))}
           </div>
@@ -447,8 +463,8 @@ export function CalendarHeatmap({
                             }),
                           }}
                           title={count > 0 
-                            ? `${formatDateForDisplay(date)}: ${count.toLocaleString("fr-FR")} écoute${count > 1 ? "s" : ""}`
-                            : `${formatDateForDisplay(date)}: Aucune écoute`}
+                            ? `${formatDateForDisplay(date, locale)}: ${count.toLocaleString(locale)} ${count > 1 ? t("listens") : t("listen")}`
+                            : `${formatDateForDisplay(date, locale)}: ${t("noListen")}`}
                           onClick={(e) => {
                             if (!isFuture && count > 0 && onDayClick) {
                               e.preventDefault();
@@ -479,8 +495,8 @@ export function CalendarHeatmap({
                             e.currentTarget.style.boxShadow = "none";
                           }}
                           aria-label={count > 0 
-                            ? `${formatDateForDisplay(date)}: ${count.toLocaleString("fr-FR")} écoute${count > 1 ? "s" : ""} - Cliquer pour voir les détails`
-                            : `${formatDateForDisplay(date)}: Aucune écoute`}
+                            ? `${formatDateForDisplay(date, locale)}: ${count.toLocaleString(locale)} ${count > 1 ? t("listens") : t("listen")} - ${t("ariaListenCount")}`
+                            : `${formatDateForDisplay(date, locale)}: ${t("noListen")}`}
                         />
                       );
                     })}
@@ -488,7 +504,7 @@ export function CalendarHeatmap({
                 ))
               ) : (
                 <div className="text-sm text-gray-500 dark:text-gray-400 py-4">
-                  Aucune donnée à afficher
+                  {t("noDataToDisplay")}
                 </div>
               )}
             </div>

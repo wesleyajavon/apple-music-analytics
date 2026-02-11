@@ -18,6 +18,7 @@ import {
   setCachedInsights,
 } from "@/lib/services/ai/insights-cache";
 import { handleApiError } from "@/lib/utils/error-handler";
+import { parseAiLocale } from "@/lib/services/ai/locale-utils";
 import type { AiInsightsInput, AiInsightsResponse } from "@/lib/dto/ai-insights";
 
 export const dynamic = "force-dynamic";
@@ -69,6 +70,7 @@ const AiInsightsInputSchema = z.object({
       listens: z.number().int().nonnegative(),
     })
     .optional(),
+  locale: z.string().optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -87,13 +89,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const input = parseResult.data as AiInsightsInput;
+    const { locale: localeParam, ...inputData } = parseResult.data;
+    const input = inputData as AiInsightsInput;
+    const locale = parseAiLocale(localeParam);
 
     // 1. Summarize and normalize (deterministic)
     const summary = summarizeAnalytics(input);
 
-    // 2. Compute cache key from summary hash
-    const cacheKey = computeCacheKey(summary);
+    // 2. Compute cache key from summary hash + locale
+    const cacheKey = computeCacheKey(summary, locale);
 
     // 3. Check cache first (cache logic separated from generation)
     const cached = await getCachedInsights(cacheKey);
@@ -106,7 +110,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 4. Generate insights via LLM
-    const insights = await generateInsights(summary);
+    const insights = await generateInsights(summary, locale);
 
     // 5. Store in cache for future requests
     await setCachedInsights(cacheKey, insights);

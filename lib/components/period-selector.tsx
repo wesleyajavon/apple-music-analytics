@@ -1,20 +1,22 @@
 "use client";
 
-import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useRouter, usePathname } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useOptimisticFilters } from "@/lib/hooks/use-optimistic-filters";
 
 export type PeriodType = "day" | "week" | "month";
 
 interface PeriodOption {
-  label: string;
+  labelKey: "daily" | "weekly" | "monthly";
   value: PeriodType;
 }
 
 const periods: PeriodOption[] = [
-  { label: "Quotidien", value: "day" },
-  { label: "Hebdomadaire", value: "week" },
-  { label: "Mensuel", value: "month" },
+  { labelKey: "daily", value: "day" },
+  { labelKey: "weekly", value: "week" },
+  { labelKey: "monthly", value: "month" },
 ];
 
 export function PeriodSelector() {
@@ -22,6 +24,7 @@ export function PeriodSelector() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { prefetchWithOptimisticUpdate } = useOptimisticFilters();
+  const t = useTranslations("components.periodSelector");
 
   const currentPeriod = (searchParams.get("period") as PeriodType) || "day";
   const startDate = searchParams.get("startDate") || undefined;
@@ -93,7 +96,7 @@ export function PeriodSelector() {
   return (
     <div className="flex items-center gap-4">
       <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 shrink-0">
-        Agrégation
+        {t("label")}
       </span>
       <div
         ref={containerRef}
@@ -127,7 +130,7 @@ export function PeriodSelector() {
                 }
               `}
             >
-              {period.label}
+              {t(period.labelKey)}
             </button>
           );
         })}
@@ -135,10 +138,3 @@ export function PeriodSelector() {
     </div>
   );
 }
-
-
-
-
-
-
-

@@ -152,10 +152,29 @@ const styles = StyleSheet.create({
   },
 });
 
+/** Messages traduits pour le rapport PDF (clés du namespace annualReport) */
+export interface AnnualReportMessages {
+  title: string;
+  subtitle: string;
+  overview: string;
+  totalListens: string;
+  uniqueArtists: string;
+  uniqueTracks: string;
+  totalPlayTime: string;
+  genres: string;
+  listens: string;
+  monthlyEvolution: string;
+  tableMonth: string;
+  tableListens: string;
+  tableArtists: string;
+  tableTracks: string;
+  footer: string;
+}
+
 /**
- * Formate les secondes en format lisible
+ * Formate les secondes en format lisible (locale pour unités si besoin)
  */
-function formatTime(seconds: number): string {
+function formatTime(seconds: number, locale: string): string {
   if (seconds <= 0) return "0 min";
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
@@ -168,17 +187,17 @@ function formatTime(seconds: number): string {
 /**
  * Formate un nombre avec des séparateurs de milliers
  */
-function formatNumber(num: number): string {
-  return new Intl.NumberFormat("fr-FR").format(num);
+function formatNumber(num: number, locale: string): string {
+  return new Intl.NumberFormat(locale).format(num);
 }
 
 /**
  * Formate une date de mois (YYYY-MM) en format lisible
  */
-function formatMonth(monthStr: string): string {
+function formatMonth(monthStr: string, locale: string): string {
   const [year, month] = monthStr.split("-");
   const date = new Date(parseInt(year), parseInt(month) - 1, 1);
-  return date.toLocaleDateString("fr-FR", {
+  return date.toLocaleDateString(locale, {
     month: "long",
     year: "numeric",
   });
@@ -186,45 +205,56 @@ function formatMonth(monthStr: string): string {
 
 /**
  * Composant principal du rapport annuel PDF
+ * @react-pdf/renderer ne supporte pas les hooks React, donc locale et messages sont passés en props
  */
-export function AnnualReportPDF({ data }: { data: AnnualReportData }) {
+export function AnnualReportPDF({
+  data,
+  locale,
+  messages,
+}: {
+  data: AnnualReportData;
+  locale: string;
+  messages: AnnualReportMessages;
+}) {
+  const formattedDate = new Date().toLocaleDateString(locale);
+  const title = messages.title.replace("{year}", data.year.toString());
+  const footer = messages.footer.replace("{date}", formattedDate);
+
   return (
     <Document>
       <Page size="A4" style={styles.page}>
         {/* En-tête */}
         <View style={styles.header}>
-          <Text style={styles.title}>Rapport Annuel {data.year}</Text>
-          <Text style={styles.subtitle}>
-            Analyse de vos habitudes d&apos;écoute musicale
-          </Text>
+          <Text style={styles.title}>{title}</Text>
+          <Text style={styles.subtitle}>{messages.subtitle}</Text>
         </View>
 
         {/* Statistiques globales */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Vue d&apos;ensemble</Text>
+          <Text style={styles.sectionTitle}>{messages.overview}</Text>
           <View style={styles.statsGrid}>
             <View style={styles.statCard}>
-              <Text style={styles.statLabel}>Total d&apos;écoutes</Text>
+              <Text style={styles.statLabel}>{messages.totalListens}</Text>
               <Text style={styles.statValue}>
-                {formatNumber(data.overview.totalListens)}
+                {formatNumber(data.overview.totalListens, locale)}
               </Text>
             </View>
             <View style={styles.statCard}>
-              <Text style={styles.statLabel}>Artistes uniques</Text>
+              <Text style={styles.statLabel}>{messages.uniqueArtists}</Text>
               <Text style={styles.statValue}>
-                {formatNumber(data.overview.uniqueArtists)}
+                {formatNumber(data.overview.uniqueArtists, locale)}
               </Text>
             </View>
             <View style={styles.statCard}>
-              <Text style={styles.statLabel}>Titres uniques</Text>
+              <Text style={styles.statLabel}>{messages.uniqueTracks}</Text>
               <Text style={styles.statValue}>
-                {formatNumber(data.overview.uniqueTracks)}
+                {formatNumber(data.overview.uniqueTracks, locale)}
               </Text>
             </View>
             <View style={styles.statCard}>
-              <Text style={styles.statLabel}>Temps d&apos;écoute</Text>
+              <Text style={styles.statLabel}>{messages.totalPlayTime}</Text>
               <Text style={styles.statValue}>
-                {formatTime(data.overview.totalPlayTime)}
+                {formatTime(data.overview.totalPlayTime, locale)}
               </Text>
             </View>
           </View>
@@ -232,13 +262,14 @@ export function AnnualReportPDF({ data }: { data: AnnualReportData }) {
 
         {/* Top genres */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Genres musicaux</Text>
+          <Text style={styles.sectionTitle}>{messages.genres}</Text>
           <View style={styles.genreList}>
             {data.topGenres.slice(0, 10).map((genre, index) => (
               <View key={index} style={styles.genreItem}>
                 <Text style={styles.genreName}>{genre.genre}</Text>
                 <Text style={styles.genreStats}>
-                  {formatNumber(genre.count)} écoutes ({genre.percentage.toFixed(1)}%)
+                  {formatNumber(genre.count, locale)} {messages.listens} (
+                  {genre.percentage.toFixed(1)}%)
                 </Text>
               </View>
             ))}
@@ -248,29 +279,29 @@ export function AnnualReportPDF({ data }: { data: AnnualReportData }) {
         {/* Timeline mensuelle */}
         {data.timeline.monthly && data.timeline.monthly.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Évolution mensuelle</Text>
+            <Text style={styles.sectionTitle}>{messages.monthlyEvolution}</Text>
             <View style={styles.timelineTable}>
               {/* En-tête du tableau */}
               <View style={[styles.tableRow, styles.tableHeader]}>
-                <Text style={styles.tableCell}>Mois</Text>
-                <Text style={styles.tableCell}>Écoutes</Text>
-                <Text style={styles.tableCell}>Artistes</Text>
-                <Text style={styles.tableCell}>Titres</Text>
+                <Text style={styles.tableCell}>{messages.tableMonth}</Text>
+                <Text style={styles.tableCell}>{messages.tableListens}</Text>
+                <Text style={styles.tableCell}>{messages.tableArtists}</Text>
+                <Text style={styles.tableCell}>{messages.tableTracks}</Text>
               </View>
               {/* Lignes de données */}
               {data.timeline.monthly.map((month, index) => (
                 <View key={index} style={styles.tableRow}>
                   <Text style={styles.tableCell}>
-                    {formatMonth(month.date)}
+                    {formatMonth(month.date, locale)}
                   </Text>
                   <Text style={styles.tableCell}>
-                    {formatNumber(month.listens)}
+                    {formatNumber(month.listens, locale)}
                   </Text>
                   <Text style={styles.tableCell}>
-                    {formatNumber(month.uniqueArtists)}
+                    {formatNumber(month.uniqueArtists, locale)}
                   </Text>
                   <Text style={styles.tableCell}>
-                    {formatNumber(month.uniqueTracks)}
+                    {formatNumber(month.uniqueTracks, locale)}
                   </Text>
                 </View>
               ))}
@@ -280,8 +311,7 @@ export function AnnualReportPDF({ data }: { data: AnnualReportData }) {
 
         {/* Pied de page */}
         <Text style={styles.footer} fixed>
-          Généré le {new Date().toLocaleDateString("fr-FR")} - Apple Music
-          Analytics Dashboard
+          {footer}
         </Text>
       </Page>
     </Document>

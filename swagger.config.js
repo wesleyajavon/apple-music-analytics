@@ -1,5 +1,6 @@
 /**
- * Configuration Swagger/OpenAPI pour la documentation des routes API
+ * Swagger/OpenAPI configuration for API documentation.
+ * Convention: API docs are kept in English (standard for developer-facing technical documentation).
  */
 const swaggerJsdoc = require('swagger-jsdoc');
 
@@ -9,7 +10,7 @@ const options = {
     info: {
       title: 'Apple Music Analytics API',
       version: '1.0.0',
-      description: 'API pour le tableau de bord d\'analyse musicale. Permet de récupérer les statistiques d\'écoute, la distribution par genres, les timelines, et les données Apple Music Replay.',
+      description: 'API for the music analytics dashboard. Provides listening stats, genre distribution, timelines, and Apple Music Replay data.',
       contact: {
         name: 'Apple Music Analytics',
       },
@@ -17,11 +18,11 @@ const options = {
     servers: [
       {
         url: 'http://localhost:3000',
-        description: 'Serveur de développement',
+        description: 'Development server',
       },
       {
         url: process.env.NEXT_PUBLIC_APP_URL || 'https://your-domain.com',
-        description: 'Serveur de production',
+        description: 'Production server',
       },
     ],
     components: {
@@ -31,15 +32,15 @@ const options = {
           properties: {
             error: {
               type: 'string',
-              description: 'Message d\'erreur',
+              description: 'Error message',
             },
             code: {
               type: 'string',
-              description: 'Code d\'erreur',
+              description: 'Error code',
             },
             details: {
               type: 'object',
-              description: 'Détails supplémentaires de l\'erreur',
+              description: 'Additional error details',
             },
           },
         },
@@ -59,7 +60,7 @@ const options = {
             totalListens: { type: 'integer' },
             uniqueArtists: { type: 'integer' },
             uniqueTracks: { type: 'integer' },
-            totalPlayTime: { type: 'integer', description: 'Temps total en secondes' },
+            totalPlayTime: { type: 'integer', description: 'Total listening time in seconds' },
           },
         },
         GenreDistribution: {
@@ -106,7 +107,7 @@ const options = {
     },
   },
   apis: [
-    './app/api/**/*.ts', // Chemins vers les fichiers contenant les annotations Swagger
+    './app/api/**/*.ts', // Files containing Swagger JSDoc annotations
   ],
 };
 

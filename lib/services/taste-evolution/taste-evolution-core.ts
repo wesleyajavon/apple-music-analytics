@@ -45,11 +45,11 @@ const TOP_ARTISTS_N = 15;
 const RANK_CHANGE_THRESHOLD = 1;
 
 /**
- * Format week label for display (e.g. "Semaine du 15 jan.")
+ * Format week label for display (e.g. "15 jan." or "15 Jan" depending on locale)
  */
-export function formatWeekLabel(weekStart: string): string {
+export function formatWeekLabel(weekStart: string, locale = "fr"): string {
   const d = new Date(weekStart + "T12:00:00Z");
-  return d.toLocaleDateString("fr-FR", {
+  return d.toLocaleDateString(locale, {
     day: "numeric",
     month: "short",
   });
@@ -259,10 +259,12 @@ export function buildDominantShifts(
 /**
  * Compute a single week-to-week trend from two weekly aggregates.
  * Pure function; no DB access.
+ * @param locale - for formatting week labels (e.g. "15 jan." vs "15 Jan")
  */
 export function computeWeekToWeekTrend(
   prev: WeeklyAggregate,
-  curr: WeeklyAggregate
+  curr: WeeklyAggregate,
+  locale = "fr"
 ): WeekToWeekTrend | null {
   if (prev.listens < MIN_LISTENS_PER_WEEK || curr.listens < MIN_LISTENS_PER_WEEK) {
     return null;
@@ -293,12 +295,12 @@ export function computeWeekToWeekTrend(
   const prevRange: WeekTimeRange = {
     weekStart: prev.weekStart,
     weekEnd: prev.weekEnd,
-    label: formatWeekLabel(prev.weekStart),
+    label: formatWeekLabel(prev.weekStart, locale),
   };
   const currRange: WeekTimeRange = {
     weekStart: curr.weekStart,
     weekEnd: curr.weekEnd,
-    label: formatWeekLabel(curr.weekStart),
+    label: formatWeekLabel(curr.weekStart, locale),
   };
 
   return {

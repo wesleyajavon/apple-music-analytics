@@ -18,6 +18,7 @@ import {
   setCachedTasteProfile,
 } from "@/lib/services/ai/taste-profile-cache";
 import { handleApiError } from "@/lib/utils/error-handler";
+import { parseAiLocale } from "@/lib/services/ai/locale-utils";
 import type { TasteProfileInput, TasteProfileTone } from "@/lib/dto/taste-profile";
 
 export const dynamic = "force-dynamic";
@@ -75,6 +76,7 @@ const TasteProfileInputSchema = z.object({
   uniqueArtists: z.number().int().nonnegative().optional(),
   uniqueTracks: z.number().int().nonnegative().optional(),
   tone: TasteProfileToneSchema.default("casual"),
+  locale: z.string().optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -93,14 +95,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { tone, ...analyticsInput } = parseResult.data;
+    const { tone, locale: localeParam, ...analyticsInput } = parseResult.data;
     const input: TasteProfileInput = analyticsInput;
+    const locale = parseAiLocale(localeParam);
 
     // 1. Build deterministic taste summary
     const summary = buildTasteSummary(input);
 
-    // 2. Compute cache key (summary hash + tone)
-    const cacheKey = computeTasteProfileCacheKey(summary, tone);
+    // 2. Compute cache key (summary hash + tone + locale)
+    const cacheKey = computeTasteProfileCacheKey(summary, tone, locale);
 
     // 3. Check cache first
     const cached = await getCachedTasteProfile(cacheKey);
@@ -112,7 +115,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 4. Generate profile via LLM
-    const profile = await generateTasteProfile(summary, tone);
+    const profile = await generateTasteProfile(summary, tone, locale);
 
     // 5. Store in cache
     await setCachedTasteProfile(cacheKey, profile);

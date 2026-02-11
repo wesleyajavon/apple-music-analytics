@@ -3,6 +3,15 @@
  * Remplace les spinners génériques pour une meilleure perception de performance
  */
 
+"use client";
+
+import { useTranslations } from "next-intl";
+
+function HeatmapLegendText({ type }: { type: "less" | "more" }) {
+  const t = useTranslations("common");
+  return <>{type === "less" ? t("less") : t("more")}</>;
+}
+
 /**
  * Skeleton pour une carte statistique
  */
@@ -420,7 +429,7 @@ export function HeatmapCalendarSkeleton() {
       </div>
       {/* Légende */}
       <div className="mt-4 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-        <span>Moins</span>
+        <span><HeatmapLegendText type="less" /></span>
         <div className="flex gap-1">
           {Array.from({ length: 5 }).map((_, i) => (
             <div
@@ -432,7 +441,7 @@ export function HeatmapCalendarSkeleton() {
             />
           ))}
         </div>
-        <span>Plus</span>
+        <span><HeatmapLegendText type="more" /></span>
       </div>
     </div>
   );

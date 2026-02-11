@@ -19,8 +19,8 @@ export const dynamic = "force-dynamic";
  * @swagger
  * /api/timeline:
  *   get:
- *     summary: Récupère les données de timeline d'écoute
- *     description: Retourne des données agrégées par jour/semaine/mois, optimisées pour les graphiques
+ *     summary: Gets listening timeline data
+ *     description: Returns aggregated data by day/week/month, optimized for charts
  *     tags:
  *       - Timeline
  *     parameters:
@@ -29,28 +29,28 @@ export const dynamic = "force-dynamic";
  *         schema:
  *           type: string
  *           format: date
- *         description: Date de début au format ISO 8601 (optionnel, défaut: 30 jours avant)
+ *         description: Start date in ISO 8601 format (optional, default: 30 days ago)
  *       - in: query
  *         name: endDate
  *         schema:
  *           type: string
  *           format: date
- *         description: Date de fin au format ISO 8601 (optionnel, défaut: aujourd'hui)
+ *         description: End date in ISO 8601 format (optional, default: today)
  *       - in: query
  *         name: period
  *         schema:
  *           type: string
  *           enum: [day, week, month]
  *           default: day
- *         description: Période d'agrégation (jour, semaine ou mois)
+ *         description: Aggregation period (day, week or month)
  *       - in: query
  *         name: userId
  *         schema:
  *           type: string
- *         description: ID de l'utilisateur (optionnel)
+ *         description: User ID (optional)
  *     responses:
  *       200:
- *         description: Données agrégées de timeline
+ *         description: Aggregated timeline data
  *         content:
  *           application/json:
  *             schema:
@@ -67,13 +67,13 @@ export const dynamic = "force-dynamic";
  *                   uniqueArtists:
  *                     type: integer
  *       400:
- *         description: Erreur de validation
+ *         description: Validation error
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Error'
  *       500:
- *         description: Erreur serveur
+ *         description: Server error
  *         content:
  *           application/json:
  *             schema:

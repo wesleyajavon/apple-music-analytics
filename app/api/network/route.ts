@@ -17,8 +17,8 @@ export const dynamic = "force-dynamic";
  * @swagger
  * /api/network:
  *   get:
- *     summary: Récupère le réseau d'artistes
- *     description: Retourne un graphe avec les nœuds (artistes) et les arêtes (connexions basées sur les genres et la proximité temporelle)
+ *     summary: Gets artist network graph
+ *     description: Returns a graph with nodes (artists) and edges (connections based on genres and temporal proximity)
  *     tags:
  *       - Network
  *     parameters:
@@ -27,60 +27,60 @@ export const dynamic = "force-dynamic";
  *         schema:
  *           type: string
  *           format: date
- *         description: Date de début au format ISO 8601 (optionnel)
+ *         description: Start date in ISO 8601 format (optional)
  *       - in: query
  *         name: endDate
  *         schema:
  *           type: string
  *           format: date
- *         description: Date de fin au format ISO 8601 (optionnel)
+ *         description: End date in ISO 8601 format (optional)
  *       - in: query
  *         name: userId
  *         schema:
  *           type: string
- *         description: ID de l'utilisateur (optionnel)
+ *         description: User ID (optional)
  *       - in: query
  *         name: minPlayCount
  *         schema:
  *           type: integer
  *           minimum: 0
  *           default: 1
- *         description: Nombre minimum d'écoutes pour inclure un artiste
+ *         description: Minimum listen count to include an artist
  *       - in: query
  *         name: maxArtists
  *         schema:
  *           type: integer
  *           minimum: 1
- *         description: Nombre maximum d'artistes à inclure
+ *         description: Maximum number of artists to include
  *       - in: query
  *         name: proximityWindowMinutes
  *         schema:
  *           type: integer
  *           minimum: 1
  *           default: 30
- *         description: Fenêtre temporelle en minutes pour les connexions de proximité
+ *         description: Time window in minutes for proximity connections
  *       - in: query
  *         name: minEdgeWeight
  *         schema:
  *           type: number
  *           minimum: 0
  *           default: 1
- *         description: Poids minimum des arêtes à inclure
+ *         description: Minimum edge weight to include
  *     responses:
  *       200:
- *         description: Graphe du réseau d'artistes
+ *         description: Artist network graph
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ArtistNetworkGraph'
  *       400:
- *         description: Erreur de validation
+ *         description: Validation error
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Error'
  *       500:
- *         description: Erreur serveur
+ *         description: Server error
  *         content:
  *           application/json:
  *             schema:

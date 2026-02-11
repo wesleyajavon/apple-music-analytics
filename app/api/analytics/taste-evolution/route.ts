@@ -13,7 +13,9 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   extractDateRangeWithDefaults,
   extractOptionalUserId,
+  extractOptionalString,
 } from "@/lib/middleware/validation";
+import { parseAiLocale } from "@/lib/services/ai/locale-utils";
 import { getListenDateRange } from "@/lib/services/listening/listening-service";
 import { getTasteEvolutionTrends } from "@/lib/services/taste-evolution/taste-evolution-service";
 import { generateTasteEvolutionCommentary } from "@/lib/services/ai/taste-evolution-commentary";
@@ -62,6 +64,7 @@ export async function GET(request: NextRequest) {
       endDate = extracted.endDate;
     }
     const userId = extractOptionalUserId(request);
+    const locale = parseAiLocale(extractOptionalString(request, "locale"));
 
     const startStr = startDate.toISOString().slice(0, 10);
     const endStr = endDate.toISOString().slice(0, 10);
@@ -75,7 +78,12 @@ export async function GET(request: NextRequest) {
       trends = cachedTrends.trends;
       skippedWeeks = cachedTrends.skippedWeeks;
     } else {
-      const result = await getTasteEvolutionTrends(startDate, endDate, userId);
+      const result = await getTasteEvolutionTrends(
+        startDate,
+        endDate,
+        userId,
+        locale
+      );
       trends = result.trends;
       skippedWeeks = result.skippedWeeks;
       await setCachedTrends(startStr, endStr, userId, {
@@ -89,15 +97,15 @@ export async function GET(request: NextRequest) {
     let commentaryCached = false;
 
     if (trends.length > 0) {
-      const cachedCommentary = await getCachedCommentary(trends);
+      const cachedCommentary = await getCachedCommentary(trends, locale);
       if (cachedCommentary) {
         commentary = cachedCommentary;
         commentaryCached = true;
       } else {
         try {
-          commentary = await generateTasteEvolutionCommentary(trends);
+          commentary = await generateTasteEvolutionCommentary(trends, locale);
           if (commentary) {
-            await setCachedCommentary(trends, commentary);
+            await setCachedCommentary(trends, commentary, locale);
           }
         } catch (err) {
           // AI failure should not break the response; commentary stays null

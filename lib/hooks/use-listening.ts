@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery, UseQueryOptions, useQueryClient } from "@tanstack/react-query";
+import { useLocale } from "next-intl";
 import { apiClient } from "@/lib/api-client";
 import {
   ListensResponse,
@@ -272,12 +273,14 @@ async function fetchGenreTrends(
   endDate?: string,
   period?: "day" | "week" | "month",
   genres?: string[],
-  userId?: string
+  userId?: string,
+  locale?: string
 ): Promise<GenreTrendsResponse> {
   const searchParams = new URLSearchParams();
   if (startDate) searchParams.append("startDate", startDate);
   if (endDate) searchParams.append("endDate", endDate);
   if (period) searchParams.append("period", period);
+  if (locale) searchParams.append("locale", locale);
   if (userId) searchParams.append("userId", userId);
   if (genres?.length) {
     genres.forEach((g) => searchParams.append("genres", g));
@@ -303,6 +306,7 @@ export function useGenreTrends(
     "queryKey" | "queryFn" | "staleTime" | "placeholderData"
   >
 ) {
+  const locale = useLocale();
   const queryClient = useQueryClient();
   const queryKey = listeningKeys.genreTrends({
     startDate,
@@ -311,7 +315,7 @@ export function useGenreTrends(
     genres,
     userId,
   });
-  
+
   // Récupérer les données précédentes du cache pour les utiliser comme placeholder
   const previousData = findLatestCachedData<GenreTrendsResponse>(
     queryClient,
@@ -321,7 +325,7 @@ export function useGenreTrends(
   return useQuery<GenreTrendsResponse, Error>({
     queryKey,
     queryFn: () =>
-      fetchGenreTrends(startDate, endDate, period, genres, userId),
+      fetchGenreTrends(startDate, endDate, period, genres, userId, locale),
     staleTime: CACHE_STALE_TIME.GENRE_TRENDS,
     placeholderData: previousData,
     ...options,
@@ -350,7 +354,7 @@ async function fetchOverviewStats(
 
 /**
  * Hook pour récupérer les statistiques d'overview
- * Utilise placeholderData pour les optimistic updates lors des changements de filtres
+ * Pas de placeholderData : éviter d'afficher des données d'un autre filtre (ex. "All" quand on filtre sur 7j)
  */
 export function useOverviewStats(
   startDate?: string,
@@ -358,23 +362,15 @@ export function useOverviewStats(
   userId?: string,
   options?: Omit<
     UseQueryOptions<OverviewStatsWithTopArtists, Error>,
-    "queryKey" | "queryFn" | "staleTime" | "placeholderData"
+    "queryKey" | "queryFn" | "staleTime"
   >
 ) {
-  const queryClient = useQueryClient();
   const queryKey = listeningKeys.overview({ startDate, endDate, userId });
-  
-  // Récupérer les données précédentes du cache pour les utiliser comme placeholder
-  const previousData = findLatestCachedData<OverviewStatsWithTopArtists>(
-    queryClient,
-    queryKey
-  );
 
   return useQuery<OverviewStatsWithTopArtists, Error>({
     queryKey,
     queryFn: () => fetchOverviewStats(startDate, endDate, userId),
     staleTime: CACHE_STALE_TIME.OVERVIEW,
-    placeholderData: previousData,
     ...options,
   });
 }

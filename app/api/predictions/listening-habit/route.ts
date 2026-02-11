@@ -16,7 +16,11 @@ import {
   getExplanationCacheKey,
 } from "@/lib/services/predictions/prediction-cache";
 import { explainListeningHabitPrediction } from "@/lib/services/ai/listening-habit-explainer";
-import { extractOptionalUserId } from "@/lib/middleware/validation";
+import {
+  extractOptionalUserId,
+  extractOptionalString,
+} from "@/lib/middleware/validation";
+import { parseAiLocale } from "@/lib/services/ai/locale-utils";
 import type { ListeningHabitPrediction } from "@/lib/dto/predictions";
 import { handleApiError } from "@/lib/utils/error-handler";
 
@@ -26,11 +30,10 @@ export const dynamic = "force-dynamic";
  * @swagger
  * /api/predictions/listening-habit:
  *   get:
- *     summary: Prédiction "Quand vais-je écouter ?"
+ *     summary: "When Will I Listen?" prediction
  *     description: |
- *       Prédit la fenêtre horaire et le genre les plus probables pour aujourd'hui
- *       à partir des habitudes d'écoute historiques. Logique déterministe (pas de ML).
- *       Option ?explain=true pour une explication en langage naturel (IA).
+ *       Predicts the most likely time window and genre for today based on historical listening habits.
+ *       Uses deterministic logic (no ML). Use ?explain=true for natural language explanation (AI).
  *     tags:
  *       - Predictions
  *     parameters:
@@ -38,23 +41,24 @@ export const dynamic = "force-dynamic";
  *         name: userId
  *         schema:
  *           type: string
- *         description: ID utilisateur (optionnel)
+ *         description: User ID (optional)
  *       - in: query
  *         name: explain
  *         schema:
  *           type: boolean
- *         description: Inclure une explication IA (optionnel)
+ *         description: Include AI explanation (optional)
  *     responses:
  *       200:
- *         description: Prédiction ou données insuffisantes
+ *         description: Prediction or insufficient data
  *       500:
- *         description: Erreur serveur
+ *         description: Server error
  */
 export async function GET(request: NextRequest) {
   try {
     const userId = extractOptionalUserId(request);
     const { searchParams } = new URL(request.url);
     const includeExplanation = searchParams.get("explain") === "true";
+    const locale = parseAiLocale(extractOptionalString(request, "locale"));
 
     // Try cache first (only for successful predictions)
     const cached = await getCachedPrediction(userId);
@@ -65,11 +69,11 @@ export async function GET(request: NextRequest) {
       };
 
       if (includeExplanation && "timeWindow" in cached) {
-        const explanationKey = getExplanationCacheKey(cached);
+        const explanationKey = getExplanationCacheKey(cached, locale);
         let explanation = await getCachedExplanation(explanationKey);
         if (!explanation) {
           try {
-            explanation = await explainListeningHabitPrediction(cached);
+            explanation = await explainListeningHabitPrediction(cached, locale);
             await setCachedExplanation(explanationKey, explanation);
           } catch {
             // AI explanation failed - still return prediction without it
@@ -101,11 +105,11 @@ export async function GET(request: NextRequest) {
     };
 
     if (includeExplanation) {
-      const explanationKey = getExplanationCacheKey(prediction);
+      const explanationKey = getExplanationCacheKey(prediction, locale);
       let explanation = await getCachedExplanation(explanationKey);
       if (!explanation) {
         try {
-          explanation = await explainListeningHabitPrediction(prediction);
+          explanation = await explainListeningHabitPrediction(prediction, locale);
           await setCachedExplanation(explanationKey, explanation);
         } catch {
           // AI explanation failed

@@ -14,8 +14,8 @@ export const dynamic = "force-dynamic";
  * @swagger
  * /api/temporal-analysis:
  *   get:
- *     summary: Récupère l'analyse temporelle avancée des écoutes
- *     description: Retourne les patterns d'écoute par jour de la semaine et par heure de la journée, avec identification des moments de pic
+ *     summary: Gets advanced temporal analysis of listens
+ *     description: Returns listening patterns by day of week and hour of day, with peak moment identification
  *     tags:
  *       - Temporal Analysis
  *     parameters:
@@ -24,21 +24,21 @@ export const dynamic = "force-dynamic";
  *         schema:
  *           type: string
  *           format: date
- *         description: Date de début au format ISO 8601 (optionnel, si non fourni utilise toutes les données historiques)
+ *         description: Start date in ISO 8601 format (optional, uses all historical data if not provided)
  *       - in: query
  *         name: endDate
  *         schema:
  *           type: string
  *           format: date
- *         description: Date de fin au format ISO 8601 (optionnel, si non fourni utilise toutes les données historiques)
+ *         description: End date in ISO 8601 format (optional, uses all historical data if not provided)
  *       - in: query
  *         name: userId
  *         schema:
  *           type: string
- *         description: ID de l'utilisateur (optionnel)
+ *         description: User ID (optional)
  *     responses:
  *       200:
- *         description: Analyse temporelle complète
+ *         description: Complete temporal analysis
  *         content:
  *           application/json:
  *             schema:
@@ -79,13 +79,13 @@ export const dynamic = "force-dynamic";
  *                   type: object
  *                   nullable: true
  *       400:
- *         description: Erreur de validation
+ *         description: Validation error
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Error'
  *       500:
- *         description: Erreur serveur
+ *         description: Server error
  *         content:
  *           application/json:
  *             schema:

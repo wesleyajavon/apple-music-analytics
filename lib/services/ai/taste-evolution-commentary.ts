@@ -4,32 +4,39 @@
  * Accepts ONLY structured trend output from taste-evolution-core.
  * Generates a concise 1-2 paragraph narrative. No speculation.
  * References computed metrics explicitly.
+ * Locale: output language (fr, en, es).
  */
 
 import Groq from "groq-sdk";
 import type { WeekToWeekTrend } from "@/lib/dto/taste-evolution";
+import { getLanguageName, type AiLocale } from "./locale-utils";
 
-const TASTE_EVOLUTION_SYSTEM_PROMPT = `Tu es un analyste musical qui génère un récit concis sur l'évolution des goûts musicaux semaine après semaine.
+function buildSystemPrompt(locale: AiLocale): string {
+  const lang = getLanguageName(locale);
+  return `Tu es un analyste musical qui génère un récit concis sur l'évolution des goûts musicaux semaine après semaine.
 
 RÈGLES STRICTES:
 1. Base-toi UNIQUEMENT sur les données structurées fournies. N'invente rien.
 2. Ne fais aucune spéculation ou hypothèse non supportée par les chiffres.
 3. Produis 1 à 2 courts paragraphes maximum (3-5 phrases au total).
 4. Chaque affirmation doit citer explicitement une métrique (chiffre, pourcentage, nom de genre).
-5. Langue: français. Style: clair, accessible.
+5. Langue: ${lang}. Réponds ENTIÈREMENT dans cette langue. Style: clair, accessible.
 6. Explique ce qui a changé et pourquoi c'est pertinent, sans extrapoler.
 
 Exemple de bon commentaire: "La semaine du 15 jan. montre une expansion de vos goûts : 3 nouveaux genres apparaissent et l'entropie augmente de 0,4. Le rock progresse de +5 points tandis que la pop recule."
 Exemple à éviter: "Vous explorez de plus en plus." (trop vague, pas de chiffre)`;
+}
 
 /**
  * Generates AI narrative from structured trend data.
  *
  * @param trends - Array of week-to-week trend objects (deterministic output)
+ * @param locale - fr | en | es - output language
  * @returns 1-2 paragraph narrative string
  */
 export async function generateTasteEvolutionCommentary(
-  trends: WeekToWeekTrend[]
+  trends: WeekToWeekTrend[],
+  locale: AiLocale = "fr"
 ): Promise<string> {
   if (trends.length === 0) {
     return "";
@@ -83,7 +90,7 @@ Chaque affirmation doit citer une métrique. Pas d'introduction ni de conclusion
   const response = await groq.chat.completions.create({
     model: "llama-3.1-8b-instant",
     messages: [
-      { role: "system", content: TASTE_EVOLUTION_SYSTEM_PROMPT },
+      { role: "system", content: buildSystemPrompt(locale) },
       { role: "user", content: userPrompt },
     ],
     temperature: 0.3,

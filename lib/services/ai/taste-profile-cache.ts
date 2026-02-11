@@ -12,6 +12,7 @@ import { createHash } from "crypto";
 import { getRedisClient } from "@/lib/redis";
 import type { TasteSummary } from "./taste-summary-builder";
 import type { TasteProfileTone } from "@/lib/dto/taste-profile";
+import type { AiLocale } from "./locale-utils";
 
 const CACHE_PREFIX = "ai:taste-profile:";
 const CACHE_TTL_SECONDS = 24 * 60 * 60; // 24 hours
@@ -30,17 +31,18 @@ const memoryCache = new Map<
 const MEMORY_CACHE_TTL_MS = CACHE_TTL_SECONDS * 1000;
 
 /**
- * Computes cache key from summary hash + tone.
- * Same summary + same tone → same key → cache hit.
+ * Computes cache key from summary hash + tone + locale.
+ * Same summary + same tone + same locale → same key → cache hit.
  */
 export function computeTasteProfileCacheKey(
   summary: TasteSummary,
-  tone: TasteProfileTone
+  tone: TasteProfileTone,
+  locale: AiLocale
 ): string {
   const hash = createHash("sha256")
     .update(summary.structured, "utf8")
     .digest("hex");
-  return `${hash}:${tone}`;
+  return `${hash}:${tone}:${locale}`;
 }
 
 /**

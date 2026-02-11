@@ -56,12 +56,13 @@ export const tasteProfileKeys = {
     startDate?: string;
     endDate?: string;
     tone?: "analytical" | "casual" | "poetic";
+    locale?: string;
   }) => [...tasteProfileKeys.all, params] as const,
 } as const;
 
 export const predictionKeys = {
   all: ["predictions"] as const,
-  listeningHabit: (params?: { userId?: string; explain?: boolean }) =>
+  listeningHabit: (params?: { userId?: string; explain?: boolean; locale?: string }) =>
     [...predictionKeys.all, "listening-habit", params] as const,
 } as const;
 
@@ -71,6 +72,7 @@ export const tasteEvolutionKeys = {
     startDate?: string;
     endDate?: string;
     userId?: string;
+    locale?: string;
   }) => [...tasteEvolutionKeys.all, params] as const,
 } as const;
 

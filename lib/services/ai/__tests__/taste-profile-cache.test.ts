@@ -30,30 +30,37 @@ describe("taste-profile-cache", () => {
   });
 
   describe("computeTasteProfileCacheKey", () => {
-    it("returns deterministic key for same summary and tone", () => {
-      const key1 = computeTasteProfileCacheKey(mockSummary, "casual");
-      const key2 = computeTasteProfileCacheKey(mockSummary, "casual");
+    it("returns deterministic key for same summary, tone and locale", () => {
+      const key1 = computeTasteProfileCacheKey(mockSummary, "casual", "fr");
+      const key2 = computeTasteProfileCacheKey(mockSummary, "casual", "fr");
       expect(key1).toBe(key2);
     });
 
     it("returns different key for different tone", () => {
-      const key1 = computeTasteProfileCacheKey(mockSummary, "casual");
-      const key2 = computeTasteProfileCacheKey(mockSummary, "analytical");
+      const key1 = computeTasteProfileCacheKey(mockSummary, "casual", "fr");
+      const key2 = computeTasteProfileCacheKey(mockSummary, "analytical", "fr");
       expect(key1).not.toBe(key2);
     });
 
     it("returns different key for different summary", () => {
-      const key1 = computeTasteProfileCacheKey(mockSummary, "casual");
+      const key1 = computeTasteProfileCacheKey(mockSummary, "casual", "fr");
       const key2 = computeTasteProfileCacheKey(
         { ...mockSummary, structured: '{"other":"data"}' },
-        "casual"
+        "casual",
+        "fr"
       );
       expect(key1).not.toBe(key2);
     });
 
-    it("key format includes tone suffix", () => {
-      const key = computeTasteProfileCacheKey(mockSummary, "poetic");
-      expect(key).toMatch(/:poetic$/);
+    it("returns different key for different locale", () => {
+      const key1 = computeTasteProfileCacheKey(mockSummary, "casual", "fr");
+      const key2 = computeTasteProfileCacheKey(mockSummary, "casual", "en");
+      expect(key1).not.toBe(key2);
+    });
+
+    it("key format includes tone and locale suffix", () => {
+      const key = computeTasteProfileCacheKey(mockSummary, "poetic", "fr");
+      expect(key).toMatch(/:poetic:fr$/);
     });
   });
 
@@ -64,7 +71,7 @@ describe("taste-profile-cache", () => {
     });
 
     it("stores and retrieves profile", async () => {
-      const cacheKey = computeTasteProfileCacheKey(mockSummary, "casual");
+      const cacheKey = computeTasteProfileCacheKey(mockSummary, "casual", "fr");
 
       await setCachedTasteProfile(cacheKey, mockProfile);
       const result = await getCachedTasteProfile(cacheKey);

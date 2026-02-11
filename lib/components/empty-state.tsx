@@ -5,7 +5,8 @@
 
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 
 export interface EmptyStateAction {
   label: string;
@@ -18,7 +19,7 @@ interface EmptyStateProps {
   message?: string;
   /** Description ou précision contextuelle */
   description?: string;
-  /** Emoji ou caractère d’illustration (ignoré si illustration est fourni) */
+  /** Emoji ou caractère d'illustration (ignoré si illustration est fourni) */
   icon?: string;
   /** Illustration personnalisée (SVG, composant). Si fourni, remplace icon. */
   illustration?: React.ReactNode;
@@ -29,7 +30,6 @@ interface EmptyStateProps {
 
 /** Illustrations SVG légères pour les états vides */
 const ILLUSTRATIONS = {
-  /** Données / statistiques */
   stats: (
     <svg
       className="mx-auto h-24 w-24 text-gray-300 dark:text-gray-600"
@@ -46,7 +46,6 @@ const ILLUSTRATIONS = {
       />
     </svg>
   ),
-  /** Calendrier / dates */
   calendar: (
     <svg
       className="mx-auto h-24 w-24 text-gray-300 dark:text-gray-600"
@@ -63,7 +62,6 @@ const ILLUSTRATIONS = {
       />
     </svg>
   ),
-  /** Filtre / période */
   filter: (
     <svg
       className="mx-auto h-24 w-24 text-gray-300 dark:text-gray-600"
@@ -80,7 +78,6 @@ const ILLUSTRATIONS = {
       />
     </svg>
   ),
-  /** Réseau / graphe */
   network: (
     <svg
       className="mx-auto h-24 w-24 text-gray-300 dark:text-gray-600"
@@ -97,7 +94,6 @@ const ILLUSTRATIONS = {
       />
     </svg>
   ),
-  /** Musique / écoute */
   music: (
     <svg
       className="mx-auto h-24 w-24 text-gray-300 dark:text-gray-600"
@@ -114,7 +110,6 @@ const ILLUSTRATIONS = {
       />
     </svg>
   ),
-  /** Replay / comparaison */
   replay: (
     <svg
       className="mx-auto h-24 w-24 text-gray-300 dark:text-gray-600"
@@ -136,13 +131,16 @@ const ILLUSTRATIONS = {
 export type EmptyStateIllustrationKey = keyof typeof ILLUSTRATIONS;
 
 export function EmptyState({
-  message = "Aucune donnée disponible",
+  message,
   description,
   icon = "📭",
   illustration,
   actions,
   className = "",
 }: EmptyStateProps) {
+  const t = useTranslations("components.emptyState");
+  const displayMessage = message ?? t("defaultMessage");
+
   const visual = illustration ?? (
     <div
       className="text-6xl mb-6 transform transition-transform hover:scale-110 duration-300"
@@ -156,14 +154,14 @@ export function EmptyState({
     <div
       className={`flex items-center justify-center py-16 ${className}`}
       role="status"
-      aria-label={message}
+      aria-label={displayMessage}
     >
       <div className="text-center max-w-md mx-auto px-4">
         <div className="mb-6 flex justify-center [&>svg]:shrink-0">
           {visual}
         </div>
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-          {message}
+          {displayMessage}
         </h3>
         {description && (
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
@@ -211,47 +209,41 @@ export function EmptyState({
   );
 }
 
-/** Presets contextuels (message, description, icon/illustration, actions) pour réutilisation */
-export const emptyStatePresets = {
-  /** Aucune donnée d’écoute : inviter à importer (Last.fm / Replay) */
-  importData: {
-    message: "Aucune donnée d'écoute disponible",
-    description:
-      "Importez vos données Last.fm ou Apple Music Replay pour voir vos statistiques.",
-    illustration: ILLUSTRATIONS.stats,
-    actions: [
-      { label: "Importer vos données", href: "/api-docs" },
-    ] as EmptyStateAction[],
-  },
-  /** Aucune donnée Replay : inviter à importer Replay */
-  importReplay: {
-    message: "Aucune donnée Replay disponible",
-    description:
-      "Importez vos données Apple Music Replay pour comparer vos années d'écoute.",
-    illustration: ILLUSTRATIONS.replay,
-    actions: [{ label: "Voir comment importer Replay", href: "/api-docs" }] as EmptyStateAction[],
-  },
-  /** Aucun résultat pour la période : inviter à modifier les dates */
-  changeDates: (basePath: string) => ({
-    message: "Aucune donnée pour cette période",
-    description: "Modifiez les dates ou la période dans la barre de filtres pour afficher des résultats.",
-    illustration: ILLUSTRATIONS.filter,
-    actions: [{ label: "Modifier les dates", href: basePath }] as EmptyStateAction[],
-  }),
-  /** Aucune écoute pour une date précise (ex. détail heatmap) */
-  noDayDetail: {
-    message: "Aucune écoute trouvée pour cette date",
-    description: "Choisissez une autre date dans le calendrier pour voir le détail.",
-    illustration: ILLUSTRATIONS.music,
-  },
-  /** Réseau d’artistes vide */
-  noNetwork: {
-    message: "Aucune donnée pour visualiser le réseau d'artistes",
-    description:
-      "Assurez-vous d'avoir des écoutes avec des connexions entre artistes. Importez ou étendez vos données si besoin.",
-    illustration: ILLUSTRATIONS.network,
-    actions: [{ label: "Voir la doc d'import", href: "/api-docs" }] as EmptyStateAction[],
-  },
-} as const;
+/** Hook qui retourne les presets d'état vide traduits */
+export function useEmptyStatePresets() {
+  const t = useTranslations("components.emptyState");
+
+  return {
+    importData: {
+      message: t("importData.message"),
+      description: t("importData.description"),
+      illustration: ILLUSTRATIONS.stats,
+      actions: [{ label: t("importData.actionLabel"), href: "/api-docs" }] as EmptyStateAction[],
+    },
+    importReplay: {
+      message: t("importReplay.message"),
+      description: t("importReplay.description"),
+      illustration: ILLUSTRATIONS.replay,
+      actions: [{ label: t("importReplay.actionLabel"), href: "/api-docs" }] as EmptyStateAction[],
+    },
+    changeDates: (basePath: string) => ({
+      message: t("changeDates.message"),
+      description: t("changeDates.description"),
+      illustration: ILLUSTRATIONS.filter,
+      actions: [{ label: t("changeDates.actionLabel"), href: basePath }] as EmptyStateAction[],
+    }),
+    noDayDetail: {
+      message: t("noDayDetail.message"),
+      description: t("noDayDetail.description"),
+      illustration: ILLUSTRATIONS.music,
+    },
+    noNetwork: {
+      message: t("noNetwork.message"),
+      description: t("noNetwork.description"),
+      illustration: ILLUSTRATIONS.network,
+      actions: [{ label: t("noNetwork.actionLabel"), href: "/api-docs" }] as EmptyStateAction[],
+    },
+  };
+}
 
 export { ILLUSTRATIONS };

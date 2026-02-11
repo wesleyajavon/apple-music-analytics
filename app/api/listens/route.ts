@@ -18,12 +18,12 @@ export const dynamic = "force-dynamic";
  * @swagger
  * /api/listens:
  *   get:
- *     summary: Récupère les écoutes ou les données agrégées
+ *     summary: Gets listens or aggregated data
  *     description: |
- *       Récupère la liste des écoutes avec pagination, ou les données agrégées si le paramètre aggregate/period est fourni.
- *       Deux modes de fonctionnement:
- *       - Sans aggregate: Retourne les écoutes individuelles avec pagination
- *       - Avec aggregate: Retourne les données agrégées par période
+ *       Retrieves the list of listens with pagination, or aggregated data if aggregate/period parameter is provided.
+ *       Two modes:
+ *       - Without aggregate: Returns individual listens with pagination
+ *       - With aggregate: Returns data aggregated by period
  *     tags:
  *       - Listens
  *     parameters:
@@ -32,53 +32,53 @@ export const dynamic = "force-dynamic";
  *         schema:
  *           type: string
  *           format: date
- *         description: Date de début au format ISO 8601 (optionnel, requis si aggregate est fourni)
+ *         description: Start date in ISO 8601 format (optional, required if aggregate is provided)
  *       - in: query
  *         name: endDate
  *         schema:
  *           type: string
  *           format: date
- *         description: Date de fin au format ISO 8601 (optionnel, requis si aggregate est fourni)
+ *         description: End date in ISO 8601 format (optional, required if aggregate is provided)
  *       - in: query
  *         name: userId
  *         schema:
  *           type: string
- *         description: ID de l'utilisateur (optionnel)
+ *         description: User ID (optional)
  *       - in: query
  *         name: limit
  *         schema:
  *           type: integer
  *           minimum: 1
  *           default: 100
- *         description: Nombre de résultats (mode liste uniquement)
+ *         description: Number of results (list mode only)
  *       - in: query
  *         name: offset
  *         schema:
  *           type: integer
  *           minimum: 0
  *           default: 0
- *         description: Décalage pour la pagination (mode liste uniquement)
+ *         description: Pagination offset (list mode only)
  *       - in: query
  *         name: source
  *         schema:
  *           type: string
  *           enum: [lastfm, apple_music_replay]
- *         description: Source des écoutes (mode liste uniquement)
+ *         description: Listen source (list mode only)
  *       - in: query
  *         name: aggregate
  *         schema:
  *           type: string
  *           enum: [day, week, month]
- *         description: Période d'agrégation (alias: period)
+ *         description: Aggregation period (alias: period)
  *       - in: query
  *         name: period
  *         schema:
  *           type: string
  *           enum: [day, week, month]
- *         description: Alias pour aggregate
+ *         description: Alias for aggregate
  *     responses:
  *       200:
- *         description: Liste des écoutes ou données agrégées
+ *         description: List of listens or aggregated data
  *         content:
  *           application/json:
  *             schema:
@@ -118,13 +118,13 @@ export const dynamic = "force-dynamic";
  *                     endDate:
  *                       type: string
  *       400:
- *         description: Erreur de validation
+ *         description: Validation error
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Error'
  *       500:
- *         description: Erreur serveur
+ *         description: Server error
  *         content:
  *           application/json:
  *             schema:

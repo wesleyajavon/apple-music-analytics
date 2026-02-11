@@ -1,0 +1,632 @@
+{
+  "common": {
+    "retry": "Reintentar",
+    "loading": "Cargando...",
+    "loadingData": "Cargando datos...",
+    "pleaseWait": "Espere por favor...",
+    "export": "Exportar",
+    "error": "Error",
+    "less": "Menos",
+    "more": "Más"
+  },
+  "sidebar": {
+    "openMenu": "Abrir menú",
+    "logo": "Analytics",
+    "groups": {
+      "main": "Principal",
+      "temporal": "Análisis temporal",
+      "content": "Contenido",
+      "ai": "IA",
+      "other": "Otros"
+    },
+    "items": {
+      "overview": "Vista general",
+      "timeline": "Timeline",
+      "heatmap": "Mapa de calor",
+      "temporalAnalysis": "Análisis temporal",
+      "genres": "Géneros",
+      "genreTrends": "Tendencias de géneros",
+      "artists": "Artistas",
+      "network": "Red",
+      "aiInsights": "AI Insights",
+      "tasteEvolution": "Evolución de gustos",
+      "whenWillIListen": "¿Cuándo escucharé?",
+      "tasteProfile": "Explicar mi gusto",
+      "methodology": "Metodología",
+      "sentryTest": "Test Sentry"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard"
+  },
+  "overview": {
+    "title": "Vista general",
+    "subtitle": "Estadísticas generales de tu escucha musical. Analiza tus tendencias y descubre tus géneros favoritos.",
+    "stats": {
+      "totalListens": "Total de escuchas",
+      "uniqueArtists": "Artistas únicos",
+      "uniqueTracks": "Títulos únicos",
+      "totalTime": "Tiempo total"
+    },
+    "vsPreviousPeriod": "vs período anterior",
+    "notAvailable": "No disponible",
+    "recentEvolution": "Evolución reciente",
+    "listensPerDay": "Número de escuchas por día",
+    "seeMore": "Ver más",
+    "topGenres": "Top géneros",
+    "yourTopGenres": "Tus géneros más escuchados",
+    "seeAll": "Ver todo",
+    "topArtists": "Artistas más escuchados",
+    "yourFavoriteArtists": "Tus artistas favoritos por número de escuchas",
+    "listens": "escuchas",
+    "Listens": "Escuchas",
+    "errorLoading": "No se pueden cargar las estadísticas"
+  },
+  "timeline": {
+    "title": "Línea temporal de escucha",
+    "subtitle": "Evolución de tus escuchas a lo largo del tiempo",
+    "errorLoading": "No se puede cargar la línea temporal de escucha",
+    "listens": "escuchas",
+    "Listens": "Escuchas"
+  },
+  "heatmap": {
+    "title": "Mapa de calor de escucha",
+    "subtitle": "Visualiza tus patrones de escucha diarios con un calendario interactivo estilo GitHub. Haz clic en un día para ver los detalles.",
+    "errorLoading": "No se puede cargar los datos del calendario",
+    "activeDays": "Días activos",
+    "ofDays": "de los días",
+    "avgDaily": "Promedio diario",
+    "listensPerDay": "escuchas por día",
+    "mostActiveDay": "Día más activo",
+    "listensCount": "escuchas",
+    "noData": "Sin datos",
+    "favoriteDay": "Día favorito",
+    "favoriteDayHint": "día más activo (período seleccionado)",
+    "calendarTitle": "Calendario de escucha",
+    "calendarHint": "Haz clic en un día para ver los detalles de escucha",
+    "noDataPeriod": "No hay datos disponibles para este período",
+    "weekdayDistribution": "Distribución por día de la semana",
+    "weekdayDistributionHint": "Distribución de tus escuchas por día",
+    "weekdays": {
+      "monday": "Lunes",
+      "tuesday": "Martes",
+      "wednesday": "Miércoles",
+      "thursday": "Jueves",
+      "friday": "Viernes",
+      "saturday": "Sábado",
+      "sunday": "Domingo"
+    },
+    "dayDetails": "Detalles del",
+    "totalListens": "Total de escuchas",
+    "uniqueArtists": "Artistas únicos",
+    "uniqueTracks": "Títulos únicos",
+    "inTotal": "en total",
+    "closeDetails": "Cerrar detalles",
+    "topArtists": "Top artistas",
+    "listen": "escucha",
+    "listens": "escuchas",
+    "detailedListens": "Escuchas detalladas",
+    "noDateToDisplay": "Ninguna fecha para mostrar",
+    "noDataToDisplay": "Ningún dato para mostrar",
+    "ariaListenCount": "Haz clic para ver detalles",
+    "ariaNoListen": "Sin escuchas",
+    "noListen": "Sin escuchas"
+  },
+  "temporal-analysis": {
+    "title": "Análisis Temporal",
+    "subtitle": "Patrones de escucha detallados por día de la semana y hora del día. Identifica tus momentos pico.",
+    "note": "Nota",
+    "noteText": "Este análisis utiliza todos tus datos históricos para patrones fiables. Los filtros de período se ignoran porque un período corto no reflejaría tus hábitos generales.",
+    "errorLoading": "No se puede cargar el análisis temporal",
+    "peakDay": "Día pico",
+    "peakHour": "Hora pico",
+    "listens": "escuchas",
+    "Listens": "Escuchas",
+    "listensByWeekday": "Escuchas por día de la semana",
+    "listensByWeekdayHint": "Distribución de tus escuchas en los 7 días",
+    "weeklyPattern": "Patrón semanal (Radar)",
+    "weeklyPatternHint": "Visualización radar de escuchas por día de la semana",
+    "listensByHour": "Escuchas por hora del día",
+    "listensByHourHint": "Distribución de tus escuchas en las 24 horas",
+    "detailsByWeekday": "Detalles por día de la semana",
+    "detailsByWeekdayHint": "Escuchas, títulos y artistas únicos por día",
+    "tracks": "Títulos",
+    "artists": "Artistas"
+  },
+  "genres": {
+    "title": "Géneros",
+    "subtitle": "Distribución de tus escuchas por género musical. Visualiza tus preferencias en gráfico circular o de barras.",
+    "errorLoading": "No se puede cargar la distribución de géneros",
+    "chart": "Gráfico",
+    "pie": "Circular",
+    "bar": "Barras",
+    "distributionTitle": "Distribución de géneros",
+    "totalListens": "Total",
+    "detailByGenre": "Detalle por género",
+    "listens": "escuchas",
+    "Listens": "Escuchas"
+  },
+  "genreTrends": {
+    "title": "Tendencias de géneros",
+    "subtitle": "Evolución de tus preferencias musicales en el tiempo",
+    "subtitleExtended": "Evolución de tus preferencias musicales en el tiempo. Comparación primera / segunda mitad del período.",
+    "errorLoading": "No se pueden cargar las tendencias de géneros",
+    "genresToDisplay": "Géneros a mostrar:",
+    "all": "Todo",
+    "none": "Ninguno",
+    "selectAtLeastOne": "Selecciona al menos un género para mostrar el gráfico.",
+    "evolution": "Evolución de escuchas por género",
+    "rising": "En alza",
+    "declining": "En baja",
+    "listensDelta": "escuchas",
+    "noGenreData": "Sin datos de género para este período",
+    "changeDatesDescription": "Modifica las fechas o el período de agregación en la barra de filtros."
+  },
+  "artists": {
+    "title": "Artistas",
+    "subtitle": "Descubre tus artistas favoritos, sus estadísticas y la evolución de tus escuchas — inspirado en Apple Music Replay.",
+    "errorLoading": "No se pueden cargar las estadísticas de artistas",
+    "yourArtists": "Tus artistas",
+    "overviewSubtitle": "Vista general de tus escuchas",
+    "artists": "Artistas",
+    "listens": "Escuchas",
+    "topArtist": "Top artista",
+    "top3Title": "Tus 3 artistas más escuchados",
+    "allArtists": "Todos tus artistas",
+    "evolutionTitle": "Evolución de los top artistas",
+    "evolutionSubtitle": "Escuchas por día · 5 artistas",
+    "top10Listens": "Top 10 · Escuchas",
+    "distributionTop6": "Distribución · Top 6",
+    "detailedView": "Vista detallada",
+    "datesAndTracks": "Fechas y títulos únicos",
+    "rank": "Rango",
+    "artist": "Artista",
+    "listensLabel": "Escuchas",
+    "tracks": "Títulos",
+    "first": "Primera",
+    "last": "Última",
+    "uniqueTracks": "título(s) único(s)",
+    "listensCount": "escuchas",
+    "rank1st": "1.º",
+    "rankNth": "{n}.º",
+    "artistTooltip": "Artista"
+  },
+  "network": {
+    "title": "Red de artistas",
+    "subtitle": "Visualización de conexiones entre tus artistas escuchados (géneros compartidos y proximidad de escucha). Usa la barra de período arriba para filtrar por fechas.",
+    "subtitleShort": "Visualización de conexiones entre tus artistas escuchados",
+    "errorLoading": "No se puede cargar la red de artistas",
+    "artistsLabel": "artistas",
+    "egoView": "(vista ego)",
+    "connectionsLabelShort": "conexiones",
+    "topNArtists": "Top N artistas",
+    "minListens": "Mín. escuchas",
+    "proximityWindow": "Ventana de proximidad (min)",
+    "minEdgeWeight": "Mín. peso de arista",
+    "focusArtist": "Enfoque artista",
+    "allNetwork": "Toda la red",
+    "viewAllNetwork": "Ver toda la red",
+    "connectionsLabel": "Conexiones:",
+    "genre": "Género",
+    "proximity": "Proximidad",
+    "both": "Ambos",
+    "overview": "Vista general",
+    "instructions": "Instrucciones:",
+    "instructionHover": "Pasa el cursor sobre un nodo para ver sus conexiones y métricas",
+    "instructionEdge": "Pasa el cursor sobre una arista para ver el tipo de enlace (género / proximidad)",
+    "instructionZoom": "Rueda para zoom, arrastrar para mover, arrastrar un nodo para reposicionarlo",
+    "instructionOverview": "Usa « Vista general » para recentrar el grafo",
+    "legendAriaLabel": "Leyenda de tipos de conexión",
+    "legendTitle": "Conexiones",
+    "sharedGenre": "Género compartido",
+    "listeningProximity": "Proximidad de escucha",
+    "genreAndProximity": "Género + proximidad"
+  },
+  "ai-insights": {
+    "title": "AI Insights",
+    "subtitle": "Análisis inteligente de tus datos de escucha generado por IA.",
+    "loading": "Analizando tus datos de escucha...",
+    "generating": "Generando insights a partir de tus analytics...",
+    "errorLoading": "No se pueden cargar los insights.",
+    "errorMessage": "Error al generar los insights",
+    "checkApiKey": "Verifica que GROQ_API_KEY esté configurado en el servidor.",
+    "noInsights": "No hay datos disponibles para generar insights.",
+    "changeDates": "Modifica las fechas para obtener insights.",
+    "notEnoughData": "No hay suficientes datos",
+    "importDescription": "Importa tus datos de escucha (Last.fm o Apple Music Replay) y selecciona un período para obtener insights.",
+    "yourInsights": "Tus insights",
+    "insightsFromData": "Insights generados a partir de tus datos de escucha agregados.",
+    "cached": "(resultado en caché)",
+    "loadingShort": "Cargando..."
+  },
+  "taste-evolution": {
+    "title": "Evolución de gustos",
+    "subtitle": "Cambios en tus gustos musicales semana a semana. Las tendencias se calculan de forma determinista; la IA proporciona una explicación contextual.",
+    "loading": "Analizando cambios semana a semana...",
+    "loadingShort": "Cargando...",
+    "errorLoading": "No se pueden cargar las tendencias.",
+    "errorMessage": "Error al cargar la evolución de gustos",
+    "emptySubtitle": "Análisis de los cambios de tus gustos musicales semana a semana.",
+    "insufficientData": "Datos insuficientes",
+    "importDescription": "Importa tus datos de escucha y selecciona un rango de al menos 2 semanas. Cada semana debe contener al menos 10 escuchas para un análisis fiable.",
+    "vs": "vs",
+    "listens": "escuchas",
+    "classifications": {
+      "expansion": "Expansión",
+      "consolidation": "Consolidación",
+      "exploration": "Exploración",
+      "regression": "Regresión",
+      "stable": "Estable"
+    },
+    "volume": "Volumen",
+    "diversity": "Diversidad",
+    "genres": "Géneros",
+    "emergingGenres": "Géneros emergentes",
+    "decliningGenres": "Géneros en baja",
+    "artistMovements": "Movimientos de artistas",
+    "newRank": "Nuevo",
+    "aiExplanation": "Explicación IA",
+    "cached": "(caché)",
+    "skippedWeeks": "Semanas excluidas",
+    "weeklyTrends": "Tendencias semana a semana",
+    "pp": "pp"
+  },
+  "taste-profile": {
+    "title": "Explain My Taste",
+    "subtitle": "Tu perfil musical explicado a partir de tus analytics.",
+    "loading": "Generando tu perfil musical...",
+    "loadingShort": "Cargando...",
+    "analyzing": "Analizando tus datos y sintetizando...",
+    "errorLoading": "No se puede generar el perfil.",
+    "errorMessage": "Error al generar el perfil",
+    "checkApiKey": "Verifica que GROQ_API_KEY esté configurado en el servidor.",
+    "noData": "No hay datos disponibles.",
+    "notEnoughData": "No hay suficientes datos",
+    "importDescription": "Importa tus datos de escucha (Last.fm o Apple Music Replay) y selecciona un período para obtener tu perfil.",
+    "cached": "(resultado en caché)",
+    "tone": "Tono:",
+    "tones": {
+      "analytical": "Analítico",
+      "casual": "Relajado",
+      "poetic": "Poético"
+    },
+    "yourProfile": "Tu perfil musical",
+    "inBrief": "En breve",
+    "influences": "Influencias",
+    "coreGenres": "Géneros principales",
+    "whatMakesYouUnique": "Lo que te distingue",
+    "footer": "Generado a partir de tus datos de escucha • Apple Music Analytics"
+  },
+  "when-will-i-listen": {
+    "title": "¿Cuándo escucharé?",
+    "subtitle": "Predicción de tu franja de escucha más probable para hoy, basada en tus hábitos pasados. El cálculo usa heurísticas estadísticas (sin IA) — la IA solo sirve para explicar el resultado."
+  },
+  "annualReport": {
+    "title": "Informe Anual {year}",
+    "subtitle": "Análisis de tus hábitos de escucha musical",
+    "overview": "Vista general",
+    "totalListens": "Total de escuchas",
+    "uniqueArtists": "Artistas únicos",
+    "uniqueTracks": "Canciones únicas",
+    "totalPlayTime": "Tiempo de escucha",
+    "genres": "Géneros musicales",
+    "listens": "escuchas",
+    "monthlyEvolution": "Evolución mensual",
+    "tableMonth": "Mes",
+    "tableListens": "Escuchas",
+    "tableArtists": "Artistas",
+    "tableTracks": "Canciones",
+    "footer": "Generado el {date} - Apple Music Analytics Dashboard"
+  },
+  "insights": {
+    "title": "Insights y Metodología",
+    "subtitle": "Comprende qué revela cada página, cómo se calculan los analytics y las limitaciones del sistema. Referencia para importar tus datos y aprovechar al máximo el dashboard.",
+    "patterns": {
+      "sectionTitle": "Patrones revelados por los datos",
+      "overview": {
+        "title": "Vista general",
+        "paragraph": "La página <code>/dashboard/overview</code> muestra tus estadísticas globales con comparación al período anterior: total de escuchas, artistas y canciones únicos, tiempo total. Un gráfico de evolución reciente (áreas) y los géneros más escuchados completan el panorama."
+      },
+      "timeline": {
+        "title": "Timeline y tendencias temporales",
+        "paragraph": "Las páginas <code>/dashboard/timeline</code> y <code>/dashboard/genres/trends</code> revelan ciclos de escucha con agregación por día, semana o mes:",
+        "li1": "Ciclos semanales: Días de la semana en que más escuchas",
+        "li2": "Variaciones estacionales: Evolución mensual de los hábitos",
+        "li3": "Tendencias de géneros: Géneros en alza o en baja en el período (comparación primera vs segunda mitad)"
+      },
+      "heatmap": {
+        "title": "Heatmap de escucha",
+        "paragraph": "La página <code>/dashboard/heatmap</code> muestra un calendario tipo GitHub con la intensidad de escucha por día. Identifica tus días más activos y la distribución por día de la semana."
+      },
+      "temporal": {
+        "title": "Análisis temporal avanzado",
+        "paragraph": "La página <code>/dashboard/temporal-analysis</code> detalla tus patrones de escucha: escuchas por día de la semana (lunes-domingo), por hora del día, e identifica los momentos pico (día y hora en que más escuchas)."
+      },
+      "genres": {
+        "title": "Diversidad y preferencias de géneros",
+        "paragraph": "Las páginas <code>/dashboard/genres</code> y <code>/genres/trends</code> revelan el alcance de tu paleta musical: géneros dominantes, evolución temporal y diversidad de géneros. Las métricas (artistas únicos, canciones únicas) muestran el equilibrio entre repetición y exploración."
+      },
+      "network": {
+        "title": "Red de artistas",
+        "paragraph": "La página <code>/dashboard/network</code> visualiza las conexiones entre artistas: enlaces por género compartido, por proximidad de escucha (artistas escuchados a menos de 30 min de intervalo), y clusters musicales que revelan tus gustos coherentes."
+      },
+      "replay": {
+        "title": "Apple Music Replay",
+        "paragraph": "La página <code>/dashboard/replay</code> compara tus años Replay: mejores artistas, canciones y álbumes por año, con estadísticas comparativas e identificación de artistas comunes entre años."
+      }
+    },
+    "calculations": {
+      "sectionTitle": "Cómo se calculan los analytics",
+      "aggregations": {
+        "title": "Agregaciones temporales",
+        "paragraph": "Las agregaciones usan consultas SQL nativas de PostgreSQL para un rendimiento óptimo:",
+        "li1": "Diario: DATE(played_at) para agrupar por día",
+        "li2": "Semanal: DATE_TRUNC('week', played_at) para agrupar por semana (lunes-domingo)",
+        "li3": "Mensual: TO_CHAR(played_at, 'YYYY-MM') para agrupar por mes",
+        "li4": "Conteos: Uso de COUNT(*) y COUNT(DISTINCT ...) para las métricas agregadas"
+      },
+      "stats": {
+        "title": "Estadísticas globales",
+        "paragraph": "Las estadísticas de vista general se calculan así:",
+        "li1": "Total de escuchas: Conteo total de registros en la tabla Listen",
+        "li2": "Artistas únicos: Conteo distinto de artist_id a través de las canciones escuchadas",
+        "li3": "Canciones únicas: Conteo distinto de track_id",
+        "li4": "Tiempo total: Suma de las duraciones de canciones (en segundos) para todas las escuchas"
+      },
+      "network": {
+        "title": "Red de artistas",
+        "paragraph": "El grafo de red usa dos tipos de conexiones:",
+        "li1": "Conexiones por género: Dos artistas están conectados si comparten al menos un género en el mapeo",
+        "li2": "Conexiones por proximidad: Dos artistas están conectados si se escuchan en una ventana temporal (por defecto 30 minutos)",
+        "li3": "Pesos de aristas: Para conexiones de proximidad, el peso es el número de veces que los artistas fueron escuchados juntos",
+        "li4": "Fusión: Las conexiones por género y proximidad se fusionan, con un peso combinado"
+      },
+      "genres": {
+        "title": "Distribución de géneros",
+        "paragraph": "Los géneros siguen una resolución en cascada con prioridad:",
+        "li1": "1. Track.genre: Género almacenado en la canción (desde Last.fm al importar o vía script fetch-track-genres.js usando Last.fm, MusicBrainz, Spotify)",
+        "li2": "2. ARTIST_TO_GENRE_MAP: Mapeo estático manual por nombre de artista (fallback si Track.genre es null)",
+        "li3": "3. \"Unknown\": Si ninguno está disponible",
+        "li4": "Las escuchas se agregan por género resuelto; los porcentajes se calculan sobre el total de escuchas",
+        "enrichNote": "Para enriquecer géneros: <code>node scripts/fetch-track-genres.js</code> (requiere LASTFM_API_KEY)"
+      },
+      "export": {
+        "title": "Exportación de datos",
+        "paragraph": "Las exportaciones están disponibles en la barra de filtros (iconos CSV, JSON, PDF):",
+        "li1": "CSV: Todas las escuchas con Fecha, Artista, Título, Género, Fuente (filtros de período aplicados)",
+        "li2": "JSON: Estadísticas agregadas (overview, timeline, géneros) en formato estructurado",
+        "li3": "PDF: Informe anual personalizado con gráficos y mejores artistas/canciones por año"
+      }
+    },
+    "limitations": {
+      "sectionTitle": "Limitaciones y compromisos",
+      "genreMapping": {
+        "title": "Mapeo de géneros",
+        "limitation": "El fallback ARTIST_TO_GENRE_MAP solo cubre un puñado de artistas populares. Las canciones sin género en la base permanecen clasificadas como \"Unknown\" hasta que se ejecute el script fetch-track-genres.js.",
+        "impact": "Algunos artistas/canciones pueden aparecer como \"Unknown\", reduciendo la precisión del análisis por género.",
+        "solution": "Solución actual: Ejecutar node scripts/fetch-track-genres.js con LASTFM_API_KEY para enriquecer géneros vía Last.fm, MusicBrainz y Spotify (opcional)."
+      },
+      "proximityWindow": {
+        "title": "Ventana de proximidad fija (Red de artistas)",
+        "limitation": "La ventana de proximidad está fijada a 30 minutos (DEFAULT_PROXIMITY_WINDOW_MINUTES en lib/constants/config.ts). Los artistas escuchados en esta ventana se consideran \"vinculados\".",
+        "impact": "Pueden perderse conexiones si el intervalo supera los 30 min, o crearse por coincidencia si dos artistas no relacionados se escuchan juntos.",
+        "solution": "Posible mejora: Ventana configurable o adaptativa según patrones de escucha."
+      },
+      "dataSources": {
+        "title": "Fuentes de datos",
+        "limitation": "Actualmente: Dos fuentes soportadas: Last.fm (API real cuando LASTFM_API_KEY está configurada, mock para desarrollo) y Apple Music Replay (importación manual vía /api/replay/import con JSON de resúmenes anuales).",
+        "impact": "Los datos pueden estar incompletos si usas principalmente Spotify, YouTube Music u otras plataformas sin historial de Last.fm.",
+        "solution": "Extensiones futuras: Soporte Spotify (OAuth requerido), YouTube Music, etc. Ver docs/FEATURES_ROADMAP.md."
+      },
+      "listenTime": {
+        "title": "Cálculo del tiempo de escucha",
+        "limitation": "El tiempo total de escucha se estima sumando las duraciones de canciones, sin considerar interrupciones o escuchas parciales.",
+        "impact": "El tiempo calculado puede sobreestimar el tiempo realmente escuchado si las canciones se interrumpen o se escuchan parcialmente.",
+        "solution": "Posible mejora: Uso de datos de progreso de reproducción si están disponibles en las fuentes."
+      },
+      "queryPerformance": {
+        "title": "Rendimiento de consultas",
+        "limitation": "Compromiso: Las agregaciones complejas (especialmente la red de artistas con proximidad) requieren cargar todas las escuchas en memoria para los cálculos.",
+        "impact": "El rendimiento puede degradarse con grandes volúmenes de datos (millones de escuchas).",
+        "solution": "Posibles optimizaciones: Vistas materializadas, índices adicionales o cálculos asíncronos para grandes datos."
+      },
+      "dataNormalization": {
+        "title": "Normalización de datos",
+        "limitation": "La normalización de nombres de artistas y canciones depende de la coincidencia exacta de cadenas.",
+        "impact": "Variantes de nombres (ej. \"The Weeknd\" vs \"Weeknd\") pueden crear duplicados en las estadísticas.",
+        "solution": "Posible mejora: Uso de identificadores MusicBrainz (MBID) o algoritmos de fuzzy matching para deduplicación."
+      }
+    },
+    "architecture": {
+      "sectionTitle": "Arquitectura técnica",
+      "stack": {
+        "title": "Stack tecnológico",
+        "li1": "Backend: Next.js 14 (App Router) con API Routes",
+        "li2": "Base de datos: PostgreSQL con Prisma ORM",
+        "li3": "Cache: Redis preparado (opcional, REDIS_URL); TanStack Query para cache en cliente",
+        "li4": "Frontend: React 18, TanStack Query v5, Tailwind CSS, Sonner (toasts)",
+        "li5": "Visualización: Recharts (líneas, barras, áreas, tartas), react-force-graph-2d (red de artistas)",
+        "li6": "API: Documentación Swagger vía /api-docs"
+      },
+      "model": {
+        "title": "Modelo de datos",
+        "paragraph": "Esquema normalizado (Prisma) para evitar redundancia:",
+        "li1": "Artist: nombre, nameLower (búsqueda insensible a mayúsculas), MBID, imageUrl",
+        "li2": "Track: título, artista, duración, género (Last.fm o script), MBID",
+        "li3": "Listen: timestamp (playedAt), fuente (lastfm | apple_music_replay), enlace a Track",
+        "li4": "ReplayYearly: año, totales; vinculado a ReplayTopArtist, ReplayTopTrack, ReplayTopAlbum"
+      },
+      "import": {
+        "title": "Importación de datos",
+        "paragraph": "Para alimentar el dashboard:",
+        "li1": "Last.fm: node scripts/import-lastfm.js o API POST /api/lastfm/import (requiere LASTFM_API_KEY y LASTFM_USER)",
+        "li2": "Apple Music Replay: Importación manual del JSON anual vía POST /api/replay/import",
+        "li3": "Géneros: node scripts/fetch-track-genres.js para enriquecer géneros vía Last.fm/MusicBrainz/Spotify"
+      }
+    }
+  },
+  "pricing": {
+    "title": "Precios",
+    "heading": "Elige el plan adaptado a tu crecimiento",
+    "subtitle": "Precios transparentes sin cargos ocultos. Cambia de plan o cancela en cualquier momento.",
+    "monthly": "Mensual",
+    "yearly": "Anual",
+    "yearlyDiscount": "( -20% )",
+    "perMonth": "/mes",
+    "recommended": "Recomendado",
+    "trustBadge": "Más de 500 empresas confían en nosotros cada día.",
+    "toggleLabel": "Alternar entre mensual y anual",
+    "tiers": {
+      "basic": { "name": "Basic", "description": "Lo esencial para empezar.", "cta": "Comenzar gratis" },
+      "pro": { "name": "Pro", "description": "La solución completa para profesionales exigentes.", "cta": "Pasar a Pro" },
+      "enterprise": { "name": "Enterprise", "description": "Infraestructura robusta para grandes organizaciones.", "cta": "Contactar al equipo" }
+    }
+  },
+  "sentry-test": {
+    "title": "Test Sentry",
+    "subtitle": "Usa esta página para probar la integración Sentry y ver los eventos en tu dashboard Sentry.",
+    "notConfigured": "Sentry no configurado",
+    "configInstructions": "Para activar Sentry, debes configurar las variables de entorno:",
+    "step1": "Crea una cuenta en sentry.io (plan gratuito disponible)",
+    "step2": "Crea un nuevo proyecto Next.js en Sentry",
+    "step3": "Copia tu DSN (Data Source Name)",
+    "step4": "Añade estas variables a tu archivo .env.local",
+    "step5": "Reinicia tu servidor de desarrollo",
+    "sentryConfig": "Configuración Sentry",
+    "dsnConfigured": "DSN configurado:",
+    "sentryInitialized": "Sentry inicializado:",
+    "environment": "Entorno:",
+    "yes": "Sí",
+    "no": "No",
+    "notDetected": "No detectado",
+    "sentryNotInitWarning": "Sentry no parece estar inicializado. Verifica que instrumentation-client.ts esté cargado. Intenta recargar la página o verifica la consola del navegador.",
+    "errorTests": "Tests de errores",
+    "jsError": "Error JavaScript",
+    "asyncError": "Error asíncrono",
+    "unhandledError": "Error no manejado",
+    "apiError": "Error API (lado servidor)",
+    "messageTests": "Tests de mensajes",
+    "messageInfo": "Mensaje Info",
+    "messageWarning": "Mensaje Warning",
+    "configuration": "Configuración",
+    "setUser": "Definir Usuario",
+    "setTags": "Definir Tags",
+    "setContext": "Definir Contexto",
+    "howToSeeErrors": "Cómo ver los errores en Sentry",
+    "openDashboardPrompt": "Abre tu dashboard Sentry:",
+    "openDashboard": "Abrir Sentry Dashboard",
+    "whereToLook": "Dónde buscar:",
+    "howToVerify": "Cómo verificar que funciona",
+    "results": {
+      "errorTestLaunched": "Test de error lanzado...",
+      "errorSent": "¡Error enviado a Sentry! Revisa tu dashboard Sentry y la consola (F12).",
+      "errorSendFailed": "Error al enviar a Sentry. Revisa la consola (F12).",
+      "asyncTestLaunched": "Test de error asíncrono lanzado...",
+      "asyncSent": "¡Error asíncrono enviado a Sentry! Revisa tu dashboard Sentry y la consola (F12).",
+      "unhandledLaunched": "Test de error no manejado lanzado...",
+      "unhandledSent": "Error no manejado enviado (debería aparecer en Sentry)",
+      "messageTestLaunched": "Test de mensaje lanzado...",
+      "messageInfoSent": "¡Mensaje info enviado a Sentry!",
+      "warningTestLaunched": "Test de mensaje warning lanzado...",
+      "messageWarningSent": "¡Mensaje warning enviado a Sentry!",
+      "configuringUser": "Configurando usuario...",
+      "userConfigured": "¡Usuario configurado en Sentry!",
+      "configuringTags": "Configurando tags...",
+      "tagsConfigured": "¡Tags configurados! Los próximos errores/mensajes incluirán estos tags.",
+      "configuringContext": "Configurando contexto...",
+      "contextConfigured": "¡Contexto configurado! Los próximos errores/mensajes incluirán este contexto.",
+      "apiTestLaunched": "Test de error API lanzado...",
+      "apiSent": "¡Error API enviado a Sentry!"
+    }
+  },
+  "api-docs": {
+    "loading": "Cargando documentación...",
+    "error": "Error",
+    "errorLoading": "Error al cargar la documentación API",
+    "notAvailable": "Documentación no disponible",
+    "devServerHint": "Asegúrate de que el servidor de desarrollo esté en ejecución y que las dependencias Swagger estén instaladas."
+  },
+  "errors": {
+    "somethingWrong": "Algo salió mal",
+    "unexpectedError": "Un error inesperado. El error se ha registrado y será revisado.",
+    "errorDetails": "Detalles del error (desarrollo)",
+    "criticalError": "Error crítico",
+    "criticalErrorMessage": "Ocurrió un error crítico. La aplicación se ha reiniciado."
+  },
+  "components": {
+    "emptyState": {
+      "defaultMessage": "No hay datos disponibles",
+      "importData": {
+        "message": "No hay datos de escucha disponibles",
+        "description": "Importa tus datos de Last.fm o Apple Music Replay para ver tus estadísticas.",
+        "actionLabel": "Importar tus datos"
+      },
+      "importReplay": {
+        "message": "No hay datos Replay disponibles",
+        "description": "Importa tus datos de Apple Music Replay para comparar tus años de escucha.",
+        "actionLabel": "Ver cómo importar Replay"
+      },
+      "changeDates": {
+        "message": "No hay datos para este período",
+        "description": "Cambia las fechas o el período en la barra de filtros para mostrar resultados.",
+        "actionLabel": "Cambiar fechas"
+      },
+      "noDayDetail": {
+        "message": "No se encontraron escuchas para esta fecha",
+        "description": "Elige otra fecha en el calendario para ver los detalles."
+      },
+      "noNetwork": {
+        "message": "No hay datos para visualizar la red de artistas",
+        "description": "Asegúrate de tener escuchas con conexiones entre artistas. Importa o extiende tus datos si es necesario.",
+        "actionLabel": "Ver documentación de importación"
+      }
+    },
+    "errorState": {
+      "defaultMessage": "Ocurrió un error al cargar los datos",
+      "retry": "Reintentar"
+    },
+    "dateRangeFilter": {
+      "period": "Período",
+      "exportLabel": "Exportar",
+      "presets": {
+        "7d": "7d",
+        "30d": "30d",
+        "ytd": "YTD",
+        "all": "Todo"
+      },
+      "toastFilterUpdated": "Filtro actualizado",
+      "toastPeriodSelected": "Período seleccionado: {label}",
+      "toastExportInProgress": "Export {type} en curso...",
+      "toastExportSuccess": "Export {type} exitoso",
+      "toastFileDownloaded": "El archivo {filename} se ha descargado correctamente",
+      "toastExportError": "Error durante el export {type}",
+      "toastExportErrorGeneric": "Error de exportación",
+      "toastExportErrorFallback": "Ocurrió un error durante la exportación",
+      "exportCsvTitle": "Exportar escuchas a CSV",
+      "exportStatsTitle": "Exportar estadísticas a JSON",
+      "exportPdfTitle": "Generar informe PDF anual"
+    },
+    "periodSelector": {
+      "label": "Agregación",
+      "daily": "Diario",
+      "weekly": "Semanal",
+      "monthly": "Mensual"
+    },
+    "loadingState": {
+      "defaultMessage": "Cargando datos...",
+      "pleaseWait": "Espere por favor..."
+    },
+    "skeletonLoaders": {
+      "heatmapLess": "Menos",
+      "heatmapMore": "Más"
+    }
+  },
+  "home": {
+    "title": "Apple Music Analytics Dashboard",
+    "accessDashboard": "Acceder al Dashboard"
+  },
+  "metadata": {
+    "title": "Apple Music Analytics Dashboard",
+    "description": "Dashboard de análisis personal para tu comportamiento de escucha en Apple Music"
+  }
+}

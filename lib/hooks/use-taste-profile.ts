@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery, UseQueryOptions } from "@tanstack/react-query";
+import { useLocale } from "next-intl";
 import { apiClient } from "@/lib/api-client";
 import type {
   TasteProfileInput,
@@ -140,7 +141,8 @@ function buildTasteProfileInput(
 async function fetchTasteProfile(
   startDate: string,
   endDate: string,
-  tone: TasteProfileTone
+  tone: TasteProfileTone,
+  locale: string
 ): Promise<TasteProfileResponse> {
   const { prevStartDate, prevEndDate } = getPreviousPeriod(startDate, endDate);
 
@@ -171,12 +173,14 @@ async function fetchTasteProfile(
   return apiClient.post<TasteProfileResponse>("/ai/taste-profile", {
     ...input,
     tone,
+    locale,
   });
 }
 
 /**
  * Hook to fetch taste profile for a date range and tone.
  * Fetches overview, genres, temporal analysis, then POSTs to /api/ai/taste-profile.
+ * Passes current locale for localized output.
  */
 export function useTasteProfile(
   startDate: string | undefined,
@@ -187,11 +191,12 @@ export function useTasteProfile(
     "queryKey" | "queryFn"
   >
 ) {
+  const locale = useLocale();
   const hasValidRange = !!startDate && !!endDate;
 
   return useQuery<TasteProfileResponse, Error>({
-    queryKey: tasteProfileKeys.list({ startDate, endDate, tone }),
-    queryFn: () => fetchTasteProfile(startDate!, endDate!, tone),
+    queryKey: tasteProfileKeys.list({ startDate, endDate, tone, locale }),
+    queryFn: () => fetchTasteProfile(startDate!, endDate!, tone, locale),
     enabled: hasValidRange,
     staleTime: TASTE_PROFILE_STALE_TIME,
     ...options,

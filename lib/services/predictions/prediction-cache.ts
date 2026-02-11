@@ -7,6 +7,7 @@
 import { createHash } from "crypto";
 import { getRedisClient } from "@/lib/redis";
 import type { ListeningHabitPrediction } from "@/lib/dto/predictions";
+import type { AiLocale } from "@/lib/services/ai/locale-utils";
 
 const PREDICTION_PREFIX = "predictions:listening-habit:";
 const EXPLANATION_PREFIX = "predictions:listening-habit:explanation:";
@@ -33,17 +34,23 @@ function getPredictionCacheKey(userId?: string): string {
 }
 
 /**
- * Cache key for AI explanation: hash of prediction output.
- * Same prediction → same explanation.
+ * Cache key for AI explanation: hash of prediction output + locale.
+ * Same prediction + same locale → same explanation.
  */
-export function getExplanationCacheKey(prediction: ListeningHabitPrediction): string {
+export function getExplanationCacheKey(
+  prediction: ListeningHabitPrediction,
+  locale: AiLocale
+): string {
   const payload = JSON.stringify({
     timeWindow: prediction.timeWindow,
     confidenceScore: prediction.confidenceScore,
     predictedGenre: prediction.predictedGenre,
     supportingMetrics: prediction.supportingMetrics,
   });
-  return EXPLANATION_PREFIX + createHash("sha256").update(payload, "utf8").digest("hex");
+  return (
+    EXPLANATION_PREFIX +
+    createHash("sha256").update(payload + ":" + locale, "utf8").digest("hex")
+  );
 }
 
 export async function getCachedPrediction(

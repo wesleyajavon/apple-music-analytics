@@ -14,8 +14,8 @@ export const dynamic = "force-dynamic";
  * @swagger
  * /api/artists:
  *   get:
- *     summary: Récupère les statistiques des artistes
- *     description: Retourne les statistiques détaillées des artistes les plus écoutés avec vue d'ensemble
+ *     summary: Gets artist statistics
+ *     description: Returns detailed stats for the most listened artists with overview
  *     tags:
  *       - Artists
  *     parameters:
@@ -24,35 +24,35 @@ export const dynamic = "force-dynamic";
  *         schema:
  *           type: string
  *           format: date
- *         description: Date de début au format ISO 8601 (optionnel)
+ *         description: Start date in ISO 8601 format (optional)
  *       - in: query
  *         name: endDate
  *         schema:
  *           type: string
  *           format: date
- *         description: Date de fin au format ISO 8601 (optionnel)
+ *         description: End date in ISO 8601 format (optional)
  *       - in: query
  *         name: userId
  *         schema:
  *           type: string
- *         description: ID de l'utilisateur (optionnel)
+ *         description: User ID (optional)
  *       - in: query
  *         name: limit
  *         schema:
  *           type: integer
  *           default: 20
- *         description: Nombre maximum d'artistes à retourner
+ *         description: Maximum number of artists to return
  *     responses:
  *       200:
- *         description: Statistiques des artistes
+ *         description: Artist statistics
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ArtistsResponse'
  *       400:
- *         description: Erreur de validation
+ *         description: Validation error
  *       500:
- *         description: Erreur serveur
+ *         description: Server error
  */
 export async function GET(request: NextRequest) {
   try {

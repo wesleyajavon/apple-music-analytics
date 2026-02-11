@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery, UseQueryOptions } from "@tanstack/react-query";
+import { useLocale } from "next-intl";
 import { apiClient } from "@/lib/api-client";
 import type {
   AiInsightsInput,
@@ -133,7 +134,8 @@ function buildInsightsInput(
 
 async function fetchAiInsights(
   startDate: string,
-  endDate: string
+  endDate: string,
+  locale: string
 ): Promise<AiInsightsResponse> {
   const { prevStartDate, prevEndDate } = getPreviousPeriod(startDate, endDate);
 
@@ -161,18 +163,22 @@ async function fetchAiInsights(
     temporal
   );
 
-  return apiClient.post<AiInsightsResponse>("/ai/insights", input);
+  return apiClient.post<AiInsightsResponse>("/ai/insights", {
+    ...input,
+    locale,
+  });
 }
 
 export const aiInsightsKeys = {
   all: ["ai", "insights"] as const,
-  list: (params?: { startDate?: string; endDate?: string }) =>
+  list: (params?: { startDate?: string; endDate?: string; locale?: string }) =>
     [...aiInsightsKeys.all, params] as const,
 };
 
 /**
  * Hook to fetch AI-generated insights for a date range.
  * Fetches overview, genres, temporal analysis, then POSTs to /api/ai/insights.
+ * Passes current locale for localized output.
  */
 export function useAiInsights(
   startDate: string | undefined,
@@ -182,11 +188,12 @@ export function useAiInsights(
     "queryKey" | "queryFn"
   >
 ) {
+  const locale = useLocale();
   const hasValidRange = !!startDate && !!endDate;
 
   return useQuery<AiInsightsResponse, Error>({
-    queryKey: aiInsightsKeys.list({ startDate, endDate }),
-    queryFn: () => fetchAiInsights(startDate!, endDate!),
+    queryKey: aiInsightsKeys.list({ startDate, endDate, locale }),
+    queryFn: () => fetchAiInsights(startDate!, endDate!, locale),
     enabled: hasValidRange,
     staleTime: AI_INSIGHTS_STALE_TIME,
     ...options,

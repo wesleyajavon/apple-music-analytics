@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { renderToStream, DocumentProps } from "@react-pdf/renderer";
 import React from "react";
-import { AnnualReportPDF, AnnualReportData } from "@/lib/components/pdf/annual-report";
+import {
+  AnnualReportPDF,
+  AnnualReportData,
+  AnnualReportMessages,
+} from "@/lib/components/pdf/annual-report";
 import { getOverviewStats, getGenreDistribution } from "@/lib/services/listening/listening-stats";
 import { getMonthlyAggregatedListens } from "@/lib/services/listening/listening-aggregation";
 import { handleApiError } from "@/lib/utils/error-handler";
@@ -9,8 +13,12 @@ import {
   extractOptionalDateRange,
   extractOptionalUserId,
   extractOptionalInteger,
+  extractOptionalString,
 } from "@/lib/middleware/validation";
 import { generateExportFilename } from "@/lib/utils/csv-utils";
+import { routing } from "@/i18n/routing";
+
+const VALID_LOCALES = routing.locales as readonly string[];
 
 // Force dynamic rendering since we use request.url
 export const dynamic = "force-dynamic";
@@ -19,11 +27,11 @@ export const dynamic = "force-dynamic";
  * @swagger
  * /api/export/report:
  *   get:
- *     summary: Génère un rapport PDF annuel
+ *     summary: Generates an annual PDF report
  *     description: |
- *       Génère un rapport PDF complet avec les statistiques d'écoute pour une année donnée.
- *       Le rapport inclut : vue d'ensemble, genres musicaux, évolution mensuelle.
- *       Les données sont filtrées selon l'année fournie ou la période de dates.
+ *       Generates a complete PDF report with listening statistics for a given year.
+ *       The report includes overview, genres, and monthly evolution.
+ *       Data is filtered by the provided year or date range.
  *     tags:
  *       - Export
  *     parameters:
@@ -33,47 +41,54 @@ export const dynamic = "force-dynamic";
  *           type: string
  *           enum: [pdf]
  *           default: pdf
- *         description: Format d'export (actuellement seul PDF est supporté)
+ *         description: Export format (currently only PDF is supported)
  *       - in: query
  *         name: year
  *         schema:
  *           type: integer
  *           minimum: 2000
  *           maximum: 2100
- *         description: Année pour le rapport (optionnel, si non fourni utilise startDate/endDate)
+ *         description: Year for the report (optional, falls back to startDate/endDate if not provided)
  *       - in: query
  *         name: startDate
  *         schema:
  *           type: string
  *           format: date
- *         description: Date de début au format ISO 8601 (YYYY-MM-DD, optionnel)
+ *         description: Start date in ISO 8601 format (YYYY-MM-DD, optional)
  *       - in: query
  *         name: endDate
  *         schema:
  *           type: string
  *           format: date
- *         description: Date de fin au format ISO 8601 (YYYY-MM-DD, optionnel)
+ *         description: End date in ISO 8601 format (YYYY-MM-DD, optional)
  *       - in: query
  *         name: userId
  *         schema:
  *           type: string
- *         description: ID de l'utilisateur (optionnel)
+ *         description: User ID (optional)
+ *       - in: query
+ *         name: locale
+ *         schema:
+ *           type: string
+ *           enum: [fr, en, es]
+ *           default: fr
+ *         description: Locale for PDF content (fr, en, es)
  *     responses:
  *       200:
- *         description: Fichier PDF du rapport annuel
+ *         description: Annual report PDF file
  *         content:
  *           application/pdf:
  *             schema:
  *               type: string
  *               format: binary
  *       400:
- *         description: Erreur de validation
+ *         description: Validation error
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Error'
  *       500:
- *         description: Erreur serveur
+ *         description: Server error
  *         content:
  *           application/json:
  *             schema:
@@ -88,12 +103,20 @@ export async function GET(request: NextRequest) {
     if (format !== "pdf") {
       return NextResponse.json(
         {
-          error: "Format non supporté",
-          message: `Le format "${format}" n'est pas supporté. Seul "pdf" est disponible.`,
+          error: "Unsupported format",
+          message: `Format "${format}" is not supported. Only "pdf" is available.`,
         },
         { status: 400 }
       );
     }
+
+    // Récupérer la locale pour le PDF (fr, en, es)
+    const localeParam = extractOptionalString(request, "locale") || routing.defaultLocale;
+    const locale = VALID_LOCALES.includes(localeParam) ? localeParam : routing.defaultLocale;
+
+    // Charger les messages pour la locale
+    const messagesModule = await import(`@/messages/${locale}.json`);
+    const pdfMessages = messagesModule.default.annualReport as AnnualReportMessages;
 
     // Extraire les paramètres
     const year = extractOptionalInteger(request, "year", {
@@ -162,8 +185,12 @@ export async function GET(request: NextRequest) {
       },
     };
 
-    // Générer le PDF - créer l'élément et le caster pour TypeScript
-    const pdfElement = React.createElement(AnnualReportPDF, { data: reportData });
+    // Générer le PDF - créer l'élément avec data, locale et messages
+    const pdfElement = React.createElement(AnnualReportPDF, {
+      data: reportData,
+      locale,
+      messages: pdfMessages,
+    });
     const pdfStream = await renderToStream(
       pdfElement as React.ReactElement<DocumentProps>
     );

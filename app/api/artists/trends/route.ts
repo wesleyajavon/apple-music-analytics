@@ -14,8 +14,8 @@ export const dynamic = "force-dynamic";
  * @swagger
  * /api/artists/trends:
  *   get:
- *     summary: Récupère les tendances des artistes dans le temps
- *     description: Retourne l'évolution des écoutes pour les top artistes sur une période donnée
+ *     summary: Gets artist trends over time
+ *     description: Returns listening evolution for top artists over a given period
  *     tags:
  *       - Artists
  *     parameters:
@@ -25,39 +25,39 @@ export const dynamic = "force-dynamic";
  *         schema:
  *           type: string
  *           format: date
- *         description: Date de début au format ISO 8601
+ *         description: Start date in ISO 8601 format
  *       - in: query
  *         name: endDate
  *         required: true
  *         schema:
  *           type: string
  *           format: date
- *         description: Date de fin au format ISO 8601
+ *         description: End date in ISO 8601 format
  *       - in: query
  *         name: period
  *         schema:
  *           type: string
  *           enum: [day, week, month]
  *           default: day
- *         description: Période d'agrégation
+ *         description: Aggregation period
  *       - in: query
  *         name: topN
  *         schema:
  *           type: integer
  *           default: 5
- *         description: Nombre d'artistes à inclure
+ *         description: Number of artists to include
  *       - in: query
  *         name: userId
  *         schema:
  *           type: string
- *         description: ID de l'utilisateur (optionnel)
+ *         description: User ID (optional)
  *     responses:
  *       200:
- *         description: Tendances des artistes
+ *         description: Artist trends
  *       400:
- *         description: Erreur de validation
+ *         description: Validation error
  *       500:
- *         description: Erreur serveur
+ *         description: Server error
  */
 export async function GET(request: NextRequest) {
   try {

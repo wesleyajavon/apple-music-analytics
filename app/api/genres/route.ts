@@ -14,8 +14,8 @@ export const dynamic = "force-dynamic";
  * @swagger
  * /api/genres:
  *   get:
- *     summary: Récupère la distribution des genres musicaux
- *     description: Retourne la répartition des écoutes par genre avec les comptages et pourcentages
+ *     summary: Gets music genre distribution
+ *     description: Returns listen distribution by genre with counts and percentages
  *     tags:
  *       - Genres
  *     parameters:
@@ -24,21 +24,21 @@ export const dynamic = "force-dynamic";
  *         schema:
  *           type: string
  *           format: date
- *         description: Date de début au format ISO 8601 (optionnel)
+ *         description: Start date in ISO 8601 format (optional)
  *       - in: query
  *         name: endDate
  *         schema:
  *           type: string
  *           format: date
- *         description: Date de fin au format ISO 8601 (optionnel)
+ *         description: End date in ISO 8601 format (optional)
  *       - in: query
  *         name: userId
  *         schema:
  *           type: string
- *         description: ID de l'utilisateur (optionnel)
+ *         description: User ID (optional)
  *     responses:
  *       200:
- *         description: Distribution des genres
+ *         description: Genre distribution
  *         content:
  *           application/json:
  *             schema:
@@ -50,15 +50,15 @@ export const dynamic = "force-dynamic";
  *                     $ref: '#/components/schemas/GenreDistribution'
  *                 totalListens:
  *                   type: integer
- *                   description: Nombre total d'écoutes
+ *                   description: Total number of listens
  *       400:
- *         description: Erreur de validation
+ *         description: Validation error
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Error'
  *       500:
- *         description: Erreur serveur
+ *         description: Server error
  *         content:
  *           application/json:
  *             schema:

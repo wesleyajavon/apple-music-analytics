@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
+import { useTranslations } from "next-intl";
 import type { ForceGraphMethods } from "react-force-graph-2d";
 import { ArtistNetworkGraph } from "../dto/artist-network";
 import * as d3 from "d3";
@@ -30,6 +31,41 @@ const DEFAULT_EDGE_TYPE_FILTER: EdgeTypeFilter = {
   proximity: true,
   both: true,
 };
+
+function NetworkLegend() {
+  const t = useTranslations("network");
+  return (
+    <div
+      className="absolute bottom-3 left-3 z-10 rounded-md border border-gray-200 dark:border-gray-600 bg-white/95 dark:bg-gray-800/95 px-3 py-2 shadow text-xs text-gray-700 dark:text-gray-300"
+      aria-label={t("legendAriaLabel")}
+    >
+      <div className="font-medium mb-1.5">{t("legendTitle")}</div>
+      <div className="flex flex-col gap-1">
+        <div className="flex items-center gap-2">
+          <span
+            className="inline-block w-4 h-0.5 rounded"
+            style={{ backgroundColor: EDGE_COLORS.genre }}
+          />
+          <span>{t("sharedGenre")}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span
+            className="inline-block w-4 h-0.5 rounded"
+            style={{ backgroundColor: EDGE_COLORS.proximity }}
+          />
+          <span>{t("listeningProximity")}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span
+            className="inline-block w-4 h-0.5 rounded"
+            style={{ backgroundColor: EDGE_COLORS.both }}
+          />
+          <span>{t("genreAndProximity")}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 interface ArtistNetworkGraphProps {
   data: ArtistNetworkGraph;
@@ -227,35 +263,7 @@ export function ArtistNetworkGraphComponent({
         cooldownTicks={100}
       />
       {/* Légende fixe (roadmap §1 et §7) */}
-      <div
-        className="absolute bottom-3 left-3 z-10 rounded-md border border-gray-200 dark:border-gray-600 bg-white/95 dark:bg-gray-800/95 px-3 py-2 shadow text-xs text-gray-700 dark:text-gray-300"
-        aria-label="Légende des types de connexion"
-      >
-        <div className="font-medium mb-1.5">Connexions</div>
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-2">
-            <span
-              className="inline-block w-4 h-0.5 rounded"
-              style={{ backgroundColor: EDGE_COLORS.genre }}
-            />
-            <span>Genre partagé</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span
-              className="inline-block w-4 h-0.5 rounded"
-              style={{ backgroundColor: EDGE_COLORS.proximity }}
-            />
-            <span>Proximité d&apos;écoute</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span
-              className="inline-block w-4 h-0.5 rounded"
-              style={{ backgroundColor: EDGE_COLORS.both }}
-            />
-            <span>Genre + proximité</span>
-          </div>
-        </div>
-      </div>
+      <NetworkLegend />
     </div>
   );
 }

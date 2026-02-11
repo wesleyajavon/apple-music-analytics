@@ -14,8 +14,8 @@ export const dynamic = "force-dynamic";
  * @swagger
  * /api/overview:
  *   get:
- *     summary: Récupère les statistiques d'aperçu
- *     description: Retourne les statistiques globales d'écoute (total d'écoutes, artistes uniques, titres uniques, temps total)
+ *     summary: Gets overview statistics
+ *     description: Returns global listening stats (total listens, unique artists, unique tracks, total time)
  *     tags:
  *       - Overview
  *     parameters:
@@ -24,33 +24,33 @@ export const dynamic = "force-dynamic";
  *         schema:
  *           type: string
  *           format: date
- *         description: Date de début au format ISO 8601 (optionnel)
+ *         description: Start date in ISO 8601 format (optional)
  *       - in: query
  *         name: endDate
  *         schema:
  *           type: string
  *           format: date
- *         description: Date de fin au format ISO 8601 (optionnel)
+ *         description: End date in ISO 8601 format (optional)
  *       - in: query
  *         name: userId
  *         schema:
  *           type: string
- *         description: ID de l'utilisateur (optionnel)
+ *         description: User ID (optional)
  *     responses:
  *       200:
- *         description: Statistiques d'aperçu
+ *         description: Overview statistics
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/OverviewStats'
  *       400:
- *         description: Erreur de validation
+ *         description: Validation error
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Error'
  *       500:
- *         description: Erreur serveur
+ *         description: Server error
  *         content:
  *           application/json:
  *             schema:

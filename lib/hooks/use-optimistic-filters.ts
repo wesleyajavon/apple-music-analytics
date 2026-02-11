@@ -31,69 +31,11 @@ export function useOptimisticFilters() {
       newEndDate?: string,
       newPeriod?: "day" | "week" | "month"
     ) => {
-      // Récupérer les données ACTUELLES (anciennes) du cache pour les utiliser comme placeholder
-      const oldOverview = queryClient.getQueryData<OverviewStatsDto>(
-        listeningKeys.overview({ startDate: oldStartDate, endDate: oldEndDate })
-      );
+      // Ne pas injecter les données de l'ancien filtre dans le cache du nouveau :
+      // cela affichait des valeurs incorrectes (ex. 2918 écoutes "All" quand on filtre sur 7j).
+      // Le prefetch ci-dessous charge les bonnes données.
 
-      const oldTimeline = queryClient.getQueryData<TimelineDataPoint[]>(
-        listeningKeys.timeline({
-          startDate: oldStartDate,
-          endDate: oldEndDate,
-          period: oldPeriod,
-        })
-      );
-
-      const oldGenres = queryClient.getQueryData<GenreDistributionResponse>(
-        listeningKeys.genres({ startDate: oldStartDate, endDate: oldEndDate })
-      );
-
-      const oldTemporalAnalysis =
-        queryClient.getQueryData<TemporalAnalysisDto>(
-          listeningKeys.temporalAnalysis({
-            startDate: oldStartDate,
-            endDate: oldEndDate,
-          })
-        );
-
-      // Mettre à jour le cache de manière optimiste AVANT de précharger
-      // Cela permet d'afficher immédiatement les anciennes données pendant le chargement
-      if (oldOverview && newStartDate && newEndDate) {
-        queryClient.setQueryData(
-          listeningKeys.overview({ startDate: newStartDate, endDate: newEndDate }),
-          oldOverview
-        );
-      }
-
-      if (oldTimeline && newStartDate && newEndDate && newPeriod) {
-        queryClient.setQueryData(
-          listeningKeys.timeline({
-            startDate: newStartDate,
-            endDate: newEndDate,
-            period: newPeriod,
-          }),
-          oldTimeline
-        );
-      }
-
-      if (oldGenres && newStartDate && newEndDate) {
-        queryClient.setQueryData(
-          listeningKeys.genres({ startDate: newStartDate, endDate: newEndDate }),
-          oldGenres
-        );
-      }
-
-      if (oldTemporalAnalysis && newStartDate && newEndDate) {
-        queryClient.setQueryData(
-          listeningKeys.temporalAnalysis({
-            startDate: newStartDate,
-            endDate: newEndDate,
-          }),
-          oldTemporalAnalysis
-        );
-      }
-
-      // Précharger les nouvelles données en arrière-plan
+      // Précharger les nouvelles données
       const prefetchPromises: Promise<void>[] = [];
 
       // Précharger overview

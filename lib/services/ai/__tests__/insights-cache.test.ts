@@ -22,19 +22,25 @@ describe("insights-cache", () => {
   });
 
   describe("computeCacheKey", () => {
-    it("returns deterministic hash for same input", () => {
-      const key1 = computeCacheKey(mockSummary);
-      const key2 = computeCacheKey(mockSummary);
+    it("returns deterministic hash for same input and locale", () => {
+      const key1 = computeCacheKey(mockSummary, "fr");
+      const key2 = computeCacheKey(mockSummary, "fr");
       expect(key1).toBe(key2);
       expect(key1).toMatch(/^[a-f0-9]{64}$/);
     });
 
     it("returns different hash for different input", () => {
-      const key1 = computeCacheKey(mockSummary);
-      const key2 = computeCacheKey({
-        ...mockSummary,
-        structured: '{"different":"data"}',
-      });
+      const key1 = computeCacheKey(mockSummary, "fr");
+      const key2 = computeCacheKey(
+        { ...mockSummary, structured: '{"different":"data"}' },
+        "fr"
+      );
+      expect(key1).not.toBe(key2);
+    });
+
+    it("returns different hash for different locale", () => {
+      const key1 = computeCacheKey(mockSummary, "fr");
+      const key2 = computeCacheKey(mockSummary, "en");
       expect(key1).not.toBe(key2);
     });
   });
@@ -46,7 +52,7 @@ describe("insights-cache", () => {
     });
 
     it("stores and retrieves insights", async () => {
-      const cacheKey = computeCacheKey(mockSummary);
+      const cacheKey = computeCacheKey(mockSummary, "fr");
       const insights = ["Insight 1", "Insight 2", "Insight 3"];
 
       await setCachedInsights(cacheKey, insights);

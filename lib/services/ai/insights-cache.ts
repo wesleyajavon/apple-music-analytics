@@ -11,6 +11,7 @@
 import { createHash } from "crypto";
 import { getRedisClient } from "@/lib/redis";
 import type { AnalyticsSummary } from "./analytics-summarizer";
+import type { AiLocale } from "./locale-utils";
 
 const CACHE_PREFIX = "ai:insights:";
 const CACHE_TTL_SECONDS = 24 * 60 * 60; // 24 hours
@@ -20,11 +21,11 @@ const memoryCache = new Map<string, { insights: string[]; expiresAt: number }>()
 const MEMORY_CACHE_TTL_MS = CACHE_TTL_SECONDS * 1000;
 
 /**
- * Computes a deterministic hash of the analytics summary.
- * Same input → same hash → cache hit.
+ * Computes a deterministic hash of the analytics summary + locale.
+ * Same input + same locale → same hash → cache hit.
  */
-export function computeCacheKey(summary: AnalyticsSummary): string {
-  const payload = summary.structured;
+export function computeCacheKey(summary: AnalyticsSummary, locale: AiLocale): string {
+  const payload = summary.structured + ":" + locale;
   return createHash("sha256").update(payload, "utf8").digest("hex");
 }
 

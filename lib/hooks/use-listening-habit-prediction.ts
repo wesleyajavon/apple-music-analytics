@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery, UseQueryOptions } from "@tanstack/react-query";
+import { useLocale } from "next-intl";
 import { apiClient } from "@/lib/api-client";
 import { predictionKeys } from "./query-keys";
 import type {
@@ -22,16 +23,18 @@ export type ListeningHabitApiResponse =
     });
 
 async function fetchListeningHabitPrediction(
+  locale: string,
   userId?: string,
   includeExplanation?: boolean
 ): Promise<ListeningHabitApiResponse> {
   const params = new URLSearchParams();
+  params.append("locale", locale);
   if (userId) params.append("userId", userId);
   if (includeExplanation) params.append("explain", "true");
 
   const qs = params.toString();
   return apiClient.get<ListeningHabitApiResponse>(
-    `/predictions/listening-habit${qs ? `?${qs}` : ""}`
+    `/predictions/listening-habit?${qs}`
   );
 }
 
@@ -40,6 +43,7 @@ async function fetchListeningHabitPrediction(
  *
  * @param options.includeExplanation - Request AI explanation (requires GROQ_API_KEY)
  * @param options.userId - Optional user filter
+ * Passes current locale for localized AI explanation.
  */
 export function useListeningHabitPrediction(
   options?: {
@@ -51,15 +55,17 @@ export function useListeningHabitPrediction(
     "queryKey" | "queryFn"
   >
 ) {
+  const locale = useLocale();
   const { includeExplanation = false, userId } = options ?? {};
 
   return useQuery<ListeningHabitApiResponse, Error>({
     queryKey: predictionKeys.listeningHabit({
       userId,
       explain: includeExplanation,
+      locale,
     }),
     queryFn: () =>
-      fetchListeningHabitPrediction(userId, includeExplanation),
+      fetchListeningHabitPrediction(locale, userId, includeExplanation),
     staleTime: 5 * 60 * 1000, // 5 minutes - prediction is per day
     ...queryOptions,
   });

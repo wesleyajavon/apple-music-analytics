@@ -137,11 +137,13 @@ async function fetchWeeklyAggregate(
 
 /**
  * Fetch all weekly aggregates and compute week-to-week trends.
+ * @param locale - for formatting week labels in trend output (default: "fr")
  */
 export async function getTasteEvolutionTrends(
   startDate: Date,
   endDate: Date,
-  userId?: string
+  userId?: string,
+  locale = "fr"
 ): Promise<{
   trends: WeekToWeekTrend[];
   skippedWeeks: Array<{ weekStart: string; reason: string }>;
@@ -167,7 +169,7 @@ export async function getTasteEvolutionTrends(
   for (let i = 1; i < aggregates.length; i++) {
     const prev = aggregates[i - 1];
     const curr = aggregates[i];
-    const trend = computeWeekToWeekTrend(prev, curr);
+    const trend = computeWeekToWeekTrend(prev, curr, locale);
     if (trend) {
       trends.push(trend);
     } else {

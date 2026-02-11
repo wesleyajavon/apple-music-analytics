@@ -63,11 +63,11 @@ interface ExportStatsResponse {
  * @swagger
  * /api/export/stats:
  *   get:
- *     summary: Exporte les statistiques agrégées au format JSON
+ *     summary: Exports aggregated statistics in JSON format
  *     description: |
- *       Exporte toutes les statistiques d'analyse (aperçu, genres, timeline) au format JSON structuré.
- *       Les données sont filtrées selon les paramètres de date fournis.
- *       Le format JSON permet une réutilisation facile des données pour d'autres outils.
+ *       Exports all analytics (overview, genres, timeline) in structured JSON format.
+ *       Data is filtered by the provided date parameters.
+ *       JSON format enables easy reuse of data for other tools.
  *     tags:
  *       - Export
  *     parameters:
@@ -77,34 +77,34 @@ interface ExportStatsResponse {
  *           type: string
  *           enum: [json]
  *           default: json
- *         description: Format d'export (actuellement seul JSON est supporté)
+ *         description: Export format (currently only JSON is supported)
  *       - in: query
  *         name: startDate
  *         schema:
  *           type: string
  *           format: date
- *         description: Date de début au format ISO 8601 (YYYY-MM-DD, optionnel)
+ *         description: Start date in ISO 8601 format (YYYY-MM-DD, optional)
  *       - in: query
  *         name: endDate
  *         schema:
  *           type: string
  *           format: date
- *         description: Date de fin au format ISO 8601 (YYYY-MM-DD, optionnel)
+ *         description: End date in ISO 8601 format (YYYY-MM-DD, optional)
  *       - in: query
  *         name: userId
  *         schema:
  *           type: string
- *         description: ID de l'utilisateur (optionnel)
+ *         description: User ID (optional)
  *       - in: query
  *         name: includeTimeline
  *         schema:
  *           type: string
  *           enum: [true, false]
  *           default: true
- *         description: Inclure les données de timeline (optionnel, défaut: true)
+ *         description: Include timeline data (optional, default: true)
  *     responses:
  *       200:
- *         description: Fichier JSON des statistiques
+ *         description: Statistics JSON file
  *         content:
  *           application/json:
  *             schema:
@@ -156,13 +156,13 @@ interface ExportStatsResponse {
  *                     monthly:
  *                       type: array
  *       400:
- *         description: Erreur de validation
+ *         description: Validation error
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Error'
  *       500:
- *         description: Erreur serveur
+ *         description: Server error
  *         content:
  *           application/json:
  *             schema:
@@ -177,8 +177,8 @@ export async function GET(request: NextRequest) {
     if (format !== "json") {
       return NextResponse.json(
         {
-          error: "Format non supporté",
-          message: `Le format "${format}" n'est pas supporté. Seul "json" est disponible.`,
+          error: "Unsupported format",
+          message: `Format "${format}" is not supported. Only "json" is available.`,
         },
         { status: 400 }
       );

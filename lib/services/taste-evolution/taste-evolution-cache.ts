@@ -12,6 +12,7 @@
 import { createHash } from "crypto";
 import { getRedisClient } from "@/lib/redis";
 import type { WeekToWeekTrend } from "@/lib/dto/taste-evolution";
+import type { AiLocale } from "@/lib/services/ai/locale-utils";
 
 const TRENDS_CACHE_PREFIX = "taste-evolution:trends:";
 const COMMENTARY_CACHE_PREFIX = "taste-evolution:commentary:";
@@ -30,7 +31,7 @@ function trendsCacheKey(startDate: string, endDate: string, userId?: string): st
     .digest("hex");
 }
 
-function commentaryCacheKey(trends: WeekToWeekTrend[]): string {
+function commentaryCacheKey(trends: WeekToWeekTrend[], locale: AiLocale): string {
   const payload = JSON.stringify(
     trends.map((t) => ({
       week: t.timeRange.weekStart,
@@ -41,7 +42,7 @@ function commentaryCacheKey(trends: WeekToWeekTrend[]): string {
       declining: t.decliningGenres.map((g) => g.genre),
     }))
   );
-  return createHash("sha256").update(payload, "utf8").digest("hex");
+  return createHash("sha256").update(payload + ":" + locale, "utf8").digest("hex");
 }
 
 export async function getCachedTrends(
@@ -102,8 +103,11 @@ export async function setCachedTrends(
   });
 }
 
-export async function getCachedCommentary(trends: WeekToWeekTrend[]): Promise<string | null> {
-  const key = commentaryCacheKey(trends);
+export async function getCachedCommentary(
+  trends: WeekToWeekTrend[],
+  locale: AiLocale
+): Promise<string | null> {
+  const key = commentaryCacheKey(trends, locale);
   const redis = getRedisClient();
 
   if (redis) {
@@ -125,9 +129,10 @@ export async function getCachedCommentary(trends: WeekToWeekTrend[]): Promise<st
 
 export async function setCachedCommentary(
   trends: WeekToWeekTrend[],
-  commentary: string
+  commentary: string,
+  locale: AiLocale
 ): Promise<void> {
-  const key = commentaryCacheKey(trends);
+  const key = commentaryCacheKey(trends, locale);
   const redis = getRedisClient();
 
   if (redis) {

@@ -11,15 +11,21 @@ import {
   extractDateRangeWithDefaults,
   extractPeriod,
   extractOptionalUserId,
+  extractOptionalString,
 } from "@/lib/middleware/validation";
+import { parseAiLocale } from "@/lib/services/ai/locale-utils";
 
 export const dynamic = "force-dynamic";
 
-function formatTrendDate(date: string, period: GenreTrendPeriod): string {
+function formatTrendDate(
+  date: string,
+  period: GenreTrendPeriod,
+  locale: string
+): string {
   switch (period) {
     case "day": {
       const d = new Date(date);
-      return d.toLocaleDateString("fr-FR", {
+      return d.toLocaleDateString(locale, {
         day: "2-digit",
         month: "2-digit",
       });
@@ -28,11 +34,11 @@ function formatTrendDate(date: string, period: GenreTrendPeriod): string {
       const weekStart = new Date(date);
       const weekEnd = new Date(weekStart);
       weekEnd.setDate(weekEnd.getDate() + 6);
-      const startStr = weekStart.toLocaleDateString("fr-FR", {
+      const startStr = weekStart.toLocaleDateString(locale, {
         day: "2-digit",
         month: "2-digit",
       });
-      const endStr = weekEnd.toLocaleDateString("fr-FR", {
+      const endStr = weekEnd.toLocaleDateString(locale, {
         day: "2-digit",
         month: "2-digit",
       });
@@ -41,7 +47,7 @@ function formatTrendDate(date: string, period: GenreTrendPeriod): string {
     case "month": {
       const [year, month] = date.split("-");
       const d = new Date(parseInt(year, 10), parseInt(month, 10) - 1, 1);
-      return d.toLocaleDateString("fr-FR", {
+      return d.toLocaleDateString(locale, {
         month: "short",
         year: "numeric",
       });
@@ -52,6 +58,7 @@ function formatTrendDate(date: string, period: GenreTrendPeriod): string {
 function pivotTrends(
   rows: GenreTrendRow[],
   period: GenreTrendPeriod,
+  locale: string,
   genreFilter?: string[]
 ): { data: GenreTrendsDataPoint[]; availableGenres: string[] } {
   const byDate = new Map<string, Map<string, number>>();
@@ -76,7 +83,7 @@ function pivotTrends(
   const data: GenreTrendsDataPoint[] = dates.map((date) => {
     const point: GenreTrendsDataPoint = {
       date,
-      formattedDate: formatTrendDate(date, period),
+      formattedDate: formatTrendDate(date, period, locale),
     };
     for (const g of genres) {
       point[g] = byDate.get(date)?.get(g) ?? 0;
@@ -97,8 +104,8 @@ function extractGenresFilter(request: NextRequest): string[] | undefined {
  * @swagger
  * /api/genres/trends:
  *   get:
- *     summary: Tendances des genres dans le temps
- *     description: Évolution des écoutes par genre (jour/semaine/mois). Données pivotées pour graphique multi-lignes.
+ *     summary: Genre trends over time
+ *     description: Listening evolution by genre (day/week/month). Pivoted data for multi-line charts.
  *     tags:
  *       - Genres
  *     parameters:
@@ -114,17 +121,17 @@ function extractGenresFilter(request: NextRequest): string[] | undefined {
  *       - in: query
  *         name: genres
  *         schema: { type: array, items: { type: string } }
- *         description: Filtrer les genres affichés (répéter le paramètre)
+ *         description: Filter displayed genres (repeat parameter for multiple)
  *       - in: query
  *         name: userId
  *         schema: { type: string }
  *     responses:
  *       200:
- *         description: Données de tendances par genre
+ *         description: Genre trend data
  *       400:
- *         description: Erreur de validation
+ *         description: Validation error
  *       500:
- *         description: Erreur serveur
+ *         description: Server error
  */
 export async function GET(request: NextRequest) {
   try {
@@ -158,9 +165,15 @@ export async function GET(request: NextRequest) {
     const period = extractPeriod(request, "month") as GenreTrendPeriod;
     const userId = extractOptionalUserId(request);
     const genresFilter = extractGenresFilter(request);
+    const locale = parseAiLocale(extractOptionalString(request, "locale"));
 
     const rows = await getGenreTrends(startDate, endDate, period, userId);
-    const { data, availableGenres } = pivotTrends(rows, period, genresFilter);
+    const { data, availableGenres } = pivotTrends(
+      rows,
+      period,
+      locale,
+      genresFilter
+    );
 
     const response: GenreTrendsResponse = {
       data,

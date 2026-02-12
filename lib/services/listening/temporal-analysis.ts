@@ -13,7 +13,6 @@ import { transformBigIntToNumber } from "../../dto/transformers";
  */
 export interface DayOfWeekAggregation {
   dayOfWeek: number; // 0-6 (0 = dimanche, 1 = lundi, etc.)
-  dayName: string; // Nom du jour en français
   listens: number;
   uniqueTracks: number;
   uniqueArtists: number;
@@ -39,19 +38,6 @@ export interface TemporalAnalysisResult {
   peakDay: DayOfWeekAggregation | null;
   peakHour: HourOfDayAggregation | null;
 }
-
-/**
- * Noms des jours de la semaine en français
- */
-const DAY_NAMES = [
-  "Dimanche",
-  "Lundi",
-  "Mardi",
-  "Mercredi",
-  "Jeudi",
-  "Vendredi",
-  "Samedi",
-];
 
 /**
  * Récupère les écoutes agrégées par jour de la semaine
@@ -87,7 +73,6 @@ async function getListensByDayOfWeek(
   // Convertir bigint en number et formater les résultats
   const aggregations = result.map((row) => ({
     dayOfWeek: row.day_of_week,
-    dayName: DAY_NAMES[row.day_of_week],
     ...transformBigIntToNumber({
       listens: row.listens,
       uniqueTracks: row.unique_tracks,
@@ -106,7 +91,6 @@ async function getListensByDayOfWeek(
     } else {
       completeAggregations.push({
         dayOfWeek: i,
-        dayName: DAY_NAMES[i],
         listens: 0,
         uniqueTracks: 0,
         uniqueArtists: 0,

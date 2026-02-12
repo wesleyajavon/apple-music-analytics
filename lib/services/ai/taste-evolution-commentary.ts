@@ -4,27 +4,28 @@
  * Accepts ONLY structured trend output from taste-evolution-core.
  * Generates a concise 1-2 paragraph narrative. No speculation.
  * References computed metrics explicitly.
- * Locale: output language (fr, en, es).
+ * Locale: output language (fr, en, es). All prompt content is localized so the LLM outputs in the target language.
  */
 
 import Groq from "groq-sdk";
+import { getAiInsightsLabels } from "@/lib/constants/ai-insights-labels";
 import type { WeekToWeekTrend } from "@/lib/dto/taste-evolution";
 import { getLanguageName, type AiLocale } from "./locale-utils";
 
 function buildSystemPrompt(locale: AiLocale): string {
   const lang = getLanguageName(locale);
-  return `Tu es un analyste musical qui génère un récit concis sur l'évolution des goûts musicaux semaine après semaine.
+  return `You are a music analyst who generates concise narratives about week-to-week taste evolution.
 
-RÈGLES STRICTES:
-1. Base-toi UNIQUEMENT sur les données structurées fournies. N'invente rien.
-2. Ne fais aucune spéculation ou hypothèse non supportée par les chiffres.
-3. Produis 1 à 2 courts paragraphes maximum (3-5 phrases au total).
-4. Chaque affirmation doit citer explicitement une métrique (chiffre, pourcentage, nom de genre).
-5. Langue: ${lang}. Réponds ENTIÈREMENT dans cette langue. Style: clair, accessible.
-6. Explique ce qui a changé et pourquoi c'est pertinent, sans extrapoler.
+STRICT RULES:
+1. Base your response ONLY on the structured data provided. Do not invent anything.
+2. Do not make any speculation or hypothesis not supported by the numbers.
+3. Produce 1-2 short paragraphs maximum (3-5 sentences total).
+4. Each statement must explicitly cite a metric (number, percentage, genre name).
+5. LANGUAGE: ${lang}. You MUST respond ENTIRELY in this language. Style: clear, accessible.
+6. Explain what changed and why it matters, without extrapolating.
 
-Exemple de bon commentaire: "La semaine du 15 jan. montre une expansion de vos goûts : 3 nouveaux genres apparaissent et l'entropie augmente de 0,4. Le rock progresse de +5 points tandis que la pop recule."
-Exemple à éviter: "Vous explorez de plus en plus." (trop vague, pas de chiffre)`;
+Good example: "The week of Jan 15 shows an expansion of your tastes: 3 new genres appear and entropy increases by 0.4. Rock gains +5 points while pop declines."
+Bad example: "You are exploring more and more." (too vague, no numbers)`;
 }
 
 /**
@@ -47,45 +48,45 @@ export async function generateTasteEvolutionCommentary(
     return "";
   }
 
+  const labels = getAiInsightsLabels(locale).tasteEvolution;
   const groq = new Groq({ apiKey });
 
-  // Build a compact summary of trends for the prompt
+  // Build a compact summary of trends for the prompt (all labels localized)
   const summaryLines = trends.map((t) => {
     const parts: string[] = [
       `${t.timeRange.label} (vs ${t.previousWeekRange.label}):`,
-      `  Volume: ${t.volumeDelta >= 0 ? "+" : ""}${t.volumeDelta} écoutes (${t.volumeDeltaPct >= 0 ? "+" : ""}${t.volumeDeltaPct.toFixed(1)}%)`,
-      `  Diversité: ${t.diversityDelta >= 0 ? "+" : ""}${t.diversityDelta.toFixed(2)} (entropie), genres: ${t.genreCountPrevious} → ${t.genreCountCurrent}`,
-      `  Classification: ${t.classification}`,
+      `  ${labels.volume}: ${t.volumeDelta >= 0 ? "+" : ""}${t.volumeDelta} ${labels.listens} (${t.volumeDeltaPct >= 0 ? "+" : ""}${t.volumeDeltaPct.toFixed(1)}%)`,
+      `  ${labels.diversity}: ${t.diversityDelta >= 0 ? "+" : ""}${t.diversityDelta.toFixed(2)} (entropy), genres: ${t.genreCountPrevious} → ${t.genreCountCurrent}`,
+      `  ${labels.classification}: ${t.classification}`,
     ];
     if (t.emergingGenres.length > 0) {
       parts.push(
-        `  Genres émergents: ${t.emergingGenres.map((g) => `${g.genre} (+${g.deltaPct.toFixed(1)}pp)`).join(", ")}`
+        `  ${labels.emergingGenres}: ${t.emergingGenres.map((g) => `${g.genre} (+${g.deltaPct.toFixed(1)}pp)`).join(", ")}`
       );
     }
     if (t.decliningGenres.length > 0) {
       parts.push(
-        `  Genres en baisse: ${t.decliningGenres.map((g) => `${g.genre} (${g.deltaPct.toFixed(1)}pp)`).join(", ")}`
+        `  ${labels.decliningGenres}: ${t.decliningGenres.map((g) => `${g.genre} (${g.deltaPct.toFixed(1)}pp)`).join(", ")}`
       );
     }
     if (t.artistRankMovements.length > 0) {
       const topMoves = t.artistRankMovements.slice(0, 3).map((a) =>
         a.rankChange > 0
-          ? `${a.artistName} (+${a.rankChange} pos.)`
-          : `${a.artistName} (${a.rankChange} pos.)`
+          ? `${a.artistName} (+${a.rankChange} ${labels.rankUp})`
+          : `${a.artistName} (${a.rankChange} ${labels.rankDown})`
       );
-      parts.push(`  Mouvements artistes: ${topMoves.join(", ")}`);
+      parts.push(`  ${labels.artistMovements}: ${topMoves.join(", ")}`);
     }
     return parts.join("\n");
   });
 
-  const userPrompt = `Voici un résumé des tendances semaine-à-semaine d'évolution des goûts musicaux:
+  const userPrompt = `${labels.promptIntro}
 
 ---
 ${summaryLines.join("\n\n")}
 ---
 
-Génère 1 à 2 courts paragraphes qui expliquent ce qui a changé et pourquoi c'est pertinent.
-Chaque affirmation doit citer une métrique. Pas d'introduction ni de conclusion.`;
+${labels.promptInstruction}`;
 
   const response = await groq.chat.completions.create({
     model: "llama-3.1-8b-instant",

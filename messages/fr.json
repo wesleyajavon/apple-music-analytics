@@ -120,6 +120,15 @@
     "errorLoading": "Impossible de charger l'analyse temporelle",
     "peakDay": "Jour de pic",
     "peakHour": "Heure de pic",
+    "weekdays": {
+      "monday": "Lundi",
+      "tuesday": "Mardi",
+      "wednesday": "Mercredi",
+      "thursday": "Jeudi",
+      "friday": "Vendredi",
+      "saturday": "Samedi",
+      "sunday": "Dimanche"
+    },
     "listens": "écoutes",
     "Listens": "Écoutes",
     "listensByWeekday": "Écoutes par jour de la semaine",
@@ -225,6 +234,8 @@
   "ai-insights": {
     "title": "AI Insights",
     "subtitle": "Analyse intelligente de vos données d'écoute générée par IA.",
+    "subtitleShort": "Analyse de vos données d'écoute",
+    "seeMore": "Voir plus",
     "loading": "Analyse de vos données d'écoute en cours...",
     "generating": "Génération des insights à partir de vos analytics...",
     "errorLoading": "Impossible de charger les insights.",
@@ -241,6 +252,7 @@
   },
   "taste-evolution": {
     "title": "Évolution des goûts",
+    "seeMore": "Voir plus",
     "subtitle": "Changements de vos goûts musicaux semaine à semaine. Les tendances sont calculées de manière déterministe ; l'IA fournit une explication contextuelle.",
     "loading": "Analyse des changements semaine à semaine...",
     "loadingShort": "Chargement...",
@@ -273,6 +285,8 @@
   },
   "taste-profile": {
     "title": "Explain My Taste",
+    "subtitleShort": "Votre profil musical en bref",
+    "seeMore": "Voir plus",
     "subtitle": "Votre profil musical expliqué à partir de vos analytics.",
     "loading": "Génération de votre profil musical...",
     "loadingShort": "Chargement...",
@@ -299,7 +313,19 @@
   },
   "when-will-i-listen": {
     "title": "Quand vais-je écouter ?",
-    "subtitle": "Prédiction de votre créneau d'écoute le plus probable pour aujourd'hui, basée sur vos habitudes passées. Le calcul utilise des heuristiques statistiques (pas d'IA) — l'IA sert uniquement à expliquer le résultat."
+    "subtitle": "Prédiction de votre créneau d'écoute le plus probable pour aujourd'hui, basée sur vos habitudes passées. Le calcul utilise des heuristiques statistiques (pas d'IA) — l'IA sert uniquement à expliquer le résultat.",
+    "predictedSlot": "Créneau prédit",
+    "probableGenre": "Genre probable",
+    "confidence": "Confiance",
+    "hideExplanation": "Masquer l'explication",
+    "showExplanation": "Voir l'explication",
+    "predictionDisclaimer": "Prédiction basée sur vos habitudes passées (même jour de la semaine). Pas d'IA pour le calcul.",
+    "errorLoading": "Impossible de charger la prédiction. Réessayez plus tard.",
+    "predictionSubtitle": "Prédiction basée sur vos habitudes",
+    "predictionSubtitleToday": "Prédiction pour aujourd'hui basée sur vos habitudes passées",
+    "insufficientData": "Données insuffisantes",
+    "listensAnalyzed": "{actual} écoutes analysées (minimum recommandé: {min})",
+    "fromCache": "Cache"
   },
   "annualReport": {
     "title": "Rapport Annuel {year}",

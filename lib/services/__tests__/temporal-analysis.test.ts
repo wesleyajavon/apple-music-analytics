@@ -80,15 +80,15 @@ describe('temporal-analysis', () => {
       expect(result.byDayOfWeek).toHaveLength(7);
       
       // Vérifier que les jours avec des écoutes sont correctement formatés
-      const monday = result.byDayOfWeek.find(d => d.dayName === 'Lundi');
+      const monday = result.byDayOfWeek.find(d => d.dayOfWeek === 1);
       expect(monday).toBeDefined();
       expect(monday?.listens).toBe(100);
       expect(monday?.uniqueTracks).toBe(50);
       expect(monday?.uniqueArtists).toBe(20);
 
-      // Vérifier que tous les jours sont présents et commencent par lundi
-      expect(result.byDayOfWeek[0].dayName).toBe('Lundi');
-      expect(result.byDayOfWeek[6].dayName).toBe('Dimanche');
+      // Vérifier que tous les jours sont présents et commencent par lundi (dayOfWeek 1)
+      expect(result.byDayOfWeek[0].dayOfWeek).toBe(1);
+      expect(result.byDayOfWeek[6].dayOfWeek).toBe(0);
 
       // Vérifier que toutes les heures sont présentes (0-23)
       expect(result.byHourOfDay).toHaveLength(24);
@@ -100,9 +100,9 @@ describe('temporal-analysis', () => {
       expect(hour8?.uniqueTracks).toBe(25);
       expect(hour8?.uniqueArtists).toBe(10);
 
-      // Vérifier que le jour de pic est identifié (Vendredi avec 150 écoutes)
+      // Vérifier que le jour de pic est identifié (Vendredi dayOfWeek 5 avec 150 écoutes)
       expect(result.peakDay).toBeDefined();
-      expect(result.peakDay?.dayName).toBe('Vendredi');
+      expect(result.peakDay?.dayOfWeek).toBe(5);
       expect(result.peakDay?.listens).toBe(150);
 
       // Vérifier que l'heure de pic est identifiée (18h avec 100 écoutes)
@@ -226,7 +226,7 @@ describe('temporal-analysis', () => {
 
       const result = await getTemporalAnalysis(startDate, endDate);
 
-      const monday = result.byDayOfWeek.find(d => d.dayName === 'Lundi');
+      const monday = result.byDayOfWeek.find(d => d.dayOfWeek === 1);
       expect(monday?.listens).toBe(Number(largeNumber));
       expect(monday?.uniqueTracks).toBe(Number(largeNumber));
       expect(monday?.uniqueArtists).toBe(Number(largeNumber));
@@ -256,10 +256,10 @@ describe('temporal-analysis', () => {
 
       const result = await getTemporalAnalysis(startDate, endDate);
 
-      // Vérifier que l'ordre commence par lundi
-      expect(result.byDayOfWeek[0].dayName).toBe('Lundi');
-      expect(result.byDayOfWeek[1].dayName).toBe('Mardi');
-      expect(result.byDayOfWeek[6].dayName).toBe('Dimanche');
+      // Vérifier que l'ordre commence par lundi (dayOfWeek 1)
+      expect(result.byDayOfWeek[0].dayOfWeek).toBe(1);
+      expect(result.byDayOfWeek[1].dayOfWeek).toBe(2);
+      expect(result.byDayOfWeek[6].dayOfWeek).toBe(0);
     });
 
     it('should include all hours from 0 to 23', async () => {

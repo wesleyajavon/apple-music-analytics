@@ -94,7 +94,9 @@ function HeatmapContent() {
       temporalData.byDayOfWeek.forEach((d, i) => {
         weekdayDistribution[(i + 1) % 7] = d.listens; // temporal: Lun=0..Dim=6 → 0=Dim,1=Lun..
       });
-      mostActiveWeekday = temporalData.peakDay?.dayName ?? "—";
+      if (temporalData.peakDay != null) {
+        mostActiveWeekday = t(`weekdays.${weekdaysT[temporalData.peakDay.dayOfWeek]}`);
+      }
     } else {
       timelineData.forEach((point) => {
         const dayOfWeek = new Date(toDateOnly(point.date) + "T12:00:00Z").getUTCDay();

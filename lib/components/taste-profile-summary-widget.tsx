@@ -1,6 +1,7 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTasteProfile } from "@/lib/hooks/use-taste-profile";
@@ -18,6 +19,7 @@ function truncateText(text: string, maxLength: number = 220): string {
  * Displays truncated description with link to full profile.
  */
 export function TasteProfileSummaryWidget() {
+  const t = useTranslations("taste-profile");
   const searchParams = useSearchParams();
   const startDateParam = searchParams.get("startDate");
   const endDateParam = searchParams.get("endDate");
@@ -63,10 +65,10 @@ export function TasteProfileSummaryWidget() {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Explain My Taste
+              {t("title")}
             </h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-              Votre profil musical en bref
+              {t("subtitleShort")}
             </p>
           </div>
           <Link
@@ -75,7 +77,7 @@ export function TasteProfileSummaryWidget() {
               text-accent-violet hover:bg-accent-violet/10 dark:hover:bg-accent-violet/20
               transition-colors duration-200"
           >
-            Voir plus
+            {t("seeMore")}
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
@@ -88,7 +90,7 @@ export function TasteProfileSummaryWidget() {
         </p>
         {data.cached && (
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-            (résultat en cache)
+            {t("cached")}
           </p>
         )}
       </div>

@@ -51,8 +51,6 @@ export const dynamic = "force-dynamic";
  *                     properties:
  *                       dayOfWeek:
  *                         type: integer
- *                       dayName:
- *                         type: string
  *                       listens:
  *                         type: integer
  *                       uniqueTracks:
@@ -104,7 +102,6 @@ export async function GET(request: NextRequest) {
     const dto: TemporalAnalysisDto = {
       byDayOfWeek: result.byDayOfWeek.map((day) => ({
         dayOfWeek: day.dayOfWeek,
-        dayName: day.dayName,
         listens: day.listens,
         uniqueTracks: day.uniqueTracks,
         uniqueArtists: day.uniqueArtists,
@@ -118,7 +115,6 @@ export async function GET(request: NextRequest) {
       peakDay: result.peakDay
         ? {
             dayOfWeek: result.peakDay.dayOfWeek,
-            dayName: result.peakDay.dayName,
             listens: result.peakDay.listens,
             uniqueTracks: result.peakDay.uniqueTracks,
             uniqueArtists: result.peakDay.uniqueArtists,

@@ -3,6 +3,7 @@
 import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 import { useLocale } from "next-intl";
 import { apiClient } from "@/lib/api-client";
+import { getAiInsightsLabels } from "@/lib/constants/ai-insights-labels";
 import type {
   TasteProfileInput,
   TasteProfileResponse,
@@ -42,7 +43,8 @@ function buildTasteProfileInput(
   overview: OverviewStatsWithTopArtists,
   previousOverview: OverviewStatsWithTopArtists | null,
   genres: GenreDistributionResponse,
-  temporal: TemporalAnalysisDto
+  temporal: TemporalAnalysisDto,
+  locale: string
 ): TasteProfileInput {
   const yearOverYearDeltas: YearOverYearDelta[] = previousOverview
     ? [
@@ -122,7 +124,7 @@ function buildTasteProfileInput(
       yearOverYearDeltas.length > 0 ? yearOverYearDeltas : undefined,
     peakDay: temporal.peakDay
       ? {
-          dayName: temporal.peakDay.dayName,
+          dayName: getAiInsightsLabels(locale).dayNames[temporal.peakDay.dayOfWeek],
           listens: temporal.peakDay.listens,
         }
       : undefined,
@@ -167,7 +169,8 @@ async function fetchTasteProfile(
     overview,
     previousOverview,
     genres,
-    temporal
+    temporal,
+    locale
   );
 
   return apiClient.post<TasteProfileResponse>("/ai/taste-profile", {

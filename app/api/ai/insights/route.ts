@@ -93,8 +93,8 @@ export async function POST(request: NextRequest) {
     const input = inputData as AiInsightsInput;
     const locale = parseAiLocale(localeParam);
 
-    // 1. Summarize and normalize (deterministic)
-    const summary = summarizeAnalytics(input);
+    // 1. Summarize and normalize (deterministic, localized)
+    const summary = summarizeAnalytics(input, locale);
 
     // 2. Compute cache key from summary hash + locale
     const cacheKey = computeCacheKey(summary, locale);

@@ -1,17 +1,10 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { useTasteEvolution } from "@/lib/hooks/use-taste-evolution";
-import type { WeekToWeekTrend, TrendClassification } from "@/lib/dto/taste-evolution";
-
-const CLASSIFICATION_LABELS: Record<TrendClassification, string> = {
-  expansion: "Expansion",
-  consolidation: "Consolidation",
-  exploration: "Exploration",
-  regression: "Régression",
-  stable: "Stable",
-};
+import type { WeekToWeekTrend } from "@/lib/dto/taste-evolution";
 
 function truncateCommentary(text: string, maxLength: number = 200): string {
   if (text.length <= maxLength) return text;
@@ -26,6 +19,7 @@ function truncateCommentary(text: string, maxLength: number = 200): string {
  * Displays classification, key metrics, and truncated AI commentary.
  */
 export function TasteEvolutionSummaryWidget() {
+  const t = useTranslations("taste-evolution");
   const range = useMemo(() => {
     const end = new Date();
     const start = new Date();
@@ -64,7 +58,9 @@ export function TasteEvolutionSummaryWidget() {
     return null;
   }
 
-  const classificationLabel = CLASSIFICATION_LABELS[latestTrend.classification];
+  const classificationLabel = t(
+    `classifications.${latestTrend.classification}` as "classifications.expansion"
+  );
 
   return (
     <div className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card">
@@ -72,7 +68,7 @@ export function TasteEvolutionSummaryWidget() {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Évolution des goûts
+              {t("title")}
             </h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
               {latestTrend.timeRange.label} vs {latestTrend.previousWeekRange.label}
@@ -84,7 +80,7 @@ export function TasteEvolutionSummaryWidget() {
               text-accent-violet hover:bg-accent-violet/10 dark:hover:bg-accent-violet/20
               transition-colors duration-200"
           >
-            Voir plus
+            {t("seeMore")}
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
@@ -103,7 +99,7 @@ export function TasteEvolutionSummaryWidget() {
                 : "text-rose-600 dark:text-rose-400"
             }`}
           >
-            Volume {latestTrend.volumeDelta >= 0 ? "+" : ""}
+            {t("volume")} {latestTrend.volumeDelta >= 0 ? "+" : ""}
             {latestTrend.volumeDelta} ({latestTrend.volumeDeltaPct >= 0 ? "+" : ""}
             {latestTrend.volumeDeltaPct.toFixed(1)}%)
           </span>
@@ -114,7 +110,7 @@ export function TasteEvolutionSummaryWidget() {
                 : "text-rose-600 dark:text-rose-400"
             }`}
           >
-            Diversité {latestTrend.diversityDelta >= 0 ? "+" : ""}
+            {t("diversity")} {latestTrend.diversityDelta >= 0 ? "+" : ""}
             {latestTrend.diversityDelta.toFixed(2)}
           </span>
         </div>

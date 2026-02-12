@@ -6,8 +6,10 @@
  *
  * Design: Deterministic output for same input → stable cache keys.
  * No randomness, no timestamps in the summary content.
+ * Labels are localized per locale so the LLM receives context in the target language.
  */
 
+import { getAiInsightsLabels } from "@/lib/constants/ai-insights-labels";
 import type {
   AiInsightsInput,
   GenreDistributionItem,
@@ -15,6 +17,8 @@ import type {
   TopArtistItem,
   YearOverYearDelta,
 } from "@/lib/dto/ai-insights";
+
+export type AiSummarizerLocale = "fr" | "en" | "es";
 
 /** Format seconds as "Xh Ymin" or "Xmin" for LLM consumption */
 function formatSecondsToReadable(seconds: number): string {
@@ -39,16 +43,22 @@ export interface AnalyticsSummary {
 /**
  * Summarizes and normalizes analytics data into a deterministic format.
  * Same input always produces same output → enables cache key hashing.
+ * Labels are localized per locale so the LLM receives context in the target language.
  *
  * @param input - Aggregated analytics (genre distribution, time of day, top artists, deltas)
+ * @param locale - fr | en | es - output language for labels
  * @returns Normalized summary with text and structured representations
  */
-export function summarizeAnalytics(input: AiInsightsInput): AnalyticsSummary {
+export function summarizeAnalytics(
+  input: AiInsightsInput,
+  locale: AiSummarizerLocale = "fr"
+): AnalyticsSummary {
+  const labels = getAiInsightsLabels(locale);
   const parts: string[] = [];
 
   // Date range (always first for context)
   parts.push(
-    `Période: ${input.dateRange.start} à ${input.dateRange.end}`
+    `${labels.summary.period}: ${input.dateRange.start} ${labels.summary.periodConnector} ${input.dateRange.end}`
   );
 
   // Genre distribution - top 10, sorted by count descending
@@ -57,9 +67,12 @@ export function summarizeAnalytics(input: AiInsightsInput): AnalyticsSummary {
     .slice(0, 10);
   if (sortedGenres.length > 0) {
     const genreLines = sortedGenres.map(
-      (g) => `  - ${g.genre}: ${g.count} écoutes (${g.percentage.toFixed(1)}%)`
+      (g) =>
+        `  - ${g.genre}: ${g.count} ${labels.summary.listens} (${g.percentage.toFixed(1)}%)`
     );
-    parts.push("Distribution des genres (top 10):\n" + genreLines.join("\n"));
+    parts.push(
+      `${labels.summary.genreDistribution}:\n` + genreLines.join("\n")
+    );
   }
 
   // Listening by time of day - peak hours
@@ -68,9 +81,12 @@ export function summarizeAnalytics(input: AiInsightsInput): AnalyticsSummary {
     .slice(0, 5);
   if (sortedHours.length > 0) {
     const hourLines = sortedHours.map(
-      (h) => `  - ${h.hour}h-${h.hour + 1}h: ${h.listens} écoutes`
+      (h) =>
+        `  - ${h.hour}h-${h.hour + 1}h: ${h.listens} ${labels.summary.listens}`
     );
-    parts.push("Heures d'écoute les plus actives (top 5):\n" + hourLines.join("\n"));
+    parts.push(
+      `${labels.summary.activeHours}:\n` + hourLines.join("\n")
+    );
   }
 
   // Top artists - top 10
@@ -80,32 +96,34 @@ export function summarizeAnalytics(input: AiInsightsInput): AnalyticsSummary {
   if (sortedArtists.length > 0) {
     const artistLines = sortedArtists.map((a) =>
       a.genre
-        ? `  - ${a.artistName} (${a.genre}): ${a.listenCount} écoutes`
-        : `  - ${a.artistName}: ${a.listenCount} écoutes`
+        ? `  - ${a.artistName} (${a.genre}): ${a.listenCount} ${labels.summary.listens}`
+        : `  - ${a.artistName}: ${a.listenCount} ${labels.summary.listens}`
     );
-    parts.push("Artistes les plus écoutés (top 10):\n" + artistLines.join("\n"));
+    parts.push(`${labels.summary.topArtists}:\n` + artistLines.join("\n"));
   }
 
   // Year-over-year deltas
   if (input.yearOverYearDeltas && input.yearOverYearDeltas.length > 0) {
     const deltaLines = input.yearOverYearDeltas.map((d) => {
-      const isTimeMetric = /temps\s*d['']?écoute/i.test(d.metric);
+      const isTimeMetric = /time|écoute|escucha|play/i.test(d.metric);
       const formatVal = (v: number) =>
-        isTimeMetric ? formatSecondsToReadable(v) : v.toLocaleString("fr-FR");
+        isTimeMetric ? formatSecondsToReadable(v) : v.toLocaleString(locale);
       return `  - ${d.metric}: ${formatVal(d.currentValue)} (vs ${formatVal(d.previousValue)}) = ${d.percentChange >= 0 ? "+" : ""}${d.percentChange.toFixed(1)}%`;
     });
-    parts.push("Évolution vs période précédente:\n" + deltaLines.join("\n"));
+    parts.push(
+      `${labels.summary.evolutionVsPrevious}:\n` + deltaLines.join("\n")
+    );
   }
 
   // Peak day/hour if available
   if (input.peakDay) {
     parts.push(
-      `Jour de pic: ${input.peakDay.dayName} (${input.peakDay.listens} écoutes)`
+      `${labels.summary.peakDay}: ${input.peakDay.dayName} (${input.peakDay.listens} ${labels.summary.listens})`
     );
   }
   if (input.peakHour !== undefined) {
     parts.push(
-      `Heure de pic: ${input.peakHour.hour}h (${input.peakHour.listens} écoutes)`
+      `${labels.summary.peakHour}: ${input.peakHour.hour}h (${input.peakHour.listens} ${labels.summary.listens})`
     );
   }
 

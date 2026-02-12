@@ -3,6 +3,7 @@
 import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 import { useLocale } from "next-intl";
 import { apiClient } from "@/lib/api-client";
+import { getAiInsightsLabels } from "@/lib/constants/ai-insights-labels";
 import type {
   AiInsightsInput,
   AiInsightsResponse,
@@ -40,12 +41,14 @@ function buildInsightsInput(
   overview: OverviewStatsWithTopArtists,
   previousOverview: OverviewStatsWithTopArtists | null,
   genres: GenreDistributionResponse,
-  temporal: TemporalAnalysisDto
+  temporal: TemporalAnalysisDto,
+  locale: string
 ): AiInsightsInput {
+  const labels = getAiInsightsLabels(locale);
   const yearOverYearDeltas: YearOverYearDelta[] = previousOverview
     ? [
         {
-          metric: "Total d'écoutes",
+          metric: labels.metrics.totalListens,
           currentValue: overview.totalListens,
           previousValue: previousOverview.totalListens,
           percentChange:
@@ -58,7 +61,7 @@ function buildInsightsInput(
                 100,
         },
         {
-          metric: "Artistes uniques",
+          metric: labels.metrics.uniqueArtists,
           currentValue: overview.uniqueArtists,
           previousValue: previousOverview.uniqueArtists,
           percentChange:
@@ -71,7 +74,7 @@ function buildInsightsInput(
                 100,
         },
         {
-          metric: "Titres uniques",
+          metric: labels.metrics.uniqueTracks,
           currentValue: overview.uniqueTracks,
           previousValue: previousOverview.uniqueTracks,
           percentChange:
@@ -84,7 +87,7 @@ function buildInsightsInput(
                 100,
         },
         {
-          metric: "Temps d'écoute",
+          metric: labels.metrics.totalPlayTime,
           currentValue: overview.totalPlayTime,
           previousValue: previousOverview.totalPlayTime,
           percentChange:
@@ -119,7 +122,7 @@ function buildInsightsInput(
       yearOverYearDeltas.length > 0 ? yearOverYearDeltas : undefined,
     peakDay: temporal.peakDay
       ? {
-          dayName: temporal.peakDay.dayName,
+          dayName: labels.dayNames[temporal.peakDay.dayOfWeek],
           listens: temporal.peakDay.listens,
         }
       : undefined,
@@ -160,7 +163,8 @@ async function fetchAiInsights(
     overview,
     previousOverview,
     genres,
-    temporal
+    temporal,
+    locale
   );
 
   return apiClient.post<AiInsightsResponse>("/ai/insights", {

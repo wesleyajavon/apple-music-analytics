@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useListeningHabitPrediction } from "@/lib/hooks/use-listening-habit-prediction";
 import type { ListeningHabitApiResponse } from "@/lib/hooks/use-listening-habit-prediction";
 import type { InsufficientDataResponse } from "@/lib/dto/predictions";
@@ -16,6 +17,7 @@ function PredictionContent({
 }: {
   data: ListeningHabitApiResponse & { timeWindow: { label: string }; confidenceScore: number; predictedGenre: string };
 }) {
+  const t = useTranslations("when-will-i-listen");
   const hasExplanation = "aiExplanation" in data && data.aiExplanation;
   const [expanded, setExpanded] = useState(false);
 
@@ -24,7 +26,7 @@ function PredictionContent({
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="rounded-lg bg-accent-violet/10 dark:bg-accent-violet/20 p-4">
           <p className="text-xs font-medium uppercase tracking-wider text-accent-violet dark:text-accent-violet/90">
-            Créneau prédit
+            {t("predictedSlot")}
           </p>
           <p className="mt-1 text-lg font-bold text-gray-900 dark:text-white">
             {data.timeWindow.label}
@@ -32,7 +34,7 @@ function PredictionContent({
         </div>
         <div className="rounded-lg bg-accent-rose/10 dark:bg-accent-rose/20 p-4">
           <p className="text-xs font-medium uppercase tracking-wider text-accent-rose dark:text-accent-rose/90">
-            Genre probable
+            {t("probableGenre")}
           </p>
           <p className="mt-1 text-lg font-bold text-gray-900 dark:text-white truncate">
             {data.predictedGenre}
@@ -40,7 +42,7 @@ function PredictionContent({
         </div>
         <div className="rounded-lg bg-accent-cyan/10 dark:bg-accent-cyan/20 p-4">
           <p className="text-xs font-medium uppercase tracking-wider text-accent-cyan dark:text-accent-cyan/90">
-            Confiance
+            {t("confidence")}
           </p>
           <p className="mt-1 text-lg font-bold text-gray-900 dark:text-white">
             {data.confidenceScore}%
@@ -60,14 +62,14 @@ function PredictionContent({
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
                 </svg>
-                Masquer l&apos;explication
+                {t("hideExplanation")}
               </>
             ) : (
               <>
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
-                Voir l&apos;explication
+                {t("showExplanation")}
               </>
             )}
           </button>
@@ -80,7 +82,7 @@ function PredictionContent({
       )}
 
       <p className="text-xs text-gray-500 dark:text-gray-500">
-        Prédiction basée sur vos habitudes passées (même jour de la semaine). Pas d&apos;IA pour le calcul.
+        {t("predictionDisclaimer")}
       </p>
     </div>
   );
@@ -91,6 +93,7 @@ export function WhenWillIListenWidget({
 }: {
   includeExplanation?: boolean;
 }) {
+  const t = useTranslations("when-will-i-listen");
   const { data, isLoading, error } = useListeningHabitPrediction({
     includeExplanation,
   });
@@ -118,10 +121,10 @@ export function WhenWillIListenWidget({
       <div className="overflow-hidden rounded-xl border border-red-100 dark:border-red-900/30 bg-red-50/50 dark:bg-red-900/10 shadow-card">
         <div className="px-6 py-4">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Quand vais-je écouter ?
+            {t("title")}
           </h2>
           <p className="mt-2 text-sm text-red-600 dark:text-red-400">
-            Impossible de charger la prédiction. Réessayez plus tard.
+            {t("errorLoading")}
           </p>
         </div>
       </div>
@@ -138,10 +141,10 @@ export function WhenWillIListenWidget({
       <div className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card">
         <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Quand vais-je écouter ?
+            {t("title")}
           </h2>
           <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">
-            Prédiction basée sur vos habitudes
+            {t("predictionSubtitle")}
           </p>
         </div>
         <div className="p-6">
@@ -161,13 +164,13 @@ export function WhenWillIListenWidget({
             </svg>
             <div>
               <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
-                Données insuffisantes
+                {t("insufficientData")}
               </p>
               <p className="mt-1 text-sm text-amber-700 dark:text-amber-300">
                 {insufficient.message}
               </p>
               <p className="mt-2 text-xs text-amber-600 dark:text-amber-400">
-                {insufficient.actualListens} écoutes analysées (minimum recommandé: {insufficient.minListensRecommended})
+                {t("listensAnalyzed", { actual: insufficient.actualListens, min: insufficient.minListensRecommended })}
               </p>
             </div>
           </div>
@@ -181,16 +184,16 @@ export function WhenWillIListenWidget({
       <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
         <div className="flex items-center gap-2">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Quand vais-je écouter ?
+            {t("title")}
           </h2>
           {"fromCache" in data && data.fromCache && (
             <span className="rounded-full bg-gray-100 dark:bg-gray-700 px-2 py-0.5 text-xs text-gray-500 dark:text-gray-400">
-              Cache
+              {t("fromCache")}
             </span>
           )}
         </div>
         <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">
-          Prédiction pour aujourd&apos;hui basée sur vos habitudes passées
+          {t("predictionSubtitleToday")}
         </p>
       </div>
       <div className="p-6">

@@ -1,6 +1,7 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAiInsights } from "@/lib/hooks/use-ai-insights";
@@ -13,6 +14,7 @@ const PREVIEW_INSIGHTS_COUNT = 3;
  * Displays first few insights with link to full page.
  */
 export function AiInsightsSummaryWidget() {
+  const t = useTranslations("ai-insights");
   const searchParams = useSearchParams();
   const startDateParam = searchParams.get("startDate");
   const endDateParam = searchParams.get("endDate");
@@ -60,10 +62,10 @@ export function AiInsightsSummaryWidget() {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-              AI Insights
+              {t("title")}
             </h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-              Analyse de vos données d&apos;écoute
+              {t("subtitleShort")}
             </p>
           </div>
           <Link
@@ -72,7 +74,7 @@ export function AiInsightsSummaryWidget() {
               text-accent-violet hover:bg-accent-violet/10 dark:hover:bg-accent-violet/20
               transition-colors duration-200"
           >
-            Voir plus
+            {t("seeMore")}
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
@@ -95,7 +97,7 @@ export function AiInsightsSummaryWidget() {
         </ul>
         {data.cached && (
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
-            (résultat en cache)
+            {t("cached")}
           </p>
         )}
       </div>

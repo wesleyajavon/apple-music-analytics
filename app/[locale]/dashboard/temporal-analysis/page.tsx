@@ -25,6 +25,8 @@ import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
 import { TemporalAnalysisSkeleton } from "@/lib/components/skeleton-loaders";
 
 // Formatter tooltip - créé dans le composant pour avoir accès à t et locale
+const WEEKDAY_KEYS = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"] as const;
+
 function createTemporalTooltipFormatter(
   t: (key: string) => string,
   locale: string
@@ -71,13 +73,13 @@ function TemporalAnalysisContent() {
   const dayOfWeekData = useMemo(
     () =>
       data?.byDayOfWeek.map((item) => ({
-        name: item.dayName,
-        dayName: item.dayName,
+        name: t(`weekdays.${WEEKDAY_KEYS[item.dayOfWeek]}`),
+        dayName: t(`weekdays.${WEEKDAY_KEYS[item.dayOfWeek]}`),
         listens: item.listens,
         uniqueTracks: item.uniqueTracks,
         uniqueArtists: item.uniqueArtists,
       })) || [],
-    [data]
+    [data, t]
   );
 
   const hourOfDayData = useMemo(
@@ -98,10 +100,10 @@ function TemporalAnalysisContent() {
   const radarData = useMemo(
     () =>
       data?.byDayOfWeek.map((item) => ({
-        day: item.dayName,
+        day: t(`weekdays.${WEEKDAY_KEYS[item.dayOfWeek]}`),
         listens: item.listens,
       })) || [],
-    [data]
+    [data, t]
   );
 
   return (
@@ -149,7 +151,7 @@ function TemporalAnalysisContent() {
                       </h3>
                     </div>
                     <p className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-                      {data.peakDay.dayName}
+                      {t(`weekdays.${WEEKDAY_KEYS[data.peakDay.dayOfWeek]}`)}
                     </p>
                     <p className="text-sm text-gray-500 dark:text-gray-400 mt-1.5">
                       {data.peakDay.listens.toLocaleString(locale)} {t("listens")}

@@ -129,7 +129,6 @@ export interface TemporalAnalysisDto {
  */
 export interface DayOfWeekAggregationDto {
   dayOfWeek: number; // 0-6 (0 = dimanche, 1 = lundi, etc.)
-  dayName: string; // Nom du jour en français
   listens: number;
   uniqueTracks: number;
   uniqueArtists: number;

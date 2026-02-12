@@ -9,20 +9,38 @@
 
 import Groq from "groq-sdk";
 import type { ListeningHabitPrediction } from "@/lib/dto/predictions";
-import { getLanguageName, type AiLocale } from "./locale-utils";
+import type { AiLocale } from "./locale-utils";
 
-function buildSystemPrompt(locale: AiLocale): string {
-  const lang = getLanguageName(locale);
-  return `Tu es un assistant qui explique des prédictions d'écoute musicale.
+/** System prompts in target language - ensures AI responds in the same language */
+const SYSTEM_PROMPTS: Record<AiLocale, string> = {
+  fr: `Tu es un assistant qui explique des prédictions d'écoute musicale.
 
 RÈGLES STRICTES:
 1. Tu reçois une prédiction DÉJÀ CALCULÉE par des heuristiques statistiques. Tu ne la recalcules pas.
 2. Explique UNIQUEMENT ce que les données montrent. N'invente rien.
-3. Langue: ${lang}. Réponds ENTIÈREMENT dans cette langue. Style: concis, accessible.
+3. Réponds UNIQUEMENT en français. Style: concis, accessible.
 4. Mentionne la fenêtre horaire, le genre prédit, et le score de confiance.
 5. Une ou deux phrases suffisent. Pas de liste à puces sauf si pertinent.
-6. Ne dis pas "selon l'IA" ou "l'algorithme pense" - la prédiction est basée sur des données, pas sur une intuition.`;
-}
+6. Ne dis pas "selon l'IA" ou "l'algorithme pense" - la prédiction est basée sur des données, pas sur une intuition.`,
+  en: `You are an assistant that explains music listening predictions.
+
+STRICT RULES:
+1. You receive a prediction ALREADY CALCULATED by statistical heuristics. You do not recalculate it.
+2. Explain ONLY what the data shows. Do not invent anything.
+3. Respond ONLY in English. Style: concise, accessible.
+4. Mention the time window, predicted genre, and confidence score.
+5. One or two sentences are enough. No bullet points unless relevant.
+6. Do not say "according to the AI" or "the algorithm thinks" - the prediction is based on data, not intuition.`,
+  es: `Eres un asistente que explica predicciones de escucha musical.
+
+REGLAS ESTRICTAS:
+1. Recibes una predicción YA CALCULADA por heurísticas estadísticas. No la recalcules.
+2. Explica ÚNICAMENTE lo que muestran los datos. No inventes nada.
+3. Responde ÚNICAMENTE en español. Estilo: conciso, accesible.
+4. Menciona la franja horaria, el género predicho y el score de confianza.
+5. Una o dos frases bastan. Sin viñetas salvo si es pertinente.
+6. No digas "según la IA" o "el algoritmo piensa" - la predicción se basa en datos, no en intuición.`,
+};
 
 /**
  * Generates a concise natural-language explanation of a listening habit prediction.
@@ -48,27 +66,27 @@ export async function explainListeningHabitPrediction(
   const metrics = prediction.supportingMetrics;
   const metricsText = metrics
     ? `
-Métriques de support:
-- ${metrics.totalListensAnalyzed} écoutes analysées sur ${metrics.daysOfData} jours
-- Créneau le plus actif: ${metrics.dayName} entre ${prediction.timeWindow.label}
-- Heure de pic: ${metrics.peakHour}h
-- Répartition des genres dans la fenêtre: ${JSON.stringify(metrics.genreDistributionInWindow)}
+Support metrics:
+- ${metrics.totalListensAnalyzed} listens analyzed over ${metrics.daysOfData} days
+- Most active slot: ${metrics.dayName} during ${prediction.timeWindow.label}
+- Peak hour: ${metrics.peakHour}h
+- Genre distribution in window: ${JSON.stringify(metrics.genreDistributionInWindow)}
 `
     : "";
 
-  const userPrompt = `Voici une prédiction d'écoute musicale (déjà calculée, à expliquer):
+  const userPrompt = `Here is a music listening prediction (already calculated, needs explanation):
 
-- Fenêtre horaire prédite: ${prediction.timeWindow.label}
-- Genre le plus probable: ${prediction.predictedGenre}
-- Score de confiance: ${prediction.confidenceScore}%
+- Predicted time window: ${prediction.timeWindow.label}
+- Most likely genre: ${prediction.predictedGenre}
+- Confidence score: ${prediction.confidenceScore}%
 ${metricsText}
 
-Génère une explication courte (1 à 3 phrases) pour l'utilisateur. Explique pourquoi cette prédiction a du sens d'après ses habitudes passées.`;
+Generate a short explanation (1 to 3 sentences) for the user. Explain why this prediction makes sense based on their past habits. Respond in the same language as the system instructions.`;
 
   const response = await groq.chat.completions.create({
     model: "llama-3.1-8b-instant",
     messages: [
-      { role: "system", content: buildSystemPrompt(locale) },
+      { role: "system", content: SYSTEM_PROMPTS[locale] },
       { role: "user", content: userPrompt },
     ],
     temperature: 0.4,

@@ -120,6 +120,15 @@
     "errorLoading": "No se puede cargar el análisis temporal",
     "peakDay": "Día pico",
     "peakHour": "Hora pico",
+    "weekdays": {
+      "monday": "Lunes",
+      "tuesday": "Martes",
+      "wednesday": "Miércoles",
+      "thursday": "Jueves",
+      "friday": "Viernes",
+      "saturday": "Sábado",
+      "sunday": "Domingo"
+    },
     "listens": "escuchas",
     "Listens": "Escuchas",
     "listensByWeekday": "Escuchas por día de la semana",
@@ -225,6 +234,8 @@
   "ai-insights": {
     "title": "AI Insights",
     "subtitle": "Análisis inteligente de tus datos de escucha generado por IA.",
+    "subtitleShort": "Análisis de tus datos de escucha",
+    "seeMore": "Ver más",
     "loading": "Analizando tus datos de escucha...",
     "generating": "Generando insights a partir de tus analytics...",
     "errorLoading": "No se pueden cargar los insights.",
@@ -241,6 +252,7 @@
   },
   "taste-evolution": {
     "title": "Evolución de gustos",
+    "seeMore": "Ver más",
     "subtitle": "Cambios en tus gustos musicales semana a semana. Las tendencias se calculan de forma determinista; la IA proporciona una explicación contextual.",
     "loading": "Analizando cambios semana a semana...",
     "loadingShort": "Cargando...",
@@ -273,6 +285,8 @@
   },
   "taste-profile": {
     "title": "Explain My Taste",
+    "subtitleShort": "Tu perfil musical en breve",
+    "seeMore": "Ver más",
     "subtitle": "Tu perfil musical explicado a partir de tus analytics.",
     "loading": "Generando tu perfil musical...",
     "loadingShort": "Cargando...",
@@ -299,7 +313,19 @@
   },
   "when-will-i-listen": {
     "title": "¿Cuándo escucharé?",
-    "subtitle": "Predicción de tu franja de escucha más probable para hoy, basada en tus hábitos pasados. El cálculo usa heurísticas estadísticas (sin IA) — la IA solo sirve para explicar el resultado."
+    "subtitle": "Predicción de tu franja de escucha más probable para hoy, basada en tus hábitos pasados. El cálculo usa heurísticas estadísticas (sin IA) — la IA solo sirve para explicar el resultado.",
+    "predictedSlot": "Franja predicha",
+    "probableGenre": "Género probable",
+    "confidence": "Confianza",
+    "hideExplanation": "Ocultar explicación",
+    "showExplanation": "Ver explicación",
+    "predictionDisclaimer": "Predicción basada en tus hábitos pasados (mismo día de la semana). No se usa IA para el cálculo.",
+    "errorLoading": "No se puede cargar la predicción. Inténtalo de nuevo más tarde.",
+    "predictionSubtitle": "Predicción basada en tus hábitos",
+    "predictionSubtitleToday": "Predicción para hoy basada en tus hábitos pasados",
+    "insufficientData": "Datos insuficientes",
+    "listensAnalyzed": "{actual} escuchas analizadas (mínimo recomendado: {min})",
+    "fromCache": "Caché"
   },
   "annualReport": {
     "title": "Informe Anual {year}",

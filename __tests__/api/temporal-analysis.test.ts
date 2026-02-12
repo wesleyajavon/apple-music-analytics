@@ -19,14 +19,12 @@ describe('GET /api/temporal-analysis', () => {
       byDayOfWeek: [
         {
           dayOfWeek: 1,
-          dayName: 'Lundi',
           listens: 100,
           uniqueTracks: 50,
           uniqueArtists: 20,
         },
         {
           dayOfWeek: 2,
-          dayName: 'Mardi',
           listens: 120,
           uniqueTracks: 60,
           uniqueArtists: 25,
@@ -48,7 +46,6 @@ describe('GET /api/temporal-analysis', () => {
       ],
       peakDay: {
         dayOfWeek: 2,
-        dayName: 'Mardi',
         listens: 120,
         uniqueTracks: 60,
         uniqueArtists: 25,
@@ -81,7 +78,6 @@ describe('GET /api/temporal-analysis', () => {
     
     expect(data.byDayOfWeek[0]).toMatchObject({
       dayOfWeek: 1,
-      dayName: 'Lundi',
       listens: 100,
       uniqueTracks: 50,
       uniqueArtists: 20,
@@ -89,7 +85,6 @@ describe('GET /api/temporal-analysis', () => {
     
     expect(data.peakDay).toMatchObject({
       dayOfWeek: 2,
-      dayName: 'Mardi',
       listens: 120,
     });
     
@@ -209,14 +204,12 @@ describe('GET /api/temporal-analysis', () => {
       byDayOfWeek: [
         {
           dayOfWeek: 1,
-          dayName: 'Lundi',
           listens: 100,
           uniqueTracks: 50,
           uniqueArtists: 20,
         },
         {
           dayOfWeek: 2,
-          dayName: 'Mardi',
           listens: 120,
           uniqueTracks: 60,
           uniqueArtists: 25,
@@ -240,7 +233,6 @@ describe('GET /api/temporal-analysis', () => {
     expect(data.byDayOfWeek).toHaveLength(2);
     expect(data.byDayOfWeek[0]).toMatchObject({
       dayOfWeek: 1,
-      dayName: 'Lundi',
       listens: 100,
       uniqueTracks: 50,
       uniqueArtists: 20,

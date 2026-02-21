@@ -10,19 +10,17 @@ vi.mock('../sentry', () => ({
 }));
 
 describe('logger', () => {
-  const originalEnv = process.env.NODE_ENV;
-
   beforeEach(() => {
     vi.clearAllMocks();
     vi.spyOn(console, 'debug').mockImplementation(() => {});
     vi.spyOn(console, 'info').mockImplementation(() => {});
     vi.spyOn(console, 'warn').mockImplementation(() => {});
     vi.spyOn(console, 'error').mockImplementation(() => {});
-    process.env.NODE_ENV = 'development';
+    vi.stubEnv('NODE_ENV', 'development');
   });
 
   afterEach(() => {
-    process.env.NODE_ENV = originalEnv;
+    vi.unstubAllEnvs();
     vi.restoreAllMocks();
   });
 
@@ -35,7 +33,7 @@ describe('logger', () => {
     });
 
     it('should not log debug in production', () => {
-      process.env.NODE_ENV = 'production';
+      vi.stubEnv('NODE_ENV', 'production');
       logger.debug('test debug');
       expect(console.debug).not.toHaveBeenCalled();
     });
@@ -74,7 +72,7 @@ describe('logger', () => {
     });
 
     it('should call captureMessage in production', () => {
-      process.env.NODE_ENV = 'production';
+      vi.stubEnv('NODE_ENV', 'production');
       logger.warn('production warning');
       expect(console.warn).toHaveBeenCalled();
       expect(mockCaptureMessage).toHaveBeenCalledWith('production warning', 'warning');

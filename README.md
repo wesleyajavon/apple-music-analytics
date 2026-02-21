@@ -5,6 +5,8 @@
 
 Personal dashboard to visualize your music listening behavior from **Last.fm** history and manually imported **Apple Music Replay** data.
 
+> **Note:** This is a personal project — it does not support multiple users or public sign-up. To see it in action, visit the live demo: **[https://apple-music-analytics.vercel.app/fr](https://apple-music-analytics.vercel.app/fr)**
+
 ## Features
 
 - **Overview** — Global stats (listens, artists, tracks, total time)
@@ -24,7 +26,9 @@ Personal dashboard to visualize your music listening behavior from **Last.fm** h
 - **PostgreSQL** (local or cloud)
 - **Redis** (optional, for caching)
 
-## Quick setup
+## Local setup (for development / forking)
+
+If you want to run your own instance for personal use or contribute to the project:
 
 ```bash
 git clone https://github.com/wesleyajavon/apple-music-analytics.git

@@ -68,3 +68,6 @@ next-env.d.ts
 
 # Logs
 *.log
+
+# Personal working notes (future enhancements, ideas)
+FUTURE_ENHANCEMENTS.md

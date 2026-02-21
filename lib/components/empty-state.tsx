@@ -78,22 +78,6 @@ const ILLUSTRATIONS = {
       />
     </svg>
   ),
-  network: (
-    <svg
-      className="mx-auto h-24 w-24 text-gray-300 dark:text-gray-600"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={1.2}
-      aria-hidden
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
-      />
-    </svg>
-  ),
   music: (
     <svg
       className="mx-auto h-24 w-24 text-gray-300 dark:text-gray-600"
@@ -236,12 +220,6 @@ export function useEmptyStatePresets() {
       message: t("noDayDetail.message"),
       description: t("noDayDetail.description"),
       illustration: ILLUSTRATIONS.music,
-    },
-    noNetwork: {
-      message: t("noNetwork.message"),
-      description: t("noNetwork.description"),
-      illustration: ILLUSTRATIONS.network,
-      actions: [{ label: t("noNetwork.actionLabel"), href: "/api-docs" }] as EmptyStateAction[],
     },
   };
 }

@@ -10,6 +10,30 @@ import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
 import { HeatmapSkeleton, DayDetailsSkeleton } from "@/lib/components/skeleton-loaders";
 
+/** Icônes pour les cartes de stats - cohérent avec Overview */
+const HeatmapStatIcons = {
+  activeDays: (
+    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+    </svg>
+  ),
+  avgDaily: (
+    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+    </svg>
+  ),
+  mostActiveDay: (
+    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 01-.982-3.172M9.497 14.25a7.454 7.454 0 00.981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 007.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 002.748 3.716m-6.536-1.206A6.726 6.726 0 016.75 9.75m0 0a6.726 6.726 0 003.536 2.748M12 2.25v.75m0 12v.75m0-12v-.75m0 12v-.75" />
+    </svg>
+  ),
+  favoriteDay: (
+    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  ),
+} as const;
+
 /** Normalise une date (string ou Date) en YYYY-MM-DD pour éviter Invalid Date */
 function toDateOnly(date: string | Date): string {
   if (typeof date === "string") return date.split("T")[0];
@@ -67,6 +91,25 @@ function HeatmapContent() {
     }));
   }, [timelineData]);
 
+  // Calculer le nombre total de jours dans la plage (pour active days, etc.)
+  const totalDaysInRange = useMemo(() => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const diffTime = end.getTime() - start.getTime();
+    return Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1);
+  }, [startDate, endDate]);
+
+  // Pour la moyenne quotidienne : utiliser les jours du premier au dernier jour avec données
+  // (pas 365 ni la plage filtrée) — évite de diluer la moyenne avec des jours sans données
+  const daysForDailyAverage = useMemo(() => {
+    if (!timelineData || timelineData.length === 0) return 1;
+    const dates = timelineData.map((p) => toDateOnly(p.date));
+    const first = new Date(Math.min(...dates.map((d) => new Date(d).getTime())));
+    const last = new Date(Math.max(...dates.map((d) => new Date(d).getTime())));
+    const diffTime = last.getTime() - first.getTime();
+    return Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1);
+  }, [timelineData]);
+
   // Calculer les statistiques
   const stats = useMemo(() => {
     if (!timelineData || timelineData.length === 0) {
@@ -75,7 +118,7 @@ function HeatmapContent() {
 
     const totalListens = timelineData.reduce((sum, point) => sum + point.listens, 0);
     const daysWithListens = timelineData.filter((point) => point.listens > 0).length;
-    const averageListens = totalListens / timelineData.length;
+    const averageListens = totalListens / daysForDailyAverage;
     
     const sortedByListens = [...timelineData].sort((a, b) => b.listens - a.listens);
     const maxListens = sortedByListens[0]?.listens || 0;
@@ -110,7 +153,7 @@ function HeatmapContent() {
     return {
       totalListens,
       daysWithListens,
-      totalDays: timelineData.length,
+      totalDays: totalDaysInRange,
       averageListens: Math.round(averageListens * 10) / 10,
       maxListens,
       minListens,
@@ -135,9 +178,8 @@ function HeatmapContent() {
         }),
       } : null,
       mostActiveWeekday,
-      weekdayDistribution,
     };
-  }, [timelineData, temporalData, t, locale]);
+  }, [timelineData, temporalData, totalDaysInRange, daysForDailyAverage, t, locale]);
 
 
   const handleDayClick = useCallback((date: string, count: number) => {
@@ -172,6 +214,12 @@ function HeatmapContent() {
     refetch();
   }, [refetch]);
 
+  const dateRangeLabel = useMemo(() => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    return `${start.toLocaleDateString(locale, { month: "short", day: "numeric", year: "numeric" })} – ${end.toLocaleDateString(locale, { month: "short", day: "numeric", year: "numeric" })}`;
+  }, [startDate, endDate, locale]);
+
   if (isLoading) {
     return <HeatmapSkeleton />;
   }
@@ -192,8 +240,16 @@ function HeatmapContent() {
 
   return (
     <>
-    <div className="space-y-6">
+    <div className="space-y-8">
       <header>
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-accent-violet/10 to-accent-indigo/10 dark:from-accent-violet/20 dark:to-accent-indigo/20 border border-accent-violet/20 mb-6">
+          <svg className="w-5 h-5 text-accent-violet" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+          </svg>
+          <span className="text-sm font-medium text-accent-violet dark:text-accent-violet">
+            {t("dateRangeBadge", { range: dateRangeLabel })}
+          </span>
+        </div>
         <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
           {t("title")}
         </h1>
@@ -202,156 +258,154 @@ function HeatmapContent() {
         </p>
       </header>
 
+      {/* Spotlight: Calendrier heatmap — élément principal mis en avant */}
+      <section
+        className="relative overflow-hidden rounded-2xl border-2 border-accent-violet/20 bg-white dark:bg-gray-800/95 shadow-2xl dark:shadow-none ring-2 ring-accent-violet/10 dark:ring-accent-violet/20 animate-fade-in-up transition-all duration-300 hover:shadow-[0_0_50px_-12px_rgba(139,92,246,0.25)] hover:border-accent-violet/30 dark:hover:border-accent-violet/40"
+        aria-labelledby="heatmap-spotlight-title"
+      >
+        {/* Gradient spotlight — effet de lumière centré */}
+        <div
+          className="pointer-events-none absolute inset-0 rounded-2xl opacity-60 dark:opacity-40"
+          style={{
+            background: "radial-gradient(ellipse 80% 70% at 50% 40%, rgba(139, 92, 246, 0.08) 0%, rgba(99, 102, 241, 0.04) 40%, transparent 70%)",
+          }}
+        />
+        <div
+          className="pointer-events-none absolute inset-0 rounded-2xl opacity-80 dark:opacity-60"
+          style={{
+            background: "radial-gradient(ellipse 100% 80% at 50% 50%, rgba(139, 92, 246, 0.06) 0%, transparent 60%)",
+          }}
+        />
+        {/* Glow subtil en bas */}
+        <div className="pointer-events-none absolute -bottom-12 left-1/2 -translate-x-1/2 w-[90%] h-24 bg-accent-violet/10 dark:bg-accent-violet/15 blur-3xl rounded-full" />
+
+        <div className="relative">
+          <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-5">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-accent-violet/20 to-accent-indigo/20 text-accent-violet">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                </svg>
+              </div>
+              <div>
+                <h2 id="heatmap-spotlight-title" className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">
+                  {t("calendarTitle")}
+                </h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                  {t("calendarHint")}
+                </p>
+              </div>
+            </div>
+            {heatmapData.length === 0 && (
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                {t("noDataPeriod")}
+              </p>
+            )}
+          </div>
+          <div className="p-6 sm:p-8 md:p-10">
+            {heatmapData.length > 0 ? (
+              <CalendarHeatmap
+                data={heatmapData}
+                startDate={startDate}
+                endDate={endDate}
+                selectedDate={selectedDate}
+                onDayClick={handleDayClick}
+                locale={locale}
+              />
+            ) : (
+              <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                <p>{t("noDataPeriod")}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
       {/* Statistiques principales */}
       {stats && (
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           <div className="overflow-hidden rounded-xl border border-l-4 border-gray-100 dark:border-gray-700/50 border-l-accent-rose bg-white dark:bg-gray-800/90 shadow-card p-5 transition-all duration-300 hover:shadow-card-hover">
-            <dl>
-              <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                {t("activeDays")}
-              </dt>
-              <dd className="mt-1 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-                {stats.daysWithListens.toLocaleString(locale)} / {stats.totalDays.toLocaleString(locale)}
-              </dd>
-              <dd className="text-xs text-gray-500 dark:text-gray-400 mt-1.5">
-                {Math.round((stats.daysWithListens / stats.totalDays) * 100)}% {t("ofDays")}
-              </dd>
-            </dl>
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-accent-rose/15 text-accent-rose">
+                {HeatmapStatIcons.activeDays}
+              </div>
+              <dl className="min-w-0 flex-1">
+                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  {t("activeDays")}
+                </dt>
+                <dd className="mt-0.5 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                  {stats.daysWithListens.toLocaleString(locale)} / {stats.totalDays.toLocaleString(locale)}
+                </dd>
+                <dd className="text-xs text-gray-500 dark:text-gray-400 mt-1.5">
+                  {Math.round((stats.daysWithListens / stats.totalDays) * 100)}% {t("ofDays")}
+                </dd>
+              </dl>
+            </div>
           </div>
 
           <div className="overflow-hidden rounded-xl border border-l-4 border-gray-100 dark:border-gray-700/50 border-l-accent-violet bg-white dark:bg-gray-800/90 shadow-card p-5 transition-all duration-300 hover:shadow-card-hover">
-            <dl>
-              <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                {t("avgDaily")}
-              </dt>
-              <dd className="mt-1 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-                {stats.averageListens.toLocaleString(locale)}
-              </dd>
-              <dd className="text-xs text-gray-500 dark:text-gray-400 mt-1.5">
-                {t("listensPerDay")}
-              </dd>
-            </dl>
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-accent-violet/15 text-accent-violet">
+                {HeatmapStatIcons.avgDaily}
+              </div>
+              <dl className="min-w-0 flex-1">
+                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  {t("avgDaily")}
+                </dt>
+                <dd className="mt-0.5 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                  {stats.averageListens.toLocaleString(locale)}
+                </dd>
+                <dd className="text-xs text-gray-500 dark:text-gray-400 mt-1.5">
+                  {t("listensPerDay")}
+                </dd>
+              </dl>
+            </div>
           </div>
 
           <div className="overflow-hidden rounded-xl border border-l-4 border-gray-100 dark:border-gray-700/50 border-l-accent-indigo bg-white dark:bg-gray-800/90 shadow-card p-5 transition-all duration-300 hover:shadow-card-hover">
-            <dl>
-              <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                {t("mostActiveDay")}
-              </dt>
-              {stats.maxDay ? (
-                <>
-                  <dd className="mt-1 text-xl font-bold tracking-tight text-gray-900 dark:text-white">
-                    {stats.maxDay.listens.toLocaleString(locale)} {t("listensCount")}
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-accent-indigo/15 text-accent-indigo">
+                {HeatmapStatIcons.mostActiveDay}
+              </div>
+              <dl className="min-w-0 flex-1">
+                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  {t("mostActiveDay")}
+                </dt>
+                {stats.maxDay ? (
+                  <>
+                    <dd className="mt-0.5 text-xl font-bold tracking-tight text-gray-900 dark:text-white">
+                      {stats.maxDay.listens.toLocaleString(locale)} {t("listensCount")}
+                    </dd>
+                    <dd className="text-xs text-gray-500 dark:text-gray-400 mt-1.5 truncate">
+                      {stats.maxDay.formatted}
+                    </dd>
+                  </>
+                ) : (
+                  <dd className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">
+                    {t("noData")}
                   </dd>
-                  <dd className="text-xs text-gray-500 dark:text-gray-400 mt-1.5 truncate">
-                    {stats.maxDay.formatted}
-                  </dd>
-                </>
-              ) : (
-                <dd className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                  {t("noData")}
-                </dd>
-              )}
-            </dl>
+                )}
+              </dl>
+            </div>
           </div>
 
           <div className="overflow-hidden rounded-xl border border-l-4 border-gray-100 dark:border-gray-700/50 border-l-accent-cyan bg-white dark:bg-gray-800/90 shadow-card p-5 transition-all duration-300 hover:shadow-card-hover">
-            <dl>
-              <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                {t("favoriteDay")}
-              </dt>
-              <dd className="mt-1 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-                {stats.mostActiveWeekday}
-              </dd>
-              <dd className="text-xs text-gray-500 dark:text-gray-400 mt-1.5">
-                {t("favoriteDayHint")}
-              </dd>
-            </dl>
-          </div>
-        </div>
-      )}
-
-      {/* Calendrier heatmap */}
-      <div className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card">
-        <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-            {t("calendarTitle")}
-          </h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-            {t("calendarHint")}
-          </p>
-          {heatmapData.length === 0 && (
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-              {t("noDataPeriod")}
-            </p>
-          )}
-        </div>
-        <div className="p-6">
-        
-        {heatmapData.length > 0 ? (
-          <CalendarHeatmap
-            data={heatmapData}
-            startDate={startDate}
-            endDate={endDate}
-            selectedDate={selectedDate}
-            onDayClick={handleDayClick}
-            locale={locale}
-          />
-        ) : (
-          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-            <p>{t("noDataPeriod")}</p>
-          </div>
-        )}
-        </div>
-      </div>
-
-      {/* Distribution par jour de la semaine */}
-      {stats && (
-        <div className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card">
-          <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-              {t("weekdayDistribution")}
-            </h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-              {t("weekdayDistributionHint")}
-            </p>
-          </div>
-          <div className="p-6 space-y-4">
-            {[
-              { key: "monday", index: 1 },
-              { key: "tuesday", index: 2 },
-              { key: "wednesday", index: 3 },
-              { key: "thursday", index: 4 },
-              { key: "friday", index: 5 },
-              { key: "saturday", index: 6 },
-              { key: "sunday", index: 0 },
-            ].map(({ key, index }) => {
-              const name = t(`weekdays.${key}`);
-              const count = stats.weekdayDistribution[index];
-              const maxCount = Math.max(...stats.weekdayDistribution);
-              const percentage = maxCount > 0 ? (count / maxCount) * 100 : 0;
-              
-              return (
-                <div key={name} className="flex items-center gap-4">
-                  <div className="w-20 text-sm font-medium text-gray-700 dark:text-gray-300 shrink-0">
-                    {name}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3">
-                      <div className="flex-1 h-2.5 bg-gray-100 dark:bg-gray-700/50 rounded-full overflow-hidden">
-                        <div
-                          className="h-full rounded-full bg-gradient-to-r from-accent-violet to-accent-indigo transition-all duration-500 ease-out"
-                          style={{ width: `${percentage}%` }}
-                        />
-                      </div>
-                      <div className="w-14 text-sm font-semibold text-gray-900 dark:text-white text-right tabular-nums shrink-0">
-                        {count.toLocaleString(locale)}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-accent-cyan/15 text-accent-cyan">
+                {HeatmapStatIcons.favoriteDay}
+              </div>
+              <dl className="min-w-0 flex-1">
+                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  {t("favoriteDay")}
+                </dt>
+                <dd className="mt-0.5 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                  {stats.mostActiveWeekday}
+                </dd>
+                <dd className="text-xs text-gray-500 dark:text-gray-400 mt-1.5">
+                  {t("favoriteDayHint")}
+                </dd>
+              </dl>
+            </div>
           </div>
         </div>
       )}
@@ -359,8 +413,12 @@ function HeatmapContent() {
 
     {/* Détails du jour sélectionné */}
     {selectedDate && (
-      <div ref={dayDetailsRef} className="mt-8 scroll-mt-4">
-        <div className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card">
+      <div
+        ref={dayDetailsRef}
+        className="mt-8 scroll-mt-8 animate-fade-in-up"
+        style={{ animationDelay: "0ms" }}
+      >
+        <div className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 border-l-4 border-l-accent-violet bg-white dark:bg-gray-800/90 shadow-card hover:shadow-card-hover transition-all duration-300 ring-2 ring-accent-violet/20">
           <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4 flex items-center justify-between">
             <div>
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">

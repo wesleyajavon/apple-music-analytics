@@ -12,6 +12,8 @@ const config: Config = {
         background: "var(--background)",
         foreground: "var(--foreground)",
         card: "var(--card)",
+        "card-surface": "var(--card-surface)",
+        "card-border": "var(--card-border)",
         border: "var(--border)",
         muted: "var(--muted)",
         accent: {
@@ -27,8 +29,8 @@ const config: Config = {
         sans: ["var(--font-inter)", "system-ui", "sans-serif"],
       },
       boxShadow: {
-        card: "0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05)",
-        "card-hover": "0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05)",
+        card: "var(--card-shadow)",
+        "card-hover": "var(--card-shadow-hover)",
         glow: "0 0 40px -10px rgb(139 92 246 / 0.25)",
       },
     },

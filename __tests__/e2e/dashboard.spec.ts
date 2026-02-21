@@ -39,13 +39,6 @@ test.describe("Dashboard Navigation", () => {
     await expect(mainContent).toBeVisible();
   });
 
-  test("should navigate to network page", async ({ page }) => {
-    await page.goto("/en/dashboard/network");
-    await expect(page).toHaveURL(/\/en\/dashboard\/network/);
-
-    const mainContent = page.locator("main, [role='main']").first();
-    await expect(mainContent).toBeVisible();
-  });
 });
 
 test.describe("Dashboard API Integration", () => {

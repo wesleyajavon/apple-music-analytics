@@ -254,11 +254,18 @@ export function CalendarHeatmap({
   const WEEK_WIDTH = SQUARE_SIZE + WEEK_GAP; // Largeur totale d'une semaine
 
   return (
-    <div className="w-full overflow-x-auto">
+    <div
+      className="w-full overflow-x-auto"
+      role="group"
+      aria-label={t("calendarTitle")}
+    >
       <div className="inline-block">
-        {/* Légende d'intensité - style GitHub exact */}
-        <div className="flex items-center justify-end gap-1 mb-3 text-xs text-gray-600 dark:text-gray-400">
-          <span className="mr-2 text-xs" style={{ fontSize: "10px" }}>{tCommon("less")}</span>
+        {/* Légende d'intensité - style GitHub, accessibilité 5of10 */}
+        <div
+          className="flex items-center justify-end gap-1 mb-3 text-xs text-gray-600 dark:text-gray-400"
+          aria-label={`${t("legendLess")} - ${t("legendMore")}`}
+        >
+          <span className="mr-2 text-xs" style={{ fontSize: "10px" }}>{t("legendLess")}</span>
           <div className="flex gap-1">
             <div 
               style={{ 
@@ -311,7 +318,7 @@ export function CalendarHeatmap({
               }} 
             />
           </div>
-          <span className="ml-2 text-xs" style={{ fontSize: "10px" }}>{tCommon("more")}</span>
+          <span className="ml-2 text-xs" style={{ fontSize: "10px" }}>{t("legendMore")}</span>
         </div>
 
         {/* Calendrier - structure GitHub */}

@@ -17,17 +17,17 @@ function HeatmapLegendText({ type }: { type: "less" | "more" }) {
  */
 export function StatCardSkeleton() {
   return (
-    <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+    <div className="overflow-hidden rounded-xl border border-card-border bg-card-surface shadow-card">
       <div className="p-5">
         <div className="flex items-center">
           <div className="flex-shrink-0">
-            <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+            <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
           </div>
           <div className="ml-5 w-0 flex-1">
             <div className="space-y-2">
-              <div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-              <div className="h-6 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-              <div className="h-3 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+              <div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+              <div className="h-6 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+              <div className="h-3 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
             </div>
           </div>
         </div>
@@ -54,13 +54,13 @@ export function StatCardsSkeleton({ count = 4 }: { count?: number }) {
  */
 export function ChartSkeleton({ height = 400 }: { height?: number }) {
   return (
-    <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+    <div className="overflow-hidden rounded-xl border border-card-border bg-card-surface shadow-card p-6">
       <div className="mb-4 space-y-2">
-        <div className="h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-        <div className="h-4 w-64 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+        <div className="h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+        <div className="h-4 w-64 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
       </div>
       <div
-        className="bg-gray-100 dark:bg-gray-900 rounded animate-pulse"
+        className="bg-gray-100 dark:bg-gray-900 rounded animate-shimmer"
         style={{ height: `${height}px` }}
       >
         {/* Simulation de grille de graphique */}
@@ -83,13 +83,13 @@ export function ChartSkeleton({ height = 400 }: { height?: number }) {
  */
 export function LineChartSkeleton({ height = 500 }: { height?: number }) {
   return (
-    <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+    <div className="overflow-hidden rounded-xl border border-card-border bg-card-surface shadow-card p-6">
       <div className="mb-4 space-y-2">
-        <div className="h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-        <div className="h-4 w-64 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+        <div className="h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+        <div className="h-4 w-64 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
       </div>
       <div
-        className="bg-gray-100 dark:bg-gray-900 rounded animate-pulse relative overflow-hidden"
+        className="bg-gray-100 dark:bg-gray-900 rounded animate-shimmer relative overflow-hidden"
         style={{ height: `${height}px` }}
       >
         {/* Simulation de ligne de graphique avec animation */}
@@ -233,12 +233,12 @@ export function GenreListSkeleton({ count = 6 }: { count?: number }) {
           className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg"
         >
           <div className="flex items-center flex-1 min-w-0">
-            <div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded mr-3 animate-pulse" />
-            <div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+            <div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded mr-3 animate-shimmer" />
+            <div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
           </div>
           <div className="flex items-center gap-3 ml-3">
-            <div className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-            <div className="h-3 w-12 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+            <div className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+            <div className="h-3 w-12 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
           </div>
         </div>
       ))}
@@ -327,24 +327,76 @@ export function RiseDeclineListSkeleton({ count = 5 }: { count?: number }) {
 }
 
 /**
- * Skeleton pour la page Overview complète
+ * Skeleton pour la page Overview complète — layout Bento Grid
  */
 export function OverviewSkeleton() {
   return (
     <div className="space-y-6">
-      <StatCardsSkeleton count={4} />
-      <LineChartSkeleton height={250} />
-      <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-        <div className="mb-4 flex items-center justify-between">
-          <div className="space-y-2">
-            <div className="h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-            <div className="h-4 w-64 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
+        {/* 4 StatCards */}
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="sm:col-span-2 lg:col-span-1">
+            <StatCardSkeleton />
           </div>
-          <div className="h-4 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+        ))}
+        {/* Timeline (2×2) */}
+        <div className="sm:col-span-2 lg:col-span-2 lg:row-span-2 min-h-[280px]">
+          <LineChartSkeleton height={280} />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <ChartSkeleton height={256} />
-          <GenreListSkeleton count={6} />
+        {/* AI Insights (1×2) */}
+        <div className="sm:col-span-2 lg:col-span-1 lg:row-span-2 min-h-[280px]">
+          <div className="overflow-hidden rounded-xl border border-card-border bg-card-surface shadow-card p-6">
+            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-4 animate-shimmer" />
+            <div className="space-y-3">
+              {[1, 2, 3].map((j) => (
+                <div key={j} className="h-12 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+              ))}
+            </div>
+          </div>
+        </div>
+        {/* Taste Profile (1×2) */}
+        <div className="sm:col-span-2 lg:col-span-1 lg:row-span-2 min-h-[280px]">
+          <div className="overflow-hidden rounded-xl border border-card-border bg-card-surface shadow-card p-6">
+            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-4 animate-shimmer" />
+            <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-full mb-2 animate-shimmer" />
+            <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-4/5 animate-shimmer" />
+          </div>
+        </div>
+        {/* Top genres (2×1) */}
+        <div className="sm:col-span-2 lg:col-span-2">
+          <div className="overflow-hidden rounded-xl border border-card-border bg-card-surface shadow-card p-6">
+            <div className="mb-4 flex items-center justify-between">
+              <div className="space-y-2">
+                <div className="h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+                <div className="h-4 w-64 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+              </div>
+              <div className="h-4 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <ChartSkeleton height={200} />
+              <GenreListSkeleton count={6} />
+            </div>
+          </div>
+        </div>
+        {/* Top artists (2×1) */}
+        <div className="sm:col-span-2 lg:col-span-2">
+          <div className="overflow-hidden rounded-xl border border-card-border bg-card-surface shadow-card p-6">
+            <div className="mb-4 flex items-center justify-between">
+              <div className="space-y-2">
+                <div className="h-6 w-40 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+                <div className="h-4 w-56 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+              </div>
+              <div className="h-4 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <ChartSkeleton height={200} />
+              <div className="space-y-3">
+                {[1, 2, 3, 4, 5].map((j) => (
+                  <div key={j} className="h-8 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -352,14 +404,85 @@ export function OverviewSkeleton() {
 }
 
 /**
- * Skeleton pour la page Genres complète
+ * Skeleton pour la page Genres complète – hero, top 3, chart, détail
  */
 export function GenresSkeleton() {
   return (
-    <div className="space-y-6">
-      <ChartTypeSelectorSkeleton />
-      <PieChartSkeleton height={500} />
-      <TableSkeleton rows={8} cols={3} />
+    <div className="space-y-8">
+      {/* Hero bandeau skeleton */}
+      <div className="relative overflow-hidden rounded-3xl bg-gray-200 dark:bg-gray-700/50 px-6 py-8 sm:px-8 sm:py-10">
+        <div className="space-y-4">
+          <div className="h-8 w-48 bg-gray-300 dark:bg-gray-600 rounded animate-shimmer" />
+          <div className="h-4 w-64 bg-gray-300 dark:bg-gray-600 rounded animate-shimmer" />
+          <div className="flex flex-wrap gap-4 mt-6">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="rounded-xl bg-white/20 dark:bg-black/20 px-4 py-3 backdrop-blur-sm">
+                <div className="h-3 w-16 bg-white/40 rounded animate-shimmer mb-2" />
+                <div className="h-8 w-20 bg-white/40 rounded animate-shimmer" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Top 3 spotlight skeleton */}
+      <div>
+        <div className="h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer mb-2" />
+        <div className="h-4 w-72 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer mb-6" />
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="rounded-3xl bg-card-surface shadow-xl p-6 border border-card-border">
+              <div className="flex flex-col items-center text-center">
+                <div className="h-16 w-16 bg-gray-200 dark:bg-gray-700 rounded-2xl animate-shimmer mb-4" />
+                <div className="h-5 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer mb-2" />
+                <div className="h-8 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer mb-1" />
+                <div className="h-3 w-12 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer mb-3" />
+                <div className="w-full max-w-[160px] h-2 bg-gray-200 dark:bg-gray-700 rounded-full animate-shimmer" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Chart type + chart skeleton */}
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center gap-4">
+          <div className="h-4 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+          <div className="flex gap-2">
+            <div className="h-10 w-24 bg-gray-200 dark:bg-gray-700 rounded-xl animate-shimmer" />
+            <div className="h-10 w-24 bg-gray-200 dark:bg-gray-700 rounded-xl animate-shimmer" />
+          </div>
+        </div>
+        <div className="overflow-hidden rounded-xl border border-card-border bg-card-surface shadow-card p-6">
+          <div className="mb-4 space-y-2">
+            <div className="h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+            <div className="h-4 w-64 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+          </div>
+          <div className="flex justify-center">
+            <div
+              className="bg-gray-100 dark:bg-gray-900 rounded-full animate-shimmer"
+              style={{ width: 300, height: 300 }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Detail list skeleton */}
+      <div className="space-y-3">
+        <div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer mb-4" />
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+              <div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+              <div className="h-3 w-12 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -408,8 +531,8 @@ export function HeatmapCalendarSkeleton() {
   return (
     <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
       <div className="mb-4 space-y-2">
-        <div className="h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-        <div className="h-4 w-64 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+        <div className="h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+        <div className="h-4 w-64 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
       </div>
       {/* Simulation d'une grille de calendrier */}
       <div className="space-y-2">
@@ -418,10 +541,7 @@ export function HeatmapCalendarSkeleton() {
             {Array.from({ length: 7 }).map((_, dayIndex) => (
               <div
                 key={dayIndex}
-                className="flex-1 aspect-square bg-gray-200 dark:bg-gray-700 rounded animate-pulse"
-                style={{
-                  animationDelay: `${(weekIndex * 7 + dayIndex) * 0.05}s`,
-                }}
+                className="flex-1 aspect-square bg-gray-200 dark:bg-gray-700 rounded animate-shimmer"
               />
             ))}
           </div>
@@ -434,7 +554,7 @@ export function HeatmapCalendarSkeleton() {
           {Array.from({ length: 5 }).map((_, i) => (
             <div
               key={i}
-              className="w-3 h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"
+              className="w-3 h-3 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer"
               style={{
                 opacity: 0.3 + (i * 0.15),
               }}
@@ -453,14 +573,14 @@ export function HeatmapCalendarSkeleton() {
 export function WeekdayDistributionSkeleton() {
   return (
     <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-      <div className="h-6 w-64 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-4" />
+      <div className="h-6 w-64 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer mb-4" />
       <div className="space-y-3">
         {Array.from({ length: 7 }).map((_, i) => (
           <div key={i} className="flex items-center gap-4">
-            <div className="w-20 h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+            <div className="w-20 h-4 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
             <div className="flex-1 flex items-center gap-2">
-              <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-6 animate-pulse" />
-              <div className="w-16 h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+              <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-6 animate-shimmer" />
+              <div className="w-16 h-4 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
             </div>
           </div>
         ))}
@@ -478,16 +598,16 @@ export function HeatmapSkeleton() {
       {/* En-tête avec sélecteur */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="space-y-2">
-          <div className="h-8 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-          <div className="h-4 w-96 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+          <div className="h-8 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+          <div className="h-4 w-96 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
         </div>
         <div className="flex items-center gap-2">
-          <div className="h-4 w-12 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+          <div className="h-4 w-12 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
           <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
             {Array.from({ length: 3 }).map((_, i) => (
               <div
                 key={i}
-                className="h-8 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"
+                className="h-8 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer"
               />
             ))}
           </div>
@@ -514,25 +634,25 @@ export function DayDetailsSkeleton() {
     <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
       <div className="flex items-center justify-between mb-4">
         <div className="space-y-2">
-          <div className="h-6 w-64 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-          <div className="h-4 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+          <div className="h-6 w-64 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+          <div className="h-4 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
         </div>
-        <div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+        <div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
       </div>
 
       {/* Statistiques du jour */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         {Array.from({ length: 3 }).map((_, i) => (
           <div key={i} className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 space-y-2">
-            <div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-            <div className="h-8 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+            <div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+            <div className="h-8 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
           </div>
         ))}
       </div>
 
       {/* Top artistes */}
       <div className="mb-6">
-        <div className="h-5 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-3" />
+        <div className="h-5 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer mb-3" />
         <div className="space-y-2">
           {Array.from({ length: 5 }).map((_, i) => (
             <div
@@ -540,10 +660,10 @@ export function DayDetailsSkeleton() {
               className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg"
             >
               <div className="flex items-center gap-3">
-                <div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-                <div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                <div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+                <div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
               </div>
-              <div className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+              <div className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
             </div>
           ))}
         </div>
@@ -551,7 +671,7 @@ export function DayDetailsSkeleton() {
 
       {/* Liste des écoutes */}
       <div>
-        <div className="h-5 w-40 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-3" />
+        <div className="h-5 w-40 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer mb-3" />
         <div className="space-y-2 max-h-96 overflow-y-auto">
           {Array.from({ length: 8 }).map((_, i) => (
             <div
@@ -559,12 +679,12 @@ export function DayDetailsSkeleton() {
               className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg"
             >
               <div className="flex-1 space-y-2">
-                <div className="h-4 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-                <div className="h-3 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                <div className="h-4 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+                <div className="h-3 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
               </div>
               <div className="flex items-center gap-4 ml-4">
-                <div className="h-3 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-                <div className="h-5 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                <div className="h-3 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+                <div className="h-5 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
               </div>
             </div>
           ))}

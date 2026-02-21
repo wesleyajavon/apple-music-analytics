@@ -2,9 +2,8 @@
 
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
-import { useMemo } from "react";
-import { useSearchParams } from "next/navigation";
 import { useTasteProfile } from "@/lib/hooks/use-taste-profile";
+import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
 
 function truncateText(text: string, maxLength: number = 220): string {
   if (text.length <= maxLength) return text;
@@ -17,39 +16,22 @@ function truncateText(text: string, maxLength: number = 220): string {
 /**
  * Small overview widget showing a taste profile summary.
  * Displays truncated description with link to full profile.
+ * Uses full listen range when "all" (tout) filter is selected.
  */
 export function TasteProfileSummaryWidget() {
   const t = useTranslations("taste-profile");
-  const searchParams = useSearchParams();
-  const startDateParam = searchParams.get("startDate");
-  const endDateParam = searchParams.get("endDate");
+  const { startDate, endDate, isLoading: isRangeLoading } = useListenDateRange();
 
-  const effectiveRange = useMemo(() => {
-    if (startDateParam && endDateParam) {
-      return { startDate: startDateParam, endDate: endDateParam };
-    }
-    const end = new Date();
-    const start = new Date();
-    start.setDate(start.getDate() - 30);
-    return {
-      startDate: start.toISOString().split("T")[0],
-      endDate: end.toISOString().split("T")[0],
-    };
-  }, [startDateParam, endDateParam]);
+  const { data, isLoading } = useTasteProfile(startDate, endDate, "casual");
+  const isLoadingOrFetching = isRangeLoading || isLoading;
 
-  const { data, isLoading } = useTasteProfile(
-    effectiveRange.startDate,
-    effectiveRange.endDate,
-    "casual"
-  );
-
-  if (isLoading) {
+  if (isLoadingOrFetching) {
     return (
-      <div className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card animate-pulse">
+      <div className="overflow-hidden rounded-xl border border-card-border bg-card-surface shadow-card min-h-[200px]">
         <div className="p-6">
-          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-4" />
-          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-full mb-2" />
-          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-4/5" />
+          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-4 animate-shimmer" />
+          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-full mb-2 animate-shimmer" />
+          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-4/5 animate-shimmer" />
         </div>
       </div>
     );
@@ -60,7 +42,7 @@ export function TasteProfileSummaryWidget() {
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card">
+    <div className="overflow-hidden rounded-xl border border-card-border bg-card-surface shadow-card transition-shadow duration-300 hover:shadow-card-hover min-h-[220px] flex flex-col">
       <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
         <div className="flex items-center justify-between">
           <div>

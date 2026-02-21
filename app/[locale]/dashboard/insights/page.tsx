@@ -1,10 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 
 /**
  * Page Insights - Documentation sur les patterns, calculs et limitations
- * 
+ *
  * Cette page explique:
  * - Quels patterns révèlent ces données
  * - Comment les analytics sont calculés
@@ -34,6 +35,19 @@ const SectionIcons = {
   ),
 };
 
+function ChevronIcon({ expanded }: { expanded: boolean }) {
+  return (
+    <svg
+      className={`w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+    </svg>
+  );
+}
+
 function InlineCode({ children }: { children: React.ReactNode }) {
   return (
     <code className="px-1.5 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-accent-violet dark:text-accent-violet font-mono text-sm">
@@ -42,13 +56,88 @@ function InlineCode({ children }: { children: React.ReactNode }) {
   );
 }
 
+type SectionKey = "patterns" | "calculations" | "limitations" | "architecture";
+
+function TogglableSection({
+  id,
+  sectionKey,
+  icon,
+  iconBg,
+  iconColor,
+  title,
+  isExpanded,
+  onToggle,
+  children,
+}: {
+  id: string;
+  sectionKey: SectionKey;
+  icon: React.ReactNode;
+  iconBg: string;
+  iconColor: string;
+  title: string;
+  isExpanded: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+}) {
+  const t = useTranslations("insights");
+  const ariaLabel = isExpanded ? t("collapseSection") : t("expandSection");
+
+  return (
+    <section
+      id={id}
+      className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card hover:shadow-card-hover transition-shadow"
+    >
+      <button
+        type="button"
+        onClick={onToggle}
+        className="w-full px-6 py-4 flex items-center justify-between gap-3 text-left hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer border-b border-gray-100 dark:border-gray-700/50"
+        aria-expanded={isExpanded}
+        aria-controls={`${id}-content`}
+        aria-label={ariaLabel}
+      >
+        <div className="flex items-center gap-3">
+          <span className={`flex h-10 w-10 items-center justify-center rounded-xl ${iconBg} ${iconColor}`}>
+            {icon}
+          </span>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h2>
+        </div>
+        <ChevronIcon expanded={isExpanded} />
+      </button>
+      {isExpanded && (
+        <div id={`${id}-content`} className="p-6">
+          {children}
+        </div>
+      )}
+    </section>
+  );
+}
+
 export default function InsightsPage() {
   const t = useTranslations("insights");
   const code = (chunks: React.ReactNode) => <InlineCode>{chunks}</InlineCode>;
 
+  const [expandedSections, setExpandedSections] = useState<Record<SectionKey, boolean>>({
+    patterns: true,
+    calculations: false,
+    limitations: false,
+    architecture: false,
+  });
+
+  const toggleSection = (key: SectionKey) => {
+    setExpandedSections((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const summaryKeys: SectionKey[] = ["patterns", "calculations", "limitations", "architecture"];
+
   return (
     <div className="px-4 py-6 sm:px-0 max-w-4xl">
-      <header className="mb-8">
+      {/* Hero */}
+      <header className="mb-10">
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-accent-indigo/10 to-accent-cyan/10 dark:from-accent-indigo/20 dark:to-accent-cyan/20 border border-accent-indigo/20 mb-6">
+          <span className="text-sm font-medium text-accent-indigo dark:text-accent-indigo">
+            {t("heroBadge")}
+          </span>
+        </div>
         <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
           {t("title")}
         </h1>
@@ -57,18 +146,57 @@ export default function InsightsPage() {
         </p>
       </header>
 
-      <div className="space-y-6">
-        {/* Section 1: Patterns révélés */}
-        <section className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card">
-          <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-violet/15 text-accent-violet">
+      {/* Spotlight: Summary */}
+      <section
+        className="relative overflow-hidden rounded-2xl border-2 border-accent-indigo/20 bg-white dark:bg-gray-800/95 shadow-2xl dark:shadow-none ring-2 ring-accent-indigo/10 dark:ring-accent-indigo/20 mb-8 transition-all duration-300 hover:shadow-[0_0_50px_-12px_rgba(99,102,241,0.25)] hover:border-accent-indigo/30 dark:hover:border-accent-indigo/40"
+        aria-labelledby="insights-spotlight-title"
+      >
+        <div
+          className="pointer-events-none absolute inset-0 rounded-2xl opacity-60 dark:opacity-40"
+          style={{
+            background:
+              "radial-gradient(ellipse 80% 70% at 50% 40%, rgba(99, 102, 241, 0.08) 0%, rgba(6, 182, 212, 0.04) 40%, transparent 70%)",
+          }}
+        />
+        <div className="relative">
+          <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-5">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-accent-indigo/20 to-accent-cyan/20 text-accent-indigo">
                 {SectionIcons.patterns}
-              </span>
-              {t("patterns.sectionTitle")}
-            </h2>
+              </div>
+              <div>
+                <h2 id="insights-spotlight-title" className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">
+                  {t("spotlightTitle")}
+                </h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                  {t("spotlightHint")}
+                </p>
+              </div>
+            </div>
           </div>
-          <div className="p-6 space-y-6 text-gray-600 dark:text-gray-300">
+          <div className="p-6 sm:p-8 space-y-3">
+            {summaryKeys.map((key) => (
+              <p key={key} className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                {t(`summary.${key}`)}
+              </p>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Togglable sections */}
+      <div className="space-y-6">
+        <TogglableSection
+          id="patterns"
+          sectionKey="patterns"
+          icon={SectionIcons.patterns}
+          iconBg="bg-accent-violet/15"
+          iconColor="text-accent-violet"
+          title={t("patterns.sectionTitle")}
+          isExpanded={expandedSections.patterns}
+          onToggle={() => toggleSection("patterns")}
+        >
+          <div className="space-y-6 text-gray-600 dark:text-gray-300">
             <div>
               <h3 className="font-semibold text-base mb-2 text-gray-900 dark:text-white">
                 {t("patterns.overview.title")}
@@ -121,35 +249,41 @@ export default function InsightsPage() {
 
             <div>
               <h3 className="font-semibold text-base mb-2 text-gray-900 dark:text-white">
-                {t("patterns.network.title")}
+                {t("patterns.ai.title")}
               </h3>
               <p className="mb-2 text-sm leading-relaxed">
-                {t.rich("patterns.network.paragraph", { code })}
+                {t("patterns.ai.paragraph")}
               </p>
+              <ul className="space-y-2 ml-4 list-disc text-sm">
+                <li>{t.rich("patterns.ai.li1", { code })}</li>
+                <li>{t.rich("patterns.ai.li2", { code })}</li>
+                <li>{t.rich("patterns.ai.li3", { code })}</li>
+                <li>{t.rich("patterns.ai.li4", { code })}</li>
+              </ul>
             </div>
 
             <div>
               <h3 className="font-semibold text-base mb-2 text-gray-900 dark:text-white">
-                {t("patterns.replay.title")}
+                {t("patterns.dateRange.title")}
               </h3>
               <p className="mb-2 text-sm leading-relaxed">
-                {t.rich("patterns.replay.paragraph", { code })}
+                {t.rich("patterns.dateRange.paragraph", { code })}
               </p>
             </div>
           </div>
-        </section>
+        </TogglableSection>
 
-        {/* Section 2: Calculs des analytics */}
-        <section className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card">
-          <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-indigo/15 text-accent-indigo">
-                {SectionIcons.calculations}
-              </span>
-              {t("calculations.sectionTitle")}
-            </h2>
-          </div>
-          <div className="p-6 space-y-6 text-gray-600 dark:text-gray-300">
+        <TogglableSection
+          id="calculations"
+          sectionKey="calculations"
+          icon={SectionIcons.calculations}
+          iconBg="bg-accent-indigo/15"
+          iconColor="text-accent-indigo"
+          title={t("calculations.sectionTitle")}
+          isExpanded={expandedSections.calculations}
+          onToggle={() => toggleSection("calculations")}
+        >
+          <div className="space-y-6 text-gray-600 dark:text-gray-300">
             <div>
               <h3 className="font-semibold text-base mb-2 text-gray-900 dark:text-white">
                 {t("calculations.aggregations.title")}
@@ -177,21 +311,6 @@ export default function InsightsPage() {
                 <li>{t("calculations.stats.li2")}</li>
                 <li>{t("calculations.stats.li3")}</li>
                 <li>{t("calculations.stats.li4")}</li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="font-semibold text-base mb-2 text-gray-900 dark:text-white">
-                {t("calculations.network.title")}
-              </h3>
-              <p className="mb-2 text-sm leading-relaxed">
-                {t("calculations.network.paragraph")}
-              </p>
-              <ul className="space-y-2 ml-4 list-disc text-sm">
-                <li>{t("calculations.network.li1")}</li>
-                <li>{t("calculations.network.li2")}</li>
-                <li>{t("calculations.network.li3")}</li>
-                <li>{t("calculations.network.li4")}</li>
               </ul>
             </div>
 
@@ -227,19 +346,19 @@ export default function InsightsPage() {
               </ul>
             </div>
           </div>
-        </section>
+        </TogglableSection>
 
-        {/* Section 3: Limitations et compromis */}
-        <section className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card">
-          <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-rose/15 text-accent-rose">
-                {SectionIcons.limitations}
-              </span>
-              {t("limitations.sectionTitle")}
-            </h2>
-          </div>
-          <div className="p-6 space-y-6 text-gray-600 dark:text-gray-300">
+        <TogglableSection
+          id="limitations"
+          sectionKey="limitations"
+          icon={SectionIcons.limitations}
+          iconBg="bg-accent-rose/15"
+          iconColor="text-accent-rose"
+          title={t("limitations.sectionTitle")}
+          isExpanded={expandedSections.limitations}
+          onToggle={() => toggleSection("limitations")}
+        >
+          <div className="space-y-6 text-gray-600 dark:text-gray-300">
             <div>
               <h3 className="font-semibold text-base mb-2 text-gray-900 dark:text-white">
                 {t("limitations.genreMapping.title")}
@@ -252,21 +371,6 @@ export default function InsightsPage() {
               </p>
               <p className="mb-2 text-sm italic text-gray-500 dark:text-gray-400">
                 {t("limitations.genreMapping.solution")}
-              </p>
-            </div>
-
-            <div>
-              <h3 className="font-semibold text-base mb-2 text-gray-900 dark:text-white">
-                {t("limitations.proximityWindow.title")}
-              </h3>
-              <p className="mb-2 text-sm leading-relaxed">
-                {t("limitations.proximityWindow.limitation")}
-              </p>
-              <p className="mb-2 text-sm leading-relaxed">
-                {t("limitations.proximityWindow.impact")}
-              </p>
-              <p className="mb-2 text-sm italic text-gray-500 dark:text-gray-400">
-                {t("limitations.proximityWindow.solution")}
               </p>
             </div>
 
@@ -330,19 +434,19 @@ export default function InsightsPage() {
               </p>
             </div>
           </div>
-        </section>
+        </TogglableSection>
 
-        {/* Section 4: Architecture technique */}
-        <section className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card">
-          <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-cyan/15 text-accent-cyan">
-                {SectionIcons.architecture}
-              </span>
-              {t("architecture.sectionTitle")}
-            </h2>
-          </div>
-          <div className="p-6 space-y-6 text-gray-600 dark:text-gray-300">
+        <TogglableSection
+          id="architecture"
+          sectionKey="architecture"
+          icon={SectionIcons.architecture}
+          iconBg="bg-accent-cyan/15"
+          iconColor="text-accent-cyan"
+          title={t("architecture.sectionTitle")}
+          isExpanded={expandedSections.architecture}
+          onToggle={() => toggleSection("architecture")}
+        >
+          <div className="space-y-6 text-gray-600 dark:text-gray-300">
             <div>
               <h3 className="font-semibold text-base mb-2 text-gray-900 dark:text-white">
                 {t("architecture.stack.title")}
@@ -368,7 +472,6 @@ export default function InsightsPage() {
                 <li>{t("architecture.model.li1")}</li>
                 <li>{t("architecture.model.li2")}</li>
                 <li>{t("architecture.model.li3")}</li>
-                <li>{t("architecture.model.li4")}</li>
               </ul>
             </div>
 
@@ -382,13 +485,11 @@ export default function InsightsPage() {
               <ul className="space-y-2 ml-4 list-disc text-sm">
                 <li>{t("architecture.import.li1")}</li>
                 <li>{t("architecture.import.li2")}</li>
-                <li>{t("architecture.import.li3")}</li>
               </ul>
             </div>
           </div>
-        </section>
+        </TogglableSection>
       </div>
     </div>
   );
 }
-

@@ -27,7 +27,6 @@ Les tests d'intégration vérifient le comportement des routes API en isolant le
 - `listens.test.ts` - Tests pour `/api/listens`
 - `artists.test.ts` - Tests pour `/api/artists`
 - `artists-trends.test.ts` - Tests pour `/api/artists/trends`
-- `network.test.ts` - Tests pour `/api/network`
 - `temporal-analysis.test.ts` - Tests pour `/api/temporal-analysis`
 - `ai-insights.test.ts` - Tests pour `/api/ai/insights`
 - `taste-profile.test.ts` - Tests pour `/api/ai/taste-profile`

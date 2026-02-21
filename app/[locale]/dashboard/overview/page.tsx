@@ -4,6 +4,7 @@ import { memo, useCallback, useMemo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
 import {
   Area,
   AreaChart,
@@ -156,7 +157,7 @@ const StatCard = memo(({
     <div
       className={`
         group relative overflow-hidden rounded-xl border border-l-4
-        border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90
+        border-card-border bg-card-surface
         shadow-card hover:shadow-card-hover transition-all duration-300
         ${accent.borderColor}
       `}
@@ -304,76 +305,87 @@ function OverviewContent() {
 
   return (
     <div className="space-y-6">
-      {/* Cartes statistiques principales */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          iconType="listens"
-          label={t("stats.totalListens")}
-          value={data.totalListens}
-          change={changes?.totalListens}
-          vsLabel={t("vsPreviousPeriod")}
-          locale={locale}
-        />
-        <StatCard
-          iconType="artists"
-          label={t("stats.uniqueArtists")}
-          value={data.uniqueArtists}
-          change={changes?.uniqueArtists}
-          vsLabel={t("vsPreviousPeriod")}
-          locale={locale}
-        />
-        <StatCard
-          iconType="tracks"
-          label={t("stats.uniqueTracks")}
-          value={data.uniqueTracks}
-          change={changes?.uniqueTracks}
-          vsLabel={t("vsPreviousPeriod")}
-          locale={locale}
-        />
-        <StatCard
-          iconType="time"
-          label={t("stats.totalTime")}
-          value={formatTime(data.totalPlayTime, t("notAvailable"))}
-          change={changes?.totalPlayTime}
-          vsLabel={t("vsPreviousPeriod")}
-          locale={locale}
-        />
-      </div>
+      {/* Bento Grid - layout asymetrique type Apple/Linear */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
+        {/* 4 StatCards — petits blocs en première ligne */}
+        <div className="sm:col-span-2 lg:col-span-1 lg:row-span-1">
+          <StatCard
+            iconType="listens"
+            label={t("stats.totalListens")}
+            value={data.totalListens}
+            change={changes?.totalListens}
+            vsLabel={t("vsPreviousPeriod")}
+            locale={locale}
+          />
+        </div>
+        <div className="sm:col-span-2 lg:col-span-1 lg:row-span-1">
+          <StatCard
+            iconType="artists"
+            label={t("stats.uniqueArtists")}
+            value={data.uniqueArtists}
+            change={changes?.uniqueArtists}
+            vsLabel={t("vsPreviousPeriod")}
+            locale={locale}
+          />
+        </div>
+        <div className="sm:col-span-2 lg:col-span-1 lg:row-span-1">
+          <StatCard
+            iconType="tracks"
+            label={t("stats.uniqueTracks")}
+            value={data.uniqueTracks}
+            change={changes?.uniqueTracks}
+            vsLabel={t("vsPreviousPeriod")}
+            locale={locale}
+          />
+        </div>
+        <div className="sm:col-span-2 lg:col-span-1 lg:row-span-1">
+          <StatCard
+            iconType="time"
+            label={t("stats.totalTime")}
+            value={formatTime(data.totalPlayTime, t("notAvailable"))}
+            change={changes?.totalPlayTime}
+            vsLabel={t("vsPreviousPeriod")}
+            locale={locale}
+          />
+        </div>
 
-      {/* AI Insights & Explain My Taste - side by side on larger screens */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 [&>*:only-child]:sm:col-span-2">
-        <AiInsightsSummaryWidget />
-        <TasteProfileSummaryWidget />
-      </div>
-
-      {/* Mini-graphique de timeline */}
-      {chartData.length > 0 && (
-        <div className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card">
-          <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  {t("recentEvolution")}
-                </h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-                  {t("listensPerDay")}
-                </p>
-              </div>
-              <Link
+        {/* Bloc large (2×2) : Timeline / évolution récente — spotlight */}
+        {chartData.length > 0 && (
+          <div className="sm:col-span-2 lg:col-span-2 lg:row-span-2 min-h-[280px]">
+            <div className="relative h-full overflow-hidden rounded-2xl border-2 border-accent-violet/20 bg-card-surface shadow-2xl dark:shadow-none ring-2 ring-accent-violet/10 dark:ring-accent-violet/20 transition-all duration-300 hover:shadow-[0_0_50px_-12px_rgba(139,92,246,0.25)] hover:border-accent-violet/30 dark:hover:border-accent-violet/40 animate-fade-in-up">
+              <div
+                className="pointer-events-none absolute inset-0 rounded-2xl opacity-60 dark:opacity-40"
+                style={{
+                  background:
+                    "radial-gradient(ellipse 80% 70% at 50% 40%, rgba(139, 92, 246, 0.08) 0%, rgba(99, 102, 241, 0.04) 40%, transparent 70%)",
+                }}
+              />
+              <div className="relative">
+                <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                        {t("recentEvolution")}
+                      </h2>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                        {t("listensPerDay")}
+                      </p>
+                    </div>
+                    <Link
                 href="/dashboard/timeline"
                 className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium
                   text-accent-violet hover:bg-accent-violet/10 dark:hover:bg-accent-violet/20
-                  transition-colors duration-200"
+                  transition-colors duration-200 shrink-0"
               >
                 {t("seeMore")}
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
-              </Link>
-            </div>
-          </div>
-          <div className="p-6 pt-2">
-            <ResponsiveContainer width="100%" height={260}>
+                    </Link>
+                  </div>
+                </div>
+              <div className="p-6 pt-2">
+                <ResponsiveContainer width="100%" height={260}>
               <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
@@ -416,53 +428,66 @@ function OverviewContent() {
                   animationEasing="ease-out"
                 />
               </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      )}
-
-      {/* Top genres */}
-      {topGenres.length > 0 && (
-        <div className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card">
-          <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  {t("topGenres")}
-                </h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-                  {t("yourTopGenres")}
-                </p>
+                </ResponsiveContainer>
               </div>
-              <Link
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Bloc moyen (1×2) : AI Insights en spotlight */}
+        <div className="sm:col-span-2 lg:col-span-1 lg:row-span-2 min-h-[280px] flex ">
+          <AiInsightsSummaryWidget />
+        </div>
+
+        {/* Bloc moyen (1×2) : Taste Profile */}
+        <div className="sm:col-span-2 lg:col-span-1 lg:row-span-2 min-h-[280px] flex ">
+          <TasteProfileSummaryWidget />
+        </div>
+
+        {/* Bloc large (2×1) : Top genres */}
+        {topGenres.length > 0 && (
+          <div className="sm:col-span-2 lg:col-span-2">
+            <div className="overflow-hidden rounded-xl border border-card-border border-l-4 border-l-accent-indigo bg-card-surface shadow-card transition-shadow duration-300 hover:shadow-card-hover">
+              <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                      {t("topGenres")}
+                    </h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                      {t("yourTopGenres")}
+                    </p>
+                  </div>
+                  <Link
                 href="/dashboard/genres"
                 className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium
                   text-accent-violet hover:bg-accent-violet/10 dark:hover:bg-accent-violet/20
-                  transition-colors duration-200"
+                  transition-colors duration-200 shrink-0"
               >
                 {t("seeAll")}
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </Link>
-            </div>
-          </div>
-          <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Graphique en barres horizontal */}
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={topGenres.map((g) => ({
-                      name: g.genre,
-                      value: g.count,
-                      percentage: g.percentage,
-                    }))}
-                    layout="vertical"
-                    margin={{ top: 5, right: 30, left: 80, bottom: 5 }}
-                  >
-                    <defs>
-                      <linearGradient id="genreBarGradient" x1="0" y1="0" x2="1" y2="0">
+                </div>
+              </div>
+              <div className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Graphique en barres horizontal */}
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={topGenres.map((g) => ({
+                        name: g.genre,
+                        value: g.count,
+                        percentage: g.percentage,
+                      }))}
+                      layout="vertical"
+                      margin={{ top: 5, right: 30, left: 80, bottom: 5 }}
+                    >
+                      <defs>
+                        <linearGradient id="genreBarGradient" x1="0" y1="0" x2="1" y2="0">
                         <stop offset="0%" stopColor="#8b5cf6" />
                         <stop offset="100%" stopColor="#6366f1" />
                       </linearGradient>
@@ -545,13 +570,15 @@ function OverviewContent() {
             </div>
           </div>
         </div>
-      )}
+          </div>
+        )}
 
-      {/* Artistes les plus écoutés */}
-      {data.topArtists && data.topArtists.length > 0 && (
-        <div className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card">
-          <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
-            <div className="flex items-center justify-between">
+        {/* Bloc large (2×1) : Top artists */}
+        {data.topArtists && data.topArtists.length > 0 && (
+          <div className="sm:col-span-2 lg:col-span-2">
+            <div className="overflow-hidden rounded-xl border border-card-border border-l-4 border-l-accent-rose bg-card-surface shadow-card transition-shadow duration-300 hover:shadow-card-hover">
+              <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
+                <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                   {t("topArtists")}
@@ -564,22 +591,22 @@ function OverviewContent() {
                 href="/dashboard/artists"
                 className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium
                   text-accent-violet hover:bg-accent-violet/10 dark:hover:bg-accent-violet/20
-                  transition-colors duration-200"
+                  transition-colors duration-200 shrink-0"
               >
                 {t("seeAll")}
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </Link>
-            </div>
-          </div>
-          <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Graphique en barres horizontal */}
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={data.topArtists.map((artist) => ({
+                </div>
+              </div>
+              <div className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Graphique en barres horizontal */}
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={data.topArtists.map((artist) => ({
                       name: artist.artistName,
                       value: artist.listenCount,
                     }))}
@@ -660,11 +687,13 @@ function OverviewContent() {
                     </div>
                   );
                 })}
+                </div>
               </div>
             </div>
           </div>
         </div>
-      )}
+        )}
+      </div>
 
       {/* When Will I Listen? widget */}
       <WhenWillIListenWidget includeExplanation />
@@ -675,17 +704,44 @@ function OverviewContent() {
   );
 }
 
+/** Format date range for display */
+function formatDateRange(startDate?: string, endDate?: string): string {
+  if (!startDate || !endDate) return "";
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  return `${start.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })} – ${end.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}`;
+}
+
 export default function OverviewPage() {
   const searchParams = useSearchParams();
   const t = useTranslations("overview");
-  const startDate = searchParams.get("startDate") ?? "";
-  const endDate = searchParams.get("endDate") ?? "";
+  const { startDate, endDate, isAll } = useListenDateRange();
+  const startDateParam = searchParams.get("startDate") ?? "";
+  const endDateParam = searchParams.get("endDate") ?? "";
   // Key force le remontage complet quand le filtre change (évite données "All" affichées avec filtre 7j)
-  const filterKey = `${startDate}-${endDate}`;
+  const filterKey = `${startDateParam}-${endDateParam}`;
+
+  const dateRangeLabel = formatDateRange(startDate, endDate);
+  const hasComparison = !isAll && !!startDate && !!endDate;
 
   return (
     <div className="px-4 py-6 sm:px-0">
       <header className="mb-8">
+        <div className="flex flex-wrap items-center gap-3 mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-accent-violet/10 to-accent-indigo/10 dark:from-accent-violet/20 dark:to-accent-indigo/20 border border-accent-violet/20">
+            <svg className="w-5 h-5 text-accent-violet" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+            </svg>
+            <span className="text-sm font-medium text-accent-violet dark:text-accent-violet">
+              {dateRangeLabel ? dateRangeLabel : t("allData")}
+            </span>
+          </div>
+          {hasComparison && (
+            <span className="px-2.5 py-1 rounded-full bg-accent-emerald/10 text-accent-emerald text-xs font-medium">
+              {t("vsPreviousPeriod")}
+            </span>
+          )}
+        </div>
         <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
           {t("title")}
         </h1>

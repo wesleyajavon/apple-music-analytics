@@ -1,11 +1,12 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { Link, usePathname } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { LanguageSwitcher } from "@/lib/components/language-switcher";
 import { ThemeSwitcher } from "@/lib/components/theme-switcher";
-import { useState } from "react";
+
+const STORAGE_KEY = "sidebar-collapsed";
 
 interface NavItem {
   href: string;
@@ -28,6 +29,15 @@ const navGroups: NavGroup[] = [
         icon: (props) => (
           <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
+          </svg>
+        ),
+      },
+      {
+        href: "/dashboard/overview-bis",
+        labelKey: "overviewBis",
+        icon: (props) => (
+          <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
           </svg>
         ),
       },
@@ -96,15 +106,6 @@ const navGroups: NavGroup[] = [
           </svg>
         ),
       },
-      {
-        href: "/dashboard/network",
-        labelKey: "network",
-        icon: (props) => (
-          <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
-          </svg>
-        ),
-      },
     ],
   },
   {
@@ -152,6 +153,15 @@ const navGroups: NavGroup[] = [
     labelKey: "other",
     items: [
       {
+        href: "/dashboard/about",
+        labelKey: "about",
+        icon: (props) => (
+          <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+          </svg>
+        ),
+      },
+      {
         href: "/dashboard/insights",
         labelKey: "methodology",
         icon: (props) => (
@@ -165,7 +175,7 @@ const navGroups: NavGroup[] = [
         labelKey: "sentryTest",
         icon: (props) => (
           <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c3.556 0 6.592-1.42 8.864-3.476m-12.728 0C3.5 17.5 4.5 16 6 16h12c1.5 0 2.5 1.5 2.5 3 0 1.5-1.5 3-2.5 3H6c-1.5 0-2.5-1.5-2.5-3 0-1.5 1-3 2.5-3m0 0c0-.5.5-1 1-1h1c.5 0 1 .5 1 1v2c0 .5-.5 1-1 1H7c-.5 0-1-.5-1-1v-2c0-.5.5-1 1-1h1c.5 0 1 .5 1 1m0 0h4m0 0h4" />
           </svg>
         ),
       },
@@ -173,10 +183,38 @@ const navGroups: NavGroup[] = [
   },
 ];
 
+function getStoredCollapsed(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return stored === "true";
+  } catch {
+    return false;
+  }
+}
+
 export function Sidebar() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const t = useTranslations("sidebar");
+
+  // Hydrate collapsed state from localStorage (SSR-safe)
+  useEffect(() => {
+    setIsCollapsed(getStoredCollapsed());
+  }, []);
+
+  const toggleCollapsed = () => {
+    setIsCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem(STORAGE_KEY, String(next));
+      } catch {
+        /* ignore */
+      }
+      return next;
+    });
+  };
 
   return (
     <>
@@ -184,7 +222,7 @@ export function Sidebar() {
       <div className="lg:hidden fixed top-4 left-4 z-50">
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="p-2.5 rounded-xl text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700/50 shadow-card hover:shadow-card-hover transition-all focus:outline-none focus:ring-2 focus:ring-accent-violet/20"
+          className="p-2.5 rounded-xl text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-800 shadow-card hover:shadow-card-hover transition-all focus:outline-none focus:ring-2 focus:ring-accent-violet/20"
           aria-label={t("openMenu")}
         >
           <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -208,18 +246,25 @@ export function Sidebar() {
       {/* Sidebar */}
       <aside
         className={`
-          fixed top-0 left-0 z-40 h-screen transition-transform duration-300 ease-out
+          fixed top-0 left-0 z-40 h-screen transition-all duration-300 ease-out flex-shrink-0
           lg:translate-x-0 lg:static lg:z-auto
           ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
-          w-64 bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-700/50
+          w-64 ${isCollapsed ? "lg:w-20" : "lg:w-64"}
+          bg-white dark:bg-gray-900
+          border-r border-gray-200/80 dark:border-gray-800
+          shadow-[2px_0_8px_-2px_rgba(0,0,0,0.05)] dark:shadow-[2px_0_8px_-2px_rgba(0,0,0,0.2)]
         `}
       >
-        <div className="flex flex-col h-full">
-          {/* Logo */}
-          <div className="flex items-center h-20 px-6 border-b border-gray-100 dark:border-gray-700/50">
+        <div className="flex flex-col h-full w-full">
+          {/* Logo + Toggle */}
+          <div
+            className={`flex items-center h-20 border-b border-gray-100 dark:border-gray-800 transition-all duration-300 ${
+              isCollapsed ? "px-3 justify-center" : "px-6"
+            }`}
+          >
             <Link
               href="/dashboard"
-              className="flex items-center gap-3 group"
+              className={`flex items-center group ${isCollapsed ? "justify-center" : "gap-3"}`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-accent-violet to-accent-indigo text-white shadow-lg shadow-accent-violet/20 group-hover:scale-105 transition-transform">
@@ -227,32 +272,70 @@ export function Sidebar() {
                   <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
                 </svg>
               </div>
-              <span className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">
-                {t("logo")}
-              </span>
+              {!isCollapsed && (
+                <span className="text-xl font-bold tracking-tight text-gray-900 dark:text-white truncate">
+                  {t("logo")}
+                </span>
+              )}
             </Link>
+          </div>
+
+          {/* Desktop collapse toggle */}
+          <div
+            className={`hidden lg:flex px-2 py-2 border-b border-gray-100 dark:border-gray-800 ${
+              isCollapsed ? "justify-center" : "justify-end"
+            }`}
+          >
+            <button
+              onClick={toggleCollapsed}
+              className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-accent-violet/20"
+              aria-label={isCollapsed ? t("expandSidebar") : t("collapseSidebar")}
+              title={isCollapsed ? t("expandSidebar") : t("collapseSidebar")}
+            >
+              <svg
+                className={`h-5 w-5 transition-transform duration-300 ${isCollapsed ? "rotate-180" : ""}`}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+              </svg>
+            </button>
           </div>
 
           {/* Navigation */}
           <nav className="flex-1 px-3 py-5 overflow-y-auto">
             {navGroups.map((group) => (
               <div key={group.labelKey} className="mb-6 last:mb-0">
-                <div className="px-3 mb-2">
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
-                    {t(`groups.${group.labelKey}`)}
-                  </span>
-                </div>
+                {!isCollapsed && (
+                  <div className="px-3 mb-2">
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                      {t(`groups.${group.labelKey}`)}
+                    </span>
+                  </div>
+                )}
                 <div className="space-y-0.5">
-                  {group.items.map((item) => {
+                  {group.items
+                    .filter(
+                      (item) =>
+                        !(
+                          item.href === '/dashboard/sentry-test' &&
+                          process.env.NODE_ENV === 'production'
+                        )
+                    )
+                    .map((item) => {
                     const isActive = pathname === item.href;
                     const Icon = item.icon;
+                    const label = t(`items.${item.labelKey}`);
                     return (
                       <Link
                         key={item.href}
                         href={item.href}
                         onClick={() => setIsMobileMenuOpen(false)}
+                        title={isCollapsed ? label : undefined}
                         className={`
-                          group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
+                          group flex items-center rounded-xl text-sm font-medium transition-all duration-200
+                          ${isCollapsed ? "justify-center px-2 py-2.5" : "gap-3 px-3 py-2.5"}
                           ${
                             isActive
                               ? "bg-accent-violet/10 text-accent-violet dark:text-accent-violet"
@@ -265,9 +348,13 @@ export function Sidebar() {
                             isActive ? "text-accent-violet" : "text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300"
                           }`}
                         />
-                        <span className="flex-1 truncate">{t(`items.${item.labelKey}`)}</span>
-                        {isActive && (
-                          <div className="w-1 h-5 rounded-full bg-accent-violet shrink-0" />
+                        {!isCollapsed && (
+                          <>
+                            <span className="flex-1 truncate">{label}</span>
+                            {isActive && (
+                              <div className="w-1 h-5 rounded-full bg-accent-violet shrink-0" />
+                            )}
+                          </>
                         )}
                       </Link>
                     );
@@ -278,23 +365,31 @@ export function Sidebar() {
           </nav>
 
           {/* Theme & Language switchers */}
-          <div className="px-3 py-4 border-t border-gray-100 dark:border-gray-700/50 space-y-4">
-            <div>
+          <div
+            className={`px-3 py-4 border-t border-gray-100 dark:border-gray-800 space-y-4 transition-all duration-300 ${
+              isCollapsed ? "flex flex-col items-center gap-2" : ""
+            }`}
+          >
+            {!isCollapsed && (
               <div className="px-3 mb-2">
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
                   {t("appearance")}
                 </span>
               </div>
-              <ThemeSwitcher placement="top" />
+            )}
+            <div className={isCollapsed && !isMobileMenuOpen ? "w-full flex justify-center" : ""}>
+              <ThemeSwitcher placement="top" collapsed={isCollapsed && !isMobileMenuOpen} />
             </div>
-            <div>
+            {!isCollapsed && (
               <div className="px-3 mb-2">
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
                   {t("language")}
                 </span>
               </div>
+            )}
+            <div className={isCollapsed && !isMobileMenuOpen ? "w-full flex justify-center" : ""}>
               <Suspense fallback={<div className="h-10 rounded-xl bg-gray-100 dark:bg-gray-800 animate-pulse" />}>
-                <LanguageSwitcher />
+                <LanguageSwitcher collapsed={isCollapsed && !isMobileMenuOpen} />
               </Suspense>
             </div>
           </div>

@@ -75,17 +75,3 @@ export const tasteEvolutionKeys = {
     locale?: string;
   }) => [...tasteEvolutionKeys.all, params] as const,
 } as const;
-
-export const networkKeys = {
-  all: ["network"] as const,
-  graph: (params?: {
-    startDate?: string;
-    endDate?: string;
-    userId?: string;
-    minPlayCount?: number;
-    maxArtists?: number;
-    proximityWindowMinutes?: number;
-    minEdgeWeight?: number;
-  }) => [...networkKeys.all, "graph", params] as const,
-} as const;
-

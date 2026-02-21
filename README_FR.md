@@ -3,7 +3,26 @@
 [![CI](https://img.shields.io/github/actions/workflow/status/wesleyajavon/apple-music-analytics/ci.yml?branch=main)](https://github.com/wesleyajavon/apple-music-analytics/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-Tableau de bord personnel pour visualiser votre comportement d'écoute musicale à partir de l'historique **Last.fm** et des données **Apple Music Replay** importées manuellement.
+Tableau de bord personnel pour visualiser votre comportement d'écoute musicale à partir de l'historique **Last.fm**.
+
+## Pourquoi Last.fm plutôt que l'API Apple Music ?
+
+Ce projet utilise l'**API Last.fm** plutôt que l'API officielle Apple Music pour des raisons budgétaires. L'API Apple Music nécessite un abonnement payant au programme développeur Apple et des coûts à l'usage. Last.fm propose une API gratuite pour un usage personnel.
+
+### Qu'est-ce que Last.fm ?
+
+[Last.fm](https://www.last.fm) est un service de découverte musicale qui enregistre vos écoutes sur différentes plateformes (Apple Music, Spotify, etc.). En connectant Last.fm à votre compte Apple Music, il **scrobble** vos écoutes — c'est-à-dire qu'il enregistre chaque morceau écouté (artiste, titre, horodatage) sur votre profil Last.fm. Ce projet récupère cet historique via l'API Last.fm et le stocke en base locale pour les analytics.
+
+## Workflow du projet
+
+Comprendre comment les données arrivent dans le dashboard :
+
+1. **Écouter de la musique** — Utilisez Apple Music (ou toute app supportée) sur votre téléphone comme d'habitude.
+2. **Scrobbling Last.fm** — Last.fm est lié à votre compte Apple Music et enregistre automatiquement (« scrobble ») chaque écoute.
+3. **Synchroniser les scrobbles** — *(Pas encore automatisé)* Vous ouvrez manuellement l'app Last.fm sur votre téléphone et lancez la recherche de nouveaux scrobbles pour transférer les données d'Apple Music vers Last.fm.
+4. **Mettre à jour la base** — Exécutez `npm run lastfm:update` (ou utilisez l'API Last.fm via script) pour récupérer les nouveaux scrobbles et mettre à jour la base locale.
+5. **Dashboard à jour** — Une fois la BDD mise à jour, le dashboard affiche vos dernières statistiques.
+6. **Données obsolètes ?** — Si le dashboard semble périmé, c'est généralement que la base n'a pas encore été mise à jour avec les nouveaux scrobbles Last.fm.
 
 ## Fonctionnalités
 
@@ -14,8 +33,8 @@ Tableau de bord personnel pour visualiser votre comportement d'écoute musicale 
 - **Artistes** — Top artistes, statistiques détaillées
 - **Analyse temporelle** — Habitudes par heure et jour de la semaine
 - **Quand vais-je écouter ?** — Prédiction du créneau et genre les plus probables
-- **Comparaison Replay** — Comparaison Apple Music Replay entre années
-- **Réseau d'artistes** — Visualisation interactive des connexions entre artistes
+- **Profil de goûts** — Explication IA de vos goûts musicaux (optionnel, Groq)
+- **Évolution des goûts** — Changements semaine par semaine avec contexte IA (optionnel, Groq)
 - **AI Insights** — Insights en langage naturel (optionnel, Groq)
 
 ## Prérequis

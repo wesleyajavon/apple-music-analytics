@@ -13,8 +13,7 @@ Vue d’ensemble des technologies principales du projet.
 | **next-intl** | i18n (en, fr, es) |
 | **TanStack Query** | Données côté client |
 | **Recharts** | Graphiques |
-| **D3** | Visualisations (heatmap, réseau d’artistes) |
-| **react-force-graph-2d** | Graphe des connexions entre artistes |
+| **D3** | Visualisations (heatmap) |
 
 ## Backend
 
@@ -31,7 +30,6 @@ Vue d’ensemble des technologies principales du projet.
 | Source | Usage |
 |--------|--------|
 | **Last.fm API** | Import des scrobbles |
-| **Apple Music Replay** | Import manuel (JSON) |
 | **Groq** | Insights IA (optionnel) |
 
 ## Tests

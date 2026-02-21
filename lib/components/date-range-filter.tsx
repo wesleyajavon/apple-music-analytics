@@ -263,7 +263,7 @@ export function DateRangeFilter() {
   }, [searchParams, downloadFile, locale]);
 
   return (
-    <div className="bg-white dark:bg-gray-800/95 border-b border-gray-100 dark:border-gray-700/50 px-4 sm:px-6 py-3 backdrop-blur-sm">
+    <div className="border-b border-gray-100 dark:border-gray-800 px-4 sm:px-6 lg:px-8 py-3">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 shrink-0">

@@ -16,6 +16,7 @@ import type { AiLocale } from "@/lib/services/ai/locale-utils";
 
 const TRENDS_CACHE_PREFIX = "taste-evolution:trends:";
 const COMMENTARY_CACHE_PREFIX = "taste-evolution:commentary:";
+const COMMENTARY_LIGHT_CACHE_PREFIX = "taste-evolution:commentary-light:";
 const CACHE_TTL_SECONDS = 24 * 60 * 60; // 24 hours
 
 const memoryTrendsCache = new Map<
@@ -23,6 +24,7 @@ const memoryTrendsCache = new Map<
   { trends: WeekToWeekTrend[]; skippedWeeks: Array<{ weekStart: string; reason: string }>; expiresAt: number }
 >();
 const memoryCommentaryCache = new Map<string, { commentary: string; expiresAt: number }>();
+const memoryCommentaryLightCache = new Map<string, { commentary: string; expiresAt: number }>();
 const MEMORY_CACHE_TTL_MS = CACHE_TTL_SECONDS * 1000;
 
 function trendsCacheKey(startDate: string, endDate: string, userId?: string): string {
@@ -31,7 +33,7 @@ function trendsCacheKey(startDate: string, endDate: string, userId?: string): st
     .digest("hex");
 }
 
-function commentaryCacheKey(trends: WeekToWeekTrend[], locale: AiLocale): string {
+function commentaryCacheKey(trends: WeekToWeekTrend[], locale: AiLocale, light: boolean): string {
   const payload = JSON.stringify(
     trends.map((t) => ({
       week: t.timeRange.weekStart,
@@ -42,7 +44,7 @@ function commentaryCacheKey(trends: WeekToWeekTrend[], locale: AiLocale): string
       declining: t.decliningGenres.map((g) => g.genre),
     }))
   );
-  return createHash("sha256").update(payload + ":" + locale, "utf8").digest("hex");
+  return createHash("sha256").update(payload + ":" + locale + ":" + (light ? "light" : "tech"), "utf8").digest("hex");
 }
 
 export async function getCachedTrends(
@@ -105,45 +107,51 @@ export async function setCachedTrends(
 
 export async function getCachedCommentary(
   trends: WeekToWeekTrend[],
-  locale: AiLocale
+  locale: AiLocale,
+  light = false
 ): Promise<string | null> {
-  const key = commentaryCacheKey(trends, locale);
+  const key = commentaryCacheKey(trends, locale, light);
+  const prefix = light ? COMMENTARY_LIGHT_CACHE_PREFIX : COMMENTARY_CACHE_PREFIX;
+  const cache = light ? memoryCommentaryLightCache : memoryCommentaryCache;
   const redis = getRedisClient();
 
   if (redis) {
     try {
-      const cached = await redis.get(COMMENTARY_CACHE_PREFIX + key);
+      const cached = await redis.get(prefix + key);
       if (cached) return cached;
     } catch {
       // fall through
     }
   }
 
-  const entry = memoryCommentaryCache.get(key);
+  const entry = cache.get(key);
   if (entry && entry.expiresAt > Date.now()) {
     return entry.commentary;
   }
-  if (entry) memoryCommentaryCache.delete(key);
+  if (entry) cache.delete(key);
   return null;
 }
 
 export async function setCachedCommentary(
   trends: WeekToWeekTrend[],
   commentary: string,
-  locale: AiLocale
+  locale: AiLocale,
+  light = false
 ): Promise<void> {
-  const key = commentaryCacheKey(trends, locale);
+  const key = commentaryCacheKey(trends, locale, light);
+  const prefix = light ? COMMENTARY_LIGHT_CACHE_PREFIX : COMMENTARY_CACHE_PREFIX;
+  const cache = light ? memoryCommentaryLightCache : memoryCommentaryCache;
   const redis = getRedisClient();
 
   if (redis) {
     try {
-      await redis.setex(COMMENTARY_CACHE_PREFIX + key, CACHE_TTL_SECONDS, commentary);
+      await redis.setex(prefix + key, CACHE_TTL_SECONDS, commentary);
     } catch {
       // fall through
     }
   }
 
-  memoryCommentaryCache.set(key, {
+  cache.set(key, {
     commentary,
     expiresAt: Date.now() + MEMORY_CACHE_TTL_MS,
   });

@@ -1,24 +1,21 @@
 "use client";
 
-import { memo, useMemo, Suspense } from "react";
+import { memo, useMemo, Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import {
   BarChart,
   Bar,
-  LineChart,
-  Line,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Legend,
   PieChart,
   Pie,
   Cell,
 } from "recharts";
-import { useArtistStats, useArtistTrends } from "@/lib/hooks/use-artists";
+import { useArtistStats } from "@/lib/hooks/use-artists";
 import { CHART_TOOLTIP_STYLES } from "@/lib/constants/config";
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
@@ -208,6 +205,181 @@ const TopThreeArtists = memo(({
 
 TopThreeArtists.displayName = "TopThreeArtists";
 
+const VISIBLE_ARTISTS_COUNT = 8;
+
+/**
+ * Grille "All your artists" : top 8 visibles, toggle en 9e position, reste togglable
+ */
+const AllArtistsGrid = memo(({
+  topArtists,
+  maxListens,
+  t,
+  locale,
+}: {
+  topArtists: ArtistStatsDto[];
+  maxListens: number;
+  t: (k: string, v?: Record<string, number>) => string;
+  locale: string;
+}) => {
+  const [expanded, setExpanded] = useState(false);
+  const visibleArtists = topArtists.slice(0, VISIBLE_ARTISTS_COUNT);
+  const restArtists = topArtists.slice(VISIBLE_ARTISTS_COUNT);
+  const hasMore = restArtists.length > 0;
+
+  return (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {visibleArtists.map((artist, index) => (
+        <ArtistCard key={artist.artistId} artist={artist} rank={index + 1} maxListens={maxListens} t={t} locale={locale} />
+      ))}
+      {hasMore && (
+        <div
+          className="group relative flex min-h-[140px] cursor-pointer items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-500
+            bg-gray-50/80 dark:bg-gray-800/50 transition-all duration-300
+            hover:border-accent-violet/60 hover:bg-accent-violet/5 dark:hover:bg-accent-violet/10"
+          onClick={() => setExpanded((e) => !e)}
+          onKeyDown={(ev) => ev.key === "Enter" && setExpanded((e) => !e)}
+          role="button"
+          tabIndex={0}
+          aria-expanded={expanded}
+          aria-label={expanded ? t("showLessArtists") : t("showMoreArtists", { count: restArtists.length })}
+        >
+          <span className="text-sm font-semibold text-gray-600 dark:text-gray-400 group-hover:text-accent-violet dark:group-hover:text-accent-violet">
+            {expanded ? t("showLessArtists") : t("showMoreArtists", { count: restArtists.length })}
+          </span>
+        </div>
+      )}
+      {expanded && restArtists.map((artist, index) => (
+        <ArtistCard
+          key={artist.artistId}
+          artist={artist}
+          rank={VISIBLE_ARTISTS_COUNT + index + 1}
+          maxListens={maxListens}
+          t={t}
+          locale={locale}
+        />
+      ))}
+    </div>
+  );
+});
+
+AllArtistsGrid.displayName = "AllArtistsGrid";
+
+function ChevronIcon({ direction }: { direction: "up" | "down" }) {
+  return (
+    <svg
+      className="h-4 w-4 shrink-0 transition-transform"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={2}
+      aria-hidden
+    >
+      {direction === "down" ? (
+        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+      ) : (
+        <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
+      )}
+    </svg>
+  );
+}
+
+/**
+ * Tableau détaillé – header cliquable pour expand/collapse
+ */
+const DetailedViewSection = memo(({
+  topArtists,
+  t,
+  locale,
+}: {
+  topArtists: ArtistStatsDto[];
+  t: (k: string) => string;
+  locale: string;
+}) => {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <div className="overflow-hidden rounded-2xl border border-gray-200/80 dark:border-gray-600/50 bg-white dark:bg-gray-800/90 shadow-lg">
+      <button
+        type="button"
+        onClick={() => setExpanded((e) => !e)}
+        className="flex w-full items-start justify-between gap-4 border-b border-gray-100 dark:border-gray-700/50 px-6 py-4 text-left transition-colors hover:bg-gray-50/80 dark:hover:bg-gray-700/30"
+        aria-expanded={expanded}
+      >
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{t("detailedView")}</h3>
+          <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">{t("datesAndTracks")}</p>
+        </div>
+        <ChevronIcon direction={expanded ? "up" : "down"} />
+      </button>
+      {expanded && (
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead className="bg-gray-50/80 dark:bg-gray-800/50">
+              <tr>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t("rank")}</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t("artist")}</th>
+                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t("listensLabel")}</th>
+                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t("tracks")}</th>
+                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t("first")}</th>
+                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t("last")}</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+              {topArtists.map((artist, index) => {
+                const rankStyles = ["text-amber-500", "text-slate-400", "text-amber-700"];
+                const rankBg = ["bg-amber-500/15", "bg-slate-400/15", "bg-amber-700/15"];
+                const rankStyle = index < 3 ? rankStyles[index] : "text-gray-400 dark:text-gray-500";
+                const rankBgStyle = index < 3 ? rankBg[index] : "bg-gray-100 dark:bg-gray-700/50";
+                return (
+                  <tr key={artist.artistId} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                    <td className="whitespace-nowrap px-6 py-4">
+                      <span className={`inline-flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold ${rankStyle} ${rankBgStyle}`}>
+                        {index + 1}
+                      </span>
+                    </td>
+                    <td className="whitespace-nowrap px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={getArtistImageUrl(artist, 72, index)}
+                            alt=""
+                            width={36}
+                            height={36}
+                            className="h-full w-full object-cover"
+                            onError={(e) => {
+                              e.currentTarget.src = getAvatarUrl(artist.artistName, 72, index);
+                            }}
+                          />
+                        </div>
+                        <span className="text-sm font-medium text-gray-900 dark:text-white">{artist.artistName}</span>
+                      </div>
+                    </td>
+                    <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-semibold tabular-nums text-gray-900 dark:text-white">
+                      {artist.listenCount.toLocaleString(locale)}
+                    </td>
+                    <td className="whitespace-nowrap px-6 py-4 text-right text-sm text-gray-500 dark:text-gray-400 tabular-nums">
+                      {artist.uniqueTracks}
+                    </td>
+                    <td className="whitespace-nowrap px-6 py-4 text-right text-sm text-gray-500 dark:text-gray-400">
+                      {new Date(artist.firstListenDate).toLocaleDateString(locale)}
+                    </td>
+                    <td className="whitespace-nowrap px-6 py-4 text-right text-sm text-gray-500 dark:text-gray-400">
+                      {new Date(artist.lastListenDate).toLocaleDateString(locale)}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+});
+
+DetailedViewSection.displayName = "DetailedViewSection";
+
 function ArtistsContent() {
   const searchParams = useSearchParams();
   const t = useTranslations("artists");
@@ -216,42 +388,7 @@ function ArtistsContent() {
   const startDate = searchParams.get("startDate") || undefined;
   const endDate = searchParams.get("endDate") || undefined;
 
-  const defaultStartDate = useMemo(() => {
-    if (startDate) return startDate;
-    const date = new Date();
-    date.setDate(date.getDate() - 30);
-    return date.toISOString().split("T")[0];
-  }, [startDate]);
-
-  const defaultEndDate = endDate || new Date().toISOString().split("T")[0];
-
   const { data, isLoading, error, refetch } = useArtistStats(startDate, endDate, undefined, 20);
-  const { data: trendsData } = useArtistTrends(defaultStartDate, defaultEndDate, "day", 5);
-
-  const trendChartData = useMemo(() => {
-    if (!trendsData?.data) return [];
-    const dateMap = new Map<string, Record<string, number>>();
-    trendsData.data.forEach((point) => {
-      if (!dateMap.has(point.date)) dateMap.set(point.date, {});
-      const dateData = dateMap.get(point.date)!;
-      dateData[point.artistName] = point.listenCount;
-    });
-    return Array.from(dateMap.entries()).map(([date, artists]) => {
-      const d = new Date(date);
-      return {
-        date,
-        formattedDate: d.toLocaleDateString(locale, { day: "2-digit", month: "2-digit" }),
-        ...artists,
-      };
-    });
-  }, [trendsData, locale]);
-
-  const trendArtistNames = useMemo(() => {
-    if (!trendsData?.data) return [];
-    const names = new Set<string>();
-    trendsData.data.forEach((point) => names.add(point.artistName));
-    return Array.from(names);
-  }, [trendsData]);
 
   const topArtists = data?.topArtists ?? [];
   const maxListens = topArtists[0]?.listenCount ?? 1;
@@ -320,62 +457,7 @@ function ArtistsContent() {
         <TopThreeArtists artists={topArtists} maxListens={maxListens} t={t} locale={locale} />
       </section>
 
-      {/* Évolution des top artistes */}
-      {trendChartData.length > 0 && (
-        <div className="overflow-hidden rounded-2xl border border-gray-200/80 dark:border-gray-600/50 bg-white dark:bg-gray-800/90 shadow-lg">
-          <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{t("evolutionTitle")}</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{t("evolutionSubtitle")}</p>
-          </div>
-          <div className="p-6">
-            <ResponsiveContainer width="100%" height={320}>
-              <LineChart data={trendChartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-                <XAxis
-                  dataKey="formattedDate"
-                  tick={{ fill: "#6b7280", fontSize: 11 }}
-                  axisLine={false}
-                  tickLine={false}
-                  angle={-45}
-                  textAnchor="end"
-                  height={60}
-                />
-                <YAxis tick={{ fill: "#6b7280", fontSize: 11 }} axisLine={false} tickLine={false} width={40} />
-                <Tooltip
-                  contentStyle={CHART_TOOLTIP_STYLES.contentStyle}
-                  labelStyle={CHART_TOOLTIP_STYLES.labelStyle}
-                  itemStyle={CHART_TOOLTIP_STYLES.itemStyle}
-                />
-                <Legend wrapperStyle={{ paddingTop: "16px" }} iconType="line" />
-                {trendArtistNames.map((artistName, index) => (
-                  <Line
-                    key={artistName}
-                    type="monotone"
-                    dataKey={artistName}
-                    stroke={CHART_COLORS[index % CHART_COLORS.length]}
-                    strokeWidth={2}
-                    dot={{ r: 3 }}
-                    activeDot={{ r: 5 }}
-                    name={artistName}
-                  />
-                ))}
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      )}
-
-      {/* Grille d'artistes – cartes avec avatar */}
-      <section>
-        <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">{t("allArtists")}</h3>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {topArtists.map((artist, index) => (
-            <ArtistCard key={artist.artistId} artist={artist} rank={index + 1} maxListens={maxListens} t={t} locale={locale} />
-          ))}
-        </div>
-      </section>
-
-      {/* Graphiques – barres + camembert */}
+      {/* Graphiques – Top 10 listens + Distribution Top 6 */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="overflow-hidden rounded-2xl border border-gray-200/80 dark:border-gray-600/50 bg-white dark:bg-gray-800/90 shadow-lg">
           <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
@@ -451,74 +533,14 @@ function ArtistsContent() {
         </div>
       </div>
 
-      {/* Tableau détaillé – replié visuellement */}
-      <div className="overflow-hidden rounded-2xl border border-gray-200/80 dark:border-gray-600/50 bg-white dark:bg-gray-800/90 shadow-lg">
-        <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{t("detailedView")}</h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{t("datesAndTracks")}</p>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead className="bg-gray-50/80 dark:bg-gray-800/50">
-              <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t("rank")}</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t("artist")}</th>
-                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t("listensLabel")}</th>
-                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t("tracks")}</th>
-                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t("first")}</th>
-                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t("last")}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-              {topArtists.map((artist, index) => {
-                const rankStyles = ["text-amber-500", "text-slate-400", "text-amber-700"];
-                const rankBg = ["bg-amber-500/15", "bg-slate-400/15", "bg-amber-700/15"];
-                const rankStyle = index < 3 ? rankStyles[index] : "text-gray-400 dark:text-gray-500";
-                const rankBgStyle = index < 3 ? rankBg[index] : "bg-gray-100 dark:bg-gray-700/50";
-                return (
-                  <tr key={artist.artistId} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold ${rankStyle} ${rankBgStyle}`}>
-                        {index + 1}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={getArtistImageUrl(artist, 72, index)}
-                            alt=""
-                            width={36}
-                            height={36}
-                            className="h-full w-full object-cover"
-                            onError={(e) => {
-                              e.currentTarget.src = getAvatarUrl(artist.artistName, 72, index);
-                            }}
-                          />
-                        </div>
-                        <span className="text-sm font-medium text-gray-900 dark:text-white">{artist.artistName}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-semibold tabular-nums text-gray-900 dark:text-white">
-                      {artist.listenCount.toLocaleString(locale)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-500 dark:text-gray-400 tabular-nums">
-                      {artist.uniqueTracks}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-500 dark:text-gray-400">
-                      {new Date(artist.firstListenDate).toLocaleDateString(locale)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-500 dark:text-gray-400">
-                      {new Date(artist.lastListenDate).toLocaleDateString(locale)}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {/* Grille d'artistes – top 8 visibles, reste togglable (toggle en 9e position) */}
+      <section>
+        <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">{t("allArtists")}</h3>
+        <AllArtistsGrid topArtists={topArtists} maxListens={maxListens} t={t} locale={locale} />
+      </section>
+
+      {/* Tableau détaillé – togglable */}
+      <DetailedViewSection topArtists={topArtists} t={t} locale={locale} />
     </div>
   );
 }

@@ -40,15 +40,15 @@ export function TasteEvolutionSummaryWidget() {
     [data?.trends]
   );
 
-  const commentary = data?.commentary ?? null;
+  const commentary = data?.commentaryLight ?? data?.commentary ?? null;
 
   if (isLoading) {
     return (
-      <div className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card animate-pulse">
+      <div className="overflow-hidden rounded-xl border border-card-border bg-card-surface shadow-card min-h-[200px]">
         <div className="p-6">
-          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-4" />
-          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-full mb-2" />
-          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-4/5" />
+          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-4 animate-shimmer" />
+          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-full mb-2 animate-shimmer" />
+          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-4/5 animate-shimmer" />
         </div>
       </div>
     );
@@ -63,7 +63,7 @@ export function TasteEvolutionSummaryWidget() {
   );
 
   return (
-    <div className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card">
+    <div className="overflow-hidden rounded-xl border border-card-border bg-card-surface shadow-card transition-shadow duration-300 hover:shadow-card-hover min-h-[220px] flex flex-col">
       <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
         <div className="flex items-center justify-between">
           <div>

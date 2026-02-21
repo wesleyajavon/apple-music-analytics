@@ -1,7 +1,6 @@
 "use client";
 
 import { Suspense, useState, useMemo, useCallback, memo } from "react";
-import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { usePathname } from "@/i18n/navigation";
 import {
@@ -18,26 +17,55 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { useGenres } from "@/lib/hooks/use-listening";
-import { LoadingState } from "@/lib/components/loading-state";
+import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
 import { GenresSkeleton } from "@/lib/components/skeleton-loaders";
 
 type ChartType = "pie" | "bar";
 
-// Couleurs pour les genres (palette colorée)
+// Couleurs pour les genres – palette accent du projet
 const COLORS = [
-  "#3b82f6", // blue
-  "#8b5cf6", // violet
-  "#ec4899", // pink
+  "#8b5cf6", // accent-violet
+  "#6366f1", // accent-indigo
+  "#ec4899", // accent-rose
+  "#06b6d4", // accent-cyan
+  "#10b981", // accent-emerald
   "#f59e0b", // amber
-  "#10b981", // emerald
   "#ef4444", // red
-  "#06b6d4", // cyan
   "#f97316", // orange
-  "#6366f1", // indigo
   "#14b8a6", // teal
+  "#a855f7", // purple
 ];
+
+/** Icône chevron pour expand/collapse */
+function ChevronIcon({ direction }: { direction: "up" | "down" }) {
+  return (
+    <svg
+      className="w-4 h-4 shrink-0"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={2}
+      aria-hidden
+    >
+      {direction === "down" ? (
+        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+      ) : (
+        <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
+      )}
+    </svg>
+  );
+}
+
+/** Icône genre musical */
+function GenreIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="m9 9 10.5-3m0 6.553v3.75a2.25 2.25 0 0 1-1.632 2.163l-1.32.377a1.803 1.803 0 1 1-.99-3.467l2.31-.66a2.25 2.25 0 0 0 1.632-2.163zm0 0V2.25L9 5.25v10.303m0 0v3.75a2.25 2.25 0 0 1-1.632 2.163l-1.32.377a1.803 1.803 0 0 1-.99-3.467l2.31-.66A2.25 2.25 0 0 0 9 15.553z" />
+    </svg>
+  );
+}
 
 // Custom tooltip - needs to be inside component to use translations
 function createCustomTooltip(t: (k: string) => string, locale: string) {
@@ -59,30 +87,57 @@ function createCustomTooltip(t: (k: string) => string, locale: string) {
   return T;
 }
 
+/** Légende personnalisée pour le pie chart – grille lisible avec couleur, nom et % */
+function PieChartLegend({
+  data,
+  colors,
+  locale,
+}: {
+  data: Array<{ name: string; percentage: number }>;
+  colors: string[];
+  locale: string;
+}) {
+  return (
+    <div className="mt-4 mb-6 flex flex-wrap justify-center gap-x-4 gap-y-2 sm:gap-x-6 sm:gap-y-3">
+      {data.map((item, index) => (
+        <div
+          key={item.name}
+          className="flex items-center gap-2 min-w-0 max-w-full"
+        >
+          <div
+            className="h-3 w-3 shrink-0 rounded-full"
+            style={{ backgroundColor: colors[index % colors.length] }}
+            aria-hidden
+          />
+          <span className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 truncate">
+            {item.name}
+          </span>
+          <span className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 tabular-nums shrink-0">
+            {item.percentage.toFixed(1)}%
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function GenresContent() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const t = useTranslations("genres");
+  const tCommon = useTranslations("common");
   const locale = useLocale();
   const CustomTooltip = useMemo(() => createCustomTooltip(t, locale), [t, locale]);
-  // Par défaut, utiliser les 30 derniers jours si aucune date n'est spécifiée
-  const startDateParam = searchParams.get("startDate");
-  const endDateParam = searchParams.get("endDate");
-  
-  // Si aucune date n'est spécifiée, utiliser les 30 derniers jours par défaut
-  const defaultEndDate = useMemo(() => new Date(), []);
-  const defaultStartDate = useMemo(() => {
-    const date = new Date();
-    date.setDate(date.getDate() - 30);
-    return date;
-  }, []);
-  
-  const startDate = startDateParam || defaultStartDate.toISOString().split("T")[0];
-  const endDate = endDateParam || defaultEndDate.toISOString().split("T")[0];
-  
-  const [chartType, setChartType] = useState<ChartType>("pie");
 
-  const { data, isLoading, error, refetch } = useGenres(startDate, endDate);
+  const { startDate, endDate, isLoading: isRangeLoading } = useListenDateRange();
+
+  const [chartType, setChartType] = useState<ChartType>("pie");
+  const [detailExpanded, setDetailExpanded] = useState(false);
+
+  const { data, isLoading, error, refetch } = useGenres(startDate, endDate, undefined, {
+    enabled: !!startDate && !!endDate,
+  });
+
+  const isLoadingOrFetching = isRangeLoading || isLoading;
 
   // Formater les données pour les graphiques - mémorisé pour éviter les recalculs
   const chartData = useMemo(
@@ -122,10 +177,36 @@ function GenresContent() {
 
   const emptyStatePresets = useEmptyStatePresets();
 
+  const formatDateRange = (start: string, end: string) => {
+    const s = new Date(start);
+    const e = new Date(end);
+    return `${s.toLocaleDateString(locale, { month: "short", day: "numeric", year: "numeric" })} – ${e.toLocaleDateString(locale, { month: "short", day: "numeric", year: "numeric" })}`;
+  };
+
+  const top3Genres = chartData.slice(0, 3);
+  const gradientByRank = [
+    "from-violet-500 via-purple-500 to-fuchsia-500",
+    "from-pink-500 via-rose-500 to-red-400",
+    "from-indigo-500 via-violet-500 to-purple-500",
+  ];
+
   return (
     <>
-      <div className="mt-4 sm:mt-6">
+      <div className="mt-4 sm:mt-6 space-y-8">
         <header className="mb-6 sm:mb-8">
+          <div className="flex flex-wrap items-center gap-3 mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-accent-violet/10 to-accent-indigo/10 dark:from-accent-violet/20 dark:to-accent-indigo/20 border border-accent-violet/20">
+              <GenreIcon className="w-5 h-5 text-accent-violet" />
+              <span className="text-sm font-medium text-accent-violet dark:text-accent-violet">
+                {startDate && endDate ? formatDateRange(startDate, endDate) : t("allData")}
+              </span>
+            </div>
+            {chartData.length > 0 && (
+              <span className="text-sm text-gray-500 dark:text-gray-400">
+                {chartData.length} {t("statGenres")}
+              </span>
+            )}
+          </div>
           <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl lg:text-4xl">
             {t("title")}
           </h1>
@@ -134,7 +215,7 @@ function GenresContent() {
           </p>
         </header>
 
-        {isLoading ? (
+        {isLoadingOrFetching ? (
           <GenresSkeleton />
         ) : error ? (
           <ErrorState
@@ -145,7 +226,85 @@ function GenresContent() {
         ) : !data || data.data.length === 0 ? (
           <EmptyState {...emptyStatePresets.changeDates(pathname)} />
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-8">
+            {/* Hero bandeau – style Artists */}
+            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-600 px-6 py-8 shadow-2xl sm:px-8 sm:py-10">
+              <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
+              <div className="relative">
+                <h2 className="text-2xl font-bold text-white sm:text-3xl">{t("heroTitle")}</h2>
+                <p className="mt-1 text-white/90">{t("heroSubtitle")}</p>
+                <div className="mt-6 flex flex-wrap gap-4 sm:gap-8">
+                  <div className="rounded-xl bg-white/15 px-4 py-3 backdrop-blur-sm">
+                    <p className="text-xs font-medium uppercase tracking-wider text-white/80">{t("statGenres")}</p>
+                    <p className="text-2xl font-bold text-white">{chartData.length.toLocaleString(locale)}</p>
+                  </div>
+                  <div className="rounded-xl bg-white/15 px-4 py-3 backdrop-blur-sm">
+                    <p className="text-xs font-medium uppercase tracking-wider text-white/80">{t("totalListens")}</p>
+                    <p className="text-2xl font-bold text-white">{data.totalListens.toLocaleString(locale)}</p>
+                  </div>
+                  <div className="rounded-xl bg-white/15 px-4 py-3 backdrop-blur-sm">
+                    <p className="text-xs font-medium uppercase tracking-wider text-white/80">{t("statTopGenre")}</p>
+                    <p className="text-2xl font-bold text-white truncate max-w-[180px]">
+                      {chartData[0]?.name ?? "—"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Top 3 genres spotlight – style Replay */}
+            {top3Genres.length > 0 && (
+              <section>
+                <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">{t("top3Title")}</h3>
+                <p className="mb-6 text-sm text-gray-500 dark:text-gray-400 max-w-2xl">{t("top3Subtitle")}</p>
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+                  {top3Genres.map((genre, index) => {
+                    const maxCount = chartData[0]?.count ?? 1;
+                    const progress = (genre.count / maxCount) * 100;
+                    return (
+                      <div
+                        key={genre.name}
+                        className="group relative overflow-hidden rounded-3xl bg-white dark:bg-gray-800/90
+                          shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1
+                          opacity-0 animate-fade-in-up"
+                        style={{ animationDelay: `${index * 80}ms` }}
+                      >
+                        <div className={`absolute inset-0 bg-gradient-to-br ${gradientByRank[index]} opacity-10 group-hover:opacity-20 transition-opacity`} />
+                        <div className="relative p-6">
+                          <div className="flex flex-col items-center text-center">
+                            <div className="relative mb-4">
+                              <div
+                                className="flex h-16 w-16 items-center justify-center rounded-2xl shadow-lg"
+                                style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                              >
+                                <GenreIcon className="w-8 h-8 text-white" />
+                              </div>
+                              <span className="absolute -top-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full bg-gray-900 dark:bg-white text-sm font-black text-white dark:text-gray-900 shadow-lg">
+                                {index + 1}
+                              </span>
+                            </div>
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white truncate w-full">
+                              {genre.name}
+                            </h3>
+                            <p className="mt-1 text-2xl font-extrabold tabular-nums text-transparent bg-clip-text bg-gradient-to-r from-accent-violet to-accent-pink">
+                              {genre.count.toLocaleString(locale)}
+                            </p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">{t("listens")}</p>
+                            <div className="mt-3 w-full max-w-[160px] h-2 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+                              <div
+                                className="h-full rounded-full bg-gradient-to-r from-accent-violet to-accent-pink transition-all duration-500"
+                                style={{ width: `${Math.min(progress, 100)}%` }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
             {/* Chart type selector */}
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
               <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 shrink-0">
@@ -174,7 +333,7 @@ function GenresContent() {
             </div>
 
             {/* Chart */}
-            <div className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card">
+            <div className="overflow-hidden rounded-xl border-l-4 border-l-accent-violet border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card hover:shadow-card-hover transition-shadow duration-300">
               <div className="border-b border-gray-100 dark:border-gray-700/50 px-4 py-3 sm:px-6 sm:py-4">
                 <h2 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
                   {t("distributionTitle")}
@@ -185,7 +344,7 @@ function GenresContent() {
               </div>
               <div className="p-4 sm:p-6 overflow-x-auto">
               {chartType === "pie" ? (
-                <div className="h-[280px] sm:h-[380px] lg:h-[500px] min-w-[260px]">
+                <div className="h-[280px] sm:h-[380px] lg:h-[500px] min-w-[260px] mb-10">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
@@ -206,14 +365,9 @@ function GenresContent() {
                       ))}
                     </Pie>
                     <Tooltip content={CustomTooltip} />
-                    <Legend
-                      verticalAlign="bottom"
-                      height={36}
-                      formatter={(value) => value}
-                      wrapperStyle={{ fontSize: "clamp(10px, 2.5vw, 12px)" }}
-                    />
                   </PieChart>
                 </ResponsiveContainer>
+                <PieChartLegend data={chartData} colors={COLORS} locale={locale} />
                 </div>
               ) : (
                 <div className="h-[320px] sm:h-[400px] lg:h-[500px] min-w-[280px]">
@@ -262,12 +416,12 @@ function GenresContent() {
               )}
 
               {/* Liste des genres avec barres de progression - design moderne */}
-              <div className="mt-6 pt-6 sm:mt-8 sm:pt-8 border-t border-gray-100 dark:border-gray-700/50">
+              <div className="mt-12 pt-8 sm:mt-14 sm:pt-10 border-t border-gray-100 dark:border-gray-700/50">
                 <h3 className="text-xs sm:text-sm font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4">
                   {t("detailByGenre")}
                 </h3>
                 <div className="space-y-3 sm:space-y-4">
-                  {chartData.map((item, index) => {
+                  {(detailExpanded ? chartData : chartData.slice(0, 5)).map((item, index) => {
                     const maxCount = chartData[0]?.count ?? 1;
                     const widthPercent = (item.count / maxCount) * 100;
                     const rankColors = ["text-amber-500", "text-slate-400", "text-amber-700"];
@@ -312,6 +466,26 @@ function GenresContent() {
                     );
                   })}
                 </div>
+                {chartData.length > 5 && (
+                  <button
+                    type="button"
+                    onClick={() => setDetailExpanded((prev) => !prev)}
+                    className="mt-4 flex items-center justify-center gap-2 w-full py-2.5 rounded-lg text-sm font-medium text-accent-violet hover:bg-accent-violet/10 dark:hover:bg-accent-violet/20 transition-colors"
+                    aria-expanded={detailExpanded}
+                  >
+                    {detailExpanded ? (
+                      <>
+                        <ChevronIcon direction="up" />
+                        {tCommon("less")}
+                      </>
+                    ) : (
+                      <>
+                        <ChevronIcon direction="down" />
+                        {tCommon("more")} ({chartData.length - 5})
+                      </>
+                    )}
+                  </button>
+                )}
               </div>
               </div>
             </div>

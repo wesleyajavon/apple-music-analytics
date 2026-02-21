@@ -27,12 +27,6 @@ export const CHART_TOOLTIP_STYLES = {
 } as const;
 
 /**
- * Default proximity window in minutes for artist network graph
- * Used to determine if two artists were listened to close in time
- */
-export const DEFAULT_PROXIMITY_WINDOW_MINUTES = 30;
-
-/**
  * Cache stale time configuration for React Query
  * Defines how long data is considered fresh before refetching
  */

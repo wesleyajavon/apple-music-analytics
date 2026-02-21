@@ -143,19 +143,6 @@ export const ArtistNetworkGraphSchema = z.object({
 });
 
 /**
- * Schema for ArtistNetworkQueryParams
- */
-export const ArtistNetworkQueryParamsSchema = z.object({
-  userId: z.string().optional(),
-  startDate: z.string().datetime().optional(),
-  endDate: z.string().datetime().optional(),
-  minPlayCount: z.number().int().nonnegative().optional(),
-  maxArtists: z.number().int().positive().optional(),
-  proximityWindowMinutes: z.number().int().positive().optional(),
-  minEdgeWeight: z.number().nonnegative().optional(),
-});
-
-/**
  * Schema for GenreDistributionDto
  */
 export const GenreDistributionDtoSchema = z.object({

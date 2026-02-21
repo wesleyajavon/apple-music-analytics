@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { useListeningHabitPrediction } from "@/lib/hooks/use-listening-habit-prediction";
 import type { ListeningHabitApiResponse } from "@/lib/hooks/use-listening-habit-prediction";
 import type { InsufficientDataResponse } from "@/lib/dto/predictions";
@@ -100,15 +101,15 @@ export function WhenWillIListenWidget({
 
   if (isLoading) {
     return (
-      <div className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card animate-pulse">
+      <div className="overflow-hidden rounded-xl border border-card-border bg-card-surface shadow-card min-h-[200px]">
         <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
-          <div className="h-5 w-48 bg-gray-200 dark:bg-gray-700 rounded" />
-          <div className="mt-1 h-4 w-64 bg-gray-100 dark:bg-gray-700/50 rounded" />
+          <div className="h-5 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+          <div className="mt-1 h-4 w-64 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
         </div>
         <div className="p-6 space-y-4">
           <div className="grid grid-cols-3 gap-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-20 bg-gray-100 dark:bg-gray-700/50 rounded-lg" />
+              <div key={i} className="h-20 bg-gray-200 dark:bg-gray-700 rounded-lg animate-shimmer" />
             ))}
           </div>
         </div>
@@ -119,13 +120,28 @@ export function WhenWillIListenWidget({
   if (error) {
     return (
       <div className="overflow-hidden rounded-xl border border-red-100 dark:border-red-900/30 bg-red-50/50 dark:bg-red-900/10 shadow-card">
-        <div className="px-6 py-4">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-            {t("title")}
-          </h2>
-          <p className="mt-2 text-sm text-red-600 dark:text-red-400">
-            {t("errorLoading")}
-          </p>
+        <div className="border-b border-red-100 dark:border-red-900/30 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                {t("title")}
+              </h2>
+              <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                {t("errorLoading")}
+              </p>
+            </div>
+            <Link
+              href="/dashboard/when-will-i-listen"
+              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium
+                text-accent-violet hover:bg-accent-violet/10 dark:hover:bg-accent-violet/20
+                transition-colors duration-200 shrink-0"
+            >
+              {t("seeMore")}
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -138,14 +154,29 @@ export function WhenWillIListenWidget({
   if (isInsufficientData(data)) {
     const insufficient = data;
     return (
-      <div className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card">
+      <div className="overflow-hidden rounded-xl border border-card-border bg-card-surface shadow-card">
         <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-            {t("title")}
-          </h2>
-          <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">
-            {t("predictionSubtitle")}
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                {t("title")}
+              </h2>
+              <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">
+                {t("predictionSubtitle")}
+              </p>
+            </div>
+            <Link
+              href="/dashboard/when-will-i-listen"
+              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium
+                text-accent-violet hover:bg-accent-violet/10 dark:hover:bg-accent-violet/20
+                transition-colors duration-200 shrink-0"
+            >
+              {t("seeMore")}
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+          </div>
         </div>
         <div className="p-6">
           <div className="flex items-start gap-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 p-4">
@@ -180,21 +211,36 @@ export function WhenWillIListenWidget({
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card">
+    <div className="overflow-hidden rounded-xl border border-card-border bg-card-surface shadow-card">
       <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
-        <div className="flex items-center gap-2">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-            {t("title")}
-          </h2>
-          {"fromCache" in data && data.fromCache && (
-            <span className="rounded-full bg-gray-100 dark:bg-gray-700 px-2 py-0.5 text-xs text-gray-500 dark:text-gray-400">
-              {t("fromCache")}
-            </span>
-          )}
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                {t("title")}
+              </h2>
+              {"fromCache" in data && data.fromCache && (
+                <span className="rounded-full bg-gray-100 dark:bg-gray-700 px-2 py-0.5 text-xs text-gray-500 dark:text-gray-400">
+                  {t("fromCache")}
+                </span>
+              )}
+            </div>
+            <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">
+              {t("predictionSubtitleToday")}
+            </p>
+          </div>
+          <Link
+            href="/dashboard/when-will-i-listen"
+            className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium
+              text-accent-violet hover:bg-accent-violet/10 dark:hover:bg-accent-violet/20
+              transition-colors duration-200 shrink-0"
+          >
+            {t("seeMore")}
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </Link>
         </div>
-        <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">
-          {t("predictionSubtitleToday")}
-        </p>
       </div>
       <div className="p-6">
         <PredictionContent data={data} />

@@ -18,6 +18,8 @@ export type TasteEvolutionLabels = {
   rankDown: string;
   promptIntro: string;
   promptInstruction: string;
+  promptIntroLight: string;
+  promptInstructionLight: string;
 };
 
 const LABELS: Record<
@@ -75,6 +77,10 @@ const LABELS: Record<
       promptIntro: "Voici un résumé des tendances semaine-à-semaine d'évolution des goûts musicaux:",
       promptInstruction:
         "Génère 1 à 2 courts paragraphes qui expliquent ce qui a changé et pourquoi c'est pertinent. Chaque affirmation doit citer une métrique. Pas d'introduction ni de conclusion.",
+      promptIntroLight:
+        "Voici un résumé simplifié des tendances semaine-à-semaine (sans chiffres techniques):",
+      promptInstructionLight:
+        "Génère 1 à 2 courts paragraphes faciles à lire. Décris les changements en langage simple : nouveaux genres découverts, artistes qui montent, ambiance générale. Interdit : pourcentages, points de pourcentage, entropie, chiffres techniques. Style : conversationnel et accessible.",
     },
     dayNames: [
       "Dimanche",
@@ -117,6 +123,10 @@ const LABELS: Record<
       promptIntro: "Here is a summary of week-to-week taste evolution trends:",
       promptInstruction:
         "Generate 1-2 short paragraphs explaining what changed and why it matters. Each statement must cite a metric. No introduction or conclusion.",
+      promptIntroLight:
+        "Here is a simplified summary of week-to-week trends (no technical figures):",
+      promptInstructionLight:
+        "Generate 1-2 short, easy-to-read paragraphs. Describe changes in plain language: new genres discovered, artists rising, overall vibe. Forbidden: percentages, percentage points, entropy, technical numbers. Style: conversational and accessible.",
     },
     dayNames: [
       "Sunday",
@@ -159,6 +169,10 @@ const LABELS: Record<
       promptIntro: "Aquí tienes un resumen de las tendencias de evolución de gustos semana a semana:",
       promptInstruction:
         "Genera 1-2 párrafos cortos que expliquen qué cambió y por qué es relevante. Cada afirmación debe citar una métrica. Sin introducción ni conclusión.",
+      promptIntroLight:
+        "Aquí tienes un resumen simplificado de las tendencias semana a semana (sin cifras técnicas):",
+      promptInstructionLight:
+        "Genera 1-2 párrafos cortos y fáciles de leer. Describe los cambios en lenguaje sencillo: nuevos géneros descubiertos, artistas que suben, ambiente general. Prohibido: porcentajes, puntos porcentuales, entropía, cifras técnicas. Estilo: conversacional y accesible.",
     },
     dayNames: [
       "Domingo",

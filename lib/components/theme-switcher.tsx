@@ -8,6 +8,8 @@ import { useState, useRef, useEffect } from "react";
 interface ThemeSwitcherProps {
   /** Placement du dropdown : "top" = au-dessus du bouton (sidebar), "bottom" = en dessous (header) */
   placement?: "top" | "bottom";
+  /** Sidebar collapsed: icon only, dropdown opens to the right */
+  collapsed?: boolean;
 }
 
 const THEMES: Theme[] = ["light", "dark", "system"];
@@ -81,7 +83,7 @@ function ThemeIcon({ theme }: { theme: Theme }) {
   }
 }
 
-export function ThemeSwitcher({ placement = "top" }: ThemeSwitcherProps) {
+export function ThemeSwitcher({ placement = "top", collapsed = false }: ThemeSwitcherProps) {
   const { theme, setTheme } = useTheme();
   const t = useTranslations("themeSwitcher");
   const [isOpen, setIsOpen] = useState(false);
@@ -130,29 +132,38 @@ export function ThemeSwitcher({ placement = "top" }: ThemeSwitcherProps) {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all duration-200"
+        className={`flex items-center rounded-xl text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all duration-200 ${
+          collapsed ? "justify-center p-2.5" : "gap-2 w-full px-3 py-2.5"
+        }`}
         aria-label={t("ariaLabel")}
         aria-expanded={isOpen}
         aria-haspopup="listbox"
+        title={collapsed ? t(theme) : undefined}
       >
         <ThemeIcon theme={theme} />
-        <span className="flex-1 text-left truncate">{t(theme)}</span>
-        <svg
-          className={`w-4 h-4 shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`}
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          aria-hidden
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
+        {!collapsed && (
+          <>
+            <span className="flex-1 text-left truncate">{t(theme)}</span>
+            <svg
+              className={`w-4 h-4 shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              aria-hidden
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </>
+        )}
       </button>
 
       {isOpen && (
         <ul
           role="listbox"
-          className={`absolute left-0 right-0 py-1 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700/50 rounded-xl shadow-lg overflow-hidden z-50 ${
-            placement === "top" ? "bottom-full mb-1" : "top-full mt-1"
+          className={`absolute py-1 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700/50 rounded-xl shadow-lg overflow-hidden z-50 min-w-[140px] ${
+            collapsed
+              ? "left-full ml-1 top-0"
+              : `left-0 right-0 ${placement === "top" ? "bottom-full mb-1" : "top-full mt-1"}`
           }`}
         >
           {THEMES.map(renderThemeOption)}

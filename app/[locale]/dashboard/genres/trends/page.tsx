@@ -326,60 +326,97 @@ function TrendsContent() {
             </div>
           </div>
 
-          {/* Graphique multi-lignes */}
-          <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              {t("evolution")}
-            </h2>
-            {selectedGenres.length === 0 ? (
-              <p className="text-sm text-gray-500 dark:text-gray-400 py-8 text-center">
-                {t("selectAtLeastOne")}
-              </p>
-            ) : (
-              <ResponsiveContainer width="100%" height={500}>
-                <LineChart
-                  data={chartData}
-                  margin={{ top: 5, right: 20, left: 10, bottom: 60 }}
-                >
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    stroke="#e5e7eb"
-                    className="dark:stroke-gray-700"
-                  />
-                  <XAxis
-                    dataKey="formattedDate"
-                    tick={{ fill: "currentColor", fontSize: 12 }}
-                    stroke="#6b7280"
-                    className="dark:stroke-gray-400"
-                    angle={-45}
-                    textAnchor="end"
-                    height={80}
-                  />
-                  <YAxis
-                    tick={{ fill: "currentColor", fontSize: 12 }}
-                    stroke="#6b7280"
-                    className="dark:stroke-gray-400"
-                  />
-                  <Tooltip content={<TrendsTooltip />} />
-                  <Legend />
-                  {selectedGenres.map((genre, idx) => (
-                    <Line
-                      key={genre}
-                      type="monotone"
-                      dataKey={genre}
-                      name={genre}
-                      stroke={getColor(availableGenres.indexOf(genre))}
-                      strokeWidth={2}
-                      dot={{ r: 3 }}
-                      activeDot={{ r: 5 }}
-                      animationDuration={500}
-                      animationEasing="ease-in-out"
-                    />
-                  ))}
-                </LineChart>
-              </ResponsiveContainer>
-            )}
-          </div>
+          {/* Spotlight: Graphique multi-lignes — élément principal mis en avant */}
+          <section
+            className="relative overflow-hidden rounded-2xl border-2 border-accent-violet/20 bg-white dark:bg-gray-800/95 shadow-2xl dark:shadow-none ring-2 ring-accent-violet/10 dark:ring-accent-violet/20 animate-fade-in-up transition-all duration-300 hover:shadow-[0_0_50px_-12px_rgba(139,92,246,0.25)] hover:border-accent-violet/30 dark:hover:border-accent-violet/40"
+            aria-labelledby="genre-trends-spotlight-title"
+          >
+            {/* Gradient spotlight — effet de lumière centré */}
+            <div
+              className="pointer-events-none absolute inset-0 rounded-2xl opacity-60 dark:opacity-40"
+              style={{
+                background: "radial-gradient(ellipse 80% 70% at 50% 40%, rgba(139, 92, 246, 0.08) 0%, rgba(99, 102, 241, 0.04) 40%, transparent 70%)",
+              }}
+            />
+            <div
+              className="pointer-events-none absolute inset-0 rounded-2xl opacity-80 dark:opacity-60"
+              style={{
+                background: "radial-gradient(ellipse 100% 80% at 50% 50%, rgba(139, 92, 246, 0.06) 0%, transparent 60%)",
+              }}
+            />
+            {/* Glow subtil en bas */}
+            <div className="pointer-events-none absolute -bottom-12 left-1/2 -translate-x-1/2 w-[90%] h-24 bg-accent-violet/10 dark:bg-accent-violet/15 blur-3xl rounded-full" />
+
+            <div className="relative">
+              <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-5">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-accent-violet/20 to-accent-indigo/20 text-accent-violet">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h2 id="genre-trends-spotlight-title" className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">
+                      {t("evolution")}
+                    </h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                      {t("chartHint")}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="p-6 sm:p-8 md:p-10">
+                {selectedGenres.length === 0 ? (
+                  <p className="text-sm text-gray-500 dark:text-gray-400 py-8 text-center">
+                    {t("selectAtLeastOne")}
+                  </p>
+                ) : (
+                  <ResponsiveContainer width="100%" height={500}>
+                    <LineChart
+                      data={chartData}
+                      margin={{ top: 5, right: 20, left: 10, bottom: 60 }}
+                    >
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke="#e5e7eb"
+                        className="dark:stroke-gray-700"
+                      />
+                      <XAxis
+                        dataKey="formattedDate"
+                        tick={{ fill: "currentColor", fontSize: 12 }}
+                        stroke="#6b7280"
+                        className="dark:stroke-gray-400"
+                        angle={-45}
+                        textAnchor="end"
+                        height={80}
+                      />
+                      <YAxis
+                        tick={{ fill: "currentColor", fontSize: 12 }}
+                        stroke="#6b7280"
+                        className="dark:stroke-gray-400"
+                      />
+                      <Tooltip content={<TrendsTooltip />} />
+                      <Legend />
+                      {selectedGenres.map((genre, idx) => (
+                        <Line
+                          key={genre}
+                          type="monotone"
+                          dataKey={genre}
+                          name={genre}
+                          stroke={getColor(availableGenres.indexOf(genre))}
+                          strokeWidth={2}
+                          dot={{ r: 3 }}
+                          activeDot={{ r: 5 }}
+                          animationDuration={500}
+                          animationEasing="ease-in-out"
+                        />
+                      ))}
+                    </LineChart>
+                  </ResponsiveContainer>
+                )}
+              </div>
+            </div>
+          </section>
 
           {/* Genres en hausse / baisse */}
           {selectedGenres.length > 0 && (rising.length > 0 || declining.length > 0) && (

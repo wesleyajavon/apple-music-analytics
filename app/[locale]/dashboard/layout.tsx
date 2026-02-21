@@ -1,39 +1,14 @@
-import { Suspense } from "react";
-import { Sidebar } from "@/lib/components/sidebar";
-import { DateRangeFilter } from "@/lib/components/date-range-filter";
+import { DashboardScrollWrapper } from "@/lib/components/dashboard-scroll-wrapper";
 
 // Layout partagé pour toutes les pages du dashboard
 // Inclut une sidebar responsive et une barre de filtres de dates
 // ThemeProvider et QueryClientProvider sont dans app/layout.tsx via Providers
+// DashboardScrollWrapper fournit le ref du main pour la barre de progression (overview-bis)
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex">
-        {/* Sidebar */}
-        <Sidebar />
-
-        {/* Main content area */}
-        <div className="flex-1 flex flex-col min-w-0">
-          {/* Date range filter bar */}
-          <Suspense
-            fallback={
-              <div className="bg-white dark:bg-gray-800/95 border-b border-gray-100 dark:border-gray-700/50 px-4 sm:px-6 py-3">
-                <div className="h-10 bg-gray-100 dark:bg-gray-700 rounded-xl animate-pulse w-64" />
-              </div>
-            }
-          >
-            <DateRangeFilter />
-          </Suspense>
-
-          {/* Page content */}
-          <main className="flex-1 overflow-y-auto">
-            <div className="p-4 sm:p-6 lg:p-8">{children}</div>
-          </main>
-        </div>
-      </div>
-  );
+  return <DashboardScrollWrapper>{children}</DashboardScrollWrapper>;
 }
 

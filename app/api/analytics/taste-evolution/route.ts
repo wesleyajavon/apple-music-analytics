@@ -46,6 +46,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({
           trends: [],
           commentary: null,
+          commentaryLight: null,
           skippedWeeks: [],
         });
       }
@@ -92,24 +93,40 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // 2. AI commentary (optional, cached separately)
+    // 2. AI commentary (optional, cached separately) — technical + light versions
     let commentary: string | null = null;
+    let commentaryLight: string | null = null;
     let commentaryCached = false;
 
     if (trends.length > 0) {
-      const cachedCommentary = await getCachedCommentary(trends, locale);
+      // Technical version
+      const cachedCommentary = await getCachedCommentary(trends, locale, false);
       if (cachedCommentary) {
         commentary = cachedCommentary;
         commentaryCached = true;
       } else {
         try {
-          commentary = await generateTasteEvolutionCommentary(trends, locale);
+          commentary = await generateTasteEvolutionCommentary(trends, locale, false);
           if (commentary) {
-            await setCachedCommentary(trends, commentary, locale);
+            await setCachedCommentary(trends, commentary, locale, false);
           }
         } catch (err) {
-          // AI failure should not break the response; commentary stays null
           console.warn("Taste evolution commentary generation failed:", err);
+        }
+      }
+
+      // Light version (easy to read, no percentages)
+      const cachedCommentaryLight = await getCachedCommentary(trends, locale, true);
+      if (cachedCommentaryLight) {
+        commentaryLight = cachedCommentaryLight;
+      } else {
+        try {
+          commentaryLight = await generateTasteEvolutionCommentary(trends, locale, true);
+          if (commentaryLight) {
+            await setCachedCommentary(trends, commentaryLight, locale, true);
+          }
+        } catch (err) {
+          console.warn("Taste evolution light commentary generation failed:", err);
         }
       }
     }
@@ -117,6 +134,7 @@ export async function GET(request: NextRequest) {
     const response: TasteEvolutionResponse = {
       trends,
       commentary,
+      commentaryLight,
       commentaryCached: commentary ? commentaryCached : undefined,
       skippedWeeks,
     };

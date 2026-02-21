@@ -79,8 +79,10 @@ export interface WeekToWeekTrend {
 /** Full API response */
 export interface TasteEvolutionResponse {
   trends: WeekToWeekTrend[];
-  /** AI-generated narrative (1-2 paragraphs) */
+  /** AI-generated narrative, technical version (with percentages, metrics) */
   commentary: string | null;
+  /** AI-generated narrative, light version (easy to read, no percentages) */
+  commentaryLight: string | null;
   commentaryCached?: boolean;
   /** Weeks with insufficient data (excluded from trends) */
   skippedWeeks: Array<{ weekStart: string; reason: string }>;

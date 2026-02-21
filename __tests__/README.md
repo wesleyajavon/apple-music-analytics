@@ -9,6 +9,7 @@ __tests__/
 ├── api/              # Tests d'intégration pour les routes API
 ├── e2e/              # Tests end-to-end avec Playwright
 ├── performance/      # Tests de performance et benchmarks
+├── validators/       # Tests des validateurs API
 └── README.md         # Ce fichier
 ```
 
@@ -22,8 +23,15 @@ Les tests d'intégration vérifient le comportement des routes API en isolant le
 - `timeline.test.ts` - Tests pour `/api/timeline`
 - `overview.test.ts` - Tests pour `/api/overview`
 - `genres.test.ts` - Tests pour `/api/genres`
+- `genres-trends.test.ts` - Tests pour `/api/genres/trends`
 - `listens.test.ts` - Tests pour `/api/listens`
+- `artists.test.ts` - Tests pour `/api/artists`
+- `artists-trends.test.ts` - Tests pour `/api/artists/trends`
 - `network.test.ts` - Tests pour `/api/network`
+- `temporal-analysis.test.ts` - Tests pour `/api/temporal-analysis`
+- `ai-insights.test.ts` - Tests pour `/api/ai/insights`
+- `taste-profile.test.ts` - Tests pour `/api/ai/taste-profile`
+- `listening-habit-prediction.test.ts` - Tests pour `/api/predictions/listening-habit`
 
 **Exécuter les tests d'intégration :**
 ```bash
@@ -58,6 +66,13 @@ npm run test:e2e:headed
 ```
 
 **Note :** Les tests E2E nécessitent que l'application soit en cours d'exécution (Playwright la démarre automatiquement via `webServer`).
+
+### Tests des validateurs (`__tests__/validators/`)
+
+Les tests des validateurs vérifient la logique de validation des paramètres API.
+
+**Fichiers de test :**
+- `api-validators.test.ts` - Tests pour `lib/validators/api-validators.ts`
 
 ### Tests de Performance (`__tests__/performance/`)
 

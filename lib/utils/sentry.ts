@@ -4,7 +4,7 @@
  * Utilitaires pour capturer des erreurs, messages et ajouter du contexte à Sentry.
  * 
  * Note: L'initialisation de Sentry se fait automatiquement via :
- * - instrumentation-client.ts (côté client)
+ * - SentryInit dans app/layout.tsx (côté client)
  * - sentry.server.config.ts (côté serveur, chargé via instrumentation.ts)
  * 
  * @see https://docs.sentry.dev/platforms/javascript/guides/nextjs/manual-setup/

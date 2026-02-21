@@ -483,7 +483,7 @@
         "li3": "Cache: Redis preparado (opcional, REDIS_URL); TanStack Query para cache en cliente",
         "li4": "Frontend: React 18, TanStack Query v5, Tailwind CSS, Sonner (toasts)",
         "li5": "Visualización: Recharts (líneas, barras, áreas, tartas), react-force-graph-2d (red de artistas)",
-        "li6": "API: Documentación Swagger vía /api-docs"
+        "li6": "API: Endpoints documentados en el README"
       },
       "model": {
         "title": "Modelo de datos",
@@ -536,7 +536,7 @@
     "yes": "Sí",
     "no": "No",
     "notDetected": "No detectado",
-    "sentryNotInitWarning": "Sentry no parece estar inicializado. Verifica que instrumentation-client.ts esté cargado. Intenta recargar la página o verifica la consola del navegador.",
+    "sentryNotInitWarning": "Sentry no parece estar inicializado. Verifica que NEXT_PUBLIC_SENTRY_DSN esté configurado. Intenta recargar la página o verifica la consola del navegador.",
     "errorTests": "Tests de errores",
     "jsError": "Error JavaScript",
     "asyncError": "Error asíncrono",
@@ -577,11 +577,10 @@
     }
   },
   "api-docs": {
-    "loading": "Cargando documentación...",
-    "error": "Error",
-    "errorLoading": "Error al cargar la documentación API",
-    "notAvailable": "Documentación no disponible",
-    "devServerHint": "Asegúrate de que el servidor de desarrollo esté en ejecución y que las dependencias Swagger estén instaladas."
+    "title": "Documentación API",
+    "description": "Referencia de endpoints API. Usa el dashboard para explorar tus datos de escucha.",
+    "viewReference": "Ver referencia API",
+    "goToDashboard": "Ir al Dashboard"
   },
   "errors": {
     "somethingWrong": "Algo salió mal",

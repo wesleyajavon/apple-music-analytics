@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "next dev",
     "dev:turbo": "next dev --turbo",
-    "build": "prisma generate && next build",
+    "build": "prisma generate && npm run docs:api:copy && next build",
     "start": "next start",
     "lint": "next lint",
     "test": "vitest",
@@ -24,18 +24,11 @@
     "db:migrate": "prisma migrate deploy",
     "db:migrate:dev": "prisma migrate dev",
     "db:studio": "prisma studio",
-    "db:seed": "tsx prisma/seed.ts",
-    "user:create": "node scripts/create-user.js",
-    "lastfm:import": "node scripts/import-lastfm.js",
     "lastfm:update": "node scripts/update-lastfm.js",
-    "db:reseed:lastfm": "node scripts/reseed-from-lastfm.js",
-    "db:clean-duplicates": "node scripts/clean-duplicate-listens.js",
-    "tracks:fetch-durations": "node scripts/fetch-track-durations.js",
-    "tracks:fetch-genres": "node scripts/fetch-track-genres.js",
-    "tracks:update-genres": "node scripts/update-track-genres.js",
     "vercel:env:pull": "npx vercel env pull .env.local",
-    "docs:generate": "typedoc",
-    "docs:clean": "rm -rf docs"
+    "docs:clean": "rm -rf docs/modules docs/classes docs/interfaces docs/functions docs/types docs/variables docs/assets 2>/dev/null; find docs -name '*.html' -delete",
+    "docs:generate": "npm run docs:clean && typedoc",
+    "docs:api:copy": "mkdir -p public/docs && cp docs/API.md public/docs/API.md"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -51,7 +44,6 @@
     "ioredis": "^5.8.2",
     "next": "14.2.5",
     "next-intl": "^4.8.2",
-    "node-fetch": "^2.7.0",
     "pg": "^8.11.3",
     "prisma": "^5.20.0",
     "react": "^18.3.1",
@@ -59,7 +51,6 @@
     "react-force-graph-2d": "^1.29.0",
     "recharts": "^2.12.7",
     "sonner": "^2.0.7",
-    "swagger-ui-react": "^5.31.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
@@ -69,7 +60,6 @@
     "@types/pg": "^8.10.9",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
-    "@types/swagger-jsdoc": "^6.0.4",
     "@vitest/coverage-v8": "^4.0.16",
     "@vitest/ui": "^4.0.16",
     "autoprefixer": "^10.4.19",
@@ -77,7 +67,6 @@
     "eslint-config-next": "14.2.5",
     "playwright": "^1.57.0",
     "postcss": "^8.4.40",
-    "swagger-jsdoc": "^6.2.8",
     "tailwindcss": "^3.4.7",
     "tsx": "^4.7.0",
     "typedoc": "^0.28.15",

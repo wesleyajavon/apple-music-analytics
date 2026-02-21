@@ -1,97 +1,58 @@
 # GitHub Actions Workflows
 
-Ce dossier contient les workflows CI/CD pour le projet Apple Music Analytics.
+Workflows CI/CD pour Apple Music Analytics.
 
-## 📋 Workflows Disponibles
+## Workflows
 
-### 1. `ci.yml` - Intégration Continue
-**Quand** : Sur chaque push et Pull Request
+### 1. `ci.yml` – Intégration continue
 
-**Fait** :
-- ✅ Vérification TypeScript
-- ✅ Linting (ESLint)
-- ✅ Tests unitaires
-- ✅ Build de vérification
+**Déclenchement** : push et Pull Request sur toutes les branches
 
-**Durée** : ~3-5 minutes
+**Jobs** :
+- **Lint & Type Check** : TypeScript, ESLint
+- **Run Tests** : tests unitaires (Vitest), rapport JUnit, upload Codecov
+- **Build Check** : build Next.js de production
 
----
-
-### 2. `deploy.yml` - Vérification Pre-Déploiement (Optionnel)
-**Quand** : Seulement sur la branche `main`
-
-**Fait** :
-- ✅ Vérifie que CI a réussi avant déploiement
-- ⚠️ **Note** : Ce workflow est optionnel si Vercel est déjà configuré pour déployer automatiquement
-
-**Durée** : ~1-2 minutes
-
-**Configuration** :
-- **Aucune configuration requise** (utilise le token GitHub automatique)
-- Si vous voulez que Vercel attende ce check, configurez dans Vercel Dashboard > Settings > Git > "Wait for GitHub Checks"
-
-**⚠️ Important** : Si Vercel déploie déjà automatiquement, ce workflow sert uniquement de garde-fou. Vous pouvez le supprimer si vous préférez la simplicité. Voir [`DEPLOY_OPTIONS.md`](./DEPLOY_OPTIONS.md) pour plus de détails.
+**Durée** : ~3–5 min
 
 ---
 
-### 3. `test-coverage.yml` - Rapport de Couverture
-**Quand** : Sur chaque Pull Request
+### 2. `test-coverage.yml` – Rapport de couverture
+
+**Déclenchement** : Pull Request
 
 **Fait** :
-- ✅ Génère un rapport de couverture
-- ✅ Commente la PR avec les résultats
+- Génère un rapport de couverture (lcov)
+- Commente la PR avec les résultats
+- Upload des artifacts (7 jours)
 
-**Durée** : ~2-3 minutes
+**Durée** : ~2–3 min
 
 ---
 
-## 🚀 Comment Utiliser
+## Déploiement
 
-### Première Configuration
+Le projet est déployé automatiquement sur **Vercel** à chaque push sur `main`. Aucun workflow GitHub Actions n’est requis pour le déploiement.
 
-1. **Poussez ces fichiers** sur GitHub
-2. **Allez dans l'onglet "Actions"** de votre repository
-3. **Les workflows se déclencheront automatiquement** sur le prochain push
+**Optionnel** : pour que Vercel attende les checks CI avant de déployer :
+1. Vercel Dashboard → Settings → Git
+2. Activer « Wait for GitHub Checks »
+3. Ajouter le check `CI` comme requis
 
-### Configuration Vercel (Optionnel)
+---
 
-**Si Vercel déploie déjà automatiquement** (ce qui semble être votre cas) :
-- ✅ Rien à faire ! Le workflow `deploy.yml` est optionnel
-- Vous pouvez le supprimer si vous préférez la simplicité
-- Ou le garder comme garde-fou pour vérifier que CI passe
+## Dépannage
 
-**Si vous voulez que Vercel attende les checks GitHub** :
-1. Allez dans Vercel Dashboard > Votre Projet > Settings > Git
-2. Activez "Wait for GitHub Checks"
-3. Ajoutez "Pre-Deploy Check" comme check requis
+| Problème | Vérification |
+|----------|---------------|
+| Workflow ne se déclenche pas | Fichiers dans `.github/workflows/`, syntaxe YAML correcte |
+| Tests échouent | Logs dans l’onglet Actions, étape en échec |
+| Build échoue | `DATABASE_URL` dans les secrets si nécessaire |
 
-**Pour plus d'options**, consultez [`DEPLOY_OPTIONS.md`](./DEPLOY_OPTIONS.md)
+---
 
-### Voir les Résultats
+## Badge
 
-- **Onglet "Actions"** : Voir tous les workflows et leur statut
-- **Badge de statut** : Ajoutez `![CI](https://github.com/USERNAME/REPO/workflows/CI/badge.svg)` dans votre README
-- **Notifications** : GitHub vous notifiera par email si un workflow échoue
-
-## 🔍 Dépannage
-
-### Le workflow ne se déclenche pas
-- Vérifiez que les fichiers sont dans `.github/workflows/`
-- Vérifiez la syntaxe YAML (pas d'erreurs d'indentation)
-- Vérifiez que vous avez poussé sur la bonne branche
-
-### Les tests échouent
-- Cliquez sur le workflow qui a échoué
-- Regardez les logs pour voir quelle étape a échoué
-- Corrigez le problème et poussez à nouveau
-
-### Le déploiement échoue
-- **Note** : Si Vercel déploie déjà automatiquement, ce workflow ne déploie pas réellement
-- Il vérifie seulement que CI passe
-- Si le check échoue, vérifiez que le workflow CI a bien réussi
-- Consultez [`DEPLOY_OPTIONS.md`](./DEPLOY_OPTIONS.md) pour comprendre les options
-
-## 📚 Pour En Savoir Plus
-
-Consultez le guide : [`GUIDE_CI_CD.md`](../../GUIDE_CI_CD.md)
-
+```markdown
+![CI](https://github.com/USERNAME/REPO/actions/workflows/ci.yml/badge.svg)
+```

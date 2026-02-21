@@ -7,7 +7,7 @@ import * as Sentry from '@sentry/react';
  * Composant client pour initialiser Sentry côté client
  * 
  * Ce composant s'exécute uniquement côté client et initialise Sentry
- * si ce n'est pas déjà fait via instrumentation-client.ts
+ * (ce composant remplace l'ancien instrumentation-client.ts)
  */
 export function SentryInit() {
   useEffect(() => {

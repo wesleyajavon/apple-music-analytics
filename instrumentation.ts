@@ -4,7 +4,7 @@
  * Ce fichier est exécuté au démarrage du serveur Next.js
  * et permet d'initialiser des outils comme Sentry
  * 
- * L'initialisation côté client se fait automatiquement via instrumentation-client.ts
+ * L'initialisation côté client se fait via SentryInit dans app/layout.tsx
  * 
  * @see https://nextjs.org/docs/app/building-your-application/optimizing/instrumentation
  * @see https://docs.sentry.dev/platforms/javascript/guides/nextjs/manual-setup/

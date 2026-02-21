@@ -129,6 +129,53 @@ test.describe("Dashboard UI Elements", () => {
   });
 });
 
+test.describe("Theme Switcher", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto("/en/dashboard/overview");
+  });
+
+  test("should display Theme Switcher in sidebar", async ({ page }) => {
+    const themeSwitcher = page.getByRole("button", { name: /change theme/i });
+    await expect(themeSwitcher).toBeVisible();
+  });
+
+  test("should open dropdown on click", async ({ page }) => {
+    const themeSwitcher = page.getByRole("button", { name: /change theme/i });
+    await expect(themeSwitcher).toHaveAttribute("aria-expanded", "false");
+
+    await themeSwitcher.click();
+
+    await expect(themeSwitcher).toHaveAttribute("aria-expanded", "true");
+    const listbox = page.getByRole("listbox");
+    await expect(listbox).toBeVisible();
+  });
+
+  test("should apply dark theme when selecting Dark option", async ({ page }) => {
+    const themeSwitcher = page.getByRole("button", { name: /change theme/i });
+    await themeSwitcher.click();
+
+    const darkOption = page.getByRole("option", { name: /^dark$/i });
+    await darkOption.click();
+
+    const html = page.locator("html");
+    await expect(html).toHaveClass(/dark/);
+  });
+
+  test("should persist theme selection after page reload", async ({ page }) => {
+    const themeSwitcher = page.getByRole("button", { name: /change theme/i });
+    await themeSwitcher.click();
+
+    const darkOption = page.getByRole("option", { name: /^dark$/i });
+    await darkOption.click();
+
+    await expect(page.locator("html")).toHaveClass(/dark/);
+
+    await page.reload();
+
+    await expect(page.locator("html")).toHaveClass(/dark/);
+  });
+});
+
 test.describe("Dashboard Performance", () => {
   test("should load overview page within acceptable time", async ({ page }) => {
     const startTime = Date.now();

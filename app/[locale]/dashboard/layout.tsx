@@ -1,19 +1,17 @@
 import { Suspense } from "react";
-import { Providers } from "../providers";
 import { Sidebar } from "@/lib/components/sidebar";
 import { DateRangeFilter } from "@/lib/components/date-range-filter";
 
 // Layout partagé pour toutes les pages du dashboard
-// Wrappe les pages avec TanStack Query Provider pour la gestion d'état serveur
 // Inclut une sidebar responsive et une barre de filtres de dates
+// ThemeProvider et QueryClientProvider sont dans app/layout.tsx via Providers
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <Providers>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex">
         {/* Sidebar */}
         <Sidebar />
 
@@ -36,7 +34,6 @@ export default function DashboardLayout({
           </main>
         </div>
       </div>
-    </Providers>
   );
 }
 

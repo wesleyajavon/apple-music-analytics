@@ -29,6 +29,9 @@ if (dsn) {
     ignoreErrors: [
       'NEXT_REDIRECT',
       'NEXT_NOT_FOUND',
+      // Annulation de requêtes RSC/prefetch (navigation rapide)
+      'ECANCELED',
+      'AbortError',
     ],
     
     // Configuration pour les routes API

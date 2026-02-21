@@ -1,7 +1,10 @@
 "use client";
 
+import { Suspense } from "react";
 import { Link, usePathname } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
+import { LanguageSwitcher } from "@/lib/components/language-switcher";
+import { ThemeSwitcher } from "@/lib/components/theme-switcher";
 import { useState } from "react";
 
 interface NavItem {
@@ -273,6 +276,28 @@ export function Sidebar() {
               </div>
             ))}
           </nav>
+
+          {/* Theme & Language switchers */}
+          <div className="px-3 py-4 border-t border-gray-100 dark:border-gray-700/50 space-y-4">
+            <div>
+              <div className="px-3 mb-2">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                  {t("appearance")}
+                </span>
+              </div>
+              <ThemeSwitcher placement="top" />
+            </div>
+            <div>
+              <div className="px-3 mb-2">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                  {t("language")}
+                </span>
+              </div>
+              <Suspense fallback={<div className="h-10 rounded-xl bg-gray-100 dark:bg-gray-800 animate-pulse" />}>
+                <LanguageSwitcher />
+              </Suspense>
+            </div>
+          </div>
         </div>
       </aside>
     </>

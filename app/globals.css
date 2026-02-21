@@ -2,16 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Structure des thèmes
+ * -------------------
+ * - :root = thème light par défaut
+ * - html.dark = thème dark par défaut
+ */
+
+/* Thème light – variables explicites */
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --card: #ffffff;
+  --border: #f3f4f6;
+  --muted: #6b7280;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Thème dark – contrôlé par la classe "dark" sur <html> (ThemeProvider) */
+html.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --card: #1f2937;
+  --border: #374151;
+  --muted: #9ca3af;
 }
 
 body {

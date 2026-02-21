@@ -9,9 +9,20 @@
     "less": "Moins",
     "more": "Plus"
   },
+  "languageSwitcher": {
+    "ariaLabel": "Changer la langue"
+  },
+  "themeSwitcher": {
+    "ariaLabel": "Changer le thème",
+    "light": "Clair",
+    "dark": "Sombre",
+    "system": "Système"
+  },
   "sidebar": {
     "openMenu": "Ouvrir le menu",
     "logo": "Analytics",
+    "appearance": "Apparence",
+    "language": "Langue",
     "groups": {
       "main": "Principal",
       "temporal": "Analyse temporelle",

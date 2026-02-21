@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import * as Sentry from '@sentry/nextjs';
+import * as Sentry from '@sentry/react';
 
 /**
  * Composant client pour initialiser Sentry côté client

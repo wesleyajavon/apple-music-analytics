@@ -101,16 +101,47 @@ export function WhenWillIListenWidget({
 
   if (isLoading) {
     return (
-      <div className="overflow-hidden rounded-xl border border-card-border bg-card-surface shadow-card min-h-[200px]">
+      <div
+        className="overflow-hidden rounded-xl border border-card-border bg-card-surface shadow-card"
+        role="status"
+        aria-label={t("loading")}
+      >
+        {/* Header skeleton — matches real layout */}
         <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
-          <div className="h-5 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
-          <div className="mt-1 h-4 w-64 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+          <div className="flex items-center justify-between">
+            <div className="space-y-1.5">
+              <div className="h-5 w-44 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+              <div className="h-4 w-56 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+            </div>
+            <div className="h-9 w-20 bg-gray-200 dark:bg-gray-700 rounded-lg animate-shimmer shrink-0" />
+          </div>
         </div>
+        {/* Content skeleton — 3 metric cards with staggered shimmer */}
         <div className="p-6 space-y-4">
-          <div className="grid grid-cols-3 gap-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-20 bg-gray-200 dark:bg-gray-700 rounded-lg animate-shimmer" />
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">{t("loading")}</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {[0, 1, 2].map((i) => (
+              <div
+                key={i}
+                className="rounded-lg bg-gray-50 dark:bg-gray-800/50 p-4 space-y-2"
+              >
+                <div
+                  className="h-3 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer"
+                  style={{ animationDelay: `${i * 0.12}s` }}
+                />
+                <div
+                  className="h-6 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer"
+                  style={{ animationDelay: `${i * 0.12}s` }}
+                />
+              </div>
             ))}
+          </div>
+          {/* Explanation toggle placeholder */}
+          <div className="pt-2 border-t border-gray-100 dark:border-gray-700/50">
+            <div
+              className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer"
+              style={{ animationDelay: "0.2s" }}
+            />
           </div>
         </div>
       </div>

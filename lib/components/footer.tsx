@@ -16,6 +16,7 @@ export function Footer({ variant = "dashboard" }: { variant?: FooterVariant }) {
   const links = [
     { href: "/dashboard/overview", label: t("overview") },
     { href: "/dashboard/about", label: t("about") },
+    { href: "/dashboard/demo", label: t("demo") },
     { href: "/dashboard/insights", label: t("methodology") },
     { href: "/api-docs", label: t("apiDocs") },
   ];

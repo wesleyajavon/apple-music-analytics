@@ -44,11 +44,45 @@ export function TasteEvolutionSummaryWidget() {
 
   if (isLoading) {
     return (
-      <div className="overflow-hidden rounded-xl border border-card-border bg-card-surface shadow-card min-h-[200px]">
+      <div
+        className="overflow-hidden rounded-xl border border-card-border bg-card-surface shadow-card min-h-[220px] flex flex-col"
+        role="status"
+        aria-label={t("loading")}
+      >
+        {/* Header skeleton — matches real layout */}
+        <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1.5">
+              <div className="h-5 w-40 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+              <div className="h-4 w-52 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+            </div>
+            <div className="h-9 w-20 bg-gray-200 dark:bg-gray-700 rounded-lg animate-shimmer shrink-0" />
+          </div>
+        </div>
+        {/* Content skeleton — badges + paragraph with staggered shimmer */}
         <div className="p-6">
-          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-4 animate-shimmer" />
-          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-full mb-2 animate-shimmer" />
-          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-4/5 animate-shimmer" />
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">{t("loading")}</p>
+          <div className="flex flex-wrap gap-3 mb-4">
+            {[0, 1, 2].map((i) => (
+              <div
+                key={i}
+                className="h-7 w-24 bg-gray-200 dark:bg-gray-700 rounded-lg animate-shimmer"
+                style={{ animationDelay: `${i * 0.1}s` }}
+              />
+            ))}
+          </div>
+          <div className="space-y-2">
+            {[0, 1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="h-3.5 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer"
+                style={{
+                  width: i === 3 ? "70%" : "100%",
+                  animationDelay: `${i * 0.1}s`,
+                }}
+              />
+            ))}
+          </div>
         </div>
       </div>
     );

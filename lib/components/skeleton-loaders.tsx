@@ -343,23 +343,69 @@ export function OverviewSkeleton() {
         <div className="sm:col-span-2 lg:col-span-2 lg:row-span-2 min-h-[280px]">
           <LineChartSkeleton height={280} />
         </div>
-        {/* AI Insights (1×2) */}
+        {/* AI Insights (1×2) — content-aware skeleton */}
         <div className="sm:col-span-2 lg:col-span-1 lg:row-span-2 min-h-[280px]">
-          <div className="overflow-hidden rounded-xl border border-card-border bg-card-surface shadow-card p-6">
-            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-4 animate-shimmer" />
-            <div className="space-y-3">
-              {[1, 2, 3].map((j) => (
-                <div key={j} className="h-12 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+          <div className="overflow-hidden rounded-xl border border-card-border bg-card-surface shadow-card min-h-[220px] flex flex-col">
+            <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
+              <div className="flex items-center justify-between gap-3">
+                <div className="space-y-1.5">
+                  <div className="h-5 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+                  <div className="h-4 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+                </div>
+                <div className="h-9 w-20 bg-gray-200 dark:bg-gray-700 rounded-lg animate-shimmer shrink-0" />
+              </div>
+            </div>
+            <div className="p-6 space-y-3">
+              {[0, 1, 2].map((i) => (
+                <div
+                  key={i}
+                  className="flex gap-3 p-3 -mx-1 rounded-lg border-l-4 border-l-gray-300 dark:border-l-gray-600 bg-gray-50 dark:bg-gray-800/50"
+                >
+                  <div
+                    className="h-6 w-6 shrink-0 rounded-md bg-gray-200 dark:bg-gray-700 animate-shimmer"
+                    style={{ animationDelay: `${i * 0.15}s` }}
+                  />
+                  <div className="flex-1 min-w-0 space-y-2">
+                    <div
+                      className="h-3.5 w-full bg-gray-200 dark:bg-gray-700 rounded animate-shimmer"
+                      style={{ animationDelay: `${i * 0.15}s` }}
+                    />
+                    <div
+                      className="h-3.5 w-4/5 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer"
+                      style={{ animationDelay: `${i * 0.15}s` }}
+                    />
+                  </div>
+                </div>
               ))}
             </div>
           </div>
         </div>
-        {/* Taste Profile (1×2) */}
+        {/* Taste Profile (1×2) — content-aware skeleton */}
         <div className="sm:col-span-2 lg:col-span-1 lg:row-span-2 min-h-[280px]">
-          <div className="overflow-hidden rounded-xl border border-card-border bg-card-surface shadow-card p-6">
-            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-4 animate-shimmer" />
-            <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-full mb-2 animate-shimmer" />
-            <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-4/5 animate-shimmer" />
+          <div className="overflow-hidden rounded-xl border border-card-border bg-card-surface shadow-card min-h-[220px] flex flex-col">
+            <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1.5">
+                  <div className="h-5 w-36 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+                  <div className="h-4 w-52 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+                </div>
+                <div className="h-9 w-20 bg-gray-200 dark:bg-gray-700 rounded-lg animate-shimmer shrink-0" />
+              </div>
+            </div>
+            <div className="p-6">
+              <div className="space-y-2">
+                {[0, 1, 2, 3, 4].map((i) => (
+                  <div
+                    key={i}
+                    className="h-3.5 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer"
+                    style={{
+                      width: i === 4 ? "60%" : "100%",
+                      animationDelay: `${i * 0.1}s`,
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
           </div>
         </div>
         {/* Top genres (2×1) */}
@@ -396,6 +442,71 @@ export function OverviewSkeleton() {
                 ))}
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* When Will I Listen? — content-aware skeleton */}
+      <div className="overflow-hidden rounded-xl border border-card-border bg-card-surface shadow-card">
+        <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1.5">
+              <div className="h-5 w-44 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+              <div className="h-4 w-56 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+            </div>
+            <div className="h-9 w-20 bg-gray-200 dark:bg-gray-700 rounded-lg animate-shimmer shrink-0" />
+          </div>
+        </div>
+        <div className="p-6 space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="rounded-lg bg-gray-50 dark:bg-gray-800/50 p-4 space-y-2">
+                <div
+                  className="h-3 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer"
+                  style={{ animationDelay: `${i * 0.12}s` }}
+                />
+                <div
+                  className="h-6 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer"
+                  style={{ animationDelay: `${i * 0.12}s` }}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Taste Evolution — content-aware skeleton */}
+      <div className="overflow-hidden rounded-xl border border-card-border bg-card-surface shadow-card min-h-[220px] flex flex-col">
+        <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1.5">
+              <div className="h-5 w-40 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+              <div className="h-4 w-52 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+            </div>
+            <div className="h-9 w-20 bg-gray-200 dark:bg-gray-700 rounded-lg animate-shimmer shrink-0" />
+          </div>
+        </div>
+        <div className="p-6">
+          <div className="flex flex-wrap gap-3 mb-4">
+            {[0, 1, 2].map((i) => (
+              <div
+                key={i}
+                className="h-7 w-24 bg-gray-200 dark:bg-gray-700 rounded-lg animate-shimmer"
+                style={{ animationDelay: `${i * 0.1}s` }}
+              />
+            ))}
+          </div>
+          <div className="space-y-2">
+            {[0, 1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="h-3.5 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer"
+                style={{
+                  width: i === 3 ? "70%" : "100%",
+                  animationDelay: `${i * 0.1}s`,
+                }}
+              />
+            ))}
           </div>
         </div>
       </div>

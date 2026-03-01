@@ -33,6 +33,7 @@
       "other": "Autre"
     },
     "items": {
+      "musicalProfile": "Profil musical 🎵",
       "overview": "Vue d'ensemble 📊",
       "overviewBis": "Vue d'ensemble (Narrative) 📖",
       "timeline": "Timeline 📈",
@@ -46,6 +47,7 @@
       "whenWillIListen": "Quand vais-je écouter ? ⏳",
       "tasteProfile": "Explain My Taste 🎯",
       "about": "Comment ça marche 🎯",
+      "demo": "Démo 🎬",
       "methodology": "Méthodologie 📚",
       "sentryTest": "Test Sentry 🧪"
     }
@@ -58,6 +60,7 @@
     "tagline": "Vos analytics d'écoute personnels",
     "overview": "Vue d'ensemble",
     "about": "Comment ça marche",
+    "demo": "Démo",
     "methodology": "Méthodologie",
     "apiDocs": "API Docs",
     "copyright": "Apple Music Analytics. Tous droits réservés.",
@@ -363,6 +366,7 @@
   },
   "when-will-i-listen": {
     "title": "Quand vais-je écouter ? ⏳",
+    "loading": "Calcul de votre prédiction...",
     "seeMore": "Voir plus",
     "subtitle": "Prédiction de votre créneau d'écoute le plus probable pour aujourd'hui, basée sur vos habitudes passées. Le calcul utilise des heuristiques statistiques (pas d'IA) — l'IA sert uniquement à expliquer le résultat.",
     "spotlightBadge": "Prédiction pour aujourd'hui",
@@ -380,6 +384,22 @@
     "insufficientData": "Données insuffisantes",
     "listensAnalyzed": "{actual} écoutes analysées (minimum recommandé: {min})",
     "fromCache": "Cache"
+  },
+  "musical-profile": {
+    "title": "Profil musical 🎵",
+    "subtitle": "Votre identité musicale générée par l'IA en un seul endroit. Insights, profil de goût, évolution et prédictions.",
+    "headerBadge": "Profil alimenté par l'IA",
+    "heroBadge": "Votre identité musicale",
+    "heroTitle": "Votre profil musical",
+    "heroSubtitle": "Un aperçu narratif de vos habitudes d'écoute — insights, goûts, évolution et votre prochain moment d'écoute.",
+    "noData": "Pas encore de données",
+    "importDescription": "Importez vos données d'écoute (Last.fm) et sélectionnez une période pour générer votre profil musical.",
+    "sections": {
+      "insights": "Vos insights",
+      "tasteProfile": "Vos goûts",
+      "tasteEvolution": "Votre évolution"
+    },
+    "exploreMore": "Explorer chaque fonctionnalité en détail"
   },
   "annualReport": {
     "title": "Rapport Annuel {year}",
@@ -677,9 +697,16 @@
       "heatmapMore": "Plus"
     }
   },
+  "demo": {
+    "title": "Démo produit 🎬",
+    "subtitle": "Découvrez notre vidéo de démonstration pour voir ce que nous proposons.",
+    "heroBadge": "Vidéo",
+    "videoTitle": "Vidéo de démonstration produit"
+  },
   "about": {
     "title": "Comment ça marche 🎯",
     "subtitle": "Un guide simple pour comprendre ce projet et comment vos données d'écoute arrivent dans le dashboard.",
+    "heroBadge": "Guide utilisateur",
     "whatIs": {
       "title": "C'est quoi ?",
       "paragraph": "Apple Music Analytics est un tableau de bord personnel qui visualise vos habitudes d'écoute musicale. Il utilise votre historique Last.fm pour vous montrer des stats, tendances et insights sur votre façon d'écouter."

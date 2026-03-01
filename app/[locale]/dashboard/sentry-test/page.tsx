@@ -188,19 +188,27 @@ export default function SentryTestPage() {
   if (!hasDsn) {
     return (
       <div className="max-w-4xl mx-auto">
-        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-6 mb-6">
-          <h2 className="text-xl font-semibold text-yellow-800 dark:text-yellow-200 mb-2">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            🐛 {t("title")}
+          </h1>
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 border border-amber-200 dark:border-amber-800">
+            Outil de debug
+          </span>
+        </div>
+        <div className="rounded-xl border-l-4 border-l-amber-500 bg-amber-50/80 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 shadow-card p-6">
+          <h2 className="text-xl font-semibold text-amber-800 dark:text-amber-200 mb-2">
             ⚠️ {t("notConfigured")}
           </h2>
-          <p className="text-yellow-700 dark:text-yellow-300 mb-4">
+          <p className="text-amber-700 dark:text-amber-300 mb-4 leading-relaxed">
             {t("configInstructions")}
           </p>
-          <ol className="list-decimal list-inside space-y-2 text-yellow-700 dark:text-yellow-300 mb-4">
-            <li>{t("step1")} — <a href="https://sentry.io" target="_blank" rel="noopener noreferrer" className="underline">sentry.io</a></li>
+          <ol className="list-decimal list-inside space-y-2 text-amber-700 dark:text-amber-300 mb-4">
+            <li>{t("step1")} — <a href="https://sentry.io" target="_blank" rel="noopener noreferrer" className="underline hover:text-amber-900 dark:hover:text-amber-100">sentry.io</a></li>
             <li>{t("step2")}</li>
             <li>{t("step3")}</li>
             <li>{t("step4")} :
-              <pre className="mt-2 bg-yellow-100 dark:bg-yellow-900 p-3 rounded text-sm overflow-x-auto">
+              <pre className="mt-2 bg-amber-100/80 dark:bg-amber-900/40 p-3 rounded-lg text-sm overflow-x-auto font-mono">
 {`SENTRY_DSN="https://xxxxx@xxxxx.ingest.sentry.io/xxxxx"
 NEXT_PUBLIC_SENTRY_DSN="https://xxxxx@xxxxx.ingest.sentry.io/xxxxx"`}
               </pre>
@@ -214,22 +222,25 @@ NEXT_PUBLIC_SENTRY_DSN="https://xxxxx@xxxxx.ingest.sentry.io/xxxxx"`}
 
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+      <div className="mb-6 flex flex-wrap items-center gap-3">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
           🐛 {t("title")}
         </h1>
-        <p className="text-gray-600 dark:text-gray-400">
-          {t("subtitle")}
-        </p>
+        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-accent-violet/10 dark:bg-accent-violet/20 text-accent-violet border border-accent-violet/20">
+          Outil de debug
+        </span>
       </div>
+      <p className="text-gray-600 dark:text-gray-400 mb-6">
+        {t("subtitle")}
+      </p>
 
       {testResult && (
-        <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-          <p className="text-blue-800 dark:text-blue-200">{testResult}</p>
+        <div className="mb-6 p-4 rounded-xl border-l-4 border-accent-cyan bg-accent-cyan/10 dark:bg-accent-cyan/20 border border-accent-cyan/20 shadow-card">
+          <p className="text-gray-800 dark:text-gray-200">{testResult}</p>
         </div>
       )}
 
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+      <div className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card p-6 mb-6 border-l-4 border-l-accent-emerald hover:shadow-card-hover transition-shadow">
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
           ✅ {t("sentryConfig")}
         </h2>
@@ -244,8 +255,8 @@ NEXT_PUBLIC_SENTRY_DSN="https://xxxxx@xxxxx.ingest.sentry.io/xxxxx"`}
             <strong>{t("environment")}</strong> {process.env.NODE_ENV || 'development'}
           </p>
           {!sentryInitialized && hasDsn && (
-            <div className="mt-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded">
-              <p className="text-yellow-800 dark:text-yellow-200 text-xs">
+            <div className="mt-3 p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+              <p className="text-amber-800 dark:text-amber-200 text-xs">
                 ⚠️ {t("sentryNotInitWarning")}
               </p>
             </div>
@@ -255,32 +266,32 @@ NEXT_PUBLIC_SENTRY_DSN="https://xxxxx@xxxxx.ingest.sentry.io/xxxxx"`}
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* Tests d'erreurs */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+        <div className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card p-6 border-l-4 border-l-accent-rose hover:shadow-card-hover transition-shadow">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
             🔴 {t("errorTests")}
           </h2>
           <div className="space-y-3">
             <button
               onClick={handleTestError}
-              className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded transition-colors"
+              className="w-full bg-accent-rose hover:bg-accent-rose/90 text-white font-medium py-2 px-4 rounded-lg transition-colors"
             >
               {t("jsError")}
             </button>
             <button
               onClick={handleTestAsyncError}
-              className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded transition-colors"
+              className="w-full bg-accent-rose hover:bg-accent-rose/90 text-white font-medium py-2 px-4 rounded-lg transition-colors"
             >
               {t("asyncError")}
             </button>
             <button
               onClick={handleTestUnhandledError}
-              className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded transition-colors"
+              className="w-full bg-accent-rose hover:bg-accent-rose/90 text-white font-medium py-2 px-4 rounded-lg transition-colors"
             >
               {t("unhandledError")}
             </button>
             <button
               onClick={handleTestAPIError}
-              className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded transition-colors"
+              className="w-full bg-accent-rose hover:bg-accent-rose/90 text-white font-medium py-2 px-4 rounded-lg transition-colors"
             >
               {t("apiError")}
             </button>
@@ -288,20 +299,20 @@ NEXT_PUBLIC_SENTRY_DSN="https://xxxxx@xxxxx.ingest.sentry.io/xxxxx"`}
         </div>
 
         {/* Tests de messages */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+        <div className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card p-6 border-l-4 border-l-accent-cyan hover:shadow-card-hover transition-shadow">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
             💬 {t("messageTests")}
           </h2>
           <div className="space-y-3">
             <button
               onClick={handleTestMessage}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition-colors"
+              className="w-full bg-accent-cyan hover:bg-accent-cyan/90 text-white font-medium py-2 px-4 rounded-lg transition-colors"
             >
               {t("messageInfo")}
             </button>
             <button
               onClick={handleTestWarningMessage}
-              className="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-medium py-2 px-4 rounded transition-colors"
+              className="w-full bg-accent-indigo hover:bg-accent-indigo/90 text-white font-medium py-2 px-4 rounded-lg transition-colors"
             >
               {t("messageWarning")}
             </button>
@@ -309,26 +320,26 @@ NEXT_PUBLIC_SENTRY_DSN="https://xxxxx@xxxxx.ingest.sentry.io/xxxxx"`}
         </div>
 
         {/* Configuration */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+        <div className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card p-6 border-l-4 border-l-accent-emerald hover:shadow-card-hover transition-shadow">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
             ⚙️ {t("configuration")}
           </h2>
           <div className="space-y-3">
             <button
               onClick={handleSetUser}
-              className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded transition-colors"
+              className="w-full bg-accent-emerald hover:bg-accent-emerald/90 text-white font-medium py-2 px-4 rounded-lg transition-colors"
             >
               {t("setUser")}
             </button>
             <button
               onClick={handleSetTags}
-              className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded transition-colors"
+              className="w-full bg-accent-indigo hover:bg-accent-indigo/90 text-white font-medium py-2 px-4 rounded-lg transition-colors"
             >
               {t("setTags")}
             </button>
             <button
               onClick={handleSetContext}
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded transition-colors"
+              className="w-full bg-accent-emerald hover:bg-accent-emerald/90 text-white font-medium py-2 px-4 rounded-lg transition-colors"
             >
               {t("setContext")}
             </button>
@@ -336,7 +347,7 @@ NEXT_PUBLIC_SENTRY_DSN="https://xxxxx@xxxxx.ingest.sentry.io/xxxxx"`}
         </div>
 
         {/* Instructions */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+        <div className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card p-6 border-l-4 border-l-accent-indigo hover:shadow-card-hover transition-shadow">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
             📖 {t("howToSeeErrors")}
           </h2>
@@ -347,7 +358,7 @@ NEXT_PUBLIC_SENTRY_DSN="https://xxxxx@xxxxx.ingest.sentry.io/xxxxx"`}
                 href="https://sentry.io/organizations/issues/" 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition-colors"
+                className="inline-block bg-accent-indigo hover:bg-accent-indigo/90 text-white font-medium py-2 px-4 rounded-lg transition-colors"
               >
                 🔗 {t("openDashboard")}
               </a>
@@ -373,7 +384,7 @@ NEXT_PUBLIC_SENTRY_DSN="https://xxxxx@xxxxx.ingest.sentry.io/xxxxx"`}
         </div>
       </div>
 
-      <div className="mt-6 bg-gray-50 dark:bg-gray-800/50 rounded-lg p-6">
+      <div className="mt-6 overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card p-6 border-l-4 border-l-accent-violet hover:shadow-card-hover transition-shadow">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
           💡 {t("howToVerify")}
         </h2>
@@ -381,7 +392,7 @@ NEXT_PUBLIC_SENTRY_DSN="https://xxxxx@xxxxx.ingest.sentry.io/xxxxx"`}
           <div>
             <p className="font-semibold text-gray-900 dark:text-white mb-1">1. Vérifiez la console du navigateur :</p>
             <p className="ml-4">Ouvrez les outils de développement (F12 ou Cmd+Option+I), allez dans l&apos;onglet <strong>&quot;Console&quot;</strong>. Vous devriez voir des logs comme :</p>
-            <pre className="mt-2 ml-4 bg-gray-100 dark:bg-gray-700 p-2 rounded text-xs overflow-x-auto">
+            <pre className="mt-2 ml-4 bg-gray-100 dark:bg-gray-700 p-2 rounded-lg text-xs overflow-x-auto font-mono">
 Sentry Event: {`{ type: 'error', ... }`}
 </pre>
           </div>

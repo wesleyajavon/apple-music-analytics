@@ -2,7 +2,6 @@
 
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
-import { useSearchParams } from "next/navigation";
 import { useAiInsights } from "@/lib/hooks/use-ai-insights";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
 
@@ -23,12 +22,45 @@ export function AiInsightsSummaryWidget() {
 
   if (isLoadingOrFetching) {
     return (
-      <div className="overflow-hidden rounded-xl border border-card-border bg-card-surface shadow-card min-h-[200px]">
-        <div className="p-6">
-          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-4 animate-shimmer" />
-          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-full mb-2 animate-shimmer" />
-          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-4/5 mb-2 animate-shimmer" />
-          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-3/4 animate-shimmer" />
+      <div
+        className="overflow-hidden rounded-xl border border-card-border bg-card-surface shadow-card min-h-[220px] flex flex-col"
+        role="status"
+        aria-label={t("loading")}
+      >
+        {/* Header skeleton — matches real layout */}
+        <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
+          <div className="flex items-center justify-between gap-3">
+            <div className="space-y-1.5">
+              <div className="h-5 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+              <div className="h-4 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+            </div>
+            <div className="h-9 w-20 bg-gray-200 dark:bg-gray-700 rounded-lg animate-shimmer shrink-0" />
+          </div>
+        </div>
+        {/* Content skeleton — 3 insight cards with staggered shimmer */}
+        <div className="p-6 space-y-3">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">{t("loading")}</p>
+          {[0, 1, 2].map((i) => (
+            <div
+              key={i}
+              className="flex gap-3 p-3 -mx-1 rounded-lg border-l-4 border-l-gray-300 dark:border-l-gray-600 bg-gray-50 dark:bg-gray-800/50"
+            >
+              <div
+                className="h-6 w-6 shrink-0 rounded-md bg-gray-200 dark:bg-gray-700 animate-shimmer"
+                style={{ animationDelay: `${i * 0.15}s` }}
+              />
+              <div className="flex-1 min-w-0 space-y-2">
+                <div
+                  className="h-3.5 w-full bg-gray-200 dark:bg-gray-700 rounded animate-shimmer"
+                  style={{ animationDelay: `${i * 0.15}s` }}
+                />
+                <div
+                  className="h-3.5 w-4/5 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer"
+                  style={{ animationDelay: `${i * 0.15}s` }}
+                />
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     );

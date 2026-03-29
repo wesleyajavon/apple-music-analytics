@@ -25,6 +25,7 @@ export const dynamic = "force-dynamic";
  *   page?: number - Page number (default: 1)
  *   from?: number - Unix timestamp start date (optional)
  *   to?: number - Unix timestamp end date (optional)
+ *   dryRun?: boolean - If true, fetches and counts without writing to DB (optional)
  * }
  */
 export async function POST(request: Request) {
@@ -41,7 +42,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { userId: validatedUserId, username, limit, page, from, to } = body;
+    const { userId: validatedUserId, username, limit, page, from, to, dryRun } = body;
     userId = validatedUserId;
 
     // Validate limit if provided
@@ -69,13 +70,14 @@ export async function POST(request: Request) {
     // Check if Last.fm is configured (warn if using mocked data)
     const isMocked = !isLastFmConfigured();
 
-    // Import tracks
+    // Import tracks (or dry-run)
     const result = await importLastFmTracks(validatedUserId, {
       username,
       limit: limit ? parseInt(String(limit), 10) : undefined,
       page: page ? parseInt(String(page), 10) : undefined,
       from: from ? parseInt(String(from), 10) : undefined,
       to: to ? parseInt(String(to), 10) : undefined,
+      dryRun: dryRun === true,
     });
 
     return NextResponse.json({
@@ -85,6 +87,7 @@ export async function POST(request: Request) {
       errors: result.errors,
       totalPages: result.totalPages,
       currentPage: result.currentPage,
+      dryRun: result.dryRun,
       _meta: {
         mocked: isMocked,
         message: isMocked

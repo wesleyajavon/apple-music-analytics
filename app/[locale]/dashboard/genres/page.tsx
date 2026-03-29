@@ -38,6 +38,42 @@ const COLORS = [
   "#a855f7", // purple
 ];
 
+/** Tranches max. sous le camembert / barres (le reste → « Autres »). 8 évite une légende illisible. */
+const MAX_CHART_SLICES = 12;
+
+type ChartRow = {
+  name: string;
+  value: number;
+  percentage: number;
+  count: number;
+};
+
+function aggregateChartSeries(
+  rows: ChartRow[],
+  totalListens: number,
+  otherLabel: string
+): ChartRow[] {
+  if (rows.length <= MAX_CHART_SLICES) {
+    return rows;
+  }
+  const top = rows.slice(0, MAX_CHART_SLICES - 1);
+  const tail = rows.slice(MAX_CHART_SLICES - 1);
+  const otherCount = tail.reduce((sum, x) => sum + x.count, 0);
+  const otherPercentage =
+    totalListens > 0
+      ? (otherCount / totalListens) * 100
+      : tail.reduce((sum, x) => sum + x.percentage, 0);
+  return [
+    ...top,
+    {
+      name: otherLabel,
+      value: otherCount,
+      count: otherCount,
+      percentage: otherPercentage,
+    },
+  ];
+}
+
 /** Icône chevron pour expand/collapse */
 function ChevronIcon({ direction }: { direction: "up" | "down" }) {
   return (
@@ -87,7 +123,7 @@ function createCustomTooltip(t: (k: string) => string, locale: string) {
   return T;
 }
 
-/** Légende personnalisée pour le pie chart – grille lisible avec couleur, nom et % */
+/** Légende personnalisée pour le pie chart – grille compacte (max ~8 entrées côté données). */
 function PieChartLegend({
   data,
   colors,
@@ -98,11 +134,15 @@ function PieChartLegend({
   locale: string;
 }) {
   return (
-    <div className="mt-4 mb-6 flex flex-wrap justify-center gap-x-4 gap-y-2 sm:gap-x-6 sm:gap-y-3">
+    <div
+      className="mt-4 mb-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-2.5 max-w-3xl mx-auto"
+      role="list"
+    >
       {data.map((item, index) => (
         <div
-          key={item.name}
-          className="flex items-center gap-2 min-w-0 max-w-full"
+          key={`${item.name}-${index}`}
+          className="flex items-center gap-2 min-w-0"
+          role="listitem"
         >
           <div
             className="h-3 w-3 shrink-0 rounded-full"
@@ -151,11 +191,23 @@ function GenresContent() {
     [data]
   );
 
+  /** Données agrégées pour les graphiques (max. 8 tranches, le reste → « Autres » / Other). */
+  const chartDisplayData = useMemo(
+    () =>
+      aggregateChartSeries(
+        chartData,
+        data?.totalListens ?? 0,
+        t("other")
+      ),
+    [chartData, data?.totalListens, t]
+  );
+
   // Label pour le pie chart - affichage conditionnel + taille réduite pour éviter le débordement mobile
   const renderCustomLabel = useCallback((props: any) => {
     const { cx, cy, midAngle, outerRadius, percent } = props;
     const pct = (percent ?? 0) * 100;
-    if (pct <= 8) return null;
+    /* Masque les % sur les petites tranches pour limiter le bruit visuel sur le camembert */
+    if (pct <= 12) return null;
     const RADIAN = Math.PI / 180;
     const radius = (outerRadius as number) * 1.1;
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
@@ -348,7 +400,7 @@ function GenresContent() {
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
-                      data={chartData}
+                      data={chartDisplayData}
                       cx="50%"
                       cy="50%"
                       labelLine={false}
@@ -357,9 +409,9 @@ function GenresContent() {
                       fill="#8884d8"
                       dataKey="value"
                     >
-                      {chartData.map((entry, index) => (
+                      {chartDisplayData.map((entry, index) => (
                         <Cell
-                          key={`cell-${index}`}
+                          key={`cell-${entry.name}-${index}`}
                           fill={COLORS[index % COLORS.length]}
                         />
                       ))}
@@ -367,13 +419,13 @@ function GenresContent() {
                     <Tooltip content={CustomTooltip} />
                   </PieChart>
                 </ResponsiveContainer>
-                <PieChartLegend data={chartData} colors={COLORS} locale={locale} />
+                <PieChartLegend data={chartDisplayData} colors={COLORS} locale={locale} />
                 </div>
               ) : (
                 <div className="h-[320px] sm:h-[400px] lg:h-[500px] min-w-[280px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
-                    data={chartData}
+                    data={chartDisplayData}
                     margin={{ top: 12, right: 12, left: 0, bottom: 80 }}
                   >
                     <CartesianGrid

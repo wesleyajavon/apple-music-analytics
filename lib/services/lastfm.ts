@@ -447,9 +447,14 @@ export function getLastFmBaseUrl(): string {
  * // { success: true, imported: 500, skipped: 10, errors: [], totalPages: 5, currentPage: 1 }
  * ```
  */
+export type ImportLastFmTracksParams = LastFmRecentTracksParams & {
+  /** When true, fetches tracks and counts what would be imported without writing to the database */
+  dryRun?: boolean;
+};
+
 export async function importLastFmTracks(
   userId: string,
-  params: LastFmRecentTracksParams = {}
+  params: ImportLastFmTracksParams = {}
 ): Promise<{
   success: boolean;
   imported: number;
@@ -457,10 +462,12 @@ export async function importLastFmTracks(
   errors: string[];
   totalPages?: number;
   currentPage?: number;
+  dryRun?: boolean;
 }> {
   const errors: string[] = [];
   let imported = 0;
   let skipped = 0;
+  const dryRun = params.dryRun ?? false;
 
   try {
     // Prevent importing mock data - Last.fm must be configured
@@ -486,10 +493,66 @@ export async function importLastFmTracks(
     );
     skipped += tracks.length - tracksToImport.length;
 
+    if (dryRun) {
+      // Dry run: count what would be imported without writing
+      for (const track of tracksToImport) {
+        try {
+          const artist = await prisma.artist.findUnique({
+            where: { name: track.artistName },
+          });
+
+          if (!artist) {
+            // Would create new artist + track + listen
+            imported++;
+            continue;
+          }
+
+          const trackRecord = await prisma.track.findFirst({
+            where: {
+              title: track.trackName,
+              artistId: artist.id,
+            },
+          });
+
+          if (!trackRecord || !track.playedAt) {
+            imported++;
+            continue;
+          }
+
+          const existingListen = await prisma.listen.findFirst({
+            where: {
+              userId,
+              trackId: trackRecord.id,
+              playedAt: track.playedAt,
+              source: "lastfm",
+            },
+          });
+
+          if (existingListen) {
+            skipped++;
+          } else {
+            imported++;
+          }
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : "Unknown error";
+          errors.push(`Error checking track "${track.trackName}" by "${track.artistName}": ${errorMessage}`);
+        }
+      }
+
+      return {
+        success: errors.length === 0,
+        imported,
+        skipped,
+        errors,
+        totalPages,
+        currentPage,
+        dryRun: true,
+      };
+    }
+
     // Process tracks in batches to avoid transaction timeout
-    // Reduced batch size to prevent transaction timeouts
-    const BATCH_SIZE = 20; // Process 20 tracks at a time (reduced from 50)
-    const MAX_TIMEOUT = 60000; // 60 seconds timeout per batch (increased from 30)
+    const BATCH_SIZE = 20;
+    const MAX_TIMEOUT = 60000;
 
     for (let i = 0; i < tracksToImport.length; i += BATCH_SIZE) {
       const batch = tracksToImport.slice(i, i + BATCH_SIZE);

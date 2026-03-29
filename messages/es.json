@@ -227,7 +227,8 @@
     "statTopGenre": "Género favorito",
     "top3Title": "Tus 3 géneros favoritos",
     "top3Subtitle": "Tus géneros más escuchados en primer plano",
-    "allData": "Todos los datos"
+    "allData": "Todos los datos",
+    "other": "Otros"
   },
   "genreTrends": {
     "title": "Tendencias de géneros 📉",

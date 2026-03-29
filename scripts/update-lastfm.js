@@ -9,6 +9,10 @@
  * Usage:
  *   node scripts/update-lastfm.js --userId "user_123" --username "lastfm_user"
  *   node scripts/update-lastfm.js --userId "user_123" --username "lastfm_user" --baseUrl "http://localhost:3000"
+ *   node scripts/update-lastfm.js --userId "user_123" --username "lastfm_user" --dry-run
+ *
+ * Options:
+ *   --dry-run  Simule l'import sans modifier la base de données (affiche ce qui serait ajouté)
  */
 
 // Load environment variables from .env.local if available
@@ -73,15 +77,21 @@ function getArg(key) {
   return undefined;
 }
 
+function hasFlag(flag) {
+  return args.includes(`--${flag}`);
+}
+
 const userIdArg = getArg('userId');
 const usernameArg = getArg('username');
 const baseUrlArg = getArg('baseUrl') || 'http://localhost:3000';
+const DRY_RUN = hasFlag('dry-run');
 
 if (!userIdArg || !usernameArg) {
   console.error('❌ Erreur: userId et username sont requis');
   console.error('\nUsage:');
   console.error('  node scripts/update-lastfm.js --userId "user_123" --username "lastfm_user"');
   console.error('  node scripts/update-lastfm.js --userId "user_123" --username "lastfm_user" --baseUrl "http://localhost:3000"');
+  console.error('  node scripts/update-lastfm.js --userId "user_123" --username "lastfm_user" --dry-run');
   process.exit(1);
 }
 
@@ -114,8 +124,10 @@ async function getLastListenDate() {
 
 /**
  * Importe les nouvelles écoutes depuis une date donnée
+ * @param {number} fromTimestamp - Timestamp Unix de début
+ * @param {boolean} dryRun - Si true, simule sans écrire en base
  */
-async function importNewTracks(fromTimestamp) {
+async function importNewTracks(fromTimestamp, dryRun = false) {
   let page = 1;
   let totalPages = 1;
   let totalImported = 0;
@@ -126,12 +138,15 @@ async function importNewTracks(fromTimestamp) {
   // pour éviter de surcharger l'API Last.fm
   const MAX_PAGES = 100;
 
-  console.log('🚀 Démarrage de la mise à jour Last.fm\n');
+  console.log(dryRun ? '🔍 Mode DRY-RUN : simulation sans modification de la base\n' : '🚀 Démarrage de la mise à jour Last.fm\n');
   console.log(`📋 Configuration:`);
   console.log(`   User ID: ${USER_ID}`);
   console.log(`   Last.fm Username: ${LASTFM_USERNAME}`);
   console.log(`   Base URL: ${BASE_URL}`);
   console.log(`   Date de début: ${new Date(fromTimestamp * 1000).toLocaleString()}`);
+  if (dryRun) {
+    console.log(`   🧪 Mode: DRY-RUN (aucune donnée ne sera écrite)`);
+  }
   console.log(`   ⚠️  Limite de sécurité: ${MAX_PAGES} pages maximum par exécution`);
   console.log('');
 
@@ -164,6 +179,7 @@ async function importNewTracks(fromTimestamp) {
         limit: 200,
         page: page,
         from: fromTimestamp,
+        dryRun: dryRun,
       };
 
       const response = await fetch(`${BASE_URL}/api/lastfm/import`, {
@@ -198,7 +214,7 @@ async function importNewTracks(fromTimestamp) {
       totalSkipped += result.skipped;
       totalPages = result.totalPages || 1;
 
-      console.log(`✅ Importé: ${result.imported}, Ignoré: ${result.skipped}`);
+      console.log(dryRun ? `✅ (simulation) Seraient importés: ${result.imported}, Seraient ignorés: ${result.skipped}` : `✅ Importé: ${result.imported}, Ignoré: ${result.skipped}`);
       
       if (result.errors && result.errors.length > 0) {
         console.warn(`   ⚠️  ${result.errors.length} erreur(s):`, result.errors.slice(0, 3));
@@ -238,10 +254,14 @@ async function importNewTracks(fromTimestamp) {
   } while (page <= totalPages && page <= MAX_PAGES);
 
   console.log('\n' + '='.repeat(50));
-  console.log('🎉 Mise à jour terminée !');
+  console.log(dryRun ? '🔍 Simulation terminée !' : '🎉 Mise à jour terminée !');
   console.log('📊 Statistiques:');
-  console.log(`   Total importé: ${totalImported}`);
-  console.log(`   Total ignoré: ${totalSkipped}`);
+  console.log(dryRun
+    ? `   Seraient importés: ${totalImported}`
+    : `   Total importé: ${totalImported}`);
+  console.log(dryRun
+    ? `   Seraient ignorés: ${totalSkipped}`
+    : `   Total ignoré: ${totalSkipped}`);
   console.log(`   Pages traitées: ${page - 1}/${totalPages}`);
   if (allErrors.length > 0) {
     console.log(`   ⚠️  Erreurs: ${allErrors.length}`);
@@ -251,6 +271,9 @@ async function importNewTracks(fromTimestamp) {
       console.log(`      (Afficher les ${allErrors.length} premières erreurs...)`);
       allErrors.slice(0, 5).forEach((err, i) => console.log(`      ${i + 1}. ${err}`));
     }
+  }
+  if (dryRun && totalImported > 0) {
+    console.log('\n   💡 Pour importer réellement, relancez sans --dry-run');
   }
   console.log('='.repeat(50));
 }
@@ -291,8 +314,8 @@ async function main() {
       console.log(`   (Utilisez import-lastfm.js pour un import complet de l'historique)\n`);
     }
 
-    // Importer les nouvelles écoutes
-    await importNewTracks(fromTimestamp);
+    // Importer les nouvelles écoutes (ou simuler en mode dry-run)
+    await importNewTracks(fromTimestamp, DRY_RUN);
 
   } catch (error) {
     console.error('\n❌ Erreur fatale:', error);

@@ -498,7 +498,7 @@ export async function importLastFmTracks(
       for (const track of tracksToImport) {
         try {
           const artist = await prisma.artist.findUnique({
-            where: { name: track.artistName },
+            where: { nameLower: track.artistName.toLowerCase() },
           });
 
           if (!artist) {
@@ -565,9 +565,10 @@ export async function importLastFmTracks(
                 // Find or create artist
                 const artistNameLower = track.artistName.toLowerCase();
                 const artist = await tx.artist.upsert({
-                  where: { name: track.artistName },
+                  where: { nameLower: artistNameLower },
                   update: {
-                    nameLower: artistNameLower, // Always update nameLower
+                    name: track.artistName,
+                    nameLower: artistNameLower,
                     ...(track.artistMbid && { mbid: track.artistMbid }),
                     ...(track.imageUrl && { imageUrl: track.imageUrl }),
                   },

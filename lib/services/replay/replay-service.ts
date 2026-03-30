@@ -89,10 +89,10 @@ export async function importReplayYearly(
       for (const artistInput of input.topArtists) {
         const artistNameLower = artistInput.name.toLowerCase();
         const artist = await tx.artist.upsert({
-          where: { name: artistInput.name },
+          where: { nameLower: artistNameLower },
           update: {
-            nameLower: artistNameLower, // Always update nameLower
-            // Update imageUrl if provided
+            name: artistInput.name,
+            nameLower: artistNameLower,
             ...(artistInput.imageUrl && { imageUrl: artistInput.imageUrl }),
           },
           create: {
@@ -112,9 +112,10 @@ export async function importReplayYearly(
         if (!artistId) {
           const artistNameLower = trackInput.artistName.toLowerCase();
           const artist = await tx.artist.upsert({
-            where: { name: trackInput.artistName },
+            where: { nameLower: artistNameLower },
             update: {
-              nameLower: artistNameLower, // Always update nameLower
+              name: trackInput.artistName,
+              nameLower: artistNameLower,
             },
             create: {
               name: trackInput.artistName,

@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getGenreDistribution } from "@/lib/services/listening/listening-stats";
+import {
+  getGenreDistribution,
+  getTopArtistsForGenres,
+} from "@/lib/services/listening/listening-stats";
 import { GenreDistributionResponse } from "@/lib/dto/genres";
 import { handleApiError } from "@/lib/utils/error-handler";
 import {
@@ -82,9 +85,22 @@ export async function GET(request: NextRequest) {
       percentage: totalListens > 0 ? (item.count / totalListens) * 100 : 0,
     }));
 
+    const topGenreNames = genreCounts.slice(0, 3).map((g) => g.genre);
+    const topArtistsForTopGenres =
+      topGenreNames.length > 0
+        ? await getTopArtistsForGenres(
+            topGenreNames,
+            startDate,
+            endDate,
+            userId,
+            3
+          )
+        : [];
+
     const response: GenreDistributionResponse = {
       data,
       totalListens,
+      topArtistsForTopGenres,
     };
 
     return NextResponse.json(response);

@@ -159,6 +159,149 @@ export async function getGenreDistribution(
   }));
 }
 
+/** Artiste associé à un genre (spotlight top 3 genres). */
+export interface GenreSpotlightArtist {
+  id: string;
+  name: string;
+  imageUrl: string | null;
+  listenCount: number;
+}
+
+/**
+ * Top artistes par genre pour une liste de genres donnée (même résolution de genre
+ * que getGenreDistribution : track.genre, mapping artiste, sinon Unknown).
+ */
+export async function getTopArtistsForGenres(
+  genres: string[],
+  startDate?: Date,
+  endDate?: Date,
+  userId?: string,
+  limitPerGenre = 3
+): Promise<Array<{ genre: string; artists: GenreSpotlightArtist[] }>> {
+  if (genres.length === 0) {
+    return [];
+  }
+
+  const genreParams = genres.map((g) => Prisma.sql`${g}`);
+  const genreMapEntries = Object.entries(ARTIST_TO_GENRE_MAP);
+
+  type RawRow = {
+    genre: string;
+    artist_id: string;
+    artist_name: string;
+    image_url: string | null;
+    listen_count: bigint;
+  };
+
+  const mapRowsToPayload = (
+    rows: RawRow[]
+  ): Array<{ genre: string; artists: GenreSpotlightArtist[] }> => {
+    const byGenre = new Map<string, GenreSpotlightArtist[]>();
+    for (const row of rows) {
+      const list = byGenre.get(row.genre) ?? [];
+      list.push({
+        id: row.artist_id,
+        name: row.artist_name,
+        imageUrl: row.image_url,
+        listenCount: transformBigIntToNumber({ count: row.listen_count }).count,
+      });
+      byGenre.set(row.genre, list);
+    }
+    return genres.map((g) => ({
+      genre: g,
+      artists: byGenre.get(g) ?? [],
+    }));
+  };
+
+  if (genreMapEntries.length === 0) {
+    const query = Prisma.sql`
+      WITH listen_genres AS (
+        SELECT 
+          COALESCE(t.genre, 'Unknown') AS resolved_genre,
+          a.id AS artist_id,
+          a.name AS artist_name,
+          a."imageUrl" AS image_url
+        FROM "Listen" l
+        JOIN "Track" t ON l."trackId" = t.id
+        JOIN "Artist" a ON t."artistId" = a.id
+        WHERE 1=1
+          ${startDate ? Prisma.sql`AND l."playedAt" >= ${startDate}` : Prisma.sql``}
+          ${endDate ? Prisma.sql`AND l."playedAt" <= ${endDate}` : Prisma.sql``}
+          ${userId ? Prisma.sql`AND l."userId" = ${userId}` : Prisma.sql``}
+          AND COALESCE(t.genre, 'Unknown') IN (${Prisma.join(genreParams)})
+      ),
+      agg AS (
+        SELECT 
+          resolved_genre AS genre,
+          artist_id,
+          artist_name,
+          image_url,
+          COUNT(*)::bigint AS listen_count
+        FROM listen_genres
+        GROUP BY resolved_genre, artist_id, artist_name, image_url
+      ),
+      ranked AS (
+        SELECT *,
+          ROW_NUMBER() OVER (PARTITION BY genre ORDER BY listen_count DESC) AS rn
+        FROM agg
+      )
+      SELECT genre, artist_id, artist_name, image_url, listen_count
+      FROM ranked
+      WHERE rn <= ${limitPerGenre}
+      ORDER BY genre, rn
+    `;
+
+    const rows = await prisma.$queryRaw<RawRow[]>(query);
+    return mapRowsToPayload(rows);
+  }
+
+  const valuesParts = genreMapEntries.map(([artist, genre]) =>
+    Prisma.sql`(${artist}, ${genre})`
+  );
+
+  const query = Prisma.sql`
+    WITH listen_genres AS (
+      SELECT 
+        COALESCE(t.genre, genre_map.genre, 'Unknown') AS resolved_genre,
+        a.id AS artist_id,
+        a.name AS artist_name,
+        a."imageUrl" AS image_url
+      FROM "Listen" l
+      JOIN "Track" t ON l."trackId" = t.id
+      JOIN "Artist" a ON t."artistId" = a.id
+      LEFT JOIN (VALUES ${Prisma.join(valuesParts)}) AS genre_map(artist_name, genre)
+        ON a.name = genre_map.artist_name
+      WHERE 1=1
+        ${startDate ? Prisma.sql`AND l."playedAt" >= ${startDate}` : Prisma.sql``}
+        ${endDate ? Prisma.sql`AND l."playedAt" <= ${endDate}` : Prisma.sql``}
+        ${userId ? Prisma.sql`AND l."userId" = ${userId}` : Prisma.sql``}
+        AND COALESCE(t.genre, genre_map.genre, 'Unknown') IN (${Prisma.join(genreParams)})
+    ),
+    agg AS (
+      SELECT 
+        resolved_genre AS genre,
+        artist_id,
+        artist_name,
+        image_url,
+        COUNT(*)::bigint AS listen_count
+      FROM listen_genres
+      GROUP BY resolved_genre, artist_id, artist_name, image_url
+    ),
+    ranked AS (
+      SELECT *,
+        ROW_NUMBER() OVER (PARTITION BY genre ORDER BY listen_count DESC) AS rn
+      FROM agg
+    )
+    SELECT genre, artist_id, artist_name, image_url, listen_count
+    FROM ranked
+    WHERE rn <= ${limitPerGenre}
+    ORDER BY genre, rn
+  `;
+
+  const rows = await prisma.$queryRaw<RawRow[]>(query);
+  return mapRowsToPayload(rows);
+}
+
 export type GenreTrendPeriod = "day" | "week" | "month";
 
 export interface GenreTrendRow {

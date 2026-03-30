@@ -19,14 +19,19 @@ const periods: PeriodOption[] = [
   { labelKey: "monthly", value: "month" },
 ];
 
-export function PeriodSelector() {
+export interface PeriodSelectorProps {
+  /** When `period` is absent from the URL (e.g. first visit). Defaults to `"day"`. */
+  defaultPeriod?: PeriodType;
+}
+
+export function PeriodSelector({ defaultPeriod = "day" }: PeriodSelectorProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { prefetchWithOptimisticUpdate } = useOptimisticFilters();
   const t = useTranslations("components.periodSelector");
 
-  const currentPeriod = (searchParams.get("period") as PeriodType) || "day";
+  const currentPeriod = (searchParams.get("period") as PeriodType) || defaultPeriod;
   const startDate = searchParams.get("startDate") || undefined;
   const endDate = searchParams.get("endDate") || undefined;
 

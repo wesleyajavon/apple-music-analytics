@@ -103,6 +103,41 @@ function GenreIcon({ className }: { className?: string }) {
   );
 }
 
+/** Une colonne d’image (top artiste du genre) pour le fond des cartes spotlight. */
+function TopGenreArtistBgSlot({
+  imageUrl,
+  label,
+  fallbackClass,
+}: {
+  imageUrl: string | null;
+  label: string;
+  fallbackClass: string;
+}) {
+  const [failed, setFailed] = useState(false);
+  const showImg = Boolean(imageUrl && !failed);
+  return (
+    <div className="relative min-h-[120px] flex-1 min-w-0 border-r border-white/10 last:border-r-0 sm:min-h-[140px]">
+      {showImg ? (
+        <img
+          src={imageUrl!}
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          loading="lazy"
+          decoding="async"
+          referrerPolicy="no-referrer"
+          onError={() => setFailed(true)}
+        />
+      ) : (
+        <div
+          className={`absolute inset-0 bg-gradient-to-br ${fallbackClass}`}
+          aria-hidden
+        />
+      )}
+      {label ? <span className="sr-only">{label}</span> : null}
+    </div>
+  );
+}
+
 // Custom tooltip - needs to be inside component to use translations
 function createCustomTooltip(t: (k: string) => string, locale: string) {
   const T = memo(({ active, payload }: any) => {
@@ -241,6 +276,17 @@ function GenresContent() {
     "from-pink-500 via-rose-500 to-red-400",
     "from-indigo-500 via-violet-500 to-purple-500",
   ];
+  /** Fallback visuel par colonne si pas d’image ou moins de 3 artistes. */
+  const slotFallbacks = [
+    "from-violet-800/95 via-purple-900/90 to-black/80",
+    "from-rose-800/95 via-fuchsia-900/90 to-black/80",
+    "from-indigo-800/95 via-violet-900/90 to-black/80",
+  ];
+
+  const topArtistsByGenre = useMemo(() => {
+    const entries = data?.topArtistsForTopGenres ?? [];
+    return new Map(entries.map((e) => [e.genre, e.artists]));
+  }, [data?.topArtistsForTopGenres]);
 
   return (
     <>
@@ -313,41 +359,61 @@ function GenresContent() {
                   {top3Genres.map((genre, index) => {
                     const maxCount = chartData[0]?.count ?? 1;
                     const progress = (genre.count / maxCount) * 100;
+                    const artists = topArtistsByGenre.get(genre.name) ?? [];
+                    const slots = Array.from({ length: 3 }, (_, i) => artists[i] ?? null);
                     return (
                       <div
                         key={genre.name}
-                        className="group relative overflow-hidden rounded-3xl bg-white dark:bg-gray-800/90
+                        className="group relative overflow-hidden rounded-3xl bg-gray-900
                           shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1
-                          opacity-0 animate-fade-in-up"
+                          opacity-0 animate-fade-in-up ring-1 ring-white/10"
                         style={{ animationDelay: `${index * 80}ms` }}
                       >
-                        <div className={`absolute inset-0 bg-gradient-to-br ${gradientByRank[index]} opacity-10 group-hover:opacity-20 transition-opacity`} />
-                        <div className="relative p-6">
-                          <div className="flex flex-col items-center text-center">
-                            <div className="relative mb-4">
-                              <div
-                                className="flex h-16 w-16 items-center justify-center rounded-2xl shadow-lg"
-                                style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                        <div className="absolute inset-0 flex">
+                          {slots.map((artist, slotIdx) => (
+                            <TopGenreArtistBgSlot
+                              key={`${genre.name}-slot-${slotIdx}`}
+                              imageUrl={artist?.imageUrl ?? null}
+                              label={artist?.name ?? ""}
+                              fallbackClass={slotFallbacks[slotIdx] ?? slotFallbacks[0]}
+                            />
+                          ))}
+                        </div>
+                        <div
+                          className={`absolute inset-0 bg-gradient-to-br ${gradientByRank[index]} opacity-[0.12] mix-blend-overlay`}
+                          aria-hidden
+                        />
+                        <div
+                          className="absolute inset-0 bg-gradient-to-t from-black via-black/75 to-black/35"
+                          aria-hidden
+                        />
+                        <div className="relative z-10 flex min-h-[280px] flex-col justify-end p-6 pt-16 sm:min-h-[300px]">
+                          <span className="absolute right-4 top-4 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-white text-sm font-black text-gray-900 shadow-lg ring-2 ring-black/20">
+                            {index + 1}
+                          </span>
+                          <div className="mb-3 flex flex-wrap gap-1.5">
+                            {artists.slice(0, 3).map((a) => (
+                              <span
+                                key={a.id}
+                                className="truncate rounded-full bg-white/15 px-2 py-0.5 text-[11px] font-medium text-white/95 backdrop-blur-sm max-w-full"
+                                title={a.name}
                               >
-                                <GenreIcon className="w-8 h-8 text-white" />
-                              </div>
-                              <span className="absolute -top-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full bg-gray-900 dark:bg-white text-sm font-black text-white dark:text-gray-900 shadow-lg">
-                                {index + 1}
+                                {a.name}
                               </span>
-                            </div>
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white truncate w-full">
-                              {genre.name}
-                            </h3>
-                            <p className="mt-1 text-2xl font-extrabold tabular-nums text-transparent bg-clip-text bg-gradient-to-r from-accent-violet to-accent-pink">
-                              {genre.count.toLocaleString(locale)}
-                            </p>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">{t("listens")}</p>
-                            <div className="mt-3 w-full max-w-[160px] h-2 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
-                              <div
-                                className="h-full rounded-full bg-gradient-to-r from-accent-violet to-accent-pink transition-all duration-500"
-                                style={{ width: `${Math.min(progress, 100)}%` }}
-                              />
-                            </div>
+                            ))}
+                          </div>
+                          <h3 className="text-lg font-bold text-white drop-shadow-sm truncate">
+                            {genre.name}
+                          </h3>
+                          <p className="mt-1 text-2xl font-extrabold tabular-nums text-white drop-shadow-md">
+                            {genre.count.toLocaleString(locale)}
+                          </p>
+                          <p className="text-sm text-white/75">{t("listens")}</p>
+                          <div className="mt-4 h-2 w-full max-w-[200px] overflow-hidden rounded-full bg-white/20">
+                            <div
+                              className="h-full rounded-full bg-gradient-to-r from-white/90 to-white/60 transition-all duration-500"
+                              style={{ width: `${Math.min(progress, 100)}%` }}
+                            />
                           </div>
                         </div>
                       </div>

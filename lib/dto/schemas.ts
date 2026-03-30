@@ -151,12 +151,25 @@ export const GenreDistributionDtoSchema = z.object({
   percentage: z.number().nonnegative().max(100),
 });
 
+export const GenreSpotlightArtistDtoSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  imageUrl: z.string().nullable(),
+  listenCount: z.number().int().nonnegative(),
+});
+
+export const GenreTopArtistsEntrySchema = z.object({
+  genre: z.string(),
+  artists: z.array(GenreSpotlightArtistDtoSchema),
+});
+
 /**
  * Schema for GenreDistributionResponse
  */
 export const GenreDistributionResponseSchema = z.object({
   data: z.array(GenreDistributionDtoSchema),
   totalListens: z.number().int().nonnegative(),
+  topArtistsForTopGenres: z.array(GenreTopArtistsEntrySchema).optional(),
 });
 
 /**

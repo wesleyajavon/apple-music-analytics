@@ -5,13 +5,18 @@ import { NextRequest } from 'next/server';
 // Mock des services
 vi.mock('@/lib/services/listening/listening-stats', () => ({
   getGenreDistribution: vi.fn(),
+  getTopArtistsForGenres: vi.fn(),
 }));
 
-import { getGenreDistribution } from '@/lib/services/listening/listening-stats';
+import {
+  getGenreDistribution,
+  getTopArtistsForGenres,
+} from '@/lib/services/listening/listening-stats';
 
 describe('GET /api/genres', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(getTopArtistsForGenres).mockResolvedValue([]);
   });
 
   it('should return genre distribution without date range', async () => {
@@ -40,6 +45,7 @@ describe('GET /api/genres', () => {
     expect(data.data[1].genre).toBe('Pop');
     expect(data.data[1].count).toBe(200);
     expect(data.data[1].percentage).toBeCloseTo(33.333333333333336, 10); // 200/600 * 100
+    expect(data.topArtistsForTopGenres).toEqual([]);
   });
 
   it('should return genre distribution with date range', async () => {

@@ -6,6 +6,8 @@
 export {
   GenreDistributionDtoSchema,
   GenreDistributionResponseSchema,
+  GenreSpotlightArtistDtoSchema,
+  GenreTopArtistsEntrySchema,
   validateDto,
   safeValidateDto,
 } from './schemas';
@@ -19,12 +21,28 @@ export interface GenreDistributionDto {
   percentage: number; // Percentage of total listens
 }
 
+/** Artiste mis en avant pour un genre (top écoutes dans ce genre). */
+export interface GenreSpotlightArtistDto {
+  id: string;
+  name: string;
+  imageUrl: string | null;
+  listenCount: number;
+}
+
+/** Top artistes par genre, aligné sur l’ordre des N premiers genres (ex. top 3). */
+export interface GenreTopArtistsEntry {
+  genre: string;
+  artists: GenreSpotlightArtistDto[];
+}
+
 /**
  * Response wrapper for genre distribution API
  */
 export interface GenreDistributionResponse {
   data: GenreDistributionDto[];
   totalListens: number;
+  /** Top artistes pour les genres en tête de liste (même période / utilisateur). */
+  topArtistsForTopGenres?: GenreTopArtistsEntry[];
 }
 
 /**

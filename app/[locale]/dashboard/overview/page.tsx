@@ -19,6 +19,8 @@ import {
 import { useOverviewStats, useTimeline, useGenres } from "@/lib/hooks/use-listening";
 import { WhenWillIListenWidget } from "@/lib/components/when-will-i-listen-widget";
 import { TasteEvolutionSummaryWidget } from "@/lib/components/taste-evolution-summary-widget";
+import { GenreTrendsSummaryWidget } from "@/lib/components/genre-trends-summary-widget";
+import { TopThreeArtistsOverviewWidget } from "@/lib/components/top-three-artists-overview-widget";
 import { TasteProfileSummaryWidget } from "@/lib/components/taste-profile-summary-widget";
 import { AiInsightsSummaryWidget } from "@/lib/components/ai-insights-summary-widget";
 import { CHART_TOOLTIP_STYLES } from "@/lib/constants/config";
@@ -234,7 +236,7 @@ function OverviewContent() {
     { enabled: !!previousPeriod }
   );
 
-  // Timeline pour le mini-graphique. Quand "All" (pas de dates), passer undefined
+  // Timeline (agrégation mensuelle). Quand "All" (pas de dates), passer undefined
   // pour que l'API utilise la plage réelle min/max de la DB.
   const timelineStartDate = startDate;
   const timelineEndDate = endDate;
@@ -242,7 +244,7 @@ function OverviewContent() {
   const { data: timelineData } = useTimeline(
     timelineStartDate,
     timelineEndDate,
-    "day"
+    "month"
   );
 
   // Top genres (top 6) - mêmes dates que la timeline (undefined = All)
@@ -263,16 +265,20 @@ function OverviewContent() {
     };
   }, [data, previousData]);
 
-  // Formater les données de timeline pour le graphique
+  // Formater les données de timeline (agrégation mensuelle : date = YYYY-MM)
   const chartData = useMemo(
     () =>
       timelineData?.map((point) => {
-        const d = new Date(point.date);
+        const raw = point.date;
+        const d =
+          raw.length === 7 && raw[4] === "-"
+            ? new Date(`${raw}-01T12:00:00`)
+            : new Date(raw);
         return {
           ...point,
           formattedDate: d.toLocaleDateString(locale, {
-            day: "2-digit",
-            month: "2-digit",
+            month: "short",
+            year: "numeric",
           }),
         };
       }) || [],
@@ -349,9 +355,9 @@ function OverviewContent() {
           />
         </div>
 
-        {/* Bloc large (2×2) : Timeline / évolution récente — spotlight */}
+        {/* Timeline pleine largeur */}
         {chartData.length > 0 && (
-          <div className="sm:col-span-2 lg:col-span-2 lg:row-span-2 min-h-[280px]">
+          <div className="sm:col-span-2 lg:col-span-4 min-h-[280px]">
             <div className="relative h-full overflow-hidden rounded-2xl border-2 border-accent-violet/20 bg-card-surface shadow-2xl dark:shadow-none ring-2 ring-accent-violet/10 dark:ring-accent-violet/20 transition-all duration-300 hover:shadow-[0_0_50px_-12px_rgba(139,92,246,0.25)] hover:border-accent-violet/30 dark:hover:border-accent-violet/40 animate-fade-in-up">
               <div
                 className="pointer-events-none absolute inset-0 rounded-2xl opacity-60 dark:opacity-40"
@@ -368,7 +374,7 @@ function OverviewContent() {
                         {t("recentEvolution")}
                       </h2>
                       <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-                        {t("listensPerDay")}
+                        {t("listensPerMonth")}
                       </p>
                     </div>
                     <Link
@@ -435,13 +441,16 @@ function OverviewContent() {
           </div>
         )}
 
-        {/* Bloc moyen (1×2) : AI Insights en spotlight */}
-        <div className="sm:col-span-2 lg:col-span-1 lg:row-span-2 min-h-[280px] flex ">
+        <TopThreeArtistsOverviewWidget startDate={startDate} endDate={endDate} />
+
+        <GenreTrendsSummaryWidget startDate={startDate} endDate={endDate} />
+
+        {/* AI Insights + profil goût — sous la timeline, deux colonnes */}
+        <div className="sm:col-span-2 lg:col-span-2 min-h-[280px] flex w-full min-w-0">
           <AiInsightsSummaryWidget />
         </div>
 
-        {/* Bloc moyen (1×2) : Taste Profile */}
-        <div className="sm:col-span-2 lg:col-span-1 lg:row-span-2 min-h-[280px] flex ">
+        <div className="sm:col-span-2 lg:col-span-2 min-h-[280px] flex w-full min-w-0">
           <TasteProfileSummaryWidget />
         </div>
 
@@ -571,127 +580,6 @@ function OverviewContent() {
           </div>
         </div>
           </div>
-        )}
-
-        {/* Bloc large (2×1) : Top artists */}
-        {data.topArtists && data.topArtists.length > 0 && (
-          <div className="sm:col-span-2 lg:col-span-2">
-            <div className="overflow-hidden rounded-xl border border-card-border border-l-4 border-l-accent-rose bg-card-surface shadow-card transition-shadow duration-300 hover:shadow-card-hover">
-              <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
-                <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  {t("topArtists")}
-                </h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-                  {t("yourFavoriteArtists")}
-                </p>
-              </div>
-              <Link
-                href="/dashboard/artists"
-                className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium
-                  text-accent-violet hover:bg-accent-violet/10 dark:hover:bg-accent-violet/20
-                  transition-colors duration-200 shrink-0"
-              >
-                {t("seeAll")}
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-                </div>
-              </div>
-              <div className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Graphique en barres horizontal */}
-                  <div className="h-64">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart
-                        data={data.topArtists.map((artist) => ({
-                      name: artist.artistName,
-                      value: artist.listenCount,
-                    }))}
-                    layout="vertical"
-                    margin={{ top: 5, right: 30, left: 100, bottom: 5 }}
-                  >
-                    <defs>
-                      <linearGradient id="artistBarGradient" x1="0" y1="0" x2="1" y2="0">
-                        <stop offset="0%" stopColor="#ec4899" />
-                        <stop offset="100%" stopColor="#f43f5e" />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
-                    <XAxis
-                      type="number"
-                      tick={{ fill: "#64748b", fontSize: 11 }}
-                      axisLine={false}
-                      tickLine={false}
-                    />
-                    <YAxis
-                      type="category"
-                      dataKey="name"
-                      tick={{ fill: "#475569", fontSize: 12, fontWeight: 500 }}
-                      axisLine={false}
-                      tickLine={false}
-                      width={95}
-                    />
-                    <Tooltip
-                      contentStyle={CHART_TOOLTIP_STYLES.contentStyle}
-                      labelStyle={CHART_TOOLTIP_STYLES.labelStyle}
-                      itemStyle={CHART_TOOLTIP_STYLES.itemStyle}
-                      formatter={(value: number) => [
-                        `${value.toLocaleString(locale)} ${t("listens")}`,
-                        t("Listens"),
-                      ]}
-                    />
-                    <Bar
-                      dataKey="value"
-                      fill="url(#artistBarGradient)"
-                      radius={[0, 6, 6, 0]}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-
-              {/* Liste des artistes avec barres de progression */}
-              <div className="space-y-4">
-                {data.topArtists.map((artist, index) => {
-                  const maxCount = data.topArtists[0]?.listenCount ?? 1;
-                  const widthPercent = (artist.listenCount / maxCount) * 100;
-                  const rankColors = ["text-amber-500", "text-slate-400", "text-amber-700"];
-                  const rankBg = ["bg-amber-500/15", "bg-slate-400/15", "bg-amber-700/15"];
-                  const rankStyle = index < 3 ? rankColors[index] : "text-gray-400 dark:text-gray-500";
-                  const rankBgStyle = index < 3 ? rankBg[index] : "bg-gray-100 dark:bg-gray-800";
-                  return (
-                    <div key={artist.artistId} className="group">
-                      <div className="flex items-center justify-between mb-1.5">
-                        <div className="flex items-center gap-3 min-w-0">
-                          <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold ${rankStyle} ${rankBgStyle}`}>
-                            {index + 1}
-                          </span>
-                          <span className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                            {artist.artistName}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2 ml-2 shrink-0">
-                          <span className="text-sm font-semibold text-gray-900 dark:text-white tabular-nums">
-                            {artist.listenCount.toLocaleString(locale)}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="ml-10 h-1.5 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-700/50">
-                        <div
-                          className="h-full rounded-full bg-gradient-to-r from-accent-rose to-accent-pink transition-all duration-500 ease-out"
-                          style={{ width: `${widthPercent}%` }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
         )}
       </div>
 

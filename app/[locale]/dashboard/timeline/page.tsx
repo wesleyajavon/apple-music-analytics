@@ -69,7 +69,7 @@ function TimelineContent() {
   const locale = useLocale();
   const startDate = searchParams.get("startDate") || undefined;
   const endDate = searchParams.get("endDate") || undefined;
-  const period = (searchParams.get("period") || "day") as PeriodType;
+  const period = (searchParams.get("period") || "month") as PeriodType;
 
   const { data, isLoading, error, refetch } = useTimeline(
     startDate,
@@ -93,7 +93,7 @@ function TimelineContent() {
     <>
       {/* Period selector bar - flush with DateRangeFilter above */}
       <div className="bg-white dark:bg-gray-800/95 border-b border-gray-100 dark:border-gray-700/50 -mx-4 -mt-4 sm:-mx-6 sm:-mt-6 lg:-mx-8 lg:-mt-8 px-4 sm:px-6 lg:px-8 py-3 backdrop-blur-sm">
-        <PeriodSelector />
+        <PeriodSelector defaultPeriod="month" />
       </div>
 
       {/* Page content */}
@@ -229,7 +229,7 @@ function TimelineContent() {
 function TimelineFallback() {
   const t = useTranslations("timeline");
   const searchParams = useSearchParams();
-  const period = (searchParams.get("period") || "day") as PeriodType;
+  const period = (searchParams.get("period") || "month") as PeriodType;
   return (
     <>
       <div className="bg-white dark:bg-gray-800/95 border-b border-gray-100 dark:border-gray-700/50 -mx-4 -mt-4 sm:-mx-6 sm:-mt-6 lg:-mx-8 lg:-mt-8 px-4 sm:px-6 lg:px-8 py-3 backdrop-blur-sm">

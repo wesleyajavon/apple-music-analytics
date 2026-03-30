@@ -11,8 +11,14 @@
  *   node scripts/update-lastfm.js --userId "user_123" --username "lastfm_user" --baseUrl "http://localhost:3000"
  *   node scripts/update-lastfm.js --userId "user_123" --username "lastfm_user" --dry-run
  *
+ * Backfill (rattrapage si la base a un trou alors que Last.fm est à jour) :
+ *   node scripts/update-lastfm.js --userId "..." --username "..." --from "2026-03-18"
+ *   (ISO date ou timestamp Unix en secondes ; ignore la dernière écoute en base pour ce run)
+ *
  * Options:
  *   --dry-run  Simule l'import sans modifier la base de données (affiche ce qui serait ajouté)
+ *   --from     Date de début forcée (ISO, ex. 2026-03-18) ou unix seconds ; récupère tout depuis Last.fm
+ *              depuis cette date. Les doublons sont toujours ignorés (même user, track, playedAt).
  */
 
 // Load environment variables from .env.local if available
@@ -84,7 +90,24 @@ function hasFlag(flag) {
 const userIdArg = getArg('userId');
 const usernameArg = getArg('username');
 const baseUrlArg = getArg('baseUrl') || 'http://localhost:3000';
+const fromArg = getArg('from');
 const DRY_RUN = hasFlag('dry-run');
+
+/**
+ * Parse --from: ISO date (2026-03-18), datetime, or unix seconds.
+ * @returns {number|null} Unix seconds, or null if invalid
+ */
+function parseFromTimestamp(raw) {
+  if (!raw || typeof raw !== 'string') return null;
+  const trimmed = raw.trim();
+  if (/^\d{10,13}$/.test(trimmed)) {
+    const n = parseInt(trimmed, 10);
+    return trimmed.length === 13 ? Math.floor(n / 1000) : n;
+  }
+  const ms = Date.parse(trimmed);
+  if (Number.isNaN(ms)) return null;
+  return Math.floor(ms / 1000);
+}
 
 if (!userIdArg || !usernameArg) {
   console.error('❌ Erreur: userId et username sont requis');
@@ -92,6 +115,7 @@ if (!userIdArg || !usernameArg) {
   console.error('  node scripts/update-lastfm.js --userId "user_123" --username "lastfm_user"');
   console.error('  node scripts/update-lastfm.js --userId "user_123" --username "lastfm_user" --baseUrl "http://localhost:3000"');
   console.error('  node scripts/update-lastfm.js --userId "user_123" --username "lastfm_user" --dry-run');
+  console.error('  node scripts/update-lastfm.js --userId "user_123" --username "lastfm_user" --from "2026-03-18"');
   process.exit(1);
 }
 
@@ -126,17 +150,16 @@ async function getLastListenDate() {
  * Importe les nouvelles écoutes depuis une date donnée
  * @param {number} fromTimestamp - Timestamp Unix de début
  * @param {boolean} dryRun - Si true, simule sans écrire en base
+ * @param {{ maxPages?: number }} [opts]
  */
-async function importNewTracks(fromTimestamp, dryRun = false) {
+async function importNewTracks(fromTimestamp, dryRun = false, opts = {}) {
   let page = 1;
   let totalPages = 1;
   let totalImported = 0;
   let totalSkipped = 0;
   const allErrors = [];
-  
-  // Limite de sécurité : ne pas importer plus de 100 pages par exécution
-  // pour éviter de surcharger l'API Last.fm
-  const MAX_PAGES = 100;
+
+  const MAX_PAGES = opts.maxPages ?? 100;
 
   console.log(dryRun ? '🔍 Mode DRY-RUN : simulation sans modification de la base\n' : '🚀 Démarrage de la mise à jour Last.fm\n');
   console.log(`📋 Configuration:`);
@@ -147,7 +170,7 @@ async function importNewTracks(fromTimestamp, dryRun = false) {
   if (dryRun) {
     console.log(`   🧪 Mode: DRY-RUN (aucune donnée ne sera écrite)`);
   }
-  console.log(`   ⚠️  Limite de sécurité: ${MAX_PAGES} pages maximum par exécution`);
+  console.log(`   ⚠️  Limite de sécurité: ${MAX_PAGES} pages max. (${MAX_PAGES * 200} scrobbles max. par run)`);
   console.log('');
 
   // Vérifier que le serveur est accessible
@@ -291,31 +314,47 @@ async function main() {
       process.exit(1);
     }
 
-    // Trouver la date de la dernière écoute
-    console.log('🔍 Recherche de la dernière écoute Last.fm...\n');
-    const lastListenDate = await getLastListenDate();
-
     let fromTimestamp;
 
-    if (lastListenDate) {
-      // Utiliser la date de la dernière écoute comme point de départ
-      // On soustrait 1 seconde pour s'assurer d'inclure les écoutes qui ont pu être enregistrées
-      // exactement à la même seconde
-      fromTimestamp = Math.floor(lastListenDate.getTime() / 1000) - 1;
-      console.log(`✅ Dernière écoute trouvée: ${lastListenDate.toLocaleString()}`);
-      console.log(`   Import des écoutes depuis cette date...\n`);
+    if (fromArg) {
+      const parsed = parseFromTimestamp(fromArg);
+      if (parsed === null) {
+        console.error(`❌ --from invalide: "${fromArg}"`);
+        console.error('   Utilisez une date ISO (ex. 2026-03-18), une date/heure ISO, ou un timestamp Unix en secondes.');
+        process.exit(1);
+      }
+      fromTimestamp = parsed;
+      console.log('📌 Mode rattrapage: --from ignorera la dernière écoute en base pour ce run.\n');
+      console.log(`   Point de départ: ${new Date(fromTimestamp * 1000).toLocaleString()}`);
+      console.log(`   (Les écoutes déjà présentes sont ignorées automatiquement.)\n`);
     } else {
-      // Aucune écoute trouvée, importer depuis les 30 derniers jours par défaut
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      fromTimestamp = Math.floor(thirtyDaysAgo.getTime() / 1000);
-      console.log(`⚠️  Aucune écoute Last.fm trouvée pour cet utilisateur`);
-      console.log(`   Import depuis les 30 derniers jours par défaut: ${thirtyDaysAgo.toLocaleString()}`);
-      console.log(`   (Utilisez import-lastfm.js pour un import complet de l'historique)\n`);
+      // Trouver la date de la dernière écoute
+      console.log('🔍 Recherche de la dernière écoute Last.fm...\n');
+      const lastListenDate = await getLastListenDate();
+
+      if (lastListenDate) {
+        // Utiliser la date de la dernière écoute comme point de départ
+        // On soustrait 1 seconde pour s'assurer d'inclure les écoutes qui ont pu être enregistrées
+        // exactement à la même seconde
+        fromTimestamp = Math.floor(lastListenDate.getTime() / 1000) - 1;
+        console.log(`✅ Dernière écoute trouvée: ${lastListenDate.toLocaleString()}`);
+        console.log(`   Import des écoutes depuis cette date...\n`);
+        console.log(`   💡 Si la base a un trou alors que Last.fm est complet, relancez avec --from "YYYY-MM-DD" depuis le début du trou.\n`);
+      } else {
+        // Aucune écoute trouvée, importer depuis les 30 derniers jours par défaut
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        fromTimestamp = Math.floor(thirtyDaysAgo.getTime() / 1000);
+        console.log(`⚠️  Aucune écoute Last.fm trouvée pour cet utilisateur`);
+        console.log(`   Import depuis les 30 derniers jours par défaut: ${thirtyDaysAgo.toLocaleString()}`);
+        console.log(`   (Utilisez import-lastfm.js pour un import complet de l'historique)\n`);
+      }
     }
 
+    const maxPages = fromArg ? 500 : 100;
+
     // Importer les nouvelles écoutes (ou simuler en mode dry-run)
-    await importNewTracks(fromTimestamp, DRY_RUN);
+    await importNewTracks(fromTimestamp, DRY_RUN, { maxPages });
 
   } catch (error) {
     console.error('\n❌ Erreur fatale:', error);

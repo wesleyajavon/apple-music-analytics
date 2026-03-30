@@ -78,6 +78,10 @@
       "uniqueTracks": "Titres uniques 🎵",
       "totalTime": "Temps total ⏱️"
     },
+    "statsSectionBadge": "Synthèse",
+    "statsSectionTitle": "Vos chiffres sur la période",
+    "statsSectionDescription": "Volume d'écoute, diversité et temps cumulé — les indicateurs qui résument votre activité.",
+    "statsSectionComparisonNote": "Les pourcentages comparent cette période à la fenêtre précédente de même durée (lorsque des données sont disponibles).",
     "vsPreviousPeriod": "vs période précédente",
     "notAvailable": "Non disponible",
     "recentEvolution": "Évolution récente 📈",

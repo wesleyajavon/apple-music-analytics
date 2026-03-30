@@ -50,6 +50,40 @@ export function StatCardsSkeleton({ count = 4 }: { count?: number }) {
 }
 
 /**
+ * Skeleton pour la section « chiffres clés » pleine largeur (overview)
+ */
+export function OverviewStatsSectionSkeleton() {
+  return (
+    <div className="sm:col-span-2 lg:col-span-4">
+      <div className="overflow-hidden rounded-2xl border-2 border-emerald-500/15 bg-card-surface shadow-xl">
+        <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-6 sm:px-8 sm:py-8">
+          <div className="mb-2 h-6 w-28 rounded-full bg-gray-200 dark:bg-gray-700 animate-shimmer" />
+          <div className="h-8 w-72 max-w-full rounded bg-gray-200 dark:bg-gray-700 animate-shimmer" />
+          <div className="mt-2 h-4 w-full max-w-2xl rounded bg-gray-200 dark:bg-gray-700 animate-shimmer" />
+        </div>
+        <div className="px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4 xl:gap-5">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div
+                key={i}
+                className="flex min-h-[180px] flex-col rounded-2xl border border-card-border bg-card-surface/80 p-6"
+              >
+                <div className="mb-4 h-14 w-14 rounded-2xl bg-gray-200 dark:bg-gray-700 animate-shimmer" />
+                <div className="h-3 w-32 rounded bg-gray-200 dark:bg-gray-700 animate-shimmer" />
+                <div className="mt-2 h-10 w-40 rounded bg-gray-200 dark:bg-gray-700 animate-shimmer" />
+                <div className="mt-auto pt-4">
+                  <div className="h-9 w-44 rounded-full bg-gray-200 dark:bg-gray-700 animate-shimmer" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
  * Skeleton pour un graphique (ligne, barres, camembert, etc.)
  */
 export function ChartSkeleton({ height = 400 }: { height?: number }) {
@@ -333,18 +367,36 @@ export function OverviewSkeleton() {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
-        {/* 4 StatCards */}
-        {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="sm:col-span-2 lg:col-span-1">
-            <StatCardSkeleton />
-          </div>
-        ))}
-        {/* Timeline (2×2) */}
+        {/* Taste Profile — première ligne (aligné page overview) */}
         <div className="sm:col-span-2 lg:col-span-2 lg:row-span-2 min-h-[280px]">
-          <LineChartSkeleton height={280} />
+          <div className="overflow-hidden rounded-xl border border-card-border bg-card-surface shadow-card min-h-[220px] flex flex-col">
+            <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1.5">
+                  <div className="h-5 w-36 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+                  <div className="h-4 w-52 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+                </div>
+                <div className="h-9 w-20 bg-gray-200 dark:bg-gray-700 rounded-lg animate-shimmer shrink-0" />
+              </div>
+            </div>
+            <div className="p-6">
+              <div className="space-y-2">
+                {[0, 1, 2, 3, 4].map((i) => (
+                  <div
+                    key={i}
+                    className="h-3.5 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer"
+                    style={{
+                      width: i === 4 ? "60%" : "100%",
+                      animationDelay: `${i * 0.1}s`,
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
         {/* AI Insights (1×2) — content-aware skeleton */}
-        <div className="sm:col-span-2 lg:col-span-1 lg:row-span-2 min-h-[280px]">
+        <div className="sm:col-span-2 lg:col-span-2 lg:row-span-2 min-h-[280px]">
           <div className="overflow-hidden rounded-xl border border-card-border bg-card-surface shadow-card min-h-[220px] flex flex-col">
             <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
               <div className="flex items-center justify-between gap-3">
@@ -380,49 +432,9 @@ export function OverviewSkeleton() {
             </div>
           </div>
         </div>
-        {/* Taste Profile (1×2) — content-aware skeleton */}
-        <div className="sm:col-span-2 lg:col-span-1 lg:row-span-2 min-h-[280px]">
-          <div className="overflow-hidden rounded-xl border border-card-border bg-card-surface shadow-card min-h-[220px] flex flex-col">
-            <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1.5">
-                  <div className="h-5 w-36 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
-                  <div className="h-4 w-52 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
-                </div>
-                <div className="h-9 w-20 bg-gray-200 dark:bg-gray-700 rounded-lg animate-shimmer shrink-0" />
-              </div>
-            </div>
-            <div className="p-6">
-              <div className="space-y-2">
-                {[0, 1, 2, 3, 4].map((i) => (
-                  <div
-                    key={i}
-                    className="h-3.5 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer"
-                    style={{
-                      width: i === 4 ? "60%" : "100%",
-                      animationDelay: `${i * 0.1}s`,
-                    }}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-        {/* Top genres (2×1) */}
-        <div className="sm:col-span-2 lg:col-span-2">
-          <div className="overflow-hidden rounded-xl border border-card-border bg-card-surface shadow-card p-6">
-            <div className="mb-4 flex items-center justify-between">
-              <div className="space-y-2">
-                <div className="h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
-                <div className="h-4 w-64 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
-              </div>
-              <div className="h-4 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <ChartSkeleton height={200} />
-              <GenreListSkeleton count={6} />
-            </div>
-          </div>
+        {/* Timeline pleine largeur */}
+        <div className="sm:col-span-2 lg:col-span-4 min-h-[280px]">
+          <LineChartSkeleton height={280} />
         </div>
         {/* Top artists (2×1) */}
         <div className="sm:col-span-2 lg:col-span-2">
@@ -441,6 +453,35 @@ export function OverviewSkeleton() {
                   <div key={j} className="h-8 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
                 ))}
               </div>
+            </div>
+          </div>
+        </div>
+        {/* Genre trends — placeholder */}
+        <div className="sm:col-span-2 lg:col-span-2 min-h-[200px]">
+          <div className="overflow-hidden rounded-xl border border-card-border bg-card-surface shadow-card p-6">
+            <div className="mb-4 flex items-center justify-between">
+              <div className="space-y-2">
+                <div className="h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+                <div className="h-4 w-64 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+              </div>
+            </div>
+            <div className="h-32 rounded-lg bg-gray-100 dark:bg-gray-800/50 animate-shimmer" />
+          </div>
+        </div>
+        <OverviewStatsSectionSkeleton />
+        {/* Top genres (2×1) */}
+        <div className="sm:col-span-2 lg:col-span-2">
+          <div className="overflow-hidden rounded-xl border border-card-border bg-card-surface shadow-card p-6">
+            <div className="mb-4 flex items-center justify-between">
+              <div className="space-y-2">
+                <div className="h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+                <div className="h-4 w-64 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+              </div>
+              <div className="h-4 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <ChartSkeleton height={200} />
+              <GenreListSkeleton count={6} />
             </div>
           </div>
         </div>

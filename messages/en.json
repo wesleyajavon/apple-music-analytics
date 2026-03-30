@@ -78,6 +78,10 @@
       "uniqueTracks": "Unique tracks 🎵",
       "totalTime": "Total time ⏱️"
     },
+    "statsSectionBadge": "Summary",
+    "statsSectionTitle": "Your numbers for this period",
+    "statsSectionDescription": "Listen volume, diversity, and total time — the metrics that summarize your activity.",
+    "statsSectionComparisonNote": "Percentages compare this period to the previous window of the same length (when data is available).",
     "vsPreviousPeriod": "vs previous period",
     "notAvailable": "Not available",
     "recentEvolution": "Recent evolution 📈",

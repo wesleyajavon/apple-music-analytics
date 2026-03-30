@@ -4,7 +4,13 @@ import {
   getWeeklyAggregatedListens,
   getMonthlyAggregatedListens,
 } from '../listening/listening-aggregation';
-import { getGenreDistribution, getOverviewStats } from '../listening/listening-stats';
+import {
+  getGenreDistribution,
+  getGenreTrends,
+  getOverviewStats,
+  getTopArtists,
+  getTopArtistsForGenres,
+} from '../listening/listening-stats';
 import { executeDateAggregation } from '../listening/listening-aggregation-core';
 import { prisma } from '../../prisma';
 
@@ -377,6 +383,137 @@ describe('listening service', () => {
       expect(result.uniqueTracks).toBe(Number(largeNumber));
       expect(result.uniqueArtists).toBe(Number(largeNumber));
       expect(result.totalPlayTime).toBe(Number(largeNumber));
+    });
+  });
+
+  describe('getTopArtists', () => {
+    it('should return top artists with listen counts', async () => {
+      vi.mocked(prisma.$queryRaw).mockResolvedValue([
+        {
+          artist_id: 'a1',
+          artist_name: 'Test Artist',
+          listen_count: BigInt(42),
+        },
+      ]);
+
+      const result = await getTopArtists(
+        new Date('2024-01-01'),
+        new Date('2024-01-31'),
+        'user-1',
+        5
+      );
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({
+        artistId: 'a1',
+        artistName: 'Test Artist',
+        listenCount: 42,
+      });
+    });
+  });
+
+  describe('getTopArtistsForGenres', () => {
+    it('returns empty array when genres is empty', async () => {
+      const result = await getTopArtistsForGenres([]);
+      expect(result).toEqual([]);
+      expect(prisma.$queryRaw).not.toHaveBeenCalled();
+    });
+
+    it('returns spotlight artists per genre from raw rows', async () => {
+      vi.mocked(prisma.$queryRaw).mockResolvedValue([
+        {
+          genre: 'Pop',
+          artist_id: 'id1',
+          artist_name: 'Dua Lipa',
+          image_url: null,
+          listen_count: BigInt(10),
+        },
+      ]);
+
+      const result = await getTopArtistsForGenres(
+        ['Pop'],
+        new Date('2024-01-01'),
+        new Date('2024-01-31'),
+        'user-1',
+        3
+      );
+
+      expect(result).toHaveLength(1);
+      expect(result[0].genre).toBe('Pop');
+      expect(result[0].artists).toHaveLength(1);
+      expect(result[0].artists[0]).toMatchObject({
+        id: 'id1',
+        name: 'Dua Lipa',
+        imageUrl: null,
+        listenCount: 10,
+      });
+    });
+  });
+
+  describe('getGenreTrends', () => {
+    const start = new Date('2024-01-01T00:00:00.000Z');
+    const end = new Date('2024-01-31T23:59:59.999Z');
+
+    it('aggregates by day', async () => {
+      vi.mocked(prisma.$queryRaw).mockResolvedValue([
+        { date: '2024-01-15', genre: 'Pop', count: BigInt(3) },
+      ]);
+
+      const result = await getGenreTrends(start, end, 'day');
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({ date: '2024-01-15', genre: 'Pop', count: 3 });
+    });
+
+    it('normalizes Date bucket from SQL for day period (ISO date string)', async () => {
+      vi.mocked(prisma.$queryRaw).mockResolvedValue([
+        {
+          date: new Date(Date.UTC(2024, 0, 15, 12, 0, 0)),
+          genre: 'Pop',
+          count: BigInt(1),
+        },
+      ]);
+
+      const result = await getGenreTrends(start, end, 'day');
+
+      expect(result[0].date).toBe('2024-01-15');
+    });
+
+    it('aggregates by week', async () => {
+      vi.mocked(prisma.$queryRaw).mockResolvedValue([
+        { date: '2024-01-08', genre: 'Rock', count: BigInt(1) },
+      ]);
+
+      const result = await getGenreTrends(start, end, 'week');
+
+      expect(result[0].genre).toBe('Rock');
+      expect(result[0].count).toBe(1);
+    });
+
+    it('aggregates by month', async () => {
+      vi.mocked(prisma.$queryRaw).mockResolvedValue([
+        { date: '2024-01-01', genre: 'Pop', count: BigInt(5) },
+      ]);
+
+      const result = await getGenreTrends(start, end, 'month');
+
+      expect(result[0].date).toBe('2024-01-01');
+      expect(result[0].count).toBe(5);
+    });
+
+    it('normalizes Date bucket values from SQL for month period', async () => {
+      vi.mocked(prisma.$queryRaw).mockResolvedValue([
+        {
+          date: new Date(Date.UTC(2024, 5, 1, 12, 0, 0)),
+          genre: 'Jazz',
+          count: BigInt(2),
+        },
+      ]);
+
+      const result = await getGenreTrends(start, end, 'month');
+
+      expect(result[0].date).toBe('2024-06');
+      expect(result[0].genre).toBe('Jazz');
     });
   });
 });

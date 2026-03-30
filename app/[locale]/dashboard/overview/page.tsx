@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useCallback, useMemo, Suspense } from "react";
+import { useCallback, useMemo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
@@ -27,49 +27,7 @@ import { CHART_TOOLTIP_STYLES } from "@/lib/constants/config";
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
 import { OverviewSkeleton } from "@/lib/components/skeleton-loaders";
-
-/* SVG Icons pour les stats - design cohérent */
-const StatIcons = {
-  listens: (
-    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M9 9l10.5-3m0 6.553v3.75a2.25 2.25 0 01-1.632 2.163l-1.32.377a1.803 1.803 0 11-.99-3.467l2.31-.66a2.25 2.25 0 001.632-2.163zm0 0V2.25L9 5.25v10.303m0 0v3.75a2.25 2.25 0 01-1.632 2.163l-1.32.377a1.803 1.803 0 01-.99-3.467l2.31-.66A2.25 2.25 0 009 15.553z" />
-    </svg>
-  ),
-  artists: (
-    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-    </svg>
-  ),
-  tracks: (
-    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
-    </svg>
-  ),
-  time: (
-    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-  ),
-} as const;
-
-/**
- * Formate les secondes en format lisible (heures, minutes)
- * Retourne notAvailable si seconds est 0 ou négatif
- * Fonction pure, peut être utilisée sans mémorisation
- */
-function formatTime(seconds: number, notAvailable: string): string {
-  if (seconds <= 0) {
-    return notAvailable;
-  }
-  
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  
-  if (hours > 0) {
-    return `${hours}h ${minutes}min`;
-  }
-  return `${minutes}min`;
-}
+import { OverviewStatsSection } from "@/lib/components/overview-stats-section";
 
 /**
  * Calcule la période précédente basée sur la période actuelle
@@ -123,90 +81,6 @@ function calculateChange(current: number, previous: number): {
     isPositive,
   };
 }
-
-const ACCENT_CONFIG: Record<
-  StatType,
-  { iconBg: string; iconColor: string; borderColor: string }
-> = {
-  listens: { iconBg: "bg-accent-rose/15", iconColor: "text-accent-rose", borderColor: "border-l-accent-rose" },
-  artists: { iconBg: "bg-accent-violet/15", iconColor: "text-accent-violet", borderColor: "border-l-accent-violet" },
-  tracks: { iconBg: "bg-accent-indigo/15", iconColor: "text-accent-indigo", borderColor: "border-l-accent-indigo" },
-  time: { iconBg: "bg-accent-cyan/15", iconColor: "text-accent-cyan", borderColor: "border-l-accent-cyan" },
-};
-
-type StatType = keyof typeof StatIcons;
-
-/**
- * Composant de carte statistique mémorisé - design moderne avec accents
- */
-const StatCard = memo(({ 
-  iconType, 
-  label, 
-  value,
-  change,
-  vsLabel = "vs période précédente",
-  locale = "fr",
-}: { 
-  iconType: StatType; 
-  label: string; 
-  value: string | number;
-  change?: { value: number; displayValue: string; isPositive: boolean } | null;
-  vsLabel?: string;
-  locale?: string;
-}) => {
-  const accent = ACCENT_CONFIG[iconType];
-  return (
-    <div
-      className={`
-        group relative overflow-hidden rounded-xl border border-l-4
-        border-card-border bg-card-surface
-        shadow-card hover:shadow-card-hover transition-all duration-300
-        ${accent.borderColor}
-      `}
-    >
-      <div className="p-5">
-        <div className="flex items-center gap-4">
-          <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${accent.iconBg} ${accent.iconColor}`}>
-            {StatIcons[iconType]}
-          </div>
-          <dl className="min-w-0 flex-1">
-            <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
-              {label}
-            </dt>
-            <dd className="text-xl font-bold tracking-tight text-gray-900 dark:text-white mt-0.5">
-              {typeof value === "number" ? value.toLocaleString(locale) : value}
-            </dd>
-            {change && (
-              <dd className="text-xs mt-1.5 flex items-center gap-1 flex-wrap">
-                <span
-                  className={`inline-flex items-center font-semibold ${
-                    change.isPositive
-                      ? "text-emerald-600 dark:text-emerald-400"
-                      : "text-red-600 dark:text-red-400"
-                  }`}
-                >
-                  {change.isPositive ? (
-                    <svg className="w-3.5 h-3.5 mr-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                    </svg>
-                  ) : (
-                    <svg className="w-3.5 h-3.5 mr-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                    </svg>
-                  )}
-                  {change.displayValue}%
-                </span>
-                <span className="text-gray-400 dark:text-gray-500">{vsLabel}</span>
-              </dd>
-            )}
-          </dl>
-        </div>
-      </div>
-    </div>
-  );
-});
-
-StatCard.displayName = "StatCard";
 
 function OverviewContent() {
   const searchParams = useSearchParams();
@@ -313,46 +187,13 @@ function OverviewContent() {
     <div className="space-y-6">
       {/* Bento Grid - layout asymetrique type Apple/Linear */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
-        {/* 4 StatCards — petits blocs en première ligne */}
-        <div className="sm:col-span-2 lg:col-span-1 lg:row-span-1">
-          <StatCard
-            iconType="listens"
-            label={t("stats.totalListens")}
-            value={data.totalListens}
-            change={changes?.totalListens}
-            vsLabel={t("vsPreviousPeriod")}
-            locale={locale}
-          />
+        {/* Profil goût + AI Insights — première ligne */}
+        <div className="sm:col-span-2 lg:col-span-2 min-h-[280px] flex w-full min-w-0">
+          <TasteProfileSummaryWidget />
         </div>
-        <div className="sm:col-span-2 lg:col-span-1 lg:row-span-1">
-          <StatCard
-            iconType="artists"
-            label={t("stats.uniqueArtists")}
-            value={data.uniqueArtists}
-            change={changes?.uniqueArtists}
-            vsLabel={t("vsPreviousPeriod")}
-            locale={locale}
-          />
-        </div>
-        <div className="sm:col-span-2 lg:col-span-1 lg:row-span-1">
-          <StatCard
-            iconType="tracks"
-            label={t("stats.uniqueTracks")}
-            value={data.uniqueTracks}
-            change={changes?.uniqueTracks}
-            vsLabel={t("vsPreviousPeriod")}
-            locale={locale}
-          />
-        </div>
-        <div className="sm:col-span-2 lg:col-span-1 lg:row-span-1">
-          <StatCard
-            iconType="time"
-            label={t("stats.totalTime")}
-            value={formatTime(data.totalPlayTime, t("notAvailable"))}
-            change={changes?.totalPlayTime}
-            vsLabel={t("vsPreviousPeriod")}
-            locale={locale}
-          />
+
+        <div className="sm:col-span-2 lg:col-span-2 min-h-[280px] flex w-full min-w-0">
+          <AiInsightsSummaryWidget />
         </div>
 
         {/* Timeline pleine largeur */}
@@ -445,14 +286,14 @@ function OverviewContent() {
 
         <GenreTrendsSummaryWidget startDate={startDate} endDate={endDate} />
 
-        {/* AI Insights + profil goût — sous la timeline, deux colonnes */}
-        <div className="sm:col-span-2 lg:col-span-2 min-h-[280px] flex w-full min-w-0">
-          <AiInsightsSummaryWidget />
-        </div>
-
-        <div className="sm:col-span-2 lg:col-span-2 min-h-[280px] flex w-full min-w-0">
-          <TasteProfileSummaryWidget />
-        </div>
+        <OverviewStatsSection
+          totalListens={data.totalListens}
+          uniqueArtists={data.uniqueArtists}
+          uniqueTracks={data.uniqueTracks}
+          totalPlayTime={data.totalPlayTime}
+          changes={changes}
+          showComparison={!!previousPeriod}
+        />
 
         {/* Bloc large (2×1) : Top genres */}
         {topGenres.length > 0 && (

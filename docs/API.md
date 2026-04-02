@@ -168,3 +168,84 @@ Export des statistiques.
 Rapport PDF annuel.
 
 **Paramètres** : `year`, `userId`
+
+---
+
+## Plage de dates
+
+### GET `/api/date-range`
+
+Retourne la plage complète des écoutes en base (dates min et max de `playedAt`). Utilisée notamment lorsque le filtre « tout » est sélectionné pour les insights IA et le profil de goûts, afin d’utiliser tout l’historique plutôt qu’une fenêtre par défaut (ex. 30 jours).
+
+**Paramètres** : `userId` (optionnel) — si absent, la plage est calculée sans filtrer par utilisateur (selon la logique métier du service d’écoute).
+
+**Réponse** : objet JSON avec `startDate` et `endDate` au format `YYYY-MM-DD`, ou `{ "startDate": null, "endDate": null }` s’il n’y a aucune écoute correspondante.
+
+**Exemple** : `GET /api/date-range?userId=user_123`
+
+---
+
+## Apple Music Replay
+
+### GET `/api/replay`
+
+Liste tous les résumés annuels Replay disponibles pour un utilisateur (données enrichies : top artistes, titres, albums, etc., tri par année décroissante).
+
+**Paramètres** : `userId` (optionnel) — si le paramètre est absent, l’implémentation utilise actuellement l’identifiant `default_user` (comportement à aligner avec l’auth lorsque celle-ci sera branchée).
+
+**Exemple** : `GET /api/replay?userId=user_123`
+
+### POST `/api/replay/import`
+
+Importe un résumé annuel Apple Music Replay pour un utilisateur. Crée ou remplace l’entrée pour l’année concernée (transaction côté service).
+
+**Body** (JSON) :
+
+| Champ | Type | Description |
+|-------|------|-------------|
+| `userId` | string | Obligatoire. Identifiant utilisateur. |
+| `data` | objet | Obligatoire. Résumé annuel au format `ReplayYearlyInput` (voir ci-dessous). |
+
+Structure attendue pour `data` :
+
+- `year` (number), `totalPlayTime` (secondes), `totalPlays` (number)
+- `topArtists` : tableau d’objets `{ name, playCount, rank, imageUrl? }`
+- `topTracks` : tableau d’objets `{ title, artistName, playCount, rank, duration? }`
+- `topAlbums` : tableau d’objets `{ name, artistName, playCount, rank, imageUrl? }`
+
+**Réponse** (succès) : `{ "message": "Replay data imported successfully", "replayYearlyId": "<id>" }`
+
+**Erreurs** : en cas d’échec de validation ou d’import, réponse d’erreur avec détails (`validationErrors`, `errors` selon le cas).
+
+**Exemple** :
+
+```json
+{
+  "userId": "user_123",
+  "data": {
+    "year": 2024,
+    "totalPlayTime": 360000,
+    "totalPlays": 1000,
+    "topArtists": [{ "name": "Artiste", "playCount": 100, "rank": 1 }],
+    "topTracks": [{ "title": "Titre", "artistName": "Artiste", "playCount": 50, "rank": 1 }],
+    "topAlbums": [{ "name": "Album", "artistName": "Artiste", "playCount": 40, "rank": 1 }]
+  }
+}
+```
+
+---
+
+## Diagnostic Sentry
+
+### GET `/api/test-sentry-error`
+
+Route de test : déclenche une erreur serveur intentionnelle, l’envoie à Sentry via `captureException`, puis renvoie une réponse HTTP 500 avec un corps JSON `{ "error": "Test error for Sentry" }`.
+
+**Paramètres** : aucun.
+
+**Remarques sécurité** :
+
+- À réserver aux environnements de développement ou de préproduction, ou à protéger fortement en production (pare-feu, authentification, désactivation du déploiement de la route).
+- Un appel réussi génère du bruit dans Sentry (événements, alertes) et peut polluer les métriques d’erreurs réelles.
+- Ne pas exposer publiquement sans contrôle : risque d’abus pour saturer les quotas Sentry ou déclencher des alertes inutiles.
+- En production, préférer désactiver la route, la retirer du build, ou la garder derrière un contrôle d’accès explicite.

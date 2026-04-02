@@ -497,11 +497,10 @@
       "genres": {
         "title": "Distribution des Genres",
         "paragraph": "Les genres suivent une résolution en cascade avec priorité:",
-        "li1": "1. Track.genre: Genre stocké sur la piste (depuis Last.fm lors de l'import ou via le script fetch-track-genres.js utilisant Last.fm, MusicBrainz, Spotify)",
+        "li1": "1. Track.genre: Genre stocké sur la piste (depuis Last.fm lorsqu'il est disponible à l'import)",
         "li2": "2. ARTIST_TO_GENRE_MAP: Mapping statique artisanal par nom d'artiste (fallback si Track.genre est null)",
         "li3": "3. \"Unknown\": Si aucun des deux n'est disponible",
-        "li4": "Les écoutes sont agrégées par genre résolu; les pourcentages sont calculés sur le total d'écoutes",
-        "enrichNote": "Pour enrichir les genres: <code>node scripts/fetch-track-genres.js</code> (requiert LASTFM_API_KEY)"
+        "li4": "Les écoutes sont agrégées par genre résolu; les pourcentages sont calculés sur le total d'écoutes"
       },
       "export": {
         "title": "Export de Données",
@@ -515,9 +514,9 @@
       "sectionTitle": "Limitations et Compromis",
       "genreMapping": {
         "title": "Mapping de Genres",
-        "limitation": "Le fallback ARTIST_TO_GENRE_MAP ne couvre qu'une poignée d'artistes populaires. Les pistes sans genre dans la base restent classées \"Unknown\" tant que le script fetch-track-genres.js n'a pas été exécuté.",
+        "limitation": "Le fallback ARTIST_TO_GENRE_MAP ne couvre qu'une poignée d'artistes populaires. Les pistes sans genre dans la base restent classées \"Unknown\" lorsque ni Track.genre ni la map ne fournissent de valeur.",
         "impact": "Une partie des artistes/pistes peut apparaître en \"Unknown\", ce qui réduit la finesse de l'analyse par genre.",
-        "solution": "Solution actuelle: Exécuter node scripts/fetch-track-genres.js avec LASTFM_API_KEY pour enrichir les genres via Last.fm, MusicBrainz et Spotify (optionnel)."
+        "solution": "S'appuyer sur les genres Last.fm lorsqu'ils sont présents à l'import, ou étendre ARTIST_TO_GENRE_MAP pour d'autres artistes."
       },
       "dataSources": {
         "title": "Sources de Données",
@@ -559,14 +558,14 @@
         "title": "Modèle de Données",
         "paragraph": "Schéma normalisé (Prisma) pour éviter la redondance:",
         "li1": "Artist: nom, nameLower (recherche insensible à la casse), MBID, imageUrl",
-        "li2": "Track: titre, artiste, durée, genre (Last.fm ou script), MBID",
+        "li2": "Track: titre, artiste, durée, genre (Last.fm lorsqu'il est disponible), MBID",
         "li3": "Listen: timestamp (playedAt), source (lastfm), lien vers Track"
       },
       "import": {
         "title": "Import de Données",
         "paragraph": "Pour alimenter le dashboard:",
-        "li1": "Last.fm: npm run lastfm:update ou API POST /api/lastfm/import (requiert LASTFM_API_KEY et LASTFM_USER)",
-        "li2": "Genres: node scripts/fetch-track-genres.js pour enrichir les genres via Last.fm/MusicBrainz/Spotify"
+        "li1": "Last.fm: npm run lastfm:update ou API POST /api/lastfm/import (requiert LASTFM_API_KEY et LASTFM_USER; les genres de piste viennent de Last.fm lorsqu'ils sont disponibles)",
+        "li2": "ARTIST_TO_GENRE_MAP: surcharges statiques optionnelles dans le code pour les artistes sans genre après import"
       }
     }
   },

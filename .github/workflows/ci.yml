@@ -237,6 +237,91 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://localhost:5432/test' }}
           NODE_ENV: production
 
+  # Job 4: Tests E2E (Playwright) — optionnel, pas sur chaque PR
+  # Déclenché : push sur main, ou exécution manuelle (workflow_dispatch).
+  # Nécessite PostgreSQL : service ci-dessous + migrations Prisma.
+  e2e:
+    name: E2E (Playwright)
+    if: github.event_name == 'workflow_dispatch' || (github.ref == 'refs/heads/main' && github.event_name == 'push')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: e2e
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d e2e"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/e2e
+      NODE_ENV: development
+      NEXT_TELEMETRY_DISABLED: "1"
+      CI: "true"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: Clear npm cache
+        run: npm cache clean --force
+        continue-on-error: true
+
+      - name: Install dependencies
+        run: |
+          MAX_ATTEMPTS=3
+          ATTEMPT=1
+          while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
+            echo "Tentative $ATTEMPT sur $MAX_ATTEMPTS d'installation des dépendances..."
+            if npm ci; then
+              echo "Installation réussie !"
+              exit 0
+            else
+              if [ $ATTEMPT -lt $MAX_ATTEMPTS ]; then
+                echo "Échec de l'installation. Nouvelle tentative dans 10 secondes..."
+                sleep 10
+                npm cache clean --force || true
+              fi
+            fi
+            ATTEMPT=$((ATTEMPT + 1))
+          done
+          echo "Échec après $MAX_ATTEMPTS tentatives"
+          exit 1
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Apply database migrations
+        run: npx prisma migrate deploy
+
+      - name: Install Playwright browsers (Chromium only)
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        run: npm run test:e2e -- --project=chromium
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
 # ============================================
 # NOTES IMPORTANTES
 # ============================================

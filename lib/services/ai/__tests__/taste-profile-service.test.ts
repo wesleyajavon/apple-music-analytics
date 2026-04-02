@@ -34,7 +34,7 @@ describe("taste-profile-service", () => {
   it("throws when GROQ_API_KEY is not set", async () => {
     await expect(
       generateTasteProfile(mockSummary, "casual")
-    ).rejects.toThrow("GROQ_API_KEY is not configured");
+    ).rejects.toThrow(/GROQ_API_KEY is not configured/);
     expect(mockChatCompletionsCreate).not.toHaveBeenCalled();
   });
 
@@ -102,7 +102,7 @@ describe("taste-profile-service", () => {
 
     await expect(
       generateTasteProfile(mockSummary, "casual")
-    ).rejects.toThrow("Failed to parse taste profile");
+    ).rejects.toThrow(/Failed to parse taste profile/);
   });
 
   it("throws when JSON is missing required fields", async () => {
@@ -124,6 +124,6 @@ describe("taste-profile-service", () => {
 
     await expect(
       generateTasteProfile(mockSummary, "casual")
-    ).rejects.toThrow("Failed to parse taste profile");
+    ).rejects.toThrow(/Failed to parse taste profile/);
   });
 });

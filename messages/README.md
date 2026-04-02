@@ -31,9 +31,9 @@ Ce dossier contient les fichiers de traduction pour chaque langue supportée.
 | `components` | empty-state, error-state, date-range-filter, period-selector, etc. |
 | `home` | Page d'accueil |
 
-## Documentation complète
+## Implémentation
 
-Voir `docs/I18N_IMPLEMENTATION.md` pour la documentation complète de l’implémentation multilingue.
+L’app utilise **next-intl** pour charger les JSON de ce dossier. Les routes sont sous `app/[locale]/`. Dans les composants, utilisez `useTranslations('zone')` ou `useTranslations('zone.sousSection')` en cohérence avec le tableau ci-dessus. Les fichiers `fr.json`, `en.json` et `es.json` doivent exposer les mêmes chemins de clés.
 
 ## Où placer les clés
 

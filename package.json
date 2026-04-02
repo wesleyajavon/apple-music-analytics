@@ -37,6 +37,7 @@
     "genres:pick-menu-doc": "node scripts/generate-genre-pick-menu-doc.mjs",
     "genres:map-top-unknown": "node scripts/interactive-map-top-unknown-artists.js",
     "genres:map-top-unknown:200": "node scripts/interactive-map-top-unknown-artists.js --limit 200",
+    "genres:map-tracks": "node scripts/interactive-map-top-unknown-artists.js --tracks",
     "vercel:env:pull": "npx vercel env pull .env.local",
     "docs:clean": "rm -rf docs/modules docs/classes docs/interfaces docs/functions docs/types docs/variables docs/assets 2>/dev/null; find docs -name '*.html' -delete",
     "docs:generate": "npm run docs:clean && typedoc",

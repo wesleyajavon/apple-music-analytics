@@ -497,11 +497,10 @@
       "genres": {
         "title": "Genre Distribution",
         "paragraph": "Genres follow a cascade resolution with priority:",
-        "li1": "1. Track.genre: Genre stored on the track (from Last.fm on import or via fetch-track-genres.js script using Last.fm, MusicBrainz, Spotify)",
+        "li1": "1. Track.genre: Genre stored on the track (from Last.fm when available on import)",
         "li2": "2. ARTIST_TO_GENRE_MAP: Static manual mapping by artist name (fallback if Track.genre is null)",
         "li3": "3. \"Unknown\": If neither is available",
-        "li4": "Listens are aggregated by resolved genre; percentages are calculated on total listens",
-        "enrichNote": "To enrich genres: <code>node scripts/fetch-track-genres.js</code> (requires LASTFM_API_KEY)"
+        "li4": "Listens are aggregated by resolved genre; percentages are calculated on total listens"
       },
       "export": {
         "title": "Data Export",
@@ -515,9 +514,9 @@
       "sectionTitle": "Limitations and Trade-offs",
       "genreMapping": {
         "title": "Genre Mapping",
-        "limitation": "The ARTIST_TO_GENRE_MAP fallback only covers a handful of popular artists. Tracks without genre in the database remain classified as \"Unknown\" until the fetch-track-genres.js script has been run.",
+        "limitation": "The ARTIST_TO_GENRE_MAP fallback only covers a handful of popular artists. Tracks without genre in the database remain classified as \"Unknown\" when neither Track.genre nor the map provides a value.",
         "impact": "Some artists/tracks may appear as \"Unknown\", reducing the fineness of genre analysis.",
-        "solution": "Current solution: Run node scripts/fetch-track-genres.js with LASTFM_API_KEY to enrich genres via Last.fm, MusicBrainz and Spotify (optional)."
+        "solution": "Use Last.fm genres when present on imported tracks, or extend ARTIST_TO_GENRE_MAP for additional artists."
       },
       "dataSources": {
         "title": "Data Sources",
@@ -559,14 +558,14 @@
         "title": "Data Model",
         "paragraph": "Normalized schema (Prisma) to avoid redundancy:",
         "li1": "Artist: name, nameLower (case-insensitive search), MBID, imageUrl",
-        "li2": "Track: title, artist, duration, genre (Last.fm or script), MBID",
+        "li2": "Track: title, artist, duration, genre (Last.fm when available), MBID",
         "li3": "Listen: timestamp (playedAt), source (lastfm), link to Track"
       },
       "import": {
         "title": "Data Import",
         "paragraph": "To feed the dashboard:",
-        "li1": "Last.fm: npm run lastfm:update or API POST /api/lastfm/import (requires LASTFM_API_KEY and LASTFM_USER)",
-        "li2": "Genres: node scripts/fetch-track-genres.js to enrich genres via Last.fm/MusicBrainz/Spotify"
+        "li1": "Last.fm: npm run lastfm:update or API POST /api/lastfm/import (requires LASTFM_API_KEY and LASTFM_USER; track genres come from Last.fm when available)",
+        "li2": "ARTIST_TO_GENRE_MAP: optional static genre overrides in code for artists that still lack a genre after import"
       }
     }
   },

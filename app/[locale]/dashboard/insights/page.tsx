@@ -327,9 +327,6 @@ export default function InsightsPage() {
                 <li>{t("calculations.genres.li3")}</li>
                 <li>{t("calculations.genres.li4")}</li>
               </ul>
-              <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                {t.rich("calculations.genres.enrichNote", { code })}
-              </p>
             </div>
 
             <div>

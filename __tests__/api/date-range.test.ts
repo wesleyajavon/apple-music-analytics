@@ -61,4 +61,15 @@ describe("GET /api/date-range", () => {
     expect(response.status).toBe(200);
     expect(getListenDateRange).toHaveBeenCalledWith("user-123");
   });
+
+  it("should return 500 when getListenDateRange throws", async () => {
+    vi.mocked(getListenDateRange).mockRejectedValue(new Error("Database error"));
+
+    const request = new NextRequest("http://localhost/api/date-range");
+    const response = await GET(request);
+
+    expect(response.status).toBe(500);
+    const data = await response.json();
+    expect(data).toHaveProperty("error");
+  });
 });

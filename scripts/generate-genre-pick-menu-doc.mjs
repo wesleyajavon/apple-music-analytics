@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
- * Régénère docs/GENRE_PICK_MENU.md à partir de lib/data/genre-normalization.json
- * (ordre des groupes = numéros utilisés par scripts/interactive-map-top-unknown-artists.js).
+ * Régénère docs/GENRE_PICK_MENU.md à partir de lib/data/genre-normalization.json.
+ * Le script interactif lit la table de ce fichier markdown (numéros = ordre des lignes).
  *
  *   node scripts/generate-genre-pick-menu-doc.mjs
  */
@@ -35,7 +35,7 @@ Ce fichier est **généré** — ne l’éditez pas à la main. Pour mettre à j
 node scripts/generate-genre-pick-menu-doc.mjs
 \`\`\`
 
-Source : \`lib/data/genre-normalization.json\` (champ \`canonical\` de chaque groupe, dans l’ordre).
+Source des libellés : \`lib/data/genre-normalization.json\` (champ \`canonical\` de chaque groupe, dans l’ordre). Le script \`interactive-map-top-unknown-artists.js\` charge **ce fichier** \`GENRE_PICK_MENU.md\` pour les numéros de saisie.
 
 ## Utilisation avec le script interactif
 

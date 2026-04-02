@@ -55,3 +55,7 @@ Vue d’ensemble des technologies principales du projet.
 | **@react-pdf/renderer** | Export PDF |
 | **TypeDoc** | Documentation du code |
 | **Sonner** | Notifications toast |
+
+### Documentation (TypeDoc et API)
+
+Après des changements dans `lib/services/**` ou `lib/dto/**`, lancer `npm run docs:generate` pour régénérer la doc TypeDoc dans `docs/` (`docs:clean` puis `typedoc`). `docs/API.md` est rédigé à la main ; au build, `docs:api:copy` le copie vers `public/docs/API.md`. Détails : section *Documentation* du `README.md`.

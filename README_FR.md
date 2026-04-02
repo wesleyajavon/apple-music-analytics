@@ -76,6 +76,22 @@ Consultez [`env.example`](env.example) pour la liste complète (Redis, Sentry, G
 | `npm run test:run` | Tests unitaires |
 | `npm run test:e2e` | Tests E2E Playwright |
 
+### Scripts données (genres, import Apple Music CSV, etc.)
+
+Commandes utiles pour les imports et les pipelines de genres — liste non exhaustive ; voir `package.json` pour l’ensemble des scripts.
+
+| Script | Description |
+|--------|-------------|
+| `npm run apple-music:filter` | Filtrer un export Apple Music avant import CSV |
+| `npm run apple-music:import` | Importer un CSV d’historique Apple Music en base |
+| `npm run db:check-capacity` | Vérifier la taille approximative de la BDD par rapport aux limites pratiques |
+| `npm run spotify:backfill-genres` | Compléter les genres manquants via Spotify (si les identifiants API sont configurés) |
+| `npm run genres:normalize` | Normaliser les libellés de genre après des backfills |
+| `npm run genres:pick-menu-doc` | Régénérer `docs/GENRE_PICK_MENU.md` à partir de la carte de normalisation |
+| `npm run genres:map-top-unknown` | CLI interactive pour rattacher les artistes « inconnus » aux genres (variantes : `genres:map-top-unknown:200`, `genres:map-tracks`) |
+
+Les autres backfills de genres (`genres:backfill-llm`, `genres:backfill-cascade`, `genres:backfill-consensus`) et `spotify:test-genres` sont détaillés dans `docs/` et `package.json`.
+
 ## Documentation
 
 - **API** : [`docs/API.md`](docs/API.md) (référence des endpoints)

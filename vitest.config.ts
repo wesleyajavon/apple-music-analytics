@@ -5,6 +5,10 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
+    isolate: true,
+    // Sequential files avoid fork/worker issues with heavy Next route imports; keeps module mocks deterministic.
+    fileParallelism: false,
+    maxWorkers: 1,
     exclude: [
       'node_modules/',
       'dist/',

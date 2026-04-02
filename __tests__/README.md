@@ -22,6 +22,7 @@ Les tests d'intégration vérifient le comportement des routes API en isolant le
 **Fichiers de test :**
 - `timeline.test.ts` - Tests pour `/api/timeline`
 - `overview.test.ts` - Tests pour `/api/overview`
+- `date-range.test.ts` - Tests pour `/api/date-range`
 - `genres.test.ts` - Tests pour `/api/genres`
 - `genres-trends.test.ts` - Tests pour `/api/genres/trends`
 - `listens.test.ts` - Tests pour `/api/listens`

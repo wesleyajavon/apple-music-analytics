@@ -80,10 +80,28 @@ See [`env.example`](env.example) for the full list (Redis, Sentry, Groq, etc.).
 | `npm run test:run` | Unit tests |
 | `npm run test:e2e` | Playwright E2E tests |
 
+### Data scripts (genres, Apple Music CSV, etc.)
+
+Handy commands for working with imports and genre pipelines — not an exhaustive list; see `package.json` for every script.
+
+| Script | Description |
+|--------|-------------|
+| `npm run apple-music:filter` | Filter an Apple Music export before CSV import |
+| `npm run apple-music:import` | Import Apple Music play history CSV into the database |
+| `npm run db:check-capacity` | Check approximate DB size vs. practical limits |
+| `npm run spotify:backfill-genres` | Backfill missing track genres via Spotify (when API credentials are set) |
+| `npm run genres:normalize` | Normalize genre tags after backfills |
+| `npm run genres:pick-menu-doc` | Regenerate `docs/GENRE_PICK_MENU.md` from the genre normalization map |
+| `npm run genres:map-top-unknown` | Interactive CLI to map top “unknown” artists to genres (variants: `genres:map-top-unknown:200`, `genres:map-tracks`) |
+
+Additional genre backfills (`genres:backfill-llm`, `genres:backfill-cascade`, `genres:backfill-consensus`) and `spotify:test-genres` are documented in `docs/` and `package.json`.
+
 ## Documentation
 
 - **API** : [`docs/API.md`](docs/API.md) (endpoint reference)
 - **Code** : `docs/` (generated with `npm run docs:generate`)
+
+Run `npm run docs:generate` when you change documented code under `lib/services/**` or `lib/dto/**`, or when you want to refresh the TypeDoc HTML in `docs/`; it runs `docs:clean` (removes previous TypeDoc output: modules, classes, HTML, etc.) then `typedoc` per `typedoc.json`. The endpoint reference `docs/API.md` is edited by hand and is **not** produced by TypeDoc; `npm run build` runs `docs:api:copy`, which copies `docs/API.md` to `public/docs/API.md` so the same file is served in production.
 
 ## License
 

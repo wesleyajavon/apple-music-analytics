@@ -673,8 +673,15 @@
         "7d": "7d",
         "30d": "30d",
         "ytd": "YTD",
-        "all": "Todo"
+        "all": "Todo",
+        "custom": "Personalizado"
       },
+      "customDialogLabel": "Rango de fechas personalizado",
+      "customStart": "Inicio",
+      "customEnd": "Fin",
+      "customApply": "Aplicar",
+      "customCancel": "Cancelar",
+      "customInvalidRange": "Elige una fecha de inicio y una de fin.",
       "toastFilterUpdated": "Filtro actualizado",
       "toastPeriodSelected": "Período seleccionado: {label}",
       "toastExportInProgress": "Export {type} en curso...",

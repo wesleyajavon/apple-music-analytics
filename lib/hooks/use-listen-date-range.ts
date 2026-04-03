@@ -19,7 +19,7 @@ interface DateRangeResponse {
 
 /**
  * Returns the effective date range for the current filter.
- * - When startDate/endDate are in the URL: uses those (7d, 30d, ytd presets).
+ * - When startDate/endDate are in the URL: uses those (fixed presets or custom range).
  * - When "all" (tout) is selected (no dates in URL): fetches the full range from the API.
  *
  * This fixes the bug where "all" was incorrectly falling back to 30 days for AI insights

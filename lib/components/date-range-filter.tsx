@@ -7,11 +7,24 @@ import { useCallback, useRef, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useOptimisticFilters } from "@/lib/hooks/use-optimistic-filters";
 
-export type DateRangePreset = "7d" | "30d" | "ytd" | "all";
+export type DateRangePreset = "7d" | "30d" | "ytd" | "all" | "custom";
+
+type FixedDateRangePreset = Exclude<DateRangePreset, "custom">;
 
 interface DateRange {
   startDate: Date | null;
   endDate: Date | null;
+}
+
+function toYmd(d: Date): string {
+  return d.toISOString().split("T")[0];
+}
+
+function defaultCustomRange(): { start: string; end: string } {
+  const end = new Date();
+  const start = new Date();
+  start.setDate(start.getDate() - 30);
+  return { start: toYmd(start), end: toYmd(end) };
 }
 
 const getYearToDateRange = (): DateRange => {
@@ -23,7 +36,7 @@ const getYearToDateRange = (): DateRange => {
   };
 };
 
-const presets: Record<DateRangePreset, DateRange> = {
+const presets: Record<FixedDateRangePreset, DateRange> = {
   "7d": {
     startDate: (() => {
       const date = new Date();
@@ -56,15 +69,34 @@ export function DateRangeFilter() {
   const locale = useLocale();
 
   // Déterminer le preset actif : si pas de preset dans l'URL et pas de dates, c'est "all"
-  const presetFromUrl = searchParams.get("preset") as DateRangePreset | null;
+  const presetFromUrl = searchParams.get("preset");
   const hasStartDate = searchParams.has("startDate");
   const hasEndDate = searchParams.has("endDate");
 
-  const currentPreset: DateRangePreset = presetFromUrl
-    ? presetFromUrl
-    : !hasStartDate && !hasEndDate
-      ? "all"
-      : "30d";
+  const currentPreset: DateRangePreset = (() => {
+    const p = presetFromUrl;
+    if (
+      p === "7d" ||
+      p === "30d" ||
+      p === "ytd" ||
+      p === "all" ||
+      p === "custom"
+    ) {
+      return p;
+    }
+    if (!hasStartDate && !hasEndDate) {
+      return "all";
+    }
+    if (hasStartDate && hasEndDate) {
+      return "custom";
+    }
+    return "all";
+  })();
+
+  const [customOpen, setCustomOpen] = useState(false);
+  const [customStart, setCustomStart] = useState("");
+  const [customEnd, setCustomEnd] = useState("");
+  const customWrapRef = useRef<HTMLDivElement>(null);
   const [indicatorStyle, setIndicatorStyle] = useState<{
     left: number;
     width: number;
@@ -102,8 +134,49 @@ export function DateRangeFilter() {
     return () => window.removeEventListener("resize", handleResize);
   }, [currentPreset]);
 
+  useEffect(() => {
+    if (!customOpen) return;
+    const s = searchParams.get("startDate");
+    const e = searchParams.get("endDate");
+    if (s && e) {
+      setCustomStart(s);
+      setCustomEnd(e);
+    } else {
+      const d = defaultCustomRange();
+      setCustomStart(d.start);
+      setCustomEnd(d.end);
+    }
+  }, [customOpen, searchParams]);
+
+  useEffect(() => {
+    if (currentPreset !== "custom") {
+      setCustomOpen(false);
+    }
+  }, [currentPreset]);
+
+  useEffect(() => {
+    if (!customOpen) return;
+    const handlePointerDown = (e: MouseEvent) => {
+      if (customWrapRef.current && !customWrapRef.current.contains(e.target as Node)) {
+        setCustomOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handlePointerDown);
+    return () => document.removeEventListener("mousedown", handlePointerDown);
+  }, [customOpen]);
+
+  useEffect(() => {
+    if (!customOpen) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setCustomOpen(false);
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [customOpen]);
+
   const updateDateRange = useCallback(
-    async (preset: DateRangePreset) => {
+    async (preset: FixedDateRangePreset) => {
+      setCustomOpen(false);
       const oldStartDate = searchParams.get("startDate") || undefined;
       const oldEndDate = searchParams.get("endDate") || undefined;
 
@@ -153,7 +226,50 @@ export function DateRangeFilter() {
     [router, pathname, searchParams, prefetchWithOptimisticUpdate, t]
   );
 
-  const presetEntries = Object.entries(presets) as [DateRangePreset, DateRange][];
+  const applyCustomRange = useCallback(() => {
+    let start = customStart.trim();
+    let end = customEnd.trim();
+    if (!start || !end) {
+      toast.error(t("customInvalidRange"));
+      return;
+    }
+    if (start > end) {
+      [start, end] = [end, start];
+    }
+    const oldStartDate = searchParams.get("startDate") || undefined;
+    const oldEndDate = searchParams.get("endDate") || undefined;
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("preset", "custom");
+    params.set("startDate", start);
+    params.set("endDate", end);
+    prefetchWithOptimisticUpdate(
+      oldStartDate,
+      oldEndDate,
+      undefined,
+      start,
+      end,
+      undefined
+    ).catch((error) => {
+      console.error("Erreur lors du préchargement optimiste:", error);
+    });
+    router.push(`${pathname}?${params.toString()}`);
+    setCustomOpen(false);
+    const presetLabel = t("presets.custom");
+    toast.success(t("toastFilterUpdated"), {
+      description: t("toastPeriodSelected", { label: presetLabel }),
+      duration: 2000,
+    });
+  }, [
+    customStart,
+    customEnd,
+    searchParams,
+    pathname,
+    router,
+    prefetchWithOptimisticUpdate,
+    t,
+  ]);
+
+  const presetEntries = Object.entries(presets) as [FixedDateRangePreset, DateRange][];
 
   const downloadFile = useCallback(
     async (url: string, defaultFilename: string, exportType: string) => {
@@ -306,6 +422,73 @@ export function DateRangeFilter() {
                 </button>
               );
             })}
+            <div ref={customWrapRef} className="relative z-10">
+              <button
+                type="button"
+                ref={(el) => {
+                  buttonRefs.current.custom = el;
+                }}
+                onClick={() => setCustomOpen((v) => !v)}
+                title={t("presets.custom")}
+                aria-expanded={customOpen}
+                aria-haspopup="dialog"
+                className={`
+                  relative px-4 py-2 text-sm font-semibold rounded-md
+                  transition-all duration-200
+                  ${
+                    currentPreset === "custom"
+                      ? "text-white"
+                      : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                  }
+                `}
+              >
+                {t("presets.custom")}
+              </button>
+              {customOpen ? (
+                <div
+                  role="dialog"
+                  aria-label={t("customDialogLabel")}
+                  className="absolute left-0 top-[calc(100%+0.5rem)] z-50 min-w-[min(100vw-2rem,18rem)] rounded-xl border border-gray-100 bg-white p-4 shadow-lg dark:border-gray-700/50 dark:bg-gray-900"
+                >
+                  <div className="flex flex-col gap-3">
+                    <label className="flex flex-col gap-1.5 text-xs font-medium text-gray-600 dark:text-gray-300">
+                      {t("customStart")}
+                      <input
+                        type="date"
+                        value={customStart}
+                        onChange={(e) => setCustomStart(e.target.value)}
+                        className="rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                      />
+                    </label>
+                    <label className="flex flex-col gap-1.5 text-xs font-medium text-gray-600 dark:text-gray-300">
+                      {t("customEnd")}
+                      <input
+                        type="date"
+                        value={customEnd}
+                        onChange={(e) => setCustomEnd(e.target.value)}
+                        className="rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                      />
+                    </label>
+                    <div className="flex justify-end gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => setCustomOpen(false)}
+                        className="rounded-lg px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+                      >
+                        {t("customCancel")}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={applyCustomRange}
+                        className="rounded-lg bg-accent-violet px-3 py-1.5 text-sm font-semibold text-white hover:opacity-90"
+                      >
+                        {t("customApply")}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+            </div>
           </div>
         </div>
 

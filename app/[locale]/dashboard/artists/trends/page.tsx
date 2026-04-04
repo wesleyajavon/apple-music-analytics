@@ -22,16 +22,30 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { useArtistTrendsChart } from "@/lib/hooks/use-artists";
+import {
+  useArtistTrendsChart,
+  useArtistTrendsCommentary,
+} from "@/lib/hooks/use-artists";
 import type { ArtistTrendsChartDataPoint } from "@/lib/dto/artist";
-import { ErrorState } from "@/lib/components/error-state";
+import { ErrorState, GroqQuotaNotice } from "@/lib/components/error-state";
+import { isGroqDailyQuotaError } from "@/lib/utils/groq-quota-message";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
 import { PeriodSelector, PeriodType } from "@/lib/components/period-selector";
 import { GenreTrendsSkeleton } from "@/lib/components/skeleton-loaders";
 import { ArtistTrendsArtistPicker } from "@/lib/components/artist-trends-artist-picker";
 import type { ArtistTrendsChartArtist } from "@/lib/dto/artist";
+import { useDebouncedValue } from "@/lib/hooks/use-debounced-value";
 
 const MAX_SERIES_ARTISTS = 50;
+/** Délai après lequel les sélections d’artistes déclenchent chart + IA (évite rafales de requêtes). */
+const ARTIST_SELECTION_DEBOUNCE_MS = 450;
+
+function idsEqualSorted(a: string[], b: string[]): boolean {
+  if (a.length !== b.length) return false;
+  const sa = [...a].sort();
+  const sb = [...b].sort();
+  return sa.every((v, i) => v === sb[i]);
+}
 
 const COLORS = [
   "#3b82f6",
@@ -144,8 +158,12 @@ function TrendsContent() {
 
   const startDate = startDateParam || undefined;
   const endDate = endDateParam || undefined;
+  const userId = searchParams.get("userId") ?? undefined;
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [summaryVersion, setSummaryVersion] = useState<"light" | "technical">(
+    "light"
+  );
   const [extraSearchArtists, setExtraSearchArtists] = useState<
     ArtistTrendsChartArtist[]
   >([]);
@@ -155,15 +173,43 @@ function TrendsContent() {
     defaultSelectionAppliedRef.current = false;
   }, [startDate, endDate, period]);
 
-  const artistIdsForFetch =
-    selectedIds.length > 0 ? selectedIds : undefined;
+  /** 0 ms jusqu’à la première réponse chart — pas de délai au premier rendu des sélections par défaut. */
+  const [selectionDebounceMs, setSelectionDebounceMs] = useState(0);
+  const debouncedSelectedIds = useDebouncedValue(
+    selectedIds,
+    selectionDebounceMs
+  );
+  const selectionPending = !idsEqualSorted(selectedIds, debouncedSelectedIds);
 
-  const { data, isLoading, error, refetch } = useArtistTrendsChart(
+  const artistIdsForFetch =
+    debouncedSelectedIds.length > 0 ? debouncedSelectedIds : undefined;
+
+  const {
+    data,
+    isLoading,
+    isFetching: chartFetching,
+    error,
+    refetch,
+  } = useArtistTrendsChart(
     startDate,
     endDate,
     period,
-    artistIdsForFetch
+    artistIdsForFetch,
+    undefined,
+    userId
   );
+
+  useEffect(() => {
+    setSelectionDebounceMs(0);
+  }, [startDate, endDate, period]);
+
+  useEffect(() => {
+    if (!chartFetching && data != null && !error) {
+      setSelectionDebounceMs(ARTIST_SELECTION_DEBOUNCE_MS);
+    }
+  }, [chartFetching, data, error]);
+
+  const chartDataSyncing = chartFetching || selectionPending;
 
   const pickerArtists = useMemo(() => {
     const base = data?.catalogArtists ?? data?.availableArtists ?? [];
@@ -262,6 +308,83 @@ function TrendsContent() {
         .sort((a, b) => a.deltaPercent - b.deltaPercent),
     [riseDecline]
   );
+
+  const commentaryQueryEnabled =
+    debouncedSelectedIds.length > 0 &&
+    chartData.length > 0 &&
+    !isLoading &&
+    !error;
+
+  const {
+    data: lightAi,
+    isLoading: lightAiLoading,
+    isFetching: lightAiFetching,
+    error: lightAiError,
+  } = useArtistTrendsCommentary(
+    startDate,
+    endDate,
+    period,
+    debouncedSelectedIds,
+    userId,
+    {
+      mode: "light",
+      enabled: commentaryQueryEnabled,
+    }
+  );
+
+  const {
+    data: techAi,
+    isLoading: techAiLoading,
+    isFetching: techAiFetching,
+    error: techAiError,
+  } = useArtistTrendsCommentary(
+    startDate,
+    endDate,
+    period,
+    debouncedSelectedIds,
+    userId,
+    {
+      mode: "technical",
+      enabled: commentaryQueryEnabled && summaryVersion === "technical",
+    }
+  );
+
+  const aiCommentary = useMemo(
+    () => ({
+      commentary: techAi?.commentary ?? null,
+      commentaryLight: lightAi?.commentaryLight ?? null,
+      commentaryCached: techAi?.commentaryCached,
+      commentaryLightCached: lightAi?.commentaryLightCached,
+      aiUnavailable: techAi?.aiUnavailable ?? lightAi?.aiUnavailable,
+    }),
+    [techAi, lightAi]
+  );
+
+  const showAiSkeleton =
+    (summaryVersion === "light" &&
+      !lightAi?.commentaryLight &&
+      !lightAi?.aiUnavailable &&
+      (lightAiLoading || lightAiFetching)) ||
+    (summaryVersion === "technical" &&
+      !techAi?.commentary &&
+      !techAi?.aiUnavailable &&
+      (techAiLoading || techAiFetching));
+
+  const displayAiCommentary =
+    summaryVersion === "light"
+      ? (aiCommentary?.commentaryLight ?? "")
+      : (aiCommentary?.commentary ?? "");
+
+  const hasDisplayableAiParagraph = displayAiCommentary.trim().length > 0;
+
+  const aiRefreshing =
+    !aiCommentary?.aiUnavailable &&
+    hasDisplayableAiParagraph &&
+    ((summaryVersion === "light" && lightAiFetching) ||
+      (summaryVersion === "technical" && techAiFetching));
+
+  const activeAiError =
+    summaryVersion === "technical" ? techAiError : lightAiError;
 
   const headerBlock = (
     <div className="mb-8">
@@ -375,6 +498,151 @@ function TrendsContent() {
             />
           </div>
 
+          {debouncedSelectedIds.length > 0 && chartData.length > 0 && (
+            <section
+              className="relative overflow-hidden rounded-2xl border-2 border-accent-violet/20 bg-white dark:bg-gray-800/95 shadow-2xl dark:shadow-none ring-2 ring-accent-violet/10 dark:ring-accent-violet/20 animate-fade-in-up transition-all duration-300"
+              aria-labelledby="artist-trends-ai-spotlight-title"
+              aria-busy={aiRefreshing}
+            >
+              <div
+                className="pointer-events-none absolute inset-0 rounded-2xl opacity-60 dark:opacity-40"
+                style={{
+                  background:
+                    "radial-gradient(ellipse 80% 70% at 50% 40%, rgba(139, 92, 246, 0.08) 0%, rgba(99, 102, 241, 0.04) 40%, transparent 70%)",
+                }}
+              />
+              <div className="relative">
+                <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-5">
+                  <div className="flex flex-wrap items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-accent-violet/20 to-accent-indigo/20 text-accent-violet">
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth={1.5}
+                          aria-hidden
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="m3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z"
+                          />
+                        </svg>
+                      </div>
+                      <div>
+                        <h2
+                          id="artist-trends-ai-spotlight-title"
+                          className="text-xl font-bold tracking-tight text-gray-900 dark:text-white"
+                        >
+                          {t("aiSpotlightTitle")}
+                        </h2>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                          {t("aiSpotlightHint")}
+                          {displayAiCommentary &&
+                            ((summaryVersion === "technical" &&
+                              aiCommentary?.commentaryCached) ||
+                              (summaryVersion === "light" &&
+                                aiCommentary?.commentaryLightCached)) && (
+                              <span className="ml-1">{t("aiCached")}</span>
+                            )}
+                          {aiRefreshing && (
+                            <span className="ml-2 inline-flex items-center gap-1.5 text-accent-violet/90 dark:text-accent-violet/80">
+                              <span
+                                className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent"
+                                aria-hidden
+                              />
+                              <span>{t("aiUpdating")}</span>
+                            </span>
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                    {(aiCommentary?.commentaryLight || aiCommentary?.commentary) && (
+                      <div
+                        className="flex rounded-lg bg-gray-100 dark:bg-gray-700/50 p-1"
+                        role="tablist"
+                        aria-label={t("aiExplanation")}
+                      >
+                        <button
+                          type="button"
+                          role="tab"
+                          aria-selected={summaryVersion === "light"}
+                          aria-busy={
+                            summaryVersion === "light" &&
+                            (lightAiLoading || lightAiFetching)
+                          }
+                          onClick={() => setSummaryVersion("light")}
+                          className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                            summaryVersion === "light"
+                              ? "bg-white dark:bg-gray-800 text-accent-violet shadow-sm"
+                              : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                          }`}
+                        >
+                          {t("summaryVersionLight")}
+                        </button>
+                        <button
+                          type="button"
+                          role="tab"
+                          aria-selected={summaryVersion === "technical"}
+                          aria-busy={
+                            summaryVersion === "technical" &&
+                            (techAiLoading || techAiFetching)
+                          }
+                          onClick={() => setSummaryVersion("technical")}
+                          className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                            summaryVersion === "technical"
+                              ? "bg-white dark:bg-gray-800 text-accent-violet shadow-sm"
+                              : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                          }`}
+                        >
+                          {t("summaryVersionTechnical")}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="p-6 sm:p-8">
+                  {showAiSkeleton ? (
+                    <div className="space-y-3 animate-pulse" aria-busy="true">
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full max-w-3xl" />
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full max-w-2xl" />
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-4/5 max-w-xl" />
+                    </div>
+                  ) : activeAiError ? (
+                    isGroqDailyQuotaError(activeAiError) ? (
+                      <GroqQuotaNotice error={activeAiError} />
+                    ) : (
+                      <p
+                        className="text-sm text-red-600 dark:text-red-400"
+                        role="alert"
+                      >
+                        {activeAiError.message}
+                      </p>
+                    )
+                  ) : aiCommentary?.aiUnavailable ? (
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      {t("aiUnavailable")}
+                    </p>
+                  ) : hasDisplayableAiParagraph ? (
+                    <p
+                      className={`text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line transition-opacity duration-200 ${
+                        aiRefreshing ? "opacity-60" : ""
+                      }`}
+                    >
+                      {displayAiCommentary}
+                    </p>
+                  ) : (
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      {t("aiEmpty")}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </section>
+          )}
+
           <section
             className="relative overflow-hidden rounded-2xl border-2 border-accent-violet/20 bg-white dark:bg-gray-800/95 shadow-2xl dark:shadow-none ring-2 ring-accent-violet/10 dark:ring-accent-violet/20 animate-fade-in-up transition-all duration-300 hover:shadow-[0_0_50px_-12px_rgba(139,92,246,0.25)] hover:border-accent-violet/30 dark:hover:border-accent-violet/40"
             aria-labelledby="artist-trends-spotlight-title"
@@ -419,7 +687,29 @@ function TrendsContent() {
                     {t("selectAtLeastOne")}
                   </p>
                 ) : (
-                  <ResponsiveContainer width="100%" height={500}>
+                  <div
+                    className="relative min-h-[500px]"
+                    aria-busy={chartDataSyncing}
+                  >
+                    {chartDataSyncing && (
+                      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 rounded-lg bg-white/60 backdrop-blur-[2px] dark:bg-gray-900/50 px-4 text-center">
+                        <span
+                          className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-accent-violet border-t-transparent"
+                          aria-hidden
+                        />
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
+                          {selectionPending
+                            ? t("selectionPending")
+                            : t("chartUpdating")}
+                        </span>
+                      </div>
+                    )}
+                    <div
+                      className={`transition-opacity duration-200 ${
+                        chartDataSyncing ? "opacity-40 pointer-events-none" : ""
+                      }`}
+                    >
+                      <ResponsiveContainer width="100%" height={500}>
                     <LineChart
                       data={chartData}
                       margin={{ top: 5, right: 20, left: 10, bottom: 60 }}
@@ -465,13 +755,20 @@ function TrendsContent() {
                       })}
                     </LineChart>
                   </ResponsiveContainer>
+                    </div>
+                  </div>
                 )}
               </div>
             </div>
           </section>
 
           {selectedIds.length > 0 && (rising.length > 0 || declining.length > 0) && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div
+              className={`grid grid-cols-1 md:grid-cols-2 gap-6 transition-opacity duration-200 ${
+                chartDataSyncing ? "opacity-60" : ""
+              }`}
+              aria-busy={chartDataSyncing}
+            >
               <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
                   <span className="text-green-500">↑</span> {t("rising")}

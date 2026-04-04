@@ -3,6 +3,7 @@
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { useTasteProfile } from "@/lib/hooks/use-taste-profile";
+import { AiWidgetQuotaOrError } from "@/lib/components/error-state";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
 
 function truncateText(text: string, maxLength: number = 220): string {
@@ -22,7 +23,7 @@ export function TasteProfileSummaryWidget() {
   const t = useTranslations("taste-profile");
   const { startDate, endDate, isLoading: isRangeLoading } = useListenDateRange();
 
-  const { data, isLoading } = useTasteProfile(startDate, endDate, "casual");
+  const { data, isLoading, error } = useTasteProfile(startDate, endDate, "casual");
   const isLoadingOrFetching = isRangeLoading || isLoading;
 
   if (isLoadingOrFetching) {
@@ -59,6 +60,18 @@ export function TasteProfileSummaryWidget() {
           </div>
         </div>
       </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <AiWidgetQuotaOrError
+        title={t("title")}
+        subtitle={t("subtitleShort")}
+        seeMoreHref="/dashboard/taste-profile"
+        seeMoreLabel={t("seeMore")}
+        error={error}
+      />
     );
   }
 

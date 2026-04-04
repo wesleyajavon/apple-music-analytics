@@ -18,6 +18,11 @@
     "dark": "Oscuro",
     "system": "Sistema"
   },
+  "aiMasterToggle": {
+    "label": "IA",
+    "ariaLabel": "Activar o desactivar las funciones de IA en este navegador",
+    "lockedHint": "La IA está desactivada en el servidor (AI_MASTER_ENABLED=false). Este control no puede activarla."
+  },
   "sidebar": {
     "openMenu": "Abrir menú",
     "collapseSidebar": "Contraer barra lateral",
@@ -66,6 +71,7 @@
     "apiDocs": "API Docs",
     "copyright": "Apple Music Analytics. Todos los derechos reservados.",
     "madeWith": "Hecho con ❤️ para amantes de la música",
+    "creatorCredit": "Creado por Wesley Ajavon",
     "navAriaLabel": "Navegación del pie de página"
   },
   "overview": {
@@ -91,6 +97,7 @@
     "seeMore": "Ver más",
     "topGenres": "Top géneros 🎸",
     "yourTopGenres": "Tus géneros más escuchados",
+    "yourTopArtists": "Tus artistas más escuchados",
     "seeAll": "Ver todo",
     "topArtists": "Artistas más escuchados 🎤",
     "yourFavoriteArtists": "Tus artistas favoritos por número de escuchas",
@@ -251,7 +258,16 @@
     "declining": "En baja",
     "listensDelta": "escuchas",
     "noGenreData": "Sin datos de género para este período",
-    "changeDatesDescription": "Modifica las fechas o el período de agregación en la barra de filtros."
+    "changeDatesDescription": "Modifica las fechas o el período de agregación en la barra de filtros.",
+    "aiSpotlightTitle": "Qué muestra el gráfico",
+    "aiSpotlightHint": "El resumen IA usa el mismo rango temporal, la misma agregación y los géneros seleccionados que el gráfico. Las series diarias largas se comprimen para el análisis; los totales y la comparación por mitades siguen siendo exactos.",
+    "aiCached": "(en caché)",
+    "summaryVersionLight": "Natural",
+    "summaryVersionTechnical": "Técnico",
+    "aiExplanation": "Estilo del resumen de tendencias por género",
+    "aiLoading": "Generando resumen…",
+    "aiUnavailable": "Resumen IA no disponible (API no configurada).",
+    "aiEmpty": "No hay resumen para esta selección."
   },
   "artistTrends": {
     "title": "Tendencias de artistas 📉",
@@ -282,7 +298,18 @@
     "searchInCatalog": "En la lista",
     "searchAdded": "Seleccionado",
     "searchAdd": "Añadir",
-    "selectionCount": "{selected} / {max} en el gráfico"
+    "selectionCount": "{selected} / {max} en el gráfico",
+    "aiSpotlightTitle": "Lo que muestra el gráfico",
+    "aiSpotlightHint": "El resumen IA usa el mismo rango temporal, la misma agregación y los mismos artistas seleccionados que el gráfico. Las historias diarias largas se comprimen para el análisis; los totales y la comparación entre mitades del periodo siguen siendo exactos.",
+    "aiCached": "(en caché)",
+    "summaryVersionLight": "Natural",
+    "summaryVersionTechnical": "Técnico",
+    "aiExplanation": "Estilo del resumen de tendencias por artista",
+    "aiUnavailable": "Resumen IA no disponible (API no configurada).",
+    "aiEmpty": "No hay resumen para esta selección.",
+    "chartUpdating": "Actualizando gráfico…",
+    "selectionPending": "Aplicando selección…",
+    "aiUpdating": "Actualizando resumen…"
   },
   "artists": {
     "title": "Artistas 🎤",
@@ -665,6 +692,8 @@
     "goToDashboard": "Ir al Dashboard"
   },
   "errors": {
+    "groqDailyQuotaExceeded": "Cuota diaria de IA agotada. Vuelve a intentarlo cuando se reinicie a medianoche UTC.",
+    "groqDailyQuotaExceededDetailed": "Has usado las {limit} generaciones de IA permitidas para hoy. Puedes volver a intentarlo después de {resetTime} (UTC).",
     "somethingWrong": "Algo salió mal",
     "unexpectedError": "Un error inesperado. El error se ha registrado y será revisado.",
     "errorDetails": "Detalles del error (desarrollo)",

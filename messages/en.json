@@ -18,6 +18,11 @@
     "dark": "Dark",
     "system": "System"
   },
+  "aiMasterToggle": {
+    "label": "AI",
+    "ariaLabel": "Enable or disable AI features for this browser",
+    "lockedHint": "AI is off server-side (AI_MASTER_ENABLED=false). This toggle cannot enable it."
+  },
   "sidebar": {
     "openMenu": "Open menu",
     "collapseSidebar": "Collapse sidebar",
@@ -66,6 +71,7 @@
     "apiDocs": "API Docs",
     "copyright": "Apple Music Analytics. All rights reserved.",
     "madeWith": "Made with ❤️ for music lovers",
+    "creatorCredit": "Wesley Ajavon made this",
     "navAriaLabel": "Footer navigation"
   },
   "overview": {
@@ -91,6 +97,7 @@
     "seeMore": "See more",
     "topGenres": "Top genres 🎸",
     "yourTopGenres": "Your most listened genres",
+    "yourTopArtists": "Your most listened artists",
     "seeAll": "See all",
     "topArtists": "Most listened artists 🎤",
     "yourFavoriteArtists": "Your favorite artists by listen count",
@@ -251,7 +258,16 @@
     "declining": "Declining",
     "listensDelta": "listens",
     "noGenreData": "No genre data for this period",
-    "changeDatesDescription": "Modify the dates or aggregation period in the filter bar."
+    "changeDatesDescription": "Modify the dates or aggregation period in the filter bar.",
+    "aiSpotlightTitle": "What the chart shows",
+    "aiSpotlightHint": "AI summary uses the same time range, aggregation, and selected genres as the chart. Long daily histories are compressed for analysis; totals and half-period comparisons stay exact.",
+    "aiCached": "(cached)",
+    "summaryVersionLight": "Natural",
+    "summaryVersionTechnical": "Technical",
+    "aiExplanation": "Genre trends summary style",
+    "aiLoading": "Generating summary…",
+    "aiUnavailable": "AI summary is unavailable (API not configured).",
+    "aiEmpty": "No summary for this selection."
   },
   "artistTrends": {
     "title": "Artist trends 📉",
@@ -282,7 +298,18 @@
     "searchInCatalog": "In list",
     "searchAdded": "Selected",
     "searchAdd": "Add",
-    "selectionCount": "{selected} / {max} on chart"
+    "selectionCount": "{selected} / {max} on chart",
+    "aiSpotlightTitle": "What the chart shows",
+    "aiSpotlightHint": "AI summary uses the same time range, aggregation, and selected artists as the chart. Long daily histories are compressed for analysis; totals and half-period comparisons stay exact.",
+    "aiCached": "(cached)",
+    "summaryVersionLight": "Natural",
+    "summaryVersionTechnical": "Technical",
+    "aiExplanation": "Artist trends summary style",
+    "aiUnavailable": "AI summary is unavailable (API not configured).",
+    "aiEmpty": "No summary for this selection.",
+    "chartUpdating": "Updating chart…",
+    "selectionPending": "Applying selection…",
+    "aiUpdating": "Updating summary…"
   },
   "artists": {
     "title": "Artists 🎤",
@@ -665,6 +692,8 @@
     "goToDashboard": "Go to Dashboard"
   },
   "errors": {
+    "groqDailyQuotaExceeded": "Daily AI quota reached. Try again after the limit resets at midnight UTC.",
+    "groqDailyQuotaExceededDetailed": "You have used all {limit} AI generations allowed for today. You can try again after {resetTime} (UTC).",
     "somethingWrong": "Something went wrong",
     "unexpectedError": "An unexpected error occurred. The error has been logged and will be reviewed.",
     "errorDetails": "Error details (development)",

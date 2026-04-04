@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { GroqQuotaNotice } from "@/lib/components/error-state";
+import { isGroqDailyQuotaError } from "@/lib/utils/groq-quota-message";
 import { useListeningHabitPrediction } from "@/lib/hooks/use-listening-habit-prediction";
 import type { ListeningHabitApiResponse } from "@/lib/hooks/use-listening-habit-prediction";
 import type { InsufficientDataResponse } from "@/lib/dto/predictions";
@@ -150,16 +152,30 @@ export function WhenWillIListenWidget({
 
   if (error) {
     return (
-      <div className="overflow-hidden rounded-xl border border-red-100 dark:border-red-900/30 bg-red-50/50 dark:bg-red-900/10 shadow-card">
-        <div className="border-b border-red-100 dark:border-red-900/30 px-6 py-4">
+      <div
+        className={`overflow-hidden rounded-xl border shadow-card ${
+          isGroqDailyQuotaError(error)
+            ? "border-amber-200/80 dark:border-amber-900/40 bg-card-surface"
+            : "border-red-100 dark:border-red-900/30 bg-red-50/50 dark:bg-red-900/10"
+        }`}
+      >
+        <div
+          className={`border-b px-6 py-4 ${
+            isGroqDailyQuotaError(error)
+              ? "border-gray-100 dark:border-gray-700/50"
+              : "border-red-100 dark:border-red-900/30"
+          }`}
+        >
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                 {t("title")}
               </h2>
-              <p className="mt-2 text-sm text-red-600 dark:text-red-400">
-                {t("errorLoading")}
-              </p>
+              {!isGroqDailyQuotaError(error) && (
+                <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                  {t("errorLoading")}
+                </p>
+              )}
             </div>
             <Link
               href="/dashboard/when-will-i-listen"
@@ -174,6 +190,11 @@ export function WhenWillIListenWidget({
             </Link>
           </div>
         </div>
+        {isGroqDailyQuotaError(error) && (
+          <div className="p-6">
+            <GroqQuotaNotice error={error} />
+          </div>
+        )}
       </div>
     );
   }

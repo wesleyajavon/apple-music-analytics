@@ -3,6 +3,7 @@
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { useAiInsights } from "@/lib/hooks/use-ai-insights";
+import { AiWidgetQuotaOrError } from "@/lib/components/error-state";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
 
 /** Number of insights to show in the overview widget */
@@ -17,7 +18,7 @@ export function AiInsightsSummaryWidget() {
   const t = useTranslations("ai-insights");
   const { startDate, endDate, isLoading: isRangeLoading } = useListenDateRange();
 
-  const { data, isLoading } = useAiInsights(startDate, endDate);
+  const { data, isLoading, error } = useAiInsights(startDate, endDate);
   const isLoadingOrFetching = isRangeLoading || isLoading;
 
   if (isLoadingOrFetching) {
@@ -63,6 +64,18 @@ export function AiInsightsSummaryWidget() {
           ))}
         </div>
       </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <AiWidgetQuotaOrError
+        title={t("title")}
+        subtitle={t("subtitleShort")}
+        seeMoreHref="/dashboard/ai-insights"
+        seeMoreLabel={t("seeMore")}
+        error={error}
+      />
     );
   }
 

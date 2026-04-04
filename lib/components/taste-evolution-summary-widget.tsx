@@ -4,6 +4,7 @@ import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { useTasteEvolution } from "@/lib/hooks/use-taste-evolution";
+import { AiWidgetQuotaOrError } from "@/lib/components/error-state";
 import type { WeekToWeekTrend } from "@/lib/dto/taste-evolution";
 
 function truncateCommentary(text: string, maxLength: number = 200): string {
@@ -30,7 +31,7 @@ export function TasteEvolutionSummaryWidget() {
     };
   }, []);
 
-  const { data, isLoading } = useTasteEvolution(
+  const { data, isLoading, error } = useTasteEvolution(
     range.startDate,
     range.endDate
   );
@@ -85,6 +86,18 @@ export function TasteEvolutionSummaryWidget() {
           </div>
         </div>
       </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <AiWidgetQuotaOrError
+        title={t("title")}
+        subtitle={t("spotlightHint")}
+        seeMoreHref="/dashboard/taste-evolution"
+        seeMoreLabel={t("seeMore")}
+        error={error}
+      />
     );
   }
 

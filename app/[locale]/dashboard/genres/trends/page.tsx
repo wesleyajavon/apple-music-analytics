@@ -21,9 +21,10 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { useGenreTrends } from "@/lib/hooks/use-listening";
+import { useGenreTrends, useGenreTrendsCommentary } from "@/lib/hooks/use-listening";
 import { LoadingState } from "@/lib/components/loading-state";
-import { ErrorState } from "@/lib/components/error-state";
+import { ErrorState, GroqQuotaNotice } from "@/lib/components/error-state";
+import { isGroqDailyQuotaError } from "@/lib/utils/groq-quota-message";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
 import { PeriodSelector, PeriodType } from "@/lib/components/period-selector";
 import type { GenreTrendsDataPoint } from "@/lib/dto/genres";
@@ -139,11 +140,14 @@ function TrendsContent() {
   // pour que l'API utilise la plage réelle min/max de la DB
   const startDate = startDateParam || undefined;
   const endDate = endDateParam || undefined;
+  const userId = searchParams.get("userId") ?? undefined;
 
   const { data, isLoading, error, refetch } = useGenreTrends(
     startDate,
     endDate,
-    period
+    period,
+    undefined,
+    userId
   );
 
   const availableGenres = useMemo(
@@ -156,6 +160,9 @@ function TrendsContent() {
   );
 
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
+  const [summaryVersion, setSummaryVersion] = useState<"light" | "technical">(
+    "light"
+  );
 
   useEffect(() => {
     if (availableGenres.length === 0) return;
@@ -194,6 +201,79 @@ function TrendsContent() {
     () => riseDecline.filter((r) => r.direction === "down").sort((a, b) => a.deltaPercent - b.deltaPercent),
     [riseDecline]
   );
+
+  const commentaryQueryEnabled =
+    selectedGenres.length > 0 &&
+    chartData.length > 0 &&
+    !isLoading &&
+    !error;
+
+  /** Résumé naturel par défaut : `mode=light` (un Groq par requête HTTP). */
+  const {
+    data: lightAi,
+    isLoading: lightAiLoading,
+    isFetching: lightAiFetching,
+    error: lightAiError,
+  } = useGenreTrendsCommentary(
+    startDate,
+    endDate,
+    period,
+    selectedGenres,
+    userId,
+    {
+      mode: "light",
+      enabled: commentaryQueryEnabled,
+    }
+  );
+
+  /** Variante détaillée : chargée seulement si l’utilisateur choisit l’onglet technique. */
+  const {
+    data: techAi,
+    isLoading: techAiLoading,
+    isFetching: techAiFetching,
+    error: techAiError,
+  } = useGenreTrendsCommentary(
+    startDate,
+    endDate,
+    period,
+    selectedGenres,
+    userId,
+    {
+      mode: "technical",
+      enabled: commentaryQueryEnabled && summaryVersion === "technical",
+    }
+  );
+
+  const aiCommentary = useMemo(
+    () => ({
+      commentary: techAi?.commentary ?? null,
+      commentaryLight: lightAi?.commentaryLight ?? null,
+      commentaryCached: techAi?.commentaryCached,
+      commentaryLightCached: lightAi?.commentaryLightCached,
+      aiUnavailable: techAi?.aiUnavailable ?? lightAi?.aiUnavailable,
+    }),
+    [techAi, lightAi]
+  );
+
+  const showAiSkeleton =
+    (summaryVersion === "light" &&
+      !lightAi?.commentaryLight &&
+      !lightAi?.aiUnavailable &&
+      (lightAiLoading || lightAiFetching)) ||
+    (summaryVersion === "technical" &&
+      !techAi?.commentary &&
+      !techAi?.aiUnavailable &&
+      (techAiLoading || techAiFetching));
+
+  const displayAiCommentary =
+    summaryVersion === "light"
+      ? (aiCommentary?.commentaryLight ?? "")
+      : (aiCommentary?.commentary ?? "");
+
+  const hasDisplayableAiParagraph = displayAiCommentary.trim().length > 0;
+
+  const activeAiError =
+    summaryVersion === "technical" ? techAiError : lightAiError;
 
   const headerBlock = (
     <div className="mb-8">
@@ -325,6 +405,134 @@ function TrendsContent() {
               })}
             </div>
           </div>
+
+          {/* Résumé IA — mêmes filtres que le graphique */}
+          {selectedGenres.length > 0 && chartData.length > 0 && (
+            <section
+              className="relative overflow-hidden rounded-2xl border-2 border-accent-violet/20 bg-white dark:bg-gray-800/95 shadow-2xl dark:shadow-none ring-2 ring-accent-violet/10 dark:ring-accent-violet/20 animate-fade-in-up transition-all duration-300"
+              aria-labelledby="genre-trends-ai-spotlight-title"
+            >
+              <div
+                className="pointer-events-none absolute inset-0 rounded-2xl opacity-60 dark:opacity-40"
+                style={{
+                  background:
+                    "radial-gradient(ellipse 80% 70% at 50% 40%, rgba(139, 92, 246, 0.08) 0%, rgba(99, 102, 241, 0.04) 40%, transparent 70%)",
+                }}
+              />
+              <div className="relative">
+                <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-5">
+                  <div className="flex flex-wrap items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-accent-violet/20 to-accent-indigo/20 text-accent-violet">
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth={1.5}
+                          aria-hidden
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="m3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z"
+                          />
+                        </svg>
+                      </div>
+                      <div>
+                        <h2
+                          id="genre-trends-ai-spotlight-title"
+                          className="text-xl font-bold tracking-tight text-gray-900 dark:text-white"
+                        >
+                          {t("aiSpotlightTitle")}
+                        </h2>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                          {t("aiSpotlightHint")}
+                          {displayAiCommentary &&
+                            ((summaryVersion === "technical" &&
+                              aiCommentary?.commentaryCached) ||
+                              (summaryVersion === "light" &&
+                                aiCommentary?.commentaryLightCached)) && (
+                              <span className="ml-1">{t("aiCached")}</span>
+                            )}
+                        </p>
+                      </div>
+                    </div>
+                    {(aiCommentary?.commentaryLight || aiCommentary?.commentary) && (
+                      <div
+                        className="flex rounded-lg bg-gray-100 dark:bg-gray-700/50 p-1"
+                        role="tablist"
+                        aria-label={t("aiExplanation")}
+                      >
+                        <button
+                          type="button"
+                          role="tab"
+                          aria-selected={summaryVersion === "light"}
+                          aria-busy={
+                            summaryVersion === "light" &&
+                            (lightAiLoading || lightAiFetching)
+                          }
+                          onClick={() => setSummaryVersion("light")}
+                          className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                            summaryVersion === "light"
+                              ? "bg-white dark:bg-gray-800 text-accent-violet shadow-sm"
+                              : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                          }`}
+                        >
+                          {t("summaryVersionLight")}
+                        </button>
+                        <button
+                          type="button"
+                          role="tab"
+                          aria-selected={summaryVersion === "technical"}
+                          onClick={() => setSummaryVersion("technical")}
+                          className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                            summaryVersion === "technical"
+                              ? "bg-white dark:bg-gray-800 text-accent-violet shadow-sm"
+                              : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                          }`}
+                        >
+                          {t("summaryVersionTechnical")}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="p-6 sm:p-8">
+                  {showAiSkeleton ? (
+                    <div className="space-y-3 animate-pulse" aria-busy="true">
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full max-w-3xl" />
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full max-w-2xl" />
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-4/5 max-w-xl" />
+                    </div>
+                  ) : activeAiError ? (
+                    isGroqDailyQuotaError(activeAiError) ? (
+                      <GroqQuotaNotice error={activeAiError} />
+                    ) : (
+                      <p
+                        className="text-sm text-red-600 dark:text-red-400"
+                        role="alert"
+                      >
+                        {activeAiError.message}
+                      </p>
+                    )
+                  ) : aiCommentary?.aiUnavailable ? (
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      {t("aiUnavailable")}
+                    </p>
+                  ) : hasDisplayableAiParagraph ? (
+                    <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">
+                      {displayAiCommentary}
+                    </p>
+                  ) : (
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      {t("aiEmpty")}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </section>
+          )}
 
           {/* Spotlight: Graphique multi-lignes — élément principal mis en avant */}
           <section

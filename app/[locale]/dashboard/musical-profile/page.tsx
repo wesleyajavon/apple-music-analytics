@@ -16,7 +16,8 @@ import {
   ParallaxHero,
 } from "@/lib/components/overview-bis";
 import { WhenWillIListenWidget } from "@/lib/components/when-will-i-listen-widget";
-import { ErrorState } from "@/lib/components/error-state";
+import { GroqQuotaNotice } from "@/lib/components/error-state";
+import { isGroqDailyQuotaError } from "@/lib/utils/groq-quota-message";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
 import { OverviewSkeleton } from "@/lib/components/skeleton-loaders";
 
@@ -86,6 +87,8 @@ function MusicalProfileContent() {
   const tEvolution = useTranslations("taste-evolution");
   const tWhen = useTranslations("when-will-i-listen");
   const emptyStatePresets = useEmptyStatePresets();
+  const searchParams = useSearchParams();
+  const userId = searchParams.get("userId") ?? undefined;
 
   const { startDate, endDate, isLoading: isRangeLoading } = useListenDateRange();
   const evolutionRange = useMemo(
@@ -93,16 +96,12 @@ function MusicalProfileContent() {
     [startDate, endDate]
   );
 
-  const { data: insightsData, isLoading: insightsLoading } = useAiInsights(startDate, endDate);
-  const { data: profileData, isLoading: profileLoading } = useTasteProfile(
-    startDate,
-    endDate,
-    "casual"
-  );
-  const { data: evolutionData, isLoading: evolutionLoading } = useTasteEvolution(
-    evolutionRange.startDate,
-    evolutionRange.endDate
-  );
+  const { data: insightsData, isLoading: insightsLoading, error: insightsError } =
+    useAiInsights(startDate, endDate, { userId });
+  const { data: profileData, isLoading: profileLoading, error: profileError } =
+    useTasteProfile(startDate, endDate, "casual", { userId });
+  const { data: evolutionData, isLoading: evolutionLoading, error: evolutionError } =
+    useTasteEvolution(evolutionRange.startDate, evolutionRange.endDate, userId);
 
   const isLoading =
     isRangeLoading || insightsLoading || profileLoading || evolutionLoading;
@@ -113,11 +112,16 @@ function MusicalProfileContent() {
     (evolutionData?.commentary ?? evolutionData?.commentaryLight) ||
     evolutionData?.trends?.length;
 
+  const hasAiFailure =
+    !!insightsError || !!profileError || !!evolutionError;
+
   if (isLoading) {
     return <OverviewSkeleton />;
   }
 
-  if (!hasAnyData) {
+  const showEmptyImportState = !hasAnyData && !hasAiFailure;
+
+  if (showEmptyImportState) {
     return (
       <div className="max-w-4xl mx-auto">
         <header className="mb-10">
@@ -174,7 +178,7 @@ function MusicalProfileContent() {
       </ParallaxHero>
 
       {/* Section: Your insights */}
-      {(insightsData?.insights?.length ?? 0) > 0 && (
+      {((insightsData?.insights?.length ?? 0) > 0 || insightsError) && (
         <ScrollRevealSection className="space-y-6">
           <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
             {t("sections.insights")}
@@ -215,27 +219,39 @@ function MusicalProfileContent() {
                 </div>
               </div>
               <div className="p-6 space-y-3">
-                {insightsData!.insights.slice(0, PREVIEW_INSIGHTS_COUNT).map((insight, index) => {
-                  const accent = INSIGHT_ACCENTS[index % INSIGHT_ACCENTS.length];
-                  return (
-                    <div
-                      key={index}
-                      className={`flex gap-3 p-3 -mx-1 rounded-lg border-l-4 ${accent.border} ${accent.bg}`}
-                    >
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-gray-100 dark:bg-gray-700/80 text-gray-600 dark:text-gray-300 text-xs font-semibold">
-                        {index + 1}
-                      </span>
-                      <span className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed flex-1">
-                        {insight}
-                      </span>
-                    </div>
-                  );
-                })}
-                {insightsData!.cached && (
-                  <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
-                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-accent-violet/60" />
-                    {tInsights("cached")}
-                  </p>
+                {insightsError ? (
+                  isGroqDailyQuotaError(insightsError) ? (
+                    <GroqQuotaNotice error={insightsError} />
+                  ) : (
+                    <p className="text-sm text-red-600 dark:text-red-400" role="alert">
+                      {insightsError.message}
+                    </p>
+                  )
+                ) : (
+                  <>
+                    {insightsData!.insights.slice(0, PREVIEW_INSIGHTS_COUNT).map((insight, index) => {
+                      const accent = INSIGHT_ACCENTS[index % INSIGHT_ACCENTS.length];
+                      return (
+                        <div
+                          key={index}
+                          className={`flex gap-3 p-3 -mx-1 rounded-lg border-l-4 ${accent.border} ${accent.bg}`}
+                        >
+                          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-gray-100 dark:bg-gray-700/80 text-gray-600 dark:text-gray-300 text-xs font-semibold">
+                            {index + 1}
+                          </span>
+                          <span className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed flex-1">
+                            {insight}
+                          </span>
+                        </div>
+                      );
+                    })}
+                    {insightsData!.cached && (
+                      <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
+                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-accent-violet/60" />
+                        {tInsights("cached")}
+                      </p>
+                    )}
+                  </>
                 )}
               </div>
             </div>
@@ -244,7 +260,7 @@ function MusicalProfileContent() {
       )}
 
       {/* Section: Your taste profile */}
-      {profileData && (
+      {(profileData || profileError) && (
         <ScrollRevealSection className="space-y-6">
           <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
             {t("sections.tasteProfile")}
@@ -285,11 +301,23 @@ function MusicalProfileContent() {
                 </div>
               </div>
               <blockquote className="p-6 pl-8 border-l-4 border-accent-rose/60 dark:border-accent-rose/80">
-                <p className="text-lg sm:text-xl font-medium italic text-gray-800 dark:text-gray-200 leading-snug">
-                  &ldquo;{truncateText(profileData.description, 240)}&rdquo;
-                </p>
-                {profileData.cached && (
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">{tProfile("cached")}</p>
+                {profileError ? (
+                  isGroqDailyQuotaError(profileError) ? (
+                    <GroqQuotaNotice error={profileError} />
+                  ) : (
+                    <p className="text-sm text-red-600 dark:text-red-400" role="alert">
+                      {profileError.message}
+                    </p>
+                  )
+                ) : (
+                  <>
+                    <p className="text-lg sm:text-xl font-medium italic text-gray-800 dark:text-gray-200 leading-snug">
+                      &ldquo;{truncateText(profileData!.description, 240)}&rdquo;
+                    </p>
+                    {profileData!.cached && (
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">{tProfile("cached")}</p>
+                    )}
+                  </>
                 )}
               </blockquote>
             </div>
@@ -298,7 +326,7 @@ function MusicalProfileContent() {
       )}
 
       {/* Section: Your taste evolution */}
-      {evolutionCommentary && (
+      {(evolutionCommentary.trim() || evolutionError) && (
         <ScrollRevealSection className="space-y-6">
           <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
             {t("sections.tasteEvolution")}
@@ -341,11 +369,23 @@ function MusicalProfileContent() {
                 </div>
               </div>
               <div className="p-6 sm:p-8">
-                <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">
-                  {evolutionCommentary}
-                </p>
-                {evolutionData?.commentaryCached && (
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">{tEvolution("cached")}</p>
+                {evolutionError ? (
+                  isGroqDailyQuotaError(evolutionError) ? (
+                    <GroqQuotaNotice error={evolutionError} />
+                  ) : (
+                    <p className="text-sm text-red-600 dark:text-red-400" role="alert">
+                      {evolutionError.message}
+                    </p>
+                  )
+                ) : (
+                  <>
+                    <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">
+                      {evolutionCommentary}
+                    </p>
+                    {evolutionData?.commentaryCached && (
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">{tEvolution("cached")}</p>
+                    )}
+                  </>
                 )}
               </div>
             </div>

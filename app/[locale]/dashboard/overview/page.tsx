@@ -20,6 +20,7 @@ import { useOverviewStats, useTimeline, useGenres } from "@/lib/hooks/use-listen
 import { WhenWillIListenWidget } from "@/lib/components/when-will-i-listen-widget";
 import { TasteEvolutionSummaryWidget } from "@/lib/components/taste-evolution-summary-widget";
 import { GenreTrendsSummaryWidget } from "@/lib/components/genre-trends-summary-widget";
+import { ArtistTrendsSummaryWidget } from "@/lib/components/artist-trends-summary-widget";
 import { TopThreeArtistsOverviewWidget } from "@/lib/components/top-three-artists-overview-widget";
 import { TasteProfileSummaryWidget } from "@/lib/components/taste-profile-summary-widget";
 import { AiInsightsSummaryWidget } from "@/lib/components/ai-insights-summary-widget";
@@ -283,6 +284,8 @@ function OverviewContent() {
         )}
 
         <TopThreeArtistsOverviewWidget startDate={startDate} endDate={endDate} />
+
+        <ArtistTrendsSummaryWidget startDate={startDate} endDate={endDate} />
 
         <GenreTrendsSummaryWidget startDate={startDate} endDate={endDate} />
 

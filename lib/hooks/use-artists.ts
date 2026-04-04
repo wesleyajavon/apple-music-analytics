@@ -1,12 +1,16 @@
 "use client";
 
 import { useQuery, UseQueryOptions, useQueryClient } from "@tanstack/react-query";
+import { useLocale } from "next-intl";
 import { apiClient } from "@/lib/api-client";
 import {
   ArtistsResponseDto,
+  ArtistSearchResponse,
+  ArtistTrendsChartResponse,
   ArtistTrendsResponseDto,
 } from "@/lib/dto/artist";
 import { CACHE_STALE_TIME } from "@/lib/constants/config";
+import { useDebouncedValue } from "@/lib/hooks/use-debounced-value";
 
 /**
  * Query keys pour les artistes
@@ -22,6 +26,15 @@ export const artistKeys = {
     topN?: number;
     userId?: string;
   }) => [...artistKeys.all, "trends", params] as const,
+  trendsChart: (params: {
+    startDate?: string;
+    endDate?: string;
+    period?: "day" | "week" | "month";
+    artistIds?: string[];
+    topN?: number;
+    userId?: string;
+  }) => [...artistKeys.all, "trendsChart", params] as const,
+  search: (q: string) => [...artistKeys.all, "search", q] as const,
 };
 
 /**
@@ -125,5 +138,101 @@ export function useArtistTrends(
     placeholderData: previousData,
     enabled: !!startDate && !!endDate,
     ...options,
+  });
+}
+
+async function fetchArtistTrendsChart(
+  startDate?: string,
+  endDate?: string,
+  period?: "day" | "week" | "month",
+  artistIds?: string[],
+  topN?: number,
+  userId?: string,
+  locale?: string
+): Promise<ArtistTrendsChartResponse> {
+  const searchParams = new URLSearchParams();
+  if (startDate) searchParams.append("startDate", startDate);
+  if (endDate) searchParams.append("endDate", endDate);
+  if (period) searchParams.append("period", period);
+  if (locale) searchParams.append("locale", locale);
+  if (userId) searchParams.append("userId", userId);
+  if (topN != null) searchParams.append("topN", String(topN));
+  if (artistIds?.length) {
+    artistIds.forEach((id) => searchParams.append("artists", id));
+  }
+  const qs = searchParams.toString();
+  return apiClient.get<ArtistTrendsChartResponse>(
+    `/artists/trends-chart${qs ? `?${qs}` : ""}`
+  );
+}
+
+/**
+ * Tendances artistes (format pivot) — aligné sur /dashboard/genres/trends.
+ */
+export function useArtistTrendsChart(
+  startDate?: string,
+  endDate?: string,
+  period?: "day" | "week" | "month",
+  artistIds?: string[],
+  topN?: number,
+  userId?: string,
+  options?: Omit<
+    UseQueryOptions<ArtistTrendsChartResponse, Error>,
+    "queryKey" | "queryFn" | "staleTime" | "placeholderData"
+  >
+) {
+  const locale = useLocale();
+  const queryClient = useQueryClient();
+  const artistIdsForKey =
+    artistIds?.length && artistIds.length > 0
+      ? [...artistIds].sort()
+      : undefined;
+  const queryKey = artistKeys.trendsChart({
+    startDate,
+    endDate,
+    period,
+    artistIds: artistIdsForKey,
+    topN,
+    userId,
+  });
+  const previousData = queryClient.getQueryData<ArtistTrendsChartResponse>(
+    queryKey
+  );
+
+  return useQuery<ArtistTrendsChartResponse, Error>({
+    queryKey,
+    queryFn: () =>
+      fetchArtistTrendsChart(
+        startDate,
+        endDate,
+        period,
+        artistIds,
+        topN,
+        userId,
+        locale
+      ),
+    staleTime: CACHE_STALE_TIME.ARTIST_TRENDS_CHART,
+    placeholderData: previousData,
+    ...options,
+  });
+}
+
+async function fetchArtistSearch(q: string): Promise<ArtistSearchResponse> {
+  const searchParams = new URLSearchParams({ q });
+  return apiClient.get<ArtistSearchResponse>(
+    `/artists/search?${searchParams.toString()}`
+  );
+}
+
+/**
+ * Recherche d’artistes dans le catalogue (debounce 320 ms intégré).
+ */
+export function useArtistSearch(query: string) {
+  const debounced = useDebouncedValue(query.trim(), 320);
+  return useQuery<ArtistSearchResponse, Error>({
+    queryKey: artistKeys.search(debounced),
+    queryFn: () => fetchArtistSearch(debounced),
+    enabled: debounced.length >= 2,
+    staleTime: 60 * 1000,
   });
 }

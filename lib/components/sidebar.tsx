@@ -1,10 +1,12 @@
 "use client";
 
-import { Suspense, useState, useEffect } from "react";
+import { Suspense, useState, useEffect, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import { Link, usePathname } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { LanguageSwitcher } from "@/lib/components/language-switcher";
 import { ThemeSwitcher } from "@/lib/components/theme-switcher";
+import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
 
 const STORAGE_KEY = "sidebar-collapsed";
 
@@ -103,6 +105,15 @@ const navGroups: NavGroup[] = [
         icon: (props) => (
           <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+          </svg>
+        ),
+      },
+      {
+        href: "/dashboard/artists/trends",
+        labelKey: "artistTrends",
+        icon: (props) => (
+          <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z" />
           </svg>
         ),
       },
@@ -211,11 +222,36 @@ function getStoredCollapsed(): boolean {
   }
 }
 
-export function Sidebar() {
+function SidebarFallback() {
+  return (
+    <aside
+      className="fixed top-0 left-0 z-40 h-screen w-64 flex-shrink-0 -translate-x-full border-r border-gray-200/80 bg-white shadow-[2px_0_8px_-2px_rgba(0,0,0,0.05)] transition-all dark:border-gray-800 dark:shadow-[2px_0_8px_-2px_rgba(0,0,0,0.2)] lg:sticky lg:top-0 lg:z-auto lg:translate-x-0"
+      aria-hidden
+    >
+      <div className="h-20 animate-pulse border-b border-gray-100 bg-gray-100 dark:border-gray-800 dark:bg-gray-800" />
+      <div className="space-y-2 p-4">
+        {Array.from({ length: 10 }).map((_, i) => (
+          <div
+            key={i}
+            className="h-10 animate-pulse rounded-xl bg-gray-100 dark:bg-gray-800"
+          />
+        ))}
+      </div>
+    </aside>
+  );
+}
+
+function SidebarContent() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const t = useTranslations("sidebar");
+
+  const withFilters = useMemo(
+    () => (href: string) => mergeDashboardSearchParams(href, searchParams),
+    [searchParams]
+  );
 
   // Hydrate collapsed state from localStorage (SSR-safe)
   useEffect(() => {
@@ -281,7 +317,7 @@ export function Sidebar() {
             }`}
           >
             <Link
-              href="/dashboard"
+              href={withFilters("/dashboard")}
               className={`flex items-center group ${isCollapsed ? "justify-center" : "gap-3"}`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
@@ -348,7 +384,7 @@ export function Sidebar() {
                     return (
                       <Link
                         key={item.href}
-                        href={item.href}
+                        href={withFilters(item.href)}
                         onClick={() => setIsMobileMenuOpen(false)}
                         title={isCollapsed ? label : undefined}
                         className={`
@@ -414,5 +450,13 @@ export function Sidebar() {
         </div>
       </aside>
     </>
+  );
+}
+
+export function Sidebar() {
+  return (
+    <Suspense fallback={<SidebarFallback />}>
+      <SidebarContent />
+    </Suspense>
   );
 }

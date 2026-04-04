@@ -52,3 +52,33 @@ export interface ArtistTrendsResponseDto {
   startDate: string;
   endDate: string;
 }
+
+/** Artiste disponible pour le graphique multi-lignes (trends-chart). */
+export interface ArtistTrendsChartArtist {
+  id: string;
+  name: string;
+}
+
+/**
+ * Point pivot pour `/api/artists/trends-chart` (une clé dynamique par artistId).
+ */
+export interface ArtistTrendsChartDataPoint {
+  date: string;
+  formattedDate: string;
+  [artistId: string]: string | number;
+}
+
+export interface ArtistTrendsChartResponse {
+  data: ArtistTrendsChartDataPoint[];
+  availableArtists: ArtistTrendsChartArtist[];
+  /**
+   * Top artists for the picker when `availableArtists` is a filtered series (explicit `artists` query).
+   * Lets users browse the usual “top” list while the chart shows only selected IDs.
+   */
+  catalogArtists?: ArtistTrendsChartArtist[];
+}
+
+/** Réponse de recherche d’artistes (catalogue DB). */
+export interface ArtistSearchResponse {
+  artists: ArtistTrendsChartArtist[];
+}

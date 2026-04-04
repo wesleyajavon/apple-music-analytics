@@ -93,9 +93,23 @@ Top artistes par nombre d'écoutes.
 
 ### GET `/api/artists/trends`
 
-Tendances des artistes dans le temps.
+Série temporelle (format long) pour les top artistes — dates obligatoires.
 
-**Paramètres** : `startDate`, `endDate`, `userId`
+**Paramètres** : `startDate`, `endDate`, `period`, `topN`, `userId`
+
+### GET `/api/artists/trends-chart`
+
+Données pivot pour graphiques multi-lignes (comme `/api/genres/trends`) : top **N** artistes de la période, par bucket jour / semaine / mois. Sans dates, utilise la plage min/max des écoutes.
+
+**Paramètres** : `startDate`, `endDate`, `period`, `topN` (1–50, défaut 30), `artists` (répétable, filtre par id), `locale`, `userId`
+
+Sans `artists` : top N artistes de la période. Avec `artists` (jusqu’à 50 ids) : séries pour ces artistes uniquement ; la réponse inclut `catalogArtists` (top N + artistes de la série) pour alimenter le sélecteur.
+
+### GET `/api/artists/search`
+
+Recherche dans le catalogue `Artist` (`nameLower`, indexé). Min. 2 caractères.
+
+**Paramètres** : `q`, `limit` (1–50, défaut 25)
 
 ---
 

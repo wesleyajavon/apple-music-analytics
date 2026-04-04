@@ -6,6 +6,7 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "../../prisma";
 import { transformBigIntToNumber } from "../../dto/transformers";
+import type { ArtistTrendsChartArtist } from "@/lib/dto/artist";
 
 export interface ArtistStats {
   artistId: string;
@@ -173,6 +174,202 @@ export async function getArtistTrends(
     artistName: row.artist_name,
     listenCount: transformBigIntToNumber({ count: row.listen_count }).count,
   }));
+}
+
+export interface ArtistTrendChartRow {
+  date: string;
+  artistId: string;
+  artistName: string;
+  count: number;
+}
+
+/**
+ * Lignes brutes pour graphique multi-lignes (top N artistes de la période, par bucket temporel).
+ * Utilisé par `/api/artists/trends-chart` (format pivot côté route).
+ */
+export async function getArtistTrendsChartRows(
+  startDate: Date,
+  endDate: Date,
+  period: "day" | "week" | "month",
+  userId?: string,
+  topN: number = 30
+): Promise<ArtistTrendChartRow[]> {
+  const clampedTop = Math.min(Math.max(topN, 1), 50);
+
+  const dateExpr =
+    period === "day"
+      ? Prisma.raw('DATE(l."playedAt")')
+      : period === "week"
+        ? Prisma.raw('DATE_TRUNC(\'week\', l."playedAt")::date')
+        : Prisma.raw('TO_CHAR(l."playedAt", \'YYYY-MM\')');
+
+  const topArtistsQuery = Prisma.sql`
+    SELECT a.id as artist_id, a.name as artist_name
+    FROM "Listen" l
+    JOIN "Track" t ON l."trackId" = t.id
+    JOIN "Artist" a ON t."artistId" = a.id
+    WHERE l."playedAt" >= ${startDate}
+      AND l."playedAt" <= ${endDate}
+      ${userId ? Prisma.sql`AND l."userId" = ${userId}` : Prisma.sql``}
+    GROUP BY a.id, a.name
+    ORDER BY COUNT(*) DESC
+    LIMIT ${clampedTop}
+  `;
+
+  const topArtists = await prisma.$queryRaw<Array<{
+    artist_id: string;
+    artist_name: string;
+  }>>(topArtistsQuery);
+
+  if (topArtists.length === 0) {
+    return [];
+  }
+
+  const artistIds = topArtists.map((a) => a.artist_id);
+  const artistIdsArray = Prisma.join(artistIds.map((id) => Prisma.sql`${id}`));
+
+  const trendsQuery = Prisma.sql`
+    SELECT 
+      ${dateExpr}::text as date,
+      a.id as artist_id,
+      a.name as artist_name,
+      COUNT(*)::int as listen_count
+    FROM "Listen" l
+    JOIN "Track" t ON l."trackId" = t.id
+    JOIN "Artist" a ON t."artistId" = a.id
+    WHERE l."playedAt" >= ${startDate}
+      AND l."playedAt" <= ${endDate}
+      AND a.id IN (${artistIdsArray})
+      ${userId ? Prisma.sql`AND l."userId" = ${userId}` : Prisma.sql``}
+    GROUP BY ${dateExpr}, a.id, a.name
+    ORDER BY ${dateExpr} ASC, listen_count DESC
+  `;
+
+  const result = await prisma.$queryRaw<Array<{
+    date: string | Date;
+    artist_id: string;
+    artist_name: string;
+    listen_count: bigint;
+  }>>(trendsQuery);
+
+  return result.map((row) => ({
+    date: normalizeTrendDate(row.date, period),
+    artistId: row.artist_id,
+    artistName: row.artist_name,
+    count: transformBigIntToNumber({ count: row.listen_count }).count,
+  }));
+}
+
+const MAX_TREND_SERIES = 50;
+
+/**
+ * Tendances pour une liste d’artistes explicite (pas limitée au top N de la période).
+ */
+export async function getArtistTrendsChartRowsForArtistIds(
+  startDate: Date,
+  endDate: Date,
+  period: "day" | "week" | "month",
+  userId: string | undefined,
+  artistIds: string[]
+): Promise<ArtistTrendChartRow[]> {
+  const unique = [...new Set(artistIds)].slice(0, MAX_TREND_SERIES);
+  if (unique.length === 0) return [];
+
+  const dateExpr =
+    period === "day"
+      ? Prisma.raw('DATE(l."playedAt")')
+      : period === "week"
+        ? Prisma.raw('DATE_TRUNC(\'week\', l."playedAt")::date')
+        : Prisma.raw('TO_CHAR(l."playedAt", \'YYYY-MM\')');
+
+  const idsSql = Prisma.join(unique.map((id) => Prisma.sql`${id}`));
+
+  const trendsQuery = Prisma.sql`
+    SELECT 
+      ${dateExpr}::text as date,
+      a.id as artist_id,
+      a.name as artist_name,
+      COUNT(*)::int as listen_count
+    FROM "Listen" l
+    JOIN "Track" t ON l."trackId" = t.id
+    JOIN "Artist" a ON t."artistId" = a.id
+    WHERE l."playedAt" >= ${startDate}
+      AND l."playedAt" <= ${endDate}
+      AND a.id IN (${idsSql})
+      ${userId ? Prisma.sql`AND l."userId" = ${userId}` : Prisma.sql``}
+    GROUP BY ${dateExpr}, a.id, a.name
+    ORDER BY ${dateExpr} ASC, listen_count DESC
+  `;
+
+  const result = await prisma.$queryRaw<Array<{
+    date: string | Date;
+    artist_id: string;
+    artist_name: string;
+    listen_count: bigint;
+  }>>(trendsQuery);
+
+  return result.map((row) => ({
+    date: normalizeTrendDate(row.date, period),
+    artistId: row.artist_id,
+    artistName: row.artist_name,
+    count: transformBigIntToNumber({ count: row.listen_count }).count,
+  }));
+}
+
+/**
+ * Top artistes (id + nom) sur la période — pour alimenter le picker sans recharger toute la série.
+ */
+export async function getTopArtistCatalogForRange(
+  startDate: Date,
+  endDate: Date,
+  userId: string | undefined,
+  topN: number = 30
+): Promise<ArtistTrendsChartArtist[]> {
+  const n = Math.min(Math.max(topN, 1), 50);
+
+  const topArtistsQuery = Prisma.sql`
+    SELECT a.id as artist_id, a.name as artist_name
+    FROM "Listen" l
+    JOIN "Track" t ON l."trackId" = t.id
+    JOIN "Artist" a ON t."artistId" = a.id
+    WHERE l."playedAt" >= ${startDate}
+      AND l."playedAt" <= ${endDate}
+      ${userId ? Prisma.sql`AND l."userId" = ${userId}` : Prisma.sql``}
+    GROUP BY a.id, a.name
+    ORDER BY COUNT(*) DESC
+    LIMIT ${n}
+  `;
+
+  const topArtists = await prisma.$queryRaw<Array<{
+    artist_id: string;
+    artist_name: string;
+  }>>(topArtistsQuery);
+
+  return topArtists.map((a) => ({ id: a.artist_id, name: a.artist_name }));
+}
+
+/**
+ * Recherche dans le catalogue Artist (nameLower indexé).
+ */
+export async function searchArtistsByName(
+  query: string,
+  limit: number = 25
+): Promise<ArtistTrendsChartArtist[]> {
+  const q = query.trim().toLowerCase();
+  if (q.length < 2) return [];
+
+  const take = Math.min(Math.max(limit, 1), 50);
+
+  const rows = await prisma.artist.findMany({
+    where: {
+      nameLower: { contains: q },
+    },
+    take,
+    orderBy: { name: "asc" },
+    select: { id: true, name: true },
+  });
+
+  return rows.map((r) => ({ id: r.id, name: r.name }));
 }
 
 /**

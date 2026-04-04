@@ -32,7 +32,7 @@ describe("insights-cache", () => {
     it("returns different hash for different input", () => {
       const key1 = computeCacheKey(mockSummary, "fr");
       const key2 = computeCacheKey(
-        { ...mockSummary, structured: '{"different":"data"}' },
+        { ...mockSummary, text: "Different summary text" },
         "fr"
       );
       expect(key1).not.toBe(key2);

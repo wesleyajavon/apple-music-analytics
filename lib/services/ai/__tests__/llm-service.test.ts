@@ -6,18 +6,9 @@ const { mockChatCompletionsCreate } = vi.hoisted(() => ({
   mockChatCompletionsCreate: vi.fn(),
 }));
 
-vi.mock("groq-sdk", () => ({
-  default: class MockGroq {
-    constructor() {
-      return {
-        chat: {
-          completions: {
-            create: mockChatCompletionsCreate,
-          },
-        },
-      };
-    }
-  },
+vi.mock("@/lib/services/ai/groq-chat", () => ({
+  createGroqChatCompletion: mockChatCompletionsCreate,
+  GROQ_DEFAULT_MODEL: "llama-3.1-8b-instant",
 }));
 
 describe("llm-service", () => {

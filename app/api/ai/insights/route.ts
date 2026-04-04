@@ -18,6 +18,8 @@ import {
   setCachedInsights,
 } from "@/lib/services/ai/insights-cache";
 import { handleApiError } from "@/lib/utils/error-handler";
+import { assertGroqUserQuotaForRequest } from "@/lib/services/ai/groq-user-quota";
+import { isAiMasterEnabledForRequest } from "@/lib/services/ai/ai-master";
 import { parseAiLocale } from "@/lib/services/ai/locale-utils";
 import type { AiInsightsInput, AiInsightsResponse } from "@/lib/dto/ai-insights";
 
@@ -71,6 +73,8 @@ const AiInsightsInputSchema = z.object({
     })
     .optional(),
   locale: z.string().optional(),
+  /** Optionnel : rattache le quota Groq à un utilisateur (query `userId` prioritaire). */
+  userId: z.string().optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -89,9 +93,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { locale: localeParam, ...inputData } = parseResult.data;
+    const { locale: localeParam, userId: bodyUserId, ...inputData } =
+      parseResult.data;
     const input = inputData as AiInsightsInput;
     const locale = parseAiLocale(localeParam);
+
+    if (!isAiMasterEnabledForRequest(request)) {
+      const degraded: AiInsightsResponse = {
+        insights: [],
+        cached: false,
+        aiUnavailable: true,
+      };
+      return NextResponse.json(degraded);
+    }
 
     // 1. Summarize and normalize (deterministic, localized)
     const summary = summarizeAnalytics(input, locale);
@@ -108,6 +122,8 @@ export async function POST(request: NextRequest) {
       };
       return NextResponse.json(response);
     }
+
+    await assertGroqUserQuotaForRequest(request, bodyUserId);
 
     // 4. Generate insights via LLM
     const insights = await generateInsights(summary, locale);

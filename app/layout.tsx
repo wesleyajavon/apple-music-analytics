@@ -7,6 +7,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { Providers } from "./providers";
+import { AiMasterToggle } from "@/lib/components/ai-master-toggle";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -48,6 +49,7 @@ export default async function RootLayout({
         <Providers>
           <NextIntlClientProvider messages={messages}>
             {children}
+            <AiMasterToggle />
           </NextIntlClientProvider>
         </Providers>
       </body>

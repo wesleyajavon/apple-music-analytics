@@ -487,32 +487,22 @@ export function OverviewSkeleton() {
         </div>
       </div>
 
-      {/* When Will I Listen? — content-aware skeleton */}
-      <div className="overflow-hidden rounded-xl border border-card-border bg-card-surface shadow-card">
-        <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="space-y-1.5">
-              <div className="h-5 w-44 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
-              <div className="h-4 w-56 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+      {/* Heatmap calendrier — aligné avec HeatmapCalendarOverviewWidget */}
+      <div className="relative overflow-hidden rounded-2xl border-2 border-accent-violet/20 bg-white dark:bg-gray-800/95 shadow-2xl dark:shadow-none ring-2 ring-accent-violet/10 dark:ring-accent-violet/20">
+        <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-5">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 shrink-0 rounded-xl bg-gray-200 dark:bg-gray-700 animate-shimmer" />
+              <div className="space-y-1.5">
+                <div className="h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+                <div className="h-4 w-64 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+              </div>
             </div>
-            <div className="h-9 w-20 bg-gray-200 dark:bg-gray-700 rounded-lg animate-shimmer shrink-0" />
+            <div className="h-9 w-24 bg-gray-200 dark:bg-gray-700 rounded-lg animate-shimmer shrink-0" />
           </div>
         </div>
-        <div className="p-6 space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {[0, 1, 2].map((i) => (
-              <div key={i} className="rounded-lg bg-gray-50 dark:bg-gray-800/50 p-4 space-y-2">
-                <div
-                  className="h-3 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer"
-                  style={{ animationDelay: `${i * 0.12}s` }}
-                />
-                <div
-                  className="h-6 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer"
-                  style={{ animationDelay: `${i * 0.12}s` }}
-                />
-              </div>
-            ))}
-          </div>
+        <div className="p-6 sm:p-8">
+          <HeatmapCalendarSkeleton />
         </div>
       </div>
 
@@ -552,6 +542,49 @@ export function OverviewSkeleton() {
         </div>
       </div>
     </div>
+  );
+}
+
+/**
+ * Skeleton pour le bloc spotlight « Votre évolution des goûts » (dashboard/taste-evolution)
+ */
+export function TasteEvolutionSpotlightSkeleton() {
+  return (
+    <section
+      className="relative overflow-hidden rounded-2xl border-2 border-accent-violet/20 bg-white dark:bg-gray-800/95 shadow-2xl dark:shadow-none ring-2 ring-accent-violet/10 dark:ring-accent-violet/20"
+      aria-hidden
+    >
+      <div
+        className="pointer-events-none absolute inset-0 rounded-2xl opacity-60 dark:opacity-40"
+        style={{
+          background:
+            "radial-gradient(ellipse 80% 70% at 50% 40%, rgba(139, 92, 246, 0.08) 0%, rgba(99, 102, 241, 0.04) 40%, transparent 70%)",
+        }}
+      />
+      <div className="relative">
+        <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-5">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 shrink-0 rounded-xl bg-gray-200 dark:bg-gray-700 animate-shimmer" />
+              <div className="space-y-2">
+                <div className="h-6 w-56 max-w-[85vw] rounded bg-gray-200 dark:bg-gray-700 animate-shimmer" />
+                <div className="h-4 w-48 max-w-[70vw] rounded bg-gray-200 dark:bg-gray-700 animate-shimmer" />
+              </div>
+            </div>
+            <div className="flex h-9 rounded-lg bg-gray-100 dark:bg-gray-700/50 p-1 gap-1">
+              <div className="h-full w-16 rounded-md bg-gray-200 dark:bg-gray-600 animate-shimmer" />
+              <div className="h-full w-24 rounded-md bg-gray-200 dark:bg-gray-600 animate-shimmer" />
+            </div>
+          </div>
+        </div>
+        <div className="p-6 sm:p-8 space-y-3">
+          <div className="h-4 w-full rounded bg-gray-200 dark:bg-gray-700 animate-shimmer" />
+          <div className="h-4 w-full rounded bg-gray-200 dark:bg-gray-700 animate-shimmer" />
+          <div className="h-4 w-[92%] rounded bg-gray-200 dark:bg-gray-700 animate-shimmer" />
+          <div className="h-4 w-[78%] rounded bg-gray-200 dark:bg-gray-700 animate-shimmer" />
+        </div>
+      </div>
+    </section>
   );
 }
 

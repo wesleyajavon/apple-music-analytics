@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useAiInsights } from "@/lib/hooks/use-ai-insights";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
@@ -36,9 +37,13 @@ function formatDateRange(startDate?: string, endDate?: string): string {
 function AiInsightsContent() {
   const t = useTranslations("ai-insights");
   const emptyStatePresets = useEmptyStatePresets();
+  const searchParams = useSearchParams();
+  const userId = searchParams.get("userId") ?? undefined;
   const { startDate, endDate, isLoading: isRangeLoading } = useListenDateRange();
 
-  const { data, isLoading, error, refetch } = useAiInsights(startDate, endDate);
+  const { data, isLoading, error, refetch } = useAiInsights(startDate, endDate, {
+    userId,
+  });
   const isLoadingOrFetching = isRangeLoading || isLoading;
 
   const handleRetry = useCallback(() => {

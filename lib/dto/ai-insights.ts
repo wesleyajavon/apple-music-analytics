@@ -75,4 +75,6 @@ export interface AiInsightItem {
 export interface AiInsightsResponse {
   insights: string[]; // 3-5 bullet points
   cached: boolean; // Whether response was served from cache
+  /** True when AI is disabled (AI_MASTER_ENABLED / cookie). */
+  aiUnavailable?: boolean;
 }

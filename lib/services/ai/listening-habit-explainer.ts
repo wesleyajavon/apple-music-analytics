@@ -7,7 +7,7 @@
  * Locale: output language (fr, en, es).
  */
 
-import Groq from "groq-sdk";
+import { createGroqChatCompletion, GROQ_DEFAULT_MODEL } from "@/lib/services/ai/groq-chat";
 import type { ListeningHabitPrediction } from "@/lib/dto/predictions";
 import type { AiLocale } from "./locale-utils";
 
@@ -61,8 +61,6 @@ export async function explainListeningHabitPrediction(
     );
   }
 
-  const groq = new Groq({ apiKey });
-
   const metrics = prediction.supportingMetrics;
   const metricsText = metrics
     ? `
@@ -83,8 +81,8 @@ ${metricsText}
 
 Generate a short explanation (1 to 3 sentences) for the user. Explain why this prediction makes sense based on their past habits. Respond in the same language as the system instructions.`;
 
-  const response = await groq.chat.completions.create({
-    model: "llama-3.1-8b-instant",
+  const response = await createGroqChatCompletion({
+    model: GROQ_DEFAULT_MODEL,
     messages: [
       { role: "system", content: SYSTEM_PROMPTS[locale] },
       { role: "user", content: userPrompt },

@@ -69,6 +69,9 @@ next-env.d.ts
 # Logs
 *.log
 
+# Groq Cloud CSV exports (request IDs / org — keep local)
+groq-logs-*.csv
+
 # Personal working notes (future enhancements, ideas)
 FUTURE_ENHANCEMENTS.md
 

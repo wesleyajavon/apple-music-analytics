@@ -18,8 +18,14 @@ import {
   setCachedTasteProfile,
 } from "@/lib/services/ai/taste-profile-cache";
 import { handleApiError } from "@/lib/utils/error-handler";
+import { assertGroqUserQuotaForRequest } from "@/lib/services/ai/groq-user-quota";
+import { isAiMasterEnabledForRequest } from "@/lib/services/ai/ai-master";
 import { parseAiLocale } from "@/lib/services/ai/locale-utils";
-import type { TasteProfileInput, TasteProfileTone } from "@/lib/dto/taste-profile";
+import type {
+  TasteProfileInput,
+  TasteProfileResponse,
+  TasteProfileTone,
+} from "@/lib/dto/taste-profile";
 
 export const dynamic = "force-dynamic";
 
@@ -77,6 +83,7 @@ const TasteProfileInputSchema = z.object({
   uniqueTracks: z.number().int().nonnegative().optional(),
   tone: TasteProfileToneSchema.default("casual"),
   locale: z.string().optional(),
+  userId: z.string().optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -95,9 +102,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { tone, locale: localeParam, ...analyticsInput } = parseResult.data;
+    const { tone, locale: localeParam, userId: bodyUserId, ...analyticsInput } =
+      parseResult.data;
     const input: TasteProfileInput = analyticsInput;
     const locale = parseAiLocale(localeParam);
+
+    if (!isAiMasterEnabledForRequest(request)) {
+      const degraded: TasteProfileResponse = {
+        description: "",
+        influences: "",
+        coreGenres: "",
+        uniqueAspect: "",
+        cached: false,
+        aiUnavailable: true,
+      };
+      return NextResponse.json(degraded);
+    }
 
     // 1. Build deterministic taste summary
     const summary = buildTasteSummary(input);
@@ -113,6 +133,8 @@ export async function POST(request: NextRequest) {
         cached: true,
       });
     }
+
+    await assertGroqUserQuotaForRequest(request, bodyUserId);
 
     // 4. Generate profile via LLM
     const profile = await generateTasteProfile(summary, tone, locale);

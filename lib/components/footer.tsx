@@ -49,9 +49,14 @@ export function Footer({ variant = "dashboard" }: { variant?: FooterVariant }) {
             </Link>
           ))}
         </nav>
-        <p className="text-xs text-gray-400 dark:text-gray-500">
-          © {currentYear} {t("copyright")} · {t("madeWith")}
-        </p>
+        <div className="flex flex-col gap-1 sm:items-end">
+          <p className="text-xs text-gray-400 dark:text-gray-500">
+            © {currentYear} {t("copyright")} · {t("madeWith")}
+          </p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            {t("creatorCredit")}
+          </p>
+        </div>
       </div>
     </footer>
   );

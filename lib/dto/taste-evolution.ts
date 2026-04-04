@@ -86,4 +86,6 @@ export interface TasteEvolutionResponse {
   commentaryCached?: boolean;
   /** Weeks with insufficient data (excluded from trends) */
   skippedWeeks: Array<{ weekStart: string; reason: string }>;
+  /** True when AI commentary is disabled (AI_MASTER_ENABLED / cookie). */
+  aiUnavailable?: boolean;
 }

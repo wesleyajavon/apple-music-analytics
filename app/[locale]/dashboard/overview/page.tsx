@@ -17,7 +17,7 @@ import {
   Bar,
 } from "recharts";
 import { useOverviewStats, useTimeline, useGenres } from "@/lib/hooks/use-listening";
-import { WhenWillIListenWidget } from "@/lib/components/when-will-i-listen-widget";
+import { HeatmapCalendarOverviewWidget } from "@/lib/components/heatmap-calendar-overview-widget";
 import { TasteEvolutionSummaryWidget } from "@/lib/components/taste-evolution-summary-widget";
 import { GenreTrendsSummaryWidget } from "@/lib/components/genre-trends-summary-widget";
 import { ArtistTrendsSummaryWidget } from "@/lib/components/artist-trends-summary-widget";
@@ -53,6 +53,12 @@ function getPreviousPeriod(
     prevStartDate: prevStart.toISOString().split("T")[0],
     prevEndDate: prevEnd.toISOString().split("T")[0],
   };
+}
+
+/** Tronque les libellés longs sur les axes des barres horizontales (noms d'artistes). */
+function truncateChartLabel(name: string, max = 26): string {
+  if (name.length <= max) return name;
+  return `${name.slice(0, max - 1)}…`;
 }
 
 /** Plafond pour les variations en % (évite 1926% etc.) */
@@ -165,6 +171,26 @@ function OverviewContent() {
     () => genresData?.data.slice(0, 6) || [],
     [genresData]
   );
+
+  // Top artistes (overview API, max 6) avec % du total d'écoutes — aligné sur le bloc genres
+  const topArtistsForChart = useMemo(() => {
+    if (!data?.topArtists?.length) return [];
+    const total = data.totalListens;
+    return data.topArtists.slice(0, 6).map((a) => ({
+      artistId: a.artistId,
+      name: a.artistName,
+      count: a.listenCount,
+      percentage: total > 0 ? (a.listenCount / total) * 100 : 0,
+    }));
+  }, [data]);
+
+  const artistsPageQuery = useMemo(() => {
+    const p = new URLSearchParams();
+    if (startDate) p.set("startDate", startDate);
+    if (endDate) p.set("endDate", endDate);
+    const qs = p.toString();
+    return qs ? `?${qs}` : "";
+  }, [startDate, endDate]);
 
   if (isLoading) {
     return <OverviewSkeleton />;
@@ -425,10 +451,140 @@ function OverviewContent() {
         </div>
           </div>
         )}
+
+        {/* Bloc large (2×1) : Top artistes — à côté du top genres */}
+        {topArtistsForChart.length > 0 && (
+          <div className="sm:col-span-2 lg:col-span-2">
+            <div className="overflow-hidden rounded-xl border border-card-border border-l-4 border-l-accent-violet bg-card-surface shadow-card transition-shadow duration-300 hover:shadow-card-hover">
+              <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                      {t("topArtists")}
+                    </h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                      {t("yourTopArtists")}
+                    </p>
+                  </div>
+                  <Link
+                    href={`/dashboard/artists${artistsPageQuery}`}
+                    className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium
+                  text-accent-violet hover:bg-accent-violet/10 dark:hover:bg-accent-violet/20
+                  transition-colors duration-200 shrink-0"
+                  >
+                    {t("seeAll")}
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </Link>
+                </div>
+              </div>
+              <div className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="h-64 min-h-[256px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={topArtistsForChart.map((a) => ({
+                          name: a.name,
+                          shortName: truncateChartLabel(a.name),
+                          value: a.count,
+                          percentage: a.percentage,
+                        }))}
+                        layout="vertical"
+                        margin={{ top: 5, right: 30, left: 8, bottom: 5 }}
+                      >
+                        <defs>
+                          <linearGradient id="artistBarGradient" x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0%" stopColor="#a78bfa" />
+                            <stop offset="100%" stopColor="#8b5cf6" />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
+                        <XAxis
+                          type="number"
+                          tick={{ fill: "#64748b", fontSize: 11 }}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+                        <YAxis
+                          type="category"
+                          dataKey="shortName"
+                          tick={{ fill: "#475569", fontSize: 11, fontWeight: 500 }}
+                          axisLine={false}
+                          tickLine={false}
+                          width={100}
+                        />
+                        <Tooltip
+                          contentStyle={CHART_TOOLTIP_STYLES.contentStyle}
+                          labelStyle={CHART_TOOLTIP_STYLES.labelStyle}
+                          itemStyle={CHART_TOOLTIP_STYLES.itemStyle}
+                          labelFormatter={(_, payload) =>
+                            (payload?.[0]?.payload as { name?: string })?.name ?? ""
+                          }
+                          formatter={(value: number, _name: string, props: { payload?: { percentage?: number } }) => {
+                            const pct = props?.payload?.percentage ?? 0;
+                            return [
+                              `${value.toLocaleString(locale)} ${t("listens")} (${pct.toFixed(1)}%)`,
+                              t("Listens"),
+                            ];
+                          }}
+                        />
+                        <Bar
+                          dataKey="value"
+                          fill="url(#artistBarGradient)"
+                          radius={[0, 6, 6, 0]}
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  <div className="space-y-4">
+                    {topArtistsForChart.map((artist, index) => {
+                      const maxCount = topArtistsForChart[0]?.count ?? 1;
+                      const widthPercent = (artist.count / maxCount) * 100;
+                      const rankColors = ["text-amber-500", "text-slate-400", "text-amber-700"];
+                      const rankBg = ["bg-amber-500/15", "bg-slate-400/15", "bg-amber-700/15"];
+                      const rankStyle = index < 3 ? rankColors[index] : "text-gray-400 dark:text-gray-500";
+                      const rankBgStyle = index < 3 ? rankBg[index] : "bg-gray-100 dark:bg-gray-800";
+                      return (
+                        <div key={artist.artistId} className="group">
+                          <div className="flex items-center justify-between mb-1.5 gap-2">
+                            <div className="flex items-center gap-3 min-w-0">
+                              <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold ${rankStyle} ${rankBgStyle}`}>
+                                {index + 1}
+                              </span>
+                              <span className="text-sm font-medium text-gray-900 dark:text-white truncate" title={artist.name}>
+                                {artist.name}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2 ml-2 shrink-0">
+                              <span className="text-sm font-semibold text-gray-900 dark:text-white tabular-nums">
+                                {artist.count.toLocaleString(locale)}
+                              </span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400 w-10 text-right tabular-nums">
+                                {artist.percentage.toFixed(1)}%
+                              </span>
+                            </div>
+                          </div>
+                          <div className="ml-10 h-1.5 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-700/50">
+                            <div
+                              className="h-full rounded-full bg-gradient-to-r from-accent-violet to-accent-indigo transition-all duration-500 ease-out"
+                              style={{ width: `${widthPercent}%` }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* When Will I Listen? widget */}
-      <WhenWillIListenWidget includeExplanation />
+      {/* Calendrier heatmap (aperçu — page complète : /dashboard/heatmap) */}
+      <HeatmapCalendarOverviewWidget startDate={startDate} endDate={endDate} />
 
       {/* Taste Evolution summary */}
       <TasteEvolutionSummaryWidget />

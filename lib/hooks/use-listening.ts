@@ -17,6 +17,7 @@ import {
   GenreDistributionResponse,
   GenreTrendsResponse,
 } from "@/lib/dto/genres";
+import type { GenreTrendsCommentaryApiResponse } from "@/lib/dto/genre-trends-ai";
 import { listeningKeys } from "./query-keys";
 import { CACHE_STALE_TIME } from "@/lib/constants/config";
 
@@ -329,6 +330,84 @@ export function useGenreTrends(
     staleTime: CACHE_STALE_TIME.GENRE_TRENDS,
     placeholderData: previousData,
     ...options,
+  });
+}
+
+/** API default is `both` (one response with technical + light). Split reduces Groq work per request. */
+export type GenreTrendsCommentaryMode = "technical" | "light" | "both";
+
+async function fetchGenreTrendsCommentary(
+  startDate: string | undefined,
+  endDate: string | undefined,
+  period: "day" | "week" | "month",
+  genres: string[],
+  locale: string,
+  userId: string | undefined,
+  mode: GenreTrendsCommentaryMode
+): Promise<GenreTrendsCommentaryApiResponse> {
+  const searchParams = new URLSearchParams();
+  if (startDate) searchParams.append("startDate", startDate);
+  if (endDate) searchParams.append("endDate", endDate);
+  searchParams.append("period", period);
+  searchParams.append("locale", locale);
+  if (userId) searchParams.append("userId", userId);
+  if (mode !== "both") searchParams.append("mode", mode);
+  genres.forEach((g) => searchParams.append("genres", g));
+  const qs = searchParams.toString();
+  return apiClient.get<GenreTrendsCommentaryApiResponse>(
+    `/ai/genre-trends-commentary?${qs}`
+  );
+}
+
+export type UseGenreTrendsCommentaryOptions = Omit<
+  UseQueryOptions<GenreTrendsCommentaryApiResponse, Error>,
+  "queryKey" | "queryFn" | "staleTime"
+> & {
+  /** `both` = legacy single fetch (tech + light). Default here is `both` for callers that omit it. */
+  mode?: GenreTrendsCommentaryMode;
+};
+
+/**
+ * Résumé IA pour le graphique des tendances par genre (mêmes filtres que la page).
+ * Passez `mode: "technical"` | `"light"` pour scinder les appels (moins de travail serveur par round-trip).
+ */
+export function useGenreTrendsCommentary(
+  startDate: string | undefined,
+  endDate: string | undefined,
+  period: "day" | "week" | "month",
+  genres: string[],
+  userId: string | undefined,
+  options?: UseGenreTrendsCommentaryOptions
+) {
+  const locale = useLocale();
+  const sortedGenres = [...genres].sort();
+  const { mode = "both", enabled: enabledOption, ...rest } = options ?? {};
+
+  const queryKey = listeningKeys.genreTrendsCommentary({
+    startDate,
+    endDate,
+    period,
+    genres: sortedGenres,
+    userId,
+    locale,
+    mode,
+  });
+
+  return useQuery<GenreTrendsCommentaryApiResponse, Error>({
+    queryKey,
+    queryFn: () =>
+      fetchGenreTrendsCommentary(
+        startDate,
+        endDate,
+        period,
+        sortedGenres,
+        locale,
+        userId,
+        mode
+      ),
+    staleTime: CACHE_STALE_TIME.GENRE_TRENDS_AI,
+    ...rest,
+    enabled: (enabledOption ?? true) && sortedGenres.length > 0,
   });
 }
 

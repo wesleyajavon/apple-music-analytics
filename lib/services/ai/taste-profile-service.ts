@@ -11,7 +11,7 @@
  * - Locale: prompts and output language (fr, en, es)
  */
 
-import Groq from "groq-sdk";
+import { createGroqChatCompletion, GROQ_DEFAULT_MODEL } from "@/lib/services/ai/groq-chat";
 import type { TasteSummary } from "./taste-summary-builder";
 import type { TasteProfileTone } from "@/lib/dto/taste-profile";
 import { getLanguageName, parseAiLocale, type AiLocale } from "./locale-utils";
@@ -128,7 +128,6 @@ export async function generateTasteProfile(
     );
   }
 
-  const groq = new Groq({ apiKey });
   const toneConfig = TONE_INSTRUCTIONS[tone][locale];
 
   const userPrompt = `Voici un résumé agrégé des données d'écoute musicale d'un utilisateur:
@@ -142,8 +141,8 @@ Génère un profil de goût musical structuré. ${toneConfig.style}
 Réponds UNIQUEMENT avec un objet JSON valide contenant exactement les clés: description, influences, coreGenres, uniqueAspect.
 Pas de texte avant ou après le JSON.`;
 
-  const response = await groq.chat.completions.create({
-    model: "llama-3.1-8b-instant",
+  const response = await createGroqChatCompletion({
+    model: GROQ_DEFAULT_MODEL,
     messages: [
       { role: "system", content: buildSystemPrompt(tone, locale) },
       { role: "user", content: userPrompt },

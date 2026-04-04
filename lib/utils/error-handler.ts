@@ -36,6 +36,9 @@ export const ErrorCodes = {
   
   // Erreurs de permissions (403)
   FORBIDDEN: 'FORBIDDEN',
+
+  /** Quota produit : limite d’appels Groq par utilisateur / jour (429) */
+  GROQ_DAILY_QUOTA_EXCEEDED: 'GROQ_DAILY_QUOTA_EXCEEDED',
   
   // Erreurs de ressource non trouvée (404)
   NOT_FOUND: 'NOT_FOUND',

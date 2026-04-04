@@ -138,7 +138,8 @@ function buildInsightsInput(
 async function fetchAiInsights(
   startDate: string,
   endDate: string,
-  locale: string
+  locale: string,
+  userId?: string
 ): Promise<AiInsightsResponse> {
   const { prevStartDate, prevEndDate } = getPreviousPeriod(startDate, endDate);
 
@@ -167,7 +168,11 @@ async function fetchAiInsights(
     locale
   );
 
-  return apiClient.post<AiInsightsResponse>("/ai/insights", {
+  const qs =
+    userId !== undefined && userId !== ""
+      ? `?userId=${encodeURIComponent(userId)}`
+      : "";
+  return apiClient.post<AiInsightsResponse>(`/ai/insights${qs}`, {
     ...input,
     locale,
   });
@@ -175,8 +180,12 @@ async function fetchAiInsights(
 
 export const aiInsightsKeys = {
   all: ["ai", "insights"] as const,
-  list: (params?: { startDate?: string; endDate?: string; locale?: string }) =>
-    [...aiInsightsKeys.all, params] as const,
+  list: (params?: {
+    startDate?: string;
+    endDate?: string;
+    locale?: string;
+    userId?: string;
+  }) => [...aiInsightsKeys.all, params] as const,
 };
 
 /**
@@ -190,16 +199,17 @@ export function useAiInsights(
   options?: Omit<
     UseQueryOptions<AiInsightsResponse, Error>,
     "queryKey" | "queryFn"
-  >
+  > & { userId?: string }
 ) {
   const locale = useLocale();
   const hasValidRange = !!startDate && !!endDate;
+  const { userId, ...queryOptions } = options ?? {};
 
   return useQuery<AiInsightsResponse, Error>({
-    queryKey: aiInsightsKeys.list({ startDate, endDate, locale }),
-    queryFn: () => fetchAiInsights(startDate!, endDate!, locale),
+    queryKey: aiInsightsKeys.list({ startDate, endDate, locale, userId }),
+    queryFn: () => fetchAiInsights(startDate!, endDate!, locale, userId),
     enabled: hasValidRange,
     staleTime: AI_INSIGHTS_STALE_TIME,
-    ...options,
+    ...queryOptions,
   });
 }

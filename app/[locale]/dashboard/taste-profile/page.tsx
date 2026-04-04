@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useTasteProfile } from "@/lib/hooks/use-taste-profile";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
@@ -42,13 +43,16 @@ function SparklesIcon({ className }: { className?: string }) {
 function TasteProfileContent() {
   const t = useTranslations("taste-profile");
   const emptyStatePresets = useEmptyStatePresets();
+  const searchParams = useSearchParams();
+  const userId = searchParams.get("userId") ?? undefined;
   const [tone, setTone] = useState<TasteProfileTone>("casual");
   const { startDate, endDate, isLoading: isRangeLoading } = useListenDateRange();
 
   const { data, isLoading, error, refetch } = useTasteProfile(
     startDate,
     endDate,
-    tone
+    tone,
+    { userId }
   );
   const isLoadingOrFetching = isRangeLoading || isLoading;
 

@@ -173,6 +173,11 @@ export class ApiClient {
       return true;
     }
 
+    // Quota produit Groq — ne pas retenter (évite de multiplier les échecs / bruit)
+    if (error.statusCode === 429 && error.code === "GROQ_DAILY_QUOTA_EXCEEDED") {
+      return false;
+    }
+
     // Too Many Requests (429) - peut être retryable
     if (error.statusCode === 429) {
       return true;

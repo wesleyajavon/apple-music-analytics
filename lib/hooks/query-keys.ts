@@ -38,6 +38,16 @@ export const listeningKeys = {
     genres?: string[];
     userId?: string;
   }) => [...listeningKeys.all, "genreTrends", params] as const,
+  genreTrendsCommentary: (params?: {
+    startDate?: string;
+    endDate?: string;
+    period?: "day" | "week" | "month";
+    genres?: string[];
+    userId?: string;
+    locale?: string;
+    /** technical | light: split requests; both: legacy single response */
+    mode?: "technical" | "light" | "both";
+  }) => [...listeningKeys.all, "genreTrendsCommentary", params] as const,
   overview: (params?: {
     startDate?: string;
     endDate?: string;
@@ -57,6 +67,7 @@ export const tasteProfileKeys = {
     endDate?: string;
     tone?: "analytical" | "casual" | "poetic";
     locale?: string;
+    userId?: string;
   }) => [...tasteProfileKeys.all, params] as const,
 } as const;
 

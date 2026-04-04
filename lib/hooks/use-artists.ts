@@ -1,6 +1,11 @@
 "use client";
 
-import { useQuery, UseQueryOptions, useQueryClient } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useQuery,
+  type UseQueryOptions,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useLocale } from "next-intl";
 import { apiClient } from "@/lib/api-client";
 import {
@@ -9,6 +14,7 @@ import {
   ArtistTrendsChartResponse,
   ArtistTrendsResponseDto,
 } from "@/lib/dto/artist";
+import type { ArtistTrendsCommentaryApiResponse } from "@/lib/dto/artist-trends-ai";
 import { CACHE_STALE_TIME } from "@/lib/constants/config";
 import { useDebouncedValue } from "@/lib/hooks/use-debounced-value";
 
@@ -34,6 +40,15 @@ export const artistKeys = {
     topN?: number;
     userId?: string;
   }) => [...artistKeys.all, "trendsChart", params] as const,
+  artistTrendsCommentary: (params?: {
+    startDate?: string;
+    endDate?: string;
+    period?: "day" | "week" | "month";
+    artists?: string[];
+    userId?: string;
+    locale?: string;
+    mode?: "technical" | "light" | "both";
+  }) => [...artistKeys.all, "artistTrendsCommentary", params] as const,
   search: (q: string) => [...artistKeys.all, "search", q] as const,
 };
 
@@ -182,7 +197,6 @@ export function useArtistTrendsChart(
   >
 ) {
   const locale = useLocale();
-  const queryClient = useQueryClient();
   const artistIdsForKey =
     artistIds?.length && artistIds.length > 0
       ? [...artistIds].sort()
@@ -195,9 +209,6 @@ export function useArtistTrendsChart(
     topN,
     userId,
   });
-  const previousData = queryClient.getQueryData<ArtistTrendsChartResponse>(
-    queryKey
-  );
 
   return useQuery<ArtistTrendsChartResponse, Error>({
     queryKey,
@@ -212,8 +223,84 @@ export function useArtistTrendsChart(
         locale
       ),
     staleTime: CACHE_STALE_TIME.ARTIST_TRENDS_CHART,
-    placeholderData: previousData,
+    placeholderData: keepPreviousData,
     ...options,
+  });
+}
+
+export type ArtistTrendsCommentaryMode = "technical" | "light" | "both";
+
+async function fetchArtistTrendsCommentary(
+  startDate: string | undefined,
+  endDate: string | undefined,
+  period: "day" | "week" | "month",
+  artistIds: string[],
+  locale: string,
+  userId: string | undefined,
+  mode: ArtistTrendsCommentaryMode
+): Promise<ArtistTrendsCommentaryApiResponse> {
+  const searchParams = new URLSearchParams();
+  if (startDate) searchParams.append("startDate", startDate);
+  if (endDate) searchParams.append("endDate", endDate);
+  searchParams.append("period", period);
+  searchParams.append("locale", locale);
+  if (userId) searchParams.append("userId", userId);
+  if (mode !== "both") searchParams.append("mode", mode);
+  artistIds.forEach((id) => searchParams.append("artists", id));
+  const qs = searchParams.toString();
+  return apiClient.get<ArtistTrendsCommentaryApiResponse>(
+    `/ai/artist-trends-commentary?${qs}`
+  );
+}
+
+export type UseArtistTrendsCommentaryOptions = Omit<
+  UseQueryOptions<ArtistTrendsCommentaryApiResponse, Error>,
+  "queryKey" | "queryFn" | "staleTime"
+> & {
+  mode?: ArtistTrendsCommentaryMode;
+};
+
+/**
+ * Résumé IA pour le graphique des tendances par artiste (mêmes filtres que la page).
+ */
+export function useArtistTrendsCommentary(
+  startDate: string | undefined,
+  endDate: string | undefined,
+  period: "day" | "week" | "month",
+  artistIds: string[],
+  userId: string | undefined,
+  options?: UseArtistTrendsCommentaryOptions
+) {
+  const locale = useLocale();
+  const sortedIds = [...artistIds].sort();
+  const { mode = "both", enabled: enabledOption, ...rest } = options ?? {};
+
+  const queryKey = artistKeys.artistTrendsCommentary({
+    startDate,
+    endDate,
+    period,
+    artists: sortedIds,
+    userId,
+    locale,
+    mode,
+  });
+
+  return useQuery<ArtistTrendsCommentaryApiResponse, Error>({
+    queryKey,
+    queryFn: () =>
+      fetchArtistTrendsCommentary(
+        startDate,
+        endDate,
+        period,
+        sortedIds,
+        locale,
+        userId,
+        mode
+      ),
+    staleTime: CACHE_STALE_TIME.ARTIST_TRENDS_AI,
+    ...rest,
+    placeholderData: keepPreviousData,
+    enabled: (enabledOption ?? true) && sortedIds.length > 0,
   });
 }
 

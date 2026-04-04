@@ -23,6 +23,7 @@ import {
 import { parseAiLocale } from "@/lib/services/ai/locale-utils";
 import type { ListeningHabitPrediction } from "@/lib/dto/predictions";
 import { handleApiError } from "@/lib/utils/error-handler";
+import { isAiMasterEnabledForRequest } from "@/lib/services/ai/ai-master";
 
 export const dynamic = "force-dynamic";
 
@@ -57,7 +58,9 @@ export async function GET(request: NextRequest) {
   try {
     const userId = extractOptionalUserId(request);
     const { searchParams } = new URL(request.url);
-    const includeExplanation = searchParams.get("explain") === "true";
+    const explainRequested = searchParams.get("explain") === "true";
+    const aiMasterOn = isAiMasterEnabledForRequest(request);
+    const includeExplanation = explainRequested && aiMasterOn;
     const locale = parseAiLocale(extractOptionalString(request, "locale"));
 
     // Try cache first (only for successful predictions)
@@ -69,7 +72,7 @@ export async function GET(request: NextRequest) {
       };
 
       if (includeExplanation && "timeWindow" in cached) {
-        const explanationKey = getExplanationCacheKey(cached, locale);
+        const explanationKey = getExplanationCacheKey(cached, locale, userId);
         let explanation = await getCachedExplanation(explanationKey);
         if (!explanation) {
           try {
@@ -82,6 +85,10 @@ export async function GET(request: NextRequest) {
         if (explanation) {
           response.aiExplanation = explanation;
         }
+      }
+
+      if (explainRequested && !aiMasterOn) {
+        response.aiUnavailable = true;
       }
 
       return NextResponse.json(response);
@@ -105,7 +112,7 @@ export async function GET(request: NextRequest) {
     };
 
     if (includeExplanation) {
-      const explanationKey = getExplanationCacheKey(prediction, locale);
+      const explanationKey = getExplanationCacheKey(prediction, locale, userId);
       let explanation = await getCachedExplanation(explanationKey);
       if (!explanation) {
         try {
@@ -118,6 +125,10 @@ export async function GET(request: NextRequest) {
       if (explanation) {
         response.aiExplanation = explanation;
       }
+    }
+
+    if (explainRequested && !aiMasterOn) {
+      response.aiUnavailable = true;
     }
 
     return NextResponse.json(response);

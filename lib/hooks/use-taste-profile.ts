@@ -144,7 +144,8 @@ async function fetchTasteProfile(
   startDate: string,
   endDate: string,
   tone: TasteProfileTone,
-  locale: string
+  locale: string,
+  userId?: string
 ): Promise<TasteProfileResponse> {
   const { prevStartDate, prevEndDate } = getPreviousPeriod(startDate, endDate);
 
@@ -173,7 +174,11 @@ async function fetchTasteProfile(
     locale
   );
 
-  return apiClient.post<TasteProfileResponse>("/ai/taste-profile", {
+  const qs =
+    userId !== undefined && userId !== ""
+      ? `?userId=${encodeURIComponent(userId)}`
+      : "";
+  return apiClient.post<TasteProfileResponse>(`/ai/taste-profile${qs}`, {
     ...input,
     tone,
     locale,
@@ -192,16 +197,17 @@ export function useTasteProfile(
   options?: Omit<
     UseQueryOptions<TasteProfileResponse, Error>,
     "queryKey" | "queryFn"
-  >
+  > & { userId?: string }
 ) {
   const locale = useLocale();
   const hasValidRange = !!startDate && !!endDate;
+  const { userId, ...queryOptions } = options ?? {};
 
   return useQuery<TasteProfileResponse, Error>({
-    queryKey: tasteProfileKeys.list({ startDate, endDate, tone, locale }),
-    queryFn: () => fetchTasteProfile(startDate!, endDate!, tone, locale),
+    queryKey: tasteProfileKeys.list({ startDate, endDate, tone, locale, userId }),
+    queryFn: () => fetchTasteProfile(startDate!, endDate!, tone, locale, userId),
     enabled: hasValidRange,
     staleTime: TASTE_PROFILE_STALE_TIME,
-    ...options,
+    ...queryOptions,
   });
 }

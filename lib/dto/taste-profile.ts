@@ -41,4 +41,6 @@ export interface TasteProfileResponse {
   uniqueAspect: string;
   /** Whether response was served from cache */
   cached: boolean;
+  /** True when AI is disabled (AI_MASTER_ENABLED / cookie). */
+  aiUnavailable?: boolean;
 }

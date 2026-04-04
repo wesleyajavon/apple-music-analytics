@@ -7,7 +7,7 @@
  * Locale: output language (fr, en, es). All prompt content is localized so the LLM outputs in the target language.
  */
 
-import Groq from "groq-sdk";
+import { createGroqChatCompletion, GROQ_DEFAULT_MODEL } from "@/lib/services/ai/groq-chat";
 import { getAiInsightsLabels } from "@/lib/constants/ai-insights-labels";
 import type { WeekToWeekTrend } from "@/lib/dto/taste-evolution";
 import { getLanguageName, type AiLocale } from "./locale-utils";
@@ -130,8 +130,6 @@ export async function generateTasteEvolutionCommentary(
   }
 
   const labels = getAiInsightsLabels(locale).tasteEvolution;
-  const groq = new Groq({ apiKey });
-
   const summaryLines = light
     ? buildLightSummaryLines(trends, labels)
     : buildTechnicalSummaryLines(trends, labels);
@@ -147,8 +145,8 @@ ${summaryLines.join("\n\n")}
 
 ${promptInstruction}`;
 
-  const response = await groq.chat.completions.create({
-    model: "llama-3.1-8b-instant",
+  const response = await createGroqChatCompletion({
+    model: GROQ_DEFAULT_MODEL,
     messages: [
       { role: "system", content: buildSystemPrompt(locale, light) },
       { role: "user", content: userPrompt },

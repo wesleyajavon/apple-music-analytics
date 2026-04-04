@@ -26,6 +26,7 @@ import {
   setCachedCommentary,
 } from "@/lib/services/taste-evolution/taste-evolution-cache";
 import { handleApiError } from "@/lib/utils/error-handler";
+import { isAiMasterEnabledForRequest } from "@/lib/services/ai/ai-master";
 import type { TasteEvolutionResponse } from "@/lib/dto/taste-evolution";
 
 export const dynamic = "force-dynamic";
@@ -73,7 +74,7 @@ export async function GET(request: NextRequest) {
     // 1. Check trends cache
     let trends: TasteEvolutionResponse["trends"];
     let skippedWeeks: TasteEvolutionResponse["skippedWeeks"];
-    const cachedTrends = await getCachedTrends(startStr, endStr, userId);
+    const cachedTrends = await getCachedTrends(startStr, endStr, userId, locale);
 
     if (cachedTrends) {
       trends = cachedTrends.trends;
@@ -87,7 +88,7 @@ export async function GET(request: NextRequest) {
       );
       trends = result.trends;
       skippedWeeks = result.skippedWeeks;
-      await setCachedTrends(startStr, endStr, userId, {
+      await setCachedTrends(startStr, endStr, userId, locale, {
         trends,
         skippedWeeks,
       });
@@ -97,8 +98,11 @@ export async function GET(request: NextRequest) {
     let commentary: string | null = null;
     let commentaryLight: string | null = null;
     let commentaryCached = false;
+    let aiUnavailable = false;
 
-    if (trends.length > 0) {
+    const aiOn = isAiMasterEnabledForRequest(request);
+
+    if (trends.length > 0 && aiOn) {
       // Technical version
       const cachedCommentary = await getCachedCommentary(trends, locale, false);
       if (cachedCommentary) {
@@ -129,6 +133,8 @@ export async function GET(request: NextRequest) {
           console.warn("Taste evolution light commentary generation failed:", err);
         }
       }
+    } else if (trends.length > 0 && !aiOn) {
+      aiUnavailable = true;
     }
 
     const response: TasteEvolutionResponse = {
@@ -137,6 +143,7 @@ export async function GET(request: NextRequest) {
       commentaryLight,
       commentaryCached: commentary ? commentaryCached : undefined,
       skippedWeeks,
+      ...(aiUnavailable ? { aiUnavailable: true } : {}),
     };
 
     return NextResponse.json(response);

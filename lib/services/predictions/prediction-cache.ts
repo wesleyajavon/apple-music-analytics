@@ -34,12 +34,13 @@ function getPredictionCacheKey(userId?: string): string {
 }
 
 /**
- * Cache key for AI explanation: hash of prediction output + locale.
- * Same prediction + same locale → same explanation.
+ * Cache key for AI explanation: hash of prediction output + locale + user scope.
+ * Avoids sharing an explanation string across users if two predictions ever collide.
  */
 export function getExplanationCacheKey(
   prediction: ListeningHabitPrediction,
-  locale: AiLocale
+  locale: AiLocale,
+  userId?: string
 ): string {
   const payload = JSON.stringify({
     timeWindow: prediction.timeWindow,
@@ -49,7 +50,9 @@ export function getExplanationCacheKey(
   });
   return (
     EXPLANATION_PREFIX +
-    createHash("sha256").update(payload + ":" + locale, "utf8").digest("hex")
+    createHash("sha256")
+      .update(payload + ":" + locale + ":" + (userId ?? "default"), "utf8")
+      .digest("hex")
   );
 }
 

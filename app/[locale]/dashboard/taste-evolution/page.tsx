@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { useTasteEvolution } from "@/lib/hooks/use-taste-evolution";
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
+import { TasteEvolutionSpotlightSkeleton } from "@/lib/components/skeleton-loaders";
 import type {
   WeekToWeekTrend,
   TrendClassification,
@@ -280,8 +281,8 @@ function TasteEvolutionContent() {
 
   if (isLoading) {
     return (
-      <div className="max-w-4xl mx-auto space-y-6">
-        <header className="mb-8">
+      <div className="max-w-4xl mx-auto space-y-8">
+        <header className="mb-10">
           <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
             {t("title")}
           </h1>
@@ -289,13 +290,33 @@ function TasteEvolutionContent() {
             {t("loading")}
           </p>
         </header>
-        <div className="space-y-4">
-          {[1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className="h-48 rounded-xl bg-gray-100 dark:bg-gray-800 animate-pulse"
-            />
-          ))}
+        <TasteEvolutionSpotlightSkeleton />
+        <div className="space-y-6">
+          <div className="h-8 w-48 rounded bg-gray-200 dark:bg-gray-700 animate-shimmer max-w-full" />
+          <div className="space-y-6">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card"
+              >
+                <div className="px-5 py-4 flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 dark:border-gray-700/50">
+                  <div className="space-y-2 flex-1 min-w-[200px]">
+                    <div className="h-5 w-56 max-w-full rounded bg-gray-200 dark:bg-gray-700 animate-shimmer" />
+                    <div className="h-4 w-40 max-w-full rounded bg-gray-200 dark:bg-gray-700 animate-shimmer" />
+                  </div>
+                  <div className="h-8 w-28 rounded-full bg-gray-200 dark:bg-gray-700 animate-shimmer shrink-0" />
+                </div>
+                <div className="p-5 grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  {[0, 1, 2, 3].map((j) => (
+                    <div key={j} className="space-y-2">
+                      <div className="h-3 w-16 rounded bg-gray-200 dark:bg-gray-700 animate-shimmer" />
+                      <div className="h-6 w-24 rounded bg-gray-200 dark:bg-gray-700 animate-shimmer" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -493,8 +514,8 @@ function TasteEvolutionContent() {
 function TasteEvolutionFallback() {
   const t = useTranslations("taste-evolution");
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <header className="mb-8">
+    <div className="max-w-4xl mx-auto space-y-8">
+      <header className="mb-10">
         <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
           {t("title")}
         </h1>
@@ -502,13 +523,33 @@ function TasteEvolutionFallback() {
           {t("loadingShort")}
         </p>
       </header>
-      <div className="space-y-4">
-        {[1, 2].map((i) => (
-          <div
-            key={i}
-            className="h-48 rounded-xl bg-gray-100 dark:bg-gray-800 animate-pulse"
-          />
-        ))}
+      <TasteEvolutionSpotlightSkeleton />
+      <div className="space-y-6">
+        <div className="h-8 w-48 rounded bg-gray-200 dark:bg-gray-700 animate-shimmer max-w-full" />
+        <div className="space-y-6">
+          {[1, 2].map((i) => (
+            <div
+              key={i}
+              className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card"
+            >
+              <div className="px-5 py-4 flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 dark:border-gray-700/50">
+                <div className="space-y-2 flex-1 min-w-[200px]">
+                  <div className="h-5 w-56 max-w-full rounded bg-gray-200 dark:bg-gray-700 animate-shimmer" />
+                  <div className="h-4 w-40 max-w-full rounded bg-gray-200 dark:bg-gray-700 animate-shimmer" />
+                </div>
+                <div className="h-8 w-28 rounded-full bg-gray-200 dark:bg-gray-700 animate-shimmer shrink-0" />
+              </div>
+              <div className="p-5 grid grid-cols-2 sm:grid-cols-4 gap-4">
+                {[0, 1, 2, 3].map((j) => (
+                  <div key={j} className="space-y-2">
+                    <div className="h-3 w-16 rounded bg-gray-200 dark:bg-gray-700 animate-shimmer" />
+                    <div className="h-6 w-24 rounded bg-gray-200 dark:bg-gray-700 animate-shimmer" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

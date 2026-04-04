@@ -34,6 +34,8 @@ export const CACHE_STALE_TIME = {
   TIMELINE: 2 * 60 * 1000, // 2 minutes - data depends on filters but relatively stable
   GENRES: 5 * 60 * 1000,   // 5 minutes - genre distribution changes infrequently
   GENRE_TRENDS: 2 * 60 * 1000, // 2 minutes - same as timeline
+  GENRE_TRENDS_AI: 5 * 60 * 1000, // 5 minutes - matches server-side commentary cache intent
+  ARTIST_TRENDS_AI: 5 * 60 * 1000, // 5 minutes - artist trends AI commentary
   ARTIST_TRENDS_CHART: 2 * 60 * 1000, // 2 minutes - same as genre trends
   OVERVIEW: 5 * 60 * 1000, // 5 minutes - overview statistics change infrequently
 } as const;

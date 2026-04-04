@@ -21,11 +21,11 @@ const memoryCache = new Map<string, { insights: string[]; expiresAt: number }>()
 const MEMORY_CACHE_TTL_MS = CACHE_TTL_SECONDS * 1000;
 
 /**
- * Computes a deterministic hash of the analytics summary + locale.
- * Same input + same locale → same hash → cache hit.
+ * Computes a deterministic hash of the exact LLM user-message body + locale.
+ * Uses `summary.text` (not `structured` alone) so the cache key matches what `generateInsights` sends to Groq.
  */
 export function computeCacheKey(summary: AnalyticsSummary, locale: AiLocale): string {
-  const payload = summary.structured + ":" + locale;
+  const payload = summary.text + ":" + locale;
   return createHash("sha256").update(payload, "utf8").digest("hex");
 }
 

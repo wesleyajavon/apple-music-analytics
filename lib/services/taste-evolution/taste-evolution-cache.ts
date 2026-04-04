@@ -27,21 +27,34 @@ const memoryCommentaryCache = new Map<string, { commentary: string; expiresAt: n
 const memoryCommentaryLightCache = new Map<string, { commentary: string; expiresAt: number }>();
 const MEMORY_CACHE_TTL_MS = CACHE_TTL_SECONDS * 1000;
 
-function trendsCacheKey(startDate: string, endDate: string, userId?: string): string {
+function trendsCacheKey(
+  startDate: string,
+  endDate: string,
+  userId: string | undefined,
+  locale: AiLocale
+): string {
   return createHash("sha256")
-    .update(`${startDate}:${endDate}:${userId ?? "all"}`)
+    .update(`${startDate}:${endDate}:${userId ?? "all"}:${locale}`)
     .digest("hex");
 }
 
+/** All fields that feed the taste-evolution commentary prompts (see taste-evolution-commentary.ts). */
 function commentaryCacheKey(trends: WeekToWeekTrend[], locale: AiLocale, light: boolean): string {
   const payload = JSON.stringify(
     trends.map((t) => ({
-      week: t.timeRange.weekStart,
-      classification: t.classification,
+      timeRange: t.timeRange,
+      previousWeekRange: t.previousWeekRange,
       volumeDelta: t.volumeDelta,
+      volumeDeltaPct: t.volumeDeltaPct,
       diversityDelta: t.diversityDelta,
-      emerging: t.emergingGenres.map((g) => g.genre),
-      declining: t.decliningGenres.map((g) => g.genre),
+      genreCountPrevious: t.genreCountPrevious,
+      genreCountCurrent: t.genreCountCurrent,
+      emergingGenres: t.emergingGenres,
+      decliningGenres: t.decliningGenres,
+      artistRankMovements: t.artistRankMovements,
+      classification: t.classification,
+      previousWeekListens: t.previousWeekListens,
+      currentWeekListens: t.currentWeekListens,
     }))
   );
   return createHash("sha256").update(payload + ":" + locale + ":" + (light ? "light" : "tech"), "utf8").digest("hex");
@@ -50,9 +63,10 @@ function commentaryCacheKey(trends: WeekToWeekTrend[], locale: AiLocale, light: 
 export async function getCachedTrends(
   startDate: string,
   endDate: string,
-  userId?: string
+  userId: string | undefined,
+  locale: AiLocale
 ): Promise<{ trends: WeekToWeekTrend[]; skippedWeeks: Array<{ weekStart: string; reason: string }> } | null> {
-  const key = trendsCacheKey(startDate, endDate, userId);
+  const key = trendsCacheKey(startDate, endDate, userId, locale);
   const redis = getRedisClient();
 
   if (redis) {
@@ -82,9 +96,10 @@ export async function setCachedTrends(
   startDate: string,
   endDate: string,
   userId: string | undefined,
+  locale: AiLocale,
   data: { trends: WeekToWeekTrend[]; skippedWeeks: Array<{ weekStart: string; reason: string }> }
 ): Promise<void> {
-  const key = trendsCacheKey(startDate, endDate, userId);
+  const key = trendsCacheKey(startDate, endDate, userId, locale);
   const redis = getRedisClient();
 
   if (redis) {

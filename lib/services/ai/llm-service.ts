@@ -9,8 +9,8 @@
  * Locale: output language (fr, en, es).
  */
 
-import Groq from "groq-sdk";
 import type { AnalyticsSummary } from "./analytics-summarizer";
+import { createGroqChatCompletion, GROQ_DEFAULT_MODEL } from "@/lib/services/ai/groq-chat";
 import { getLanguageName, type AiLocale } from "./locale-utils";
 
 const SYSTEM_PROMPTS: Record<
@@ -118,16 +118,14 @@ export async function generateInsights(
     );
   }
 
-  const groq = new Groq({ apiKey });
-
   // Prompt in target language so the model receives consistent context
   const userPrompt = (USER_PROMPTS[locale] ?? USER_PROMPTS.fr).replace(
     "{summary}",
     summary.text
   );
 
-  const response = await groq.chat.completions.create({
-    model: "llama-3.1-8b-instant", // Fast, free tier on Groq
+  const response = await createGroqChatCompletion({
+    model: GROQ_DEFAULT_MODEL,
     messages: [
       { role: "system", content: buildInsightsSystemPrompt(locale) },
       { role: "user", content: userPrompt },

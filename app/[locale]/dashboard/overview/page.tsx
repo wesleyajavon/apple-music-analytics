@@ -28,6 +28,7 @@ import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
 import { OverviewSkeleton } from "@/lib/components/skeleton-loaders";
 import { OverviewStatsSection } from "@/lib/components/overview-stats-section";
+import { formatOverviewDateRangeLabel } from "@/lib/utils/overview-date-range-label";
 
 /**
  * Calcule la période précédente basée sur la période actuelle
@@ -588,24 +589,17 @@ function OverviewContent() {
   );
 }
 
-/** Format date range for display */
-function formatDateRange(startDate?: string, endDate?: string): string {
-  if (!startDate || !endDate) return "";
-  const start = new Date(startDate);
-  const end = new Date(endDate);
-  return `${start.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })} – ${end.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}`;
-}
-
 export default function OverviewPage() {
   const searchParams = useSearchParams();
   const t = useTranslations("overview");
+  const locale = useLocale();
   const { startDate, endDate, isAll } = useListenDateRange();
   const startDateParam = searchParams.get("startDate") ?? "";
   const endDateParam = searchParams.get("endDate") ?? "";
   // Key force le remontage complet quand le filtre change (évite données "All" affichées avec filtre 7j)
   const filterKey = `${startDateParam}-${endDateParam}`;
 
-  const dateRangeLabel = formatDateRange(startDate, endDate);
+  const dateRangeLabel = formatOverviewDateRangeLabel(startDate, endDate, locale);
   const hasComparison = !isAll && !!startDate && !!endDate;
 
   return (

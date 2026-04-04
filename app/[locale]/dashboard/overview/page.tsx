@@ -18,7 +18,6 @@ import {
 } from "recharts";
 import { useOverviewStats, useTimeline, useGenres } from "@/lib/hooks/use-listening";
 import { HeatmapCalendarOverviewWidget } from "@/lib/components/heatmap-calendar-overview-widget";
-import { TasteEvolutionSummaryWidget } from "@/lib/components/taste-evolution-summary-widget";
 import { GenreTrendsSummaryWidget } from "@/lib/components/genre-trends-summary-widget";
 import { ArtistTrendsSummaryWidget } from "@/lib/components/artist-trends-summary-widget";
 import { TopThreeArtistsOverviewWidget } from "@/lib/components/top-three-artists-overview-widget";
@@ -585,9 +584,6 @@ function OverviewContent() {
 
       {/* Calendrier heatmap (aperçu — page complète : /dashboard/heatmap) */}
       <HeatmapCalendarOverviewWidget startDate={startDate} endDate={endDate} />
-
-      {/* Taste Evolution summary */}
-      <TasteEvolutionSummaryWidget />
     </div>
   );
 }

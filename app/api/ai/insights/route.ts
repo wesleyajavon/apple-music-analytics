@@ -19,7 +19,10 @@ import {
 } from "@/lib/services/ai/insights-cache";
 import { handleApiError } from "@/lib/utils/error-handler";
 import { assertGroqUserQuotaForRequest } from "@/lib/services/ai/groq-user-quota";
-import { isAiMasterEnabledForRequest } from "@/lib/services/ai/ai-master";
+import {
+  AI_MASTER_DISABLED_COOKIE,
+  isAiMasterEnvEnabled,
+} from "@/lib/services/ai/ai-master";
 import { parseAiLocale } from "@/lib/services/ai/locale-utils";
 import type { AiInsightsInput, AiInsightsResponse } from "@/lib/dto/ai-insights";
 
@@ -98,11 +101,21 @@ export async function POST(request: NextRequest) {
     const input = inputData as AiInsightsInput;
     const locale = parseAiLocale(localeParam);
 
-    if (!isAiMasterEnabledForRequest(request)) {
+    if (!isAiMasterEnvEnabled()) {
       const degraded: AiInsightsResponse = {
         insights: [],
         cached: false,
         aiUnavailable: true,
+        aiUnavailableReason: "env",
+      };
+      return NextResponse.json(degraded);
+    }
+    if (request.cookies.get(AI_MASTER_DISABLED_COOKIE)?.value === "1") {
+      const degraded: AiInsightsResponse = {
+        insights: [],
+        cached: false,
+        aiUnavailable: true,
+        aiUnavailableReason: "client",
       };
       return NextResponse.json(degraded);
     }

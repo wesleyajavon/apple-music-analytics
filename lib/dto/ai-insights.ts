@@ -72,9 +72,14 @@ export interface AiInsightItem {
 /**
  * Response from POST /api/ai/insights
  */
+/** Why AI output was not generated when `aiUnavailable` is true. */
+export type AiUnavailableReason = "env" | "client";
+
 export interface AiInsightsResponse {
   insights: string[]; // 3-5 bullet points
   cached: boolean; // Whether response was served from cache
   /** True when AI is disabled (AI_MASTER_ENABLED / cookie). */
   aiUnavailable?: boolean;
+  /** Present when `aiUnavailable` is true (distinguish server kill-switch vs browser toggle). */
+  aiUnavailableReason?: AiUnavailableReason;
 }

@@ -4,7 +4,7 @@
  * Output: structured text fields for UI rendering
  */
 
-import type { AiInsightsInput } from "@/lib/dto/ai-insights";
+import type { AiInsightsInput, AiUnavailableReason } from "@/lib/dto/ai-insights";
 
 /**
  * Extended input for taste profile - includes diversity metrics.
@@ -43,4 +43,6 @@ export interface TasteProfileResponse {
   cached: boolean;
   /** True when AI is disabled (AI_MASTER_ENABLED / cookie). */
   aiUnavailable?: boolean;
+  /** Present when `aiUnavailable` is true. */
+  aiUnavailableReason?: AiUnavailableReason;
 }

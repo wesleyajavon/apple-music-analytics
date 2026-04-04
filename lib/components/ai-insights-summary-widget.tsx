@@ -4,6 +4,7 @@ import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { useAiInsights } from "@/lib/hooks/use-ai-insights";
 import { AiWidgetQuotaOrError } from "@/lib/components/error-state";
+import { AiFeatureDisabledPlaceholder } from "@/lib/components/ai-feature-disabled-placeholder";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
 
 /** Number of insights to show in the overview widget */
@@ -75,6 +76,18 @@ export function AiInsightsSummaryWidget() {
         seeMoreHref="/dashboard/ai-insights"
         seeMoreLabel={t("seeMore")}
         error={error}
+      />
+    );
+  }
+
+  if (data?.aiUnavailable) {
+    return (
+      <AiFeatureDisabledPlaceholder
+        title={t("title")}
+        subtitle={t("subtitleShort")}
+        seeMoreHref="/dashboard/ai-insights"
+        seeMoreLabel={t("seeMore")}
+        reason={data.aiUnavailableReason ?? "client"}
       />
     );
   }

@@ -19,7 +19,10 @@ import {
 } from "@/lib/services/ai/taste-profile-cache";
 import { handleApiError } from "@/lib/utils/error-handler";
 import { assertGroqUserQuotaForRequest } from "@/lib/services/ai/groq-user-quota";
-import { isAiMasterEnabledForRequest } from "@/lib/services/ai/ai-master";
+import {
+  AI_MASTER_DISABLED_COOKIE,
+  isAiMasterEnvEnabled,
+} from "@/lib/services/ai/ai-master";
 import { parseAiLocale } from "@/lib/services/ai/locale-utils";
 import type {
   TasteProfileInput,
@@ -107,7 +110,7 @@ export async function POST(request: NextRequest) {
     const input: TasteProfileInput = analyticsInput;
     const locale = parseAiLocale(localeParam);
 
-    if (!isAiMasterEnabledForRequest(request)) {
+    if (!isAiMasterEnvEnabled()) {
       const degraded: TasteProfileResponse = {
         description: "",
         influences: "",
@@ -115,6 +118,19 @@ export async function POST(request: NextRequest) {
         uniqueAspect: "",
         cached: false,
         aiUnavailable: true,
+        aiUnavailableReason: "env",
+      };
+      return NextResponse.json(degraded);
+    }
+    if (request.cookies.get(AI_MASTER_DISABLED_COOKIE)?.value === "1") {
+      const degraded: TasteProfileResponse = {
+        description: "",
+        influences: "",
+        coreGenres: "",
+        uniqueAspect: "",
+        cached: false,
+        aiUnavailable: true,
+        aiUnavailableReason: "client",
       };
       return NextResponse.json(degraded);
     }

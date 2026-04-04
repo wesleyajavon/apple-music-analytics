@@ -4,6 +4,7 @@ import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { useTasteProfile } from "@/lib/hooks/use-taste-profile";
 import { AiWidgetQuotaOrError } from "@/lib/components/error-state";
+import { AiFeatureDisabledPlaceholder } from "@/lib/components/ai-feature-disabled-placeholder";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
 
 function truncateText(text: string, maxLength: number = 220): string {
@@ -71,6 +72,18 @@ export function TasteProfileSummaryWidget() {
         seeMoreHref="/dashboard/taste-profile"
         seeMoreLabel={t("seeMore")}
         error={error}
+      />
+    );
+  }
+
+  if (data?.aiUnavailable) {
+    return (
+      <AiFeatureDisabledPlaceholder
+        title={t("title")}
+        subtitle={t("subtitleShort")}
+        seeMoreHref="/dashboard/taste-profile"
+        seeMoreLabel={t("seeMore")}
+        reason={data.aiUnavailableReason ?? "client"}
       />
     );
   }

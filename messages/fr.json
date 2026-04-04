@@ -21,7 +21,9 @@
   "aiMasterToggle": {
     "label": "IA",
     "ariaLabel": "Activer ou désactiver les fonctionnalités IA pour ce navigateur",
-    "lockedHint": "L’IA est coupée côté serveur (AI_MASTER_ENABLED=false). Ce bouton ne peut pas la réactiver."
+    "lockedHint": "L’IA est coupée côté serveur (AI_MASTER_ENABLED=false). Ce bouton ne peut pas la réactiver.",
+    "widgetHint": "L’IA est désactivée pour ce navigateur. Activez le bouton « IA » en bas à droite pour afficher ce contenu.",
+    "widgetHintEnvLocked": "L’IA est désactivée côté serveur. Ce contenu ne peut pas être généré ici."
   },
   "sidebar": {
     "openMenu": "Ouvrir le menu",
@@ -317,6 +319,11 @@
     "errorLoading": "Impossible de charger les statistiques des artistes",
     "yourArtists": "Vos artistes",
     "overviewSubtitle": "Vue d'ensemble de votre écoute",
+    "periodLast7Days": "7 derniers jours",
+    "periodLast30Days": "30 derniers jours",
+    "periodYearToDate": "Depuis le début de l'année",
+    "periodAllTime": "Tout l'historique",
+    "periodCustom": "Plage personnalisée",
     "artists": "Artistes",
     "listens": "Écoutes",
     "topArtist": "Écoutes du top artiste",

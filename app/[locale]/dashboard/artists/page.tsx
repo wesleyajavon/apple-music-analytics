@@ -3,6 +3,11 @@
 import { memo, useMemo, Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
+import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
+import {
+  getDateRangePresetFromSearchParams,
+  type DateRangePreset,
+} from "@/lib/components/date-range-filter";
 import {
   BarChart,
   Bar,
@@ -294,6 +299,22 @@ const DetailedViewSection = memo(({
 
 DetailedViewSection.displayName = "DetailedViewSection";
 
+function formatDateRange(
+  startDate: string | undefined,
+  endDate: string | undefined,
+  locale: string
+): string {
+  if (!startDate || !endDate) return "";
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const opts: Intl.DateTimeFormatOptions = {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  };
+  return `${start.toLocaleDateString(locale, opts)} – ${end.toLocaleDateString(locale, opts)}`;
+}
+
 function ArtistsContent() {
   const searchParams = useSearchParams();
   const t = useTranslations("artists");
@@ -301,6 +322,32 @@ function ArtistsContent() {
   const emptyStatePresets = useEmptyStatePresets();
   const startDate = searchParams.get("startDate") || undefined;
   const endDate = searchParams.get("endDate") || undefined;
+
+  const preset = getDateRangePresetFromSearchParams(searchParams);
+  const {
+    startDate: rangeStart,
+    endDate: rangeEnd,
+    isLoading: rangeLoading,
+  } = useListenDateRange();
+
+  const periodLine = useMemo(() => {
+    const presetLabel: Record<DateRangePreset, string> = {
+      "7d": t("periodLast7Days"),
+      "30d": t("periodLast30Days"),
+      ytd: t("periodYearToDate"),
+      all: t("periodAllTime"),
+      custom: t("periodCustom"),
+    };
+    const name = presetLabel[preset];
+    const dates = formatDateRange(rangeStart, rangeEnd, locale);
+    if (dates) {
+      return `${name} · ${dates}`;
+    }
+    if (preset === "all" && rangeLoading) {
+      return name;
+    }
+    return name;
+  }, [preset, rangeStart, rangeEnd, rangeLoading, locale, t]);
 
   const { data, isLoading, error, refetch } = useArtistStats(startDate, endDate, undefined, 20);
 
@@ -348,6 +395,9 @@ function ArtistsContent() {
         <div className="relative">
           <h2 className="text-2xl font-bold text-white sm:text-3xl">{t("yourArtists")}</h2>
           <p className="mt-1 text-white/90">{t("overviewSubtitle")}</p>
+          <p className="mt-2 text-sm font-medium tracking-wide text-white/85" aria-live="polite">
+            {periodLine}
+          </p>
           <div className="mt-6 flex flex-wrap gap-4 sm:gap-8">
             <div className="rounded-xl bg-white/15 px-4 py-3 backdrop-blur-sm">
               <p className="text-xs font-medium uppercase tracking-wider text-white/80">{t("artists")}</p>

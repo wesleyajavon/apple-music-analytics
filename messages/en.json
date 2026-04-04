@@ -21,7 +21,9 @@
   "aiMasterToggle": {
     "label": "AI",
     "ariaLabel": "Enable or disable AI features for this browser",
-    "lockedHint": "AI is off server-side (AI_MASTER_ENABLED=false). This toggle cannot enable it."
+    "lockedHint": "AI is off server-side (AI_MASTER_ENABLED=false). This toggle cannot enable it.",
+    "widgetHint": "AI is turned off for this browser. Use the AI switch at the bottom-right to load this content.",
+    "widgetHintEnvLocked": "AI is disabled on the server. This content cannot be generated here."
   },
   "sidebar": {
     "openMenu": "Open menu",
@@ -317,6 +319,11 @@
     "errorLoading": "Unable to load artist statistics",
     "yourArtists": "Your artists",
     "overviewSubtitle": "Overview of your listening",
+    "periodLast7Days": "Last 7 days",
+    "periodLast30Days": "Last 30 days",
+    "periodYearToDate": "Year to date",
+    "periodAllTime": "All time",
+    "periodCustom": "Custom range",
     "artists": "Artists",
     "listens": "Listens",
     "topArtist": "Top artist listens",

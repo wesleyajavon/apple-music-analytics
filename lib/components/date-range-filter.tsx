@@ -60,6 +60,34 @@ const presets: Record<FixedDateRangePreset, DateRange> = {
   },
 };
 
+/** Preset actif à partir des paramètres d’URL (aligné sur les boutons du filtre). */
+export function getDateRangePresetFromSearchParams(searchParams: {
+  get: (key: string) => string | null;
+  has: (key: string) => boolean;
+}): DateRangePreset {
+  const presetFromUrl = searchParams.get("preset");
+  const hasStartDate = searchParams.has("startDate");
+  const hasEndDate = searchParams.has("endDate");
+
+  const p = presetFromUrl;
+  if (
+    p === "7d" ||
+    p === "30d" ||
+    p === "ytd" ||
+    p === "all" ||
+    p === "custom"
+  ) {
+    return p;
+  }
+  if (!hasStartDate && !hasEndDate) {
+    return "all";
+  }
+  if (hasStartDate && hasEndDate) {
+    return "custom";
+  }
+  return "all";
+}
+
 export function DateRangeFilter() {
   const router = useRouter();
   const pathname = usePathname();
@@ -68,30 +96,7 @@ export function DateRangeFilter() {
   const t = useTranslations("components.dateRangeFilter");
   const locale = useLocale();
 
-  // Déterminer le preset actif : si pas de preset dans l'URL et pas de dates, c'est "all"
-  const presetFromUrl = searchParams.get("preset");
-  const hasStartDate = searchParams.has("startDate");
-  const hasEndDate = searchParams.has("endDate");
-
-  const currentPreset: DateRangePreset = (() => {
-    const p = presetFromUrl;
-    if (
-      p === "7d" ||
-      p === "30d" ||
-      p === "ytd" ||
-      p === "all" ||
-      p === "custom"
-    ) {
-      return p;
-    }
-    if (!hasStartDate && !hasEndDate) {
-      return "all";
-    }
-    if (hasStartDate && hasEndDate) {
-      return "custom";
-    }
-    return "all";
-  })();
+  const currentPreset: DateRangePreset = getDateRangePresetFromSearchParams(searchParams);
 
   const [customOpen, setCustomOpen] = useState(false);
   const [customStart, setCustomStart] = useState("");

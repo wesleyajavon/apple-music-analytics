@@ -74,7 +74,7 @@ describe("POST /api/replay/import", () => {
   });
 
   it("should return 200 on successful import", async () => {
-    const request = new Request("http://localhost/api/replay/import", {
+    const request = new NextRequest("http://localhost/api/replay/import", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -97,7 +97,7 @@ describe("POST /api/replay/import", () => {
   });
 
   it("should return 401 without auth session and admin key", async () => {
-    const request = new Request("http://localhost/api/replay/import", {
+    const request = new NextRequest("http://localhost/api/replay/import", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ data: {} }),
@@ -109,7 +109,7 @@ describe("POST /api/replay/import", () => {
   });
 
   it("should return 400 in admin mode when userId is missing", async () => {
-    const request = new Request("http://localhost/api/replay/import", {
+    const request = new NextRequest("http://localhost/api/replay/import", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -126,7 +126,7 @@ describe("POST /api/replay/import", () => {
   });
 
   it("should return 400 when data is missing", async () => {
-    const request = new Request("http://localhost/api/replay/import", {
+    const request = new NextRequest("http://localhost/api/replay/import", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -149,7 +149,7 @@ describe("POST /api/replay/import", () => {
       errors: [],
     });
 
-    const request = new Request("http://localhost/api/replay/import", {
+    const request = new NextRequest("http://localhost/api/replay/import", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -170,7 +170,7 @@ describe("POST /api/replay/import", () => {
   it("should return 500 when importReplayYearly throws", async () => {
     vi.mocked(importReplayYearly).mockRejectedValue(new Error("boom"));
 
-    const request = new Request("http://localhost/api/replay/import", {
+    const request = new NextRequest("http://localhost/api/replay/import", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

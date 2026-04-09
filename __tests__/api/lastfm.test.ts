@@ -114,7 +114,7 @@ describe("POST /api/lastfm/import", () => {
   });
 
   it("should return 200 with import result", async () => {
-    const request = new Request("http://localhost/api/lastfm/import", {
+    const request = new NextRequest("http://localhost/api/lastfm/import", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -132,7 +132,7 @@ describe("POST /api/lastfm/import", () => {
   });
 
   it("should return 401 without auth session and admin key", async () => {
-    const request = new Request("http://localhost/api/lastfm/import", {
+    const request = new NextRequest("http://localhost/api/lastfm/import", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({}),
@@ -144,7 +144,7 @@ describe("POST /api/lastfm/import", () => {
   });
 
   it("should return 400 in admin mode when userId is missing", async () => {
-    const request = new Request("http://localhost/api/lastfm/import", {
+    const request = new NextRequest("http://localhost/api/lastfm/import", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -161,7 +161,7 @@ describe("POST /api/lastfm/import", () => {
   });
 
   it("should return 400 when limit is invalid", async () => {
-    const request = new Request("http://localhost/api/lastfm/import", {
+    const request = new NextRequest("http://localhost/api/lastfm/import", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -180,7 +180,7 @@ describe("POST /api/lastfm/import", () => {
   it("should return 500 when importLastFmTracks throws", async () => {
     vi.mocked(importLastFmTracks).mockRejectedValue(new Error("Import failed"));
 
-    const request = new Request("http://localhost/api/lastfm/import", {
+    const request = new NextRequest("http://localhost/api/lastfm/import", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

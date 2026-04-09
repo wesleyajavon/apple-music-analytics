@@ -5,12 +5,18 @@ import { NextRequest } from "next/server";
 vi.mock("@/lib/services/artist/artist-service", () => ({
   getArtistTrends: vi.fn(),
 }));
+vi.mock("@/lib/auth/require-auth-user-id", () => ({
+  requireAuthenticatedUserId: vi.fn(),
+  unauthorizedResponse: vi.fn(),
+}));
 
 import { getArtistTrends } from "@/lib/services/artist/artist-service";
+import { requireAuthenticatedUserId } from "@/lib/auth/require-auth-user-id";
 
 describe("GET /api/artists/trends", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(requireAuthenticatedUserId).mockResolvedValue("user-1");
   });
 
   const mockTrendData = [
@@ -38,12 +44,12 @@ describe("GET /api/artists/trends", () => {
       expect.any(Date),
       expect.any(Date),
       "day",
-      undefined,
+      "user-1",
       5
     );
   });
 
-  it("should pass period, topN and userId from query", async () => {
+  it("should pass period and topN, with authenticated user", async () => {
     vi.mocked(getArtistTrends).mockResolvedValue([]);
 
     const request = new NextRequest(
@@ -56,7 +62,7 @@ describe("GET /api/artists/trends", () => {
       expect.any(Date),
       expect.any(Date),
       "week",
-      "user123",
+      "user-1",
       10
     );
   });
@@ -74,7 +80,7 @@ describe("GET /api/artists/trends", () => {
       expect.any(Date),
       expect.any(Date),
       "month",
-      undefined,
+      "user-1",
       5
     );
   });

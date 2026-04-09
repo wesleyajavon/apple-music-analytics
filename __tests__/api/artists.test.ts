@@ -6,15 +6,21 @@ vi.mock("@/lib/services/artist/artist-service", () => ({
   getArtistStats: vi.fn(),
   getArtistOverview: vi.fn(),
 }));
+vi.mock("@/lib/auth/require-auth-user-id", () => ({
+  requireAuthenticatedUserId: vi.fn(),
+  unauthorizedResponse: vi.fn(),
+}));
 
 import {
   getArtistStats,
   getArtistOverview,
 } from "@/lib/services/artist/artist-service";
+import { requireAuthenticatedUserId } from "@/lib/auth/require-auth-user-id";
 
 describe("GET /api/artists", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(requireAuthenticatedUserId).mockResolvedValue("user-1");
   });
 
   const mockOverview = {
@@ -58,8 +64,8 @@ describe("GET /api/artists", () => {
     const data = await response.json();
     expect(data).toHaveProperty("overview", mockOverview);
     expect(data).toHaveProperty("topArtists", mockTopArtists);
-    expect(getArtistOverview).toHaveBeenCalledWith(undefined, undefined, undefined);
-    expect(getArtistStats).toHaveBeenCalledWith(undefined, undefined, undefined, 20);
+    expect(getArtistOverview).toHaveBeenCalledWith(undefined, undefined, "user-1");
+    expect(getArtistStats).toHaveBeenCalledWith(undefined, undefined, "user-1", 20);
   });
 
   it("should return artists stats with date range", async () => {
@@ -93,10 +99,10 @@ describe("GET /api/artists", () => {
     const response = await GET(request);
 
     expect(response.status).toBe(200);
-    expect(getArtistStats).toHaveBeenCalledWith(undefined, undefined, undefined, 50);
+    expect(getArtistStats).toHaveBeenCalledWith(undefined, undefined, "user-1", 50);
   });
 
-  it("should pass userId parameter", async () => {
+  it("should ignore query userId and use authenticated user", async () => {
     vi.mocked(getArtistOverview).mockResolvedValue(mockOverview);
     vi.mocked(getArtistStats).mockResolvedValue(mockTopArtists);
 
@@ -106,8 +112,8 @@ describe("GET /api/artists", () => {
     const response = await GET(request);
 
     expect(response.status).toBe(200);
-    expect(getArtistOverview).toHaveBeenCalledWith(undefined, undefined, "user123");
-    expect(getArtistStats).toHaveBeenCalledWith(undefined, undefined, "user123", 20);
+    expect(getArtistOverview).toHaveBeenCalledWith(undefined, undefined, "user-1");
+    expect(getArtistStats).toHaveBeenCalledWith(undefined, undefined, "user-1", 20);
   });
 
   it("should return 400 for invalid limit (too low)", async () => {

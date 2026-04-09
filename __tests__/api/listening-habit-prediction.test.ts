@@ -21,6 +21,10 @@ vi.mock("@/lib/services/predictions/prediction-cache", () => ({
 vi.mock("@/lib/services/ai/listening-habit-explainer", () => ({
   explainListeningHabitPrediction: vi.fn(),
 }));
+vi.mock("@/lib/auth/require-auth-user-id", () => ({
+  requireAuthenticatedUserId: vi.fn(),
+  unauthorizedResponse: vi.fn(),
+}));
 
 import { getListeningHabitPrediction } from "@/lib/services/predictions/listening-habit-service";
 import {
@@ -28,10 +32,12 @@ import {
   getCachedExplanation,
 } from "@/lib/services/predictions/prediction-cache";
 import { explainListeningHabitPrediction } from "@/lib/services/ai/listening-habit-explainer";
+import { requireAuthenticatedUserId } from "@/lib/auth/require-auth-user-id";
 
 describe("GET /api/predictions/listening-habit", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(requireAuthenticatedUserId).mockResolvedValue("user-1");
     vi.mocked(getCachedPrediction).mockResolvedValue(null);
     vi.mocked(getCachedExplanation).mockResolvedValue(null);
   });
@@ -137,7 +143,7 @@ describe("GET /api/predictions/listening-habit", () => {
     );
   });
 
-  it("accepts userId query param", async () => {
+  it("ignores userId query param and uses authenticated user", async () => {
     vi.mocked(getListeningHabitPrediction).mockResolvedValue({
       insufficientData: true,
       minListensRecommended: 30,
@@ -151,6 +157,6 @@ describe("GET /api/predictions/listening-habit", () => {
     const response = await GET(request);
 
     expect(response.status).toBe(200);
-    expect(getListeningHabitPrediction).toHaveBeenCalledWith("user-123");
+    expect(getListeningHabitPrediction).toHaveBeenCalledWith("user-1");
   });
 });

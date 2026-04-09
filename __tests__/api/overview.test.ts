@@ -7,12 +7,18 @@ vi.mock('@/lib/services/listening/listening-stats', () => ({
   getOverviewStats: vi.fn(),
   getTopArtists: vi.fn(),
 }));
+vi.mock('@/lib/auth/require-auth-user-id', () => ({
+  requireAuthenticatedUserId: vi.fn(),
+  unauthorizedResponse: vi.fn(),
+}));
 
 import { getOverviewStats, getTopArtists } from '@/lib/services/listening/listening-stats';
+import { requireAuthenticatedUserId } from '@/lib/auth/require-auth-user-id';
 
 describe('GET /api/overview', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(requireAuthenticatedUserId).mockResolvedValue('user-1');
     vi.mocked(getTopArtists).mockResolvedValue([]);
   });
 
@@ -33,7 +39,7 @@ describe('GET /api/overview', () => {
     expect(response.status).toBe(200);
     const data = await response.json();
     expect(data).toMatchObject(mockStats);
-    expect(getOverviewStats).toHaveBeenCalledWith(undefined, undefined, undefined);
+    expect(getOverviewStats).toHaveBeenCalledWith(undefined, undefined, 'user-1');
   });
 
   it('should return overview stats with date range', async () => {
@@ -85,7 +91,7 @@ describe('GET /api/overview', () => {
     expect(data).toHaveProperty('code', 'VALIDATION_ERROR');
   });
 
-  it('should handle userId parameter', async () => {
+  it('should ignore query userId and use authenticated user', async () => {
     const mockStats = {
       totalListens: 200,
       uniqueArtists: 30,
@@ -103,7 +109,7 @@ describe('GET /api/overview', () => {
     
     expect(response.status).toBe(200);
     const callArgs = vi.mocked(getOverviewStats).mock.calls[0];
-    expect(callArgs[2]).toBe('user123');
+    expect(callArgs[2]).toBe('user-1');
   });
 
   it('should return 500 when service throws an error', async () => {

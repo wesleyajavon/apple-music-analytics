@@ -11,6 +11,10 @@ vi.mock('@/lib/services/listening/listening-aggregation', () => ({
 vi.mock('@/lib/services/listening/listening-service', () => ({
   getListenDateRange: vi.fn(),
 }));
+vi.mock('@/lib/auth/require-auth-user-id', () => ({
+  requireAuthenticatedUserId: vi.fn(),
+  unauthorizedResponse: vi.fn(),
+}));
 
 import {
   getDailyAggregatedListens,
@@ -18,10 +22,12 @@ import {
   getMonthlyAggregatedListens,
 } from '@/lib/services/listening/listening-aggregation';
 import { getListenDateRange } from '@/lib/services/listening/listening-service';
+import { requireAuthenticatedUserId } from '@/lib/auth/require-auth-user-id';
 
 describe('GET /api/timeline', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(requireAuthenticatedUserId).mockResolvedValue('user-1');
   });
 
   it('should return timeline data with valid dates and default period (day)', async () => {
@@ -133,11 +139,11 @@ describe('GET /api/timeline', () => {
     const response = await GET(request);
     
     expect(response.status).toBe(200);
-    expect(getListenDateRange).toHaveBeenCalledWith(undefined);
+    expect(getListenDateRange).toHaveBeenCalledWith('user-1');
     expect(getDailyAggregatedListens).toHaveBeenCalledWith(
       minDate,
       maxDate,
-      undefined
+      'user-1'
     );
   });
 
@@ -178,7 +184,7 @@ describe('GET /api/timeline', () => {
     expect(data).toHaveProperty('code', 'VALIDATION_ERROR');
   });
 
-  it('should handle userId parameter', async () => {
+  it('should ignore query userId and use authenticated user', async () => {
     const mockData: never[] = [];
     vi.mocked(getDailyAggregatedListens).mockResolvedValue(mockData);
 
@@ -189,7 +195,7 @@ describe('GET /api/timeline', () => {
     
     expect(response.status).toBe(200);
     const callArgs = vi.mocked(getDailyAggregatedListens).mock.calls[0];
-    expect(callArgs[2]).toBe('user123');
+    expect(callArgs[2]).toBe('user-1');
   });
 
   it('should return 500 when service throws an error', async () => {

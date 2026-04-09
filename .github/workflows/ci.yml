@@ -160,7 +160,7 @@ jobs:
       # --coverage génère un rapport de couverture
       # --reporter=junit crée un format compatible avec GitHub
       - name: Run tests
-        run: npm run test:run -- --coverage --reporter=junit --outputFile=test-results.xml
+        run: npm run test:run -- --coverage --reporter=default --reporter=junit --outputFile=test-results.xml
       
       # ÉTAPE: Publier les résultats des tests
       # Permet de voir les résultats directement dans l'interface GitHub

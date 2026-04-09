@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getReplayYearlySummaries } from "@/lib/services/replay/replay-service";
 import { handleApiError } from "@/lib/utils/error-handler";
+import { getCurrentUserId } from "@/lib/auth/get-current-user-id";
 
 // Force dynamic rendering
 export const dynamic = "force-dynamic";
@@ -15,8 +16,13 @@ export const dynamic = "force-dynamic";
  */
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get("userId") || "default_user"; // TODO: Get from auth
+    const userId = await getCurrentUserId(request);
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
 
     const summaries = await getReplayYearlySummaries(userId);
 

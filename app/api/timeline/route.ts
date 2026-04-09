@@ -9,11 +9,21 @@ import { handleApiError } from "@/lib/utils/error-handler";
 import {
   extractDateRangeWithDefaults,
   extractPeriod,
-  extractOptionalUserId,
 } from "@/lib/middleware/validation";
+import {
+  requireAuthenticatedUserId,
+  unauthorizedResponse,
+} from "@/lib/auth/require-auth-user-id";
+import { assertRateLimit } from "@/lib/security/rate-limit";
 
 // Force dynamic rendering since we use request.url
 export const dynamic = "force-dynamic";
+const TIMELINE_RATE_LIMIT = {
+  route: "/api/timeline",
+  windowMs: 60_000,
+  maxRequests: 20,
+  softLimitRatio: 0.8,
+} as const;
 
 /**
  * @swagger
@@ -81,6 +91,13 @@ export const dynamic = "force-dynamic";
  */
 export async function GET(request: NextRequest) {
   try {
+    const userId = await requireAuthenticatedUserId(request);
+    if (!userId) return unauthorizedResponse();
+    await assertRateLimit(request, {
+      ...TIMELINE_RATE_LIMIT,
+      userId,
+    });
+
     const { searchParams } = new URL(request.url);
     const hasStartDate = searchParams.has("startDate");
     const hasEndDate = searchParams.has("endDate");
@@ -90,7 +107,6 @@ export async function GET(request: NextRequest) {
 
     if (!hasStartDate && !hasEndDate) {
       // "All" filter: use actual min/max from DB
-      const userId = extractOptionalUserId(request);
       const range = await getListenDateRange(userId);
       if (!range) {
         return NextResponse.json([]);
@@ -110,7 +126,6 @@ export async function GET(request: NextRequest) {
       endDate = extracted.endDate;
     }
     const period = extractPeriod(request, "day");
-    const userId = extractOptionalUserId(request);
 
     let chartData: Array<{
       date: string;

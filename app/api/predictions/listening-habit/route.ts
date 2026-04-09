@@ -17,15 +17,25 @@ import {
 } from "@/lib/services/predictions/prediction-cache";
 import { explainListeningHabitPrediction } from "@/lib/services/ai/listening-habit-explainer";
 import {
-  extractOptionalUserId,
   extractOptionalString,
 } from "@/lib/middleware/validation";
 import { parseAiLocale } from "@/lib/services/ai/locale-utils";
 import type { ListeningHabitPrediction } from "@/lib/dto/predictions";
 import { handleApiError } from "@/lib/utils/error-handler";
 import { isAiMasterEnabledForRequest } from "@/lib/services/ai/ai-master";
+import {
+  requireAuthenticatedUserId,
+  unauthorizedResponse,
+} from "@/lib/auth/require-auth-user-id";
+import { assertRateLimit } from "@/lib/security/rate-limit";
 
 export const dynamic = "force-dynamic";
+const PREDICTION_LISTENING_HABIT_RATE_LIMIT = {
+  route: "/api/predictions/listening-habit",
+  windowMs: 60_000,
+  maxRequests: 8,
+  softLimitRatio: 0.8,
+} as const;
 
 /**
  * @swagger
@@ -56,7 +66,12 @@ export const dynamic = "force-dynamic";
  */
 export async function GET(request: NextRequest) {
   try {
-    const userId = extractOptionalUserId(request);
+    const userId = await requireAuthenticatedUserId(request);
+    if (!userId) return unauthorizedResponse();
+    await assertRateLimit(request, {
+      ...PREDICTION_LISTENING_HABIT_RATE_LIMIT,
+      userId,
+    });
     const { searchParams } = new URL(request.url);
     const explainRequested = searchParams.get("explain") === "true";
     const aiMasterOn = isAiMasterEnabledForRequest(request);

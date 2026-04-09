@@ -7,8 +7,11 @@ import { GenreDistributionResponse } from "@/lib/dto/genres";
 import { handleApiError } from "@/lib/utils/error-handler";
 import {
   extractOptionalDateRange,
-  extractOptionalUserId,
 } from "@/lib/middleware/validation";
+import {
+  requireAuthenticatedUserId,
+  unauthorizedResponse,
+} from "@/lib/auth/require-auth-user-id";
 
 // Force dynamic rendering since we use request.url
 export const dynamic = "force-dynamic";
@@ -70,7 +73,8 @@ export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     const { startDate, endDate } = extractOptionalDateRange(request);
-    const userId = extractOptionalUserId(request);
+    const userId = await requireAuthenticatedUserId(request);
+    if (!userId) return unauthorizedResponse();
 
     // Récupérer la distribution des genres
     const genreCounts = await getGenreDistribution(startDate, endDate, userId);

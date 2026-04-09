@@ -14,13 +14,23 @@ import { handleApiError } from "@/lib/utils/error-handler";
 import {
   extractDateRangeWithDefaults,
   extractPeriod,
-  extractOptionalUserId,
   extractOptionalString,
 } from "@/lib/middleware/validation";
 import { parseAiLocale } from "@/lib/services/ai/locale-utils";
 import { pivotArtistTrends } from "@/lib/utils/artist-trends-pivot";
+import {
+  requireAuthenticatedUserId,
+  unauthorizedResponse,
+} from "@/lib/auth/require-auth-user-id";
+import { assertRateLimit } from "@/lib/security/rate-limit";
 
 export const dynamic = "force-dynamic";
+const ARTISTS_TRENDS_CHART_RATE_LIMIT = {
+  route: "/api/artists/trends-chart",
+  windowMs: 60_000,
+  maxRequests: 20,
+  softLimitRatio: 0.8,
+} as const;
 
 type TrendPeriod = "day" | "week" | "month";
 
@@ -90,6 +100,13 @@ function extractTopN(request: NextRequest): number {
  */
 export async function GET(request: NextRequest) {
   try {
+    const userId = await requireAuthenticatedUserId(request);
+    if (!userId) return unauthorizedResponse();
+    await assertRateLimit(request, {
+      ...ARTISTS_TRENDS_CHART_RATE_LIMIT,
+      userId,
+    });
+
     const { searchParams } = new URL(request.url);
     const hasStartDate = searchParams.has("startDate");
     const hasEndDate = searchParams.has("endDate");
@@ -98,7 +115,6 @@ export async function GET(request: NextRequest) {
     let endDate: Date;
 
     if (!hasStartDate && !hasEndDate) {
-      const userId = extractOptionalUserId(request);
       const range = await getListenDateRange(userId);
       if (!range) {
         return NextResponse.json({ data: [], availableArtists: [] });
@@ -119,7 +135,6 @@ export async function GET(request: NextRequest) {
     }
 
     const period = extractPeriod(request, "month") as TrendPeriod;
-    const userId = extractOptionalUserId(request);
     const artistsFilter = extractArtistIdsFilter(request);
     const topN = extractTopN(request);
     const locale = parseAiLocale(extractOptionalString(request, "locale"));

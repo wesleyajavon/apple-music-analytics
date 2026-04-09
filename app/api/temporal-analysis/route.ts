@@ -3,12 +3,22 @@ import { getTemporalAnalysis } from "@/lib/services/listening/temporal-analysis"
 import { handleApiError } from "@/lib/utils/error-handler";
 import {
   extractOptionalDateRange,
-  extractOptionalUserId,
 } from "@/lib/middleware/validation";
 import { TemporalAnalysisDto } from "@/lib/dto/listening";
+import {
+  requireAuthenticatedUserId,
+  unauthorizedResponse,
+} from "@/lib/auth/require-auth-user-id";
+import { assertRateLimit } from "@/lib/security/rate-limit";
 
 // Force dynamic rendering since we use request.url
 export const dynamic = "force-dynamic";
+const TEMPORAL_ANALYSIS_RATE_LIMIT = {
+  route: "/api/temporal-analysis",
+  windowMs: 60_000,
+  maxRequests: 20,
+  softLimitRatio: 0.8,
+} as const;
 
 /**
  * @swagger
@@ -94,7 +104,12 @@ export async function GET(request: NextRequest) {
     // Pour l'analyse temporelle, on utilise toutes les données si aucune date n'est fournie
     // Cela permet d'avoir des patterns fiables basés sur l'historique complet
     const { startDate, endDate } = extractOptionalDateRange(request);
-    const userId = extractOptionalUserId(request);
+    const userId = await requireAuthenticatedUserId(request);
+    if (!userId) return unauthorizedResponse();
+    await assertRateLimit(request, {
+      ...TEMPORAL_ANALYSIS_RATE_LIMIT,
+      userId,
+    });
 
     const result = await getTemporalAnalysis(startDate, endDate, userId);
 

@@ -25,8 +25,15 @@ import {
 } from "@/lib/services/ai/ai-master";
 import { parseAiLocale } from "@/lib/services/ai/locale-utils";
 import type { AiInsightsInput, AiInsightsResponse } from "@/lib/dto/ai-insights";
+import { assertRateLimit } from "@/lib/security/rate-limit";
 
 export const dynamic = "force-dynamic";
+const AI_INSIGHTS_RATE_LIMIT = {
+  route: "/api/ai/insights",
+  windowMs: 60_000,
+  maxRequests: 8,
+  softLimitRatio: 0.8,
+} as const;
 
 const AiInsightsInputSchema = z.object({
   dateRange: z.object({
@@ -98,6 +105,10 @@ export async function POST(request: NextRequest) {
 
     const { locale: localeParam, userId: bodyUserId, ...inputData } =
       parseResult.data;
+    await assertRateLimit(request, {
+      ...AI_INSIGHTS_RATE_LIMIT,
+      userId: bodyUserId,
+    });
     const input = inputData as AiInsightsInput;
     const locale = parseAiLocale(localeParam);
 

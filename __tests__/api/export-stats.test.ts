@@ -16,6 +16,10 @@ vi.mock("@/lib/services/listening/listening-aggregation", () => ({
   getWeeklyAggregatedListens: vi.fn(),
   getMonthlyAggregatedListens: vi.fn(),
 }));
+vi.mock("@/lib/auth/require-auth-user-id", () => ({
+  requireAuthenticatedUserId: vi.fn().mockResolvedValue("user-1"),
+  unauthorizedResponse: vi.fn(),
+}));
 
 import { getOverviewStats, getGenreDistribution } from "@/lib/services/listening/listening-stats";
 import {

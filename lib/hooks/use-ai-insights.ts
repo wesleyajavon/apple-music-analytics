@@ -2,7 +2,7 @@
 
 import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 import { useLocale } from "next-intl";
-import { apiClient } from "@/lib/api-client";
+import { apiClient, type ParsedRateLimitHeaders } from "@/lib/api-client";
 import { getAiInsightsLabels } from "@/lib/constants/ai-insights-labels";
 import type {
   AiInsightsInput,
@@ -14,6 +14,10 @@ import type { GenreDistributionResponse } from "@/lib/dto/genres";
 import type { TemporalAnalysisDto } from "@/lib/dto/listening";
 
 const AI_INSIGHTS_STALE_TIME = 5 * 60 * 1000; // 5 minutes
+
+export type AiInsightsUiResponse = AiInsightsResponse & {
+  rateLimit?: ParsedRateLimitHeaders;
+};
 
 function getPreviousPeriod(
   startDate: string,
@@ -140,7 +144,7 @@ async function fetchAiInsights(
   endDate: string,
   locale: string,
   userId?: string
-): Promise<AiInsightsResponse> {
+): Promise<AiInsightsUiResponse> {
   const { prevStartDate, prevEndDate } = getPreviousPeriod(startDate, endDate);
 
   const [overview, previousOverview, genres, temporal] = await Promise.all([
@@ -172,10 +176,14 @@ async function fetchAiInsights(
     userId !== undefined && userId !== ""
       ? `?userId=${encodeURIComponent(userId)}`
       : "";
-  return apiClient.post<AiInsightsResponse>(`/ai/insights${qs}`, {
+  const result = await apiClient.postWithMeta<AiInsightsResponse>(`/ai/insights${qs}`, {
     ...input,
     locale,
   });
+  return {
+    ...result.data,
+    rateLimit: result.rateLimit,
+  };
 }
 
 export const aiInsightsKeys = {
@@ -197,7 +205,7 @@ export function useAiInsights(
   startDate: string | undefined,
   endDate: string | undefined,
   options?: Omit<
-    UseQueryOptions<AiInsightsResponse, Error>,
+    UseQueryOptions<AiInsightsUiResponse, Error>,
     "queryKey" | "queryFn"
   > & { userId?: string }
 ) {
@@ -205,7 +213,7 @@ export function useAiInsights(
   const hasValidRange = !!startDate && !!endDate;
   const { userId, ...queryOptions } = options ?? {};
 
-  return useQuery<AiInsightsResponse, Error>({
+  return useQuery<AiInsightsUiResponse, Error>({
     queryKey: aiInsightsKeys.list({ startDate, endDate, locale, userId }),
     queryFn: () => fetchAiInsights(startDate!, endDate!, locale, userId),
     enabled: hasValidRange,

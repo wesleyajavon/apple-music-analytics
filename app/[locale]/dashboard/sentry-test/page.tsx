@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { captureException, captureMessage, setUser, setTag, setContext } from '@/lib/utils/sentry';
+import { RateLimitHealthWidget } from '@/lib/components/rate-limit-health-widget';
+import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import * as Sentry from '@sentry/nextjs';
 
 /**
@@ -19,6 +21,34 @@ export default function SentryTestPage() {
   const [testResult, setTestResult] = useState<string>('');
   const hasDsn = !!process.env.NEXT_PUBLIC_SENTRY_DSN;
   const [sentryInitialized, setSentryInitialized] = useState(false);
+  const [isAdminResolved, setIsAdminResolved] = useState(false);
+  const [isAdminUser, setIsAdminUser] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    const supabase = createSupabaseBrowserClient();
+    const allowedAdminUserIds = (process.env.NEXT_PUBLIC_ADMIN_USER_IDS ?? '')
+      .split(',')
+      .map((v) => v.trim())
+      .filter(Boolean);
+
+    async function resolveAdmin() {
+      try {
+        const { data } = await supabase.auth.getUser();
+        const userId = data.user?.id ?? null;
+        const allowed = !!userId && allowedAdminUserIds.includes(userId);
+        if (!mounted) return;
+        setIsAdminUser(allowed);
+      } finally {
+        if (mounted) setIsAdminResolved(true);
+      }
+    }
+
+    resolveAdmin();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     // Vérifie si Sentry est initialisé (avec un petit délai pour laisser le temps à l'init)
@@ -220,6 +250,31 @@ NEXT_PUBLIC_SENTRY_DSN="https://xxxxx@xxxxx.ingest.sentry.io/xxxxx"`}
     );
   }
 
+  if (process.env.NODE_ENV === "production" && !isAdminResolved) {
+    return (
+      <div className="max-w-4xl mx-auto">
+        <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 shadow-card">
+          <p className="text-gray-700 dark:text-gray-300">Vérification des droits admin...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (process.env.NODE_ENV === "production" && !isAdminUser) {
+    return (
+      <div className="max-w-4xl mx-auto">
+        <div className="rounded-xl border-l-4 border-l-red-500 bg-red-50/80 dark:bg-red-900/20 border border-red-200 dark:border-red-800 shadow-card p-6">
+          <h2 className="text-xl font-semibold text-red-800 dark:text-red-200 mb-2">
+            Accès refusé
+          </h2>
+          <p className="text-red-700 dark:text-red-300">
+            Cette page est réservée aux administrateurs en production.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-6 flex flex-wrap items-center gap-3">
@@ -233,6 +288,8 @@ NEXT_PUBLIC_SENTRY_DSN="https://xxxxx@xxxxx.ingest.sentry.io/xxxxx"`}
       <p className="text-gray-600 dark:text-gray-400 mb-6">
         {t("subtitle")}
       </p>
+
+      <RateLimitHealthWidget />
 
       {testResult && (
         <div className="mb-6 p-4 rounded-xl border-l-4 border-accent-cyan bg-accent-cyan/10 dark:bg-accent-cyan/20 border border-accent-cyan/20 shadow-card">

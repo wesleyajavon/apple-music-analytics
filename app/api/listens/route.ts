@@ -6,13 +6,23 @@ import { handleApiError } from "@/lib/utils/error-handler";
 import {
   extractOptionalDateRange,
   extractRequiredDateRange,
-  extractOptionalUserId,
   extractOptionalInteger,
   extractOptionalString,
 } from "@/lib/middleware/validation";
+import {
+  requireAuthenticatedUserId,
+  unauthorizedResponse,
+} from "@/lib/auth/require-auth-user-id";
+import { assertRateLimit } from "@/lib/security/rate-limit";
 
 // Force dynamic rendering since we use request.url
 export const dynamic = "force-dynamic";
+const LISTENS_RATE_LIMIT = {
+  route: "/api/listens",
+  windowMs: 60_000,
+  maxRequests: 20,
+  softLimitRatio: 0.8,
+} as const;
 
 /**
  * @swagger
@@ -132,6 +142,13 @@ export const dynamic = "force-dynamic";
  */
 export async function GET(request: NextRequest) {
   try {
+    const userId = await requireAuthenticatedUserId(request);
+    if (!userId) return unauthorizedResponse();
+    await assertRateLimit(request, {
+      ...LISTENS_RATE_LIMIT,
+      userId,
+    });
+
     const { searchParams } = new URL(request.url);
     const aggregate =
       searchParams.get("aggregate") ||
@@ -141,7 +158,6 @@ export async function GET(request: NextRequest) {
     // If aggregate is requested, return aggregated data
     if (aggregate && ["day", "week", "month"].includes(aggregate)) {
       const { startDate, endDate } = extractRequiredDateRange(request);
-      const userId = extractOptionalUserId(request);
 
       const aggregatedData = await getAggregatedListens(
         startDate,
@@ -162,7 +178,6 @@ export async function GET(request: NextRequest) {
 
     // Otherwise, return raw listens
     const { startDate: startDateObj, endDate: endDateObj } = extractOptionalDateRange(request);
-    const userId = extractOptionalUserId(request);
     const limit = extractOptionalInteger(request, "limit", {
       min: 1,
       errorMessage: "Invalid limit. Must be a positive integer",

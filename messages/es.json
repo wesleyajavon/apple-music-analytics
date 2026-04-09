@@ -32,6 +32,10 @@
     "logo": "Analytics",
     "appearance": "Apariencia",
     "language": "Idioma",
+    "signIn": "Iniciar sesión",
+    "signUp": "Crear cuenta",
+    "signOut": "Cerrar sesión",
+    "signingOut": "Cerrando sesión...",
     "groups": {
       "main": "Principal",
       "temporal": "Análisis temporal",
@@ -59,6 +63,21 @@
       "methodology": "Metodología 📚",
       "sentryTest": "Test Sentry 🧪"
     }
+  },
+  "auth": {
+    "signInTitle": "Iniciar sesión",
+    "signInSubtitle": "Inicia sesión para acceder a tus analytics.",
+    "signUpTitle": "Crear una cuenta",
+    "signUpSubtitle": "Crea una cuenta para empezar a usar la app.",
+    "email": "Email",
+    "password": "Contraseña",
+    "signIn": "Iniciar sesión",
+    "signingIn": "Iniciando sesión...",
+    "signUp": "Crear cuenta",
+    "creatingAccount": "Creando cuenta...",
+    "noAccount": "¿No tienes cuenta?",
+    "alreadyAccount": "¿Ya tienes cuenta?",
+    "signUpSuccess": "Cuenta creada. Revisa tu email para confirmar el registro."
   },
   "dashboard": {
     "title": "Dashboard 📊"
@@ -368,6 +387,7 @@
     "spotlightTitle": "Tus insights",
     "spotlightHint": "Análisis generado por IA a partir de tus datos de escucha",
     "cached": "(resultado en caché)",
+    "quotaRemaining": "Cuota: {count} restantes",
     "loadingShort": "Cargando..."
   },
   "taste-evolution": {
@@ -422,6 +442,7 @@
     "notEnoughData": "No hay suficientes datos",
     "importDescription": "Importa tus datos de escucha (Last.fm) y selecciona un período para obtener tu perfil.",
     "cached": "(resultado en caché)",
+    "quotaRemaining": "Cuota: {count} restantes",
     "tone": "Tono:",
     "tones": {
       "analytical": "Analítico",
@@ -701,6 +722,8 @@
   "errors": {
     "groqDailyQuotaExceeded": "Cuota diaria de IA agotada. Vuelve a intentarlo cuando se reinicie a medianoche UTC.",
     "groqDailyQuotaExceededDetailed": "Has usado las {limit} generaciones de IA permitidas para hoy. Puedes volver a intentarlo después de {resetTime} (UTC).",
+    "rateLimitRetryAfterSeconds": "Demasiadas solicitudes. Vuelve a intentarlo en {seconds} segundos.",
+    "rateLimitRetryAfterMinutes": "Demasiadas solicitudes. Vuelve a intentarlo en aproximadamente {minutes} minutos.",
     "somethingWrong": "Algo salió mal",
     "unexpectedError": "Un error inesperado. El error se ha registrado y será revisado.",
     "errorDetails": "Detalles del error (desarrollo)",

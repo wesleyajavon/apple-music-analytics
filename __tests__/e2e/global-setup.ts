@@ -1,4 +1,5 @@
 import { execSync } from "node:child_process";
+import { loadEnvConfig } from "@next/env";
 
 /**
  * Ensures the database schema exists before Playwright starts `next dev`.
@@ -7,6 +8,9 @@ import { execSync } from "node:child_process";
  * migrations tied to the same process env as the test run.
  */
 export default async function globalSetup(): Promise<void> {
+  // Playwright doesn't automatically load Next.js env files for globalSetup.
+  loadEnvConfig(process.cwd());
+
   const url = process.env.DATABASE_URL?.trim();
   if (!url) {
     if (process.env.CI) {

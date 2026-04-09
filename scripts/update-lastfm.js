@@ -92,6 +92,7 @@ const usernameArg = getArg('username');
 const baseUrlArg = getArg('baseUrl') || 'http://localhost:3000';
 const fromArg = getArg('from');
 const DRY_RUN = hasFlag('dry-run');
+const IMPORT_ADMIN_KEY = process.env.IMPORT_ADMIN_KEY;
 
 /**
  * Parse --from: ISO date (2026-03-18), datetime, or unix seconds.
@@ -116,6 +117,13 @@ if (!userIdArg || !usernameArg) {
   console.error('  node scripts/update-lastfm.js --userId "user_123" --username "lastfm_user" --baseUrl "http://localhost:3000"');
   console.error('  node scripts/update-lastfm.js --userId "user_123" --username "lastfm_user" --dry-run');
   console.error('  node scripts/update-lastfm.js --userId "user_123" --username "lastfm_user" --from "2026-03-18"');
+  process.exit(1);
+}
+
+if (!IMPORT_ADMIN_KEY) {
+  console.error('❌ Erreur: IMPORT_ADMIN_KEY est requis pour ce script');
+  console.error('   Définissez IMPORT_ADMIN_KEY dans .env.local pour autoriser le mode import admin.');
+  console.error('   Le script utilise le header x-import-admin-key vers /api/lastfm/import.');
   process.exit(1);
 }
 
@@ -207,7 +215,10 @@ async function importNewTracks(fromTimestamp, dryRun = false, opts = {}) {
 
       const response = await fetch(`${BASE_URL}/api/lastfm/import`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-import-admin-key': IMPORT_ADMIN_KEY,
+        },
         body: JSON.stringify(body),
       });
 

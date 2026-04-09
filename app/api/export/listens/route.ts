@@ -4,12 +4,26 @@ import { generateCsv, generateExportFilename } from "@/lib/utils/csv-utils";
 import { handleApiError } from "@/lib/utils/error-handler";
 import {
   extractOptionalDateRange,
-  extractOptionalUserId,
   extractOptionalString,
 } from "@/lib/middleware/validation";
+import {
+  requireAuthenticatedUserId,
+  unauthorizedResponse,
+} from "@/lib/auth/require-auth-user-id";
+import {
+  applyRateLimitHeaders,
+  assertRateLimit,
+  type RateLimitResult,
+} from "@/lib/security/rate-limit";
 
 // Force dynamic rendering since we use request.url
 export const dynamic = "force-dynamic";
+
+const EXPORT_LISTENS_RATE_LIMIT = {
+  route: "/api/export/listens",
+  windowMs: 60_000,
+  maxRequests: 10,
+} as const;
 
 /**
  * @swagger
@@ -78,6 +92,7 @@ export const dynamic = "force-dynamic";
  *               $ref: '#/components/schemas/Error'
  */
 export async function GET(request: NextRequest) {
+  let rateLimit: RateLimitResult | undefined;
   try {
     const { searchParams } = new URL(request.url);
     const format = searchParams.get("format") || "csv";
@@ -95,7 +110,12 @@ export async function GET(request: NextRequest) {
 
     // Extraire les paramètres de filtrage
     const { startDate: startDateObj, endDate: endDateObj } = extractOptionalDateRange(request);
-    const userId = extractOptionalUserId(request);
+    const userId = await requireAuthenticatedUserId(request);
+    if (!userId) return unauthorizedResponse();
+    rateLimit = await assertRateLimit(request, {
+      ...EXPORT_LISTENS_RATE_LIMIT,
+      userId,
+    });
     const source = extractOptionalString(request, "source") as
       | "lastfm"
       | "apple_music_replay"
@@ -132,7 +152,7 @@ export async function GET(request: NextRequest) {
     const filename = generateExportFilename("listens", "csv");
 
     // Retourner le CSV avec les bons headers
-    return new NextResponse(csvContent, {
+    const response = new NextResponse(csvContent, {
       status: 200,
       headers: {
         "Content-Type": "text/csv; charset=utf-8",
@@ -140,7 +160,12 @@ export async function GET(request: NextRequest) {
         "Cache-Control": "no-cache, no-store, must-revalidate",
       },
     });
+    return applyRateLimitHeaders(response, rateLimit, EXPORT_LISTENS_RATE_LIMIT);
   } catch (error) {
-    return handleApiError(error, { route: "/api/export/listens" });
+    const response = handleApiError(error, { route: "/api/export/listens" });
+    if (rateLimit) {
+      return applyRateLimitHeaders(response, rateLimit, EXPORT_LISTENS_RATE_LIMIT);
+    }
+    return response;
   }
 }

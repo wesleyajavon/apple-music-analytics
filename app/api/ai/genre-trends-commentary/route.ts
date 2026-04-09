@@ -8,7 +8,6 @@ import { isAiMasterEnabledForRequest } from "@/lib/services/ai/ai-master";
 import {
   extractDateRangeWithDefaults,
   extractPeriod,
-  extractOptionalUserId,
   extractOptionalString,
 } from "@/lib/middleware/validation";
 import { parseAiLocale, type AiLocale } from "@/lib/services/ai/locale-utils";
@@ -21,8 +20,22 @@ import {
   getCachedGenreTrendsCommentary,
   setCachedGenreTrendsCommentary,
 } from "@/lib/services/ai/genre-trends-commentary-cache";
+import {
+  requireAuthenticatedUserId,
+  unauthorizedResponse,
+} from "@/lib/auth/require-auth-user-id";
+import {
+  applyRateLimitHeaders,
+  assertRateLimit,
+  type RateLimitResult,
+} from "@/lib/security/rate-limit";
 
 export const dynamic = "force-dynamic";
+const AI_GENRE_TRENDS_RATE_LIMIT = {
+  route: "/api/ai/genre-trends-commentary",
+  windowMs: 60_000,
+  maxRequests: 12,
+} as const;
 
 function toIsoDate(d: Date): string {
   return d.toISOString().split("T")[0];
@@ -41,13 +54,22 @@ function extractCommentaryMode(request: NextRequest): "both" | "technical" | "li
 }
 
 export async function GET(request: NextRequest) {
+  let rateLimit: RateLimitResult | undefined;
   try {
+    const userId = await requireAuthenticatedUserId(request);
+    if (!userId) return unauthorizedResponse();
+    rateLimit = await assertRateLimit(request, {
+      ...AI_GENRE_TRENDS_RATE_LIMIT,
+      userId,
+    });
+
     const genres = extractGenres(request);
     if (genres.length === 0) {
-      return NextResponse.json(
+      const response = NextResponse.json(
         { error: "At least one `genres` query parameter is required.", code: "VALIDATION_ERROR" },
         { status: 400 }
       );
+      return applyRateLimitHeaders(response, rateLimit, AI_GENRE_TRENDS_RATE_LIMIT);
     }
 
     const { searchParams } = new URL(request.url);
@@ -59,14 +81,14 @@ export async function GET(request: NextRequest) {
     let timeFilterMode: "all_time" | "custom_range";
 
     if (!hasStartDate && !hasEndDate) {
-      const userId = extractOptionalUserId(request);
       const range = await getListenDateRange(userId);
       if (!range) {
         const empty: GenreTrendsCommentaryApiResponse = {
           commentary: null,
           commentaryLight: null,
         };
-        return NextResponse.json(empty);
+        const response = NextResponse.json(empty);
+        return applyRateLimitHeaders(response, rateLimit, AI_GENRE_TRENDS_RATE_LIMIT);
       }
       startDate = range.minDate;
       endDate = range.maxDate;
@@ -86,7 +108,6 @@ export async function GET(request: NextRequest) {
     }
 
     const period = extractPeriod(request, "month") as GenreTrendPeriod;
-    const userId = extractOptionalUserId(request);
     const locale = parseAiLocale(extractOptionalString(request, "locale")) as AiLocale;
     const commentaryMode = extractCommentaryMode(request);
 
@@ -106,7 +127,8 @@ export async function GET(request: NextRequest) {
         commentary: null,
         commentaryLight: null,
       };
-      return NextResponse.json(empty);
+      const response = NextResponse.json(empty);
+      return applyRateLimitHeaders(response, rateLimit, AI_GENRE_TRENDS_RATE_LIMIT);
     }
 
     if (!isAiMasterEnabledForRequest(request)) {
@@ -115,7 +137,8 @@ export async function GET(request: NextRequest) {
         commentaryLight: null,
         aiUnavailable: true,
       };
-      return NextResponse.json(res);
+      const response = NextResponse.json(res);
+      return applyRateLimitHeaders(response, rateLimit, AI_GENRE_TRENDS_RATE_LIMIT);
     }
 
     if (!process.env.GROQ_API_KEY) {
@@ -124,7 +147,8 @@ export async function GET(request: NextRequest) {
         commentaryLight: null,
         aiUnavailable: true,
       };
-      return NextResponse.json(res);
+      const response = NextResponse.json(res);
+      return applyRateLimitHeaders(response, rateLimit, AI_GENRE_TRENDS_RATE_LIMIT);
     }
 
     let commentary: string | null = null;
@@ -180,8 +204,16 @@ export async function GET(request: NextRequest) {
       commentaryLightCached: commentaryLight ? commentaryLightCached : undefined,
     };
 
-    return NextResponse.json(response);
+    return applyRateLimitHeaders(
+      NextResponse.json(response),
+      rateLimit,
+      AI_GENRE_TRENDS_RATE_LIMIT
+    );
   } catch (error) {
-    return handleApiError(error, { route: "/api/ai/genre-trends-commentary" });
+    const response = handleApiError(error, { route: "/api/ai/genre-trends-commentary" });
+    if (rateLimit) {
+      return applyRateLimitHeaders(response, rateLimit, AI_GENRE_TRENDS_RATE_LIMIT);
+    }
+    return response;
   }
 }

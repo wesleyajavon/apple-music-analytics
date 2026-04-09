@@ -32,6 +32,10 @@
     "logo": "Analytics",
     "appearance": "Appearance",
     "language": "Language",
+    "signIn": "Sign in",
+    "signUp": "Sign up",
+    "signOut": "Sign out",
+    "signingOut": "Signing out...",
     "groups": {
       "main": "Main",
       "temporal": "Temporal analysis",
@@ -59,6 +63,21 @@
       "methodology": "Methodology 📚",
       "sentryTest": "Sentry Test 🧪"
     }
+  },
+  "auth": {
+    "signInTitle": "Sign in",
+    "signInSubtitle": "Sign in to access your analytics.",
+    "signUpTitle": "Create an account",
+    "signUpSubtitle": "Create an account to start using the app.",
+    "email": "Email",
+    "password": "Password",
+    "signIn": "Sign in",
+    "signingIn": "Signing in...",
+    "signUp": "Sign up",
+    "creatingAccount": "Creating account...",
+    "noAccount": "Don't have an account?",
+    "alreadyAccount": "Already have an account?",
+    "signUpSuccess": "Account created. Check your email to confirm your sign up."
   },
   "dashboard": {
     "title": "Dashboard 📊"
@@ -368,6 +387,7 @@
     "spotlightTitle": "Your insights",
     "spotlightHint": "AI-generated analysis from your listening data",
     "cached": "(cached result)",
+    "quotaRemaining": "Quota: {count} remaining",
     "loadingShort": "Loading..."
   },
   "taste-evolution": {
@@ -422,6 +442,7 @@
     "notEnoughData": "Not enough data",
     "importDescription": "Import your listening data (Last.fm) and select a period to get your profile.",
     "cached": "(cached result)",
+    "quotaRemaining": "Quota: {count} remaining",
     "tone": "Tone:",
     "tones": {
       "analytical": "Analytical",
@@ -701,6 +722,8 @@
   "errors": {
     "groqDailyQuotaExceeded": "Daily AI quota reached. Try again after the limit resets at midnight UTC.",
     "groqDailyQuotaExceededDetailed": "You have used all {limit} AI generations allowed for today. You can try again after {resetTime} (UTC).",
+    "rateLimitRetryAfterSeconds": "Too many requests. Please try again in {seconds} seconds.",
+    "rateLimitRetryAfterMinutes": "Too many requests. Please try again in about {minutes} minutes.",
     "somethingWrong": "Something went wrong",
     "unexpectedError": "An unexpected error occurred. The error has been logged and will be reviewed.",
     "errorDetails": "Error details (development)",

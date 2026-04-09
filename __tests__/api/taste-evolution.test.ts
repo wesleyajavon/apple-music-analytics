@@ -24,6 +24,10 @@ vi.mock("@/lib/services/taste-evolution/taste-evolution-cache", () => ({
   getCachedCommentary: vi.fn(),
   setCachedCommentary: vi.fn(),
 }));
+vi.mock("@/lib/auth/require-auth-user-id", () => ({
+  requireAuthenticatedUserId: vi.fn().mockResolvedValue("user-1"),
+  unauthorizedResponse: vi.fn(),
+}));
 
 import { getListenDateRange } from "@/lib/services/listening/listening-service";
 import { getTasteEvolutionTrends } from "@/lib/services/taste-evolution/taste-evolution-service";

@@ -29,8 +29,15 @@ import type {
   TasteProfileResponse,
   TasteProfileTone,
 } from "@/lib/dto/taste-profile";
+import { assertRateLimit } from "@/lib/security/rate-limit";
 
 export const dynamic = "force-dynamic";
+const AI_TASTE_PROFILE_RATE_LIMIT = {
+  route: "/api/ai/taste-profile",
+  windowMs: 60_000,
+  maxRequests: 8,
+  softLimitRatio: 0.8,
+} as const;
 
 const TasteProfileToneSchema = z.enum(["analytical", "casual", "poetic"]);
 
@@ -107,6 +114,10 @@ export async function POST(request: NextRequest) {
 
     const { tone, locale: localeParam, userId: bodyUserId, ...analyticsInput } =
       parseResult.data;
+    await assertRateLimit(request, {
+      ...AI_TASTE_PROFILE_RATE_LIMIT,
+      userId: bodyUserId,
+    });
     const input: TasteProfileInput = analyticsInput;
     const locale = parseAiLocale(localeParam);
 

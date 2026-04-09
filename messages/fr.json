@@ -32,6 +32,10 @@
     "logo": "Analytics",
     "appearance": "Apparence",
     "language": "Langue",
+    "signIn": "Se connecter",
+    "signUp": "Créer un compte",
+    "signOut": "Se déconnecter",
+    "signingOut": "Déconnexion...",
     "groups": {
       "main": "Principal",
       "temporal": "Analyse temporelle",
@@ -59,6 +63,21 @@
       "methodology": "Méthodologie 📚",
       "sentryTest": "Test Sentry 🧪"
     }
+  },
+  "auth": {
+    "signInTitle": "Connexion",
+    "signInSubtitle": "Connectez-vous pour accéder à vos analytics.",
+    "signUpTitle": "Créer un compte",
+    "signUpSubtitle": "Créez un compte pour commencer à utiliser l'app.",
+    "email": "Email",
+    "password": "Mot de passe",
+    "signIn": "Se connecter",
+    "signingIn": "Connexion...",
+    "signUp": "Créer un compte",
+    "creatingAccount": "Création du compte...",
+    "noAccount": "Vous n'avez pas de compte ?",
+    "alreadyAccount": "Vous avez déjà un compte ?",
+    "signUpSuccess": "Compte créé. Vérifiez votre email pour confirmer votre inscription."
   },
   "dashboard": {
     "title": "Dashboard 📊"
@@ -368,6 +387,7 @@
     "spotlightTitle": "Vos insights",
     "spotlightHint": "Analyse générée par IA à partir de vos données d'écoute",
     "cached": "(résultat en cache)",
+    "quotaRemaining": "Quota: {count} restants",
     "loadingShort": "Chargement..."
   },
   "taste-evolution": {
@@ -422,6 +442,7 @@
     "notEnoughData": "Pas assez de données",
     "importDescription": "Importez vos données d'écoute (Last.fm) et sélectionnez une période pour obtenir votre profil.",
     "cached": "(résultat en cache)",
+    "quotaRemaining": "Quota: {count} restants",
     "tone": "Ton :",
     "tones": {
       "analytical": "Analytique",
@@ -701,6 +722,8 @@
   "errors": {
     "groqDailyQuotaExceeded": "Quota quotidien d’IA atteint. Réessayez après la remise à zéro à minuit UTC.",
     "groqDailyQuotaExceededDetailed": "Vous avez utilisé les {limit} générations IA autorisées pour aujourd’hui. Réessayez après {resetTime} (UTC).",
+    "rateLimitRetryAfterSeconds": "Trop de requêtes. Réessayez dans {seconds} secondes.",
+    "rateLimitRetryAfterMinutes": "Trop de requêtes. Réessayez dans environ {minutes} minutes.",
     "somethingWrong": "Quelque chose s'est mal passé",
     "unexpectedError": "Une erreur inattendue s'est produite. L'erreur a été enregistrée et sera examinée.",
     "errorDetails": "Détails de l'erreur (développement)",

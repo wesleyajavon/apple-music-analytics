@@ -12,7 +12,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   extractDateRangeWithDefaults,
-  extractOptionalUserId,
   extractOptionalString,
 } from "@/lib/middleware/validation";
 import { parseAiLocale } from "@/lib/services/ai/locale-utils";
@@ -28,11 +27,18 @@ import {
 import { handleApiError } from "@/lib/utils/error-handler";
 import { isAiMasterEnabledForRequest } from "@/lib/services/ai/ai-master";
 import type { TasteEvolutionResponse } from "@/lib/dto/taste-evolution";
+import {
+  requireAuthenticatedUserId,
+  unauthorizedResponse,
+} from "@/lib/auth/require-auth-user-id";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   try {
+    const userId = await requireAuthenticatedUserId(request);
+    if (!userId) return unauthorizedResponse();
+
     const { searchParams } = new URL(request.url);
     const hasStartDate = searchParams.has("startDate");
     const hasEndDate = searchParams.has("endDate");
@@ -41,7 +47,6 @@ export async function GET(request: NextRequest) {
     let endDate: Date;
 
     if (!hasStartDate && !hasEndDate) {
-      const userId = extractOptionalUserId(request);
       const range = await getListenDateRange(userId);
       if (!range) {
         return NextResponse.json({
@@ -65,7 +70,6 @@ export async function GET(request: NextRequest) {
       startDate = extracted.startDate;
       endDate = extracted.endDate;
     }
-    const userId = extractOptionalUserId(request);
     const locale = parseAiLocale(extractOptionalString(request, "locale"));
 
     const startStr = startDate.toISOString().slice(0, 10);

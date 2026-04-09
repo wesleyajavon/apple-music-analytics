@@ -10,6 +10,10 @@ vi.mock('@/lib/services/listening/listening-service', () => ({
 vi.mock('@/lib/services/listening/listening-aggregation', () => ({
   getAggregatedListens: vi.fn(),
 }));
+vi.mock('@/lib/auth/require-auth-user-id', () => ({
+  requireAuthenticatedUserId: vi.fn().mockResolvedValue('user-1'),
+  unauthorizedResponse: vi.fn(),
+}));
 
 import { getListens } from '@/lib/services/listening/listening-service';
 import { getAggregatedListens } from '@/lib/services/listening/listening-aggregation';

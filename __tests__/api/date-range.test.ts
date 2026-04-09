@@ -9,6 +9,10 @@ import { NextRequest } from "next/server";
 vi.mock("@/lib/services/listening/listening-service", () => ({
   getListenDateRange: vi.fn(),
 }));
+vi.mock("@/lib/auth/require-auth-user-id", () => ({
+  requireAuthenticatedUserId: vi.fn().mockResolvedValue("user-1"),
+  unauthorizedResponse: vi.fn(),
+}));
 
 import { getListenDateRange } from "@/lib/services/listening/listening-service";
 
@@ -31,7 +35,7 @@ describe("GET /api/date-range", () => {
       startDate: "2020-01-15",
       endDate: "2025-02-21",
     });
-    expect(getListenDateRange).toHaveBeenCalledWith(undefined);
+    expect(getListenDateRange).toHaveBeenCalledWith("user-1");
   });
 
   it("should return null when no listens exist", async () => {
@@ -48,18 +52,16 @@ describe("GET /api/date-range", () => {
     });
   });
 
-  it("should pass userId when provided", async () => {
+  it("should use authenticated user id", async () => {
     const minDate = new Date("2024-01-01");
     const maxDate = new Date("2024-12-31");
     vi.mocked(getListenDateRange).mockResolvedValue({ minDate, maxDate });
 
-    const request = new NextRequest(
-      "http://localhost/api/date-range?userId=user-123"
-    );
+    const request = new NextRequest("http://localhost/api/date-range");
     const response = await GET(request);
 
     expect(response.status).toBe(200);
-    expect(getListenDateRange).toHaveBeenCalledWith("user-123");
+    expect(getListenDateRange).toHaveBeenCalledWith("user-1");
   });
 
   it("should return 500 when getListenDateRange throws", async () => {

@@ -7,6 +7,10 @@ vi.mock('@/lib/services/listening/listening-stats', () => ({
   getGenreDistribution: vi.fn(),
   getTopArtistsForGenres: vi.fn(),
 }));
+vi.mock('@/lib/auth/require-auth-user-id', () => ({
+  requireAuthenticatedUserId: vi.fn().mockResolvedValue('user-1'),
+  unauthorizedResponse: vi.fn(),
+}));
 
 import {
   getGenreDistribution,
@@ -109,18 +113,16 @@ describe('GET /api/genres', () => {
     expect(data).toHaveProperty('code', 'VALIDATION_ERROR');
   });
 
-  it('should handle userId parameter', async () => {
+  it('should use authenticated user id', async () => {
     const mockGenreCounts = [{ genre: 'Rock', count: 100 }];
     vi.mocked(getGenreDistribution).mockResolvedValue(mockGenreCounts);
 
-    const request = new NextRequest(
-      'http://localhost/api/genres?userId=user123'
-    );
+    const request = new NextRequest('http://localhost/api/genres');
     const response = await GET(request);
     
     expect(response.status).toBe(200);
     const callArgs = vi.mocked(getGenreDistribution).mock.calls[0];
-    expect(callArgs[2]).toBe('user123');
+    expect(callArgs[2]).toBe('user-1');
   });
 
   it('should return 500 when service throws an error', async () => {

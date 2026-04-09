@@ -11,17 +11,31 @@ import { getMonthlyAggregatedListens } from "@/lib/services/listening/listening-
 import { handleApiError } from "@/lib/utils/error-handler";
 import {
   extractOptionalDateRange,
-  extractOptionalUserId,
   extractOptionalInteger,
   extractOptionalString,
 } from "@/lib/middleware/validation";
 import { generateExportFilename } from "@/lib/utils/csv-utils";
 import { routing } from "@/i18n/routing";
+import {
+  requireAuthenticatedUserId,
+  unauthorizedResponse,
+} from "@/lib/auth/require-auth-user-id";
+import {
+  applyRateLimitHeaders,
+  assertRateLimit,
+  type RateLimitResult,
+} from "@/lib/security/rate-limit";
 
 const VALID_LOCALES = routing.locales as readonly string[];
 
 // Force dynamic rendering since we use request.url
 export const dynamic = "force-dynamic";
+
+const EXPORT_REPORT_RATE_LIMIT = {
+  route: "/api/export/report",
+  windowMs: 60_000,
+  maxRequests: 5,
+} as const;
 
 /**
  * @swagger
@@ -95,6 +109,7 @@ export const dynamic = "force-dynamic";
  *               $ref: '#/components/schemas/Error'
  */
 export async function GET(request: NextRequest) {
+  let rateLimit: RateLimitResult | undefined;
   try {
     const { searchParams } = new URL(request.url);
     const format = searchParams.get("format") || "pdf";
@@ -124,7 +139,12 @@ export async function GET(request: NextRequest) {
       max: 2100,
     });
     const { startDate: startDateObj, endDate: endDateObj } = extractOptionalDateRange(request);
-    const userId = extractOptionalUserId(request);
+    const userId = await requireAuthenticatedUserId(request);
+    if (!userId) return unauthorizedResponse();
+    rateLimit = await assertRateLimit(request, {
+      ...EXPORT_REPORT_RATE_LIMIT,
+      userId,
+    });
 
     // Déterminer les dates pour le rapport
     let startDate: Date;
@@ -211,7 +231,7 @@ export async function GET(request: NextRequest) {
     const filename = generateExportFilename(`rapport_${reportYear}`, "pdf");
 
     // Retourner le PDF avec les bons headers
-    return new NextResponse(pdfBuffer, {
+    const response = new NextResponse(pdfBuffer, {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
@@ -219,7 +239,12 @@ export async function GET(request: NextRequest) {
         "Cache-Control": "no-cache, no-store, must-revalidate",
       },
     });
+    return applyRateLimitHeaders(response, rateLimit, EXPORT_REPORT_RATE_LIMIT);
   } catch (error) {
-    return handleApiError(error, { route: "/api/export/report" });
+    const response = handleApiError(error, { route: "/api/export/report" });
+    if (rateLimit) {
+      return applyRateLimitHeaders(response, rateLimit, EXPORT_REPORT_RATE_LIMIT);
+    }
+    return response;
   }
 }

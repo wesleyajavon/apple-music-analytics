@@ -2,7 +2,7 @@
 
 import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 import { useLocale } from "next-intl";
-import { apiClient } from "@/lib/api-client";
+import { apiClient, type ParsedRateLimitHeaders } from "@/lib/api-client";
 import { getAiInsightsLabels } from "@/lib/constants/ai-insights-labels";
 import type {
   TasteProfileInput,
@@ -16,6 +16,10 @@ import type { YearOverYearDelta } from "@/lib/dto/ai-insights";
 import { tasteProfileKeys } from "./query-keys";
 
 const TASTE_PROFILE_STALE_TIME = 5 * 60 * 1000; // 5 minutes
+
+export type TasteProfileUiResponse = TasteProfileResponse & {
+  rateLimit?: ParsedRateLimitHeaders;
+};
 
 function getPreviousPeriod(
   startDate: string,
@@ -146,7 +150,7 @@ async function fetchTasteProfile(
   tone: TasteProfileTone,
   locale: string,
   userId?: string
-): Promise<TasteProfileResponse> {
+): Promise<TasteProfileUiResponse> {
   const { prevStartDate, prevEndDate } = getPreviousPeriod(startDate, endDate);
 
   const [overview, previousOverview, genres, temporal] = await Promise.all([
@@ -178,11 +182,15 @@ async function fetchTasteProfile(
     userId !== undefined && userId !== ""
       ? `?userId=${encodeURIComponent(userId)}`
       : "";
-  return apiClient.post<TasteProfileResponse>(`/ai/taste-profile${qs}`, {
+  const result = await apiClient.postWithMeta<TasteProfileResponse>(`/ai/taste-profile${qs}`, {
     ...input,
     tone,
     locale,
   });
+  return {
+    ...result.data,
+    rateLimit: result.rateLimit,
+  };
 }
 
 /**
@@ -195,7 +203,7 @@ export function useTasteProfile(
   endDate: string | undefined,
   tone: TasteProfileTone = "casual",
   options?: Omit<
-    UseQueryOptions<TasteProfileResponse, Error>,
+    UseQueryOptions<TasteProfileUiResponse, Error>,
     "queryKey" | "queryFn"
   > & { userId?: string }
 ) {
@@ -203,7 +211,7 @@ export function useTasteProfile(
   const hasValidRange = !!startDate && !!endDate;
   const { userId, ...queryOptions } = options ?? {};
 
-  return useQuery<TasteProfileResponse, Error>({
+  return useQuery<TasteProfileUiResponse, Error>({
     queryKey: tasteProfileKeys.list({ startDate, endDate, tone, locale, userId }),
     queryFn: () => fetchTasteProfile(startDate!, endDate!, tone, locale, userId),
     enabled: hasValidRange,

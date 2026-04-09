@@ -7,6 +7,10 @@ import { NextRequest } from "next/server";
 import { GET } from "@/app/api/lastfm/route";
 import { POST as POSTImport } from "@/app/api/lastfm/import/route";
 
+vi.mock("@/lib/auth/get-current-user-id", () => ({
+  getCurrentUserId: vi.fn(),
+}));
+
 vi.mock("@/lib/services/lastfm", () => ({
   getRecentTracks: vi.fn(),
   getRecentTracksRaw: vi.fn(),
@@ -21,6 +25,7 @@ import {
   importLastFmTracks,
 } from "@/lib/services/lastfm";
 import type { NormalizedLastFmTrack } from "@/lib/dto/lastfm";
+import { getCurrentUserId } from "@/lib/auth/get-current-user-id";
 
 const normalizedResponse = {
   tracks: [] as NormalizedLastFmTrack[],
@@ -94,6 +99,8 @@ describe("GET /api/lastfm", () => {
 describe("POST /api/lastfm/import", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    process.env.IMPORT_ADMIN_KEY = "test-admin-key";
+    vi.mocked(getCurrentUserId).mockResolvedValue(undefined);
     vi.mocked(isLastFmConfigured).mockReturnValue(true);
     vi.mocked(importLastFmTracks).mockResolvedValue({
       success: true,
@@ -109,7 +116,10 @@ describe("POST /api/lastfm/import", () => {
   it("should return 200 with import result", async () => {
     const request = new Request("http://localhost/api/lastfm/import", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-import-admin-key": "test-admin-key",
+      },
       body: JSON.stringify({ userId: "user-1" }),
     });
     const response = await POSTImport(request);
@@ -121,10 +131,25 @@ describe("POST /api/lastfm/import", () => {
     expect(importLastFmTracks).toHaveBeenCalledWith("user-1", expect.any(Object));
   });
 
-  it("should return 400 when userId is missing", async () => {
+  it("should return 401 without auth session and admin key", async () => {
     const request = new Request("http://localhost/api/lastfm/import", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({}),
+    });
+    const response = await POSTImport(request);
+
+    expect(response.status).toBe(401);
+    expect(importLastFmTracks).not.toHaveBeenCalled();
+  });
+
+  it("should return 400 in admin mode when userId is missing", async () => {
+    const request = new Request("http://localhost/api/lastfm/import", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-import-admin-key": "test-admin-key",
+      },
       body: JSON.stringify({}),
     });
     const response = await POSTImport(request);
@@ -138,7 +163,10 @@ describe("POST /api/lastfm/import", () => {
   it("should return 400 when limit is invalid", async () => {
     const request = new Request("http://localhost/api/lastfm/import", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-import-admin-key": "test-admin-key",
+      },
       body: JSON.stringify({ userId: "user-1", limit: 500 }),
     });
     const response = await POSTImport(request);
@@ -154,7 +182,10 @@ describe("POST /api/lastfm/import", () => {
 
     const request = new Request("http://localhost/api/lastfm/import", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-import-admin-key": "test-admin-key",
+      },
       body: JSON.stringify({ userId: "user-1" }),
     });
     const response = await POSTImport(request);

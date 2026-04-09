@@ -39,6 +39,7 @@ export const ErrorCodes = {
 
   /** Quota produit : limite d’appels Groq par utilisateur / jour (429) */
   GROQ_DAILY_QUOTA_EXCEEDED: 'GROQ_DAILY_QUOTA_EXCEEDED',
+  RATE_LIMIT_EXCEEDED: 'RATE_LIMIT_EXCEEDED',
   
   // Erreurs de ressource non trouvée (404)
   NOT_FOUND: 'NOT_FOUND',
@@ -121,8 +122,22 @@ export function handleApiError(
     if (error.details !== undefined) {
       responseBody.details = error.details;
     }
-
-    return NextResponse.json(responseBody, { status: error.statusCode });
+    const response = NextResponse.json(responseBody, { status: error.statusCode });
+    if (
+      error.statusCode === 429 &&
+      error.code === ErrorCodes.RATE_LIMIT_EXCEEDED &&
+      error.details &&
+      typeof error.details === "object" &&
+      "resetAt" in error.details
+    ) {
+      const resetAt = (error.details as { resetAt?: string }).resetAt;
+      const resetAtMs = resetAt ? new Date(resetAt).getTime() : NaN;
+      if (Number.isFinite(resetAtMs)) {
+        const retryAfterSec = Math.max(0, Math.ceil((resetAtMs - Date.now()) / 1000));
+        response.headers.set("Retry-After", String(retryAfterSec));
+      }
+    }
+    return response;
   }
 
   // Erreur inattendue - logging structuré

@@ -46,6 +46,7 @@ Les tests end-to-end utilisent Playwright pour tester l'application complète da
 
 **Fichiers de test :**
 - `dashboard.spec.ts` - Tests de navigation et intégration du dashboard
+- `auth-hardening.spec.ts` - Couverture auth: bootstrap (sign-up ou fallback sign-in), session requise (`401`) et isolation cross-user
 
 **Prérequis :**
 ```bash
@@ -66,6 +67,14 @@ npm run test:e2e:headed
 ```
 
 **Note :** Les tests E2E nécessitent que l'application soit en cours d'exécution (Playwright la démarre automatiquement via `webServer`).
+
+**Notes auth E2E (CI-friendly) :**
+- Variables minimales recommandées: `E2E_AUTH_EMAIL` et `E2E_AUTH_PASSWORD` (utilisateur seedé dédié aux tests).
+- Le test "bootstrap auth" utilise le sign-in par défaut pour rester déterministe en CI.
+- Pour activer le scénario sign-up, définir `E2E_AUTH_ENABLE_SIGNUP=true` (optionnel), puis configurer au besoin:
+  - `E2E_AUTH_SIGNUP_DOMAIN` (default: `example.com`)
+  - `E2E_AUTH_SIGNUP_PASSWORD` (default: `E2EAuthHardening#2026`)
+- Si la confirmation email est active côté Supabase, le test sign-up vérifie uniquement le message de succès (pas de dépendance à un lien email).
 
 ### Tests des validateurs (`__tests__/validators/`)
 

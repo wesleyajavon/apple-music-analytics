@@ -8,6 +8,10 @@ vi.mock("@/lib/services/artist/artist-service", () => ({
 vi.mock("@/lib/services/listening/listening-service", () => ({
   getListenDateRange: vi.fn(),
 }));
+vi.mock("@/lib/auth/require-auth-user-id", () => ({
+  requireAuthenticatedUserId: vi.fn().mockResolvedValue("user-1"),
+  unauthorizedResponse: vi.fn(),
+}));
 
 import { getArtistTrendsChartRows } from "@/lib/services/artist/artist-service";
 import { getListenDateRange } from "@/lib/services/listening/listening-service";
@@ -78,7 +82,7 @@ describe("GET /api/artists/trends-chart", () => {
     expect(start).toBeInstanceOf(Date);
     expect(end).toBeInstanceOf(Date);
     expect(period).toBe("month");
-    expect(userId).toBeUndefined();
+    expect(userId).toBe("user-1");
     expect(topN).toBe(30);
   });
 
@@ -95,7 +99,7 @@ describe("GET /api/artists/trends-chart", () => {
       expect.any(Date),
       expect.any(Date),
       "week",
-      undefined,
+      "user-1",
       10
     );
   });

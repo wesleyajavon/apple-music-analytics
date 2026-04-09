@@ -55,3 +55,26 @@ export function setContext(key: string, context: Record<string, unknown>) {
 export function setTag(key: string, value: string) {
   Sentry.setTag(key, value);
 }
+
+/**
+ * Signal dédié pour les pics de rate-limit (429).
+ */
+export function captureRateLimitSpike(params: {
+  route: string;
+  blockedInMinute: number;
+  threshold: number;
+  subject?: string;
+}) {
+  Sentry.withScope((scope) => {
+    scope.setLevel("warning");
+    scope.setTag("signal", "rate_limit_spike");
+    scope.setTag("route", params.route);
+    scope.setContext("rate_limit_spike", {
+      route: params.route,
+      blockedInMinute: params.blockedInMinute,
+      threshold: params.threshold,
+      subject: params.subject,
+    });
+    Sentry.captureMessage("Rate limit spike detected", "warning");
+  });
+}

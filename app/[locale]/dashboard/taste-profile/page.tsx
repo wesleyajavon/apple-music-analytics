@@ -162,6 +162,11 @@ function TasteProfileContent() {
               {t("cached")}
             </span>
           )}
+          {typeof data.rateLimit?.remaining === "number" && (
+            <span className="inline-flex items-center rounded-full border border-gray-200 dark:border-gray-700 px-3 py-1 text-xs text-gray-600 dark:text-gray-300">
+              {t("quotaRemaining", { count: data.rateLimit.remaining })}
+            </span>
+          )}
           {dateRangeLabel && (
             <span className="text-sm text-gray-500 dark:text-gray-400">
               {dateRangeLabel}

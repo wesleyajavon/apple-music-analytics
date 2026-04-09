@@ -9,13 +9,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getListenDateRange } from "@/lib/services/listening/listening-service";
 import { handleApiError } from "@/lib/utils/error-handler";
-import { extractOptionalUserId } from "@/lib/middleware/validation";
+import {
+  requireAuthenticatedUserId,
+  unauthorizedResponse,
+} from "@/lib/auth/require-auth-user-id";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   try {
-    const userId = extractOptionalUserId(request);
+    const userId = await requireAuthenticatedUserId(request);
+    if (!userId) return unauthorizedResponse();
     const range = await getListenDateRange(userId);
 
     if (!range) {

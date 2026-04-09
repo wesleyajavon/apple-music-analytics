@@ -6,6 +6,10 @@ import { NextRequest } from 'next/server';
 vi.mock('@/lib/services/listening/temporal-analysis', () => ({
   getTemporalAnalysis: vi.fn(),
 }));
+vi.mock('@/lib/auth/require-auth-user-id', () => ({
+  requireAuthenticatedUserId: vi.fn().mockResolvedValue('user-1'),
+  unauthorizedResponse: vi.fn(),
+}));
 
 import { getTemporalAnalysis } from '@/lib/services/listening/temporal-analysis';
 
@@ -118,7 +122,7 @@ describe('GET /api/temporal-analysis', () => {
     expect(callArgs[1]).toBeUndefined();
   });
 
-  it('should handle userId parameter', async () => {
+  it('should use authenticated user id', async () => {
     const mockData = {
       byDayOfWeek: [],
       byHourOfDay: [],
@@ -129,13 +133,13 @@ describe('GET /api/temporal-analysis', () => {
     vi.mocked(getTemporalAnalysis).mockResolvedValue(mockData);
 
     const request = new NextRequest(
-      'http://localhost/api/temporal-analysis?startDate=2024-01-01&endDate=2024-01-31&userId=user123'
+      'http://localhost/api/temporal-analysis?startDate=2024-01-01&endDate=2024-01-31'
     );
     const response = await GET(request);
     
     expect(response.status).toBe(200);
     const callArgs = vi.mocked(getTemporalAnalysis).mock.calls[0];
-    expect(callArgs[2]).toBe('user123');
+    expect(callArgs[2]).toBe('user-1');
   });
 
   it('should return 400 for invalid date format', async () => {

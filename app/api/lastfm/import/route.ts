@@ -1,9 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { importLastFmTracks, isLastFmConfigured } from "@/lib/services/lastfm";
 import { handleApiError, createValidationError } from "@/lib/utils/error-handler";
+import { resolveImportUserId } from "@/lib/auth/resolve-import-user-id";
+import {
+  applyRateLimitHeaders,
+  assertRateLimit,
+  type RateLimitResult,
+} from "@/lib/security/rate-limit";
 
 // Force dynamic rendering
 export const dynamic = "force-dynamic";
+
+const LASTFM_IMPORT_RATE_LIMIT = {
+  route: "/api/lastfm/import",
+  windowMs: 60_000,
+  maxRequests: 5,
+} as const;
 
 /**
  * POST /api/lastfm/import
@@ -28,22 +40,19 @@ export const dynamic = "force-dynamic";
  *   dryRun?: boolean - If true, fetches and counts without writing to DB (optional)
  * }
  */
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   let userId: string | undefined;
+  let rateLimit: RateLimitResult | undefined;
   try {
     const body = await request.json();
-    userId = body?.userId;
-
-    // Validate request body
-    if (!body.userId || typeof body.userId !== "string") {
-      throw createValidationError(
-        "userId is required and must be a string",
-        { body }
-      );
-    }
-
-    const { userId: validatedUserId, username, limit, page, from, to, dryRun } = body;
-    userId = validatedUserId;
+    const { username, limit, page, from, to, dryRun } = body ?? {};
+    const resolved = await resolveImportUserId(request, body?.userId);
+    if (!resolved.ok) return resolved.response;
+    userId = resolved.userId;
+    rateLimit = await assertRateLimit(request, {
+      ...LASTFM_IMPORT_RATE_LIMIT,
+      userId,
+    });
 
     // Validate limit if provided
     if (limit !== undefined) {
@@ -71,7 +80,7 @@ export async function POST(request: Request) {
     const isMocked = !isLastFmConfigured();
 
     // Import tracks (or dry-run)
-    const result = await importLastFmTracks(validatedUserId, {
+    const result = await importLastFmTracks(userId, {
       username,
       limit: limit ? parseInt(String(limit), 10) : undefined,
       page: page ? parseInt(String(page), 10) : undefined,
@@ -80,7 +89,7 @@ export async function POST(request: Request) {
       dryRun: dryRun === true,
     });
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: result.success,
       imported: result.imported,
       skipped: result.skipped,
@@ -95,8 +104,13 @@ export async function POST(request: Request) {
           : "Using real Last.fm API",
       },
     });
+    return applyRateLimitHeaders(response, rateLimit, LASTFM_IMPORT_RATE_LIMIT);
   } catch (error) {
-    return handleApiError(error, { route: '/api/lastfm/import', userId });
+    const response = handleApiError(error, { route: '/api/lastfm/import', userId });
+    if (rateLimit) {
+      return applyRateLimitHeaders(response, rateLimit, LASTFM_IMPORT_RATE_LIMIT);
+    }
+    return response;
   }
 }
 

@@ -6,6 +6,7 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { ApiError } from "@/lib/api-client";
 import {
   getGroqQuotaUserFacingMessage,
   isGroqDailyQuotaError,
@@ -30,8 +31,20 @@ export function ErrorState({
   const quotaMessage = error
     ? getGroqQuotaUserFacingMessage(error, tErrors, locale)
     : null;
+  const rateLimitMessage = (() => {
+    if (!(error instanceof ApiError)) return null;
+    if (error.code !== "RATE_LIMIT_EXCEEDED") return null;
+    const retryAfterSeconds = error.rateLimit?.retryAfterSeconds;
+    if (retryAfterSeconds === undefined) return null;
+
+    if (retryAfterSeconds >= 60) {
+      const minutes = Math.ceil(retryAfterSeconds / 60);
+      return tErrors("rateLimitRetryAfterMinutes", { minutes });
+    }
+    return tErrors("rateLimitRetryAfterSeconds", { seconds: retryAfterSeconds });
+  })();
   const displayMessage =
-    quotaMessage ?? message ?? t("defaultMessage");
+    quotaMessage ?? rateLimitMessage ?? message ?? t("defaultMessage");
   const retryLabel = t("retry");
   const showTechnicalDetail =
     error && !isGroqDailyQuotaError(error);

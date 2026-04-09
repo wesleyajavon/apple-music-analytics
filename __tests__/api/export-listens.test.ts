@@ -9,6 +9,10 @@ import { GET } from "@/app/api/export/listens/route";
 vi.mock("@/lib/services/listening/listening-service", () => ({
   getAllListensForExport: vi.fn(),
 }));
+vi.mock("@/lib/auth/require-auth-user-id", () => ({
+  requireAuthenticatedUserId: vi.fn().mockResolvedValue("user-1"),
+  unauthorizedResponse: vi.fn(),
+}));
 
 import { getAllListensForExport } from "@/lib/services/listening/listening-service";
 
@@ -34,13 +38,16 @@ describe("GET /api/export/listens", () => {
     expect(response.status).toBe(200);
     expect(response.headers.get("Content-Type")).toContain("text/csv");
     expect(response.headers.get("Content-Disposition")).toContain("attachment");
+    expect(response.headers.get("X-RateLimit-Limit")).toBe("10");
+    expect(response.headers.get("X-RateLimit-Remaining")).toBeDefined();
+    expect(response.headers.get("X-RateLimit-Reset")).toBeDefined();
     const text = await response.text();
     expect(text).toContain("Date");
     expect(text).toContain("Artist");
     expect(getAllListensForExport).toHaveBeenCalledWith({
       startDate: undefined,
       endDate: undefined,
-      userId: undefined,
+      userId: "user-1",
       source: undefined,
     });
   });

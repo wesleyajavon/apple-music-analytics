@@ -4,11 +4,21 @@ import { OverviewStatsDto, TopArtistDto } from "@/lib/dto/listening";
 import { handleApiError } from "@/lib/utils/error-handler";
 import {
   extractOptionalDateRange,
-  extractOptionalUserId,
 } from "@/lib/middleware/validation";
+import {
+  requireAuthenticatedUserId,
+  unauthorizedResponse,
+} from "@/lib/auth/require-auth-user-id";
+import { assertRateLimit } from "@/lib/security/rate-limit";
 
 // Force dynamic rendering since we use request.url
 export const dynamic = "force-dynamic";
+const OVERVIEW_RATE_LIMIT = {
+  route: "/api/overview",
+  windowMs: 60_000,
+  maxRequests: 20,
+  softLimitRatio: 0.8,
+} as const;
 
 /**
  * @swagger
@@ -59,7 +69,12 @@ export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     const { startDate, endDate } = extractOptionalDateRange(request);
-    const userId = extractOptionalUserId(request);
+    const userId = await requireAuthenticatedUserId(request);
+    if (!userId) return unauthorizedResponse();
+    await assertRateLimit(request, {
+      ...OVERVIEW_RATE_LIMIT,
+      userId,
+    });
 
     const [stats, topArtists] = await Promise.all([
       getOverviewStats(startDate, endDate, userId),

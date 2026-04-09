@@ -4,11 +4,21 @@ import { ArtistTrendsResponseDto } from "@/lib/dto/artist";
 import { handleApiError } from "@/lib/utils/error-handler";
 import {
   extractRequiredDateRange,
-  extractOptionalUserId,
 } from "@/lib/middleware/validation";
+import {
+  requireAuthenticatedUserId,
+  unauthorizedResponse,
+} from "@/lib/auth/require-auth-user-id";
+import { assertRateLimit } from "@/lib/security/rate-limit";
 
 // Force dynamic rendering since we use request.url
 export const dynamic = "force-dynamic";
+const ARTISTS_TRENDS_RATE_LIMIT = {
+  route: "/api/artists/trends",
+  windowMs: 60_000,
+  maxRequests: 20,
+  softLimitRatio: 0.8,
+} as const;
 
 /**
  * @swagger
@@ -62,7 +72,12 @@ export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     const { startDate, endDate } = extractRequiredDateRange(request);
-    const userId = extractOptionalUserId(request);
+    const userId = await requireAuthenticatedUserId(request);
+    if (!userId) return unauthorizedResponse();
+    await assertRateLimit(request, {
+      ...ARTISTS_TRENDS_RATE_LIMIT,
+      userId,
+    });
     
     const { searchParams } = new URL(request.url);
     const periodParam = searchParams.get("period") || "day";

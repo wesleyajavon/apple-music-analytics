@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { LanguageSwitcher } from "@/lib/components/language-switcher";
 import { ThemeSwitcher } from "@/lib/components/theme-switcher";
 import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 const STORAGE_KEY = "sidebar-collapsed";
 
@@ -246,7 +247,22 @@ function SidebarContent() {
   const searchParams = useSearchParams();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [authEmail, setAuthEmail] = useState<string | null>(null);
+  const [authUserId, setAuthUserId] = useState<string | null>(null);
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const t = useTranslations("sidebar");
+  const adminUserIds = useMemo(
+    () =>
+      (process.env.NEXT_PUBLIC_ADMIN_USER_IDS ?? "")
+        .split(",")
+        .map((v) => v.trim())
+        .filter(Boolean),
+    []
+  );
+  const isAdminUser = useMemo(
+    () => !!authUserId && adminUserIds.includes(authUserId),
+    [authUserId, adminUserIds]
+  );
 
   const withFilters = useMemo(
     () => (href: string) => mergeDashboardSearchParams(href, searchParams),
@@ -257,6 +273,44 @@ function SidebarContent() {
   useEffect(() => {
     setIsCollapsed(getStoredCollapsed());
   }, []);
+
+  useEffect(() => {
+    let mounted = true;
+    const supabase = createSupabaseBrowserClient();
+
+    async function loadAuthUser() {
+      const { data } = await supabase.auth.getUser();
+      if (!mounted) return;
+      setAuthEmail(data.user?.email ?? null);
+      setAuthUserId(data.user?.id ?? null);
+    }
+
+    loadAuthUser();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!mounted) return;
+      setAuthEmail(session?.user?.email ?? null);
+      setAuthUserId(session?.user?.id ?? null);
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  async function handleSignOut() {
+    try {
+      setIsSigningOut(true);
+      const supabase = createSupabaseBrowserClient();
+      await supabase.auth.signOut();
+      window.location.href = "/sign-in";
+    } finally {
+      setIsSigningOut(false);
+    }
+  }
 
   const toggleCollapsed = () => {
     setIsCollapsed((prev) => {
@@ -374,7 +428,8 @@ function SidebarContent() {
                       (item) =>
                         !(
                           item.href === '/dashboard/sentry-test' &&
-                          process.env.NODE_ENV === 'production'
+                          process.env.NODE_ENV === 'production' &&
+                          !isAdminUser
                         )
                     )
                     .map((item) => {
@@ -446,6 +501,42 @@ function SidebarContent() {
                 <LanguageSwitcher collapsed={isCollapsed && !isMobileMenuOpen} />
               </Suspense>
             </div>
+            {!isCollapsed && (
+              <div className="space-y-2 px-3">
+                {authEmail ? (
+                  <>
+                    <p
+                      className="truncate text-xs text-gray-500 dark:text-gray-400"
+                      title={authEmail}
+                    >
+                      {authEmail}
+                    </p>
+                    <button
+                      onClick={handleSignOut}
+                      disabled={isSigningOut}
+                      className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
+                    >
+                      {isSigningOut ? t("signingOut") : t("signOut")}
+                    </button>
+                  </>
+                ) : (
+                  <div className="grid grid-cols-2 gap-2">
+                    <Link
+                      href="/sign-in"
+                      className="rounded-lg border border-gray-200 px-3 py-2 text-center text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
+                    >
+                      {t("signIn")}
+                    </Link>
+                    <Link
+                      href="/sign-up"
+                      className="rounded-lg bg-accent-violet px-3 py-2 text-center text-sm font-medium text-white transition-opacity hover:opacity-90"
+                    >
+                      {t("signUp")}
+                    </Link>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </aside>

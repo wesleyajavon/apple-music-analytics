@@ -8,13 +8,27 @@ import {
 import { handleApiError } from "@/lib/utils/error-handler";
 import {
   extractOptionalDateRange,
-  extractOptionalUserId,
   extractOptionalString,
 } from "@/lib/middleware/validation";
 import { generateExportFilename } from "@/lib/utils/csv-utils";
+import {
+  requireAuthenticatedUserId,
+  unauthorizedResponse,
+} from "@/lib/auth/require-auth-user-id";
+import {
+  applyRateLimitHeaders,
+  assertRateLimit,
+  type RateLimitResult,
+} from "@/lib/security/rate-limit";
 
 // Force dynamic rendering since we use request.url
 export const dynamic = "force-dynamic";
+
+const EXPORT_STATS_RATE_LIMIT = {
+  route: "/api/export/stats",
+  windowMs: 60_000,
+  maxRequests: 10,
+} as const;
 
 /**
  * Interface pour les statistiques exportées
@@ -169,6 +183,7 @@ interface ExportStatsResponse {
  *               $ref: '#/components/schemas/Error'
  */
 export async function GET(request: NextRequest) {
+  let rateLimit: RateLimitResult | undefined;
   try {
     const { searchParams } = new URL(request.url);
     const format = searchParams.get("format") || "json";
@@ -186,7 +201,12 @@ export async function GET(request: NextRequest) {
 
     // Extraire les paramètres de filtrage
     const { startDate: startDateObj, endDate: endDateObj } = extractOptionalDateRange(request);
-    const userId = extractOptionalUserId(request);
+    const userId = await requireAuthenticatedUserId(request);
+    if (!userId) return unauthorizedResponse();
+    rateLimit = await assertRateLimit(request, {
+      ...EXPORT_STATS_RATE_LIMIT,
+      userId,
+    });
     const includeTimeline = searchParams.get("includeTimeline") !== "false";
 
     // Convertir les dates en format ISO string pour les services
@@ -292,7 +312,7 @@ export async function GET(request: NextRequest) {
     const filename = generateExportFilename("stats", "json");
 
     // Retourner le JSON avec les bons headers
-    return new NextResponse(JSON.stringify(response, null, 2), {
+    const rawResponse = new NextResponse(JSON.stringify(response, null, 2), {
       status: 200,
       headers: {
         "Content-Type": "application/json; charset=utf-8",
@@ -300,7 +320,12 @@ export async function GET(request: NextRequest) {
         "Cache-Control": "no-cache, no-store, must-revalidate",
       },
     });
+    return applyRateLimitHeaders(rawResponse, rateLimit, EXPORT_STATS_RATE_LIMIT);
   } catch (error) {
-    return handleApiError(error, { route: "/api/export/stats" });
+    const response = handleApiError(error, { route: "/api/export/stats" });
+    if (rateLimit) {
+      return applyRateLimitHeaders(response, rateLimit, EXPORT_STATS_RATE_LIMIT);
+    }
+    return response;
   }
 }

@@ -35,6 +35,27 @@ export default function SignInPage() {
     }
   }
 
+  async function onGoogleSignIn() {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const supabase = createSupabaseBrowserClient();
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+        },
+      });
+
+      if (oauthError) {
+        setError(oauthError.message);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   return (
     <main className="mx-auto flex min-h-[70vh] w-full max-w-md items-center px-4 py-10">
       <section className="w-full rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
@@ -84,6 +105,15 @@ export default function SignInPage() {
             className="w-full rounded-lg bg-accent-violet px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isLoading ? t("signingIn") : t("signIn")}
+          </button>
+
+          <button
+            type="button"
+            onClick={onGoogleSignIn}
+            disabled={isLoading}
+            className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100 dark:hover:bg-gray-900"
+          >
+            Continuer avec Google
           </button>
         </form>
 

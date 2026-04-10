@@ -4,12 +4,13 @@ import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 import { apiClient } from "@/lib/api-client";
+import { useDashboardViewerUserId } from "@/lib/context/dashboard-viewer-context";
 
 const DATE_RANGE_STALE_TIME = 5 * 60 * 1000; // 5 minutes
 
 export const listenDateRangeKeys = {
   all: ["listening", "date-range"] as const,
-  list: () => [...listenDateRangeKeys.all] as const,
+  list: (userId?: string) => [...listenDateRangeKeys.all, userId ?? "self"] as const,
 } as const;
 
 interface DateRangeResponse {
@@ -32,14 +33,21 @@ export function useListenDateRange(): {
   isAll: boolean;
 } {
   const searchParams = useSearchParams();
+  const viewerUserId = useDashboardViewerUserId();
   const startDateParam = searchParams.get("startDate");
   const endDateParam = searchParams.get("endDate");
 
   const hasUrlDates = !!startDateParam && !!endDateParam;
 
   const { data, isLoading } = useQuery<DateRangeResponse>({
-    queryKey: listenDateRangeKeys.list(),
-    queryFn: () => apiClient.get<DateRangeResponse>("/date-range"),
+    queryKey: listenDateRangeKeys.list(viewerUserId),
+    queryFn: () => {
+      const q =
+        viewerUserId !== undefined && viewerUserId !== ""
+          ? `?userId=${encodeURIComponent(viewerUserId)}`
+          : "";
+      return apiClient.get<DateRangeResponse>(`/date-range${q}`);
+    },
     enabled: !hasUrlDates,
     staleTime: DATE_RANGE_STALE_TIME,
   });

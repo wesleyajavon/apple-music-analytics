@@ -21,9 +21,8 @@ vi.mock("@/lib/services/predictions/prediction-cache", () => ({
 vi.mock("@/lib/services/ai/listening-habit-explainer", () => ({
   explainListeningHabitPrediction: vi.fn(),
 }));
-vi.mock("@/lib/auth/require-auth-user-id", () => ({
-  requireAuthenticatedUserId: vi.fn(),
-  unauthorizedResponse: vi.fn(),
+vi.mock("@/lib/auth/resolve-authorized-data-user-id", () => ({
+  resolveAuthorizedDataUserId: vi.fn(),
 }));
 
 import { getListeningHabitPrediction } from "@/lib/services/predictions/listening-habit-service";
@@ -32,12 +31,15 @@ import {
   getCachedExplanation,
 } from "@/lib/services/predictions/prediction-cache";
 import { explainListeningHabitPrediction } from "@/lib/services/ai/listening-habit-explainer";
-import { requireAuthenticatedUserId } from "@/lib/auth/require-auth-user-id";
+import { resolveAuthorizedDataUserId } from "@/lib/auth/resolve-authorized-data-user-id";
 
 describe("GET /api/predictions/listening-habit", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(requireAuthenticatedUserId).mockResolvedValue("user-1");
+    vi.mocked(resolveAuthorizedDataUserId).mockResolvedValue({
+      ok: true,
+      userId: "user-1",
+    });
     vi.mocked(getCachedPrediction).mockResolvedValue(null);
     vi.mocked(getCachedExplanation).mockResolvedValue(null);
   });

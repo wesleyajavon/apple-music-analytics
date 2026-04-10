@@ -2,6 +2,7 @@ import createMiddleware from "next-intl/middleware";
 import { NextRequest, NextResponse } from "next/server";
 import { routing } from "./i18n/routing";
 import { updateSession } from "@/lib/supabase/middleware";
+import { getPublicProfileUserId } from "@/lib/constants/public-profile";
 
 const handleI18nRouting = createMiddleware(routing);
 
@@ -31,6 +32,11 @@ export default async function middleware(request: NextRequest) {
     normalizedPath === "/dashboard" || normalizedPath.startsWith("/dashboard/");
 
   if (isDashboardRoute && !user) {
+    const publicProfileId = getPublicProfileUserId();
+    const userIdParam = request.nextUrl.searchParams.get("userId");
+    if (publicProfileId && userIdParam === publicProfileId) {
+      return sessionResponse;
+    }
     const locale = getLocaleFromPathname(request.nextUrl.pathname);
     const publicHomePath = locale ? `/${locale}` : "/";
     return NextResponse.redirect(new URL(publicHomePath, request.url));

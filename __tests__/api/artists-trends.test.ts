@@ -5,18 +5,20 @@ import { NextRequest } from "next/server";
 vi.mock("@/lib/services/artist/artist-service", () => ({
   getArtistTrends: vi.fn(),
 }));
-vi.mock("@/lib/auth/require-auth-user-id", () => ({
-  requireAuthenticatedUserId: vi.fn(),
-  unauthorizedResponse: vi.fn(),
+vi.mock("@/lib/auth/resolve-authorized-data-user-id", () => ({
+  resolveAuthorizedDataUserId: vi.fn(),
 }));
 
 import { getArtistTrends } from "@/lib/services/artist/artist-service";
-import { requireAuthenticatedUserId } from "@/lib/auth/require-auth-user-id";
+import { resolveAuthorizedDataUserId } from "@/lib/auth/resolve-authorized-data-user-id";
 
 describe("GET /api/artists/trends", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(requireAuthenticatedUserId).mockResolvedValue("user-1");
+    vi.mocked(resolveAuthorizedDataUserId).mockResolvedValue({
+      ok: true,
+      userId: "user-1",
+    });
   });
 
   const mockTrendData = [

@@ -7,6 +7,7 @@ export const DASHBOARD_PRESERVED_SEARCH_KEYS = [
   "endDate",
   "preset",
   "period",
+  "userId",
 ] as const;
 
 /**

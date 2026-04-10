@@ -67,17 +67,19 @@ function HeatmapContent() {
 
   const startDate = searchParams.get("startDate") || defaultStartDate;
   const endDate = searchParams.get("endDate") || defaultEndDate;
+  const userId = searchParams.get("userId") ?? undefined;
 
   // Récupérer les données de timeline (par jour)
   const { data: timelineData, isLoading, error, refetch } = useTimeline(
     startDate,
     endDate,
-    "day"
+    "day",
+    userId
   );
 
   // Utiliser l'analyse temporelle pour "Jour préféré" - même logique que temporal-analysis
   // (EXTRACT(DOW FROM playedAt) en SQL), évite les bugs de timezone de getDay() côté client
-  const { data: temporalData } = useTemporalAnalysis(startDate, endDate, undefined, {
+  const { data: temporalData } = useTemporalAnalysis(startDate, endDate, userId, {
     enabled: !!startDate && !!endDate,
   });
 
@@ -197,13 +199,14 @@ function HeatmapContent() {
   // Le service listening-service.ts gère automatiquement l'inclusion de toute la journée
   const dayListensParams = useMemo(() => {
     if (!selectedDate) return undefined;
-    
+
     return {
       startDate: selectedDate,
       endDate: selectedDate, // Le service ajustera automatiquement pour inclure toute la journée
       limit: 500, // Limite élevée pour avoir toutes les écoutes du jour
+      userId,
     };
-  }, [selectedDate]);
+  }, [selectedDate, userId]);
 
   const { data: dayListensData, isLoading: isLoadingDayListens } = useListens(
     dayListensParams,

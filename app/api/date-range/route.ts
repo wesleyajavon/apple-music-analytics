@@ -9,8 +9,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getListenDateRange } from "@/lib/services/listening/listening-service";
 import { handleApiError } from "@/lib/utils/error-handler";
+import { resolveAuthorizedDataUserId } from "@/lib/auth/resolve-authorized-data-user-id";
 import {
-  requireAuthenticatedUserId,
+  forbiddenResponse,
   unauthorizedResponse,
 } from "@/lib/auth/require-auth-user-id";
 
@@ -18,8 +19,11 @@ export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   try {
-    const userId = await requireAuthenticatedUserId(request);
-    if (!userId) return unauthorizedResponse();
+    const resolved = await resolveAuthorizedDataUserId(request);
+    if (!resolved.ok) {
+      return resolved.status === 403 ? forbiddenResponse() : unauthorizedResponse();
+    }
+    const { userId } = resolved;
     const range = await getListenDateRange(userId);
 
     if (!range) {

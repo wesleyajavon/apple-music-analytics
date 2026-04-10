@@ -29,6 +29,7 @@ import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
 import { OverviewSkeleton } from "@/lib/components/skeleton-loaders";
 import { OverviewStatsSection } from "@/lib/components/overview-stats-section";
 import { formatOverviewDateRangeLabel } from "@/lib/utils/overview-date-range-label";
+import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
 
 /**
  * Calcule la période précédente basée sur la période actuelle
@@ -96,6 +97,7 @@ function OverviewContent() {
   const emptyStatePresets = useEmptyStatePresets();
   const startDate = searchParams.get("startDate") || undefined;
   const endDate = searchParams.get("endDate") || undefined;
+  const userId = searchParams.get("userId") ?? undefined;
 
   // Calculer la période précédente pour les comparaisons
   const previousPeriod = useMemo(
@@ -106,14 +108,15 @@ function OverviewContent() {
   // Statistiques actuelles
   const { data, isLoading, error, refetch } = useOverviewStats(
     startDate,
-    endDate
+    endDate,
+    userId
   );
 
   // Statistiques de la période précédente
   const { data: previousData } = useOverviewStats(
     previousPeriod?.prevStartDate,
     previousPeriod?.prevEndDate,
-    undefined,
+    userId,
     { enabled: !!previousPeriod }
   );
 
@@ -125,11 +128,12 @@ function OverviewContent() {
   const { data: timelineData } = useTimeline(
     timelineStartDate,
     timelineEndDate,
-    "month"
+    "month",
+    userId
   );
 
   // Top genres (top 6) - mêmes dates que la timeline (undefined = All)
-  const { data: genresData } = useGenres(timelineStartDate, timelineEndDate);
+  const { data: genresData } = useGenres(timelineStartDate, timelineEndDate, userId);
 
   const handleRetry = useCallback(() => {
     refetch();
@@ -188,9 +192,19 @@ function OverviewContent() {
     const p = new URLSearchParams();
     if (startDate) p.set("startDate", startDate);
     if (endDate) p.set("endDate", endDate);
+    if (userId) p.set("userId", userId);
     const qs = p.toString();
     return qs ? `?${qs}` : "";
-  }, [startDate, endDate]);
+  }, [startDate, endDate, userId]);
+
+  const timelineHref = useMemo(
+    () => mergeDashboardSearchParams("/dashboard/timeline", searchParams),
+    [searchParams]
+  );
+  const genresHref = useMemo(
+    () => mergeDashboardSearchParams("/dashboard/genres", searchParams),
+    [searchParams]
+  );
 
   if (isLoading) {
     return <OverviewSkeleton />;
@@ -246,7 +260,7 @@ function OverviewContent() {
                       </p>
                     </div>
                     <Link
-                href="/dashboard/timeline"
+                href={timelineHref}
                 className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium
                   text-accent-violet hover:bg-accent-violet/10 dark:hover:bg-accent-violet/20
                   transition-colors duration-200 shrink-0"
@@ -339,7 +353,7 @@ function OverviewContent() {
                     </p>
                   </div>
                   <Link
-                href="/dashboard/genres"
+                href={genresHref}
                 className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium
                   text-accent-violet hover:bg-accent-violet/10 dark:hover:bg-accent-violet/20
                   transition-colors duration-200 shrink-0"

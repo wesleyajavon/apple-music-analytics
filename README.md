@@ -7,6 +7,8 @@ Personal dashboard to visualize your music listening behavior from **Last.fm** h
 
 > **Note:** This is a personal project — it does not support multiple users or public sign-up yet. To see it in action, visit the live demo: **[https://apple-music-analytics.vercel.app/fr](https://apple-music-analytics.vercel.app/fr)**
 
+Maintainer: future product ideas and codenames (Breakwater, Encore, …) live in **[IDEAS_BAG.md](IDEAS_BAG.md)** at the repo root.
+
 ## Why Last.fm instead of Apple Music API?
 
 This project uses the **Last.fm API** rather than the official Apple Music API for budget and financial reasons. The Apple Music API requires a paid Apple Developer Program membership and has usage-based costs. Last.fm offers a free API for personal use, making it an affordable way to track listening history.

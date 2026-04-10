@@ -6,6 +6,7 @@ import { useAiInsights } from "@/lib/hooks/use-ai-insights";
 import { AiWidgetQuotaOrError } from "@/lib/components/error-state";
 import { AiFeatureDisabledPlaceholder } from "@/lib/components/ai-feature-disabled-placeholder";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
+import { useDashboardViewerUserId } from "@/lib/context/dashboard-viewer-context";
 
 /** Number of insights to show in the overview widget */
 const PREVIEW_INSIGHTS_COUNT = 3;
@@ -17,9 +18,12 @@ const PREVIEW_INSIGHTS_COUNT = 3;
  */
 export function AiInsightsSummaryWidget() {
   const t = useTranslations("ai-insights");
+  const viewerUserId = useDashboardViewerUserId();
   const { startDate, endDate, isLoading: isRangeLoading } = useListenDateRange();
 
-  const { data, isLoading, error } = useAiInsights(startDate, endDate);
+  const { data, isLoading, error } = useAiInsights(startDate, endDate, {
+    userId: viewerUserId,
+  });
   const isLoadingOrFetching = isRangeLoading || isLoading;
 
   if (isLoadingOrFetching) {

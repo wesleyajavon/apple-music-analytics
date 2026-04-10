@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import {
   BarChart,
@@ -77,6 +78,8 @@ function createTemporalTooltipFormatter(
 }
 
 function TemporalAnalysisContent() {
+  const searchParams = useSearchParams();
+  const userId = searchParams.get("userId") ?? undefined;
   const t = useTranslations("temporal-analysis");
   const locale = useLocale();
   const [dayOfWeekChartType, setDayOfWeekChartType] = useState<DayOfWeekChartType>("bar");
@@ -94,7 +97,11 @@ function TemporalAnalysisContent() {
   // Si vous voulez analyser une période spécifique, utilisez la page Timeline.
   
   // Ne pas utiliser de filtres de date - toujours utiliser toutes les données
-  const { data, isLoading, error, refetch } = useTemporalAnalysis(undefined, undefined);
+  const { data, isLoading, error, refetch } = useTemporalAnalysis(
+    undefined,
+    undefined,
+    userId
+  );
 
   // Formater les données pour les graphiques - mémorisé pour éviter les recalculs
   const dayOfWeekData = useMemo(

@@ -14,6 +14,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { useGenreTrends } from "@/lib/hooks/use-listening";
+import { useDashboardViewerUserId } from "@/lib/context/dashboard-viewer-context";
 import { ErrorState } from "@/lib/components/error-state";
 
 const COLORS = [
@@ -84,12 +85,15 @@ export function GenreTrendsSummaryWidget({
   const t = useTranslations("genreTrends");
   const tOverview = useTranslations("overview");
   const locale = useLocale();
+  const viewerUserId = useDashboardViewerUserId();
   const TrendsTooltip = useMemo(() => createTrendsTooltip(t, locale), [t, locale]);
 
   const { data, isLoading, error, refetch } = useGenreTrends(
     startDate,
     endDate,
-    "month"
+    "month",
+    undefined,
+    viewerUserId
   );
 
   const availableGenres = useMemo(

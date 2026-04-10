@@ -14,17 +14,24 @@ vi.mock("@/lib/services/replay/replay-service", () => ({
 vi.mock("@/lib/auth/get-current-user-id", () => ({
   getCurrentUserId: vi.fn(),
 }));
+vi.mock("@/lib/auth/resolve-authorized-data-user-id", () => ({
+  resolveAuthorizedDataUserId: vi.fn(),
+}));
 
 import {
   getReplayYearlySummaries,
   importReplayYearly,
 } from "@/lib/services/replay/replay-service";
 import { getCurrentUserId } from "@/lib/auth/get-current-user-id";
+import { resolveAuthorizedDataUserId } from "@/lib/auth/resolve-authorized-data-user-id";
 
 describe("GET /api/replay", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(getCurrentUserId).mockResolvedValue("user-1");
+    vi.mocked(resolveAuthorizedDataUserId).mockResolvedValue({
+      ok: true,
+      userId: "user-1",
+    });
     vi.mocked(getReplayYearlySummaries).mockResolvedValue([]);
   });
 
@@ -40,13 +47,14 @@ describe("GET /api/replay", () => {
     expect(getReplayYearlySummaries).toHaveBeenCalledWith("user-1");
   });
 
-  it("should ignore query userId and use authenticated user", async () => {
+  it("should use data user id from authorization resolver", async () => {
     const request = new NextRequest(
       "http://localhost/api/replay?userId=custom-user"
     );
     const response = await GET(request);
 
     expect(response.status).toBe(200);
+    expect(resolveAuthorizedDataUserId).toHaveBeenCalledWith(request);
     expect(getReplayYearlySummaries).toHaveBeenCalledWith("user-1");
   });
 

@@ -65,10 +65,12 @@
     }
   },
   "auth": {
+    "signInEyebrow": "Welcome back",
     "signInTitle": "Sign in",
     "signInSubtitle": "Sign in to access your analytics.",
     "signUpTitle": "Create an account",
     "signUpSubtitle": "Create an account to start using the app.",
+    "signUpEyebrow": "Get started",
     "email": "Email",
     "password": "Password",
     "signIn": "Sign in",
@@ -77,7 +79,13 @@
     "creatingAccount": "Creating account...",
     "noAccount": "Don't have an account?",
     "alreadyAccount": "Already have an account?",
-    "signUpSuccess": "Account created. Check your email to confirm your sign up."
+    "signUpSuccess": "Account created. Check your email to confirm your sign up.",
+    "skipToContent": "Skip to sign-in form",
+    "homeLinkAriaLabel": "Apple Music Analytics — home",
+    "authNavAriaLabel": "Account pages",
+    "dashboardLink": "Wesley's dashboard",
+    "continueWithGoogle": "Continue with Google",
+    "orDivider": "or"
   },
   "dashboard": {
     "title": "Dashboard 📊"
@@ -853,7 +861,7 @@
     "title": "Apple Music Analytics 🎵",
     "welcome": "Welcome back, Wesley 👋",
     "subtitle": "Analyze your listening habits and discover your musical trends.",
-    "accessDashboard": "Access Wesley's dashboard 🚀"
+    "accessDashboard": "Wesley's dashboard (public) 🚀"
   },
   "metadata": {
     "title": "Apple Music Analytics Dashboard",

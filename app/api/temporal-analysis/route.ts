@@ -5,8 +5,9 @@ import {
   extractOptionalDateRange,
 } from "@/lib/middleware/validation";
 import { TemporalAnalysisDto } from "@/lib/dto/listening";
+import { resolveAuthorizedDataUserId } from "@/lib/auth/resolve-authorized-data-user-id";
 import {
-  requireAuthenticatedUserId,
+  forbiddenResponse,
   unauthorizedResponse,
 } from "@/lib/auth/require-auth-user-id";
 import { assertRateLimit } from "@/lib/security/rate-limit";
@@ -104,8 +105,11 @@ export async function GET(request: NextRequest) {
     // Pour l'analyse temporelle, on utilise toutes les données si aucune date n'est fournie
     // Cela permet d'avoir des patterns fiables basés sur l'historique complet
     const { startDate, endDate } = extractOptionalDateRange(request);
-    const userId = await requireAuthenticatedUserId(request);
-    if (!userId) return unauthorizedResponse();
+    const resolved = await resolveAuthorizedDataUserId(request);
+    if (!resolved.ok) {
+      return resolved.status === 403 ? forbiddenResponse() : unauthorizedResponse();
+    }
+    const { userId } = resolved;
     await assertRateLimit(request, {
       ...TEMPORAL_ANALYSIS_RATE_LIMIT,
       userId,

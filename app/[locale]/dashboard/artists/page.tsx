@@ -322,6 +322,7 @@ function ArtistsContent() {
   const emptyStatePresets = useEmptyStatePresets();
   const startDate = searchParams.get("startDate") || undefined;
   const endDate = searchParams.get("endDate") || undefined;
+  const userId = searchParams.get("userId") ?? undefined;
 
   const preset = getDateRangePresetFromSearchParams(searchParams);
   const {
@@ -349,7 +350,12 @@ function ArtistsContent() {
     return name;
   }, [preset, rangeStart, rangeEnd, rangeLoading, locale, t]);
 
-  const { data, isLoading, error, refetch } = useArtistStats(startDate, endDate, undefined, 20);
+  const { data, isLoading, error, refetch } = useArtistStats(
+    startDate,
+    endDate,
+    userId,
+    20
+  );
 
   const topArtists = data?.topArtists ?? [];
   const maxListens = topArtists[0]?.listenCount ?? 1;

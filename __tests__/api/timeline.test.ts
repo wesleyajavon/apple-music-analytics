@@ -11,9 +11,8 @@ vi.mock('@/lib/services/listening/listening-aggregation', () => ({
 vi.mock('@/lib/services/listening/listening-service', () => ({
   getListenDateRange: vi.fn(),
 }));
-vi.mock('@/lib/auth/require-auth-user-id', () => ({
-  requireAuthenticatedUserId: vi.fn(),
-  unauthorizedResponse: vi.fn(),
+vi.mock('@/lib/auth/resolve-authorized-data-user-id', () => ({
+  resolveAuthorizedDataUserId: vi.fn(),
 }));
 
 import {
@@ -22,12 +21,15 @@ import {
   getMonthlyAggregatedListens,
 } from '@/lib/services/listening/listening-aggregation';
 import { getListenDateRange } from '@/lib/services/listening/listening-service';
-import { requireAuthenticatedUserId } from '@/lib/auth/require-auth-user-id';
+import { resolveAuthorizedDataUserId } from '@/lib/auth/resolve-authorized-data-user-id';
 
 describe('GET /api/timeline', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(requireAuthenticatedUserId).mockResolvedValue('user-1');
+    vi.mocked(resolveAuthorizedDataUserId).mockResolvedValue({
+      ok: true,
+      userId: 'user-1',
+    });
   });
 
   it('should return timeline data with valid dates and default period (day)', async () => {

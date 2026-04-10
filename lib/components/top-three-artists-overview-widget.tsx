@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useArtistStats } from "@/lib/hooks/use-artists";
+import { useDashboardViewerUserId } from "@/lib/context/dashboard-viewer-context";
 import { TopThreeArtists } from "@/lib/components/top-three-artists-cards";
 import { ErrorState } from "@/lib/components/error-state";
 
@@ -22,11 +23,12 @@ export function TopThreeArtistsOverviewWidget({
   const tArtists = useTranslations("artists");
   const tOverview = useTranslations("overview");
   const locale = useLocale();
+  const viewerUserId = useDashboardViewerUserId();
 
   const { data, isLoading, error, refetch } = useArtistStats(
     startDate,
     endDate,
-    undefined,
+    viewerUserId,
     3
   );
 

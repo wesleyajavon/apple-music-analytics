@@ -8,8 +8,9 @@ import { handleApiError } from "@/lib/utils/error-handler";
 import {
   extractOptionalDateRange,
 } from "@/lib/middleware/validation";
+import { resolveAuthorizedDataUserId } from "@/lib/auth/resolve-authorized-data-user-id";
 import {
-  requireAuthenticatedUserId,
+  forbiddenResponse,
   unauthorizedResponse,
 } from "@/lib/auth/require-auth-user-id";
 
@@ -73,8 +74,11 @@ export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     const { startDate, endDate } = extractOptionalDateRange(request);
-    const userId = await requireAuthenticatedUserId(request);
-    if (!userId) return unauthorizedResponse();
+    const resolved = await resolveAuthorizedDataUserId(request);
+    if (!resolved.ok) {
+      return resolved.status === 403 ? forbiddenResponse() : unauthorizedResponse();
+    }
+    const { userId } = resolved;
 
     // Récupérer la distribution des genres
     const genreCounts = await getGenreDistribution(startDate, endDate, userId);

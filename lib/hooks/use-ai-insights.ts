@@ -139,6 +139,12 @@ function buildInsightsInput(
   };
 }
 
+function withUserIdQuery(path: string, userId?: string): string {
+  if (userId === undefined || userId === "") return path;
+  const sep = path.includes("?") ? "&" : "?";
+  return `${path}${sep}userId=${encodeURIComponent(userId)}`;
+}
+
 async function fetchAiInsights(
   startDate: string,
   endDate: string,
@@ -149,16 +155,28 @@ async function fetchAiInsights(
 
   const [overview, previousOverview, genres, temporal] = await Promise.all([
     apiClient.get<OverviewStatsWithTopArtists>(
-      `/overview?startDate=${startDate}&endDate=${endDate}`
+      withUserIdQuery(
+        `/overview?startDate=${startDate}&endDate=${endDate}`,
+        userId
+      )
     ),
     apiClient.get<OverviewStatsWithTopArtists>(
-      `/overview?startDate=${prevStartDate}&endDate=${prevEndDate}`
+      withUserIdQuery(
+        `/overview?startDate=${prevStartDate}&endDate=${prevEndDate}`,
+        userId
+      )
     ),
     apiClient.get<GenreDistributionResponse>(
-      `/genres?startDate=${startDate}&endDate=${endDate}`
+      withUserIdQuery(
+        `/genres?startDate=${startDate}&endDate=${endDate}`,
+        userId
+      )
     ),
     apiClient.get<TemporalAnalysisDto>(
-      `/temporal-analysis?startDate=${startDate}&endDate=${endDate}`
+      withUserIdQuery(
+        `/temporal-analysis?startDate=${startDate}&endDate=${endDate}`,
+        userId
+      )
     ),
   ]);
 

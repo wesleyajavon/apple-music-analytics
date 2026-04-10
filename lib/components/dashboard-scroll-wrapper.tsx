@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { Sidebar } from "@/lib/components/sidebar";
 import { DateRangeFilter } from "@/lib/components/date-range-filter";
 import { Footer } from "@/lib/components/footer";
+import { DashboardViewerProvider } from "@/lib/context/dashboard-viewer-context";
 
 export function DashboardScrollWrapper({ children }: { children: React.ReactNode }) {
   return (
@@ -25,10 +26,14 @@ export function DashboardScrollWrapper({ children }: { children: React.ReactNode
             <DateRangeFilter />
           </div>
         </Suspense>
-        <main className="min-w-0">
-          <div className="p-4 sm:p-6 lg:p-8">{children}</div>
-        </main>
-        <Footer />
+        <Suspense fallback={<main className="min-w-0"><div className="p-4 sm:p-6 lg:p-8">{children}</div></main>}>
+          <DashboardViewerProvider>
+            <main className="min-w-0">
+              <div className="p-4 sm:p-6 lg:p-8">{children}</div>
+            </main>
+            <Footer />
+          </DashboardViewerProvider>
+        </Suspense>
       </div>
     </div>
   );

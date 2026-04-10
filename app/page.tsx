@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DEFAULT_PUBLIC_PROFILE_USER_ID } from "@/lib/constants/public-profile";
 
 export default function Home() {
   return (
@@ -26,10 +27,10 @@ export default function Home() {
           Analyze your listening habits and discover your musical trends.
         </p>
         <Link
-          href="/dashboard"
+          href={`/dashboard/overview?userId=${DEFAULT_PUBLIC_PROFILE_USER_ID}`}
           className="group inline-flex items-center gap-2 px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
         >
-          Access Wesley&apos;s dashboard
+          Access Wesley&apos;s dashboard (public)
           <svg
             className="w-5 h-5 transition-transform group-hover:translate-x-0.5"
             fill="none"

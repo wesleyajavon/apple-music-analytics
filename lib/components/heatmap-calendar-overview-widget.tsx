@@ -5,6 +5,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { CalendarHeatmap, HeatmapDataPoint } from "@/lib/components/calendar-heatmap";
 import { useTimeline } from "@/lib/hooks/use-listening";
+import { useDashboardViewerUserId } from "@/lib/context/dashboard-viewer-context";
 import { ErrorState } from "@/lib/components/error-state";
 import { HeatmapCalendarSkeleton } from "@/lib/components/skeleton-loaders";
 
@@ -29,11 +30,13 @@ export function HeatmapCalendarOverviewWidget({
   const tOverview = useTranslations("overview");
   const locale = useLocale();
   const router = useRouter();
+  const viewerUserId = useDashboardViewerUserId();
 
   const { data: timelineData, isLoading, error, refetch } = useTimeline(
     startDate,
     endDate,
-    "day"
+    "day",
+    viewerUserId
   );
 
   const heatmapData: HeatmapDataPoint[] = useMemo(() => {

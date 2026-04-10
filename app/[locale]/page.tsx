@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { LanguageSwitcher } from "@/lib/components/language-switcher";
 import { Footer } from "@/lib/components/footer";
 import { ThemeSwitcher } from "@/lib/components/theme-switcher";
+import { DEFAULT_PUBLIC_PROFILE_USER_ID } from "@/lib/constants/public-profile";
 
 export default function Home() {
   const t = useTranslations("home");
@@ -66,7 +67,7 @@ export default function Home() {
               {tAuth("signIn")}
             </Link>
             <Link
-              href="/dashboard"
+              href={`/dashboard/overview?userId=${DEFAULT_PUBLIC_PROFILE_USER_ID}`}
               className="group inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold text-accent-violet transition-colors hover:bg-accent-violet/10 dark:hover:bg-accent-violet/20"
             >
               {t("accessDashboard")}

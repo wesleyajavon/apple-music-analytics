@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useListeningHabitPrediction } from "@/lib/hooks/use-listening-habit-prediction";
 import type { ListeningHabitApiResponse } from "@/lib/hooks/use-listening-habit-prediction";
@@ -34,8 +35,11 @@ function ClockIcon({ className }: { className?: string }) {
 
 function WhenWillIListenContent() {
   const t = useTranslations("when-will-i-listen");
+  const searchParams = useSearchParams();
+  const userId = searchParams.get("userId") ?? undefined;
   const { data, isLoading, error, refetch } = useListeningHabitPrediction({
     includeExplanation: true,
+    userId,
   });
 
   const handleRetry = useCallback(() => {

@@ -6,6 +6,7 @@ import { useTasteProfile } from "@/lib/hooks/use-taste-profile";
 import { AiWidgetQuotaOrError } from "@/lib/components/error-state";
 import { AiFeatureDisabledPlaceholder } from "@/lib/components/ai-feature-disabled-placeholder";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
+import { useDashboardViewerUserId } from "@/lib/context/dashboard-viewer-context";
 
 function truncateText(text: string, maxLength: number = 220): string {
   if (text.length <= maxLength) return text;
@@ -22,9 +23,12 @@ function truncateText(text: string, maxLength: number = 220): string {
  */
 export function TasteProfileSummaryWidget() {
   const t = useTranslations("taste-profile");
+  const viewerUserId = useDashboardViewerUserId();
   const { startDate, endDate, isLoading: isRangeLoading } = useListenDateRange();
 
-  const { data, isLoading, error } = useTasteProfile(startDate, endDate, "casual");
+  const { data, isLoading, error } = useTasteProfile(startDate, endDate, "casual", {
+    userId: viewerUserId,
+  });
   const isLoadingOrFetching = isRangeLoading || isLoading;
 
   if (isLoadingOrFetching) {

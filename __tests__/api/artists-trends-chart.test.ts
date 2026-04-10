@@ -8,9 +8,11 @@ vi.mock("@/lib/services/artist/artist-service", () => ({
 vi.mock("@/lib/services/listening/listening-service", () => ({
   getListenDateRange: vi.fn(),
 }));
-vi.mock("@/lib/auth/require-auth-user-id", () => ({
-  requireAuthenticatedUserId: vi.fn().mockResolvedValue("user-1"),
-  unauthorizedResponse: vi.fn(),
+vi.mock("@/lib/auth/resolve-authorized-data-user-id", () => ({
+  resolveAuthorizedDataUserId: vi.fn().mockResolvedValue({
+    ok: true,
+    userId: "user-1",
+  }),
 }));
 
 import { getArtistTrendsChartRows } from "@/lib/services/artist/artist-service";

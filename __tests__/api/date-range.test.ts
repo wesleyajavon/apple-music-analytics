@@ -9,9 +9,11 @@ import { NextRequest } from "next/server";
 vi.mock("@/lib/services/listening/listening-service", () => ({
   getListenDateRange: vi.fn(),
 }));
-vi.mock("@/lib/auth/require-auth-user-id", () => ({
-  requireAuthenticatedUserId: vi.fn().mockResolvedValue("user-1"),
-  unauthorizedResponse: vi.fn(),
+vi.mock("@/lib/auth/resolve-authorized-data-user-id", () => ({
+  resolveAuthorizedDataUserId: vi.fn().mockResolvedValue({
+    ok: true,
+    userId: "user-1",
+  }),
 }));
 
 import { getListenDateRange } from "@/lib/services/listening/listening-service";

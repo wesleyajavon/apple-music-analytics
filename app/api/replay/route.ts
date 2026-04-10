@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getReplayYearlySummaries } from "@/lib/services/replay/replay-service";
 import { handleApiError } from "@/lib/utils/error-handler";
-import { getCurrentUserId } from "@/lib/auth/get-current-user-id";
+import { resolveAuthorizedDataUserId } from "@/lib/auth/resolve-authorized-data-user-id";
+import {
+  forbiddenResponse,
+  unauthorizedResponse,
+} from "@/lib/auth/require-auth-user-id";
 
 // Force dynamic rendering
 export const dynamic = "force-dynamic";
@@ -16,13 +20,11 @@ export const dynamic = "force-dynamic";
  */
 export async function GET(request: NextRequest) {
   try {
-    const userId = await getCurrentUserId(request);
-    if (!userId) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 }
-      );
+    const resolved = await resolveAuthorizedDataUserId(request);
+    if (!resolved.ok) {
+      return resolved.status === 403 ? forbiddenResponse() : unauthorizedResponse();
     }
+    const { userId } = resolved;
 
     const summaries = await getReplayYearlySummaries(userId);
 

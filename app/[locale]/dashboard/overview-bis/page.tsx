@@ -178,18 +178,19 @@ function OverviewBisContent() {
   const emptyStatePresets = useEmptyStatePresets();
   const startDate = searchParams.get("startDate") || undefined;
   const endDate = searchParams.get("endDate") || undefined;
+  const userId = searchParams.get("userId") ?? undefined;
 
   const previousPeriod = useMemo(() => getPreviousPeriod(startDate, endDate), [startDate, endDate]);
-  const { data, isLoading, error, refetch } = useOverviewStats(startDate, endDate);
+  const { data, isLoading, error, refetch } = useOverviewStats(startDate, endDate, userId);
   const { data: previousData } = useOverviewStats(
     previousPeriod?.prevStartDate,
     previousPeriod?.prevEndDate,
-    undefined,
+    userId,
     { enabled: !!previousPeriod }
   );
 
-  const { data: timelineData } = useTimeline(startDate, endDate, "day");
-  const { data: genresData } = useGenres(startDate, endDate);
+  const { data: timelineData } = useTimeline(startDate, endDate, "day", userId);
+  const { data: genresData } = useGenres(startDate, endDate, userId);
 
   const handleRetry = useCallback(() => refetch(), [refetch]);
 

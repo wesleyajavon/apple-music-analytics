@@ -70,11 +70,13 @@ function TimelineContent() {
   const startDate = searchParams.get("startDate") || undefined;
   const endDate = searchParams.get("endDate") || undefined;
   const period = (searchParams.get("period") || "month") as PeriodType;
+  const userId = searchParams.get("userId") ?? undefined;
 
   const { data, isLoading, error, refetch } = useTimeline(
     startDate,
     endDate,
-    period
+    period,
+    userId
   );
 
   // Format data for chart with proper date formatting - mémorisé pour éviter les recalculs

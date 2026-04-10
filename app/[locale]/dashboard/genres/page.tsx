@@ -2,6 +2,7 @@
 
 import { Suspense, useState, useMemo, useCallback, memo } from "react";
 import { useTranslations, useLocale } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import { usePathname } from "@/i18n/navigation";
 import {
   PieChart,
@@ -197,6 +198,8 @@ function PieChartLegend({
 }
 
 function GenresContent() {
+  const searchParams = useSearchParams();
+  const userId = searchParams.get("userId") ?? undefined;
   const pathname = usePathname();
   const t = useTranslations("genres");
   const tCommon = useTranslations("common");
@@ -208,7 +211,7 @@ function GenresContent() {
   const [chartType, setChartType] = useState<ChartType>("pie");
   const [detailExpanded, setDetailExpanded] = useState(false);
 
-  const { data, isLoading, error, refetch } = useGenres(startDate, endDate, undefined, {
+  const { data, isLoading, error, refetch } = useGenres(startDate, endDate, userId, {
     enabled: !!startDate && !!endDate,
   });
 

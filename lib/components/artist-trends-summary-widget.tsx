@@ -14,6 +14,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { useArtistTrendsChart } from "@/lib/hooks/use-artists";
+import { useDashboardViewerUserId } from "@/lib/context/dashboard-viewer-context";
 import { ErrorState } from "@/lib/components/error-state";
 
 const COLORS = [
@@ -86,6 +87,7 @@ export function ArtistTrendsSummaryWidget({
   const t = useTranslations("artistTrends");
   const tOverview = useTranslations("overview");
   const locale = useLocale();
+  const viewerUserId = useDashboardViewerUserId();
   const TrendsTooltip = useMemo(() => createTrendsTooltip(t, locale), [t, locale]);
 
   const { data, isLoading, error, refetch } = useArtistTrendsChart(
@@ -93,7 +95,8 @@ export function ArtistTrendsSummaryWidget({
     endDate,
     "month",
     undefined,
-    OVERVIEW_ARTIST_TRENDS_TOP_N
+    OVERVIEW_ARTIST_TRENDS_TOP_N,
+    viewerUserId
   );
 
   const availableArtists = useMemo(

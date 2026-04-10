@@ -8,19 +8,21 @@ vi.mock("@/lib/services/listening/listening-stats", () => ({
 vi.mock("@/lib/services/listening/listening-service", () => ({
   getListenDateRange: vi.fn(),
 }));
-vi.mock("@/lib/auth/require-auth-user-id", () => ({
-  requireAuthenticatedUserId: vi.fn(),
-  unauthorizedResponse: vi.fn(),
+vi.mock("@/lib/auth/resolve-authorized-data-user-id", () => ({
+  resolveAuthorizedDataUserId: vi.fn(),
 }));
 
 import { getGenreTrends } from "@/lib/services/listening/listening-stats";
 import { getListenDateRange } from "@/lib/services/listening/listening-service";
-import { requireAuthenticatedUserId } from "@/lib/auth/require-auth-user-id";
+import { resolveAuthorizedDataUserId } from "@/lib/auth/resolve-authorized-data-user-id";
 
 describe("GET /api/genres/trends", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(requireAuthenticatedUserId).mockResolvedValue("user-1");
+    vi.mocked(resolveAuthorizedDataUserId).mockResolvedValue({
+      ok: true,
+      userId: "user-1",
+    });
     vi.mocked(getListenDateRange).mockResolvedValue({
       minDate: new Date("2024-01-01"),
       maxDate: new Date("2024-02-29"),

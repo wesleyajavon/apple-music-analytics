@@ -258,6 +258,7 @@ function TasteEvolutionContent() {
   const [summaryVersion, setSummaryVersion] = useState<"light" | "technical">("light");
   const startDateParam = searchParams.get("startDate");
   const endDateParam = searchParams.get("endDate");
+  const userId = searchParams.get("userId") ?? undefined;
 
   const effectiveRange = useMemo(() => {
     if (startDateParam && endDateParam) {
@@ -274,7 +275,8 @@ function TasteEvolutionContent() {
 
   const { data, isLoading, error, refetch } = useTasteEvolution(
     effectiveRange.startDate,
-    effectiveRange.endDate
+    effectiveRange.endDate,
+    userId
   );
 
   const handleRetry = () => refetch();

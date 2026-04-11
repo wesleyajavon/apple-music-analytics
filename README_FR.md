@@ -3,7 +3,13 @@
 [![CI](https://img.shields.io/github/actions/workflow/status/wesleyajavon/apple-music-analytics/ci.yml?branch=main)](https://github.com/wesleyajavon/apple-music-analytics/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-Tableau de bord personnel pour visualiser votre comportement d'écoute musicale à partir de l'historique **Last.fm**.
+Tableau de bord personnel pour visualiser votre comportement d'écoute à partir des **scrobbles Last.fm**, d’**exports CSV Apple Music**, ou de données mock / seed.
+
+L’authentification repose sur **Supabase Auth** (connexion et inscription). Les visiteurs anonymes peuvent consulter une **démo publique** lorsque `NEXT_PUBLIC_PUBLIC_PROFILE_USER_ID` est configuré (voir [`env.example`](env.example)).
+
+Démo en ligne : **[https://apple-music-analytics.vercel.app/fr](https://apple-music-analytics.vercel.app/fr)** (locale par défaut : français ; **en** et **es** sont disponibles sous `/en` et `/es`).
+
+Idées produit et noms de code (Breakwater, Encore, …) : **[IDEAS_BAG.md](IDEAS_BAG.md)** à la racine du dépôt. Notes d’implémentation auth : **[`docs/SUPABASE_AUTH_IMPLEMENTATION.md`](docs/SUPABASE_AUTH_IMPLEMENTATION.md)**.
 
 ## Pourquoi Last.fm plutôt que l'API Apple Music ?
 
@@ -20,11 +26,13 @@ Comprendre comment les données arrivent dans le dashboard :
 1. **Écouter de la musique** — Utilisez Apple Music (ou toute app supportée) sur votre téléphone comme d'habitude.
 2. **Scrobbling Last.fm** — Last.fm est lié à votre compte Apple Music et enregistre automatiquement (« scrobble ») chaque écoute.
 3. **Synchroniser les scrobbles** — *(Pas encore automatisé)* Vous ouvrez manuellement l'app Last.fm sur votre téléphone et lancez la recherche de nouveaux scrobbles pour transférer les données d'Apple Music vers Last.fm.
-4. **Mettre à jour la base** — Exécutez `npm run lastfm:update` (ou utilisez l'API Last.fm via script) pour récupérer les nouveaux scrobbles et mettre à jour la base locale.
+4. **Mettre à jour la base** — Exécutez `npm run lastfm:update` (ou utilisez l'API Last.fm via script) pour récupérer les nouveaux scrobbles et mettre à jour la base locale. Vous pouvez aussi importer un CSV d’historique Apple Music via la section **Scripts données** ci-dessous (`apple-music:filter` / `apple-music:import`).
 5. **Dashboard à jour** — Une fois la BDD mise à jour, le dashboard affiche vos dernières statistiques.
 6. **Données obsolètes ?** — Si le dashboard semble périmé, c'est généralement que la base n'a pas encore été mise à jour avec les nouveaux scrobbles Last.fm.
 
 ## Fonctionnalités
+
+- **i18n** — Interface en français (par défaut), anglais et espagnol (`next-intl`)
 
 - **Vue d'ensemble** — Statistiques globales (écoutes, artistes, titres, temps total)
 - **Timeline** — Évolution de vos écoutes dans le temps (jour/semaine/mois)
@@ -40,10 +48,11 @@ Comprendre comment les données arrivent dans le dashboard :
 ## Prérequis
 
 - **Node.js 20+** (voir `.nvmrc`)
-- **PostgreSQL** (local ou cloud)
+- **PostgreSQL** (local ou cloud ; avec Vercel + Postgres Supabase, préférer `POSTGRES_PRISMA_URL` pour l’app et `POSTGRES_URL_NON_POOLING` pour les migrations — voir [`env.example`](env.example))
+- **Projet Supabase** avec Auth activé (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`)
 - **Redis** (optionnel, pour le cache)
 
-## Installation rapide
+## Installation locale (développement / fork)
 
 ```bash
 git clone https://github.com/wesleyajavon/apple-music-analytics.git
@@ -52,29 +61,37 @@ npm install
 cp env.example .env.local
 # Éditer .env.local : voir env.example pour la liste complète des variables
 npm run db:generate
-npm run db:migrate   # ou db:push pour le dev
+npm run db:migrate   # ou db:migrate:dev / db:push selon votre flux
 npm run dev
 ```
 
-Ouvrir [http://localhost:3000](http://localhost:3000).
+Ouvrir [http://localhost:3000](http://localhost:3000) (redirection vers la locale par défaut).
 
 ### Variables d'environnement
 
-Les variables minimales sont `DATABASE_URL`, `LASTFM_API_KEY` et `LASTFM_API_SECRET`.  
-Consultez [`env.example`](env.example) pour la liste complète (Redis, Sentry, Groq, etc.).
+**Indispensables pour lancer l’app :** `DATABASE_URL`, `NEXT_PUBLIC_SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
+
+**Last.fm** (`LASTFM_API_KEY`, `LASTFM_API_SECRET`) est **optionnel** — le code utilise des clés mock tant que vous n’avez pas défini de vraies credentials (voir `lib/services/lastfm.ts`).
+
+Les **scripts serveur** d’import peuvent exiger `IMPORT_ADMIN_KEY` (en-tête `x-import-admin-key`). En option : `NEXT_PUBLIC_PUBLIC_PROFILE_USER_ID` pour la démo anonyme, Redis, Sentry, `GROQ_API_KEY`, etc. Liste complète : [`env.example`](env.example).
 
 ## Scripts principaux
 
 | Script | Description |
 |--------|-------------|
 | `npm run dev` | Serveur de développement |
+| `npm run dev:turbo` | Dev avec Turbopack |
 | `npm run build` | Build production |
 | `npm run start` | Serveur production |
+| `npm run lint` | ESLint (Next.js) |
 | `npm run lastfm:update` | Mise à jour des données Last.fm |
-| `npm run db:migrate` | Appliquer les migrations |
+| `npm run db:migrate` | Appliquer les migrations (`prisma migrate deploy`) |
+| `npm run db:migrate:dev` | Créer / appliquer les migrations en développement |
 | `npm run db:studio` | Prisma Studio (interface BDD) |
-| `npm run test:run` | Tests unitaires |
+| `npm run test:run` | Tests unitaires (Vitest) |
+| `npm run test:integration` | Tests d’intégration API |
 | `npm run test:e2e` | Tests E2E Playwright |
+| `npm run vercel:env:pull` | Récupérer les variables Vercel dans `.env.local` |
 
 ### Scripts données (genres, import Apple Music CSV, etc.)
 
@@ -95,7 +112,9 @@ Les autres backfills de genres (`genres:backfill-llm`, `genres:backfill-cascade`
 ## Documentation
 
 - **API** : [`docs/API.md`](docs/API.md) (référence des endpoints)
-- **Code** : `docs/` (généré par `npm run docs:generate`)
+- **Code** : `docs/` (généré avec `npm run docs:generate`)
+
+Lancer `npm run docs:generate` après modification du code documenté sous `lib/services/**` ou `lib/dto/**`, ou pour régénérer la sortie TypeDoc HTML dans `docs/` ; la commande exécute `docs:clean` puis `typedoc` (voir `typedoc.json`). Le fichier `docs/API.md` est rédigé à la main et **n’est pas** produit par TypeDoc ; `npm run build` exécute `docs:api:copy`, qui copie `docs/API.md` vers `public/docs/API.md` pour la production.
 
 ## Licence
 

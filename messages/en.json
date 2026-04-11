@@ -91,6 +91,8 @@
     "metaTitle": "First sign-in — export your listening data",
     "welcomeEyebrow": "Welcome",
     "welcomeTitle": "Get your listening export ready",
+    "whyNotApiTitle": "Why can’t this app connect to Apple Music or Spotify for me?",
+    "whyNotApiBody": "Those companies don’t give independent apps direct access to your personal listening history — that data stays between you and them, which protects your privacy. We’re a third-party app, so there’s no supported “log in and sync” path for your full history. The official option is for you to request your own copy from their privacy tools; you then import that file here.",
     "welcomeBody": "To power this dashboard, request a copy of your listening history from your music service. Apple and Spotify email you the file when it is ready — often after several days (sometimes up to a week or more, depending on the service).",
     "welcomeNoteStrong": "Nothing to upload here until the file arrives",
     "welcomeNoteRest": " : you will import it as soon as you receive it.",

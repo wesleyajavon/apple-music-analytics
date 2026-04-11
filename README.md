@@ -3,11 +3,13 @@
 [![CI](https://img.shields.io/github/actions/workflow/status/wesleyajavon/apple-music-analytics/ci.yml?branch=main)](https://github.com/wesleyajavon/apple-music-analytics/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-Personal dashboard to visualize your music listening behavior from **Last.fm** history.
+Personal dashboard to visualize your music listening behavior from **Last.fm** scrobbles, **Apple Music CSV exports**, or seeded / mock data.
 
-> **Note:** This is a personal project — it does not support multiple users or public sign-up yet. To see it in action, visit the live demo: **[https://apple-music-analytics.vercel.app/fr](https://apple-music-analytics.vercel.app/fr)**
+Authentication is handled with **Supabase Auth** (sign-in and sign-up). Anonymous visitors can still open a **public demo profile** when `NEXT_PUBLIC_PUBLIC_PROFILE_USER_ID` is configured (see [`env.example`](env.example)).
 
-Maintainer: future product ideas and codenames (Breakwater, Encore, …) live in **[IDEAS_BAG.md](IDEAS_BAG.md)** at the repo root.
+Live demo: **[https://apple-music-analytics.vercel.app/fr](https://apple-music-analytics.vercel.app/fr)** (default locale is French; **en** and **es** are also available under `/en` and `/es`).
+
+Maintainer: future product ideas and codenames (Breakwater, Encore, …) live in **[IDEAS_BAG.md](IDEAS_BAG.md)** at the repo root. Supabase auth notes: **[`docs/SUPABASE_AUTH_IMPLEMENTATION.md`](docs/SUPABASE_AUTH_IMPLEMENTATION.md)**.
 
 ## Why Last.fm instead of Apple Music API?
 
@@ -24,11 +26,13 @@ Understanding how data flows into the dashboard:
 1. **Listen to music** — Use Apple Music (or any supported app) on your phone as usual.
 2. **Last.fm scrobbling** — Last.fm is linked to your Apple Music account and automatically records ("scrobbles") each listen.
 3. **Sync scrobbles** — *(Not yet automated)* You manually open the Last.fm app on your phone and scan for new scrobbles to transfer data from Apple Music to Last.fm.
-4. **Update the database** — Run `npm run lastfm:update` (or use the Last.fm API via scripting) to fetch new scrobbles and update your local database.
+4. **Update the database** — Run `npm run lastfm:update` (or use the Last.fm API via scripting) to fetch new scrobbles and update your local database. Alternatively, import an Apple Music play-history CSV using the **Data scripts** section below (`apple-music:filter` / `apple-music:import`).
 5. **Dashboard reflects data** — Once the DB is updated, the dashboard shows your latest listening stats.
 6. **Outdated data?** — If the dashboard looks stale, it usually means the database hasn’t been updated yet with new scrobbles from Last.fm.
 
 ## Features
+
+- **i18n** — UI in French (default), English, and Spanish (`next-intl`)
 
 - **Overview** — Global stats (listens, artists, tracks, total time)
 - **Timeline** — Evolution of your listens over time (day/week/month)
@@ -44,7 +48,8 @@ Understanding how data flows into the dashboard:
 ## Prerequisites
 
 - **Node.js 20+** (see `.nvmrc`)
-- **PostgreSQL** (local or cloud)
+- **PostgreSQL** (local or cloud; on Vercel + Supabase Postgres, prefer `POSTGRES_PRISMA_URL` for the app and `POSTGRES_URL_NON_POOLING` for migrations — see [`env.example`](env.example))
+- **Supabase** project with Auth enabled (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`)
 - **Redis** (optional, for caching)
 
 ## Local setup (for development / forking)
@@ -58,29 +63,37 @@ npm install
 cp env.example .env.local
 # Edit .env.local: see env.example for the full list of variables
 npm run db:generate
-npm run db:migrate   # or db:push for dev
+npm run db:migrate   # or db:migrate:dev / db:push depending on your workflow
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3000](http://localhost:3000) (redirects to the default locale).
 
 ### Environment variables
 
-Minimum required: `DATABASE_URL`, `LASTFM_API_KEY`, and `LASTFM_API_SECRET`.  
-See [`env.example`](env.example) for the full list (Redis, Sentry, Groq, etc.).
+**Required to run the app:** `DATABASE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
+
+**Last.fm** (`LASTFM_API_KEY`, `LASTFM_API_SECRET`) is optional — the codebase falls back to mock API keys until you configure real credentials (see `lib/services/lastfm.ts`).
+
+**Server scripts** that import into the DB may need `IMPORT_ADMIN_KEY` (sent as `x-import-admin-key`). Optional: `NEXT_PUBLIC_PUBLIC_PROFILE_USER_ID` for the anonymous demo profile, Redis, Sentry, `GROQ_API_KEY`, etc. Full list: [`env.example`](env.example).
 
 ## Main scripts
 
 | Script | Description |
 |--------|-------------|
 | `npm run dev` | Development server |
+| `npm run dev:turbo` | Dev server with Turbopack |
 | `npm run build` | Production build |
 | `npm run start` | Production server |
+| `npm run lint` | ESLint (Next.js) |
 | `npm run lastfm:update` | Update Last.fm data |
-| `npm run db:migrate` | Apply migrations |
+| `npm run db:migrate` | Apply migrations (`prisma migrate deploy`) |
+| `npm run db:migrate:dev` | Create/apply migrations in development |
 | `npm run db:studio` | Prisma Studio (DB UI) |
-| `npm run test:run` | Unit tests |
+| `npm run test:run` | Unit tests (Vitest) |
+| `npm run test:integration` | API integration tests |
 | `npm run test:e2e` | Playwright E2E tests |
+| `npm run vercel:env:pull` | Pull env from Vercel into `.env.local` |
 
 ### Data scripts (genres, Apple Music CSV, etc.)
 

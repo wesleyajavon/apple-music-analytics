@@ -91,6 +91,8 @@
     "metaTitle": "Primer acceso — exportar tus datos de escucha",
     "welcomeEyebrow": "Bienvenido",
     "welcomeTitle": "Prepara tu exportación de escucha",
+    "whyNotApiTitle": "¿Por qué la app no se conecta a Apple Music o Spotify por mí?",
+    "whyNotApiBody": "Esas compañías no permiten que apps independientes accedan directamente a tu historial personal de escucha: esos datos quedan entre tú y ellos, para proteger tu privacidad. Somos un servicio de terceros, así que no hay un camino oficial tipo «iniciar sesión y sincronizar» para todo tu historial. Lo previsto es que solicites tú mismo una copia desde sus herramientas de privacidad y luego importes el archivo aquí.",
     "welcomeBody": "Para alimentar este panel, solicita una copia de tu historial en tu servicio musical. Apple y Spotify te envían el archivo por correo: a menudo tarda varios días (a veces hasta una semana o más, según el servicio).",
     "welcomeNoteStrong": "Aquí no subes nada hasta que llegue el archivo",
     "welcomeNoteRest": " : lo importarás en cuanto lo recibas.",

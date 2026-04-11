@@ -139,16 +139,18 @@ function OverviewContent() {
     refetch();
   }, [refetch]);
 
-  // Calculer les variations
+  // Calculer les variations (uniquement si une vraie période précédente existe dans l’URL).
+  // En mode « Tout », les deux useOverviewStats partagent la même query key (dates absentes) :
+  // sans ce garde, previousData === data et on affichait des badges « vs période précédente » à ~0 %.
   const changes = useMemo(() => {
-    if (!data || !previousData) return null;
+    if (!previousPeriod || !data || !previousData) return null;
     return {
       totalListens: calculateChange(data.totalListens, previousData.totalListens),
       uniqueArtists: calculateChange(data.uniqueArtists, previousData.uniqueArtists),
       uniqueTracks: calculateChange(data.uniqueTracks, previousData.uniqueTracks),
       totalPlayTime: calculateChange(data.totalPlayTime, previousData.totalPlayTime),
     };
-  }, [data, previousData]);
+  }, [previousPeriod, data, previousData]);
 
   // Formater les données de timeline (agrégation mensuelle : date = YYYY-MM)
   const chartData = useMemo(

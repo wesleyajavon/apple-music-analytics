@@ -195,14 +195,14 @@ function OverviewBisContent() {
   const handleRetry = useCallback(() => refetch(), [refetch]);
 
   const changes = useMemo(() => {
-    if (!data || !previousData) return null;
+    if (!previousPeriod || !data || !previousData) return null;
     return {
       totalListens: calculateChange(data.totalListens, previousData.totalListens),
       uniqueArtists: calculateChange(data.uniqueArtists, previousData.uniqueArtists),
       uniqueTracks: calculateChange(data.uniqueTracks, previousData.uniqueTracks),
       totalPlayTime: calculateChange(data.totalPlayTime, previousData.totalPlayTime),
     };
-  }, [data, previousData]);
+  }, [previousPeriod, data, previousData]);
 
   const chartData = useMemo(
     () =>

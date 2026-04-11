@@ -137,6 +137,18 @@ export function DataExportOnboarding() {
             <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
               {t("welcomeTitle")}
             </h1>
+            <section
+              className="rounded-xl border border-sky-200/80 bg-sky-50/90 px-4 py-3 text-sm leading-relaxed text-sky-950 dark:border-sky-900/40 dark:bg-sky-950/25 dark:text-sky-100"
+              aria-labelledby="onboarding-why-not-api-heading"
+            >
+              <h2
+                id="onboarding-why-not-api-heading"
+                className="text-base font-semibold text-sky-950 dark:text-sky-50"
+              >
+                {t("whyNotApiTitle")}
+              </h2>
+              <p className="mt-2 text-sky-900/95 dark:text-sky-100/95">{t("whyNotApiBody")}</p>
+            </section>
             <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-300">
               {t("welcomeBody")}
             </p>

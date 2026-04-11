@@ -87,6 +87,62 @@
     "continueWithGoogle": "Continuer avec Google",
     "orDivider": "ou"
   },
+  "onboarding": {
+    "metaTitle": "Première connexion — exporter vos données",
+    "welcomeEyebrow": "Bienvenue",
+    "welcomeTitle": "Préparez votre export d’écoute",
+    "welcomeBody": "Pour alimenter ce tableau de bord, vous devez demander une copie de votre historique d’écoute chez votre service musical. Apple et Spotify vous envoient le fichier par e-mail : comptez souvent plusieurs jours (parfois jusqu’à une semaine ou plus selon le service).",
+    "welcomeNoteStrong": "Rien à faire ici tant que le fichier n’est pas arrivé",
+    "welcomeNoteRest": " : vous pourrez l’importer dès réception.",
+    "continue": "Continuer",
+    "pickTitle": "Où écoutez-vous surtout la musique ?",
+    "pickSubtitle": "Choisissez un parcours : les étapes et captures d’écran correspondent à ce service.",
+    "pickSpotify": "Spotify",
+    "pickSpotifyHint": "Historique étendu recommandé",
+    "pickApple": "Apple Music",
+    "pickAppleHint": "Données Apple Media Services",
+    "back": "Retour",
+    "stepProgress": "Étape {current} sur {total}",
+    "openSpotifyPrivacy": "Ouvrir les paramètres Spotify",
+    "openApplePrivacy": "Ouvrir le portail Apple",
+    "spotifyUrls": {
+      "privacy": "https://www.spotify.com/us/account/privacy/"
+    },
+    "appleUrls": {
+      "privacy": "https://privacy.apple.com/"
+    },
+    "spotify": {
+      "step1Title": "Demander l’historique de streaming étendu",
+      "step1Body": "Sur la page « Download your data », activez la sélection pour l’historique de streaming étendu (Extended streaming history) — c’est ce qui couvre le plus d’écoute dans le temps. Ensuite, touchez « Request data ». Le compte « Account data » peut arriver plus vite, mais l’historique étendu est souvent plus complet ; Spotify indique jusqu’à 30 jours pour le préparer.",
+      "step2Title": "Confirmation",
+      "step2Body": "Revenez sur « Account privacy » : une bannière verte confirme que Spotify prépare votre fichier. Vous recevrez un e-mail lorsque le téléchargement sera prêt."
+    },
+    "apple": {
+      "step1Title": "Demander une copie de vos données",
+      "step1Body": "Connectez-vous au portail Données et confidentialité Apple, puis sous « Gérer vos données », ouvrez le lien « Demander une copie de vos données » (Request a copy of your data).",
+      "step2Title": "Cocher Apple Media Services",
+      "step2Body": "Dans la liste, sélectionnez « Apple Media Services Information » (App Store, Apple Music, Podcasts, etc.). Vous pouvez laisser les autres cases décochées si vous voulez un export ciblé.",
+      "step3Title": "Taille de fichier",
+      "step3Body": "Choisissez une taille maximale pratique pour le téléchargement — 1 Go convient en général. Vérifiez le récapitulatif, puis validez la demande.",
+      "step4Title": "Confirmation",
+      "step4Body": "Apple affiche un message de remerciement et précise que la préparation peut prendre jusqu’à quelques jours ; vous serez notifié à l’adresse e-mail de votre compte."
+    },
+    "next": "Suivant",
+    "finishTitle": "C’est noté",
+    "finishBody": "Quand vous aurez reçu l’e-mail et le fichier, vous pourrez importer vos données dans l’app. En attendant, explorez le tableau de bord : certaines vues se rempliront après l’import.",
+    "goToDashboard": "Accéder au tableau de bord",
+    "finishing": "Enregistrement…",
+    "skipForNow": "Passer pour l’instant",
+    "skipHint": "Vous pourrez refaire la demande d’export plus tard ; nous ne vous bloquons pas.",
+    "completeError": "Impossible d’enregistrer. Réessayez.",
+    "imageAltSpotifyStep1": "Capture : page Spotify Download your data avec historique étendu et bouton Request data",
+    "imageAltSpotifyStep2": "Capture : page Account privacy Spotify avec bannière de confirmation verte",
+    "imageAltAppleStep1": "Capture : portail Apple, lien pour demander une copie des données",
+    "imageAltAppleStep2": "Capture : sélection Apple Media Services Information",
+    "imageAltAppleStep3": "Capture : choix de la taille maximale des fichiers (1 Go)",
+    "imageAltAppleStep4": "Capture : confirmation Apple, préparation des données",
+    "externalLinkAria": "S’ouvre dans un nouvel onglet"
+  },
   "dashboard": {
     "title": "Dashboard 📊"
   },

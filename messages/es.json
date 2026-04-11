@@ -87,6 +87,62 @@
     "continueWithGoogle": "Continuar con Google",
     "orDivider": "o"
   },
+  "onboarding": {
+    "metaTitle": "Primer acceso — exportar tus datos de escucha",
+    "welcomeEyebrow": "Bienvenido",
+    "welcomeTitle": "Prepara tu exportación de escucha",
+    "welcomeBody": "Para alimentar este panel, solicita una copia de tu historial en tu servicio musical. Apple y Spotify te envían el archivo por correo: a menudo tarda varios días (a veces hasta una semana o más, según el servicio).",
+    "welcomeNoteStrong": "Aquí no subes nada hasta que llegue el archivo",
+    "welcomeNoteRest": " : lo importarás en cuanto lo recibas.",
+    "continue": "Continuar",
+    "pickTitle": "¿Dónde escuchas música sobre todo?",
+    "pickSubtitle": "Elige un recorrido: los pasos y capturas corresponden a ese servicio.",
+    "pickSpotify": "Spotify",
+    "pickSpotifyHint": "Historial de streaming ampliado recomendado",
+    "pickApple": "Apple Music",
+    "pickAppleHint": "Datos de Apple Media Services",
+    "back": "Atrás",
+    "stepProgress": "Paso {current} de {total}",
+    "openSpotifyPrivacy": "Abrir privacidad de Spotify",
+    "openApplePrivacy": "Abrir el portal de privacidad de Apple",
+    "spotifyUrls": {
+      "privacy": "https://www.spotify.com/us/account/privacy/"
+    },
+    "appleUrls": {
+      "privacy": "https://privacy.apple.com/"
+    },
+    "spotify": {
+      "step1Title": "Solicitar el historial de streaming ampliado",
+      "step1Body": "En “Download your data”, selecciona Extended streaming history y pulsa “Request data.” Los datos de cuenta pueden llegar antes, pero el historial ampliado suele ser más completo; Spotify puede tardar hasta 30 días en prepararlo.",
+      "step2Title": "Confirmación",
+      "step2Body": "En “Account privacy”, un banner verde confirma que Spotify prepara tu archivo. Recibirás un correo cuando la descarga esté lista."
+    },
+    "apple": {
+      "step1Title": "Solicitar una copia de tus datos",
+      "step1Body": "Inicia sesión en el portal Datos y privacidad de Apple y, en “Administrar tus datos”, abre “Solicitar una copia de tus datos” (Request a copy of your data).",
+      "step2Title": "Marcar Apple Media Services",
+      "step2Body": "En la lista, marca “Apple Media Services Information” (App Store, Apple Music, Podcasts, etc.). Puedes dejar el resto sin marcar para un export más acotado.",
+      "step3Title": "Tamaño de archivo",
+      "step3Body": "Elige un tamaño máximo cómodo para descargar — 1 GB suele bastar. Revisa el resumen y completa la solicitud.",
+      "step4Title": "Confirmación",
+      "step4Body": "Apple muestra un mensaje de agradecimiento y avisa de que la preparación puede tardar varios días; te notificarán al correo de tu Apple ID."
+    },
+    "next": "Siguiente",
+    "finishTitle": "Listo",
+    "finishBody": "Cuando recibas el correo y los archivos, podrás importarlos en la app. Mientras tanto puedes explorar el panel; muchas vistas se completan tras la importación.",
+    "goToDashboard": "Ir al panel",
+    "finishing": "Guardando…",
+    "skipForNow": "Omitir por ahora",
+    "skipHint": "Podrás solicitar el export más tarde; no te bloqueamos.",
+    "completeError": "No se pudo guardar. Inténtalo de nuevo.",
+    "imageAltSpotifyStep1": "Captura: Spotify Download your data con historial ampliado y Request data",
+    "imageAltSpotifyStep2": "Captura: Spotify Account privacy con banner verde de confirmación",
+    "imageAltAppleStep1": "Captura: Apple Datos y privacidad, solicitar copia",
+    "imageAltAppleStep2": "Captura: lista de export con Apple Media Services marcado",
+    "imageAltAppleStep3": "Captura: tamaño máximo de archivo (1 GB)",
+    "imageAltAppleStep4": "Captura: confirmación de Apple, preparando datos",
+    "externalLinkAria": "Se abre en una pestaña nueva"
+  },
   "dashboard": {
     "title": "Dashboard 📊"
   },

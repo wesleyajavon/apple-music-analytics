@@ -14,6 +14,7 @@ export type ResolveAuthorizedDataUserIdResult =
  * Resolves which user's data a read-only analytics request may access.
  * - Authenticated: own data; optional `userId` may select the public demo profile only.
  *   Any other `userId` query is ignored (still scoped to the session user).
+ *   Malformed values are treated like a foreign override (scoped to session when logged in).
  * - Anonymous: only the configured public profile, and only when `userId` query matches it.
  */
 export async function resolveAuthorizedDataUserId(
@@ -24,11 +25,14 @@ export async function resolveAuthorizedDataUserId(
   const requested =
     requestedRaw && isUuidString(requestedRaw) ? requestedRaw.trim() : undefined;
 
+  const sessionUserId = (await getCurrentUserId(request)) ?? null;
+
   if (requestedRaw && !requested) {
+    if (sessionUserId) {
+      return { ok: true, userId: sessionUserId };
+    }
     return { ok: false, status: 403 };
   }
-
-  const sessionUserId = (await getCurrentUserId(request)) ?? null;
 
   if (sessionUserId) {
     if (publicId && requested === publicId) {

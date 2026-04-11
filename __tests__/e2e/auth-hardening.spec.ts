@@ -91,8 +91,9 @@ test.describe("Auth hardening coverage", () => {
     await signInViaUi(page);
 
     const ownScopeResponse = await page.request.get("/api/overview");
+    // Must match app UUID validation (version nibble 1–8, variant 8/9/a/b), not a bogus string.
     const foreignScopeResponse = await page.request.get(
-      "/api/overview?userId=00000000-0000-0000-0000-000000000999"
+      "/api/overview?userId=11111111-1111-4111-8111-111111111111"
     );
 
     expect(ownScopeResponse.status()).toBe(200);

@@ -61,8 +61,32 @@
       "about": "Comment ça marche 🎯",
       "demo": "Démo 🎬",
       "methodology": "Méthodologie 📚",
-      "sentryTest": "Test Sentry 🧪"
+      "sentryTest": "Test Sentry 🧪",
+      "settings": "Paramètres ⚙️"
     }
+  },
+  "settings": {
+    "metaTitle": "Paramètres du compte",
+    "title": "Paramètres",
+    "subtitle": "Gérez les données liées à votre compte dans cette application.",
+    "signedOutHint": "Connectez-vous pour effacer vos données d’analytics ou gérer votre compte.",
+    "signInCta": "Se connecter",
+    "dangerTitle": "Effacer mes données d’analytics",
+    "dangerBody": "Cette action supprime définitivement tout votre historique d’écoute importé et vos données Replay stockés dans notre base. Votre compte (email) n’est pas supprimé.",
+    "dangerBulletListens": "Toutes les écoutes enregistrées (imports, etc.)",
+    "dangerBulletReplay": "Tous les imports Apple Music Replay / années",
+    "dangerBulletOnboarding": "Réinitialisation de l’onboarding : vous devrez réimporter un export pour recharger le tableau de bord",
+    "confirmCheckbox": "Je comprends que cette action est irréversible.",
+    "phraseInstruction": "Pour confirmer, saisissez exactement la phrase ci-dessous : prénom et nom en minuscules, sans accents, séparés par un tiret (ex. marie-curie). Si vous n’avez qu’un seul nom affiché, saisissez ce seul mot.",
+    "phraseLabel": "Phrase de confirmation",
+    "phrasePlaceholder": "prenom-nom",
+    "phraseHint": "La phrase est dérivée du nom sur votre compte (ou de votre adresse e-mail si le nom est absent).",
+    "phraseMismatch": "La phrase ne correspond pas à votre profil.",
+    "phraseLoadError": "Impossible de charger la phrase de confirmation. Réessayez.",
+    "noPhraseError": "Nous ne pouvons pas générer de phrase à partir de votre profil (nom ou e-mail). Mettez à jour votre nom dans les paramètres du compte ou contactez le support.",
+    "clearDataButton": "Effacer toutes mes données d’analytics",
+    "clearing": "Suppression en cours…",
+    "clearError": "Impossible d’effacer les données. Réessayez plus tard."
   },
   "auth": {
     "signInEyebrow": "Bon retour",

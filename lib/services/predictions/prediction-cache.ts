@@ -143,3 +143,19 @@ export async function setCachedExplanation(
     expiresAt: Date.now() + MEMORY_TTL_MS,
   });
 }
+
+/** Best-effort invalidation after a user clears analytics (avoids stale “today” prediction). */
+export async function invalidateListeningHabitPredictionForUser(
+  userId: string
+): Promise<void> {
+  const key = getPredictionCacheKey(userId);
+  const redis = getRedisClient();
+  if (redis) {
+    try {
+      await redis.del(key);
+    } catch {
+      // ignore
+    }
+  }
+  memoryPredictionCache.delete(key);
+}

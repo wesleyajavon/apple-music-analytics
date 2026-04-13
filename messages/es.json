@@ -61,8 +61,32 @@
       "about": "Cómo funciona 🎯",
       "demo": "Demo 🎬",
       "methodology": "Metodología 📚",
-      "sentryTest": "Test Sentry 🧪"
+      "sentryTest": "Test Sentry 🧪",
+      "settings": "Ajustes ⚙️"
     }
+  },
+  "settings": {
+    "metaTitle": "Ajustes de la cuenta",
+    "title": "Ajustes",
+    "subtitle": "Gestiona los datos asociados a tu cuenta en esta aplicación.",
+    "signedOutHint": "Inicia sesión para borrar tus datos de analytics o gestionar tu cuenta.",
+    "signInCta": "Iniciar sesión",
+    "dangerTitle": "Borrar mis datos de analytics",
+    "dangerBody": "Esto elimina de forma permanente todo el historial de escucha importado y los datos Replay que guardamos. Tu cuenta (email) no se elimina.",
+    "dangerBulletListens": "Todas las escuchas guardadas (importaciones, etc.)",
+    "dangerBulletReplay": "Todas las importaciones de Apple Music Replay / años",
+    "dangerBulletOnboarding": "Se reinicia el onboarding: tendrás que importar un export otra vez para llenar el panel",
+    "confirmCheckbox": "Entiendo que esta acción no se puede deshacer.",
+    "phraseInstruction": "Para confirmar, escribe exactamente la frase de abajo: nombre y apellido en minúsculas, sin acentos, separados por un guion (p. ej. marie-curie). Si solo hay un nombre en tu cuenta, escribe esa única palabra.",
+    "phraseLabel": "Frase de confirmación",
+    "phrasePlaceholder": "nombre-apellido",
+    "phraseHint": "La frase se obtiene del nombre de tu cuenta (o del correo si no hay nombre).",
+    "phraseMismatch": "La frase no coincide con tu perfil.",
+    "phraseLoadError": "No se pudo cargar la frase de confirmación. Inténtalo de nuevo.",
+    "noPhraseError": "No podemos generar una frase a partir de tu perfil (nombre o correo). Actualiza tu nombre en la cuenta o contacta con soporte.",
+    "clearDataButton": "Borrar todos mis datos de analytics",
+    "clearing": "Borrando…",
+    "clearError": "No se pudieron borrar los datos. Inténtalo más tarde."
   },
   "auth": {
     "signInEyebrow": "Bienvenido de nuevo",

@@ -61,8 +61,32 @@
       "about": "How it works 🎯",
       "demo": "Demo 🎬",
       "methodology": "Methodology 📚",
-      "sentryTest": "Sentry Test 🧪"
+      "sentryTest": "Sentry Test 🧪",
+      "settings": "Settings ⚙️"
     }
+  },
+  "settings": {
+    "metaTitle": "Account settings",
+    "title": "Settings",
+    "subtitle": "Manage data stored for your account in this app.",
+    "signedOutHint": "Sign in to clear your analytics data or manage your account.",
+    "signInCta": "Sign in",
+    "dangerTitle": "Clear my analytics data",
+    "dangerBody": "This permanently deletes all imported listening history and Replay data we store. Your account (email) is not deleted.",
+    "dangerBulletListens": "All stored listens (imports, etc.)",
+    "dangerBulletReplay": "All Apple Music Replay / yearly imports",
+    "dangerBulletOnboarding": "Onboarding is reset: you will need to import an export again to refill the dashboard",
+    "confirmCheckbox": "I understand this action cannot be undone.",
+    "phraseInstruction": "To confirm, type exactly the phrase below: first and last name in lowercase, no accents, separated by a hyphen (e.g. marie-curie). If only one name is shown on your account, type that single word.",
+    "phraseLabel": "Confirmation phrase",
+    "phrasePlaceholder": "firstname-lastname",
+    "phraseHint": "The phrase is derived from the name on your account (or from your email address if no name is set).",
+    "phraseMismatch": "The phrase does not match your profile.",
+    "phraseLoadError": "Could not load the confirmation phrase. Please try again.",
+    "noPhraseError": "We cannot build a phrase from your profile (name or email). Update your display name in your account settings or contact support.",
+    "clearDataButton": "Clear all my analytics data",
+    "clearing": "Clearing…",
+    "clearError": "Could not clear data. Please try again later."
   },
   "auth": {
     "signInEyebrow": "Welcome back",

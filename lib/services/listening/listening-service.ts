@@ -5,6 +5,7 @@
 
 import { Prisma } from "@prisma/client";
 import { prisma } from "../../prisma";
+import type { ListenRecordSource } from "@/lib/constants/listen-source";
 import {
   ListenDto,
   ListensQueryParams,
@@ -97,7 +98,7 @@ export async function getListens(
     trackTitle: listen.track.title,
     artistName: listen.track.artist.name,
     playedAt: listen.playedAt.toISOString(),
-    source: listen.source as "lastfm" | "apple_music_replay",
+    source: listen.source as ListenRecordSource,
   }));
 
   return { data, total };
@@ -111,7 +112,7 @@ export interface ListenExportDto {
   artistName: string;
   trackTitle: string;
   genre: string | null;
-  source: "lastfm" | "apple_music_replay";
+  source: ListenRecordSource;
 }
 
 /**
@@ -121,7 +122,7 @@ export interface ListensExportParams {
   startDate?: string; // ISO 8601 date string
   endDate?: string; // ISO 8601 date string
   userId?: string;
-  source?: "lastfm" | "apple_music_replay";
+  source?: ListenRecordSource;
 }
 
 /**
@@ -199,7 +200,7 @@ export async function getAllListensForExport(
     artistName: listen.track.artist.name,
     trackTitle: listen.track.title,
     genre: listen.track.genre,
-    source: listen.source as "lastfm" | "apple_music_replay",
+    source: listen.source as ListenRecordSource,
   }));
 }
 

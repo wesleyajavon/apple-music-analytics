@@ -3,6 +3,8 @@
  * These DTOs provide a clean API surface without exposing Prisma models directly
  */
 
+import type { ListenRecordSource } from "@/lib/constants/listen-source";
+
 // Re-export Zod schemas and validation functions for convenience
 export {
   ListenDtoSchema,
@@ -26,7 +28,7 @@ export interface ListenDto {
   trackTitle: string;
   artistName: string;
   playedAt: string; // ISO 8601 date string
-  source: "lastfm" | "apple_music_replay";
+  source: ListenRecordSource;
 }
 
 /**
@@ -81,7 +83,7 @@ export interface ListensQueryParams {
   userId?: string;
   limit?: number;
   offset?: number;
-  source?: "lastfm" | "apple_music_replay";
+  source?: ListenRecordSource;
 }
 
 /**

@@ -111,7 +111,8 @@
       "privacy": "https://www.spotify.com/us/account/privacy/"
     },
     "appleUrls": {
-      "privacy": "https://privacy.apple.com/"
+      "privacy": "https://privacy.apple.com/",
+      "archive": "https://privacy.apple.com/account/archive"
     },
     "spotify": {
       "step1Title": "Demander l’historique de streaming étendu",
@@ -130,8 +131,28 @@
       "step4Body": "Apple affiche un message de remerciement et précise que la préparation peut prendre jusqu’à quelques jours ; vous serez notifié à l’adresse e-mail de votre compte."
     },
     "next": "Suivant",
+    "import": {
+      "eyebrow": "Étape 2 — Import",
+      "spotifyTitle": "Envoyez votre archive Spotify",
+      "spotifyBody": "Ouvrez l’e-mail envoyé par Spotify (expéditeur habituel : noreply@spotify.com) et téléchargez l’archive, souvent nommée my_spotify_data.zip. Elle contient le dossier « Spotify Extended Streaming History » avec les fichiers Streaming_History_Audio_*.json. Nous ne lisons que ces fichiers JSON ; le lien de téléchargement expire au bout d’environ 14 jours.",
+      "appleTitle": "Envoyez votre export Apple Music",
+      "appleBody": "Ouvrez l’e-mail d’Apple puis la page des téléchargements. Récupérez l’archive Apple Media Services (le libellé peut varier selon la langue, par ex. « Informations sur les services multimédia Apple »). Décompressez-la, puis ouvrez Apple_Media_Services → Apple Music Activity et sélectionnez le fichier « Apple Music - Play History Daily Tracks.csv ».",
+      "openAppleDownloads": "Ouvrir la page Téléchargements Apple",
+      "dropTitle": "Déposez le fichier ici ou cliquez pour parcourir",
+      "dropSub": "Spotify : fichier .zip • Apple : fichier .csv",
+      "selectedFile": "Fichier sélectionné : {name}",
+      "noFile": "Choisissez un fichier à importer.",
+      "importSubmit": "Importer dans mon compte",
+      "importing": "Import en cours…",
+      "importingOverlayTitle": "Envoi et analyse de votre fichier…",
+      "importingOverlayHint": "Les archives volumineuses peuvent prendre jusqu’à une minute. Gardez cet onglet ouvert.",
+      "skipImport": "Je n’ai pas encore le fichier",
+      "toastSuccess": "{count, plural, one {# écoute importée.} other {# écoutes importées.}}",
+      "importError": "L’import a échoué. Vérifiez le fichier et réessayez."
+    },
     "finishTitle": "C’est noté",
-    "finishBody": "Quand vous aurez reçu l’e-mail et le fichier, vous pourrez importer vos données dans l’app. En attendant, explorez le tableau de bord : certaines vues se rempliront après l’import.",
+    "finishBody": "Vous pouvez passer cette étape si votre export n’est pas encore prêt : le tableau de bord reste accessible, et les vues se rempliront après un import ultérieur.",
+    "finishAfterImport": "{imported} écoutes ont été ajoutées à votre profil. Doublons ignorés : {skipped}.",
     "goToDashboard": "Accéder au tableau de bord",
     "finishing": "Enregistrement…",
     "skipForNow": "Passer pour l’instant",
@@ -143,6 +164,7 @@
     "imageAltAppleStep2": "Capture : sélection Apple Media Services Information",
     "imageAltAppleStep3": "Capture : choix de la taille maximale des fichiers (1 Go)",
     "imageAltAppleStep4": "Capture : confirmation Apple, préparation des données",
+    "imageAltSpotifyEmail": "Capture : e-mail Spotify, historique étendu prêt, bouton vert Download",
     "externalLinkAria": "S’ouvre dans un nouvel onglet"
   },
   "dashboard": {

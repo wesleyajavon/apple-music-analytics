@@ -25,6 +25,7 @@ const DEFAULT_ROUTES = [
   "/api/export/report",
   "/api/lastfm/import",
   "/api/replay/import",
+  "/api/user/onboarding/import",
 ] as const;
 
 type HealthStatus = "ok" | "warn" | "critical";

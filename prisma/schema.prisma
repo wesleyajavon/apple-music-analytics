@@ -68,7 +68,7 @@ model Listen {
   trackId   String
   track     Track    @relation(fields: [trackId], references: [id], onDelete: Cascade)
   playedAt  DateTime // Timestamp of when the track was played
-  source    String   @default("lastfm") // 'lastfm' or 'apple_music_replay'
+  source    String   @default("lastfm") // lastfm | apple_music_replay | spotify_export | apple_music_export
   createdAt DateTime @default(now())
 
   @@index([userId])

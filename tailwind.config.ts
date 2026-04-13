@@ -33,6 +33,16 @@ const config: Config = {
         "card-hover": "var(--card-shadow-hover)",
         glow: "0 0 40px -10px rgb(139 92 246 / 0.25)",
       },
+      keyframes: {
+        "onboarding-import-indeterminate": {
+          "0%": { transform: "translateX(-100%)" },
+          "100%": { transform: "translateX(350%)" },
+        },
+      },
+      animation: {
+        "onboarding-import-indeterminate":
+          "onboarding-import-indeterminate 1.15s ease-in-out infinite",
+      },
     },
   },
   plugins: [],

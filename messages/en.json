@@ -111,7 +111,8 @@
       "privacy": "https://www.spotify.com/us/account/privacy/"
     },
     "appleUrls": {
-      "privacy": "https://privacy.apple.com/"
+      "privacy": "https://privacy.apple.com/",
+      "archive": "https://privacy.apple.com/account/archive"
     },
     "spotify": {
       "step1Title": "Request Extended streaming history",
@@ -130,8 +131,28 @@
       "step4Body": "Apple thanks you and explains that preparation can take up to several days; you will be notified at your Apple ID email."
     },
     "next": "Next",
+    "import": {
+      "eyebrow": "Step 2 — Import",
+      "spotifyTitle": "Upload your Spotify archive",
+      "spotifyBody": "Open the email from Spotify (usually from noreply@spotify.com) and download the archive — often named my_spotify_data.zip. It contains the “Spotify Extended Streaming History” folder with Streaming_History_Audio_*.json files. We only read those JSON files. The download link expires after about 14 days.",
+      "appleTitle": "Upload your Apple Music export",
+      "appleBody": "Open Apple’s email, then go to your downloads page. Download the Apple Media Services archive (the exact name may vary by language). Unzip it, then open Apple_Media_Services → Apple Music Activity and choose “Apple Music - Play History Daily Tracks.csv”.",
+      "openAppleDownloads": "Open Apple’s downloads page",
+      "dropTitle": "Drop the file here or click to browse",
+      "dropSub": "Spotify: .zip file • Apple: .csv file",
+      "selectedFile": "Selected file: {name}",
+      "noFile": "Choose a file to import.",
+      "importSubmit": "Import into my account",
+      "importing": "Importing…",
+      "importingOverlayTitle": "Uploading and processing your file…",
+      "importingOverlayHint": "Large archives can take up to a minute. Please keep this tab open.",
+      "skipImport": "I don’t have the file yet",
+      "toastSuccess": "{count, plural, one {# listen imported.} other {# listens imported.}}",
+      "importError": "Import failed. Check the file and try again."
+    },
     "finishTitle": "You’re set",
-    "finishBody": "When you receive the email and files, you can import them into the app. Until then, you can still explore the dashboard; many views fill in after import.",
+    "finishBody": "You can skip this step if your export is not ready yet — the dashboard stays available, and charts will fill in after you import later.",
+    "finishAfterImport": "{imported} listens were added to your profile. Skipped duplicates: {skipped}.",
     "goToDashboard": "Go to dashboard",
     "finishing": "Saving…",
     "skipForNow": "Skip for now",
@@ -143,6 +164,7 @@
     "imageAltAppleStep2": "Screenshot: Apple export list with Apple Media Services selected",
     "imageAltAppleStep3": "Screenshot: Apple maximum file size choice (1 GB)",
     "imageAltAppleStep4": "Screenshot: Apple confirmation, preparing your data",
+    "imageAltSpotifyEmail": "Screenshot: Spotify email, extended streaming history ready, green Download button",
     "externalLinkAria": "Opens in a new tab"
   },
   "dashboard": {

@@ -111,7 +111,8 @@
       "privacy": "https://www.spotify.com/us/account/privacy/"
     },
     "appleUrls": {
-      "privacy": "https://privacy.apple.com/"
+      "privacy": "https://privacy.apple.com/",
+      "archive": "https://privacy.apple.com/account/archive"
     },
     "spotify": {
       "step1Title": "Solicitar el historial de streaming ampliado",
@@ -130,8 +131,28 @@
       "step4Body": "Apple muestra un mensaje de agradecimiento y avisa de que la preparación puede tardar varios días; te notificarán al correo de tu Apple ID."
     },
     "next": "Siguiente",
+    "import": {
+      "eyebrow": "Paso 2 — Importación",
+      "spotifyTitle": "Sube tu archivo de Spotify",
+      "spotifyBody": "Abre el correo de Spotify (suele ser noreply@spotify.com) y descarga el archivo, a menudo llamado my_spotify_data.zip. Contiene la carpeta «Spotify Extended Streaming History» con archivos Streaming_History_Audio_*.json. Solo leemos esos JSON. El enlace caduca a los ~14 días.",
+      "appleTitle": "Sube tu export de Apple Music",
+      "appleBody": "Abre el correo de Apple y ve a la página de descargas. Descarga el archivo de Apple Media Services (el nombre exacto puede variar según el idioma). Descomprímelo, abre Apple_Media_Services → Apple Music Activity y elige «Apple Music - Play History Daily Tracks.csv».",
+      "openAppleDownloads": "Abrir la página de descargas de Apple",
+      "dropTitle": "Suelta el archivo aquí o haz clic para elegir",
+      "dropSub": "Spotify: .zip • Apple: .csv",
+      "selectedFile": "Archivo seleccionado: {name}",
+      "noFile": "Elige un archivo para importar.",
+      "importSubmit": "Importar a mi cuenta",
+      "importing": "Importando…",
+      "importingOverlayTitle": "Subiendo y procesando tu archivo…",
+      "importingOverlayHint": "Los archivos grandes pueden tardar hasta un minuto. No cierres esta pestaña.",
+      "skipImport": "Aún no tengo el archivo",
+      "toastSuccess": "{count, plural, one {# escucha importada.} other {# escuchas importadas.}}",
+      "importError": "La importación falló. Revisa el archivo e inténtalo de nuevo."
+    },
     "finishTitle": "Listo",
-    "finishBody": "Cuando recibas el correo y los archivos, podrás importarlos en la app. Mientras tanto puedes explorar el panel; muchas vistas se completan tras la importación.",
+    "finishBody": "Puedes omitir este paso si el export aún no está listo: el panel sigue disponible y los gráficos se completarán cuando importes más adelante.",
+    "finishAfterImport": "Se añadieron {imported} escuchas a tu perfil. Duplicados omitidos: {skipped}.",
     "goToDashboard": "Ir al panel",
     "finishing": "Guardando…",
     "skipForNow": "Omitir por ahora",
@@ -143,6 +164,7 @@
     "imageAltAppleStep2": "Captura: lista de export con Apple Media Services marcado",
     "imageAltAppleStep3": "Captura: tamaño máximo de archivo (1 GB)",
     "imageAltAppleStep4": "Captura: confirmación de Apple, preparando datos",
+    "imageAltSpotifyEmail": "Captura: correo de Spotify, historial ampliado listo, botón verde Download",
     "externalLinkAria": "Se abre en una pestaña nueva"
   },
   "dashboard": {

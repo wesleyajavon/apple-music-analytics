@@ -15,6 +15,7 @@ import {
   unauthorizedResponse,
 } from "@/lib/auth/require-auth-user-id";
 import { assertRateLimit } from "@/lib/security/rate-limit";
+import { isListenRecordSource } from "@/lib/constants/listen-source";
 
 // Force dynamic rendering since we use request.url
 export const dynamic = "force-dynamic";
@@ -73,7 +74,7 @@ const LISTENS_RATE_LIMIT = {
  *         name: source
  *         schema:
  *           type: string
- *           enum: [lastfm, apple_music_replay]
+ *           enum: [lastfm, apple_music_replay, spotify_export, apple_music_export]
  *         description: Listen source (list mode only)
  *       - in: query
  *         name: aggregate
@@ -190,10 +191,9 @@ export async function GET(request: NextRequest) {
       min: 0,
       errorMessage: "Invalid offset. Must be a non-negative integer",
     }) || 0;
-    const source = extractOptionalString(request, "source") as
-      | "lastfm"
-      | "apple_music_replay"
-      | undefined;
+    const sourceRaw = extractOptionalString(request, "source");
+    const source =
+      sourceRaw && isListenRecordSource(sourceRaw) ? sourceRaw : undefined;
 
     // Convert dates to ISO strings for getListens
     const startDate = startDateObj?.toISOString().split("T")[0];

@@ -4,6 +4,9 @@
  */
 
 import { z } from 'zod';
+import { LISTEN_RECORD_SOURCES } from '@/lib/constants/listen-source';
+
+const listenSourceEnum = z.enum(LISTEN_RECORD_SOURCES);
 
 /**
  * Schema for ListenDto
@@ -13,7 +16,7 @@ export const ListenDtoSchema = z.object({
   trackTitle: z.string(),
   artistName: z.string(),
   playedAt: z.string().datetime(),
-  source: z.enum(['lastfm', 'apple_music_replay']),
+  source: listenSourceEnum,
 });
 
 /**
@@ -78,7 +81,7 @@ export const ListensQueryParamsSchema = z.object({
   userId: z.string().optional(),
   limit: z.number().int().positive().optional(),
   offset: z.number().int().nonnegative().optional(),
-  source: z.enum(['lastfm', 'apple_music_replay']).optional(),
+  source: listenSourceEnum.optional(),
 });
 
 /**

@@ -28,6 +28,7 @@ const DEFAULT_ROUTES = [
   "/api/export/report",
   "/api/lastfm/import",
   "/api/replay/import",
+  "/api/user/onboarding/import",
 ] as const;
 
 function parsePositiveInt(raw: string | null, fallback: number, min: number, max: number): number {

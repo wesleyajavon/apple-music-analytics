@@ -1,12 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { toast } from "sonner";
 
-type Phase = "welcome" | "pick" | "guide" | "finish";
+type Phase = "welcome" | "pick" | "guide" | "import" | "finish";
 type MusicProvider = "spotify" | "apple";
 
 type GuideStep = {
@@ -71,6 +71,13 @@ export function DataExportOnboarding() {
   const [provider, setProvider] = useState<MusicProvider | null>(null);
   const [stepIndex, setStepIndex] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [isImporting, setIsImporting] = useState(false);
+  const [importSummary, setImportSummary] = useState<{
+    imported: number;
+    skippedDuplicates: number;
+  } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const steps = useMemo(() => {
     if (provider === "spotify") return SPOTIFY_STEPS;
@@ -93,6 +100,7 @@ export function DataExportOnboarding() {
 
   const spotifyPrivacyUrl = t("spotifyUrls.privacy");
   const applePrivacyUrl = t("appleUrls.privacy");
+  const appleArchiveUrl = t("appleUrls.archive");
 
   function selectProvider(p: MusicProvider) {
     setProvider(p);
@@ -105,7 +113,9 @@ export function DataExportOnboarding() {
       setStepIndex((i) => i + 1);
       return;
     }
-    setPhase("finish");
+    setImportFile(null);
+    setImportSummary(null);
+    setPhase("import");
   }
 
   function goBackGuide() {
@@ -115,6 +125,49 @@ export function DataExportOnboarding() {
     }
     setPhase("pick");
     setProvider(null);
+  }
+
+  function goBackImport() {
+    setPhase("guide");
+    setStepIndex(Math.max(0, steps.length - 1));
+    setImportFile(null);
+  }
+
+  const submitImport = useCallback(async () => {
+    if (!provider || !importFile) {
+      toast.error(t("import.noFile"));
+      return;
+    }
+    setIsImporting(true);
+    try {
+      const fd = new FormData();
+      fd.append("provider", provider);
+      fd.append("file", importFile);
+      const res = await fetch("/api/user/onboarding/import", { method: "POST", body: fd });
+      const data = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        imported?: number;
+        skippedDuplicates?: number;
+      };
+      if (!res.ok) {
+        toast.error(data?.error ?? t("import.importError"));
+        return;
+      }
+      const imported = data.imported ?? 0;
+      const skippedDuplicates = data.skippedDuplicates ?? 0;
+      setImportSummary({ imported, skippedDuplicates });
+      toast.success(t("import.toastSuccess", { count: imported }));
+      setPhase("finish");
+    } catch {
+      toast.error(t("import.importError"));
+    } finally {
+      setIsImporting(false);
+    }
+  }, [importFile, provider, t]);
+
+  function skipImportToFinish() {
+    setImportSummary(null);
+    setPhase("finish");
   }
 
   const cardClass =
@@ -272,10 +325,165 @@ export function DataExportOnboarding() {
           </div>
         )}
 
+        {phase === "import" && provider && (
+          <div
+            className={`relative space-y-6 ${isImporting ? "min-h-[22rem] sm:min-h-[26rem]" : ""}`}
+          >
+            {isImporting ? (
+              <div
+                className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 rounded-2xl bg-white/92 px-6 py-8 text-center shadow-inner backdrop-blur-sm dark:bg-gray-950/92"
+                role="status"
+                aria-live="polite"
+                aria-busy="true"
+              >
+                <div className="relative mb-1">
+                  <div
+                    className="h-14 w-14 animate-spin rounded-full border-4 border-gray-200 border-t-accent-violet dark:border-gray-700 dark:border-t-accent-violet"
+                    aria-hidden
+                  />
+                </div>
+                <p className="text-base font-semibold text-gray-900 dark:text-white">
+                  {t("import.importingOverlayTitle")}
+                </p>
+                <p className="max-w-sm text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+                  {t("import.importingOverlayHint")}
+                </p>
+                {importFile ? (
+                  <p
+                    className="mt-1 max-w-full truncate px-2 text-xs font-medium text-accent-violet dark:text-violet-300"
+                    title={importFile.name}
+                  >
+                    {importFile.name}
+                  </p>
+                ) : null}
+                <div
+                  className="mt-4 h-1.5 w-full max-w-[220px] overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700"
+                  aria-hidden
+                >
+                  <div className="h-full w-1/3 rounded-full bg-accent-violet shadow-sm shadow-accent-violet/40 animate-onboarding-import-indeterminate" />
+                </div>
+              </div>
+            ) : null}
+
+            <p className="text-xs font-semibold uppercase tracking-widest text-blue-600 dark:text-blue-400">
+              {t("import.eyebrow")}
+            </p>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">
+              {provider === "spotify" ? t("import.spotifyTitle") : t("import.appleTitle")}
+            </h2>
+            <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-300">
+              {provider === "spotify" ? t("import.spotifyBody") : t("import.appleBody")}
+            </p>
+
+            {provider === "spotify" && (
+              <figure className="overflow-hidden rounded-xl border border-gray-200/90 bg-gray-50 dark:border-gray-700 dark:bg-gray-950/50">
+                <Image
+                  src="/onboarding/spotify-email-download.png"
+                  alt={t("imageAltSpotifyEmail")}
+                  width={1280}
+                  height={720}
+                  className="h-auto w-full object-contain"
+                  sizes="(max-width: 768px) 100vw, 42rem"
+                />
+              </figure>
+            )}
+
+            {provider === "apple" && (
+              <a
+                href={appleArchiveUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={secondaryBtn}
+                aria-label={`${t("import.openAppleDownloads")} (${t("externalLinkAria")})`}
+              >
+                {t("import.openAppleDownloads")} ↗
+              </a>
+            )}
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              className="sr-only"
+              accept={provider === "spotify" ? ".zip,application/zip" : ".csv,text/csv"}
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                setImportFile(f ?? null);
+              }}
+            />
+            <button
+              type="button"
+              className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-300 bg-gray-50/80 px-4 py-10 text-center text-sm text-gray-700 transition-colors hover:border-accent-violet/50 hover:bg-violet-50/40 disabled:pointer-events-none disabled:opacity-50 dark:border-gray-600 dark:bg-gray-950/40 dark:text-gray-200 dark:hover:border-accent-violet/40"
+              disabled={isImporting}
+              onClick={() => fileInputRef.current?.click()}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => {
+                e.preventDefault();
+                if (isImporting) return;
+                const f = e.dataTransfer.files?.[0];
+                if (f) setImportFile(f);
+              }}
+            >
+              <span className="font-semibold text-gray-900 dark:text-white">{t("import.dropTitle")}</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">{t("import.dropSub")}</span>
+              {importFile ? (
+                <span className="mt-1 text-xs font-medium text-accent-violet">
+                  {t("import.selectedFile", { name: importFile.name })}
+                </span>
+              ) : null}
+            </button>
+
+            <div className="flex flex-col-reverse gap-3 border-t border-gray-100 pt-6 dark:border-gray-800 sm:flex-row sm:justify-between">
+              <button
+                type="button"
+                className={secondaryBtn}
+                onClick={goBackImport}
+                disabled={isImporting}
+              >
+                {t("back")}
+              </button>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <button
+                  type="button"
+                  className={`${secondaryBtn} text-gray-600 dark:text-gray-400`}
+                  onClick={skipImportToFinish}
+                  disabled={isImporting}
+                >
+                  {t("import.skipImport")}
+                </button>
+                <button
+                  type="button"
+                  className={`${primaryBtn} inline-flex items-center gap-2`}
+                  onClick={() => void submitImport()}
+                  disabled={isImporting || !importFile}
+                >
+                  {isImporting ? (
+                    <>
+                      <span
+                        className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-white/40 border-t-white"
+                        aria-hidden
+                      />
+                      <span>{t("import.importing")}</span>
+                    </>
+                  ) : (
+                    t("import.importSubmit")
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {phase === "finish" && (
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">{t("finishTitle")}</h2>
-            <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-300">{t("finishBody")}</p>
+            <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-300">
+              {importSummary
+                ? t("finishAfterImport", {
+                    imported: importSummary.imported,
+                    skipped: importSummary.skippedDuplicates,
+                  })
+                : t("finishBody")}
+            </p>
             <button
               type="button"
               className={primaryBtn}

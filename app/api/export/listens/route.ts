@@ -15,6 +15,7 @@ import {
   assertRateLimit,
   type RateLimitResult,
 } from "@/lib/security/rate-limit";
+import { isListenRecordSource } from "@/lib/constants/listen-source";
 
 // Force dynamic rendering since we use request.url
 export const dynamic = "force-dynamic";
@@ -60,7 +61,7 @@ const EXPORT_LISTENS_RATE_LIMIT = {
  *         name: source
  *         schema:
  *           type: string
- *           enum: [lastfm, apple_music_replay]
+ *           enum: [lastfm, apple_music_replay, spotify_export, apple_music_export]
  *         description: Source of listens to export (optional)
  *       - in: query
  *         name: userId
@@ -116,10 +117,9 @@ export async function GET(request: NextRequest) {
       ...EXPORT_LISTENS_RATE_LIMIT,
       userId,
     });
-    const source = extractOptionalString(request, "source") as
-      | "lastfm"
-      | "apple_music_replay"
-      | undefined;
+    const sourceRaw = extractOptionalString(request, "source");
+    const source =
+      sourceRaw && isListenRecordSource(sourceRaw) ? sourceRaw : undefined;
 
     // Convertir les dates en format ISO string pour le service
     const startDate = startDateObj?.toISOString().split("T")[0];

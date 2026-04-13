@@ -1,3 +1,5 @@
+import type { ListenRecordSource } from "@/lib/constants/listen-source";
+
 /**
  * Query keys centralisés pour TanStack Query
  * Permet une meilleure organisation et évite les erreurs de typage
@@ -10,7 +12,7 @@ export const listeningKeys = {
     startDate?: string;
     endDate?: string;
     userId?: string;
-    source?: "lastfm" | "apple_music_replay";
+    source?: ListenRecordSource;
     limit?: number;
     offset?: number;
   }) => [...listeningKeys.lists(), filters] as const,

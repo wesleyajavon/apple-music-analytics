@@ -77,3 +77,6 @@ FUTURE_ENHANCEMENTS.md
 
 # Local Apple Music export / backfill CSVs (personal listening data)
 /apple-music-play-history*.csv
+
+# Local database backups/dumps (personal data)
+/backups/

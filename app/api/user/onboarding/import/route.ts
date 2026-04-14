@@ -13,6 +13,7 @@ import { parseSpotifyStreamingHistoryAudioJson } from "@/lib/services/listening/
 import { parseApplePlayHistoryDailyTracksCsv } from "@/lib/services/listening/parse-apple-play-history-daily-csv";
 import { importOnboardingListens } from "@/lib/services/listening/import-onboarding-listens";
 import type { NormalizedListenInput } from "@/lib/services/listening/onboarding-import-types";
+import { getPaletteInvitationStatus } from "@/lib/services/palette/palette-service";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -119,6 +120,7 @@ export async function POST(request: NextRequest) {
       providerRaw === "spotify" ? ("spotify_export" as const) : ("apple_music_export" as const);
 
     const result = await importOnboardingListens(userId, source, rows);
+    const paletteInvite = await getPaletteInvitationStatus(userId);
 
     return NextResponse.json({
       ok: true,
@@ -127,6 +129,7 @@ export async function POST(request: NextRequest) {
       imported: result.imported,
       skippedDuplicates: result.skippedDuplicates,
       skippedInvalid: result.skippedInvalid,
+      paletteInvitation: paletteInvite,
     });
   } catch (error) {
     return handleApiError(error, { route: RATE.route });

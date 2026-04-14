@@ -77,6 +77,11 @@ export function DataExportOnboarding() {
     imported: number;
     skippedDuplicates: number;
   } | null>(null);
+  const [paletteInvitation, setPaletteInvitation] = useState<{
+    shouldInvite: boolean;
+    unknownRatio: number;
+    unknownArtists: number;
+  } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const steps = useMemo(() => {
@@ -148,6 +153,11 @@ export function DataExportOnboarding() {
         error?: string;
         imported?: number;
         skippedDuplicates?: number;
+        paletteInvitation?: {
+          shouldInvite?: boolean;
+          unknownRatio?: number;
+          unknownArtists?: number;
+        };
       };
       if (!res.ok) {
         toast.error(data?.error ?? t("import.importError"));
@@ -156,6 +166,15 @@ export function DataExportOnboarding() {
       const imported = data.imported ?? 0;
       const skippedDuplicates = data.skippedDuplicates ?? 0;
       setImportSummary({ imported, skippedDuplicates });
+      if (data.paletteInvitation) {
+        setPaletteInvitation({
+          shouldInvite: Boolean(data.paletteInvitation.shouldInvite),
+          unknownRatio: Number(data.paletteInvitation.unknownRatio ?? 0),
+          unknownArtists: Number(data.paletteInvitation.unknownArtists ?? 0),
+        });
+      } else {
+        setPaletteInvitation(null);
+      }
       toast.success(t("import.toastSuccess", { count: imported }));
       setPhase("finish");
     } catch {
@@ -492,6 +511,16 @@ export function DataExportOnboarding() {
             >
               {isSubmitting ? t("finishing") : t("goToDashboard")}
             </button>
+            {paletteInvitation?.shouldInvite ? (
+              <button
+                type="button"
+                className={secondaryBtn}
+                onClick={() => router.push("/dashboard/genres/palette")}
+                disabled={isSubmitting}
+              >
+                Palette ({paletteInvitation.unknownArtists})
+              </button>
+            ) : null}
           </div>
         )}
       </div>

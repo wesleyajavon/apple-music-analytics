@@ -114,6 +114,7 @@ Additional genre backfills (`genres:backfill-llm`, `genres:backfill-cascade`, `g
 ## Documentation
 
 - **API** : [`docs/API.md`](docs/API.md) (endpoint reference)
+- **DB workflow**: [`docs/DB_ENV_WORKFLOW.md`](docs/DB_ENV_WORKFLOW.md) (safe Prisma dev/prod workflow)
 - **Code** : `docs/` (generated with `npm run docs:generate`)
 
 Run `npm run docs:generate` when you change documented code under `lib/services/**` or `lib/dto/**`, or when you want to refresh the TypeDoc HTML in `docs/`; it runs `docs:clean` (removes previous TypeDoc output: modules, classes, HTML, etc.) then `typedoc` per `typedoc.json`. The endpoint reference `docs/API.md` is edited by hand and is **not** produced by TypeDoc; `npm run build` runs `docs:api:copy`, which copies `docs/API.md` to `public/docs/API.md` so the same file is served in production.

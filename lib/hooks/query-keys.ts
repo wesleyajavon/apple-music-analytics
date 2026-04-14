@@ -60,6 +60,8 @@ export const listeningKeys = {
     endDate?: string;
     userId?: string;
   }) => [...listeningKeys.all, "temporalAnalysis", params] as const,
+  palette: () => [...listeningKeys.all, "palette"] as const,
+  paletteSession: () => [...listeningKeys.palette(), "session"] as const,
 } as const;
 
 export const tasteProfileKeys = {

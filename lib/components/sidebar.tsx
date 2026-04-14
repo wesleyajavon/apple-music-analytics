@@ -115,6 +115,16 @@ const navGroups: NavGroup[] = [
         ),
       },
       {
+        href: "/dashboard/genres/palette",
+        labelKey: "palette",
+        icon: (props) => (
+          <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9 9 0 1 0-9-9 9 9 0 0 0 9 9Z" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 12a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm6.75-3a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm4.5 4.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z" />
+          </svg>
+        ),
+      },
+      {
         href: "/dashboard/artists",
         labelKey: "artists",
         icon: (props) => (

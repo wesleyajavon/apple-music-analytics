@@ -3,7 +3,7 @@
 import { Suspense, useState, useMemo, useCallback, memo } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { useSearchParams } from "next/navigation";
-import { usePathname } from "@/i18n/navigation";
+import { Link, usePathname } from "@/i18n/navigation";
 import {
   PieChart,
   Pie,
@@ -314,6 +314,18 @@ function GenresContent() {
           <p className="mt-1.5 sm:mt-2 text-sm sm:text-base text-gray-500 dark:text-gray-400 max-w-2xl">
             {t("subtitle")}
           </p>
+          <div className="mt-4 max-w-3xl rounded-xl border border-amber-200 bg-amber-50/80 px-4 py-3 text-sm text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-100">
+            <p className="font-semibold">{t("apiMappingNoticeTitle")}</p>
+            <p className="mt-1">
+              {t("apiMappingNoticeBody")}{" "}
+              <Link
+                href="/dashboard/genres/palette"
+                className="font-semibold underline decoration-amber-500/60 underline-offset-2 hover:decoration-amber-600 dark:decoration-amber-300/70"
+              >
+                {t("apiMappingNoticeLink")}
+              </Link>
+            </p>
+          </div>
         </header>
 
         {isLoadingOrFetching ? (

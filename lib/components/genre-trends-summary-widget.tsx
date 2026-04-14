@@ -180,6 +180,15 @@ export function GenreTrendsSummaryWidget({
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
                   {t("chartHint")}
                 </p>
+                <p className="mt-2 text-xs text-amber-800 dark:text-amber-200">
+                  {t("apiMappingNoticeShort")}{" "}
+                  <Link
+                    href="/dashboard/genres/palette"
+                    className="font-semibold underline underline-offset-2 hover:text-amber-900 dark:hover:text-amber-100"
+                  >
+                    {t("apiMappingNoticeLink")}
+                  </Link>
+                </p>
               </div>
               <Link
                 href={`/dashboard/genres/trends${trendsQuery}`}

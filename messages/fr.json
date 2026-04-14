@@ -375,7 +375,10 @@
     "top3Title": "Vos 3 genres favoris",
     "top3Subtitle": "Vos genres les plus écoutés mis en avant",
     "allData": "Toutes les données",
-    "other": "Autres"
+    "other": "Autres",
+    "apiMappingNoticeTitle": "Limite actuelle sur le mapping des genres",
+    "apiMappingNoticeBody": "Le mapping automatique vers des genres précis reste partiel, car l'app n'a pas un accès fiable aux APIs Apple Music ou Spotify pour enrichir chaque piste/artiste.",
+    "apiMappingNoticeLink": "Palette Features"
   },
   "genreTrends": {
     "title": "Tendances de genres 📉",
@@ -401,11 +404,18 @@
     "aiExplanation": "Style du résumé des tendances par genre",
     "aiLoading": "Génération du résumé…",
     "aiUnavailable": "Résumé IA indisponible (clé API non configurée).",
-    "aiEmpty": "Aucun résumé pour cette sélection."
+    "aiEmpty": "Aucun résumé pour cette sélection.",
+    "apiMappingNoticeTitle": "Limite actuelle sur le mapping des genres",
+    "apiMappingNoticeBody": "Les tendances reflètent les genres actuellement mappés. Sans accès fiable aux APIs Apple Music ou Spotify, une partie des écoutes peut rester moins précise côté classification.",
+    "apiMappingNoticeShort": "Certaines tendances peuvent rester approximatives sans accès API Apple Music/Spotify pour affiner le mapping des genres.",
+    "apiMappingNoticeLink": "Palette Features"
   },
   "palette": {
     "title": "Palette",
     "subtitle": "Mappez vos artistes Unknown un par un, par impact d'écoutes.",
+    "whyImplementedTitle": "Pourquoi Palette a ete implemente",
+    "whyImplementedBody": "Apple Music et Spotify ne fournissent pas un acces API fiable pour recuperer et normaliser les genres de chaque artiste/piste a grande echelle. Resultat: une partie de la bibliotheque reste en \"Unknown\".",
+    "whyImplementedOutcome": "Palette vous permet de corriger ces cas manuellement, priorises par impact d'ecoutes, afin d'ameliorer la precision des pages Genres et Tendances de genres.",
     "loadError": "Impossible de charger la session Palette.",
     "nextCard": "Carte suivante",
     "listensImpacted": "{count} écoutes Unknown concernées",

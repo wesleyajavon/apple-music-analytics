@@ -375,7 +375,10 @@
     "top3Title": "Tus 3 géneros favoritos",
     "top3Subtitle": "Tus géneros más escuchados en primer plano",
     "allData": "Todos los datos",
-    "other": "Otros"
+    "other": "Otros",
+    "apiMappingNoticeTitle": "Limitación actual del mapeo de géneros",
+    "apiMappingNoticeBody": "El mapeo automático a géneros precisos sigue siendo parcial porque la app no tiene acceso fiable a las APIs de Apple Music o Spotify para enriquecer cada pista/artista.",
+    "apiMappingNoticeLink": "Palette Features"
   },
   "genreTrends": {
     "title": "Tendencias de géneros 📉",
@@ -401,11 +404,18 @@
     "aiExplanation": "Estilo del resumen de tendencias por género",
     "aiLoading": "Generando resumen…",
     "aiUnavailable": "Resumen IA no disponible (API no configurada).",
-    "aiEmpty": "No hay resumen para esta selección."
+    "aiEmpty": "No hay resumen para esta selección.",
+    "apiMappingNoticeTitle": "Limitación actual del mapeo de géneros",
+    "apiMappingNoticeBody": "Las tendencias reflejan los géneros actualmente mapeados. Sin acceso fiable a las APIs de Apple Music o Spotify, una parte de las escuchas puede quedar menos precisa en su clasificación.",
+    "apiMappingNoticeShort": "Algunas tendencias pueden seguir siendo aproximadas sin acceso API de Apple Music/Spotify para refinar el mapeo de géneros.",
+    "apiMappingNoticeLink": "Palette Features"
   },
   "palette": {
     "title": "Palette",
     "subtitle": "Mapea artistas Unknown una tarjeta a la vez por impacto de escuchas.",
+    "whyImplementedTitle": "Por que se implemento Palette",
+    "whyImplementedBody": "Apple Music y Spotify no ofrecen un acceso API fiable para recuperar y normalizar los generos de cada artista/pista a gran escala. Como resultado, parte de la biblioteca queda como \"Unknown\".",
+    "whyImplementedOutcome": "Palette te permite corregir esos casos manualmente, priorizados por impacto de escuchas, para mejorar la precision en las paginas de Generos y Tendencias de generos.",
     "loadError": "No se pudo cargar la sesión de Palette.",
     "nextCard": "Siguiente tarjeta",
     "listensImpacted": "{count} escuchas Unknown afectadas",

@@ -375,7 +375,10 @@
     "top3Title": "Your top 3 genres",
     "top3Subtitle": "Your most listened genres in the spotlight",
     "allData": "All data",
-    "other": "Other"
+    "other": "Other",
+    "apiMappingNoticeTitle": "Current limitation on genre mapping",
+    "apiMappingNoticeBody": "Automatic mapping to precise genres is still partial because the app does not have reliable access to Apple Music or Spotify APIs to enrich every track/artist.",
+    "apiMappingNoticeLink": "Palette Features"
   },
   "genreTrends": {
     "title": "Genre trends 📉",
@@ -401,11 +404,18 @@
     "aiExplanation": "Genre trends summary style",
     "aiLoading": "Generating summary…",
     "aiUnavailable": "AI summary is unavailable (API not configured).",
-    "aiEmpty": "No summary for this selection."
+    "aiEmpty": "No summary for this selection.",
+    "apiMappingNoticeTitle": "Current limitation on genre mapping",
+    "apiMappingNoticeBody": "Trends reflect currently mapped genres. Without reliable access to Apple Music or Spotify APIs, some listens may remain less precise in classification.",
+    "apiMappingNoticeShort": "Some trends can remain approximate without Apple Music/Spotify API access to refine genre mapping.",
+    "apiMappingNoticeLink": "Palette Features"
   },
   "palette": {
     "title": "Palette",
     "subtitle": "Map unknown artists one card at a time by listens impact.",
+    "whyImplementedTitle": "Why Palette was implemented",
+    "whyImplementedBody": "Apple Music and Spotify do not provide reliable API access to fetch and normalize genres for every artist/track at scale. As a result, part of the library remains labeled as \"Unknown\".",
+    "whyImplementedOutcome": "Palette lets you fix those cases manually, prioritized by listens impact, to improve accuracy in Genres and Genre Trends pages.",
     "loadError": "Unable to load Palette session.",
     "nextCard": "Next card",
     "listensImpacted": "{count} unknown listens impacted",

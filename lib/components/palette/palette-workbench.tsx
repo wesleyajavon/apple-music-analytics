@@ -109,6 +109,11 @@ export function PaletteWorkbench() {
           </span>
         </div>
         <p className="text-sm text-gray-600 dark:text-gray-300">{t("subtitle")}</p>
+        <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50/80 px-4 py-3 text-sm text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-100">
+          <p className="font-semibold">{t("whyImplementedTitle")}</p>
+          <p className="mt-1">{t("whyImplementedBody")}</p>
+          <p className="mt-1">{t("whyImplementedOutcome")}</p>
+        </div>
         <div className="mt-4 h-2 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
           <div
             className="h-full rounded-full bg-gradient-to-r from-violet-500 to-indigo-500 transition-all"

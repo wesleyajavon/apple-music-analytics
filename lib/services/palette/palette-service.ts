@@ -21,7 +21,7 @@ type ExistingGenreRow = {
 type DecisionRow = {
   artistId: string;
   status: "mapped" | "skipped";
-  unknownListensRemoved: bigint;
+  unknownListensRemoved: number | bigint;
 };
 
 type QueueArtist = {
@@ -212,7 +212,7 @@ export async function mapPaletteArtistGenre(
         AND t."artistId" = ${artistId}
         AND ${UNKNOWN_SQL}
     `);
-    const unknownListensRemoved = Number(listenCountRows[0]?.count ?? 0n);
+    const unknownListensRemoved = Number(listenCountRows[0]?.count ?? 0);
 
     const trackIdRows = await tx.$queryRaw<Array<{ id: string }>>(Prisma.sql`
       SELECT DISTINCT t.id AS id
@@ -285,8 +285,8 @@ export async function getPaletteInvitationStatus(userId: string): Promise<{
     fetchUnknownQueue(userId),
   ]);
 
-  const total = Number(counts[0]?.total ?? 0n);
-  const unknown = Number(counts[0]?.unknown ?? 0n);
+  const total = Number(counts[0]?.total ?? 0);
+  const unknown = Number(counts[0]?.unknown ?? 0);
   const unknownRatio = total > 0 ? (unknown / total) * 100 : 0;
   const unknownArtists = queue.length;
 

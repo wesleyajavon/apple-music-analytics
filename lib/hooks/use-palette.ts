@@ -22,6 +22,10 @@ type OptimisticSkipInput = {
   artistId: string;
 };
 
+type PaletteMutationContext = {
+  previous?: PaletteSessionDto;
+};
+
 function applyOptimisticStep(
   session: PaletteSessionDto,
   mode: "map" | "skip"
@@ -75,7 +79,12 @@ export function usePaletteSession() {
 
 export function useMapPaletteArtist() {
   const queryClient = useQueryClient();
-  return useMutation<PaletteMapArtistResponseDto, Error, OptimisticMapInput>({
+  return useMutation<
+    PaletteMapArtistResponseDto,
+    Error,
+    OptimisticMapInput,
+    PaletteMutationContext
+  >({
     mutationFn: (payload) => apiClient.post<PaletteMapArtistResponseDto>("/palette/map", payload),
     onMutate: async () => {
       await queryClient.cancelQueries({ queryKey: listeningKeys.paletteSession() });
@@ -106,7 +115,12 @@ export function useMapPaletteArtist() {
 
 export function useSkipPaletteArtist() {
   const queryClient = useQueryClient();
-  return useMutation<PaletteSkipArtistResponseDto, Error, OptimisticSkipInput>({
+  return useMutation<
+    PaletteSkipArtistResponseDto,
+    Error,
+    OptimisticSkipInput,
+    PaletteMutationContext
+  >({
     mutationFn: (payload) =>
       apiClient.post<PaletteSkipArtistResponseDto>("/palette/skip", payload),
     onMutate: async () => {

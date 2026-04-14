@@ -10,11 +10,10 @@ import {
 import {
   getPaletteSession,
   skipPaletteArtist,
+  skipPaletteTrack,
+  parsePaletteMode,
 } from "@/lib/services/palette/palette-service";
-import type {
-  PaletteSkipArtistPayload,
-  PaletteSkipArtistResponseDto,
-} from "@/lib/dto/palette";
+import type { PaletteSkipArtistResponseDto, PaletteSkipRequestBody } from "@/lib/dto/palette";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -36,22 +35,34 @@ export async function POST(request: NextRequest) {
       userId,
     });
 
-    const body = (await request.json()) as Partial<PaletteSkipArtistPayload>;
-    const artistId = body.artistId?.trim();
-    if (!artistId) {
-      throw createValidationError("artistId is required");
-    }
+    const body = (await request.json()) as Partial<PaletteSkipRequestBody>;
+    const mode = parsePaletteMode(body.mode);
 
     try {
-      await skipPaletteArtist(userId, artistId);
+      if (mode === "tracks") {
+        const trackId = body.trackId?.trim();
+        if (!trackId) {
+          throw createValidationError("trackId is required in tracks mode");
+        }
+        await skipPaletteTrack(userId, trackId);
+      } else {
+        const artistId = body.artistId?.trim();
+        if (!artistId) {
+          throw createValidationError("artistId is required");
+        }
+        await skipPaletteArtist(userId, artistId);
+      }
     } catch (error) {
       if (error instanceof Error && error.message === "ARTIST_NOT_FOUND") {
         throw new AppError(404, "Artist not found", "NOT_FOUND");
       }
+      if (error instanceof Error && error.message === "TRACK_NOT_FOUND") {
+        throw new AppError(404, "Track not found", "NOT_FOUND");
+      }
       throw error;
     }
 
-    const session = await getPaletteSession(userId);
+    const session = await getPaletteSession(userId, mode);
     const response: PaletteSkipArtistResponseDto = {
       ok: true,
       session,

@@ -18,6 +18,7 @@ import {
   usePaletteSession,
   useSkipPaletteArtist,
 } from "@/lib/hooks/use-palette";
+import type { PaletteMode } from "@/lib/dto/palette";
 
 function PaletteMiniChart({
   data,
@@ -58,7 +59,8 @@ function PaletteMiniChart({
 export function PaletteWorkbench() {
   const t = useTranslations("palette");
   const locale = useLocale();
-  const { data, isLoading, error, refetch } = usePaletteSession();
+  const [paletteMode, setPaletteMode] = useState<PaletteMode>("artists");
+  const { data, isLoading, error, refetch } = usePaletteSession(paletteMode);
   const mapMutation = useMapPaletteArtist();
   const skipMutation = useSkipPaletteArtist();
   const [customGenre, setCustomGenre] = useState("");
@@ -66,8 +68,10 @@ export function PaletteWorkbench() {
 
   const isBusy = mapMutation.isPending || skipMutation.isPending;
   const artist = data?.nextArtist ?? null;
+  const track = data?.nextTrack ?? null;
+  const activeCard = paletteMode === "tracks" ? track : artist;
   const genreValue = selectedGenre || customGenre.trim();
-  const canSubmit = !!artist && genreValue.length >= 2 && !isBusy;
+  const canSubmit = !!activeCard && genreValue.length >= 2 && !isBusy;
 
   const progressLabel = useMemo(() => {
     if (!data) return "";
@@ -85,30 +89,75 @@ export function PaletteWorkbench() {
   if (!data) return null;
 
   async function handleMap() {
-    if (!artist || !canSubmit) return;
-    await mapMutation.mutateAsync({
-      artistId: artist.artistId,
-      genre: genreValue,
-    });
+    if (!activeCard || !canSubmit) return;
+    if (paletteMode === "tracks" && track) {
+      await mapMutation.mutateAsync({
+        mode: "tracks",
+        trackId: track.trackId,
+        genre: genreValue,
+      });
+    } else if (paletteMode === "artists" && artist) {
+      await mapMutation.mutateAsync({
+        mode: "artists",
+        artistId: artist.artistId,
+        genre: genreValue,
+      });
+    }
     setCustomGenre("");
     setSelectedGenre("");
   }
 
   async function handleSkip() {
-    if (!artist || isBusy) return;
-    await skipMutation.mutateAsync({ artistId: artist.artistId });
+    if (!activeCard || isBusy) return;
+    if (paletteMode === "tracks" && track) {
+      await skipMutation.mutateAsync({ mode: "tracks", trackId: track.trackId });
+    } else if (paletteMode === "artists" && artist) {
+      await skipMutation.mutateAsync({ mode: "artists", artistId: artist.artistId });
+    }
   }
 
   return (
     <div className="space-y-6">
       <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-900">
-        <div className="mb-3 flex items-center justify-between gap-4">
+        <div className="mb-3 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("title")}</h1>
-          <span className="rounded-full bg-violet-100 px-3 py-1 text-xs font-semibold text-violet-700 dark:bg-violet-900/40 dark:text-violet-200">
-            {progressLabel}
-          </span>
+          <div className="flex flex-wrap items-center gap-3">
+            <div
+              className="inline-flex rounded-lg border border-gray-200 p-0.5 dark:border-gray-600"
+              role="group"
+              aria-label={t("modeAriaLabel")}
+            >
+              <button
+                type="button"
+                onClick={() => setPaletteMode("artists")}
+                className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${
+                  paletteMode === "artists"
+                    ? "bg-violet-600 text-white shadow-sm"
+                    : "text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
+                }`}
+              >
+                {t("modeArtists")}
+              </button>
+              <button
+                type="button"
+                onClick={() => setPaletteMode("tracks")}
+                className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${
+                  paletteMode === "tracks"
+                    ? "bg-violet-600 text-white shadow-sm"
+                    : "text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
+                }`}
+              >
+                {t("modeTracks")}
+              </button>
+            </div>
+            <span className="rounded-full bg-violet-100 px-3 py-1 text-xs font-semibold text-violet-700 dark:bg-violet-900/40 dark:text-violet-200">
+              {progressLabel}
+            </span>
+          </div>
         </div>
-        <p className="text-sm text-gray-600 dark:text-gray-300">{t("subtitle")}</p>
+        <p className="text-sm text-gray-600 dark:text-gray-300">
+          {paletteMode === "tracks" ? t("subtitleTracks") : t("subtitleArtists")}
+        </p>
         <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50/80 px-4 py-3 text-sm text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-100">
           <p className="font-semibold">{t("whyImplementedTitle")}</p>
           <p className="mt-1">{t("whyImplementedBody")}</p>
@@ -124,21 +173,36 @@ export function PaletteWorkbench() {
 
       <div className="grid gap-6 lg:grid-cols-5">
         <section className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-900 lg:col-span-3">
-          {!artist ? (
+          {!activeCard ? (
             <div className="py-10 text-center">
               <p className="text-base font-semibold text-gray-900 dark:text-white">{t("doneTitle")}</p>
-              <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">{t("doneHint")}</p>
+              <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                {paletteMode === "tracks" ? t("doneHintTracks") : t("doneHintArtists")}
+              </p>
             </div>
           ) : (
             <>
               <p className="text-xs font-semibold uppercase tracking-wider text-violet-500">
-                {t("nextCard")}
+                {paletteMode === "tracks" ? t("nextTrackCard") : t("nextArtistCard")}
               </p>
-              <h2 className="mt-2 text-xl font-bold text-gray-900 dark:text-white">{artist.artistName}</h2>
-              <div className="mt-3 flex flex-wrap gap-3 text-sm text-gray-600 dark:text-gray-300">
-                <span>{t("listensImpacted", { count: artist.unknownListens.toLocaleString(locale) })}</span>
-                <span>{t("tracksImpacted", { count: artist.impactedTracks.toLocaleString(locale) })}</span>
-              </div>
+              {paletteMode === "tracks" && track ? (
+                <>
+                  <h2 className="mt-2 text-xl font-bold text-gray-900 dark:text-white">{track.trackTitle}</h2>
+                  <p className="mt-1 text-sm font-medium text-gray-600 dark:text-gray-300">{track.artistName}</p>
+                  <div className="mt-3 flex flex-wrap gap-3 text-sm text-gray-600 dark:text-gray-300">
+                    <span>{t("listensImpacted", { count: track.unknownListens.toLocaleString(locale) })}</span>
+                    <span>{t("tracksImpacted", { count: track.impactedTracks.toLocaleString(locale) })}</span>
+                  </div>
+                </>
+              ) : artist ? (
+                <>
+                  <h2 className="mt-2 text-xl font-bold text-gray-900 dark:text-white">{artist.artistName}</h2>
+                  <div className="mt-3 flex flex-wrap gap-3 text-sm text-gray-600 dark:text-gray-300">
+                    <span>{t("listensImpacted", { count: artist.unknownListens.toLocaleString(locale) })}</span>
+                    <span>{t("tracksImpacted", { count: artist.impactedTracks.toLocaleString(locale) })}</span>
+                  </div>
+                </>
+              ) : null}
 
               <div className="mt-6 space-y-3">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">

@@ -412,12 +412,17 @@
   },
   "palette": {
     "title": "Palette",
-    "subtitle": "Map unknown artists one card at a time by listens impact.",
+    "modeArtists": "Top artists",
+    "modeTracks": "Top tracks",
+    "modeAriaLabel": "Mapping queue: prioritize by artist or by track",
+    "subtitleArtists": "Map unknown artists one card at a time, ordered by how much you listen to them.",
+    "subtitleTracks": "Map unknown tracks one card at a time, ordered by listen count (most played first).",
     "whyImplementedTitle": "Why Palette was implemented",
     "whyImplementedBody": "Apple Music and Spotify do not provide reliable API access to fetch and normalize genres for every artist/track at scale. As a result, part of the library remains labeled as \"Unknown\".",
     "whyImplementedOutcome": "Palette lets you fix those cases manually, prioritized by listens impact, to improve accuracy in Genres and Genre Trends pages.",
     "loadError": "Unable to load Palette session.",
-    "nextCard": "Next card",
+    "nextArtistCard": "Next artist",
+    "nextTrackCard": "Next track",
     "listensImpacted": "{count} unknown listens impacted",
     "tracksImpacted": "{count} tracks to update",
     "existingGenres": "Existing genres (autocomplete)",
@@ -431,7 +436,8 @@
     "unknownTotal": "Unknown remaining: {count}",
     "mappedTotal": "Unknown mapped: {count}",
     "doneTitle": "Session complete",
-    "doneHint": "You have processed all unknown artists in queue."
+    "doneHintArtists": "You have processed every artist in this queue.",
+    "doneHintTracks": "You have processed every track in this queue."
   },
   "artistTrends": {
     "title": "Artist trends 📉",

@@ -412,12 +412,17 @@
   },
   "palette": {
     "title": "Palette",
-    "subtitle": "Mappez vos artistes Unknown un par un, par impact d'écoutes.",
+    "modeArtists": "Top artistes",
+    "modeTracks": "Top titres",
+    "modeAriaLabel": "File de mapping : prioriser par artiste ou par titre",
+    "subtitleArtists": "Corrigez les genres inconnus artiste par artiste, triés par volume d’écoutes.",
+    "subtitleTracks": "Corrigez les genres inconnus titre par titre, triés par nombre d’écoutes (les plus joués en premier).",
     "whyImplementedTitle": "Pourquoi Palette a ete implemente",
     "whyImplementedBody": "Apple Music et Spotify ne fournissent pas un acces API fiable pour recuperer et normaliser les genres de chaque artiste/piste a grande echelle. Resultat: une partie de la bibliotheque reste en \"Unknown\".",
     "whyImplementedOutcome": "Palette vous permet de corriger ces cas manuellement, priorises par impact d'ecoutes, afin d'ameliorer la precision des pages Genres et Tendances de genres.",
     "loadError": "Impossible de charger la session Palette.",
-    "nextCard": "Carte suivante",
+    "nextArtistCard": "Artiste suivant",
+    "nextTrackCard": "Titre suivant",
     "listensImpacted": "{count} écoutes Unknown concernées",
     "tracksImpacted": "{count} titres à mettre à jour",
     "existingGenres": "Genres existants (autocomplete)",
@@ -431,7 +436,8 @@
     "unknownTotal": "Unknown restants: {count}",
     "mappedTotal": "Unknown déjà mappés: {count}",
     "doneTitle": "Session terminée",
-    "doneHint": "Vous avez traité tous les artistes Unknown de la file."
+    "doneHintArtists": "Vous avez traité toute la file (artistes).",
+    "doneHintTracks": "Vous avez traité toute la file (titres)."
   },
   "artistTrends": {
     "title": "Tendances d'artistes 📉",

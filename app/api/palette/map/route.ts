@@ -7,11 +7,13 @@ import {
   createValidationError,
   handleApiError,
 } from "@/lib/utils/error-handler";
-import { getPaletteSession, mapPaletteArtistGenre } from "@/lib/services/palette/palette-service";
-import type {
-  PaletteMapArtistPayload,
-  PaletteMapArtistResponseDto,
-} from "@/lib/dto/palette";
+import {
+  getPaletteSession,
+  mapPaletteArtistGenre,
+  mapPaletteTrackGenre,
+  parsePaletteMode,
+} from "@/lib/services/palette/palette-service";
+import type { PaletteMapArtistResponseDto, PaletteMapRequestBody } from "@/lib/dto/palette";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -33,16 +35,28 @@ export async function POST(request: NextRequest) {
       userId,
     });
 
-    const body = (await request.json()) as Partial<PaletteMapArtistPayload>;
-    const artistId = body.artistId?.trim();
+    const body = (await request.json()) as Partial<PaletteMapRequestBody>;
+    const mode = parsePaletteMode(body.mode);
     const genre = body.genre?.trim();
-    if (!artistId || !genre) {
-      throw createValidationError("artistId and genre are required");
+    if (!genre) {
+      throw createValidationError("genre is required");
     }
 
     let mapResult: Awaited<ReturnType<typeof mapPaletteArtistGenre>>;
     try {
-      mapResult = await mapPaletteArtistGenre(userId, artistId, genre);
+      if (mode === "tracks") {
+        const trackId = body.trackId?.trim();
+        if (!trackId) {
+          throw createValidationError("trackId is required in tracks mode");
+        }
+        mapResult = await mapPaletteTrackGenre(userId, trackId, genre);
+      } else {
+        const artistId = body.artistId?.trim();
+        if (!artistId) {
+          throw createValidationError("artistId is required");
+        }
+        mapResult = await mapPaletteArtistGenre(userId, artistId, genre);
+      }
     } catch (error) {
       if (error instanceof Error && error.message === "INVALID_GENRE") {
         throw createValidationError("genre is invalid");
@@ -50,10 +64,13 @@ export async function POST(request: NextRequest) {
       if (error instanceof Error && error.message === "ARTIST_NOT_FOUND") {
         throw new AppError(404, "Artist not found", "NOT_FOUND");
       }
+      if (error instanceof Error && error.message === "TRACK_NOT_FOUND") {
+        throw new AppError(404, "Track not found", "NOT_FOUND");
+      }
       throw error;
     }
 
-    const session = await getPaletteSession(userId);
+    const session = await getPaletteSession(userId, mode);
     const response: PaletteMapArtistResponseDto = {
       ok: true,
       updatedTracks: mapResult.updatedTracks,

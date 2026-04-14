@@ -3,36 +3,47 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
 import { listeningKeys } from "@/lib/hooks/query-keys";
+import type { PaletteMode, PaletteSessionDto } from "@/lib/dto/palette";
 import type {
   PaletteMapArtistResponseDto,
-  PaletteSessionDto,
   PaletteSkipArtistResponseDto,
 } from "@/lib/dto/palette";
 
-async function fetchPaletteSession(): Promise<PaletteSessionDto> {
-  return apiClient.get<PaletteSessionDto>("/palette/session");
+async function fetchPaletteSession(mode: PaletteMode): Promise<PaletteSessionDto> {
+  const query = mode === "tracks" ? "?mode=tracks" : "";
+  return apiClient.get<PaletteSessionDto>(`/palette/session${query}`);
 }
 
 type OptimisticMapInput = {
-  artistId: string;
+  mode: PaletteMode;
+  artistId?: string;
+  trackId?: string;
   genre: string;
 };
 
 type OptimisticSkipInput = {
-  artistId: string;
+  mode: PaletteMode;
+  artistId?: string;
+  trackId?: string;
 };
 
 type PaletteMutationContext = {
   previous?: PaletteSessionDto;
+  mode: PaletteMode;
 };
+
+function getNextQueueItem(session: PaletteSessionDto) {
+  return session.mode === "tracks" ? session.nextTrack : session.nextArtist;
+}
 
 function applyOptimisticStep(
   session: PaletteSessionDto,
-  mode: "map" | "skip"
+  action: "map" | "skip"
 ): PaletteSessionDto {
-  if (!session.nextArtist) return session;
+  const next = getNextQueueItem(session);
+  if (!next) return session;
   const nextStep = (session.compactTrends[session.compactTrends.length - 1]?.step ?? 0) + 1;
-  const unknownDelta = mode === "map" ? session.nextArtist.unknownListens : 0;
+  const unknownDelta = action === "map" ? next.unknownListens : 0;
   const last = session.compactTrends[session.compactTrends.length - 1] ?? {
     step: 0,
     unknownListens: session.unknownListensTotal,
@@ -42,18 +53,16 @@ function applyOptimisticStep(
     ...session,
     progress: {
       ...session.progress,
-      mappedArtists: session.progress.mappedArtists + (mode === "map" ? 1 : 0),
-      skippedArtists: session.progress.skippedArtists + (mode === "skip" ? 1 : 0),
-      remainingArtists: Math.max(0, session.progress.remainingArtists - 1),
+      mapped: session.progress.mapped + (action === "map" ? 1 : 0),
+      skipped: session.progress.skipped + (action === "skip" ? 1 : 0),
+      remaining: Math.max(0, session.progress.remaining - 1),
       completionRatio:
-        session.progress.totalArtists === 0
+        session.progress.totalInQueue === 0
           ? 1
           : Math.min(
               1,
-              (session.progress.mappedArtists +
-                session.progress.skippedArtists +
-                1) /
-                session.progress.totalArtists
+              (session.progress.mapped + session.progress.skipped + 1) /
+                session.progress.totalInQueue
             ),
     },
     unknownListensTotal: Math.max(0, session.unknownListensTotal - unknownDelta),
@@ -69,10 +78,10 @@ function applyOptimisticStep(
   };
 }
 
-export function usePaletteSession() {
+export function usePaletteSession(mode: PaletteMode = "artists") {
   return useQuery<PaletteSessionDto, Error>({
-    queryKey: listeningKeys.paletteSession(),
-    queryFn: fetchPaletteSession,
+    queryKey: listeningKeys.paletteSession(mode),
+    queryFn: () => fetchPaletteSession(mode),
     staleTime: 0,
   });
 }
@@ -85,27 +94,42 @@ export function useMapPaletteArtist() {
     OptimisticMapInput,
     PaletteMutationContext
   >({
-    mutationFn: (payload) => apiClient.post<PaletteMapArtistResponseDto>("/palette/map", payload),
-    onMutate: async () => {
-      await queryClient.cancelQueries({ queryKey: listeningKeys.paletteSession() });
+    mutationFn: (payload) => {
+      if (payload.mode === "tracks") {
+        return apiClient.post<PaletteMapArtistResponseDto>("/palette/map", {
+          mode: "tracks",
+          trackId: payload.trackId,
+          genre: payload.genre,
+        });
+      }
+      return apiClient.post<PaletteMapArtistResponseDto>("/palette/map", {
+        mode: "artists",
+        artistId: payload.artistId,
+        genre: payload.genre,
+      });
+    },
+    onMutate: async (variables) => {
+      const mode = variables.mode;
+      await queryClient.cancelQueries({ queryKey: listeningKeys.paletteSession(mode) });
       const previous = queryClient.getQueryData<PaletteSessionDto>(
-        listeningKeys.paletteSession()
+        listeningKeys.paletteSession(mode)
       );
       if (previous) {
         queryClient.setQueryData<PaletteSessionDto>(
-          listeningKeys.paletteSession(),
+          listeningKeys.paletteSession(mode),
           applyOptimisticStep(previous, "map")
         );
       }
-      return { previous };
+      return { previous, mode };
     },
     onError: (_error, _variables, ctx) => {
       if (ctx?.previous) {
-        queryClient.setQueryData(listeningKeys.paletteSession(), ctx.previous);
+        queryClient.setQueryData(listeningKeys.paletteSession(ctx.mode), ctx.previous);
       }
     },
     onSuccess: (response) => {
-      queryClient.setQueryData(listeningKeys.paletteSession(), response.session);
+      const m = response.session.mode;
+      queryClient.setQueryData(listeningKeys.paletteSession(m), response.session);
       queryClient.invalidateQueries({ queryKey: listeningKeys.genres() });
       queryClient.invalidateQueries({ queryKey: listeningKeys.genreTrends() });
       queryClient.invalidateQueries({ queryKey: listeningKeys.overview() });
@@ -121,28 +145,40 @@ export function useSkipPaletteArtist() {
     OptimisticSkipInput,
     PaletteMutationContext
   >({
-    mutationFn: (payload) =>
-      apiClient.post<PaletteSkipArtistResponseDto>("/palette/skip", payload),
-    onMutate: async () => {
-      await queryClient.cancelQueries({ queryKey: listeningKeys.paletteSession() });
+    mutationFn: (payload) => {
+      if (payload.mode === "tracks") {
+        return apiClient.post<PaletteSkipArtistResponseDto>("/palette/skip", {
+          mode: "tracks",
+          trackId: payload.trackId,
+        });
+      }
+      return apiClient.post<PaletteSkipArtistResponseDto>("/palette/skip", {
+        mode: "artists",
+        artistId: payload.artistId,
+      });
+    },
+    onMutate: async (variables) => {
+      const mode = variables.mode;
+      await queryClient.cancelQueries({ queryKey: listeningKeys.paletteSession(mode) });
       const previous = queryClient.getQueryData<PaletteSessionDto>(
-        listeningKeys.paletteSession()
+        listeningKeys.paletteSession(mode)
       );
       if (previous) {
         queryClient.setQueryData<PaletteSessionDto>(
-          listeningKeys.paletteSession(),
+          listeningKeys.paletteSession(mode),
           applyOptimisticStep(previous, "skip")
         );
       }
-      return { previous };
+      return { previous, mode };
     },
     onError: (_error, _variables, ctx) => {
       if (ctx?.previous) {
-        queryClient.setQueryData(listeningKeys.paletteSession(), ctx.previous);
+        queryClient.setQueryData(listeningKeys.paletteSession(ctx.mode), ctx.previous);
       }
     },
     onSuccess: (response) => {
-      queryClient.setQueryData(listeningKeys.paletteSession(), response.session);
+      const m = response.session.mode;
+      queryClient.setQueryData(listeningKeys.paletteSession(m), response.session);
     },
   });
 }

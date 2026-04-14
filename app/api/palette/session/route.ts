@@ -3,7 +3,10 @@ import { getCurrentUserId } from "@/lib/auth/get-current-user-id";
 import { unauthorizedResponse } from "@/lib/auth/require-auth-user-id";
 import { assertRateLimit } from "@/lib/security/rate-limit";
 import { handleApiError } from "@/lib/utils/error-handler";
-import { getPaletteSession } from "@/lib/services/palette/palette-service";
+import {
+  getPaletteSession,
+  parsePaletteMode,
+} from "@/lib/services/palette/palette-service";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -25,7 +28,8 @@ export async function GET(request: NextRequest) {
       userId,
     });
 
-    const session = await getPaletteSession(userId);
+    const mode = parsePaletteMode(request.nextUrl.searchParams.get("mode"));
+    const session = await getPaletteSession(userId, mode);
     return NextResponse.json(session);
   } catch (error) {
     return handleApiError(error, { route: RATE.route });

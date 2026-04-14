@@ -3,10 +3,11 @@ import { prisma } from "@/lib/prisma";
 import { normalizeGenreLabel } from "@/lib/services/genre/genre-normalization";
 import type {
   PaletteCompactTrendPointDto,
+  PaletteMode,
   PaletteSessionDto,
 } from "@/lib/dto/palette";
 
-type QueueRow = {
+type QueueArtistRow = {
   artistId: string;
   artistName: string;
   imageUrl: string | null;
@@ -14,12 +15,20 @@ type QueueRow = {
   impactedTracks: bigint;
 };
 
+type QueueTrackRow = {
+  trackId: string;
+  trackTitle: string;
+  artistId: string;
+  artistName: string;
+  imageUrl: string | null;
+  unknownListens: bigint;
+};
+
 type ExistingGenreRow = {
   genre: string;
 };
 
-type DecisionRow = {
-  artistId: string;
+type DecisionTrendRow = {
   status: "mapped" | "skipped";
   unknownListensRemoved: number | bigint;
 };
@@ -32,10 +41,25 @@ type QueueArtist = {
   impactedTracks: number;
 };
 
+type QueueTrack = {
+  trackId: string;
+  trackTitle: string;
+  artistId: string;
+  artistName: string;
+  imageUrl: string | null;
+  unknownListens: number;
+  impactedTracks: number;
+};
+
 const UNKNOWN_SQL = Prisma.sql`(t.genre IS NULL OR LOWER(t.genre) = 'unknown')`;
 
-async function fetchUnknownQueue(userId: string): Promise<QueueArtist[]> {
-  const rows = await prisma.$queryRaw<QueueRow[]>(Prisma.sql`
+export function parsePaletteMode(value: string | null | undefined): PaletteMode {
+  if (value === "tracks") return "tracks";
+  return "artists";
+}
+
+async function fetchUnknownArtistQueue(userId: string): Promise<QueueArtist[]> {
+  const rows = await prisma.$queryRaw<QueueArtistRow[]>(Prisma.sql`
     SELECT
       a.id AS "artistId",
       a.name::text AS "artistName",
@@ -60,6 +84,35 @@ async function fetchUnknownQueue(userId: string): Promise<QueueArtist[]> {
   }));
 }
 
+async function fetchUnknownTrackQueue(userId: string): Promise<QueueTrack[]> {
+  const rows = await prisma.$queryRaw<QueueTrackRow[]>(Prisma.sql`
+    SELECT
+      t.id AS "trackId",
+      t.title::text AS "trackTitle",
+      a.id AS "artistId",
+      a.name::text AS "artistName",
+      a."imageUrl" AS "imageUrl",
+      COUNT(*)::bigint AS "unknownListens"
+    FROM "Listen" l
+    JOIN "Track" t ON l."trackId" = t.id
+    JOIN "Artist" a ON t."artistId" = a.id
+    WHERE l."userId" = ${userId}
+      AND ${UNKNOWN_SQL}
+    GROUP BY t.id, t.title, a.id, a.name, a."imageUrl"
+    ORDER BY "unknownListens" DESC, t.title ASC
+  `);
+
+  return rows.map((row) => ({
+    trackId: row.trackId,
+    trackTitle: row.trackTitle,
+    artistId: row.artistId,
+    artistName: row.artistName,
+    imageUrl: row.imageUrl,
+    unknownListens: Number(row.unknownListens),
+    impactedTracks: 1,
+  }));
+}
+
 async function fetchExistingGenres(userId: string): Promise<string[]> {
   const rows = await prisma.$queryRaw<ExistingGenreRow[]>(Prisma.sql`
     SELECT DISTINCT t.genre::text AS genre
@@ -78,7 +131,7 @@ async function fetchExistingGenres(userId: string): Promise<string[]> {
 
 function toCompactTrendSeries(
   unknownListensCurrent: number,
-  decisions: DecisionRow[]
+  decisions: DecisionTrendRow[]
 ): PaletteCompactTrendPointDto[] {
   const mappedTotal = decisions
     .filter((decision) => decision.status === "mapped")
@@ -107,9 +160,19 @@ function toCompactTrendSeries(
   return points.slice(-12);
 }
 
-export async function getPaletteSession(userId: string): Promise<PaletteSessionDto> {
+export async function getPaletteSession(
+  userId: string,
+  mode: PaletteMode = "artists"
+): Promise<PaletteSessionDto> {
+  if (mode === "tracks") {
+    return getPaletteSessionTracks(userId);
+  }
+  return getPaletteSessionArtists(userId);
+}
+
+async function getPaletteSessionArtists(userId: string): Promise<PaletteSessionDto> {
   const [queue, existingGenres, decisions] = await Promise.all([
-    fetchUnknownQueue(userId),
+    fetchUnknownArtistQueue(userId),
     fetchExistingGenres(userId),
     prisma.paletteArtistDecision.findMany({
       where: { userId },
@@ -136,14 +199,62 @@ export async function getPaletteSession(userId: string): Promise<PaletteSessionD
     completionBase === 0 ? 1 : (mappedCount + skippedCount) / completionBase;
 
   return {
+    mode: "artists",
     progress: {
-      totalArtists: completionBase,
-      mappedArtists: mappedCount,
-      skippedArtists: skippedCount,
-      remainingArtists: remaining.length,
+      totalInQueue: completionBase,
+      mapped: mappedCount,
+      skipped: skippedCount,
+      remaining: remaining.length,
       completionRatio,
     },
     nextArtist,
+    nextTrack: null,
+    existingGenres,
+    compactTrends: toCompactTrendSeries(unknownListensTotal, decisions),
+    unknownListensTotal,
+    mappedListensTotal,
+  };
+}
+
+async function getPaletteSessionTracks(userId: string): Promise<PaletteSessionDto> {
+  const [queue, existingGenres, decisions] = await Promise.all([
+    fetchUnknownTrackQueue(userId),
+    fetchExistingGenres(userId),
+    prisma.paletteTrackDecision.findMany({
+      where: { userId },
+      select: {
+        trackId: true,
+        status: true,
+        unknownListensRemoved: true,
+      },
+      orderBy: { updatedAt: "asc" },
+    }),
+  ]);
+
+  const mappedCount = decisions.filter((d) => d.status === "mapped").length;
+  const skippedCount = decisions.filter((d) => d.status === "skipped").length;
+  const decidedTrackIds = new Set(decisions.map((d) => d.trackId));
+  const remaining = queue.filter((track) => !decidedTrackIds.has(track.trackId));
+  const nextTrack = remaining[0] ?? null;
+  const unknownListensTotal = queue.reduce((sum, track) => sum + track.unknownListens, 0);
+  const mappedListensTotal = decisions
+    .filter((d) => d.status === "mapped")
+    .reduce((sum, d) => sum + Number(d.unknownListensRemoved), 0);
+  const completionBase = mappedCount + skippedCount + remaining.length;
+  const completionRatio =
+    completionBase === 0 ? 1 : (mappedCount + skippedCount) / completionBase;
+
+  return {
+    mode: "tracks",
+    progress: {
+      totalInQueue: completionBase,
+      mapped: mappedCount,
+      skipped: skippedCount,
+      remaining: remaining.length,
+      completionRatio,
+    },
+    nextArtist: null,
+    nextTrack,
     existingGenres,
     compactTrends: toCompactTrendSeries(unknownListensTotal, decisions),
     unknownListensTotal,
@@ -173,6 +284,42 @@ export async function skipPaletteArtist(userId: string, artistId: string): Promi
       userId,
       artistId,
       artistName: target.name,
+      status: "skipped",
+      genre: null,
+      unknownListensRemoved: 0,
+      impactedTracks: 0,
+    },
+  });
+}
+
+export async function skipPaletteTrack(userId: string, trackId: string): Promise<void> {
+  const target = await prisma.track.findUnique({
+    where: { id: trackId },
+    select: {
+      id: true,
+      title: true,
+      artist: { select: { name: true } },
+    },
+  });
+  if (!target) {
+    throw new Error("TRACK_NOT_FOUND");
+  }
+
+  await prisma.paletteTrackDecision.upsert({
+    where: { userId_trackId: { userId, trackId } },
+    update: {
+      status: "skipped",
+      genre: null,
+      trackTitle: target.title,
+      artistName: target.artist.name,
+      unknownListensRemoved: 0,
+      impactedTracks: 0,
+    },
+    create: {
+      userId,
+      trackId,
+      trackTitle: target.title,
+      artistName: target.artist.name,
       status: "skipped",
       genre: null,
       unknownListensRemoved: 0,
@@ -261,6 +408,80 @@ export async function mapPaletteArtistGenre(
   return { normalizedGenre, ...result };
 }
 
+export async function mapPaletteTrackGenre(
+  userId: string,
+  trackId: string,
+  inputGenre: string
+): Promise<{
+  normalizedGenre: string;
+  updatedTracks: number;
+  unknownListensRemoved: number;
+}> {
+  const normalizedGenre = normalizeGenreLabel(inputGenre)?.trim();
+  if (!normalizedGenre) {
+    throw new Error("INVALID_GENRE");
+  }
+
+  const result = await prisma.$transaction(async (tx) => {
+    const row = await tx.track.findUnique({
+      where: { id: trackId },
+      select: {
+        id: true,
+        title: true,
+        artist: { select: { name: true } },
+      },
+    });
+    if (!row) {
+      throw new Error("TRACK_NOT_FOUND");
+    }
+
+    const listenCountRows = await tx.$queryRaw<Array<{ count: bigint }>>(Prisma.sql`
+      SELECT COUNT(*)::bigint AS count
+      FROM "Listen" l
+      JOIN "Track" t ON l."trackId" = t.id
+      WHERE l."userId" = ${userId}
+        AND t.id = ${trackId}
+        AND ${UNKNOWN_SQL}
+    `);
+    const unknownListensRemoved = Number(listenCountRows[0]?.count ?? 0);
+
+    const updated = await tx.track.updateMany({
+      where: {
+        id: trackId,
+        OR: [{ genre: null }, { genre: { equals: "unknown", mode: "insensitive" } }],
+      },
+      data: { genre: normalizedGenre },
+    });
+    const updatedTracks = updated.count;
+
+    await tx.paletteTrackDecision.upsert({
+      where: { userId_trackId: { userId, trackId } },
+      update: {
+        status: "mapped",
+        trackTitle: row.title,
+        artistName: row.artist.name,
+        genre: normalizedGenre,
+        unknownListensRemoved,
+        impactedTracks: updatedTracks,
+      },
+      create: {
+        userId,
+        trackId,
+        trackTitle: row.title,
+        artistName: row.artist.name,
+        status: "mapped",
+        genre: normalizedGenre,
+        unknownListensRemoved,
+        impactedTracks: updatedTracks,
+      },
+    });
+
+    return { updatedTracks, unknownListensRemoved };
+  });
+
+  return { normalizedGenre, ...result };
+}
+
 export async function getPaletteInvitationStatus(userId: string): Promise<{
   shouldInvite: boolean;
   unknownRatio: number;
@@ -282,7 +503,7 @@ export async function getPaletteInvitationStatus(userId: string): Promise<{
       JOIN "Track" t ON l."trackId" = t.id
       WHERE l."userId" = ${userId}
     `),
-    fetchUnknownQueue(userId),
+    fetchUnknownArtistQueue(userId),
   ]);
 
   const total = Number(counts[0]?.total ?? 0);

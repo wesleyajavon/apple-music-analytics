@@ -22,6 +22,7 @@ model User {
   listens       Listen[]
   replayYearly  ReplayYearly[]
   paletteDecisions PaletteArtistDecision[]
+  paletteTrackDecisions PaletteTrackDecision[]
 }
 
 model Artist {
@@ -65,6 +66,26 @@ model PaletteArtistDecision {
   @@index([artistId])
 }
 
+model PaletteTrackDecision {
+  id                    String                @id @default(cuid())
+  userId                String
+  user                  User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trackId               String
+  track                 Track                 @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  trackTitle            String
+  artistName            String
+  status                PaletteDecisionStatus
+  genre                 String?
+  unknownListensRemoved Int                   @default(0)
+  impactedTracks      Int                     @default(0)
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+
+  @@unique([userId, trackId])
+  @@index([userId, status])
+  @@index([trackId])
+}
+
 model Track {
   id        String   @id @default(cuid())
   title     String
@@ -77,8 +98,9 @@ model Track {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  listens          Listen[]
-  replayTopTracks  ReplayTopTrack[]
+  listens             Listen[]
+  replayTopTracks     ReplayTopTrack[]
+  paletteTrackDecisions PaletteTrackDecision[]
 
   @@unique([title, artistId], name: "unique_title_artist")
   @@index([artistId])

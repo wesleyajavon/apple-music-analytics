@@ -1,8 +1,10 @@
+export type PaletteMode = "artists" | "tracks";
+
 export type PaletteProgressDto = {
-  totalArtists: number;
-  mappedArtists: number;
-  skippedArtists: number;
-  remainingArtists: number;
+  totalInQueue: number;
+  mapped: number;
+  skipped: number;
+  remaining: number;
   completionRatio: number;
 };
 
@@ -20,22 +22,40 @@ export type PaletteArtistCardDto = {
   impactedTracks: number;
 };
 
+export type PaletteTrackCardDto = {
+  trackId: string;
+  trackTitle: string;
+  artistId: string;
+  artistName: string;
+  imageUrl: string | null;
+  unknownListens: number;
+  impactedTracks: number;
+};
+
 export type PaletteSessionDto = {
+  mode: PaletteMode;
   progress: PaletteProgressDto;
   nextArtist: PaletteArtistCardDto | null;
+  nextTrack: PaletteTrackCardDto | null;
   existingGenres: string[];
   compactTrends: PaletteCompactTrendPointDto[];
   unknownListensTotal: number;
   mappedListensTotal: number;
 };
 
-export type PaletteMapArtistPayload = {
-  artistId: string;
+/** POST /api/palette/map — default mode is artists when omitted */
+export type PaletteMapRequestBody = {
   genre: string;
+  mode?: PaletteMode;
+  artistId?: string;
+  trackId?: string;
 };
 
-export type PaletteSkipArtistPayload = {
-  artistId: string;
+/** POST /api/palette/skip — default mode is artists when omitted */
+export type PaletteSkipRequestBody = {
+  mode?: PaletteMode;
+  artistId?: string;
+  trackId?: string;
 };
 
 export type PaletteMapArtistResponseDto = {

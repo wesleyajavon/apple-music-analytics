@@ -1,4 +1,5 @@
 import type { ListenRecordSource } from "@/lib/constants/listen-source";
+import type { PaletteMode } from "@/lib/dto/palette";
 
 /**
  * Query keys centralisés pour TanStack Query
@@ -61,7 +62,8 @@ export const listeningKeys = {
     userId?: string;
   }) => [...listeningKeys.all, "temporalAnalysis", params] as const,
   palette: () => [...listeningKeys.all, "palette"] as const,
-  paletteSession: () => [...listeningKeys.palette(), "session"] as const,
+  paletteSession: (mode?: PaletteMode) =>
+    [...listeningKeys.palette(), "session", mode ?? "artists"] as const,
 } as const;
 
 export const tasteProfileKeys = {

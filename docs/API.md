@@ -113,6 +113,35 @@ Recherche dans le catalogue `Artist` (`nameLower`, indexé). Min. 2 caractères.
 
 ---
 
+## Titres
+
+### GET `/api/tracks`
+
+Top titres sur la période, avec pagination serveur.
+
+**Paramètres** : `startDate`, `endDate`, `userId`, `limit` (1–100, défaut 20), `offset` (>= 0, défaut 0)
+
+**Réponse** :
+- `overview` : `totalTracks`, `totalListens`, `averageListensPerTrack`, `topTrackListenCount`
+- `topTracks` : tableau des titres (`trackId`, `trackTitle`, `artistName`, `listenCount`, etc.)
+- `pagination` : `limit`, `offset`, `total`, `hasMore`
+
+### GET `/api/tracks/trends-chart`
+
+Données pivot pour graphiques multi-lignes, en miroir de `/api/artists/trends-chart`.
+
+**Paramètres** : `startDate`, `endDate`, `period`, `topN` (1–50, défaut 20), `tracks` (répétable, filtre par id), `locale`, `userId`
+
+Sans `tracks` : top N titres de la période. Avec `tracks` (jusqu’à 50 ids) : séries de ces titres uniquement ; la réponse ajoute `catalogTracks` (top N + titres de la série) pour alimenter le sélecteur.
+
+### GET `/api/tracks/search`
+
+Recherche dans le catalogue `Track` (titre + artiste, index `titleLower`/`nameLower`). Min. 2 caractères.
+
+**Paramètres** : `q`, `limit` (1–50, défaut 25)
+
+---
+
 ## Analyse temporelle
 
 ### GET `/api/temporal-analysis`

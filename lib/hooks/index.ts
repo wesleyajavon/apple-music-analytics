@@ -6,6 +6,7 @@ export * from "./use-listening";
 export * from "./use-listen-date-range";
 export * from "./use-replay";
 export * from "./use-artists";
+export * from "./use-tracks";
 export * from "./use-ai-insights";
 export * from "./use-taste-profile";
 export * from "./use-listening-habit-prediction";

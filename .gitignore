@@ -39,8 +39,7 @@ yarn-error.log*
 next-env.d.ts
 
 # prisma
-/prisma/migrations
-/prisma/migrationsSaved
+
 
 # generated (Prisma generated files - auto-generated, don't commit)
 /generated*

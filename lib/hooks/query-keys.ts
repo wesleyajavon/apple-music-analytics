@@ -64,6 +64,11 @@ export const listeningKeys = {
   palette: () => [...listeningKeys.all, "palette"] as const,
   paletteSession: (mode?: PaletteMode) =>
     [...listeningKeys.palette(), "session", mode ?? "artists"] as const,
+  paletteSuggestions: (params?: {
+    mode?: PaletteMode;
+    artistId?: string;
+    trackId?: string;
+  }) => [...listeningKeys.palette(), "suggestions", params] as const,
 } as const;
 
 export const tasteProfileKeys = {

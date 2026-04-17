@@ -13,6 +13,7 @@ import {
   mapPaletteTrackGenre,
   parsePaletteMode,
 } from "@/lib/services/palette/palette-service";
+import { recordPaletteSuggestionDecision } from "@/lib/services/palette/palette-suggestions-service";
 import type { PaletteMapArtistResponseDto, PaletteMapRequestBody } from "@/lib/dto/palette";
 
 export const dynamic = "force-dynamic";
@@ -38,6 +39,7 @@ export async function POST(request: NextRequest) {
     const body = (await request.json()) as Partial<PaletteMapRequestBody>;
     const mode = parsePaletteMode(body.mode);
     const genre = body.genre?.trim();
+    const suggestionId = body.suggestionId?.trim();
     if (!genre) {
       throw createValidationError("genre is required");
     }
@@ -68,6 +70,18 @@ export async function POST(request: NextRequest) {
         throw new AppError(404, "Track not found", "NOT_FOUND");
       }
       throw error;
+    }
+
+    if (suggestionId) {
+      await recordPaletteSuggestionDecision({
+        userId,
+        suggestionId,
+        finalGenre: mapResult.normalizedGenre,
+        decision:
+          mapResult.normalizedGenre.toLowerCase() === genre.toLowerCase()
+            ? "accepted"
+            : "edited",
+      });
     }
 
     const session = await getPaletteSession(userId, mode);

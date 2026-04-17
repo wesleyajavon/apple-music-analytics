@@ -625,6 +625,16 @@ export const ARTIST_TO_GENRE_MAP: Record<string, string> = {
   "Soso Maness & PLK": "Hip hop",
   "JunLIB": "Hip hop",
   "Smur Lee & ODUMODUBLVCK": "Latin",
+  "Triangle des Bermudes": "French Afrobeats",
+  "Emma'a": "French Afrobeats",
+  "Phillbill": "Cameroon music",
+  "Samuel G, Oscar el Ruso & Aissa": "Latin",
+  "Junior NGD": "French Afrobeats",
+  "Franglish": "Hip hop",
+  "DJ VH SAGAZ & Mc Rf": "Latin",
+  "Abl Génie": "Hip hop",
+  "Josiane Nsimba": "Gospel",
+  "Kokosvoice & Dj porboy": "French Afrobeats",
   // Ajoutez plus de mappings selon vos besoins
 };
 

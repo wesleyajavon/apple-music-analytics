@@ -18,11 +18,13 @@
  * Usage :
  *   node scripts/interactive-map-top-unknown-artists.js
  *   node scripts/interactive-map-top-unknown-artists.js --limit 200
+ *   node scripts/interactive-map-top-unknown-artists.js --user-id=<uuid> --start-date=2025-02-01
  *   node scripts/interactive-map-top-unknown-artists.js --dry-run --limit 200
  *
  *   node scripts/interactive-map-top-unknown-artists.js --tracks
  *   node scripts/interactive-map-top-unknown-artists.js --tracks --batch-size 10
  *   node scripts/interactive-map-top-unknown-artists.js --tracks --start-date=2026-03-01
+ *   node scripts/interactive-map-top-unknown-artists.js --tracks --user-id=<uuid> --start-date=2025-02-01 --end-date=2026-04-15
  *   node scripts/interactive-map-top-unknown-artists.js --tracks --dry-run
  *
  * Chaque genre validé est écrit tout de suite (fichier genre-service en mode artiste,
@@ -96,6 +98,35 @@ function defaultStartOfMarchUtc() {
   const y = new Date().getUTCFullYear();
   return new Date(Date.UTC(y, 2, 1, 0, 0, 0, 0));
 }
+
+function parseDateRange(defaultStartDateFactory) {
+  const startDateRaw = getArg(args, 'start-date');
+  const startDate = startDateRaw
+    ? new Date(`${String(startDateRaw).trim()}T00:00:00.000Z`)
+    : defaultStartDateFactory();
+
+  const endDateRaw = getArg(args, 'end-date');
+  const endDate = endDateRaw
+    ? new Date(`${String(endDateRaw).trim()}T23:59:59.999Z`)
+    : new Date();
+
+  if (Number.isNaN(startDate.getTime())) {
+    throw new Error('Date de début invalide (--start-date=YYYY-MM-DD).');
+  }
+  if (Number.isNaN(endDate.getTime())) {
+    throw new Error('Date de fin invalide (--end-date=YYYY-MM-DD).');
+  }
+
+  return { startDateRaw, startDate, endDateRaw, endDate };
+}
+
+function buildPeriodLabel(startDate, endDateRaw, endDate) {
+  return endDateRaw
+    ? `${startDate.toISOString().slice(0, 10)} → ${endDate.toISOString().slice(0, 10)}`
+    : `${startDate.toISOString().slice(0, 10)} → maintenant`;
+}
+
+const USER_ID = getArg(args, 'user-id');
 
 const GENRE_SERVICE_PATH = path.join(
   __dirname,
@@ -189,7 +220,11 @@ function ask(rl, question) {
   });
 }
 
-async function fetchTopUnknownArtists(prisma, mapEntries, limit) {
+async function fetchTopUnknownArtists(prisma, mapEntries, limit, userId, startDate, endDate) {
+  const userSql = userId ? Prisma.sql`AND l."userId" = ${userId}` : Prisma.empty;
+  const startSql = startDate ? Prisma.sql`AND l."playedAt" >= ${startDate}` : Prisma.empty;
+  const endSql = endDate ? Prisma.sql`AND l."playedAt" <= ${endDate}` : Prisma.empty;
+
   if (mapEntries.length === 0) {
     const rows = await prisma.$queryRaw`
       SELECT a.name::text AS name, COUNT(*)::bigint AS count
@@ -197,6 +232,9 @@ async function fetchTopUnknownArtists(prisma, mapEntries, limit) {
       JOIN "Track" t ON l."trackId" = t.id
       JOIN "Artist" a ON t."artistId" = a.id
       WHERE t.genre IS NULL
+        ${userSql}
+        ${startSql}
+        ${endSql}
       GROUP BY a.name
       ORDER BY count DESC
       LIMIT ${limit}
@@ -220,6 +258,9 @@ async function fetchTopUnknownArtists(prisma, mapEntries, limit) {
       VALUES ${Prisma.join(valuesParts)}
     ) AS genre_map(artist_name, genre) ON a.name = genre_map.artist_name
     WHERE COALESCE(t.genre, genre_map.genre, 'Unknown') = 'Unknown'
+      ${userSql}
+      ${startSql}
+      ${endSql}
     GROUP BY a.name
     ORDER BY count DESC
     LIMIT ${limit}
@@ -238,6 +279,7 @@ async function fetchTopUnknownArtists(prisma, mapEntries, limit) {
  */
 async function fetchTracksBatchWithoutGenreInPeriod(
   prisma,
+  userId,
   startDate,
   endDate,
   batchSize,
@@ -259,6 +301,7 @@ async function fetchTracksBatchWithoutGenreInPeriod(
     JOIN "Track" t ON l."trackId" = t.id
     JOIN "Artist" a ON t."artistId" = a.id
     WHERE t.genre IS NULL
+      ${userId ? Prisma.sql`AND l."userId" = ${userId}` : Prisma.empty}
       AND l."playedAt" >= ${startDate}
       AND l."playedAt" <= ${endDate}
       ${excludeSql}
@@ -280,22 +323,14 @@ async function mainTracks() {
     process.exit(1);
   }
 
-  const startDateRaw = getArg(args, 'start-date');
-  const startDate = startDateRaw
-    ? new Date(`${String(startDateRaw).trim()}T00:00:00.000Z`)
-    : defaultStartOfMarchUtc();
-
-  const endDateRaw = getArg(args, 'end-date');
-  const endDate = endDateRaw
-    ? new Date(`${String(endDateRaw).trim()}T23:59:59.999Z`)
-    : new Date();
-
-  if (Number.isNaN(startDate.getTime())) {
-    console.error('Date de début invalide (--start-date=YYYY-MM-DD).');
-    process.exit(1);
-  }
-  if (Number.isNaN(endDate.getTime())) {
-    console.error('Date de fin invalide (--end-date=YYYY-MM-DD).');
+  let startDateRaw;
+  let startDate;
+  let endDateRaw;
+  let endDate;
+  try {
+    ({ startDateRaw, startDate, endDateRaw, endDate } = parseDateRange(defaultStartOfMarchUtc));
+  } catch (e) {
+    console.error(e.message || String(e));
     process.exit(1);
   }
 
@@ -307,11 +342,11 @@ async function mainTracks() {
 
   const prisma = new PrismaClient();
   try {
-    const periodLabel = endDateRaw
-      ? `${startDate.toISOString().slice(0, 10)} → ${endDate.toISOString().slice(0, 10)}`
-      : `${startDate.toISOString().slice(0, 10)} → maintenant`;
+    const periodLabel = buildPeriodLabel(startDate, endDateRaw, endDate);
+    const userScopeLabel = USER_ID ? `Utilisateur: ${USER_ID}` : 'Tous utilisateurs';
     console.log(
       `\nMode --tracks : morceaux sans genre, écoutes dans la période ${periodLabel}\n` +
+        `${userScopeLabel}\n` +
         `(lots de ${TRACK_BATCH_SIZE}, tri par nombre d’écoutes dans la période).\n`
     );
 
@@ -351,6 +386,7 @@ async function mainTracks() {
         const nowEnd = endDateRaw ? endDate : new Date();
         const batch = await fetchTracksBatchWithoutGenreInPeriod(
           prisma,
+          USER_ID,
           startDate,
           nowEnd,
           TRACK_BATCH_SIZE,
@@ -437,6 +473,16 @@ async function mainArtists() {
     process.exit(1);
   }
 
+  let startDate;
+  let endDateRaw;
+  let endDate;
+  try {
+    ({ startDate, endDateRaw, endDate } = parseDateRange(defaultStartOfMarchUtc));
+  } catch (e) {
+    console.error(e.message || String(e));
+    process.exit(1);
+  }
+
   const canonicals = loadCanonicalGenres();
   if (canonicals.length === 0) {
     console.error('Aucun genre valide dans docs/GENRE_PICK_MENU.md (table vide ?).');
@@ -449,7 +495,14 @@ async function mainArtists() {
 
   const prisma = new PrismaClient();
   try {
-    const artists = await fetchTopUnknownArtists(prisma, mapEntries, TOP_LIMIT);
+    const artists = await fetchTopUnknownArtists(
+      prisma,
+      mapEntries,
+      TOP_LIMIT,
+      USER_ID,
+      startDate,
+      endDate
+    );
 
     if (artists.length === 0) {
       console.log(
@@ -458,6 +511,11 @@ async function mainArtists() {
       return;
     }
 
+    const periodLabel = buildPeriodLabel(startDate, endDateRaw, endDate);
+    const userScopeLabel = USER_ID ? `Utilisateur: ${USER_ID}` : 'Tous utilisateurs';
+
+    console.log(`\nPériode : ${periodLabel}`);
+    console.log(`${userScopeLabel}`);
     console.log(`\n(Limite : ${TOP_LIMIT} artiste(s) les plus écoutés en Unknown)\n`);
 
     console.log('\n── Genres (numéro → libellé canonique) — voir aussi docs/GENRE_PICK_MENU.md ──\n');

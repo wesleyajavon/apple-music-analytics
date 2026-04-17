@@ -14,6 +14,10 @@ import { parseApplePlayHistoryDailyTracksCsv } from "@/lib/services/listening/pa
 import { importOnboardingListens } from "@/lib/services/listening/import-onboarding-listens";
 import type { NormalizedListenInput } from "@/lib/services/listening/onboarding-import-types";
 import { getPaletteInvitationStatus } from "@/lib/services/palette/palette-service";
+import {
+  enqueueSpotifyImportGenreBackfillJob,
+  triggerImportGenreBackfillWorker,
+} from "@/lib/services/listening/import-genre-backfill-queue";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -121,6 +125,17 @@ export async function POST(request: NextRequest) {
 
     const result = await importOnboardingListens(userId, source, rows);
     const paletteInvite = await getPaletteInvitationStatus(userId);
+    let genreBackfillJob: { id: string; status: string; reused: boolean } | null = null;
+    if (providerRaw === "spotify" && result.imported > 0) {
+      const queued = await enqueueSpotifyImportGenreBackfillJob(userId);
+      genreBackfillJob = {
+        id: queued.jobId,
+        status: queued.status,
+        reused: queued.reused,
+      };
+      // Fire-and-forget local worker so import response stays fast.
+      void triggerImportGenreBackfillWorker();
+    }
 
     return NextResponse.json({
       ok: true,
@@ -130,6 +145,7 @@ export async function POST(request: NextRequest) {
       skippedDuplicates: result.skippedDuplicates,
       skippedInvalid: result.skippedInvalid,
       paletteInvitation: paletteInvite,
+      genreBackfillJob,
     });
   } catch (error) {
     return handleApiError(error, { route: RATE.route });

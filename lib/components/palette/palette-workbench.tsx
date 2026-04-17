@@ -16,6 +16,7 @@ import { ErrorState } from "@/lib/components/error-state";
 import {
   useMapPaletteArtist,
   usePaletteSession,
+  usePaletteSuggestions,
   useSkipPaletteArtist,
 } from "@/lib/hooks/use-palette";
 import type { PaletteMode } from "@/lib/dto/palette";
@@ -65,6 +66,7 @@ export function PaletteWorkbench() {
   const skipMutation = useSkipPaletteArtist();
   const [customGenre, setCustomGenre] = useState("");
   const [selectedGenre, setSelectedGenre] = useState("");
+  const [selectedSuggestionId, setSelectedSuggestionId] = useState<string | null>(null);
 
   const isBusy = mapMutation.isPending || skipMutation.isPending;
   const artist = data?.nextArtist ?? null;
@@ -72,6 +74,12 @@ export function PaletteWorkbench() {
   const activeCard = paletteMode === "tracks" ? track : artist;
   const genreValue = selectedGenre || customGenre.trim();
   const canSubmit = !!activeCard && genreValue.length >= 2 && !isBusy;
+  const { data: suggestions = [] } = usePaletteSuggestions({
+    mode: paletteMode,
+    artistId: paletteMode === "artists" ? artist?.artistId : undefined,
+    trackId: paletteMode === "tracks" ? track?.trackId : undefined,
+    enabled: !!activeCard,
+  });
 
   const progressLabel = useMemo(() => {
     if (!data) return "";
@@ -95,25 +103,37 @@ export function PaletteWorkbench() {
         mode: "tracks",
         trackId: track.trackId,
         genre: genreValue,
+        suggestionId: selectedSuggestionId ?? undefined,
       });
     } else if (paletteMode === "artists" && artist) {
       await mapMutation.mutateAsync({
         mode: "artists",
         artistId: artist.artistId,
         genre: genreValue,
+        suggestionId: selectedSuggestionId ?? undefined,
       });
     }
     setCustomGenre("");
     setSelectedGenre("");
+    setSelectedSuggestionId(null);
   }
 
   async function handleSkip() {
     if (!activeCard || isBusy) return;
     if (paletteMode === "tracks" && track) {
-      await skipMutation.mutateAsync({ mode: "tracks", trackId: track.trackId });
+      await skipMutation.mutateAsync({
+        mode: "tracks",
+        trackId: track.trackId,
+        suggestionId: selectedSuggestionId ?? undefined,
+      });
     } else if (paletteMode === "artists" && artist) {
-      await skipMutation.mutateAsync({ mode: "artists", artistId: artist.artistId });
+      await skipMutation.mutateAsync({
+        mode: "artists",
+        artistId: artist.artistId,
+        suggestionId: selectedSuggestionId ?? undefined,
+      });
     }
+    setSelectedSuggestionId(null);
   }
 
   return (
@@ -205,13 +225,50 @@ export function PaletteWorkbench() {
               ) : null}
 
               <div className="mt-6 space-y-3">
+                {suggestions.length > 0 ? (
+                  <div className="space-y-2 rounded-lg border border-violet-200 bg-violet-50/70 p-3 dark:border-violet-900/40 dark:bg-violet-950/20">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-violet-700 dark:text-violet-200">
+                      {t("suggestionsTitle")}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {suggestions.map((s) => {
+                        const isActive = selectedSuggestionId === s.id;
+                        return (
+                          <button
+                            key={s.id}
+                            type="button"
+                            onClick={() => {
+                              setSelectedSuggestionId(s.id);
+                              setSelectedGenre(s.genre);
+                              setCustomGenre("");
+                            }}
+                            className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                              isActive
+                                ? "border-violet-600 bg-violet-600 text-white"
+                                : "border-violet-200 bg-white text-violet-700 hover:bg-violet-100 dark:border-violet-800 dark:bg-gray-900 dark:text-violet-200 dark:hover:bg-violet-900/40"
+                            }`}
+                            title={`${s.reason} • ${s.provider}`}
+                          >
+                            {s.genre} ({Math.round(s.confidence * 100)}%)
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <p className="text-xs text-violet-700/80 dark:text-violet-200/80">
+                      {t("suggestionsHint")}
+                    </p>
+                  </div>
+                ) : null}
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   {t("existingGenres")}
                 </label>
                 <input
                   list="palette-genre-suggestions"
                   value={selectedGenre}
-                  onChange={(event) => setSelectedGenre(event.target.value)}
+                  onChange={(event) => {
+                    setSelectedGenre(event.target.value);
+                    setSelectedSuggestionId(null);
+                  }}
                   className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-800"
                   placeholder={t("existingGenresPlaceholder")}
                 />
@@ -228,7 +285,10 @@ export function PaletteWorkbench() {
                 </label>
                 <input
                   value={customGenre}
-                  onChange={(event) => setCustomGenre(event.target.value)}
+                  onChange={(event) => {
+                    setCustomGenre(event.target.value);
+                    setSelectedSuggestionId(null);
+                  }}
                   className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-800"
                   placeholder={t("customGenrePlaceholder")}
                 />

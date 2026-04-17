@@ -49,6 +49,7 @@ export type PaletteMapRequestBody = {
   mode?: PaletteMode;
   artistId?: string;
   trackId?: string;
+  suggestionId?: string;
 };
 
 /** POST /api/palette/skip — default mode is artists when omitted */
@@ -56,6 +57,7 @@ export type PaletteSkipRequestBody = {
   mode?: PaletteMode;
   artistId?: string;
   trackId?: string;
+  suggestionId?: string;
 };
 
 export type PaletteMapArtistResponseDto = {
@@ -69,4 +71,12 @@ export type PaletteMapArtistResponseDto = {
 export type PaletteSkipArtistResponseDto = {
   ok: true;
   session: PaletteSessionDto;
+};
+
+export type PaletteSuggestionDto = {
+  id: string;
+  provider: string;
+  genre: string;
+  confidence: number;
+  reason: string;
 };

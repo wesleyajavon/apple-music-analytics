@@ -13,6 +13,7 @@ import {
   skipPaletteTrack,
   parsePaletteMode,
 } from "@/lib/services/palette/palette-service";
+import { recordPaletteSuggestionDecision } from "@/lib/services/palette/palette-suggestions-service";
 import type { PaletteSkipArtistResponseDto, PaletteSkipRequestBody } from "@/lib/dto/palette";
 
 export const dynamic = "force-dynamic";
@@ -37,6 +38,7 @@ export async function POST(request: NextRequest) {
 
     const body = (await request.json()) as Partial<PaletteSkipRequestBody>;
     const mode = parsePaletteMode(body.mode);
+    const suggestionId = body.suggestionId?.trim();
 
     try {
       if (mode === "tracks") {
@@ -60,6 +62,14 @@ export async function POST(request: NextRequest) {
         throw new AppError(404, "Track not found", "NOT_FOUND");
       }
       throw error;
+    }
+
+    if (suggestionId) {
+      await recordPaletteSuggestionDecision({
+        userId,
+        suggestionId,
+        decision: "rejected",
+      });
     }
 
     const session = await getPaletteSession(userId, mode);

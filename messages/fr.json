@@ -192,10 +192,27 @@
     "imageAltAppleStep3": "Capture : choix de la taille maximale des fichiers (1 Go)",
     "imageAltAppleStep4": "Capture : confirmation Apple, préparation des données",
     "imageAltSpotifyEmail": "Capture : e-mail Spotify, historique étendu prêt, bouton vert Download",
-    "externalLinkAria": "S’ouvre dans un nouvel onglet"
+    "externalLinkAria": "S’ouvre dans un nouvel onglet",
+    "genreBackfill": {
+      "title": "Mapping automatique des genres en cours",
+      "running": "Nous enrichissons les artistes unknown en arrière-plan via l’API Spotify.",
+      "completed": "Le mapping automatique des genres est terminé.",
+      "failed": "Le mapping automatique des genres s’est arrêté avant la fin.",
+      "artistsProcessed": "Artistes traités : {count}",
+      "artistsMapped": "Artistes mappés : {count}",
+      "tracksUpdated": "Morceaux mis à jour : {count}",
+      "requestsUsed": "Requêtes API Spotify utilisées : {count}",
+      "ratio": "Taux unknown : {initial}% -> {current}% (cible : {target}%)",
+      "error": "Dernière erreur : {message}"
+    }
   },
   "dashboard": {
-    "title": "Dashboard 📊"
+    "title": "Dashboard 📊",
+    "genreBackfill": {
+      "running": "Le mapping automatique Spotify des genres est en cours",
+      "details": "Artistes : {processed}/{max} • Unknown : {ratio} • Cible : {target}%",
+      "ratioPending": "calcul en cours"
+    }
   },
   "footer": {
     "brand": "Apple Music Analytics 🎵",
@@ -441,7 +458,9 @@
     "mappedTotal": "Unknown déjà mappés: {count}",
     "doneTitle": "Session terminée",
     "doneHintArtists": "Vous avez traité toute la file (artistes).",
-    "doneHintTracks": "Vous avez traité toute la file (titres)."
+    "doneHintTracks": "Vous avez traité toute la file (titres).",
+    "suggestionsTitle": "Genres suggérés",
+    "suggestionsHint": "Les suggestions sont uniquement des aides et ne sont jamais appliquées automatiquement."
   },
   "artistTrends": {
     "title": "Tendances d'artistes 📉",

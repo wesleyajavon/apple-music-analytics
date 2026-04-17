@@ -3,7 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
 import { listeningKeys } from "@/lib/hooks/query-keys";
-import type { PaletteMode, PaletteSessionDto } from "@/lib/dto/palette";
+import type { PaletteMode, PaletteSessionDto, PaletteSuggestionDto } from "@/lib/dto/palette";
 import type {
   PaletteMapArtistResponseDto,
   PaletteSkipArtistResponseDto,
@@ -14,17 +14,34 @@ async function fetchPaletteSession(mode: PaletteMode): Promise<PaletteSessionDto
   return apiClient.get<PaletteSessionDto>(`/palette/session${query}`);
 }
 
+async function fetchPaletteSuggestions(params: {
+  mode: PaletteMode;
+  artistId?: string;
+  trackId?: string;
+}): Promise<PaletteSuggestionDto[]> {
+  const q = new URLSearchParams();
+  q.set("mode", params.mode);
+  if (params.artistId) q.set("artistId", params.artistId);
+  if (params.trackId) q.set("trackId", params.trackId);
+  const response = await apiClient.get<{ ok: true; suggestions: PaletteSuggestionDto[] }>(
+    `/palette/suggestions?${q.toString()}`
+  );
+  return response.suggestions ?? [];
+}
+
 type OptimisticMapInput = {
   mode: PaletteMode;
   artistId?: string;
   trackId?: string;
   genre: string;
+  suggestionId?: string;
 };
 
 type OptimisticSkipInput = {
   mode: PaletteMode;
   artistId?: string;
   trackId?: string;
+  suggestionId?: string;
 };
 
 type PaletteMutationContext = {
@@ -86,6 +103,29 @@ export function usePaletteSession(mode: PaletteMode = "artists") {
   });
 }
 
+export function usePaletteSuggestions(params: {
+  mode: PaletteMode;
+  artistId?: string;
+  trackId?: string;
+  enabled?: boolean;
+}) {
+  return useQuery<PaletteSuggestionDto[], Error>({
+    queryKey: listeningKeys.paletteSuggestions({
+      mode: params.mode,
+      artistId: params.artistId,
+      trackId: params.trackId,
+    }),
+    queryFn: () =>
+      fetchPaletteSuggestions({
+        mode: params.mode,
+        artistId: params.artistId,
+        trackId: params.trackId,
+      }),
+    enabled: params.enabled ?? true,
+    staleTime: 15_000,
+  });
+}
+
 export function useMapPaletteArtist() {
   const queryClient = useQueryClient();
   return useMutation<
@@ -100,12 +140,14 @@ export function useMapPaletteArtist() {
           mode: "tracks",
           trackId: payload.trackId,
           genre: payload.genre,
+          suggestionId: payload.suggestionId,
         });
       }
       return apiClient.post<PaletteMapArtistResponseDto>("/palette/map", {
         mode: "artists",
         artistId: payload.artistId,
         genre: payload.genre,
+        suggestionId: payload.suggestionId,
       });
     },
     onMutate: async (variables) => {
@@ -130,6 +172,9 @@ export function useMapPaletteArtist() {
     onSuccess: (response) => {
       const m = response.session.mode;
       queryClient.setQueryData(listeningKeys.paletteSession(m), response.session);
+      queryClient.invalidateQueries({
+        queryKey: listeningKeys.paletteSuggestions({ mode: m }),
+      });
       queryClient.invalidateQueries({ queryKey: listeningKeys.genres() });
       queryClient.invalidateQueries({ queryKey: listeningKeys.genreTrends() });
       queryClient.invalidateQueries({ queryKey: listeningKeys.overview() });
@@ -150,11 +195,13 @@ export function useSkipPaletteArtist() {
         return apiClient.post<PaletteSkipArtistResponseDto>("/palette/skip", {
           mode: "tracks",
           trackId: payload.trackId,
+          suggestionId: payload.suggestionId,
         });
       }
       return apiClient.post<PaletteSkipArtistResponseDto>("/palette/skip", {
         mode: "artists",
         artistId: payload.artistId,
+        suggestionId: payload.suggestionId,
       });
     },
     onMutate: async (variables) => {
@@ -179,6 +226,9 @@ export function useSkipPaletteArtist() {
     onSuccess: (response) => {
       const m = response.session.mode;
       queryClient.setQueryData(listeningKeys.paletteSession(m), response.session);
+      queryClient.invalidateQueries({
+        queryKey: listeningKeys.paletteSuggestions({ mode: m }),
+      });
     },
   });
 }

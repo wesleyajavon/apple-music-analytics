@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { toast } from "sonner";
@@ -20,6 +20,22 @@ type GuideStep = {
     | "imageAltAppleStep2"
     | "imageAltAppleStep3"
     | "imageAltAppleStep4";
+};
+
+type GenreBackfillJobStatus = "pending" | "running" | "completed" | "failed";
+
+type GenreBackfillJob = {
+  id: string;
+  status: GenreBackfillJobStatus;
+  targetUnknownPct: number;
+  maxArtists: number;
+  artistsProcessed: number;
+  artistsMapped: number;
+  tracksUpdated: number;
+  apiRequestsUsed: number;
+  initialUnknownPct: number | null;
+  currentUnknownPct: number | null;
+  errorMessage: string | null;
 };
 
 const SPOTIFY_STEPS: GuideStep[] = [
@@ -82,6 +98,12 @@ export function DataExportOnboarding() {
     unknownRatio: number;
     unknownArtists: number;
   } | null>(null);
+  const [genreBackfillJob, setGenreBackfillJob] = useState<{
+    id: string;
+    status: GenreBackfillJobStatus;
+    reused: boolean;
+  } | null>(null);
+  const [genreBackfillStatus, setGenreBackfillStatus] = useState<GenreBackfillJob | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const steps = useMemo(() => {
@@ -89,6 +111,28 @@ export function DataExportOnboarding() {
     if (provider === "apple") return APPLE_STEPS;
     return [];
   }, [provider]);
+
+  const refreshGenreBackfillStatus = useCallback(async () => {
+    try {
+      const res = await fetch("/api/user/onboarding/import/genre-backfill/status");
+      if (!res.ok) return;
+      const data = (await res.json().catch(() => ({}))) as {
+        job?: GenreBackfillJob | null;
+      };
+      setGenreBackfillStatus(data.job ?? null);
+    } catch {
+      // Best effort only.
+    }
+  }, []);
+
+  useEffect(() => {
+    if (phase !== "finish" || !genreBackfillJob?.id) return;
+    void refreshGenreBackfillStatus();
+    const intervalId = window.setInterval(() => {
+      void refreshGenreBackfillStatus();
+    }, 4000);
+    return () => window.clearInterval(intervalId);
+  }, [phase, genreBackfillJob?.id, refreshGenreBackfillStatus]);
 
   const completeOnboarding = useCallback(async () => {
     setIsSubmitting(true);
@@ -153,6 +197,11 @@ export function DataExportOnboarding() {
         error?: string;
         imported?: number;
         skippedDuplicates?: number;
+        genreBackfillJob?: {
+          id?: string;
+          status?: GenreBackfillJobStatus;
+          reused?: boolean;
+        } | null;
         paletteInvitation?: {
           shouldInvite?: boolean;
           unknownRatio?: number;
@@ -175,6 +224,17 @@ export function DataExportOnboarding() {
       } else {
         setPaletteInvitation(null);
       }
+      if (data.genreBackfillJob?.id && data.genreBackfillJob.status) {
+        setGenreBackfillJob({
+          id: data.genreBackfillJob.id,
+          status: data.genreBackfillJob.status,
+          reused: Boolean(data.genreBackfillJob.reused),
+        });
+        setGenreBackfillStatus(null);
+      } else {
+        setGenreBackfillJob(null);
+        setGenreBackfillStatus(null);
+      }
       toast.success(t("import.toastSuccess", { count: imported }));
       setPhase("finish");
     } catch {
@@ -186,6 +246,8 @@ export function DataExportOnboarding() {
 
   function skipImportToFinish() {
     setImportSummary(null);
+    setGenreBackfillJob(null);
+    setGenreBackfillStatus(null);
     setPhase("finish");
   }
 
@@ -197,6 +259,35 @@ export function DataExportOnboarding() {
 
   const secondaryBtn =
     "inline-flex min-h-[44px] items-center justify-center rounded-xl border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-950 dark:text-gray-100 dark:hover:bg-gray-900";
+  const effectiveBackfill = useMemo(
+    () =>
+      genreBackfillStatus ??
+      (genreBackfillJob
+        ? {
+            id: genreBackfillJob.id,
+            status: genreBackfillJob.status,
+            targetUnknownPct: 15,
+            maxArtists: 0,
+            artistsProcessed: 0,
+            artistsMapped: 0,
+            tracksUpdated: 0,
+            apiRequestsUsed: 0,
+            initialUnknownPct: null,
+            currentUnknownPct: null,
+            errorMessage: null,
+          }
+        : null),
+    [genreBackfillJob, genreBackfillStatus]
+  );
+  const hasBackfillInProgress =
+    effectiveBackfill?.status === "pending" || effectiveBackfill?.status === "running";
+  const backfillProgressRatio = useMemo(() => {
+    if (!effectiveBackfill) return 0;
+    if (effectiveBackfill.maxArtists > 0) {
+      return Math.min(1, effectiveBackfill.artistsProcessed / effectiveBackfill.maxArtists);
+    }
+    return effectiveBackfill.status === "completed" ? 1 : 0;
+  }, [effectiveBackfill]);
 
   return (
     <div className="mx-auto max-w-3xl pb-16">
@@ -503,6 +594,47 @@ export function DataExportOnboarding() {
                   })
                 : t("finishBody")}
             </p>
+            {effectiveBackfill ? (
+              <section className="space-y-3 rounded-xl border border-violet-200/80 bg-violet-50/70 p-4 dark:border-violet-900/50 dark:bg-violet-950/30">
+                <p className="text-sm font-semibold text-violet-900 dark:text-violet-100">
+                  {t("genreBackfill.title")}
+                </p>
+                <p className="text-xs text-violet-800/90 dark:text-violet-200/90">
+                  {hasBackfillInProgress
+                    ? t("genreBackfill.running")
+                    : effectiveBackfill.status === "completed"
+                      ? t("genreBackfill.completed")
+                      : t("genreBackfill.failed")}
+                </p>
+                <div className="h-2 w-full overflow-hidden rounded-full bg-violet-200/70 dark:bg-violet-900/60">
+                  <div
+                    className="h-full rounded-full bg-accent-violet transition-all"
+                    style={{ width: `${Math.round(backfillProgressRatio * 100)}%` }}
+                  />
+                </div>
+                <div className="grid gap-2 text-xs text-violet-900 dark:text-violet-100 sm:grid-cols-2">
+                  <p>{t("genreBackfill.artistsProcessed", { count: effectiveBackfill.artistsProcessed })}</p>
+                  <p>{t("genreBackfill.artistsMapped", { count: effectiveBackfill.artistsMapped })}</p>
+                  <p>{t("genreBackfill.tracksUpdated", { count: effectiveBackfill.tracksUpdated })}</p>
+                  <p>{t("genreBackfill.requestsUsed", { count: effectiveBackfill.apiRequestsUsed })}</p>
+                </div>
+                {effectiveBackfill.initialUnknownPct != null &&
+                effectiveBackfill.currentUnknownPct != null ? (
+                  <p className="text-xs text-violet-900/90 dark:text-violet-100/90">
+                    {t("genreBackfill.ratio", {
+                      initial: effectiveBackfill.initialUnknownPct.toFixed(1),
+                      current: effectiveBackfill.currentUnknownPct.toFixed(1),
+                      target: effectiveBackfill.targetUnknownPct.toFixed(1),
+                    })}
+                  </p>
+                ) : null}
+                {effectiveBackfill.errorMessage ? (
+                  <p className="text-xs text-red-700 dark:text-red-300">
+                    {t("genreBackfill.error", { message: effectiveBackfill.errorMessage })}
+                  </p>
+                ) : null}
+              </section>
+            ) : null}
             <button
               type="button"
               className={primaryBtn}

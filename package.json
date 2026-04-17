@@ -31,6 +31,7 @@
     "auth:migrate-user-id": "node scripts/migrate-user-id-to-supabase.js",
     "db:check-capacity": "node scripts/check-db-capacity.js",
     "spotify:backfill-genres": "node scripts/backfill-track-genres-spotify.js",
+    "spotify:backfill-genres:user-target": "node scripts/backfill-track-genres-spotify.js --target-unknown-pct 15",
     "spotify:test-genres": "node scripts/test-spotify-genres-backfill.js",
     "genres:backfill-llm": "node scripts/backfill-track-genres-llm.js",
     "genres:backfill-cascade": "node scripts/backfill-track-genres-cascade.js",

@@ -5,9 +5,9 @@ import JSZip from "jszip";
  * (ex. my_spotify_data.zip), quel que soit le dossier parent dans l’archive.
  */
 export async function extractSpotifyStreamingHistoryJsonTextsFromZip(
-  buffer: Buffer
+  data: Buffer | Uint8Array | ArrayBuffer
 ): Promise<string[]> {
-  const zip = await JSZip.loadAsync(buffer);
+  const zip = await JSZip.loadAsync(data);
   const texts: string[] = [];
 
   const entries = Object.keys(zip.files);

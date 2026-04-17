@@ -5,6 +5,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { toast } from "sonner";
+import { extractSpotifyStreamingHistoryJsonTextsFromZip } from "@/lib/services/listening/extract-spotify-export-zip";
+import { ONBOARDING_IMPORT_MAX_JSON_BATCH_ROWS } from "@/lib/services/listening/onboarding-import-constants";
+import type { NormalizedListenInput } from "@/lib/services/listening/onboarding-import-types";
+import { parseApplePlayHistoryDailyTracksCsv } from "@/lib/services/listening/parse-apple-play-history-daily-csv";
+import { parseSpotifyStreamingHistoryAudioJson } from "@/lib/services/listening/parse-spotify-streaming-history-json";
 
 type Phase = "welcome" | "pick" | "guide" | "import" | "finish";
 type MusicProvider = "spotify" | "apple";
@@ -79,6 +84,24 @@ const APPLE_STEPS: GuideStep[] = [
     altKey: "imageAltAppleStep4",
   },
 ];
+
+/** En dessous de ~4,5 Mo (plafond Vercel sur le corps des requêtes), l’upload multipart classique suffit. */
+const VERCEL_SAFE_MULTIPART_MAX_BYTES = 4 * 1024 * 1024;
+const MAX_ONBOARDING_PARSED_ROWS = 75_000;
+
+function chunkArray<T>(arr: T[], size: number): T[][] {
+  const out: T[][] = [];
+  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+  return out;
+}
+
+function listensToJsonRows(rows: NormalizedListenInput[]) {
+  return rows.map((r) => ({
+    artistName: r.artistName,
+    trackName: r.trackName,
+    playedAt: r.playedAt.toISOString(),
+  }));
+}
 
 export function DataExportOnboarding() {
   const t = useTranslations("onboarding");
@@ -189,14 +212,13 @@ export function DataExportOnboarding() {
     }
     setIsImporting(true);
     try {
-      const fd = new FormData();
-      fd.append("provider", provider);
-      fd.append("file", importFile);
-      const res = await fetch("/api/user/onboarding/import", { method: "POST", body: fd });
-      const data = (await res.json().catch(() => ({}))) as {
+      const useLargeFilePath = importFile.size >= VERCEL_SAFE_MULTIPART_MAX_BYTES;
+
+      type ImportOkJson = {
         error?: string;
         imported?: number;
         skippedDuplicates?: number;
+        skippedInvalid?: number;
         genreBackfillJob?: {
           id?: string;
           status?: GenreBackfillJobStatus;
@@ -208,34 +230,139 @@ export function DataExportOnboarding() {
           unknownArtists?: number;
         };
       };
-      if (!res.ok) {
-        toast.error(data?.error ?? t("import.importError"));
+
+      if (!useLargeFilePath) {
+        const fd = new FormData();
+        fd.append("provider", provider);
+        fd.append("file", importFile);
+        const res = await fetch("/api/user/onboarding/import", { method: "POST", body: fd });
+        const data = (await res.json().catch(() => ({}))) as ImportOkJson;
+        if (!res.ok) {
+          toast.error(data?.error ?? t("import.importError"));
+          return;
+        }
+        const imported = data.imported ?? 0;
+        const skippedDuplicates = data.skippedDuplicates ?? 0;
+        setImportSummary({ imported, skippedDuplicates });
+        if (data.paletteInvitation) {
+          setPaletteInvitation({
+            shouldInvite: Boolean(data.paletteInvitation.shouldInvite),
+            unknownRatio: Number(data.paletteInvitation.unknownRatio ?? 0),
+            unknownArtists: Number(data.paletteInvitation.unknownArtists ?? 0),
+          });
+        } else {
+          setPaletteInvitation(null);
+        }
+        if (data.genreBackfillJob?.id && data.genreBackfillJob.status) {
+          setGenreBackfillJob({
+            id: data.genreBackfillJob.id,
+            status: data.genreBackfillJob.status,
+            reused: Boolean(data.genreBackfillJob.reused),
+          });
+          setGenreBackfillStatus(null);
+        } else {
+          setGenreBackfillJob(null);
+          setGenreBackfillStatus(null);
+        }
+        toast.success(t("import.toastSuccess", { count: imported }));
+        setPhase("finish");
         return;
       }
-      const imported = data.imported ?? 0;
-      const skippedDuplicates = data.skippedDuplicates ?? 0;
-      setImportSummary({ imported, skippedDuplicates });
-      if (data.paletteInvitation) {
+
+      let allRows: NormalizedListenInput[];
+
+      if (provider === "spotify") {
+        if (!importFile.name.toLowerCase().endsWith(".zip")) {
+          toast.error(t("import.importError"));
+          return;
+        }
+        const buf = await importFile.arrayBuffer();
+        const jsonTexts = await extractSpotifyStreamingHistoryJsonTextsFromZip(buf);
+        if (jsonTexts.length === 0) {
+          toast.error(t("import.zipMissingAudioJson"));
+          return;
+        }
+        allRows = jsonTexts.flatMap((text) => parseSpotifyStreamingHistoryAudioJson(text));
+      } else {
+        if (!importFile.name.toLowerCase().endsWith(".csv")) {
+          toast.error(t("import.importError"));
+          return;
+        }
+        const csvText = await importFile.text();
+        allRows = parseApplePlayHistoryDailyTracksCsv(csvText);
+      }
+
+      if (allRows.length === 0) {
+        toast.error(t("import.noParsedListens"));
+        return;
+      }
+      if (allRows.length > MAX_ONBOARDING_PARSED_ROWS) {
+        toast.error(t("import.tooManyPlays", { max: MAX_ONBOARDING_PARSED_ROWS.toLocaleString() }));
+        return;
+      }
+
+      const chunks = chunkArray(allRows, ONBOARDING_IMPORT_MAX_JSON_BATCH_ROWS);
+      let sumImported = 0;
+      let sumSkippedDup = 0;
+      let lastPayload: ImportOkJson | null = null;
+
+      for (let i = 0; i < chunks.length; i++) {
+        const body: Record<string, unknown> = {
+          provider,
+          rows: listensToJsonRows(chunks[i]!),
+        };
+        if (chunks.length > 1) {
+          body.batch = { index: i, count: chunks.length };
+          if (i === chunks.length - 1) {
+            body.sessionTotalImported = sumImported;
+          }
+        }
+
+        const res = await fetch("/api/user/onboarding/import", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        const data = (await res.json().catch(() => ({}))) as ImportOkJson;
+        if (!res.ok) {
+          toast.error(data?.error ?? t("import.importError"));
+          return;
+        }
+        sumImported += data.imported ?? 0;
+        sumSkippedDup += data.skippedDuplicates ?? 0;
+        lastPayload = data;
+      }
+
+      if (!lastPayload) {
+        toast.error(t("import.importError"));
+        return;
+      }
+
+      setImportSummary({
+        imported: sumImported,
+        skippedDuplicates: sumSkippedDup,
+      });
+      if (lastPayload.paletteInvitation) {
         setPaletteInvitation({
-          shouldInvite: Boolean(data.paletteInvitation.shouldInvite),
-          unknownRatio: Number(data.paletteInvitation.unknownRatio ?? 0),
-          unknownArtists: Number(data.paletteInvitation.unknownArtists ?? 0),
+          shouldInvite: Boolean(lastPayload.paletteInvitation.shouldInvite),
+          unknownRatio: Number(lastPayload.paletteInvitation.unknownRatio ?? 0),
+          unknownArtists: Number(lastPayload.paletteInvitation.unknownArtists ?? 0),
         });
       } else {
         setPaletteInvitation(null);
       }
-      if (data.genreBackfillJob?.id && data.genreBackfillJob.status) {
+      if (lastPayload.genreBackfillJob?.id && lastPayload.genreBackfillJob.status) {
         setGenreBackfillJob({
-          id: data.genreBackfillJob.id,
-          status: data.genreBackfillJob.status,
-          reused: Boolean(data.genreBackfillJob.reused),
+          id: lastPayload.genreBackfillJob.id,
+          status: lastPayload.genreBackfillJob.status,
+          reused: Boolean(lastPayload.genreBackfillJob.reused),
         });
         setGenreBackfillStatus(null);
       } else {
         setGenreBackfillJob(null);
         setGenreBackfillStatus(null);
       }
-      toast.success(t("import.toastSuccess", { count: imported }));
+      toast.success(t("import.toastSuccess", { count: sumImported }));
       setPhase("finish");
     } catch {
       toast.error(t("import.importError"));

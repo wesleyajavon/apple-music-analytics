@@ -18,6 +18,7 @@ import {
   enqueueSpotifyImportGenreBackfillJob,
   triggerImportGenreBackfillWorker,
 } from "@/lib/services/listening/import-genre-backfill-queue";
+import { parseOnboardingImportJsonBody } from "@/lib/services/listening/onboarding-import-json-body";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -26,7 +27,8 @@ export const maxDuration = 60;
 const RATE = {
   route: "/api/user/onboarding/import",
   windowMs: 60_000,
-  maxRequests: 5,
+  /** Import découpé en plusieurs lots JSON (contournement plafond Vercel ~4,5 Mo). */
+  maxRequests: 40,
   softLimitRatio: 0.8,
 } as const;
 
@@ -59,8 +61,60 @@ export async function POST(request: NextRequest) {
     }
 
     const contentType = request.headers.get("content-type") ?? "";
+
+    if (contentType.includes("application/json")) {
+      const raw = await request.json();
+      const { provider: providerRaw, rows, batch, sessionTotalImported } =
+        parseOnboardingImportJsonBody(raw);
+
+      if (rows.length > MAX_PARSED_ROWS) {
+        throw createValidationError(
+          `This export contains more than ${MAX_PARSED_ROWS.toLocaleString()} plays. Contact support or split the data.`
+        );
+      }
+
+      const source =
+        providerRaw === "spotify" ? ("spotify_export" as const) : ("apple_music_export" as const);
+
+      const result = await importOnboardingListens(userId, source, rows);
+      const isLastBatch = !batch || batch.index === batch.count - 1;
+
+      let paletteInvite: Awaited<ReturnType<typeof getPaletteInvitationStatus>> | null = null;
+      let genreBackfillJob: { id: string; status: string; reused: boolean } | null = null;
+
+      if (isLastBatch) {
+        paletteInvite = await getPaletteInvitationStatus(userId);
+        const priorImported =
+          batch && batch.count > 1 && sessionTotalImported !== null
+            ? sessionTotalImported
+            : 0;
+        const sessionImports = priorImported + result.imported;
+        if (providerRaw === "spotify" && sessionImports > 0) {
+          const queued = await enqueueSpotifyImportGenreBackfillJob(userId);
+          genreBackfillJob = {
+            id: queued.jobId,
+            status: queued.status,
+            reused: queued.reused,
+          };
+          void triggerImportGenreBackfillWorker();
+        }
+      }
+
+      return NextResponse.json({
+        ok: true,
+        partial: !isLastBatch,
+        provider: providerRaw,
+        parsedRows: rows.length,
+        imported: result.imported,
+        skippedDuplicates: result.skippedDuplicates,
+        skippedInvalid: result.skippedInvalid,
+        paletteInvitation: paletteInvite,
+        genreBackfillJob,
+      });
+    }
+
     if (!contentType.includes("multipart/form-data")) {
-      throw createValidationError("Expected multipart/form-data");
+      throw createValidationError("Expected multipart/form-data or application/json");
     }
 
     const form = await request.formData();

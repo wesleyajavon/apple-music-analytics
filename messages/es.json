@@ -175,7 +175,10 @@
       "importingOverlayHint": "Los archivos grandes pueden tardar hasta un minuto. No cierres esta pestaña.",
       "skipImport": "Aún no tengo el archivo",
       "toastSuccess": "{count, plural, one {# escucha importada.} other {# escuchas importadas.}}",
-      "importError": "La importación falló. Revisa el archivo e inténtalo de nuevo."
+      "importError": "La importación falló. Revisa el archivo e inténtalo de nuevo.",
+      "zipMissingAudioJson": "No hay archivos Streaming_History_Audio_*.json en este ZIP. Usa el archivo de «Extended streaming history» del correo de Spotify.",
+      "noParsedListens": "No se reconoció ninguna escucha en este archivo. Comprueba que es el export correcto.",
+      "tooManyPlays": "Este export supera {max} reproducciones. Contacta con soporte o divide los datos."
     },
     "finishTitle": "Listo",
     "finishBody": "Puedes omitir este paso si el export aún no está listo: el panel sigue disponible y los gráficos se completarán cuando importes más adelante.",

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { parseOnboardingImportJsonBody } from "@/lib/services/listening/onboarding-import-json-body";
 import { parseSpotifyStreamingHistoryAudioJson } from "@/lib/services/listening/parse-spotify-streaming-history-json";
 import { parseApplePlayHistoryDailyTracksCsv } from "@/lib/services/listening/parse-apple-play-history-daily-csv";
 
@@ -49,5 +50,29 @@ describe("parseApplePlayHistoryDailyTracksCsv", () => {
     expect(rows[0]!.playedAt.getUTCFullYear()).toBe(2024);
     expect(rows[0]!.playedAt.getUTCMonth()).toBe(0);
     expect(rows[0]!.playedAt.getUTCDate()).toBe(15);
+  });
+});
+
+describe("parseOnboardingImportJsonBody", () => {
+  it("parses rows and batch metadata", () => {
+    const parsed = parseOnboardingImportJsonBody({
+      provider: "spotify",
+      batch: { index: 1, count: 3 },
+      sessionTotalImported: 12,
+      rows: [
+        {
+          artistName: " A ",
+          trackName: " T ",
+          playedAt: "2020-01-02T03:04:05.000Z",
+        },
+      ],
+    });
+    expect(parsed.provider).toBe("spotify");
+    expect(parsed.batch).toEqual({ index: 1, count: 3 });
+    expect(parsed.sessionTotalImported).toBe(12);
+    expect(parsed.rows).toHaveLength(1);
+    expect(parsed.rows[0]!.artistName).toBe("A");
+    expect(parsed.rows[0]!.trackName).toBe("T");
+    expect(parsed.rows[0]!.playedAt.toISOString()).toBe("2020-01-02T03:04:05.000Z");
   });
 });

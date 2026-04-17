@@ -41,8 +41,8 @@ async function getUserUnknownTrackStats(userId: string): Promise<UnknownStats> {
     WHERE l."userId" = ${userId}
       AND t."genre" IS NULL
   `);
-  const total = Number(totalRows[0]?.total ?? 0n);
-  const unknown = Number(unknownRows[0]?.unknown ?? 0n);
+  const total = Number(totalRows[0]?.total ?? 0);
+  const unknown = Number(unknownRows[0]?.unknown ?? 0);
   return {
     total,
     unknown,

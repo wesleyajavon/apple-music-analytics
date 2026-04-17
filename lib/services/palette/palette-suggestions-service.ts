@@ -136,7 +136,7 @@ export async function getPaletteSuggestions(args: {
           suggestedGenreRaw: seed.genre,
           suggestedGenreNormalized: seed.genre,
           confidence: seed.confidence,
-          evidence: seed.evidence ?? { reason: seed.reason },
+          evidence: (seed.evidence ?? { reason: seed.reason }) as Prisma.InputJsonValue,
         },
         select: {
           id: true,

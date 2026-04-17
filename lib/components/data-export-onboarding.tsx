@@ -127,6 +127,14 @@ export function DataExportOnboarding() {
     reused: boolean;
   } | null>(null);
   const [genreBackfillStatus, setGenreBackfillStatus] = useState<GenreBackfillJob | null>(null);
+  const [genreLlmAfterImport, setGenreLlmAfterImport] = useState<{
+    unknownTrackCount: number;
+    unknownRatio: number;
+    totalTrackCount: number;
+    groqConfigured: boolean;
+  } | null>(null);
+  const [genreLlmDeclined, setGenreLlmDeclined] = useState(false);
+  const [isStartingLlmBackfill, setIsStartingLlmBackfill] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const steps = useMemo(() => {
@@ -219,10 +227,11 @@ export function DataExportOnboarding() {
         imported?: number;
         skippedDuplicates?: number;
         skippedInvalid?: number;
-        genreBackfillJob?: {
-          id?: string;
-          status?: GenreBackfillJobStatus;
-          reused?: boolean;
+        genreLlmBackfill?: {
+          unknownTrackCount?: number;
+          unknownRatio?: number;
+          totalTrackCount?: number;
+          groqConfigured?: boolean;
         } | null;
         paletteInvitation?: {
           shouldInvite?: boolean;
@@ -253,16 +262,18 @@ export function DataExportOnboarding() {
         } else {
           setPaletteInvitation(null);
         }
-        if (data.genreBackfillJob?.id && data.genreBackfillJob.status) {
-          setGenreBackfillJob({
-            id: data.genreBackfillJob.id,
-            status: data.genreBackfillJob.status,
-            reused: Boolean(data.genreBackfillJob.reused),
+        setGenreBackfillJob(null);
+        setGenreBackfillStatus(null);
+        setGenreLlmDeclined(false);
+        if (data.genreLlmBackfill && (data.genreLlmBackfill.unknownTrackCount ?? 0) > 0) {
+          setGenreLlmAfterImport({
+            unknownTrackCount: Number(data.genreLlmBackfill.unknownTrackCount ?? 0),
+            unknownRatio: Number(data.genreLlmBackfill.unknownRatio ?? 0),
+            totalTrackCount: Number(data.genreLlmBackfill.totalTrackCount ?? 0),
+            groqConfigured: Boolean(data.genreLlmBackfill.groqConfigured),
           });
-          setGenreBackfillStatus(null);
         } else {
-          setGenreBackfillJob(null);
-          setGenreBackfillStatus(null);
+          setGenreLlmAfterImport(null);
         }
         toast.success(t("import.toastSuccess", { count: imported }));
         setPhase("finish");
@@ -351,16 +362,18 @@ export function DataExportOnboarding() {
       } else {
         setPaletteInvitation(null);
       }
-      if (lastPayload.genreBackfillJob?.id && lastPayload.genreBackfillJob.status) {
-        setGenreBackfillJob({
-          id: lastPayload.genreBackfillJob.id,
-          status: lastPayload.genreBackfillJob.status,
-          reused: Boolean(lastPayload.genreBackfillJob.reused),
+      setGenreBackfillJob(null);
+      setGenreBackfillStatus(null);
+      setGenreLlmDeclined(false);
+      if (lastPayload.genreLlmBackfill && (lastPayload.genreLlmBackfill.unknownTrackCount ?? 0) > 0) {
+        setGenreLlmAfterImport({
+          unknownTrackCount: Number(lastPayload.genreLlmBackfill.unknownTrackCount ?? 0),
+          unknownRatio: Number(lastPayload.genreLlmBackfill.unknownRatio ?? 0),
+          totalTrackCount: Number(lastPayload.genreLlmBackfill.totalTrackCount ?? 0),
+          groqConfigured: Boolean(lastPayload.genreLlmBackfill.groqConfigured),
         });
-        setGenreBackfillStatus(null);
       } else {
-        setGenreBackfillJob(null);
-        setGenreBackfillStatus(null);
+        setGenreLlmAfterImport(null);
       }
       toast.success(t("import.toastSuccess", { count: sumImported }));
       setPhase("finish");
@@ -375,8 +388,44 @@ export function DataExportOnboarding() {
     setImportSummary(null);
     setGenreBackfillJob(null);
     setGenreBackfillStatus(null);
+    setGenreLlmAfterImport(null);
+    setGenreLlmDeclined(false);
     setPhase("finish");
   }
+
+  const startLlmGenreBackfill = useCallback(async () => {
+    setIsStartingLlmBackfill(true);
+    try {
+      const res = await fetch("/api/user/onboarding/import/genre-backfill/start", {
+        method: "POST",
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        error?: string;
+        jobId?: string;
+        status?: GenreBackfillJobStatus;
+        reused?: boolean;
+      };
+      if (!res.ok) {
+        toast.error(data?.error ?? t("genreLlmConsent.startError"));
+        return;
+      }
+      if (data.jobId && data.status) {
+        setGenreBackfillJob({
+          id: data.jobId,
+          status: data.status,
+          reused: Boolean(data.reused),
+        });
+        setGenreBackfillStatus(null);
+        setGenreLlmAfterImport(null);
+        toast.success(t("genreLlmConsent.startedToast"));
+      }
+    } catch {
+      toast.error(t("genreLlmConsent.startError"));
+    } finally {
+      setIsStartingLlmBackfill(false);
+    }
+  }, [t]);
 
   const cardClass =
     "mx-auto w-full max-w-3xl rounded-2xl border border-gray-200/90 bg-white/95 p-6 shadow-lg shadow-gray-200/30 backdrop-blur-sm dark:border-gray-800 dark:bg-gray-900/90 dark:shadow-none sm:p-8";
@@ -721,6 +770,53 @@ export function DataExportOnboarding() {
                   })
                 : t("finishBody")}
             </p>
+            {genreLlmAfterImport &&
+            genreLlmAfterImport.unknownTrackCount > 0 &&
+            !genreBackfillJob?.id &&
+            !genreLlmDeclined ? (
+              <section
+                className="space-y-3 rounded-xl border border-sky-200/80 bg-sky-50/80 p-4 dark:border-sky-900/50 dark:bg-sky-950/30"
+                aria-labelledby="onboarding-genre-llm-consent-heading"
+              >
+                <h3
+                  id="onboarding-genre-llm-consent-heading"
+                  className="text-sm font-semibold text-sky-950 dark:text-sky-50"
+                >
+                  {t("genreLlmConsent.title")}
+                </h3>
+                <p className="text-xs leading-relaxed text-sky-900/95 dark:text-sky-100/90">
+                  {t("genreLlmConsent.body", {
+                    unknown: genreLlmAfterImport.unknownTrackCount,
+                    pct: genreLlmAfterImport.unknownRatio.toFixed(1),
+                  })}
+                </p>
+                {!genreLlmAfterImport.groqConfigured ? (
+                  <p className="text-xs font-medium text-amber-900 dark:text-amber-200">
+                    {t("genreLlmConsent.missingKey")}
+                  </p>
+                ) : (
+                  <p className="text-xs text-sky-900/90 dark:text-sky-100/85">{t("genreLlmConsent.privacy")}</p>
+                )}
+                <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                  <button
+                    type="button"
+                    className={primaryBtn}
+                    disabled={!genreLlmAfterImport.groqConfigured || isStartingLlmBackfill}
+                    onClick={() => void startLlmGenreBackfill()}
+                  >
+                    {isStartingLlmBackfill ? t("genreLlmConsent.starting") : t("genreLlmConsent.accept")}
+                  </button>
+                  <button
+                    type="button"
+                    className={secondaryBtn}
+                    disabled={isStartingLlmBackfill}
+                    onClick={() => setGenreLlmDeclined(true)}
+                  >
+                    {t("genreLlmConsent.decline")}
+                  </button>
+                </div>
+              </section>
+            ) : null}
             {effectiveBackfill ? (
               <section className="space-y-3 rounded-xl border border-violet-200/80 bg-violet-50/70 p-4 dark:border-violet-900/50 dark:bg-violet-950/30">
                 <p className="text-sm font-semibold text-violet-900 dark:text-violet-100">

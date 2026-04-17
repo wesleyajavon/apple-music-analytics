@@ -1,5 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { classifyPrimaryTrackGenreGroq } from "@/lib/services/genre/groq-track-genre-classify";
 
 type UnknownStats = {
   total: number;
@@ -7,25 +8,16 @@ type UnknownStats = {
   ratio: number;
 };
 
-type UnknownArtistRow = {
-  artistId: string;
+type CandidateTrackRow = {
+  id: string;
+  title: string;
   artistName: string;
-  unknownListens: bigint;
 };
 
 let workerRunning = false;
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-function normalizeText(s: string): string {
-  return s
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/\s+/g, " ")
-    .trim();
 }
 
 async function getUserUnknownTrackStats(userId: string): Promise<UnknownStats> {
@@ -50,144 +42,43 @@ async function getUserUnknownTrackStats(userId: string): Promise<UnknownStats> {
   };
 }
 
-async function getTopUnknownArtistsByUserListens(userId: string, limit: number) {
-  const rows = await prisma.$queryRaw<UnknownArtistRow[]>(Prisma.sql`
-    SELECT
-      a.id AS "artistId",
-      a.name AS "artistName",
-      COUNT(l.id)::bigint AS "unknownListens"
-    FROM "Listen" l
-    JOIN "Track" t ON t.id = l."trackId"
-    JOIN "Artist" a ON a.id = t."artistId"
-    WHERE l."userId" = ${userId}
-      AND t."genre" IS NULL
-    GROUP BY a.id, a.name
-    ORDER BY COUNT(l.id) DESC, a.name ASC
-    LIMIT ${limit}
-  `);
-  return rows.map((row) => ({
-    artistId: row.artistId,
-    artistName: row.artistName,
-    unknownListens: Number(row.unknownListens),
-  }));
-}
-
-function createSpotifyClient(opts: {
-  clientId: string;
-  clientSecret: string;
-  delayMs: number;
-  maxApiRequests: number;
-}) {
-  const SPOTIFY_ACCOUNTS = "https://accounts.spotify.com/api/token";
-  const SPOTIFY_API = "https://api.spotify.com/v1";
-
-  let cachedToken: string | null = null;
-  let tokenExpiresAt = 0;
-  let requestCount = 0;
-
-  async function getAccessToken() {
-    const now = Date.now();
-    if (cachedToken && now < tokenExpiresAt - 30_000) {
-      return cachedToken;
-    }
-    const body = new URLSearchParams({ grant_type: "client_credentials" });
-    const basic = Buffer.from(`${opts.clientId}:${opts.clientSecret}`, "utf8").toString("base64");
-    const res = await fetch(SPOTIFY_ACCOUNTS, {
-      method: "POST",
-      headers: {
-        Authorization: `Basic ${basic}`,
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body,
-    });
-    if (!res.ok) {
-      throw new Error(`Spotify token failed: ${res.status}`);
-    }
-    const data = (await res.json()) as { access_token?: string; expires_in?: number };
-    cachedToken = data.access_token ?? null;
-    tokenExpiresAt = Date.now() + (data.expires_in ?? 3600) * 1000;
-    if (!cachedToken) throw new Error("Spotify token missing access_token");
-    return cachedToken;
-  }
-
-  async function spotifyGet(url: string, state?: { authRetry?: boolean; rate429Count?: number }) {
-    if (requestCount >= opts.maxApiRequests) {
-      const e = new Error("MAX_API_REQUESTS");
-      (e as Error & { code?: string }).code = "MAX_API_REQUESTS";
-      throw e;
-    }
-    await sleep(opts.delayMs);
-    const token = await getAccessToken();
-    requestCount += 1;
-    const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-    const authRetry = state?.authRetry === true;
-    const rate429Count = state?.rate429Count ?? 0;
-
-    if (res.status === 401 && !authRetry) {
-      cachedToken = null;
-      tokenExpiresAt = 0;
-      return spotifyGet(url, { authRetry: true, rate429Count });
-    }
-    if (res.status === 429 && rate429Count < 5) {
-      const retryAfter = parseInt(res.headers.get("Retry-After") || "5", 10);
-      await sleep(retryAfter * 1000);
-      return spotifyGet(url, { authRetry, rate429Count: rate429Count + 1 });
-    }
-    return res;
-  }
-
-  async function fetchPrimaryGenreForArtistName(artistName: string) {
-    const q = `artist:"${artistName.replace(/"/g, " ").trim()}"`;
-    const searchUrl = `${SPOTIFY_API}/search?${new URLSearchParams({
-      q,
-      type: "artist",
-      limit: "5",
-    })}`;
-    const searchRes = await spotifyGet(searchUrl);
-    if (!searchRes.ok) return { genre: null as string | null, reason: "search_failed" };
-    const searchJson = (await searchRes.json()) as {
-      artists?: { items?: Array<{ id?: string; name?: string; popularity?: number }> };
-    };
-    const items = searchJson.artists?.items ?? [];
-    if (items.length === 0) return { genre: null as string | null, reason: "no_artist_match" };
-
-    const target = normalizeText(artistName);
-    let bestId: string | null = null;
-    let bestScore = -1;
-    for (const item of items) {
-      if (!item.id || !item.name) continue;
-      const candidate = normalizeText(item.name);
-      let score = 0;
-      if (candidate === target) score = 100;
-      else if (candidate.includes(target) || target.includes(candidate)) score = 70;
-      else score = 10;
-      score += Math.min(20, Math.floor((item.popularity ?? 0) / 5));
-      if (score > bestScore) {
-        bestScore = score;
-        bestId = item.id;
-      }
-    }
-    if (!bestId) return { genre: null as string | null, reason: "no_artist_match" };
-
-    const artistRes = await spotifyGet(`${SPOTIFY_API}/artists/${encodeURIComponent(bestId)}`);
-    if (!artistRes.ok) return { genre: null as string | null, reason: "artist_failed" };
-    const artistJson = (await artistRes.json()) as { genres?: string[] };
-    const genres = artistJson.genres ?? [];
-    if (!Array.isArray(genres) || genres.length === 0) {
-      return { genre: null as string | null, reason: "empty_genres" };
-    }
-    return { genre: genres[0], reason: null as string | null };
-  }
-
+/**
+ * After import: unknown tracks exist and we could offer LLM backfill (Groq must be configured to run).
+ */
+export async function getGroqImportGenreBackfillEligibility(userId: string): Promise<{
+  unknownTrackCount: number;
+  unknownRatio: number;
+  totalTrackCount: number;
+  groqConfigured: boolean;
+}> {
+  const stats = await getUserUnknownTrackStats(userId);
   return {
-    fetchPrimaryGenreForArtistName,
-    getRequestCount: () => requestCount,
+    unknownTrackCount: stats.unknown,
+    unknownRatio: stats.ratio,
+    totalTrackCount: stats.total,
+    groqConfigured: Boolean(process.env.GROQ_API_KEY?.trim()),
   };
 }
 
-export async function enqueueSpotifyImportGenreBackfillJob(
-  userId: string
-): Promise<{
+async function fetchTopUnknownTracksForUser(
+  userId: string,
+  limit: number
+): Promise<CandidateTrackRow[]> {
+  const rows = await prisma.$queryRaw<CandidateTrackRow[]>(Prisma.sql`
+    SELECT t.id, t.title, a.name AS "artistName"
+    FROM "Track" t
+    JOIN "Artist" a ON a.id = t."artistId"
+    INNER JOIN "Listen" l ON l."trackId" = t.id
+    WHERE l."userId" = ${userId}
+      AND t.genre IS NULL
+    GROUP BY t.id, t.title, a.name
+    ORDER BY COUNT(l.id)::bigint DESC, t.title ASC
+    LIMIT ${limit}
+  `);
+  return rows;
+}
+
+export async function enqueueGroqImportGenreBackfillJob(userId: string): Promise<{
   jobId: string;
   status: "pending" | "running" | "completed" | "failed";
   reused: boolean;
@@ -195,7 +86,7 @@ export async function enqueueSpotifyImportGenreBackfillJob(
   const existing = await prisma.importGenreBackfillJob.findFirst({
     where: {
       userId,
-      provider: "spotify",
+      provider: "groq",
       status: { in: ["pending", "running"] },
     },
     orderBy: { createdAt: "desc" },
@@ -205,23 +96,23 @@ export async function enqueueSpotifyImportGenreBackfillJob(
     return { jobId: existing.id, status: existing.status, reused: true };
   }
 
-  const targetUnknownPct = Number(process.env.SPOTIFY_IMPORT_TARGET_UNKNOWN_PCT ?? 15);
-  const delayMs = Number(process.env.SPOTIFY_IMPORT_DELAY_MS ?? 300);
-  const maxApiRequests = Number(process.env.SPOTIFY_IMPORT_MAX_API_REQUESTS ?? 250);
-  const maxArtists = Number(process.env.SPOTIFY_IMPORT_MAX_ARTISTS ?? 200);
+  const targetUnknownPct = Number(process.env.GROQ_IMPORT_TARGET_UNKNOWN_PCT ?? 15);
+  const delayMs = Number(process.env.GROQ_IMPORT_DELAY_MS ?? 400);
+  const maxLlmCalls = Number(process.env.GROQ_IMPORT_MAX_LLM_CALLS ?? 250);
+  const maxTracks = Number(process.env.GROQ_IMPORT_MAX_TRACKS ?? 200);
 
   const created = await prisma.importGenreBackfillJob.create({
     data: {
       userId,
-      provider: "spotify",
+      provider: "groq",
       status: "pending",
       targetUnknownPct:
         Number.isFinite(targetUnknownPct) && targetUnknownPct >= 0 && targetUnknownPct <= 100
           ? targetUnknownPct
           : 15,
-      delayMs: Number.isFinite(delayMs) && delayMs >= 0 ? delayMs : 300,
-      maxApiRequests: Number.isFinite(maxApiRequests) && maxApiRequests >= 1 ? maxApiRequests : 250,
-      maxArtists: Number.isFinite(maxArtists) && maxArtists >= 1 ? maxArtists : 200,
+      delayMs: Number.isFinite(delayMs) && delayMs >= 0 ? delayMs : 400,
+      maxApiRequests: Number.isFinite(maxLlmCalls) && maxLlmCalls >= 1 ? maxLlmCalls : 250,
+      maxArtists: Number.isFinite(maxTracks) && maxTracks >= 1 ? maxTracks : 200,
     },
     select: { id: true, status: true },
   });
@@ -249,6 +140,7 @@ async function runSingleJob(jobId: string): Promise<void> {
     select: {
       id: true,
       userId: true,
+      provider: true,
       targetUnknownPct: true,
       delayMs: true,
       maxApiRequests: true,
@@ -257,14 +149,24 @@ async function runSingleJob(jobId: string): Promise<void> {
   });
   if (!job) return;
 
-  const spotifyClientId = process.env.SPOTIFY_CLIENT_ID;
-  const spotifyClientSecret = process.env.SPOTIFY_CLIENT_SECRET;
-  if (!spotifyClientId || !spotifyClientSecret) {
+  if (job.provider !== "groq") {
     await prisma.importGenreBackfillJob.update({
       where: { id: jobId },
       data: {
         status: "failed",
-        errorMessage: "Missing SPOTIFY_CLIENT_ID or SPOTIFY_CLIENT_SECRET",
+        errorMessage: "This job type is no longer supported (use Groq LLM flow).",
+        finishedAt: new Date(),
+      },
+    });
+    return;
+  }
+
+  if (!process.env.GROQ_API_KEY?.trim()) {
+    await prisma.importGenreBackfillJob.update({
+      where: { id: jobId },
+      data: {
+        status: "failed",
+        errorMessage: "Missing GROQ_API_KEY",
         finishedAt: new Date(),
       },
     });
@@ -285,40 +187,53 @@ async function runSingleJob(jobId: string): Promise<void> {
       return;
     }
 
-    const spotify = createSpotifyClient({
-      clientId: spotifyClientId,
-      clientSecret: spotifyClientSecret,
-      delayMs: Math.max(0, job.delayMs),
-      maxApiRequests: Math.max(1, job.maxApiRequests),
-    });
-    const artists = await getTopUnknownArtistsByUserListens(job.userId, Math.max(1, job.maxArtists));
+    const candidates = await fetchTopUnknownTracksForUser(
+      job.userId,
+      Math.max(1, job.maxArtists)
+    );
 
     let artistsProcessed = 0;
     let artistsMapped = 0;
     let tracksUpdated = 0;
+    let llmCalls = 0;
 
-    for (const artist of artists) {
+    for (const row of candidates) {
       const currentStats = await getUserUnknownTrackStats(job.userId);
       if (currentStats.ratio <= job.targetUnknownPct) break;
+      if (llmCalls >= job.maxApiRequests) break;
 
       artistsProcessed += 1;
-      let mappedInThisArtist = false;
+      await sleep(Math.max(0, job.delayMs));
+
       try {
-        const resolved = await spotify.fetchPrimaryGenreForArtistName(artist.artistName);
-        if (resolved.genre) {
-          const update = await prisma.track.updateMany({
-            where: { artistId: artist.artistId, genre: null },
-            data: { genre: resolved.genre },
+        llmCalls += 1;
+        const genre = await classifyPrimaryTrackGenreGroq(row.title, row.artistName);
+        if (genre) {
+          const upd = await prisma.track.updateMany({
+            where: { id: row.id, genre: null },
+            data: { genre },
           });
-          if (update.count > 0) {
+          if (upd.count > 0) {
             artistsMapped += 1;
-            tracksUpdated += update.count;
-            mappedInThisArtist = true;
+            tracksUpdated += upd.count;
           }
         }
       } catch (err) {
-        const e = err as Error & { code?: string };
-        if (e.code === "MAX_API_REQUESTS") break;
+        const message = err instanceof Error ? err.message : "LLM error";
+        await prisma.importGenreBackfillJob.update({
+          where: { id: jobId },
+          data: {
+            status: "failed",
+            errorMessage: message.slice(0, 1000),
+            finishedAt: new Date(),
+            artistsProcessed,
+            artistsMapped,
+            tracksUpdated,
+            apiRequestsUsed: llmCalls,
+            currentUnknownPct: (await getUserUnknownTrackStats(job.userId)).ratio,
+          },
+        });
+        return;
       }
 
       const stats = await getUserUnknownTrackStats(job.userId);
@@ -329,14 +244,9 @@ async function runSingleJob(jobId: string): Promise<void> {
           artistsProcessed,
           artistsMapped,
           tracksUpdated,
-          apiRequestsUsed: spotify.getRequestCount(),
+          apiRequestsUsed: llmCalls,
         },
       });
-
-      // tiny pause when we did mutate a lot of rows to smooth DB bursts
-      if (mappedInThisArtist) {
-        await sleep(50);
-      }
     }
 
     const finalStats = await getUserUnknownTrackStats(job.userId);
@@ -349,7 +259,7 @@ async function runSingleJob(jobId: string): Promise<void> {
         artistsProcessed,
         artistsMapped,
         tracksUpdated,
-        apiRequestsUsed: spotify.getRequestCount(),
+        apiRequestsUsed: llmCalls,
       },
     });
   } catch (error) {
@@ -371,7 +281,7 @@ export async function triggerImportGenreBackfillWorker(): Promise<void> {
   try {
     while (true) {
       const next = await prisma.importGenreBackfillJob.findFirst({
-        where: { status: "pending", provider: "spotify" },
+        where: { status: "pending", provider: "groq" },
         orderBy: { createdAt: "asc" },
         select: { id: true },
       });
@@ -385,7 +295,7 @@ export async function triggerImportGenreBackfillWorker(): Promise<void> {
 
 export async function getLatestImportGenreBackfillJob(userId: string) {
   return prisma.importGenreBackfillJob.findFirst({
-    where: { userId, provider: "spotify" },
+    where: { userId, provider: "groq" },
     orderBy: { createdAt: "desc" },
     select: {
       id: true,

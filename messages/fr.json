@@ -196,15 +196,26 @@
     "imageAltAppleStep4": "Capture : confirmation Apple, préparation des données",
     "imageAltSpotifyEmail": "Capture : e-mail Spotify, historique étendu prêt, bouton vert Download",
     "externalLinkAria": "S’ouvre dans un nouvel onglet",
+    "genreLlmConsent": {
+      "title": "Améliorer les genres avec l’IA (optionnel)",
+      "body": "Environ {unknown} morceaux ({pct}% de votre bibliothèque) n’ont pas encore de genre. Vous pouvez lancer une passe Groq (LLM) sur les morceaux inconnus les plus écoutés. Rien ne part tant que vous n’acceptez pas.",
+      "privacy": "Cela envoie le nom de l’artiste et le titre du morceau à Groq pour classification. Vous pouvez refuser et mapper plus tard dans Palette.",
+      "missingKey": "Groq n’est pas configuré sur ce serveur (GROQ_API_KEY). Contactez l’administrateur ou utilisez Palette pour mapper à la main.",
+      "accept": "Oui, classifier avec Groq",
+      "decline": "Pas maintenant",
+      "starting": "Démarrage…",
+      "startedToast": "Classification des genres démarrée en arrière-plan.",
+      "startError": "Impossible de démarrer la classification des genres."
+    },
     "genreBackfill": {
-      "title": "Mapping automatique des genres en cours",
-      "running": "Nous enrichissons les artistes unknown en arrière-plan via l’API Spotify.",
-      "completed": "Le mapping automatique des genres est terminé.",
-      "failed": "Le mapping automatique des genres s’est arrêté avant la fin.",
-      "artistsProcessed": "Artistes traités : {count}",
-      "artistsMapped": "Artistes mappés : {count}",
-      "tracksUpdated": "Morceaux mis à jour : {count}",
-      "requestsUsed": "Requêtes API Spotify utilisées : {count}",
+      "title": "Classification des genres (IA) en cours",
+      "running": "Nous complétons les genres manquants en arrière-plan via Groq (LLM).",
+      "completed": "Classification des genres (IA) terminée.",
+      "failed": "La classification des genres (IA) s’est arrêtée avant la fin.",
+      "artistsProcessed": "Morceaux traités : {count}",
+      "artistsMapped": "Morceaux étiquetés : {count}",
+      "tracksUpdated": "Lignes mises à jour : {count}",
+      "requestsUsed": "Appels Groq utilisés : {count}",
       "ratio": "Taux unknown : {initial}% -> {current}% (cible : {target}%)",
       "error": "Dernière erreur : {message}"
     }
@@ -212,8 +223,8 @@
   "dashboard": {
     "title": "Dashboard 📊",
     "genreBackfill": {
-      "running": "Le mapping automatique Spotify des genres est en cours",
-      "details": "Artistes : {processed}/{max} • Unknown : {ratio} • Cible : {target}%",
+      "running": "Classification des genres Groq en cours",
+      "details": "Morceaux : {processed}/{max} • Unknown : {ratio} • Cible : {target}%",
       "ratioPending": "calcul en cours"
     }
   },

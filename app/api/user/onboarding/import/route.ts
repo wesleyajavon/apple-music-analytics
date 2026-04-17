@@ -14,10 +14,7 @@ import { parseApplePlayHistoryDailyTracksCsv } from "@/lib/services/listening/pa
 import { importOnboardingListens } from "@/lib/services/listening/import-onboarding-listens";
 import type { NormalizedListenInput } from "@/lib/services/listening/onboarding-import-types";
 import { getPaletteInvitationStatus } from "@/lib/services/palette/palette-service";
-import {
-  enqueueSpotifyImportGenreBackfillJob,
-  triggerImportGenreBackfillWorker,
-} from "@/lib/services/listening/import-genre-backfill-queue";
+import { getGroqImportGenreBackfillEligibility } from "@/lib/services/listening/import-genre-backfill-queue";
 import { parseOnboardingImportJsonBody } from "@/lib/services/listening/onboarding-import-json-body";
 
 export const dynamic = "force-dynamic";
@@ -80,7 +77,9 @@ export async function POST(request: NextRequest) {
       const isLastBatch = !batch || batch.index === batch.count - 1;
 
       let paletteInvite: Awaited<ReturnType<typeof getPaletteInvitationStatus>> | null = null;
-      let genreBackfillJob: { id: string; status: string; reused: boolean } | null = null;
+      let genreLlmBackfill: Awaited<
+        ReturnType<typeof getGroqImportGenreBackfillEligibility>
+      > | null = null;
 
       if (isLastBatch) {
         paletteInvite = await getPaletteInvitationStatus(userId);
@@ -89,14 +88,8 @@ export async function POST(request: NextRequest) {
             ? sessionTotalImported
             : 0;
         const sessionImports = priorImported + result.imported;
-        if (providerRaw === "spotify" && sessionImports > 0) {
-          const queued = await enqueueSpotifyImportGenreBackfillJob(userId);
-          genreBackfillJob = {
-            id: queued.jobId,
-            status: queued.status,
-            reused: queued.reused,
-          };
-          void triggerImportGenreBackfillWorker();
+        if (sessionImports > 0) {
+          genreLlmBackfill = await getGroqImportGenreBackfillEligibility(userId);
         }
       }
 
@@ -109,7 +102,7 @@ export async function POST(request: NextRequest) {
         skippedDuplicates: result.skippedDuplicates,
         skippedInvalid: result.skippedInvalid,
         paletteInvitation: paletteInvite,
-        genreBackfillJob,
+        genreLlmBackfill,
       });
     }
 
@@ -179,17 +172,10 @@ export async function POST(request: NextRequest) {
 
     const result = await importOnboardingListens(userId, source, rows);
     const paletteInvite = await getPaletteInvitationStatus(userId);
-    let genreBackfillJob: { id: string; status: string; reused: boolean } | null = null;
-    if (providerRaw === "spotify" && result.imported > 0) {
-      const queued = await enqueueSpotifyImportGenreBackfillJob(userId);
-      genreBackfillJob = {
-        id: queued.jobId,
-        status: queued.status,
-        reused: queued.reused,
-      };
-      // Fire-and-forget local worker so import response stays fast.
-      void triggerImportGenreBackfillWorker();
-    }
+    const genreLlmBackfill =
+      result.imported > 0
+        ? await getGroqImportGenreBackfillEligibility(userId)
+        : null;
 
     return NextResponse.json({
       ok: true,
@@ -199,7 +185,7 @@ export async function POST(request: NextRequest) {
       skippedDuplicates: result.skippedDuplicates,
       skippedInvalid: result.skippedInvalid,
       paletteInvitation: paletteInvite,
-      genreBackfillJob,
+      genreLlmBackfill,
     });
   } catch (error) {
     return handleApiError(error, { route: RATE.route });

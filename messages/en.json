@@ -196,15 +196,26 @@
     "imageAltAppleStep4": "Screenshot: Apple confirmation, preparing your data",
     "imageAltSpotifyEmail": "Screenshot: Spotify email, extended streaming history ready, green Download button",
     "externalLinkAria": "Opens in a new tab",
+    "genreLlmConsent": {
+      "title": "Improve genres with AI (optional)",
+      "body": "About {unknown} tracks ({pct}% of your library) have no genre yet. You can run a quick Groq (LLM) pass on the most-played unknown tracks. Nothing starts until you confirm.",
+      "privacy": "This sends artist and track titles to Groq for classification. You can skip and map genres later in Palette.",
+      "missingKey": "Groq is not configured on this server (GROQ_API_KEY). Ask your admin or use Palette to map genres manually.",
+      "accept": "Yes, classify with Groq",
+      "decline": "Not now",
+      "starting": "Starting…",
+      "startedToast": "Genre classification started in the background.",
+      "startError": "Could not start genre classification."
+    },
     "genreBackfill": {
-      "title": "Automatic genre mapping in progress",
-      "running": "We are enriching unknown artists in the background using Spotify API.",
-      "completed": "Automatic genre mapping completed.",
-      "failed": "Automatic genre mapping stopped before completion.",
-      "artistsProcessed": "Artists processed: {count}",
-      "artistsMapped": "Artists mapped: {count}",
-      "tracksUpdated": "Tracks updated: {count}",
-      "requestsUsed": "Spotify API requests used: {count}",
+      "title": "AI genre classification in progress",
+      "running": "We are filling missing genres in the background using Groq (LLM).",
+      "completed": "AI genre classification finished.",
+      "failed": "AI genre classification stopped before completion.",
+      "artistsProcessed": "Tracks processed: {count}",
+      "artistsMapped": "Tracks labeled: {count}",
+      "tracksUpdated": "Rows updated: {count}",
+      "requestsUsed": "Groq calls used: {count}",
       "ratio": "Unknown ratio: {initial}% -> {current}% (target: {target}%)",
       "error": "Last error: {message}"
     }
@@ -212,8 +223,8 @@
   "dashboard": {
     "title": "Dashboard 📊",
     "genreBackfill": {
-      "running": "Automatic Spotify genre mapping is running",
-      "details": "Artists: {processed}/{max} • Unknown: {ratio} • Target: {target}%",
+      "running": "Groq genre classification is running",
+      "details": "Tracks: {processed}/{max} • Unknown: {ratio} • Target: {target}%",
       "ratioPending": "calculating"
     }
   },

@@ -216,7 +216,7 @@ model ImportGenreBackfillJob {
   id               String                     @id @default(cuid())
   userId           String
   user             User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  provider         String                     @default("spotify")
+  provider         String                     @default("groq")
   status           ImportGenreBackfillJobStatus @default(pending)
   targetUnknownPct Float                      @default(15)
   delayMs          Int                        @default(300)

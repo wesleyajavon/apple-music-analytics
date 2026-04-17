@@ -8,15 +8,13 @@
  *  2. Last.fm — track.getTopTags
  *  3. MusicBrainz — tags sur l’artiste si Artist.mbid
  *  4. MusicBrainz — tags sur l’enregistrement si Track.mbid
- *  5. (optionnel) Spotify — même logique que backfill-track-genres-spotify.js
  *
  * Variables : DATABASE_URL, LASTFM_API_KEY
- * Optionnel : SPOTIFY_CLIENT_ID + SPOTIFY_CLIENT_SECRET (si --with-spotify)
  *
  * Usage :
  *   node scripts/backfill-track-genres-cascade.js
  *   node scripts/backfill-track-genres-cascade.js --dry-run --limit 50
- *   node scripts/backfill-track-genres-cascade.js --batch-size 400 --with-spotify
+ *   node scripts/backfill-track-genres-cascade.js --batch-size 400
  *
  * Sans `--limit`, tous les morceaux sans genre sont parcourus par lots (`--batch-size`, défaut 300)
  * pour limiter la mémoire. La pagination utilise l’id (curseur), ce qui fonctionne aussi en --dry-run.
@@ -26,8 +24,6 @@
  *   attend et réessaie une fois.
  * - MusicBrainz : ~1 requête / seconde / IP (sinon 503). Un délai minimum de 1100 ms est appliqué
  *   avant chaque appel MB, même si --delay-ms est plus bas.
- * - Spotify (optionnel) : délai minimum 250 ms entre appels api.spotify.com (aligné sur le script
- *   Spotify dédié), en plus de --delay-ms si celui-ci est plus grand.
  */
 
 const fs = require('fs');
@@ -80,25 +76,17 @@ function hasFlag(flag) {
 }
 
 const DRY_RUN = hasFlag('dry-run');
-const WITH_SPOTIFY = hasFlag('with-spotify');
 /** Délai entre requêtes Last.fm (et base pour les autres sauf planchers ci-dessous). */
 const DELAY_MS = Math.max(0, parseInt(getArg('delay-ms') || '1200', 10) || 1200);
 
 /** MusicBrainz : doc officielle ~1 req/s / IP — ne pas descendre en dessous pour les appels MB. */
 const MIN_MS_MUSICBRAINZ = 1100;
 
-/** Spotify Web API : éviter les 429 (script dédié utilisait 250 ms). */
-const MIN_MS_SPOTIFY = 250;
 const LIMIT = getArg('limit') != null ? parseInt(getArg('limit'), 10) : undefined;
 const BATCH_SIZE = Math.max(
   1,
   parseInt(getArg('batch-size') || '300', 10) || 300
 );
-const MAX_SPOTIFY_REQUESTS_RAW = getArg('max-spotify-requests');
-const MAX_SPOTIFY_REQUESTS =
-  MAX_SPOTIFY_REQUESTS_RAW != null && MAX_SPOTIFY_REQUESTS_RAW !== ''
-    ? parseInt(MAX_SPOTIFY_REQUESTS_RAW, 10)
-    : undefined;
 
 const LASTFM_BASE = 'https://ws.audioscrobbler.com/2.0/';
 const MB_BASE = 'https://musicbrainz.org/ws/2';
@@ -131,14 +119,6 @@ if (!process.env.DATABASE_URL) {
 const lastfmKey = process.env.LASTFM_API_KEY;
 if (!lastfmKey) {
   console.error('LASTFM_API_KEY est requis pour la cascade (coût minimal).');
-  process.exit(1);
-}
-
-if (
-  MAX_SPOTIFY_REQUESTS != null &&
-  (Number.isNaN(MAX_SPOTIFY_REQUESTS) || MAX_SPOTIFY_REQUESTS < 1)
-) {
-  console.error('--max-spotify-requests doit être un entier ≥ 1.');
   process.exit(1);
 }
 
@@ -287,144 +267,10 @@ async function fetchGenreMbRecording(mbid) {
   return pickMusicBrainzTag(data.tags);
 }
 
-// --- Spotify (optionnel, copie logique alignée sur backfill-track-genres-spotify.js) ---
-
-let spotifyApiRequestCount = 0;
-
-function throwSpotifyHttpError(context, status, body) {
-  const err = new Error(`${context} failed: ${status} ${body}`);
-  if (
-    status === 403 &&
-    /premium subscription required/i.test(body) &&
-    /owner of the app/i.test(body)
-  ) {
-    err.code = 'SPOTIFY_PREMIUM_403';
-  }
-  throw err;
-}
-
-function createSpotifyFetcher(clientId, clientSecret, delayMs, maxRequests) {
-  const SPOTIFY_ACCOUNTS = 'https://accounts.spotify.com/api/token';
-  const SPOTIFY_API = 'https://api.spotify.com/v1';
-  let cachedToken = null;
-  let tokenExpiresAt = 0;
-
-  async function getAccessToken() {
-    const now = Date.now();
-    if (cachedToken && now < tokenExpiresAt - 30_000) {
-      return cachedToken;
-    }
-    const body = new URLSearchParams({ grant_type: 'client_credentials' });
-    const basic = Buffer.from(`${clientId}:${clientSecret}`, 'utf8').toString('base64');
-    const res = await fetch(SPOTIFY_ACCOUNTS, {
-      method: 'POST',
-      headers: {
-        Authorization: `Basic ${basic}`,
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body,
-    });
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error(`Spotify token: ${res.status} ${text}`);
-    }
-    const data = await res.json();
-    cachedToken = data.access_token;
-    const expiresIn = typeof data.expires_in === 'number' ? data.expires_in : 3600;
-    tokenExpiresAt = Date.now() + expiresIn * 1000;
-    return cachedToken;
-  }
-
-  async function spotifyGet(url) {
-    if (maxRequests != null && spotifyApiRequestCount >= maxRequests) {
-      const e = new Error('MAX_SPOTIFY_REQUESTS');
-      e.code = 'MAX_SPOTIFY_REQUESTS';
-      throw e;
-    }
-    await sleep(Math.max(delayMs, MIN_MS_SPOTIFY));
-    const token = await getAccessToken();
-    spotifyApiRequestCount += 1;
-    return fetch(url, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-  }
-
-  function sanitizeForQuery(s) {
-    if (s == null || typeof s !== 'string') return '';
-    return s.replace(/"/g, ' ').trim();
-  }
-
-  function buildSearchQuery(title, artistName) {
-    const t = sanitizeForQuery(title);
-    const a = sanitizeForQuery(artistName);
-    return `track:"${t}" artist:"${a}"`;
-  }
-
-  /**
-   * @returns {Promise<{ genre: string | null, reason: string }>}
-   */
-  async function fetchGenre(title, artistName) {
-    const q = buildSearchQuery(title, artistName);
-    const searchUrl = `${SPOTIFY_API}/search?${new URLSearchParams({
-      q,
-      type: 'track',
-      limit: '1',
-    })}`;
-
-    const searchRes = await spotifyGet(searchUrl);
-    if (!searchRes.ok) {
-      const text = await searchRes.text();
-      throwSpotifyHttpError('Search', searchRes.status, text);
-    }
-
-    const searchJson = await searchRes.json();
-    const items = searchJson?.tracks?.items;
-    if (!Array.isArray(items) || items.length === 0) {
-      return { genre: null, reason: 'no_track' };
-    }
-
-    const firstTrack = items[0];
-    const artists = firstTrack?.artists;
-    if (!Array.isArray(artists) || artists.length === 0) {
-      return { genre: null, reason: 'no_artist' };
-    }
-
-    const seen = new Set();
-    const artistIdsOrdered = [];
-    for (const a of artists) {
-      if (a?.id && !seen.has(a.id)) {
-        seen.add(a.id);
-        artistIdsOrdered.push(a.id);
-      }
-    }
-    if (artistIdsOrdered.length === 0) {
-      return { genre: null, reason: 'no_artist' };
-    }
-
-    for (const id of artistIdsOrdered.slice(0, 50)) {
-      const artistUrl = `${SPOTIFY_API}/artists/${encodeURIComponent(id)}`;
-      const artistRes = await spotifyGet(artistUrl);
-      if (!artistRes.ok) {
-        const text = await artistRes.text();
-        throwSpotifyHttpError('Artist', artistRes.status, text);
-      }
-      const artistJson = await artistRes.json();
-      const genres = artistJson?.genres;
-      if (Array.isArray(genres) && genres.length > 0) {
-        return { genre: genres[0], reason: 'ok' };
-      }
-    }
-
-    return { genre: null, reason: 'empty_genres' };
-  }
-
-  return { fetchGenre, getSpotifyRequestCount: () => spotifyApiRequestCount };
-}
-
 /**
  * @returns {Promise<{ genre: string | null, source: string }>}
  */
-async function resolveGenreCascade(tr, spotifyFetcher) {
+async function resolveGenreCascade(tr) {
   const artistName = tr.artist.name;
   const title = tr.title;
 
@@ -444,15 +290,6 @@ async function resolveGenreCascade(tr, spotifyFetcher) {
     if (g) return { genre: g, source: 'musicbrainz_recording' };
   }
 
-  if (spotifyFetcher) {
-    const { genre, reason } = await spotifyFetcher.fetchGenre(title, artistName);
-    if (genre) return { genre, source: 'spotify' };
-    if (reason && reason !== 'empty_genres') {
-      return { genre: null, source: `spotify_${reason}` };
-    }
-    return { genre: null, source: 'spotify_empty' };
-  }
-
   return { genre: null, source: 'none' };
 }
 
@@ -462,23 +299,12 @@ async function main() {
       ? 'Mode DRY-RUN : aucune écriture en base.\n'
       : 'Mise à jour des genres (cascade).\n'
   );
-  console.log(
-    `Ordre : Last.fm (artiste) → Last.fm (morceau) → MusicBrainz si MBID${WITH_SPOTIFY ? ' → Spotify' : ''}`
-  );
+  console.log('Ordre : Last.fm (artiste) → Last.fm (morceau) → MusicBrainz si MBID');
 
   console.log(`Délai entre requêtes Last.fm : ${DELAY_MS} ms`);
   console.log(
     `MusicBrainz : minimum ${MIN_MS_MUSICBRAINZ} ms entre chaque requête (plancher appliqué automatiquement).`
   );
-  if (WITH_SPOTIFY) {
-    console.log(
-      `Spotify : minimum ${MIN_MS_SPOTIFY} ms entre chaque requête api.spotify.com (ou ton --delay-ms si plus élevé).`
-    );
-  }
-  console.log(`Spotify : ${WITH_SPOTIFY ? 'activé (--with-spotify)' : 'désactivé (ajoute --with-spotify si besoin)'}`);
-  if (WITH_SPOTIFY && MAX_SPOTIFY_REQUESTS != null) {
-    console.log(`Plafond requêtes Spotify (api.spotify.com) : ${MAX_SPOTIFY_REQUESTS}`);
-  }
   if (LIMIT != null && !Number.isNaN(LIMIT)) {
     console.log(`Limite totale de morceaux à traiter : ${LIMIT}`);
   } else {
@@ -486,17 +312,6 @@ async function main() {
   }
   console.log(`Taille des lots (Prisma) : ${BATCH_SIZE}`);
   console.log('');
-
-  let spotifyFetcher = null;
-  if (WITH_SPOTIFY) {
-    const cid = process.env.SPOTIFY_CLIENT_ID;
-    const sec = process.env.SPOTIFY_CLIENT_SECRET;
-    if (!cid || !sec) {
-      console.error('Avec --with-spotify : SPOTIFY_CLIENT_ID et SPOTIFY_CLIENT_SECRET sont requis.');
-      process.exit(1);
-    }
-    spotifyFetcher = createSpotifyFetcher(cid, sec, DELAY_MS, MAX_SPOTIFY_REQUESTS);
-  }
 
   const pendingAtStart = await prisma.track.count({ where: { genre: null } });
   const maxToProcess =
@@ -517,7 +332,6 @@ async function main() {
   const bySource = {};
   let skipped = 0;
   let errors = 0;
-  let stoppedSpotifyCap = false;
   let processedTotal = 0;
   let batchIndex = 0;
   /** @type {string|null} dernier id du lot (curseur id > …) — marche aussi en --dry-run */
@@ -554,7 +368,7 @@ async function main() {
       process.stdout.write(`[${processedTotal}/${maxToProcess}] ${label} … `);
 
       try {
-        const { genre, source } = await resolveGenreCascade(tr, spotifyFetcher);
+        const { genre, source } = await resolveGenreCascade(tr);
 
         bySource[source] = (bySource[source] || 0) + 1;
 
@@ -577,20 +391,6 @@ async function main() {
         updated++;
         console.log(`→ "${genre}" [${source}]`);
       } catch (e) {
-        if (e.code === 'MAX_SPOTIFY_REQUESTS') {
-          stoppedSpotifyCap = true;
-          abortRun = true;
-          console.log(
-            `\nArrêt : plafond Spotify (${MAX_SPOTIFY_REQUESTS} requêtes api.spotify.com).`
-          );
-          break;
-        }
-        if (e.code === 'SPOTIFY_PREMIUM_403') {
-          errors++;
-          abortRun = true;
-          console.log(`Spotify 403 (compte dev / Premium). Arrêt cascade Spotify.`);
-          break;
-        }
         errors++;
         console.log(`erreur: ${e.message}`);
       }
@@ -601,11 +401,6 @@ async function main() {
   console.log(DRY_RUN ? `Serait mis à jour : ${updated}` : `Mis à jour : ${updated}`);
   console.log(`Sans résultat : ${skipped}`);
   console.log(`Erreurs : ${errors}`);
-  if (stoppedSpotifyCap && spotifyFetcher) {
-    console.log(
-      `Requêtes Spotify utilisées : ${spotifyFetcher.getSpotifyRequestCount()} / ${MAX_SPOTIFY_REQUESTS}`
-    );
-  }
   console.log('Par source (tentatives) :', JSON.stringify(bySource, null, 0));
 }
 

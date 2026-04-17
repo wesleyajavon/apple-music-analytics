@@ -205,6 +205,9 @@
       "decline": "Not now",
       "starting": "Starting…",
       "startedToast": "Genre classification started in the background.",
+      "startNextSession": "Start another session",
+      "nextSessionPrompt": "Unknown is still at {current}% (target: {target}%). Start another Groq session?",
+      "nextSessionAfterError": "The previous session stopped early. Start a new session?",
       "startError": "Could not start genre classification."
     },
     "genreBackfill": {
@@ -225,7 +228,15 @@
     "genreBackfill": {
       "running": "Groq genre classification is running",
       "details": "Tracks: {processed}/{max} • Unknown: {ratio} • Target: {target}%",
-      "ratioPending": "calculating"
+      "ratioPending": "calculating",
+      "completed": "Groq genre classification finished",
+      "failed": "Groq genre classification stopped before completion",
+      "startNextSession": "Start another session",
+      "starting": "Starting…",
+      "started": "Genre classification started in the background",
+      "startError": "Could not start genre classification",
+      "nextSessionPrompt": "Unknown is still at {current}% (target: {target}%). Start another session?",
+      "nextSessionAfterError": "The previous session stopped early. Start a new session?"
     }
   },
   "footer": {

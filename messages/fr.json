@@ -205,6 +205,9 @@
       "decline": "Pas maintenant",
       "starting": "Démarrage…",
       "startedToast": "Classification des genres démarrée en arrière-plan.",
+      "startNextSession": "Lancer une autre session",
+      "nextSessionPrompt": "Le taux unknown est encore à {current}% (cible : {target}%). Lancer une nouvelle session Groq ?",
+      "nextSessionAfterError": "La session précédente s'est arrêtée avant la fin. Lancer une nouvelle session ?",
       "startError": "Impossible de démarrer la classification des genres."
     },
     "genreBackfill": {
@@ -225,7 +228,15 @@
     "genreBackfill": {
       "running": "Classification des genres Groq en cours",
       "details": "Morceaux : {processed}/{max} • Unknown : {ratio} • Cible : {target}%",
-      "ratioPending": "calcul en cours"
+      "ratioPending": "calcul en cours",
+      "completed": "Classification des genres Groq terminée",
+      "failed": "La classification des genres Groq s'est arrêtée avant la fin",
+      "startNextSession": "Lancer une autre session",
+      "starting": "Démarrage…",
+      "started": "Classification des genres démarrée en arrière-plan",
+      "startError": "Impossible de démarrer la classification des genres",
+      "nextSessionPrompt": "Le taux unknown est encore à {current}% (cible : {target}%). Lancer une autre session ?",
+      "nextSessionAfterError": "La session précédente s'est arrêtée avant la fin. Lancer une nouvelle session ?"
     }
   },
   "footer": {

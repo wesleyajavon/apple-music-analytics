@@ -1,4 +1,5 @@
 import { Prisma } from "@prisma/client";
+import { RateLimitError } from "groq-sdk";
 import { prisma } from "@/lib/prisma";
 import { classifyPrimaryTrackGenreGroq } from "@/lib/services/genre/groq-track-genre-classify";
 
@@ -15,9 +16,80 @@ type CandidateTrackRow = {
 };
 
 let workerRunning = false;
+const GROQ_RATE_LIMIT_EXTRA_ATTEMPTS = 3;
+const GROQ_IMPORT_DEBUG_RATE_LIMIT = process.env.GROQ_IMPORT_DEBUG_RATE_LIMIT === "true";
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isGroq429Error(err: unknown): boolean {
+  return (
+    err instanceof RateLimitError ||
+    (err instanceof Error &&
+      "status" in err &&
+      (err as { status?: number }).status === 429)
+  );
+}
+
+function groqRateLimitRetryDelayMs(
+  headers: RateLimitError["headers"] | undefined
+): number {
+  if (!headers) return 12_000;
+  const h = headers as Record<string, string | undefined>;
+  const retryAfter = h["retry-after"];
+  if (retryAfter) {
+    const sec = parseFloat(retryAfter);
+    if (!Number.isNaN(sec)) {
+      return Math.min(Math.ceil(sec * 1000) + 250, 90_000);
+    }
+  }
+  const resetTokens = h["x-ratelimit-reset-tokens"];
+  if (resetTokens) {
+    const sec = parseFloat(String(resetTokens).replace(/s$/i, ""));
+    if (!Number.isNaN(sec)) {
+      return Math.min(Math.ceil(sec * 1000) + 250, 90_000);
+    }
+  }
+  return 12_000;
+}
+
+function logGroqRateLimitDebug(
+  message: string,
+  details?: Record<string, string | number | undefined>
+): void {
+  if (!GROQ_IMPORT_DEBUG_RATE_LIMIT) return;
+  const base = "[groq-import-rate-limit]";
+  if (!details) {
+    console.info(`${base} ${message}`);
+    return;
+  }
+  const compact = Object.entries(details)
+    .filter(([, v]) => v !== undefined)
+    .map(([k, v]) => `${k}=${v}`)
+    .join(" ");
+  console.info(`${base} ${message}${compact ? ` ${compact}` : ""}`);
+}
+
+function getGroqImportDailyCallBudget(): number {
+  const raw = process.env.GROQ_IMPORT_DAILY_CALL_BUDGET;
+  if (raw == null || raw.trim() === "") return 0;
+  const n = Number(raw);
+  if (!Number.isFinite(n) || n <= 0) return 0;
+  return Math.floor(n);
+}
+
+async function getTodayGroqImportCallsUsed(): Promise<number> {
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+  const rows = await prisma.importGenreBackfillJob.aggregate({
+    _sum: { apiRequestsUsed: true },
+    where: {
+      provider: "groq",
+      createdAt: { gte: start },
+    },
+  });
+  return Number(rows._sum.apiRequestsUsed ?? 0);
 }
 
 async function getUserUnknownTrackStats(userId: string): Promise<UnknownStats> {
@@ -83,6 +155,16 @@ export async function enqueueGroqImportGenreBackfillJob(userId: string): Promise
   status: "pending" | "running" | "completed" | "failed";
   reused: boolean;
 }> {
+  const dailyBudget = getGroqImportDailyCallBudget();
+  if (dailyBudget > 0) {
+    const usedToday = await getTodayGroqImportCallsUsed();
+    if (usedToday >= dailyBudget) {
+      throw new Error(
+        `GROQ_IMPORT_DAILY_CALL_BUDGET reached for today (${usedToday}/${dailyBudget}).`
+      );
+    }
+  }
+
   const existing = await prisma.importGenreBackfillJob.findFirst({
     where: {
       userId,
@@ -97,9 +179,10 @@ export async function enqueueGroqImportGenreBackfillJob(userId: string): Promise
   }
 
   const targetUnknownPct = Number(process.env.GROQ_IMPORT_TARGET_UNKNOWN_PCT ?? 15);
-  const delayMs = Number(process.env.GROQ_IMPORT_DELAY_MS ?? 400);
-  const maxLlmCalls = Number(process.env.GROQ_IMPORT_MAX_LLM_CALLS ?? 250);
-  const maxTracks = Number(process.env.GROQ_IMPORT_MAX_TRACKS ?? 200);
+  // Developer plan baseline defaults: faster throughput with conservative headroom.
+  const delayMs = Number(process.env.GROQ_IMPORT_DELAY_MS ?? 1000);
+  const maxLlmCalls = Number(process.env.GROQ_IMPORT_MAX_LLM_CALLS ?? 800);
+  const maxTracks = Number(process.env.GROQ_IMPORT_MAX_TRACKS ?? 800);
 
   const created = await prisma.importGenreBackfillJob.create({
     data: {
@@ -110,9 +193,9 @@ export async function enqueueGroqImportGenreBackfillJob(userId: string): Promise
         Number.isFinite(targetUnknownPct) && targetUnknownPct >= 0 && targetUnknownPct <= 100
           ? targetUnknownPct
           : 15,
-      delayMs: Number.isFinite(delayMs) && delayMs >= 0 ? delayMs : 400,
-      maxApiRequests: Number.isFinite(maxLlmCalls) && maxLlmCalls >= 1 ? maxLlmCalls : 250,
-      maxArtists: Number.isFinite(maxTracks) && maxTracks >= 1 ? maxTracks : 200,
+      delayMs: Number.isFinite(delayMs) && delayMs >= 0 ? delayMs : 1000,
+      maxApiRequests: Number.isFinite(maxLlmCalls) && maxLlmCalls >= 1 ? maxLlmCalls : 800,
+      maxArtists: Number.isFinite(maxTracks) && maxTracks >= 1 ? maxTracks : 800,
     },
     select: { id: true, status: true },
   });
@@ -196,18 +279,73 @@ async function runSingleJob(jobId: string): Promise<void> {
     let artistsMapped = 0;
     let tracksUpdated = 0;
     let llmCalls = 0;
+    let stoppedByLlmCallCap = false;
+    let stoppedByDailyBudget = false;
+    let rateLimit429Count = 0;
+    const dailyBudget = getGroqImportDailyCallBudget();
+    const usedTodayAtStart = dailyBudget > 0 ? await getTodayGroqImportCallsUsed() : 0;
 
     for (const row of candidates) {
       const currentStats = await getUserUnknownTrackStats(job.userId);
       if (currentStats.ratio <= job.targetUnknownPct) break;
-      if (llmCalls >= job.maxApiRequests) break;
+      if (llmCalls >= job.maxApiRequests) {
+        stoppedByLlmCallCap = true;
+        break;
+      }
+      if (dailyBudget > 0 && usedTodayAtStart + llmCalls >= dailyBudget) {
+        stoppedByDailyBudget = true;
+        break;
+      }
 
       artistsProcessed += 1;
       await sleep(Math.max(0, job.delayMs));
 
       try {
-        llmCalls += 1;
-        const genre = await classifyPrimaryTrackGenreGroq(row.title, row.artistName);
+        let genre: string | null = null;
+        let done = false;
+        for (let attempt = 0; attempt < GROQ_RATE_LIMIT_EXTRA_ATTEMPTS; attempt++) {
+          if (llmCalls >= job.maxApiRequests) {
+            stoppedByLlmCallCap = true;
+            break;
+          }
+          if (dailyBudget > 0 && usedTodayAtStart + llmCalls >= dailyBudget) {
+            stoppedByDailyBudget = true;
+            break;
+          }
+          llmCalls += 1;
+          try {
+            genre = await classifyPrimaryTrackGenreGroq(row.title, row.artistName);
+            done = true;
+            break;
+          } catch (err) {
+            const is429 = isGroq429Error(err);
+            const isLastAttempt = attempt === GROQ_RATE_LIMIT_EXTRA_ATTEMPTS - 1;
+            if (!is429 || isLastAttempt) {
+              throw err;
+            }
+            rateLimit429Count += 1;
+            const headers = err instanceof RateLimitError ? err.headers : undefined;
+            const retryDelayMs = groqRateLimitRetryDelayMs(
+              headers
+            );
+            const h = (headers ?? {}) as Record<string, string | undefined>;
+            logGroqRateLimitDebug("429 received, retrying", {
+              attempt: attempt + 1,
+              maxAttempts: GROQ_RATE_LIMIT_EXTRA_ATTEMPTS,
+              retryAfter: h["retry-after"],
+              resetTokens: h["x-ratelimit-reset-tokens"],
+              remainingTokens: h["x-ratelimit-remaining-tokens"],
+              remainingRequests: h["x-ratelimit-remaining-requests"],
+              sleepMs: retryDelayMs,
+            });
+            await sleep(retryDelayMs);
+          }
+        }
+
+        if (stoppedByLlmCallCap) break;
+        if (stoppedByDailyBudget) break;
+        if (!done) continue;
+
         if (genre) {
           const upd = await prisma.track.updateMany({
             where: { id: row.id, genre: null },
@@ -247,20 +385,36 @@ async function runSingleJob(jobId: string): Promise<void> {
           apiRequestsUsed: llmCalls,
         },
       });
+
+      if (stoppedByLlmCallCap) break;
+      if (stoppedByDailyBudget) break;
     }
 
     const finalStats = await getUserUnknownTrackStats(job.userId);
+    const stoppedByBudgetMessage =
+      stoppedByDailyBudget && dailyBudget > 0
+        ? `Daily Groq import budget reached (${usedTodayAtStart + llmCalls}/${dailyBudget}).`
+        : null;
     await prisma.importGenreBackfillJob.update({
       where: { id: jobId },
       data: {
-        status: "completed",
+        status: stoppedByDailyBudget ? "failed" : "completed",
         finishedAt: new Date(),
         currentUnknownPct: finalStats.ratio,
         artistsProcessed,
         artistsMapped,
         tracksUpdated,
         apiRequestsUsed: llmCalls,
+        errorMessage: stoppedByBudgetMessage,
       },
+    });
+    logGroqRateLimitDebug("job completed", {
+      jobId,
+      llmCalls,
+      stoppedByDailyBudget: stoppedByDailyBudget ? 1 : 0,
+      rateLimit429Count,
+      artistsProcessed,
+      tracksUpdated,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown backfill error";

@@ -457,6 +457,11 @@ export function DataExportOnboarding() {
   );
   const hasBackfillInProgress =
     effectiveBackfill?.status === "pending" || effectiveBackfill?.status === "running";
+  const shouldOfferNextLlmSession =
+    effectiveBackfill?.status === "completed" &&
+    effectiveBackfill.currentUnknownPct != null &&
+    effectiveBackfill.currentUnknownPct > effectiveBackfill.targetUnknownPct;
+  const shouldOfferRetryLlmSession = effectiveBackfill?.status === "failed";
   const backfillProgressRatio = useMemo(() => {
     if (!effectiveBackfill) return 0;
     if (effectiveBackfill.maxArtists > 0) {
@@ -855,6 +860,30 @@ export function DataExportOnboarding() {
                   <p className="text-xs text-red-700 dark:text-red-300">
                     {t("genreBackfill.error", { message: effectiveBackfill.errorMessage })}
                   </p>
+                ) : null}
+                {shouldOfferNextLlmSession || shouldOfferRetryLlmSession ? (
+                  <div className="space-y-2 rounded-lg border border-violet-300/70 bg-white/70 p-3 dark:border-violet-700/60 dark:bg-violet-950/20">
+                    <p className="text-xs text-violet-900 dark:text-violet-100">
+                      {shouldOfferRetryLlmSession
+                        ? t("genreLlmConsent.nextSessionAfterError")
+                        : t("genreLlmConsent.nextSessionPrompt", {
+                            current: effectiveBackfill.currentUnknownPct?.toFixed(1) ?? "0.0",
+                            target: effectiveBackfill.targetUnknownPct.toFixed(1),
+                          })}
+                    </p>
+                    <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                      <button
+                        type="button"
+                        className={primaryBtn}
+                        disabled={isStartingLlmBackfill}
+                        onClick={() => void startLlmGenreBackfill()}
+                      >
+                        {isStartingLlmBackfill
+                          ? t("genreLlmConsent.starting")
+                          : t("genreLlmConsent.startNextSession")}
+                      </button>
+                    </div>
+                  </div>
                 ) : null}
               </section>
             ) : null}

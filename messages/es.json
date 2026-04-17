@@ -205,6 +205,9 @@
       "decline": "Ahora no",
       "starting": "Iniciando…",
       "startedToast": "Clasificación de géneros iniciada en segundo plano.",
+      "startNextSession": "Iniciar otra sesión",
+      "nextSessionPrompt": "El ratio unknown sigue en {current}% (objetivo: {target}%). ¿Iniciar otra sesión de Groq?",
+      "nextSessionAfterError": "La sesión anterior se detuvo antes de terminar. ¿Iniciar una nueva sesión?",
       "startError": "No se pudo iniciar la clasificación de géneros."
     },
     "genreBackfill": {
@@ -225,7 +228,15 @@
     "genreBackfill": {
       "running": "Clasificación de géneros con Groq en curso",
       "details": "Canciones: {processed}/{max} • Unknown: {ratio} • Objetivo: {target}%",
-      "ratioPending": "calculando"
+      "ratioPending": "calculando",
+      "completed": "Clasificación de géneros con Groq finalizada",
+      "failed": "La clasificación de géneros con Groq se detuvo antes de finalizar",
+      "startNextSession": "Iniciar otra sesión",
+      "starting": "Iniciando…",
+      "started": "Clasificación de géneros iniciada en segundo plano",
+      "startError": "No se pudo iniciar la clasificación de géneros",
+      "nextSessionPrompt": "El ratio unknown sigue en {current}% (objetivo: {target}%). ¿Iniciar otra sesión?",
+      "nextSessionAfterError": "La sesión anterior se detuvo antes de terminar. ¿Iniciar una nueva sesión?"
     }
   },
   "footer": {

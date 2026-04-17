@@ -203,7 +203,15 @@ export async function enqueueGroqImportGenreBackfillJob(userId: string): Promise
   return { jobId: created.id, status: created.status, reused: false };
 }
 
-async function runSingleJob(jobId: string): Promise<void> {
+async function runSingleJob(
+  jobId: string,
+  options?: { maxTracksThisRun?: number }
+): Promise<void> {
+  const maxTracksThisRun =
+    options?.maxTracksThisRun != null && options.maxTracksThisRun > 0
+      ? Math.floor(options.maxTracksThisRun)
+      : Number.MAX_SAFE_INTEGER;
+
   const started = await prisma.importGenreBackfillJob.updateMany({
     where: { id: jobId, status: "pending" },
     data: {
@@ -228,9 +236,15 @@ async function runSingleJob(jobId: string): Promise<void> {
       delayMs: true,
       maxApiRequests: true,
       maxArtists: true,
+      apiRequestsUsed: true,
+      artistsProcessed: true,
+      artistsMapped: true,
+      tracksUpdated: true,
+      status: true,
     },
   });
   if (!job) return;
+  if (started.count === 0 && job.status !== "running") return;
 
   if (job.provider !== "groq") {
     await prisma.importGenreBackfillJob.update({
@@ -275,17 +289,23 @@ async function runSingleJob(jobId: string): Promise<void> {
       Math.max(1, job.maxArtists)
     );
 
-    let artistsProcessed = 0;
-    let artistsMapped = 0;
-    let tracksUpdated = 0;
-    let llmCalls = 0;
+    let artistsProcessed = job.artistsProcessed;
+    let artistsMapped = job.artistsMapped;
+    let tracksUpdated = job.tracksUpdated;
+    let llmCalls = job.apiRequestsUsed;
     let stoppedByLlmCallCap = false;
     let stoppedByDailyBudget = false;
+    let stoppedBySliceLimit = false;
     let rateLimit429Count = 0;
     const dailyBudget = getGroqImportDailyCallBudget();
     const usedTodayAtStart = dailyBudget > 0 ? await getTodayGroqImportCallsUsed() : 0;
+    let processedThisRun = 0;
 
     for (const row of candidates) {
+      if (processedThisRun >= maxTracksThisRun) {
+        stoppedBySliceLimit = true;
+        break;
+      }
       const currentStats = await getUserUnknownTrackStats(job.userId);
       if (currentStats.ratio <= job.targetUnknownPct) break;
       if (llmCalls >= job.maxApiRequests) {
@@ -298,6 +318,7 @@ async function runSingleJob(jobId: string): Promise<void> {
       }
 
       artistsProcessed += 1;
+      processedThisRun += 1;
       await sleep(Math.max(0, job.delayMs));
 
       try {
@@ -398,8 +419,8 @@ async function runSingleJob(jobId: string): Promise<void> {
     await prisma.importGenreBackfillJob.update({
       where: { id: jobId },
       data: {
-        status: stoppedByDailyBudget ? "failed" : "completed",
-        finishedAt: new Date(),
+        status: stoppedByDailyBudget ? "failed" : stoppedBySliceLimit ? "running" : "completed",
+        finishedAt: stoppedBySliceLimit ? null : new Date(),
         currentUnknownPct: finalStats.ratio,
         artistsProcessed,
         artistsMapped,
@@ -411,6 +432,7 @@ async function runSingleJob(jobId: string): Promise<void> {
     logGroqRateLimitDebug("job completed", {
       jobId,
       llmCalls,
+      stoppedBySliceLimit: stoppedBySliceLimit ? 1 : 0,
       stoppedByDailyBudget: stoppedByDailyBudget ? 1 : 0,
       rateLimit429Count,
       artistsProcessed,
@@ -429,22 +451,45 @@ async function runSingleJob(jobId: string): Promise<void> {
   }
 }
 
+async function findNextGroqBackfillJobId(): Promise<string | null> {
+  const running = await prisma.importGenreBackfillJob.findFirst({
+    where: { status: "running", provider: "groq" },
+    orderBy: { createdAt: "asc" },
+    select: { id: true },
+  });
+  if (running) return running.id;
+  const pending = await prisma.importGenreBackfillJob.findFirst({
+    where: { status: "pending", provider: "groq" },
+    orderBy: { createdAt: "asc" },
+    select: { id: true },
+  });
+  return pending?.id ?? null;
+}
+
 export async function triggerImportGenreBackfillWorker(): Promise<void> {
   if (workerRunning) return;
   workerRunning = true;
   try {
     while (true) {
-      const next = await prisma.importGenreBackfillJob.findFirst({
-        where: { status: "pending", provider: "groq" },
-        orderBy: { createdAt: "asc" },
-        select: { id: true },
-      });
-      if (!next) break;
-      await runSingleJob(next.id);
+      const nextId = await findNextGroqBackfillJobId();
+      if (!nextId) break;
+      await runSingleJob(nextId);
     }
   } finally {
     workerRunning = false;
   }
+}
+
+export async function triggerImportGenreBackfillWorkerRunOnce(): Promise<{
+  processed: boolean;
+  jobId: string | null;
+}> {
+  const nextId = await findNextGroqBackfillJobId();
+  if (!nextId) return { processed: false, jobId: null };
+  const sliceSizeRaw = Number(process.env.GROQ_IMPORT_RUN_ONCE_MAX_TRACKS ?? 25);
+  const sliceSize = Number.isFinite(sliceSizeRaw) && sliceSizeRaw > 0 ? Math.floor(sliceSizeRaw) : 25;
+  await runSingleJob(nextId, { maxTracksThisRun: sliceSize });
+  return { processed: true, jobId: nextId };
 }
 
 export async function getLatestImportGenreBackfillJob(userId: string) {

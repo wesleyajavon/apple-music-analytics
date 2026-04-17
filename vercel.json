@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/internal/genre-backfill/run-once",
+      "schedule": "*/2 * * * *"
+    }
+  ]
+}

@@ -6,7 +6,7 @@ import { handleApiError } from "@/lib/utils/error-handler";
 import {
   enqueueGroqImportGenreBackfillJob,
   getGroqImportGenreBackfillEligibility,
-  triggerImportGenreBackfillWorker,
+  triggerImportGenreBackfillWorkerRunOnce,
 } from "@/lib/services/listening/import-genre-backfill-queue";
 
 export const dynamic = "force-dynamic";
@@ -48,7 +48,8 @@ export async function POST(request: NextRequest) {
     }
 
     const queued = await enqueueGroqImportGenreBackfillJob(userId);
-    void triggerImportGenreBackfillWorker();
+    // Kick one serverless-safe slice immediately.
+    void triggerImportGenreBackfillWorkerRunOnce();
 
     return NextResponse.json({
       ok: true,

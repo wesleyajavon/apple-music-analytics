@@ -16,8 +16,19 @@ type CandidateTrackRow = {
 };
 
 let workerRunning = false;
+/** Évite plusieurs `runOnce` en parallèle (poll status) qui se marcheraient dessus. */
+let genreBackfillRunOnceInFlight = false;
 const GROQ_RATE_LIMIT_EXTRA_ATTEMPTS = 3;
 const GROQ_IMPORT_DEBUG_RATE_LIMIT = process.env.GROQ_IMPORT_DEBUG_RATE_LIMIT === "true";
+
+/** Persist job counters to DB every N tracks (reduces UPDATE spam; UI may lag by up to N-1 tracks). */
+function getGroqImportProgressDbEvery(): number {
+  const raw = process.env.GROQ_IMPORT_PROGRESS_DB_EVERY;
+  if (raw == null || raw.trim() === "") return 10;
+  const n = Number(raw);
+  if (!Number.isFinite(n) || n < 1) return 10;
+  return Math.floor(n);
+}
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -212,7 +223,7 @@ async function runSingleJob(
       ? Math.floor(options.maxTracksThisRun)
       : Number.MAX_SAFE_INTEGER;
 
-  const started = await prisma.importGenreBackfillJob.updateMany({
+  const claimedPending = await prisma.importGenreBackfillJob.updateMany({
     where: { id: jobId, status: "pending" },
     data: {
       status: "running",
@@ -224,7 +235,6 @@ async function runSingleJob(
       tracksUpdated: 0,
     },
   });
-  if (started.count === 0) return;
 
   const job = await prisma.importGenreBackfillJob.findUnique({
     where: { id: jobId },
@@ -241,10 +251,17 @@ async function runSingleJob(
       artistsMapped: true,
       tracksUpdated: true,
       status: true,
+      initialUnknownPct: true,
     },
   });
   if (!job) return;
-  if (started.count === 0 && job.status !== "running") return;
+
+  if (claimedPending.count === 0) {
+    if (job.status !== "running") return;
+    // Reprise serverless : le job est déjà `running` après une tranche (run-once).
+  } else if (job.status !== "running") {
+    return;
+  }
 
   if (job.provider !== "groq") {
     await prisma.importGenreBackfillJob.update({
@@ -272,10 +289,17 @@ async function runSingleJob(
 
   try {
     const stats0 = await getUserUnknownTrackStats(job.userId);
-    await prisma.importGenreBackfillJob.update({
-      where: { id: jobId },
-      data: { initialUnknownPct: stats0.ratio, currentUnknownPct: stats0.ratio },
-    });
+    if (job.initialUnknownPct == null) {
+      await prisma.importGenreBackfillJob.update({
+        where: { id: jobId },
+        data: { initialUnknownPct: stats0.ratio, currentUnknownPct: stats0.ratio },
+      });
+    } else {
+      await prisma.importGenreBackfillJob.update({
+        where: { id: jobId },
+        data: { currentUnknownPct: stats0.ratio },
+      });
+    }
     if (stats0.total === 0 || stats0.ratio <= job.targetUnknownPct) {
       await prisma.importGenreBackfillJob.update({
         where: { id: jobId },
@@ -300,14 +324,15 @@ async function runSingleJob(
     const dailyBudget = getGroqImportDailyCallBudget();
     const usedTodayAtStart = dailyBudget > 0 ? await getTodayGroqImportCallsUsed() : 0;
     let processedThisRun = 0;
+    const progressDbEvery = getGroqImportProgressDbEvery();
+    let loopStats = await getUserUnknownTrackStats(job.userId);
 
     for (const row of candidates) {
       if (processedThisRun >= maxTracksThisRun) {
         stoppedBySliceLimit = true;
         break;
       }
-      const currentStats = await getUserUnknownTrackStats(job.userId);
-      if (currentStats.ratio <= job.targetUnknownPct) break;
+      if (loopStats.ratio <= job.targetUnknownPct) break;
       if (llmCalls >= job.maxApiRequests) {
         stoppedByLlmCallCap = true;
         break;
@@ -395,17 +420,19 @@ async function runSingleJob(
         return;
       }
 
-      const stats = await getUserUnknownTrackStats(job.userId);
-      await prisma.importGenreBackfillJob.update({
-        where: { id: jobId },
-        data: {
-          currentUnknownPct: stats.ratio,
-          artistsProcessed,
-          artistsMapped,
-          tracksUpdated,
-          apiRequestsUsed: llmCalls,
-        },
-      });
+      loopStats = await getUserUnknownTrackStats(job.userId);
+      if (artistsProcessed % progressDbEvery === 0) {
+        await prisma.importGenreBackfillJob.update({
+          where: { id: jobId },
+          data: {
+            currentUnknownPct: loopStats.ratio,
+            artistsProcessed,
+            artistsMapped,
+            tracksUpdated,
+            apiRequestsUsed: llmCalls,
+          },
+        });
+      }
 
       if (stoppedByLlmCallCap) break;
       if (stoppedByDailyBudget) break;
@@ -467,7 +494,7 @@ async function findNextGroqBackfillJobId(): Promise<string | null> {
 }
 
 export async function triggerImportGenreBackfillWorker(): Promise<void> {
-  if (workerRunning) return;
+  if (workerRunning || genreBackfillRunOnceInFlight) return;
   workerRunning = true;
   try {
     while (true) {
@@ -484,12 +511,20 @@ export async function triggerImportGenreBackfillWorkerRunOnce(): Promise<{
   processed: boolean;
   jobId: string | null;
 }> {
-  const nextId = await findNextGroqBackfillJobId();
-  if (!nextId) return { processed: false, jobId: null };
-  const sliceSizeRaw = Number(process.env.GROQ_IMPORT_RUN_ONCE_MAX_TRACKS ?? 25);
-  const sliceSize = Number.isFinite(sliceSizeRaw) && sliceSizeRaw > 0 ? Math.floor(sliceSizeRaw) : 25;
-  await runSingleJob(nextId, { maxTracksThisRun: sliceSize });
-  return { processed: true, jobId: nextId };
+  if (workerRunning || genreBackfillRunOnceInFlight) {
+    return { processed: false, jobId: null };
+  }
+  genreBackfillRunOnceInFlight = true;
+  try {
+    const nextId = await findNextGroqBackfillJobId();
+    if (!nextId) return { processed: false, jobId: null };
+    const sliceSizeRaw = Number(process.env.GROQ_IMPORT_RUN_ONCE_MAX_TRACKS ?? 25);
+    const sliceSize = Number.isFinite(sliceSizeRaw) && sliceSizeRaw > 0 ? Math.floor(sliceSizeRaw) : 25;
+    await runSingleJob(nextId, { maxTracksThisRun: sliceSize });
+    return { processed: true, jobId: nextId };
+  } finally {
+    genreBackfillRunOnceInFlight = false;
+  }
 }
 
 export async function getLatestImportGenreBackfillJob(userId: string) {

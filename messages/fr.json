@@ -161,7 +161,7 @@
     "import": {
       "eyebrow": "Étape 2 — Import",
       "spotifyTitle": "Envoyez votre archive Spotify",
-      "spotifyBody": "Ouvrez l’e-mail envoyé par Spotify (expéditeur habituel : noreply@spotify.com) et téléchargez l’archive, souvent nommée my_spotify_data.zip. Elle contient le dossier « Spotify Extended Streaming History » avec les fichiers Streaming_History_Audio_*.json. Nous ne lisons que ces fichiers JSON ; le lien de téléchargement expire au bout d’environ 14 jours.",
+      "spotifyBody": "Ouvrez l’e-mail envoyé par Spotify (expéditeur habituel : noreply@spotify.com) et téléchargez l’archive, souvent nommée my_spotify_data.zip. Elle contient le dossier « Spotify Extended Streaming History » avec des fichiers JSON du type Streaming_History_Audio_*.json ou StreamingHistory_music_*.json. Nous ne lisons que ces fichiers JSON ; le lien de téléchargement expire au bout d’environ 14 jours.",
       "appleTitle": "Envoyez votre export Apple Music",
       "appleBody": "Ouvrez l’e-mail d’Apple puis la page des téléchargements. Récupérez l’archive Apple Media Services (le libellé peut varier selon la langue, par ex. « Informations sur les services multimédia Apple »). Décompressez-la, puis ouvrez Apple_Media_Services → Apple Music Activity et sélectionnez le fichier « Apple Music - Play History Daily Tracks.csv ».",
       "openAppleDownloads": "Ouvrir la page Téléchargements Apple",
@@ -176,7 +176,7 @@
       "skipImport": "Je n’ai pas encore le fichier",
       "toastSuccess": "{count, plural, one {# écoute importée.} other {# écoutes importées.}}",
       "importError": "L’import a échoué. Vérifiez le fichier et réessayez.",
-      "zipMissingAudioJson": "Aucun fichier Streaming_History_Audio_*.json dans ce ZIP. Utilisez l’archive « Extended streaming history » envoyée par Spotify.",
+      "zipMissingAudioJson": "Aucun JSON d’historique étendu dans ce ZIP (Streaming_History_Audio_*.json ou StreamingHistory_music_*.json). Utilisez l’archive « Extended streaming history » envoyée par Spotify.",
       "noParsedListens": "Aucune écoute reconnue dans ce fichier. Vérifiez que vous avez choisi le bon export.",
       "tooManyPlays": "Cet export dépasse {max} lectures. Contactez le support ou divisez les données."
     },

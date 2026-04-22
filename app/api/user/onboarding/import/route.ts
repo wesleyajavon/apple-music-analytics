@@ -137,7 +137,7 @@ export async function POST(request: NextRequest) {
       const jsonTexts = await extractSpotifyStreamingHistoryJsonTextsFromZip(buffer);
       if (jsonTexts.length === 0) {
         throw createValidationError(
-          "No Streaming_History_Audio_*.json files found in this ZIP. Use the archive from Spotify’s email (Extended streaming history)."
+          "No Spotify extended streaming history JSON files found in this ZIP (expected Streaming_History_Audio_*.json or StreamingHistory_music_*.json). Use the archive from Spotify’s email (Extended streaming history)."
         );
       }
       rows = jsonTexts.flatMap((text) => parseSpotifyStreamingHistoryAudioJson(text));

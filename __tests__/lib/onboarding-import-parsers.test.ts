@@ -32,6 +32,27 @@ describe("parseSpotifyStreamingHistoryAudioJson", () => {
     expect(rows[0]!.playedAt.toISOString()).toContain("2021-06-15T14:22:01");
   });
 
+  it("parses StreamingHistory_music_*.json style (camelCase, endTime)", () => {
+    const json = JSON.stringify([
+      {
+        endTime: "2025-04-16 05:27",
+        artistName: "Mac Gayver",
+        trackName: "Loketo",
+        msPlayed: 170_481,
+      },
+      {
+        endTime: "2025-04-16 05:30",
+        artistName: "Franglish",
+        trackName: "Lego",
+        msPlayed: 460,
+      },
+    ]);
+    const rows = parseSpotifyStreamingHistoryAudioJson(json);
+    expect(rows).toHaveLength(1);
+    expect(rows[0]!.trackName).toBe("Loketo");
+    expect(rows[0]!.artistName).toBe("Mac Gayver");
+  });
+
   it("returns empty for invalid JSON", () => {
     expect(parseSpotifyStreamingHistoryAudioJson("not json")).toEqual([]);
   });

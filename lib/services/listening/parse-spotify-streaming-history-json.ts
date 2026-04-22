@@ -1,14 +1,19 @@
 import type { NormalizedListenInput } from "./onboarding-import-types";
 
-/** Aligné sur l’export « Extended streaming history » (fichiers Streaming_History_Audio_*.json). */
+/** Export étendu classique + fichiers StreamingHistory_music_*.json (champs camelCase). */
 const MIN_MS_PLAYED = 30_000;
 
 type SpotifyHistoryRow = {
   ts?: string;
   endTime?: string;
+  /** Export « Extended » (snake_case). */
   ms_played?: number;
+  /** Variante StreamingHistory_music_*.json. */
+  msPlayed?: number;
   master_metadata_track_name?: string | null;
   master_metadata_album_artist_name?: string | null;
+  trackName?: string | null;
+  artistName?: string | null;
 };
 
 function parseSpotifyTimestamp(row: SpotifyHistoryRow): Date | null {
@@ -36,7 +41,7 @@ function parseSpotifyTimestamp(row: SpotifyHistoryRow): Date | null {
 }
 
 /**
- * Parse le contenu JSON d’un fichier Streaming_History_Audio_*.json.
+ * Parse le contenu JSON d’un fichier d’historique audio étendu Spotify.
  */
 export function parseSpotifyStreamingHistoryAudioJson(
   jsonText: string
@@ -52,11 +57,15 @@ export function parseSpotifyStreamingHistoryAudioJson(
   const out: NormalizedListenInput[] = [];
   for (const item of arr) {
     const row = item as SpotifyHistoryRow;
-    const ms = row.ms_played ?? 0;
+    const ms = row.ms_played ?? row.msPlayed ?? 0;
     if (ms < MIN_MS_PLAYED) continue;
 
-    const track = row.master_metadata_track_name?.trim();
-    const artist = row.master_metadata_album_artist_name?.trim();
+    const track = (
+      row.master_metadata_track_name ?? row.trackName
+    )?.trim();
+    const artist = (
+      row.master_metadata_album_artist_name ?? row.artistName
+    )?.trim();
     if (!track || !artist) continue;
 
     const playedAt = parseSpotifyTimestamp(row);

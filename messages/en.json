@@ -161,7 +161,7 @@
     "import": {
       "eyebrow": "Step 2 — Import",
       "spotifyTitle": "Upload your Spotify archive",
-      "spotifyBody": "Open the email from Spotify (usually from noreply@spotify.com) and download the archive — often named my_spotify_data.zip. It contains the “Spotify Extended Streaming History” folder with Streaming_History_Audio_*.json files. We only read those JSON files. The download link expires after about 14 days.",
+      "spotifyBody": "Open the email from Spotify (usually from noreply@spotify.com) and download the archive — often named my_spotify_data.zip. It contains the “Spotify Extended Streaming History” folder with JSON files named like Streaming_History_Audio_*.json or StreamingHistory_music_*.json. We only read those JSON files. The download link expires after about 14 days.",
       "appleTitle": "Upload your Apple Music export",
       "appleBody": "Open Apple’s email, then go to your downloads page. Download the Apple Media Services archive (the exact name may vary by language). Unzip it, then open Apple_Media_Services → Apple Music Activity and choose “Apple Music - Play History Daily Tracks.csv”.",
       "openAppleDownloads": "Open Apple’s downloads page",
@@ -176,7 +176,7 @@
       "skipImport": "I don’t have the file yet",
       "toastSuccess": "{count, plural, one {# listen imported.} other {# listens imported.}}",
       "importError": "Import failed. Check the file and try again.",
-      "zipMissingAudioJson": "No Streaming_History_Audio_*.json files in this ZIP. Use the “Extended streaming history” archive from Spotify’s email.",
+      "zipMissingAudioJson": "No extended streaming history JSON found in this ZIP (Streaming_History_Audio_*.json or StreamingHistory_music_*.json). Use the archive from Spotify’s “Extended streaming history” email.",
       "noParsedListens": "No listens could be parsed from this file. Make sure you selected the correct export.",
       "tooManyPlays": "This export exceeds {max} plays. Contact support or split the data."
     },

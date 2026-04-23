@@ -18,15 +18,18 @@ type CandidateTrackRow = {
 let workerRunning = false;
 /** Évite plusieurs `runOnce` en parallèle (poll status) qui se marcheraient dessus. */
 let genreBackfillRunOnceInFlight = false;
+/** Limite les rafales de `runOnce` depuis GET /status (plusieurs onglets / RSC) sans bloquer POST /start. */
+let lastRunOnceTriggerAt = 0;
+const RUN_ONCE_STATUS_DEBOUNCE_MS = 2000;
 const GROQ_RATE_LIMIT_EXTRA_ATTEMPTS = 3;
 const GROQ_IMPORT_DEBUG_RATE_LIMIT = process.env.GROQ_IMPORT_DEBUG_RATE_LIMIT === "true";
 
-/** Persist job counters to DB every N tracks (reduces UPDATE spam; UI may lag by up to N-1 tracks). */
+/** Persist job counters to DB every N tracks (1 = live progress in the dashboard banner). */
 function getGroqImportProgressDbEvery(): number {
   const raw = process.env.GROQ_IMPORT_PROGRESS_DB_EVERY;
-  if (raw == null || raw.trim() === "") return 10;
+  if (raw == null || raw.trim() === "") return 1;
   const n = Number(raw);
-  if (!Number.isFinite(n) || n < 1) return 10;
+  if (!Number.isFinite(n) || n < 1) return 1;
   return Math.floor(n);
 }
 
@@ -163,7 +166,7 @@ async function fetchTopUnknownTracksForUser(
 
 export async function enqueueGroqImportGenreBackfillJob(userId: string): Promise<{
   jobId: string;
-  status: "pending" | "running" | "completed" | "failed";
+  status: "pending" | "running" | "paused" | "completed" | "failed" | "cancelled";
   reused: boolean;
 }> {
   const dailyBudget = getGroqImportDailyCallBudget();
@@ -180,12 +183,18 @@ export async function enqueueGroqImportGenreBackfillJob(userId: string): Promise
     where: {
       userId,
       provider: "groq",
-      status: { in: ["pending", "running"] },
+      status: { in: ["pending", "running", "paused"] },
     },
     orderBy: { createdAt: "desc" },
     select: { id: true, status: true },
   });
   if (existing) {
+    if (existing.status === "paused") {
+      const reactivated = await reactivatePausedGroqImportJobForUser(userId, existing.id);
+      if (reactivated) {
+        return { jobId: existing.id, status: "pending", reused: true };
+      }
+    }
     return { jobId: existing.id, status: existing.status, reused: true };
   }
 
@@ -229,10 +238,6 @@ async function runSingleJob(
       status: "running",
       startedAt: new Date(),
       errorMessage: null,
-      apiRequestsUsed: 0,
-      artistsProcessed: 0,
-      artistsMapped: 0,
-      tracksUpdated: 0,
     },
   });
 
@@ -326,8 +331,17 @@ async function runSingleJob(
     let processedThisRun = 0;
     const progressDbEvery = getGroqImportProgressDbEvery();
     let loopStats = await getUserUnknownTrackStats(job.userId);
+    let stoppedByUserInterrupt = false;
 
     for (const row of candidates) {
+      const lifeGate = await prisma.importGenreBackfillJob.findUnique({
+        where: { id: jobId },
+        select: { status: true },
+      });
+      if (lifeGate?.status === "paused" || lifeGate?.status === "cancelled") {
+        stoppedByUserInterrupt = true;
+        break;
+      }
       if (processedThisRun >= maxTracksThisRun) {
         stoppedBySliceLimit = true;
         break;
@@ -403,6 +417,39 @@ async function runSingleJob(
           }
         }
       } catch (err) {
+        const lifecycleMid = await prisma.importGenreBackfillJob.findUnique({
+          where: { id: jobId },
+          select: { status: true },
+        });
+        const ratioMid = (await getUserUnknownTrackStats(job.userId)).ratio;
+        if (lifecycleMid?.status === "cancelled") {
+          await prisma.importGenreBackfillJob.update({
+            where: { id: jobId },
+            data: {
+              artistsProcessed,
+              artistsMapped,
+              tracksUpdated,
+              apiRequestsUsed: llmCalls,
+              currentUnknownPct: ratioMid,
+            },
+          });
+          return;
+        }
+        if (lifecycleMid?.status === "paused") {
+          await prisma.importGenreBackfillJob.update({
+            where: { id: jobId },
+            data: {
+              status: "paused",
+              finishedAt: null,
+              artistsProcessed,
+              artistsMapped,
+              tracksUpdated,
+              apiRequestsUsed: llmCalls,
+              currentUnknownPct: ratioMid,
+            },
+          });
+          return;
+        }
         const message = err instanceof Error ? err.message : "LLM error";
         await prisma.importGenreBackfillJob.update({
           where: { id: jobId },
@@ -414,7 +461,7 @@ async function runSingleJob(
             artistsMapped,
             tracksUpdated,
             apiRequestsUsed: llmCalls,
-            currentUnknownPct: (await getUserUnknownTrackStats(job.userId)).ratio,
+            currentUnknownPct: ratioMid,
           },
         });
         return;
@@ -439,6 +486,41 @@ async function runSingleJob(
     }
 
     const finalStats = await getUserUnknownTrackStats(job.userId);
+    const lifecycle = await prisma.importGenreBackfillJob.findUnique({
+      where: { id: jobId },
+      select: { status: true },
+    });
+
+    if (lifecycle?.status === "cancelled") {
+      await prisma.importGenreBackfillJob.update({
+        where: { id: jobId },
+        data: {
+          artistsProcessed,
+          artistsMapped,
+          tracksUpdated,
+          apiRequestsUsed: llmCalls,
+          currentUnknownPct: finalStats.ratio,
+        },
+      });
+      return;
+    }
+
+    if (lifecycle?.status === "paused" || stoppedByUserInterrupt) {
+      await prisma.importGenreBackfillJob.update({
+        where: { id: jobId },
+        data: {
+          status: "paused",
+          finishedAt: null,
+          artistsProcessed,
+          artistsMapped,
+          tracksUpdated,
+          apiRequestsUsed: llmCalls,
+          currentUnknownPct: finalStats.ratio,
+        },
+      });
+      return;
+    }
+
     const stoppedByBudgetMessage =
       stoppedByDailyBudget && dailyBudget > 0
         ? `Daily Groq import budget reached (${usedTodayAtStart + llmCalls}/${dailyBudget}).`
@@ -466,6 +548,13 @@ async function runSingleJob(
       tracksUpdated,
     });
   } catch (error) {
+    const current = await prisma.importGenreBackfillJob.findUnique({
+      where: { id: jobId },
+      select: { status: true },
+    });
+    if (current?.status === "paused" || current?.status === "cancelled") {
+      return;
+    }
     const message = error instanceof Error ? error.message : "Unknown backfill error";
     await prisma.importGenreBackfillJob.update({
       where: { id: jobId },
@@ -478,15 +567,16 @@ async function runSingleJob(
   }
 }
 
-async function findNextGroqBackfillJobId(): Promise<string | null> {
+async function findNextGroqBackfillJobId(forUserId?: string): Promise<string | null> {
+  const userScope = forUserId ? { userId: forUserId } : {};
   const running = await prisma.importGenreBackfillJob.findFirst({
-    where: { status: "running", provider: "groq" },
+    where: { status: "running", provider: "groq", ...userScope },
     orderBy: { createdAt: "asc" },
     select: { id: true },
   });
   if (running) return running.id;
   const pending = await prisma.importGenreBackfillJob.findFirst({
-    where: { status: "pending", provider: "groq" },
+    where: { status: "pending", provider: "groq", ...userScope },
     orderBy: { createdAt: "asc" },
     select: { id: true },
   });
@@ -498,7 +588,7 @@ export async function triggerImportGenreBackfillWorker(): Promise<void> {
   workerRunning = true;
   try {
     while (true) {
-      const nextId = await findNextGroqBackfillJobId();
+      const nextId = await findNextGroqBackfillJobId(undefined);
       if (!nextId) break;
       await runSingleJob(nextId);
     }
@@ -507,16 +597,33 @@ export async function triggerImportGenreBackfillWorker(): Promise<void> {
   }
 }
 
-export async function triggerImportGenreBackfillWorkerRunOnce(): Promise<{
+export async function triggerImportGenreBackfillWorkerRunOnce(options?: {
+  /** Skip GET debounce (POST /start, cron interne). */
+  force?: boolean;
+  /**
+   * GET /status : ne traiter que les jobs de cet utilisateur (aligné sur le bandeau).
+   * Cron interne : omettre pour traiter la file globale.
+   */
+  userId?: string;
+}): Promise<{
   processed: boolean;
   jobId: string | null;
 }> {
+  const now = Date.now();
+  if (
+    !options?.force &&
+    now - lastRunOnceTriggerAt < RUN_ONCE_STATUS_DEBOUNCE_MS
+  ) {
+    return { processed: false, jobId: null };
+  }
+  lastRunOnceTriggerAt = now;
+
   if (workerRunning || genreBackfillRunOnceInFlight) {
     return { processed: false, jobId: null };
   }
   genreBackfillRunOnceInFlight = true;
   try {
-    const nextId = await findNextGroqBackfillJobId();
+    const nextId = await findNextGroqBackfillJobId(options?.userId);
     if (!nextId) return { processed: false, jobId: null };
     const sliceSizeRaw = Number(process.env.GROQ_IMPORT_RUN_ONCE_MAX_TRACKS ?? 25);
     const sliceSize = Number.isFinite(sliceSizeRaw) && sliceSizeRaw > 0 ? Math.floor(sliceSizeRaw) : 25;
@@ -527,28 +634,140 @@ export async function triggerImportGenreBackfillWorkerRunOnce(): Promise<{
   }
 }
 
-export async function getLatestImportGenreBackfillJob(userId: string) {
+const GROQ_BACKFILL_JOB_DASHBOARD_SELECT = {
+  id: true,
+  status: true,
+  targetUnknownPct: true,
+  delayMs: true,
+  maxApiRequests: true,
+  maxArtists: true,
+  apiRequestsUsed: true,
+  artistsProcessed: true,
+  artistsMapped: true,
+  tracksUpdated: true,
+  initialUnknownPct: true,
+  currentUnknownPct: true,
+  errorMessage: true,
+  createdAt: true,
+  startedAt: true,
+  finishedAt: true,
+  updatedAt: true,
+} as const;
+
+/**
+ * Job à afficher pour l’utilisateur : même ordre que le worker (`running` puis `pending`,
+ * toujours le plus ancien actif). Évite d’afficher une ligne « récente » à 0 alors qu’un
+ * job plus ancien est en cours de traitement.
+ */
+export async function getGroqBackfillJobForDashboard(userId: string) {
+  const running = await prisma.importGenreBackfillJob.findFirst({
+    where: { userId, provider: "groq", status: "running" },
+    orderBy: { createdAt: "asc" },
+    select: GROQ_BACKFILL_JOB_DASHBOARD_SELECT,
+  });
+  if (running) return running;
+  const paused = await prisma.importGenreBackfillJob.findFirst({
+    where: { userId, provider: "groq", status: "paused" },
+    orderBy: { createdAt: "asc" },
+    select: GROQ_BACKFILL_JOB_DASHBOARD_SELECT,
+  });
+  if (paused) return paused;
+  const pending = await prisma.importGenreBackfillJob.findFirst({
+    where: { userId, provider: "groq", status: "pending" },
+    orderBy: { createdAt: "asc" },
+    select: GROQ_BACKFILL_JOB_DASHBOARD_SELECT,
+  });
+  if (pending) return pending;
   return prisma.importGenreBackfillJob.findFirst({
     where: { userId, provider: "groq" },
     orderBy: { createdAt: "desc" },
-    select: {
-      id: true,
-      status: true,
-      targetUnknownPct: true,
-      delayMs: true,
-      maxApiRequests: true,
-      maxArtists: true,
-      apiRequestsUsed: true,
-      artistsProcessed: true,
-      artistsMapped: true,
-      tracksUpdated: true,
-      initialUnknownPct: true,
-      currentUnknownPct: true,
-      errorMessage: true,
-      createdAt: true,
-      startedAt: true,
-      finishedAt: true,
-      updatedAt: true,
+    select: GROQ_BACKFILL_JOB_DASHBOARD_SELECT,
+  });
+}
+
+async function reactivatePausedGroqImportJobForUser(
+  userId: string,
+  jobId: string
+): Promise<boolean> {
+  const r = await prisma.importGenreBackfillJob.updateMany({
+    where: { id: jobId, userId, provider: "groq", status: "paused" },
+    data: { status: "pending", errorMessage: null },
+  });
+  return r.count > 0;
+}
+
+export async function pauseGroqImportGenreBackfillForUser(userId: string): Promise<
+  | { ok: true; jobId: string }
+  | { ok: false; error: "NO_RUNNING_JOB" }
+> {
+  const running = await prisma.importGenreBackfillJob.findFirst({
+    where: { userId, provider: "groq", status: "running" },
+    orderBy: { createdAt: "asc" },
+    select: { id: true },
+  });
+  if (running) {
+    const r = await prisma.importGenreBackfillJob.updateMany({
+      where: { id: running.id, userId, status: "running" },
+      data: { status: "paused", finishedAt: null },
+    });
+    if (r.count > 0) return { ok: true, jobId: running.id };
+  }
+  const pending = await prisma.importGenreBackfillJob.findFirst({
+    where: { userId, provider: "groq", status: "pending" },
+    orderBy: { createdAt: "asc" },
+    select: { id: true },
+  });
+  if (!pending) return { ok: false, error: "NO_RUNNING_JOB" };
+  const r2 = await prisma.importGenreBackfillJob.updateMany({
+    where: { id: pending.id, userId, status: "pending" },
+    data: { status: "paused", finishedAt: null },
+  });
+  if (r2.count === 0) return { ok: false, error: "NO_RUNNING_JOB" };
+  return { ok: true, jobId: pending.id };
+}
+
+export async function cancelGroqImportGenreBackfillForUser(userId: string): Promise<
+  | { ok: true; jobId: string }
+  | { ok: false; error: "NO_ACTIVE_JOB" | "NOTHING_TO_CANCEL" }
+> {
+  const job = await getGroqBackfillJobForDashboard(userId);
+  if (!job) return { ok: false, error: "NO_ACTIVE_JOB" };
+  if (!["pending", "running", "paused"].includes(job.status)) {
+    return { ok: false, error: "NOTHING_TO_CANCEL" };
+  }
+  const r = await prisma.importGenreBackfillJob.updateMany({
+    where: {
+      id: job.id,
+      userId,
+      status: { in: ["pending", "running", "paused"] },
+    },
+    data: {
+      status: "cancelled",
+      finishedAt: new Date(),
+      errorMessage: "Cancelled by user",
     },
   });
+  if (r.count === 0) return { ok: false, error: "NOTHING_TO_CANCEL" };
+  return { ok: true, jobId: job.id };
+}
+
+export async function resumeGroqImportGenreBackfillForUser(userId: string): Promise<
+  | { ok: true; jobId: string }
+  | { ok: false; error: "NO_PAUSED_JOB" }
+> {
+  const paused = await prisma.importGenreBackfillJob.findFirst({
+    where: { userId, provider: "groq", status: "paused" },
+    orderBy: { createdAt: "asc" },
+    select: { id: true },
+  });
+  if (!paused) return { ok: false, error: "NO_PAUSED_JOB" };
+  const ok = await reactivatePausedGroqImportJobForUser(userId, paused.id);
+  if (!ok) return { ok: false, error: "NO_PAUSED_JOB" };
+  void triggerImportGenreBackfillWorkerRunOnce({ force: true, userId });
+  return { ok: true, jobId: paused.id };
+}
+
+/** @deprecated Préférer `getGroqBackfillJobForDashboard` (ordre aligné sur le worker). */
+export async function getLatestImportGenreBackfillJob(userId: string) {
+  return getGroqBackfillJobForDashboard(userId);
 }

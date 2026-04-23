@@ -3,7 +3,8 @@ import { getCurrentUserId } from "@/lib/auth/get-current-user-id";
 import { unauthorizedResponse } from "@/lib/auth/require-auth-user-id";
 import { handleApiError } from "@/lib/utils/error-handler";
 import {
-  getLatestImportGenreBackfillJob,
+  getGroqBackfillJobForDashboard,
+  getGroqImportGenreBackfillEligibility,
   triggerImportGenreBackfillWorkerRunOnce,
 } from "@/lib/services/listening/import-genre-backfill-queue";
 
@@ -18,13 +19,17 @@ export async function GET(request: NextRequest) {
     const userId = await getCurrentUserId(request);
     if (!userId) return unauthorizedResponse();
 
-    // Best-effort self-heal: serverless-safe single slice.
-    void triggerImportGenreBackfillWorkerRunOnce();
+    // Best-effort self-heal: une tranche pour ce user uniquement (alignée sur le job affiché).
+    void triggerImportGenreBackfillWorkerRunOnce({ userId });
 
-    const job = await getLatestImportGenreBackfillJob(userId);
+    const [job, eligibility] = await Promise.all([
+      getGroqBackfillJobForDashboard(userId),
+      getGroqImportGenreBackfillEligibility(userId),
+    ]);
     return NextResponse.json({
       ok: true,
       job,
+      eligibility,
     });
   } catch (error) {
     return handleApiError(error, { route: ROUTE });

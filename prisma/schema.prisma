@@ -56,6 +56,8 @@ enum ImportGenreBackfillJobStatus {
   running
   completed
   failed
+  paused
+  cancelled
 }
 
 enum PaletteSuggestionMode {

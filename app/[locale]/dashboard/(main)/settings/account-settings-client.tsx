@@ -5,6 +5,11 @@ import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { deletionPhrasesMatch } from "@/lib/user/deletion-confirmation-phrase";
+import {
+  clearGenreBackfillBannerBlockingPrefs,
+  getGenreBackfillBannerOptOut,
+  setGenreBackfillBannerOptOut,
+} from "@/lib/utils/genre-backfill-banner-prefs";
 
 export function AccountSettingsClient() {
   const t = useTranslations("settings");
@@ -18,6 +23,7 @@ export function AccountSettingsClient() {
   const [understood, setUnderstood] = useState(false);
   const [clearing, setClearing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hideGenreBanner, setHideGenreBanner] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -44,6 +50,10 @@ export function AccountSettingsClient() {
       subscription.unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    setHideGenreBanner(getGenreBackfillBannerOptOut());
+  }, [userId]);
 
   useEffect(() => {
     if (!userId) return;
@@ -153,6 +163,33 @@ export function AccountSettingsClient() {
         </h1>
         <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">{t("subtitle")}</p>
       </div>
+
+      <section
+        className="rounded-2xl border border-gray-200/90 bg-white/80 p-6 dark:border-gray-700 dark:bg-gray-900/40"
+        aria-labelledby="genre-banner-prefs-heading"
+      >
+        <h2
+          id="genre-banner-prefs-heading"
+          className="text-lg font-semibold text-gray-900 dark:text-gray-100"
+        >
+          {t("genreBannerTitle")}
+        </h2>
+        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">{t("genreBannerDescription")}</p>
+        <label className="mt-4 flex cursor-pointer items-start gap-3 text-sm text-gray-800 dark:text-gray-200">
+          <input
+            type="checkbox"
+            className="mt-1 h-4 w-4 shrink-0 rounded border-gray-300 text-accent-violet focus:ring-accent-violet/30 dark:border-gray-600 dark:bg-gray-900"
+            checked={hideGenreBanner}
+            onChange={(e) => {
+              const next = e.target.checked;
+              if (next) setGenreBackfillBannerOptOut(true);
+              else clearGenreBackfillBannerBlockingPrefs();
+              setHideGenreBanner(next);
+            }}
+          />
+          <span>{t("genreBannerHideLabel")}</span>
+        </label>
+      </section>
 
       <section
         className="rounded-2xl border border-red-200/80 bg-red-50/50 p-6 dark:border-red-900/50 dark:bg-red-950/20"

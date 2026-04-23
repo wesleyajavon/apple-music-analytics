@@ -9,6 +9,14 @@ L’authentification repose sur **Supabase Auth** (connexion et inscription). Le
 
 Démo en ligne : **[https://apple-music-analytics.vercel.app/fr](https://apple-music-analytics.vercel.app/fr)** (locale par défaut : français ; **en** et **es** sont disponibles sous `/en` et `/es`).
 
+### Vercel et migrations Prisma
+
+À chaque déploiement **Vercel**, `npm run build` exécute d’abord **`prisma migrate deploy`** (voir `scripts/vercel-build.mjs`) avec le **`DATABASE_URL`** du projet pour l’environnement concerné (Production ou Preview). Vous committez les dossiers `prisma/migrations/` depuis la dev ; pas besoin d’appliquer les migrations à la main sur la prod.
+
+En **local**, `npm run build` **ne lance pas** `migrate deploy` (évite de migrer par erreur la base pointée par `.env`). Utilisez **`npm run db:migrate:dev`** (ou `db:migrate` avec `dotenv-cli -e .env.local`) sur votre base de dev ; Vercel appliquera les mêmes migrations au déploiement.
+
+Sur **Neon / pooler**, si `migrate deploy` échoue au build, utilisez une URL **directe (hors pooler)** pour les migrations (voir la doc Neon) ; éventuellement `directUrl` dans `schema.prisma` si vous adoptez ce modèle.
+
 Idées produit et noms de code (Breakwater, Encore, …) : **[IDEAS_BAG.md](IDEAS_BAG.md)** à la racine du dépôt. Notes d’implémentation auth : **[`docs/SUPABASE_AUTH_IMPLEMENTATION.md`](docs/SUPABASE_AUTH_IMPLEMENTATION.md)**.
 
 ## Pourquoi Last.fm plutôt que l'API Apple Music ?
@@ -81,7 +89,8 @@ Les **scripts serveur** d’import peuvent exiger `IMPORT_ADMIN_KEY` (en-tête `
 |--------|-------------|
 | `npm run dev` | Serveur de développement |
 | `npm run dev:turbo` | Dev avec Turbopack |
-| `npm run build` | Build production |
+| `npm run build` | Build production — sur **Vercel**, `prisma migrate deploy` puis le reste (`scripts/vercel-build.mjs`) ; en local, migrate ignoré (utiliser `db:migrate` / `db:migrate:dev` sur la dev) |
+| `npm run build:app` | Client Prisma, copie `docs/API.md`, `next build` (sans migrate) |
 | `npm run start` | Serveur production |
 | `npm run lint` | ESLint (Next.js) |
 | `npm run lastfm:update` | Mise à jour des données Last.fm |

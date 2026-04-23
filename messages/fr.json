@@ -89,7 +89,10 @@
     "noPhraseError": "Nous ne pouvons pas générer de phrase à partir de votre profil (nom ou e-mail). Mettez à jour votre nom dans les paramètres du compte ou contactez le support.",
     "clearDataButton": "Effacer toutes mes données d’analytics",
     "clearing": "Suppression en cours…",
-    "clearError": "Impossible d’effacer les données. Réessayez plus tard."
+    "clearError": "Impossible d’effacer les données. Réessayez plus tard.",
+    "genreBannerTitle": "Bandeau Groq (genres)",
+    "genreBannerDescription": "Après l’import, vous pouvez masquer le bandeau du tableau de bord sur la classification Groq. Réactivez-le ici à tout moment.",
+    "genreBannerHideLabel": "Masquer sur le tableau de bord les invites et résumés de classification Groq"
   },
   "auth": {
     "signInEyebrow": "Bon retour",
@@ -213,6 +216,8 @@
     "genreBackfill": {
       "title": "Classification des genres (IA) en cours",
       "running": "Nous complétons les genres manquants en arrière-plan via Groq (LLM).",
+      "paused": "La classification des genres (IA) est en pause. Vous pouvez reprendre ou annuler.",
+      "cancelled": "La classification des genres (IA) a été annulée.",
       "completed": "Classification des genres (IA) terminée.",
       "failed": "La classification des genres (IA) s’est arrêtée avant la fin.",
       "artistsProcessed": "Morceaux traités : {count}",
@@ -227,16 +232,38 @@
     "title": "Dashboard 📊",
     "genreBackfill": {
       "running": "Classification des genres Groq en cours",
+      "pausedHeading": "Classification des genres Groq en pause",
+      "cancelledHeading": "Classification des genres Groq annulée",
       "details": "Morceaux : {processed}/{max} • Unknown : {ratio} • Cible : {target}%",
       "ratioPending": "calcul en cours",
       "completed": "Classification des genres Groq terminée",
       "failed": "La classification des genres Groq s'est arrêtée avant la fin",
+      "pause": "Pause",
+      "pausing": "Mise en pause…",
+      "resume": "Reprendre",
+      "resuming": "Reprise…",
+      "cancel": "Annuler le job",
+      "cancelling": "Annulation…",
+      "pausedToast": "Classification mise en pause. Reprenez quand vous voulez.",
+      "resumedToast": "Classification reprise.",
+      "cancelledToast": "Classification annulée.",
+      "pauseError": "Impossible de mettre en pause la classification.",
+      "pauseNoRunning": "Aucune classification en cours pour l’instant.",
+      "cancelError": "Impossible d’annuler la classification.",
+      "cancelNoJob": "Aucune classification active à annuler.",
+      "cancelNothing": "Cette session ne peut plus être annulée.",
+      "resumeError": "Impossible de reprendre la classification.",
+      "resumeNoPaused": "Aucune session en pause à reprendre.",
       "startNextSession": "Lancer une autre session",
       "starting": "Démarrage…",
       "started": "Classification des genres démarrée en arrière-plan",
       "startError": "Impossible de démarrer la classification des genres",
       "nextSessionPrompt": "Le taux unknown est encore à {current}% (cible : {target}%). Lancer une autre session ?",
-      "nextSessionAfterError": "La session précédente s'est arrêtée avant la fin. Lancer une nouvelle session ?"
+      "nextSessionAfterError": "La session précédente s'est arrêtée avant la fin. Lancer une nouvelle session ?",
+      "collapsedSummary": "Classification des genres Groq — afficher le détail",
+      "collapseAria": "Réduire le bandeau",
+      "dismissAria": "Masquer ce résumé jusqu’à la prochaine session",
+      "progressAria": "Progression de la session"
     }
   },
   "footer": {
@@ -454,7 +481,13 @@
     "apiMappingNoticeTitle": "Limite actuelle sur le mapping des genres",
     "apiMappingNoticeBody": "Les tendances reflètent les genres actuellement mappés. Sans accès fiable aux APIs Apple Music ou Spotify, une partie des écoutes peut rester moins précise côté classification.",
     "apiMappingNoticeShort": "Certaines tendances peuvent rester approximatives sans accès API Apple Music/Spotify pour affiner le mapping des genres.",
-    "apiMappingNoticeLink": "Palette Features"
+    "apiMappingNoticeLink": "Palette Features",
+    "chartGenreAccuracyIntro": "Chaque courbe repose sur le genre enregistré pour chaque écoute ; les exports contiennent rarement un genre fiable pour tous les titres.",
+    "chartGenreAccuracyPalette": "<manualLabel>Palette (manuel)</manualLabel> : vous corrigez vous-même les genres inconnus ou discutables, carte par carte (contrôle total, tri par impact d’écoute). <palette>Ouvrir Palette</palette>.",
+    "chartGenreAccuracyGroq": "<aiLabel>Classification Groq (IA)</aiLabel> : un LLM propose un genre principal à partir du nom de l’artiste et du titre (envoyés à Groq uniquement après votre accord). Idéal pour réduire l’Unknown en masse ; l’avancement s’affiche dans la bande violette du tableau de bord pendant ou juste après une session.",
+    "groqSessionRunningHint": "Une session de classification Groq est déjà en cours.",
+    "groqProgressAnchor": "Voir le bandeau de progression",
+    "groqStartNoUnknown": "Toutes les pistes que vous avez écoutées ont déjà un genre dans vos données ; il ne reste rien à classifier ici avec Groq."
   },
   "palette": {
     "title": "Palette",

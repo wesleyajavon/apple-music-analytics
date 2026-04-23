@@ -89,7 +89,10 @@
     "noPhraseError": "We cannot build a phrase from your profile (name or email). Update your display name in your account settings or contact support.",
     "clearDataButton": "Clear all my analytics data",
     "clearing": "Clearing…",
-    "clearError": "Could not clear data. Please try again later."
+    "clearError": "Could not clear data. Please try again later.",
+    "genreBannerTitle": "Groq genre banner",
+    "genreBannerDescription": "After import you can hide the dashboard strip about Groq genre classification. Turn it back on here anytime.",
+    "genreBannerHideLabel": "Hide Groq genre classification prompts and summaries on the dashboard"
   },
   "auth": {
     "signInEyebrow": "Welcome back",
@@ -213,6 +216,8 @@
     "genreBackfill": {
       "title": "AI genre classification in progress",
       "running": "We are filling missing genres in the background using Groq (LLM).",
+      "paused": "AI genre classification is paused. You can resume or cancel.",
+      "cancelled": "AI genre classification was cancelled.",
       "completed": "AI genre classification finished.",
       "failed": "AI genre classification stopped before completion.",
       "artistsProcessed": "Tracks processed: {count}",
@@ -227,16 +232,38 @@
     "title": "Dashboard 📊",
     "genreBackfill": {
       "running": "Groq genre classification is running",
+      "pausedHeading": "Groq genre classification is paused",
+      "cancelledHeading": "Groq genre classification was cancelled",
       "details": "Tracks: {processed}/{max} • Unknown: {ratio} • Target: {target}%",
       "ratioPending": "calculating",
       "completed": "Groq genre classification finished",
       "failed": "Groq genre classification stopped before completion",
+      "pause": "Pause",
+      "pausing": "Pausing…",
+      "resume": "Resume",
+      "resuming": "Resuming…",
+      "cancel": "Cancel job",
+      "cancelling": "Cancelling…",
+      "pausedToast": "Classification paused. Resume when you are ready.",
+      "resumedToast": "Classification resumed.",
+      "cancelledToast": "Classification cancelled.",
+      "pauseError": "Could not pause classification.",
+      "pauseNoRunning": "Nothing is running right now.",
+      "cancelError": "Could not cancel classification.",
+      "cancelNoJob": "No active classification to cancel.",
+      "cancelNothing": "This session cannot be cancelled anymore.",
+      "resumeError": "Could not resume classification.",
+      "resumeNoPaused": "No paused session to resume.",
       "startNextSession": "Start another session",
       "starting": "Starting…",
       "started": "Genre classification started in the background",
       "startError": "Could not start genre classification",
       "nextSessionPrompt": "Unknown is still at {current}% (target: {target}%). Start another session?",
-      "nextSessionAfterError": "The previous session stopped early. Start a new session?"
+      "nextSessionAfterError": "The previous session stopped early. Start a new session?",
+      "collapsedSummary": "Groq genre classification — show details",
+      "collapseAria": "Minimize banner",
+      "dismissAria": "Hide this summary until the next session",
+      "progressAria": "Session progress"
     }
   },
   "footer": {
@@ -454,7 +481,13 @@
     "apiMappingNoticeTitle": "Current limitation on genre mapping",
     "apiMappingNoticeBody": "Trends reflect currently mapped genres. Without reliable access to Apple Music or Spotify APIs, some listens may remain less precise in classification.",
     "apiMappingNoticeShort": "Some trends can remain approximate without Apple Music/Spotify API access to refine genre mapping.",
-    "apiMappingNoticeLink": "Palette Features"
+    "apiMappingNoticeLink": "Palette Features",
+    "chartGenreAccuracyIntro": "Each line uses how listens are labeled in your library; exports rarely include a reliable genre for every track.",
+    "chartGenreAccuracyPalette": "<manualLabel>Palette (manual)</manualLabel>: fix Unknown or questionable genres yourself, one artist or track at a time (full control, ordered by listen impact). <palette>Open Palette</palette>.",
+    "chartGenreAccuracyGroq": "<aiLabel>Groq (AI)</aiLabel>: an LLM proposes a primary genre from the artist and track titles (sent to Groq only after you opt in). Best for clearing Unknown in bulk; progress appears in the violet dashboard banner when a session is active or just finished.",
+    "groqSessionRunningHint": "A Groq classification session is already in progress.",
+    "groqProgressAnchor": "View the progress banner",
+    "groqStartNoUnknown": "Every track you have listened to already has a genre in your data; there is nothing left for Groq to classify here."
   },
   "palette": {
     "title": "Palette",

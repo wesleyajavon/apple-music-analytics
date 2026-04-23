@@ -8,6 +8,8 @@ import { getMessages } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { Providers } from "./providers";
 import { AiMasterToggle } from "@/lib/components/ai-master-toggle";
+import { Analytics } from "@vercel/analytics/next"
+
 
 const inter = Inter({
   subsets: ["latin"],
@@ -52,6 +54,7 @@ export default async function RootLayout({
             <AiMasterToggle />
           </NextIntlClientProvider>
         </Providers>
+        <Analytics />
       </body>
     </html>
   );

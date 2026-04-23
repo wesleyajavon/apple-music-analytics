@@ -37,6 +37,10 @@ DATABASE_URL="postgresql://.../apple_music_analytics_dev"
 
 Definir `DATABASE_URL` dans les variables d'environnement de la plateforme, avec l'URL prod uniquement.
 
+### Vercel (deploiement)
+
+Sur Vercel, `npm run build` execute `prisma migrate deploy` automatiquement (variable systeme `VERCEL=1`, script `scripts/vercel-build.mjs`). Les builds locaux et la CI GitHub ne declenchent pas cette etape.
+
 ## Quick commands (copier-coller)
 
 Si vous avez defini cet alias dans `~/.zshrc`:

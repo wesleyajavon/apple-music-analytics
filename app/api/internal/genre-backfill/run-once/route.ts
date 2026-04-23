@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
     }
 
-    const result = await triggerImportGenreBackfillWorkerRunOnce();
+    const result = await triggerImportGenreBackfillWorkerRunOnce({ force: true });
     return NextResponse.json({
       ok: true,
       processed: result.processed,

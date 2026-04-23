@@ -13,9 +13,11 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import { toast } from "sonner";
 import { useGenreTrends } from "@/lib/hooks/use-listening";
 import { useDashboardViewerUserId } from "@/lib/context/dashboard-viewer-context";
 import { ErrorState } from "@/lib/components/error-state";
+import { clearGenreBackfillBannerBlockingPrefs } from "@/lib/utils/genre-backfill-banner-prefs";
 
 const COLORS = [
   "#3b82f6",
@@ -69,6 +71,21 @@ function createTrendsTooltip(t: (k: string) => string, locale: string) {
 
 const DEFAULT_GENRE_COUNT = 5;
 
+type GroqEligibility = {
+  unknownTrackCount: number;
+  unknownRatio: number;
+  totalTrackCount: number;
+  groqConfigured: boolean;
+};
+
+type GroqJobStatus =
+  | "pending"
+  | "running"
+  | "paused"
+  | "completed"
+  | "failed"
+  | "cancelled";
+
 export type GenreTrendsSummaryWidgetProps = {
   startDate?: string;
   endDate?: string;
@@ -84,6 +101,7 @@ export function GenreTrendsSummaryWidget({
 }: GenreTrendsSummaryWidgetProps) {
   const t = useTranslations("genreTrends");
   const tOverview = useTranslations("overview");
+  const tConsent = useTranslations("onboarding.genreLlmConsent");
   const locale = useLocale();
   const viewerUserId = useDashboardViewerUserId();
   const TrendsTooltip = useMemo(() => createTrendsTooltip(t, locale), [t, locale]);
@@ -125,6 +143,93 @@ export function GenreTrendsSummaryWidget({
     const qs = p.toString();
     return qs ? `?${qs}` : "?period=month";
   }, [startDate, endDate]);
+
+  const [groqMeta, setGroqMeta] = useState<{
+    loaded: boolean;
+    eligibility: GroqEligibility | null;
+    jobStatus: GroqJobStatus | null;
+  }>({ loaded: false, eligibility: null, jobStatus: null });
+  const [groqStarting, setGroqStarting] = useState(false);
+
+  useEffect(() => {
+    if (viewerUserId) {
+      setGroqMeta({ loaded: true, eligibility: null, jobStatus: null });
+      return;
+    }
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await fetch("/api/user/onboarding/import/genre-backfill/status");
+        const data = (await res.json().catch(() => ({}))) as {
+          eligibility?: GroqEligibility;
+          job?: { status: GroqJobStatus } | null;
+        };
+        if (cancelled) return;
+        if (!res.ok) {
+          setGroqMeta({ loaded: true, eligibility: null, jobStatus: null });
+          return;
+        }
+        setGroqMeta({
+          loaded: true,
+          eligibility: data.eligibility ?? null,
+          jobStatus: data.job?.status ?? null,
+        });
+      } catch {
+        if (!cancelled) {
+          setGroqMeta({ loaded: true, eligibility: null, jobStatus: null });
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [viewerUserId]);
+
+  const refreshGroqMeta = useCallback(async () => {
+    if (viewerUserId) return;
+    try {
+      const res = await fetch("/api/user/onboarding/import/genre-backfill/status");
+      const data = (await res.json().catch(() => ({}))) as {
+        eligibility?: GroqEligibility;
+        job?: { status: GroqJobStatus } | null;
+      };
+      if (!res.ok) return;
+      setGroqMeta({
+        loaded: true,
+        eligibility: data.eligibility ?? null,
+        jobStatus: data.job?.status ?? null,
+      });
+    } catch {
+      /* ignore */
+    }
+  }, [viewerUserId]);
+
+  const startGroqBackfill = useCallback(async () => {
+    setGroqStarting(true);
+    try {
+      const res = await fetch("/api/user/onboarding/import/genre-backfill/start", {
+        method: "POST",
+      });
+      const data = (await res.json().catch(() => ({}))) as { error?: string };
+      if (!res.ok) {
+        toast.error(data?.error ?? tConsent("startError"));
+        return;
+      }
+      clearGenreBackfillBannerBlockingPrefs();
+      toast.success(tConsent("startedToast"));
+      await refreshGroqMeta();
+      window.setTimeout(() => {
+        document.getElementById("genre-backfill-global-badge-panel")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 200);
+    } catch {
+      toast.error(tConsent("startError"));
+    } finally {
+      setGroqStarting(false);
+    }
+  }, [refreshGroqMeta, tConsent]);
 
   if (isLoading) {
     return (
@@ -180,15 +285,76 @@ export function GenreTrendsSummaryWidget({
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
                   {t("chartHint")}
                 </p>
-                <p className="mt-2 text-xs text-amber-800 dark:text-amber-200">
-                  {t("apiMappingNoticeShort")}{" "}
-                  <Link
-                    href="/dashboard/genres/palette"
-                    className="font-semibold underline underline-offset-2 hover:text-amber-900 dark:hover:text-amber-100"
-                  >
-                    {t("apiMappingNoticeLink")}
-                  </Link>
-                </p>
+                <div className="mt-2 space-y-2 text-xs text-amber-800 dark:text-amber-200">
+                  <p>{t("chartGenreAccuracyIntro")}</p>
+                  <ul className="list-disc space-y-1.5 pl-4 marker:text-amber-700 dark:marker:text-amber-300">
+                    <li>
+                      {t.rich("chartGenreAccuracyPalette", {
+                        manualLabel: (chunks) => (
+                          <span className="font-semibold text-amber-900 dark:text-amber-50">{chunks}</span>
+                        ),
+                        palette: (chunks) => (
+                          <Link
+                            href="/dashboard/genres/palette"
+                            className="font-semibold underline underline-offset-2 hover:text-amber-950 dark:hover:text-amber-50"
+                          >
+                            {chunks}
+                          </Link>
+                        ),
+                      })}
+                    </li>
+                    <li>
+                      {t.rich("chartGenreAccuracyGroq", {
+                        aiLabel: (chunks) => (
+                          <span className="font-semibold text-amber-900 dark:text-amber-50">{chunks}</span>
+                        ),
+                      })}
+                    </li>
+                  </ul>
+                  {viewerUserId == null && groqMeta.loaded && groqMeta.eligibility ? (
+                    <div className="mt-3 space-y-2 border-t border-amber-200/60 pt-2.5 dark:border-amber-800/50">
+                      {!groqMeta.eligibility.groqConfigured ? (
+                        <p className="text-[11px] font-medium leading-snug text-amber-950 dark:text-amber-50">
+                          {tConsent("missingKey")}
+                        </p>
+                      ) : groqMeta.eligibility.unknownTrackCount === 0 ? (
+                        <p className="text-[11px] leading-snug text-amber-900/90 dark:text-amber-100/85">
+                          {t("groqStartNoUnknown")}
+                        </p>
+                      ) : (
+                        <>
+                          {groqMeta.jobStatus === "pending" ||
+                          groqMeta.jobStatus === "running" ||
+                          groqMeta.jobStatus === "paused" ? (
+                            <p className="text-[11px] leading-snug text-amber-900/95 dark:text-amber-100/90">
+                              <span>{t("groqSessionRunningHint")} </span>
+                              <a
+                                href="#genre-backfill-global-badge-panel"
+                                className="font-semibold text-amber-950 underline underline-offset-2 hover:text-amber-900 dark:text-amber-50 dark:hover:text-white"
+                              >
+                                {t("groqProgressAnchor")}
+                              </a>
+                            </p>
+                          ) : (
+                            <>
+                              <p className="text-[11px] leading-snug text-amber-900/90 dark:text-amber-100/85">
+                                {tConsent("privacy")}
+                              </p>
+                              <button
+                                type="button"
+                                disabled={groqStarting}
+                                onClick={() => void startGroqBackfill()}
+                                className="inline-flex min-h-[36px] items-center justify-center rounded-lg bg-accent-violet px-3 py-2 text-xs font-semibold text-white shadow-sm transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                              >
+                                {groqStarting ? tConsent("starting") : tConsent("accept")}
+                              </button>
+                            </>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  ) : null}
+                </div>
               </div>
               <Link
                 href={`/dashboard/genres/trends${trendsQuery}`}

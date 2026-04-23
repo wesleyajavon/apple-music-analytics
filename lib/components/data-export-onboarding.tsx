@@ -10,6 +10,10 @@ import { ONBOARDING_IMPORT_MAX_JSON_BATCH_ROWS } from "@/lib/services/listening/
 import type { NormalizedListenInput } from "@/lib/services/listening/onboarding-import-types";
 import { parseApplePlayHistoryDailyTracksCsv } from "@/lib/services/listening/parse-apple-play-history-daily-csv";
 import { parseSpotifyStreamingHistoryAudioJson } from "@/lib/services/listening/parse-spotify-streaming-history-json";
+import {
+  clearGenreBackfillBannerBlockingPrefs,
+  setGenreBackfillBannerOptOut,
+} from "@/lib/utils/genre-backfill-banner-prefs";
 
 type Phase = "welcome" | "pick" | "guide" | "import" | "finish";
 type MusicProvider = "spotify" | "apple";
@@ -27,7 +31,13 @@ type GuideStep = {
     | "imageAltAppleStep4";
 };
 
-type GenreBackfillJobStatus = "pending" | "running" | "completed" | "failed";
+type GenreBackfillJobStatus =
+  | "pending"
+  | "running"
+  | "paused"
+  | "completed"
+  | "failed"
+  | "cancelled";
 
 type GenreBackfillJob = {
   id: string;
@@ -411,6 +421,7 @@ export function DataExportOnboarding() {
         return;
       }
       if (data.jobId && data.status) {
+        clearGenreBackfillBannerBlockingPrefs();
         setGenreBackfillJob({
           id: data.jobId,
           status: data.status,
@@ -456,12 +467,15 @@ export function DataExportOnboarding() {
     [genreBackfillJob, genreBackfillStatus]
   );
   const hasBackfillInProgress =
-    effectiveBackfill?.status === "pending" || effectiveBackfill?.status === "running";
+    effectiveBackfill?.status === "pending" ||
+    effectiveBackfill?.status === "running" ||
+    effectiveBackfill?.status === "paused";
   const shouldOfferNextLlmSession =
     effectiveBackfill?.status === "completed" &&
     effectiveBackfill.currentUnknownPct != null &&
     effectiveBackfill.currentUnknownPct > effectiveBackfill.targetUnknownPct;
-  const shouldOfferRetryLlmSession = effectiveBackfill?.status === "failed";
+  const shouldOfferRetryLlmSession =
+    effectiveBackfill?.status === "failed" || effectiveBackfill?.status === "cancelled";
   const backfillProgressRatio = useMemo(() => {
     if (!effectiveBackfill) return 0;
     if (effectiveBackfill.maxArtists > 0) {
@@ -815,7 +829,10 @@ export function DataExportOnboarding() {
                     type="button"
                     className={secondaryBtn}
                     disabled={isStartingLlmBackfill}
-                    onClick={() => setGenreLlmDeclined(true)}
+                    onClick={() => {
+                      setGenreLlmDeclined(true);
+                      setGenreBackfillBannerOptOut(true);
+                    }}
                   >
                     {t("genreLlmConsent.decline")}
                   </button>
@@ -829,10 +846,14 @@ export function DataExportOnboarding() {
                 </p>
                 <p className="text-xs text-violet-800/90 dark:text-violet-200/90">
                   {hasBackfillInProgress
-                    ? t("genreBackfill.running")
+                    ? effectiveBackfill.status === "paused"
+                      ? t("genreBackfill.paused")
+                      : t("genreBackfill.running")
                     : effectiveBackfill.status === "completed"
                       ? t("genreBackfill.completed")
-                      : t("genreBackfill.failed")}
+                      : effectiveBackfill.status === "cancelled"
+                        ? t("genreBackfill.cancelled")
+                        : t("genreBackfill.failed")}
                 </p>
                 <div className="h-2 w-full overflow-hidden rounded-full bg-violet-200/70 dark:bg-violet-900/60">
                   <div

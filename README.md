@@ -9,6 +9,14 @@ Authentication is handled with **Supabase Auth** (sign-in and sign-up). Anonymou
 
 Live demo: **[https://apple-music-analytics.vercel.app/fr](https://apple-music-analytics.vercel.app/fr)** (default locale is French; **en** and **es** are also available under `/en` and `/es`).
 
+### Vercel and database migrations
+
+On each **Vercel** deployment, `npm run build` runs **`prisma migrate deploy`** first (see `scripts/vercel-build.mjs`), using the project’s **`DATABASE_URL`** for that environment (Production vs Preview). Commit migration files from dev as usual; you do not need to SSH into prod to apply them.
+
+Local **`npm run build`** skips `migrate deploy` so a stray `.env` does not migrate the wrong database. Use **`npm run db:migrate:dev`** (or `db:migrate` with `dotenv-cli -e .env.local`) against your dev DB while iterating; Vercel will apply the same migrations on deploy.
+
+For **Neon / pooled** URLs, if `migrate deploy` ever fails at build time, use a **direct (non-pooler)** connection for migrations (Neon documents this pattern); you can expose it only on Vercel as `DATABASE_URL` for the build or add a `directUrl` in `schema.prisma` when you adopt that layout.
+
 Maintainer: future product ideas and codenames (Breakwater, Encore, …) live in **[IDEAS_BAG.md](IDEAS_BAG.md)** at the repo root. Supabase auth notes: **[`docs/SUPABASE_AUTH_IMPLEMENTATION.md`](docs/SUPABASE_AUTH_IMPLEMENTATION.md)**.
 
 ## Why Last.fm instead of Apple Music API?
@@ -83,7 +91,8 @@ Open [http://localhost:3000](http://localhost:3000) (redirects to the default lo
 |--------|-------------|
 | `npm run dev` | Development server |
 | `npm run dev:turbo` | Dev server with Turbopack |
-| `npm run build` | Production build |
+| `npm run build` | Production build — on **Vercel** runs `prisma migrate deploy` first (`scripts/vercel-build.mjs`); locally skips migrate (use `db:migrate` / `db:migrate:dev` for your dev DB) |
+| `npm run build:app` | Same as the tail of `build`: generate client, copy API doc, `next build` (no migrate) |
 | `npm run start` | Production server |
 | `npm run lint` | ESLint (Next.js) |
 | `npm run lastfm:update` | Update Last.fm data |

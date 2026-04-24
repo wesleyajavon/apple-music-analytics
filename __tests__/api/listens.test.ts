@@ -16,6 +16,9 @@ vi.mock('@/lib/auth/resolve-authorized-data-user-id', () => ({
     userId: 'user-1',
   }),
 }));
+vi.mock('@/lib/security/rate-limit', () => ({
+  assertRateLimit: vi.fn(),
+}));
 
 import { getListens } from '@/lib/services/listening/listening-service';
 import { getAggregatedListens } from '@/lib/services/listening/listening-aggregation';

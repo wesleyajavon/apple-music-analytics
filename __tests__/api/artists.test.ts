@@ -5,6 +5,7 @@ import { NextRequest } from "next/server";
 vi.mock("@/lib/services/artist/artist-service", () => ({
   getArtistStats: vi.fn(),
   getArtistOverview: vi.fn(),
+  countArtistsForRange: vi.fn(),
 }));
 vi.mock("@/lib/auth/resolve-authorized-data-user-id", () => ({
   resolveAuthorizedDataUserId: vi.fn(),
@@ -13,6 +14,7 @@ vi.mock("@/lib/auth/resolve-authorized-data-user-id", () => ({
 import {
   getArtistStats,
   getArtistOverview,
+  countArtistsForRange,
 } from "@/lib/services/artist/artist-service";
 import { resolveAuthorizedDataUserId } from "@/lib/auth/resolve-authorized-data-user-id";
 
@@ -57,6 +59,7 @@ describe("GET /api/artists", () => {
 
   it("should return artists stats and overview without date range", async () => {
     vi.mocked(getArtistOverview).mockResolvedValue(mockOverview);
+    vi.mocked(countArtistsForRange).mockResolvedValue(50);
     vi.mocked(getArtistStats).mockResolvedValue(mockTopArtists);
 
     const request = new NextRequest("http://localhost/api/artists");
@@ -66,12 +69,15 @@ describe("GET /api/artists", () => {
     const data = await response.json();
     expect(data).toHaveProperty("overview", mockOverview);
     expect(data).toHaveProperty("topArtists", mockTopArtists);
+    expect(data).toHaveProperty("pagination");
     expect(getArtistOverview).toHaveBeenCalledWith(undefined, undefined, "user-1");
-    expect(getArtistStats).toHaveBeenCalledWith(undefined, undefined, "user-1", 20);
+    expect(countArtistsForRange).toHaveBeenCalledWith(undefined, undefined, "user-1");
+    expect(getArtistStats).toHaveBeenCalledWith(undefined, undefined, "user-1", 20, 0);
   });
 
   it("should return artists stats with date range", async () => {
     vi.mocked(getArtistOverview).mockResolvedValue(mockOverview);
+    vi.mocked(countArtistsForRange).mockResolvedValue(50);
     vi.mocked(getArtistStats).mockResolvedValue(mockTopArtists);
 
     const request = new NextRequest(
@@ -84,15 +90,20 @@ describe("GET /api/artists", () => {
     expect(getArtistStats).toHaveBeenCalledOnce();
     const overviewArgs = vi.mocked(getArtistOverview).mock.calls[0];
     const statsArgs = vi.mocked(getArtistStats).mock.calls[0];
+    const totalArgs = vi.mocked(countArtistsForRange).mock.calls[0];
     expect(overviewArgs[0]).toBeInstanceOf(Date);
     expect(overviewArgs[1]).toBeInstanceOf(Date);
+    expect(totalArgs[0]).toBeInstanceOf(Date);
+    expect(totalArgs[1]).toBeInstanceOf(Date);
     expect(statsArgs[0]).toBeInstanceOf(Date);
     expect(statsArgs[1]).toBeInstanceOf(Date);
     expect(statsArgs[3]).toBe(20);
+    expect(statsArgs[4]).toBe(0);
   });
 
   it("should pass limit parameter", async () => {
     vi.mocked(getArtistOverview).mockResolvedValue(mockOverview);
+    vi.mocked(countArtistsForRange).mockResolvedValue(50);
     vi.mocked(getArtistStats).mockResolvedValue(mockTopArtists);
 
     const request = new NextRequest(
@@ -101,11 +112,12 @@ describe("GET /api/artists", () => {
     const response = await GET(request);
 
     expect(response.status).toBe(200);
-    expect(getArtistStats).toHaveBeenCalledWith(undefined, undefined, "user-1", 50);
+    expect(getArtistStats).toHaveBeenCalledWith(undefined, undefined, "user-1", 50, 0);
   });
 
   it("should ignore query userId and use authenticated user", async () => {
     vi.mocked(getArtistOverview).mockResolvedValue(mockOverview);
+    vi.mocked(countArtistsForRange).mockResolvedValue(50);
     vi.mocked(getArtistStats).mockResolvedValue(mockTopArtists);
 
     const request = new NextRequest(
@@ -115,7 +127,8 @@ describe("GET /api/artists", () => {
 
     expect(response.status).toBe(200);
     expect(getArtistOverview).toHaveBeenCalledWith(undefined, undefined, "user-1");
-    expect(getArtistStats).toHaveBeenCalledWith(undefined, undefined, "user-1", 20);
+    expect(countArtistsForRange).toHaveBeenCalledWith(undefined, undefined, "user-1");
+    expect(getArtistStats).toHaveBeenCalledWith(undefined, undefined, "user-1", 20, 0);
   });
 
   it("should return 400 for invalid limit (too low)", async () => {
@@ -126,6 +139,7 @@ describe("GET /api/artists", () => {
     const data = await response.json();
     expect(data).toHaveProperty("error", "Le paramètre limit doit être entre 1 et 100");
     expect(getArtistOverview).not.toHaveBeenCalled();
+    expect(countArtistsForRange).not.toHaveBeenCalled();
     expect(getArtistStats).not.toHaveBeenCalled();
   });
 

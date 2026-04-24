@@ -113,7 +113,7 @@ export async function countArtistsForRange(
   `;
 
   const result = await prisma.$queryRaw<Array<{ total: bigint }>>(query);
-  return Number(result[0]?.total ?? 0n);
+  return Number(result[0]?.total ?? BigInt(0));
 }
 
 /**

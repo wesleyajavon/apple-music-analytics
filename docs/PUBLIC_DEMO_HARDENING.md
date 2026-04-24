@@ -85,7 +85,6 @@ Document de **cadrage** : plan étape par étape et **prompts** réutilisables p
 | Route | Public OK | Notes |
 |-------|-----------|--------|
 | `/dashboard/overview` | ☐ | |
-| `/dashboard/overview-bis` | ☐ | |
 | *(à compléter)* | | |
 
 ---

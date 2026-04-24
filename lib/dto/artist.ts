@@ -41,6 +41,12 @@ export interface ArtistOverviewDto {
 export interface ArtistsResponseDto {
   overview: ArtistOverviewDto;
   topArtists: ArtistStatsDto[];
+  pagination?: {
+    limit: number;
+    offset: number;
+    total: number;
+    hasMore: boolean;
+  };
 }
 
 /**

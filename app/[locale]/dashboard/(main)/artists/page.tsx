@@ -1,8 +1,10 @@
 "use client";
 
-import { memo, useMemo, Suspense, useState } from "react";
+import { memo, useMemo, Suspense, useState, useCallback, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
+import { useQueryClient } from "@tanstack/react-query";
+import { usePathname, useRouter } from "@/i18n/navigation";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
 import {
   getDateRangePresetFromSearchParams,
@@ -20,7 +22,7 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import { useArtistStats } from "@/lib/hooks/use-artists";
+import { artistKeys, fetchArtistStats, useArtistStats } from "@/lib/hooks/use-artists";
 import { CHART_TOOLTIP_STYLES } from "@/lib/constants/config";
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
@@ -52,7 +54,7 @@ const ArtistCard = memo(({
   artist: ArtistStatsDto;
   rank: number;
   maxListens: number;
-  t: (k: string) => string;
+  t: (k: string, v?: Record<string, string | number>) => string;
   locale: string;
 }) => {
   const progress = maxListens > 0 ? (artist.listenCount / maxListens) * 100 : 0;
@@ -206,15 +208,35 @@ function ChevronIcon({ direction }: { direction: "up" | "down" }) {
  * Tableau détaillé – header cliquable pour expand/collapse
  */
 const DetailedViewSection = memo(({
-  topArtists,
+  artists,
+  page,
+  pageSize,
+  totalPages,
+  total,
+  hasMore,
+  offset,
+  isFetching,
+  onPageChange,
+  onPageSizeChange,
   t,
   locale,
 }: {
-  topArtists: ArtistStatsDto[];
+  artists: ArtistStatsDto[];
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  total: number;
+  hasMore: boolean;
+  offset: number;
+  isFetching: boolean;
+  onPageChange: (nextPage: number) => void;
+  onPageSizeChange: (nextPageSize: number) => void;
   t: (k: string) => string;
   locale: string;
 }) => {
   const [expanded, setExpanded] = useState(false);
+  const pageStart = total === 0 ? 0 : offset + 1;
+  const pageEnd = Math.min(offset + artists.length, total);
 
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-200/80 dark:border-gray-600/50 bg-white dark:bg-gray-800/90 shadow-lg">
@@ -231,9 +253,10 @@ const DetailedViewSection = memo(({
         <ChevronIcon direction={expanded ? "up" : "down"} />
       </button>
       {expanded && (
-        <div className="overflow-x-auto">
+        <>
+        <div className="max-h-[520px] overflow-y-auto overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead className="bg-gray-50/80 dark:bg-gray-800/50">
+            <thead className="sticky top-0 z-10 bg-gray-50/95 backdrop-blur supports-[backdrop-filter]:bg-gray-50/80 dark:bg-gray-800/95 dark:supports-[backdrop-filter]:bg-gray-800/80">
               <tr>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t("rank")}</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t("artist")}</th>
@@ -244,7 +267,30 @@ const DetailedViewSection = memo(({
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-              {topArtists.map((artist, index) => {
+              {isFetching
+                ? Array.from({ length: Math.min(pageSize, 10) }).map((_, index) => (
+                    <tr key={`artist-skeleton-${index}`}>
+                      <td className="whitespace-nowrap px-6 py-4">
+                        <div className="h-8 w-8 animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700" />
+                      </td>
+                      <td className="whitespace-nowrap px-6 py-4">
+                        <div className="h-4 w-44 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+                      </td>
+                      <td className="whitespace-nowrap px-6 py-4">
+                        <div className="ml-auto h-4 w-16 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+                      </td>
+                      <td className="whitespace-nowrap px-6 py-4">
+                        <div className="ml-auto h-4 w-10 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+                      </td>
+                      <td className="whitespace-nowrap px-6 py-4">
+                        <div className="ml-auto h-4 w-24 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+                      </td>
+                      <td className="whitespace-nowrap px-6 py-4">
+                        <div className="ml-auto h-4 w-24 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+                      </td>
+                    </tr>
+                  ))
+                : artists.map((artist, index) => {
                 const rankStyles = ["text-amber-500", "text-slate-400", "text-amber-700"];
                 const rankBg = ["bg-amber-500/15", "bg-slate-400/15", "bg-amber-700/15"];
                 const rankStyle = index < 3 ? rankStyles[index] : "text-gray-400 dark:text-gray-500";
@@ -253,7 +299,7 @@ const DetailedViewSection = memo(({
                   <tr key={artist.artistId} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
                     <td className="whitespace-nowrap px-6 py-4">
                       <span className={`inline-flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold ${rankStyle} ${rankBgStyle}`}>
-                        {index + 1}
+                        {offset + index + 1}
                       </span>
                     </td>
                     <td className="whitespace-nowrap px-6 py-4">
@@ -292,6 +338,52 @@ const DetailedViewSection = memo(({
             </tbody>
           </table>
         </div>
+        <div className="flex flex-col gap-3 border-t border-gray-100 dark:border-gray-700/50 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            {t("paginationSummary", {
+              start: pageStart,
+              end: pageEnd,
+              total,
+            })}
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => onPageChange(page - 1)}
+              disabled={page === 1}
+              className="inline-flex min-h-[36px] items-center justify-center rounded-md border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700/50"
+            >
+              {t("paginationPrevious")}
+            </button>
+            <label className="ml-2 inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+              <span>{t("pageSizeLabel")}</span>
+              <select
+                value={pageSize}
+                onChange={(e) => onPageSizeChange(Number(e.target.value))}
+                className="rounded-md border border-gray-200 bg-white px-2 py-1 text-sm dark:border-gray-600 dark:bg-gray-800"
+              >
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+            </label>
+            <span className="px-2 text-sm text-gray-600 dark:text-gray-300">
+              {t("paginationPage", { page, totalPages })}
+            </span>
+            <button
+              type="button"
+              onClick={() => onPageChange(page + 1)}
+              disabled={!hasMore}
+              className="inline-flex min-h-[36px] items-center justify-center rounded-md border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700/50"
+            >
+              {t("paginationNext")}
+            </button>
+          </div>
+        </div>
+        {isFetching ? (
+          <div className="px-6 pb-4 text-xs text-gray-500 dark:text-gray-400">{t("paginationLoading")}</div>
+        ) : null}
+        </>
       )}
     </div>
   );
@@ -316,13 +408,35 @@ function formatDateRange(
 }
 
 function ArtistsContent() {
+  const DEFAULT_PAGE_SIZE = 20;
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  const queryClient = useQueryClient();
   const t = useTranslations("artists");
   const locale = useLocale();
   const emptyStatePresets = useEmptyStatePresets();
   const startDate = searchParams.get("startDate") || undefined;
   const endDate = searchParams.get("endDate") || undefined;
   const userId = searchParams.get("userId") ?? undefined;
+  const page = Math.max(1, Number.parseInt(searchParams.get("page") ?? "1", 10) || 1);
+  const pageSize = [20, 50, 100].includes(
+    Number.parseInt(searchParams.get("pageSize") ?? String(DEFAULT_PAGE_SIZE), 10)
+  )
+    ? Number.parseInt(searchParams.get("pageSize") ?? String(DEFAULT_PAGE_SIZE), 10)
+    : DEFAULT_PAGE_SIZE;
+  const offset = (page - 1) * pageSize;
+
+  const updatePaginationParams = useCallback(
+    (nextPage: number, nextPageSize: number) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("page", String(Math.max(1, nextPage)));
+      params.set("pageSize", String(nextPageSize));
+      const qs = params.toString();
+      router.replace(qs ? `${pathname}?${qs}` : pathname);
+    },
+    [pathname, router, searchParams]
+  );
 
   const preset = getDateRangePresetFromSearchParams(searchParams);
   const {
@@ -350,15 +464,66 @@ function ArtistsContent() {
     return name;
   }, [preset, rangeStart, rangeEnd, rangeLoading, locale, t]);
 
-  const { data, isLoading, error, refetch } = useArtistStats(
+  const {
+    data: topData,
+    isLoading: isTopLoading,
+    error: topError,
+    refetch: refetchTop,
+  } = useArtistStats(
     startDate,
     endDate,
     userId,
     20
   );
+  const {
+    data: pagedData,
+    isLoading: isPagedLoading,
+    isFetching: isPagedFetching,
+    error: pagedError,
+    refetch: refetchPaged,
+  } = useArtistStats(
+    startDate,
+    endDate,
+    userId,
+    pageSize,
+    offset
+  );
 
-  const topArtists = data?.topArtists ?? [];
+  const topArtists = topData?.topArtists ?? [];
+  const pagedArtists = pagedData?.topArtists ?? [];
+  const pagination = pagedData?.pagination;
+  const totalArtistsInRange = pagination?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalArtistsInRange / pageSize));
   const maxListens = topArtists[0]?.listenCount ?? 1;
+
+  useEffect(() => {
+    if (page > totalPages) {
+      updatePaginationParams(totalPages, pageSize);
+    }
+  }, [page, pageSize, totalPages, updatePaginationParams]);
+
+  useEffect(() => {
+    if (!pagination?.hasMore) return;
+    const nextOffset = offset + pageSize;
+    void queryClient.prefetchQuery({
+      queryKey: artistKeys.stats({
+        startDate,
+        endDate,
+        userId,
+        limit: pageSize,
+        offset: nextOffset,
+      }),
+      queryFn: () => fetchArtistStats(startDate, endDate, userId, pageSize, nextOffset),
+    });
+  }, [
+    endDate,
+    offset,
+    pageSize,
+    pagination?.hasMore,
+    queryClient,
+    startDate,
+    userId,
+  ]);
 
   const barChartData = useMemo(() => {
     return topArtists.slice(0, 10).map((artist) => ({
@@ -377,21 +542,24 @@ function ArtistsContent() {
     }));
   }, [topArtists]);
 
-  if (isLoading) return <OverviewSkeleton />;
-  if (error) {
+  if (isTopLoading) return <OverviewSkeleton />;
+  if (topError) {
     return (
       <ErrorState
-        error={error}
+        error={topError}
         message={t("errorLoading")}
-        onRetry={refetch}
+        onRetry={refetchTop}
       />
     );
   }
-  if (!data || data.topArtists.length === 0) {
+  if (!topData || topData.topArtists.length === 0) {
     return <EmptyState {...emptyStatePresets.importData} />;
   }
+  if (isPagedLoading && !pagedData) return <OverviewSkeleton />;
+  if (pagedError) return <ErrorState error={pagedError} message={t("errorLoading")} onRetry={refetchPaged} />;
+  if (!pagedData) return <EmptyState {...emptyStatePresets.importData} />;
 
-  const { overview } = data;
+  const { overview } = topData;
 
   return (
     <div className="space-y-8">
@@ -510,7 +678,20 @@ function ArtistsContent() {
       </section>
 
       {/* Tableau détaillé – togglable */}
-      <DetailedViewSection topArtists={topArtists} t={t} locale={locale} />
+      <DetailedViewSection
+        artists={pagedArtists}
+        page={page}
+        pageSize={pageSize}
+        totalPages={totalPages}
+        total={totalArtistsInRange}
+        hasMore={pagination?.hasMore ?? false}
+        offset={offset}
+        isFetching={isPagedFetching}
+        onPageChange={(nextPage) => updatePaginationParams(nextPage, pageSize)}
+        onPageSizeChange={(nextPageSize) => updatePaginationParams(1, nextPageSize)}
+        t={t}
+        locale={locale}
+      />
     </div>
   );
 }

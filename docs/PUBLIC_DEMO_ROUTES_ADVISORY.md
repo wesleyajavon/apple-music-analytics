@@ -23,7 +23,6 @@ Voir aussi : [PUBLIC_DEMO_HARDENING.md](./PUBLIC_DEMO_HARDENING.md) (levier 1, p
 | Route | Verdict public anonyme | Pourquoi |
 |--------|------------------------|----------|
 | `/dashboard/overview` | **Garder** | Vitre principale de la démo ; agrégats + widgets ; bon équilibre (éventuellement limiter l’IA sur l’overview plus tard). |
-| `/dashboard/overview-bis` | **Optionnel** | Belle vitrine mais redondante ; peut être fermée pour **réduire la surface** sans perdre l’essentiel. |
 | `/dashboard/timeline` | **Garder** | Courbe agrégée, lisible pour un prospect. |
 | `/dashboard/genres` | **Garder** | Répartition agrégée. |
 | `/dashboard/artists` | **Garder** | Top artistes agrégés. |
@@ -48,12 +47,6 @@ Voir aussi : [PUBLIC_DEMO_HARDENING.md](./PUBLIC_DEMO_HARDENING.md) (levier 1, p
 1. Bloquer tout le **bloc IA** : `musical-profile`, `ai-insights`, `taste-evolution`, `taste-profile`, `when-will-i-listen`.
 2. Bloquer **`heatmap`** (ou désactiver uniquement le détail jour + appels `listens` en mode public — plus fin à implémenter).
 3. Laisser ouvert : **overview**, **temporal-analysis**, **genres**, **artists**, **genres/trends**, **artists/trends**, **timeline**, **about**, **demo**, **insights**.
-
----
-
-## Synthèse « démo plus riche »
-
-- Comme la synthèse minimale, en **gardant** `overview-bis` si tu veux plus de « wow » sans rouvrir le bloc IA ni le heatmap détaillé.
 
 ---
 

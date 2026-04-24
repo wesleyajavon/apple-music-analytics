@@ -8,6 +8,7 @@ import { LanguageSwitcher } from "@/lib/components/language-switcher";
 import { ThemeSwitcher } from "@/lib/components/theme-switcher";
 import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { getPublicProfileUserId } from "@/lib/constants/public-profile";
 
 const STORAGE_KEY = "sidebar-collapsed";
 
@@ -32,15 +33,6 @@ const navGroups: NavGroup[] = [
         icon: (props) => (
           <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
-          </svg>
-        ),
-      },
-      {
-        href: "/dashboard/overview-bis",
-        labelKey: "overviewBis",
-        icon: (props) => (
-          <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
           </svg>
         ),
       },
@@ -166,15 +158,6 @@ const navGroups: NavGroup[] = [
     labelKey: "ai",
     items: [
       {
-        href: "/dashboard/musical-profile",
-        labelKey: "musicalProfile",
-        icon: (props) => (
-          <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 9l10.5-3m0 6.553v3.75a2.25 2.25 0 01-1.632 2.163l-1.32.377a1.803 1.803 0 11-.99-3.467l2.31-.66a2.25 2.25 0 001.632-2.163zm0 0V2.25L9 5.25v10.303m0 0v3.75a2.25 2.25 0 01-1.632 2.163l-1.32.377a1.803 1.803 0 01-.99-3.467l2.31-.66A2.25 2.25 0 009 15.553z" />
-          </svg>
-        ),
-      },
-      {
         href: "/dashboard/ai-insights",
         labelKey: "aiInsights",
         icon: (props) => (
@@ -293,6 +276,7 @@ function SidebarContent() {
   const [authUserId, setAuthUserId] = useState<string | null>(null);
   const [isSigningOut, setIsSigningOut] = useState(false);
   const t = useTranslations("sidebar");
+  const publicProfileUserId = useMemo(() => getPublicProfileUserId(), []);
   const adminUserIds = useMemo(
     () =>
       (process.env.NEXT_PUBLIC_ADMIN_USER_IDS ?? "")
@@ -309,6 +293,13 @@ function SidebarContent() {
   const withFilters = useMemo(
     () => (href: string) => mergeDashboardSearchParams(href, searchParams),
     [searchParams]
+  );
+  const isPublicDemoViewer = useMemo(
+    () =>
+      !authUserId &&
+      !!publicProfileUserId &&
+      searchParams.get("userId") === publicProfileUserId,
+    [authUserId, publicProfileUserId, searchParams]
   );
 
   // Hydrate collapsed state from localStorage (SSR-safe)
@@ -413,7 +404,7 @@ function SidebarContent() {
             }`}
           >
             <Link
-              href={withFilters("/dashboard")}
+              href={isPublicDemoViewer ? "/" : withFilters("/dashboard")}
               className={`flex items-center group ${isCollapsed ? "justify-center" : "gap-3"}`}
               onClick={() => setIsMobileMenuOpen(false)}
             >

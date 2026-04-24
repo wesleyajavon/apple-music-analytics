@@ -659,25 +659,28 @@ const GROQ_BACKFILL_JOB_DASHBOARD_SELECT = {
  * toujours le plus ancien actif). Évite d’afficher une ligne « récente » à 0 alors qu’un
  * job plus ancien est en cours de traitement.
  */
+function oldestJobByStatus<
+  T extends { status: string; createdAt: Date },
+>(rows: T[], status: T["status"]): T | undefined {
+  const subset = rows.filter((j) => j.status === status);
+  if (subset.length === 0) return undefined;
+  return subset.reduce((a, b) => (a.createdAt <= b.createdAt ? a : b));
+}
+
 export async function getGroqBackfillJobForDashboard(userId: string) {
-  const running = await prisma.importGenreBackfillJob.findFirst({
-    where: { userId, provider: "groq", status: "running" },
-    orderBy: { createdAt: "asc" },
+  const activeRows = await prisma.importGenreBackfillJob.findMany({
+    where: {
+      userId,
+      provider: "groq",
+      status: { in: ["running", "paused", "pending"] },
+    },
     select: GROQ_BACKFILL_JOB_DASHBOARD_SELECT,
   });
-  if (running) return running;
-  const paused = await prisma.importGenreBackfillJob.findFirst({
-    where: { userId, provider: "groq", status: "paused" },
-    orderBy: { createdAt: "asc" },
-    select: GROQ_BACKFILL_JOB_DASHBOARD_SELECT,
-  });
-  if (paused) return paused;
-  const pending = await prisma.importGenreBackfillJob.findFirst({
-    where: { userId, provider: "groq", status: "pending" },
-    orderBy: { createdAt: "asc" },
-    select: GROQ_BACKFILL_JOB_DASHBOARD_SELECT,
-  });
-  if (pending) return pending;
+  const chosen =
+    oldestJobByStatus(activeRows, "running") ??
+    oldestJobByStatus(activeRows, "paused") ??
+    oldestJobByStatus(activeRows, "pending");
+  if (chosen) return chosen;
   return prisma.importGenreBackfillJob.findFirst({
     where: { userId, provider: "groq" },
     orderBy: { createdAt: "desc" },

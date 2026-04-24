@@ -44,9 +44,7 @@
       "other": "Otros"
     },
     "items": {
-      "musicalProfile": "Perfil musical 🎵",
       "overview": "Vista general 📊",
-      "overviewBis": "Vista general (Narrativa) 📖",
       "timeline": "Timeline 📈",
       "heatmap": "Mapa de calor 🔥",
       "temporalAnalysis": "Análisis temporal ⏰",
@@ -281,6 +279,7 @@
   },
   "overview": {
     "title": "Vista general 📊",
+    "titlePersonal": "Vista general de {name} 📊",
     "subtitle": "Estadísticas generales de tu escucha musical. Analiza tus tendencias y descubre tus géneros favoritos.",
     "periodBadge": "Período",
     "allData": "Todos los datos",
@@ -312,26 +311,11 @@
     "Listens": "Escuchas",
     "errorLoading": "No se pueden cargar las estadísticas"
   },
-  "overviewBis": {
-    "title": "Vista general (Narrativa) 📖",
-    "subtitle": "Tu historia de escucha en flujo narrativo. Hero spotlight, cifras, evolución y favoritos.",
-    "testBadge": "Test A/B",
-    "hero": {
-      "listenedHours": "Escuchaste {hours} horas este período",
-      "genreOfMoment": "Tu género del momento: {genre}"
-    },
-    "sections": {
-      "inNumbers": "En cifras",
-      "yourEvolution": "Tu evolución",
-      "yourHighlights": "Tus highlights",
-      "yourFavorites": "Tus favoritos"
-    }
-  },
   "timeline": {
     "title": "Línea temporal de escucha 📈",
-    "subtitle": "Evolución de tus escuchas a lo largo del tiempo",
-    "chartTitle": "Evolución de escuchas",
-    "chartHint": "Evolución de tus escuchas a lo largo del tiempo",
+    "subtitle": "Mira cómo cambian tus hábitos de escucha con el tiempo",
+    "chartTitle": "Tu tendencia de escucha",
+    "chartHint": "Sigue picos, caídas y ritmo en el período seleccionado",
     "errorLoading": "No se puede cargar la línea temporal de escucha",
     "listens": "escuchas",
     "Listens": "Escuchas",
@@ -451,12 +435,17 @@
     "other": "Otros",
     "apiMappingNoticeTitle": "Limitación actual del mapeo de géneros",
     "apiMappingNoticeBody": "El mapeo automático a géneros precisos sigue siendo parcial porque la app no tiene acceso fiable a las APIs de Apple Music o Spotify para enriquecer cada pista/artista.",
-    "apiMappingNoticeLink": "Palette Features"
+    "apiMappingNoticeLink": "Palette Features",
+    "paginationSummary": "Mostrando {start}-{end} de {total}",
+    "paginationPrevious": "Anterior",
+    "paginationNext": "Siguiente",
+    "paginationPage": "Página {page} / {totalPages}",
+    "pageSizeLabel": "Filas"
   },
   "genreTrends": {
     "title": "Tendencias de géneros 📉",
     "subtitle": "Evolución de tus preferencias musicales en el tiempo",
-    "subtitleExtended": "Evolución de tus preferencias musicales en el tiempo. Comparación primera / segunda mitad del período.",
+    "subtitleExtended": "Evolución de tus preferencias musicales en el tiempo. Compara cómo cada género seleccionado sube o baja a lo largo del período.",
     "errorLoading": "No se pueden cargar las tendencias de géneros",
     "genresToDisplay": "Géneros a mostrar:",
     "all": "Todo",
@@ -483,8 +472,8 @@
     "apiMappingNoticeShort": "Algunas tendencias pueden seguir siendo aproximadas sin acceso API de Apple Music/Spotify para refinar el mapeo de géneros.",
     "apiMappingNoticeLink": "Palette Features",
     "chartGenreAccuracyIntro": "Cada línea usa el género guardado por escucha; las exportaciones rara vez traen un género fiable para todas las pistas.",
-    "chartGenreAccuracyPalette": "<manualLabel>Palette (manual)</manualLabel>: corriges tú los géneros desconocidos o dudosos, tarjeta a tarjeta (control total, ordenado por impacto de escuchas). <palette>Abrir Palette</palette>.",
-    "chartGenreAccuracyGroq": "<aiLabel>Clasificación con Groq (IA)</aiLabel>: un LLM propone un género principal a partir del artista y el título (se envían a Groq solo tras tu consentimiento). Útil para limpiar Unknown al por mayor; el progreso aparece en la franja violeta del panel cuando hay sesión activa o recién terminada.",
+    "chartGenreAccuracyPalette": "<manualLabel>Mapeo manual (Palette)</manualLabel>: eliges tú el género, artista por artista o canción por canción. El más preciso. <palette>Abrir Palette</palette>.",
+    "chartGenreAccuracyGroq": "<aiLabel>Mapeo automático (Groq IA)</aiLabel>: la IA sugiere géneros en lote para reducir Unknown más rápido. El más rápido, pero menos preciso.",
     "groqSessionRunningHint": "Ya hay una sesión de clasificación con Groq en curso.",
     "groqProgressAnchor": "Ver el banner de progreso",
     "groqStartNoUnknown": "Todas las pistas que has escuchado ya tienen género en tus datos; no queda nada que clasificar aquí con Groq."
@@ -523,7 +512,7 @@
   "artistTrends": {
     "title": "Tendencias de artistas 📉",
     "subtitle": "Cómo evolucionan tus artistas más escuchados en el tiempo",
-    "subtitleExtended": "Cómo evolucionan tus artistas más escuchados en el tiempo. Comparación primera / segunda mitad del período.",
+    "subtitleExtended": "Cómo evolucionan tus artistas más escuchados en el tiempo. Compara cómo cada artista seleccionado sube o baja a lo largo del período.",
     "errorLoading": "No se pueden cargar las tendencias de artistas",
     "artistsToDisplay": "Artistas a mostrar:",
     "all": "Todo",
@@ -596,11 +585,17 @@
     "rankNth": "{n}.º",
     "artistTooltip": "Artista",
     "showMoreArtists": "Ver {count} más",
-    "showLessArtists": "Ver menos"
+    "showLessArtists": "Ver menos",
+    "paginationSummary": "Mostrando {start}-{end} de {total}",
+    "paginationPrevious": "Anterior",
+    "paginationNext": "Siguiente",
+    "paginationPage": "Página {page} / {totalPages}",
+    "pageSizeLabel": "Filas",
+    "paginationLoading": "Cargando la página siguiente..."
   },
   "tracks": {
     "title": "Títulos 🎧",
-    "subtitle": "Tus títulos más escuchados con enfoque top 20 y paginación API.",
+    "subtitle": "Tus títulos más escuchados de un vistazo, empezando por tu top 20.",
     "errorLoading": "No se pueden cargar las estadísticas de títulos",
     "heroTitle": "Tus títulos",
     "heroSubtitle": "Top títulos para el período seleccionado",
@@ -610,9 +605,16 @@
     "listens": "Escuchas",
     "topTrack": "Escuchas del top título",
     "top12Listens": "Top 12 · Escuchas",
-    "allTracks": "Top 20 títulos",
+    "top20Listens": "Top 20 · Escuchas",
+    "allTracks": "Ranking de títulos",
     "rank": "Rango",
-    "listensCount": "escuchas"
+    "listensCount": "escuchas",
+    "paginationSummary": "Mostrando {start}-{end} de {total}",
+    "paginationPrevious": "Anterior",
+    "paginationNext": "Siguiente",
+    "paginationPage": "Página {page} / {totalPages}",
+    "pageSizeLabel": "Filas",
+    "paginationLoading": "Cargando la página siguiente..."
   },
   "trackTrends": {
     "title": "Tendencias de títulos 📉",
@@ -656,7 +658,7 @@
     "noInsights": "No hay datos disponibles para generar insights.",
     "changeDates": "Modifica las fechas para obtener insights.",
     "notEnoughData": "No hay suficientes datos",
-    "importDescription": "Importa tus datos de escucha (Last.fm) y selecciona un período para obtener insights.",
+    "importDescription": "Importa tus datos de escucha (exportaciones Spotify/Apple recomendadas) y selecciona un período para obtener insights.",
     "yourInsights": "Tus insights",
     "insightsFromData": "Insights generados a partir de tus datos de escucha agregados.",
     "spotlightTitle": "Tus insights",
@@ -715,7 +717,7 @@
     "checkApiKey": "Verifica que GROQ_API_KEY esté configurado en el servidor.",
     "noData": "No hay datos disponibles.",
     "notEnoughData": "No hay suficientes datos",
-    "importDescription": "Importa tus datos de escucha (Last.fm) y selecciona un período para obtener tu perfil.",
+    "importDescription": "Importa tus datos de escucha (exportaciones Spotify/Apple recomendadas) y selecciona un período para obtener tu perfil.",
     "cached": "(resultado en caché)",
     "quotaRemaining": "Cuota: {count} restantes",
     "tone": "Tono:",
@@ -761,7 +763,7 @@
     "heroTitle": "Tu perfil musical",
     "heroSubtitle": "Una instantánea narrativa de tus hábitos de escucha — insights, gustos, evolución y tu próximo momento de escucha.",
     "noData": "Aún no hay datos",
-    "importDescription": "Importa tus datos de escucha (Last.fm) y selecciona un período para generar tu perfil musical.",
+    "importDescription": "Importa tus datos de escucha (exportaciones Spotify/Apple recomendadas) y selecciona un período para generar tu perfil musical.",
     "sections": {
       "insights": "Tus insights",
       "tasteProfile": "Tus gustos",
@@ -788,15 +790,15 @@
   },
   "insights": {
     "title": "Insights y Metodología 📚",
-    "subtitle": "Comprende qué revela cada página, cómo se calculan los analytics y las limitaciones del sistema. Referencia para importar tus datos y aprovechar al máximo el dashboard.",
+    "subtitle": "Comprende qué revela cada página, cómo se calculan los analytics y cuáles son las limitaciones actuales. Usa esta página como referencia para importar datos y sacar más valor del dashboard.",
     "heroBadge": "Documentación técnica",
     "spotlightTitle": "En resumen",
     "spotlightHint": "Resumen rápido de la metodología",
     "summary": {
-      "patterns": "Patrones: Overview, Timeline, Heatmap, Análisis temporal, Géneros, funciones IA y filtros de fechas revelan tus hábitos de escucha.",
+      "patterns": "Patrones: Overview, Timeline, Heatmap, Canciones, Artistas, Análisis temporal, Géneros, Perfil musical, Insights y páginas IA revelan tus hábitos de escucha.",
       "calculations": "Cálculos: Agregaciones PostgreSQL (día/semana/mes), estadísticas globales, cascada de géneros (Track → ARTIST_TO_GENRE_MAP → Unknown), exportaciones CSV/JSON/PDF.",
-      "limitations": "Limitaciones: Cobertura del mapeo de géneros, fuentes solo Last.fm, tiempo de escucha estimado, rendimiento con grandes volúmenes, normalización de nombres.",
-      "architecture": "Arquitectura: Next.js 14, PostgreSQL + Prisma, caché Redis-ready, Recharts, importación Last.fm vía scripts o API."
+      "limitations": "Limitaciones: Cobertura del mapeo de géneros, completitud de fuentes, tiempo de escucha estimado, rendimiento a gran escala y normalización de nombres.",
+      "architecture": "Arquitectura: Next.js App Router, PostgreSQL + Prisma, caché Redis opcional, Recharts, e ingestión orientada al producto público vía exportaciones Spotify/Apple (Last.fm opcional)."
     },
     "expandSection": "Expandir sección",
     "collapseSection": "Colapsar sección",
@@ -804,7 +806,7 @@
       "sectionTitle": "Patrones revelados por los datos",
       "overview": {
         "title": "Vista general",
-        "paragraph": "La página <code>/dashboard/overview</code> muestra tus estadísticas globales con comparación al período anterior: total de escuchas, artistas y canciones únicos, tiempo total. Un gráfico de evolución reciente (áreas) y los géneros más escuchados completan el panorama."
+        "paragraph": "La página <code>/dashboard/overview</code> muestra tus estadísticas globales con comparación al período anterior: total de escuchas, artistas y canciones únicos, tiempo total. Un gráfico de evolución reciente (áreas) y los géneros más escuchados completan el panorama. También hay páginas complementarias: <code>/dashboard/tracks</code>, <code>/dashboard/artists</code>, <code>/dashboard/musical-profile</code> y esta página <code>/dashboard/insights</code>."
       },
       "timeline": {
         "title": "Timeline y tendencias temporales",
@@ -823,7 +825,7 @@
       },
       "genres": {
         "title": "Diversidad y preferencias de géneros",
-        "paragraph": "Las páginas <code>/dashboard/genres</code> y <code>/genres/trends</code> revelan el alcance de tu paleta musical: géneros dominantes, evolución temporal y diversidad de géneros. Las métricas (artistas únicos, canciones únicas) muestran el equilibrio entre repetición y exploración."
+        "paragraph": "Las páginas <code>/dashboard/genres</code> y <code>/dashboard/genres/trends</code> revelan el alcance de tu paleta musical: géneros dominantes, evolución temporal y diversidad de géneros. Las métricas (artistas únicos, canciones únicas) muestran el equilibrio entre repetición y exploración."
       },
       "ai": {
         "title": "Insights impulsados por IA",
@@ -835,7 +837,7 @@
       },
       "dateRange": {
         "title": "Filtro de rango de fechas",
-        "paragraph": "La barra de filtros en la parte superior permite enfocarte en períodos específicos: 7 días, 30 días, año en curso, o todo. Todas las páginas del dashboard respetan este filtro. Las exportaciones (CSV, JSON, PDF) también usan el período seleccionado."
+        "paragraph": "La barra de filtros en la parte superior permite enfocarte en períodos específicos: 7 días, 30 días, año en curso, o todo. Las páginas principales de analytics respetan este filtro. Las exportaciones (CSV, JSON, PDF) también usan el período seleccionado."
       }
     },
     "calculations": {
@@ -882,9 +884,9 @@
       },
       "dataSources": {
         "title": "Fuentes de datos",
-        "limitation": "Actualmente: Last.fm está soportado (API real cuando LASTFM_API_KEY está configurada, mock para desarrollo).",
-        "impact": "Los datos pueden estar incompletos si usas principalmente Spotify, YouTube Music u otras plataformas sin historial de Last.fm.",
-        "solution": "Extensiones futuras: Soporte Spotify (OAuth requerido), YouTube Music, etc."
+        "limitation": "Para el producto público, la ingestión principal se basa en exportaciones solicitadas por el usuario (ZIP de Spotify + CSV de Apple Music). Last.fm queda como vía histórica/opcional y ya no se espera en el flujo UX por defecto.",
+        "impact": "El riesgo principal son exportaciones faltantes o desactualizadas, más que la ausencia de scrobbles Last.fm. La cobertura depende de lo que los usuarios solicitan y suben.",
+        "solution": "Diseñar onboarding y recordatorios in-app alrededor de los flujos de exportación/importación; dejar Last.fm como fallback avanzado para usuarios power."
       },
       "listenTime": {
         "title": "Cálculo del tiempo de escucha",
@@ -909,9 +911,9 @@
       "sectionTitle": "Arquitectura técnica",
       "stack": {
         "title": "Stack tecnológico",
-        "li1": "Backend: Next.js 14 (App Router) con API Routes",
+        "li1": "Backend: Next.js (App Router) con API Routes",
         "li2": "Base de datos: PostgreSQL con Prisma ORM",
-        "li3": "Cache: Redis preparado (opcional, REDIS_URL); TanStack Query para cache en cliente",
+        "li3": "Cache: Redis opcional (REDIS_URL) y TanStack Query para cache en cliente",
         "li4": "Frontend: React 18, TanStack Query v5, Tailwind CSS, Sonner (toasts)",
         "li5": "Visualización: Recharts (líneas, barras, áreas, tartas)",
         "li6": "API: Endpoints documentados en docs/API.md"
@@ -921,13 +923,13 @@
         "paragraph": "Esquema normalizado (Prisma) para evitar redundancia:",
         "li1": "Artist: nombre, nameLower (búsqueda insensible a mayúsculas), MBID, imageUrl",
         "li2": "Track: título, artista, duración, género (Last.fm cuando está disponible), MBID",
-        "li3": "Listen: timestamp (playedAt), fuente (lastfm), enlace a Track"
+        "li3": "Listen: timestamp (playedAt), fuente (spotify_export | apple_music_export | apple_music_replay | lastfm), enlace a Track"
       },
       "import": {
         "title": "Importación de datos",
         "paragraph": "Para alimentar el dashboard:",
-        "li1": "Last.fm: npm run lastfm:update o API POST /api/lastfm/import (requiere LASTFM_API_KEY y LASTFM_USER; los géneros de las canciones vienen de Last.fm cuando están disponibles)",
-        "li2": "ARTIST_TO_GENRE_MAP: anulaciones estáticas opcionales en código para artistas que siguen sin género tras la importación"
+        "li1": "Vía principal (público): importación de usuario desde onboarding (ZIP de exportación Spotify y CSV de exportación Apple Music), con parsing y guardado por cuenta.",
+        "li2": "Vía secundaria (legado): la sincronización Last.fm por scripts/API sigue disponible para uso avanzado, pero se desprioriza intencionalmente en UX."
       }
     }
   },
@@ -1083,29 +1085,29 @@
   },
   "about": {
     "title": "Cómo funciona 🎯",
-    "subtitle": "Una guía simple para entender este proyecto y cómo tus datos de escucha llegan al dashboard.",
+    "subtitle": "Una guía rápida para entender de dónde vienen tus datos de escucha y qué puedes explorar hoy en el dashboard.",
     "heroBadge": "Guía de usuario",
     "whatIs": {
       "title": "¿Qué es esto?",
-      "paragraph": "Apple Music Analytics es un dashboard personal que visualiza tus hábitos de escucha musical. Usa tu historial de Last.fm para mostrarte estadísticas, tendencias e insights sobre cómo escuchas."
+      "paragraph": "Apple Music Analytics es un dashboard personal que visualiza la evolución de tus hábitos de escucha. Puedes cargar datos desde scrobbles de Last.fm o exportaciones CSV de Apple Music, y explorar estadísticas, tendencias e insights en un solo lugar."
     },
     "whyLastfm": {
       "title": "¿Por qué Last.fm en lugar de Apple Music?",
-      "paragraph": "La API oficial de Apple Music requiere una membresía de desarrollador de pago y tiene costos por uso. Last.fm ofrece una API gratuita para uso personal, lo que permite rastrear tu historial de escucha de forma económica."
+      "paragraph": "La API oficial de Apple Music requiere una membresía de desarrollador de pago y puede implicar costos de uso. Last.fm es una fuente gratuita y práctica para proyectos personales, y las importaciones CSV sirven como respaldo para completar historial."
     },
     "whatIsLastfm": {
       "title": "¿Qué es Last.fm?",
-      "paragraph": "Last.fm es un servicio de descubrimiento musical que rastrea lo que escuchas en varias plataformas (Apple Music, Spotify, etc.). Cuando conectas Last.fm a tu cuenta de Apple Music, registra cada canción que reproduces — artista, título y fecha — y almacena este historial en tu perfil de Last.fm. Este proyecto obtiene ese historial y lo almacena localmente para análisis."
+      "paragraph": "Last.fm es un servicio musical que rastrea tus escuchas en varias plataformas (Apple Music, Spotify, etc.). Cada scrobble incluye metadatos como artista, canción y fecha. Este proyecto obtiene ese historial y lo guarda localmente para análisis."
     },
     "workflow": {
       "title": "¿Cómo llegan los datos aquí?",
       "steps": {
         "step1": "Escucha música — Usa Apple Music (o cualquier app soportada) en tu teléfono como siempre.",
         "step2": "Scrobbling de Last.fm — Last.fm está vinculado a tu cuenta de Apple Music y registra automáticamente cada escucha.",
-        "step3": "Sincroniza los scrobbles — Abres manualmente la app de Last.fm en tu teléfono y buscas nuevos scrobbles para transferir datos de Apple Music a Last.fm.",
-        "step4": "Actualiza la base de datos — Ejecuta el comando de sincronización (o usa la API) para obtener nuevos scrobbles y actualizar tu base de datos local.",
-        "step5": "El dashboard refleja los datos — Una vez actualizada la base, el dashboard muestra tus últimas estadísticas de escucha.",
-        "step6": "¿Datos desactualizados? — Si el dashboard parece desactualizado, suele ser porque la base aún no se ha actualizado con los nuevos scrobbles de Last.fm."
+        "step3": "Captura y sincronización — Las nuevas escuchas llegan a Last.fm mediante scrobbling, o se importan después desde CSV de Apple Music.",
+        "step4": "Actualiza la base de datos — Ejecuta scripts de actualización/importación para traer escuchas recientes y guardarlas en tu base local.",
+        "step5": "El dashboard se refresca — Cuando termina el pipeline de datos, gráficas y métricas muestran los registros más recientes.",
+        "step6": "¿Datos desactualizados? — Casi siempre significa que todavía no se ejecutó una sync/import reciente."
       }
     },
     "features": {
@@ -1114,9 +1116,12 @@
         "overview": "Vista general — Estadísticas globales (escuchas, artistas, canciones, tiempo total)",
         "timeline": "Timeline — Evolución de tus escuchas en el tiempo (día/semana/mes)",
         "heatmap": "Heatmap — Calendario estilo GitHub de tu intensidad de escucha",
+        "tracks": "Canciones — Temas más reproducidos y patrones de repetición",
         "genres": "Géneros — Desglose por género y tendencias temporales",
         "artists": "Artistas — Mejores artistas y estadísticas detalladas",
         "timeAnalysis": "Análisis temporal — Hábitos por hora y día de la semana",
+        "musicalProfile": "Perfil musical — Tu persona de escucha basada en patrones",
+        "insights": "Insights — Resúmenes generados por el producto y señales clave de escucha",
         "whenWillIListen": "¿Cuándo escucharé? — Predicción del horario y género más probables",
         "tasteProfile": "Explain My Taste — Explicación IA de tus preferencias musicales",
         "tasteEvolution": "Evolución de gustos — Cambios semana a semana de tus gustos musicales",
@@ -1126,9 +1131,25 @@
   },
   "home": {
     "title": "Apple Music Analytics 🎵",
-    "welcome": "Bienvenido de nuevo, Wesley 👋",
+    "welcome": "Tu escucha, explicada con claridad.",
+    "welcomePersonal": "Bienvenido de nuevo, {name} 👋",
     "subtitle": "Analiza tus hábitos de escucha y descubre tus tendencias musicales.",
-    "accessDashboard": "Dashboard de Wesley (público) 🚀"
+    "goToDashboard": "Volver a tu dashboard",
+    "accessDashboard": "Explorar una demo publica del dashboard 🚀",
+    "features": {
+      "timeline": {
+        "title": "Timeline",
+        "description": "Visualiza tus habitos de escucha a lo largo del tiempo."
+      },
+      "genresArtists": {
+        "title": "Generos y artistas",
+        "description": "Explora tus top, tendencias y evolucion musical."
+      },
+      "aiInsights": {
+        "title": "AI Insights",
+        "description": "Obten analisis rapidos basados en tus estadisticas."
+      }
+    }
   },
   "metadata": {
     "title": "Apple Music Analytics Dashboard",

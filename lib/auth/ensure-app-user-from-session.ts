@@ -6,22 +6,23 @@ import { prisma } from "@/lib/prisma";
  * Prisma User.id is the same value as Supabase auth user id.
  */
 export async function ensureAppUserFromSession(user: SupabaseUser) {
+  const metadataName =
+    (user.user_metadata?.name as string | undefined) ??
+    (user.user_metadata?.full_name as string | undefined) ??
+    undefined;
+  const safeName = metadataName?.trim() ? metadataName.trim() : undefined;
+
   await prisma.user.upsert({
     where: { id: user.id },
     update: {
       email: user.email ?? null,
-      name:
-        (user.user_metadata?.name as string | undefined) ??
-        (user.user_metadata?.full_name as string | undefined) ??
-        null,
+      // Never overwrite an existing DB name with null/empty metadata.
+      ...(safeName !== undefined ? { name: safeName } : {}),
     },
     create: {
       id: user.id,
       email: user.email ?? null,
-      name:
-        (user.user_metadata?.name as string | undefined) ??
-        (user.user_metadata?.full_name as string | undefined) ??
-        null,
+      name: safeName ?? null,
     },
   });
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, Suspense } from "react";
+import { useCallback, useMemo, Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
@@ -770,6 +770,7 @@ export default function OverviewPage() {
   const t = useTranslations("overview");
   const locale = useLocale();
   const { startDate, endDate, isAll } = useListenDateRange();
+  const [firstName, setFirstName] = useState<string | null>(null);
   const startDateParam = searchParams.get("startDate") ?? "";
   const endDateParam = searchParams.get("endDate") ?? "";
   // Key force le remontage complet quand le filtre change (évite données "All" affichées avec filtre 7j)
@@ -777,6 +778,38 @@ export default function OverviewPage() {
 
   const dateRangeLabel = formatOverviewDateRangeLabel(startDate, endDate, locale);
   const hasComparison = !isAll && !!startDate && !!endDate;
+  const overviewTitle = firstName
+    ? t("titlePersonal", { name: firstName })
+    : t("title");
+
+  useEffect(() => {
+    let mounted = true;
+
+    function extractFirstName(rawName?: string | null) {
+      if (!rawName) return null;
+      const cleaned = rawName.trim();
+      if (!cleaned) return null;
+      return cleaned.split(/\s+/)[0] ?? null;
+    }
+
+    function resolveFirstName(name: string | null | undefined) {
+      return extractFirstName(name ?? null);
+    }
+
+    async function hydrateUserNameFromDb() {
+      const response = await fetch("/api/user/me", { method: "GET" });
+      if (!response.ok) return;
+      const payload = (await response.json()) as { user?: { name?: string | null } | null };
+      if (!mounted) return;
+      setFirstName(resolveFirstName(payload.user?.name));
+    }
+
+    hydrateUserNameFromDb();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   return (
     <div className="px-4 py-6 sm:px-0">
@@ -797,7 +830,7 @@ export default function OverviewPage() {
           )}
         </div>
         <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
-          {t("title")}
+          {overviewTitle}
         </h1>
         <p className="mt-2 text-base text-gray-500 dark:text-gray-400 max-w-2xl">
           {t("subtitle")}

@@ -39,7 +39,8 @@ export async function getArtistStats(
   startDate?: Date,
   endDate?: Date,
   userId?: string,
-  limit: number = 20
+  limit: number = 20,
+  offset: number = 0
 ): Promise<ArtistStats[]> {
   const query = Prisma.sql`
     SELECT 
@@ -61,6 +62,7 @@ export async function getArtistStats(
     GROUP BY a.id, a.name, a."imageUrl"
     ORDER BY listen_count DESC
     LIMIT ${limit}
+    OFFSET ${offset}
   `;
 
   const result = await prisma.$queryRaw<Array<{
@@ -92,6 +94,26 @@ export async function getArtistStats(
       totalPlayTime: transformed.total_play_time,
     };
   });
+}
+
+export async function countArtistsForRange(
+  startDate?: Date,
+  endDate?: Date,
+  userId?: string
+): Promise<number> {
+  const query = Prisma.sql`
+    SELECT COUNT(DISTINCT a.id)::bigint AS total
+    FROM "Listen" l
+    JOIN "Track" t ON l."trackId" = t.id
+    JOIN "Artist" a ON t."artistId" = a.id
+    WHERE 1=1
+      ${startDate ? Prisma.sql`AND l."playedAt" >= ${startDate}` : Prisma.sql``}
+      ${endDate ? Prisma.sql`AND l."playedAt" <= ${endDate}` : Prisma.sql``}
+      ${userId ? Prisma.sql`AND l."userId" = ${userId}` : Prisma.sql``}
+  `;
+
+  const result = await prisma.$queryRaw<Array<{ total: bigint }>>(query);
+  return Number(result[0]?.total ?? 0n);
 }
 
 /**

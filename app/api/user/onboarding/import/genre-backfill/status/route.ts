@@ -19,13 +19,21 @@ export async function GET(request: NextRequest) {
     const userId = await getCurrentUserId(request);
     if (!userId) return unauthorizedResponse();
 
-    // Best-effort self-heal: une tranche pour ce user uniquement (alignée sur le job affiché).
-    void triggerImportGenreBackfillWorkerRunOnce({ userId });
-
     const [job, eligibility] = await Promise.all([
       getGroqBackfillJobForDashboard(userId),
       getGroqImportGenreBackfillEligibility(userId),
     ]);
+
+    // Ne lancer le worker que lorsqu’un job actif existe (évite run-once + requêtes file à chaque poll à vide).
+    if (
+      job &&
+      (job.status === "pending" ||
+        job.status === "running" ||
+        job.status === "paused")
+    ) {
+      void triggerImportGenreBackfillWorkerRunOnce({ userId });
+    }
+
     return NextResponse.json({
       ok: true,
       job,

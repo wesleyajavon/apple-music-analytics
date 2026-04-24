@@ -1,16 +1,71 @@
 "use client";
 
 import { Suspense } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { LanguageSwitcher } from "@/lib/components/language-switcher";
 import { Footer } from "@/lib/components/footer";
 import { ThemeSwitcher } from "@/lib/components/theme-switcher";
 import { DEFAULT_PUBLIC_PROFILE_USER_ID } from "@/lib/constants/public-profile";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 export default function Home() {
   const t = useTranslations("home");
   const tAuth = useTranslations("auth");
+  const [firstName, setFirstName] = useState<string | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    const supabase = createSupabaseBrowserClient();
+
+    function extractFirstName(rawName?: string | null) {
+      if (!rawName) return null;
+      const cleaned = rawName.trim();
+      if (!cleaned) return null;
+      return cleaned.split(/\s+/)[0] ?? null;
+    }
+
+    function resolveFirstName(user: { user_metadata?: Record<string, unknown> } | null) {
+      if (!user?.user_metadata) return null;
+      const metadata = user.user_metadata;
+      const candidate =
+        (metadata.full_name as string | undefined) ??
+        (metadata.name as string | undefined) ??
+        (metadata.given_name as string | undefined) ??
+        (metadata.preferred_username as string | undefined) ??
+        null;
+      return extractFirstName(candidate);
+    }
+
+    async function hydrateUserName() {
+      const { data } = await supabase.auth.getUser();
+      if (!mounted) return;
+      setIsAuthenticated(!!data.user);
+      setFirstName(resolveFirstName(data.user));
+    }
+
+    hydrateUserName();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!mounted) return;
+      setIsAuthenticated(!!session?.user);
+      setFirstName(resolveFirstName(session?.user ?? null));
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  const welcomeMessage = useMemo(() => {
+    if (!firstName) return t("welcome");
+    return t("welcomePersonal", { name: firstName });
+  }, [firstName, t]);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -47,25 +102,36 @@ export default function Home() {
             {t("title")}
           </p>
           <h1 className="mb-4 max-w-3xl text-4xl font-bold tracking-tight text-slate-900 dark:text-slate-50 sm:text-5xl">
-            {t("welcome")}
+            {welcomeMessage}
           </h1>
           <p className="mb-10 max-w-2xl text-lg text-slate-600 dark:text-slate-400">
             {t("subtitle")}
           </p>
 
           <div className="mb-10 flex flex-wrap items-center justify-center gap-3">
-            <Link
-              href="/sign-up"
-              className="inline-flex items-center justify-center rounded-xl bg-accent-violet px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-accent-violet/20 transition-all hover:opacity-90"
-            >
-              {tAuth("signUp")}
-            </Link>
-            <Link
-              href="/sign-in"
-              className="inline-flex items-center justify-center rounded-xl border border-gray-300 bg-white px-6 py-3 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800"
-            >
-              {tAuth("signIn")}
-            </Link>
+            {isAuthenticated ? (
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center justify-center rounded-xl bg-accent-violet px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-accent-violet/20 transition-all hover:opacity-90"
+              >
+                {t("goToDashboard")}
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/sign-up"
+                  className="inline-flex items-center justify-center rounded-xl bg-accent-violet px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-accent-violet/20 transition-all hover:opacity-90"
+                >
+                  {tAuth("signUp")}
+                </Link>
+                <Link
+                  href="/sign-in"
+                  className="inline-flex items-center justify-center rounded-xl border border-gray-300 bg-white px-6 py-3 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800"
+                >
+                  {tAuth("signIn")}
+                </Link>
+              </>
+            )}
             <Link
               href={`/dashboard/overview?userId=${DEFAULT_PUBLIC_PROFILE_USER_ID}`}
               className="group inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold text-accent-violet transition-colors hover:bg-accent-violet/10 dark:hover:bg-accent-violet/20"
@@ -91,26 +157,26 @@ export default function Home() {
           <div className="grid w-full max-w-4xl gap-3 sm:grid-cols-3">
             <div className="rounded-2xl border border-gray-200/80 bg-white/85 p-4 text-left shadow-sm backdrop-blur dark:border-gray-800 dark:bg-gray-900/70">
               <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                Timeline
+                {t("features.timeline.title")}
               </p>
               <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
-                Visualise tes habitudes d’ecoute au fil du temps.
+                {t("features.timeline.description")}
               </p>
             </div>
             <div className="rounded-2xl border border-gray-200/80 bg-white/85 p-4 text-left shadow-sm backdrop-blur dark:border-gray-800 dark:bg-gray-900/70">
               <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                Genres & Artists
+                {t("features.genresArtists.title")}
               </p>
               <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
-                Explore tes tops, tendances et evolutions musicales.
+                {t("features.genresArtists.description")}
               </p>
             </div>
             <div className="rounded-2xl border border-gray-200/80 bg-white/85 p-4 text-left shadow-sm backdrop-blur dark:border-gray-800 dark:bg-gray-900/70">
               <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                AI Insights
+                {t("features.aiInsights.title")}
               </p>
               <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
-                Obtiens des analyses rapides basees sur tes statistiques.
+                {t("features.aiInsights.description")}
               </p>
             </div>
           </div>

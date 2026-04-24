@@ -5,6 +5,8 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { CalendarHeatmap, HeatmapDataPoint } from "@/lib/components/calendar-heatmap";
 import { useTimeline, useListens, useTemporalAnalysis } from "@/lib/hooks/use-listening";
+import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
+import { formatOverviewDateRangeLabel } from "@/lib/utils/overview-date-range-label";
 import { LoadingState } from "@/lib/components/loading-state";
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
@@ -43,6 +45,7 @@ function toDateOnly(date: string | Date): string {
 function HeatmapContent() {
   const searchParams = useSearchParams();
   const t = useTranslations("heatmap");
+  const tOverview = useTranslations("overview");
   const locale = useLocale();
   const emptyStatePresets = useEmptyStatePresets();
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -54,20 +57,14 @@ function HeatmapContent() {
     }
   }, [selectedDate]);
 
-  // Calculer les dates par défaut (décembre 2025 à décembre 2026)
-  const defaultStartDate = useMemo(() => {
-    const date = new Date(2025, 11, 1); // Décembre 2025 (mois 11 = décembre)
-    return date.toISOString().split("T")[0];
-  }, []);
-
-  const defaultEndDate = useMemo(() => {
-    const date = new Date(2026, 11, 31); // 31 décembre 2026
-    return date.toISOString().split("T")[0];
-  }, []);
-
-  const startDate = searchParams.get("startDate") || defaultStartDate;
-  const endDate = searchParams.get("endDate") || defaultEndDate;
+  // Même logique que /dashboard/overview : sans dates dans l’URL (« Tout »), undefined
+  // pour que la timeline / l’analyse temporelle utilisent toute l’historique (min–max côté API).
+  const startDate = searchParams.get("startDate") || undefined;
+  const endDate = searchParams.get("endDate") || undefined;
   const userId = searchParams.get("userId") ?? undefined;
+
+  const { startDate: badgeStart, endDate: badgeEnd } = useListenDateRange();
+  const badgeRangeLabel = formatOverviewDateRangeLabel(badgeStart, badgeEnd, locale);
 
   // Récupérer les données de timeline (par jour)
   const { data: timelineData, isLoading, error, refetch } = useTimeline(
@@ -79,9 +76,29 @@ function HeatmapContent() {
 
   // Utiliser l'analyse temporelle pour "Jour préféré" - même logique que temporal-analysis
   // (EXTRACT(DOW FROM playedAt) en SQL), évite les bugs de timezone de getDay() côté client
-  const { data: temporalData } = useTemporalAnalysis(startDate, endDate, userId, {
-    enabled: !!startDate && !!endDate,
-  });
+  const { data: temporalData } = useTemporalAnalysis(startDate, endDate, userId);
+
+  // Bornes du calendrier : URL explicite, sinon min/max des points timeline (comme HeatmapCalendarOverviewWidget).
+  const { rangeStart, rangeEnd } = useMemo(() => {
+    if (startDate && endDate) {
+      return { rangeStart: startDate, rangeEnd: endDate };
+    }
+    if (!timelineData?.length) {
+      return {
+        rangeStart: undefined as string | undefined,
+        rangeEnd: undefined as string | undefined,
+      };
+    }
+    const dates = timelineData.map((p) => toDateOnly(p.date));
+    const sorted = [...dates].sort();
+    return {
+      rangeStart: sorted[0],
+      rangeEnd: sorted[sorted.length - 1],
+    };
+  }, [startDate, endDate, timelineData]);
+
+  const calendarStart = startDate ?? rangeStart;
+  const calendarEnd = endDate ?? rangeEnd;
 
   // Transformer les données pour le heatmap
   const heatmapData: HeatmapDataPoint[] = useMemo(() => {
@@ -95,11 +112,12 @@ function HeatmapContent() {
 
   // Calculer le nombre total de jours dans la plage (pour active days, etc.)
   const totalDaysInRange = useMemo(() => {
-    const start = new Date(startDate);
-    const end = new Date(endDate);
+    if (!calendarStart || !calendarEnd) return 1;
+    const start = new Date(calendarStart);
+    const end = new Date(calendarEnd);
     const diffTime = end.getTime() - start.getTime();
     return Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1);
-  }, [startDate, endDate]);
+  }, [calendarStart, calendarEnd]);
 
   // Pour la moyenne quotidienne : utiliser les jours du premier au dernier jour avec données
   // (pas 365 ni la plage filtrée) — évite de diluer la moyenne avec des jours sans données
@@ -217,12 +235,6 @@ function HeatmapContent() {
     refetch();
   }, [refetch]);
 
-  const dateRangeLabel = useMemo(() => {
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    return `${start.toLocaleDateString(locale, { month: "short", day: "numeric", year: "numeric" })} – ${end.toLocaleDateString(locale, { month: "short", day: "numeric", year: "numeric" })}`;
-  }, [startDate, endDate, locale]);
-
   if (isLoading) {
     return <HeatmapSkeleton />;
   }
@@ -250,7 +262,9 @@ function HeatmapContent() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
           </svg>
           <span className="text-sm font-medium text-accent-violet dark:text-accent-violet">
-            {t("dateRangeBadge", { range: dateRangeLabel })}
+            {badgeRangeLabel
+              ? t("dateRangeBadge", { range: badgeRangeLabel })
+              : tOverview("allData")}
           </span>
         </div>
         <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
@@ -309,8 +323,8 @@ function HeatmapContent() {
             {heatmapData.length > 0 ? (
               <CalendarHeatmap
                 data={heatmapData}
-                startDate={startDate}
-                endDate={endDate}
+                startDate={calendarStart}
+                endDate={calendarEnd}
                 selectedDate={selectedDate}
                 onDayClick={handleDayClick}
                 locale={locale}
@@ -576,10 +590,15 @@ function HeatmapContent() {
 }
 
 export default function HeatmapPage() {
+  const searchParams = useSearchParams();
+  const startDateParam = searchParams.get("startDate") ?? "";
+  const endDateParam = searchParams.get("endDate") ?? "";
+  const filterKey = `${startDateParam}-${endDateParam}`;
+
   return (
     <div className="px-4 py-6 sm:px-0">
       <Suspense fallback={<HeatmapSkeleton />}>
-        <HeatmapContent />
+        <HeatmapContent key={filterKey} />
       </Suspense>
     </div>
   );

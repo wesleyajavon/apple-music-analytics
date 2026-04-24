@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getArtistStats, getArtistOverview } from "@/lib/services/artist/artist-service";
+import { countArtistsForRange, getArtistStats, getArtistOverview } from "@/lib/services/artist/artist-service";
 import { ArtistsResponseDto } from "@/lib/dto/artist";
 import { handleApiError } from "@/lib/utils/error-handler";
 import {
@@ -70,7 +70,9 @@ export async function GET(request: NextRequest) {
     // Extraire le paramètre limit
     const { searchParams } = new URL(request.url);
     const limitParam = searchParams.get("limit");
+    const offsetParam = searchParams.get("offset");
     const limit = limitParam ? parseInt(limitParam, 10) : 20;
+    const offset = offsetParam ? parseInt(offsetParam, 10) : 0;
 
     // Valider le limit
     if (isNaN(limit) || limit < 1 || limit > 100) {
@@ -79,15 +81,28 @@ export async function GET(request: NextRequest) {
         { status: 400 }
       );
     }
+    if (isNaN(offset) || offset < 0) {
+      return NextResponse.json(
+        { error: "Le paramètre offset doit être supérieur ou égal à 0" },
+        { status: 400 }
+      );
+    }
 
-    const [overview, topArtists] = await Promise.all([
+    const [overview, total, topArtists] = await Promise.all([
       getArtistOverview(startDate, endDate, userId),
-      getArtistStats(startDate, endDate, userId, limit)
+      countArtistsForRange(startDate, endDate, userId),
+      getArtistStats(startDate, endDate, userId, limit, offset)
     ]);
 
     const response: ArtistsResponseDto = {
       overview,
-      topArtists
+      topArtists,
+      pagination: {
+        limit,
+        offset,
+        total,
+        hasMore: offset + topArtists.length < total,
+      },
     };
 
     return NextResponse.json(response);

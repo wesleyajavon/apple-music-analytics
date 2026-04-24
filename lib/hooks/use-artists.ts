@@ -23,7 +23,7 @@ import { useDebouncedValue } from "@/lib/hooks/use-debounced-value";
  */
 export const artistKeys = {
   all: ["artists"] as const,
-  stats: (params: { startDate?: string; endDate?: string; userId?: string; limit?: number }) =>
+  stats: (params: { startDate?: string; endDate?: string; userId?: string; limit?: number; offset?: number }) =>
     [...artistKeys.all, "stats", params] as const,
   trends: (params: {
     startDate?: string;
@@ -55,11 +55,12 @@ export const artistKeys = {
 /**
  * Fonction pour récupérer les statistiques des artistes
  */
-async function fetchArtistStats(
+export async function fetchArtistStats(
   startDate?: string,
   endDate?: string,
   userId?: string,
-  limit?: number
+  limit?: number,
+  offset?: number
 ): Promise<ArtistsResponseDto> {
   const searchParams = new URLSearchParams();
   
@@ -67,6 +68,7 @@ async function fetchArtistStats(
   if (endDate) searchParams.append("endDate", endDate);
   if (userId) searchParams.append("userId", userId);
   if (limit) searchParams.append("limit", limit.toString());
+  if (offset != null) searchParams.append("offset", offset.toString());
 
   const queryString = searchParams.toString();
   const endpoint = `/artists${queryString ? `?${queryString}` : ""}`;
@@ -82,22 +84,19 @@ export function useArtistStats(
   endDate?: string,
   userId?: string,
   limit?: number,
+  offset?: number,
   options?: Omit<
     UseQueryOptions<ArtistsResponseDto, Error>,
     "queryKey" | "queryFn" | "staleTime" | "placeholderData"
   >
 ) {
-  const queryClient = useQueryClient();
-  const queryKey = artistKeys.stats({ startDate, endDate, userId, limit });
-  
-  // Récupérer les données précédentes du cache pour les utiliser comme placeholder
-  const previousData = queryClient.getQueryData<ArtistsResponseDto>(queryKey);
+  const queryKey = artistKeys.stats({ startDate, endDate, userId, limit, offset });
 
   return useQuery<ArtistsResponseDto, Error>({
     queryKey,
-    queryFn: () => fetchArtistStats(startDate, endDate, userId, limit),
+    queryFn: () => fetchArtistStats(startDate, endDate, userId, limit, offset),
     staleTime: CACHE_STALE_TIME.OVERVIEW,
-    placeholderData: previousData,
+    placeholderData: keepPreviousData,
     ...options,
   });
 }

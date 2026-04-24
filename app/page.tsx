@@ -21,7 +21,7 @@ export default function Home() {
           Apple Music Analytics
         </p>
         <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 dark:text-slate-50 mb-4 tracking-tight">
-          Welcome back, Wesley
+          Your listening, clearly explained.
         </h1>
         <p className="text-slate-600 dark:text-slate-400 text-lg mb-10 max-w-md">
           Analyze your listening habits and discover your musical trends.
@@ -30,7 +30,7 @@ export default function Home() {
           href={`/dashboard/overview?userId=${DEFAULT_PUBLIC_PROFILE_USER_ID}`}
           className="group inline-flex items-center gap-2 px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
         >
-          Access Wesley&apos;s dashboard (public)
+          Explore a public dashboard demo
           <svg
             className="w-5 h-5 transition-transform group-hover:translate-x-0.5"
             fill="none"

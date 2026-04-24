@@ -25,7 +25,10 @@ type BackfillJob = {
 };
 
 const POLL_MS_ACTIVE = 2500;
-const POLL_MS_IDLE = 10000;
+/** Job terminal (succès / échec / annulé) : rafraîchir rarement. */
+const POLL_MS_TERMINAL = 60_000;
+/** Aucun job en base : pas besoin de poller comme un job actif. */
+const POLL_MS_NO_JOB = 90_000;
 
 function isTerminal(status: JobStatus): boolean {
   return status === "completed" || status === "failed" || status === "cancelled";
@@ -80,7 +83,11 @@ export function GenreBackfillGlobalBadge() {
     void loadStatus();
     const active =
       job?.status === "pending" || job?.status === "running" || job?.status === "paused";
-    const pollMs = active ? POLL_MS_ACTIVE : POLL_MS_IDLE;
+    const pollMs = active
+      ? POLL_MS_ACTIVE
+      : job == null
+        ? POLL_MS_NO_JOB
+        : POLL_MS_TERMINAL;
     const id = window.setInterval(() => {
       void loadStatus();
     }, pollMs);

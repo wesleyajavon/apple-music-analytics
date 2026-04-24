@@ -1,6 +1,6 @@
 "use client";
 
-import { keepPreviousData, useQuery, useQueryClient, type UseQueryOptions } from "@tanstack/react-query";
+import { keepPreviousData, useQuery, type UseQueryOptions } from "@tanstack/react-query";
 import { useLocale } from "next-intl";
 import { apiClient } from "@/lib/api-client";
 import type {
@@ -31,7 +31,7 @@ export const trackKeys = {
   search: (q: string) => [...trackKeys.all, "search", q] as const,
 };
 
-async function fetchTrackStats(
+export async function fetchTrackStats(
   startDate?: string,
   endDate?: string,
   userId?: string,
@@ -59,14 +59,12 @@ export function useTrackStats(
     "queryKey" | "queryFn" | "staleTime" | "placeholderData"
   >
 ) {
-  const queryClient = useQueryClient();
   const queryKey = trackKeys.stats({ startDate, endDate, userId, limit, offset });
-  const previousData = queryClient.getQueryData<TracksResponseDto>(queryKey);
   return useQuery<TracksResponseDto, Error>({
     queryKey,
     queryFn: () => fetchTrackStats(startDate, endDate, userId, limit, offset),
     staleTime: CACHE_STALE_TIME.OVERVIEW,
-    placeholderData: previousData,
+    placeholderData: keepPreviousData,
     ...options,
   });
 }

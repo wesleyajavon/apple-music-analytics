@@ -1,9 +1,9 @@
 "use client";
 
-import { Suspense, useState, useMemo, useCallback, memo } from "react";
+import { Suspense, useState, useMemo, useCallback, memo, useEffect } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { useSearchParams } from "next/navigation";
-import { Link, usePathname } from "@/i18n/navigation";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import {
   PieChart,
   Pie,
@@ -201,6 +201,7 @@ function GenresContent() {
   const searchParams = useSearchParams();
   const userId = searchParams.get("userId") ?? undefined;
   const pathname = usePathname();
+  const router = useRouter();
   const t = useTranslations("genres");
   const tCommon = useTranslations("common");
   const locale = useLocale();
@@ -209,7 +210,24 @@ function GenresContent() {
   const { startDate, endDate, isLoading: isRangeLoading } = useListenDateRange();
 
   const [chartType, setChartType] = useState<ChartType>("pie");
-  const [detailExpanded, setDetailExpanded] = useState(false);
+  const detailPage = Math.max(1, Number.parseInt(searchParams.get("genresPage") ?? "1", 10) || 1);
+  const detailPageSize = [10, 20, 50].includes(
+    Number.parseInt(searchParams.get("genresPageSize") ?? "10", 10)
+  )
+    ? Number.parseInt(searchParams.get("genresPageSize") ?? "10", 10)
+    : 10;
+  const detailOffset = (detailPage - 1) * detailPageSize;
+
+  const updateDetailPaginationParams = useCallback(
+    (nextPage: number, nextPageSize: number) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("genresPage", String(Math.max(1, nextPage)));
+      params.set("genresPageSize", String(nextPageSize));
+      const qs = params.toString();
+      router.replace(qs ? `${pathname}?${qs}` : pathname);
+    },
+    [pathname, router, searchParams]
+  );
 
   const { data, isLoading, error, refetch } = useGenres(startDate, endDate, userId, {
     enabled: !!startDate && !!endDate,
@@ -274,6 +292,17 @@ function GenresContent() {
   };
 
   const top3Genres = chartData.slice(0, 3);
+  const detailRows = chartData.slice(detailOffset, detailOffset + detailPageSize);
+  const detailTotal = chartData.length;
+  const detailTotalPages = Math.max(1, Math.ceil(detailTotal / detailPageSize));
+  const detailStart = detailTotal === 0 ? 0 : detailOffset + 1;
+  const detailEnd = Math.min(detailOffset + detailRows.length, detailTotal);
+
+  useEffect(() => {
+    if (detailPage > detailTotalPages) {
+      updateDetailPaginationParams(detailTotalPages, detailPageSize);
+    }
+  }, [detailPage, detailPageSize, detailTotalPages, updateDetailPaginationParams]);
   const gradientByRank = [
     "from-violet-500 via-purple-500 to-fuchsia-500",
     "from-pink-500 via-rose-500 to-red-400",
@@ -553,24 +582,25 @@ function GenresContent() {
                 <h3 className="text-xs sm:text-sm font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4">
                   {t("detailByGenre")}
                 </h3>
-                <div className="space-y-3 sm:space-y-4">
-                  {(detailExpanded ? chartData : chartData.slice(0, 5)).map((item, index) => {
+                <div className="max-h-[460px] overflow-y-auto pr-1 space-y-3 sm:space-y-4">
+                  {detailRows.map((item, index) => {
+                    const absoluteIndex = detailOffset + index;
                     const maxCount = chartData[0]?.count ?? 1;
                     const widthPercent = (item.count / maxCount) * 100;
                     const rankColors = ["text-amber-500", "text-slate-400", "text-amber-700"];
                     const rankBg = ["bg-amber-500/15", "bg-slate-400/15", "bg-amber-700/15"];
-                    const rankStyle = index < 3 ? rankColors[index] : "text-gray-400 dark:text-gray-500";
-                    const rankBgStyle = index < 3 ? rankBg[index] : "bg-gray-100 dark:bg-gray-800";
+                    const rankStyle = absoluteIndex < 3 ? rankColors[absoluteIndex] : "text-gray-400 dark:text-gray-500";
+                    const rankBgStyle = absoluteIndex < 3 ? rankBg[absoluteIndex] : "bg-gray-100 dark:bg-gray-800";
                     return (
                       <div key={item.name} className="group">
                         <div className="flex flex-col gap-0.5 sm:flex-row sm:items-center sm:justify-between sm:gap-2 mb-1 sm:mb-1.5">
                           <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                             <span className={`flex h-6 w-6 sm:h-7 sm:w-7 shrink-0 items-center justify-center rounded-lg text-[10px] sm:text-xs font-bold ${rankStyle} ${rankBgStyle}`}>
-                              {index + 1}
+                              {absoluteIndex + 1}
                             </span>
                             <div
                               className="w-2.5 h-2.5 sm:w-3 sm:h-3 shrink-0 rounded-full"
-                              style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                              style={{ backgroundColor: COLORS[absoluteIndex % COLORS.length] }}
                               aria-hidden
                             />
                             <span className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white truncate min-w-0">
@@ -591,7 +621,7 @@ function GenresContent() {
                             className="h-full rounded-full transition-all duration-500 ease-out"
                             style={{
                               width: `${widthPercent}%`,
-                              backgroundColor: COLORS[index % COLORS.length],
+                              backgroundColor: COLORS[absoluteIndex % COLORS.length],
                             }}
                           />
                         </div>
@@ -599,26 +629,48 @@ function GenresContent() {
                     );
                   })}
                 </div>
-                {chartData.length > 5 && (
-                  <button
-                    type="button"
-                    onClick={() => setDetailExpanded((prev) => !prev)}
-                    className="mt-4 flex items-center justify-center gap-2 w-full py-2.5 rounded-lg text-sm font-medium text-accent-violet hover:bg-accent-violet/10 dark:hover:bg-accent-violet/20 transition-colors"
-                    aria-expanded={detailExpanded}
-                  >
-                    {detailExpanded ? (
-                      <>
-                        <ChevronIcon direction="up" />
-                        {tCommon("less")}
-                      </>
-                    ) : (
-                      <>
-                        <ChevronIcon direction="down" />
-                        {tCommon("more")} ({chartData.length - 5})
-                      </>
-                    )}
-                  </button>
-                )}
+                <div className="mt-4 flex flex-col gap-3 border-t border-gray-100 dark:border-gray-700/50 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {t("paginationSummary", {
+                      start: detailStart,
+                      end: detailEnd,
+                      total: detailTotal,
+                    })}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => updateDetailPaginationParams(detailPage - 1, detailPageSize)}
+                      disabled={detailPage === 1}
+                      className="inline-flex min-h-[36px] items-center justify-center rounded-md border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700/50"
+                    >
+                      {t("paginationPrevious")}
+                    </button>
+                    <label className="ml-2 inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                      <span>{t("pageSizeLabel")}</span>
+                      <select
+                        value={detailPageSize}
+                        onChange={(e) => updateDetailPaginationParams(1, Number(e.target.value))}
+                        className="rounded-md border border-gray-200 bg-white px-2 py-1 text-sm dark:border-gray-600 dark:bg-gray-800"
+                      >
+                        <option value={10}>10</option>
+                        <option value={20}>20</option>
+                        <option value={50}>50</option>
+                      </select>
+                    </label>
+                    <span className="px-2 text-sm text-gray-600 dark:text-gray-300">
+                      {t("paginationPage", { page: detailPage, totalPages: detailTotalPages })}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => updateDetailPaginationParams(detailPage + 1, detailPageSize)}
+                      disabled={detailPage >= detailTotalPages}
+                      className="inline-flex min-h-[36px] items-center justify-center rounded-md border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700/50"
+                    >
+                      {t("paginationNext")}
+                    </button>
+                  </div>
+                </div>
               </div>
               </div>
             </div>

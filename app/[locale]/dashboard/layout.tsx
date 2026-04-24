@@ -3,7 +3,6 @@ import { DashboardScrollWrapper } from "@/lib/components/dashboard-scroll-wrappe
 // Layout partagé pour toutes les pages du dashboard
 // Inclut une sidebar responsive et une barre de filtres de dates
 // ThemeProvider et QueryClientProvider sont dans app/layout.tsx via Providers
-// La barre de progression overview-bis utilise le scroll de la fenêtre (viewport)
 export default function DashboardLayout({
   children,
 }: {

@@ -60,7 +60,7 @@ const ArtistCard = memo(({
   const progress = maxListens > 0 ? (artist.listenCount / maxListens) * 100 : 0;
   const isTop3 = rank <= 3;
   const rankStyles = ["from-amber-400 to-amber-600", "from-slate-300 to-slate-500", "from-amber-700 to-amber-800"];
-  const rankLabel = rank === 1 ? t("rank1st") : t("rankNth", { n: rank });
+  const rankLabel = rank === 1 ? t("rank1st") : (t as (k: string, v?: Record<string, number>) => string)("rankNth", { n: rank });
 
   return (
     <div

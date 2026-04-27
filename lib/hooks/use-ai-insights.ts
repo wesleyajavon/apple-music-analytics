@@ -7,6 +7,7 @@ import { getAiInsightsLabels } from "@/lib/constants/ai-insights-labels";
 import type {
   AiInsightsInput,
   AiInsightsResponse,
+  AiInsightsStyle,
   YearOverYearDelta,
 } from "@/lib/dto/ai-insights";
 import type { OverviewStatsWithTopArtists } from "./use-listening";
@@ -149,6 +150,7 @@ async function fetchAiInsights(
   startDate: string,
   endDate: string,
   locale: string,
+  insightStyle: AiInsightsStyle,
   userId?: string
 ): Promise<AiInsightsUiResponse> {
   const { prevStartDate, prevEndDate } = getPreviousPeriod(startDate, endDate);
@@ -196,6 +198,7 @@ async function fetchAiInsights(
       : "";
   const result = await apiClient.postWithMeta<AiInsightsResponse>(`/ai/insights${qs}`, {
     ...input,
+    insightStyle,
     locale,
   });
   return {
@@ -210,6 +213,7 @@ export const aiInsightsKeys = {
     startDate?: string;
     endDate?: string;
     locale?: string;
+    insightStyle?: AiInsightsStyle;
     userId?: string;
   }) => [...aiInsightsKeys.all, params] as const,
 };
@@ -225,15 +229,22 @@ export function useAiInsights(
   options?: Omit<
     UseQueryOptions<AiInsightsUiResponse, Error>,
     "queryKey" | "queryFn"
-  > & { userId?: string }
+  > & { insightStyle?: AiInsightsStyle; userId?: string }
 ) {
   const locale = useLocale();
   const hasValidRange = !!startDate && !!endDate;
-  const { userId, ...queryOptions } = options ?? {};
+  const { insightStyle = "technical", userId, ...queryOptions } = options ?? {};
 
   return useQuery<AiInsightsUiResponse, Error>({
-    queryKey: aiInsightsKeys.list({ startDate, endDate, locale, userId }),
-    queryFn: () => fetchAiInsights(startDate!, endDate!, locale, userId),
+    queryKey: aiInsightsKeys.list({
+      startDate,
+      endDate,
+      locale,
+      insightStyle,
+      userId,
+    }),
+    queryFn: () =>
+      fetchAiInsights(startDate!, endDate!, locale, insightStyle, userId),
     enabled: hasValidRange,
     staleTime: AI_INSIGHTS_STALE_TIME,
     ...queryOptions,

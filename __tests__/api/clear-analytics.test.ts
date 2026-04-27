@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { GET, POST } from "@/app/api/user/clear-analytics/route";
 
-vi.mock("@/lib/auth/get-current-user-id", () => ({
-  getCurrentUserId: vi.fn(),
+vi.mock("@/lib/auth/require-recent-auth", () => ({
+  requireRecentAuthenticatedUser: vi.fn(),
 }));
 
 vi.mock("@/lib/security/rate-limit", () => ({
@@ -18,10 +18,6 @@ vi.mock("@/lib/services/user/clear-user-analytics-data", () => ({
   clearUserAnalyticsData: vi.fn(),
 }));
 
-vi.mock("@/lib/services/predictions/prediction-cache", () => ({
-  invalidateListeningHabitPredictionForUser: vi.fn().mockResolvedValue(undefined),
-}));
-
 vi.mock("@/lib/prisma", () => ({
   prisma: {
     user: {
@@ -30,19 +26,25 @@ vi.mock("@/lib/prisma", () => ({
   },
 }));
 
-import { getCurrentUserId } from "@/lib/auth/get-current-user-id";
+import { requireRecentAuthenticatedUser } from "@/lib/auth/require-recent-auth";
 import { clearUserAnalyticsData } from "@/lib/services/user/clear-user-analytics-data";
-import { invalidateListeningHabitPredictionForUser } from "@/lib/services/predictions/prediction-cache";
 import { prisma } from "@/lib/prisma";
 
 describe("GET /api/user/clear-analytics", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(getCurrentUserId).mockResolvedValue("user-abc");
+    vi.mocked(requireRecentAuthenticatedUser).mockResolvedValue({
+      ok: true,
+      userId: "user-abc",
+      authenticatedAt: new Date(),
+    });
   });
 
   it("returns 401 when not authenticated", async () => {
-    vi.mocked(getCurrentUserId).mockResolvedValue(undefined);
+    vi.mocked(requireRecentAuthenticatedUser).mockResolvedValue({
+      ok: false,
+      response: NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
+    });
     const request = new NextRequest("http://localhost/api/user/clear-analytics");
     const response = await GET(request);
     expect(response.status).toBe(401);
@@ -76,7 +78,11 @@ describe("GET /api/user/clear-analytics", () => {
 describe("POST /api/user/clear-analytics", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(getCurrentUserId).mockResolvedValue("user-abc");
+    vi.mocked(requireRecentAuthenticatedUser).mockResolvedValue({
+      ok: true,
+      userId: "user-abc",
+      authenticatedAt: new Date(),
+    });
     vi.mocked(prisma.user.findUnique).mockResolvedValue({
       name: "John Doe",
       email: "john@example.com",
@@ -88,7 +94,10 @@ describe("POST /api/user/clear-analytics", () => {
   });
 
   it("returns 401 when not authenticated", async () => {
-    vi.mocked(getCurrentUserId).mockResolvedValue(undefined);
+    vi.mocked(requireRecentAuthenticatedUser).mockResolvedValue({
+      ok: false,
+      response: NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
+    });
     const request = new NextRequest("http://localhost/api/user/clear-analytics", {
       method: "POST",
       body: JSON.stringify({ confirm: true, phrase: "john-doe" }),
@@ -131,6 +140,5 @@ describe("POST /api/user/clear-analytics", () => {
     expect(data.ok).toBe(true);
     expect(data.listensDeleted).toBe(12);
     expect(clearUserAnalyticsData).toHaveBeenCalledWith("user-abc");
-    expect(invalidateListeningHabitPredictionForUser).toHaveBeenCalledWith("user-abc");
   });
 });

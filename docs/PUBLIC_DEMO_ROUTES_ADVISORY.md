@@ -32,9 +32,7 @@ Voir aussi : [PUBLIC_DEMO_HARDENING.md](./PUBLIC_DEMO_HARDENING.md) (levier 1, p
 | `/dashboard/heatmap` | **Fermer ou fortement limiter** | Au clic sur un jour, chargement d’**écoutes détaillées** (`useListens`) → titres, artistes, horaires : granularité la plus sensible pour une démo publique. |
 | `/dashboard/musical-profile` | **Fermer** | Hub avec **plusieurs flux IA** (insights, profil, évolution) → coût + surface narrative forte. |
 | `/dashboard/ai-insights` | **Fermer** | IA + texte interprétatif ; coût ; contenu très « personnalisé ». |
-| `/dashboard/taste-profile` | **Fermer** | Profil de goût généré (LLM). |
 | `/dashboard/taste-evolution` | **Fermer** | Tendances + commentaires IA. |
-| `/dashboard/when-will-i-listen` | **Fermer** | Prédiction + explication IA ; cadrage « à moi » même si les données sont celles du profil démo. |
 | `/dashboard/about` | **Garder** | Contenu éducatif, confiance. |
 | `/dashboard/demo` | **Garder** | Vidéo / démo produit. |
 | `/dashboard/insights` | **Garder** | Méthodologie / documentation. |
@@ -44,7 +42,7 @@ Voir aussi : [PUBLIC_DEMO_HARDENING.md](./PUBLIC_DEMO_HARDENING.md) (levier 1, p
 
 ## Synthèse minimale (peu de règles)
 
-1. Bloquer tout le **bloc IA** : `musical-profile`, `ai-insights`, `taste-evolution`, `taste-profile`, `when-will-i-listen`.
+1. Bloquer tout le **bloc IA** : `musical-profile`, `ai-insights`, `taste-evolution`, `taste-profile`.
 2. Bloquer **`heatmap`** (ou désactiver uniquement le détail jour + appels `listens` en mode public — plus fin à implémenter).
 3. Laisser ouvert : **overview**, **temporal-analysis**, **genres**, **artists**, **genres/trends**, **artists/trends**, **timeline**, **about**, **demo**, **insights**.
 

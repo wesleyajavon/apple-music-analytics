@@ -18,7 +18,7 @@ function truncateText(text: string, maxLength: number = 220): string {
 
 /**
  * Small overview widget showing a taste profile summary.
- * Displays truncated description with link to full profile.
+ * Displays truncated description with link to the musical profile.
  * Uses full listen range when "all" (tout) filter is selected.
  */
 export function TasteProfileSummaryWidget() {
@@ -73,7 +73,7 @@ export function TasteProfileSummaryWidget() {
       <AiWidgetQuotaOrError
         title={t("title")}
         subtitle={t("subtitleShort")}
-        seeMoreHref="/dashboard/taste-profile"
+        seeMoreHref="/dashboard/musical-profile"
         seeMoreLabel={t("seeMore")}
         error={error}
       />
@@ -85,7 +85,7 @@ export function TasteProfileSummaryWidget() {
       <AiFeatureDisabledPlaceholder
         title={t("title")}
         subtitle={t("subtitleShort")}
-        seeMoreHref="/dashboard/taste-profile"
+        seeMoreHref="/dashboard/musical-profile"
         seeMoreLabel={t("seeMore")}
         reason={data.aiUnavailableReason ?? "client"}
       />
@@ -109,7 +109,7 @@ export function TasteProfileSummaryWidget() {
             </p>
           </div>
           <Link
-            href="/dashboard/taste-profile"
+            href="/dashboard/musical-profile"
             className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium
               text-accent-violet hover:bg-accent-violet/10 dark:hover:bg-accent-violet/20
               transition-colors duration-200"

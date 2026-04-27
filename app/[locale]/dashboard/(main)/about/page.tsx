@@ -68,8 +68,6 @@ const FEATURE_ROUTES: Record<string, string> = {
   timeAnalysis: "/dashboard/temporal-analysis",
   musicalProfile: "/dashboard/musical-profile",
   insights: "/dashboard/insights",
-  whenWillIListen: "/dashboard/when-will-i-listen",
-  tasteProfile: "/dashboard/taste-profile",
   tasteEvolution: "/dashboard/taste-evolution",
   aiInsights: "/dashboard/ai-insights",
 };
@@ -96,8 +94,6 @@ export default function AboutPage() {
     "timeAnalysis",
     "musicalProfile",
     "insights",
-    "whenWillIListen",
-    "tasteProfile",
     "tasteEvolution",
     "aiInsights",
   ] as const;

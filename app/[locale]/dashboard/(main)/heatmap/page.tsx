@@ -48,7 +48,8 @@ function HeatmapContent() {
   const tOverview = useTranslations("overview");
   const locale = useLocale();
   const emptyStatePresets = useEmptyStatePresets();
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const selectedDateParam = searchParams.get("selectedDate");
+  const [selectedDate, setSelectedDate] = useState<string | null>(selectedDateParam);
   const dayDetailsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -593,7 +594,8 @@ export default function HeatmapPage() {
   const searchParams = useSearchParams();
   const startDateParam = searchParams.get("startDate") ?? "";
   const endDateParam = searchParams.get("endDate") ?? "";
-  const filterKey = `${startDateParam}-${endDateParam}`;
+  const selectedDateParam = searchParams.get("selectedDate") ?? "";
+  const filterKey = `${startDateParam}-${endDateParam}-${selectedDateParam}`;
 
   return (
     <div className="px-4 py-6 sm:px-0">

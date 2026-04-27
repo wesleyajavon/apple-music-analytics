@@ -21,7 +21,7 @@ export default async function DashboardPage({
   }
   const qs = q.toString();
   redirect({
-    href: qs ? `/dashboard/overview?${qs}` : "/dashboard/overview",
+    href: qs ? `/dashboard/musical-profile?${qs}` : "/dashboard/musical-profile",
     locale,
   });
 }

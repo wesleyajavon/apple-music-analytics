@@ -22,6 +22,7 @@ export function AiInsightsSummaryWidget() {
   const { startDate, endDate, isLoading: isRangeLoading } = useListenDateRange();
 
   const { data, isLoading, error } = useAiInsights(startDate, endDate, {
+    insightStyle: "human",
     userId: viewerUserId,
   });
   const isLoadingOrFetching = isRangeLoading || isLoading;

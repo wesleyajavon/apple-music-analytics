@@ -3,6 +3,7 @@ import { getCurrentUserId } from "@/lib/auth/get-current-user-id";
 import { unauthorizedResponse } from "@/lib/auth/require-auth-user-id";
 import { handleApiError } from "@/lib/utils/error-handler";
 import {
+  getActiveGroqBackfillJobForDashboard,
   getGroqBackfillJobForDashboard,
   getGroqImportGenreBackfillEligibility,
   triggerImportGenreBackfillWorkerRunOnce,
@@ -19,10 +20,15 @@ export async function GET(request: NextRequest) {
     const userId = await getCurrentUserId(request);
     if (!userId) return unauthorizedResponse();
 
-    const [job, eligibility] = await Promise.all([
-      getGroqBackfillJobForDashboard(userId),
-      getGroqImportGenreBackfillEligibility(userId),
-    ]);
+    const includeTerminal = request.nextUrl.searchParams.get("includeTerminal") === "1";
+    const includeEligibility = request.nextUrl.searchParams.get("includeEligibility") === "1";
+
+    const job = includeTerminal
+      ? await getGroqBackfillJobForDashboard(userId)
+      : await getActiveGroqBackfillJobForDashboard(userId);
+    const eligibility = includeEligibility
+      ? await getGroqImportGenreBackfillEligibility(userId)
+      : null;
 
     // Ne lancer le worker que lorsqu’un job actif existe (évite run-once + requêtes file à chaque poll à vide).
     if (

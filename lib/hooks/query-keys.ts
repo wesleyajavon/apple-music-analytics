@@ -82,12 +82,6 @@ export const tasteProfileKeys = {
   }) => [...tasteProfileKeys.all, params] as const,
 } as const;
 
-export const predictionKeys = {
-  all: ["predictions"] as const,
-  listeningHabit: (params?: { userId?: string; explain?: boolean; locale?: string }) =>
-    [...predictionKeys.all, "listening-habit", params] as const,
-} as const;
-
 export const tasteEvolutionKeys = {
   all: ["analytics", "taste-evolution"] as const,
   list: (params?: {

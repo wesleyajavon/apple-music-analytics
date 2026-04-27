@@ -70,6 +70,7 @@ function createTrendsTooltip(t: (k: string) => string, locale: string) {
 }
 
 const DEFAULT_GENRE_COUNT = 5;
+const MAX_FILTER_GENRE_COUNT = 12;
 
 type GroqEligibility = {
   unknownTrackCount: number;
@@ -117,6 +118,10 @@ export function GenreTrendsSummaryWidget({
   const availableGenres = useMemo(
     () => data?.availableGenres ?? [],
     [data?.availableGenres]
+  );
+  const filterGenres = useMemo(
+    () => availableGenres.slice(0, MAX_FILTER_GENRE_COUNT),
+    [availableGenres]
   );
   const chartData = useMemo(() => data?.data ?? [], [data?.data]);
 
@@ -373,7 +378,7 @@ export function GenreTrendsSummaryWidget({
               {t("genresToDisplay")}
             </p>
             <div className="flex flex-wrap gap-1.5">
-              {availableGenres.map((genre, idx) => {
+              {filterGenres.map((genre, idx) => {
                 const selected = selectedGenres.includes(genre);
                 return (
                   <button

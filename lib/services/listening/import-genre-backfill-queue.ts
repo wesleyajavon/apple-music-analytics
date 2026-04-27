@@ -667,7 +667,7 @@ function oldestJobByStatus<
   return subset.reduce((a, b) => (a.createdAt <= b.createdAt ? a : b));
 }
 
-export async function getGroqBackfillJobForDashboard(userId: string) {
+export async function getActiveGroqBackfillJobForDashboard(userId: string) {
   const activeRows = await prisma.importGenreBackfillJob.findMany({
     where: {
       userId,
@@ -680,7 +680,12 @@ export async function getGroqBackfillJobForDashboard(userId: string) {
     oldestJobByStatus(activeRows, "running") ??
     oldestJobByStatus(activeRows, "paused") ??
     oldestJobByStatus(activeRows, "pending");
-  if (chosen) return chosen;
+  return chosen ?? null;
+}
+
+export async function getGroqBackfillJobForDashboard(userId: string) {
+  const active = await getActiveGroqBackfillJobForDashboard(userId);
+  if (active) return active;
   return prisma.importGenreBackfillJob.findFirst({
     where: { userId, provider: "groq" },
     orderBy: { createdAt: "desc" },

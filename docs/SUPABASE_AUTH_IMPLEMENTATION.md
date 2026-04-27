@@ -119,7 +119,6 @@ Remplacer progressivement `extractOptionalUserId` par l'utilisateur de session.
   - `app/api/artists/trends-chart/route.ts`
   - `app/api/genres/trends/route.ts`
   - `app/api/analytics/taste-evolution/route.ts`
-  - `app/api/predictions/listening-habit/route.ts`
   - `app/api/ai/artist-trends-commentary/route.ts`
   - `app/api/ai/genre-trends-commentary/route.ts`
   - `app/api/export/listens/route.ts`

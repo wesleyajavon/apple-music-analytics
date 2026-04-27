@@ -3,6 +3,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
+import {
+  isRecentAuthRequiredError,
+  redirectToRecentSignIn,
+} from "@/lib/auth/recent-auth-client";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { deletionPhrasesMatch } from "@/lib/user/deletion-confirmation-phrase";
 import {
@@ -71,6 +75,11 @@ export function AccountSettingsClient() {
         };
         if (cancelled) return;
         if (!res.ok) {
+          if (isRecentAuthRequiredError(data)) {
+            setPhraseLoadError(t("recentAuthRequired"));
+            redirectToRecentSignIn(window.location.pathname + window.location.search);
+            return;
+          }
           if (data.code === "NO_CONFIRMATION_PHRASE") {
             setPhraseLoadError(t("noPhraseError"));
           } else {
@@ -88,7 +97,7 @@ export function AccountSettingsClient() {
     return () => {
       cancelled = true;
     };
-  }, [userId]);
+  }, [t, userId]);
 
   const phraseOk =
     expectedPhrase != null &&
@@ -110,6 +119,11 @@ export function AccountSettingsClient() {
         code?: string;
       };
       if (!res.ok) {
+        if (isRecentAuthRequiredError(data)) {
+          setError(t("recentAuthRequired"));
+          redirectToRecentSignIn(window.location.pathname + window.location.search);
+          return;
+        }
         if (data.code === "PHRASE_MISMATCH") {
           setError(t("phraseMismatch"));
         } else if (data.code === "NO_CONFIRMATION_PHRASE") {

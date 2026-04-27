@@ -16,10 +16,7 @@ import {
 } from "@/lib/middleware/validation";
 import { generateExportFilename } from "@/lib/utils/csv-utils";
 import { routing } from "@/i18n/routing";
-import {
-  requireAuthenticatedUserId,
-  unauthorizedResponse,
-} from "@/lib/auth/require-auth-user-id";
+import { requireRecentAuthenticatedUser } from "@/lib/auth/require-recent-auth";
 import {
   applyRateLimitHeaders,
   assertRateLimit,
@@ -139,8 +136,9 @@ export async function GET(request: NextRequest) {
       max: 2100,
     });
     const { startDate: startDateObj, endDate: endDateObj } = extractOptionalDateRange(request);
-    const userId = await requireAuthenticatedUserId(request);
-    if (!userId) return unauthorizedResponse();
+    const auth = await requireRecentAuthenticatedUser(request);
+    if (!auth.ok) return auth.response;
+    const userId = auth.userId;
     rateLimit = await assertRateLimit(request, {
       ...EXPORT_REPORT_RATE_LIMIT,
       userId,

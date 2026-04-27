@@ -82,6 +82,7 @@ const AiInsightsInputSchema = z.object({
       listens: z.number().int().nonnegative(),
     })
     .optional(),
+  insightStyle: z.enum(["human", "technical"]).optional().default("technical"),
   locale: z.string().optional(),
   /** Optionnel : rattache le quota Groq à un utilisateur (query `userId` prioritaire). */
   userId: z.string().optional(),
@@ -103,7 +104,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { locale: localeParam, userId: bodyUserId, ...inputData } =
+    const {
+      locale: localeParam,
+      userId: bodyUserId,
+      insightStyle,
+      ...inputData
+    } =
       parseResult.data;
     await assertRateLimit(request, {
       ...AI_INSIGHTS_RATE_LIMIT,
@@ -135,7 +141,7 @@ export async function POST(request: NextRequest) {
     const summary = summarizeAnalytics(input, locale);
 
     // 2. Compute cache key from summary hash + locale
-    const cacheKey = computeCacheKey(summary, locale);
+    const cacheKey = computeCacheKey(summary, locale, insightStyle);
 
     // 3. Check cache first (cache logic separated from generation)
     const cached = await getCachedInsights(cacheKey);
@@ -150,7 +156,7 @@ export async function POST(request: NextRequest) {
     await assertGroqUserQuotaForRequest(request, bodyUserId);
 
     // 4. Generate insights via LLM
-    const insights = await generateInsights(summary, locale);
+    const insights = await generateInsights(summary, locale, insightStyle);
 
     // 5. Store in cache for future requests
     await setCachedInsights(cacheKey, insights);

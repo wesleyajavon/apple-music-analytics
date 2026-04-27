@@ -6,10 +6,7 @@ import {
   extractOptionalDateRange,
   extractOptionalString,
 } from "@/lib/middleware/validation";
-import {
-  requireAuthenticatedUserId,
-  unauthorizedResponse,
-} from "@/lib/auth/require-auth-user-id";
+import { requireRecentAuthenticatedUser } from "@/lib/auth/require-recent-auth";
 import {
   applyRateLimitHeaders,
   assertRateLimit,
@@ -111,8 +108,9 @@ export async function GET(request: NextRequest) {
 
     // Extraire les paramètres de filtrage
     const { startDate: startDateObj, endDate: endDateObj } = extractOptionalDateRange(request);
-    const userId = await requireAuthenticatedUserId(request);
-    if (!userId) return unauthorizedResponse();
+    const auth = await requireRecentAuthenticatedUser(request);
+    if (!auth.ok) return auth.response;
+    const userId = auth.userId;
     rateLimit = await assertRateLimit(request, {
       ...EXPORT_LISTENS_RATE_LIMIT,
       userId,

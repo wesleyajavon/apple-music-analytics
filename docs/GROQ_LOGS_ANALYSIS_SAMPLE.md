@@ -125,7 +125,6 @@ Ce tableau décrit **le code actuel** (pas seulement les logs Groq). Les répons
 | Évolution du goût (commentaires) | `/api/analytics/taste-evolution` | **200** : `catch` → warn, commentaires **null**. | **200** : idem. |
 | Insights | `/api/ai/insights` | **500** via `handleApiError` si l’exception remonte. | **500** : idem. |
 | Profil de goût | `/api/ai/taste-profile` | **500**. | **500**. |
-| Explication prédiction écoute | `/api/predictions/listening-habit` | **500**. | **500**. |
 
 **Synthèse :**
 

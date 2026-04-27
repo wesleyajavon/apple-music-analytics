@@ -71,22 +71,25 @@ export function HeatmapCalendarOverviewWidget({
     const e = endDate ?? rangeEnd;
     if (s) params.set("startDate", s);
     if (e) params.set("endDate", e);
+    if (viewerUserId) params.set("userId", viewerUserId);
     const q = params.toString();
     return `/dashboard/heatmap${q ? `?${q}` : ""}`;
-  }, [startDate, endDate, rangeStart, rangeEnd]);
+  }, [startDate, endDate, rangeStart, rangeEnd, viewerUserId]);
 
   const handleDayClick = useCallback(
-    (_date: string, count: number) => {
+    (date: string, count: number) => {
       if (count === 0) return;
       const params = new URLSearchParams();
       const s = startDate ?? rangeStart;
       const e = endDate ?? rangeEnd;
       if (s) params.set("startDate", s);
       if (e) params.set("endDate", e);
+      if (viewerUserId) params.set("userId", viewerUserId);
+      params.set("selectedDate", date);
       const q = params.toString();
       router.push(`/dashboard/heatmap${q ? `?${q}` : ""}`);
     },
-    [router, startDate, endDate, rangeStart, rangeEnd]
+    [router, startDate, endDate, rangeStart, rangeEnd, viewerUserId]
   );
 
   if (isLoading) {
@@ -165,7 +168,7 @@ export function HeatmapCalendarOverviewWidget({
                   {tHeatmap("calendarTitle")}
                 </h2>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-                  {tHeatmap("calendarHint")}
+                  {tHeatmap("overviewCalendarHint")}
                 </p>
               </div>
             </div>

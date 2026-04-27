@@ -45,6 +45,9 @@ const COLORS = [
   "#14b8a6",
 ];
 
+const MAX_SERIES_GENRES = 30;
+const GENRE_FILTER_PAGE_SIZE = 30;
+
 function getColor(index: number): string {
   return COLORS[index % COLORS.length];
 }
@@ -181,6 +184,7 @@ function TrendsContent() {
   const [summaryVersion, setSummaryVersion] = useState<"light" | "technical">(
     "light"
   );
+  const [genreFilterPage, setGenreFilterPage] = useState(0);
   const [groqMeta, setGroqMeta] = useState<{
     loaded: boolean;
     eligibility: GroqEligibility | null;
@@ -197,6 +201,34 @@ function TrendsContent() {
         : availableGenres.slice(0, 5);
     setSelectedGenres(defaultSelected);
   }, [availableGenres, selectedGenres.length]);
+
+  const genreFilterPageCount = Math.max(
+    1,
+    Math.ceil(availableGenres.length / GENRE_FILTER_PAGE_SIZE)
+  );
+  const visibleGenreStart = genreFilterPage * GENRE_FILTER_PAGE_SIZE;
+  const visibleGenres = useMemo(
+    () =>
+      availableGenres.slice(
+        visibleGenreStart,
+        visibleGenreStart + GENRE_FILTER_PAGE_SIZE
+      ),
+    [availableGenres, visibleGenreStart]
+  );
+  const visibleGenreEnd = Math.min(
+    visibleGenreStart + visibleGenres.length,
+    availableGenres.length
+  );
+
+  useEffect(() => {
+    setGenreFilterPage(0);
+  }, [availableGenres]);
+
+  useEffect(() => {
+    if (genreFilterPage >= genreFilterPageCount) {
+      setGenreFilterPage(genreFilterPageCount - 1);
+    }
+  }, [genreFilterPage, genreFilterPageCount]);
 
   useEffect(() => {
     if (userId) {
@@ -279,14 +311,16 @@ function TrendsContent() {
   }, [refreshGroqMeta, tConsent]);
 
   const toggleGenre = useCallback((genre: string) => {
-    setSelectedGenres((prev) =>
-      prev.includes(genre) ? prev.filter((g) => g !== genre) : [...prev, genre]
-    );
+    setSelectedGenres((prev) => {
+      if (prev.includes(genre)) return prev.filter((g) => g !== genre);
+      if (prev.length >= MAX_SERIES_GENRES) return prev;
+      return [...prev, genre];
+    });
   }, []);
 
   const selectAll = useCallback(() => {
-    setSelectedGenres([...availableGenres]);
-  }, [availableGenres]);
+    setSelectedGenres(visibleGenres.slice(0, MAX_SERIES_GENRES));
+  }, [visibleGenres]);
 
   const selectNone = useCallback(() => {
     setSelectedGenres([]);
@@ -515,36 +549,92 @@ function TrendsContent() {
               <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 {t("genresToDisplay")}
               </span>
-              <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={selectAll}
-                  className="px-3 py-1.5 text-sm font-medium rounded-md bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                >
-                  {t("all")}
-                </button>
-                <button
-                  type="button"
-                  onClick={selectNone}
-                  className="px-3 py-1.5 text-sm font-medium rounded-md bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                >
-                  {t("none")}
-                </button>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs text-gray-500 dark:text-gray-400 tabular-nums">
+                  {t("selectionCount", {
+                    selected: selectedGenres.length,
+                    max: MAX_SERIES_GENRES,
+                  })}
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={selectAll}
+                    className="px-3 py-1.5 text-sm font-medium rounded-md bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                  >
+                    {t("all")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={selectNone}
+                    className="px-3 py-1.5 text-sm font-medium rounded-md bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                  >
+                    {t("none")}
+                  </button>
+                </div>
               </div>
             </div>
+            {availableGenres.length > GENRE_FILTER_PAGE_SIZE && (
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-gray-100 bg-gray-50/70 px-3 py-2 dark:border-gray-700/50 dark:bg-gray-900/30">
+                <div className="text-xs text-gray-500 dark:text-gray-400">
+                  <span>
+                    {t("paginationSummary", {
+                      start: visibleGenreStart + 1,
+                      end: visibleGenreEnd,
+                      total: availableGenres.length,
+                    })}
+                  </span>
+                  <span className="ml-2">
+                    {t("paginationPage", {
+                      page: genreFilterPage + 1,
+                      totalPages: genreFilterPageCount,
+                    })}
+                  </span>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setGenreFilterPage((page) => Math.max(0, page - 1))}
+                    disabled={genreFilterPage === 0}
+                    className="rounded-md border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                  >
+                    {t("paginationPrevious")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setGenreFilterPage((page) =>
+                        Math.min(genreFilterPageCount - 1, page + 1)
+                      )
+                    }
+                    disabled={genreFilterPage >= genreFilterPageCount - 1}
+                    className="rounded-md border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                  >
+                    {t("paginationNext")}
+                  </button>
+                </div>
+              </div>
+            )}
             <div className="mt-3 flex flex-wrap gap-2">
-              {availableGenres.map((genre, idx) => {
+              {visibleGenres.map((genre) => {
                 const selected = selectedGenres.includes(genre);
+                const disabled = !selected && selectedGenres.length >= MAX_SERIES_GENRES;
+                const idx = availableGenres.indexOf(genre);
                 return (
                   <label
                     key={genre}
-                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50 border-gray-200 dark:border-gray-600"
+                    className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-md border transition-colors border-gray-200 dark:border-gray-600 ${
+                      disabled
+                        ? "cursor-not-allowed opacity-50"
+                        : "cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                    }`}
                   >
                     <input
                       type="checkbox"
                       checked={selected}
+                      disabled={disabled}
                       onChange={() => toggleGenre(genre)}
-                      className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
+                      className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 disabled:opacity-40"
                     />
                     <span
                       className="w-3 h-3 rounded-full shrink-0"

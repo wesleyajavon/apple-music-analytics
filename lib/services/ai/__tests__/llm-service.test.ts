@@ -57,6 +57,38 @@ describe("llm-service", () => {
     );
   });
 
+  it("uses human-readable prompt rules when requested", async () => {
+    process.env.GROQ_API_KEY = "test-key";
+    mockChatCompletionsCreate.mockResolvedValue({
+      choices: [
+        {
+          message: {
+            content: `1. Votre écoute penche nettement vers le rock, qui représente environ 40% de vos écoutes.
+2. Vos soirées semblent concentrer une part importante de l'écoute, surtout entre 18h et 19h.
+3. Artist A ressort comme votre repère principal sur cette période.`,
+          },
+        },
+      ],
+    });
+
+    await generateInsights(mockSummary, "fr", "human");
+
+    expect(mockChatCompletionsCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        messages: expect.arrayContaining([
+          expect.objectContaining({
+            role: "system",
+            content: expect.stringContaining("chaleureux, humain, précis"),
+          }),
+          expect.objectContaining({
+            role: "user",
+            content: expect.stringContaining("insights naturels et utiles"),
+          }),
+        ]),
+      })
+    );
+  });
+
   it("throws when LLM returns empty content", async () => {
     process.env.GROQ_API_KEY = "test-key";
     mockChatCompletionsCreate.mockResolvedValue({

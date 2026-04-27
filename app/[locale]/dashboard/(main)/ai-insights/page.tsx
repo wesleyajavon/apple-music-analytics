@@ -1,12 +1,13 @@
 "use client";
 
-import { useCallback, Suspense } from "react";
+import { useCallback, Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useAiInsights } from "@/lib/hooks/use-ai-insights";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
+import type { AiInsightsStyle } from "@/lib/dto/ai-insights";
 
 /** Accent color variants for insight cards - creates visual variety */
 const INSIGHT_ACCENTS = [
@@ -40,8 +41,10 @@ function AiInsightsContent() {
   const searchParams = useSearchParams();
   const userId = searchParams.get("userId") ?? undefined;
   const { startDate, endDate, isLoading: isRangeLoading } = useListenDateRange();
+  const [insightStyle, setInsightStyle] = useState<AiInsightsStyle>("human");
 
   const { data, isLoading, error, refetch } = useAiInsights(startDate, endDate, {
+    insightStyle,
     userId,
   });
   const isLoadingOrFetching = isRangeLoading || isLoading;
@@ -159,12 +162,46 @@ function AiInsightsContent() {
           )}
         </div>
 
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
-          {t("title")}
-        </h1>
-        <p className="mt-2 text-base text-gray-500 dark:text-gray-400 max-w-2xl">
-          {t("yourInsights")}
-        </p>
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
+              {t("title")}
+            </h1>
+            <p className="mt-2 text-base text-gray-500 dark:text-gray-400 max-w-2xl">
+              {t("yourInsights")}
+            </p>
+          </div>
+
+          <div
+            className="flex w-full flex-col gap-2 sm:w-auto"
+            role="group"
+            aria-label={t("styleToggle.ariaLabel")}
+          >
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+              {t("styleToggle.label")}
+            </span>
+            <div className="inline-flex rounded-xl border border-gray-100 bg-gray-50 p-1.5 dark:border-gray-700/50 dark:bg-gray-800/80">
+              {(["human", "technical"] as const).map((style) => {
+                const isActive = insightStyle === style;
+                return (
+                  <button
+                    key={style}
+                    type="button"
+                    aria-pressed={isActive}
+                    onClick={() => setInsightStyle(style)}
+                    className={`rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-200 ${
+                      isActive
+                        ? "bg-accent-violet text-white shadow-sm"
+                        : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                    }`}
+                  >
+                    {t(`styleToggle.${style}`)}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
       </header>
 
       {/* Spotlight: AI insights — carte principale avec gradient et effet de lumière */}

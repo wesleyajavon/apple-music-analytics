@@ -11,13 +11,15 @@
 
 import type { AnalyticsSummary } from "./analytics-summarizer";
 import { createGroqChatCompletion, GROQ_DEFAULT_MODEL } from "@/lib/services/ai/groq-chat";
+import type { AiInsightsStyle } from "@/lib/dto/ai-insights";
 import { getLanguageName, type AiLocale } from "./locale-utils";
 
 const SYSTEM_PROMPTS: Record<
   AiLocale,
-  (lang: string) => string
+  Record<AiInsightsStyle, (lang: string) => string>
 > = {
-  fr: (lang) => `Tu es un analyste musical qui génère des insights concis à partir de données d'écoute agrégées.
+  fr: {
+    technical: (lang) => `Tu es un analyste musical qui génère des insights concis à partir de données d'écoute agrégées.
 
 RÈGLES STRICTES:
 1. Base-toi UNIQUEMENT sur les données fournies. N'invente rien.
@@ -29,7 +31,22 @@ RÈGLES STRICTES:
 
 Exemple de bon insight: "Le rock représente 42% de vos écoutes, dominant largement les autres genres."
 Exemple à éviter: "Vous avez des goûts musicaux variés." (trop vague, pas de chiffre)`,
-  en: (lang) => `You are a music analyst who generates concise insights from aggregated listening data.
+    human: (lang) => `Tu es un analyste musical qui transforme des données d'écoute agrégées en observations utiles, naturelles et faciles à lire.
+
+RÈGLES STRICTES:
+1. Base-toi UNIQUEMENT sur les données fournies. N'invente rien.
+2. Ne fais aucune spéculation ou hypothèse non supportée par les données.
+3. Produis exactement 3 à 5 points sous forme de puces.
+4. Chaque point doit exprimer une idée claire sur l'habitude d'écoute, puis l'appuyer avec une donnée du résumé.
+5. Langue: ${lang}. Réponds ENTIÈREMENT dans cette langue.
+6. Style: chaleureux, humain, précis, sans jargon. Évite de commencer par des chiffres bruts.
+7. Tu peux arrondir les pourcentages à l'entier le plus proche si cela rend la phrase plus naturelle, mais ne change jamais le sens.
+
+Exemple de bon insight: "Votre écoute penche nettement vers le rock: il représente environ 42% de vos écoutes, ce qui en fait votre point d'ancrage musical sur cette période."
+Exemple à éviter: "Rock: 42%, Pop: 18%, Jazz: 11%." (trop technique, sans interprétation)`,
+  },
+  en: {
+    technical: (lang) => `You are a music analyst who generates concise insights from aggregated listening data.
 
 STRICT RULES:
 1. Base yourself ONLY on the data provided. Do not invent anything.
@@ -41,7 +58,22 @@ STRICT RULES:
 
 Good insight example: "Rock represents 42% of your listens, dominating other genres."
 Bad example to avoid: "You have varied musical tastes." (too vague, no numbers)`,
-  es: (lang) => `Eres un analista musical que genera insights concisos a partir de datos de escucha agregados.
+    human: (lang) => `You are a music analyst who turns aggregated listening data into useful, natural, easy-to-read observations.
+
+STRICT RULES:
+1. Base yourself ONLY on the data provided. Do not invent anything.
+2. Do not make any speculation or hypothesis not supported by the data.
+3. Produce exactly 3 to 5 bullet points.
+4. Each point must express one clear idea about the listening habit, then support it with a data point from the summary.
+5. Language: ${lang}. Respond ENTIRELY in this language.
+6. Style: warm, human, precise, and jargon-free. Avoid opening with raw numbers.
+7. You may round percentages to the nearest whole number when it reads more naturally, but never change the meaning.
+
+Good insight example: "Your listening leans strongly toward rock: it accounts for about 42% of your plays, making it your musical anchor for this period."
+Bad example to avoid: "Rock: 42%, Pop: 18%, Jazz: 11%." (too technical, no interpretation)`,
+  },
+  es: {
+    technical: (lang) => `Eres un analista musical que genera insights concisos a partir de datos de escucha agregados.
 
 REGLAS ESTRICTAS:
 1. Basa tu respuesta ÚNICAMENTE en los datos proporcionados. No inventes nada.
@@ -53,15 +85,33 @@ REGLAS ESTRICTAS:
 
 Ejemplo de buen insight: "El rock representa el 42% de tus escuchas, dominando ampliamente los demás géneros."
 Ejemplo a evitar: "Tienes gustos musicales variados." (demasiado vago, sin cifras)`,
+    human: (lang) => `Eres un analista musical que convierte datos agregados de escucha en observaciones útiles, naturales y fáciles de leer.
+
+REGLAS ESTRICTAS:
+1. Basa tu respuesta ÚNICAMENTE en los datos proporcionados. No inventes nada.
+2. No hagas especulaciones ni hipótesis no apoyadas por los datos.
+3. Produce exactamente 3 a 5 puntos en forma de viñetas.
+4. Cada punto debe expresar una idea clara sobre el hábito de escucha y apoyarla con un dato del resumen.
+5. Idioma: ${lang}. Responde ENTERAMENTE en este idioma.
+6. Estilo: cálido, humano, preciso y sin jerga. Evita empezar con números en bruto.
+7. Puedes redondear porcentajes al número entero más cercano si la frase suena más natural, pero nunca cambies el sentido.
+
+Ejemplo de buen insight: "Tu escucha se inclina claramente hacia el rock: representa alrededor del 42% de tus reproducciones, convirtiéndose en tu punto de referencia musical en este período."
+Ejemplo a evitar: "Rock: 42%, Pop: 18%, Jazz: 11%." (demasiado técnico, sin interpretación)`,
+  },
 };
 
-function buildInsightsSystemPrompt(locale: AiLocale): string {
+function buildInsightsSystemPrompt(
+  locale: AiLocale,
+  insightStyle: AiInsightsStyle
+): string {
   const lang = getLanguageName(locale);
-  return SYSTEM_PROMPTS[locale](lang);
+  return SYSTEM_PROMPTS[locale][insightStyle](lang);
 }
 
-const USER_PROMPTS: Record<AiLocale, string> = {
-  fr: `Voici un résumé agrégé des données d'écoute musicale d'un utilisateur:
+const USER_PROMPTS: Record<AiLocale, Record<AiInsightsStyle, string>> = {
+  fr: {
+    technical: `Voici un résumé agrégé des données d'écoute musicale d'un utilisateur:
 
 ---
 {summary}
@@ -73,7 +123,22 @@ Génère 3 à 5 insights concis et factuels. Chaque insight doit:
 - Ne pas spéculer au-delà des données
 
 Réponds UNIQUEMENT avec une liste numérotée (1. 2. 3. ...), une insight par ligne. Pas d'introduction ni de conclusion.`,
-  en: `Here is an aggregated summary of a user's music listening data:
+    human: `Voici un résumé agrégé des données d'écoute musicale d'un utilisateur:
+
+---
+{summary}
+---
+
+Génère 3 à 5 insights naturels et utiles. Chaque insight doit:
+- Mettre l'idée principale en mots simples avant de citer la donnée qui la justifie
+- Rester précis et fidèle au résumé
+- Éviter le jargon, les formulations de tableau de bord et les listes de chiffres sans explication
+- Ne pas spéculer au-delà des données
+
+Réponds UNIQUEMENT avec une liste numérotée (1. 2. 3. ...), une insight par ligne. Pas d'introduction ni de conclusion.`,
+  },
+  en: {
+    technical: `Here is an aggregated summary of a user's music listening data:
 
 ---
 {summary}
@@ -85,7 +150,22 @@ Generate 3 to 5 concise, factual insights. Each insight must:
 - Not speculate beyond the data
 
 Respond ONLY with a numbered list (1. 2. 3. ...), one insight per line. No introduction or conclusion.`,
-  es: `Aquí tienes un resumen agregado de los datos de escucha musical de un usuario:
+    human: `Here is an aggregated summary of a user's music listening data:
+
+---
+{summary}
+---
+
+Generate 3 to 5 natural, useful insights. Each insight must:
+- Put the main idea in simple words before citing the data that supports it
+- Stay precise and faithful to the summary
+- Avoid jargon, dashboard-style phrasing, and lists of numbers without explanation
+- Not speculate beyond the data
+
+Respond ONLY with a numbered list (1. 2. 3. ...), one insight per line. No introduction or conclusion.`,
+  },
+  es: {
+    technical: `Aquí tienes un resumen agregado de los datos de escucha musical de un usuario:
 
 ---
 {summary}
@@ -97,6 +177,20 @@ Genera 3 a 5 insights concisos y factuales. Cada insight debe:
 - No especular más allá de los datos
 
 Responde ÚNICAMENTE con una lista numerada (1. 2. 3. ...), un insight por línea. Sin introducción ni conclusión.`,
+    human: `Aquí tienes un resumen agregado de los datos de escucha musical de un usuario:
+
+---
+{summary}
+---
+
+Genera 3 a 5 insights naturales y útiles. Cada insight debe:
+- Expresar la idea principal con palabras sencillas antes de citar el dato que la respalda
+- Mantenerse preciso y fiel al resumen
+- Evitar jerga, frases de panel técnico y listas de números sin explicación
+- No especular más allá de los datos
+
+Responde ÚNICAMENTE con una lista numerada (1. 2. 3. ...), un insight por línea. Sin introducción ni conclusión.`,
+  },
 };
 
 /**
@@ -109,7 +203,8 @@ Responde ÚNICAMENTE con una lista numerada (1. 2. 3. ...), un insight por líne
  */
 export async function generateInsights(
   summary: AnalyticsSummary,
-  locale: AiLocale = "fr"
+  locale: AiLocale = "fr",
+  insightStyle: AiInsightsStyle = "technical"
 ): Promise<string[]> {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
@@ -119,7 +214,7 @@ export async function generateInsights(
   }
 
   // Prompt in target language so the model receives consistent context
-  const userPrompt = (USER_PROMPTS[locale] ?? USER_PROMPTS.fr).replace(
+  const userPrompt = (USER_PROMPTS[locale] ?? USER_PROMPTS.fr)[insightStyle].replace(
     "{summary}",
     summary.text
   );
@@ -127,7 +222,7 @@ export async function generateInsights(
   const response = await createGroqChatCompletion({
     model: GROQ_DEFAULT_MODEL,
     messages: [
-      { role: "system", content: buildInsightsSystemPrompt(locale) },
+      { role: "system", content: buildInsightsSystemPrompt(locale, insightStyle) },
       { role: "user", content: userPrompt },
     ],
     temperature: 0.3, // Low temperature for factual, consistent output

@@ -40,6 +40,13 @@ export interface YearOverYearDelta {
 }
 
 /**
+ * Presentation style for generated insights.
+ * "technical" preserves the existing metric-heavy output.
+ * "human" keeps the facts but explains them in a more natural way.
+ */
+export type AiInsightsStyle = "human" | "technical";
+
+/**
  * Input payload for POST /api/ai/insights
  * Contains ONLY aggregated analytics - no raw events
  */
@@ -60,6 +67,8 @@ export interface AiInsightsInput {
   /** Optional: peak day/hour from temporal analysis */
   peakDay?: { dayName: string; listens: number };
   peakHour?: { hour: number; listens: number };
+  /** Optional presentation style. Defaults to "technical" for backwards compatibility. */
+  insightStyle?: AiInsightsStyle;
 }
 
 /**

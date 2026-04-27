@@ -5,6 +5,10 @@ import { useRouter, usePathname } from "@/i18n/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { useCallback, useRef, useEffect, useState } from "react";
 import { toast } from "sonner";
+import {
+  isRecentAuthRequiredError,
+  redirectToRecentSignIn,
+} from "@/lib/auth/recent-auth-client";
 import { useOptimisticFilters } from "@/lib/hooks/use-optimistic-filters";
 
 export type DateRangePreset = "7d" | "30d" | "ytd" | "all" | "custom";
@@ -282,8 +286,16 @@ export function DateRangeFilter() {
       try {
         const response = await fetch(url);
         if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(errorText || t("toastExportErrorFallback"));
+          const errorPayload = (await response.json().catch(() => null)) as {
+            error?: string;
+            code?: string;
+          } | null;
+          if (isRecentAuthRequiredError(errorPayload)) {
+            toast.error(t("recentAuthRequired"), { id: toastId });
+            redirectToRecentSignIn(window.location.pathname + window.location.search);
+            return;
+          }
+          throw new Error(errorPayload?.error || t("toastExportErrorFallback"));
         }
 
         const blob = await response.blob();

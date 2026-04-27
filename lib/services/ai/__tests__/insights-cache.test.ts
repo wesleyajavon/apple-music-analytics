@@ -43,6 +43,12 @@ describe("insights-cache", () => {
       const key2 = computeCacheKey(mockSummary, "en");
       expect(key1).not.toBe(key2);
     });
+
+    it("returns different hash for different insight styles", () => {
+      const key1 = computeCacheKey(mockSummary, "fr", "human");
+      const key2 = computeCacheKey(mockSummary, "fr", "technical");
+      expect(key1).not.toBe(key2);
+    });
   });
 
   describe("getCachedInsights / setCachedInsights (memory fallback)", () => {

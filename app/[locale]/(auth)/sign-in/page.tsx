@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useId, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -8,6 +9,7 @@ import { DEFAULT_PUBLIC_PROFILE_USER_ID } from "@/lib/constants/public-profile";
 
 export default function SignInPage() {
   const t = useTranslations("auth");
+  const searchParams = useSearchParams();
   const emailId = useId();
   const passwordId = useId();
   const errorId = useId();
@@ -15,6 +17,12 @@ export default function SignInPage() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const reason = searchParams.get("reason");
+  const nextParam = searchParams.get("next");
+  const nextPath =
+    nextParam && nextParam.startsWith("/") && !nextParam.startsWith("//")
+      ? nextParam
+      : "/dashboard";
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -33,7 +41,7 @@ export default function SignInPage() {
         return;
       }
 
-      window.location.href = "/dashboard";
+      window.location.href = nextPath;
     } finally {
       setIsLoading(false);
     }
@@ -48,7 +56,8 @@ export default function SignInPage() {
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+          redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`,
+          queryParams: reason === "recent-auth" ? { prompt: "login" } : undefined,
         },
       });
 
@@ -85,6 +94,15 @@ export default function SignInPage() {
         <p className="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-300">
           {t("signInSubtitle")}
         </p>
+
+        {reason === "recent-auth" ? (
+          <p
+            role="status"
+            className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-100"
+          >
+            {t("recentAuthNotice")}
+          </p>
+        ) : null}
 
         <form onSubmit={onSubmit} className="mt-8 space-y-5">
           <div>

@@ -15,7 +15,6 @@ const DEFAULT_ROUTES = [
   "/api/ai/genre-trends-commentary",
   "/api/ai/insights",
   "/api/ai/taste-profile",
-  "/api/predictions/listening-habit",
   "/api/listens",
   "/api/artists/trends",
   "/api/artists/trends-chart",

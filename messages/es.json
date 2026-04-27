@@ -29,6 +29,8 @@
     "openMenu": "Abrir menú",
     "collapseSidebar": "Contraer barra lateral",
     "expandSidebar": "Expandir barra lateral",
+    "collapseSection": "Contraer {label}",
+    "expandSection": "Expandir {label}",
     "logo": "Analytics",
     "appearance": "Apariencia",
     "language": "Idioma",
@@ -37,33 +39,34 @@
     "signOut": "Cerrar sesión",
     "signingOut": "Cerrando sesión...",
     "groups": {
-      "main": "Principal",
-      "temporal": "Análisis temporal",
-      "content": "Contenido",
-      "ai": "IA",
-      "other": "Otros"
+      "home": "Inicio",
+      "library": "Biblioteca",
+      "patterns": "Patrones de escucha",
+      "aiPredictions": "IA y predicciones",
+      "helpProduct": "Ayuda y producto",
+      "account": "Cuenta"
     },
     "items": {
-      "overview": "Vista general 📊",
-      "timeline": "Timeline 📈",
-      "heatmap": "Mapa de calor 🔥",
-      "temporalAnalysis": "Análisis temporal ⏰",
-      "genres": "Géneros 🎸",
-      "genreTrends": "Tendencias de géneros 📉",
-      "palette": "Palette 🎨",
-      "artistTrends": "Tendencias de artistas 📉",
-      "artists": "Artistas 🎤",
-      "trackTrends": "Tendencias de títulos 📉",
-      "tracks": "Títulos 🎧",
-      "aiInsights": "AI Insights ✨",
-      "tasteEvolution": "Evolución de gustos 🌱",
-      "whenWillIListen": "¿Cuándo escucharé? ⏳",
-      "tasteProfile": "Explicar mi gusto 🎯",
-      "about": "Cómo funciona 🎯",
-      "demo": "Demo 🎬",
-      "methodology": "Metodología 📚",
-      "sentryTest": "Test Sentry 🧪",
-      "settings": "Ajustes ⚙️"
+      "overview": "Your Music",
+      "musicalProfile": "Perfil musical",
+      "timeline": "Timeline",
+      "heatmap": "Mapa de calor",
+      "temporalAnalysis": "Análisis temporal",
+      "genres": "Géneros",
+      "genreTrends": "Tendencias de géneros",
+      "palette": "Palette",
+      "artistTrends": "Tendencias de artistas",
+      "artists": "Artistas",
+      "trackTrends": "Tendencias de títulos",
+      "tracks": "Títulos",
+      "aiInsights": "AI Insights",
+      "tasteEvolution": "Evolución de gustos",
+      "tasteProfile": "Perfil de gusto",
+      "about": "Cómo funciona",
+      "demo": "Demo",
+      "methodology": "Metodología",
+      "sentryTest": "Test Sentry",
+      "settings": "Ajustes"
     }
   },
   "settings": {
@@ -88,6 +91,7 @@
     "clearDataButton": "Borrar todos mis datos de analytics",
     "clearing": "Borrando…",
     "clearError": "No se pudieron borrar los datos. Inténtalo más tarde.",
+    "recentAuthRequired": "Por seguridad, inicia sesión de nuevo antes de cambiar o borrar datos de la cuenta.",
     "genreBannerTitle": "Aviso de géneros Groq",
     "genreBannerDescription": "Tras importar puedes ocultar la franja del panel sobre la clasificación Groq. Reactívala aquí cuando quieras.",
     "genreBannerHideLabel": "Ocultar en el panel avisos y resúmenes de clasificación de géneros con Groq"
@@ -113,7 +117,8 @@
     "authNavAriaLabel": "Navegación de cuenta",
     "dashboardLink": "Dashboard de Wesley",
     "continueWithGoogle": "Continuar con Google",
-    "orDivider": "o"
+    "orDivider": "o",
+    "recentAuthNotice": "Inicia sesión de nuevo para continuar con esta acción sensible."
   },
   "onboarding": {
     "metaTitle": "Primer acceso — exportar tus datos de escucha",
@@ -177,6 +182,7 @@
       "skipImport": "Aún no tengo el archivo",
       "toastSuccess": "{count, plural, one {# escucha importada.} other {# escuchas importadas.}}",
       "importError": "La importación falló. Revisa el archivo e inténtalo de nuevo.",
+      "recentAuthRequired": "Inicia sesión de nuevo antes de importar datos.",
       "zipMissingAudioJson": "No hay JSON de historial extendido en este ZIP (Streaming_History_Audio_*.json o StreamingHistory_music_*.json). Usa el archivo de «Extended streaming history» del correo de Spotify.",
       "noParsedListens": "No se reconoció ninguna escucha en este archivo. Comprueba que es el export correcto.",
       "tooManyPlays": "Este export supera {max} reproducciones. Contacta con soporte o divide los datos."
@@ -267,7 +273,7 @@
   "footer": {
     "brand": "Apple Music Analytics 🎵",
     "tagline": "Tus analytics de escucha personales",
-    "overview": "Vista general",
+    "overview": "Your Music",
     "about": "Cómo funciona",
     "demo": "Demo",
     "methodology": "Metodología",
@@ -278,9 +284,9 @@
     "navAriaLabel": "Navegación del pie de página"
   },
   "overview": {
-    "title": "Vista general 📊",
-    "titlePersonal": "Vista general de {name} 📊",
-    "subtitle": "Estadísticas generales de tu escucha musical. Analiza tus tendencias y descubre tus géneros favoritos.",
+    "title": "Your Music 📊",
+    "titlePersonal": "La música de {name} 📊",
+    "subtitle": "Tus estadísticas personales de escucha. Analiza tus tendencias y descubre tus géneros favoritos.",
     "periodBadge": "Período",
     "allData": "Todos los datos",
     "stats": {
@@ -339,6 +345,7 @@
     "favoriteDayHint": "día más activo (período seleccionado)",
     "calendarTitle": "Calendario de escucha",
     "calendarHint": "Haz clic en un día para ver los detalles de escucha",
+    "overviewCalendarHint": "Haz clic en un día para abrir sus detalles en el mapa de calor completo.",
     "noDataPeriod": "No hay datos disponibles para este período",
     "weekdayDistribution": "Distribución por día de la semana",
     "weekdayDistributionHint": "Distribución de tus escuchas por día",
@@ -450,6 +457,11 @@
     "genresToDisplay": "Géneros a mostrar:",
     "all": "Todo",
     "none": "Ninguno",
+    "selectionCount": "{selected} / {max} en el gráfico",
+    "paginationSummary": "Mostrando {start}-{end} de {total}",
+    "paginationPrevious": "Anterior",
+    "paginationNext": "Siguiente",
+    "paginationPage": "Página {page} / {totalPages}",
     "selectAtLeastOne": "Selecciona al menos un género para mostrar el gráfico.",
     "evolution": "Evolución de escuchas por género",
     "chartHint": "Compara las escuchas entre tus géneros seleccionados a lo largo del tiempo",
@@ -556,7 +568,7 @@
     "subtitle": "Descubre tus artistas favoritos, sus estadísticas y la evolución de tus escuchas.",
     "errorLoading": "No se pueden cargar las estadísticas de artistas",
     "yourArtists": "Tus artistas",
-    "overviewSubtitle": "Vista general de tus escuchas",
+    "overviewSubtitle": "Snapshot de tus escuchas",
     "periodLast7Days": "Últimos 7 días",
     "periodLast30Days": "Últimos 30 días",
     "periodYearToDate": "Año en curso",
@@ -665,6 +677,12 @@
     "spotlightHint": "Análisis generado por IA a partir de tus datos de escucha",
     "cached": "(resultado en caché)",
     "quotaRemaining": "Cuota: {count} restantes",
+    "styleToggle": {
+      "label": "Estilo de insight",
+      "ariaLabel": "Elegir el estilo de los insights de IA",
+      "human": "Humano",
+      "technical": "Técnico"
+    },
     "loadingShort": "Cargando..."
   },
   "taste-evolution": {
@@ -734,47 +752,73 @@
     "whatMakesYouUnique": "Lo que te distingue",
     "footer": "Generado a partir de tus datos de escucha • Apple Music Analytics"
   },
-  "when-will-i-listen": {
-    "title": "¿Cuándo escucharé? ⏳",
-    "loading": "Calculando tu predicción...",
-    "seeMore": "Ver más",
-    "subtitle": "Predicción de tu franja de escucha más probable para hoy, basada en tus hábitos pasados. El cálculo usa heurísticas estadísticas (sin IA) — la IA solo sirve para explicar el resultado.",
-    "spotlightBadge": "Predicción para hoy",
-    "spotlightTitle": "Tu momento de escucha",
-    "spotlightHint": "Tu franja más probable para darle al play",
-    "predictedSlot": "Franja predicha",
-    "probableGenre": "Género probable",
-    "confidence": "Confianza",
-    "hideExplanation": "Ocultar explicación",
-    "showExplanation": "Ver explicación",
-    "predictionDisclaimer": "Predicción basada en tus hábitos pasados (mismo día de la semana). No se usa IA para el cálculo.",
-    "errorLoading": "No se puede cargar la predicción. Inténtalo de nuevo más tarde.",
-    "predictionSubtitle": "Predicción basada en tus hábitos",
-    "predictionSubtitleToday": "Predicción para hoy basada en tus hábitos pasados",
-    "insufficientData": "Datos insuficientes",
-    "listensAnalyzed": "{actual} escuchas analizadas (mínimo recomendado: {min})",
-    "fromCache": "Caché"
-  },
   "musical-profile": {
-    "title": "Perfil musical 🎵",
-    "subtitle": "Tu identidad musical generada por IA en un solo lugar. Insights, perfil de gustos, evolución y predicciones.",
-    "headerBadge": "Perfil con IA",
-    "heroBadge": "Tu identidad musical",
-    "heroTitle": "Tu perfil musical",
-    "heroSubtitle": "Una instantánea narrativa de tus hábitos de escucha — insights, gustos, evolución y tu próximo momento de escucha.",
-    "noData": "Aún no hay datos",
-    "importDescription": "Importa tus datos de escucha (exportaciones Spotify/Apple recomendadas) y selecciona un período para generar tu perfil musical.",
+    "title": "Perfil musical",
+    "subtitle": "Un replay premium de tu identidad musical, enriquecido con IA.",
+    "heroBadge": "Replay mejorado con IA",
+    "heroTitle": "Tu perfil musical, reconstruido desde tus datos",
+    "heroSubtitle": "Una experiencia tipo Wrapped que combina tus artistas, géneros, canciones más escuchadas y un único análisis IA generado desde tus agregados de escucha.",
+    "heroSignature": "Firma sonora",
+    "heroSignatureHint": "Anclada en {genre}",
+    "heroSignatureHintFallback": "Esperando más señal de género",
+    "noData": "Aún no hay datos de escucha",
+    "importDescription": "Importa tu exportación de Spotify o Apple Music para generar un perfil musical desde tu historial real.",
+    "errorLoading": "No se puede cargar tu perfil musical. Inténtalo de nuevo.",
+    "unknownArtist": "Artista desconocido",
+    "unknownGenre": "tu paleta actual",
+    "deterministicProfile": "Tu perfil actual se inclina hacia {genre}, con {artist} como uno de los anclajes más fuertes del período. Importa más escuchas o amplía el rango de fechas para afinar el perfil IA.",
+    "identityTitle": "Tu identidad sonora",
+    "identitySubtitle": "La sección IA se genera desde las mismas estadísticas agregadas que ves abajo, así que el resultado sigue siendo rico sin releer escuchas brutas ni duplicar llamadas costosas.",
+    "aiCached": "Perfil IA servido desde caché",
+    "aiUnavailable": "La IA está desactivada para este entorno o navegador, por lo que esta página muestra un perfil determinista basado en tus estadísticas.",
+    "aiErrorTitle": "Análisis IA no disponible. Mostrando un resumen basado en datos.",
+    "genreDnaTitle": "ADN de géneros",
+    "artistConstellationTitle": "Constelación de artistas",
+    "trackObsessionTitle": "Canciones en repetición",
+    "aiAttributesTitle": "Atributos del perfil IA",
     "sections": {
-      "insights": "Tus insights",
-      "tasteProfile": "Tus gustos",
-      "tasteEvolution": "Tu evolución"
+      "sonicIdentity": "Narrativa IA",
+      "topArtists": "Artistas más escuchados",
+      "topTracks": "Canciones más escuchadas",
+      "topGenres": "Géneros dominantes",
+      "aiAttributes": "Señales profundas"
     },
-    "exploreMore": "Explorar cada función en detalle"
+    "metrics": {
+      "totalListens": "Escuchas",
+      "totalListensHint": "Reproducciones en este perfil",
+      "listeningTime": "Tiempo de escucha",
+      "listeningTimeHint": "Estimado desde la duración de las canciones",
+      "uniqueArtists": "Artistas",
+      "uniqueArtistsHint": "Artistas distintos explorados",
+      "uniqueTracks": "Canciones",
+      "uniqueTracksHint": "Canciones distintas reproducidas"
+    },
+    "labels": {
+      "listens": "escuchas",
+      "ofListens": "de la escucha",
+      "by": "de"
+    },
+    "units": {
+      "hours": "h",
+      "minutes": "min"
+    },
+    "cards": {
+      "influences": "Influencias",
+      "coreGenres": "Géneros centrales",
+      "uniqueAspect": "Lo que lo hace tuyo"
+    },
+    "ctas": {
+      "artists": "Explorar artistas",
+      "tracks": "Explorar canciones",
+      "genres": "Explorar géneros",
+      "tasteProfile": "Abrir perfil completo"
+    },
+    "exploreMore": "Seguir explorando"
   },
   "annualReport": {
     "title": "Informe Anual {year}",
     "subtitle": "Análisis de tus hábitos de escucha musical",
-    "overview": "Vista general",
+    "overview": "Your Music",
     "totalListens": "Total de escuchas",
     "uniqueArtists": "Artistas únicos",
     "uniqueTracks": "Canciones únicas",
@@ -795,7 +839,7 @@
     "spotlightTitle": "En resumen",
     "spotlightHint": "Resumen rápido de la metodología",
     "summary": {
-      "patterns": "Patrones: Overview, Timeline, Heatmap, Canciones, Artistas, Análisis temporal, Géneros, Perfil musical, Insights y páginas IA revelan tus hábitos de escucha.",
+      "patterns": "Patrones: Your Music, Timeline, Heatmap, Canciones, Artistas, Análisis temporal, Géneros, Perfil musical, Insights y páginas IA revelan tus hábitos de escucha.",
       "calculations": "Cálculos: Agregaciones PostgreSQL (día/semana/mes), estadísticas globales, cascada de géneros (Track → ARTIST_TO_GENRE_MAP → Unknown), exportaciones CSV/JSON/PDF.",
       "limitations": "Limitaciones: Cobertura del mapeo de géneros, completitud de fuentes, tiempo de escucha estimado, rendimiento a gran escala y normalización de nombres.",
       "architecture": "Arquitectura: Next.js App Router, PostgreSQL + Prisma, caché Redis opcional, Recharts, e ingestión orientada al producto público vía exportaciones Spotify/Apple (Last.fm opcional)."
@@ -805,8 +849,8 @@
     "patterns": {
       "sectionTitle": "Patrones revelados por los datos",
       "overview": {
-        "title": "Vista general",
-        "paragraph": "La página <code>/dashboard/overview</code> muestra tus estadísticas globales con comparación al período anterior: total de escuchas, artistas y canciones únicos, tiempo total. Un gráfico de evolución reciente (áreas) y los géneros más escuchados completan el panorama. También hay páginas complementarias: <code>/dashboard/tracks</code>, <code>/dashboard/artists</code>, <code>/dashboard/musical-profile</code> y esta página <code>/dashboard/insights</code>."
+        "title": "Your Music",
+        "paragraph": "La página <code>/dashboard/overview</code> muestra tus estadísticas musicales personales con comparación al período anterior: total de escuchas, artistas y canciones únicos, tiempo total. Un gráfico de evolución reciente (áreas) y los géneros más escuchados completan el panorama. También hay páginas complementarias: <code>/dashboard/tracks</code>, <code>/dashboard/artists</code>, <code>/dashboard/musical-profile</code> y esta página <code>/dashboard/insights</code>."
       },
       "timeline": {
         "title": "Timeline y tendencias temporales",
@@ -831,9 +875,8 @@
         "title": "Insights impulsados por IA",
         "paragraph": "Varias páginas usan IA para analizar tus escuchas:",
         "li1": "<code>/dashboard/ai-insights</code>: Insights en lenguaje natural generados a partir de tus datos (opcional, requiere Groq)",
-        "li2": "<code>/dashboard/taste-profile</code>: Explica tus gustos musicales en lenguaje simple",
-        "li3": "<code>/dashboard/taste-evolution</code>: Cambios de gusto semana a semana con contexto IA",
-        "li4": "<code>/dashboard/when-will-i-listen</code>: Predice el horario y género más probables para tus próximas escuchas"
+        "li2": "<code>/dashboard/musical-profile</code>: Combina tus estadísticas de escucha con una identidad musical generada por IA",
+        "li3": "<code>/dashboard/taste-evolution</code>: Cambios de gusto semana a semana con contexto IA"
       },
       "dateRange": {
         "title": "Filtro de rango de fechas",
@@ -1058,6 +1101,7 @@
       "toastExportError": "Error durante el export {type}",
       "toastExportErrorGeneric": "Error de exportación",
       "toastExportErrorFallback": "Ocurrió un error durante la exportación",
+      "recentAuthRequired": "Inicia sesión de nuevo antes de exportar tus datos.",
       "exportCsvTitle": "Exportar escuchas a CSV",
       "exportStatsTitle": "Exportar estadísticas a JSON",
       "exportPdfTitle": "Generar informe PDF anual"
@@ -1113,7 +1157,7 @@
     "features": {
       "title": "¿Qué puedes explorar?",
       "items": {
-        "overview": "Vista general — Estadísticas globales (escuchas, artistas, canciones, tiempo total)",
+        "overview": "Your Music — Estadísticas globales (escuchas, artistas, canciones, tiempo total)",
         "timeline": "Timeline — Evolución de tus escuchas en el tiempo (día/semana/mes)",
         "heatmap": "Heatmap — Calendario estilo GitHub de tu intensidad de escucha",
         "tracks": "Canciones — Temas más reproducidos y patrones de repetición",
@@ -1122,7 +1166,6 @@
         "timeAnalysis": "Análisis temporal — Hábitos por hora y día de la semana",
         "musicalProfile": "Perfil musical — Tu persona de escucha basada en patrones",
         "insights": "Insights — Resúmenes generados por el producto y señales clave de escucha",
-        "whenWillIListen": "¿Cuándo escucharé? — Predicción del horario y género más probables",
         "tasteProfile": "Explain My Taste — Explicación IA de tus preferencias musicales",
         "tasteEvolution": "Evolución de gustos — Cambios semana a semana de tus gustos musicales",
         "aiInsights": "AI Insights — Insights en lenguaje natural (opcional)"

@@ -1,13 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { getCurrentUserId } from "@/lib/auth/get-current-user-id";
-import { unauthorizedResponse } from "@/lib/auth/require-auth-user-id";
+import { requireRecentAuthenticatedUser } from "@/lib/auth/require-recent-auth";
 import { assertRateLimit } from "@/lib/security/rate-limit";
 import { handleApiError } from "@/lib/utils/error-handler";
 import { logger } from "@/lib/utils/logger";
 import { prisma } from "@/lib/prisma";
 import { clearUserAnalyticsData } from "@/lib/services/user/clear-user-analytics-data";
-import { invalidateListeningHabitPredictionForUser } from "@/lib/services/predictions/prediction-cache";
 import {
   buildExpectedDeletionPhrase,
   deletionPhrasesMatch,
@@ -39,8 +37,9 @@ async function loadConfirmationPhrase(userId: string) {
 
 export async function GET(request: NextRequest) {
   try {
-    const userId = await getCurrentUserId(request);
-    if (!userId) return unauthorizedResponse();
+    const auth = await requireRecentAuthenticatedUser(request);
+    if (!auth.ok) return auth.response;
+    const userId = auth.userId;
 
     const phrase = await loadConfirmationPhrase(userId);
     if (!phrase) {
@@ -61,8 +60,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const userId = await getCurrentUserId(request);
-    if (!userId) return unauthorizedResponse();
+    const auth = await requireRecentAuthenticatedUser(request);
+    if (!auth.ok) return auth.response;
+    const userId = auth.userId;
 
     await assertRateLimit(request, {
       ...RATE,
@@ -112,7 +112,6 @@ export async function POST(request: NextRequest) {
     }
 
     const result = await clearUserAnalyticsData(userId);
-    await invalidateListeningHabitPredictionForUser(userId);
 
     logger.info("User analytics cleared", {
       route: ROUTE,

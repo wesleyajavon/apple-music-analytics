@@ -12,7 +12,6 @@ Ce document liste les usages de **`createGroqChatCompletion`** (point d’entré
 |--------|---------------------------|-----------|-------------|----------------------------------|
 | **AI Insights** (bullets analytics) | `lib/services/ai/llm-service.ts` | `POST /api/ai/insights` | Oui | `ai:insights:` + SHA-256 du résumé structuré + locale (`computeCacheKey` dans `insights-cache.ts`) |
 | **Profil de goût** (texte) | `lib/services/ai/taste-profile-service.ts` | `POST /api/ai/taste-profile` | Oui | `ai:taste-profile:` + `{hash résumé}:{tone}:{locale}` (`computeTasteProfileCacheKey` dans `taste-profile-cache.ts`) |
-| **Explication « When Will I Listen? »** | `lib/services/ai/listening-habit-explainer.ts` | `GET /api/predictions/listening-habit` (`?explain=true`) | Oui (explication uniquement ; la prédiction a son propre cache) | `predictions:listening-habit:explanation:` + SHA-256(payload prédiction + locale) (`getExplanationCacheKey` dans `prediction-cache.ts`) |
 | **Commentaire évolution du goût** (tech + light) | `lib/services/ai/taste-evolution-commentary.ts` | `GET /api/analytics/taste-evolution` | Oui | `taste-evolution:commentary:` / `taste-evolution:commentary-light:` + SHA-256 des tendances + locale + mode (`taste-evolution-cache.ts`). Les **tendances** hebdomadaires sont aussi cachées sous `taste-evolution:trends:` + hash plage + user (pas d’appel Groq pour ce volet). |
 | **Commentaire tendances par genre** (tech + light) | `lib/services/ai/genre-trends-commentary.ts` (import `RateLimitError` depuis `groq-sdk`) | `GET /api/ai/genre-trends-commentary` | Oui | `genre-trends:commentary:` / `genre-trends:commentary-light:` + hash stable du payload compact + locale + mode (`genre-trends-commentary-cache.ts`) |
 | **Point d’entrée Groq + TPM** | `lib/services/ai/groq-chat.ts` | *(aucune route directe)* | Oui (limitation TPM, pas cache réponse) | `groq:tpm:window`, `groq:tpm:seq` (`groq-rate-limiter.ts`, script Lua Redis) |
@@ -32,11 +31,10 @@ Ce document liste les usages de **`createGroqChatCompletion`** (point d’entré
 Ces fichiers **mockent** `createGroqChatCompletion` et ne appellent pas Groq en conditions réelles :
 
 - `lib/services/ai/__tests__/llm-service.test.ts`
-- `lib/services/ai/__tests__/listening-habit-explainer.test.ts`
 - `lib/services/ai/__tests__/taste-evolution-commentary.test.ts`
 - `lib/services/ai/__tests__/taste-profile-service.test.ts`
 
-Tests liés aux routes / caches : `__tests__/api/ai-insights.test.ts`, `__tests__/api/taste-profile.test.ts`, `__tests__/api/taste-evolution.test.ts`, `__tests__/api/listening-habit-prediction.test.ts`, `lib/services/ai/__tests__/insights-cache.test.ts`, `lib/services/ai/__tests__/taste-profile-cache.test.ts`, `lib/services/ai/__tests__/groq-rate-limiter.test.ts` (estimate tokens uniquement).
+Tests liés aux routes / caches : `__tests__/api/ai-insights.test.ts`, `__tests__/api/taste-profile.test.ts`, `__tests__/api/taste-evolution.test.ts`, `lib/services/ai/__tests__/insights-cache.test.ts`, `lib/services/ai/__tests__/taste-profile-cache.test.ts`, `lib/services/ai/__tests__/groq-rate-limiter.test.ts` (estimate tokens uniquement).
 
 ---
 

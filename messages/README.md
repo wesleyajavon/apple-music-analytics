@@ -24,7 +24,6 @@ Ce dossier contient les fichiers de traduction pour chaque langue supportée.
 | `ai-insights` | Page AI Insights |
 | `taste-evolution` | Page évolution des goûts |
 | `taste-profile` | Page Explain My Taste |
-| `when-will-i-listen` | Page quand vais-je écouter |
 | `insights` | Page méthodologie |
 | `api-docs` | Page doc API |
 | `errors` | error.tsx, global-error.tsx |

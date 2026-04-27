@@ -5,6 +5,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { toast } from "sonner";
+import {
+  isRecentAuthRequiredError,
+  redirectToRecentSignIn,
+} from "@/lib/auth/recent-auth-client";
 import { extractSpotifyStreamingHistoryJsonTextsFromZip } from "@/lib/services/listening/extract-spotify-export-zip";
 import { ONBOARDING_IMPORT_MAX_JSON_BATCH_ROWS } from "@/lib/services/listening/onboarding-import-constants";
 import type { NormalizedListenInput } from "@/lib/services/listening/onboarding-import-types";
@@ -155,7 +159,7 @@ export function DataExportOnboarding() {
 
   const refreshGenreBackfillStatus = useCallback(async () => {
     try {
-      const res = await fetch("/api/user/onboarding/import/genre-backfill/status");
+      const res = await fetch("/api/user/onboarding/import/genre-backfill/status?includeTerminal=1");
       if (!res.ok) return;
       const data = (await res.json().catch(() => ({}))) as {
         job?: GenreBackfillJob | null;
@@ -234,6 +238,7 @@ export function DataExportOnboarding() {
 
       type ImportOkJson = {
         error?: string;
+        code?: string;
         imported?: number;
         skippedDuplicates?: number;
         skippedInvalid?: number;
@@ -257,6 +262,11 @@ export function DataExportOnboarding() {
         const res = await fetch("/api/user/onboarding/import", { method: "POST", body: fd });
         const data = (await res.json().catch(() => ({}))) as ImportOkJson;
         if (!res.ok) {
+          if (isRecentAuthRequiredError(data)) {
+            toast.error(t("import.recentAuthRequired"));
+            redirectToRecentSignIn(window.location.pathname + window.location.search);
+            return;
+          }
           toast.error(data?.error ?? t("import.importError"));
           return;
         }
@@ -346,6 +356,11 @@ export function DataExportOnboarding() {
         });
         const data = (await res.json().catch(() => ({}))) as ImportOkJson;
         if (!res.ok) {
+          if (isRecentAuthRequiredError(data)) {
+            toast.error(t("import.recentAuthRequired"));
+            redirectToRecentSignIn(window.location.pathname + window.location.search);
+            return;
+          }
           toast.error(data?.error ?? t("import.importError"));
           return;
         }

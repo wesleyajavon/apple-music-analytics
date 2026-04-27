@@ -39,7 +39,6 @@ Chaque **requête** Groq correspond à un `createGroqChatCompletion` avec un pla
 | Profil de goût | `taste-profile-service` → `/api/ai/taste-profile` | 800 | 1 appel |
 | Évolution du goût (commentaire) | `taste-evolution-commentary` → `/api/analytics/taste-evolution` | 400 | **Jusqu’à 2 appels** (version « technique » + « light ») si les deux sont demandés |
 | Tendances genres (commentaire) | `genre-trends-commentary` → `/api/ai/genre-trends-commentary` | 450 | **Jusqu’à 2 appels** (technical + light) |
-| Prédiction habitude d’écoute | `listening-habit-explainer` → `/api/predictions/listening-habit` | 200 | 1 appel si explication activée |
 
 **Réduction réelle des coûts :** le cache Redis (et le cache React côté client) fait que **beaucoup d’appels ne touchent pas Groq** si les paramètres sont identiques. Le coût dépend donc surtout du **taux de cache miss** et des **nouveaux filtres / nouveaux utilisateurs**.
 

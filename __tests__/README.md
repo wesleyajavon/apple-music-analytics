@@ -31,7 +31,6 @@ Les tests d'intégration vérifient le comportement des routes API en isolant le
 - `temporal-analysis.test.ts` - Tests pour `/api/temporal-analysis`
 - `ai-insights.test.ts` - Tests pour `/api/ai/insights`
 - `taste-profile.test.ts` - Tests pour `/api/ai/taste-profile`
-- `listening-habit-prediction.test.ts` - Tests pour `/api/predictions/listening-habit`
 
 **Exécuter les tests d'intégration :**
 ```bash

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getCurrentUserId } from "@/lib/auth/get-current-user-id";
-import { unauthorizedResponse } from "@/lib/auth/require-auth-user-id";
+import { requireRecentAuthenticatedUser } from "@/lib/auth/require-recent-auth";
 import { assertRateLimit } from "@/lib/security/rate-limit";
 import {
   AppError,
@@ -41,8 +40,9 @@ function isProvider(s: string | null): s is Provider {
 
 export async function POST(request: NextRequest) {
   try {
-    const userId = await getCurrentUserId(request);
-    if (!userId) return unauthorizedResponse();
+    const auth = await requireRecentAuthenticatedUser(request);
+    if (!auth.ok) return auth.response;
+    const userId = auth.userId;
 
     await assertRateLimit(request, {
       ...RATE,

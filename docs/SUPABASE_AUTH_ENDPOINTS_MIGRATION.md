@@ -22,7 +22,6 @@ Reference file for Phase 3 migration (`query userId` -> Supabase session user).
 ## AI / prediction endpoints to migrate
 
 - `app/api/analytics/taste-evolution/route.ts`
-- `app/api/predictions/listening-habit/route.ts`
 - `app/api/ai/artist-trends-commentary/route.ts`
 - `app/api/ai/genre-trends-commentary/route.ts`
 

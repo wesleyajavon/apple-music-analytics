@@ -10,7 +10,6 @@ export * from "./date-range-filter";
 export * from "./period-selector";
 export * from "./calendar-heatmap";
 export * from "./skeleton-loaders";
-export * from "./when-will-i-listen-widget";
 export * from "./taste-evolution-summary-widget";
 export * from "./taste-profile-summary-widget";
 export * from "./ai-insights-summary-widget";

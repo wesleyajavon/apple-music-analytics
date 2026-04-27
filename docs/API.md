@@ -152,16 +152,6 @@ Recherche dans le catalogue `Track` (titre + artiste, index `titleLower`/`nameLo
 
 ---
 
-## Prédictions
-
-### GET `/api/predictions/listening-habit`
-
-Prédiction du créneau horaire et genre les plus probables pour aujourd'hui.
-
-**Paramètres** : `userId`
-
----
-
 ## Analytics IA
 
 ### GET `/api/analytics/taste-evolution`

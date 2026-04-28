@@ -27,9 +27,12 @@ vi.mock("@react-pdf/renderer", async (importOriginal) => {
     }),
   };
 });
-vi.mock("@/lib/auth/require-auth-user-id", () => ({
-  requireAuthenticatedUserId: vi.fn().mockResolvedValue("user-1"),
-  unauthorizedResponse: vi.fn(),
+vi.mock("@/lib/auth/require-recent-auth", () => ({
+  requireRecentAuthenticatedUser: vi.fn().mockResolvedValue({
+    ok: true,
+    userId: "user-1",
+    authenticatedAt: new Date(),
+  }),
 }));
 
 import { getOverviewStats, getGenreDistribution } from "@/lib/services/listening/listening-stats";

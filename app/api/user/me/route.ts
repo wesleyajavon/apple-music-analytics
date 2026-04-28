@@ -94,8 +94,8 @@ export async function PATCH(request: NextRequest) {
     });
     if (authError) {
       logger.warn(
-        { err: authError, route: ROUTE },
-        "Supabase auth.updateUser failed when updating display name"
+        "Supabase auth.updateUser failed when updating display name",
+        { err: authError, route: ROUTE }
       );
       return NextResponse.json(
         { error: authError.message, code: "AUTH_UPDATE_FAILED" },

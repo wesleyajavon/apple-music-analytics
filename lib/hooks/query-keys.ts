@@ -91,3 +91,13 @@ export const tasteEvolutionKeys = {
     locale?: string;
   }) => [...tasteEvolutionKeys.all, params] as const,
 } as const;
+
+export const predictionKeys = {
+  all: ["predictions"] as const,
+  listeningHabit: (params: {
+    userId?: string;
+    explain: boolean;
+    locale: string;
+  }) =>
+    [...predictionKeys.all, "listening-habit", params] as const,
+} as const;

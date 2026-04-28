@@ -19,13 +19,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const t = await getTranslations({ locale, namespace: "metadata" });
 
   const ogImage = "/brand/soundprint-ai-logo.png";
+  const faviconUrl = "/brand/favicon.png";
 
   return {
     title: t("title"),
     description: t("description"),
     icons: {
-      icon: [{ url: ogImage, type: "image/png" }],
-      apple: ogImage,
+      icon: [{ url: faviconUrl, type: "image/png" }],
+      apple: faviconUrl,
     },
     openGraph: {
       title: t("title"),

@@ -175,7 +175,7 @@ export function ArtistTrendsArtistPicker({
               placeholder={t("searchPlaceholder")}
               autoComplete="off"
               spellCheck={false}
-              className="w-full rounded-lg border border-gray-200 bg-white py-2 pl-9 pr-3 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-accent-violet focus:outline-none focus:ring-2 focus:ring-accent-violet/20 dark:border-gray-600 dark:bg-gray-800/80 dark:text-white dark:placeholder:text-gray-500"
+              className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-9 pr-3 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-600/20 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-500"
               aria-controls="artist-trends-listbox"
               aria-describedby="artist-trends-search-hint"
               aria-activedescendant={
@@ -195,7 +195,7 @@ export function ArtistTrendsArtistPicker({
               {t("searchResultsCount", { count: filtered.length, total: catalogArtists.length })}
             </p>
           )}
-          <p className="text-xs text-gray-500 dark:text-gray-400 tabular-nums">
+          <p className="rounded-full border border-gray-200 bg-gray-50/80 px-2.5 py-1 text-xs text-gray-500 tabular-nums dark:border-gray-600 dark:bg-gray-700/30 dark:text-gray-400">
             {t("selectionCount", { selected: selectedIds.length, max: maxSelectable })}
           </p>
         </div>
@@ -203,18 +203,18 @@ export function ArtistTrendsArtistPicker({
 
       {enableRemoteSearch && query.trim().length >= 2 && (
         <div
-          className="rounded-xl border border-accent-violet/20 bg-white dark:bg-gray-800/95 shadow-md dark:shadow-none"
+          className="rounded-xl border border-gray-200 bg-white shadow-lg dark:border-gray-600 dark:bg-gray-800"
           role="region"
           aria-label={t("searchDatabaseRegion")}
         >
-          <div className="border-b border-gray-100 dark:border-gray-700/50 px-3 py-2">
-            <p className="text-xs font-medium text-accent-violet dark:text-accent-violet/90">
+          <div className="border-b border-gray-100 px-3 py-2 dark:border-gray-700/50">
+            <p className="text-xs font-semibold uppercase tracking-wider text-violet-700 dark:text-violet-300">
               {t("searchDatabaseTitle")}
             </p>
           </div>
           <div className="max-h-52 overflow-y-auto p-2">
             {remoteLoading ? (
-              <p className="px-2 py-4 text-center text-sm text-gray-500">{t("searchRemoteLoading")}</p>
+              <p className="px-2 py-4 text-center text-sm text-gray-500 dark:text-gray-400">{t("searchRemoteLoading")}</p>
             ) : remoteSuggestions.filter((a) => !catalogIdSet.has(a.id)).length === 0 &&
               remoteSuggestions.length > 0 ? (
               <p className="px-2 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
@@ -244,13 +244,13 @@ export function ArtistTrendsArtistPicker({
                             inCatalog
                               ? "cursor-default text-gray-400 dark:text-gray-500"
                               : disabledAdd
-                                ? "cursor-not-allowed opacity-50 text-gray-500"
-                                : "text-gray-900 hover:bg-accent-violet/10 dark:text-white dark:hover:bg-accent-violet/20"
+                                ? "cursor-not-allowed opacity-50 text-gray-500 dark:text-gray-400"
+                                : "text-gray-900 hover:bg-violet-50 dark:text-white dark:hover:bg-violet-500/10"
                           }
                         `}
                       >
                         <span className="min-w-0 truncate font-medium">{artist.name}</span>
-                        <span className="shrink-0 text-xs">
+                        <span className="shrink-0 text-xs text-gray-500 dark:text-gray-400">
                           {inCatalog
                             ? t("searchInCatalog")
                             : selected
@@ -272,7 +272,7 @@ export function ArtistTrendsArtistPicker({
         role="listbox"
         aria-label={t("artistsToDisplay")}
         aria-multiselectable="true"
-        className="mt-3 flex max-h-[min(50vh,22rem)] flex-wrap content-start gap-2 overflow-y-auto rounded-lg border border-gray-100 bg-gray-50/50 p-2 dark:border-gray-700/50 dark:bg-gray-900/30"
+        className="mt-3 flex max-h-[min(50vh,22rem)] flex-wrap content-start gap-2 overflow-y-auto rounded-xl border border-gray-200 bg-gray-50/80 p-2 dark:border-gray-700 dark:bg-gray-700/30"
       >
         {filtered.length === 0 ? (
           <p className="px-2 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
@@ -291,11 +291,13 @@ export function ArtistTrendsArtistPicker({
                 role="option"
                 aria-selected={selected}
                 className={`
-                  inline-flex max-w-[min(100%,260px)] cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 transition-colors
+                  inline-flex max-w-[min(100%,260px)] cursor-pointer items-center gap-2 rounded-lg border px-3 py-1.5 transition-colors
                   ${
-                    isHighlighted
-                      ? "border-accent-violet ring-2 ring-accent-violet/30 bg-accent-violet/5 dark:bg-accent-violet/10"
-                      : "border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                    selected
+                      ? "border-violet-300/70 bg-violet-50 text-gray-900 shadow-sm dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-white"
+                      : isHighlighted
+                        ? "border-violet-500/60 bg-violet-50 ring-2 ring-violet-500/25 dark:bg-violet-500/10"
+                        : "border-gray-200 bg-white text-gray-900 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700/50"
                   }
                 `}
               >
@@ -308,7 +310,7 @@ export function ArtistTrendsArtistPicker({
                     onToggle(artist.id);
                   }}
                   tabIndex={-1}
-                  className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 disabled:opacity-40"
+                  className="rounded border-gray-300 text-violet-700 focus:ring-violet-600 disabled:opacity-40 dark:border-gray-600 dark:bg-gray-800"
                 />
                 <span
                   className="w-3 h-3 shrink-0 rounded-full"
@@ -319,7 +321,7 @@ export function ArtistTrendsArtistPicker({
                   aria-hidden
                 />
                 <span
-                  className="text-sm text-gray-800 dark:text-gray-200 truncate"
+                  className="truncate text-sm text-gray-900 dark:text-white"
                   title={artist.name}
                 >
                   {artist.name}

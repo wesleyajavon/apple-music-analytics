@@ -22,16 +22,30 @@ const periods: PeriodOption[] = [
 export interface PeriodSelectorProps {
   /** When `period` is absent from the URL (e.g. first visit). Defaults to `"day"`. */
   defaultPeriod?: PeriodType;
+  /** Page-owned period value, used when the page already normalizes the URL state. */
+  value?: PeriodType;
 }
 
-export function PeriodSelector({ defaultPeriod = "day" }: PeriodSelectorProps) {
+export function isPeriodType(value: string | null | undefined): value is PeriodType {
+  return value === "day" || value === "week" || value === "month";
+}
+
+export function getPeriodFromSearchParams(
+  searchParams: { get: (key: string) => string | null },
+  defaultPeriod: PeriodType = "day"
+): PeriodType {
+  const period = searchParams.get("period");
+  return isPeriodType(period) ? period : defaultPeriod;
+}
+
+export function PeriodSelector({ defaultPeriod = "day", value }: PeriodSelectorProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { prefetchWithOptimisticUpdate } = useOptimisticFilters();
   const t = useTranslations("components.periodSelector");
 
-  const currentPeriod = (searchParams.get("period") as PeriodType) || defaultPeriod;
+  const currentPeriod = value ?? getPeriodFromSearchParams(searchParams, defaultPeriod);
   const startDate = searchParams.get("startDate") || undefined;
   const endDate = searchParams.get("endDate") || undefined;
 
@@ -100,16 +114,16 @@ export function PeriodSelector({ defaultPeriod = "day" }: PeriodSelectorProps) {
 
   return (
     <div className="flex items-center gap-4">
-      <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 shrink-0">
+      <span className="text-[10px] font-semibold uppercase tracking-wider text-muted shrink-0">
         {t("label")}
       </span>
       <div
         ref={containerRef}
-        className="relative flex items-center bg-gray-50 dark:bg-gray-800/80 p-1.5 rounded-xl border border-gray-100 dark:border-gray-700/50"
+        className="relative flex items-center bg-surface p-1.5 rounded-xl border border-card-border"
       >
         {indicatorStyle && (
           <div
-            className="absolute h-[calc(100%-12px)] top-1.5 bg-accent-violet rounded-lg transition-all duration-300 ease-out shadow-sm"
+            className="absolute h-[calc(100%-12px)] top-1.5 bg-brand-gradient rounded-lg transition-all duration-300 ease-out shadow-sm"
             style={{
               left: `${indicatorStyle.left}px`,
               width: `${indicatorStyle.width}px`,
@@ -131,7 +145,7 @@ export function PeriodSelector({ defaultPeriod = "day" }: PeriodSelectorProps) {
                 ${
                   isActive
                     ? "text-white"
-                    : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                    : "text-muted hover:text-foreground"
                 }
               `}
             >

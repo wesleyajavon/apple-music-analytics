@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { BookOpen } from "lucide-react";
+import { DashboardHeroTitle } from "@/lib/components/dashboard-hero-title";
 
 /**
  * Page Insights - Documentation sur les patterns, calculs et limitations
@@ -138,9 +140,9 @@ export default function InsightsPage() {
             {t("heroBadge")}
           </span>
         </div>
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
+        <DashboardHeroTitle icon={BookOpen} variant="page">
           {t("title")}
-        </h1>
+        </DashboardHeroTitle>
         <p className="mt-2 text-base text-gray-500 dark:text-gray-400 max-w-2xl">
           {t("subtitle")}
         </p>

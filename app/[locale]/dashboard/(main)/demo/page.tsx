@@ -1,6 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { Video } from "lucide-react";
+import { DashboardHeroTitle } from "@/lib/components/dashboard-hero-title";
 
 const YOUTUBE_VIDEO_ID = "bSSbz4yFeKo";
 
@@ -33,9 +35,9 @@ export default function DemoPage() {
             {t("heroBadge")}
           </span>
         </div>
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
+        <DashboardHeroTitle icon={Video} variant="page">
           {t("title")}
-        </h1>
+        </DashboardHeroTitle>
         <p className="mt-2 text-base text-gray-500 dark:text-gray-400 max-w-2xl">
           {t("subtitle")}
         </p>

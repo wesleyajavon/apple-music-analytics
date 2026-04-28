@@ -28,8 +28,8 @@ export function Footer({ variant = "dashboard" }: { variant?: FooterVariant }) {
       className={`
         shrink-0 px-4 sm:px-6 lg:px-8 py-5
         ${isHome
-          ? "border-t border-white/20 dark:border-white/10 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm"
-          : "border-t border-gray-100 dark:border-gray-800"
+          ? "border-t border-card-border bg-surface-glass backdrop-blur-sm"
+          : "border-t border-card-border"
         }
       `}
       role="contentinfo"
@@ -43,17 +43,17 @@ export function Footer({ variant = "dashboard" }: { variant?: FooterVariant }) {
             <Link
               key={link.href}
               href={link.href}
-              className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors duration-200"
+              className="text-sm text-muted hover:text-primary transition-colors duration-200"
             >
               {link.label}
             </Link>
           ))}
         </nav>
         <div className="flex flex-col gap-1 sm:items-end">
-          <p className="text-xs text-gray-400 dark:text-gray-500">
+          <p className="text-xs text-muted/75">
             © {currentYear} {t("copyright")} · {t("madeWith")}
           </p>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
+          <p className="text-xs text-muted">
             {t("creatorCredit")}
           </p>
         </div>

@@ -1,12 +1,13 @@
 /**
  * Composant réutilisable pour afficher un état vide avec messages contextuels,
- * actions suggérées et illustrations (emoji ou SVG).
+ * actions suggérées et illustrations (SVG ou Lucide).
  */
 
 "use client";
 
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
+import { Inbox } from "lucide-react";
 
 export interface EmptyStateAction {
   label: string;
@@ -19,7 +20,7 @@ interface EmptyStateProps {
   message?: string;
   /** Description ou précision contextuelle */
   description?: string;
-  /** Emoji ou caractère d'illustration (ignoré si illustration est fourni) */
+  /** Illustration textuelle optionnelle (ignorée si illustration est fournie) */
   icon?: string;
   /** Illustration personnalisée (SVG, composant). Si fourni, remplace icon. */
   illustration?: React.ReactNode;
@@ -114,10 +115,20 @@ const ILLUSTRATIONS = {
 
 export type EmptyStateIllustrationKey = keyof typeof ILLUSTRATIONS;
 
+function DefaultEmptyIllustration() {
+  return (
+    <Inbox
+      className="mx-auto h-24 w-24 text-gray-300 dark:text-gray-600"
+      strokeWidth={1.2}
+      aria-hidden
+    />
+  );
+}
+
 export function EmptyState({
   message,
   description,
-  icon = "📭",
+  icon,
   illustration,
   actions,
   className = "",
@@ -125,14 +136,18 @@ export function EmptyState({
   const t = useTranslations("components.emptyState");
   const displayMessage = message ?? t("defaultMessage");
 
-  const visual = illustration ?? (
-    <div
-      className="text-6xl mb-6 transform transition-transform hover:scale-110 duration-300"
-      aria-hidden
-    >
-      {icon}
-    </div>
-  );
+  const visual =
+    illustration ??
+    (icon ? (
+      <div
+        className="mb-6 text-6xl transform transition-transform duration-300 hover:scale-110"
+        aria-hidden
+      >
+        {icon}
+      </div>
+    ) : (
+      <DefaultEmptyIllustration />
+    ));
 
   return (
     <div
@@ -163,8 +178,8 @@ export function EmptyState({
                     href={action.href}
                     className={
                       isPrimary
-                        ? "inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
-                        : "inline-flex items-center justify-center rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+                        ? "inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+                        : "inline-flex items-center justify-center rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 dark:focus:ring-offset-gray-900"
                     }
                   >
                     {action.label}
@@ -178,8 +193,8 @@ export function EmptyState({
                   onClick={action.onClick}
                   className={
                     isPrimary
-                      ? "inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
-                      : "inline-flex items-center justify-center rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+                      ? "inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+                      : "inline-flex items-center justify-center rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 dark:focus:ring-offset-gray-900"
                   }
                 >
                   {action.label}

@@ -47,7 +47,7 @@ export default function SignUpPage() {
   }
 
   const inputClassName =
-    "w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none transition-shadow ring-accent-violet focus:border-accent-violet focus:ring-2 focus:ring-accent-violet/30 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100";
+    "w-full rounded-lg border border-card-border bg-surface-raised px-3 py-2.5 text-sm text-foreground outline-none transition-shadow ring-ring focus:border-primary focus:ring-2 focus:ring-ring";
 
   const statusId = error ? errorId : success ? successId : undefined;
 
@@ -58,27 +58,27 @@ export default function SignUpPage() {
       className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-4 py-8 sm:py-12"
     >
       <section
-        className="w-full rounded-2xl border border-gray-200/80 bg-white/90 p-6 shadow-lg shadow-gray-200/40 backdrop-blur-sm dark:border-gray-800 dark:bg-gray-900/80 dark:shadow-none sm:p-8"
+        className="w-full rounded-2xl border border-card-border bg-card-surface p-6 shadow-card backdrop-blur-sm sm:p-8"
         aria-labelledby="sign-up-heading"
       >
-        <p className="text-xs font-semibold uppercase tracking-widest text-blue-600 dark:text-blue-400">
+        <p className="text-xs font-semibold uppercase tracking-widest text-primary">
           {t("signUpEyebrow")}
         </p>
         <h1
           id="sign-up-heading"
-          className="mt-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl"
+          className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl"
         >
           {t("signUpTitle")}
         </h1>
-        <p className="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-300">
+        <p className="mt-2 text-sm leading-relaxed text-muted">
           {t("signUpSubtitle")}
         </p>
 
-        <form onSubmit={onSubmit} className="mt-8 space-y-5">
+        <form method="post" onSubmit={onSubmit} className="mt-8 space-y-5">
           <div>
             <label
               htmlFor={emailId}
-              className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-200"
+              className="mb-1.5 block text-sm font-medium text-foreground/85"
             >
               {t("email")}
             </label>
@@ -99,7 +99,7 @@ export default function SignUpPage() {
           <div>
             <label
               htmlFor={passwordId}
-              className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-200"
+              className="mb-1.5 block text-sm font-medium text-foreground/85"
             >
               {t("password")}
             </label>
@@ -141,15 +141,15 @@ export default function SignUpPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full rounded-xl bg-accent-violet px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-accent-violet/20 transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full rounded-xl bg-brand-gradient px-4 py-2.5 text-sm font-semibold text-white shadow-brand-glow transition-opacity hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isLoading ? t("creatingAccount") : t("signUp")}
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-300">
+        <p className="mt-6 text-center text-sm text-muted">
           {t("alreadyAccount")}{" "}
-          <Link href="/sign-in" className="font-semibold text-accent-violet hover:underline">
+          <Link href="/sign-in" className="font-semibold text-primary hover:underline">
             {t("signIn")}
           </Link>
         </p>
@@ -157,7 +157,7 @@ export default function SignUpPage() {
         <p className="mt-4 text-center sm:hidden">
           <Link
             href={`/dashboard/overview?userId=${DEFAULT_PUBLIC_PROFILE_USER_ID}`}
-            className="text-sm font-medium text-gray-500 underline-offset-4 hover:text-gray-800 hover:underline dark:text-gray-400 dark:hover:text-gray-200"
+            className="text-sm font-medium text-muted underline-offset-4 hover:text-primary hover:underline"
           >
             {t("dashboardLink")}
           </Link>

@@ -31,13 +31,15 @@
     "expandSidebar": "Expand sidebar",
     "collapseSection": "Collapse {label}",
     "expandSection": "Expand {label}",
-    "logo": "Analytics",
+    "logo": "Soundprint",
+    "tagline": "Your listening, visualized",
     "appearance": "Appearance",
     "language": "Language",
     "signIn": "Sign in",
     "signUp": "Sign up",
     "signOut": "Sign out",
     "signingOut": "Signing out...",
+    "featuredBadge": "Core",
     "groups": {
       "home": "Home",
       "library": "Library",
@@ -73,8 +75,28 @@
     "metaTitle": "Account settings",
     "title": "Settings",
     "subtitle": "Manage data stored for your account in this app.",
+    "pageEyebrow": "Account",
+    "navOnThisPage": "On this page",
+    "sectionProfile": "Profile",
+    "sectionProfileLead": "Your name appears in the dashboard and is used for sensitive confirmations (e.g. clearing data).",
+    "profileNameLabel": "Display name",
+    "profileEmailLabel": "Email",
+    "profileEmailHint": "From your sign-in. To change it, use your account provider or contact support.",
+    "saveProfile": "Save",
+    "savingProfile": "Saving…",
+    "profileSaved": "Changes saved",
+    "profileLoadError": "Could not load your profile. Please refresh the page.",
+    "profileSaveError": "Could not save. Please try again.",
+    "profileNameTooLong": "Use at most 200 characters.",
+    "sectionPreferences": "Preferences",
+    "sectionPreferencesLead": "Optional prompts, banners, and in-app messages.",
+    "sectionDataPrivacy": "Data & privacy",
+    "sectionDataPrivacyLead": "Remove listening history and imports stored in this app. Your sign-in is not deleted.",
+    "signedOutTitle": "Sign in to manage settings",
     "signedOutHint": "Sign in to clear your analytics data or manage your account.",
     "signInCta": "Sign in",
+    "switchHideGenreAria": "Hide Groq genre classification banner on the dashboard",
+    "switchUnderstandAria": "I understand this data deletion cannot be undone",
     "dangerTitle": "Clear my analytics data",
     "dangerBody": "This permanently deletes all imported listening history and Replay data we store. Your account (email) is not deleted.",
     "dangerBulletListens": "All stored listens (imports, etc.)",
@@ -113,7 +135,7 @@
     "alreadyAccount": "Already have an account?",
     "signUpSuccess": "Account created. Check your email to confirm your sign up.",
     "skipToContent": "Skip to sign-in form",
-    "homeLinkAriaLabel": "Apple Music Analytics — home",
+    "homeLinkAriaLabel": "Soundprint — home",
     "authNavAriaLabel": "Account pages",
     "dashboardLink": "Wesley's dashboard",
     "continueWithGoogle": "Continue with Google",
@@ -233,7 +255,7 @@
     }
   },
   "dashboard": {
-    "title": "Dashboard 📊",
+    "title": "Dashboard",
     "genreBackfill": {
       "running": "Groq genre classification is running",
       "pausedHeading": "Groq genre classification is paused",
@@ -271,29 +293,30 @@
     }
   },
   "footer": {
-    "brand": "Apple Music Analytics 🎵",
+    "brand": "Soundprint",
     "tagline": "Your personal listening analytics",
     "overview": "Your Music",
     "about": "How it works",
     "demo": "Demo",
     "methodology": "Methodology",
     "apiDocs": "API Docs",
-    "copyright": "Apple Music Analytics. All rights reserved.",
-    "madeWith": "Made with ❤️ for music lovers",
+    "copyright": "Soundprint. All rights reserved.",
+    "madeWith": "Made with care for music lovers",
     "creatorCredit": "Wesley Ajavon made this",
     "navAriaLabel": "Footer navigation"
   },
   "overview": {
-    "title": "Your Music 📊",
-    "titlePersonal": "{name}'s music 📊",
+    "title": "Your music",
+    "titlePersonal": "{name}'s music",
+    "heroEyebrow": "Your listening at a glance",
     "subtitle": "Your personal listening stats. Analyze your trends and discover your favorite genres.",
     "periodBadge": "Period",
     "allData": "All data",
     "stats": {
-      "totalListens": "Total listens 🎧",
-      "uniqueArtists": "Unique artists 🎤",
-      "uniqueTracks": "Unique tracks 🎵",
-      "totalTime": "Total time ⏱️"
+      "totalListens": "Total listens",
+      "uniqueArtists": "Unique artists",
+      "uniqueTracks": "Unique tracks",
+      "totalTime": "Total time"
     },
     "statsSectionBadge": "Summary",
     "statsSectionTitle": "Your numbers for this period",
@@ -301,25 +324,29 @@
     "statsSectionComparisonNote": "Percentages compare this period to the previous window of the same length (when data is available).",
     "vsPreviousPeriod": "vs previous period",
     "notAvailable": "Not available",
-    "recentEvolution": "Recent evolution 📈",
+    "recentEvolution": "Recent evolution",
     "listensPerDay": "Number of listens per day",
     "listensPerMonth": "Number of listens per month",
     "seeMore": "See more",
-    "topGenres": "Top genres 🎸",
+    "topGenres": "Top genres",
     "yourTopGenres": "Your most listened genres",
     "yourTopArtists": "Your most listened artists",
     "yourTopTracks": "Your most listened tracks",
     "seeAll": "See all",
-    "topArtists": "Most listened artists 🎤",
-    "topTracks": "Most listened tracks 🎧",
+    "topArtists": "Most listened artists",
+    "topTracks": "Most listened tracks",
     "yourFavoriteArtists": "Your favorite artists by listen count",
     "listens": "listens",
     "Listens": "Listens",
     "errorLoading": "Unable to load statistics"
   },
   "timeline": {
-    "title": "Listening timeline 📈",
+    "title": "Listening timeline",
     "subtitle": "See how your listening habits shift over time",
+    "heroEyebrow": "Listening over time",
+    "heroStatTotal": "Total listens",
+    "heroStatPeak": "Peak period",
+    "heroStatBuckets": "Data points",
     "chartTitle": "Your listening trend",
     "chartHint": "Track peaks, dips, and momentum across the selected period",
     "errorLoading": "Unable to load the listening timeline",
@@ -330,8 +357,9 @@
     "periodBadgeMonth": "Monthly"
   },
   "heatmap": {
-    "title": "Listening heatmap 🔥",
+    "title": "Listening heatmap",
     "subtitle": "Visualize your daily listening patterns with an interactive GitHub-style calendar. Click on a day to see details.",
+    "heroEyebrow": "Calendar intensity",
     "dateRangeBadge": "Period: {range}",
     "errorLoading": "Unable to load calendar data",
     "activeDays": "Active days",
@@ -377,8 +405,11 @@
     "noListen": "No listens"
   },
   "temporal-analysis": {
-    "title": "Temporal Analysis ⏰",
+    "title": "Temporal analysis",
     "subtitle": "Detailed listening patterns by day of week and hour of day. Identify your peak moments.",
+    "heroEyebrow": "When you listen",
+    "heroBadge": "Full history · period filters ignored",
+    "heroStatTotal": "Total listens",
     "note": "Note",
     "noteText": "This analysis uses all your historical data for reliable patterns. Period filters are ignored because a short period would not reflect your general habits.",
     "errorLoading": "Unable to load temporal analysis",
@@ -421,9 +452,10 @@
     "artists": "Artists"
   },
   "genres": {
-    "title": "Genres 🎸",
+    "title": "Genres",
     "subtitle": "Distribution of your listens by music genre. Visualize your preferences in a pie or bar chart.",
     "errorLoading": "Unable to load genre distribution",
+    "heroEyebrow": "Rankings & overview",
     "chart": "Chart",
     "pie": "Pie",
     "bar": "Bar",
@@ -443,6 +475,7 @@
     "apiMappingNoticeTitle": "Current limitation on genre mapping",
     "apiMappingNoticeBody": "Automatic mapping to precise genres is still partial because the app does not have reliable access to Apple Music or Spotify APIs to enrich every track/artist.",
     "apiMappingNoticeLink": "Palette Features",
+    "viewTrends": "View genre trends",
     "paginationSummary": "Showing {start}-{end} of {total}",
     "paginationPrevious": "Previous",
     "paginationNext": "Next",
@@ -450,7 +483,9 @@
     "pageSizeLabel": "Rows"
   },
   "genreTrends": {
-    "title": "Genre trends 📉",
+    "title": "Genre trends",
+    "heroEyebrow": "Listening over time",
+    "backToGenres": "Back to genre overview",
     "subtitle": "Evolution of your musical preferences over time",
     "subtitleExtended": "Evolution of your musical preferences over time. Compare how each selected genre rises or declines across the period.",
     "errorLoading": "Unable to load genre trends",
@@ -513,6 +548,9 @@
     "skip": "Skip",
     "saving": "Saving…",
     "miniChartTitle": "Live progress",
+    "stepLabel": "Step",
+    "unknownSeries": "Unknown",
+    "mappedSeries": "Mapped",
     "unknownTotal": "Unknown remaining: {count}",
     "mappedTotal": "Unknown mapped: {count}",
     "doneTitle": "Session complete",
@@ -522,7 +560,9 @@
     "suggestionsHint": "Suggestions are hints only and are never auto-applied."
   },
   "artistTrends": {
-    "title": "Artist trends 📉",
+    "title": "Artist trends",
+    "heroEyebrow": "Listening over time",
+    "backToArtists": "Back to artist rankings",
     "subtitle": "How your top artists evolve over time",
     "subtitleExtended": "How your top artists evolve over time. Compare how each selected artist gains or declines across the period.",
     "errorLoading": "Unable to load artist trends",
@@ -564,9 +604,10 @@
     "aiUpdating": "Updating summary…"
   },
   "artists": {
-    "title": "Artists 🎤",
+    "title": "Artists",
     "subtitle": "Discover your favorite artists, their stats and the evolution of your listening.",
     "errorLoading": "Unable to load artist statistics",
+    "heroEyebrow": "Rankings & overview",
     "yourArtists": "Your artists",
     "overviewSubtitle": "Your listening snapshot",
     "periodLast7Days": "Last 7 days",
@@ -598,6 +639,7 @@
     "artistTooltip": "Artist",
     "showMoreArtists": "Show {count} more",
     "showLessArtists": "Show less",
+    "viewTrends": "View artist trends",
     "paginationSummary": "Showing {start}-{end} of {total}",
     "paginationPrevious": "Previous",
     "paginationNext": "Next",
@@ -606,9 +648,10 @@
     "paginationLoading": "Loading next page..."
   },
   "tracks": {
-    "title": "Tracks 🎧",
+    "title": "Tracks",
     "subtitle": "Your most played tracks at a glance, starting with your top 20.",
     "errorLoading": "Unable to load track statistics",
+    "heroEyebrow": "Rankings & overview",
     "heroTitle": "Your tracks",
     "heroSubtitle": "Top tracks for the selected period",
     "tracks": "Tracks",
@@ -621,6 +664,7 @@
     "allTracks": "Tracks ranking",
     "rank": "Rank",
     "listensCount": "listens",
+    "viewTrends": "View track trends",
     "paginationSummary": "Showing {start}-{end} of {total}",
     "paginationPrevious": "Previous",
     "paginationNext": "Next",
@@ -629,7 +673,9 @@
     "paginationLoading": "Loading next page..."
   },
   "trackTrends": {
-    "title": "Track trends 📉",
+    "title": "Track trends",
+    "heroEyebrow": "Listening over time",
+    "backToTracks": "Back to track rankings",
     "subtitle": "Evolution of your most played tracks",
     "subtitleExtended": "Compare track evolution over time. Start with top 20, then add other tracks via catalog search.",
     "errorLoading": "Unable to load track trends",
@@ -658,7 +704,12 @@
     "selectionPending": "Applying selection…"
   },
   "ai-insights": {
-    "title": "AI Insights ✨",
+    "title": "AI insights",
+    "heroEyebrow": "AI-powered takeaways",
+    "heroStatInsights": "Insights",
+    "heroStatTone": "Tone",
+    "heroStatStatus": "Quota / cache",
+    "heroFresh": "Live response",
     "subtitle": "Intelligent analysis of your listening data generated by AI.",
     "subtitleShort": "Analysis of your listening data",
     "seeMore": "See more",
@@ -686,8 +737,13 @@
     "loadingShort": "Loading..."
   },
   "taste-evolution": {
-    "title": "Taste evolution 🌱",
+    "title": "Taste evolution",
     "seeMore": "See more",
+    "heroEyebrow": "Week over week",
+    "heroStatComparisons": "Comparisons",
+    "heroStatLatest": "Latest pattern",
+    "heroStatSkipped": "Skipped weeks",
+    "summaryStyleLabel": "Summary style",
     "subtitle": "Changes in your musical tastes week to week. Trends are calculated deterministically; AI provides contextual explanation.",
     "loading": "Analyzing week-to-week changes...",
     "loadingShort": "Loading...",
@@ -723,8 +779,9 @@
     "pp": "pp"
   },
   "taste-profile": {
-    "title": "Explain My Taste 🎯",
-    "subtitleShort": "Your musical profile in brief",
+    "title": "Your Soundprint, decoded",
+    "featureBadge": "AI music read",
+    "subtitleShort": "The patterns behind what you play most",
     "seeMore": "See more",
     "subtitle": "Your musical profile explained from your analytics.",
     "loading": "Generating your musical profile...",
@@ -750,7 +807,7 @@
     "influences": "Influences",
     "coreGenres": "Core genres",
     "whatMakesYouUnique": "What makes you unique",
-    "footer": "Generated from your listening data • Apple Music Analytics"
+    "footer": "Generated from your listening data • Soundprint"
   },
   "musical-profile": {
     "title": "Musical Profile",
@@ -772,6 +829,12 @@
     "aiCached": "AI profile served from cache",
     "aiUnavailable": "AI is currently disabled for this environment or browser, so this page is showing a deterministic profile from your stats.",
     "aiErrorTitle": "AI analysis unavailable. Showing a data-based summary instead.",
+    "overviewCallout": {
+      "badge": "Start with the heart of Soundprint",
+      "title": "Your Music is the overview that ties everything together",
+      "body": "Use Your Music as your home base: it summarizes your listens, artists, tracks, time, recent movement, and genre mix before you dive into deeper pages like this profile.",
+      "cta": "Open Your Music"
+    },
     "genreDnaTitle": "Genre DNA",
     "artistConstellationTitle": "Artist constellation",
     "trackObsessionTitle": "Repeat-worthy tracks",
@@ -830,10 +893,10 @@
     "tableListens": "Listens",
     "tableArtists": "Artists",
     "tableTracks": "Tracks",
-    "footer": "Generated on {date} - Apple Music Analytics Dashboard"
+    "footer": "Generated on {date} - Soundprint Dashboard"
   },
   "insights": {
-    "title": "Insights & Methodology 📚",
+    "title": "Insights & methodology",
     "subtitle": "Understand what each page reveals, how analytics are calculated, and where the current limitations are. Use this as a reference to import data and get more value from the dashboard.",
     "heroBadge": "Technical documentation",
     "spotlightTitle": "At a glance",
@@ -1034,7 +1097,7 @@
     }
   },
   "api-docs": {
-    "title": "API Documentation 📖",
+    "title": "API documentation",
     "description": "API endpoints reference. Use the dashboard to explore your listening data.",
     "viewReference": "View API reference",
     "goToDashboard": "Go to Dashboard"
@@ -1054,7 +1117,7 @@
     "emptyState": {
       "defaultMessage": "No data available",
       "importData": {
-        "message": "No listening data available 📭",
+        "message": "No listening data available",
         "description": "Import your Last.fm data to see your statistics.",
         "actionLabel": "Import your data"
       },
@@ -1064,7 +1127,7 @@
         "actionLabel": "See how to import"
       },
       "changeDates": {
-        "message": "No data for this period 📅",
+        "message": "No data for this period",
         "description": "Change the dates or period in the filter bar to display results.",
         "actionLabel": "Change dates"
       },
@@ -1107,7 +1170,7 @@
       "exportPdfTitle": "Generate annual PDF report"
     },
     "periodSelector": {
-      "label": "Aggregation",
+      "label": "Group by",
       "daily": "Daily",
       "weekly": "Weekly",
       "monthly": "Monthly"
@@ -1122,18 +1185,22 @@
     }
   },
   "demo": {
-    "title": "Product Demo 🎬",
+    "title": "Product demo",
     "subtitle": "Watch our product demo video to discover what we offer.",
     "heroBadge": "Video",
     "videoTitle": "Product demo video"
   },
   "about": {
-    "title": "How it works 🎯",
+    "title": "How it works",
     "subtitle": "A quick guide to understand where your listening data comes from and what you can explore in the dashboard today.",
     "heroBadge": "User guide",
+    "brandCard": {
+      "title": "Soundprint",
+      "lead": "A personal analytics space for your Apple Music and Last.fm history—trends, habits, and insights in one calm dashboard."
+    },
     "whatIs": {
       "title": "What is this?",
-      "paragraph": "Apple Music Analytics is a personal dashboard that visualizes your listening habits over time. You can ingest data from Last.fm scrobbles or Apple Music CSV exports, then explore stats, trends, and insights in one place."
+      "paragraph": "Soundprint is a personal dashboard that visualizes your listening habits over time. You can ingest data from Last.fm scrobbles or Apple Music CSV exports, then explore stats, trends, and insights in one place."
     },
     "whyLastfm": {
       "title": "Why Last.fm instead of Apple Music?",
@@ -1173,12 +1240,12 @@
     }
   },
   "home": {
-    "title": "Apple Music Analytics 🎵",
+    "title": "Soundprint",
     "welcome": "Your listening, clearly explained.",
-    "welcomePersonal": "Welcome back, {name} 👋",
+    "welcomePersonal": "Welcome back, {name}",
     "subtitle": "Analyze your listening habits and discover your musical trends.",
     "goToDashboard": "Go to your dashboard",
-    "accessDashboard": "Explore a public dashboard demo 🚀",
+    "accessDashboard": "Explore a public dashboard demo",
     "features": {
       "timeline": {
         "title": "Timeline",
@@ -1195,7 +1262,7 @@
     }
   },
   "metadata": {
-    "title": "Apple Music Analytics Dashboard",
+    "title": "Soundprint Dashboard",
     "description": "Personal analytics dashboard for Apple Music listening behavior"
   }
 }

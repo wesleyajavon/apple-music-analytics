@@ -6,6 +6,7 @@ import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { LanguageSwitcher } from "@/lib/components/language-switcher";
 import { Footer } from "@/lib/components/footer";
+import { SoundprintLogo } from "@/lib/components/soundprint-logo";
 import { ThemeSwitcher } from "@/lib/components/theme-switcher";
 import { DEFAULT_PUBLIC_PROFILE_USER_ID } from "@/lib/constants/public-profile";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -70,27 +71,24 @@ export default function Home() {
   return (
     <div className="flex min-h-screen flex-col">
       <main className="relative flex flex-1 flex-col overflow-hidden">
+        <div className="absolute inset-0 -z-10 bg-app-shell" aria-hidden />
         <div
-          className="absolute inset-0 -z-10 bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-blue-950/20"
+          className="absolute top-1/4 -left-32 -z-10 h-64 w-64 rounded-full bg-accent-rose/20 blur-3xl dark:bg-accent-rose/20"
           aria-hidden
         />
         <div
-          className="absolute top-1/4 -left-32 -z-10 h-64 w-64 rounded-full bg-blue-100/40 blur-3xl dark:bg-blue-900/20"
-          aria-hidden
-        />
-        <div
-          className="absolute bottom-1/4 -right-32 -z-10 h-80 w-80 rounded-full bg-indigo-100/30 blur-3xl dark:bg-indigo-900/15"
+          className="absolute bottom-1/4 -right-32 -z-10 h-80 w-80 rounded-full bg-accent-cyan/20 blur-3xl dark:bg-accent-cyan/15"
           aria-hidden
         />
 
         <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-6">
-          <div className="rounded-xl bg-white/70 px-3 py-2 text-sm font-semibold tracking-wide text-gray-900 shadow-sm ring-1 ring-gray-200 backdrop-blur dark:bg-gray-900/70 dark:text-gray-100 dark:ring-gray-700">
-            Apple Music Analytics
+          <div className="rounded-xl bg-surface-glass px-3 py-2 shadow-card ring-1 ring-card-border backdrop-blur">
+            <SoundprintLogo />
           </div>
           <div className="flex items-center gap-3">
             <ThemeSwitcher placement="bottom" />
             <Suspense
-              fallback={<div className="h-10 w-32 animate-pulse rounded-xl bg-gray-200 dark:bg-gray-700" />}
+              fallback={<div className="h-10 w-32 animate-pulse rounded-xl bg-card-surface" />}
             >
               <LanguageSwitcher placement="bottom" />
             </Suspense>
@@ -98,13 +96,16 @@ export default function Home() {
         </header>
 
         <section className="mx-auto flex w-full max-w-6xl flex-1 flex-col items-center justify-center px-6 pb-14 pt-6 text-center">
-          <p className="mb-3 text-sm font-medium uppercase tracking-widest text-blue-600 dark:text-blue-400">
-            {t("title")}
-          </p>
-          <h1 className="mb-4 max-w-3xl text-4xl font-bold tracking-tight text-slate-900 dark:text-slate-50 sm:text-5xl">
+          <SoundprintLogo
+            className="mb-6 flex-col gap-3"
+            imageClassName="h-36 w-36 rounded-3xl shadow-brand-glow ring-1 ring-white/10 sm:h-44 sm:w-44"
+            showText={false}
+            priority
+          />
+          <h1 className="mb-4 max-w-3xl text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
             {welcomeMessage}
           </h1>
-          <p className="mb-10 max-w-2xl text-lg text-slate-600 dark:text-slate-400">
+          <p className="mb-10 max-w-2xl text-lg text-muted">
             {t("subtitle")}
           </p>
 
@@ -112,7 +113,7 @@ export default function Home() {
             {isAuthenticated ? (
               <Link
                 href="/dashboard"
-                className="inline-flex items-center justify-center rounded-xl bg-accent-violet px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-accent-violet/20 transition-all hover:opacity-90"
+                className="inline-flex items-center justify-center rounded-xl bg-brand-gradient px-6 py-3 text-sm font-semibold text-white shadow-brand-glow transition-all hover:scale-[1.01] hover:opacity-95"
               >
                 {t("goToDashboard")}
               </Link>
@@ -120,13 +121,13 @@ export default function Home() {
               <>
                 <Link
                   href="/sign-up"
-                  className="inline-flex items-center justify-center rounded-xl bg-accent-violet px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-accent-violet/20 transition-all hover:opacity-90"
+                  className="inline-flex items-center justify-center rounded-xl bg-brand-gradient px-6 py-3 text-sm font-semibold text-white shadow-brand-glow transition-all hover:scale-[1.01] hover:opacity-95"
                 >
                   {tAuth("signUp")}
                 </Link>
                 <Link
                   href="/sign-in"
-                  className="inline-flex items-center justify-center rounded-xl border border-gray-300 bg-white px-6 py-3 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800"
+                  className="inline-flex items-center justify-center rounded-xl border border-card-border bg-surface-glass px-6 py-3 text-sm font-semibold text-foreground backdrop-blur transition-colors hover:bg-card-surface"
                 >
                   {tAuth("signIn")}
                 </Link>
@@ -134,7 +135,7 @@ export default function Home() {
             )}
             <Link
               href={`/dashboard/overview?userId=${DEFAULT_PUBLIC_PROFILE_USER_ID}`}
-              className="group inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold text-accent-violet transition-colors hover:bg-accent-violet/10 dark:hover:bg-accent-violet/20"
+              className="group inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold text-primary transition-colors hover:bg-primary/10"
             >
               {t("accessDashboard")}
               <svg
@@ -155,27 +156,27 @@ export default function Home() {
           </div>
 
           <div className="grid w-full max-w-4xl gap-3 sm:grid-cols-3">
-            <div className="rounded-2xl border border-gray-200/80 bg-white/85 p-4 text-left shadow-sm backdrop-blur dark:border-gray-800 dark:bg-gray-900/70">
-              <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+            <div className="rounded-2xl border border-card-border bg-card-surface p-4 text-left shadow-card backdrop-blur">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted">
                 {t("features.timeline.title")}
               </p>
-              <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+              <p className="mt-2 text-sm text-foreground/80">
                 {t("features.timeline.description")}
               </p>
             </div>
-            <div className="rounded-2xl border border-gray-200/80 bg-white/85 p-4 text-left shadow-sm backdrop-blur dark:border-gray-800 dark:bg-gray-900/70">
-              <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+            <div className="rounded-2xl border border-card-border bg-card-surface p-4 text-left shadow-card backdrop-blur">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted">
                 {t("features.genresArtists.title")}
               </p>
-              <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+              <p className="mt-2 text-sm text-foreground/80">
                 {t("features.genresArtists.description")}
               </p>
             </div>
-            <div className="rounded-2xl border border-gray-200/80 bg-white/85 p-4 text-left shadow-sm backdrop-blur dark:border-gray-800 dark:bg-gray-900/70">
-              <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+            <div className="rounded-2xl border border-card-border bg-card-surface p-4 text-left shadow-card backdrop-blur">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted">
                 {t("features.aiInsights.title")}
               </p>
-              <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+              <p className="mt-2 text-sm text-foreground/80">
                 {t("features.aiInsights.description")}
               </p>
             </div>

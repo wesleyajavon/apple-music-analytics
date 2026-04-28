@@ -399,16 +399,16 @@ export function DateRangeFilter() {
     <div className="px-4 py-3 sm:px-6 lg:px-8">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 shrink-0">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted shrink-0">
             {t("period")}
           </span>
           <div
             ref={containerRef}
-            className="relative flex items-center bg-gray-50 dark:bg-gray-800/80 p-1.5 rounded-xl border border-gray-100 dark:border-gray-700/50"
+            className="relative flex items-center bg-surface p-1.5 rounded-xl border border-card-border"
           >
             {indicatorStyle && (
               <div
-                className="absolute h-[calc(100%-12px)] top-1.5 bg-accent-violet rounded-lg transition-all duration-300 ease-out shadow-sm"
+                className="absolute h-[calc(100%-12px)] top-1.5 bg-brand-gradient rounded-lg transition-all duration-300 ease-out shadow-sm"
                 style={{
                   left: `${indicatorStyle.left}px`,
                   width: `${indicatorStyle.width}px`,
@@ -431,7 +431,7 @@ export function DateRangeFilter() {
                     ${
                       isActive
                         ? "text-white"
-                        : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                        : "text-muted hover:text-foreground"
                     }
                   `}
                 >
@@ -455,7 +455,7 @@ export function DateRangeFilter() {
                   ${
                     currentPreset === "custom"
                       ? "text-white"
-                      : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                      : "text-muted hover:text-foreground"
                   }
                 `}
               >
@@ -465,39 +465,39 @@ export function DateRangeFilter() {
                 <div
                   role="dialog"
                   aria-label={t("customDialogLabel")}
-                  className="absolute left-0 top-[calc(100%+0.5rem)] z-50 min-w-[min(100vw-2rem,18rem)] rounded-xl border border-gray-100 bg-white p-4 shadow-lg dark:border-gray-700/50 dark:bg-gray-900"
+                  className="absolute left-0 top-[calc(100%+0.5rem)] z-50 min-w-[min(100vw-2rem,18rem)] rounded-xl border border-card-border bg-surface-raised p-4 shadow-card"
                 >
                   <div className="flex flex-col gap-3">
-                    <label className="flex flex-col gap-1.5 text-xs font-medium text-gray-600 dark:text-gray-300">
+                    <label className="flex flex-col gap-1.5 text-xs font-medium text-muted">
                       {t("customStart")}
                       <input
                         type="date"
                         value={customStart}
                         onChange={(e) => setCustomStart(e.target.value)}
-                        className="rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                        className="rounded-lg border border-card-border bg-card px-2 py-1.5 text-sm text-foreground"
                       />
                     </label>
-                    <label className="flex flex-col gap-1.5 text-xs font-medium text-gray-600 dark:text-gray-300">
+                    <label className="flex flex-col gap-1.5 text-xs font-medium text-muted">
                       {t("customEnd")}
                       <input
                         type="date"
                         value={customEnd}
                         onChange={(e) => setCustomEnd(e.target.value)}
-                        className="rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                        className="rounded-lg border border-card-border bg-card px-2 py-1.5 text-sm text-foreground"
                       />
                     </label>
                     <div className="flex justify-end gap-2 pt-1">
                       <button
                         type="button"
                         onClick={() => setCustomOpen(false)}
-                        className="rounded-lg px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+                        className="rounded-lg px-3 py-1.5 text-sm font-medium text-muted hover:bg-primary/10"
                       >
                         {t("customCancel")}
                       </button>
                       <button
                         type="button"
                         onClick={applyCustomRange}
-                        className="rounded-lg bg-accent-violet px-3 py-1.5 text-sm font-semibold text-white hover:opacity-90"
+                        className="rounded-lg bg-brand-gradient px-3 py-1.5 text-sm font-semibold text-white hover:opacity-95"
                       >
                         {t("customApply")}
                       </button>
@@ -509,13 +509,13 @@ export function DateRangeFilter() {
           </div>
         </div>
 
-        <div className="flex items-center gap-1 pl-4 border-l border-gray-100 dark:border-gray-700/50">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mr-2 hidden sm:inline">
+        <div className="flex items-center gap-1 pl-4 border-l border-card-border">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted mr-2 hidden sm:inline">
             {t("exportLabel")}
           </span>
           <button
             onClick={handleExportCsv}
-            className="p-2.5 text-gray-500 dark:text-gray-400 hover:text-accent-emerald dark:hover:text-accent-emerald hover:bg-accent-emerald/10 dark:hover:bg-accent-emerald/10 rounded-lg transition-colors"
+            className="p-2.5 text-muted hover:text-accent-emerald hover:bg-accent-emerald/10 rounded-lg transition-colors"
             title={t("exportCsvTitle")}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -524,7 +524,7 @@ export function DateRangeFilter() {
           </button>
           <button
             onClick={handleExportStats}
-            className="p-2.5 text-gray-500 dark:text-gray-400 hover:text-accent-indigo dark:hover:text-accent-indigo hover:bg-accent-indigo/10 dark:hover:bg-accent-indigo/10 rounded-lg transition-colors"
+            className="p-2.5 text-muted hover:text-accent-indigo hover:bg-accent-indigo/10 rounded-lg transition-colors"
             title={t("exportStatsTitle")}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -533,7 +533,7 @@ export function DateRangeFilter() {
           </button>
           <button
             onClick={handleExportPdf}
-            className="p-2.5 text-gray-500 dark:text-gray-400 hover:text-accent-rose dark:hover:text-accent-rose hover:bg-accent-rose/10 dark:hover:bg-accent-rose/10 rounded-lg transition-colors"
+            className="p-2.5 text-muted hover:text-accent-rose hover:bg-accent-rose/10 rounded-lg transition-colors"
             title={t("exportPdfTitle")}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

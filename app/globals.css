@@ -11,29 +11,89 @@
 
 /* Thème light – variables explicites */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --brand-rose: #f04068;
+  --brand-rose-rgb: 240 64 104;
+  --brand-pink: #e04088;
+  --brand-pink-rgb: 224 64 136;
+  --brand-violet: #9850d0;
+  --brand-violet-rgb: 152 80 208;
+  --brand-indigo: #706fe0;
+  --brand-indigo-rgb: 112 111 224;
+  --brand-cyan: #4f90e0;
+  --brand-cyan-rgb: 79 144 224;
+  --brand-emerald: #16c784;
+  --brand-emerald-rgb: 22 199 132;
+
+  --background: #fbf8ff;
+  --background-rgb: 251 248 255;
+  --foreground: #171321;
+  --foreground-rgb: 23 19 33;
   --card: #ffffff;
-  --border: #f3f4f6;
-  --muted: #6b7280;
-  /* Card surfaces: meilleur contraste en light mode (WCAG 2.1, best practices) */
-  --card-surface: #f9fafb;
-  --card-border: #e5e7eb;
-  --card-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.06);
-  --card-shadow-hover: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.08);
+  --card-rgb: 255 255 255;
+  --surface: #f7f2ff;
+  --surface-rgb: 247 242 255;
+  --surface-raised: #ffffff;
+  --surface-raised-rgb: 255 255 255;
+  --surface-glass: rgb(255 255 255 / 0.78);
+  --surface-glass-rgb: 255 255 255;
+  --surface-sidebar: #ffffff;
+  --surface-sidebar-rgb: 255 255 255;
+  --surface-dashboard: #fffbff;
+  --surface-dashboard-rgb: 255 251 255;
+  --border: #e8ddfb;
+  --border-rgb: 232 221 251;
+  --muted: #6d6680;
+  --muted-rgb: 109 102 128;
+  --primary: var(--brand-violet);
+  --primary-rgb: var(--brand-violet-rgb);
+  --primary-hover: #8745c2;
+  --primary-foreground: #ffffff;
+  --ring: rgb(152 80 208 / 0.32);
+  --card-surface: rgb(255 255 255 / 0.9);
+  --card-border: rgb(232 221 251 / 0.9);
+  --app-shell-gradient:
+    radial-gradient(circle at top left, rgb(240 64 104 / 0.14), transparent 30rem),
+    radial-gradient(circle at bottom right, rgb(79 144 224 / 0.16), transparent 28rem),
+    linear-gradient(135deg, #fff9fd 0%, #fbf8ff 46%, #eef5ff 100%);
+  --card-shadow: 0 18px 60px -42px rgb(80 42 130 / 0.42), 0 1px 2px rgb(23 19 33 / 0.05);
+  --card-shadow-hover: 0 24px 70px -38px rgb(80 42 130 / 0.5), 0 6px 18px -12px rgb(23 19 33 / 0.18);
 }
 
 /* Thème dark – contrôlé par la classe "dark" sur <html> (ThemeProvider) */
 html.dark {
-  --background: #0a0a0a;
-  --foreground: #ededed;
-  --card: #1f2937;
-  --border: #374151;
-  --muted: #9ca3af;
-  --card-surface: rgba(31, 41, 55, 0.9);
-  --card-border: rgba(55, 65, 81, 0.5);
-  --card-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05);
-  --card-shadow-hover: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  --background: #06070d;
+  --background-rgb: 6 7 13;
+  --foreground: #f7f3ff;
+  --foreground-rgb: 247 243 255;
+  --card: #10111c;
+  --card-rgb: 16 17 28;
+  --surface: #0b0d16;
+  --surface-rgb: 11 13 22;
+  --surface-raised: #151827;
+  --surface-raised-rgb: 21 24 39;
+  --surface-glass: rgb(15 17 29 / 0.78);
+  --surface-glass-rgb: 15 17 29;
+  --surface-sidebar: #090a12;
+  --surface-sidebar-rgb: 9 10 18;
+  --surface-dashboard: #080913;
+  --surface-dashboard-rgb: 8 9 19;
+  --border: #28213c;
+  --border-rgb: 40 33 60;
+  --muted: #a59ab8;
+  --muted-rgb: 165 154 184;
+  --primary: #b06cff;
+  --primary-rgb: 176 108 255;
+  --primary-hover: #c28aff;
+  --primary-foreground: #ffffff;
+  --ring: rgb(176 108 255 / 0.38);
+  --card-surface: rgb(21 24 39 / 0.86);
+  --card-border: rgb(74 55 110 / 0.44);
+  --app-shell-gradient:
+    radial-gradient(circle at top left, rgb(240 64 104 / 0.24), transparent 28rem),
+    radial-gradient(circle at bottom right, rgb(79 144 224 / 0.22), transparent 30rem),
+    linear-gradient(135deg, #06070d 0%, #0b0d18 45%, #0a1224 100%);
+  --card-shadow: 0 22px 70px -42px rgb(152 80 208 / 0.45), 0 1px 1px rgb(0 0 0 / 0.35);
+  --card-shadow-hover: 0 30px 80px -38px rgb(152 80 208 / 0.56), 0 8px 24px -18px rgb(0 0 0 / 0.6);
 }
 
 body {
@@ -59,9 +119,9 @@ body {
   .animate-shimmer {
     background: linear-gradient(
       90deg,
-      rgb(229 231 235 / 0.4) 25%,
-      rgb(243 244 246 / 0.8) 50%,
-      rgb(229 231 235 / 0.4) 75%
+      rgb(232 221 251 / 0.35) 25%,
+      rgb(255 255 255 / 0.8) 50%,
+      rgb(232 221 251 / 0.35) 75%
     );
     background-size: 200% 100%;
     animation: shimmer 1.5s ease-in-out infinite;
@@ -69,9 +129,9 @@ body {
   html.dark .animate-shimmer {
     background: linear-gradient(
       90deg,
-      rgb(55 65 81 / 0.4) 25%,
-      rgb(75 85 99 / 0.8) 50%,
-      rgb(55 65 81 / 0.4) 75%
+      rgb(74 55 110 / 0.28) 25%,
+      rgb(30 34 54 / 0.78) 50%,
+      rgb(74 55 110 / 0.28) 75%
     );
     background-size: 200% 100%;
   }

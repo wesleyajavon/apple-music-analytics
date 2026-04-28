@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { memo, useMemo, useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import {
   CartesianGrid,
@@ -21,24 +21,97 @@ import {
 } from "@/lib/hooks/use-palette";
 import type { PaletteMode } from "@/lib/dto/palette";
 
+const PALETTE_CARD_CLASS =
+  "relative overflow-hidden rounded-2xl border border-cyan-300/20 bg-card-surface shadow-card backdrop-blur-sm dark:border-cyan-300/15";
+const PALETTE_RAIL_CLASS =
+  "bg-gradient-to-r from-fuchsia-500 via-cyan-400 to-emerald-400";
+const PALETTE_HERO_CLASS =
+  "relative overflow-hidden rounded-3xl border border-cyan-300/25 bg-[radial-gradient(circle_at_top_left,_rgba(34,211,238,0.28),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(217,70,239,0.24),_transparent_32%),linear-gradient(135deg,_#020617_0%,_#0f172a_50%,_#11203a_100%)] shadow-2xl shadow-cyan-950/40";
+const PALETTE_HERO_GRID_CLASS =
+  "absolute inset-0 bg-[linear-gradient(rgba(34,211,238,0.1)_1px,_transparent_1px),linear-gradient(90deg,_rgba(217,70,239,0.08)_1px,_transparent_1px)] bg-[size:32px_32px] opacity-30";
+
+type PaletteChartTranslationKey =
+  | "stepLabel"
+  | "unknownSeries"
+  | "mappedSeries";
+
+function createPaletteTooltip(
+  t: (key: PaletteChartTranslationKey) => string,
+  locale: string,
+) {
+  const PaletteTooltipInner = memo(
+    ({
+      active,
+      payload,
+      label,
+    }: {
+      active?: boolean;
+      payload?: Array<{ name: string; value: number; color: string }>;
+      label?: string | number;
+    }) => {
+      if (!active || !payload?.length) return null;
+      return (
+        <div className="chart-tooltip-accessible min-w-[180px] p-4">
+          <p className="mb-2 font-semibold">
+            {t("stepLabel")} {label}
+          </p>
+          <ul className="space-y-1.5 text-sm">
+            {payload.map((entry) => (
+              <li key={entry.name} className="flex justify-between gap-4">
+                <span style={{ color: entry.color }}>{entry.name}</span>
+                <span className="chart-tooltip-secondary font-medium tabular-nums">
+                  {Number(entry.value).toLocaleString(locale)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      );
+    },
+  );
+  PaletteTooltipInner.displayName = "PaletteTooltip";
+  return PaletteTooltipInner;
+}
+
 function PaletteMiniChart({
   data,
+  t,
+  locale,
 }: {
   data: Array<{ step: number; unknownListens: number; mappedListens: number }>;
+  t: (key: PaletteChartTranslationKey) => string;
+  locale: string;
 }) {
+  const PaletteTooltip = useMemo(
+    () => createPaletteTooltip(t, locale),
+    [t, locale],
+  );
+
   return (
     <ResponsiveContainer width="100%" height={180}>
       <LineChart data={data}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-        <XAxis dataKey="step" tick={{ fontSize: 11 }} />
-        <YAxis tick={{ fontSize: 11 }} />
-        <Tooltip />
-        <Legend />
+        <CartesianGrid
+          strokeDasharray="3 3"
+          stroke="rgb(var(--border-rgb) / 0.45)"
+        />
+        <XAxis
+          dataKey="step"
+          tick={{ fill: "rgb(var(--muted-rgb) / 0.95)", fontSize: 11 }}
+          stroke="rgb(var(--border-rgb) / 0.85)"
+        />
+        <YAxis
+          tick={{ fill: "rgb(var(--muted-rgb) / 0.95)", fontSize: 11 }}
+          stroke="rgb(var(--border-rgb) / 0.85)"
+        />
+        <Tooltip content={<PaletteTooltip />} />
+        <Legend
+          wrapperStyle={{ color: "rgb(var(--muted-rgb))", fontSize: 12 }}
+        />
         <Line
           type="monotone"
           dataKey="unknownListens"
-          name="Unknown"
-          stroke="#ef4444"
+          name={t("unknownSeries")}
+          stroke="#e879f9"
           strokeWidth={2}
           dot={false}
           animationDuration={300}
@@ -46,8 +119,8 @@ function PaletteMiniChart({
         <Line
           type="monotone"
           dataKey="mappedListens"
-          name="Mapped"
-          stroke="#10b981"
+          name={t("mappedSeries")}
+          stroke="#22d3ee"
           strokeWidth={2}
           dot={false}
           animationDuration={300}
@@ -66,7 +139,9 @@ export function PaletteWorkbench() {
   const skipMutation = useSkipPaletteArtist();
   const [customGenre, setCustomGenre] = useState("");
   const [selectedGenre, setSelectedGenre] = useState("");
-  const [selectedSuggestionId, setSelectedSuggestionId] = useState<string | null>(null);
+  const [selectedSuggestionId, setSelectedSuggestionId] = useState<
+    string | null
+  >(null);
 
   const isBusy = mapMutation.isPending || skipMutation.isPending;
   const artist = data?.nextArtist ?? null;
@@ -87,11 +162,41 @@ export function PaletteWorkbench() {
   }, [data]);
 
   if (isLoading) {
-    return <div className="h-64 animate-pulse rounded-xl bg-gray-100 dark:bg-gray-800" />;
+    return (
+      <div className="space-y-6">
+        <div className={PALETTE_CARD_CLASS}>
+          <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${PALETTE_RAIL_CLASS} opacity-80`} />
+          <div className="p-6">
+            <div className="mb-4 h-8 w-48 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+            <div className="h-4 w-full max-w-2xl animate-pulse rounded bg-gray-100 dark:bg-gray-700" />
+            <div className="mt-5 h-2 animate-pulse rounded-full bg-gray-100 dark:bg-gray-800" />
+          </div>
+        </div>
+        <div className="grid gap-6 lg:grid-cols-5">
+          <div className={`${PALETTE_CARD_CLASS} p-6 lg:col-span-3`}>
+            <div className="h-80 animate-pulse rounded-xl bg-surface/60" />
+          </div>
+          <div className={`${PALETTE_CARD_CLASS} p-6 lg:col-span-2`}>
+            <div className="h-56 animate-pulse rounded-xl bg-surface/60" />
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
-    return <ErrorState error={error} onRetry={() => refetch()} message={t("loadError")} />;
+    return (
+      <div className={PALETTE_CARD_CLASS}>
+        <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${PALETTE_RAIL_CLASS} opacity-80`} />
+        <div className="p-6">
+          <ErrorState
+            error={error}
+            onRetry={() => refetch()}
+            message={t("loadError")}
+          />
+        </div>
+      </div>
+    );
   }
 
   if (!data) return null;
@@ -138,192 +243,254 @@ export function PaletteWorkbench() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-900">
-        <div className="mb-3 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("title")}</h1>
-          <div className="flex flex-wrap items-center gap-3">
-            <div
-              className="inline-flex rounded-lg border border-gray-200 p-0.5 dark:border-gray-600"
-              role="group"
-              aria-label={t("modeAriaLabel")}
-            >
-              <button
-                type="button"
-                onClick={() => setPaletteMode("artists")}
-                className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${
-                  paletteMode === "artists"
-                    ? "bg-violet-600 text-white shadow-sm"
-                    : "text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
-                }`}
-              >
-                {t("modeArtists")}
-              </button>
-              <button
-                type="button"
-                onClick={() => setPaletteMode("tracks")}
-                className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${
-                  paletteMode === "tracks"
-                    ? "bg-violet-600 text-white shadow-sm"
-                    : "text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
-                }`}
-              >
-                {t("modeTracks")}
-              </button>
+      <div className={PALETTE_HERO_CLASS}>
+        <div className={PALETTE_HERO_GRID_CLASS} />
+        <div className="absolute -right-20 -top-24 h-56 w-56 rounded-full bg-cyan-400/20 blur-3xl" />
+        <div className="absolute -bottom-28 left-8 h-48 w-48 rounded-full bg-fuchsia-500/20 blur-3xl" />
+        <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${PALETTE_RAIL_CLASS} opacity-90`} />
+        <div className="relative p-6">
+          <div className="mb-3 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-white">
+                {t("title")}
+              </h1>
+              <p className="mt-2 text-sm text-cyan-100/85">
+                {paletteMode === "tracks"
+                  ? t("subtitleTracks")
+                  : t("subtitleArtists")}
+              </p>
             </div>
-            <span className="rounded-full bg-violet-100 px-3 py-1 text-xs font-semibold text-violet-700 dark:bg-violet-900/40 dark:text-violet-200">
-              {progressLabel}
-            </span>
+            <div className="flex flex-wrap items-center gap-3">
+              <div
+                className="inline-flex rounded-lg border border-cyan-300/20 bg-slate-950/35 p-1 backdrop-blur-sm"
+                role="group"
+                aria-label={t("modeAriaLabel")}
+              >
+                <button
+                  type="button"
+                  onClick={() => setPaletteMode("artists")}
+                  className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${
+                    paletteMode === "artists"
+                      ? "bg-cyan-300 text-slate-950 shadow-sm shadow-cyan-950/20"
+                      : "text-cyan-100/75 hover:text-white"
+                  }`}
+                >
+                  {t("modeArtists")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPaletteMode("tracks")}
+                  className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${
+                    paletteMode === "tracks"
+                      ? "bg-cyan-300 text-slate-950 shadow-sm shadow-cyan-950/20"
+                      : "text-cyan-100/75 hover:text-white"
+                  }`}
+                >
+                  {t("modeTracks")}
+                </button>
+              </div>
+              <span className="rounded-full border border-cyan-300/20 bg-slate-950/35 px-3 py-1 text-xs font-semibold text-cyan-100 tabular-nums backdrop-blur-sm">
+                {progressLabel}
+              </span>
+            </div>
           </div>
-        </div>
-        <p className="text-sm text-gray-600 dark:text-gray-300">
-          {paletteMode === "tracks" ? t("subtitleTracks") : t("subtitleArtists")}
-        </p>
-        <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50/80 px-4 py-3 text-sm text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-100">
-          <p className="font-semibold">{t("whyImplementedTitle")}</p>
-          <p className="mt-1">{t("whyImplementedBody")}</p>
-          <p className="mt-1">{t("whyImplementedOutcome")}</p>
-        </div>
-        <div className="mt-4 h-2 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
-          <div
-            className="h-full rounded-full bg-gradient-to-r from-violet-500 to-indigo-500 transition-all"
-            style={{ width: `${Math.max(0, Math.min(100, data.progress.completionRatio * 100))}%` }}
-          />
+          <div className="mt-4 rounded-xl border border-cyan-300/15 bg-slate-950/35 px-4 py-3 text-sm text-cyan-50 shadow-lg shadow-cyan-950/10 backdrop-blur-sm">
+            <p className="font-semibold">{t("whyImplementedTitle")}</p>
+            <p className="mt-1 text-cyan-100/85">{t("whyImplementedBody")}</p>
+            <p className="mt-1 text-cyan-100/85">{t("whyImplementedOutcome")}</p>
+          </div>
+          <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-950/45">
+            <div
+              className={`h-full rounded-full ${PALETTE_RAIL_CLASS} transition-all`}
+              style={{
+                width: `${Math.max(0, Math.min(100, data.progress.completionRatio * 100))}%`,
+              }}
+            />
+          </div>
         </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-5">
-        <section className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-900 lg:col-span-3">
-          {!activeCard ? (
-            <div className="py-10 text-center">
-              <p className="text-base font-semibold text-gray-900 dark:text-white">{t("doneTitle")}</p>
-              <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
-                {paletteMode === "tracks" ? t("doneHintTracks") : t("doneHintArtists")}
-              </p>
-            </div>
-          ) : (
-            <>
-              <p className="text-xs font-semibold uppercase tracking-wider text-violet-500">
-                {paletteMode === "tracks" ? t("nextTrackCard") : t("nextArtistCard")}
-              </p>
-              {paletteMode === "tracks" && track ? (
-                <>
-                  <h2 className="mt-2 text-xl font-bold text-gray-900 dark:text-white">{track.trackTitle}</h2>
-                  <p className="mt-1 text-sm font-medium text-gray-600 dark:text-gray-300">{track.artistName}</p>
-                  <div className="mt-3 flex flex-wrap gap-3 text-sm text-gray-600 dark:text-gray-300">
-                    <span>{t("listensImpacted", { count: track.unknownListens.toLocaleString(locale) })}</span>
-                    <span>{t("tracksImpacted", { count: track.impactedTracks.toLocaleString(locale) })}</span>
-                  </div>
-                </>
-              ) : artist ? (
-                <>
-                  <h2 className="mt-2 text-xl font-bold text-gray-900 dark:text-white">{artist.artistName}</h2>
-                  <div className="mt-3 flex flex-wrap gap-3 text-sm text-gray-600 dark:text-gray-300">
-                    <span>{t("listensImpacted", { count: artist.unknownListens.toLocaleString(locale) })}</span>
-                    <span>{t("tracksImpacted", { count: artist.impactedTracks.toLocaleString(locale) })}</span>
-                  </div>
-                </>
-              ) : null}
-
-              <div className="mt-6 space-y-3">
-                {suggestions.length > 0 ? (
-                  <div className="space-y-2 rounded-lg border border-violet-200 bg-violet-50/70 p-3 dark:border-violet-900/40 dark:bg-violet-950/20">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-violet-700 dark:text-violet-200">
-                      {t("suggestionsTitle")}
+        <section className={`${PALETTE_CARD_CLASS} lg:col-span-3`}>
+          <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${PALETTE_RAIL_CLASS} opacity-80`} />
+          <div className="relative p-6">
+            {!activeCard ? (
+              <div className="rounded-xl border border-card-border bg-surface/60 px-6 py-10 text-center">
+                <p className="text-base font-semibold text-foreground">
+                  {t("doneTitle")}
+                </p>
+                <p className="mt-2 text-sm text-muted">
+                  {paletteMode === "tracks"
+                    ? t("doneHintTracks")
+                    : t("doneHintArtists")}
+                </p>
+              </div>
+            ) : (
+              <>
+                <p className="text-xs font-semibold uppercase tracking-wider text-cyan-600 dark:text-cyan-300">
+                  {paletteMode === "tracks"
+                    ? t("nextTrackCard")
+                    : t("nextArtistCard")}
+                </p>
+                {paletteMode === "tracks" && track ? (
+                  <>
+                    <h2 className="mt-2 text-2xl font-bold tracking-tight text-foreground">
+                      {track.trackTitle}
+                    </h2>
+                    <p className="mt-1 text-sm font-medium text-muted">
+                      {track.artistName}
                     </p>
-                    <div className="flex flex-wrap gap-2">
-                      {suggestions.map((s) => {
-                        const isActive = selectedSuggestionId === s.id;
-                        return (
-                          <button
-                            key={s.id}
-                            type="button"
-                            onClick={() => {
-                              setSelectedSuggestionId(s.id);
-                              setSelectedGenre(s.genre);
-                              setCustomGenre("");
-                            }}
-                            className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
-                              isActive
-                                ? "border-violet-600 bg-violet-600 text-white"
-                                : "border-violet-200 bg-white text-violet-700 hover:bg-violet-100 dark:border-violet-800 dark:bg-gray-900 dark:text-violet-200 dark:hover:bg-violet-900/40"
-                            }`}
-                            title={`${s.reason} • ${s.provider}`}
-                          >
-                            {s.genre} ({Math.round(s.confidence * 100)}%)
-                          </button>
-                        );
-                      })}
+                    <div className="mt-4 flex flex-wrap gap-2 text-sm text-muted">
+                      <span className="rounded-full border border-card-border bg-surface-glass px-3 py-1">
+                        {t("listensImpacted", {
+                          count: track.unknownListens.toLocaleString(locale),
+                        })}
+                      </span>
+                      <span className="rounded-full border border-card-border bg-surface-glass px-3 py-1">
+                        {t("tracksImpacted", {
+                          count: track.impactedTracks.toLocaleString(locale),
+                        })}
+                      </span>
                     </div>
-                    <p className="text-xs text-violet-700/80 dark:text-violet-200/80">
-                      {t("suggestionsHint")}
-                    </p>
-                  </div>
+                  </>
+                ) : artist ? (
+                  <>
+                    <h2 className="mt-2 text-2xl font-bold tracking-tight text-foreground">
+                      {artist.artistName}
+                    </h2>
+                    <div className="mt-4 flex flex-wrap gap-2 text-sm text-muted">
+                      <span className="rounded-full border border-card-border bg-surface-glass px-3 py-1">
+                        {t("listensImpacted", {
+                          count: artist.unknownListens.toLocaleString(locale),
+                        })}
+                      </span>
+                      <span className="rounded-full border border-card-border bg-surface-glass px-3 py-1">
+                        {t("tracksImpacted", {
+                          count: artist.impactedTracks.toLocaleString(locale),
+                        })}
+                      </span>
+                    </div>
+                  </>
                 ) : null}
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {t("existingGenres")}
-                </label>
-                <input
-                  list="palette-genre-suggestions"
-                  value={selectedGenre}
-                  onChange={(event) => {
-                    setSelectedGenre(event.target.value);
-                    setSelectedSuggestionId(null);
-                  }}
-                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-800"
-                  placeholder={t("existingGenresPlaceholder")}
-                />
-                <datalist id="palette-genre-suggestions">
-                  {data.existingGenres.map((genre) => (
-                    <option key={genre} value={genre} />
-                  ))}
-                </datalist>
-              </div>
 
-              <div className="mt-4 space-y-3">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {t("customGenre")}
-                </label>
-                <input
-                  value={customGenre}
-                  onChange={(event) => {
-                    setCustomGenre(event.target.value);
-                    setSelectedSuggestionId(null);
-                  }}
-                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-800"
-                  placeholder={t("customGenrePlaceholder")}
-                />
-              </div>
+                <div className="mt-6 space-y-3">
+                  {suggestions.length > 0 ? (
+                    <div className="space-y-2 rounded-xl border border-cyan-400/20 bg-cyan-400/10 p-3">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-cyan-700 dark:text-cyan-300">
+                        {t("suggestionsTitle")}
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {suggestions.map((s) => {
+                          const isActive = selectedSuggestionId === s.id;
+                          return (
+                            <button
+                              key={s.id}
+                              type="button"
+                              onClick={() => {
+                                setSelectedSuggestionId(s.id);
+                                setSelectedGenre(s.genre);
+                                setCustomGenre("");
+                              }}
+                              className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                                isActive
+                                  ? "border-cyan-400 bg-cyan-400 text-slate-950 shadow-sm"
+                                  : "border-cyan-400/25 bg-card-surface text-cyan-700 hover:bg-cyan-400/10 dark:text-cyan-300"
+                              }`}
+                              title={`${s.reason} • ${s.provider}`}
+                            >
+                              {s.genre} ({Math.round(s.confidence * 100)}%)
+                            </button>
+                          );
+                        })}
+                      </div>
+                      <p className="text-xs text-muted">
+                        {t("suggestionsHint")}
+                      </p>
+                    </div>
+                  ) : null}
+                  <label className="block text-sm font-medium text-foreground">
+                    {t("existingGenres")}
+                  </label>
+                  <input
+                    list="palette-genre-suggestions"
+                    value={selectedGenre}
+                    onChange={(event) => {
+                      setSelectedGenre(event.target.value);
+                      setSelectedSuggestionId(null);
+                    }}
+                    className="w-full rounded-lg border border-card-border bg-surface-glass px-3 py-2 text-sm text-foreground placeholder:text-muted focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/20"
+                    placeholder={t("existingGenresPlaceholder")}
+                  />
+                  <datalist id="palette-genre-suggestions">
+                    {data.existingGenres.map((genre) => (
+                      <option key={genre} value={genre} />
+                    ))}
+                  </datalist>
+                </div>
 
-              <div className="mt-6 flex flex-wrap gap-3">
-                <button
-                  type="button"
-                  onClick={handleMap}
-                  disabled={!canSubmit}
-                  className="rounded-lg bg-violet-600 px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {isBusy ? t("saving") : t("apply")}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleSkip}
-                  disabled={isBusy}
-                  className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:text-gray-100 dark:hover:bg-gray-800"
-                >
-                  {t("skip")}
-                </button>
-              </div>
-            </>
-          )}
+                <div className="mt-4 space-y-3">
+                  <label className="block text-sm font-medium text-foreground">
+                    {t("customGenre")}
+                  </label>
+                  <input
+                    value={customGenre}
+                    onChange={(event) => {
+                      setCustomGenre(event.target.value);
+                      setSelectedSuggestionId(null);
+                    }}
+                    className="w-full rounded-lg border border-card-border bg-surface-glass px-3 py-2 text-sm text-foreground placeholder:text-muted focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/20"
+                    placeholder={t("customGenrePlaceholder")}
+                  />
+                </div>
+
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={handleMap}
+                    disabled={!canSubmit}
+                    className={`rounded-lg ${PALETTE_RAIL_CLASS} px-4 py-2 text-sm font-semibold text-slate-950 shadow-sm shadow-cyan-950/20 transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50`}
+                  >
+                    {isBusy ? t("saving") : t("apply")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSkip}
+                    disabled={isBusy}
+                    className="rounded-lg border border-card-border bg-surface-glass px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-card-surface disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {t("skip")}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </section>
 
-        <aside className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-900 lg:col-span-2">
-          <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-500">{t("miniChartTitle")}</h3>
-          <div className="mt-4">
-            <PaletteMiniChart data={data.compactTrends} />
-          </div>
-          <div className="mt-3 text-xs text-gray-500 dark:text-gray-400">
-            <p>{t("unknownTotal", { count: data.unknownListensTotal.toLocaleString(locale) })}</p>
-            <p>{t("mappedTotal", { count: data.mappedListensTotal.toLocaleString(locale) })}</p>
+        <aside className={`${PALETTE_CARD_CLASS} lg:col-span-2`}>
+          <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${PALETTE_RAIL_CLASS} opacity-80`} />
+          <div className="relative p-6">
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-muted">
+              {t("miniChartTitle")}
+            </h3>
+            <div className="mt-4 rounded-xl border border-card-border bg-surface/60 p-3">
+              <PaletteMiniChart
+                data={data.compactTrends}
+                t={t}
+                locale={locale}
+              />
+            </div>
+            <div className="mt-3 space-y-2 text-xs text-muted">
+              <p className="rounded-lg border border-card-border bg-surface-glass px-3 py-2">
+                {t("unknownTotal", {
+                  count: data.unknownListensTotal.toLocaleString(locale),
+                })}
+              </p>
+              <p className="rounded-lg border border-card-border bg-surface-glass px-3 py-2">
+                {t("mappedTotal", {
+                  count: data.mappedListensTotal.toLocaleString(locale),
+                })}
+              </p>
+            </div>
           </div>
         </aside>
       </div>

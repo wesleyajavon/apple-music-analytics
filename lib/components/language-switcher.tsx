@@ -61,7 +61,7 @@ export function LanguageSwitcher({ placement = "top", collapsed = false }: Langu
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center rounded-xl text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all duration-200 ${
+        className={`flex items-center rounded-xl text-sm font-medium text-muted hover:text-foreground hover:bg-primary/10 transition-all duration-200 ${
           collapsed ? "justify-center p-2.5" : "gap-2 w-full px-3 py-2.5"
         }`}
         aria-label={t("ariaLabel")}
@@ -70,7 +70,7 @@ export function LanguageSwitcher({ placement = "top", collapsed = false }: Langu
         title={collapsed ? LOCALE_LABELS[locale] ?? locale : undefined}
       >
         <svg
-          className="w-5 h-5 shrink-0 text-gray-400"
+          className="w-5 h-5 shrink-0 text-muted"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -102,7 +102,7 @@ export function LanguageSwitcher({ placement = "top", collapsed = false }: Langu
       {isOpen && (
         <ul
           role="listbox"
-          className={`absolute py-1 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700/50 rounded-xl shadow-lg overflow-hidden z-50 min-w-[120px] ${
+          className={`absolute py-1 bg-surface-raised border border-card-border rounded-xl shadow-card overflow-hidden z-50 min-w-[120px] ${
             collapsed
               ? "left-full ml-1 top-0"
               : `left-0 right-0 ${placement === "top" ? "bottom-full mb-1" : "top-full mt-1"}`
@@ -119,8 +119,8 @@ export function LanguageSwitcher({ placement = "top", collapsed = false }: Langu
                     w-full px-3 py-2.5 text-left text-sm font-medium transition-colors
                     ${
                       isActive
-                        ? "bg-accent-violet/10 text-accent-violet dark:text-accent-violet"
-                        : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white"
+                        ? "bg-primary/10 text-primary"
+                        : "text-muted hover:bg-primary/10 hover:text-foreground"
                     }
                   `}
                 >

@@ -9,6 +9,10 @@ import { useDashboardViewerUserId } from "@/lib/context/dashboard-viewer-context
 import { ErrorState } from "@/lib/components/error-state";
 import { HeatmapCalendarSkeleton } from "@/lib/components/skeleton-loaders";
 
+const HEATMAP_OVERVIEW_CARD_CLASS =
+  "relative overflow-hidden rounded-2xl border border-sky-300/20 bg-[radial-gradient(circle_at_top_left,_rgba(45,212,191,0.11),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(139,92,246,0.1),_transparent_30%),rgb(var(--card-rgb)/0.92)] shadow-2xl ring-1 ring-sky-300/10 backdrop-blur-sm transition-all duration-300 hover:border-sky-300/35 hover:shadow-[0_0_50px_-12px_rgba(56,189,248,0.28)] dark:border-sky-300/15 dark:bg-[radial-gradient(circle_at_top_left,_rgba(45,212,191,0.16),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(139,92,246,0.14),_transparent_30%),rgb(var(--card-rgb)/0.9)] dark:ring-sky-300/15";
+const HEATMAP_RAIL_CLASS = "bg-gradient-to-r from-emerald-300 via-sky-400 to-violet-400";
+
 function toDateOnly(date: string): string {
   return date.split("T")[0];
 }
@@ -95,15 +99,20 @@ export function HeatmapCalendarOverviewWidget({
   if (isLoading) {
     return (
       <section
-        className="relative overflow-hidden rounded-2xl border-2 border-accent-violet/20 bg-white dark:bg-gray-800/95 shadow-2xl dark:shadow-none ring-2 ring-accent-violet/10 dark:ring-accent-violet/20"
+        className={HEATMAP_OVERVIEW_CARD_CLASS}
         aria-busy="true"
         aria-label={tHeatmap("calendarTitle")}
       >
-        <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-5">
+        <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${HEATMAP_RAIL_CLASS} opacity-85`} />
+        <div className="pointer-events-none absolute -right-20 -top-24 h-56 w-56 rounded-full bg-sky-400/12 blur-3xl dark:bg-sky-400/16" />
+        <div className="pointer-events-none absolute -bottom-24 left-10 h-52 w-52 rounded-full bg-emerald-400/12 blur-3xl dark:bg-emerald-400/16" />
+        <div className="relative border-b border-sky-200/20 px-6 py-5 dark:border-sky-300/10">
           <div className="h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
         </div>
-        <div className="p-6 sm:p-8">
-          <HeatmapCalendarSkeleton />
+        <div className="relative p-6 sm:p-8">
+          <div className="rounded-2xl border border-sky-200/20 bg-white/50 p-3 shadow-inner dark:border-sky-300/10 dark:bg-slate-950/20">
+            <HeatmapCalendarSkeleton />
+          </div>
         </div>
       </section>
     );
@@ -121,30 +130,18 @@ export function HeatmapCalendarOverviewWidget({
 
   return (
     <section
-      className="relative overflow-hidden rounded-2xl border-2 border-accent-violet/20 bg-white dark:bg-gray-800/95 shadow-2xl dark:shadow-none ring-2 ring-accent-violet/10 dark:ring-accent-violet/20 animate-fade-in-up transition-all duration-300 hover:shadow-[0_0_50px_-12px_rgba(139,92,246,0.25)] hover:border-accent-violet/30 dark:hover:border-accent-violet/40"
+      className={`${HEATMAP_OVERVIEW_CARD_CLASS} animate-fade-in-up`}
       aria-labelledby="overview-heatmap-calendar-title"
     >
-      <div
-        className="pointer-events-none absolute inset-0 rounded-2xl opacity-60 dark:opacity-40"
-        style={{
-          background:
-            "radial-gradient(ellipse 80% 70% at 50% 40%, rgba(139, 92, 246, 0.08) 0%, rgba(99, 102, 241, 0.04) 40%, transparent 70%)",
-        }}
-      />
-      <div
-        className="pointer-events-none absolute inset-0 rounded-2xl opacity-80 dark:opacity-60"
-        style={{
-          background:
-            "radial-gradient(ellipse 100% 80% at 50% 50%, rgba(139, 92, 246, 0.06) 0%, transparent 60%)",
-        }}
-      />
-      <div className="pointer-events-none absolute -bottom-12 left-1/2 -translate-x-1/2 w-[90%] h-24 bg-accent-violet/10 dark:bg-accent-violet/15 blur-3xl rounded-full" />
+      <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${HEATMAP_RAIL_CLASS} opacity-85`} />
+      <div className="pointer-events-none absolute -right-20 -top-24 h-56 w-56 rounded-full bg-sky-400/12 blur-3xl dark:bg-sky-400/16" />
+      <div className="pointer-events-none absolute -bottom-24 left-10 h-52 w-52 rounded-full bg-emerald-400/12 blur-3xl dark:bg-emerald-400/16" />
 
       <div className="relative">
-        <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-5">
+        <div className="border-b border-sky-200/20 px-6 py-5 dark:border-sky-300/10">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="flex items-center gap-3 min-w-0">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-accent-violet/20 to-accent-indigo/20 text-accent-violet">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-sky-300/25 bg-sky-300/10 text-sky-600 shadow-sm shadow-sky-950/10 dark:text-sky-200">
                 <svg
                   className="w-5 h-5"
                   fill="none"
@@ -167,14 +164,14 @@ export function HeatmapCalendarOverviewWidget({
                 >
                   {tHeatmap("calendarTitle")}
                 </h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                <p className="text-sm text-sky-700/75 dark:text-sky-100/65 mt-0.5">
                   {tHeatmap("overviewCalendarHint")}
                 </p>
               </div>
             </div>
             <Link
               href={heatmapPageHref}
-              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-accent-violet hover:bg-accent-violet/10 dark:hover:bg-accent-violet/20 transition-colors duration-200 shrink-0"
+              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-sky-700 hover:bg-sky-400/10 dark:text-sky-200 dark:hover:bg-sky-400/15 transition-colors duration-200 shrink-0"
             >
               {tOverview("seeMore")}
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -190,16 +187,20 @@ export function HeatmapCalendarOverviewWidget({
         </div>
         <div className="p-6 sm:p-8 md:p-10">
           {heatmapData.length > 0 ? (
-            <CalendarHeatmap
-              data={heatmapData}
-              startDate={rangeStart}
-              endDate={rangeEnd}
-              selectedDate={null}
-              onDayClick={handleDayClick}
-              locale={locale}
-            />
+            <div className="relative rounded-2xl border border-sky-200/20 bg-white/50 p-3 shadow-inner dark:border-sky-300/10 dark:bg-slate-950/20">
+              <div className="pointer-events-none absolute left-1/2 top-10 h-64 w-64 -translate-x-1/2 rounded-full bg-violet-400/10 blur-3xl dark:bg-violet-400/15" />
+              <CalendarHeatmap
+                data={heatmapData}
+                startDate={rangeStart}
+                endDate={rangeEnd}
+                selectedDate={null}
+                onDayClick={handleDayClick}
+                locale={locale}
+                colorScheme="aurora"
+              />
+            </div>
           ) : (
-            <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+            <div className="rounded-xl border border-sky-200/20 bg-white/50 py-12 text-center text-gray-500 dark:border-sky-300/10 dark:bg-slate-950/20 dark:text-gray-400">
               <p>{tHeatmap("noDataPeriod")}</p>
             </div>
           )}

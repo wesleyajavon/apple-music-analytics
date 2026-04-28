@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { Link, usePathname } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { LanguageSwitcher } from "@/lib/components/language-switcher";
+import { SoundprintLogo } from "@/lib/components/soundprint-logo";
 import { ThemeSwitcher } from "@/lib/components/theme-switcher";
 import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -16,6 +17,7 @@ interface NavItem {
   href: string;
   labelKey: string;
   icon: (props: React.SVGProps<SVGSVGElement>) => JSX.Element;
+  featured?: boolean;
   children?: NavItem[];
 }
 
@@ -82,26 +84,6 @@ const icons = {
       <path strokeLinecap="round" strokeLinejoin="round" d="m3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z" />
     </svg>
   ),
-  help: (props: React.SVGProps<SVGSVGElement>) => (
-    <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
-    </svg>
-  ),
-  demo: (props: React.SVGProps<SVGSVGElement>) => (
-    <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
-    </svg>
-  ),
-  methodology: (props: React.SVGProps<SVGSVGElement>) => (
-    <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
-    </svg>
-  ),
-  sentry: (props: React.SVGProps<SVGSVGElement>) => (
-    <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c3.556 0 6.592-1.42 8.864-3.476m-12.728 0C3.5 17.5 4.5 16 6 16h12c1.5 0 2.5 1.5 2.5 3 0 1.5-1.5 3-2.5 3H6c-1.5 0-2.5-1.5-2.5-3 0-1.5 1-3 2.5-3m0 0c0-.5.5-1 1-1h1c.5 0 1 .5 1 1v2c0 .5-.5 1-1 1H7c-.5 0-1-.5-1-1v-2c0-.5.5-1 1-1h1c.5 0 1 .5 1 1m0 0h4m0 0h4" />
-    </svg>
-  ),
   settings: (props: React.SVGProps<SVGSVGElement>) => (
     <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
@@ -115,7 +97,7 @@ const navGroups: NavGroup[] = [
     labelKey: "home",
     items: [
       { href: "/dashboard/musical-profile", labelKey: "musicalProfile", icon: icons.musicalProfile },
-      { href: "/dashboard/overview", labelKey: "overview", icon: icons.overview },
+      { href: "/dashboard/overview", labelKey: "overview", icon: icons.overview, featured: true },
     ],
   },
   {
@@ -160,15 +142,6 @@ const navGroups: NavGroup[] = [
     ],
   },
   {
-    labelKey: "helpProduct",
-    items: [
-      { href: "/dashboard/about", labelKey: "about", icon: icons.help },
-      { href: "/dashboard/insights", labelKey: "methodology", icon: icons.methodology },
-      { href: "/dashboard/demo", labelKey: "demo", icon: icons.demo },
-      { href: "/dashboard/sentry-test", labelKey: "sentryTest", icon: icons.sentry },
-    ],
-  },
-  {
     labelKey: "account",
     items: [{ href: "/dashboard/settings", labelKey: "settings", icon: icons.settings }],
   },
@@ -182,23 +155,6 @@ function getStoredCollapsed(): boolean {
   } catch {
     return false;
   }
-}
-
-function isHiddenNavItem(item: NavItem, isAdminUser: boolean): boolean {
-  return (
-    item.href === "/dashboard/sentry-test" &&
-    process.env.NODE_ENV === "production" &&
-    !isAdminUser
-  );
-}
-
-function filterNavItems(items: NavItem[], isAdminUser: boolean): NavItem[] {
-  return items
-    .filter((item) => !isHiddenNavItem(item, isAdminUser))
-    .map((item) => ({
-      ...item,
-      children: item.children ? filterNavItems(item.children, isAdminUser) : undefined,
-    }));
 }
 
 function isNavItemActive(item: NavItem, pathname: string): boolean {
@@ -216,15 +172,15 @@ function getActiveParentKeys(groups: NavGroup[], pathname: string): string[] {
 function SidebarFallback() {
   return (
     <aside
-      className="fixed top-0 left-0 z-40 h-screen w-64 flex-shrink-0 -translate-x-full border-r border-gray-200/80 bg-white shadow-[2px_0_8px_-2px_rgba(0,0,0,0.05)] transition-all dark:border-gray-800 dark:shadow-[2px_0_8px_-2px_rgba(0,0,0,0.2)] lg:sticky lg:top-0 lg:z-auto lg:translate-x-0"
+      className="fixed top-0 left-0 z-40 h-screen w-64 flex-shrink-0 -translate-x-full border-r border-card-border bg-surface-sidebar shadow-card transition-all lg:sticky lg:top-0 lg:z-auto lg:translate-x-0"
       aria-hidden
     >
-      <div className="h-20 animate-pulse border-b border-gray-100 bg-gray-100 dark:border-gray-800 dark:bg-gray-800" />
+      <div className="min-h-[5.25rem] animate-pulse border-b border-card-border bg-card-surface" />
       <div className="space-y-2 p-4">
         {Array.from({ length: 10 }).map((_, i) => (
           <div
             key={i}
-            className="h-10 animate-pulse rounded-xl bg-gray-100 dark:bg-gray-800"
+            className="h-10 animate-pulse rounded-xl bg-card-surface"
           />
         ))}
       </div>
@@ -243,28 +199,6 @@ function SidebarContent() {
   const [isSigningOut, setIsSigningOut] = useState(false);
   const t = useTranslations("sidebar");
   const publicProfileUserId = useMemo(() => getPublicProfileUserId(), []);
-  const adminUserIds = useMemo(
-    () =>
-      (process.env.NEXT_PUBLIC_ADMIN_USER_IDS ?? "")
-        .split(",")
-        .map((v) => v.trim())
-        .filter(Boolean),
-    []
-  );
-  const isAdminUser = useMemo(
-    () => !!authUserId && adminUserIds.includes(authUserId),
-    [authUserId, adminUserIds]
-  );
-  const visibleNavGroups = useMemo(
-    () =>
-      navGroups
-        .map((group) => ({
-          ...group,
-          items: filterNavItems(group.items, isAdminUser),
-        }))
-        .filter((group) => group.items.length > 0),
-    [isAdminUser]
-  );
 
   const withFilters = useMemo(
     () => (href: string) => mergeDashboardSearchParams(href, searchParams),
@@ -278,8 +212,8 @@ function SidebarContent() {
     [authUserId, publicProfileUserId, searchParams]
   );
   const activeParentKeys = useMemo(
-    () => getActiveParentKeys(visibleNavGroups, pathname),
-    [pathname, visibleNavGroups]
+    () => getActiveParentKeys(navGroups, pathname),
+    [pathname]
   );
 
   // Hydrate collapsed state from localStorage (SSR-safe)
@@ -361,6 +295,7 @@ function SidebarContent() {
     const isDirectActive = pathname === item.href;
     const isActive = isNavItemActive(item, pathname);
     const isOpen = !isCollapsed && hasChildren && !!openNavKeys[key];
+    const isFeatured = !!item.featured;
     const Icon = item.icon;
     const label = t(`items.${item.labelKey}`);
     const itemClassName = `
@@ -368,12 +303,22 @@ function SidebarContent() {
       ${isCollapsed ? "justify-center px-2 py-2.5" : "gap-3 px-3 py-2.5"}
       ${
         isActive
-          ? "bg-accent-violet/10 text-accent-violet dark:text-accent-violet"
-          : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800/50"
+          ? isFeatured
+            ? "bg-brand-gradient text-white shadow-brand-glow"
+            : "bg-primary/10 text-primary"
+          : isFeatured
+            ? "bg-gradient-to-r from-primary/15 via-accent-violet/10 to-accent-cyan/10 text-foreground ring-1 ring-primary/20 shadow-sm hover:shadow-brand-glow"
+            : "text-muted hover:text-foreground hover:bg-primary/10"
       }
     `;
     const iconClassName = `w-5 h-5 shrink-0 transition-transform group-hover:scale-105 ${
-      isActive ? "text-accent-violet" : "text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300"
+      isFeatured
+        ? isActive
+          ? "text-white"
+          : "text-primary"
+        : isActive
+          ? "text-primary"
+          : "text-muted/75 group-hover:text-primary"
     }`;
 
     if (hasChildren) {
@@ -391,11 +336,11 @@ function SidebarContent() {
             </Link>
             {!isCollapsed && (
               <>
-                {isDirectActive && <div className="w-1 h-5 rounded-full bg-accent-violet shrink-0" />}
+                {isDirectActive && <div className="w-1 h-5 rounded-full bg-brand-gradient shrink-0" />}
                 <button
                   type="button"
                   onClick={() => toggleNavItem(key)}
-                  className="-mr-1 rounded-md p-1 text-gray-400 transition-colors hover:bg-white/70 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-violet/20 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+                  className="-mr-1 rounded-md p-1 text-muted transition-colors hover:bg-primary/10 hover:text-primary focus:outline-none focus:ring-2 focus:ring-ring"
                   aria-expanded={isOpen}
                   aria-label={t(isOpen ? "collapseSection" : "expandSection", { label })}
                 >
@@ -412,7 +357,7 @@ function SidebarContent() {
             )}
           </div>
           {isOpen && (
-            <div className="ml-5 mt-1 space-y-0.5 border-l border-gray-100 pl-2 dark:border-gray-800">
+            <div className="ml-5 mt-1 space-y-0.5 border-l border-card-border pl-2">
               {item.children?.map((child) => renderNavItem(child, depth + 1))}
             </div>
           )}
@@ -435,7 +380,12 @@ function SidebarContent() {
         {!isCollapsed && (
           <>
             <span className="flex-1 truncate">{label}</span>
-            {isDirectActive && <div className="w-1 h-5 rounded-full bg-accent-violet shrink-0" />}
+            {isFeatured && !isDirectActive && (
+              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">
+                {t("featuredBadge")}
+              </span>
+            )}
+            {isDirectActive && <div className="w-1 h-5 rounded-full bg-brand-gradient shrink-0" />}
           </>
         )}
       </Link>
@@ -448,7 +398,7 @@ function SidebarContent() {
       <div className="lg:hidden fixed top-4 left-4 z-50">
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="p-2.5 rounded-xl text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-800 shadow-card hover:shadow-card-hover transition-all focus:outline-none focus:ring-2 focus:ring-accent-violet/20"
+          className="p-2.5 rounded-xl text-muted bg-surface-glass border border-card-border shadow-card hover:text-primary hover:shadow-card-hover transition-all focus:outline-none focus:ring-2 focus:ring-ring"
           aria-label={t("openMenu")}
         >
           <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -464,7 +414,7 @@ function SidebarContent() {
       {/* Mobile overlay */}
       {isMobileMenuOpen && (
         <div
-          className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-40 lg:hidden transition-opacity"
+          className="fixed inset-0 bg-background/55 backdrop-blur-sm z-40 lg:hidden transition-opacity"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
@@ -476,45 +426,46 @@ function SidebarContent() {
           lg:sticky lg:top-0 lg:self-start lg:translate-x-0 lg:z-auto
           ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
           w-64 ${isCollapsed ? "lg:w-20" : "lg:w-64"}
-          bg-white dark:bg-gray-900
-          border-r border-gray-200/80 dark:border-gray-800
-          shadow-[2px_0_8px_-2px_rgba(0,0,0,0.05)] dark:shadow-[2px_0_8px_-2px_rgba(0,0,0,0.2)]
+          bg-surface-sidebar
+          border-r border-card-border
+          shadow-[2px_0_18px_-8px_rgb(152_80_208_/_0.32)]
         `}
       >
         <div className="flex flex-col h-full w-full">
           {/* Logo + Toggle */}
           <div
-            className={`flex items-center h-20 border-b border-gray-100 dark:border-gray-800 transition-all duration-300 ${
+            className={`flex items-center min-h-[5.25rem] py-3 border-b border-card-border transition-all duration-300 ${
               isCollapsed ? "px-3 justify-center" : "px-6"
             }`}
           >
             <Link
               href={isPublicDemoViewer ? "/" : withFilters("/dashboard")}
-              className={`flex items-center group ${isCollapsed ? "justify-center" : "gap-3"}`}
+              className={`flex items-center gap-3 group ${isCollapsed ? "justify-center" : ""}`}
               onClick={() => setIsMobileMenuOpen(false)}
+              title={isCollapsed ? t("logo") : undefined}
             >
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-accent-violet to-accent-indigo text-white shadow-lg shadow-accent-violet/20 group-hover:scale-105 transition-transform">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
-                </svg>
-              </div>
+              <SoundprintLogo
+                showText={false}
+                imageClassName="h-12 w-12 rounded-xl shadow-brand-glow transition-transform group-hover:scale-105 ring-1 ring-card-border/40"
+              />
               {!isCollapsed && (
-                <span className="text-xl font-bold tracking-tight text-gray-900 dark:text-white truncate">
-                  {t("logo")}
-                </span>
+                <div className="flex min-w-0 flex-col justify-center gap-0.5">
+                  <span className="truncate text-xl font-bold tracking-tight text-foreground">Soundprint</span>
+                  <span className="text-[11px] font-medium leading-snug text-muted">{t("tagline")}</span>
+                </div>
               )}
             </Link>
           </div>
 
           {/* Desktop collapse toggle */}
           <div
-            className={`hidden lg:flex px-2 py-2 border-b border-gray-100 dark:border-gray-800 ${
+            className={`hidden lg:flex px-2 py-2 border-b border-card-border ${
               isCollapsed ? "justify-center" : "justify-end"
             }`}
           >
             <button
               onClick={toggleCollapsed}
-              className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-accent-violet/20"
+              className="p-2 rounded-lg text-muted hover:text-primary hover:bg-primary/10 transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
               aria-label={isCollapsed ? t("expandSidebar") : t("collapseSidebar")}
               title={isCollapsed ? t("expandSidebar") : t("collapseSidebar")}
             >
@@ -531,11 +482,11 @@ function SidebarContent() {
 
           {/* Navigation */}
           <nav className="flex-1 px-3 py-5 overflow-y-auto">
-            {visibleNavGroups.map((group) => (
+            {navGroups.map((group) => (
               <div key={group.labelKey} className="mb-6 last:mb-0">
                 {!isCollapsed && (
                   <div className="px-3 mb-2">
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">
                       {t(`groups.${group.labelKey}`)}
                     </span>
                   </div>
@@ -549,13 +500,13 @@ function SidebarContent() {
 
           {/* Theme & Language switchers */}
           <div
-            className={`px-3 py-4 border-t border-gray-100 dark:border-gray-800 space-y-4 transition-all duration-300 ${
+            className={`px-3 py-4 border-t border-card-border space-y-4 transition-all duration-300 ${
               isCollapsed ? "flex flex-col items-center gap-2" : ""
             }`}
           >
             {!isCollapsed && (
               <div className="px-3 mb-2">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">
                   {t("appearance")}
                 </span>
               </div>
@@ -565,7 +516,7 @@ function SidebarContent() {
             </div>
             {!isCollapsed && (
               <div className="px-3 mb-2">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">
                   {t("language")}
                 </span>
               </div>
@@ -580,7 +531,7 @@ function SidebarContent() {
                 {authEmail ? (
                   <>
                     <p
-                      className="truncate text-xs text-gray-500 dark:text-gray-400"
+                      className="truncate text-xs text-muted"
                       title={authEmail}
                     >
                       {authEmail}
@@ -588,7 +539,7 @@ function SidebarContent() {
                     <button
                       onClick={handleSignOut}
                       disabled={isSigningOut}
-                      className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
+                      className="w-full rounded-lg border border-card-border px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {isSigningOut ? t("signingOut") : t("signOut")}
                     </button>
@@ -597,13 +548,13 @@ function SidebarContent() {
                   <div className="grid grid-cols-2 gap-2">
                     <Link
                       href="/sign-in"
-                      className="rounded-lg border border-gray-200 px-3 py-2 text-center text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
+                      className="rounded-lg border border-card-border px-3 py-2 text-center text-sm font-medium text-foreground transition-colors hover:bg-primary/10"
                     >
                       {t("signIn")}
                     </Link>
                     <Link
                       href="/sign-up"
-                      className="rounded-lg bg-accent-violet px-3 py-2 text-center text-sm font-medium text-white transition-opacity hover:opacity-90"
+                      className="rounded-lg bg-brand-gradient px-3 py-2 text-center text-sm font-medium text-white transition-opacity hover:opacity-95"
                     >
                       {t("signUp")}
                     </Link>

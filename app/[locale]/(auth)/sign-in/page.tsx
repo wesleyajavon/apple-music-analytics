@@ -70,7 +70,7 @@ export default function SignInPage() {
   }
 
   const inputClassName =
-    "w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none transition-shadow ring-accent-violet focus:border-accent-violet focus:ring-2 focus:ring-accent-violet/30 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100";
+    "w-full rounded-lg border border-card-border bg-surface-raised px-3 py-2.5 text-sm text-foreground outline-none transition-shadow ring-ring focus:border-primary focus:ring-2 focus:ring-ring";
 
   return (
     <main
@@ -79,19 +79,19 @@ export default function SignInPage() {
       className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-4 py-8 sm:py-12"
     >
       <section
-        className="w-full rounded-2xl border border-gray-200/80 bg-white/90 p-6 shadow-lg shadow-gray-200/40 backdrop-blur-sm dark:border-gray-800 dark:bg-gray-900/80 dark:shadow-none sm:p-8"
+        className="w-full rounded-2xl border border-card-border bg-card-surface p-6 shadow-card backdrop-blur-sm sm:p-8"
         aria-labelledby="sign-in-heading"
       >
-        <p className="text-xs font-semibold uppercase tracking-widest text-blue-600 dark:text-blue-400">
+        <p className="text-xs font-semibold uppercase tracking-widest text-primary">
           {t("signInEyebrow")}
         </p>
         <h1
           id="sign-in-heading"
-          className="mt-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl"
+          className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl"
         >
           {t("signInTitle")}
         </h1>
-        <p className="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-300">
+        <p className="mt-2 text-sm leading-relaxed text-muted">
           {t("signInSubtitle")}
         </p>
 
@@ -104,11 +104,11 @@ export default function SignInPage() {
           </p>
         ) : null}
 
-        <form onSubmit={onSubmit} className="mt-8 space-y-5">
+        <form method="post" onSubmit={onSubmit} className="mt-8 space-y-5">
           <div>
             <label
               htmlFor={emailId}
-              className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-200"
+              className="mb-1.5 block text-sm font-medium text-foreground/85"
             >
               {t("email")}
             </label>
@@ -129,7 +129,7 @@ export default function SignInPage() {
           <div>
             <label
               htmlFor={passwordId}
-              className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-200"
+              className="mb-1.5 block text-sm font-medium text-foreground/85"
             >
               {t("password")}
             </label>
@@ -160,17 +160,17 @@ export default function SignInPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full rounded-xl bg-accent-violet px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-accent-violet/20 transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full rounded-xl bg-brand-gradient px-4 py-2.5 text-sm font-semibold text-white shadow-brand-glow transition-opacity hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isLoading ? t("signingIn") : t("signIn")}
           </button>
 
           <div className="relative py-1">
             <div className="absolute inset-0 flex items-center" aria-hidden>
-              <span className="w-full border-t border-gray-200 dark:border-gray-700" />
+              <span className="w-full border-t border-card-border" />
             </div>
             <div className="relative flex justify-center text-xs uppercase tracking-wider">
-              <span className="bg-white/90 px-3 text-gray-500 dark:bg-gray-900/80 dark:text-gray-400">
+              <span className="bg-card px-3 text-muted">
                 {t("orDivider")}
               </span>
             </div>
@@ -180,7 +180,7 @@ export default function SignInPage() {
             type="button"
             onClick={onGoogleSignIn}
             disabled={isLoading}
-            className="flex w-full items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100 dark:hover:bg-gray-900"
+            className="flex w-full items-center justify-center gap-2 rounded-xl border border-card-border bg-surface-raised px-4 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-card-surface disabled:cursor-not-allowed disabled:opacity-60"
           >
             <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" aria-hidden>
               <path
@@ -204,9 +204,9 @@ export default function SignInPage() {
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-300">
+        <p className="mt-6 text-center text-sm text-muted">
           {t("noAccount")}{" "}
-          <Link href="/sign-up" className="font-semibold text-accent-violet hover:underline">
+          <Link href="/sign-up" className="font-semibold text-primary hover:underline">
             {t("signUp")}
           </Link>
         </p>
@@ -214,7 +214,7 @@ export default function SignInPage() {
         <p className="mt-4 text-center sm:hidden">
           <Link
             href={`/dashboard/overview?userId=${DEFAULT_PUBLIC_PROFILE_USER_ID}`}
-            className="text-sm font-medium text-gray-500 underline-offset-4 hover:text-gray-800 hover:underline dark:text-gray-400 dark:hover:text-gray-200"
+            className="text-sm font-medium text-muted underline-offset-4 hover:text-primary hover:underline"
           >
             {t("dashboardLink")}
           </Link>

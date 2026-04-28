@@ -32,6 +32,7 @@ import {
 } from "@/lib/hooks/use-listening";
 import { useTrackStats } from "@/lib/hooks/use-tracks";
 import { isGroqDailyQuotaError } from "@/lib/utils/groq-quota-message";
+import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
 
 const TOP_LIMIT = 6;
 const PROFILE_AI_STALE_TIME = 5 * 60 * 1000;
@@ -332,6 +333,10 @@ function MusicalProfileContent() {
   const emptyStatePresets = useEmptyStatePresets();
   const searchParams = useSearchParams();
   const userId = searchParams.get("userId") ?? undefined;
+  const withFilters = useMemo(
+    () => (href: string) => mergeDashboardSearchParams(href, searchParams),
+    [searchParams]
+  );
 
   const { startDate, endDate, isLoading: isRangeLoading } = useListenDateRange();
   const { data: overview, isLoading: overviewLoading, error: overviewError, refetch } =
@@ -480,6 +485,32 @@ function MusicalProfileContent() {
         </motion.section>
       </ParallaxHero>
 
+      <ScrollRevealSection>
+        <section className="relative overflow-hidden rounded-[2rem] border border-accent-cyan/20 bg-gradient-to-br from-accent-violet/10 via-card-surface to-accent-cyan/10 p-6 shadow-card sm:p-8">
+          <div className="pointer-events-none absolute -right-20 -top-24 h-56 w-56 rounded-full bg-accent-cyan/20 blur-3xl" />
+          <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+            <div className="max-w-2xl">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-accent-violet">
+                {t("overviewCallout.badge")}
+              </p>
+              <h2 className="mt-3 text-2xl font-bold tracking-tight text-gray-950 dark:text-white sm:text-3xl">
+                {t("overviewCallout.title")}
+              </h2>
+              <p className="mt-3 text-sm leading-6 text-gray-600 dark:text-gray-300">
+                {t("overviewCallout.body")}
+              </p>
+            </div>
+            <Link
+              href={withFilters("/dashboard/overview")}
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-5 py-3 text-sm font-bold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:shadow-card-hover focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
+            >
+              {t("overviewCallout.cta")}
+              <span aria-hidden="true">&rarr;</span>
+            </Link>
+          </div>
+        </section>
+      </ScrollRevealSection>
+
       <StaggerContainer className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard
           label={t("metrics.totalListens")}
@@ -565,7 +596,7 @@ function MusicalProfileContent() {
         </section>
       </ScrollRevealSection>
 
-      <ScrollRevealSection className="grid grid-cols-1 gap-6 xl:grid-cols-[0.95fr_1.05fr]">
+      <ScrollRevealSection className="grid grid-cols-1 gap-6 xl:grid-cols-[0.95fr_1.05fr] xl:items-start">
         <section className="rounded-[2rem] border border-card-border bg-card-surface p-6 shadow-card sm:p-8">
           <div className="mb-6 flex items-center justify-between gap-4">
             <div>

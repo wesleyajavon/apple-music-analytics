@@ -9,21 +9,37 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
-        card: "var(--card)",
+        background: "rgb(var(--background-rgb) / <alpha-value>)",
+        foreground: "rgb(var(--foreground-rgb) / <alpha-value>)",
+        card: "rgb(var(--card-rgb) / <alpha-value>)",
+        surface: "rgb(var(--surface-rgb) / <alpha-value>)",
+        "surface-raised": "rgb(var(--surface-raised-rgb) / <alpha-value>)",
+        "surface-glass": "rgb(var(--surface-glass-rgb) / 0.78)",
+        "surface-sidebar": "rgb(var(--surface-sidebar-rgb) / <alpha-value>)",
+        "surface-dashboard": "rgb(var(--surface-dashboard-rgb) / <alpha-value>)",
         "card-surface": "var(--card-surface)",
         "card-border": "var(--card-border)",
-        border: "var(--border)",
-        muted: "var(--muted)",
+        border: "rgb(var(--border-rgb) / <alpha-value>)",
+        muted: "rgb(var(--muted-rgb) / <alpha-value>)",
+        primary: "rgb(var(--primary-rgb) / <alpha-value>)",
+        "primary-hover": "var(--primary-hover)",
+        "primary-foreground": "var(--primary-foreground)",
+        ring: "var(--ring)",
         accent: {
-          rose: "#fa586a",
-          pink: "#ec4899",
-          violet: "#8b5cf6",
-          indigo: "#6366f1",
-          cyan: "#06b6d4",
-          emerald: "#10b981",
+          rose: "rgb(var(--brand-rose-rgb) / <alpha-value>)",
+          pink: "rgb(var(--brand-pink-rgb) / <alpha-value>)",
+          violet: "rgb(var(--brand-violet-rgb) / <alpha-value>)",
+          indigo: "rgb(var(--brand-indigo-rgb) / <alpha-value>)",
+          cyan: "rgb(var(--brand-cyan-rgb) / <alpha-value>)",
+          emerald: "rgb(var(--brand-emerald-rgb) / <alpha-value>)",
         },
+      },
+      backgroundImage: {
+        "app-shell": "var(--app-shell-gradient)",
+        "brand-gradient":
+          "linear-gradient(135deg, var(--brand-rose) 0%, var(--brand-violet) 52%, var(--brand-cyan) 100%)",
+        "brand-gradient-soft":
+          "linear-gradient(135deg, rgb(240 64 104 / 0.14) 0%, rgb(152 80 208 / 0.16) 52%, rgb(79 144 224 / 0.14) 100%)",
       },
       fontFamily: {
         sans: ["var(--font-inter)", "system-ui", "sans-serif"],
@@ -31,7 +47,8 @@ const config: Config = {
       boxShadow: {
         card: "var(--card-shadow)",
         "card-hover": "var(--card-shadow-hover)",
-        glow: "0 0 40px -10px rgb(139 92 246 / 0.25)",
+        glow: "0 0 48px -12px rgb(152 80 208 / 0.42)",
+        "brand-glow": "0 22px 70px -28px rgb(152 80 208 / 0.58)",
       },
       keyframes: {
         "onboarding-import-indeterminate": {

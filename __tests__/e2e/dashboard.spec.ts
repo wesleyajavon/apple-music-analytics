@@ -11,7 +11,7 @@ test.describe("Dashboard Navigation", () => {
   });
 
   test("should load the home page", async ({ page }) => {
-    await expect(page).toHaveTitle(/Apple Music Analytics/i);
+    await expect(page).toHaveTitle(/Soundprint/i);
   });
 
   test("should navigate to dashboard overview", async ({ page }) => {

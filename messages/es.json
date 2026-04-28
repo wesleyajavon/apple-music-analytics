@@ -31,13 +31,15 @@
     "expandSidebar": "Expandir barra lateral",
     "collapseSection": "Contraer {label}",
     "expandSection": "Expandir {label}",
-    "logo": "Analytics",
+    "logo": "Soundprint",
+    "tagline": "Tu escucha, visualizada",
     "appearance": "Apariencia",
     "language": "Idioma",
     "signIn": "Iniciar sesión",
     "signUp": "Crear cuenta",
     "signOut": "Cerrar sesión",
     "signingOut": "Cerrando sesión...",
+    "featuredBadge": "Clave",
     "groups": {
       "home": "Inicio",
       "library": "Biblioteca",
@@ -73,8 +75,28 @@
     "metaTitle": "Ajustes de la cuenta",
     "title": "Ajustes",
     "subtitle": "Gestiona los datos asociados a tu cuenta en esta aplicación.",
+    "pageEyebrow": "Cuenta",
+    "navOnThisPage": "En esta página",
+    "sectionProfile": "Perfil",
+    "sectionProfileLead": "Tu nombre se muestra en el panel y se usa en confirmaciones sensibles (p. ej. borrar datos).",
+    "profileNameLabel": "Nombre mostrado",
+    "profileEmailLabel": "Correo",
+    "profileEmailHint": "Proviene de tu inicio de sesión. Para cambiarlo, usa tu proveedor de cuenta o contacta con soporte.",
+    "saveProfile": "Guardar",
+    "savingProfile": "Guardando…",
+    "profileSaved": "Cambios guardados",
+    "profileLoadError": "No se pudo cargar tu perfil. Actualiza la página.",
+    "profileSaveError": "No se pudo guardar. Inténtalo de nuevo.",
+    "profileNameTooLong": "Máximo 200 caracteres.",
+    "sectionPreferences": "Preferencias",
+    "sectionPreferencesLead": "Avisos opcionales, bandas y mensajes en la app.",
+    "sectionDataPrivacy": "Datos y privacidad",
+    "sectionDataPrivacyLead": "Elimina el historial e importaciones guardados en esta app. Tu inicio de sesión no se borra.",
+    "signedOutTitle": "Inicia sesión para gestionar los ajustes",
     "signedOutHint": "Inicia sesión para borrar tus datos de analytics o gestionar tu cuenta.",
     "signInCta": "Iniciar sesión",
+    "switchHideGenreAria": "Ocultar el aviso de clasificación de géneros Groq en el panel",
+    "switchUnderstandAria": "Entiendo que esta eliminación de datos no se puede deshacer",
     "dangerTitle": "Borrar mis datos de analytics",
     "dangerBody": "Esto elimina de forma permanente todo el historial de escucha importado y los datos Replay que guardamos. Tu cuenta (email) no se elimina.",
     "dangerBulletListens": "Todas las escuchas guardadas (importaciones, etc.)",
@@ -113,7 +135,7 @@
     "alreadyAccount": "¿Ya tienes cuenta?",
     "signUpSuccess": "Cuenta creada. Revisa tu email para confirmar el registro.",
     "skipToContent": "Ir al formulario de inicio de sesión",
-    "homeLinkAriaLabel": "Apple Music Analytics — inicio",
+    "homeLinkAriaLabel": "Soundprint — inicio",
     "authNavAriaLabel": "Navegación de cuenta",
     "dashboardLink": "Dashboard de Wesley",
     "continueWithGoogle": "Continuar con Google",
@@ -233,7 +255,7 @@
     }
   },
   "dashboard": {
-    "title": "Dashboard 📊",
+    "title": "Dashboard",
     "genreBackfill": {
       "running": "Clasificación de géneros con Groq en curso",
       "pausedHeading": "Clasificación de géneros con Groq en pausa",
@@ -271,29 +293,30 @@
     }
   },
   "footer": {
-    "brand": "Apple Music Analytics 🎵",
+    "brand": "Soundprint",
     "tagline": "Tus analytics de escucha personales",
     "overview": "Your Music",
     "about": "Cómo funciona",
     "demo": "Demo",
     "methodology": "Metodología",
     "apiDocs": "API Docs",
-    "copyright": "Apple Music Analytics. Todos los derechos reservados.",
-    "madeWith": "Hecho con ❤️ para amantes de la música",
+    "copyright": "Soundprint. Todos los derechos reservados.",
+    "madeWith": "Hecho para quienes aman la música",
     "creatorCredit": "Creado por Wesley Ajavon",
     "navAriaLabel": "Navegación del pie de página"
   },
   "overview": {
-    "title": "Your Music 📊",
-    "titlePersonal": "La música de {name} 📊",
+    "title": "Tu música",
+    "titlePersonal": "La música de {name}",
+    "heroEyebrow": "Tu escucha de un vistazo",
     "subtitle": "Tus estadísticas personales de escucha. Analiza tus tendencias y descubre tus géneros favoritos.",
     "periodBadge": "Período",
     "allData": "Todos los datos",
     "stats": {
-      "totalListens": "Total de escuchas 🎧",
-      "uniqueArtists": "Artistas únicos 🎤",
-      "uniqueTracks": "Títulos únicos 🎵",
-      "totalTime": "Tiempo total ⏱️"
+      "totalListens": "Total de escuchas",
+      "uniqueArtists": "Artistas únicos",
+      "uniqueTracks": "Títulos únicos",
+      "totalTime": "Tiempo total"
     },
     "statsSectionBadge": "Resumen",
     "statsSectionTitle": "Tus cifras en el período",
@@ -301,25 +324,29 @@
     "statsSectionComparisonNote": "Los porcentajes comparan este período con la ventana anterior de la misma duración (cuando hay datos).",
     "vsPreviousPeriod": "vs período anterior",
     "notAvailable": "No disponible",
-    "recentEvolution": "Evolución reciente 📈",
+    "recentEvolution": "Evolución reciente",
     "listensPerDay": "Número de escuchas por día",
     "listensPerMonth": "Número de escuchas por mes",
     "seeMore": "Ver más",
-    "topGenres": "Top géneros 🎸",
+    "topGenres": "Top géneros",
     "yourTopGenres": "Tus géneros más escuchados",
     "yourTopArtists": "Tus artistas más escuchados",
     "yourTopTracks": "Tus títulos más escuchados",
     "seeAll": "Ver todo",
-    "topArtists": "Artistas más escuchados 🎤",
-    "topTracks": "Títulos más escuchados 🎧",
+    "topArtists": "Artistas más escuchados",
+    "topTracks": "Títulos más escuchados",
     "yourFavoriteArtists": "Tus artistas favoritos por número de escuchas",
     "listens": "escuchas",
     "Listens": "Escuchas",
     "errorLoading": "No se pueden cargar las estadísticas"
   },
   "timeline": {
-    "title": "Línea temporal de escucha 📈",
+    "title": "Línea temporal de escucha",
     "subtitle": "Mira cómo cambian tus hábitos de escucha con el tiempo",
+    "heroEyebrow": "Escucha a lo largo del tiempo",
+    "heroStatTotal": "Escuchas totales",
+    "heroStatPeak": "Pico en un período",
+    "heroStatBuckets": "Puntos en el gráfico",
     "chartTitle": "Tu tendencia de escucha",
     "chartHint": "Sigue picos, caídas y ritmo en el período seleccionado",
     "errorLoading": "No se puede cargar la línea temporal de escucha",
@@ -330,8 +357,9 @@
     "periodBadgeMonth": "Mes"
   },
   "heatmap": {
-    "title": "Mapa de calor de escucha 🔥",
+    "title": "Mapa de calor de escucha",
     "subtitle": "Visualiza tus patrones de escucha diarios con un calendario interactivo estilo GitHub. Haz clic en un día para ver los detalles.",
+    "heroEyebrow": "Intensidad en el calendario",
     "dateRangeBadge": "Período: {range}",
     "errorLoading": "No se puede cargar los datos del calendario",
     "activeDays": "Días activos",
@@ -377,8 +405,11 @@
     "noListen": "Sin escuchas"
   },
   "temporal-analysis": {
-    "title": "Análisis Temporal ⏰",
+    "title": "Análisis temporal",
     "subtitle": "Patrones de escucha detallados por día de la semana y hora del día. Identifica tus momentos pico.",
+    "heroEyebrow": "Cuándo escuchas",
+    "heroBadge": "Historial completo · se ignoran los filtros de fechas",
+    "heroStatTotal": "Escuchas totales",
     "note": "Nota",
     "noteText": "Este análisis utiliza todos tus datos históricos para patrones fiables. Los filtros de período se ignoran porque un período corto no reflejaría tus hábitos generales.",
     "errorLoading": "No se puede cargar el análisis temporal",
@@ -421,9 +452,10 @@
     "artists": "Artistas"
   },
   "genres": {
-    "title": "Géneros 🎸",
+    "title": "Géneros",
     "subtitle": "Distribución de tus escuchas por género musical. Visualiza tus preferencias en gráfico circular o de barras.",
     "errorLoading": "No se puede cargar la distribución de géneros",
+    "heroEyebrow": "Ranking y resumen",
     "chart": "Gráfico",
     "pie": "Circular",
     "bar": "Barras",
@@ -443,6 +475,7 @@
     "apiMappingNoticeTitle": "Limitación actual del mapeo de géneros",
     "apiMappingNoticeBody": "El mapeo automático a géneros precisos sigue siendo parcial porque la app no tiene acceso fiable a las APIs de Apple Music o Spotify para enriquecer cada pista/artista.",
     "apiMappingNoticeLink": "Palette Features",
+    "viewTrends": "Ver tendencias de géneros",
     "paginationSummary": "Mostrando {start}-{end} de {total}",
     "paginationPrevious": "Anterior",
     "paginationNext": "Siguiente",
@@ -450,7 +483,9 @@
     "pageSizeLabel": "Filas"
   },
   "genreTrends": {
-    "title": "Tendencias de géneros 📉",
+    "title": "Tendencias de géneros",
+    "heroEyebrow": "Escucha a lo largo del tiempo",
+    "backToGenres": "Volver a la vista de géneros",
     "subtitle": "Evolución de tus preferencias musicales en el tiempo",
     "subtitleExtended": "Evolución de tus preferencias musicales en el tiempo. Compara cómo cada género seleccionado sube o baja a lo largo del período.",
     "errorLoading": "No se pueden cargar las tendencias de géneros",
@@ -513,6 +548,9 @@
     "skip": "Saltar",
     "saving": "Guardando…",
     "miniChartTitle": "Progreso en vivo",
+    "stepLabel": "Paso",
+    "unknownSeries": "Unknown",
+    "mappedSeries": "Mapeados",
     "unknownTotal": "Unknown restantes: {count}",
     "mappedTotal": "Unknown mapeados: {count}",
     "doneTitle": "Sesión terminada",
@@ -522,7 +560,9 @@
     "suggestionsHint": "Las sugerencias son solo ayudas y nunca se aplican automáticamente."
   },
   "artistTrends": {
-    "title": "Tendencias de artistas 📉",
+    "title": "Tendencias de artistas",
+    "heroEyebrow": "Escucha a lo largo del tiempo",
+    "backToArtists": "Volver al ranking de artistas",
     "subtitle": "Cómo evolucionan tus artistas más escuchados en el tiempo",
     "subtitleExtended": "Cómo evolucionan tus artistas más escuchados en el tiempo. Compara cómo cada artista seleccionado sube o baja a lo largo del período.",
     "errorLoading": "No se pueden cargar las tendencias de artistas",
@@ -564,9 +604,10 @@
     "aiUpdating": "Actualizando resumen…"
   },
   "artists": {
-    "title": "Artistas 🎤",
+    "title": "Artistas",
     "subtitle": "Descubre tus artistas favoritos, sus estadísticas y la evolución de tus escuchas.",
     "errorLoading": "No se pueden cargar las estadísticas de artistas",
+    "heroEyebrow": "Ranking y resumen",
     "yourArtists": "Tus artistas",
     "overviewSubtitle": "Snapshot de tus escuchas",
     "periodLast7Days": "Últimos 7 días",
@@ -598,6 +639,7 @@
     "artistTooltip": "Artista",
     "showMoreArtists": "Ver {count} más",
     "showLessArtists": "Ver menos",
+    "viewTrends": "Ver tendencias de artistas",
     "paginationSummary": "Mostrando {start}-{end} de {total}",
     "paginationPrevious": "Anterior",
     "paginationNext": "Siguiente",
@@ -606,9 +648,10 @@
     "paginationLoading": "Cargando la página siguiente..."
   },
   "tracks": {
-    "title": "Títulos 🎧",
+    "title": "Títulos",
     "subtitle": "Tus títulos más escuchados de un vistazo, empezando por tu top 20.",
     "errorLoading": "No se pueden cargar las estadísticas de títulos",
+    "heroEyebrow": "Ranking y resumen",
     "heroTitle": "Tus títulos",
     "heroSubtitle": "Top títulos para el período seleccionado",
     "tracks": "Títulos",
@@ -621,6 +664,7 @@
     "allTracks": "Ranking de títulos",
     "rank": "Rango",
     "listensCount": "escuchas",
+    "viewTrends": "Ver tendencias de títulos",
     "paginationSummary": "Mostrando {start}-{end} de {total}",
     "paginationPrevious": "Anterior",
     "paginationNext": "Siguiente",
@@ -629,7 +673,9 @@
     "paginationLoading": "Cargando la página siguiente..."
   },
   "trackTrends": {
-    "title": "Tendencias de títulos 📉",
+    "title": "Tendencias de títulos",
+    "heroEyebrow": "Escucha a lo largo del tiempo",
+    "backToTracks": "Volver al ranking de títulos",
     "subtitle": "Evolución de tus títulos más escuchados",
     "subtitleExtended": "Compara la evolución de títulos en el tiempo. Empieza con top 20 y añade otros títulos mediante búsqueda de catálogo.",
     "errorLoading": "No se pueden cargar las tendencias de títulos",
@@ -658,7 +704,12 @@
     "selectionPending": "Aplicando selección…"
   },
   "ai-insights": {
-    "title": "AI Insights ✨",
+    "title": "AI Insights",
+    "heroEyebrow": "Ideas con IA",
+    "heroStatInsights": "Insights",
+    "heroStatTone": "Tono",
+    "heroStatStatus": "Cuota / caché",
+    "heroFresh": "Respuesta en vivo",
     "subtitle": "Análisis inteligente de tus datos de escucha generado por IA.",
     "subtitleShort": "Análisis de tus datos de escucha",
     "seeMore": "Ver más",
@@ -686,8 +737,13 @@
     "loadingShort": "Cargando..."
   },
   "taste-evolution": {
-    "title": "Evolución de gustos 🌱",
+    "title": "Evolución de gustos",
     "seeMore": "Ver más",
+    "heroEyebrow": "Semana a semana",
+    "heroStatComparisons": "Comparaciones",
+    "heroStatLatest": "Último patrón",
+    "heroStatSkipped": "Semanas excluidas",
+    "summaryStyleLabel": "Estilo del resumen",
     "subtitle": "Cambios en tus gustos musicales semana a semana. Las tendencias se calculan de forma determinista; la IA proporciona una explicación contextual.",
     "loading": "Analizando cambios semana a semana...",
     "loadingShort": "Cargando...",
@@ -723,8 +779,9 @@
     "pp": "pp"
   },
   "taste-profile": {
-    "title": "Explain My Taste 🎯",
-    "subtitleShort": "Tu perfil musical en breve",
+    "title": "Tu Soundprint, descifrado",
+    "featureBadge": "Lectura musical IA",
+    "subtitleShort": "Los patrones detrás de lo que más escuchas",
     "seeMore": "Ver más",
     "subtitle": "Tu perfil musical explicado a partir de tus analytics.",
     "loading": "Generando tu perfil musical...",
@@ -750,7 +807,7 @@
     "influences": "Influencias",
     "coreGenres": "Géneros principales",
     "whatMakesYouUnique": "Lo que te distingue",
-    "footer": "Generado a partir de tus datos de escucha • Apple Music Analytics"
+    "footer": "Generado a partir de tus datos de escucha • Soundprint"
   },
   "musical-profile": {
     "title": "Perfil musical",
@@ -772,6 +829,12 @@
     "aiCached": "Perfil IA servido desde caché",
     "aiUnavailable": "La IA está desactivada para este entorno o navegador, por lo que esta página muestra un perfil determinista basado en tus estadísticas.",
     "aiErrorTitle": "Análisis IA no disponible. Mostrando un resumen basado en datos.",
+    "overviewCallout": {
+      "badge": "Empieza por el corazón de Soundprint",
+      "title": "Your Music es la vista general que conecta todo",
+      "body": "Usa Your Music como punto de partida: resume tus escuchas, artistas, canciones, tiempo de escucha, evolución reciente y mezcla de géneros antes de abrir vistas más profundas como este perfil.",
+      "cta": "Abrir Your Music"
+    },
     "genreDnaTitle": "ADN de géneros",
     "artistConstellationTitle": "Constelación de artistas",
     "trackObsessionTitle": "Canciones en repetición",
@@ -830,10 +893,10 @@
     "tableListens": "Escuchas",
     "tableArtists": "Artistas",
     "tableTracks": "Canciones",
-    "footer": "Generado el {date} - Apple Music Analytics Dashboard"
+    "footer": "Generado el {date} - Soundprint Dashboard"
   },
   "insights": {
-    "title": "Insights y Metodología 📚",
+    "title": "Insights y metodología",
     "subtitle": "Comprende qué revela cada página, cómo se calculan los analytics y cuáles son las limitaciones actuales. Usa esta página como referencia para importar datos y sacar más valor del dashboard.",
     "heroBadge": "Documentación técnica",
     "spotlightTitle": "En resumen",
@@ -1034,7 +1097,7 @@
     }
   },
   "api-docs": {
-    "title": "Documentación API 📖",
+    "title": "Documentación API",
     "description": "Referencia de endpoints API. Usa el dashboard para explorar tus datos de escucha.",
     "viewReference": "Ver referencia API",
     "goToDashboard": "Ir al Dashboard"
@@ -1107,7 +1170,7 @@
       "exportPdfTitle": "Generar informe PDF anual"
     },
     "periodSelector": {
-      "label": "Agregación",
+      "label": "Agrupar por",
       "daily": "Diario",
       "weekly": "Semanal",
       "monthly": "Mensual"
@@ -1122,18 +1185,22 @@
     }
   },
   "demo": {
-    "title": "Demo de producto 🎬",
+    "title": "Demo de producto",
     "subtitle": "Mira nuestro vídeo de demostración para descubrir lo que ofrecemos.",
     "heroBadge": "Vídeo",
     "videoTitle": "Vídeo de demostración de producto"
   },
   "about": {
-    "title": "Cómo funciona 🎯",
+    "title": "Cómo funciona",
     "subtitle": "Una guía rápida para entender de dónde vienen tus datos de escucha y qué puedes explorar hoy en el dashboard.",
     "heroBadge": "Guía de usuario",
+    "brandCard": {
+      "title": "Soundprint",
+      "lead": "Un espacio personal de analíticas para tu historial de Apple Music y Last.fm: tendencias, hábitos e insights en un solo dashboard claro."
+    },
     "whatIs": {
       "title": "¿Qué es esto?",
-      "paragraph": "Apple Music Analytics es un dashboard personal que visualiza la evolución de tus hábitos de escucha. Puedes cargar datos desde scrobbles de Last.fm o exportaciones CSV de Apple Music, y explorar estadísticas, tendencias e insights en un solo lugar."
+      "paragraph": "Soundprint es un dashboard personal que visualiza la evolución de tus hábitos de escucha. Puedes cargar datos desde scrobbles de Last.fm o exportaciones CSV de Apple Music, y explorar estadísticas, tendencias e insights en un solo lugar."
     },
     "whyLastfm": {
       "title": "¿Por qué Last.fm en lugar de Apple Music?",
@@ -1173,12 +1240,12 @@
     }
   },
   "home": {
-    "title": "Apple Music Analytics 🎵",
+    "title": "Soundprint",
     "welcome": "Tu escucha, explicada con claridad.",
-    "welcomePersonal": "Bienvenido de nuevo, {name} 👋",
+    "welcomePersonal": "Bienvenido de nuevo, {name}",
     "subtitle": "Analiza tus hábitos de escucha y descubre tus tendencias musicales.",
     "goToDashboard": "Volver a tu dashboard",
-    "accessDashboard": "Explorar una demo publica del dashboard 🚀",
+    "accessDashboard": "Explorar una demo pública del dashboard",
     "features": {
       "timeline": {
         "title": "Timeline",
@@ -1195,7 +1262,7 @@
     }
   },
   "metadata": {
-    "title": "Apple Music Analytics Dashboard",
+    "title": "Soundprint Dashboard",
     "description": "Dashboard de análisis personal para tu comportamiento de escucha en Apple Music"
   }
 }

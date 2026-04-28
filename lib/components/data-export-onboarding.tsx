@@ -504,7 +504,7 @@ export function DataExportOnboarding() {
       <div className={cardClass}>
         {phase === "welcome" && (
           <div className="space-y-6">
-            <p className="text-xs font-semibold uppercase tracking-widest text-blue-600 dark:text-blue-400">
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary">
               {t("welcomeEyebrow")}
             </p>
             <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
@@ -685,7 +685,7 @@ export function DataExportOnboarding() {
               </div>
             ) : null}
 
-            <p className="text-xs font-semibold uppercase tracking-widest text-blue-600 dark:text-blue-400">
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary">
               {t("import.eyebrow")}
             </p>
             <h2 className="text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">

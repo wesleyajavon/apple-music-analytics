@@ -1,28 +1,65 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useCallback, useLayoutEffect, useState, type CSSProperties } from "react";
 import { Sidebar } from "@/lib/components/sidebar";
 import { DateRangeFilter } from "@/lib/components/date-range-filter";
+import { DashboardToolbarBrand } from "@/lib/components/dashboard-toolbar-brand";
 import { Footer } from "@/lib/components/footer";
 import { DashboardViewerProvider } from "@/lib/context/dashboard-viewer-context";
 
 export function DashboardScrollWrapper({ children }: { children: React.ReactNode }) {
+  const [filterElement, setFilterElement] = useState<HTMLDivElement | null>(null);
+  const [filterHeight, setFilterHeight] = useState(0);
+
+  const filterRef = useCallback((node: HTMLDivElement | null) => {
+    setFilterElement(node);
+  }, []);
+
+  useLayoutEffect(() => {
+    const el = filterElement;
+    if (!el) return;
+
+    const updateFilterHeight = () => {
+      setFilterHeight(el.getBoundingClientRect().height);
+    };
+
+    updateFilterHeight();
+
+    const observer = new ResizeObserver(updateFilterHeight);
+    observer.observe(el);
+    window.addEventListener("resize", updateFilterHeight);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", updateFilterHeight);
+    };
+  }, [filterElement]);
+
+  const dashboardStyle = {
+    "--dashboard-filter-height": `${filterHeight}px`,
+  } as CSSProperties;
+
   return (
-    <div className="flex min-h-screen bg-gray-100 dark:bg-gray-950">
+    <div className="flex min-h-screen bg-background" style={dashboardStyle}>
       <Sidebar />
-      <div className="min-w-0 flex-1 bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.04)] dark:bg-gray-900 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.06)]">
+      <div className="min-w-0 flex-1 bg-surface-dashboard shadow-[0_0_0_1px_rgb(152_80_208_/_0.08)]">
         <Suspense
           fallback={
-            <div className="sticky top-0 z-30 shrink-0 border-b border-gray-200/90 bg-white/90 shadow-[0_1px_0_0_rgba(0,0,0,0.06)] backdrop-blur-md dark:border-gray-800 dark:bg-gray-950/90 dark:shadow-[0_1px_0_0_rgba(255,255,255,0.06)]">
+            <div className="sticky top-0 z-30 shrink-0 border-b border-card-border bg-surface-glass shadow-[0_1px_0_0_rgb(152_80_208_/_0.1)] backdrop-blur-md">
+              <div className="border-b border-card-border/70 px-4 py-3 lg:hidden">
+                <div className="h-9 w-40 animate-pulse rounded-lg bg-card-surface" />
+              </div>
               <div className="px-4 py-3 sm:px-6 lg:px-8">
-                <div className="h-10 w-64 animate-pulse rounded-xl bg-gray-100 dark:bg-gray-800" />
+                <div className="h-10 w-64 animate-pulse rounded-xl bg-card-surface" />
               </div>
             </div>
           }
         >
           <div
-            className="sticky top-0 z-30 shrink-0 border-b border-gray-200/90 bg-white/90 shadow-[0_1px_0_0_rgba(0,0,0,0.06)] backdrop-blur-md dark:border-gray-800 dark:bg-gray-950/90 dark:shadow-[0_1px_0_0_rgba(255,255,255,0.06)]"
+            ref={filterRef}
+            className="sticky top-0 z-30 shrink-0 border-b border-card-border bg-surface-glass shadow-[0_1px_0_0_rgb(152_80_208_/_0.1)] backdrop-blur-md"
           >
+            <DashboardToolbarBrand />
             <DateRangeFilter />
           </div>
         </Suspense>

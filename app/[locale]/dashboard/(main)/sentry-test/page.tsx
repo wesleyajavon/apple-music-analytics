@@ -6,6 +6,7 @@ import { captureException, captureMessage, setUser, setTag, setContext } from '@
 import { RateLimitHealthWidget } from '@/lib/components/rate-limit-health-widget';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import * as Sentry from '@sentry/nextjs';
+import { AlertTriangle, Bug } from 'lucide-react';
 
 /**
  * Page de test pour Sentry
@@ -219,16 +220,18 @@ export default function SentryTestPage() {
     return (
       <div className="max-w-4xl mx-auto">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            🐛 {t("title")}
+          <h1 className="mb-2 flex items-center gap-2 text-3xl font-bold text-gray-900 dark:text-white">
+            <Bug className="h-8 w-8 shrink-0 text-accent-violet" strokeWidth={1.75} aria-hidden />
+            {t("title")}
           </h1>
           <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 border border-amber-200 dark:border-amber-800">
             Outil de debug
           </span>
         </div>
         <div className="rounded-xl border-l-4 border-l-amber-500 bg-amber-50/80 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 shadow-card p-6">
-          <h2 className="text-xl font-semibold text-amber-800 dark:text-amber-200 mb-2">
-            ⚠️ {t("notConfigured")}
+          <h2 className="mb-2 flex items-center gap-2 text-xl font-semibold text-amber-800 dark:text-amber-200">
+            <AlertTriangle className="h-6 w-6 shrink-0" strokeWidth={1.75} aria-hidden />
+            {t("notConfigured")}
           </h2>
           <p className="text-amber-700 dark:text-amber-300 mb-4 leading-relaxed">
             {t("configInstructions")}
@@ -278,8 +281,9 @@ NEXT_PUBLIC_SENTRY_DSN="https://xxxxx@xxxxx.ingest.sentry.io/xxxxx"`}
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-6 flex flex-wrap items-center gap-3">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-          🐛 {t("title")}
+        <h1 className="flex items-center gap-2 text-3xl font-bold text-gray-900 dark:text-white">
+          <Bug className="h-8 w-8 shrink-0 text-accent-violet" strokeWidth={1.75} aria-hidden />
+          {t("title")}
         </h1>
         <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-accent-violet/10 dark:bg-accent-violet/20 text-accent-violet border border-accent-violet/20">
           Outil de debug

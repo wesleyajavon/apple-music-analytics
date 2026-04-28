@@ -180,7 +180,7 @@ export function useTimeline(
 ) {
   const queryClient = useQueryClient();
   const queryKey = listeningKeys.timeline({ startDate, endDate, period, userId });
-  
+
   // Récupérer les données précédentes du cache pour les utiliser comme placeholder
   // Cherche dans toutes les requêtes timeline pour trouver des données similaires
   const previousData = findLatestCachedData<TimelineDataPoint[]>(

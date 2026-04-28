@@ -11,6 +11,7 @@ import {
   getGroqQuotaUserFacingMessage,
   isGroqDailyQuotaError,
 } from "@/lib/utils/groq-quota-message";
+import { AlertTriangle } from "lucide-react";
 
 interface ErrorStateProps {
   error: Error | null;
@@ -53,7 +54,17 @@ export function ErrorState({
   return (
     <div className={`flex items-center justify-center py-16 ${className}`}>
       <div className="text-center max-w-md mx-auto px-4">
-        <div className="text-6xl mb-6">⚠️</div>
+        <div className="mb-6 flex justify-center">
+          <AlertTriangle
+            className={`h-24 w-24 ${
+              isGroqDailyQuotaError(error)
+                ? "text-amber-500 dark:text-amber-400"
+                : "text-red-500 dark:text-red-400"
+            }`}
+            strokeWidth={1.15}
+            aria-hidden
+          />
+        </div>
         <h3
           className={`text-lg font-semibold mb-3 ${
             isGroqDailyQuotaError(error)
@@ -73,7 +84,7 @@ export function ErrorState({
         {showRetry && (
           <button
             onClick={onRetry}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-500 transition-colors font-medium shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
+            className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-hover dark:hover:bg-primary-hover transition-colors font-medium shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 dark:focus:ring-offset-gray-800"
           >
             {retryLabel}
           </button>
@@ -121,8 +132,8 @@ export function AiWidgetQuotaOrError({
 }: {
   title: string;
   subtitle: string;
-  seeMoreHref: string;
-  seeMoreLabel: string;
+  seeMoreHref?: string;
+  seeMoreLabel?: string;
   error: Error;
 }) {
   return (
@@ -137,17 +148,19 @@ export function AiWidgetQuotaOrError({
               {subtitle}
             </p>
           </div>
-          <Link
-            href={seeMoreHref}
-            className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium
-              text-accent-violet hover:bg-accent-violet/10 dark:hover:bg-accent-violet/20
-              transition-colors duration-200 shrink-0"
-          >
-            {seeMoreLabel}
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </Link>
+          {seeMoreHref && seeMoreLabel && (
+            <Link
+              href={seeMoreHref}
+              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium
+                text-accent-violet hover:bg-accent-violet/10 dark:hover:bg-accent-violet/20
+                transition-colors duration-200 shrink-0"
+            >
+              {seeMoreLabel}
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+          )}
         </div>
       </div>
       <div className="p-6 flex-1">

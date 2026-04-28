@@ -14,4 +14,5 @@ export * from "./taste-evolution-summary-widget";
 export * from "./taste-profile-summary-widget";
 export * from "./ai-insights-summary-widget";
 export * from "./footer";
+export * from "./soundprint-logo";
 

@@ -17,8 +17,8 @@ export function AiFeatureDisabledPlaceholder({
 }: {
   title: string;
   subtitle: string;
-  seeMoreHref: string;
-  seeMoreLabel: string;
+  seeMoreHref?: string;
+  seeMoreLabel?: string;
   reason: AiUnavailableReason;
 }) {
   const t = useTranslations("aiMasterToggle");
@@ -41,17 +41,19 @@ export function AiFeatureDisabledPlaceholder({
               {subtitle}
             </p>
           </div>
-          <Link
-            href={seeMoreHref}
-            className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium
-              text-accent-violet hover:bg-accent-violet/10 dark:hover:bg-accent-violet/20
-              transition-colors duration-200 shrink-0"
-          >
-            {seeMoreLabel}
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </Link>
+          {seeMoreHref && seeMoreLabel && (
+            <Link
+              href={seeMoreHref}
+              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium
+                text-accent-violet hover:bg-accent-violet/10 dark:hover:bg-accent-violet/20
+                transition-colors duration-200 shrink-0"
+            >
+              {seeMoreLabel}
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+          )}
         </div>
       </div>
       <div className="p-6 flex-1 flex flex-col justify-center">

@@ -11,7 +11,7 @@ import {
 } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
-import { usePathname } from "@/i18n/navigation";
+import { Link, usePathname } from "@/i18n/navigation";
 import {
   LineChart,
   Line,
@@ -35,10 +35,66 @@ import { GenreTrendsSkeleton } from "@/lib/components/skeleton-loaders";
 import { ArtistTrendsArtistPicker } from "@/lib/components/artist-trends-artist-picker";
 import type { ArtistTrendsChartArtist } from "@/lib/dto/artist";
 import { useDebouncedValue } from "@/lib/hooks/use-debounced-value";
+import { TrendingUp } from "lucide-react";
 
 const MAX_SERIES_ARTISTS = 50;
 /** Délai après lequel les sélections d’artistes déclenchent chart + IA (évite rafales de requêtes). */
 const ARTIST_SELECTION_DEBOUNCE_MS = 450;
+
+const ARTIST_RAIL_CLASS = "bg-gradient-to-r from-violet-400 via-cyan-300 to-lime-300";
+const ARTISTS_TRENDS_HERO_SHELL_CLASS =
+  "relative overflow-hidden rounded-3xl border border-violet-400/25 bg-[radial-gradient(circle_at_top_left,_rgba(139,92,246,0.34),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(6,182,212,0.22),_transparent_30%),linear-gradient(135deg,_#020617_0%,_#111827_48%,_#164e63_100%)] px-6 py-8 shadow-2xl shadow-violet-950/35 sm:px-8 sm:py-10";
+const ARTIST_TRENDS_PANEL_CLASS =
+  "relative overflow-hidden rounded-2xl border border-violet-300/20 bg-[radial-gradient(circle_at_top_left,_rgba(139,92,246,0.1),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(6,182,212,0.08),_transparent_30%),rgb(var(--card-rgb)/0.92)] shadow-card transition-shadow duration-300 hover:shadow-card-hover dark:border-violet-300/15 dark:bg-[radial-gradient(circle_at_top_left,_rgba(139,92,246,0.15),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(6,182,212,0.12),_transparent_30%),rgb(var(--card-rgb)/0.9)]";
+const GROUP_BY_BAR_CLASS =
+  "sticky top-[var(--dashboard-filter-height)] z-20 bg-surface-glass border-b border-violet-200/30 dark:border-violet-400/15 -mx-4 -mt-4 sm:-mx-6 sm:-mt-6 lg:-mx-8 lg:-mt-8 px-4 sm:px-6 lg:px-8 py-3 shadow-[0_1px_0_0_rgb(139_92_246_/_0.2)] backdrop-blur-md";
+const TRENDS_CTA_CLASS =
+  "inline-flex min-h-[44px] w-fit shrink-0 items-center justify-center rounded-full border border-cyan-100/30 bg-white/95 px-5 py-2.5 text-sm font-semibold text-cyan-950 shadow-lg shadow-cyan-950/20 transition hover:-translate-y-0.5 hover:bg-cyan-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80";
+
+function useArtistsListHref() {
+  const searchParams = useSearchParams();
+  return useMemo(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("period");
+    const qs = params.toString();
+    return qs ? `/dashboard/artists?${qs}` : "/dashboard/artists";
+  }, [searchParams]);
+}
+
+function ArtistTrendsHero({
+  artistsHref,
+  subtitleKey,
+}: {
+  artistsHref: string;
+  subtitleKey: "subtitle" | "subtitleExtended";
+}) {
+  const t = useTranslations("artistTrends");
+  return (
+    <div className={ARTISTS_TRENDS_HERO_SHELL_CLASS}>
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(139,92,246,0.1)_1px,_transparent_1px),linear-gradient(90deg,_rgba(6,182,212,0.08)_1px,_transparent_1px)] bg-[size:32px_32px] opacity-30" />
+      <div className="absolute -right-20 -top-24 h-56 w-56 rounded-full bg-violet-500/18 blur-3xl" />
+      <div className="absolute -bottom-24 left-10 h-48 w-48 rounded-full bg-cyan-400/16 blur-3xl" />
+      <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${ARTIST_RAIL_CLASS} opacity-90`} />
+      <div className="relative flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+        <div className="max-w-3xl">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-200/85">{t("heroEyebrow")}</p>
+          <h1 className="mt-3 flex items-center gap-3 text-3xl font-bold tracking-tight text-white sm:text-4xl">
+            <TrendingUp className="h-9 w-9 shrink-0 text-violet-200/90 sm:h-10 sm:w-10" strokeWidth={1.75} aria-hidden />
+            <span>{t("title")}</span>
+          </h1>
+          <div
+            className={`mt-4 h-1.5 w-24 rounded-full ${ARTIST_RAIL_CLASS} opacity-95 shadow-[0_0_24px_rgba(139,92,246,0.35)]`}
+            aria-hidden
+          />
+          <p className="mt-5 text-base leading-relaxed text-cyan-100/90 sm:text-lg">{t(subtitleKey)}</p>
+        </div>
+        <Link href={artistsHref} className={TRENDS_CTA_CLASS}>
+          {t("backToArtists")}
+        </Link>
+      </div>
+    </div>
+  );
+}
 
 function idsEqualSorted(a: string[], b: string[]): boolean {
   if (a.length !== b.length) return false;
@@ -48,16 +104,16 @@ function idsEqualSorted(a: string[], b: string[]): boolean {
 }
 
 const COLORS = [
-  "#3b82f6",
-  "#8b5cf6",
-  "#ec4899",
-  "#f59e0b",
-  "#10b981",
-  "#ef4444",
-  "#06b6d4",
-  "#f97316",
-  "#6366f1",
-  "#14b8a6",
+  "rgb(var(--brand-violet-rgb))",
+  "rgb(var(--brand-rose-rgb))",
+  "rgb(var(--brand-cyan-rgb))",
+  "rgb(var(--brand-emerald-rgb))",
+  "rgb(var(--brand-pink-rgb))",
+  "rgb(var(--brand-indigo-rgb))",
+  "rgb(var(--primary-rgb))",
+  "rgb(var(--brand-violet-rgb) / 0.72)",
+  "rgb(var(--brand-rose-rgb) / 0.72)",
+  "rgb(var(--brand-cyan-rgb) / 0.72)",
 ];
 
 function getColor(index: number): string {
@@ -159,6 +215,8 @@ function TrendsContent() {
   const startDate = startDateParam || undefined;
   const endDate = endDateParam || undefined;
   const userId = searchParams.get("userId") ?? undefined;
+
+  const artistsHref = useArtistsListHref();
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [summaryVersion, setSummaryVersion] = useState<"light" | "technical">(
@@ -386,25 +444,14 @@ function TrendsContent() {
   const activeAiError =
     summaryVersion === "technical" ? techAiError : lightAiError;
 
-  const headerBlock = (
-    <div className="mb-8">
-      <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-        {t("title")}
-      </h1>
-      <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-        {t("subtitle")}
-      </p>
-    </div>
-  );
-
   if (isLoading) {
     return (
       <>
-        <div className="bg-white dark:bg-gray-800/95 border-b border-gray-100 dark:border-gray-700/50 -mx-4 -mt-4 sm:-mx-6 sm:-mt-6 lg:-mx-8 lg:-mt-8 px-4 sm:px-6 lg:px-8 py-3 backdrop-blur-sm">
+        <div className={GROUP_BY_BAR_CLASS}>
           <div className="h-10 bg-gray-100 dark:bg-gray-700 rounded-xl animate-pulse w-64" />
         </div>
-        <div className="mt-6">
-          {headerBlock}
+        <div className="mt-6 space-y-6">
+          <ArtistTrendsHero artistsHref={artistsHref} subtitleKey="subtitleExtended" />
           <GenreTrendsSkeleton />
         </div>
       </>
@@ -414,11 +461,11 @@ function TrendsContent() {
   if (error) {
     return (
       <>
-        <div className="bg-white dark:bg-gray-800/95 border-b border-gray-100 dark:border-gray-700/50 -mx-4 -mt-4 sm:-mx-6 sm:-mt-6 lg:-mx-8 lg:-mt-8 px-4 sm:px-6 lg:px-8 py-3 backdrop-blur-sm">
-          <div className="h-10" />
+        <div className={GROUP_BY_BAR_CLASS}>
+          <PeriodSelector defaultPeriod="month" />
         </div>
-        <div className="mt-6">
-          {headerBlock}
+        <div className="mt-6 space-y-6">
+          <ArtistTrendsHero artistsHref={artistsHref} subtitleKey="subtitleExtended" />
           <ErrorState
             error={error}
             message={t("errorLoading")}
@@ -432,11 +479,11 @@ function TrendsContent() {
   if (!data || (chartData.length === 0 && pickerArtists.length === 0)) {
     return (
       <>
-        <div className="bg-white dark:bg-gray-800/95 border-b border-gray-100 dark:border-gray-700/50 -mx-4 -mt-4 sm:-mx-6 sm:-mt-6 lg:-mx-8 lg:-mt-8 px-4 sm:px-6 lg:px-8 py-3 backdrop-blur-sm">
+        <div className={GROUP_BY_BAR_CLASS}>
           <PeriodSelector defaultPeriod="month" />
         </div>
-        <div className="mt-6">
-          {headerBlock}
+        <div className="mt-6 space-y-6">
+          <ArtistTrendsHero artistsHref={artistsHref} subtitleKey="subtitleExtended" />
           <EmptyState
             {...emptyStatePresets.changeDates(pathname)}
             message={t("noArtistData")}
@@ -449,73 +496,167 @@ function TrendsContent() {
 
   return (
     <>
-      <div className="bg-white dark:bg-gray-800/95 border-b border-gray-100 dark:border-gray-700/50 -mx-4 -mt-4 sm:-mx-6 sm:-mt-6 lg:-mx-8 lg:-mt-8 px-4 sm:px-6 lg:px-8 py-3 backdrop-blur-sm">
+      <div className={GROUP_BY_BAR_CLASS}>
         <PeriodSelector defaultPeriod="month" />
       </div>
 
-      <div className="mt-6">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            {t("title")}
-          </h1>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            {t("subtitleExtended")}
-          </p>
-        </div>
+      <div className="mt-6 space-y-6">
+        <ArtistTrendsHero artistsHref={artistsHref} subtitleKey="subtitleExtended" />
 
         <div className="space-y-6">
-          <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <div className={ARTIST_TRENDS_PANEL_CLASS}>
+            <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${ARTIST_RAIL_CLASS} opacity-80`} />
+            <div className="relative z-10 border-b border-violet-200/25 px-4 py-4 dark:border-violet-400/15 sm:px-6">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+              <span className="inline-flex items-center gap-2 text-sm font-semibold text-foreground">
+                <span className={`h-2 w-2 rounded-full ${ARTIST_RAIL_CLASS} shadow-[0_0_14px_rgb(139_92_246_/_0.4)]`} aria-hidden />
                 {t("artistsToDisplay")}
               </span>
               <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
                   onClick={selectAll}
-                  className="px-3 py-1.5 text-sm font-medium rounded-md bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                  className="rounded-lg border border-violet-200/40 bg-white/70 px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-violet-50/90 dark:border-violet-400/25 dark:bg-surface-glass dark:hover:bg-violet-950/30"
                 >
                   {t("all")}
                 </button>
                 <button
                   type="button"
                   onClick={selectNone}
-                  className="px-3 py-1.5 text-sm font-medium rounded-md bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                  className="rounded-lg border border-card-border bg-surface-glass px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-card-surface hover:text-foreground"
                 >
                   {t("none")}
                 </button>
               </div>
+              </div>
             </div>
-            <ArtistTrendsArtistPicker
-              catalogArtists={pickerArtists}
-              selectedIds={selectedIds}
-              onToggle={toggleArtist}
-              getColor={getColor}
-              getArtistIndex={getArtistIndex}
-              enableRemoteSearch
-              onPickRemoteArtist={handlePickRemoteArtist}
-              maxSelectable={MAX_SERIES_ARTISTS}
-            />
+            <div className="relative z-10 p-4 sm:p-6">
+              <ArtistTrendsArtistPicker
+                catalogArtists={pickerArtists}
+                selectedIds={selectedIds}
+                onToggle={toggleArtist}
+                getColor={getColor}
+                getArtistIndex={getArtistIndex}
+                enableRemoteSearch
+                onPickRemoteArtist={handlePickRemoteArtist}
+                maxSelectable={MAX_SERIES_ARTISTS}
+              />
+            </div>
           </div>
+
+          <section
+            className={`${ARTIST_TRENDS_PANEL_CLASS} animate-fade-in-up transition-all duration-300`}
+            aria-labelledby="artist-trends-spotlight-title"
+          >
+            <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${ARTIST_RAIL_CLASS} opacity-80`} />
+            <div className="relative">
+              <div className="border-b border-violet-200/25 px-6 py-5 dark:border-violet-400/15">
+                <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <h2 id="artist-trends-spotlight-title" className="text-lg font-semibold tracking-tight text-gray-900 dark:text-white">
+                      {t("evolution")}
+                    </h2>
+                    <p className="mt-0.5 text-sm text-violet-800/85 dark:text-violet-100/75">
+                      {t("chartHint")}
+                    </p>
+                  </div>
+                  <span className="inline-flex w-fit items-center rounded-full border border-violet-200/35 bg-violet-50/85 px-2.5 py-1 text-xs font-medium text-violet-950 dark:border-violet-400/25 dark:bg-surface-glass dark:text-violet-100/90">
+                    {t("selectionCount", { selected: selectedIds.length, max: MAX_SERIES_ARTISTS })}
+                  </span>
+                </div>
+              </div>
+              <div className="p-4 sm:p-6 md:p-8">
+                {selectedIds.length === 0 ? (
+                  <div className="rounded-xl border border-card-border bg-surface/60 px-6 py-10 text-center">
+                    <p className="text-sm text-muted">
+                      {t("selectAtLeastOne")}
+                    </p>
+                  </div>
+                ) : (
+                  <div
+                    className="relative min-h-[500px] rounded-xl border border-card-border bg-surface/60 p-3 shadow-inner"
+                    aria-busy={chartDataSyncing}
+                  >
+                    {chartDataSyncing && (
+                      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 rounded-xl bg-card-surface/75 backdrop-blur-[2px] px-4 text-center">
+                        <span
+                          className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-violet-500 border-t-transparent dark:border-violet-400"
+                          aria-hidden
+                        />
+                        <span className="text-sm font-medium text-foreground">
+                          {selectionPending
+                            ? t("selectionPending")
+                            : t("chartUpdating")}
+                        </span>
+                      </div>
+                    )}
+                    <div
+                      className={`transition-opacity duration-200 ${
+                        chartDataSyncing ? "opacity-40 pointer-events-none" : ""
+                      }`}
+                    >
+                      <ResponsiveContainer width="100%" height={500}>
+                    <LineChart
+                      data={chartData}
+                      margin={{ top: 5, right: 20, left: 10, bottom: 60 }}
+                    >
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke="rgb(var(--border-rgb) / 0.45)"
+                      />
+                      <XAxis
+                        dataKey="formattedDate"
+                        tick={{ fill: "rgb(var(--muted-rgb) / 0.95)", fontSize: 12 }}
+                        stroke="rgb(var(--border-rgb) / 0.85)"
+                        angle={-45}
+                        textAnchor="end"
+                        height={80}
+                      />
+                      <YAxis
+                        tick={{ fill: "rgb(var(--muted-rgb) / 0.95)", fontSize: 12 }}
+                        stroke="rgb(var(--border-rgb) / 0.85)"
+                      />
+                      <Tooltip content={<TrendsTooltip />} />
+                      <Legend wrapperStyle={{ color: "rgb(var(--muted-rgb))", paddingTop: 12 }} />
+                      {selectedIds.map((artistId) => {
+                        const idx = getArtistIndex(artistId);
+                        const name = idToName.get(artistId) ?? artistId;
+                        return (
+                          <Line
+                            key={artistId}
+                            type="monotone"
+                            dataKey={artistId}
+                            name={name}
+                            stroke={getColor(idx >= 0 ? idx : 0)}
+                            strokeWidth={2}
+                            dot={{ r: 3 }}
+                            activeDot={{ r: 5 }}
+                            animationDuration={500}
+                            animationEasing="ease-in-out"
+                          />
+                        );
+                      })}
+                    </LineChart>
+                  </ResponsiveContainer>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </section>
 
           {debouncedSelectedIds.length > 0 && chartData.length > 0 && (
             <section
-              className="relative overflow-hidden rounded-2xl border-2 border-accent-violet/20 bg-white dark:bg-gray-800/95 shadow-2xl dark:shadow-none ring-2 ring-accent-violet/10 dark:ring-accent-violet/20 animate-fade-in-up transition-all duration-300"
+              className="relative overflow-hidden rounded-2xl border border-gray-200/80 bg-white shadow-lg backdrop-blur-sm animate-fade-in-up transition-all duration-300 dark:border-gray-600/50 dark:bg-gray-800/90"
               aria-labelledby="artist-trends-ai-spotlight-title"
               aria-busy={aiRefreshing}
             >
-              <div
-                className="pointer-events-none absolute inset-0 rounded-2xl opacity-60 dark:opacity-40"
-                style={{
-                  background:
-                    "radial-gradient(ellipse 80% 70% at 50% 40%, rgba(139, 92, 246, 0.08) 0%, rgba(99, 102, 241, 0.04) 40%, transparent 70%)",
-                }}
-              />
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-violet-700 via-emerald-600 to-amber-600 opacity-70" />
               <div className="relative">
-                <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-5">
+                <div className="border-b border-gray-100 px-6 py-5 dark:border-gray-700/50">
                   <div className="flex flex-wrap items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-accent-violet/20 to-accent-indigo/20 text-accent-violet">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-violet-200/70 bg-violet-50 text-violet-700 dark:border-violet-500/25 dark:bg-violet-500/10 dark:text-violet-300">
                         <svg
                           className="w-5 h-5"
                           fill="none"
@@ -548,7 +689,7 @@ function TrendsContent() {
                               <span className="ml-1">{t("aiCached")}</span>
                             )}
                           {aiRefreshing && (
-                            <span className="ml-2 inline-flex items-center gap-1.5 text-accent-violet/90 dark:text-accent-violet/80">
+                            <span className="ml-2 inline-flex items-center gap-1.5 text-violet-700/90 dark:text-violet-300/80">
                               <span
                                 className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent"
                                 aria-hidden
@@ -561,7 +702,7 @@ function TrendsContent() {
                     </div>
                     {(aiCommentary?.commentaryLight || aiCommentary?.commentary) && (
                       <div
-                        className="flex rounded-lg bg-gray-100 dark:bg-gray-700/50 p-1"
+                        className="flex rounded-lg border border-gray-200 bg-gray-50/80 p-1 dark:border-gray-600 dark:bg-gray-700/30"
                         role="tablist"
                         aria-label={t("aiExplanation")}
                       >
@@ -576,8 +717,8 @@ function TrendsContent() {
                           onClick={() => setSummaryVersion("light")}
                           className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
                             summaryVersion === "light"
-                              ? "bg-white dark:bg-gray-800 text-accent-violet shadow-sm"
-                              : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                              ? "bg-white text-violet-700 shadow-sm dark:bg-gray-800 dark:text-violet-300"
+                              : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
                           }`}
                         >
                           {t("summaryVersionLight")}
@@ -593,8 +734,8 @@ function TrendsContent() {
                           onClick={() => setSummaryVersion("technical")}
                           className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
                             summaryVersion === "technical"
-                              ? "bg-white dark:bg-gray-800 text-accent-violet shadow-sm"
-                              : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                              ? "bg-white text-violet-700 shadow-sm dark:bg-gray-800 dark:text-violet-300"
+                              : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
                           }`}
                         >
                           {t("summaryVersionTechnical")}
@@ -606,9 +747,9 @@ function TrendsContent() {
                 <div className="p-6 sm:p-8">
                   {showAiSkeleton ? (
                     <div className="space-y-3 animate-pulse" aria-busy="true">
-                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full max-w-3xl" />
-                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full max-w-2xl" />
-                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-4/5 max-w-xl" />
+                      <div className="h-4 bg-gray-200 rounded w-full max-w-3xl dark:bg-gray-700" />
+                      <div className="h-4 bg-gray-200 rounded w-full max-w-2xl dark:bg-gray-700" />
+                      <div className="h-4 bg-gray-200 rounded w-4/5 max-w-xl dark:bg-gray-700" />
                     </div>
                   ) : activeAiError ? (
                     isGroqDailyQuotaError(activeAiError) ? (
@@ -627,7 +768,7 @@ function TrendsContent() {
                     </p>
                   ) : hasDisplayableAiParagraph ? (
                     <p
-                      className={`text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line transition-opacity duration-200 ${
+                      className={`text-gray-700 leading-relaxed whitespace-pre-line transition-opacity duration-200 dark:text-gray-200 ${
                         aiRefreshing ? "opacity-60" : ""
                       }`}
                     >
@@ -643,125 +784,6 @@ function TrendsContent() {
             </section>
           )}
 
-          <section
-            className="relative overflow-hidden rounded-2xl border-2 border-accent-violet/20 bg-white dark:bg-gray-800/95 shadow-2xl dark:shadow-none ring-2 ring-accent-violet/10 dark:ring-accent-violet/20 animate-fade-in-up transition-all duration-300 hover:shadow-[0_0_50px_-12px_rgba(139,92,246,0.25)] hover:border-accent-violet/30 dark:hover:border-accent-violet/40"
-            aria-labelledby="artist-trends-spotlight-title"
-          >
-            <div
-              className="pointer-events-none absolute inset-0 rounded-2xl opacity-60 dark:opacity-40"
-              style={{
-                background:
-                  "radial-gradient(ellipse 80% 70% at 50% 40%, rgba(139, 92, 246, 0.08) 0%, rgba(99, 102, 241, 0.04) 40%, transparent 70%)",
-              }}
-            />
-            <div
-              className="pointer-events-none absolute inset-0 rounded-2xl opacity-80 dark:opacity-60"
-              style={{
-                background:
-                  "radial-gradient(ellipse 100% 80% at 50% 50%, rgba(139, 92, 246, 0.06) 0%, transparent 60%)",
-              }}
-            />
-            <div className="pointer-events-none absolute -bottom-12 left-1/2 -translate-x-1/2 w-[90%] h-24 bg-accent-violet/10 dark:bg-accent-violet/15 blur-3xl rounded-full" />
-
-            <div className="relative">
-              <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-5">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-accent-violet/20 to-accent-indigo/20 text-accent-violet">
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h2 id="artist-trends-spotlight-title" className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">
-                      {t("evolution")}
-                    </h2>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-                      {t("chartHint")}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div className="p-6 sm:p-8 md:p-10">
-                {selectedIds.length === 0 ? (
-                  <p className="text-sm text-gray-500 dark:text-gray-400 py-8 text-center">
-                    {t("selectAtLeastOne")}
-                  </p>
-                ) : (
-                  <div
-                    className="relative min-h-[500px]"
-                    aria-busy={chartDataSyncing}
-                  >
-                    {chartDataSyncing && (
-                      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 rounded-lg bg-white/60 backdrop-blur-[2px] dark:bg-gray-900/50 px-4 text-center">
-                        <span
-                          className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-accent-violet border-t-transparent"
-                          aria-hidden
-                        />
-                        <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
-                          {selectionPending
-                            ? t("selectionPending")
-                            : t("chartUpdating")}
-                        </span>
-                      </div>
-                    )}
-                    <div
-                      className={`transition-opacity duration-200 ${
-                        chartDataSyncing ? "opacity-40 pointer-events-none" : ""
-                      }`}
-                    >
-                      <ResponsiveContainer width="100%" height={500}>
-                    <LineChart
-                      data={chartData}
-                      margin={{ top: 5, right: 20, left: 10, bottom: 60 }}
-                    >
-                      <CartesianGrid
-                        strokeDasharray="3 3"
-                        stroke="#e5e7eb"
-                        className="dark:stroke-gray-700"
-                      />
-                      <XAxis
-                        dataKey="formattedDate"
-                        tick={{ fill: "currentColor", fontSize: 12 }}
-                        stroke="#6b7280"
-                        className="dark:stroke-gray-400"
-                        angle={-45}
-                        textAnchor="end"
-                        height={80}
-                      />
-                      <YAxis
-                        tick={{ fill: "currentColor", fontSize: 12 }}
-                        stroke="#6b7280"
-                        className="dark:stroke-gray-400"
-                      />
-                      <Tooltip content={<TrendsTooltip />} />
-                      <Legend />
-                      {selectedIds.map((artistId) => {
-                        const idx = getArtistIndex(artistId);
-                        const name = idToName.get(artistId) ?? artistId;
-                        return (
-                          <Line
-                            key={artistId}
-                            type="monotone"
-                            dataKey={artistId}
-                            name={name}
-                            stroke={getColor(idx >= 0 ? idx : 0)}
-                            strokeWidth={2}
-                            dot={{ r: 3 }}
-                            activeDot={{ r: 5 }}
-                            animationDuration={500}
-                            animationEasing="ease-in-out"
-                          />
-                        );
-                      })}
-                    </LineChart>
-                  </ResponsiveContainer>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </section>
-
           {selectedIds.length > 0 && (rising.length > 0 || declining.length > 0) && (
             <div
               className={`grid grid-cols-1 md:grid-cols-2 gap-6 transition-opacity duration-200 ${
@@ -769,20 +791,22 @@ function TrendsContent() {
               }`}
               aria-busy={chartDataSyncing}
             >
-              <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                  <span className="text-green-500">↑</span> {t("rising")}
+              <div className="relative overflow-hidden rounded-2xl border border-gray-200/80 bg-white p-6 shadow-lg backdrop-blur-sm dark:border-gray-600/50 dark:bg-gray-800/90">
+                <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-emerald-600 via-violet-700 to-transparent opacity-70" />
+                <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
+                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-emerald-200/70 bg-emerald-50 text-emerald-700 dark:border-emerald-500/25 dark:bg-emerald-500/10 dark:text-emerald-300">↑</span>
+                  {t("rising")}
                 </h2>
                 <ul className="space-y-2">
                   {rising.map((r) => (
                     <li
                       key={r.artistId}
-                      className="flex items-center justify-between text-sm gap-2"
+                      className="flex items-center justify-between gap-3 rounded-xl border border-gray-200 bg-gray-50/80 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-700/30"
                     >
-                      <span className="text-gray-800 dark:text-gray-200 truncate min-w-0">
+                      <span className="min-w-0 truncate text-gray-900 dark:text-white">
                         {r.artistName}
                       </span>
-                      <span className="text-green-600 dark:text-green-400 font-medium tabular-nums shrink-0">
+                      <span className="shrink-0 rounded-full bg-emerald-50 px-2.5 py-1 font-medium tabular-nums text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">
                         +{r.deltaPercent}% ({r.delta > 0 ? "+" : ""}
                         {r.delta.toLocaleString(locale)} {t("listensDelta")})
                       </span>
@@ -790,20 +814,22 @@ function TrendsContent() {
                   ))}
                 </ul>
               </div>
-              <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                  <span className="text-red-500">↓</span> {t("declining")}
+              <div className="relative overflow-hidden rounded-2xl border border-gray-200/80 bg-white p-6 shadow-lg backdrop-blur-sm dark:border-gray-600/50 dark:bg-gray-800/90">
+                <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-rose-700 via-violet-700 to-transparent opacity-70" />
+                <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
+                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-rose-200/70 bg-rose-50 text-rose-700 dark:border-rose-500/25 dark:bg-rose-500/10 dark:text-rose-300">↓</span>
+                  {t("declining")}
                 </h2>
                 <ul className="space-y-2">
                   {declining.map((r) => (
                     <li
                       key={r.artistId}
-                      className="flex items-center justify-between text-sm gap-2"
+                      className="flex items-center justify-between gap-3 rounded-xl border border-gray-200 bg-gray-50/80 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-700/30"
                     >
-                      <span className="text-gray-800 dark:text-gray-200 truncate min-w-0">
+                      <span className="min-w-0 truncate text-gray-900 dark:text-white">
                         {r.artistName}
                       </span>
-                      <span className="text-red-600 dark:text-red-400 font-medium tabular-nums shrink-0">
+                      <span className="shrink-0 rounded-full bg-rose-50 px-2.5 py-1 font-medium tabular-nums text-rose-700 dark:bg-rose-500/10 dark:text-rose-300">
                         {r.deltaPercent}% ({r.delta.toLocaleString(locale)}{" "}
                         {t("listensDelta")})
                       </span>
@@ -820,21 +846,14 @@ function TrendsContent() {
 }
 
 function ArtistTrendsFallback() {
-  const t = useTranslations("artistTrends");
+  const artistsHref = useArtistsListHref();
   return (
     <>
-      <div className="bg-white dark:bg-gray-800/95 border-b border-gray-100 dark:border-gray-700/50 -mx-4 -mt-4 sm:-mx-6 sm:-mt-6 lg:-mx-8 lg:-mt-8 px-4 sm:px-6 lg:px-8 py-3 backdrop-blur-sm">
+      <div className={GROUP_BY_BAR_CLASS}>
         <div className="h-10 bg-gray-100 dark:bg-gray-700 rounded-xl animate-pulse w-64" />
       </div>
-      <div className="mt-6">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            {t("title")}
-          </h1>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            {t("subtitle")}
-          </p>
-        </div>
+      <div className="mt-6 space-y-6">
+        <ArtistTrendsHero artistsHref={artistsHref} subtitleKey="subtitle" />
         <GenreTrendsSkeleton />
       </div>
     </>
@@ -843,8 +862,10 @@ function ArtistTrendsFallback() {
 
 export default function ArtistTrendsPage() {
   return (
-    <Suspense fallback={<ArtistTrendsFallback />}>
-      <TrendsContent />
-    </Suspense>
+    <div className="px-4 py-6 sm:px-0">
+      <Suspense fallback={<ArtistTrendsFallback />}>
+        <TrendsContent />
+      </Suspense>
+    </div>
   );
 }

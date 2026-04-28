@@ -2,6 +2,9 @@
 
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { Map } from "lucide-react";
+import { DashboardHeroTitle } from "@/lib/components/dashboard-hero-title";
+import { SoundprintLogo } from "@/lib/components/soundprint-logo";
 
 /**
  * Page About - Guide utilisateur non-technique
@@ -107,13 +110,35 @@ export default function AboutPage() {
             {t("heroBadge")}
           </span>
         </div>
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
+        <DashboardHeroTitle icon={Map} variant="page">
           {t("title")}
-        </h1>
+        </DashboardHeroTitle>
         <p className="mt-2 text-base text-gray-500 dark:text-gray-400 max-w-2xl">
           {t("subtitle")}
         </p>
       </header>
+
+      <section
+        className="mb-10 flex flex-col items-start gap-4 rounded-2xl border border-accent-violet/20 bg-gradient-to-br from-accent-violet/10 via-surface-glass to-accent-indigo/10 p-6 shadow-card sm:flex-row sm:items-center sm:gap-8"
+        aria-labelledby="about-brand-heading"
+      >
+        <SoundprintLogo
+          className="shrink-0"
+          showText={false}
+          imageClassName="h-24 w-24 rounded-2xl shadow-brand-glow ring-1 ring-white/10 sm:h-28 sm:w-28"
+        />
+        <div className="min-w-0">
+          <h2
+            id="about-brand-heading"
+            className="text-lg font-bold tracking-tight text-gray-900 dark:text-white"
+          >
+            {t("brandCard.title")}
+          </h2>
+          <p className="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-300">
+            {t("brandCard.lead")}
+          </p>
+        </div>
+      </section>
 
       <div className="space-y-6">
         {/* What is this */}

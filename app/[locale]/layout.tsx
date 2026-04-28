@@ -18,9 +18,33 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const t = await getTranslations({ locale, namespace: "metadata" });
 
+  const ogImage = "/brand/soundprint-logo.png";
+
   return {
     title: t("title"),
     description: t("description"),
+    icons: {
+      icon: [{ url: ogImage, type: "image/png" }],
+      apple: ogImage,
+    },
+    openGraph: {
+      title: t("title"),
+      description: t("description"),
+      images: [
+        {
+          url: ogImage,
+          width: 512,
+          height: 512,
+          alt: "Soundprint",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary",
+      title: t("title"),
+      description: t("description"),
+      images: [ogImage],
+    },
   };
 }
 

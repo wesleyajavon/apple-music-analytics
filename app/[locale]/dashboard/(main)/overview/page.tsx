@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, Suspense, useEffect, useState } from "react";
+import { useCallback, useMemo, Suspense, useEffect, useState, type ReactNode } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
@@ -32,6 +32,7 @@ import { OverviewSkeleton } from "@/lib/components/skeleton-loaders";
 import { OverviewStatsSection } from "@/lib/components/overview-stats-section";
 import { formatOverviewDateRangeLabel } from "@/lib/utils/overview-date-range-label";
 import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
+import { BarChart3 } from "lucide-react";
 
 /**
  * Calcule la période précédente basée sur la période actuelle
@@ -92,11 +93,141 @@ function calculateChange(current: number, previous: number): {
   };
 }
 
+const OVERVIEW_RAIL_CLASS = "bg-gradient-to-r from-violet-400 via-indigo-500 to-cyan-400";
+const OVERVIEW_HERO_SHELL_CLASS =
+  "relative overflow-hidden rounded-3xl border border-violet-300/25 bg-[radial-gradient(circle_at_top_left,_rgba(139,92,246,0.28),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(6,182,212,0.2),_transparent_30%),linear-gradient(135deg,_#020617_0%,_#0f172a_48%,_#2e1065_100%)] px-6 py-8 shadow-2xl shadow-violet-950/40 sm:px-8 sm:py-10";
+
+function OverviewHeroFrame({
+  title,
+  description,
+  badgeLabel,
+  hasComparison,
+  stats,
+}: {
+  title: string;
+  description: string;
+  badgeLabel: string;
+  hasComparison: boolean;
+  stats: ReactNode;
+}) {
+  const t = useTranslations("overview");
+  return (
+    <div className={OVERVIEW_HERO_SHELL_CLASS}>
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(139,92,246,0.1)_1px,_transparent_1px),linear-gradient(90deg,_rgba(34,211,238,0.08)_1px,_transparent_1px)] bg-[size:32px_32px] opacity-30" />
+      <div className="absolute -right-20 -top-24 h-56 w-56 rounded-full bg-violet-400/18 blur-3xl" />
+      <div className="absolute -bottom-24 left-10 h-48 w-48 rounded-full bg-cyan-400/16 blur-3xl" />
+      <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${OVERVIEW_RAIL_CLASS} opacity-90`} />
+      <div className="relative max-w-3xl">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-200/85">{t("heroEyebrow")}</p>
+        <h1 className="mt-3 flex items-center gap-3 text-3xl font-bold tracking-tight text-white sm:text-4xl">
+          <BarChart3 className="h-9 w-9 shrink-0 text-violet-200/90 sm:h-10 sm:w-10" strokeWidth={1.75} aria-hidden />
+          <span>{title}</span>
+        </h1>
+        <div
+          className={`mt-4 h-1.5 w-24 rounded-full ${OVERVIEW_RAIL_CLASS} opacity-95 shadow-[0_0_24px_rgba(139,92,246,0.35)]`}
+          aria-hidden
+        />
+        <p className="mt-5 text-base leading-relaxed text-violet-100/90 sm:text-lg">{description}</p>
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <span className="inline-flex items-center rounded-full border border-violet-200/30 bg-white/10 px-3 py-1 text-sm font-medium text-violet-100">
+            {badgeLabel}
+          </span>
+          {hasComparison ? (
+            <span className="inline-flex items-center rounded-full border border-emerald-300/30 bg-emerald-400/15 px-3 py-1 text-xs font-medium text-emerald-100">
+              {t("vsPreviousPeriod")}
+            </span>
+          ) : null}
+        </div>
+        {stats}
+      </div>
+    </div>
+  );
+}
+
+function OverviewHeroStats({
+  totalListens,
+  uniqueArtists,
+  uniqueTracks,
+  locale: statsLocale,
+}: {
+  totalListens: number;
+  uniqueArtists: number;
+  uniqueTracks: number;
+  locale: string;
+}) {
+  const t = useTranslations("overview");
+  return (
+    <div className="mt-6 flex flex-wrap gap-4 sm:gap-8">
+      <div className="rounded-xl border border-violet-200/15 bg-slate-950/35 px-4 py-3 shadow-lg shadow-violet-950/20 backdrop-blur-sm">
+        <p className="text-xs font-medium uppercase tracking-wider text-violet-100/80">{t("stats.totalListens")}</p>
+        <p className="text-2xl font-bold text-white">{totalListens.toLocaleString(statsLocale)}</p>
+      </div>
+      <div className="rounded-xl border border-indigo-200/15 bg-slate-950/35 px-4 py-3 shadow-lg shadow-indigo-950/20 backdrop-blur-sm">
+        <p className="text-xs font-medium uppercase tracking-wider text-indigo-100/80">{t("stats.uniqueArtists")}</p>
+        <p className="text-2xl font-bold text-white">{uniqueArtists.toLocaleString(statsLocale)}</p>
+      </div>
+      <div className="rounded-xl border border-cyan-200/15 bg-slate-950/35 px-4 py-3 shadow-lg shadow-cyan-950/20 backdrop-blur-sm">
+        <p className="text-xs font-medium uppercase tracking-wider text-cyan-100/80">{t("stats.uniqueTracks")}</p>
+        <p className="text-2xl font-bold text-white">{uniqueTracks.toLocaleString(statsLocale)}</p>
+      </div>
+    </div>
+  );
+}
+
+function OverviewHeroStatsSkeleton() {
+  return (
+    <div className="mt-6 flex flex-wrap gap-4 sm:gap-8">
+      {[0, 1, 2].map((i) => (
+        <div
+          key={i}
+          className="min-w-[140px] flex-1 animate-pulse rounded-xl border border-white/10 bg-slate-950/35 px-4 py-3 shadow-lg backdrop-blur-sm sm:flex-initial"
+        >
+          <div className="mb-2 h-3 w-24 rounded bg-white/15" />
+          <div className="h-8 w-20 rounded bg-white/20" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function OverviewContent() {
   const searchParams = useSearchParams();
   const t = useTranslations("overview");
   const locale = useLocale();
   const emptyStatePresets = useEmptyStatePresets();
+  const { startDate: rangeStart, endDate: rangeEnd, isAll } = useListenDateRange();
+  const dateRangeLabel = formatOverviewDateRangeLabel(rangeStart, rangeEnd, locale);
+  const badgeLabel = dateRangeLabel || t("allData");
+  const hasComparison = !isAll && !!rangeStart && !!rangeEnd;
+
+  const [firstName, setFirstName] = useState<string | null>(null);
+  useEffect(() => {
+    let mounted = true;
+
+    function extractFirstName(rawName?: string | null) {
+      if (!rawName) return null;
+      const cleaned = rawName.trim();
+      if (!cleaned) return null;
+      return cleaned.split(/\s+/)[0] ?? null;
+    }
+
+    async function hydrateUserNameFromDb() {
+      const response = await fetch("/api/user/me", { method: "GET" });
+      if (!response.ok) return;
+      const payload = (await response.json()) as { user?: { name?: string | null } | null };
+      if (!mounted) return;
+      setFirstName(extractFirstName(payload.user?.name ?? null));
+    }
+
+    hydrateUserNameFromDb();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const overviewTitle = firstName ? t("titlePersonal", { name: firstName }) : t("title");
+
   const startDate = searchParams.get("startDate") || undefined;
   const endDate = searchParams.get("endDate") || undefined;
   const userId = searchParams.get("userId") ?? undefined;
@@ -233,34 +364,76 @@ function OverviewContent() {
   );
 
   if (isLoading) {
-    return <OverviewSkeleton />;
+    return (
+      <div className="space-y-8">
+        <OverviewHeroFrame
+          title={overviewTitle}
+          description={t("subtitle")}
+          badgeLabel={badgeLabel}
+          hasComparison={hasComparison}
+          stats={<OverviewHeroStatsSkeleton />}
+        />
+        <OverviewSkeleton />
+      </div>
+    );
   }
 
   if (error) {
     return (
-      <ErrorState
-        error={error}
-        message={t("errorLoading")}
-        onRetry={handleRetry}
-      />
+      <div className="space-y-8">
+        <OverviewHeroFrame
+          title={overviewTitle}
+          description={t("errorLoading")}
+          badgeLabel={badgeLabel}
+          hasComparison={hasComparison}
+          stats={null}
+        />
+        <ErrorState
+          error={error}
+          message={t("errorLoading")}
+          onRetry={handleRetry}
+        />
+      </div>
     );
   }
 
   if (!data || data.totalListens === 0) {
-    return <EmptyState {...emptyStatePresets.importData} />;
+    return (
+      <div className="space-y-8">
+        <OverviewHeroFrame
+          title={overviewTitle}
+          description={t("subtitle")}
+          badgeLabel={badgeLabel}
+          hasComparison={hasComparison}
+          stats={null}
+        />
+        <EmptyState {...emptyStatePresets.importData} />
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      <OverviewHeroFrame
+        title={overviewTitle}
+        description={t("subtitle")}
+        badgeLabel={badgeLabel}
+        hasComparison={hasComparison}
+        stats={
+          <OverviewHeroStats
+            totalListens={data.totalListens}
+            uniqueArtists={data.uniqueArtists}
+            uniqueTracks={data.uniqueTracks}
+            locale={locale}
+          />
+        }
+      />
+      <div className="space-y-6">
       {/* Bento Grid - layout asymetrique type Apple/Linear */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
-        {/* Profil goût + AI Insights — première ligne */}
-        <div className="sm:col-span-2 lg:col-span-2 min-h-[280px] flex w-full min-w-0">
+        {/* Profil goût IA — carte d'entrée de l'overview */}
+        <div className="sm:col-span-2 lg:col-span-4 min-h-[280px] flex w-full min-w-0">
           <TasteProfileSummaryWidget />
-        </div>
-
-        <div className="sm:col-span-2 lg:col-span-2 min-h-[280px] flex w-full min-w-0">
-          <AiInsightsSummaryWidget />
         </div>
 
         {/* Timeline pleine largeur */}
@@ -369,8 +542,16 @@ function OverviewContent() {
         {/* Bloc large (2×1) : Top genres */}
         {topGenres.length > 0 && (
           <div className="sm:col-span-2 lg:col-span-2">
-            <div className="overflow-hidden rounded-xl border border-card-border border-l-4 border-l-accent-indigo bg-card-surface shadow-card transition-shadow duration-300 hover:shadow-card-hover">
-              <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
+            <div className="relative overflow-hidden rounded-2xl border border-indigo-300/25 bg-card-surface shadow-2xl ring-1 ring-rose-400/10 transition-all duration-300 hover:border-rose-400/40 hover:shadow-[0_0_50px_-12px_rgba(244,114,182,0.26)] dark:border-indigo-300/20 dark:ring-rose-400/20">
+              <div
+                className="pointer-events-none absolute inset-0 opacity-75 dark:opacity-50"
+                style={{
+                  background:
+                    "radial-gradient(circle at top left, rgba(129, 140, 248, 0.16), transparent 34%), radial-gradient(circle at 85% 20%, rgba(244, 114, 182, 0.12), transparent 28%), radial-gradient(circle at 50% 100%, rgba(251, 191, 36, 0.1), transparent 34%)",
+                }}
+              />
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-indigo-400 via-rose-400 to-amber-300 opacity-80" />
+              <div className="relative border-b border-gray-100/80 dark:border-gray-700/50 px-6 py-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -383,7 +564,7 @@ function OverviewContent() {
                   <Link
                 href={genresHref}
                 className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium
-                  text-accent-violet hover:bg-accent-violet/10 dark:hover:bg-accent-violet/20
+                  text-rose-600 hover:bg-rose-400/10 dark:text-rose-300 dark:hover:bg-rose-400/15
                   transition-colors duration-200 shrink-0"
               >
                 {t("seeAll")}
@@ -393,7 +574,7 @@ function OverviewContent() {
               </Link>
                 </div>
               </div>
-              <div className="p-6">
+              <div className="relative p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Graphique en barres horizontal */}
                 <div className="h-64">
@@ -409,8 +590,9 @@ function OverviewContent() {
                     >
                       <defs>
                         <linearGradient id="genreBarGradient" x1="0" y1="0" x2="1" y2="0">
-                        <stop offset="0%" stopColor="#8b5cf6" />
-                        <stop offset="100%" stopColor="#6366f1" />
+                        <stop offset="0%" stopColor="#818cf8" />
+                        <stop offset="50%" stopColor="#f472b6" />
+                        <stop offset="100%" stopColor="#f59e0b" />
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
@@ -459,7 +641,7 @@ function OverviewContent() {
                   const rankStyle = index < 3 ? rankColors[index] : "text-gray-400 dark:text-gray-500";
                   const rankBgStyle = index < 3 ? rankBg[index] : "bg-gray-100 dark:bg-gray-800";
                   return (
-                    <div key={genre.genre} className="group">
+                    <div key={genre.genre} className="group rounded-xl border border-white/70 bg-white/60 p-3 shadow-sm backdrop-blur transition-colors hover:bg-white/80 dark:border-white/10 dark:bg-white/[0.04] dark:hover:bg-white/[0.07]">
                       <div className="flex items-center justify-between mb-1.5">
                         <div className="flex items-center gap-3 min-w-0">
                           <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold ${rankStyle} ${rankBgStyle}`}>
@@ -478,9 +660,9 @@ function OverviewContent() {
                           </span>
                         </div>
                       </div>
-                      <div className="ml-10 h-1.5 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-700/50">
+                      <div className="ml-10 h-1.5 overflow-hidden rounded-full bg-gray-100/90 dark:bg-white/10">
                         <div
-                          className="h-full rounded-full bg-gradient-to-r from-accent-violet to-accent-indigo transition-all duration-500 ease-out"
+                          className="h-full rounded-full bg-gradient-to-r from-indigo-400 via-rose-400 to-amber-300 transition-all duration-500 ease-out"
                           style={{ width: `${widthPercent}%` }}
                         />
                       </div>
@@ -497,8 +679,16 @@ function OverviewContent() {
         {/* Bloc large (2×1) : Top artistes — à côté du top genres */}
         {topArtistsForChart.length > 0 && (
           <div className="sm:col-span-2 lg:col-span-2">
-            <div className="overflow-hidden rounded-xl border border-card-border border-l-4 border-l-accent-violet bg-card-surface shadow-card transition-shadow duration-300 hover:shadow-card-hover">
-              <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
+            <div className="relative overflow-hidden rounded-2xl border border-cyan-300/25 bg-card-surface shadow-2xl ring-1 ring-violet-400/10 transition-all duration-300 hover:border-cyan-300/40 hover:shadow-[0_0_50px_-12px_rgba(6,182,212,0.28)] dark:border-cyan-300/20 dark:ring-violet-400/20">
+              <div
+                className="pointer-events-none absolute inset-0 opacity-75 dark:opacity-50"
+                style={{
+                  background:
+                    "radial-gradient(circle at top left, rgba(139, 92, 246, 0.16), transparent 34%), radial-gradient(circle at 85% 20%, rgba(6, 182, 212, 0.13), transparent 28%), radial-gradient(circle at 50% 100%, rgba(132, 204, 22, 0.1), transparent 34%)",
+                }}
+              />
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-violet-400 via-cyan-300 to-lime-300 opacity-80" />
+              <div className="relative border-b border-gray-100/80 dark:border-gray-700/50 px-6 py-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -511,7 +701,7 @@ function OverviewContent() {
                   <Link
                     href={`/dashboard/artists${artistsPageQuery}`}
                     className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium
-                  text-accent-violet hover:bg-accent-violet/10 dark:hover:bg-accent-violet/20
+                  text-cyan-700 hover:bg-cyan-400/10 dark:text-cyan-200 dark:hover:bg-cyan-400/15
                   transition-colors duration-200 shrink-0"
                   >
                     {t("seeAll")}
@@ -521,7 +711,7 @@ function OverviewContent() {
                   </Link>
                 </div>
               </div>
-              <div className="p-6">
+              <div className="relative p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="h-64 min-h-[256px]">
                     <ResponsiveContainer width="100%" height="100%">
@@ -537,8 +727,9 @@ function OverviewContent() {
                       >
                         <defs>
                           <linearGradient id="artistBarGradient" x1="0" y1="0" x2="1" y2="0">
-                            <stop offset="0%" stopColor="#a78bfa" />
-                            <stop offset="100%" stopColor="#8b5cf6" />
+                            <stop offset="0%" stopColor="#8b5cf6" />
+                            <stop offset="48%" stopColor="#06b6d4" />
+                            <stop offset="100%" stopColor="#84cc16" />
                           </linearGradient>
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
@@ -589,7 +780,7 @@ function OverviewContent() {
                       const rankStyle = index < 3 ? rankColors[index] : "text-gray-400 dark:text-gray-500";
                       const rankBgStyle = index < 3 ? rankBg[index] : "bg-gray-100 dark:bg-gray-800";
                       return (
-                        <div key={artist.artistId} className="group">
+                        <div key={artist.artistId} className="group rounded-xl border border-white/70 bg-white/60 p-3 shadow-sm backdrop-blur transition-colors hover:bg-white/80 dark:border-white/10 dark:bg-white/[0.04] dark:hover:bg-white/[0.07]">
                           <div className="flex items-center justify-between mb-1.5 gap-2">
                             <div className="flex items-center gap-3 min-w-0">
                               <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold ${rankStyle} ${rankBgStyle}`}>
@@ -608,9 +799,9 @@ function OverviewContent() {
                               </span>
                             </div>
                           </div>
-                          <div className="ml-10 h-1.5 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-700/50">
+                          <div className="ml-10 h-1.5 overflow-hidden rounded-full bg-gray-100/90 dark:bg-white/10">
                             <div
-                              className="h-full rounded-full bg-gradient-to-r from-accent-violet to-accent-indigo transition-all duration-500 ease-out"
+                              className="h-full rounded-full bg-gradient-to-r from-violet-400 via-cyan-300 to-lime-300 transition-all duration-500 ease-out"
                               style={{ width: `${widthPercent}%` }}
                             />
                           </div>
@@ -626,8 +817,16 @@ function OverviewContent() {
         {/* Bloc large (2×1) : Top titres */}
         {topTracksForChart.length > 0 && (
           <div className="sm:col-span-2 lg:col-span-2">
-            <div className="overflow-hidden rounded-xl border border-card-border border-l-4 border-l-accent-cyan bg-card-surface shadow-card transition-shadow duration-300 hover:shadow-card-hover">
-              <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
+            <div className="relative overflow-hidden rounded-2xl border border-cyan-300/25 bg-card-surface shadow-2xl ring-1 ring-emerald-400/10 transition-all duration-300 hover:border-emerald-300/40 hover:shadow-[0_0_50px_-12px_rgba(16,185,129,0.28)] dark:border-cyan-300/20 dark:ring-emerald-400/20">
+              <div
+                className="pointer-events-none absolute inset-0 opacity-75 dark:opacity-50"
+                style={{
+                  background:
+                    "radial-gradient(circle at top left, rgba(34, 211, 238, 0.16), transparent 34%), radial-gradient(circle at 85% 20%, rgba(45, 212, 191, 0.12), transparent 28%), radial-gradient(circle at 50% 100%, rgba(190, 242, 100, 0.1), transparent 34%)",
+                }}
+              />
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-cyan-300 via-emerald-400 to-lime-300 opacity-80" />
+              <div className="relative border-b border-gray-100/80 dark:border-gray-700/50 px-6 py-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -640,7 +839,7 @@ function OverviewContent() {
                   <Link
                     href={tracksHref}
                     className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium
-                  text-accent-violet hover:bg-accent-violet/10 dark:hover:bg-accent-violet/20
+                  text-cyan-700 hover:bg-cyan-400/10 dark:text-cyan-200 dark:hover:bg-cyan-400/15
                   transition-colors duration-200 shrink-0"
                   >
                     {t("seeAll")}
@@ -650,7 +849,7 @@ function OverviewContent() {
                   </Link>
                 </div>
               </div>
-              <div className="p-6">
+              <div className="relative p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="h-64 min-h-[256px]">
                     <ResponsiveContainer width="100%" height="100%">
@@ -667,7 +866,9 @@ function OverviewContent() {
                         <defs>
                           <linearGradient id="trackBarGradientOverview" x1="0" y1="0" x2="1" y2="0">
                             <stop offset="0%" stopColor="#22d3ee" />
-                            <stop offset="100%" stopColor="#06b6d4" />
+                            <stop offset="45%" stopColor="#2dd4bf" />
+                            <stop offset="78%" stopColor="#34d399" />
+                            <stop offset="100%" stopColor="#bef264" />
                           </linearGradient>
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
@@ -718,7 +919,7 @@ function OverviewContent() {
                       const rankStyle = index < 3 ? rankColors[index] : "text-gray-400 dark:text-gray-500";
                       const rankBgStyle = index < 3 ? rankBg[index] : "bg-gray-100 dark:bg-gray-800";
                       return (
-                        <div key={track.trackId} className="group">
+                        <div key={track.trackId} className="group rounded-xl border border-white/70 bg-white/60 p-3 shadow-sm backdrop-blur transition-colors hover:bg-white/80 dark:border-white/10 dark:bg-white/[0.04] dark:hover:bg-white/[0.07]">
                           <div className="flex items-center justify-between mb-1.5 gap-2">
                             <div className="flex items-center gap-3 min-w-0">
                               <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold ${rankStyle} ${rankBgStyle}`}>
@@ -742,9 +943,9 @@ function OverviewContent() {
                               </span>
                             </div>
                           </div>
-                          <div className="ml-10 h-1.5 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-700/50">
+                          <div className="ml-10 h-1.5 overflow-hidden rounded-full bg-gray-100/90 dark:bg-white/10">
                             <div
-                              className="h-full rounded-full bg-gradient-to-r from-accent-cyan to-accent-indigo transition-all duration-500 ease-out"
+                              className="h-full rounded-full bg-gradient-to-r from-cyan-300 via-emerald-400 to-lime-300 transition-all duration-500 ease-out"
                               style={{ width: `${widthPercent}%` }}
                             />
                           </div>
@@ -757,87 +958,50 @@ function OverviewContent() {
             </div>
           </div>
         )}
+
+        <div className="sm:col-span-2 lg:col-span-2 min-h-[280px] flex w-full min-w-0">
+          <AiInsightsSummaryWidget />
+        </div>
       </div>
 
       {/* Calendrier heatmap (aperçu — page complète : /dashboard/heatmap) */}
       <HeatmapCalendarOverviewWidget startDate={startDate} endDate={endDate} />
+      </div>
+    </div>
+  );
+}
+
+function OverviewPageFallback() {
+  const t = useTranslations("overview");
+  const locale = useLocale();
+  const { startDate, endDate, isAll } = useListenDateRange();
+  const dateRangeLabel = formatOverviewDateRangeLabel(startDate, endDate, locale);
+  const badgeLabel = dateRangeLabel || t("allData");
+  const hasComparison = !isAll && !!startDate && !!endDate;
+
+  return (
+    <div className="space-y-8">
+      <OverviewHeroFrame
+        title={t("title")}
+        description={t("subtitle")}
+        badgeLabel={badgeLabel}
+        hasComparison={hasComparison}
+        stats={<OverviewHeroStatsSkeleton />}
+      />
+      <OverviewSkeleton />
     </div>
   );
 }
 
 export default function OverviewPage() {
   const searchParams = useSearchParams();
-  const t = useTranslations("overview");
-  const locale = useLocale();
-  const { startDate, endDate, isAll } = useListenDateRange();
-  const [firstName, setFirstName] = useState<string | null>(null);
   const startDateParam = searchParams.get("startDate") ?? "";
   const endDateParam = searchParams.get("endDate") ?? "";
-  // Key force le remontage complet quand le filtre change (évite données "All" affichées avec filtre 7j)
   const filterKey = `${startDateParam}-${endDateParam}`;
-
-  const dateRangeLabel = formatOverviewDateRangeLabel(startDate, endDate, locale);
-  const hasComparison = !isAll && !!startDate && !!endDate;
-  const overviewTitle = firstName
-    ? t("titlePersonal", { name: firstName })
-    : t("title");
-
-  useEffect(() => {
-    let mounted = true;
-
-    function extractFirstName(rawName?: string | null) {
-      if (!rawName) return null;
-      const cleaned = rawName.trim();
-      if (!cleaned) return null;
-      return cleaned.split(/\s+/)[0] ?? null;
-    }
-
-    function resolveFirstName(name: string | null | undefined) {
-      return extractFirstName(name ?? null);
-    }
-
-    async function hydrateUserNameFromDb() {
-      const response = await fetch("/api/user/me", { method: "GET" });
-      if (!response.ok) return;
-      const payload = (await response.json()) as { user?: { name?: string | null } | null };
-      if (!mounted) return;
-      setFirstName(resolveFirstName(payload.user?.name));
-    }
-
-    hydrateUserNameFromDb();
-
-    return () => {
-      mounted = false;
-    };
-  }, []);
 
   return (
     <div className="px-4 py-6 sm:px-0">
-      <header className="mb-8">
-        <div className="flex flex-wrap items-center gap-3 mb-6">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-accent-violet/10 to-accent-indigo/10 dark:from-accent-violet/20 dark:to-accent-indigo/20 border border-accent-violet/20">
-            <svg className="w-5 h-5 text-accent-violet" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-            </svg>
-            <span className="text-sm font-medium text-accent-violet dark:text-accent-violet">
-              {dateRangeLabel ? dateRangeLabel : t("allData")}
-            </span>
-          </div>
-          {hasComparison && (
-            <span className="px-2.5 py-1 rounded-full bg-accent-emerald/10 text-accent-emerald text-xs font-medium">
-              {t("vsPreviousPeriod")}
-            </span>
-          )}
-        </div>
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
-          {overviewTitle}
-        </h1>
-        <p className="mt-2 text-base text-gray-500 dark:text-gray-400 max-w-2xl">
-          {t("subtitle")}
-        </p>
-      </header>
-
-      <Suspense fallback={<OverviewSkeleton />}>
+      <Suspense fallback={<OverviewPageFallback />}>
         <OverviewContent key={filterKey} />
       </Suspense>
     </div>

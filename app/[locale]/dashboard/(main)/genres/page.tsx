@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, useMemo, useCallback, memo, useEffect } from "react";
+import { Suspense, useState, useMemo, useCallback, memo, useEffect, type ReactNode } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
@@ -22,22 +22,135 @@ import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
 import { GenresSkeleton } from "@/lib/components/skeleton-loaders";
+import { Tags } from "lucide-react";
 
 type ChartType = "pie" | "bar";
 
-// Couleurs pour les genres – palette accent du projet
+// Couleurs pour les genres – vibe spectrum / synthwave analytics.
 const COLORS = [
-  "#8b5cf6", // accent-violet
-  "#6366f1", // accent-indigo
-  "#ec4899", // accent-rose
-  "#06b6d4", // accent-cyan
-  "#10b981", // accent-emerald
+  "#818cf8", // indigo
+  "#f472b6", // pink
+  "#22d3ee", // cyan
   "#f59e0b", // amber
-  "#ef4444", // red
+  "#a78bfa", // violet
+  "#fb7185", // rose
+  "#2dd4bf", // teal
+  "#c084fc", // purple
+  "#38bdf8", // sky
   "#f97316", // orange
-  "#14b8a6", // teal
-  "#a855f7", // purple
 ];
+const GENRE_RAIL_CLASS = "bg-gradient-to-r from-indigo-400 via-rose-400 to-amber-300";
+const GENRE_ACTIVE_TAB_CLASS =
+  "bg-gradient-to-r from-indigo-500 via-rose-500 to-amber-400 text-white shadow-sm shadow-rose-950/20";
+
+const GENRES_HERO_SHELL_CLASS =
+  "relative overflow-hidden rounded-3xl border border-indigo-300/20 bg-[radial-gradient(circle_at_top_left,_rgba(129,140,248,0.32),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(244,114,182,0.24),_transparent_30%),linear-gradient(135deg,_#020617_0%,_#111827_48%,_#312e81_100%)] px-6 py-8 shadow-2xl shadow-indigo-950/40 sm:px-8 sm:py-10";
+
+const TRENDS_CTA_CLASS =
+  "inline-flex min-h-[44px] w-fit shrink-0 items-center justify-center rounded-full border border-indigo-100/30 bg-white/95 px-5 py-2.5 text-sm font-semibold text-indigo-950 shadow-lg shadow-indigo-950/20 transition hover:-translate-y-0.5 hover:bg-indigo-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80";
+
+function GenresHeroFrame({
+  trendsHref,
+  stats,
+  dateSummary,
+  genreExtras,
+}: {
+  trendsHref: string;
+  stats: ReactNode;
+  dateSummary: string;
+  genreExtras?: string;
+}) {
+  const t = useTranslations("genres");
+  const meta = [dateSummary, genreExtras].filter(Boolean).join(" · ");
+  return (
+    <div className={GENRES_HERO_SHELL_CLASS}>
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(129,140,248,0.11)_1px,_transparent_1px),linear-gradient(90deg,_rgba(251,191,36,0.08)_1px,_transparent_1px)] bg-[size:32px_32px] opacity-30" />
+      <div className="absolute -right-20 -top-24 h-56 w-56 rounded-full bg-rose-400/20 blur-3xl" />
+      <div className="absolute -bottom-24 left-10 h-48 w-48 rounded-full bg-cyan-400/16 blur-3xl" />
+      <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${GENRE_RAIL_CLASS} opacity-90`} />
+      <div className="relative flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+        <div className="max-w-3xl">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-indigo-200/85">{t("heroEyebrow")}</p>
+          <h1 className="mt-3 flex items-center gap-3 text-3xl font-bold tracking-tight text-white sm:text-4xl">
+            <Tags className="h-9 w-9 shrink-0 text-indigo-200/90 sm:h-10 sm:w-10" strokeWidth={1.75} aria-hidden />
+            <span>{t("title")}</span>
+          </h1>
+          <div
+            className={`mt-4 h-1.5 w-24 rounded-full ${GENRE_RAIL_CLASS} opacity-95 shadow-[0_0_24px_rgba(129,140,248,0.35)]`}
+            aria-hidden
+          />
+          <p className="mt-5 text-base leading-relaxed text-indigo-100/90 sm:text-lg">{t("subtitle")}</p>
+          {meta ? (
+            <p className="mt-2 text-sm font-medium tracking-wide text-amber-100/90" aria-live="polite">
+              {meta}
+            </p>
+          ) : null}
+          {stats}
+        </div>
+        <Link href={trendsHref} className={TRENDS_CTA_CLASS}>
+          {t("viewTrends")}
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+function GenresHeroStats({
+  genreCount,
+  totalListens,
+  topGenreName,
+  locale,
+}: {
+  genreCount: number;
+  totalListens: number;
+  topGenreName: string;
+  locale: string;
+}) {
+  const t = useTranslations("genres");
+  return (
+    <div className="mt-6 flex flex-wrap gap-4 sm:gap-8">
+      <div className="rounded-xl border border-indigo-200/15 bg-slate-950/35 px-4 py-3 shadow-lg shadow-indigo-950/20 backdrop-blur-sm">
+        <p className="text-xs font-medium uppercase tracking-wider text-indigo-100/80">{t("statGenres")}</p>
+        <p className="text-2xl font-bold text-white">{genreCount.toLocaleString(locale)}</p>
+      </div>
+      <div className="rounded-xl border border-rose-200/15 bg-slate-950/35 px-4 py-3 shadow-lg shadow-rose-950/20 backdrop-blur-sm">
+        <p className="text-xs font-medium uppercase tracking-wider text-rose-100/80">{t("totalListens")}</p>
+        <p className="text-2xl font-bold text-white">{totalListens.toLocaleString(locale)}</p>
+      </div>
+      <div className="rounded-xl border border-amber-200/15 bg-slate-950/35 px-4 py-3 shadow-lg shadow-amber-950/20 backdrop-blur-sm">
+        <p className="text-xs font-medium uppercase tracking-wider text-amber-100/80">{t("statTopGenre")}</p>
+        <p className="text-2xl font-bold text-white truncate max-w-[200px]">{topGenreName}</p>
+      </div>
+    </div>
+  );
+}
+
+function GenresHeroStatsSkeleton() {
+  return (
+    <div className="mt-6 flex flex-wrap gap-4 sm:gap-8">
+      {[0, 1, 2].map((i) => (
+        <div
+          key={i}
+          className="min-w-[140px] flex-1 animate-pulse rounded-xl border border-white/10 bg-slate-950/35 px-4 py-3 shadow-lg backdrop-blur-sm sm:flex-initial"
+        >
+          <div className="mb-2 h-3 w-20 rounded bg-white/15" />
+          <div className="h-8 w-24 rounded bg-white/20" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function useGenresTrendsHref() {
+  const searchParams = useSearchParams();
+  return useMemo(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("genresPage");
+    params.delete("genresPageSize");
+    const qs = params.toString();
+    return qs ? `/dashboard/genres/trends?${qs}` : "/dashboard/genres/trends";
+  }, [searchParams]);
+}
 
 /** Tranches max. sous le camembert / barres (le reste → « Autres »). 8 évite une légende illisible. */
 const MAX_CHART_SLICES = 12;
@@ -91,15 +204,6 @@ function ChevronIcon({ direction }: { direction: "up" | "down" }) {
       ) : (
         <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
       )}
-    </svg>
-  );
-}
-
-/** Icône genre musical */
-function GenreIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="m9 9 10.5-3m0 6.553v3.75a2.25 2.25 0 0 1-1.632 2.163l-1.32.377a1.803 1.803 0 1 1-.99-3.467l2.31-.66a2.25 2.25 0 0 0 1.632-2.163zm0 0V2.25L9 5.25v10.303m0 0v3.75a2.25 2.25 0 0 1-1.632 2.163l-1.32.377a1.803 1.803 0 0 1-.99-3.467l2.31-.66A2.25 2.25 0 0 0 9 15.553z" />
     </svg>
   );
 }
@@ -297,6 +401,7 @@ function GenresContent() {
   const detailTotalPages = Math.max(1, Math.ceil(detailTotal / detailPageSize));
   const detailStart = detailTotal === 0 ? 0 : detailOffset + 1;
   const detailEnd = Math.min(detailOffset + detailRows.length, detailTotal);
+  const trendsHref = useGenresTrendsHref();
 
   useEffect(() => {
     if (detailPage > detailTotalPages) {
@@ -304,15 +409,15 @@ function GenresContent() {
     }
   }, [detailPage, detailPageSize, detailTotalPages, updateDetailPaginationParams]);
   const gradientByRank = [
-    "from-violet-500 via-purple-500 to-fuchsia-500",
-    "from-pink-500 via-rose-500 to-red-400",
-    "from-indigo-500 via-violet-500 to-purple-500",
+    "from-indigo-400 via-cyan-400 to-sky-400",
+    "from-fuchsia-500 via-rose-500 to-orange-400",
+    "from-violet-500 via-indigo-500 to-amber-400",
   ];
   /** Fallback visuel par colonne si pas d’image ou moins de 3 artistes. */
   const slotFallbacks = [
-    "from-violet-800/95 via-purple-900/90 to-black/80",
+    "from-indigo-800/95 via-sky-900/90 to-black/80",
     "from-rose-800/95 via-fuchsia-900/90 to-black/80",
-    "from-indigo-800/95 via-violet-900/90 to-black/80",
+    "from-amber-800/95 via-indigo-900/90 to-black/80",
   ];
 
   const topArtistsByGenre = useMemo(() => {
@@ -320,80 +425,54 @@ function GenresContent() {
     return new Map(entries.map((e) => [e.genre, e.artists]));
   }, [data?.topArtistsForTopGenres]);
 
+  const dateSummary = startDate && endDate ? formatDateRange(startDate, endDate) : t("allData");
+  const genreExtras =
+    !isLoadingOrFetching && chartData.length > 0
+      ? `${chartData.length} ${t("statGenres")}`
+      : undefined;
+  const heroStats = isLoadingOrFetching ? (
+    <GenresHeroStatsSkeleton />
+  ) : error || !data || data.data.length === 0 ? null : (
+    <GenresHeroStats
+      genreCount={chartData.length}
+      totalListens={data.totalListens}
+      topGenreName={chartData[0]?.name ?? "—"}
+      locale={locale}
+    />
+  );
+
   return (
-    <>
-      <div className="mt-4 sm:mt-6 space-y-8">
-        <header className="mb-6 sm:mb-8">
-          <div className="flex flex-wrap items-center gap-3 mb-6">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-accent-violet/10 to-accent-indigo/10 dark:from-accent-violet/20 dark:to-accent-indigo/20 border border-accent-violet/20">
-              <GenreIcon className="w-5 h-5 text-accent-violet" />
-              <span className="text-sm font-medium text-accent-violet dark:text-accent-violet">
-                {startDate && endDate ? formatDateRange(startDate, endDate) : t("allData")}
-              </span>
-            </div>
-            {chartData.length > 0 && (
-              <span className="text-sm text-gray-500 dark:text-gray-400">
-                {chartData.length} {t("statGenres")}
-              </span>
-            )}
-          </div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl lg:text-4xl">
-            {t("title")}
-          </h1>
-          <p className="mt-1.5 sm:mt-2 text-sm sm:text-base text-gray-500 dark:text-gray-400 max-w-2xl">
-            {t("subtitle")}
-          </p>
-          <div className="mt-4 max-w-3xl rounded-xl border border-amber-200 bg-amber-50/80 px-4 py-3 text-sm text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-100">
-            <p className="font-semibold">{t("apiMappingNoticeTitle")}</p>
-            <p className="mt-1">
-              {t("apiMappingNoticeBody")}{" "}
-              <Link
-                href="/dashboard/genres/palette"
-                className="font-semibold underline decoration-amber-500/60 underline-offset-2 hover:decoration-amber-600 dark:decoration-amber-300/70"
-              >
-                {t("apiMappingNoticeLink")}
-              </Link>
-            </p>
-          </div>
-        </header>
-
-        {isLoadingOrFetching ? (
-          <GenresSkeleton />
-        ) : error ? (
-          <ErrorState
-            error={error}
-            message={t("errorLoading")}
-            onRetry={() => refetch()}
-          />
-        ) : !data || data.data.length === 0 ? (
-          <EmptyState {...emptyStatePresets.changeDates(pathname)} />
-        ) : (
-          <div className="space-y-8">
-            {/* Hero bandeau – style Artists */}
-            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-600 px-6 py-8 shadow-2xl sm:px-8 sm:py-10">
-              <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
-              <div className="relative">
-                <h2 className="text-2xl font-bold text-white sm:text-3xl">{t("heroTitle")}</h2>
-                <p className="mt-1 text-white/90">{t("heroSubtitle")}</p>
-                <div className="mt-6 flex flex-wrap gap-4 sm:gap-8">
-                  <div className="rounded-xl bg-white/15 px-4 py-3 backdrop-blur-sm">
-                    <p className="text-xs font-medium uppercase tracking-wider text-white/80">{t("statGenres")}</p>
-                    <p className="text-2xl font-bold text-white">{chartData.length.toLocaleString(locale)}</p>
-                  </div>
-                  <div className="rounded-xl bg-white/15 px-4 py-3 backdrop-blur-sm">
-                    <p className="text-xs font-medium uppercase tracking-wider text-white/80">{t("totalListens")}</p>
-                    <p className="text-2xl font-bold text-white">{data.totalListens.toLocaleString(locale)}</p>
-                  </div>
-                  <div className="rounded-xl bg-white/15 px-4 py-3 backdrop-blur-sm">
-                    <p className="text-xs font-medium uppercase tracking-wider text-white/80">{t("statTopGenre")}</p>
-                    <p className="text-2xl font-bold text-white truncate max-w-[180px]">
-                      {chartData[0]?.name ?? "—"}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
+    <div className="space-y-8">
+      <GenresHeroFrame
+        trendsHref={trendsHref}
+        stats={heroStats}
+        dateSummary={dateSummary}
+        genreExtras={genreExtras}
+      />
+      <div className="max-w-3xl rounded-xl border border-amber-200 bg-amber-50/80 px-4 py-3 text-sm text-amber-900 shadow-sm shadow-amber-950/5 dark:border-amber-400/25 dark:bg-amber-950/30 dark:text-amber-100">
+        <p className="font-semibold">{t("apiMappingNoticeTitle")}</p>
+        <p className="mt-1">
+          {t("apiMappingNoticeBody")}{" "}
+          <Link
+            href="/dashboard/genres/palette"
+            className="font-semibold underline decoration-amber-500/60 underline-offset-2 hover:decoration-amber-600 dark:decoration-amber-300/70"
+          >
+            {t("apiMappingNoticeLink")}
+          </Link>
+        </p>
+      </div>
+      {isLoadingOrFetching ? (
+        <GenresSkeleton />
+      ) : error ? (
+        <ErrorState
+          error={error}
+          message={t("errorLoading")}
+          onRetry={() => refetch()}
+        />
+      ) : !data || data.data.length === 0 ? (
+        <EmptyState {...emptyStatePresets.changeDates(pathname)} />
+      ) : (
+        <div className="space-y-8">
             {/* Top 3 genres spotlight – style Replay */}
             {top3Genres.length > 0 && (
               <section>
@@ -469,15 +548,15 @@ function GenresContent() {
 
             {/* Chart type selector */}
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 shrink-0">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted shrink-0">
                 {t("chart")}
               </span>
-              <div className="flex items-center bg-gray-50 dark:bg-gray-800/80 p-1.5 rounded-xl border border-gray-100 dark:border-gray-700/50 w-fit">
+              <div className="flex w-fit items-center rounded-xl border border-indigo-300/20 bg-surface p-1.5 shadow-sm">
                 <button
                   onClick={() => setChartType("pie")}
                   className={`
-                    px-3 py-2 sm:px-4 text-xs sm:text-sm font-semibold rounded-lg transition-all duration-200
-                    ${chartType === "pie" ? "bg-accent-violet text-white shadow-sm" : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"}
+                    relative z-10 px-3 py-2 sm:px-4 text-xs sm:text-sm font-semibold rounded-lg transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
+                    ${chartType === "pie" ? GENRE_ACTIVE_TAB_CLASS : "text-muted hover:text-foreground"}
                   `}
                 >
                   {t("pie")}
@@ -485,8 +564,8 @@ function GenresContent() {
                 <button
                   onClick={() => setChartType("bar")}
                   className={`
-                    px-3 py-2 sm:px-4 text-xs sm:text-sm font-semibold rounded-lg transition-all duration-200
-                    ${chartType === "bar" ? "bg-accent-violet text-white shadow-sm" : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"}
+                    relative z-10 px-3 py-2 sm:px-4 text-xs sm:text-sm font-semibold rounded-lg transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
+                    ${chartType === "bar" ? GENRE_ACTIVE_TAB_CLASS : "text-muted hover:text-foreground"}
                   `}
                 >
                   {t("bar")}
@@ -495,34 +574,45 @@ function GenresContent() {
             </div>
 
             {/* Chart */}
-            <div className="overflow-hidden rounded-xl border-l-4 border-l-accent-violet border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card hover:shadow-card-hover transition-shadow duration-300">
-              <div className="border-b border-gray-100 dark:border-gray-700/50 px-4 py-3 sm:px-6 sm:py-4">
+            <div className="relative overflow-hidden rounded-2xl border border-indigo-300/20 border-l-4 border-l-rose-400 bg-[radial-gradient(circle_at_top_left,_rgba(129,140,248,0.1),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(244,114,182,0.08),_transparent_30%),rgb(var(--card-rgb)/0.92)] shadow-card transition-shadow duration-300 hover:shadow-card-hover dark:border-indigo-300/15 dark:bg-[radial-gradient(circle_at_top_left,_rgba(129,140,248,0.16),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(244,114,182,0.12),_transparent_30%),rgb(var(--card-rgb)/0.9)]">
+              <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${GENRE_RAIL_CLASS} opacity-80`} />
+              <div className="border-b border-indigo-200/20 px-4 py-3 dark:border-indigo-300/10 sm:px-6 sm:py-4">
                 <h2 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
                   {t("distributionTitle")}
                 </h2>
-                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                <p className="mt-0.5 text-xs text-indigo-700/80 dark:text-indigo-100/70 sm:text-sm">
                   {t("totalListens")}: {data.totalListens.toLocaleString(locale)} {t("listens")}
                 </p>
               </div>
-              <div className="p-4 sm:p-6 overflow-x-auto">
+              <div className="relative overflow-x-auto p-4 sm:p-6">
+              <div className="pointer-events-none absolute left-1/2 top-16 h-64 w-64 -translate-x-1/2 rounded-full bg-rose-400/10 blur-3xl dark:bg-rose-400/15" />
               {chartType === "pie" ? (
-                <div className="h-[280px] sm:h-[380px] lg:h-[500px] min-w-[260px] mb-10">
+                <div className="relative mb-10 min-w-[260px] rounded-2xl border border-indigo-200/20 bg-white/50 p-3 shadow-inner dark:border-indigo-300/10 dark:bg-slate-950/20 h-[280px] sm:h-[380px] lg:h-[500px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
+                    <defs>
+                      <filter id="genrePieGlow" x="-30%" y="-30%" width="160%" height="160%">
+                        <feDropShadow dx="0" dy="8" stdDeviation="10" floodColor="#4f46e5" floodOpacity="0.18" />
+                      </filter>
+                    </defs>
                     <Pie
                       data={chartDisplayData}
                       cx="50%"
                       cy="50%"
                       labelLine={false}
                       label={renderCustomLabel}
+                      innerRadius="38%"
                       outerRadius="75%"
-                      fill="#8884d8"
+                      paddingAngle={2}
                       dataKey="value"
+                      filter="url(#genrePieGlow)"
                     >
                       {chartDisplayData.map((entry, index) => (
                         <Cell
                           key={`cell-${entry.name}-${index}`}
                           fill={COLORS[index % COLORS.length]}
+                          stroke="rgb(var(--card-rgb) / 0.95)"
+                          strokeWidth={2}
                         />
                       ))}
                     </Pie>
@@ -532,15 +622,26 @@ function GenresContent() {
                 <PieChartLegend data={chartDisplayData} colors={COLORS} locale={locale} />
                 </div>
               ) : (
-                <div className="h-[320px] sm:h-[400px] lg:h-[500px] min-w-[280px]">
+                <div className="relative min-w-[280px] rounded-2xl border border-indigo-200/20 bg-white/50 p-3 shadow-inner dark:border-indigo-300/10 dark:bg-slate-950/20 h-[320px] sm:h-[400px] lg:h-[500px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
                     data={chartDisplayData}
-                    margin={{ top: 12, right: 12, left: 0, bottom: 80 }}
+                    margin={{ top: 18, right: 18, left: 0, bottom: 80 }}
                   >
+                    <defs>
+                      <linearGradient id="genreBarGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#818cf8" />
+                        <stop offset="48%" stopColor="#f472b6" />
+                        <stop offset="100%" stopColor="#f59e0b" />
+                      </linearGradient>
+                      <filter id="genreBarGlow" x="-20%" y="-20%" width="140%" height="150%">
+                        <feDropShadow dx="0" dy="8" stdDeviation="6" floodColor="#e879f9" floodOpacity="0.22" />
+                      </filter>
+                    </defs>
                     <CartesianGrid
                       strokeDasharray="3 3"
-                      stroke="#e2e8f0"
+                      stroke="#c7d2fe"
+                      strokeOpacity={0.32}
                       vertical={false}
                     />
                     <XAxis
@@ -549,28 +650,23 @@ function GenresContent() {
                       textAnchor="end"
                       height={80}
                       tick={{ fill: "currentColor", fontSize: 10 }}
-                      stroke="#6b7280"
+                      stroke="#6366f1"
                       className="dark:stroke-gray-400"
                       interval={0}
                     />
                     <YAxis
                       tick={{ fill: "currentColor", fontSize: 12 }}
-                      stroke="#6b7280"
+                      stroke="#6366f1"
                       className="dark:stroke-gray-400"
                     />
-                    <defs>
-                      <linearGradient id="genreBarGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#8b5cf6" />
-                        <stop offset="100%" stopColor="#6366f1" />
-                      </linearGradient>
-                    </defs>
                     <Tooltip content={CustomTooltip} />
-                    <Legend />
+                    <Legend wrapperStyle={{ color: "rgb(var(--muted-rgb))", fontSize: 12 }} />
                     <Bar
                       dataKey="count"
                       name={t("Listens")}
                       fill="url(#genreBarGradient)"
-                      radius={[6, 6, 0, 0]}
+                      filter="url(#genreBarGlow)"
+                      radius={[8, 8, 0, 0]}
                     />
                   </BarChart>
                 </ResponsiveContainer>
@@ -578,7 +674,7 @@ function GenresContent() {
               )}
 
               {/* Liste des genres avec barres de progression - design moderne */}
-              <div className="mt-12 pt-8 sm:mt-14 sm:pt-10 border-t border-gray-100 dark:border-gray-700/50">
+              <div className="mt-12 border-t border-indigo-200/20 pt-8 dark:border-indigo-300/10 sm:mt-14 sm:pt-10">
                 <h3 className="text-xs sm:text-sm font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4">
                   {t("detailByGenre")}
                 </h3>
@@ -616,9 +712,9 @@ function GenresContent() {
                             </span>
                           </div>
                         </div>
-                        <div className="ml-8 sm:ml-10 h-1.5 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-700/50">
+                        <div className="ml-8 h-1.5 overflow-hidden rounded-full bg-indigo-100/70 dark:bg-indigo-950/45 sm:ml-10">
                           <div
-                            className="h-full rounded-full transition-all duration-500 ease-out"
+                            className="h-full rounded-full shadow-[0_0_18px_-6px_currentColor] transition-all duration-500 ease-out"
                             style={{
                               width: `${widthPercent}%`,
                               backgroundColor: COLORS[absoluteIndex % COLORS.length],
@@ -629,43 +725,43 @@ function GenresContent() {
                     );
                   })}
                 </div>
-                <div className="mt-4 flex flex-col gap-3 border-t border-gray-100 dark:border-gray-700/50 pt-4 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                <div className="mt-4 flex flex-col gap-3 border-t border-indigo-200/30 bg-indigo-50/25 pt-4 dark:border-indigo-400/15 dark:bg-indigo-950/15 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-sm text-indigo-900/75 dark:text-indigo-100/75">
                     {t("paginationSummary", {
                       start: detailStart,
                       end: detailEnd,
                       total: detailTotal,
                     })}
                   </p>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <button
                       type="button"
                       onClick={() => updateDetailPaginationParams(detailPage - 1, detailPageSize)}
                       disabled={detailPage === 1}
-                      className="inline-flex min-h-[36px] items-center justify-center rounded-md border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700/50"
+                      className="inline-flex min-h-[36px] items-center justify-center rounded-lg border border-indigo-200/70 bg-white/90 px-3 py-1.5 text-sm font-medium text-indigo-950 transition-colors hover:bg-indigo-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-indigo-500/30 dark:bg-slate-900/60 dark:text-indigo-50 dark:hover:bg-indigo-950/35"
                     >
                       {t("paginationPrevious")}
                     </button>
-                    <label className="ml-2 inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                    <label className="ml-2 inline-flex items-center gap-2 text-sm text-indigo-900/85 dark:text-indigo-100/80">
                       <span>{t("pageSizeLabel")}</span>
                       <select
                         value={detailPageSize}
                         onChange={(e) => updateDetailPaginationParams(1, Number(e.target.value))}
-                        className="rounded-md border border-gray-200 bg-white px-2 py-1 text-sm dark:border-gray-600 dark:bg-gray-800"
+                        className="rounded-lg border border-indigo-200/70 bg-white px-2 py-1 text-sm text-indigo-950 dark:border-indigo-500/30 dark:bg-slate-900 dark:text-indigo-50"
                       >
                         <option value={10}>10</option>
                         <option value={20}>20</option>
                         <option value={50}>50</option>
                       </select>
                     </label>
-                    <span className="px-2 text-sm text-gray-600 dark:text-gray-300">
+                    <span className="px-2 text-sm text-indigo-900/85 dark:text-indigo-100/80">
                       {t("paginationPage", { page: detailPage, totalPages: detailTotalPages })}
                     </span>
                     <button
                       type="button"
                       onClick={() => updateDetailPaginationParams(detailPage + 1, detailPageSize)}
                       disabled={detailPage >= detailTotalPages}
-                      className="inline-flex min-h-[36px] items-center justify-center rounded-md border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700/50"
+                      className="inline-flex min-h-[36px] items-center justify-center rounded-lg border border-indigo-200/70 bg-white/90 px-3 py-1.5 text-sm font-medium text-indigo-950 transition-colors hover:bg-indigo-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-indigo-500/30 dark:bg-slate-900/60 dark:text-indigo-50 dark:hover:bg-indigo-950/35"
                     >
                       {t("paginationNext")}
                     </button>
@@ -676,23 +772,28 @@ function GenresContent() {
             </div>
           </div>
         )}
-      </div>
-    </>
+    </div>
   );
 }
 
 function GenresFallback() {
+  const trendsHref = useGenresTrendsHref();
   const t = useTranslations("genres");
+  const locale = useLocale();
+  const { startDate, endDate } = useListenDateRange();
+  const formatDateRange = (start: string, end: string) => {
+    const s = new Date(start);
+    const e = new Date(end);
+    return `${s.toLocaleDateString(locale, { month: "short", day: "numeric", year: "numeric" })} – ${e.toLocaleDateString(locale, { month: "short", day: "numeric", year: "numeric" })}`;
+  };
+  const dateSummary = startDate && endDate ? formatDateRange(startDate, endDate) : t("allData");
   return (
-    <div className="mt-6">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
-          {t("title")}
-        </h1>
-        <p className="mt-2 text-base text-gray-500 dark:text-gray-400 max-w-2xl">
-          {t("subtitle")}
-        </p>
-      </header>
+    <div className="space-y-8">
+      <GenresHeroFrame
+        trendsHref={trendsHref}
+        stats={<GenresHeroStatsSkeleton />}
+        dateSummary={dateSummary}
+      />
       <GenresSkeleton />
     </div>
   );
@@ -700,8 +801,10 @@ function GenresFallback() {
 
 export default function GenresPage() {
   return (
-    <Suspense fallback={<GenresFallback />}>
-      <GenresContent />
-    </Suspense>
+    <div className="px-4 py-6 sm:px-0">
+      <Suspense fallback={<GenresFallback />}>
+        <GenresContent />
+      </Suspense>
+    </div>
   );
 }

@@ -129,9 +129,10 @@ export function TrackTrendsSummaryWidget({
     if (startDate) p.set("startDate", startDate);
     if (endDate) p.set("endDate", endDate);
     p.set("period", "month");
+    if (viewerUserId) p.set("userId", viewerUserId);
     const qs = p.toString();
     return qs ? `?${qs}` : "?period=month";
-  }, [startDate, endDate]);
+  }, [startDate, endDate, viewerUserId]);
 
   if (isLoading) {
     return (

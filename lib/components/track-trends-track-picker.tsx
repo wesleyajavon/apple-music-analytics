@@ -130,7 +130,7 @@ export function TrackTrendsTrackPicker({
           </label>
           <div className="relative">
             <span
-              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500"
+              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted"
               aria-hidden
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -150,7 +150,7 @@ export function TrackTrendsTrackPicker({
               placeholder={t("searchPlaceholder")}
               autoComplete="off"
               spellCheck={false}
-              className="w-full rounded-lg border border-gray-200 bg-white py-2 pl-9 pr-3 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-accent-violet focus:outline-none focus:ring-2 focus:ring-accent-violet/20 dark:border-gray-600 dark:bg-gray-800/80 dark:text-white dark:placeholder:text-gray-500"
+              className="w-full rounded-xl border border-card-border bg-surface py-2.5 pl-9 pr-3 text-sm text-foreground shadow-sm placeholder:text-muted/70 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/20"
               aria-controls="track-trends-listbox"
               aria-describedby="track-trends-search-hint"
               aria-activedescendant={
@@ -160,31 +160,31 @@ export function TrackTrendsTrackPicker({
               }
             />
           </div>
-          <p id="track-trends-search-hint" className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+          <p id="track-trends-search-hint" className="mt-1 text-xs text-muted">
             {enableRemoteSearch ? t("searchKeyboardHintExtended") : t("searchKeyboardHint")}
           </p>
         </div>
-        <p className="text-xs text-gray-500 dark:text-gray-400 tabular-nums">
+        <p className="rounded-full border border-card-border bg-surface-glass px-2.5 py-1 text-xs text-muted tabular-nums">
           {t("selectionCount", { selected: selectedIds.length, max: maxSelectable })}
         </p>
       </div>
 
       {enableRemoteSearch && query.trim().length >= 2 && (
         <div
-          className="rounded-xl border border-accent-violet/20 bg-white dark:bg-gray-800/95 shadow-md dark:shadow-none"
+          className="rounded-xl border border-card-border bg-card-surface shadow-card"
           role="region"
           aria-label={t("searchDatabaseRegion")}
         >
-          <div className="border-b border-gray-100 dark:border-gray-700/50 px-3 py-2">
-            <p className="text-xs font-medium text-accent-violet dark:text-accent-violet/90">
+          <div className="border-b border-card-border px-3 py-2">
+            <p className="text-xs font-semibold uppercase tracking-wider text-cyan-500 dark:text-cyan-300">
               {t("searchDatabaseTitle")}
             </p>
           </div>
           <div className="max-h-52 overflow-y-auto p-2">
             {remoteLoading ? (
-              <p className="px-2 py-4 text-center text-sm text-gray-500">{t("searchRemoteLoading")}</p>
+              <p className="px-2 py-4 text-center text-sm text-muted">{t("searchRemoteLoading")}</p>
             ) : remoteSuggestions.length === 0 ? (
-              <p className="px-2 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+              <p className="px-2 py-4 text-center text-sm text-muted">
                 {t("searchNoResults")}
               </p>
             ) : (
@@ -203,15 +203,15 @@ export function TrackTrendsTrackPicker({
                           flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors
                           ${
                             inCatalog
-                              ? "cursor-default text-gray-400 dark:text-gray-500"
+                              ? "cursor-default text-muted/60"
                               : disabledAdd
-                                ? "cursor-not-allowed opacity-50 text-gray-500"
-                                : "text-gray-900 hover:bg-accent-violet/10 dark:text-white dark:hover:bg-accent-violet/20"
+                                ? "cursor-not-allowed opacity-50 text-muted"
+                                : "text-foreground hover:bg-cyan-400/10"
                           }
                         `}
                       >
                         <span className="min-w-0 truncate font-medium">{getTrackLabel(track)}</span>
-                        <span className="shrink-0 text-xs">
+                        <span className="shrink-0 text-xs text-muted">
                           {inCatalog ? t("searchInCatalog") : selected ? t("searchAdded") : t("searchAdd")}
                         </span>
                       </button>
@@ -229,10 +229,10 @@ export function TrackTrendsTrackPicker({
         role="listbox"
         aria-label={t("tracksToDisplay")}
         aria-multiselectable="true"
-        className="mt-3 flex max-h-[min(50vh,22rem)] flex-wrap content-start gap-2 overflow-y-auto rounded-lg border border-gray-100 bg-gray-50/50 p-2 dark:border-gray-700/50 dark:bg-gray-900/30"
+        className="mt-3 flex max-h-[min(50vh,22rem)] flex-wrap content-start gap-2 overflow-y-auto rounded-xl border border-card-border bg-surface/60 p-2"
       >
         {filtered.length === 0 ? (
-          <p className="px-2 py-6 text-center text-sm text-gray-500 dark:text-gray-400">{t("searchNoResults")}</p>
+          <p className="px-2 py-6 text-center text-sm text-muted">{t("searchNoResults")}</p>
         ) : (
           filtered.map((track, pos) => {
             const selected = selectedIds.includes(track.id);
@@ -246,11 +246,13 @@ export function TrackTrendsTrackPicker({
                 role="option"
                 aria-selected={selected}
                 className={`
-                  inline-flex max-w-[min(100%,320px)] cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 transition-colors
+                  inline-flex max-w-[min(100%,320px)] cursor-pointer items-center gap-2 rounded-lg border px-3 py-1.5 transition-colors
                   ${
-                    isHighlighted
-                      ? "border-accent-violet ring-2 ring-accent-violet/30 bg-accent-violet/5 dark:bg-accent-violet/10"
-                      : "border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                    selected
+                      ? "border-cyan-400/35 bg-cyan-400/10 text-foreground shadow-sm"
+                      : isHighlighted
+                        ? "border-cyan-400/60 bg-cyan-400/10 ring-2 ring-cyan-400/25"
+                        : "border-card-border bg-card-surface text-foreground hover:bg-surface-glass"
                   }
                 `}
               >
@@ -263,7 +265,7 @@ export function TrackTrendsTrackPicker({
                     onToggle(track.id);
                   }}
                   tabIndex={-1}
-                  className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 disabled:opacity-40"
+                  className="rounded border-card-border text-primary focus:ring-ring disabled:opacity-40"
                 />
                 <span
                   className="w-3 h-3 shrink-0 rounded-full"
@@ -273,7 +275,7 @@ export function TrackTrendsTrackPicker({
                   }}
                   aria-hidden
                 />
-                <span className="text-sm text-gray-800 dark:text-gray-200 truncate" title={getTrackLabel(track)}>
+                <span className="truncate text-sm text-foreground" title={getTrackLabel(track)}>
                   {getTrackLabel(track)}
                 </span>
               </label>

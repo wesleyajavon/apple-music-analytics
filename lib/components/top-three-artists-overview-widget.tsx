@@ -39,9 +39,10 @@ export function TopThreeArtistsOverviewWidget({
     const p = new URLSearchParams();
     if (startDate) p.set("startDate", startDate);
     if (endDate) p.set("endDate", endDate);
+    if (viewerUserId) p.set("userId", viewerUserId);
     const qs = p.toString();
     return qs ? `?${qs}` : "";
-  }, [startDate, endDate]);
+  }, [startDate, endDate, viewerUserId]);
 
   if (isLoading) {
     return (

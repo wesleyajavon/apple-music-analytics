@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { useTasteEvolution } from "@/lib/hooks/use-taste-evolution";
 import { AiWidgetQuotaOrError } from "@/lib/components/error-state";
+import { useDashboardViewerUserId } from "@/lib/context/dashboard-viewer-context";
 import type { WeekToWeekTrend } from "@/lib/dto/taste-evolution";
 
 function truncateCommentary(text: string, maxLength: number = 200): string {
@@ -21,6 +22,7 @@ function truncateCommentary(text: string, maxLength: number = 200): string {
  */
 export function TasteEvolutionSummaryWidget() {
   const t = useTranslations("taste-evolution");
+  const viewerUserId = useDashboardViewerUserId();
   const range = useMemo(() => {
     const end = new Date();
     const start = new Date();
@@ -33,8 +35,16 @@ export function TasteEvolutionSummaryWidget() {
 
   const { data, isLoading, error } = useTasteEvolution(
     range.startDate,
-    range.endDate
+    range.endDate,
+    viewerUserId
   );
+
+  const seeMoreHref = useMemo(() => {
+    const p = new URLSearchParams();
+    if (viewerUserId) p.set("userId", viewerUserId);
+    const qs = p.toString();
+    return qs ? `/dashboard/taste-evolution?${qs}` : "/dashboard/taste-evolution";
+  }, [viewerUserId]);
 
   const latestTrend = useMemo(
     () => (data?.trends?.length ? data.trends[data.trends.length - 1] : null),
@@ -94,7 +104,7 @@ export function TasteEvolutionSummaryWidget() {
       <AiWidgetQuotaOrError
         title={t("title")}
         subtitle={t("spotlightHint")}
-        seeMoreHref="/dashboard/taste-evolution"
+        seeMoreHref={seeMoreHref}
         seeMoreLabel={t("seeMore")}
         error={error}
       />
@@ -122,7 +132,7 @@ export function TasteEvolutionSummaryWidget() {
             </p>
           </div>
           <Link
-            href="/dashboard/taste-evolution"
+            href={seeMoreHref}
             className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium
               text-accent-violet hover:bg-accent-violet/10 dark:hover:bg-accent-violet/20
               transition-colors duration-200"

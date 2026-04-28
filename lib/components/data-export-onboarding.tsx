@@ -33,8 +33,24 @@ type Phase = "welcome" | "pick" | "guide" | "import" | "finish";
 type MusicProvider = "spotify" | "apple";
 
 type GuideStep = {
-  titleKey: "step1Title" | "step2Title" | "step3Title" | "step4Title";
-  bodyKey: "step1Body" | "step2Body" | "step3Body" | "step4Body";
+  titleKey:
+    | "step1Title"
+    | "step2Title"
+    | "step3Title"
+    | "step4Title"
+    | "step5Title"
+    | "step6Title"
+    | "step7Title"
+    | "step8Title";
+  bodyKey:
+    | "step1Body"
+    | "step2Body"
+    | "step3Body"
+    | "step4Body"
+    | "step5Body"
+    | "step6Body"
+    | "step7Body"
+    | "step8Body";
   imageSrc: string;
   altKey:
     | "imageAltSpotifyStep1"
@@ -42,7 +58,14 @@ type GuideStep = {
     | "imageAltAppleStep1"
     | "imageAltAppleStep2"
     | "imageAltAppleStep3"
-    | "imageAltAppleStep4";
+    | "imageAltAppleStep4"
+    | "imageAltAppleStep5"
+    | "imageAltAppleStep6"
+    | "imageAltAppleStep7"
+    | "imageAltAppleStep8";
+  /** Second screenshot (e.g. nested folder + target file). */
+  imageSrc2?: string;
+  altKey2?: "imageAltAppleStep8b";
 };
 
 type GenreBackfillJobStatus =
@@ -106,6 +129,32 @@ const APPLE_STEPS: GuideStep[] = [
     bodyKey: "step4Body",
     imageSrc: "/onboarding/apple-step-4.png",
     altKey: "imageAltAppleStep4",
+  },
+  {
+    titleKey: "step5Title",
+    bodyKey: "step5Body",
+    imageSrc: "/onboarding/apple-step-5.png",
+    altKey: "imageAltAppleStep5",
+  },
+  {
+    titleKey: "step6Title",
+    bodyKey: "step6Body",
+    imageSrc: "/onboarding/apple-step-6.png",
+    altKey: "imageAltAppleStep6",
+  },
+  {
+    titleKey: "step7Title",
+    bodyKey: "step7Body",
+    imageSrc: "/onboarding/apple-step-7.png",
+    altKey: "imageAltAppleStep7",
+  },
+  {
+    titleKey: "step8Title",
+    bodyKey: "step8Body",
+    imageSrc: "/onboarding/apple-step-8.png",
+    altKey: "imageAltAppleStep8",
+    imageSrc2: "/onboarding/apple-step-8b.png",
+    altKey2: "imageAltAppleStep8b",
   },
 ];
 
@@ -807,17 +856,31 @@ export function DataExportOnboarding() {
             {provider === "spotify" ? t("openSpotifyPrivacy") : t("openApplePrivacy")} ↗
           </a>
 
-          <figure className="overflow-hidden rounded-xl border border-card-border bg-surface shadow-inner">
-            <Image
-              src={steps[stepIndex].imageSrc}
-              alt={t(steps[stepIndex].altKey)}
-              width={1280}
-              height={720}
-              className="h-auto w-full object-contain"
-              sizes="(max-width: 768px) 100vw, 42rem"
-              priority={stepIndex === 0}
-            />
-          </figure>
+          <div className="space-y-4">
+            <figure className="overflow-hidden rounded-xl border border-card-border bg-surface shadow-inner">
+              <Image
+                src={steps[stepIndex].imageSrc}
+                alt={t(steps[stepIndex].altKey)}
+                width={1280}
+                height={720}
+                className="h-auto w-full object-contain"
+                sizes="(max-width: 768px) 100vw, 42rem"
+                priority={stepIndex === 0}
+              />
+            </figure>
+            {"imageSrc2" in steps[stepIndex] && steps[stepIndex].imageSrc2 && steps[stepIndex].altKey2 ? (
+              <figure className="overflow-hidden rounded-xl border border-card-border bg-surface shadow-inner">
+                <Image
+                  src={steps[stepIndex].imageSrc2}
+                  alt={t(steps[stepIndex].altKey2)}
+                  width={1280}
+                  height={720}
+                  className="h-auto w-full object-contain"
+                  sizes="(max-width: 768px) 100vw, 42rem"
+                />
+              </figure>
+            ) : null}
+          </div>
 
           <div className="flex flex-col-reverse gap-3 border-t border-card-border pt-6 sm:flex-row sm:justify-between">
             <button type="button" className={secondaryBtn} onClick={goBackGuide}>
@@ -868,7 +931,9 @@ export function DataExportOnboarding() {
             </div>
           ) : null}
 
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">{t("import.eyebrow")}</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+            {t("import.eyebrow", { step: steps.length + 1 })}
+          </p>
           <OnboardingFlowProgressBar
             percent={flowProgressPercent}
             variant="surface"
@@ -882,16 +947,28 @@ export function DataExportOnboarding() {
           </p>
 
           {provider === "spotify" && (
-            <figure className="overflow-hidden rounded-xl border border-card-border bg-surface shadow-inner">
-              <Image
-                src="/onboarding/spotify-email-download.png"
-                alt={t("imageAltSpotifyEmail")}
-                width={1280}
-                height={720}
-                className="h-auto w-full object-contain"
-                sizes="(max-width: 768px) 100vw, 42rem"
-              />
-            </figure>
+            <div className="flex flex-col gap-3">
+              <figure className="overflow-hidden rounded-xl border border-card-border bg-surface shadow-inner">
+                <Image
+                  src="/onboarding/spotify-email-download.png"
+                  alt={t("imageAltSpotifyEmail")}
+                  width={1280}
+                  height={720}
+                  className="h-auto w-full object-contain"
+                  sizes="(max-width: 768px) 100vw, 42rem"
+                />
+              </figure>
+              <figure className="overflow-hidden rounded-xl border border-card-border bg-surface shadow-inner">
+                <Image
+                  src="/onboarding/spotify-download-zip-file.png"
+                  alt={t("imageAltSpotifyDownloadZip")}
+                  width={1280}
+                  height={720}
+                  className="h-auto w-full object-contain"
+                  sizes="(max-width: 768px) 100vw, 42rem"
+                />
+              </figure>
+            </div>
           )}
 
           {provider === "apple" && (

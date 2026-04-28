@@ -862,7 +862,7 @@ function ArtistTrendsFallback() {
 
 export default function ArtistTrendsPage() {
   return (
-    <div className="px-4 py-6 sm:px-0">
+    <div className="px-4 pb-6 pt-0 sm:px-0">
       <Suspense fallback={<ArtistTrendsFallback />}>
         <TrendsContent />
       </Suspense>

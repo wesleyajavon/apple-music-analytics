@@ -327,10 +327,108 @@ function AiAttributeCard({
   );
 }
 
+function MusicalProfileNoDataView({
+  locale,
+  withFilters,
+}: {
+  locale: string;
+  withFilters: (href: string) => string;
+}) {
+  const t = useTranslations("musical-profile");
+  const emptyStatePresets = useEmptyStatePresets();
+  const { startDate, endDate } = useListenDateRange();
+  const dateRangeLabel = formatDateRange(startDate, endDate, locale);
+  const previewBullets = [t("emptyFeature.item1"), t("emptyFeature.item2"), t("emptyFeature.item3")];
+
+  return (
+    <div className="space-y-8 pb-10">
+      <ParallaxHero>
+        <motion.section
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          className="relative overflow-hidden rounded-[2rem] border border-accent-violet/20 bg-gray-950 px-6 py-8 text-white shadow-2xl shadow-accent-violet/20 sm:px-10 sm:py-12"
+        >
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.45),transparent_35%),radial-gradient(circle_at_80%_20%,rgba(6,182,212,0.28),transparent_30%),linear-gradient(135deg,rgba(17,24,39,0.98),rgba(76,29,149,0.78))]" />
+          <div className="absolute -bottom-24 left-1/2 h-56 w-[80%] -translate-x-1/2 rounded-full bg-accent-violet/25 blur-3xl" />
+          <div className="relative grid gap-10 lg:grid-cols-[1.25fr_0.75fr] lg:items-end">
+            <div>
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-white/90 backdrop-blur">
+                <ProfileIcon className="h-5 w-5 text-accent-cyan" />
+                {t("heroBadge")}
+              </div>
+              <h1 className="max-w-3xl text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">
+                {t("heroTitle")}
+              </h1>
+              <p className="mt-5 max-w-2xl text-base leading-7 text-white/72 sm:text-lg">
+                {t("heroSubtitle")}
+              </p>
+              {dateRangeLabel ? (
+                <p className="mt-5 text-sm font-medium text-white/55">{dateRangeLabel}</p>
+              ) : null}
+            </div>
+            <div className="rounded-3xl border border-white/15 bg-white/10 p-5 backdrop-blur">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-accent-cyan">
+                {t("heroSignature")}
+              </p>
+              <p className="mt-3 text-2xl font-bold leading-tight text-white/50">{t("unknownArtist")}</p>
+              <p className="mt-2 text-sm text-white/55">{t("heroSignatureHintFallback")}</p>
+            </div>
+          </div>
+        </motion.section>
+      </ParallaxHero>
+
+      <section className="relative min-h-[240px] w-full overflow-hidden rounded-2xl border border-accent-violet/25 bg-card-surface shadow-2xl ring-1 ring-accent-violet/10 transition-all duration-300 dark:border-accent-violet/30 dark:ring-accent-violet/20">
+        <div
+          className="pointer-events-none absolute inset-0 opacity-80 dark:opacity-50"
+          style={{
+            background:
+              "radial-gradient(circle at top left, rgba(139, 92, 246, 0.18), transparent 34%), radial-gradient(circle at 85% 20%, rgba(34, 211, 238, 0.12), transparent 28%)",
+          }}
+        />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-accent-violet via-accent-indigo to-accent-cyan opacity-80" />
+        <div className="relative border-b border-gray-100/80 px-6 py-5 dark:border-gray-700/50">
+          <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-accent-violet/20 bg-accent-violet/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-accent-violet dark:bg-accent-violet/15">
+            <span className="h-1.5 w-1.5 rounded-full bg-accent-violet" aria-hidden />
+            {t("emptyFeature.badge")}
+          </div>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{t("emptyFeature.title")}</h2>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{t("emptyFeature.lead")}</p>
+        </div>
+        <div className="relative space-y-6 p-6">
+          <ul className="list-none space-y-3">
+            {previewBullets.map((text) => (
+              <li key={text} className="flex gap-3 text-sm leading-6 text-gray-700 dark:text-gray-300">
+                <span
+                  className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-violet"
+                  aria-hidden
+                />
+                <span>{text}</span>
+              </li>
+            ))}
+          </ul>
+          <Link
+            href={withFilters("/dashboard/overview")}
+            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-5 py-3 text-sm font-bold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:shadow-card-hover focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
+          >
+            {t("overviewCallout.cta")}
+            <span aria-hidden="true">&rarr;</span>
+          </Link>
+        </div>
+      </section>
+
+      <EmptyState
+        {...emptyStatePresets.importData}
+        message={t("noData")}
+        description={t("importDescription")}
+      />
+    </div>
+  );
+}
+
 function MusicalProfileContent() {
   const t = useTranslations("musical-profile");
   const locale = useLocale();
-  const emptyStatePresets = useEmptyStatePresets();
   const searchParams = useSearchParams();
   const userId = searchParams.get("userId") ?? undefined;
   const withFilters = useMemo(
@@ -419,15 +517,7 @@ function MusicalProfileContent() {
   }
 
   if (!hasListeningData) {
-    return (
-      <div className="max-w-4xl">
-        <EmptyState
-          {...emptyStatePresets.importData}
-          message={t("noData")}
-          description={t("importDescription")}
-        />
-      </div>
-    );
+    return <MusicalProfileNoDataView locale={locale} withFilters={withFilters} />;
   }
 
   const dateRangeLabel = formatDateRange(startDate, endDate, locale);

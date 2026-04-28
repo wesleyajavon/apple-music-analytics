@@ -4,9 +4,11 @@ import { redirect } from "@/i18n/navigation";
 import { getCurrentUserId } from "@/lib/auth/get-current-user-id";
 import { prisma } from "@/lib/prisma";
 import { DataExportOnboarding } from "@/lib/components/data-export-onboarding";
+import { wantsOnboardingImportReentry } from "@/lib/utils/onboarding-route";
 
 type Props = {
   params: Promise<{ locale: string }>;
+  searchParams?: Record<string, string | string[] | undefined>;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -15,7 +17,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return { title: t("metaTitle") };
 }
 
-export default async function OnboardingPage({ params }: Props) {
+export default async function OnboardingPage({
+  params,
+  searchParams = {},
+}: Props) {
   const { locale } = await params;
   const userId = await getCurrentUserId();
   if (!userId) {
@@ -27,7 +32,10 @@ export default async function OnboardingPage({ params }: Props) {
     select: { onboardingCompletedAt: true },
   });
 
-  if (user?.onboardingCompletedAt) {
+  const openImportWizard =
+    !user?.onboardingCompletedAt || wantsOnboardingImportReentry(searchParams);
+
+  if (!openImportWizard) {
     redirect({ href: "/dashboard/overview", locale });
   }
 

@@ -1,10 +1,20 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { toast } from "sonner";
+import {
+  ArrowRight,
+  CheckCircle2,
+  Loader2,
+  Music2,
+  Palette,
+  SkipForward,
+  Sparkles,
+} from "lucide-react";
+import { DashboardHeroTitle } from "@/lib/components/dashboard-hero-title";
 import {
   isRecentAuthRequiredError,
   redirectToRecentSignIn,
@@ -103,10 +113,125 @@ const APPLE_STEPS: GuideStep[] = [
 const VERCEL_SAFE_MULTIPART_MAX_BYTES = 4 * 1024 * 1024;
 const MAX_ONBOARDING_PARSED_ROWS = 75_000;
 
+/** Aligné sur le hero « Overview » (violet / cyan). */
+const ONBOARDING_RAIL_CLASS = "bg-gradient-to-r from-violet-400 via-indigo-500 to-cyan-400";
+const ONBOARDING_HERO_SHELL_CLASS =
+  "relative overflow-hidden rounded-3xl border border-violet-300/25 bg-[radial-gradient(circle_at_top_left,_rgba(139,92,246,0.28),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(6,182,212,0.2),_transparent_30%),linear-gradient(135deg,_#020617_0%,_#0f172a_48%,_#2e1065_100%)] px-6 py-8 shadow-2xl shadow-violet-950/40 sm:px-8 sm:py-10";
+
+function OnboardingHeroShell({ children }: { children: ReactNode }) {
+  return (
+    <div className={ONBOARDING_HERO_SHELL_CLASS}>
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(139,92,246,0.1)_1px,_transparent_1px),linear-gradient(90deg,_rgba(34,211,238,0.08)_1px,_transparent_1px)] bg-[size:32px_32px] opacity-30" />
+      <div className="absolute -right-20 -top-24 h-56 w-56 rounded-full bg-violet-400/18 blur-3xl" />
+      <div className="absolute -bottom-24 left-10 h-48 w-48 rounded-full bg-cyan-400/16 blur-3xl" />
+      <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${ONBOARDING_RAIL_CLASS} opacity-90`} />
+      <div className="relative">{children}</div>
+    </div>
+  );
+}
+
+/** Carte « genres IA » — même langage que le hero (violet / cyan). */
+const GENRE_AI_SURFACE =
+  "relative overflow-hidden rounded-2xl border border-violet-300/25 bg-[radial-gradient(circle_at_top_left,_rgba(139,92,246,0.16),_transparent_42%),radial-gradient(circle_at_bottom_right,_rgba(34,211,238,0.12),_transparent_40%),linear-gradient(145deg,_rgb(15_23_42_/_0.94)_0%,_rgb(49_46_129_/_0.38)_100%)] shadow-lg shadow-violet-950/30 ring-1 ring-white/[0.06]";
+
+const GENRE_AI_ACCEPT_BTN =
+  "group inline-flex min-h-[48px] w-full shrink-0 items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-5 py-3 text-sm font-semibold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:opacity-[0.98] hover:shadow-card-hover active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 sm:w-auto sm:min-w-[min(100%,260px)]";
+
+const GENRE_AI_DECLINE_BTN =
+  "inline-flex min-h-[48px] w-full shrink-0 items-center justify-center gap-2 rounded-2xl border border-white/18 bg-white/[0.07] px-5 py-3 text-sm font-semibold text-foreground shadow-[inset_0_1px_0_0_rgb(255_255_255_/0.08)] backdrop-blur-sm transition-all hover:border-white/28 hover:bg-white/[0.12] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/35 disabled:cursor-not-allowed disabled:opacity-55 sm:w-auto sm:min-w-[min(100%,200px)]";
+
+function GenreAiPanelChrome({
+  children,
+  className = "",
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={`${GENRE_AI_SURFACE} ${className}`}>
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(139,92,246,0.07)_1px,_transparent_1px),linear-gradient(90deg,_rgba(34,211,238,0.05)_1px,_transparent_1px)] bg-[size:24px_24px] opacity-[0.38]" />
+      <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${ONBOARDING_RAIL_CLASS} opacity-85`} />
+      <div className="relative">{children}</div>
+    </div>
+  );
+}
+
 function chunkArray<T>(arr: T[], size: number): T[][] {
   const out: T[][] = [];
   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
   return out;
+}
+
+/**
+ * Linear onboarding progress: welcome → pick → guide (per step) → import screen → finish.
+ * Before a provider is chosen, the longest guide (Apple) is used so the bar does not max out early.
+ */
+function getOnboardingFlowProgressPercent(
+  phase: Phase,
+  stepIndex: number,
+  provider: MusicProvider | null,
+  spotifyGuideCount: number,
+  appleGuideCount: number,
+): number {
+  const guideLen =
+    provider === "spotify"
+      ? spotifyGuideCount
+      : provider === "apple"
+        ? appleGuideCount
+        : appleGuideCount;
+
+  const totalSegments = 2 + guideLen + 2;
+
+  let segmentIndex: number;
+  switch (phase) {
+    case "welcome":
+      segmentIndex = 0;
+      break;
+    case "pick":
+      segmentIndex = 1;
+      break;
+    case "guide":
+      segmentIndex = 2 + stepIndex;
+      break;
+    case "import":
+      segmentIndex = 2 + guideLen;
+      break;
+    case "finish":
+      segmentIndex = 2 + guideLen + 1;
+      break;
+  }
+
+  return Math.min(100, Math.round(((segmentIndex + 1) / totalSegments) * 100));
+}
+
+function OnboardingFlowProgressBar({
+  percent,
+  variant,
+  ariaLabel,
+}: {
+  percent: number;
+  variant: "hero" | "surface";
+  ariaLabel: string;
+}) {
+  const trough =
+    variant === "hero"
+      ? "bg-white/[0.12] ring-1 ring-inset ring-white/[0.06]"
+      : "bg-border";
+  return (
+    <div
+      role="progressbar"
+      aria-valuenow={percent}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-label={ariaLabel}
+      className={`h-1.5 w-full max-w-md overflow-hidden rounded-full ${trough}`}
+    >
+      <div
+        className={`h-full rounded-full ${ONBOARDING_RAIL_CLASS} shadow-[0_0_20px_rgba(139,92,246,0.35)] transition-[width] duration-500 ease-out`}
+        style={{ width: `${percent}%` }}
+      />
+    </div>
+  );
 }
 
 function listensToJsonRows(rows: NormalizedListenInput[]) {
@@ -156,6 +281,19 @@ export function DataExportOnboarding() {
     if (provider === "apple") return APPLE_STEPS;
     return [];
   }, [provider]);
+
+  const flowProgressPercent = useMemo(
+    () =>
+      getOnboardingFlowProgressPercent(
+        phase,
+        stepIndex,
+        provider,
+        SPOTIFY_STEPS.length,
+        APPLE_STEPS.length,
+      ),
+    [phase, stepIndex, provider],
+  );
+  const flowProgressAria = t("flowProgressAriaLabel", { percent: flowProgressPercent });
 
   const refreshGenreBackfillStatus = useCallback(async () => {
     try {
@@ -453,14 +591,27 @@ export function DataExportOnboarding() {
     }
   }, [t]);
 
-  const cardClass =
-    "mx-auto w-full max-w-3xl rounded-2xl border border-gray-200/90 bg-white/95 p-6 shadow-lg shadow-gray-200/30 backdrop-blur-sm dark:border-gray-800 dark:bg-gray-900/90 dark:shadow-none sm:p-8";
+  const surfaceShellClass =
+    "relative mx-auto w-full max-w-4xl rounded-3xl border border-card-border bg-card-surface p-6 shadow-card backdrop-blur-sm sm:p-8";
 
   const primaryBtn =
-    "inline-flex min-h-[44px] items-center justify-center rounded-xl bg-accent-violet px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-accent-violet/20 transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60";
+    "inline-flex min-h-[44px] items-center justify-center rounded-xl bg-accent-violet px-5 py-2.5 text-sm font-semibold text-white shadow-brand-glow transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60";
 
   const secondaryBtn =
-    "inline-flex min-h-[44px] items-center justify-center rounded-xl border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-950 dark:text-gray-100 dark:hover:bg-gray-900";
+    "inline-flex min-h-[44px] items-center justify-center rounded-xl border border-card-border bg-surface-raised px-5 py-2.5 text-sm font-semibold text-foreground transition-colors hover:border-primary/30 hover:bg-primary/5 dark:hover:bg-white/5";
+
+  /** CTA principal onboarding (welcome) — dégradé marque comme la connexion */
+  const welcomeContinueBtn =
+    "group inline-flex min-h-[48px] w-full shrink-0 items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-6 py-3 text-sm font-semibold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:opacity-[0.98] hover:shadow-card-hover active:translate-y-0 sm:w-auto";
+
+  /** Passer sans importer — overlay hero sombre */
+  const welcomeSkipBtn =
+    "inline-flex min-h-[48px] w-full shrink-0 items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/[0.08] px-5 py-3 text-sm font-medium text-violet-100 shadow-[inset_0_1px_0_0_rgb(255_255_255_/0.12)] backdrop-blur-sm transition-all hover:border-white/35 hover:bg-white/[0.14] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 disabled:opacity-55 sm:w-auto";
+
+  /** Passer depuis l’étape « choix » — surface claire */
+  const pickSkipBtn =
+    "inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-transparent px-5 py-2.5 text-sm font-medium text-muted transition-all hover:border-primary/35 hover:bg-primary/[0.06] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-55";
+
   const effectiveBackfill = useMemo(
     () =>
       genreBackfillStatus ??
@@ -499,70 +650,97 @@ export function DataExportOnboarding() {
     return effectiveBackfill.status === "completed" ? 1 : 0;
   }, [effectiveBackfill]);
 
+  const finishSurfaceHasExtras =
+    Boolean(
+      genreLlmAfterImport &&
+        genreLlmAfterImport.unknownTrackCount > 0 &&
+        !genreBackfillJob?.id &&
+        !genreLlmDeclined,
+    ) || Boolean(effectiveBackfill);
+
   return (
-    <div className="mx-auto max-w-3xl pb-16">
-      <div className={cardClass}>
-        {phase === "welcome" && (
-          <div className="space-y-6">
-            <p className="text-xs font-semibold uppercase tracking-widest text-primary">
+    <div className="mx-auto max-w-4xl space-y-8 pb-16">
+      {phase === "welcome" && (
+        <OnboardingHeroShell>
+          <div className="max-w-3xl space-y-6">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-200/85">
               {t("welcomeEyebrow")}
             </p>
-            <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
+            <DashboardHeroTitle icon={Sparkles} variant="hero">
               {t("welcomeTitle")}
-            </h1>
+            </DashboardHeroTitle>
+            <OnboardingFlowProgressBar
+              percent={flowProgressPercent}
+              variant="hero"
+              ariaLabel={flowProgressAria}
+            />
             <section
-              className="rounded-xl border border-sky-200/80 bg-sky-50/90 px-4 py-3 text-sm leading-relaxed text-sky-950 dark:border-sky-900/40 dark:bg-sky-950/25 dark:text-sky-100"
+              className="rounded-xl border border-violet-200/15 bg-slate-950/40 px-4 py-4 text-sm leading-relaxed backdrop-blur-sm"
               aria-labelledby="onboarding-why-not-api-heading"
             >
               <h2
                 id="onboarding-why-not-api-heading"
-                className="text-base font-semibold text-sky-950 dark:text-sky-50"
+                className="text-base font-semibold text-white"
               >
                 {t("whyNotApiTitle")}
               </h2>
-              <p className="mt-2 text-sky-900/95 dark:text-sky-100/95">{t("whyNotApiBody")}</p>
+              <p className="mt-2 text-violet-100/90">{t("whyNotApiBody")}</p>
             </section>
-            <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-300">
-              {t("welcomeBody")}
-            </p>
-            <p className="rounded-xl border border-amber-200/80 bg-amber-50/90 px-4 py-3 text-sm leading-relaxed text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-100">
-              <strong className="font-semibold">{t("welcomeNoteStrong")}</strong>
+            <p className="text-base leading-relaxed text-violet-100/92 sm:text-lg">{t("welcomeBody")}</p>
+            <p className="rounded-xl border border-amber-400/35 bg-amber-500/[0.12] px-4 py-3 text-sm leading-relaxed text-amber-50 backdrop-blur-sm">
+              <strong className="font-semibold text-amber-100">{t("welcomeNoteStrong")}</strong>
               {t("welcomeNoteRest")}
             </p>
-            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-              <button type="button" className={primaryBtn} onClick={() => setPhase("pick")}>
-                {t("continue")}
+            <div className="flex flex-col gap-3 pt-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-start">
+              <button type="button" className={welcomeContinueBtn} onClick={() => setPhase("pick")}>
+                <span>{t("continue")}</span>
+                <ArrowRight
+                  className="h-[1.125rem] w-[1.125rem] shrink-0 transition-transform duration-200 group-hover:translate-x-0.5"
+                  aria-hidden
+                />
               </button>
               <button
                 type="button"
-                className={`${secondaryBtn} text-gray-600 dark:text-gray-400`}
+                className={welcomeSkipBtn}
                 onClick={() => void completeOnboarding()}
                 disabled={isSubmitting}
               >
-                {t("skipForNow")}
+                <SkipForward className="h-[1.125rem] w-[1.125rem] shrink-0 opacity-90" aria-hidden />
+                <span>{t("skipForNow")}</span>
               </button>
             </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">{t("skipHint")}</p>
+            <p className="text-xs text-violet-300/85">{t("skipHint")}</p>
           </div>
-        )}
+        </OnboardingHeroShell>
+      )}
 
-        {phase === "pick" && (
-          <div className="space-y-8">
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
+      {phase === "pick" && (
+        <>
+          <OnboardingHeroShell>
+            <div className="max-w-3xl">
+              <DashboardHeroTitle icon={Music2} variant="hero">
                 {t("pickTitle")}
-              </h1>
-              <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">{t("pickSubtitle")}</p>
+              </DashboardHeroTitle>
+              <div className="mt-5">
+                <OnboardingFlowProgressBar
+                  percent={flowProgressPercent}
+                  variant="hero"
+                  ariaLabel={flowProgressAria}
+                />
+              </div>
+              <p className="mt-5 text-base leading-relaxed text-violet-100/90">{t("pickSubtitle")}</p>
             </div>
+          </OnboardingHeroShell>
 
+          <div className={`${surfaceShellClass} space-y-8`}>
             <div className="grid gap-4 sm:grid-cols-2">
               <button
                 type="button"
                 onClick={() => selectProvider("spotify")}
-                className="group flex flex-col items-start rounded-2xl border-2 border-gray-200 bg-gradient-to-br from-[#1DB954]/10 to-transparent p-6 text-left transition-all hover:border-[#1DB954]/60 hover:shadow-md dark:border-gray-700 dark:from-[#1DB954]/15 dark:hover:border-[#1DB954]/50"
+                className="group flex flex-col items-start rounded-2xl border border-card-border bg-gradient-to-br from-[#1DB954]/14 to-transparent p-6 text-left shadow-card ring-1 ring-[#1DB954]/25 transition-all hover:border-[#1DB954]/55 hover:shadow-brand-glow dark:from-[#1DB954]/18 dark:hover:border-[#1DB954]/50"
               >
-                <span className="text-lg font-bold text-gray-900 dark:text-white">{t("pickSpotify")}</span>
-                <span className="mt-1 text-sm text-gray-600 dark:text-gray-400">{t("pickSpotifyHint")}</span>
+                <span className="text-lg font-bold text-foreground">{t("pickSpotify")}</span>
+                <span className="mt-1 text-sm text-muted">{t("pickSpotifyHint")}</span>
                 <span className="mt-4 text-sm font-semibold text-[#169c46] group-hover:underline dark:text-[#1ed760]">
                   {t("continue")} →
                 </span>
@@ -571,379 +749,519 @@ export function DataExportOnboarding() {
               <button
                 type="button"
                 onClick={() => selectProvider("apple")}
-                className="group flex flex-col items-start rounded-2xl border-2 border-gray-200 bg-gradient-to-br from-gray-100/80 to-transparent p-6 text-left transition-all hover:border-gray-400 hover:shadow-md dark:border-gray-700 dark:from-gray-800/50 dark:hover:border-gray-500"
+                className="group flex flex-col items-start rounded-2xl border border-card-border bg-gradient-to-br from-accent-violet/10 via-transparent to-accent-cyan/10 p-6 text-left shadow-card ring-1 ring-primary/15 transition-all hover:border-primary/40 hover:shadow-brand-glow"
               >
-                <span className="text-lg font-bold text-gray-900 dark:text-white">{t("pickApple")}</span>
-                <span className="mt-1 text-sm text-gray-600 dark:text-gray-400">{t("pickAppleHint")}</span>
+                <span className="text-lg font-bold text-foreground">{t("pickApple")}</span>
+                <span className="mt-1 text-sm text-muted">{t("pickAppleHint")}</span>
                 <span className="mt-4 text-sm font-semibold text-accent-violet group-hover:underline">
                   {t("continue")} →
                 </span>
               </button>
             </div>
 
-            <div className="flex flex-col gap-3 border-t border-gray-100 pt-6 dark:border-gray-800 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-3 border-t border-card-border pt-6 sm:flex-row sm:items-center sm:justify-between">
               <button type="button" className={secondaryBtn} onClick={() => setPhase("welcome")}>
                 {t("back")}
               </button>
               <button
                 type="button"
-                className="text-sm font-medium text-gray-500 underline-offset-4 hover:text-gray-800 hover:underline dark:text-gray-400 dark:hover:text-gray-200"
+                className={pickSkipBtn}
                 onClick={() => void completeOnboarding()}
                 disabled={isSubmitting}
               >
-                {t("skipForNow")}
+                <SkipForward className="h-[1.125rem] w-[1.125rem] shrink-0 opacity-80" aria-hidden />
+                <span>{t("skipForNow")}</span>
               </button>
             </div>
           </div>
-        )}
+        </>
+      )}
 
-        {phase === "guide" && provider && steps[stepIndex] && (
-          <div className="space-y-6">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="text-xs font-medium text-gray-500 dark:text-gray-400" aria-live="polite">
-                {t("stepProgress", { current: stepIndex + 1, total: steps.length })}
-              </p>
-            </div>
-
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">
-              {t(`${provider}.${steps[stepIndex].titleKey}` as Parameters<typeof t>[0])}
-            </h2>
-            <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-300">
-              {t(`${provider}.${steps[stepIndex].bodyKey}` as Parameters<typeof t>[0])}
+      {phase === "guide" && provider && steps[stepIndex] && (
+        <div className={`${surfaceShellClass} space-y-6`}>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary" aria-live="polite">
+              {t("stepProgress", { current: stepIndex + 1, total: steps.length })}
             </p>
+          </div>
+          <OnboardingFlowProgressBar
+            percent={flowProgressPercent}
+            variant="surface"
+            ariaLabel={flowProgressAria}
+          />
 
-            <a
-              href={provider === "spotify" ? spotifyPrivacyUrl : applePrivacyUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={secondaryBtn}
-              aria-label={`${provider === "spotify" ? t("openSpotifyPrivacy") : t("openApplePrivacy")} (${t("externalLinkAria")})`}
+          <h2 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+            {t(`${provider}.${steps[stepIndex].titleKey}` as Parameters<typeof t>[0])}
+          </h2>
+          <p className="text-sm leading-relaxed text-muted">
+            {t(`${provider}.${steps[stepIndex].bodyKey}` as Parameters<typeof t>[0])}
+          </p>
+
+          <a
+            href={provider === "spotify" ? spotifyPrivacyUrl : applePrivacyUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`${secondaryBtn} w-fit`}
+            aria-label={`${provider === "spotify" ? t("openSpotifyPrivacy") : t("openApplePrivacy")} (${t("externalLinkAria")})`}
+          >
+            {provider === "spotify" ? t("openSpotifyPrivacy") : t("openApplePrivacy")} ↗
+          </a>
+
+          <figure className="overflow-hidden rounded-xl border border-card-border bg-surface shadow-inner">
+            <Image
+              src={steps[stepIndex].imageSrc}
+              alt={t(steps[stepIndex].altKey)}
+              width={1280}
+              height={720}
+              className="h-auto w-full object-contain"
+              sizes="(max-width: 768px) 100vw, 42rem"
+              priority={stepIndex === 0}
+            />
+          </figure>
+
+          <div className="flex flex-col-reverse gap-3 border-t border-card-border pt-6 sm:flex-row sm:justify-between">
+            <button type="button" className={secondaryBtn} onClick={goBackGuide}>
+              {t("back")}
+            </button>
+            <button type="button" className={primaryBtn} onClick={goNextGuide}>
+              {t("next")}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {phase === "import" && provider && (
+        <div
+          className={`relative space-y-6 ${surfaceShellClass} ${
+            isImporting ? "min-h-[22rem] sm:min-h-[26rem]" : ""
+          }`}
+        >
+          {isImporting ? (
+            <div
+              className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 rounded-3xl bg-surface-glass px-6 py-8 text-center shadow-inner backdrop-blur-md"
+              role="status"
+              aria-live="polite"
+              aria-busy="true"
             >
-              {provider === "spotify" ? t("openSpotifyPrivacy") : t("openApplePrivacy")} ↗
-            </a>
+              <div className="relative mb-1">
+                <div
+                  className="h-14 w-14 animate-spin rounded-full border-4 border-border border-t-accent-violet"
+                  aria-hidden
+                />
+              </div>
+              <p className="text-base font-semibold text-foreground">{t("import.importingOverlayTitle")}</p>
+              <p className="max-w-sm text-sm leading-relaxed text-muted">{t("import.importingOverlayHint")}</p>
+              {importFile ? (
+                <p
+                  className="mt-1 max-w-full truncate px-2 text-xs font-medium text-accent-violet"
+                  title={importFile.name}
+                >
+                  {importFile.name}
+                </p>
+              ) : null}
+              <div
+                className="mt-4 h-1.5 w-full max-w-[220px] overflow-hidden rounded-full bg-border"
+                aria-hidden
+              >
+                <div className="h-full w-1/3 rounded-full bg-accent-violet shadow-glow animate-onboarding-import-indeterminate" />
+              </div>
+            </div>
+          ) : null}
 
-            <figure className="overflow-hidden rounded-xl border border-gray-200/90 bg-gray-50 dark:border-gray-700 dark:bg-gray-950/50">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">{t("import.eyebrow")}</p>
+          <OnboardingFlowProgressBar
+            percent={flowProgressPercent}
+            variant="surface"
+            ariaLabel={flowProgressAria}
+          />
+          <h2 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+            {provider === "spotify" ? t("import.spotifyTitle") : t("import.appleTitle")}
+          </h2>
+          <p className="text-sm leading-relaxed text-muted">
+            {provider === "spotify" ? t("import.spotifyBody") : t("import.appleBody")}
+          </p>
+
+          {provider === "spotify" && (
+            <figure className="overflow-hidden rounded-xl border border-card-border bg-surface shadow-inner">
               <Image
-                src={steps[stepIndex].imageSrc}
-                alt={t(steps[stepIndex].altKey)}
+                src="/onboarding/spotify-email-download.png"
+                alt={t("imageAltSpotifyEmail")}
                 width={1280}
                 height={720}
                 className="h-auto w-full object-contain"
                 sizes="(max-width: 768px) 100vw, 42rem"
-                priority={stepIndex === 0}
               />
             </figure>
+          )}
 
-            <div className="flex flex-col-reverse gap-3 border-t border-gray-100 pt-6 dark:border-gray-800 sm:flex-row sm:justify-between">
-              <button type="button" className={secondaryBtn} onClick={goBackGuide}>
-                {t("back")}
-              </button>
-              <button type="button" className={primaryBtn} onClick={goNextGuide}>
-                {t("next")}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {phase === "import" && provider && (
-          <div
-            className={`relative space-y-6 ${isImporting ? "min-h-[22rem] sm:min-h-[26rem]" : ""}`}
-          >
-            {isImporting ? (
-              <div
-                className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 rounded-2xl bg-white/92 px-6 py-8 text-center shadow-inner backdrop-blur-sm dark:bg-gray-950/92"
-                role="status"
-                aria-live="polite"
-                aria-busy="true"
-              >
-                <div className="relative mb-1">
-                  <div
-                    className="h-14 w-14 animate-spin rounded-full border-4 border-gray-200 border-t-accent-violet dark:border-gray-700 dark:border-t-accent-violet"
-                    aria-hidden
-                  />
-                </div>
-                <p className="text-base font-semibold text-gray-900 dark:text-white">
-                  {t("import.importingOverlayTitle")}
-                </p>
-                <p className="max-w-sm text-sm leading-relaxed text-gray-600 dark:text-gray-400">
-                  {t("import.importingOverlayHint")}
-                </p>
-                {importFile ? (
-                  <p
-                    className="mt-1 max-w-full truncate px-2 text-xs font-medium text-accent-violet dark:text-violet-300"
-                    title={importFile.name}
-                  >
-                    {importFile.name}
-                  </p>
-                ) : null}
-                <div
-                  className="mt-4 h-1.5 w-full max-w-[220px] overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700"
-                  aria-hidden
-                >
-                  <div className="h-full w-1/3 rounded-full bg-accent-violet shadow-sm shadow-accent-violet/40 animate-onboarding-import-indeterminate" />
-                </div>
-              </div>
-            ) : null}
-
-            <p className="text-xs font-semibold uppercase tracking-widest text-primary">
-              {t("import.eyebrow")}
-            </p>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">
-              {provider === "spotify" ? t("import.spotifyTitle") : t("import.appleTitle")}
-            </h2>
-            <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-300">
-              {provider === "spotify" ? t("import.spotifyBody") : t("import.appleBody")}
-            </p>
-
-            {provider === "spotify" && (
-              <figure className="overflow-hidden rounded-xl border border-gray-200/90 bg-gray-50 dark:border-gray-700 dark:bg-gray-950/50">
-                <Image
-                  src="/onboarding/spotify-email-download.png"
-                  alt={t("imageAltSpotifyEmail")}
-                  width={1280}
-                  height={720}
-                  className="h-auto w-full object-contain"
-                  sizes="(max-width: 768px) 100vw, 42rem"
-                />
-              </figure>
-            )}
-
-            {provider === "apple" && (
-              <a
-                href={appleArchiveUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={secondaryBtn}
-                aria-label={`${t("import.openAppleDownloads")} (${t("externalLinkAria")})`}
-              >
-                {t("import.openAppleDownloads")} ↗
-              </a>
-            )}
-
-            <input
-              ref={fileInputRef}
-              type="file"
-              className="sr-only"
-              accept={provider === "spotify" ? ".zip,application/zip" : ".csv,text/csv"}
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                setImportFile(f ?? null);
-              }}
-            />
-            <button
-              type="button"
-              className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-300 bg-gray-50/80 px-4 py-10 text-center text-sm text-gray-700 transition-colors hover:border-accent-violet/50 hover:bg-violet-50/40 disabled:pointer-events-none disabled:opacity-50 dark:border-gray-600 dark:bg-gray-950/40 dark:text-gray-200 dark:hover:border-accent-violet/40"
-              disabled={isImporting}
-              onClick={() => fileInputRef.current?.click()}
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={(e) => {
-                e.preventDefault();
-                if (isImporting) return;
-                const f = e.dataTransfer.files?.[0];
-                if (f) setImportFile(f);
-              }}
+          {provider === "apple" && (
+            <a
+              href={appleArchiveUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`${secondaryBtn} w-fit`}
+              aria-label={`${t("import.openAppleDownloads")} (${t("externalLinkAria")})`}
             >
-              <span className="font-semibold text-gray-900 dark:text-white">{t("import.dropTitle")}</span>
-              <span className="text-xs text-gray-500 dark:text-gray-400">{t("import.dropSub")}</span>
-              {importFile ? (
-                <span className="mt-1 text-xs font-medium text-accent-violet">
-                  {t("import.selectedFile", { name: importFile.name })}
-                </span>
-              ) : null}
-            </button>
+              {t("import.openAppleDownloads")} ↗
+            </a>
+          )}
 
-            <div className="flex flex-col-reverse gap-3 border-t border-gray-100 pt-6 dark:border-gray-800 sm:flex-row sm:justify-between">
+          <input
+            ref={fileInputRef}
+            type="file"
+            className="sr-only"
+            accept={provider === "spotify" ? ".zip,application/zip" : ".csv,text/csv"}
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              setImportFile(f ?? null);
+            }}
+          />
+          <button
+            type="button"
+            className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-card-border bg-surface px-4 py-10 text-center text-sm text-foreground transition-colors hover:border-accent-violet/40 hover:bg-accent-violet/5 disabled:pointer-events-none disabled:opacity-50 dark:hover:bg-accent-violet/10"
+            disabled={isImporting}
+            onClick={() => fileInputRef.current?.click()}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => {
+              e.preventDefault();
+              if (isImporting) return;
+              const f = e.dataTransfer.files?.[0];
+              if (f) setImportFile(f);
+            }}
+          >
+            <span className="font-semibold text-foreground">{t("import.dropTitle")}</span>
+            <span className="text-xs text-muted">
+              {provider === "spotify" ? t("import.dropSubSpotify") : t("import.dropSubApple")}
+            </span>
+            {importFile ? (
+              <span className="mt-1 text-xs font-medium text-accent-violet">
+                {t("import.selectedFile", { name: importFile.name })}
+              </span>
+            ) : null}
+          </button>
+
+          <div className="flex flex-col-reverse gap-3 border-t border-card-border pt-6 sm:flex-row sm:justify-between">
+            <button type="button" className={secondaryBtn} onClick={goBackImport} disabled={isImporting}>
+              {t("back")}
+            </button>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <button
                 type="button"
-                className={secondaryBtn}
-                onClick={goBackImport}
+                className={`${secondaryBtn} text-muted`}
+                onClick={skipImportToFinish}
                 disabled={isImporting}
               >
-                {t("back")}
+                {t("import.skipImport")}
               </button>
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                <button
-                  type="button"
-                  className={`${secondaryBtn} text-gray-600 dark:text-gray-400`}
-                  onClick={skipImportToFinish}
-                  disabled={isImporting}
-                >
-                  {t("import.skipImport")}
-                </button>
-                <button
-                  type="button"
-                  className={`${primaryBtn} inline-flex items-center gap-2`}
-                  onClick={() => void submitImport()}
-                  disabled={isImporting || !importFile}
-                >
-                  {isImporting ? (
-                    <>
-                      <span
-                        className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-white/40 border-t-white"
-                        aria-hidden
-                      />
-                      <span>{t("import.importing")}</span>
-                    </>
-                  ) : (
-                    t("import.importSubmit")
-                  )}
-                </button>
-              </div>
+              <button
+                type="button"
+                className={`${primaryBtn} inline-flex items-center gap-2`}
+                onClick={() => void submitImport()}
+                disabled={isImporting || !importFile}
+              >
+                {isImporting ? (
+                  <>
+                    <span
+                      className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-white/40 border-t-white"
+                      aria-hidden
+                    />
+                    <span>{t("import.importing")}</span>
+                  </>
+                ) : (
+                  t("import.importSubmit")
+                )}
+              </button>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {phase === "finish" && (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">{t("finishTitle")}</h2>
-            <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-300">
-              {importSummary
-                ? t("finishAfterImport", {
+      {phase === "finish" && (
+        <div className="space-y-8">
+          {importSummary ? (
+            <OnboardingHeroShell>
+              <div className="max-w-3xl space-y-6">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-200/90">
+                  {t("finishSuccessEyebrow")}
+                </p>
+                <DashboardHeroTitle icon={CheckCircle2} variant="hero">
+                  {t("finishTitle")}
+                </DashboardHeroTitle>
+                <OnboardingFlowProgressBar
+                  percent={flowProgressPercent}
+                  variant="hero"
+                  ariaLabel={flowProgressAria}
+                />
+                <p className="sr-only">
+                  {t("finishAfterImport", {
                     imported: importSummary.imported,
                     skipped: importSummary.skippedDuplicates,
-                  })
-                : t("finishBody")}
-            </p>
-            {genreLlmAfterImport &&
-            genreLlmAfterImport.unknownTrackCount > 0 &&
-            !genreBackfillJob?.id &&
-            !genreLlmDeclined ? (
-              <section
-                className="space-y-3 rounded-xl border border-sky-200/80 bg-sky-50/80 p-4 dark:border-sky-900/50 dark:bg-sky-950/30"
-                aria-labelledby="onboarding-genre-llm-consent-heading"
-              >
-                <h3
-                  id="onboarding-genre-llm-consent-heading"
-                  className="text-sm font-semibold text-sky-950 dark:text-sky-50"
-                >
-                  {t("genreLlmConsent.title")}
-                </h3>
-                <p className="text-xs leading-relaxed text-sky-900/95 dark:text-sky-100/90">
-                  {t("genreLlmConsent.body", {
-                    unknown: genreLlmAfterImport.unknownTrackCount,
-                    pct: genreLlmAfterImport.unknownRatio.toFixed(1),
                   })}
                 </p>
-                {!genreLlmAfterImport.groqConfigured ? (
-                  <p className="text-xs font-medium text-amber-900 dark:text-amber-200">
-                    {t("genreLlmConsent.missingKey")}
-                  </p>
-                ) : (
-                  <p className="text-xs text-sky-900/90 dark:text-sky-100/85">{t("genreLlmConsent.privacy")}</p>
-                )}
-                <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-                  <button
-                    type="button"
-                    className={primaryBtn}
-                    disabled={!genreLlmAfterImport.groqConfigured || isStartingLlmBackfill}
-                    onClick={() => void startLlmGenreBackfill()}
-                  >
-                    {isStartingLlmBackfill ? t("genreLlmConsent.starting") : t("genreLlmConsent.accept")}
-                  </button>
-                  <button
-                    type="button"
-                    className={secondaryBtn}
-                    disabled={isStartingLlmBackfill}
-                    onClick={() => {
-                      setGenreLlmDeclined(true);
-                      setGenreBackfillBannerOptOut(true);
-                    }}
-                  >
-                    {t("genreLlmConsent.decline")}
-                  </button>
-                </div>
-              </section>
-            ) : null}
-            {effectiveBackfill ? (
-              <section className="space-y-3 rounded-xl border border-violet-200/80 bg-violet-50/70 p-4 dark:border-violet-900/50 dark:bg-violet-950/30">
-                <p className="text-sm font-semibold text-violet-900 dark:text-violet-100">
-                  {t("genreBackfill.title")}
-                </p>
-                <p className="text-xs text-violet-800/90 dark:text-violet-200/90">
-                  {hasBackfillInProgress
-                    ? effectiveBackfill.status === "paused"
-                      ? t("genreBackfill.paused")
-                      : t("genreBackfill.running")
-                    : effectiveBackfill.status === "completed"
-                      ? t("genreBackfill.completed")
-                      : effectiveBackfill.status === "cancelled"
-                        ? t("genreBackfill.cancelled")
-                        : t("genreBackfill.failed")}
-                </p>
-                <div className="h-2 w-full overflow-hidden rounded-full bg-violet-200/70 dark:bg-violet-900/60">
-                  <div
-                    className="h-full rounded-full bg-accent-violet transition-all"
-                    style={{ width: `${Math.round(backfillProgressRatio * 100)}%` }}
-                  />
-                </div>
-                <div className="grid gap-2 text-xs text-violet-900 dark:text-violet-100 sm:grid-cols-2">
-                  <p>{t("genreBackfill.artistsProcessed", { count: effectiveBackfill.artistsProcessed })}</p>
-                  <p>{t("genreBackfill.artistsMapped", { count: effectiveBackfill.artistsMapped })}</p>
-                  <p>{t("genreBackfill.tracksUpdated", { count: effectiveBackfill.tracksUpdated })}</p>
-                  <p>{t("genreBackfill.requestsUsed", { count: effectiveBackfill.apiRequestsUsed })}</p>
-                </div>
-                {effectiveBackfill.initialUnknownPct != null &&
-                effectiveBackfill.currentUnknownPct != null ? (
-                  <p className="text-xs text-violet-900/90 dark:text-violet-100/90">
-                    {t("genreBackfill.ratio", {
-                      initial: effectiveBackfill.initialUnknownPct.toFixed(1),
-                      current: effectiveBackfill.currentUnknownPct.toFixed(1),
-                      target: effectiveBackfill.targetUnknownPct.toFixed(1),
-                    })}
-                  </p>
-                ) : null}
-                {effectiveBackfill.errorMessage ? (
-                  <p className="text-xs text-red-700 dark:text-red-300">
-                    {t("genreBackfill.error", { message: effectiveBackfill.errorMessage })}
-                  </p>
-                ) : null}
-                {shouldOfferNextLlmSession || shouldOfferRetryLlmSession ? (
-                  <div className="space-y-2 rounded-lg border border-violet-300/70 bg-white/70 p-3 dark:border-violet-700/60 dark:bg-violet-950/20">
-                    <p className="text-xs text-violet-900 dark:text-violet-100">
-                      {shouldOfferRetryLlmSession
-                        ? t("genreLlmConsent.nextSessionAfterError")
-                        : t("genreLlmConsent.nextSessionPrompt", {
-                            current: effectiveBackfill.currentUnknownPct?.toFixed(1) ?? "0.0",
-                            target: effectiveBackfill.targetUnknownPct.toFixed(1),
-                          })}
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="rounded-2xl border border-emerald-400/30 bg-emerald-500/[0.12] px-5 py-4 shadow-[inset_0_1px_0_0_rgb(255_255_255_/0.06)] backdrop-blur-sm">
+                    <p className="text-3xl font-bold tabular-nums tracking-tight text-white sm:text-4xl">
+                      {importSummary.imported.toLocaleString()}
                     </p>
-                    <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                    <p className="mt-1 text-sm font-medium text-emerald-100/90">{t("finishImportedLabel")}</p>
+                  </div>
+                  <div className="rounded-2xl border border-violet-200/20 bg-slate-950/45 px-5 py-4 shadow-[inset_0_1px_0_0_rgb(255_255_255_/0.05)] backdrop-blur-sm">
+                    <p className="text-3xl font-bold tabular-nums tracking-tight text-violet-50 sm:text-4xl">
+                      {importSummary.skippedDuplicates.toLocaleString()}
+                    </p>
+                    <p className="mt-1 text-sm font-medium text-violet-100/85">{t("finishSkippedLabel")}</p>
+                  </div>
+                </div>
+                <p className="text-base leading-relaxed text-violet-100/90 sm:text-[1.05rem]">{t("finishNextHint")}</p>
+              </div>
+            </OnboardingHeroShell>
+          ) : (
+            <OnboardingHeroShell>
+              <div className="max-w-3xl space-y-6">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-200/85">
+                  {t("finishSkippedEyebrow")}
+                </p>
+                <DashboardHeroTitle icon={Sparkles} variant="hero">
+                  {t("finishTitle")}
+                </DashboardHeroTitle>
+                <OnboardingFlowProgressBar
+                  percent={flowProgressPercent}
+                  variant="hero"
+                  ariaLabel={flowProgressAria}
+                />
+                <p className="text-base leading-relaxed text-violet-100/92 sm:text-lg">{t("finishBody")}</p>
+              </div>
+            </OnboardingHeroShell>
+          )}
+
+          <div className={`${surfaceShellClass} space-y-6`}>
+          {genreLlmAfterImport &&
+          genreLlmAfterImport.unknownTrackCount > 0 &&
+          !genreBackfillJob?.id &&
+          !genreLlmDeclined ? (
+            <section aria-labelledby="onboarding-genre-llm-consent-heading">
+              <GenreAiPanelChrome className="p-5 sm:p-6">
+                <div className="space-y-5">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="flex min-w-0 gap-3 sm:gap-4">
+                      <div
+                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,_rgba(139,92,246,0.38),_rgba(34,211,238,0.22))] shadow-[inset_0_1px_0_0_rgb(255_255_255_/0.15)] ring-1 ring-white/15"
+                        aria-hidden
+                      >
+                        <Sparkles className="h-5 w-5 text-cyan-50 drop-shadow-[0_0_12px_rgba(34,211,238,0.45)]" />
+                      </div>
+                      <div className="min-w-0 space-y-2">
+                        <h3
+                          id="onboarding-genre-llm-consent-heading"
+                          className="text-base font-semibold leading-snug text-foreground sm:text-[1.05rem]"
+                        >
+                          {t("genreLlmConsent.title")}
+                        </h3>
+                        <p className="text-sm leading-relaxed text-muted">
+                          {t("genreLlmConsent.body", {
+                            unknown: genreLlmAfterImport.unknownTrackCount,
+                            pct: genreLlmAfterImport.unknownRatio.toFixed(1),
+                          })}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  {!genreLlmAfterImport.groqConfigured ? (
+                    <div className="rounded-xl border border-amber-400/40 bg-amber-500/[0.1] px-4 py-3 text-sm font-medium leading-snug text-amber-950 shadow-inner dark:text-amber-50">
+                      {t("genreLlmConsent.missingKey")}
+                    </div>
+                  ) : (
+                    <div className="rounded-xl border border-white/12 bg-black/[0.18] px-4 py-3 text-xs leading-relaxed text-violet-100/85 shadow-[inset_0_1px_0_0_rgb(255_255_255_/0.06)]">
+                      {t("genreLlmConsent.privacy")}
+                    </div>
+                  )}
+                  <div className="flex flex-col gap-3 pt-1 sm:flex-row sm:flex-wrap sm:items-stretch">
+                    <button
+                      type="button"
+                      className={`${GENRE_AI_ACCEPT_BTN} sm:flex-1`}
+                      disabled={!genreLlmAfterImport.groqConfigured || isStartingLlmBackfill}
+                      onClick={() => void startLlmGenreBackfill()}
+                    >
+                      {isStartingLlmBackfill ? (
+                        <>
+                          <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+                          <span>{t("genreLlmConsent.starting")}</span>
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="h-4 w-4 shrink-0 opacity-90 transition-transform duration-200 group-hover:scale-105" aria-hidden />
+                          <span>{t("genreLlmConsent.accept")}</span>
+                        </>
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      className={`${GENRE_AI_DECLINE_BTN} sm:flex-1`}
+                      disabled={isStartingLlmBackfill}
+                      onClick={() => {
+                        setGenreLlmDeclined(true);
+                        setGenreBackfillBannerOptOut(true);
+                      }}
+                    >
+                      {t("genreLlmConsent.decline")}
+                    </button>
+                  </div>
+                </div>
+              </GenreAiPanelChrome>
+            </section>
+          ) : null}
+          {effectiveBackfill ? (
+            <section aria-label={t("genreBackfill.title")}>
+              <GenreAiPanelChrome className="p-5 sm:p-6">
+                <div className="space-y-5">
+                  <div className="flex gap-3 sm:gap-4">
+                    <div
+                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,_rgba(139,92,246,0.38),_rgba(34,211,238,0.22))] shadow-[inset_0_1px_0_0_rgb(255_255_255_/0.15)] ring-1 ring-white/15"
+                      aria-hidden
+                    >
+                      {hasBackfillInProgress ? (
+                        <Loader2 className="h-5 w-5 animate-spin text-cyan-50" />
+                      ) : (
+                        <Sparkles className="h-5 w-5 text-cyan-50 drop-shadow-[0_0_12px_rgba(34,211,238,0.45)]" />
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1 space-y-2">
+                      <p className="text-base font-semibold leading-snug text-foreground sm:text-[1.05rem]">
+                        {t("genreBackfill.title")}
+                      </p>
+                      <p className="text-xs leading-relaxed text-violet-100/85 sm:text-sm">
+                        {hasBackfillInProgress
+                          ? effectiveBackfill.status === "paused"
+                            ? t("genreBackfill.paused")
+                            : t("genreBackfill.running")
+                          : effectiveBackfill.status === "completed"
+                            ? t("genreBackfill.completed")
+                            : effectiveBackfill.status === "cancelled"
+                              ? t("genreBackfill.cancelled")
+                              : t("genreBackfill.failed")}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="h-2 w-full overflow-hidden rounded-full bg-white/[0.1] ring-1 ring-inset ring-white/[0.06]">
+                    <div
+                      className={`h-full rounded-full ${ONBOARDING_RAIL_CLASS} shadow-[0_0_18px_rgba(139,92,246,0.35)] transition-[width] duration-500 ease-out`}
+                      style={{ width: `${Math.round(backfillProgressRatio * 100)}%` }}
+                    />
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="rounded-xl border border-emerald-400/25 bg-emerald-500/[0.09] px-4 py-3 shadow-[inset_0_1px_0_0_rgb(255_255_255_/0.06)]">
+                      <p className="text-xs font-medium text-emerald-100/90">
+                        {t("genreBackfill.artistsProcessed", { count: effectiveBackfill.artistsProcessed })}
+                      </p>
+                    </div>
+                    <div className="rounded-xl border border-violet-300/25 bg-violet-500/[0.08] px-4 py-3 shadow-[inset_0_1px_0_0_rgb(255_255_255_/0.06)]">
+                      <p className="text-xs font-medium text-violet-100/90">
+                        {t("genreBackfill.artistsMapped", { count: effectiveBackfill.artistsMapped })}
+                      </p>
+                    </div>
+                    <div className="rounded-xl border border-cyan-400/25 bg-cyan-500/[0.08] px-4 py-3 shadow-[inset_0_1px_0_0_rgb(255_255_255_/0.06)]">
+                      <p className="text-xs font-medium text-cyan-100/90">
+                        {t("genreBackfill.tracksUpdated", { count: effectiveBackfill.tracksUpdated })}
+                      </p>
+                    </div>
+                    <div className="rounded-xl border border-white/15 bg-black/[0.15] px-4 py-3 shadow-[inset_0_1px_0_0_rgb(255_255_255_/0.06)]">
+                      <p className="text-xs font-medium text-violet-100/85">
+                        {t("genreBackfill.requestsUsed", { count: effectiveBackfill.apiRequestsUsed })}
+                      </p>
+                    </div>
+                  </div>
+                  {effectiveBackfill.initialUnknownPct != null &&
+                  effectiveBackfill.currentUnknownPct != null ? (
+                    <p className="text-xs leading-relaxed text-muted">
+                      {t("genreBackfill.ratio", {
+                        initial: effectiveBackfill.initialUnknownPct.toFixed(1),
+                        current: effectiveBackfill.currentUnknownPct.toFixed(1),
+                        target: effectiveBackfill.targetUnknownPct.toFixed(1),
+                      })}
+                    </p>
+                  ) : null}
+                  {effectiveBackfill.errorMessage ? (
+                    <p className="rounded-xl border border-red-400/35 bg-red-500/[0.12] px-4 py-3 text-xs leading-relaxed text-red-100">
+                      {t("genreBackfill.error", { message: effectiveBackfill.errorMessage })}
+                    </p>
+                  ) : null}
+                  {shouldOfferNextLlmSession || shouldOfferRetryLlmSession ? (
+                    <div className="space-y-3 rounded-xl border border-violet-300/25 bg-black/[0.2] p-4 shadow-inner ring-1 ring-white/[0.04]">
+                      <p className="text-sm leading-relaxed text-violet-50/95">
+                        {shouldOfferRetryLlmSession
+                          ? t("genreLlmConsent.nextSessionAfterError")
+                          : t("genreLlmConsent.nextSessionPrompt", {
+                              current: effectiveBackfill.currentUnknownPct?.toFixed(1) ?? "0.0",
+                              target: effectiveBackfill.targetUnknownPct.toFixed(1),
+                            })}
+                      </p>
                       <button
                         type="button"
-                        className={primaryBtn}
+                        className={`${GENRE_AI_ACCEPT_BTN} w-full sm:w-auto`}
                         disabled={isStartingLlmBackfill}
                         onClick={() => void startLlmGenreBackfill()}
                       >
-                        {isStartingLlmBackfill
-                          ? t("genreLlmConsent.starting")
-                          : t("genreLlmConsent.startNextSession")}
+                        {isStartingLlmBackfill ? (
+                          <>
+                            <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+                            <span>{t("genreLlmConsent.starting")}</span>
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
+                            <span>{t("genreLlmConsent.startNextSession")}</span>
+                          </>
+                        )}
                       </button>
                     </div>
-                  </div>
-                ) : null}
-              </section>
-            ) : null}
+                  ) : null}
+                </div>
+              </GenreAiPanelChrome>
+            </section>
+          ) : null}
+          <div
+            className={
+              finishSurfaceHasExtras
+                ? "flex flex-col gap-3 border-t border-card-border pt-6"
+                : "flex flex-col gap-3 pt-2"
+            }
+          >
             <button
               type="button"
-              className={primaryBtn}
+              className={`${welcomeContinueBtn} disabled:pointer-events-none disabled:opacity-60`}
               onClick={() => void completeOnboarding()}
               disabled={isSubmitting}
             >
-              {isSubmitting ? t("finishing") : t("goToDashboard")}
+              <span>{isSubmitting ? t("finishing") : t("goToDashboard")}</span>
+              {!isSubmitting ? (
+                <ArrowRight
+                  className="h-[1.125rem] w-[1.125rem] shrink-0 transition-transform duration-200 group-hover:translate-x-0.5"
+                  aria-hidden
+                />
+              ) : (
+                <span
+                  className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-white/40 border-t-white"
+                  aria-hidden
+                />
+              )}
             </button>
             {paletteInvitation?.shouldInvite ? (
               <button
                 type="button"
-                className={secondaryBtn}
+                className={`${secondaryBtn} inline-flex w-full items-center justify-center gap-2 sm:w-auto sm:self-center`}
                 onClick={() => router.push("/dashboard/genres/palette")}
                 disabled={isSubmitting}
               >
-                Palette ({paletteInvitation.unknownArtists})
+                <Palette className="h-4 w-4 shrink-0 text-accent-violet opacity-90" aria-hidden />
+                <span>
+                  {t("finishPaletteCta", { count: paletteInvitation.unknownArtists })}
+                </span>
               </button>
             ) : null}
           </div>
-        )}
-      </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -7,6 +7,8 @@
 
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
+import { getPublicProfileUserId } from "@/lib/constants/public-profile";
+import { DASHBOARD_ONBOARDING_REIMPORT_PATH } from "@/lib/utils/onboarding-route";
 import { Inbox } from "lucide-react";
 
 export interface EmptyStateAction {
@@ -211,19 +213,37 @@ export function EmptyState({
 /** Hook qui retourne les presets d'état vide traduits */
 export function useEmptyStatePresets() {
   const t = useTranslations("components.emptyState");
+  const publicProfileId = getPublicProfileUserId();
+  const publicDemoHref =
+    publicProfileId !== null
+      ? `/dashboard/overview?userId=${encodeURIComponent(publicProfileId)}`
+      : null;
+
+  const actionsWithPublicDemo = (primaryHref: string, primaryLabel: string): EmptyStateAction[] => [
+    { label: primaryLabel, href: primaryHref },
+    ...(publicDemoHref
+      ? ([{ label: t("publicDemoLabel"), href: publicDemoHref }] as EmptyStateAction[])
+      : []),
+  ];
 
   return {
     importData: {
       message: t("importData.message"),
       description: t("importData.description"),
       illustration: ILLUSTRATIONS.stats,
-      actions: [{ label: t("importData.actionLabel"), href: "/api-docs" }] as EmptyStateAction[],
+      actions: actionsWithPublicDemo(
+        DASHBOARD_ONBOARDING_REIMPORT_PATH,
+        t("importData.actionLabel"),
+      ),
     },
     importReplay: {
       message: t("importReplay.message"),
       description: t("importReplay.description"),
       illustration: ILLUSTRATIONS.replay,
-      actions: [{ label: t("importReplay.actionLabel"), href: "/api-docs" }] as EmptyStateAction[],
+      actions: actionsWithPublicDemo(
+        DASHBOARD_ONBOARDING_REIMPORT_PATH,
+        t("importReplay.actionLabel"),
+      ),
     },
     changeDates: (basePath: string) => ({
       message: t("changeDates.message"),

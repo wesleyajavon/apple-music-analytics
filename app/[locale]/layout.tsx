@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const t = await getTranslations({ locale, namespace: "metadata" });
 
-  const ogImage = "/brand/soundprint-logo.png";
+  const ogImage = "/brand/soundprint-ai-logo.png";
 
   return {
     title: t("title"),
@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
           url: ogImage,
           width: 512,
           height: 512,
-          alt: "Soundprint",
+          alt: "Soundprint-AI",
         },
       ],
     },

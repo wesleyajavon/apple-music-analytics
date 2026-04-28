@@ -450,7 +450,7 @@ function SidebarContent() {
               />
               {!isCollapsed && (
                 <div className="flex min-w-0 flex-col justify-center gap-0.5">
-                  <span className="truncate text-xl font-bold tracking-tight text-foreground">Soundprint</span>
+                  <span className="truncate text-xl font-bold tracking-tight text-foreground">{t("logo")}</span>
                   <span className="text-[11px] font-medium leading-snug text-muted">{t("tagline")}</span>
                 </div>
               )}

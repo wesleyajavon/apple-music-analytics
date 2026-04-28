@@ -8,7 +8,7 @@ type SoundprintLogoProps = {
   priority?: boolean;
 };
 
-const LOGO_SRC = "/brand/soundprint-logo.png";
+const LOGO_SRC = "/brand/soundprint-ai-logo.png";
 
 export function SoundprintLogo({
   className = "",
@@ -21,13 +21,13 @@ export function SoundprintLogo({
     <span className={`inline-flex items-center gap-2 ${className}`}>
       <Image
         src={LOGO_SRC}
-        alt={showText ? "" : "Soundprint"}
+        alt={showText ? "" : "Soundprint-AI"}
         width={256}
         height={256}
         className={`object-cover ${imageClassName}`}
         priority={priority}
       />
-      {showText ? <span className={textClassName}>Soundprint</span> : null}
+      {showText ? <span className={textClassName}>Soundprint-AI</span> : null}
     </span>
   );
 }

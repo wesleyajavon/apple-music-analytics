@@ -11,7 +11,7 @@ test.describe("Dashboard Navigation", () => {
   });
 
   test("should load the home page", async ({ page }) => {
-    await expect(page).toHaveTitle(/Soundprint/i);
+    await expect(page).toHaveTitle(/Soundprint-AI/i);
   });
 
   test("should navigate to dashboard overview", async ({ page }) => {

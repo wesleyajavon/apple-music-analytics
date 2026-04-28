@@ -31,7 +31,7 @@
     "expandSidebar": "Expand sidebar",
     "collapseSection": "Collapse {label}",
     "expandSection": "Expand {label}",
-    "logo": "Soundprint",
+    "logo": "Soundprint-AI",
     "tagline": "Your listening, visualized",
     "appearance": "Appearance",
     "language": "Language",
@@ -135,7 +135,7 @@
     "alreadyAccount": "Already have an account?",
     "signUpSuccess": "Account created. Check your email to confirm your sign up.",
     "skipToContent": "Skip to sign-in form",
-    "homeLinkAriaLabel": "Soundprint — home",
+    "homeLinkAriaLabel": "Soundprint-AI — home",
     "authNavAriaLabel": "Account pages",
     "dashboardLink": "Wesley's dashboard",
     "continueWithGoogle": "Continue with Google",
@@ -293,14 +293,14 @@
     }
   },
   "footer": {
-    "brand": "Soundprint",
+    "brand": "Soundprint-AI",
     "tagline": "Your personal listening analytics",
     "overview": "Your Music",
     "about": "How it works",
     "demo": "Demo",
     "methodology": "Methodology",
     "apiDocs": "API Docs",
-    "copyright": "Soundprint. All rights reserved.",
+    "copyright": "Soundprint-AI. All rights reserved.",
     "madeWith": "Made with care for music lovers",
     "creatorCredit": "Wesley Ajavon made this",
     "navAriaLabel": "Footer navigation"
@@ -779,7 +779,7 @@
     "pp": "pp"
   },
   "taste-profile": {
-    "title": "Your Soundprint, decoded",
+    "title": "Your Soundprint-AI, decoded",
     "featureBadge": "AI music read",
     "subtitleShort": "The patterns behind what you play most",
     "seeMore": "See more",
@@ -807,7 +807,7 @@
     "influences": "Influences",
     "coreGenres": "Core genres",
     "whatMakesYouUnique": "What makes you unique",
-    "footer": "Generated from your listening data • Soundprint"
+    "footer": "Generated from your listening data • Soundprint-AI"
   },
   "musical-profile": {
     "title": "Musical Profile",
@@ -830,7 +830,7 @@
     "aiUnavailable": "AI is currently disabled for this environment or browser, so this page is showing a deterministic profile from your stats.",
     "aiErrorTitle": "AI analysis unavailable. Showing a data-based summary instead.",
     "overviewCallout": {
-      "badge": "Start with the heart of Soundprint",
+      "badge": "Start with the heart of Soundprint-AI",
       "title": "Your Music is the overview that ties everything together",
       "body": "Use Your Music as your home base: it summarizes your listens, artists, tracks, time, recent movement, and genre mix before you dive into deeper pages like this profile.",
       "cta": "Open Your Music"
@@ -893,7 +893,7 @@
     "tableListens": "Listens",
     "tableArtists": "Artists",
     "tableTracks": "Tracks",
-    "footer": "Generated on {date} - Soundprint Dashboard"
+    "footer": "Generated on {date} - Soundprint-AI Dashboard"
   },
   "insights": {
     "title": "Insights & methodology",
@@ -1195,12 +1195,12 @@
     "subtitle": "A quick guide to understand where your listening data comes from and what you can explore in the dashboard today.",
     "heroBadge": "User guide",
     "brandCard": {
-      "title": "Soundprint",
+      "title": "Soundprint-AI",
       "lead": "A personal analytics space for your Apple Music and Last.fm history—trends, habits, and insights in one calm dashboard."
     },
     "whatIs": {
       "title": "What is this?",
-      "paragraph": "Soundprint is a personal dashboard that visualizes your listening habits over time. You can ingest data from Last.fm scrobbles or Apple Music CSV exports, then explore stats, trends, and insights in one place."
+      "paragraph": "Soundprint-AI is a personal dashboard that visualizes your listening habits over time. You can ingest data from Last.fm scrobbles or Apple Music CSV exports, then explore stats, trends, and insights in one place."
     },
     "whyLastfm": {
       "title": "Why Last.fm instead of Apple Music?",
@@ -1240,7 +1240,7 @@
     }
   },
   "home": {
-    "title": "Soundprint",
+    "title": "Soundprint-AI",
     "welcome": "Your listening, clearly explained.",
     "welcomePersonal": "Welcome back, {name}",
     "subtitle": "Analyze your listening habits and discover your musical trends.",
@@ -1262,7 +1262,7 @@
     }
   },
   "metadata": {
-    "title": "Soundprint Dashboard",
+    "title": "Soundprint-AI Dashboard",
     "description": "Personal analytics dashboard for Apple Music listening behavior"
   }
 }

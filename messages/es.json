@@ -31,7 +31,7 @@
     "expandSidebar": "Expandir barra lateral",
     "collapseSection": "Contraer {label}",
     "expandSection": "Expandir {label}",
-    "logo": "Soundprint",
+    "logo": "Soundprint-AI",
     "tagline": "Tu escucha, visualizada",
     "appearance": "Apariencia",
     "language": "Idioma",
@@ -135,7 +135,7 @@
     "alreadyAccount": "¿Ya tienes cuenta?",
     "signUpSuccess": "Cuenta creada. Revisa tu email para confirmar el registro.",
     "skipToContent": "Ir al formulario de inicio de sesión",
-    "homeLinkAriaLabel": "Soundprint — inicio",
+    "homeLinkAriaLabel": "Soundprint-AI — inicio",
     "authNavAriaLabel": "Navegación de cuenta",
     "dashboardLink": "Dashboard de Wesley",
     "continueWithGoogle": "Continuar con Google",
@@ -293,14 +293,14 @@
     }
   },
   "footer": {
-    "brand": "Soundprint",
+    "brand": "Soundprint-AI",
     "tagline": "Tus analytics de escucha personales",
     "overview": "Your Music",
     "about": "Cómo funciona",
     "demo": "Demo",
     "methodology": "Metodología",
     "apiDocs": "API Docs",
-    "copyright": "Soundprint. Todos los derechos reservados.",
+    "copyright": "Soundprint-AI. Todos los derechos reservados.",
     "madeWith": "Hecho para quienes aman la música",
     "creatorCredit": "Creado por Wesley Ajavon",
     "navAriaLabel": "Navegación del pie de página"
@@ -779,7 +779,7 @@
     "pp": "pp"
   },
   "taste-profile": {
-    "title": "Tu Soundprint, descifrado",
+    "title": "Tu Soundprint-AI, descifrado",
     "featureBadge": "Lectura musical IA",
     "subtitleShort": "Los patrones detrás de lo que más escuchas",
     "seeMore": "Ver más",
@@ -807,7 +807,7 @@
     "influences": "Influencias",
     "coreGenres": "Géneros principales",
     "whatMakesYouUnique": "Lo que te distingue",
-    "footer": "Generado a partir de tus datos de escucha • Soundprint"
+    "footer": "Generado a partir de tus datos de escucha • Soundprint-AI"
   },
   "musical-profile": {
     "title": "Perfil musical",
@@ -830,7 +830,7 @@
     "aiUnavailable": "La IA está desactivada para este entorno o navegador, por lo que esta página muestra un perfil determinista basado en tus estadísticas.",
     "aiErrorTitle": "Análisis IA no disponible. Mostrando un resumen basado en datos.",
     "overviewCallout": {
-      "badge": "Empieza por el corazón de Soundprint",
+      "badge": "Empieza por el corazón de Soundprint-AI",
       "title": "Your Music es la vista general que conecta todo",
       "body": "Usa Your Music como punto de partida: resume tus escuchas, artistas, canciones, tiempo de escucha, evolución reciente y mezcla de géneros antes de abrir vistas más profundas como este perfil.",
       "cta": "Abrir Your Music"
@@ -893,7 +893,7 @@
     "tableListens": "Escuchas",
     "tableArtists": "Artistas",
     "tableTracks": "Canciones",
-    "footer": "Generado el {date} - Soundprint Dashboard"
+    "footer": "Generado el {date} - Soundprint-AI Dashboard"
   },
   "insights": {
     "title": "Insights y metodología",
@@ -1195,12 +1195,12 @@
     "subtitle": "Una guía rápida para entender de dónde vienen tus datos de escucha y qué puedes explorar hoy en el dashboard.",
     "heroBadge": "Guía de usuario",
     "brandCard": {
-      "title": "Soundprint",
+      "title": "Soundprint-AI",
       "lead": "Un espacio personal de analíticas para tu historial de Apple Music y Last.fm: tendencias, hábitos e insights en un solo dashboard claro."
     },
     "whatIs": {
       "title": "¿Qué es esto?",
-      "paragraph": "Soundprint es un dashboard personal que visualiza la evolución de tus hábitos de escucha. Puedes cargar datos desde scrobbles de Last.fm o exportaciones CSV de Apple Music, y explorar estadísticas, tendencias e insights en un solo lugar."
+      "paragraph": "Soundprint-AI es un dashboard personal que visualiza la evolución de tus hábitos de escucha. Puedes cargar datos desde scrobbles de Last.fm o exportaciones CSV de Apple Music, y explorar estadísticas, tendencias e insights en un solo lugar."
     },
     "whyLastfm": {
       "title": "¿Por qué Last.fm en lugar de Apple Music?",
@@ -1240,7 +1240,7 @@
     }
   },
   "home": {
-    "title": "Soundprint",
+    "title": "Soundprint-AI",
     "welcome": "Tu escucha, explicada con claridad.",
     "welcomePersonal": "Bienvenido de nuevo, {name}",
     "subtitle": "Analiza tus hábitos de escucha y descubre tus tendencias musicales.",
@@ -1262,7 +1262,7 @@
     }
   },
   "metadata": {
-    "title": "Soundprint Dashboard",
+    "title": "Soundprint-AI Dashboard",
     "description": "Dashboard de análisis personal para tu comportamiento de escucha en Apple Music"
   }
 }

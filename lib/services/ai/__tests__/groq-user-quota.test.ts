@@ -67,7 +67,13 @@ describe("groq-user-quota helpers", () => {
     expect(isGroqUserQuotaEnabled()).toBe(false);
   });
 
-  it("resolveGroqQuotaSubject prefers query userId then body then IP headers", () => {
+  it("resolveGroqQuotaSubject prefers explicit userId then query then IP headers", () => {
+    expect(
+      resolveGroqQuotaSubject(
+        new NextRequest("http://localhost/api?userId=abc"),
+        "xyz"
+      )
+    ).toBe("u:xyz");
     expect(
       resolveGroqQuotaSubject(
         new NextRequest("http://localhost/api?userId=abc")

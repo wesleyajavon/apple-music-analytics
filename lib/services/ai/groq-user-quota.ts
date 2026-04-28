@@ -124,17 +124,18 @@ function getClientIp(request: NextRequest): string | null {
 }
 
 /**
- * Identifiant stable pour le quota : `userId` (query ou body) prioritaire, sinon IP client.
+ * Identifiant stable pour le quota : `explicitUserId` (body ou userId résolu côté route) prioritaire,
+ * puis `userId` en query, sinon IP client.
  * Retourne null si aucun sujet fiable (quota désactivé pour cette requête — fail-open).
  */
 export function resolveGroqQuotaSubject(
   request: NextRequest,
-  bodyUserId?: string
+  explicitUserId?: string
 ): string | null {
+  const trusted = explicitUserId?.trim();
+  if (trusted) return `u:${trusted}`;
   const q = request.nextUrl.searchParams.get("userId")?.trim();
   if (q) return `u:${q}`;
-  const b = bodyUserId?.trim();
-  if (b) return `u:${b}`;
   const ip = getClientIp(request);
   if (ip) return `ip:${ip}`;
   return null;
@@ -165,10 +166,10 @@ function createQuotaExceededError(limit: number): AppError {
  */
 export async function assertGroqUserQuotaForRequest(
   request: NextRequest,
-  bodyUserId?: string
+  explicitUserId?: string
 ): Promise<void> {
   if (!isGroqUserQuotaEnabled()) return;
-  const subject = resolveGroqQuotaSubject(request, bodyUserId);
+  const subject = resolveGroqQuotaSubject(request, explicitUserId);
   if (subject === null) return;
   const limit = getGroqUserDailyQuotaLimit();
   const allowed = await tryConsumeGroqUserQuotaRedis(subject, limit);

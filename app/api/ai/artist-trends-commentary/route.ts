@@ -211,7 +211,7 @@ export async function GET(request: NextRequest) {
         commentaryCached = true;
       } else {
         try {
-          await assertGroqUserQuotaForRequest(request);
+          await assertGroqUserQuotaForRequest(request, userId);
           commentary = await generateArtistTrendsCommentary(payload, locale, false);
           if (commentary) {
             await setCachedArtistTrendsCommentary(payload, commentary, locale, false);
@@ -230,7 +230,7 @@ export async function GET(request: NextRequest) {
         commentaryLightCached = true;
       } else {
         try {
-          await assertGroqUserQuotaForRequest(request);
+          await assertGroqUserQuotaForRequest(request, userId);
           commentaryLight = await generateArtistTrendsCommentary(payload, locale, true);
           if (commentaryLight) {
             await setCachedArtistTrendsCommentary(payload, commentaryLight, locale, true);

@@ -2,12 +2,13 @@
 
 Cette doc décrit le flux recommandé pour mapper les artistes sans genre après import Spotify JSON (`Streaming_History_Audio_*.json`) jusqu'à un seuil cible.
 
+**Backfill dans l’app** : le worker (`import-genre-backfill-queue.ts`) utilise **Groq** (`GROQ_API_KEY`), pas l’API Spotify. Les sections 2–7 ci-dessous restent une référence pour un **script externe** optionnel basé sur la Spotify Web API (client credentials), non requis par ce dépôt.
+
 ## 1) Pré-requis
 
 - Variables env:
   - `DATABASE_URL`
-  - `SPOTIFY_CLIENT_ID`
-  - `SPOTIFY_CLIENT_SECRET`
+  - `GROQ_API_KEY` (pour le backfill de genres intégré à l’app ; voir §8–9)
 - L'utilisateur existe déjà en base et a des `Listen` importés.
 - Node 18+ (fetch natif).
 
@@ -151,12 +152,16 @@ Cela évite de bloquer l'UI d'import et garde un contrôle strict sur le budget 
 - `errorMessage` (si `failed`)
 - `startedAt`, `finishedAt`, `updatedAt`
 
-## 9) Variables d'environnement (optionnelles)
+## 9) Variables d'environnement (optionnelles, worker Groq)
 
-- `SPOTIFY_IMPORT_TARGET_UNKNOWN_PCT` (default: `15`)
-- `SPOTIFY_IMPORT_DELAY_MS` (default: `300`)
-- `SPOTIFY_IMPORT_MAX_API_REQUESTS` (default: `250`)
-- `SPOTIFY_IMPORT_MAX_ARTISTS` (default: `200`)
+Alignées sur `lib/services/listening/import-genre-backfill-queue.ts` :
+
+- `GROQ_IMPORT_TARGET_UNKNOWN_PCT` (défaut: `15`)
+- `GROQ_IMPORT_DELAY_MS` (défaut: `1000`)
+- `GROQ_IMPORT_MAX_LLM_CALLS` (défaut: `800`)
+- `GROQ_IMPORT_MAX_TRACKS` (défaut: `800`)
+- `GROQ_IMPORT_DAILY_CALL_BUDGET` (défaut: désactivé — budget journalier agrégé si la valeur est un entier strictement positif)
+- `GROQ_IMPORT_PROGRESS_DB_EVERY`, `GROQ_IMPORT_RUN_ONCE_MAX_TRACKS`, `GROQ_IMPORT_DEBUG_RATE_LIMIT` (affinage progression / debug)
 
 ## 10) Prompt UI poll status
 

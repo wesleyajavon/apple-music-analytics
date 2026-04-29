@@ -55,6 +55,7 @@ export default async function RootLayout({
           </NextIntlClientProvider>
         </Providers>
         <Analytics />
+        
       </body>
     </html>
   );

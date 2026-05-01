@@ -20,22 +20,29 @@ export async function explainListeningHabitPrediction(
   prediction: ListeningHabitPrediction,
   locale: string = "fr"
 ): Promise<string> {
-  try {
-    const completion = await createGroqChatCompletion({
-      model: GROQ_DEFAULT_MODEL,
-      temperature: 0.55,
-      max_tokens: 220,
-      messages: [
-        {
-          role: "user",
-          content: buildPrompt(prediction, locale),
-        },
-      ],
-    });
-
-    const text = completion.choices[0]?.message?.content?.trim();
-    return text ?? "";
-  } catch {
-    return "";
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) {
+    throw new Error(
+      "GROQ_API_KEY is not configured. Listening habit explanation is disabled."
+    );
   }
+
+  const completion = await createGroqChatCompletion({
+    model: GROQ_DEFAULT_MODEL,
+    temperature: 0.55,
+    max_tokens: 220,
+    messages: [
+      {
+        role: "user",
+        content: buildPrompt(prediction, locale),
+      },
+    ],
+  });
+
+  const text = completion.choices[0]?.message?.content?.trim();
+  if (!text) {
+    throw new Error("Empty response from LLM");
+  }
+
+  return text;
 }

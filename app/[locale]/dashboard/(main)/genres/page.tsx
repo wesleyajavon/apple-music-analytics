@@ -141,6 +141,63 @@ function GenresHeroStatsSkeleton() {
   );
 }
 
+function TopGenresSpotlightSkeleton() {
+  return (
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-3" aria-busy="true">
+      {Array.from({ length: 3 }).map((_, index) => (
+        <div key={index} className="min-h-[280px] rounded-3xl bg-gray-100 animate-shimmer dark:bg-gray-800 sm:min-h-[300px]" />
+      ))}
+    </div>
+  );
+}
+
+function GenreChartSkeleton({ type }: { type: ChartType }) {
+  if (type === "pie") {
+    return (
+      <div className="relative mb-10 flex min-w-[260px] items-center justify-center rounded-2xl border border-indigo-200/20 bg-white/50 p-3 shadow-inner dark:border-indigo-300/10 dark:bg-slate-950/20 h-[280px] sm:h-[380px] lg:h-[500px]" aria-busy="true">
+        <div className="h-44 w-44 rounded-full border-[28px] border-indigo-100 bg-gray-100 animate-shimmer dark:border-indigo-900/60 dark:bg-gray-800 sm:h-60 sm:w-60 sm:border-[38px]" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative min-w-[280px] rounded-2xl border border-indigo-200/20 bg-white/50 p-6 shadow-inner dark:border-indigo-300/10 dark:bg-slate-950/20 h-[320px] sm:h-[400px] lg:h-[500px]" aria-busy="true">
+      <div className="flex h-full items-end justify-between gap-3">
+        {Array.from({ length: 10 }).map((_, index) => (
+          <div
+            key={index}
+            className="w-full rounded-t-lg bg-indigo-200 animate-shimmer dark:bg-indigo-900/70"
+            style={{ height: `${28 + ((index * 17) % 62)}%` }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function GenreDetailRowsSkeleton() {
+  return (
+    <div className="max-h-[460px] overflow-y-auto pr-1 space-y-3 sm:space-y-4" aria-busy="true">
+      {Array.from({ length: 8 }).map((_, index) => (
+        <div key={index} className="group">
+          <div className="mb-1 flex items-center gap-3">
+            <div className="h-7 w-7 shrink-0 rounded-lg bg-gray-200 animate-shimmer dark:bg-gray-700" />
+            <div className="h-3 w-3 shrink-0 rounded-full bg-gray-200 animate-shimmer dark:bg-gray-700" />
+            <div className="h-4 w-40 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
+            <div className="ml-auto h-4 w-20 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
+          </div>
+          <div className="ml-10 h-1.5 overflow-hidden rounded-full bg-indigo-100/70 dark:bg-indigo-950/45">
+            <div
+              className="h-full rounded-full bg-indigo-200 animate-shimmer dark:bg-indigo-800"
+              style={{ width: `${35 + ((index * 13) % 55)}%` }}
+            />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function useGenresTrendsHref() {
   const searchParams = useSearchParams();
   return useMemo(() => {
@@ -223,6 +280,7 @@ function TopGenreArtistBgSlot({
   return (
     <div className="relative min-h-[120px] flex-1 min-w-0 border-r border-white/10 last:border-r-0 sm:min-h-[140px]">
       {showImg ? (
+        // eslint-disable-next-line @next/next/no-img-element
         <img
           src={imageUrl!}
           alt=""
@@ -461,20 +519,24 @@ function GenresContent() {
           </Link>
         </p>
       </div>
-      {isLoadingOrFetching ? (
-        <GenresSkeleton />
-      ) : error ? (
+      {!isLoadingOrFetching && error ? (
         <ErrorState
           error={error}
           message={t("errorLoading")}
           onRetry={() => refetch()}
         />
-      ) : !data || data.data.length === 0 ? (
+      ) : !isLoadingOrFetching && (!data || data.data.length === 0) ? (
         <EmptyState {...emptyStatePresets.changeDates(pathname)} />
       ) : (
         <div className="space-y-8">
             {/* Top 3 genres spotlight – style Replay */}
-            {top3Genres.length > 0 && (
+            {isLoadingOrFetching ? (
+              <section>
+                <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">{t("top3Title")}</h3>
+                <p className="mb-6 text-sm text-gray-500 dark:text-gray-400 max-w-2xl">{t("top3Subtitle")}</p>
+                <TopGenresSpotlightSkeleton />
+              </section>
+            ) : top3Genres.length > 0 && (
               <section>
                 <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">{t("top3Title")}</h3>
                 <p className="mb-6 text-sm text-gray-500 dark:text-gray-400 max-w-2xl">{t("top3Subtitle")}</p>
@@ -581,12 +643,16 @@ function GenresContent() {
                   {t("distributionTitle")}
                 </h2>
                 <p className="mt-0.5 text-xs text-indigo-700/80 dark:text-indigo-100/70 sm:text-sm">
-                  {t("totalListens")}: {data.totalListens.toLocaleString(locale)} {t("listens")}
+                  {data
+                    ? `${t("totalListens")}: ${data.totalListens.toLocaleString(locale)} ${t("listens")}`
+                    : t("totalListens")}
                 </p>
               </div>
               <div className="relative overflow-x-auto p-4 sm:p-6">
               <div className="pointer-events-none absolute left-1/2 top-16 h-64 w-64 -translate-x-1/2 rounded-full bg-rose-400/10 blur-3xl dark:bg-rose-400/15" />
-              {chartType === "pie" ? (
+              {isLoadingOrFetching ? (
+                <GenreChartSkeleton type={chartType} />
+              ) : chartType === "pie" ? (
                 <div className="relative mb-10 min-w-[260px] rounded-2xl border border-indigo-200/20 bg-white/50 p-3 shadow-inner dark:border-indigo-300/10 dark:bg-slate-950/20 h-[280px] sm:h-[380px] lg:h-[500px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
@@ -678,6 +744,9 @@ function GenresContent() {
                 <h3 className="text-xs sm:text-sm font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4">
                   {t("detailByGenre")}
                 </h3>
+                {isLoadingOrFetching ? (
+                  <GenreDetailRowsSkeleton />
+                ) : (
                 <div className="max-h-[460px] overflow-y-auto pr-1 space-y-3 sm:space-y-4">
                   {detailRows.map((item, index) => {
                     const absoluteIndex = detailOffset + index;
@@ -725,6 +794,7 @@ function GenresContent() {
                     );
                   })}
                 </div>
+                )}
                 <div className="mt-4 flex flex-col gap-3 border-t border-indigo-200/30 bg-indigo-50/25 pt-4 dark:border-indigo-400/15 dark:bg-indigo-950/15 sm:flex-row sm:items-center sm:justify-between">
                   <p className="text-sm text-indigo-900/75 dark:text-indigo-100/75">
                     {t("paginationSummary", {

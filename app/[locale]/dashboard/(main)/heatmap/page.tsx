@@ -400,19 +400,7 @@ function HeatmapContent() {
     refetch();
   }, [refetch]);
 
-  if (isLoading) {
-    return (
-      <div className="space-y-8">
-        <HeatmapHeroFrame
-          badgeLabel={badgeLabel}
-          stats={<HeatmapHeroStatsSkeleton />}
-        />
-        <HeatmapSkeleton />
-      </div>
-    );
-  }
-
-  if (error) {
+  if (!isLoading && error) {
     return (
       <div className="space-y-8">
         <HeatmapHeroFrame badgeLabel={badgeLabel} stats={null} />
@@ -425,7 +413,7 @@ function HeatmapContent() {
     );
   }
 
-  if (!timelineData || timelineData.length === 0) {
+  if (!isLoading && (!timelineData || timelineData.length === 0)) {
     return (
       <div className="space-y-8">
         <HeatmapHeroFrame badgeLabel={badgeLabel} stats={null} />
@@ -440,7 +428,9 @@ function HeatmapContent() {
         <HeatmapHeroFrame
           badgeLabel={badgeLabel}
           stats={
-            stats ? (
+            isLoading ? (
+              <HeatmapHeroStatsSkeleton />
+            ) : stats ? (
               <HeatmapHeroStats
                 stats={{
                   totalListens: stats.totalListens,
@@ -499,7 +489,9 @@ function HeatmapContent() {
               )}
             </div>
             <div className="p-4 sm:p-6 md:p-8">
-              {heatmapData.length > 0 ? (
+              {isLoading ? (
+                <HeatmapSkeleton />
+              ) : heatmapData.length > 0 ? (
                 <div className="relative rounded-2xl border border-sky-200/20 bg-white/50 p-3 shadow-inner dark:border-sky-300/10 dark:bg-slate-950/20">
                   <div className="pointer-events-none absolute left-1/2 top-10 h-64 w-64 -translate-x-1/2 rounded-full bg-violet-400/10 blur-3xl dark:bg-violet-400/15" />
                   <CalendarHeatmap

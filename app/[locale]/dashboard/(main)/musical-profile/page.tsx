@@ -15,7 +15,6 @@ import {
   ScrollRevealSection,
   StaggerContainer,
 } from "@/lib/components/overview-bis";
-import { OverviewSkeleton } from "@/lib/components/skeleton-loaders";
 import { getAiInsightsLabels } from "@/lib/constants/ai-insights-labels";
 import type { ArtistStatsDto } from "@/lib/dto/artist";
 import type { GenreDistributionDto } from "@/lib/dto/genres";
@@ -195,6 +194,17 @@ function MetricCard({
   );
 }
 
+function MetricCardSkeleton() {
+  return (
+    <div className="rounded-2xl border border-white/60 bg-white/80 p-5 shadow-xl shadow-gray-900/5 backdrop-blur dark:border-white/10 dark:bg-gray-900/70">
+      <div className="mb-4 h-1.5 w-14 rounded-full bg-gray-200 animate-shimmer dark:bg-gray-700" />
+      <div className="h-3 w-28 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
+      <div className="mt-3 h-9 w-24 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
+      <div className="mt-2 h-4 w-36 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
+    </div>
+  );
+}
+
 function RankedArtistCard({
   artist,
   rank,
@@ -220,6 +230,20 @@ function RankedArtistCard({
           <p className="text-sm text-gray-500 dark:text-gray-400">
             {formatNumber(artist.listenCount, locale)} {listensLabel}
           </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RankedItemSkeleton() {
+  return (
+    <div className="rounded-2xl border border-card-border bg-card-surface p-5 shadow-card">
+      <div className="flex items-center gap-4">
+        <div className="h-12 w-12 shrink-0 rounded-2xl bg-gray-200 animate-shimmer dark:bg-gray-700" />
+        <div className="min-w-0 flex-1 space-y-2">
+          <div className="h-4 w-3/4 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
+          <div className="h-3 w-1/2 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
         </div>
       </div>
     </div>
@@ -301,6 +325,21 @@ function GenreBar({
       <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
         {formatNumber(genre.count, locale)} {listensLabel} {ofListensLabel}
       </p>
+    </div>
+  );
+}
+
+function GenreBarSkeleton() {
+  return (
+    <div className="rounded-2xl border border-card-border bg-card-surface p-4 shadow-card">
+      <div className="mb-3 flex items-center justify-between gap-4">
+        <div className="h-4 w-40 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
+        <div className="h-4 w-12 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
+      </div>
+      <div className="h-3 rounded-full bg-gray-100 dark:bg-gray-800">
+        <div className="h-full w-2/3 rounded-full bg-gray-200 animate-shimmer dark:bg-gray-700" />
+      </div>
+      <div className="mt-3 h-3 w-24 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
     </div>
   );
 }
@@ -500,11 +539,7 @@ function MusicalProfileContent() {
   const dataError = overviewError ?? artistsError ?? tracksError ?? genresError ?? temporalError;
   const hasListeningData = (overview?.totalListens ?? 0) > 0 || topArtists.length > 0 || topTracks.length > 0;
 
-  if (isLoading) {
-    return <OverviewSkeleton />;
-  }
-
-  if (dataError && !hasListeningData) {
+  if (!isLoading && dataError && !hasListeningData) {
     return (
       <div className="max-w-4xl">
         <ErrorState
@@ -516,7 +551,7 @@ function MusicalProfileContent() {
     );
   }
 
-  if (!hasListeningData) {
+  if (!isLoading && !hasListeningData) {
     return <MusicalProfileNoDataView locale={locale} withFilters={withFilters} />;
   }
 
@@ -601,32 +636,40 @@ function MusicalProfileContent() {
         </section>
       </ScrollRevealSection>
 
-      <StaggerContainer className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <MetricCard
-          label={t("metrics.totalListens")}
-          value={formatNumber(overview?.totalListens ?? 0, locale)}
-          hint={t("metrics.totalListensHint")}
-          accent="bg-accent-violet"
-        />
-        <MetricCard
-          label={t("metrics.listeningTime")}
-          value={formatListeningTime(overview?.totalPlayTime ?? 0, locale, t)}
-          hint={t("metrics.listeningTimeHint")}
-          accent="bg-accent-cyan"
-        />
-        <MetricCard
-          label={t("metrics.uniqueArtists")}
-          value={formatNumber(overview?.uniqueArtists ?? 0, locale)}
-          hint={t("metrics.uniqueArtistsHint")}
-          accent="bg-accent-rose"
-        />
-        <MetricCard
-          label={t("metrics.uniqueTracks")}
-          value={formatNumber(overview?.uniqueTracks ?? 0, locale)}
-          hint={t("metrics.uniqueTracksHint")}
-          accent="bg-accent-emerald"
-        />
-      </StaggerContainer>
+      {overviewLoading || isRangeLoading ? (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-busy="true">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <MetricCardSkeleton key={index} />
+          ))}
+        </div>
+      ) : (
+        <StaggerContainer className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <MetricCard
+            label={t("metrics.totalListens")}
+            value={formatNumber(overview?.totalListens ?? 0, locale)}
+            hint={t("metrics.totalListensHint")}
+            accent="bg-accent-violet"
+          />
+          <MetricCard
+            label={t("metrics.listeningTime")}
+            value={formatListeningTime(overview?.totalPlayTime ?? 0, locale, t)}
+            hint={t("metrics.listeningTimeHint")}
+            accent="bg-accent-cyan"
+          />
+          <MetricCard
+            label={t("metrics.uniqueArtists")}
+            value={formatNumber(overview?.uniqueArtists ?? 0, locale)}
+            hint={t("metrics.uniqueArtistsHint")}
+            accent="bg-accent-rose"
+          />
+          <MetricCard
+            label={t("metrics.uniqueTracks")}
+            value={formatNumber(overview?.uniqueTracks ?? 0, locale)}
+            hint={t("metrics.uniqueTracksHint")}
+            accent="bg-accent-emerald"
+          />
+        </StaggerContainer>
+      )}
 
       <ScrollRevealSection>
         <section className="relative overflow-hidden rounded-[2rem] border-2 border-accent-violet/20 bg-card-surface shadow-2xl ring-2 ring-accent-violet/10">
@@ -700,16 +743,20 @@ function MusicalProfileContent() {
             <BarsIcon className="h-7 w-7 text-accent-violet" />
           </div>
           <div className="space-y-3">
-            {topGenres.map((genre, index) => (
-              <GenreBar
-                key={genre.genre}
-                genre={genre}
-                index={index}
-                locale={locale}
-                listensLabel={t("labels.listens")}
-                ofListensLabel={t("labels.ofListens")}
-              />
-            ))}
+            {genresLoading || isRangeLoading
+              ? Array.from({ length: TOP_LIMIT }).map((_, index) => (
+                  <GenreBarSkeleton key={index} />
+                ))
+              : topGenres.map((genre, index) => (
+                  <GenreBar
+                    key={genre.genre}
+                    genre={genre}
+                    index={index}
+                    locale={locale}
+                    listensLabel={t("labels.listens")}
+                    ofListensLabel={t("labels.ofListens")}
+                  />
+                ))}
           </div>
         </section>
 
@@ -723,15 +770,19 @@ function MusicalProfileContent() {
             </h2>
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {topArtists.map((artist, index) => (
-              <RankedArtistCard
-                key={artist.artistId}
-                artist={artist}
-                rank={index + 1}
-                locale={locale}
-                listensLabel={t("labels.listens")}
-              />
-            ))}
+            {artistsLoading || isRangeLoading
+              ? Array.from({ length: TOP_LIMIT }).map((_, index) => (
+                  <RankedItemSkeleton key={index} />
+                ))
+              : topArtists.map((artist, index) => (
+                  <RankedArtistCard
+                    key={artist.artistId}
+                    artist={artist}
+                    rank={index + 1}
+                    locale={locale}
+                    listensLabel={t("labels.listens")}
+                  />
+                ))}
           </div>
         </section>
       </ScrollRevealSection>
@@ -746,16 +797,20 @@ function MusicalProfileContent() {
           </h2>
         </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {topTracks.map((track, index) => (
-            <RankedTrackCard
-              key={track.trackId}
-              track={track}
-              rank={index + 1}
-              locale={locale}
-              listensLabel={t("labels.listens")}
-              byLabel={t("labels.by")}
-            />
-          ))}
+          {tracksLoading || isRangeLoading
+            ? Array.from({ length: TOP_LIMIT }).map((_, index) => (
+                <RankedItemSkeleton key={index} />
+              ))
+            : topTracks.map((track, index) => (
+                <RankedTrackCard
+                  key={track.trackId}
+                  track={track}
+                  rank={index + 1}
+                  locale={locale}
+                  listensLabel={t("labels.listens")}
+                  byLabel={t("labels.by")}
+                />
+              ))}
         </div>
       </ScrollRevealSection>
 

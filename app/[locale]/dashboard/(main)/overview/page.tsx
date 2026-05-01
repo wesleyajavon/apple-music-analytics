@@ -28,7 +28,10 @@ import { AiInsightsSummaryWidget } from "@/lib/components/ai-insights-summary-wi
 import { CHART_TOOLTIP_STYLES } from "@/lib/constants/config";
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
-import { OverviewSkeleton } from "@/lib/components/skeleton-loaders";
+import {
+  OverviewSkeleton,
+  OverviewStatsSectionSkeleton,
+} from "@/lib/components/skeleton-loaders";
 import { OverviewStatsSection } from "@/lib/components/overview-stats-section";
 import { formatOverviewDateRangeLabel } from "@/lib/utils/overview-date-range-label";
 import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
@@ -363,22 +366,7 @@ function OverviewContent() {
     [searchParams]
   );
 
-  if (isLoading) {
-    return (
-      <div className="space-y-8">
-        <OverviewHeroFrame
-          title={overviewTitle}
-          description={t("subtitle")}
-          badgeLabel={badgeLabel}
-          hasComparison={hasComparison}
-          stats={<OverviewHeroStatsSkeleton />}
-        />
-        <OverviewSkeleton />
-      </div>
-    );
-  }
-
-  if (error) {
+  if (!isLoading && error) {
     return (
       <div className="space-y-8">
         <OverviewHeroFrame
@@ -397,7 +385,7 @@ function OverviewContent() {
     );
   }
 
-  if (!data || data.totalListens === 0) {
+  if (!isLoading && (!data || data.totalListens === 0)) {
     return (
       <div className="space-y-8">
         <OverviewHeroFrame
@@ -420,12 +408,16 @@ function OverviewContent() {
         badgeLabel={badgeLabel}
         hasComparison={hasComparison}
         stats={
-          <OverviewHeroStats
-            totalListens={data.totalListens}
-            uniqueArtists={data.uniqueArtists}
-            uniqueTracks={data.uniqueTracks}
-            locale={locale}
-          />
+          data ? (
+            <OverviewHeroStats
+              totalListens={data.totalListens}
+              uniqueArtists={data.uniqueArtists}
+              uniqueTracks={data.uniqueTracks}
+              locale={locale}
+            />
+          ) : (
+            <OverviewHeroStatsSkeleton />
+          )
         }
       />
       <div className="space-y-6">
@@ -530,14 +522,18 @@ function OverviewContent() {
 
         <TrackTrendsSummaryWidget startDate={startDate} endDate={endDate} />
 
-        <OverviewStatsSection
-          totalListens={data.totalListens}
-          uniqueArtists={data.uniqueArtists}
-          uniqueTracks={data.uniqueTracks}
-          totalPlayTime={data.totalPlayTime}
-          changes={changes}
-          showComparison={!!previousPeriod}
-        />
+        {data ? (
+          <OverviewStatsSection
+            totalListens={data.totalListens}
+            uniqueArtists={data.uniqueArtists}
+            uniqueTracks={data.uniqueTracks}
+            totalPlayTime={data.totalPlayTime}
+            changes={changes}
+            showComparison={!!previousPeriod}
+          />
+        ) : (
+          <OverviewStatsSectionSkeleton />
+        )}
 
         {/* Bloc large (2×1) : Top genres */}
         {topGenres.length > 0 && (

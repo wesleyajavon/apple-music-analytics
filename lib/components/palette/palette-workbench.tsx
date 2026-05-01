@@ -130,6 +130,77 @@ function PaletteMiniChart({
   );
 }
 
+function PaletteMappingSkeleton() {
+  return (
+    <div className="space-y-6" aria-busy="true">
+      <div>
+        <div className="h-3 w-28 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
+        <div className="mt-3 h-8 w-64 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
+        <div className="mt-4 flex flex-wrap gap-2">
+          <div className="h-8 w-32 rounded-full bg-gray-100 animate-shimmer dark:bg-gray-800" />
+          <div className="h-8 w-36 rounded-full bg-gray-100 animate-shimmer dark:bg-gray-800" />
+        </div>
+      </div>
+      <div className="space-y-3 rounded-xl border border-cyan-400/20 bg-cyan-400/10 p-3">
+        <div className="h-3 w-36 rounded bg-cyan-200 animate-shimmer dark:bg-cyan-900/70" />
+        <div className="flex flex-wrap gap-2">
+          {Array.from({ length: 5 }).map((_, index) => (
+            <div
+              key={index}
+              className="h-7 rounded-full bg-cyan-100 animate-shimmer dark:bg-cyan-900/60"
+              style={{ width: `${92 + ((index * 17) % 72)}px` }}
+            />
+          ))}
+        </div>
+      </div>
+      <div className="space-y-3">
+        <div className="h-4 w-32 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
+        <div className="h-10 rounded-lg bg-gray-100 animate-shimmer dark:bg-gray-800" />
+      </div>
+      <div className="space-y-3">
+        <div className="h-4 w-28 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
+        <div className="h-10 rounded-lg bg-gray-100 animate-shimmer dark:bg-gray-800" />
+      </div>
+      <div className="flex flex-wrap gap-3">
+        <div className="h-10 w-28 rounded-lg bg-cyan-200 animate-shimmer dark:bg-cyan-900/70" />
+        <div className="h-10 w-20 rounded-lg bg-gray-100 animate-shimmer dark:bg-gray-800" />
+      </div>
+    </div>
+  );
+}
+
+function PaletteMiniChartSkeleton() {
+  return (
+    <div className="relative h-[180px] rounded-xl border border-card-border bg-surface/60 p-4" aria-busy="true">
+      <div className="flex h-full flex-col justify-between">
+        {Array.from({ length: 5 }).map((_, index) => (
+          <div key={index} className="h-px bg-gray-200 dark:bg-gray-700" />
+        ))}
+      </div>
+      <div className="absolute inset-x-6 bottom-8 top-8">
+        <svg className="h-full w-full" viewBox="0 0 360 120" preserveAspectRatio="none" aria-hidden>
+          <path
+            d="M0 35 C70 45 100 75 160 70 S250 35 360 50"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="4"
+            className="text-fuchsia-200 dark:text-fuchsia-900"
+            opacity="0.85"
+          />
+          <path
+            d="M0 95 C80 85 115 65 180 55 S280 45 360 20"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="4"
+            className="text-cyan-200 dark:text-cyan-900"
+            opacity="0.85"
+          />
+        </svg>
+      </div>
+    </div>
+  );
+}
+
 export function PaletteWorkbench() {
   const t = useTranslations("palette");
   const locale = useLocale();
@@ -161,29 +232,6 @@ export function PaletteWorkbench() {
     return `${Math.round(data.progress.completionRatio * 100)}%`;
   }, [data]);
 
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <div className={PALETTE_CARD_CLASS}>
-          <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${PALETTE_RAIL_CLASS} opacity-80`} />
-          <div className="p-6">
-            <div className="mb-4 h-8 w-48 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
-            <div className="h-4 w-full max-w-2xl animate-pulse rounded bg-gray-100 dark:bg-gray-700" />
-            <div className="mt-5 h-2 animate-pulse rounded-full bg-gray-100 dark:bg-gray-800" />
-          </div>
-        </div>
-        <div className="grid gap-6 lg:grid-cols-5">
-          <div className={`${PALETTE_CARD_CLASS} p-6 lg:col-span-3`}>
-            <div className="h-80 animate-pulse rounded-xl bg-surface/60" />
-          </div>
-          <div className={`${PALETTE_CARD_CLASS} p-6 lg:col-span-2`}>
-            <div className="h-56 animate-pulse rounded-xl bg-surface/60" />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   if (error) {
     return (
       <div className={PALETTE_CARD_CLASS}>
@@ -199,7 +247,7 @@ export function PaletteWorkbench() {
     );
   }
 
-  if (!data) return null;
+  if (!isLoading && !data) return null;
 
   async function handleMap() {
     if (!activeCard || !canSubmit) return;
@@ -303,7 +351,7 @@ export function PaletteWorkbench() {
             <div
               className={`h-full rounded-full ${PALETTE_RAIL_CLASS} transition-all`}
               style={{
-                width: `${Math.max(0, Math.min(100, data.progress.completionRatio * 100))}%`,
+                width: `${Math.max(0, Math.min(100, (data?.progress.completionRatio ?? 0) * 100))}%`,
               }}
             />
           </div>
@@ -314,7 +362,9 @@ export function PaletteWorkbench() {
         <section className={`${PALETTE_CARD_CLASS} lg:col-span-3`}>
           <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${PALETTE_RAIL_CLASS} opacity-80`} />
           <div className="relative p-6">
-            {!activeCard ? (
+            {isLoading ? (
+              <PaletteMappingSkeleton />
+            ) : !activeCard ? (
               <div className="rounded-xl border border-card-border bg-surface/60 px-6 py-10 text-center">
                 <p className="text-base font-semibold text-foreground">
                   {t("doneTitle")}
@@ -422,7 +472,7 @@ export function PaletteWorkbench() {
                     placeholder={t("existingGenresPlaceholder")}
                   />
                   <datalist id="palette-genre-suggestions">
-                    {data.existingGenres.map((genre) => (
+                    {data?.existingGenres.map((genre) => (
                       <option key={genre} value={genre} />
                     ))}
                   </datalist>
@@ -472,25 +522,39 @@ export function PaletteWorkbench() {
             <h3 className="text-sm font-semibold uppercase tracking-wider text-muted">
               {t("miniChartTitle")}
             </h3>
-            <div className="mt-4 rounded-xl border border-card-border bg-surface/60 p-3">
-              <PaletteMiniChart
-                data={data.compactTrends}
-                t={t}
-                locale={locale}
-              />
-            </div>
-            <div className="mt-3 space-y-2 text-xs text-muted">
-              <p className="rounded-lg border border-card-border bg-surface-glass px-3 py-2">
-                {t("unknownTotal", {
-                  count: data.unknownListensTotal.toLocaleString(locale),
-                })}
-              </p>
-              <p className="rounded-lg border border-card-border bg-surface-glass px-3 py-2">
-                {t("mappedTotal", {
-                  count: data.mappedListensTotal.toLocaleString(locale),
-                })}
-              </p>
-            </div>
+            {isLoading || !data ? (
+              <>
+                <div className="mt-4">
+                  <PaletteMiniChartSkeleton />
+                </div>
+                <div className="mt-3 space-y-2">
+                  <div className="h-9 rounded-lg bg-gray-100 animate-shimmer dark:bg-gray-800" />
+                  <div className="h-9 rounded-lg bg-gray-100 animate-shimmer dark:bg-gray-800" />
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="mt-4 rounded-xl border border-card-border bg-surface/60 p-3">
+                  <PaletteMiniChart
+                    data={data.compactTrends}
+                    t={t}
+                    locale={locale}
+                  />
+                </div>
+                <div className="mt-3 space-y-2 text-xs text-muted">
+                  <p className="rounded-lg border border-card-border bg-surface-glass px-3 py-2">
+                    {t("unknownTotal", {
+                      count: data.unknownListensTotal.toLocaleString(locale),
+                    })}
+                  </p>
+                  <p className="rounded-lg border border-card-border bg-surface-glass px-3 py-2">
+                    {t("mappedTotal", {
+                      count: data.mappedListensTotal.toLocaleString(locale),
+                    })}
+                  </p>
+                </div>
+              </>
+            )}
           </div>
         </aside>
       </div>

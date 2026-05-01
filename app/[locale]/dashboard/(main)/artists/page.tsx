@@ -135,6 +135,64 @@ function ArtistsHeroStatsSkeleton() {
   );
 }
 
+function ArtistCardSkeleton() {
+  return (
+    <div className="min-h-[168px] rounded-3xl border border-cyan-300/15 bg-card-surface p-5 shadow-lg shadow-violet-950/5">
+      <div className="flex items-start gap-4">
+        <div className="h-[76px] w-[76px] shrink-0 rounded-[1.15rem] bg-gray-200 animate-shimmer dark:bg-gray-700" />
+        <div className="min-w-0 flex-1">
+          <div className="h-3 w-24 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
+          <div className="mt-3 h-6 w-40 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
+          <div className="mt-4 flex gap-2">
+            <div className="h-7 w-24 rounded-full bg-gray-200 animate-shimmer dark:bg-gray-700" />
+            <div className="h-7 w-28 rounded-full bg-gray-200 animate-shimmer dark:bg-gray-700" />
+          </div>
+        </div>
+      </div>
+      <div className="mt-4 grid grid-cols-2 gap-2">
+        <div className="h-14 rounded-2xl bg-gray-100 animate-shimmer dark:bg-gray-800" />
+        <div className="h-14 rounded-2xl bg-gray-100 animate-shimmer dark:bg-gray-800" />
+      </div>
+    </div>
+  );
+}
+
+function ArtistsGridSkeleton({ count = 6 }: { count?: number }) {
+  return (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true">
+      {Array.from({ length: count }).map((_, index) => (
+        <ArtistCardSkeleton key={index} />
+      ))}
+    </div>
+  );
+}
+
+function ArtistsBarChartSkeleton() {
+  return (
+    <div className="h-[360px] rounded-2xl border border-cyan-200/20 bg-white/40 p-6 shadow-inner dark:border-cyan-300/10 dark:bg-slate-950/20" aria-busy="true">
+      <div className="flex h-full flex-col justify-between">
+        {Array.from({ length: 8 }).map((_, index) => (
+          <div key={index} className="flex items-center gap-4">
+            <div className="h-3 w-24 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
+            <div
+              className="h-5 rounded-r-lg bg-cyan-200 animate-shimmer dark:bg-cyan-900/70"
+              style={{ width: `${35 + ((index * 13) % 55)}%` }}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ArtistsPieChartSkeleton() {
+  return (
+    <div className="flex h-[360px] items-center justify-center rounded-2xl border border-cyan-200/20 bg-white/40 p-6 shadow-inner dark:border-cyan-300/10 dark:bg-slate-950/20" aria-busy="true">
+      <div className="h-56 w-56 rounded-full border-[34px] border-cyan-100 bg-gray-100 animate-shimmer dark:border-cyan-900/50 dark:bg-gray-800" />
+    </div>
+  );
+}
+
 function useArtistsTrendsHref() {
   const searchParams = useSearchParams();
   return useMemo(() => {
@@ -622,8 +680,8 @@ function ArtistsContent() {
     offset
   );
 
-  const topArtists = topData?.topArtists ?? [];
-  const pagedArtists = pagedData?.topArtists ?? [];
+  const topArtists = useMemo(() => topData?.topArtists ?? [], [topData?.topArtists]);
+  const pagedArtists = useMemo(() => pagedData?.topArtists ?? [], [pagedData?.topArtists]);
   const pagination = pagedData?.pagination;
   const totalArtistsInRange = pagination?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(totalArtistsInRange / pageSize));
@@ -676,19 +734,7 @@ function ArtistsContent() {
     }));
   }, [topArtists]);
 
-  if (isTopLoading) {
-    return (
-      <div className="space-y-8">
-        <ArtistsHeroFrame
-          trendsHref={trendsHref}
-          stats={<ArtistsHeroStatsSkeleton />}
-          periodLine={periodLine}
-        />
-        <OverviewSkeleton />
-      </div>
-    );
-  }
-  if (topError) {
+  if (!isTopLoading && topError && !topData) {
     return (
       <div className="space-y-8">
         <ArtistsHeroFrame trendsHref={trendsHref} stats={null} periodLine={periodLine} />
@@ -696,7 +742,7 @@ function ArtistsContent() {
       </div>
     );
   }
-  if (!topData || topData.topArtists.length === 0) {
+  if (!isTopLoading && (!topData || topData.topArtists.length === 0)) {
     return (
       <div className="space-y-8">
         <ArtistsHeroFrame trendsHref={trendsHref} stats={null} periodLine={periodLine} />
@@ -704,57 +750,48 @@ function ArtistsContent() {
       </div>
     );
   }
-  if (isPagedLoading && !pagedData) {
+  if (!isPagedLoading && pagedError && !pagedData) {
     return (
       <div className="space-y-8">
         <ArtistsHeroFrame
           trendsHref={trendsHref}
-          stats={<ArtistsHeroStats overview={topData.overview} locale={locale} />}
-          periodLine={periodLine}
-        />
-        <OverviewSkeleton />
-      </div>
-    );
-  }
-  if (pagedError) {
-    return (
-      <div className="space-y-8">
-        <ArtistsHeroFrame
-          trendsHref={trendsHref}
-          stats={<ArtistsHeroStats overview={topData.overview} locale={locale} />}
+          stats={
+            topData ? (
+              <ArtistsHeroStats overview={topData.overview} locale={locale} />
+            ) : (
+              <ArtistsHeroStatsSkeleton />
+            )
+          }
           periodLine={periodLine}
         />
         <ErrorState error={pagedError} message={t("errorLoading")} onRetry={refetchPaged} />
       </div>
     );
   }
-  if (!pagedData) {
-    return (
-      <div className="space-y-8">
-        <ArtistsHeroFrame
-          trendsHref={trendsHref}
-          stats={<ArtistsHeroStats overview={topData.overview} locale={locale} />}
-          periodLine={periodLine}
-        />
-        <EmptyState {...emptyStatePresets.importData} />
-      </div>
-    );
-  }
-
-  const { overview } = topData;
+  const overview = topData?.overview;
 
   return (
     <div className="space-y-8">
       <ArtistsHeroFrame
         trendsHref={trendsHref}
-        stats={<ArtistsHeroStats overview={overview} locale={locale} />}
+        stats={
+          overview ? (
+            <ArtistsHeroStats overview={overview} locale={locale} />
+          ) : (
+            <ArtistsHeroStatsSkeleton />
+          )
+        }
         periodLine={periodLine}
       />
 
       {/* Top 3 – grandes cartes style Replay */}
       <section className="animate-fade-in-up">
         <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">{t("top3Title")}</h3>
-        <TopThreeArtists artists={topArtists} maxListens={maxListens} t={t} locale={locale} />
+        {isTopLoading ? (
+          <ArtistsGridSkeleton count={3} />
+        ) : (
+          <TopThreeArtists artists={topArtists} maxListens={maxListens} t={t} locale={locale} />
+        )}
       </section>
 
       {/* Graphiques – Top 10 listens + Distribution Top 6 */}
@@ -766,48 +803,52 @@ function ArtistsContent() {
           </div>
           <div className="relative p-6">
             <div className="pointer-events-none absolute left-1/3 top-16 h-48 w-48 rounded-full bg-cyan-400/10 blur-3xl dark:bg-cyan-400/15" />
-            <ResponsiveContainer width="100%" height={360}>
-              <BarChart data={barChartData} layout="vertical" margin={{ top: 5, right: 30, left: 100, bottom: 5 }}>
-                <defs>
-                  <linearGradient id="barGradient" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0%" stopColor="#8b5cf6" />
-                    <stop offset="50%" stopColor="#06b6d4" />
-                    <stop offset="100%" stopColor="#84cc16" />
-                  </linearGradient>
-                  <filter id="artistBarGlow" x="-20%" y="-20%" width="140%" height="150%">
-                    <feDropShadow dx="0" dy="8" stdDeviation="6" floodColor="#06b6d4" floodOpacity="0.2" />
-                  </filter>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#67e8f9" strokeOpacity={0.28} horizontal={false} />
-                <XAxis
-                  type="number"
-                  tick={{ fill: "rgb(var(--muted-rgb))", fontSize: 11 }}
-                  axisLine={false}
-                  tickLine={false}
-                  tickMargin={8}
-                />
-                <YAxis
-                  type="category"
-                  dataKey="name"
-                  tick={{ fill: "rgb(var(--muted-rgb))", fontSize: 12, fontWeight: 500 }}
-                  axisLine={false}
-                  tickLine={false}
-                  tickMargin={8}
-                  width={95}
-                />
-                <Tooltip
-                  contentStyle={CHART_TOOLTIP_STYLES.contentStyle}
-                  labelStyle={CHART_TOOLTIP_STYLES.labelStyle}
-                  itemStyle={CHART_TOOLTIP_STYLES.itemStyle}
-                  formatter={(value: number, name: string, props: { payload?: { fullName?: string } }) => {
-                    const fullName = props?.payload?.fullName;
-                    if (name === "listens") return [`${value.toLocaleString(locale)} ${t("listensCount")}`, fullName || t("artistTooltip")];
-                    return [value, name];
-                  }}
-                />
-                <Bar dataKey="listens" fill="url(#barGradient)" filter="url(#artistBarGlow)" radius={[0, 8, 8, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            {isTopLoading ? (
+              <ArtistsBarChartSkeleton />
+            ) : (
+              <ResponsiveContainer width="100%" height={360}>
+                <BarChart data={barChartData} layout="vertical" margin={{ top: 5, right: 30, left: 100, bottom: 5 }}>
+                  <defs>
+                    <linearGradient id="barGradient" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stopColor="#8b5cf6" />
+                      <stop offset="50%" stopColor="#06b6d4" />
+                      <stop offset="100%" stopColor="#84cc16" />
+                    </linearGradient>
+                    <filter id="artistBarGlow" x="-20%" y="-20%" width="140%" height="150%">
+                      <feDropShadow dx="0" dy="8" stdDeviation="6" floodColor="#06b6d4" floodOpacity="0.2" />
+                    </filter>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#67e8f9" strokeOpacity={0.28} horizontal={false} />
+                  <XAxis
+                    type="number"
+                    tick={{ fill: "rgb(var(--muted-rgb))", fontSize: 11 }}
+                    axisLine={false}
+                    tickLine={false}
+                    tickMargin={8}
+                  />
+                  <YAxis
+                    type="category"
+                    dataKey="name"
+                    tick={{ fill: "rgb(var(--muted-rgb))", fontSize: 12, fontWeight: 500 }}
+                    axisLine={false}
+                    tickLine={false}
+                    tickMargin={8}
+                    width={95}
+                  />
+                  <Tooltip
+                    contentStyle={CHART_TOOLTIP_STYLES.contentStyle}
+                    labelStyle={CHART_TOOLTIP_STYLES.labelStyle}
+                    itemStyle={CHART_TOOLTIP_STYLES.itemStyle}
+                    formatter={(value: number, name: string, props: { payload?: { fullName?: string } }) => {
+                      const fullName = props?.payload?.fullName;
+                      if (name === "listens") return [`${value.toLocaleString(locale)} ${t("listensCount")}`, fullName || t("artistTooltip")];
+                      return [value, name];
+                    }}
+                  />
+                  <Bar dataKey="listens" fill="url(#barGradient)" filter="url(#artistBarGlow)" radius={[0, 8, 8, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
 
@@ -818,40 +859,44 @@ function ArtistsContent() {
           </div>
           <div className="relative p-6">
             <div className="pointer-events-none absolute left-1/2 top-16 h-56 w-56 -translate-x-1/2 rounded-full bg-lime-300/10 blur-3xl dark:bg-lime-300/15" />
-            <ResponsiveContainer width="100%" height={360}>
-              <PieChart>
-                <defs>
-                  <filter id="artistPieGlow" x="-30%" y="-30%" width="160%" height="160%">
-                    <feDropShadow dx="0" dy="8" stdDeviation="10" floodColor="#8b5cf6" floodOpacity="0.18" />
-                  </filter>
-                </defs>
-                <Pie
-                  data={pieChartData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) =>
-                    `${name.length > 12 ? name.substring(0, 12) + "…" : name} (${(percent * 100).toFixed(1)}%)`
-                  }
-                  innerRadius={58}
-                  outerRadius={116}
-                  paddingAngle={2}
-                  fill="#a855f7"
-                  dataKey="value"
-                  filter="url(#artistPieGlow)"
-                >
-                  {pieChartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} stroke="rgb(var(--card-rgb) / 0.95)" strokeWidth={2} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={CHART_TOOLTIP_STYLES.contentStyle}
-                  labelStyle={CHART_TOOLTIP_STYLES.labelStyle}
-                  itemStyle={CHART_TOOLTIP_STYLES.itemStyle}
-                  formatter={(value: number) => [`${value.toLocaleString(locale)} ${t("listensCount")}`, t("listens")]}
-                />
-              </PieChart>
-            </ResponsiveContainer>
+            {isTopLoading ? (
+              <ArtistsPieChartSkeleton />
+            ) : (
+              <ResponsiveContainer width="100%" height={360}>
+                <PieChart>
+                  <defs>
+                    <filter id="artistPieGlow" x="-30%" y="-30%" width="160%" height="160%">
+                      <feDropShadow dx="0" dy="8" stdDeviation="10" floodColor="#8b5cf6" floodOpacity="0.18" />
+                    </filter>
+                  </defs>
+                  <Pie
+                    data={pieChartData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) =>
+                      `${name.length > 12 ? name.substring(0, 12) + "…" : name} (${(percent * 100).toFixed(1)}%)`
+                    }
+                    innerRadius={58}
+                    outerRadius={116}
+                    paddingAngle={2}
+                    fill="#a855f7"
+                    dataKey="value"
+                    filter="url(#artistPieGlow)"
+                  >
+                    {pieChartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} stroke="rgb(var(--card-rgb) / 0.95)" strokeWidth={2} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={CHART_TOOLTIP_STYLES.contentStyle}
+                    labelStyle={CHART_TOOLTIP_STYLES.labelStyle}
+                    itemStyle={CHART_TOOLTIP_STYLES.itemStyle}
+                    formatter={(value: number) => [`${value.toLocaleString(locale)} ${t("listensCount")}`, t("listens")]}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
       </div>
@@ -859,7 +904,11 @@ function ArtistsContent() {
       {/* Grille d'artistes – top 8 visibles, reste togglable (toggle en 9e position) */}
       <section className="animate-fade-in-up" style={{ animationDelay: "80ms" }}>
         <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">{t("allArtists")}</h3>
-        <AllArtistsGrid topArtists={topArtists} t={t} locale={locale} />
+        {isTopLoading ? (
+          <ArtistsGridSkeleton />
+        ) : (
+          <AllArtistsGrid topArtists={topArtists} t={t} locale={locale} />
+        )}
       </section>
 
       {/* Tableau détaillé – togglable */}
@@ -871,7 +920,7 @@ function ArtistsContent() {
         total={totalArtistsInRange}
         hasMore={pagination?.hasMore ?? false}
         offset={offset}
-        isFetching={isPagedFetching}
+        isFetching={isPagedFetching || !pagedData}
         onPageChange={(nextPage) => updatePaginationParams(nextPage, pageSize)}
         onPageSizeChange={(nextPageSize) => updatePaginationParams(1, nextPageSize)}
         t={t}

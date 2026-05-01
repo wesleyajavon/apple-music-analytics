@@ -98,6 +98,47 @@ function TracksHeroStatsSkeleton() {
   );
 }
 
+function TracksChartSkeleton() {
+  return (
+    <div className="h-[560px] min-w-[360px] rounded-2xl border border-cyan-200/20 bg-white/50 p-6 shadow-inner dark:border-cyan-300/10 dark:bg-slate-950/20">
+      <div className="flex h-full flex-col justify-between">
+        {Array.from({ length: 12 }).map((_, index) => (
+          <div key={index} className="flex items-center gap-4">
+            <div className="h-3 w-28 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
+            <div
+              className="h-5 rounded-r-lg bg-cyan-200 animate-shimmer dark:bg-cyan-900/70"
+              style={{ width: `${35 + ((index * 11) % 55)}%` }}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TracksTableRowsSkeleton({ count }: { count: number }) {
+  return (
+    <>
+      {Array.from({ length: count }).map((_, index) => (
+        <tr key={`skeleton-${index}`}>
+          <td className="whitespace-nowrap px-6 py-4">
+            <div className="h-4 w-8 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
+          </td>
+          <td className="px-6 py-4">
+            <div className="h-4 w-40 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
+          </td>
+          <td className="px-6 py-4">
+            <div className="h-4 w-32 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
+          </td>
+          <td className="whitespace-nowrap px-6 py-4">
+            <div className="ml-auto h-4 w-16 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
+          </td>
+        </tr>
+      ))}
+    </>
+  );
+}
+
 function useTracksTrendsHref() {
   const searchParams = useSearchParams();
   return useMemo(() => {
@@ -224,15 +265,7 @@ function TracksContent() {
     [topTracks]
   );
 
-  if (isTopLoading) {
-    return (
-      <div className="space-y-8">
-        <TracksHeroFrame trendsHref={trendsHref} stats={<TracksHeroStatsSkeleton />} />
-        <OverviewSkeleton />
-      </div>
-    );
-  }
-  if (topError) {
+  if (!isTopLoading && topError && !topData) {
     return (
       <div className="space-y-8">
         <TracksHeroFrame trendsHref={trendsHref} stats={null} />
@@ -240,7 +273,7 @@ function TracksContent() {
       </div>
     );
   }
-  if (!topData || topData.topTracks.length === 0) {
+  if (!isTopLoading && (!topData || topData.topTracks.length === 0)) {
     return (
       <div className="space-y-8">
         <TracksHeroFrame trendsHref={trendsHref} stats={null} />
@@ -248,36 +281,20 @@ function TracksContent() {
       </div>
     );
   }
-  if (isPagedLoading && !pagedData) {
+  if (!isPagedLoading && pagedError && !pagedData) {
     return (
       <div className="space-y-8">
         <TracksHeroFrame
           trendsHref={trendsHref}
-          stats={<TracksHeroStats overview={topData.overview} locale={locale} />}
-        />
-        <OverviewSkeleton />
-      </div>
-    );
-  }
-  if (pagedError) {
-    return (
-      <div className="space-y-8">
-        <TracksHeroFrame
-          trendsHref={trendsHref}
-          stats={<TracksHeroStats overview={topData.overview} locale={locale} />}
+          stats={
+            topData ? (
+              <TracksHeroStats overview={topData.overview} locale={locale} />
+            ) : (
+              <TracksHeroStatsSkeleton />
+            )
+          }
         />
         <ErrorState error={pagedError} message={t("errorLoading")} onRetry={refetchPaged} />
-      </div>
-    );
-  }
-  if (!pagedData) {
-    return (
-      <div className="space-y-8">
-        <TracksHeroFrame
-          trendsHref={trendsHref}
-          stats={<TracksHeroStats overview={topData.overview} locale={locale} />}
-        />
-        <EmptyState {...emptyStatePresets.importData} />
       </div>
     );
   }
@@ -286,7 +303,13 @@ function TracksContent() {
     <div className="space-y-8">
       <TracksHeroFrame
         trendsHref={trendsHref}
-        stats={<TracksHeroStats overview={topData.overview} locale={locale} />}
+        stats={
+          topData ? (
+            <TracksHeroStats overview={topData.overview} locale={locale} />
+          ) : (
+            <TracksHeroStatsSkeleton />
+          )
+        }
       />
 
       <section className={`${TRACK_PANEL_CLASS} animate-fade-in-up`}>
@@ -294,41 +317,47 @@ function TracksContent() {
         <div className="border-b border-cyan-200/20 px-6 py-4 dark:border-cyan-300/10">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{t("top20Listens")}</h3>
           <p className="mt-0.5 text-sm text-cyan-700/80 dark:text-cyan-100/70">
-            {topData.overview.totalListens.toLocaleString(locale)} {t("listensCount")}
+            {topData
+              ? `${topData.overview.totalListens.toLocaleString(locale)} ${t("listensCount")}`
+              : t("heroSubtitle")}
           </p>
         </div>
         <div className="relative overflow-x-auto p-6">
           <div className="pointer-events-none absolute right-12 top-12 h-64 w-64 rounded-full bg-emerald-400/10 blur-3xl dark:bg-emerald-400/15" />
           <div className="relative min-w-[360px] rounded-2xl border border-cyan-200/20 bg-white/50 p-3 shadow-inner dark:border-cyan-300/10 dark:bg-slate-950/20">
-          <ResponsiveContainer width="100%" height={560}>
-            <BarChart data={chartData} layout="vertical" margin={{ top: 5, right: 30, left: 150, bottom: 5 }}>
-              <defs>
-                <linearGradient id="trackBarGradient" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stopColor="#22d3ee" />
-                  <stop offset="45%" stopColor="#2dd4bf" />
-                  <stop offset="78%" stopColor="#34d399" />
-                  <stop offset="100%" stopColor="#bef264" />
-                </linearGradient>
-                <filter id="trackBarGlow" x="-20%" y="-35%" width="150%" height="170%">
-                  <feDropShadow dx="0" dy="6" stdDeviation="5" floodColor="#22d3ee" floodOpacity="0.24" />
-                </filter>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#67e8f9" strokeOpacity={0.24} horizontal={false} />
-              <XAxis type="number" tick={{ fill: "#0891b2", fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis type="category" dataKey="name" tick={{ fill: "#0f766e", fontSize: 12, fontWeight: 600 }} axisLine={false} tickLine={false} width={140} />
-              <Tooltip
-                contentStyle={CHART_TOOLTIP_STYLES.contentStyle}
-                labelStyle={CHART_TOOLTIP_STYLES.labelStyle}
-                itemStyle={CHART_TOOLTIP_STYLES.itemStyle}
-                formatter={(value: number, name: string, props: { payload?: { fullName?: string } }) => {
-                  const fullName = props?.payload?.fullName ?? t("track");
-                  if (name === "listens") return [`${value.toLocaleString(locale)} ${t("listensCount")}`, fullName];
-                  return [value, name];
-                }}
-              />
-              <Bar dataKey="listens" fill="url(#trackBarGradient)" filter="url(#trackBarGlow)" radius={[0, 8, 8, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+            {isTopLoading || !topData ? (
+              <TracksChartSkeleton />
+            ) : (
+              <ResponsiveContainer width="100%" height={560}>
+                <BarChart data={chartData} layout="vertical" margin={{ top: 5, right: 30, left: 150, bottom: 5 }}>
+                  <defs>
+                    <linearGradient id="trackBarGradient" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stopColor="#22d3ee" />
+                      <stop offset="45%" stopColor="#2dd4bf" />
+                      <stop offset="78%" stopColor="#34d399" />
+                      <stop offset="100%" stopColor="#bef264" />
+                    </linearGradient>
+                    <filter id="trackBarGlow" x="-20%" y="-35%" width="150%" height="170%">
+                      <feDropShadow dx="0" dy="6" stdDeviation="5" floodColor="#22d3ee" floodOpacity="0.24" />
+                    </filter>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#67e8f9" strokeOpacity={0.24} horizontal={false} />
+                  <XAxis type="number" tick={{ fill: "#0891b2", fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <YAxis type="category" dataKey="name" tick={{ fill: "#0f766e", fontSize: 12, fontWeight: 600 }} axisLine={false} tickLine={false} width={140} />
+                  <Tooltip
+                    contentStyle={CHART_TOOLTIP_STYLES.contentStyle}
+                    labelStyle={CHART_TOOLTIP_STYLES.labelStyle}
+                    itemStyle={CHART_TOOLTIP_STYLES.itemStyle}
+                    formatter={(value: number, name: string, props: { payload?: { fullName?: string } }) => {
+                      const fullName = props?.payload?.fullName ?? t("track");
+                      if (name === "listens") return [`${value.toLocaleString(locale)} ${t("listensCount")}`, fullName];
+                      return [value, name];
+                    }}
+                  />
+                  <Bar dataKey="listens" fill="url(#trackBarGradient)" filter="url(#trackBarGlow)" radius={[0, 8, 8, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
       </section>
@@ -352,23 +381,8 @@ function TracksContent() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-              {isPagedFetching
-                ? Array.from({ length: Math.min(pageSize, 10) }).map((_, index) => (
-                    <tr key={`skeleton-${index}`}>
-                      <td className="whitespace-nowrap px-6 py-4">
-                        <div className="h-4 w-8 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="h-4 w-40 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="h-4 w-32 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
-                      </td>
-                      <td className="whitespace-nowrap px-6 py-4">
-                        <div className="ml-auto h-4 w-16 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
-                      </td>
-                    </tr>
-                  ))
+              {isPagedFetching || !pagedData
+                ? <TracksTableRowsSkeleton count={Math.min(pageSize, 10)} />
                 : pagedTracks.map((track, index) => (
                     <tr key={track.trackId} className="transition-colors hover:bg-cyan-50/70 dark:hover:bg-cyan-950/20">
                       <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-300">{offset + index + 1}</td>

@@ -239,6 +239,57 @@ function TemporalNoteCallout() {
   );
 }
 
+function TemporalSpotlightSkeleton() {
+  return (
+    <section
+      className={`${CARD_CLASS} animate-pulse transition-all duration-300`}
+      aria-busy="true"
+    >
+      <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${TEMPORAL_RAIL_CLASS} opacity-85`} />
+      <div className="pointer-events-none absolute -right-20 -top-24 h-56 w-56 rounded-full bg-fuchsia-400/12 blur-3xl dark:bg-fuchsia-400/16" />
+      <div className="relative">
+        <div className="border-b border-blue-200/20 px-6 py-5 dark:border-blue-300/10">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-blue-300/10" />
+            <div>
+              <div className="h-5 w-44 rounded bg-muted/20" />
+              <div className="mt-2 h-4 w-64 rounded bg-muted/15" />
+            </div>
+          </div>
+        </div>
+        <div className="p-4 sm:p-6 md:p-8">
+          <div className="flex flex-col items-center gap-8 md:flex-row md:gap-12">
+            <div className="h-32 w-32 rounded-full bg-blue-400/10 sm:h-40 sm:w-40" />
+            <div className="w-full flex-1 space-y-4">
+              <div className="h-3 w-36 rounded bg-blue-400/20" />
+              <div className="h-8 w-72 max-w-full rounded bg-muted/20" />
+              <div className="h-8 w-40 rounded-full bg-blue-400/15" />
+              <div className="h-4 w-80 max-w-full rounded bg-muted/15" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function TemporalChartSkeleton() {
+  return (
+    <div className={`${CHART_PANEL_CLASS} animate-pulse`} aria-busy="true">
+      <div className="flex h-[400px] items-end gap-3 p-4">
+        {[52, 76, 44, 88, 64, 58, 72].map((height, index) => (
+          <div key={index} className="flex flex-1 items-end">
+            <div
+              className="w-full rounded-t-lg bg-gradient-to-t from-blue-400/20 to-fuchsia-400/20"
+              style={{ height: `${height}%` }}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function TemporalAnalysisContent() {
   const searchParams = useSearchParams();
   const userId = searchParams.get("userId") ?? undefined;
@@ -317,40 +368,51 @@ function TemporalAnalysisContent() {
     [data, locale],
   );
 
+  if (!isLoading && error) {
+    return (
+      <div className="space-y-8">
+        <TemporalHeroFrame badgeLabel={t("heroBadge")} stats={null} />
+        <TemporalNoteCallout />
+        <ErrorState
+          error={error}
+          message={t("errorLoading")}
+          onRetry={() => refetch()}
+        />
+      </div>
+    );
+  }
+
+  if (
+    !isLoading &&
+    (!data || (data.byDayOfWeek.length === 0 && data.byHourOfDay.length === 0))
+  ) {
+    return (
+      <div className="space-y-8">
+        <TemporalHeroFrame badgeLabel={t("heroBadge")} stats={null} />
+        <TemporalNoteCallout />
+        <EmptyState {...emptyStatePresets.importData} />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
-      {isLoading ? (
-        <>
-          <TemporalHeroFrame badgeLabel={t("heroBadge")} stats={<TemporalHeroStatsSkeleton />} />
-          <TemporalAnalysisSkeleton />
-        </>
-      ) : error ? (
-        <>
-          <TemporalHeroFrame badgeLabel={t("heroBadge")} stats={null} />
-          <TemporalNoteCallout />
-          <ErrorState
-            error={error}
-            message={t("errorLoading")}
-            onRetry={() => refetch()}
-          />
-        </>
-      ) : !data ||
-        (data.byDayOfWeek.length === 0 && data.byHourOfDay.length === 0) ? (
-        <>
-          <TemporalHeroFrame badgeLabel={t("heroBadge")} stats={null} />
-          <TemporalNoteCallout />
-          <EmptyState {...emptyStatePresets.importData} />
-        </>
-      ) : (
-        <>
-          <TemporalHeroFrame
-            badgeLabel={t("heroBadge")}
-            stats={<TemporalHeroStats data={data} locale={locale} />}
-          />
-          <TemporalNoteCallout />
-          <div className="space-y-8">
+      <TemporalHeroFrame
+        badgeLabel={t("heroBadge")}
+        stats={
+          isLoading ? (
+            <TemporalHeroStatsSkeleton />
+          ) : data ? (
+            <TemporalHeroStats data={data} locale={locale} />
+          ) : null
+        }
+      />
+      <TemporalNoteCallout />
+      <div className="space-y-8">
             {/* Spotlight: Your listening rhythm — moment de pic combiné avec visuel créatif */}
-            {(data.peakDay || data.peakHour) && (
+            {isLoading ? (
+              <TemporalSpotlightSkeleton />
+            ) : data && (data.peakDay || data.peakHour) ? (
               <section
                 className={`${CARD_CLASS} animate-fade-in-up transition-all duration-300`}
                 aria-labelledby="temporal-spotlight-title"
@@ -527,7 +589,7 @@ function TemporalAnalysisContent() {
                   </div>
                 </div>
               </section>
-            )}
+            ) : null}
 
             {/* Graphique par jour de la semaine - Barres ou distribution (comme heatmap) */}
             <div className={CHART_CARD_CLASS}>
@@ -577,7 +639,9 @@ function TemporalAnalysisContent() {
               </div>
               <div className="relative p-4 sm:p-6">
                 <div className="pointer-events-none absolute right-12 top-12 h-56 w-56 rounded-full bg-violet-400/10 blur-3xl dark:bg-violet-400/15" />
-                {dayOfWeekChartType === "bar" ? (
+                {isLoading ? (
+                  <TemporalChartSkeleton />
+                ) : dayOfWeekChartType === "bar" ? (
                   <div className={CHART_PANEL_CLASS}>
                     <ResponsiveContainer width="100%" height={400}>
                       <BarChart
@@ -783,7 +847,9 @@ function TemporalAnalysisContent() {
               </div>
               <div className="relative p-4 sm:p-6">
                 <div className="pointer-events-none absolute left-12 top-12 h-56 w-56 rounded-full bg-fuchsia-400/10 blur-3xl dark:bg-fuchsia-400/15" />
-                {hourOfDayChartType === "bar" ? (
+                {isLoading ? (
+                  <TemporalChartSkeleton />
+                ) : hourOfDayChartType === "bar" ? (
                   <div className={CHART_PANEL_CLASS}>
                     <ResponsiveContainer width="100%" height={400}>
                       <BarChart
@@ -945,9 +1011,7 @@ function TemporalAnalysisContent() {
                 )}
               </div>
             </div>
-          </div>
-        </>
-      )}
+      </div>
     </div>
   );
 }

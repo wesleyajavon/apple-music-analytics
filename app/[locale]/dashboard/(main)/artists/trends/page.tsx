@@ -96,6 +96,60 @@ function ArtistTrendsHero({
   );
 }
 
+function ArtistPickerSkeleton() {
+  return (
+    <div className="space-y-4" aria-busy="true">
+      <div className="h-10 w-full max-w-md rounded-xl bg-gray-100 animate-shimmer dark:bg-gray-800" />
+      <div className="flex flex-wrap gap-2">
+        {Array.from({ length: 10 }).map((_, index) => (
+          <div
+            key={index}
+            className="h-9 rounded-full bg-gray-100 animate-shimmer dark:bg-gray-800"
+            style={{ width: `${96 + ((index * 23) % 88)}px` }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ArtistTrendsChartSkeleton() {
+  return (
+    <div className="relative min-h-[500px] rounded-xl border border-card-border bg-surface/60 p-6 shadow-inner" aria-busy="true">
+      <div className="flex h-[452px] flex-col justify-between">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <div key={index} className="h-px bg-gray-200 dark:bg-gray-700" />
+        ))}
+      </div>
+      <div className="absolute inset-x-8 bottom-20 top-16">
+        <svg className="h-full w-full" viewBox="0 0 800 320" preserveAspectRatio="none" aria-hidden>
+          <path
+            d="M0 250 C90 210 160 190 250 205 S430 120 540 150 700 210 800 105"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="5"
+            className="text-violet-200 dark:text-violet-900"
+            opacity="0.8"
+          />
+          <path
+            d="M0 285 C120 230 230 250 320 180 S510 210 620 145 735 125 800 170"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="5"
+            className="text-cyan-200 dark:text-cyan-900"
+            opacity="0.75"
+          />
+        </svg>
+      </div>
+      <div className="absolute inset-x-8 bottom-6 flex flex-wrap gap-3">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <div key={index} className="h-3 w-28 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function idsEqualSorted(a: string[], b: string[]): boolean {
   if (a.length !== b.length) return false;
   const sa = [...a].sort();
@@ -444,21 +498,7 @@ function TrendsContent() {
   const activeAiError =
     summaryVersion === "technical" ? techAiError : lightAiError;
 
-  if (isLoading) {
-    return (
-      <>
-        <div className={GROUP_BY_BAR_CLASS}>
-          <div className="h-10 bg-gray-100 dark:bg-gray-700 rounded-xl animate-pulse w-64" />
-        </div>
-        <div className="mt-6 space-y-6">
-          <ArtistTrendsHero artistsHref={artistsHref} subtitleKey="subtitleExtended" />
-          <GenreTrendsSkeleton />
-        </div>
-      </>
-    );
-  }
-
-  if (error) {
+  if (!isLoading && error && !data) {
     return (
       <>
         <div className={GROUP_BY_BAR_CLASS}>
@@ -476,7 +516,7 @@ function TrendsContent() {
     );
   }
 
-  if (!data || (chartData.length === 0 && pickerArtists.length === 0)) {
+  if (!isLoading && (!data || (chartData.length === 0 && pickerArtists.length === 0))) {
     return (
       <>
         <div className={GROUP_BY_BAR_CLASS}>
@@ -531,16 +571,20 @@ function TrendsContent() {
               </div>
             </div>
             <div className="relative z-10 p-4 sm:p-6">
-              <ArtistTrendsArtistPicker
-                catalogArtists={pickerArtists}
-                selectedIds={selectedIds}
-                onToggle={toggleArtist}
-                getColor={getColor}
-                getArtistIndex={getArtistIndex}
-                enableRemoteSearch
-                onPickRemoteArtist={handlePickRemoteArtist}
-                maxSelectable={MAX_SERIES_ARTISTS}
-              />
+              {isLoading ? (
+                <ArtistPickerSkeleton />
+              ) : (
+                <ArtistTrendsArtistPicker
+                  catalogArtists={pickerArtists}
+                  selectedIds={selectedIds}
+                  onToggle={toggleArtist}
+                  getColor={getColor}
+                  getArtistIndex={getArtistIndex}
+                  enableRemoteSearch
+                  onPickRemoteArtist={handlePickRemoteArtist}
+                  maxSelectable={MAX_SERIES_ARTISTS}
+                />
+              )}
             </div>
           </div>
 
@@ -566,7 +610,9 @@ function TrendsContent() {
                 </div>
               </div>
               <div className="p-4 sm:p-6 md:p-8">
-                {selectedIds.length === 0 ? (
+                {isLoading ? (
+                  <ArtistTrendsChartSkeleton />
+                ) : selectedIds.length === 0 ? (
                   <div className="rounded-xl border border-card-border bg-surface/60 px-6 py-10 text-center">
                     <p className="text-sm text-muted">
                       {t("selectAtLeastOne")}

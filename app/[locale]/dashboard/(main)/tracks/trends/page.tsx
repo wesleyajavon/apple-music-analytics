@@ -94,6 +94,60 @@ function TrackTrendsHero({
   );
 }
 
+function TrackPickerSkeleton() {
+  return (
+    <div className="space-y-4" aria-busy="true">
+      <div className="h-10 w-full max-w-md rounded-xl bg-gray-100 animate-shimmer dark:bg-gray-800" />
+      <div className="flex flex-wrap gap-2">
+        {Array.from({ length: 10 }).map((_, index) => (
+          <div
+            key={index}
+            className="h-9 rounded-full bg-gray-100 animate-shimmer dark:bg-gray-800"
+            style={{ width: `${96 + ((index * 19) % 90)}px` }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TrackTrendsChartSkeleton() {
+  return (
+    <div className="relative min-h-[500px] rounded-xl border border-card-border bg-surface/60 p-6 shadow-inner" aria-busy="true">
+      <div className="flex h-[452px] flex-col justify-between">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <div key={index} className="h-px bg-gray-200 dark:bg-gray-700" />
+        ))}
+      </div>
+      <div className="absolute inset-x-8 bottom-20 top-16">
+        <svg className="h-full w-full" viewBox="0 0 800 320" preserveAspectRatio="none" aria-hidden>
+          <path
+            d="M0 230 C120 170 180 250 290 185 S500 120 610 165 720 220 800 135"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="5"
+            className="text-cyan-200 dark:text-cyan-900"
+            opacity="0.8"
+          />
+          <path
+            d="M0 285 C150 220 220 235 330 205 S520 250 640 160 730 115 800 150"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="5"
+            className="text-emerald-200 dark:text-emerald-900"
+            opacity="0.75"
+          />
+        </svg>
+      </div>
+      <div className="absolute inset-x-8 bottom-6 flex flex-wrap gap-3">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <div key={index} className="h-3 w-28 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function TrendsContent() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -198,21 +252,7 @@ function TrendsContent() {
   const idToTrack = useMemo(() => new Map(pickerTracks.map((item) => [item.id, item])), [pickerTracks]);
   const chartData = data?.data ?? [];
 
-  if (isLoading) {
-    return (
-      <>
-        <div className={GROUP_BY_BAR_CLASS}>
-          <div className="h-10 bg-gray-100 dark:bg-gray-700 rounded-xl animate-pulse w-64" />
-        </div>
-        <div className="mt-6 space-y-6">
-          <TrackTrendsHero tracksHref={tracksHref} subtitleKey="subtitleExtended" />
-          <GenreTrendsSkeleton />
-        </div>
-      </>
-    );
-  }
-
-  if (error) {
+  if (!isLoading && error && !data) {
     return (
       <>
         <div className={GROUP_BY_BAR_CLASS}>
@@ -226,7 +266,7 @@ function TrendsContent() {
     );
   }
 
-  if (!data || (chartData.length === 0 && pickerTracks.length === 0)) {
+  if (!isLoading && (!data || (chartData.length === 0 && pickerTracks.length === 0))) {
     return (
       <>
         <div className={GROUP_BY_BAR_CLASS}>
@@ -268,16 +308,20 @@ function TrendsContent() {
             </div>
           </div>
           <div className="relative z-10 p-4 sm:p-6">
-            <TrackTrendsTrackPicker
-              catalogTracks={pickerTracks}
-              selectedIds={selectedIds}
-              onToggle={toggleTrack}
-              getColor={getColor}
-              getTrackIndex={getTrackIndex}
-              enableRemoteSearch
-              onPickRemoteTrack={handlePickRemoteTrack}
-              maxSelectable={MAX_SERIES_TRACKS}
-            />
+            {isLoading ? (
+              <TrackPickerSkeleton />
+            ) : (
+              <TrackTrendsTrackPicker
+                catalogTracks={pickerTracks}
+                selectedIds={selectedIds}
+                onToggle={toggleTrack}
+                getColor={getColor}
+                getTrackIndex={getTrackIndex}
+                enableRemoteSearch
+                onPickRemoteTrack={handlePickRemoteTrack}
+                maxSelectable={MAX_SERIES_TRACKS}
+              />
+            )}
           </div>
         </div>
 
@@ -295,7 +339,9 @@ function TrendsContent() {
             </div>
           </div>
           <div className="p-4 sm:p-6 md:p-8">
-            {selectedIds.length === 0 ? (
+            {isLoading ? (
+              <TrackTrendsChartSkeleton />
+            ) : selectedIds.length === 0 ? (
               <div className="rounded-xl border border-card-border bg-surface/60 px-6 py-10 text-center">
                 <p className="text-sm text-muted">{t("selectAtLeastOne")}</p>
               </div>

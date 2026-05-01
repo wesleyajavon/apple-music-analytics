@@ -198,6 +198,38 @@ function TimelineHeroStatsSkeleton() {
   );
 }
 
+function TimelineChartSkeleton() {
+  return (
+    <div className="relative min-h-[500px] rounded-2xl border border-amber-200/20 bg-white/50 p-6 shadow-inner dark:border-amber-300/10 dark:bg-slate-950/20" aria-busy="true">
+      <div className="flex h-[452px] flex-col justify-between">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <div key={index} className="h-px bg-amber-100 dark:bg-amber-900/60" />
+        ))}
+      </div>
+      <div className="absolute inset-x-8 bottom-20 top-16">
+        <svg className="h-full w-full" viewBox="0 0 800 320" preserveAspectRatio="none" aria-hidden>
+          <path
+            d="M0 250 C110 175 190 225 300 175 S500 115 610 165 720 215 800 120"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="5"
+            className="text-amber-200 dark:text-amber-900"
+            opacity="0.85"
+          />
+          <path
+            d="M0 285 C140 240 235 245 340 205 S530 250 650 165 735 130 800 155"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="5"
+            className="text-sky-200 dark:text-sky-900"
+            opacity="0.75"
+          />
+        </svg>
+      </div>
+    </div>
+  );
+}
+
 function TimelineContent() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -254,15 +286,13 @@ function TimelineContent() {
       <div className="mt-6 space-y-8">
         <TimelineHeroFrame periodBadgeLabel={periodBadgeLabel} stats={heroStats} />
 
-        {isLoading ? (
-          <LineChartSkeleton height={500} />
-        ) : error ? (
+        {!isLoading && error ? (
           <ErrorState
             error={error}
             message={t("errorLoading")}
             onRetry={() => refetch()}
           />
-        ) : !data || data.length === 0 ? (
+        ) : !isLoading && (!data || data.length === 0) ? (
           <EmptyState {...emptyStatePresets.changeDates(pathname)} />
         ) : (
           <section
@@ -305,6 +335,9 @@ function TimelineContent() {
                 </div>
               </div>
               <div className="p-4 sm:p-6 md:p-8">
+                {isLoading ? (
+                  <TimelineChartSkeleton />
+                ) : (
                 <div className="relative min-h-[500px] rounded-2xl border border-amber-200/20 bg-white/50 p-3 shadow-inner dark:border-amber-300/10 dark:bg-slate-950/20">
                   <div className="pointer-events-none absolute left-1/2 top-16 h-64 w-64 -translate-x-1/2 rounded-full bg-orange-400/10 blur-3xl dark:bg-orange-400/15" />
                   <ResponsiveContainer width="100%" height={500}>
@@ -361,6 +394,7 @@ function TimelineContent() {
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
+                )}
               </div>
             </div>
           </section>

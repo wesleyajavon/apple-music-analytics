@@ -104,6 +104,57 @@ function GenreTrendsHero({
   );
 }
 
+function GenreFilterSkeleton() {
+  return (
+    <div className="flex max-h-[min(50vh,22rem)] flex-wrap content-start gap-2 overflow-y-auto rounded-xl border border-card-border bg-surface/60 p-2" aria-busy="true">
+      {Array.from({ length: 18 }).map((_, index) => (
+        <div
+          key={index}
+          className="h-9 rounded-lg bg-gray-100 animate-shimmer dark:bg-gray-800"
+          style={{ width: `${84 + ((index * 17) % 82)}px` }}
+        />
+      ))}
+    </div>
+  );
+}
+
+function GenreTrendsChartSkeleton() {
+  return (
+    <div className="relative min-h-[500px] rounded-xl border border-card-border bg-surface/60 p-6 shadow-inner" aria-busy="true">
+      <div className="flex h-[452px] flex-col justify-between">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <div key={index} className="h-px bg-gray-200 dark:bg-gray-700" />
+        ))}
+      </div>
+      <div className="absolute inset-x-8 bottom-20 top-16">
+        <svg className="h-full w-full" viewBox="0 0 800 320" preserveAspectRatio="none" aria-hidden>
+          <path
+            d="M0 245 C120 190 190 230 290 175 S480 130 600 160 720 220 800 120"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="5"
+            className="text-indigo-200 dark:text-indigo-900"
+            opacity="0.8"
+          />
+          <path
+            d="M0 285 C130 230 230 245 330 205 S520 245 645 165 735 125 800 155"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="5"
+            className="text-rose-200 dark:text-rose-900"
+            opacity="0.75"
+          />
+        </svg>
+      </div>
+      <div className="absolute inset-x-8 bottom-6 flex flex-wrap gap-3">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <div key={index} className="h-3 w-28 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function getColor(index: number): string {
   return COLORS[index % COLORS.length];
 }
@@ -470,21 +521,7 @@ function TrendsContent() {
   const activeAiError =
     summaryVersion === "technical" ? techAiError : lightAiError;
 
-  if (isLoading) {
-    return (
-      <>
-        <div className={GROUP_BY_BAR_CLASS}>
-          <div className="h-10 bg-gray-100 dark:bg-gray-700 rounded-xl animate-pulse w-64" />
-        </div>
-        <div className="mt-6 space-y-6">
-          <GenreTrendsHero genresHref={genresHref} subtitleKey="subtitleExtended" />
-          <GenreTrendsSkeleton />
-        </div>
-      </>
-    );
-  }
-
-  if (error) {
+  if (!isLoading && error && !data) {
     return (
       <>
         <div className={GROUP_BY_BAR_CLASS}>
@@ -502,7 +539,7 @@ function TrendsContent() {
     );
   }
 
-  if (!data || (chartData.length === 0 && availableGenres.length === 0)) {
+  if (!isLoading && (!data || (chartData.length === 0 && availableGenres.length === 0))) {
     return (
       <>
         <div className={GROUP_BY_BAR_CLASS}>
@@ -659,43 +696,47 @@ function TrendsContent() {
                 </div>
               </div>
             )}
-            <div className="flex max-h-[min(50vh,22rem)] flex-wrap content-start gap-2 overflow-y-auto rounded-xl border border-card-border bg-surface/60 p-2">
-              {visibleGenres.map((genre) => {
-                const selected = selectedGenres.includes(genre);
-                const disabled = !selected && selectedGenres.length >= MAX_SERIES_GENRES;
-                const idx = availableGenres.indexOf(genre);
-                return (
-                  <label
-                    key={genre}
-                    className={`inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 transition-colors ${
-                      selected
-                        ? "border-accent-violet/30 bg-accent-violet/10 text-foreground shadow-sm"
-                        : "border-card-border bg-card-surface text-foreground hover:bg-surface-glass"
-                    } ${
-                      disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selected}
-                      disabled={disabled}
-                      onChange={() => toggleGenre(genre)}
-                      className="rounded border-card-border text-primary focus:ring-ring disabled:opacity-40"
-                    />
-                    <span
-                      className="w-3 h-3 rounded-full shrink-0"
-                      style={{
-                        backgroundColor: selected ? getColor(idx) : "transparent",
-                        border: selected ? "none" : "1px solid #9ca3af",
-                      }}
-                    />
-                    <span className="text-sm text-foreground">
-                      {genre}
-                    </span>
-                  </label>
-                );
-              })}
-            </div>
+            {isLoading ? (
+              <GenreFilterSkeleton />
+            ) : (
+              <div className="flex max-h-[min(50vh,22rem)] flex-wrap content-start gap-2 overflow-y-auto rounded-xl border border-card-border bg-surface/60 p-2">
+                {visibleGenres.map((genre) => {
+                  const selected = selectedGenres.includes(genre);
+                  const disabled = !selected && selectedGenres.length >= MAX_SERIES_GENRES;
+                  const idx = availableGenres.indexOf(genre);
+                  return (
+                    <label
+                      key={genre}
+                      className={`inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 transition-colors ${
+                        selected
+                          ? "border-accent-violet/30 bg-accent-violet/10 text-foreground shadow-sm"
+                          : "border-card-border bg-card-surface text-foreground hover:bg-surface-glass"
+                      } ${
+                        disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selected}
+                        disabled={disabled}
+                        onChange={() => toggleGenre(genre)}
+                        className="rounded border-card-border text-primary focus:ring-ring disabled:opacity-40"
+                      />
+                      <span
+                        className="w-3 h-3 rounded-full shrink-0"
+                        style={{
+                          backgroundColor: selected ? getColor(idx) : "transparent",
+                          border: selected ? "none" : "1px solid #9ca3af",
+                        }}
+                      />
+                      <span className="text-sm text-foreground">
+                        {genre}
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            )}
             </div>
           </div>
 
@@ -844,7 +885,9 @@ function TrendsContent() {
                 </div>
               </div>
               <div className="p-4 sm:p-6 md:p-8">
-                {selectedGenres.length === 0 ? (
+                {isLoading ? (
+                  <GenreTrendsChartSkeleton />
+                ) : selectedGenres.length === 0 ? (
                   <div className="rounded-xl border border-card-border bg-surface/60 px-6 py-10 text-center">
                     <p className="text-sm text-muted">
                       {t("selectAtLeastOne")}

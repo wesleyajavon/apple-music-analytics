@@ -72,11 +72,17 @@ describe("Palette API auth", () => {
   });
 
   it.each([
-    ["GET /api/palette/session", GETSession, "http://localhost/api/palette/session"],
+    [
+      "GET /api/palette/session",
+      GETSession,
+      "http://localhost/api/palette/session",
+      undefined,
+    ],
     [
       "GET /api/palette/suggestions",
       GETSuggestions,
       "http://localhost/api/palette/suggestions?mode=artists&artistId=artist-1",
+      undefined,
     ],
     [
       "POST /api/palette/map",

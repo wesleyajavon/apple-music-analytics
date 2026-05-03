@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentUserId } from "@/lib/auth/get-current-user-id";
-import { unauthorizedResponse } from "@/lib/auth/require-auth-user-id";
+import {
+  requireAuthenticatedUserId,
+  unauthorizedResponse,
+} from "@/lib/auth/require-auth-user-id";
 import { assertRateLimit } from "@/lib/security/rate-limit";
 import {
   AppError,
@@ -28,7 +30,7 @@ const RATE = {
 
 export async function POST(request: NextRequest) {
   try {
-    const userId = await getCurrentUserId(request);
+    const userId = await requireAuthenticatedUserId(request);
     if (!userId) return unauthorizedResponse();
 
     await assertRateLimit(request, {

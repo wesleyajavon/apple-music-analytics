@@ -23,6 +23,30 @@ function getLocaleFromPathname(pathname: string): string | null {
   return null;
 }
 
+function getLocalizedPath(path: string, locale: string | null): string {
+  return locale ? `/${locale}${path}` : path;
+}
+
+function redirectToPublicPaletteFallback(
+  request: NextRequest,
+  locale: string | null,
+  publicProfileId: string
+) {
+  const fallbackUrl = new URL(
+    getLocalizedPath("/dashboard/genres", locale),
+    request.url
+  );
+  fallbackUrl.searchParams.set("userId", publicProfileId);
+  fallbackUrl.searchParams.set("palette", "restricted");
+  return NextResponse.redirect(fallbackUrl);
+}
+
+function redirectToPublicHome(request: NextRequest, locale: string | null) {
+  return NextResponse.redirect(
+    new URL(getLocalizedPath("/", locale), request.url)
+  );
+}
+
 export default async function middleware(request: NextRequest) {
   const response = handleI18nRouting(request);
   const { response: sessionResponse, user } = await updateSession(request, response);
@@ -34,12 +58,19 @@ export default async function middleware(request: NextRequest) {
   if (isDashboardRoute && !user) {
     const publicProfileId = getPublicProfileUserId();
     const userIdParam = request.nextUrl.searchParams.get("userId");
+    const locale = getLocaleFromPathname(request.nextUrl.pathname);
+
+    if (normalizedPath === "/dashboard/genres/palette") {
+      if (publicProfileId && userIdParam === publicProfileId) {
+        return redirectToPublicPaletteFallback(request, locale, publicProfileId);
+      }
+      return redirectToPublicHome(request, locale);
+    }
+
     if (publicProfileId && userIdParam === publicProfileId) {
       return sessionResponse;
     }
-    const locale = getLocaleFromPathname(request.nextUrl.pathname);
-    const publicHomePath = locale ? `/${locale}` : "/";
-    return NextResponse.redirect(new URL(publicHomePath, request.url));
+    return redirectToPublicHome(request, locale);
   }
 
   return sessionResponse;

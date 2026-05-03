@@ -27,6 +27,7 @@ Voir aussi : [PUBLIC_DEMO_HARDENING.md](./PUBLIC_DEMO_HARDENING.md) (levier 1, p
 | `/dashboard/genres` | **Garder** | Répartition agrégée. |
 | `/dashboard/artists` | **Garder** | Top artistes agrégés. |
 | `/dashboard/genres/trends` | **Garder** | Tendances agrégées ; un peu « power user » mais pas plus intime que le reste. |
+| `/dashboard/genres/palette` | **Fermer** | Atelier de mapping manuel : écritures, skips, suggestions et exploration d’une file de genres inconnus hors périmètre démo. Restreindre la page **et** les API `/api/palette/*` ensemble ; cacher le lien ne suffit pas. |
 | `/dashboard/artists/trends` | **Garder** | Idem. |
 | `/dashboard/temporal-analysis` | **Garder** | Patterns jour/heure en agrégé ; montre la profondeur du produit. |
 | `/dashboard/heatmap` | **Fermer ou fortement limiter** | Au clic sur un jour, chargement d’**écoutes détaillées** (`useListens`) → titres, artistes, horaires : granularité la plus sensible pour une démo publique. |
@@ -44,7 +45,8 @@ Voir aussi : [PUBLIC_DEMO_HARDENING.md](./PUBLIC_DEMO_HARDENING.md) (levier 1, p
 
 1. Bloquer tout le **bloc IA** : `musical-profile`, `ai-insights`, `taste-evolution`, `taste-profile`.
 2. Bloquer **`heatmap`** (ou désactiver uniquement le détail jour + appels `listens` en mode public — plus fin à implémenter).
-3. Laisser ouvert : **overview**, **temporal-analysis**, **genres**, **artists**, **genres/trends**, **artists/trends**, **timeline**, **about**, **demo**, **insights**.
+3. Bloquer **`genres/palette`** côté page et API : cacher le lien ne suffit pas, car `GET /api/palette/session`, `GET /api/palette/suggestions`, `POST /api/palette/map` et `POST /api/palette/skip` explorent la file Palette ou écrivent des décisions utilisateur.
+4. Laisser ouvert : **overview**, **temporal-analysis**, **genres**, **artists**, **genres/trends**, **artists/trends**, **timeline**, **about**, **demo**, **insights**.
 
 ---
 
@@ -57,4 +59,4 @@ Voir aussi : [PUBLIC_DEMO_HARDENING.md](./PUBLIC_DEMO_HARDENING.md) (levier 1, p
 
 ## Étape suivante (implémentation)
 
-Mapper chaque route fermée vers les **endpoints API** à restreindre de la même façon pour les requêtes anonymes sur le seul `userId` public (IA, `/api/listens` en liste brute, etc.).
+Mapper chaque route fermée vers les **endpoints API** à restreindre de la même façon pour les requêtes anonymes sur le seul `userId` public (IA, `/api/listens` en liste brute, etc.). Pour Palette, la règle est stricte : page fermée au public anonyme et `/api/palette/*` réservé aux sessions authentifiées, même si `?userId=<profil public>` est présent.

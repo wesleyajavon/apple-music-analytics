@@ -11,7 +11,7 @@
 | Codename   | Thème (une ligne) | Doc principal |
 |------------|-------------------|---------------|
 | **Breakwater** | Durcir la démo publique quand coûts, trafic ou risque dépassent le confort actuel | [docs/BREAKWATER.md](docs/BREAKWATER.md) |
-| **CurtainCall** | Sessions expirantes avec timeout d’inactivité : demander une reconnexion après absence prolongée | (à créer) |
+| **CurtainCall** | Sessions expirantes avec timeout d’inactivité : demander une reconnexion après absence prolongée | [docs/CURTAINCALL.md](docs/CURTAINCALL.md) |
 | **Encore** | UI **Replay par année** (style Apple Music Replay), API déjà prête | [docs/ENCORE.md](docs/ENCORE.md) |
 | **Headliner** | Unifier **artiste principal vs featuring** pour des tops et agrégats plus justes (parsing, alias, mbid, ou crédits multiples) | [docs/HEADLINER.md](docs/HEADLINER.md) |
 | **Palette** | Atelier **genres** ré-entrant : l’utilisateur mappe les tops artistes « Unknown » (liste existante + saisie), expérience ludique, sans bloquer l’import | [docs/PALETTE.md](docs/PALETTE.md) |
@@ -32,6 +32,7 @@
 - **Idée** : ajouter des **sessions expirantes par inactivité**. Si un utilisateur ferme l’app ou la laisse inactive trop longtemps, il doit se reconnecter au retour au lieu de retrouver automatiquement son dashboard ouvert.
 - **Pourquoi maintenant** : aujourd’hui, la session semble survivre à la fermeture du navigateur pendant plusieurs heures. C’est normal si le client auth persiste la session dans un stockage durable (`localStorage` / cookies) et si le refresh token reste valide : fermer l’onglet ne détruit pas forcément la session.
 - **Pistes produit / sécurité** : définir un timeout d’inactivité clair (ex. 30 min, 2 h, 24 h), afficher un message de reconnexion propre, et décider si l’expiration doit être côté client seulement ou renforcée côté serveur pour les routes sensibles.
+- **Doc** : [docs/CURTAINCALL.md](docs/CURTAINCALL.md) (cadrage Supabase Auth, UX de reconnexion, garde serveur, prompt agent).
 - **Quand prioriser** : avant une démo publique élargie, si plusieurs personnes utilisent le même appareil, ou si des données utilisateur deviennent plus sensibles.
 
 ---
@@ -55,6 +56,7 @@
 ## Palette
 
 - **Idée** : quand beaucoup de données restent en **genre inconnu** après import, laisser l’utilisateur **revenir quand il veut** pour « colorier » sa bibliothèque — en priorité les **artistes les plus écoutés** (même logique que le CLI `genres:map-top-unknown`), avec choix parmi les genres déjà connus **ou** saisie libre ; parcours **agrégable** (court, progressif, optionnel).
+- **Démo publique** : retirer ou rendre **inaccessible** Palette dans le mode public/demo pour éviter qu’un visiteur anonyme puisse modifier, mapper ou explorer des données de genres hors périmètre.
 - **Doc** : [docs/PALETTE.md](docs/PALETTE.md) (flux MVP, UX ludique, déclencheurs, lien CLI / scripts existants, prompt agent).
 - **Quand prioriser** : retours utilisateurs sur graphiques genres « vides » ; après stabilisation des imports ; avant d’investir dans de gros backfills automatiques coûteux.
 
@@ -95,9 +97,9 @@ Quand une idée mérite son propre dossier, crée `docs/NOM_CODENAME.md` (comme 
 ## Recherche dans le repo
 
 - **Breakwater** : `Breakwater`, `breakwater`, [docs/BREAKWATER.md](docs/BREAKWATER.md)
-- **CurtainCall** : `CurtainCall`, `curtain call`, `session`, `timeout`, `expiration`, `inactivité`, `reconnexion`
+- **CurtainCall** : `CurtainCall`, `curtain call`, `session`, `timeout`, `expiration`, `inactivité`, `reconnexion`, [docs/CURTAINCALL.md](docs/CURTAINCALL.md)
 - **Encore** : `Encore`, `encore`, [docs/ENCORE.md](docs/ENCORE.md)
 - **Headliner** : `Headliner`, `headliner`, `featuring`, `feat.`, `artiste canonique`, [docs/HEADLINER.md](docs/HEADLINER.md)
-- **Palette** : `Palette`, `palette`, `Unknown`, `genre`, `mapping genres`, `genres:map-top-unknown`, [docs/PALETTE.md](docs/PALETTE.md)
+- **Palette** : `Palette`, `palette`, `Unknown`, `genre`, `mapping genres`, `genres:map-top-unknown`, `démo publique`, `public demo`, [docs/PALETTE.md](docs/PALETTE.md)
 - **Setlist** : `Setlist`, `setlist`, `tracks`, `titres`, `dashboard/tracks`, [docs/SETLIST.md](docs/SETLIST.md)
 - **Ce fichier** : `IDEAS_BAG`, `ideas bag`, `sac à idées`

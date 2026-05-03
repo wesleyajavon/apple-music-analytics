@@ -21,7 +21,9 @@ import { useGenres } from "@/lib/hooks/use-listening";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
+import { PaletteMappingNotice } from "@/lib/components/palette/palette-mapping-notice";
 import { GenresSkeleton } from "@/lib/components/skeleton-loaders";
+import { usePublicDemoViewer } from "@/lib/hooks/use-public-demo-viewer";
 import { Tags } from "lucide-react";
 
 type ChartType = "pie" | "bar";
@@ -362,6 +364,8 @@ function PieChartLegend({
 function GenresContent() {
   const searchParams = useSearchParams();
   const userId = searchParams.get("userId") ?? undefined;
+  const paletteAccessRestricted = searchParams.get("palette") === "restricted";
+  const isPublicDemoViewer = usePublicDemoViewer(userId);
   const pathname = usePathname();
   const router = useRouter();
   const t = useTranslations("genres");
@@ -507,18 +511,20 @@ function GenresContent() {
         dateSummary={dateSummary}
         genreExtras={genreExtras}
       />
-      <div className="max-w-3xl rounded-xl border border-amber-200 bg-amber-50/80 px-4 py-3 text-sm text-amber-900 shadow-sm shadow-amber-950/5 dark:border-amber-400/25 dark:bg-amber-950/30 dark:text-amber-100">
-        <p className="font-semibold">{t("apiMappingNoticeTitle")}</p>
-        <p className="mt-1">
-          {t("apiMappingNoticeBody")}{" "}
-          <Link
-            href="/dashboard/genres/palette"
-            className="font-semibold underline decoration-amber-500/60 underline-offset-2 hover:decoration-amber-600 dark:decoration-amber-300/70"
-          >
-            {t("apiMappingNoticeLink")}
-          </Link>
-        </p>
-      </div>
+      {paletteAccessRestricted ? (
+        <div className="max-w-3xl rounded-xl border border-cyan-200 bg-cyan-50/80 px-4 py-3 text-sm text-cyan-950 shadow-sm shadow-cyan-950/5 dark:border-cyan-400/25 dark:bg-cyan-950/30 dark:text-cyan-100">
+          <p className="font-semibold">{t("paletteRestrictedTitle")}</p>
+          <p className="mt-1">{t("paletteRestrictedBody")}</p>
+        </div>
+      ) : null}
+      <PaletteMappingNotice
+        title={t("apiMappingNoticeTitle")}
+        body={t("apiMappingNoticeBody")}
+        linkLabel={t("apiMappingNoticeLink")}
+        isPublicDemoViewer={isPublicDemoViewer}
+        showGroqCta
+        viewerUserId={userId}
+      />
       {!isLoadingOrFetching && error ? (
         <ErrorState
           error={error}

@@ -195,7 +195,9 @@ function SidebarContent() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [openNavKeys, setOpenNavKeys] = useState<Record<string, boolean>>({});
   const [authEmail, setAuthEmail] = useState<string | null>(null);
-  const [authUserId, setAuthUserId] = useState<string | null>(null);
+  const [authUserId, setAuthUserId] = useState<string | null | undefined>(
+    undefined
+  );
   const [isSigningOut, setIsSigningOut] = useState(false);
   const t = useTranslations("sidebar");
   const publicProfileUserId = useMemo(() => getPublicProfileUserId(), []);
@@ -206,7 +208,7 @@ function SidebarContent() {
   );
   const isPublicDemoViewer = useMemo(
     () =>
-      !authUserId &&
+      authUserId === null &&
       !!publicProfileUserId &&
       searchParams.get("userId") === publicProfileUserId,
     [authUserId, publicProfileUserId, searchParams]
@@ -290,6 +292,10 @@ function SidebarContent() {
   };
 
   const renderNavItem = (item: NavItem, depth = 0) => {
+    if (isPublicDemoViewer && item.href === "/dashboard/genres/palette") {
+      return null;
+    }
+
     const key = item.href;
     const hasChildren = !!item.children?.length;
     const isDirectActive = pathname === item.href;

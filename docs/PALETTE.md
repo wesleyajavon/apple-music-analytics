@@ -71,6 +71,97 @@
 
 ---
 
+## Démo publique : rendre Palette inaccessible
+
+**Objectif** : un visiteur anonyme qui consulte le dashboard public via `?userId=<profil public>` ne doit pas pouvoir ouvrir Palette, voir la file de mapping, déclencher des suggestions, passer des cartes, ni écrire de décisions de genres. Un utilisateur connecté conserve le parcours normal.
+
+### Étape 1 — Confirmer la surface Palette
+
+Lister les entrées UI et API concernées avant de coder :
+
+- page : `/dashboard/genres/palette` ;
+- liens d’entrée : page Genres, page Tendances de genres, éventuelles invitations post-import ;
+- API : `GET /api/palette/session`, `GET /api/palette/suggestions`, `POST /api/palette/map`, `POST /api/palette/skip`.
+
+**Prompt associé**
+
+> Fais l’inventaire complet de Palette dans le repo. Cherche la page `/dashboard/genres/palette`, les liens qui pointent vers elle, les hooks `usePalette*`, et toutes les routes `/api/palette/*`. Retourne une liste courte `UI`, `API`, `traductions`, `tests existants`, sans modifier de fichiers.
+
+### Étape 2 — Définir la règle d’accès public/demo
+
+Règle produit recommandée :
+
+- **anonyme + `userId` du profil public** : Palette est inaccessible ;
+- **anonyme sans profil public** : comportement auth normal, donc accès refusé ;
+- **utilisateur connecté** : Palette reste disponible pour ses propres données.
+
+Le blocage doit être explicite côté serveur, pas seulement caché dans la navigation.
+
+**Prompt associé**
+
+> Formalise la règle d’autorisation Palette : bloque tout accès Palette quand la requête vient d’un visiteur non authentifié, y compris s’il consulte le profil public via `?userId=<NEXT_PUBLIC_PUBLIC_PROFILE_USER_ID>`. Les utilisateurs connectés ne doivent pas être affectés. Indique où placer le guard côté page/dashboard et côté API.
+
+### Étape 3 — Bloquer la route page en accès direct
+
+Ajouter un guard sur `/dashboard/genres/palette` ou dans le layout dashboard pour rediriger un visiteur public vers `/dashboard/genres?userId=<profil public>` ou `/dashboard/overview?userId=<profil public>` avec un message clair.
+
+Critère d’acceptation : taper l’URL Palette à la main en mode public ne montre jamais `PaletteWorkbench`.
+
+**Prompt associé**
+
+> Implémente le blocage de `/dashboard/genres/palette` pour la démo publique. Détecte le cas `pas de session Supabase` + `searchParams.userId === getPublicProfileUserId()`, puis redirige vers une page dashboard autorisée en conservant `userId`. Garde l’accès normal pour les utilisateurs connectés. Ajoute ou réutilise une copie traduite pour expliquer que Palette est réservée aux comptes connectés.
+
+### Étape 4 — Retirer les liens Palette du parcours public
+
+Masquer ou remplacer les CTA Palette sur les pages publiques autorisées :
+
+- bannière de mapping sur `/dashboard/genres` ;
+- bannière de mapping sur `/dashboard/genres/trends` ;
+- toute invitation Palette affichée après import ou dans une navigation future.
+
+Critère d’acceptation : un visiteur public ne voit pas de lien qui l’envoie vers Palette.
+
+**Prompt associé**
+
+> Cache les liens et CTA vers Palette quand l’utilisateur est un visiteur public anonyme du profil demo. Inspecte les pages Genres et Tendances de genres, conserve les messages pédagogiques utiles, mais retire le lien `/dashboard/genres/palette` dans ce mode. Ne change pas l’affichage pour un utilisateur connecté.
+
+### Étape 5 — Verrouiller toutes les API Palette
+
+Les routes `/api/palette/*` utilisent déjà la session via `getCurrentUserId()`. L’implémentation doit vérifier que ce comportement reste strict : aucune route Palette ne doit accepter un `userId` de query string, ni mapper/skipper/suggérer pour le profil public sans session.
+
+Critère d’acceptation : les appels anonymes à `/api/palette/session`, `/api/palette/suggestions`, `/api/palette/map`, `/api/palette/skip` renvoient `401` ou `403`, même avec `?userId=<profil public>`.
+
+**Prompt associé**
+
+> Audite puis durcis les routes `/api/palette/*`. Vérifie qu’elles ne lisent jamais `userId` depuis l’URL ou le body pour autoriser un accès public, et qu’elles retournent `401`/`403` pour toute requête anonyme, même avec le `userId` du profil public. Ajoute des tests ciblés pour session, suggestions, map et skip si l’infrastructure de tests API existante le permet.
+
+### Étape 6 — Couvrir les tests de non-régression
+
+Tester à la fois l’UX et l’API :
+
+- public demo : lien Palette absent ;
+- public demo : URL directe redirigée ou refusée ;
+- public demo : API Palette refusée ;
+- connecté : Palette fonctionne encore ;
+- traductions : message de restriction présent dans `en`, `fr`, `es` si affiché.
+
+**Prompt associé**
+
+> Ajoute les tests nécessaires pour garantir que Palette est inaccessible en mode public/demo mais reste disponible pour un utilisateur authentifié. Priorise les tests API pour les écritures (`map`, `skip`) et un test UI léger pour l’absence du CTA Palette en vue publique. Lance la suite ciblée et corrige les régressions.
+
+### Étape 7 — Mettre à jour les docs Breakwater
+
+Reporter la décision dans la cartographie des routes publiques :
+
+- `/dashboard/genres/palette` = **Fermer** ;
+- justification : écriture de décisions utilisateur, exploration de file inconnue, suggestions et mapping hors périmètre démo.
+
+**Prompt associé**
+
+> Mets à jour `docs/PUBLIC_DEMO_ROUTES_ADVISORY.md` pour ajouter `/dashboard/genres/palette` comme route fermée au public anonyme. Mentionne que la page et les API Palette doivent être restreintes ensemble, car cacher le lien ne suffit pas.
+
+---
+
 ## Prompt agent (brouillon, quand tu voudras implémenter)
 
 > Conçois une feature « Palette » : file d’artistes triés par listens avec genre unknown, UI une carte à la fois, combo autocomplete genres existants + input libre, progression et reprise session. Inclure un **mini-graphique** (même famille que `/dashboard/genres/trends`, version compacte) mis à jour de façon **optimiste** pendant le flux ; **persistance** : par défaut **une requête / transaction par artiste mappé** (bulk update des tracks de l’artiste), pas une écriture par morceau. Réutilise la logique métier proche de `scripts/interactive-map-top-unknown-artists.js` côté API + Prisma, avec routes dédiées et état utilisateur. Ne pas bloquer le dashboard ; seuil d’invitation post-import optionnel.

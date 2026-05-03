@@ -81,11 +81,12 @@ export function GenreBackfillGlobalBadge() {
 
   useEffect(() => {
     void loadStatus();
+    const status = job?.status;
     const active =
-      job?.status === "pending" || job?.status === "running" || job?.status === "paused";
+      status === "pending" || status === "running" || status === "paused";
     const pollMs = active
       ? POLL_MS_ACTIVE
-      : job == null
+      : status == null
         ? POLL_MS_NO_JOB
         : POLL_MS_TERMINAL;
     const id = window.setInterval(() => {

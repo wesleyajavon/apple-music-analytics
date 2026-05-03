@@ -25,7 +25,7 @@ export default function Home() {
           Your listening, clearly explained.
         </h1>
         <p className="text-muted text-lg mb-10 max-w-md">
-          See your music taste evolution, hidden patterns, and stats Apple/Spotify don't show you.
+          See your music taste evolution, hidden patterns, and stats Apple/Spotify don&apos;t show you.
         </p>
         <Link
           href={`/dashboard/overview?userId=${DEFAULT_PUBLIC_PROFILE_USER_ID}`}

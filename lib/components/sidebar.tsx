@@ -18,6 +18,7 @@ interface NavItem {
   labelKey: string;
   icon: (props: React.SVGProps<SVGSVGElement>) => JSX.Element;
   featured?: boolean;
+  badgeKey?: string;
   children?: NavItem[];
 }
 
@@ -137,6 +138,13 @@ const navGroups: NavGroup[] = [
   {
     labelKey: "aiPredictions",
     items: [
+      {
+        href: "/dashboard/ask-your-soundprint",
+        labelKey: "askSoundprint",
+        icon: icons.aiInsights,
+        featured: true,
+        badgeKey: "newAiBadge",
+      },
       { href: "/dashboard/ai-insights", labelKey: "aiInsights", icon: icons.aiInsights },
       { href: "/dashboard/taste-evolution", labelKey: "tasteEvolution", icon: icons.trends },
     ],
@@ -388,7 +396,7 @@ function SidebarContent() {
             <span className="flex-1 truncate">{label}</span>
             {isFeatured && !isDirectActive && (
               <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">
-                {t("featuredBadge")}
+                {t(item.badgeKey ?? "featuredBadge")}
               </span>
             )}
             {isDirectActive && <div className="w-1 h-5 rounded-full bg-brand-gradient shrink-0" />}

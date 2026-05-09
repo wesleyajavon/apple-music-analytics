@@ -35,7 +35,7 @@ import {
 import { OverviewStatsSection } from "@/lib/components/overview-stats-section";
 import { formatOverviewDateRangeLabel } from "@/lib/utils/overview-date-range-label";
 import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
-import { BarChart3 } from "lucide-react";
+import { BarChart3, Sparkles } from "lucide-react";
 
 /**
  * Calcule la période précédente basée sur la période actuelle
@@ -105,12 +105,14 @@ function OverviewHeroFrame({
   description,
   badgeLabel,
   hasComparison,
+  featureHref = "/dashboard/ask-your-soundprint",
   stats,
 }: {
   title: string;
   description: string;
   badgeLabel: string;
   hasComparison: boolean;
+  featureHref?: string;
   stats: ReactNode;
 }) {
   const t = useTranslations("overview");
@@ -120,7 +122,18 @@ function OverviewHeroFrame({
       <div className="absolute -right-20 -top-24 h-56 w-56 rounded-full bg-violet-400/18 blur-3xl" />
       <div className="absolute -bottom-24 left-10 h-48 w-48 rounded-full bg-cyan-400/16 blur-3xl" />
       <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${OVERVIEW_RAIL_CLASS} opacity-90`} />
-      <div className="relative max-w-3xl">
+      <Link
+        href={featureHref}
+        className="group absolute right-4 top-4 z-10 inline-flex items-center gap-2 rounded-full border border-cyan-200/30 bg-slate-950/55 px-3 py-2 text-xs font-semibold text-cyan-50 shadow-lg shadow-cyan-950/20 backdrop-blur-md transition hover:border-cyan-200/60 hover:bg-cyan-300/15 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-200 sm:right-6 sm:top-6"
+        aria-label={t("musicAgentPromoAria")}
+      >
+        <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-cyan-300/20 text-cyan-100">
+          <Sparkles className="h-3.5 w-3.5" aria-hidden />
+        </span>
+        <span className="hidden text-cyan-200/85 sm:inline">{t("musicAgentPromoBadge")}</span>
+        <span>{t("musicAgentPromoTitle")}</span>
+      </Link>
+      <div className="relative max-w-3xl pt-12 sm:pt-0 sm:pr-48">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-200/85">{t("heroEyebrow")}</p>
         <h1 className="mt-3 flex items-center gap-3 text-3xl font-bold tracking-tight text-white sm:text-4xl">
           <BarChart3 className="h-9 w-9 shrink-0 text-violet-200/90 sm:h-10 sm:w-10" strokeWidth={1.75} aria-hidden />
@@ -365,6 +378,10 @@ function OverviewContent() {
     () => mergeDashboardSearchParams("/dashboard/tracks", searchParams),
     [searchParams]
   );
+  const musicAgentHref = useMemo(
+    () => mergeDashboardSearchParams("/dashboard/ask-your-soundprint", searchParams),
+    [searchParams]
+  );
 
   if (!isLoading && error) {
     return (
@@ -374,6 +391,7 @@ function OverviewContent() {
           description={t("errorLoading")}
           badgeLabel={badgeLabel}
           hasComparison={hasComparison}
+          featureHref={musicAgentHref}
           stats={null}
         />
         <ErrorState
@@ -393,6 +411,7 @@ function OverviewContent() {
           description={t("subtitle")}
           badgeLabel={badgeLabel}
           hasComparison={hasComparison}
+          featureHref={musicAgentHref}
           stats={null}
         />
         <EmptyState {...emptyStatePresets.importData} />
@@ -407,6 +426,7 @@ function OverviewContent() {
         description={t("subtitle")}
         badgeLabel={badgeLabel}
         hasComparison={hasComparison}
+        featureHref={musicAgentHref}
         stats={
           data ? (
             <OverviewHeroStats

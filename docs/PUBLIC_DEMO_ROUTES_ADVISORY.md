@@ -32,6 +32,7 @@ Voir aussi : [PUBLIC_DEMO_HARDENING.md](./PUBLIC_DEMO_HARDENING.md) (levier 1, p
 | `/dashboard/temporal-analysis` | **Garder** | Patterns jour/heure en agrégé ; montre la profondeur du produit. |
 | `/dashboard/heatmap` | **Fermer ou fortement limiter** | Au clic sur un jour, chargement d’**écoutes détaillées** (`useListens`) → titres, artistes, horaires : granularité la plus sensible pour une démo publique. |
 | `/dashboard/musical-profile` | **Fermer** | Hub avec **plusieurs flux IA** (insights, profil, évolution) → coût + surface narrative forte. |
+| `/dashboard/ask-your-soundprint` | **Limiter** | Agent IA conversationnel : autoriser seulement des questions prédéfinies en mode public/demo, refuser le texte libre et garder les API alignées. |
 | `/dashboard/ai-insights` | **Fermer** | IA + texte interprétatif ; coût ; contenu très « personnalisé ». |
 | `/dashboard/taste-evolution` | **Fermer** | Tendances + commentaires IA. |
 | `/dashboard/about` | **Garder** | Contenu éducatif, confiance. |
@@ -43,7 +44,7 @@ Voir aussi : [PUBLIC_DEMO_HARDENING.md](./PUBLIC_DEMO_HARDENING.md) (levier 1, p
 
 ## Synthèse minimale (peu de règles)
 
-1. Bloquer tout le **bloc IA** : `musical-profile`, `ai-insights`, `taste-evolution`, `taste-profile`.
+1. Bloquer ou limiter tout le **bloc IA** : `musical-profile`, `ai-insights`, `taste-evolution`, `taste-profile`; `ask-your-soundprint` reste limité aux questions prédéfinies en public/demo.
 2. Bloquer **`heatmap`** (ou désactiver uniquement le détail jour + appels `listens` en mode public — plus fin à implémenter).
 3. Bloquer **`genres/palette`** côté page et API : cacher le lien ne suffit pas, car `GET /api/palette/session`, `GET /api/palette/suggestions`, `POST /api/palette/map` et `POST /api/palette/skip` explorent la file Palette ou écrivent des décisions utilisateur.
 4. Laisser ouvert : **overview**, **temporal-analysis**, **genres**, **artists**, **genres/trends**, **artists/trends**, **timeline**, **about**, **demo**, **insights**.

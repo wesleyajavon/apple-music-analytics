@@ -14,6 +14,7 @@
 | **CurtainCall** | Sessions expirantes avec timeout d’inactivité : demander une reconnexion après absence prolongée | [docs/CURTAINCALL.md](docs/CURTAINCALL.md) |
 | **Encore** | UI **Replay par année** (style Apple Music Replay), API déjà prête | [docs/ENCORE.md](docs/ENCORE.md) |
 | **Headliner** | Unifier **artiste principal vs featuring** pour des tops et agrégats plus justes (parsing, alias, mbid, ou crédits multiples) | [docs/HEADLINER.md](docs/HEADLINER.md) |
+| **Maestro** | Agent conversationnel IA pour poser des questions en langage naturel sur les données musicales de l’utilisateur | [docs/MAESTRO.md](docs/MAESTRO.md) |
 | **Palette** | Atelier **genres** ré-entrant : l’utilisateur mappe les tops artistes « Unknown » (liste existante + saisie), expérience ludique, sans bloquer l’import | [docs/PALETTE.md](docs/PALETTE.md) |
 | **Setlist** | Page **`/dashboard/tracks`** au même niveau qu’**Artists** et **Genres** : tops morceaux + tendances temporelles, UX et API alignés sur l’existant | [docs/SETLIST.md](docs/SETLIST.md) |
 
@@ -50,6 +51,15 @@
 - **Idée** : traiter « Artiste » et « Artiste feat. X » comme le **même artiste canonique** pour les stats, sans perdre la possibilité d’afficher le crédit brut ou d’analyser les collabs.
 - **Doc** : [docs/HEADLINER.md](docs/HEADLINER.md) (axes A→D, métriques produit, ordre d’implémentation, prompt agent).
 - **Quand prioriser** : tops artistes jugés « faux » par les utilisateurs ; avant gros marketing / démo ; en même temps qu’un refactor import Last.fm / CSV.
+
+---
+
+## Maestro
+
+- **Idée** : ajouter un agent conversationnel qui permet de demander en langage naturel « quels morceaux ai-je le plus écoutés pendant l’été 2022 ? », « quel artiste est le plus régulier dans mon historique ? », etc.
+- **Doc** : [docs/MAESTRO.md](docs/MAESTRO.md) (cadrage produit, architecture tool calling, tools analytics allowlistés, sécurité, plan MVP).
+- **Upgrade** : [docs/MAESTRO_UPGRADE_PLAYBOOK.md](docs/MAESTRO_UPGRADE_PLAYBOOK.md) (ordre conseillé : deep dive artiste, taste shifts, obsessions, UI structurée, streaming).
+- **Quand prioriser** : quand tu veux transformer le dashboard en assistant exploratoire, ou quand les utilisateurs doivent pouvoir obtenir une réponse sans connaître la bonne page / le bon filtre.
 
 ---
 
@@ -100,6 +110,7 @@ Quand une idée mérite son propre dossier, crée `docs/NOM_CODENAME.md` (comme 
 - **CurtainCall** : `CurtainCall`, `curtain call`, `session`, `timeout`, `expiration`, `inactivité`, `reconnexion`, [docs/CURTAINCALL.md](docs/CURTAINCALL.md)
 - **Encore** : `Encore`, `encore`, [docs/ENCORE.md](docs/ENCORE.md)
 - **Headliner** : `Headliner`, `headliner`, `featuring`, `feat.`, `artiste canonique`, [docs/HEADLINER.md](docs/HEADLINER.md)
+- **Maestro** : `Maestro`, `maestro`, `music-chat`, `agent conversationnel`, `Ask your music data`, [docs/MAESTRO.md](docs/MAESTRO.md)
 - **Palette** : `Palette`, `palette`, `Unknown`, `genre`, `mapping genres`, `genres:map-top-unknown`, `démo publique`, `public demo`, [docs/PALETTE.md](docs/PALETTE.md)
 - **Setlist** : `Setlist`, `setlist`, `tracks`, `titres`, `dashboard/tracks`, [docs/SETLIST.md](docs/SETLIST.md)
 - **Ce fichier** : `IDEAS_BAG`, `ideas bag`, `sac à idées`

@@ -40,6 +40,7 @@
     "signOut": "Se déconnecter",
     "signingOut": "Déconnexion...",
     "featuredBadge": "Cœur",
+    "newAiBadge": "New",
     "groups": {
       "home": "Accueil",
       "library": "Bibliothèque",
@@ -61,6 +62,7 @@
       "artists": "Artistes",
       "trackTrends": "Tendances titres",
       "tracks": "Titres",
+      "askSoundprint": "Ask your Soundprint",
       "aiInsights": "AI Insights",
       "tasteEvolution": "Évolution des goûts",
       "tasteProfile": "Profil de goût",
@@ -69,6 +71,85 @@
       "methodology": "Méthodologie",
       "sentryTest": "Test Sentry",
       "settings": "Paramètres"
+    }
+  },
+  "askSoundprint": {
+    "eyebrow": "Agent musical",
+    "title": "Ask your Soundprint",
+    "subtitle": "Posez une question sur vos écoutes : morceaux les plus joués, artistes réguliers, saisons, horaires ou changements de goût.",
+    "publicDemoMode": "Mode démo publique : seules les questions prédéfinies sont disponibles.",
+    "emptyAssistantMessage": "Demandez-moi quelque chose sur vos données musicales. Je répondrai uniquement à partir d’agrégats calculés côté serveur.",
+    "publicDemoIntro": "Bienvenue dans la démo. Choisissez une question prédéfinie pour explorer le profil public sans ouvrir le texte libre.",
+    "inputLabel": "Question à poser à Ask your Soundprint",
+    "inputPlaceholder": "Ex. Quels morceaux ai-je le plus écoutés pendant l’été 2022 ?",
+    "publicDemoPlaceholder": "Le texte libre est désactivé en mode démo.",
+    "send": "Envoyer",
+    "thinking": "Analyse de votre Soundprint…",
+    "presetTitle": "Questions rapides",
+    "presetDescription": "Utilisez ces exemples pour comprendre ce que l’agent sait traiter. Cliquez pour poser la question directement.",
+    "customizeHint": "Ces questions sont des modèles : les utilisateurs connectés peuvent changer l’artiste, l’année, la période, les périodes à comparer, la taille de fenêtre ou la limite de résultats en texte libre.",
+    "supportedGuideTitle": "Ce que vous pouvez demander",
+    "demoPresetOnlyHint": "Disponible en texte libre pour les comptes connectés.",
+    "presetSections": {
+      "core": "Questions de base",
+      "maestroUpgrade": "Upgrades Maestro"
+    },
+    "guardrailHint": "Ask your Soundprint utilise des tools analytics autorisés : pas de SQL généré librement, pas d’écriture, et des résultats limités.",
+    "unsupportedTitle": "Ce qui n’est pas supporté",
+    "unsupportedExamples": "Création de playlists, changements de compte, suppression/import de données, faits externes sur les artistes, SQL libre et tâches générales hors analytics musicales.",
+    "publicDemoFreeTextBlocked": "Le mode démo publique accepte uniquement les questions prédéfinies.",
+    "genericError": "Impossible de générer une réponse. Réessayez.",
+    "aiDisabledClient": "L’IA est désactivée pour ce navigateur. Réactivez le bouton IA pour utiliser Ask your Soundprint.",
+    "aiDisabledEnv": "L’IA est désactivée côté serveur. Ask your Soundprint n’est pas disponible ici.",
+    "presets": {
+      "summer-2022-top-tracks": "Quels morceaux ai-je le plus écoutés pendant l’été 2022 ?",
+      "consistent-artists": "Quel artiste ai-je écouté le plus régulièrement au fil des années ?",
+      "late-night-habits": "Qu’est-ce que j’écoute le plus souvent tard le soir ?",
+      "artist-deep-dive": "Raconte-moi mon historique d’écoute avec Radiohead.",
+      "taste-shift-2020-2024": "Comment mes goûts ont-ils changé entre 2020 et 2024 ?",
+      "track-obsessions-2022": "Quels morceaux m’ont obsédé en 2022 ?"
+    },
+    "examples": {
+      "top-tracks": {
+        "label": "Top titres",
+        "question": "Quels morceaux ai-je le plus écoutés pendant l’été 2022 ?"
+      },
+      "top-artists": {
+        "label": "Top artistes",
+        "question": "Quels étaient mes artistes les plus écoutés en 2024 ?"
+      },
+      "genre-breakdown": {
+        "label": "Répartition genres",
+        "question": "Quels genres ai-je le plus écoutés l’année dernière ?"
+      },
+      "compare-periods": {
+        "label": "Comparer deux périodes",
+        "question": "Compare mes top titres et artistes en 2021 vs 2024."
+      },
+      "taste-shift": {
+        "label": "Évolution des goûts",
+        "question": "Comment mes goûts ont-ils changé entre 2020 et 2024 ?"
+      },
+      "yearly-trends": {
+        "label": "Tendances annuelles",
+        "question": "Comment mon volume d’écoute a-t-il changé par année ?"
+      },
+      "consistent-artists": {
+        "label": "Artistes constants",
+        "question": "Quel artiste ai-je écouté le plus régulièrement au fil des années ?"
+      },
+      "time-of-day": {
+        "label": "Habitudes horaires",
+        "question": "Qu’est-ce que j’écoute le plus souvent tard le soir ?"
+      },
+      "artist-deep-dive": {
+        "label": "Deep dive artiste",
+        "question": "Raconte-moi mon historique d’écoute avec Radiohead."
+      },
+      "track-obsessions": {
+        "label": "Morceaux obsession",
+        "question": "Quels morceaux m’ont obsédé en 2022 ?"
+      }
     }
   },
   "settings": {
@@ -331,6 +412,9 @@
     "title": "Votre musique",
     "titlePersonal": "La musique de {name}",
     "heroEyebrow": "Votre écoute en un coup d'œil",
+    "musicAgentPromoBadge": "Nouveau",
+    "musicAgentPromoTitle": "Music AI Agent",
+    "musicAgentPromoAria": "Ouvrir le nouveau Music AI Agent",
     "subtitle": "Vos statistiques d'écoute personnelles. Analysez vos tendances et découvrez vos genres favoris.",
     "periodBadge": "Période",
     "allData": "Toutes les données",

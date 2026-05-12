@@ -18,7 +18,10 @@ function resolveRecentlyPlayedUrl(firstAfterMs?: number): string {
 }
 
 export async function syncSpotifyRecentlyPlayedForUser(userId: string): Promise<{
+  /** Rows usable after normalization (music tracks with artist + title + date). */
   fetched: number;
+  /** Raw `items.length` sum from Spotify API across paginated requests (before filtering). */
+  spotifyApiItemCount: number;
   imported: number;
   skippedDuplicates: number;
   skippedInvalid: number;
@@ -42,6 +45,7 @@ export async function syncSpotifyRecentlyPlayedForUser(userId: string): Promise<
 
   let url: string | null = resolveRecentlyPlayedUrl(firstAfterMs);
   const allRows: ReturnType<typeof spotifyRecentlyPlayedItemsToNormalized> = [];
+  let spotifyApiItemCount = 0;
   let pages = 0;
 
   while (url && pages < MAX_PAGES) {
@@ -81,7 +85,9 @@ export async function syncSpotifyRecentlyPlayedForUser(userId: string): Promise<
       );
     }
 
-    allRows.push(...spotifyRecentlyPlayedItemsToNormalized(data.items ?? []));
+    const pageItems = data.items ?? [];
+    spotifyApiItemCount += pageItems.length;
+    allRows.push(...spotifyRecentlyPlayedItemsToNormalized(pageItems));
     pages += 1;
 
     const next = data.next?.trim();
@@ -117,6 +123,7 @@ export async function syncSpotifyRecentlyPlayedForUser(userId: string): Promise<
 
   return {
     fetched: allRows.length,
+    spotifyApiItemCount,
     imported: importResult.imported,
     skippedDuplicates: importResult.skippedDuplicates,
     skippedInvalid: importResult.skippedInvalid,

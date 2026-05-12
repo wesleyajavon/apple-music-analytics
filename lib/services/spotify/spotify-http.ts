@@ -37,3 +37,25 @@ export function parseSpotifyApiErrorMessage(bodyText: string): string | undefine
     return undefined;
   }
 }
+
+/**
+ * User-facing detail when Spotify returns a non-2xx body (JSON error message, or short plain/HTML snippet).
+ */
+export function formatSpotifyApiFailureDetail(
+  status: number,
+  bodyText: string,
+  maxLen = 800
+): string {
+  const parsed = parseSpotifyApiErrorMessage(bodyText)?.trim();
+  if (parsed) return parsed;
+
+  const trimmed = bodyText.trim();
+  if (!trimmed) return `HTTP ${status}`;
+
+  if (trimmed.includes("<!DOCTYPE") || trimmed.toLowerCase().includes("<html")) {
+    return `HTTP ${status} (Spotify returned HTML, not JSON — often a gateway or temporary outage)`;
+  }
+
+  const slice = trimmed.length > maxLen ? `${trimmed.slice(0, maxLen)}…` : trimmed;
+  return slice;
+}

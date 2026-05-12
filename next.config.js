@@ -39,7 +39,14 @@ const nextConfig = {
   // Configuration des images (si vous utilisez next/image)
   images: {
     domains: [],
-    formats: ['image/avif', 'image/webp'],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "i.scdn.co",
+        pathname: "/**",
+      },
+    ],
+    formats: ["image/avif", "image/webp"],
   },
   
   // Optimisation du build

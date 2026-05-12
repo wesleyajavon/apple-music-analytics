@@ -70,6 +70,8 @@
       "demo": "Demo",
       "methodology": "Methodology",
       "sentryTest": "Sentry Test",
+      "spotifySnapshot": "Spotify live snapshot",
+      "spotifyPlayground": "Spotify API playground",
       "settings": "Settings"
     }
   },
@@ -173,6 +175,9 @@
     "sectionPreferencesLead": "Optional prompts, banners, and in-app messages.",
     "sectionDataPrivacy": "Data & privacy",
     "sectionDataPrivacyLead": "Remove listening history and imports stored in this app. Your sign-in is not deleted.",
+    "importExportsTitle": "Listening data imports",
+    "importExportsBody": "Add or update Spotify or Apple exports any time — duplicate plays from an earlier sync or import are skipped automatically.",
+    "importExportsCta": "Open import assistant",
     "signedOutTitle": "Sign in to manage settings",
     "signedOutHint": "Sign in to clear your analytics data or manage your account.",
     "signInCta": "Sign in",
@@ -301,7 +306,18 @@
       "recentAuthRequired": "Please sign in again before importing data.",
       "zipMissingAudioJson": "No extended streaming history JSON found in this ZIP (Streaming_History_Audio_*.json or StreamingHistory_music_*.json). Use the archive from Spotify’s “Extended streaming history” email.",
       "noParsedListens": "No listens could be parsed from this file. Make sure you selected the correct export.",
-      "tooManyPlays": "This export exceeds {max} plays. Contact support or split the data."
+      "tooManyPlays": "This export exceeds {max} plays. Contact support or split the data.",
+      "spotifyWebEyebrow": "Partial setup",
+      "spotifyWebTitle": "Try your Spotify link",
+      "spotifyWebBody": "We call Spotify live to confirm the link works. Nothing from this step is saved in your account yet — the next screen shows top tracks, artists, and recent plays straight from Spotify. Charts and analytics only appear after you import your official Spotify ZIP or Apple CSV below.",
+      "spotifyWebCta": "Open live Spotify preview",
+      "spotifyWebDivider": "Full history (.zip export)",
+      "spotifyWebNoConnection": "No Spotify connection is saved for this account. Sign in with Spotify or upload the .zip archive below.",
+      "spotifyWebVerifyError": "Could not reach Spotify with your saved connection. Try again or reconnect Spotify.",
+      "spotifyWebVerifySuccess": "Spotify responded — opening your live preview.",
+      "spotifyWebVerifying": "Checking…",
+      "importingOverlayTitleWebApi": "Checking Spotify…",
+      "importingOverlayHintWebApi": "Contacting Spotify — no listens are saved to your dashboard from this step."
     },
     "finishTitle": "You’re set",
     "finishSuccessEyebrow": "Import complete",
@@ -359,6 +375,33 @@
       "ratio": "Unknown ratio: {initial}% -> {current}% (target: {target}%)",
       "error": "Last error: {message}"
     }
+  },
+  "partialSyncPreview": {
+    "metaTitle": "Spotify live preview",
+    "eyebrow": "Partial onboarding",
+    "title": "You’re connected",
+    "subtitle": "Everything below is read live from Spotify (not loaded from Soundprint saved data). Your dashboard charts fill in only after you import an export file.",
+    "connectedAs": "Spotify account: {name}.",
+    "liveSnapshotTitle": "Live Spotify snapshot",
+    "reload": "Refresh",
+    "loading": "Loading…",
+    "topTracks": "Top tracks",
+    "topArtists": "Top artists",
+    "recentlyPlayed": "Recently played",
+    "emptySection": "Nothing here yet for this section.",
+    "recentUnknownTrack": "Unknown track",
+    "fetchedAt": "Fetched {time}",
+    "nextStepsHint": "When Spotify emails your Extended streaming history ZIP, use Open import assistant below to load it — that is what feeds the dashboard. Opening the dashboard now is fine even if charts are empty until then.",
+    "goToDashboard": "Go to dashboard",
+    "finishing": "Saving…",
+    "backToImport": "Back to import assistant",
+    "completeError": "Could not save. Please try again.",
+    "recentAuthRequired": "Please sign in again before continuing.",
+    "invalidResponse": "Unexpected API response.",
+    "networkError": "Network error while loading Spotify data.",
+    "coverAlt": "Album art for {title}",
+    "artistCoverAlt": "Image of {name}",
+    "coverAltFallback": "Album artwork"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -1162,6 +1205,36 @@
         "li1": "Primary path (public): user imports from onboarding flows (Spotify export ZIP and Apple Music export CSV), then data is parsed and stored account-side.",
         "li2": "Secondary path (legacy): Last.fm sync via scripts/API remains available for advanced usage, but is intentionally de-emphasized for UX."
       }
+    }
+  },
+  "spotifyPlayground": {
+    "metaTitle": "Spotify API playground",
+    "title": "Spotify API playground",
+    "subtitle": "Inspect JSON responses from classic Web API endpoints using your linked Spotify account. For exploration and debugging only.",
+    "connectedAs": "Signed in to Spotify as {name}.",
+    "reload": "Reload",
+    "loading": "Loading…",
+    "networkError": "Network error while calling the API.",
+    "invalidResponse": "Unexpected API response shape.",
+    "tablistLabel": "Spotify endpoints",
+    "statusOk": "HTTP {status}",
+    "statusError": "HTTP {status}",
+    "emptyPanel": "No response loaded yet.",
+    "fetchedAt": "Fetched at {time}",
+    "apiTroubleshootTitle": "Seeing errors on Top tracks / Top artists / Recently played?",
+    "apiTroubleshootBody": "• OAuth scopes: Top and recently-played need user-top-read and user-read-recently-played. In Supabase, open Authentication → Providers → Spotify and set the provider scopes to include those (same string as SPOTIFY_WEB_API_OAUTH_SCOPES in your app). Then sign out and sign in with Spotify again.\n• HTTP 502 / 500 / “Server error”: Spotify sometimes has short outages — wait and tap Reload. If /v1/me works but other tabs fail, check scopes first.",
+    "scopeStoredLabel": "Scope string stored for this connection (may update after token refresh)",
+    "scopeExpectedLabel": "Scopes this app expects",
+    "notConnected": {
+      "title": "Spotify is not linked",
+      "description": "Connect Spotify from the import assistant (OAuth) to view live API payloads here.",
+      "cta": "Open data import assistant"
+    },
+    "tabs": {
+      "me": "Current user",
+      "topTracks": "Top tracks",
+      "topArtists": "Top artists",
+      "recentlyPlayed": "Recently played"
     }
   },
   "sentry-test": {

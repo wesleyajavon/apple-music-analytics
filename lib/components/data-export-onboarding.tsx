@@ -291,7 +291,13 @@ function listensToJsonRows(rows: NormalizedListenInput[]) {
   }));
 }
 
-export function DataExportOnboarding() {
+type ImportOverlayKind = "file" | "spotify_web";
+
+export function DataExportOnboarding({
+  hasSpotifyWebConnection = false,
+}: {
+  hasSpotifyWebConnection?: boolean;
+} = {}) {
   const t = useTranslations("onboarding");
   const router = useRouter();
   const [phase, setPhase] = useState<Phase>("welcome");
@@ -300,6 +306,8 @@ export function DataExportOnboarding() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [importFile, setImportFile] = useState<File | null>(null);
   const [isImporting, setIsImporting] = useState(false);
+  const [importOverlayKind, setImportOverlayKind] =
+    useState<ImportOverlayKind>("file");
   const [importSummary, setImportSummary] = useState<{
     imported: number;
     skippedDuplicates: number;
@@ -366,18 +374,22 @@ export function DataExportOnboarding() {
     return () => window.clearInterval(intervalId);
   }, [phase, genreBackfillJob?.id, refreshGenreBackfillStatus]);
 
-  const completeOnboarding = useCallback(async () => {
-    setIsSubmitting(true);
-    try {
-      const res = await fetch("/api/user/onboarding/complete", { method: "POST" });
-      if (!res.ok) throw new Error("complete_failed");
-      router.push("/dashboard/overview");
-    } catch {
-      toast.error(t("completeError"));
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, [router, t]);
+  const completeOnboarding = useCallback(
+    async (nextPath = "/dashboard/overview") => {
+      setIsSubmitting(true);
+      try {
+        const res = await fetch("/api/user/onboarding/complete", { method: "POST" });
+        if (!res.ok) throw new Error("complete_failed");
+        router.refresh();
+        router.replace(nextPath);
+      } catch {
+        toast.error(t("completeError"));
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [router, t],
+  );
 
   const spotifyPrivacyUrl = t("spotifyUrls.privacy");
   const applePrivacyUrl = t("appleUrls.privacy");
@@ -412,13 +424,56 @@ export function DataExportOnboarding() {
     setPhase("guide");
     setStepIndex(Math.max(0, steps.length - 1));
     setImportFile(null);
+    setImportOverlayKind("file");
   }
+
+  const verifySpotifyWebConnection = useCallback(async () => {
+    setImportOverlayKind("spotify_web");
+    setIsImporting(true);
+    try {
+      type VerifyOkJson = {
+        ok?: boolean;
+        error?: string;
+        code?: string;
+      };
+
+      const res = await fetch("/api/spotify/connection-verify", { method: "POST" });
+      const data = (await res.json().catch(() => ({}))) as VerifyOkJson;
+
+      if (!res.ok) {
+        if (isRecentAuthRequiredError(data)) {
+          toast.error(t("import.recentAuthRequired"));
+          redirectToRecentSignIn(window.location.pathname + window.location.search);
+          return;
+        }
+        if (res.status === 401) {
+          toast.error(t("import.recentAuthRequired"));
+          return;
+        }
+        if (res.status === 404) {
+          toast.error(t("import.spotifyWebNoConnection"));
+          return;
+        }
+        toast.error(data?.error?.trim() || t("import.spotifyWebVerifyError"));
+        return;
+      }
+
+      toast.success(t("import.spotifyWebVerifySuccess"));
+      router.replace("/dashboard/spotify-snapshot");
+    } catch {
+      toast.error(t("import.spotifyWebVerifyError"));
+    } finally {
+      setIsImporting(false);
+      setImportOverlayKind("file");
+    }
+  }, [t, router]);
 
   const submitImport = useCallback(async () => {
     if (!provider || !importFile) {
       toast.error(t("import.noFile"));
       return;
     }
+    setImportOverlayKind("file");
     setIsImporting(true);
     try {
       const useLargeFilePath = importFile.size >= VERCEL_SAFE_MULTIPART_MAX_BYTES;
@@ -912,9 +967,17 @@ export function DataExportOnboarding() {
                   aria-hidden
                 />
               </div>
-              <p className="text-base font-semibold text-foreground">{t("import.importingOverlayTitle")}</p>
-              <p className="max-w-sm text-sm leading-relaxed text-muted">{t("import.importingOverlayHint")}</p>
-              {importFile ? (
+              <p className="text-base font-semibold text-foreground">
+                {importOverlayKind === "spotify_web"
+                  ? t("import.importingOverlayTitleWebApi")
+                  : t("import.importingOverlayTitle")}
+              </p>
+              <p className="max-w-sm text-sm leading-relaxed text-muted">
+                {importOverlayKind === "spotify_web"
+                  ? t("import.importingOverlayHintWebApi")
+                  : t("import.importingOverlayHint")}
+              </p>
+              {importOverlayKind === "file" && importFile ? (
                 <p
                   className="mt-1 max-w-full truncate px-2 text-xs font-medium text-accent-violet"
                   title={importFile.name}
@@ -945,6 +1008,43 @@ export function DataExportOnboarding() {
           <p className="text-sm leading-relaxed text-muted">
             {provider === "spotify" ? t("import.spotifyBody") : t("import.appleBody")}
           </p>
+
+          {provider === "spotify" && hasSpotifyWebConnection ? (
+            <div className="space-y-4 rounded-2xl border border-[#1DB954]/35 bg-[#1DB954]/[0.07] p-5 shadow-inner ring-1 ring-[#1DB954]/20 dark:ring-[#1DB954]/25">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#169c46] dark:text-[#1ed760]">
+                {t("import.spotifyWebEyebrow")}
+              </p>
+              <h3 className="text-lg font-bold tracking-tight text-foreground">
+                {t("import.spotifyWebTitle")}
+              </h3>
+              <p className="text-sm leading-relaxed text-muted">{t("import.spotifyWebBody")}</p>
+              <button
+                type="button"
+                className={`${primaryBtn} inline-flex w-full items-center justify-center gap-2 sm:w-auto`}
+                onClick={() => void verifySpotifyWebConnection()}
+                disabled={isImporting}
+              >
+                {isImporting && importOverlayKind === "spotify_web" ? (
+                  <>
+                    <span
+                      className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-white/40 border-t-white"
+                      aria-hidden
+                    />
+                    <span>{t("import.spotifyWebVerifying")}</span>
+                  </>
+                ) : (
+                  t("import.spotifyWebCta")
+                )}
+              </button>
+              <div className="flex items-center gap-3 pt-2">
+                <div className="h-px flex-1 bg-border" />
+                <span className="text-xs font-medium uppercase tracking-wide text-muted">
+                  {t("import.spotifyWebDivider")}
+                </span>
+                <div className="h-px flex-1 bg-border" />
+              </div>
+            </div>
+          ) : null}
 
           {provider === "spotify" && (
             <div className="flex flex-col gap-3">
@@ -1326,7 +1426,7 @@ export function DataExportOnboarding() {
               <button
                 type="button"
                 className={`${secondaryBtn} inline-flex w-full items-center justify-center gap-2 sm:w-auto sm:self-center`}
-                onClick={() => router.push("/dashboard/genres/palette")}
+                onClick={() => void completeOnboarding("/dashboard/genres/palette")}
                 disabled={isSubmitting}
               >
                 <Palette className="h-4 w-4 shrink-0 text-accent-violet opacity-90" aria-hidden />

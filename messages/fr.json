@@ -70,6 +70,8 @@
       "demo": "Démo",
       "methodology": "Méthodologie",
       "sentryTest": "Test Sentry",
+      "spotifySnapshot": "Aperçu Spotify en direct",
+      "spotifyPlayground": "Playground API Spotify",
       "settings": "Paramètres"
     }
   },
@@ -173,6 +175,9 @@
     "sectionPreferencesLead": "Invites, bandeaux et messages optionnels dans l’app.",
     "sectionDataPrivacy": "Données et confidentialité",
     "sectionDataPrivacyLead": "Supprimez l’historique d’écoute et les importations stockés dans cette app. Votre connexion n’est pas supprimée.",
+    "importExportsTitle": "Import des données d’écoute",
+    "importExportsBody": "Ajoutez ou mettez à jour un export Spotify ou Apple à tout moment — les lectures déjà enregistrées (sync ou import) sont ignorées en doublon.",
+    "importExportsCta": "Ouvrir l’assistant d’import",
     "signedOutTitle": "Connectez-vous pour gérer les paramètres",
     "signedOutHint": "Connectez-vous pour effacer vos données d’analytics ou gérer votre compte.",
     "signInCta": "Se connecter",
@@ -301,7 +306,18 @@
       "recentAuthRequired": "Reconnectez-vous avant d’importer des données.",
       "zipMissingAudioJson": "Aucun JSON d’historique étendu dans ce ZIP (Streaming_History_Audio_*.json ou StreamingHistory_music_*.json). Utilisez l’archive « Extended streaming history » envoyée par Spotify.",
       "noParsedListens": "Aucune écoute reconnue dans ce fichier. Vérifiez que vous avez choisi le bon export.",
-      "tooManyPlays": "Cet export dépasse {max} lectures. Contactez le support ou divisez les données."
+      "tooManyPlays": "Cet export dépasse {max} lectures. Contactez le support ou divisez les données.",
+      "spotifyWebEyebrow": "Onboarding partiel",
+      "spotifyWebTitle": "Tester votre lien Spotify",
+      "spotifyWebBody": "Nous contactons Spotify en direct pour vérifier que le lien fonctionne. Rien n’est encore enregistré dans votre compte : l’écran suivant montre tops et écoutes récentes lues depuis Spotify uniquement. Graphiques et stats n’utilisent vos données Soundprint qu’après import du ZIP officiel Spotify ou CSV Apple ci‑dessous.",
+      "spotifyWebCta": "Voir l’aperçu Spotify en direct",
+      "spotifyWebDivider": "Historique complet (export ZIP)",
+      "spotifyWebNoConnection": "Aucune connexion Spotify enregistrée pour ce compte. Connectez-vous avec Spotify ou importez l’archive .zip ci-dessous.",
+      "spotifyWebVerifyError": "Impossible de joindre Spotify avec votre connexion enregistrée. Réessayez ou reconnectez Spotify.",
+      "spotifyWebVerifySuccess": "Spotify répond — ouverture de l’aperçu en direct.",
+      "spotifyWebVerifying": "Vérification…",
+      "importingOverlayTitleWebApi": "Connexion à Spotify…",
+      "importingOverlayHintWebApi": "Échange avec Spotify — aucune écoute n’est sauvegardée dans le tableau de bord à cette étape."
     },
     "finishTitle": "C’est noté",
     "finishSuccessEyebrow": "Import terminé",
@@ -359,6 +375,33 @@
       "ratio": "Taux unknown : {initial}% -> {current}% (cible : {target}%)",
       "error": "Dernière erreur : {message}"
     }
+  },
+  "partialSyncPreview": {
+    "metaTitle": "Aperçu Spotify en direct",
+    "eyebrow": "Onboarding partiel",
+    "title": "Compte Spotify relié",
+    "subtitle": "Tout ce qui suit est lu en direct sur Spotify (pas chargé depuis les données enregistrées dans Soundprint). Les graphiques du tableau de bord ne se remplissent qu’après import d’un fichier d’export.",
+    "connectedAs": "Compte Spotify : {name}.",
+    "liveSnapshotTitle": "Instantané Spotify en direct",
+    "reload": "Actualiser",
+    "loading": "Chargement…",
+    "topTracks": "Titres favoris",
+    "topArtists": "Artistes favoris",
+    "recentlyPlayed": "Écoutes récentes",
+    "emptySection": "Rien à afficher pour cette section pour l’instant.",
+    "recentUnknownTrack": "Morceau inconnu",
+    "fetchedAt": "Données du {time}",
+    "nextStepsHint": "Quand Spotify vous envoie le ZIP Extended streaming history, utilisez « Ouvrir l’assistant d’import » ci‑dessous pour l’importer — c’est lui qui alimente le tableau de bord. Vous pouvez déjà ouvrir le tableau de bord ; les graphiques resteront vides tant que vous n’aurez pas importé cet export.",
+    "goToDashboard": "Ouvrir le tableau de bord",
+    "finishing": "Enregistrement…",
+    "backToImport": "Retour à l’assistant d’import",
+    "completeError": "Enregistrement impossible. Réessayez.",
+    "recentAuthRequired": "Reconnectez-vous pour continuer.",
+    "invalidResponse": "Réponse API inattendue.",
+    "networkError": "Erreur réseau en chargeant les données Spotify.",
+    "coverAlt": "Pochette pour {title}",
+    "artistCoverAlt": "Image pour {name}",
+    "coverAltFallback": "Illustration album"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -1162,6 +1205,36 @@
         "li1": "Chemin principal (public) : import utilisateur depuis l'onboarding (ZIP d'export Spotify et CSV d'export Apple Music), puis parsing et stockage côté compte.",
         "li2": "Chemin secondaire (historique) : la sync Last.fm via scripts/API reste disponible pour des usages avancés, mais est volontairement mise au second plan côté UX."
       }
+    }
+  },
+  "spotifyPlayground": {
+    "metaTitle": "Playground API Spotify",
+    "title": "Playground API Spotify",
+    "subtitle": "Consultez les réponses JSON des grands endpoints de la Web API avec votre compte Spotify lié. À utiliser pour explorer et déboguer.",
+    "connectedAs": "Session Spotify : {name}",
+    "reload": "Actualiser",
+    "loading": "Chargement…",
+    "networkError": "Erreur réseau lors de l’appel à l’API.",
+    "invalidResponse": "Format de réponse API inattendu.",
+    "tablistLabel": "Endpoints Spotify",
+    "statusOk": "HTTP {status}",
+    "statusError": "HTTP {status}",
+    "emptyPanel": "Aucune réponse chargée pour l’instant.",
+    "fetchedAt": "Récupéré le {time}",
+    "apiTroubleshootTitle": "Erreurs sur Top titres / artistes ou Écoutes récentes ?",
+    "apiTroubleshootBody": "• Scopes OAuth : les tops nécessitent user-top-read et les écoutes récentes user-read-recently-played. Dans Supabase : Authentication → Providers → Spotify — ajoutez ces scopes côté provider (comme dans votre app), puis déconnectez-vous et reconnectez-vous avec Spotify pour obtenir un jeton à jour.\n• HTTP 502 / 500 / « Server error » : incident côté Spotify possible — attendez et réessayez. Si seul /v1/me fonctionne, vérifiez surtout les scopes.",
+    "scopeStoredLabel": "Scopes enregistrés pour cette connexion (peuvent changer après refresh du jeton)",
+    "scopeExpectedLabel": "Scopes attendus par l’application",
+    "notConnected": {
+      "title": "Spotify non lié",
+      "description": "Reliez Spotify depuis l’assistant d’import (OAuth) pour afficher les réponses de l’API ici.",
+      "cta": "Ouvrir l’assistant d’import"
+    },
+    "tabs": {
+      "me": "Profil courant",
+      "topTracks": "Top titres",
+      "topArtists": "Top artistes",
+      "recentlyPlayed": "Écoutes récentes"
     }
   },
   "sentry-test": {

@@ -14,6 +14,7 @@ import {
   getGenreBackfillBannerOptOut,
   setGenreBackfillBannerOptOut,
 } from "@/lib/utils/genre-backfill-banner-prefs";
+import { DASHBOARD_ONBOARDING_REIMPORT_PATH } from "@/lib/utils/onboarding-route";
 
 const SUBNAV_STICKY_TOP =
   "top-[calc(var(--dashboard-filter-height,4.5rem)+0.5rem)]";
@@ -599,6 +600,19 @@ export function AccountSettingsClient() {
             </h2>
             <p className="mt-1.5 text-sm text-muted">{t("sectionDataPrivacyLead")}</p>
           </div>
+
+          <SectionCard className="mb-8 border border-card-border shadow-card">
+            <div className="space-y-3 p-5 sm:p-6">
+              <h3 className="text-base font-semibold text-foreground">{t("importExportsTitle")}</h3>
+              <p className="text-sm leading-relaxed text-muted">{t("importExportsBody")}</p>
+              <Link
+                href={DASHBOARD_ONBOARDING_REIMPORT_PATH}
+                className="inline-flex min-h-11 items-center justify-center rounded-xl border border-card-border bg-card-surface px-4 py-2.5 text-sm font-medium text-foreground shadow-sm transition hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                {t("importExportsCta")}
+              </Link>
+            </div>
+          </SectionCard>
 
           <div className="overflow-hidden rounded-2xl border border-red-200/80 bg-gradient-to-b from-red-50/90 to-red-50/40 shadow-card dark:border-red-900/50 dark:from-red-950/30 dark:to-red-950/10">
             <div className="border-b border-red-200/60 p-4 sm:p-6 dark:border-red-900/40">

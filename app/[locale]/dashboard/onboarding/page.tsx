@@ -32,6 +32,11 @@ export default async function OnboardingPage({
     select: { onboardingCompletedAt: true },
   });
 
+  /**
+   * Completed users need `?addData=1` to reopen the wizard (DASHBOARD_ONBOARDING_REIMPORT_PATH);
+   * without it they stay on Overview so the first-time funnel stays obvious. Re-imports rely on
+   * server-side duplicate skips, not this gate.
+   */
   const openImportWizard =
     !user?.onboardingCompletedAt || wantsOnboardingImportReentry(searchParams);
 
@@ -39,5 +44,12 @@ export default async function OnboardingPage({
     redirect({ href: "/dashboard/overview", locale });
   }
 
-  return <DataExportOnboarding />;
+  const spotifyConnection = await prisma.spotifyConnection.findFirst({
+    where: { userId, revokedAt: null },
+    select: { id: true },
+  });
+
+  return (
+    <DataExportOnboarding hasSpotifyWebConnection={Boolean(spotifyConnection)} />
+  );
 }

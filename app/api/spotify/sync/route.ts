@@ -18,6 +18,10 @@ const RATE = {
   softLimitRatio: 0.85,
 } as const;
 
+/**
+ * Persisted sync: pulls recently played from Spotify and imports into the account (spotify_web_api source).
+ * Not used during partial onboarding (`/api/spotify/connection-verify` covers that flow without persisting plays).
+ */
 export async function POST(request: NextRequest) {
   try {
     const userId = await requireAuthenticatedUserId(request);
@@ -34,6 +38,7 @@ export async function POST(request: NextRequest) {
       ok: true,
       source: "spotify_web_api",
       fetched: result.fetched,
+      spotifyApiItemCount: result.spotifyApiItemCount,
       imported: result.imported,
       skippedDuplicates: result.skippedDuplicates,
       skippedInvalid: result.skippedInvalid,

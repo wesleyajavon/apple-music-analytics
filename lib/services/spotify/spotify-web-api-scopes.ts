@@ -3,4 +3,4 @@
  * Une seule source de vérité pour sign-in et persistance `SpotifyConnection.scope`.
  */
 export const SPOTIFY_WEB_API_OAUTH_SCOPES =
-  "user-read-email user-read-private user-read-recently-played";
+  "user-read-email user-read-private user-read-recently-played user-top-read";

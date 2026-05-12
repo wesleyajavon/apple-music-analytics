@@ -15,6 +15,9 @@ function firstSearchParam(raw: string | string[] | undefined): string | undefine
 /**
  * Used by `app/[locale]/dashboard/onboarding/page.tsx`: when truthy (`?addData=1` or `?addData=true`),
  * users who already have `onboardingCompletedAt` can open the wizard again instead of hitting overview.
+ *
+ * For users who have not finished onboarding yet, plain `/dashboard/onboarding` already opens the wizard;
+ * this query param is ignored in that case, so callers can safely always link here for “open import assistant”.
  */
 export function wantsOnboardingImportReentry(
   searchParams: Record<string, string | string[] | undefined> | undefined,

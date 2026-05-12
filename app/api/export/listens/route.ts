@@ -58,7 +58,7 @@ const EXPORT_LISTENS_RATE_LIMIT = {
  *         name: source
  *         schema:
  *           type: string
- *           enum: [lastfm, apple_music_replay, spotify_export, apple_music_export]
+ *           enum: [lastfm, apple_music_replay, spotify_export, spotify_web_api, apple_music_export]
  *         description: Source of listens to export (optional)
  *       - in: query
  *         name: userId

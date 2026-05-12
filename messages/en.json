@@ -220,7 +220,10 @@
     "authNavAriaLabel": "Account pages",
     "dashboardLink": "Wesley's dashboard",
     "continueWithGoogle": "Continue with Google",
+    "continueWithSpotify": "Continue with Spotify",
     "orDivider": "or",
+    "oauthCallbackFailed": "Sign-in with the music provider failed.",
+    "oauthCallbackSpotifyHint": "If you use Spotify: open the Spotify Developer Dashboard, add your Spotify account email under User management (apps in Development mode only work for listed users). Try signing into Spotify with email and password instead of “Continue with Google” on Spotify’s page. Check Supabase Dashboard → Logs → Auth for details.",
     "recentAuthNotice": "Please sign in again to continue this sensitive action."
   },
   "onboarding": {

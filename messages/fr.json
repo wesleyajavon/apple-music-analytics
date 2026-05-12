@@ -220,7 +220,10 @@
     "authNavAriaLabel": "Navigation compte",
     "dashboardLink": "Dashboard de Wesley",
     "continueWithGoogle": "Continuer avec Google",
+    "continueWithSpotify": "Continuer avec Spotify",
     "orDivider": "ou",
+    "oauthCallbackFailed": "La connexion via le fournisseur musical a échoué.",
+    "oauthCallbackSpotifyHint": "Avec Spotify : dans le Spotify Developer Dashboard, ajoutez l’e-mail de votre compte Spotify dans la gestion des utilisateurs (en mode Development, seuls les comptes listés peuvent se connecter). Essayez aussi de vous connecter à Spotify avec e-mail et mot de passe plutôt que « Continuer avec Google » sur la page Spotify. Consultez Supabase → Logs → Auth pour le détail.",
     "recentAuthNotice": "Reconnectez-vous pour continuer cette action sensible."
   },
   "onboarding": {

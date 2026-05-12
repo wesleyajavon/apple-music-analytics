@@ -26,6 +26,30 @@ model User {
   importGenreBackfillJobs ImportGenreBackfillJob[]
   paletteSuggestions PaletteSuggestion[]
   paletteSuggestionDecisions PaletteSuggestionDecision[]
+  spotifyConnection SpotifyConnection?
+}
+
+/// OAuth Spotify (Web API) — tokens chiffrés au repos ; Option A Supabase provider.
+model SpotifyConnection {
+  id                    String    @id @default(cuid())
+  userId                String    @unique
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  spotifyUserId         String
+  spotifyDisplayName    String?
+  spotifyEmail          String?
+  accessTokenEncrypted  String
+  refreshTokenEncrypted String?
+  scope                 String
+  tokenType             String    @default("Bearer")
+  expiresAt             DateTime
+  syncCursorMs          BigInt?
+  lastSyncedAt          DateTime?
+  revokedAt             DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([spotifyUserId])
+  @@index([userId, revokedAt])
 }
 
 model Artist {
@@ -141,7 +165,7 @@ model Listen {
   trackId   String
   track     Track    @relation(fields: [trackId], references: [id], onDelete: Cascade)
   playedAt  DateTime // Timestamp of when the track was played
-  source    String   @default("lastfm") // lastfm | apple_music_replay | spotify_export | apple_music_export
+  source    String   @default("lastfm") // lastfm | apple_music_replay | spotify_export | spotify_web_api | apple_music_export
   createdAt DateTime @default(now())
 
   @@index([userId])

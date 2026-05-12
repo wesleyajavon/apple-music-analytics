@@ -6,6 +6,7 @@ import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { DEFAULT_PUBLIC_PROFILE_USER_ID } from "@/lib/constants/public-profile";
+import { SPOTIFY_WEB_API_OAUTH_SCOPES } from "@/lib/services/spotify/spotify-web-api-scopes";
 
 export default function SignInPage() {
   const t = useTranslations("auth");
@@ -19,6 +20,8 @@ export default function SignInPage() {
   const [error, setError] = useState<string | null>(null);
   const reason = searchParams.get("reason");
   const nextParam = searchParams.get("next");
+  const oauthCallbackFailed = searchParams.get("oauth_error") === "1";
+  const oauthDetail = searchParams.get("detail");
   const nextPath =
     nextParam && nextParam.startsWith("/") && !nextParam.startsWith("//")
       ? nextParam
@@ -53,11 +56,40 @@ export default function SignInPage() {
 
     try {
       const supabase = createSupabaseBrowserClient();
+      const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`;
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`,
+          redirectTo,
           queryParams: reason === "recent-auth" ? { prompt: "login" } : undefined,
+        },
+      });
+
+      if (oauthError) {
+        setError(oauthError.message);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function onSpotifySignIn() {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const supabase = createSupabaseBrowserClient();
+      const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`;
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider: "spotify",
+        options: {
+          redirectTo,
+          /** Liste séparée par des espaces - supportée par `signInWithOAuth` (Supabase auth-js). */
+          scopes: SPOTIFY_WEB_API_OAUTH_SCOPES,
+          queryParams:
+            reason === "recent-auth"
+              ? { show_dialog: "true" }
+              : undefined,
         },
       });
 
@@ -94,6 +126,19 @@ export default function SignInPage() {
         <p className="mt-2 text-sm leading-relaxed text-muted">
           {t("signInSubtitle")}
         </p>
+
+        {oauthCallbackFailed ? (
+          <div
+            role="alert"
+            className="mt-4 space-y-2 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800 dark:border-red-900 dark:bg-red-950/40 dark:text-red-200"
+          >
+            <p className="font-medium">{t("oauthCallbackFailed")}</p>
+            {oauthDetail ? (
+              <p className="break-words font-mono text-xs opacity-90">{oauthDetail}</p>
+            ) : null}
+            <p className="text-xs leading-relaxed opacity-95">{t("oauthCallbackSpotifyHint")}</p>
+          </div>
+        ) : null}
 
         {reason === "recent-auth" ? (
           <p
@@ -201,6 +246,21 @@ export default function SignInPage() {
               />
             </svg>
             {t("continueWithGoogle")}
+          </button>
+
+          <button
+            type="button"
+            onClick={onSpotifySignIn}
+            disabled={isLoading}
+            className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#1ed760]/35 bg-[#191414] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#282828] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" aria-hidden>
+              <path
+                fill="#1DB954"
+                d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.261 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"
+              />
+            </svg>
+            {t("continueWithSpotify")}
           </button>
         </form>
 

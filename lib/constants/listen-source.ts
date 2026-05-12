@@ -6,6 +6,7 @@ export const LISTEN_RECORD_SOURCES = [
   "lastfm",
   "apple_music_replay",
   "spotify_export",
+  "spotify_web_api",
   "apple_music_export",
 ] as const;
 

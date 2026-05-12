@@ -44,7 +44,7 @@ describe("GET /auth/callback", () => {
     });
     vi.mocked(createSupabaseRouteHandlerClient).mockResolvedValue({
       auth: { exchangeCodeForSession },
-    });
+    } as Awaited<ReturnType<typeof createSupabaseRouteHandlerClient>>);
     vi.mocked(ensureAppUserFromSession).mockResolvedValue(undefined);
     vi.mocked(persistSpotifyConnectionFromSupabaseSession).mockResolvedValue(
       undefined

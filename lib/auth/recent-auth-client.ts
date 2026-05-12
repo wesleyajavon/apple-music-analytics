@@ -6,8 +6,10 @@ type ApiErrorPayload = {
   code?: string;
 };
 
-export function isRecentAuthRequiredError(payload: ApiErrorPayload | null | undefined) {
-  return payload?.code === RECENT_AUTH_REQUIRED_CODE;
+export function isRecentAuthRequiredError(payload: unknown): boolean {
+  if (payload === null || payload === undefined) return false;
+  if (typeof payload !== "object") return false;
+  return (payload as ApiErrorPayload).code === RECENT_AUTH_REQUIRED_CODE;
 }
 
 export function redirectToRecentSignIn(returnTo?: string) {

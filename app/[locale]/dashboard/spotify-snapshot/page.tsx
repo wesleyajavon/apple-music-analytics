@@ -32,9 +32,9 @@ export default async function SpotifySnapshotPage({ params }: Props) {
     select: { spotifyDisplayName: true },
   });
 
-  if (!conn) {
-    redirect({ href: DASHBOARD_ONBOARDING_REIMPORT_PATH, locale });
+  if (conn) {
+    return <SpotifyPartialSyncPreviewClient spotifyDisplayName={conn.spotifyDisplayName} />;
   }
 
-  return <SpotifyPartialSyncPreviewClient spotifyDisplayName={conn.spotifyDisplayName} />;
+  redirect({ href: DASHBOARD_ONBOARDING_REIMPORT_PATH, locale });
 }

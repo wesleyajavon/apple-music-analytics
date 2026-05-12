@@ -86,10 +86,12 @@ export default function SignInPage() {
           redirectTo,
           /** Liste séparée par des espaces - supportée par `signInWithOAuth` (Supabase auth-js). */
           scopes: SPOTIFY_WEB_API_OAUTH_SCOPES,
-          queryParams:
-            reason === "recent-auth"
-              ? { show_dialog: "true" }
-              : undefined,
+          /**
+           * Toujours afficher le dialogue Spotify : sans cela, la session cookie du navigateur
+           * peut reconnecter automatiquement le dernier compte sans possibilité de choisir un autre.
+           * @see https://developer.spotify.com/documentation/web-api/tutorials/code-flow
+           */
+          queryParams: { show_dialog: "true" },
         },
       });
 

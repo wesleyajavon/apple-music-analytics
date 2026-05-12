@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { routing } from "@/i18n/routing";
 import { ensureAppUserFromSession } from "@/lib/auth/ensure-app-user-from-session";
 import { persistSpotifyConnectionFromSupabaseSession } from "@/lib/services/spotify/persist-connection-from-session";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseRouteHandlerClient } from "@/lib/supabase/server";
+import { logger } from "@/lib/utils/logger";
 
 function getSafeNextPath(rawNext: string | null): string {
   if (!rawNext) return "/dashboard";
@@ -14,6 +15,26 @@ function getSafeNextPath(rawNext: string | null): string {
 const DETAIL_PARAM_MAX_LEN = 500;
 
 export async function GET(request: Request) {
+  try {
+    return await handleAuthCallback(request);
+  } catch (e) {
+    logger.error("[auth/callback] unexpected error", {
+      message: e instanceof Error ? e.message : String(e),
+    });
+    const url = new URL(request.url);
+    const next = getSafeNextPath(url.searchParams.get("next"));
+    const signIn = new URL(`/${routing.defaultLocale}/sign-in`, url.origin);
+    signIn.searchParams.set("oauth_error", "1");
+    signIn.searchParams.set(
+      "detail",
+      "Échec du retour d'authentification. Veuillez réessayer."
+    );
+    signIn.searchParams.set("next", next);
+    return NextResponse.redirect(signIn);
+  }
+}
+
+async function handleAuthCallback(request: Request): Promise<NextResponse> {
   const url = new URL(request.url);
   const next = getSafeNextPath(url.searchParams.get("next"));
   const oauthErr = url.searchParams.get("error");
@@ -36,12 +57,9 @@ export async function GET(request: Request) {
   const code = url.searchParams.get("code");
 
   if (code) {
-    const supabase = await createSupabaseServerClient();
+    const successRedirect = NextResponse.redirect(new URL(next, url.origin));
+    const supabase = await createSupabaseRouteHandlerClient(successRedirect);
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-    if (!error && data.session) {
-      await ensureAppUserFromSession(data.session.user);
-      await persistSpotifyConnectionFromSupabaseSession(data.session);
-    }
     if (error) {
       const signIn = new URL(`/${routing.defaultLocale}/sign-in`, url.origin);
       signIn.searchParams.set("oauth_error", "1");
@@ -54,6 +72,17 @@ export async function GET(request: Request) {
       signIn.searchParams.set("next", next);
       return NextResponse.redirect(signIn);
     }
+    if (data.session) {
+      try {
+        await ensureAppUserFromSession(data.session.user);
+        await persistSpotifyConnectionFromSupabaseSession(data.session);
+      } catch (e) {
+        logger.error("[auth/callback] post-session persist failed", {
+          message: e instanceof Error ? e.message : String(e),
+        });
+      }
+    }
+    return successRedirect;
   }
 
   return NextResponse.redirect(new URL(next, url.origin));

@@ -4,6 +4,7 @@ import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 import { useLocale } from "next-intl";
 import { apiClient, type ParsedRateLimitHeaders } from "@/lib/api-client";
 import { getAiInsightsLabels } from "@/lib/constants/ai-insights-labels";
+import { useInteractiveAiBlockedByGenreBackfill } from "@/lib/hooks/use-interactive-ai-blocked-by-genre-backfill";
 import type {
   AiInsightsInput,
   AiInsightsResponse,
@@ -233,7 +234,13 @@ export function useAiInsights(
 ) {
   const locale = useLocale();
   const hasValidRange = !!startDate && !!endDate;
-  const { insightStyle = "technical", userId, ...queryOptions } = options ?? {};
+  const blockedByGenreBackfill = useInteractiveAiBlockedByGenreBackfill();
+  const {
+    insightStyle = "technical",
+    userId,
+    enabled: enabledOption,
+    ...queryOptions
+  } = options ?? {};
 
   return useQuery<AiInsightsUiResponse, Error>({
     queryKey: aiInsightsKeys.list({
@@ -245,8 +252,9 @@ export function useAiInsights(
     }),
     queryFn: () =>
       fetchAiInsights(startDate!, endDate!, locale, insightStyle, userId),
-    enabled: hasValidRange,
     staleTime: AI_INSIGHTS_STALE_TIME,
     ...queryOptions,
+    enabled:
+      (enabledOption ?? true) && hasValidRange && !blockedByGenreBackfill,
   });
 }

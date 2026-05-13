@@ -10,6 +10,9 @@ import {
   redirectToRecentSignIn,
 } from "@/lib/auth/recent-auth-client";
 import { useOptimisticFilters } from "@/lib/hooks/use-optimistic-filters";
+import { NotificationCenter } from "@/lib/components/notification-center";
+import { useNotifications } from "@/lib/context/notification-center-context";
+import { useHideNotificationCenterForPublicDemo } from "@/lib/hooks/use-public-demo-viewer";
 
 export type DateRangePreset = "7d" | "30d" | "ytd" | "all" | "custom";
 
@@ -98,6 +101,11 @@ export function DateRangeFilter() {
   const searchParams = useSearchParams();
   const { prefetchWithOptimisticUpdate } = useOptimisticFilters();
   const t = useTranslations("components.dateRangeFilter");
+  const tNotifications = useTranslations("components.notificationCenter");
+  const { addNotification } = useNotifications();
+  const hideNotificationCenter = useHideNotificationCenterForPublicDemo(
+    searchParams.get("userId")
+  );
   const locale = useLocale();
 
   const currentPreset: DateRangePreset = getDateRangePresetFromSearchParams(searchParams);
@@ -318,6 +326,14 @@ export function DateRangeFilter() {
           id: toastId,
           description: t("toastFileDownloaded", { filename }),
         });
+        if (!hideNotificationCenter) {
+          addNotification({
+            title: tNotifications("exportSuccessTitle", { type: exportType }),
+            body: tNotifications("exportSuccessBody", { filename }),
+            severity: "success",
+            source: `export-${exportType.toLowerCase()}`,
+          });
+        }
       } catch (error) {
         console.error("Erreur lors de l'export:", error);
         const errorMessage =
@@ -326,9 +342,17 @@ export function DateRangeFilter() {
           id: toastId,
           description: errorMessage,
         });
+        if (!hideNotificationCenter) {
+          addNotification({
+            title: tNotifications("exportErrorTitle", { type: exportType }),
+            body: errorMessage,
+            severity: "error",
+            source: `export-${exportType.toLowerCase()}`,
+          });
+        }
       }
     },
-    [t]
+    [t, tNotifications, addNotification, hideNotificationCenter]
   );
 
   const handleExportCsv = useCallback(async () => {
@@ -509,37 +533,55 @@ export function DateRangeFilter() {
           </div>
         </div>
 
-        <div className="flex items-center gap-1 pl-4 border-l border-card-border">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted mr-2 hidden sm:inline">
-            {t("exportLabel")}
-          </span>
-          <button
-            onClick={handleExportCsv}
-            className="p-2.5 text-muted hover:text-accent-emerald hover:bg-accent-emerald/10 rounded-lg transition-colors"
-            title={t("exportCsvTitle")}
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-          </button>
-          <button
-            onClick={handleExportStats}
-            className="p-2.5 text-muted hover:text-accent-indigo hover:bg-accent-indigo/10 rounded-lg transition-colors"
-            title={t("exportStatsTitle")}
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-            </svg>
-          </button>
-          <button
-            onClick={handleExportPdf}
-            className="p-2.5 text-muted hover:text-accent-rose hover:bg-accent-rose/10 rounded-lg transition-colors"
-            title={t("exportPdfTitle")}
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-            </svg>
-          </button>
+        <div className="flex items-center gap-2 sm:gap-3">
+          {!hideNotificationCenter ? <NotificationCenter /> : null}
+          <div className="flex items-center gap-1 border-l border-card-border pl-3 sm:pl-4">
+            <span className="mr-2 hidden text-[10px] font-semibold uppercase tracking-wider text-muted sm:inline">
+              {t("exportLabel")}
+            </span>
+            <button
+              onClick={handleExportCsv}
+              className="rounded-lg p-2.5 text-muted transition-colors hover:bg-accent-emerald/10 hover:text-accent-emerald"
+              title={t("exportCsvTitle")}
+            >
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+            </button>
+            <button
+              onClick={handleExportStats}
+              className="rounded-lg p-2.5 text-muted transition-colors hover:bg-accent-indigo/10 hover:text-accent-indigo"
+              title={t("exportStatsTitle")}
+            >
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
+                />
+              </svg>
+            </button>
+            <button
+              onClick={handleExportPdf}
+              className="rounded-lg p-2.5 text-muted transition-colors hover:bg-accent-rose/10 hover:text-accent-rose"
+              title={t("exportPdfTitle")}
+            >
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
     </div>

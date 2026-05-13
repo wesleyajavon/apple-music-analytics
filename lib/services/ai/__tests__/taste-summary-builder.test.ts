@@ -85,6 +85,24 @@ describe("taste-summary-builder", () => {
     expect(parsed.coreArtists).toHaveLength(10);
   });
 
+  it("excludes Unknown genre from summary and renormalizes shares", () => {
+    const dominatedByUnknown: TasteProfileInput = {
+      ...minimalInput,
+      genreDistribution: [
+        { genre: "Unknown", count: 900, percentage: 90 },
+        { genre: "Rock", count: 50, percentage: 5 },
+        { genre: "Pop", count: 50, percentage: 5 },
+      ],
+    };
+    const result = buildTasteSummary(dominatedByUnknown);
+    expect(result.text).not.toContain("Unknown");
+    expect(result.text.indexOf("Rock")).toBeLessThan(result.text.indexOf("Pop"));
+    const parsed = JSON.parse(result.structured);
+    expect(parsed.topGenres.map((g: { genre: string }) => g.genre)).toEqual(["Rock", "Pop"]);
+    expect(parsed.topGenres[0].percentage).toBe(50);
+    expect(parsed.topGenres[1].percentage).toBe(50);
+  });
+
   it("includes peak day and hour when provided", () => {
     const withPeaks: TasteProfileInput = {
       ...minimalInput,

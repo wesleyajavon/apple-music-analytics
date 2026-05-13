@@ -16,6 +16,9 @@ import {
 import { parseAiLocale } from "@/lib/services/ai/locale-utils";
 import { generateMusicChatAnswer } from "@/lib/services/ai/music-chat-service";
 import {
+  assertInteractiveGroqNotBlockedByImportGenreBackfill,
+} from "@/lib/services/listening/groq-import-genre-backfill-ai-guard";
+import {
   getPresetQuestion,
   isMusicChatPresetQuestionId,
 } from "@/lib/services/ai/music-chat-tools";
@@ -152,6 +155,8 @@ export async function POST(request: NextRequest) {
       };
       return NextResponse.json(degraded);
     }
+
+    await assertInteractiveGroqNotBlockedByImportGenreBackfill(userId);
 
     await assertGroqUserQuotaForRequest(request, userId);
 

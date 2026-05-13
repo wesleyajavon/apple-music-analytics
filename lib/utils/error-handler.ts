@@ -39,6 +39,8 @@ export const ErrorCodes = {
 
   /** Quota produit : limite d’appels Groq par utilisateur / jour (429) */
   GROQ_DAILY_QUOTA_EXCEEDED: 'GROQ_DAILY_QUOTA_EXCEEDED',
+  /** Classification genres import en cours : réservation capacité Groq interactive (423) */
+  GROQ_GENRE_CLASSIFICATION_ACTIVE: 'GROQ_GENRE_CLASSIFICATION_ACTIVE',
   RATE_LIMIT_EXCEEDED: 'RATE_LIMIT_EXCEEDED',
   
   // Erreurs de ressource non trouvée (404)

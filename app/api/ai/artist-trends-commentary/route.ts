@@ -35,6 +35,7 @@ import {
   assertRateLimit,
   type RateLimitResult,
 } from "@/lib/security/rate-limit";
+import { assertInteractiveGroqNotBlockedByImportGenreBackfill } from "@/lib/services/listening/groq-import-genre-backfill-ai-guard";
 
 export const dynamic = "force-dynamic";
 
@@ -211,13 +212,14 @@ export async function GET(request: NextRequest) {
         commentaryCached = true;
       } else {
         try {
+          await assertInteractiveGroqNotBlockedByImportGenreBackfill(userId);
           await assertGroqUserQuotaForRequest(request, userId);
           commentary = await generateArtistTrendsCommentary(payload, locale, false);
           if (commentary) {
             await setCachedArtistTrendsCommentary(payload, commentary, locale, false);
           }
         } catch (err) {
-          if (err instanceof AppError && err.statusCode === 429) throw err;
+          if (err instanceof AppError && (err.statusCode === 429 || err.statusCode === 423)) throw err;
           console.warn("Artist trends AI commentary (technical) failed:", err);
         }
       }
@@ -230,13 +232,14 @@ export async function GET(request: NextRequest) {
         commentaryLightCached = true;
       } else {
         try {
+          await assertInteractiveGroqNotBlockedByImportGenreBackfill(userId);
           await assertGroqUserQuotaForRequest(request, userId);
           commentaryLight = await generateArtistTrendsCommentary(payload, locale, true);
           if (commentaryLight) {
             await setCachedArtistTrendsCommentary(payload, commentaryLight, locale, true);
           }
         } catch (err) {
-          if (err instanceof AppError && err.statusCode === 429) throw err;
+          if (err instanceof AppError && (err.statusCode === 429 || err.statusCode === 423)) throw err;
           console.warn("Artist trends AI commentary (light) failed:", err);
         }
       }

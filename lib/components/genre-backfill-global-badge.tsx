@@ -1,8 +1,24 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import {
+  AlertCircle,
+  Ban,
+  CheckCircle2,
+  ChevronDown,
+  Loader2,
+  Minus,
+  Pause,
+  Play,
+  Sparkles,
+  X,
+} from "lucide-react";
 import { toast } from "sonner";
+import {
+  type GroqBackfillDashboardJob,
+  useGenreBackfillJob,
+} from "@/lib/context/genre-backfill-job-context";
 import {
   clearGenreBackfillBannerBlockingPrefs,
   getGenreBackfillBannerCollapsed,
@@ -12,29 +28,13 @@ import {
   setGenreBackfillBannerDismissedJobId,
 } from "@/lib/utils/genre-backfill-banner-prefs";
 
-type JobStatus = "pending" | "running" | "paused" | "completed" | "failed" | "cancelled";
-
-type BackfillJob = {
-  id: string;
-  status: JobStatus;
-  targetUnknownPct: number;
-  initialUnknownPct: number | null;
-  currentUnknownPct: number | null;
-  artistsProcessed: number;
-  maxArtists: number;
-};
-
-const POLL_MS_ACTIVE = 2500;
-/** Job terminal (succès / échec / annulé) : rafraîchir rarement. */
-const POLL_MS_TERMINAL = 60_000;
-/** Aucun job en base : pas besoin de poller comme un job actif. */
-const POLL_MS_NO_JOB = 90_000;
+type JobStatus = GroqBackfillDashboardJob["status"];
 
 function isTerminal(status: JobStatus): boolean {
   return status === "completed" || status === "failed" || status === "cancelled";
 }
 
-function isCleanCompletedSuccess(job: BackfillJob): boolean {
+function isCleanCompletedSuccess(job: GroqBackfillDashboardJob): boolean {
   return (
     job.status === "completed" &&
     job.currentUnknownPct != null &&
@@ -42,9 +42,90 @@ function isCleanCompletedSuccess(job: BackfillJob): boolean {
   );
 }
 
+type PanelTone = "active" | "paused" | "success" | "warning" | "danger" | "muted";
+
+function panelTone(job: GroqBackfillDashboardJob, showNextSessionCta: boolean): PanelTone {
+  if (job.status === "failed") return "danger";
+  if (job.status === "cancelled") return "muted";
+  if (job.status === "paused") return "paused";
+  if (
+    job.status === "completed" &&
+    (!isCleanCompletedSuccess(job) || showNextSessionCta)
+  ) {
+    return "warning";
+  }
+  if (job.status === "completed") return "success";
+  return "active";
+}
+
+/** Aligné sur le hero Musical Profile : verre sur dégradé sombre violet / cyan */
+const GLASS_SHELL =
+  "relative overflow-hidden rounded-[1.75rem] border border-accent-violet/25 bg-gray-950 text-white shadow-2xl shadow-accent-violet/15 ring-1 ring-white/10";
+
+const GLASS_SHELL_BG = (
+  <>
+    <div
+      className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.42),transparent_38%),radial-gradient(circle_at_82%_18%,rgba(6,182,212,0.26),transparent_32%),linear-gradient(135deg,rgba(17,24,39,0.97),rgba(76,29,149,0.72))]"
+      aria-hidden
+    />
+    <div
+      className="pointer-events-none absolute -bottom-20 left-1/2 h-48 w-[85%] -translate-x-1/2 rounded-full bg-accent-violet/22 blur-3xl"
+      aria-hidden
+    />
+    <div
+      className="pointer-events-none absolute -top-16 -right-12 h-40 w-40 rounded-full bg-accent-cyan/12 blur-3xl"
+      aria-hidden
+    />
+  </>
+);
+
+const TONE_STYLES: Record<
+  PanelTone,
+  { accentBar: string; iconWrap: string; glow: string }
+> = {
+  active: {
+    accentBar: "bg-gradient-to-b from-violet-400 via-accent-violet to-cyan-400 shadow-[0_0_20px_rgba(139,92,246,0.45)]",
+    iconWrap:
+      "border border-white/15 bg-white/10 shadow-inner shadow-white/5 backdrop-blur-md ring-1 ring-white/10",
+    glow: "[--gb-glow:rgba(139,92,246,0.35)]",
+  },
+  paused: {
+    accentBar:
+      "bg-gradient-to-b from-indigo-300 via-accent-indigo to-cyan-400 shadow-[0_0_18px_rgba(99,102,241,0.4)]",
+    iconWrap:
+      "border border-white/15 bg-indigo-500/18 shadow-inner shadow-cyan-500/10 backdrop-blur-md ring-1 ring-indigo-400/25",
+    glow: "[--gb-glow:rgba(99,102,241,0.26)]",
+  },
+  success: {
+    accentBar: "bg-gradient-to-b from-emerald-400 to-teal-500 shadow-[0_0_16px_rgba(16,185,129,0.35)]",
+    iconWrap:
+      "border border-white/15 bg-emerald-500/15 shadow-inner shadow-emerald-500/10 backdrop-blur-md ring-1 ring-emerald-400/25",
+    glow: "[--gb-glow:rgba(16,185,129,0.22)]",
+  },
+  warning: {
+    accentBar:
+      "bg-gradient-to-b from-fuchsia-400 via-accent-violet to-indigo-400 shadow-[0_0_20px_rgba(168,85,247,0.32)]",
+    iconWrap:
+      "border border-white/15 bg-fuchsia-500/14 shadow-inner shadow-violet-500/15 backdrop-blur-md ring-1 ring-fuchsia-400/22",
+    glow: "[--gb-glow:rgba(167,139,250,0.22)]",
+  },
+  danger: {
+    accentBar: "bg-gradient-to-b from-rose-400 to-red-500 shadow-[0_0_18px_rgba(244,63,94,0.38)]",
+    iconWrap:
+      "border border-white/15 bg-rose-500/18 shadow-inner shadow-rose-500/15 backdrop-blur-md ring-1 ring-rose-400/30",
+    glow: "[--gb-glow:rgba(244,63,94,0.22)]",
+  },
+  muted: {
+    accentBar: "bg-gradient-to-b from-white/35 to-white/15",
+    iconWrap:
+      "border border-white/12 bg-white/8 backdrop-blur-md ring-1 ring-white/10",
+    glow: "[--gb-glow:rgba(148,163,184,0.14)]",
+  },
+};
+
 export function GenreBackfillGlobalBadge() {
   const t = useTranslations("dashboard.genreBackfill");
-  const [job, setJob] = useState<BackfillJob | null>(null);
+  const { job, refreshStatus, hasActiveGroqJob } = useGenreBackfillJob();
   const [isStarting, setIsStarting] = useState(false);
   const [isPausing, setIsPausing] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
@@ -53,7 +134,6 @@ export function GenreBackfillGlobalBadge() {
   const [optOut, setOptOut] = useState(false);
   const [dismissedJobId, setDismissedJobId] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState(false);
-  const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     setOptOut(getGenreBackfillBannerOptOut());
@@ -61,47 +141,6 @@ export function GenreBackfillGlobalBadge() {
     setCollapsed(getGenreBackfillBannerCollapsed());
     setPrefsHydrated(true);
   }, []);
-
-  const loadStatus = useCallback(async () => {
-    if (typeof document !== "undefined" && document.visibilityState === "hidden") return;
-    abortRef.current?.abort();
-    const ac = new AbortController();
-    abortRef.current = ac;
-    try {
-      const res = await fetch("/api/user/onboarding/import/genre-backfill/status", {
-        signal: ac.signal,
-      });
-      if (!res.ok) return;
-      const data = (await res.json().catch(() => ({}))) as { job?: BackfillJob | null };
-      setJob(data.job ?? null);
-    } catch (e) {
-      if (e instanceof DOMException && e.name === "AbortError") return;
-    }
-  }, []);
-
-  useEffect(() => {
-    void loadStatus();
-    const status = job?.status;
-    const active =
-      status === "pending" || status === "running" || status === "paused";
-    const pollMs = active
-      ? POLL_MS_ACTIVE
-      : status == null
-        ? POLL_MS_NO_JOB
-        : POLL_MS_TERMINAL;
-    const id = window.setInterval(() => {
-      void loadStatus();
-    }, pollMs);
-    const onVis = () => {
-      if (document.visibilityState === "visible") void loadStatus();
-    };
-    document.addEventListener("visibilitychange", onVis);
-    return () => {
-      window.clearInterval(id);
-      document.removeEventListener("visibilitychange", onVis);
-      abortRef.current?.abort();
-    };
-  }, [loadStatus, job?.status]);
 
   const persistCollapsed = useCallback((next: boolean) => {
     setCollapsed(next);
@@ -127,13 +166,13 @@ export function GenreBackfillGlobalBadge() {
         return;
       }
       toast.success(t("pausedToast"));
-      await loadStatus();
+      await refreshStatus();
     } catch {
       toast.error(t("pauseError"));
     } finally {
       setIsPausing(false);
     }
-  }, [loadStatus, t]);
+  }, [refreshStatus, t]);
 
   const cancelBackfill = useCallback(async () => {
     setIsCancelling(true);
@@ -149,13 +188,13 @@ export function GenreBackfillGlobalBadge() {
         return;
       }
       toast.success(t("cancelledToast"));
-      await loadStatus();
+      await refreshStatus();
     } catch {
       toast.error(t("cancelError"));
     } finally {
       setIsCancelling(false);
     }
-  }, [loadStatus, t]);
+  }, [refreshStatus, t]);
 
   const resumeBackfill = useCallback(async () => {
     setIsResuming(true);
@@ -170,13 +209,13 @@ export function GenreBackfillGlobalBadge() {
         return;
       }
       toast.success(t("resumedToast"));
-      await loadStatus();
+      await refreshStatus();
     } catch {
       toast.error(t("resumeError"));
     } finally {
       setIsResuming(false);
     }
-  }, [loadStatus, t]);
+  }, [refreshStatus, t]);
 
   const startAnotherSession = useCallback(async () => {
     setIsStarting(true);
@@ -193,13 +232,14 @@ export function GenreBackfillGlobalBadge() {
       setOptOut(false);
       setDismissedJobId(null);
       toast.success(t("started"));
-      await loadStatus();
+      await refreshStatus();
+      window.setTimeout(() => void refreshStatus(), 400);
     } catch {
       toast.error(t("startError"));
     } finally {
       setIsStarting(false);
     }
-  }, [loadStatus, t]);
+  }, [refreshStatus, t]);
 
   const visibleJob = useMemo(() => {
     if (!job || !prefsHydrated) return null;
@@ -231,7 +271,7 @@ export function GenreBackfillGlobalBadge() {
   const ratioText = useMemo(() => {
     if (!visibleJob) return "";
     if (visibleJob.initialUnknownPct != null && visibleJob.currentUnknownPct != null) {
-      return `${visibleJob.initialUnknownPct.toFixed(1)}% -> ${visibleJob.currentUnknownPct.toFixed(1)}%`;
+      return `${visibleJob.initialUnknownPct.toFixed(1)}% → ${visibleJob.currentUnknownPct.toFixed(1)}%`;
     }
     if (visibleJob.currentUnknownPct != null) {
       return `${visibleJob.currentUnknownPct.toFixed(1)}%`;
@@ -247,25 +287,84 @@ export function GenreBackfillGlobalBadge() {
     return hasBackfillInProgress ? 0 : 100;
   }, [visibleJob, hasBackfillInProgress]);
 
+  const headingCopy = visibleJob
+    ? hasBackfillInProgress
+      ? t("running")
+      : isPaused
+        ? t("pausedHeading")
+        : visibleJob.status === "failed"
+          ? t("failed")
+          : visibleJob.status === "cancelled"
+            ? t("cancelledHeading")
+            : t("completed")
+    : "";
+
+  const tones = visibleJob ? TONE_STYLES[panelTone(visibleJob, showNextSessionCta)] : TONE_STYLES.active;
+
+  const headlineIcon =
+    visibleJob && hasBackfillInProgress ? (
+      <Loader2 className="h-5 w-5 animate-spin motion-reduce:animate-none text-violet-200" aria-hidden />
+    ) : visibleJob && isPaused ? (
+      <Pause className="h-5 w-5 text-indigo-200" aria-hidden />
+    ) : visibleJob?.status === "failed" ? (
+      <AlertCircle className="h-5 w-5 text-rose-300" aria-hidden />
+    ) : visibleJob?.status === "cancelled" ? (
+      <Ban className="h-5 w-5 text-white/45" aria-hidden />
+    ) : visibleJob?.status === "completed" ? (
+      <CheckCircle2 className="h-5 w-5 text-emerald-300" aria-hidden />
+    ) : (
+      <Sparkles className="h-5 w-5 text-cyan-200" aria-hidden />
+    );
+
+  const collapsedPulse =
+    prefsHydrated && visibleJob != null &&
+    (visibleJob.status === "pending" || visibleJob.status === "running");
+
   if (!visibleJob) {
     return null;
   }
 
   const headingId = "genre-backfill-global-badge-title";
+  const srSummaryId = "genre-backfill-global-badge-summary";
 
   if (collapsed) {
     return (
-      <div className="mb-4">
+      <div className="mb-6">
         <button
           type="button"
-          className="flex w-full items-center justify-between gap-2 rounded-lg border border-violet-200/70 bg-violet-50/60 px-3 py-2 text-left text-xs font-medium text-violet-900 shadow-sm dark:border-violet-900/50 dark:bg-violet-950/30 dark:text-violet-100"
+          className={`group ${GLASS_SHELL} flex w-full items-center gap-3 px-4 py-3.5 text-left shadow-2xl transition-[transform,box-shadow] hover:shadow-accent-violet/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950 motion-safe:active:scale-[0.998] ${tones.glow}`}
           onClick={() => persistCollapsed(false)}
           aria-expanded={false}
+          aria-controls="genre-backfill-global-badge-panel"
         >
-          <span className="truncate">{t("collapsedSummary")}</span>
-          <span className="shrink-0 text-violet-600 dark:text-violet-300" aria-hidden>
-            ▼
+          {GLASS_SHELL_BG}
+          <div
+            className={`pointer-events-none absolute left-3 top-1/2 z-[1] h-[70%] max-h-14 w-1 -translate-y-1/2 rounded-full ${tones.accentBar}`}
+            aria-hidden
+          />
+          <div
+            className="pointer-events-none absolute inset-0 z-[1] bg-[radial-gradient(circle_at_100%_0%,var(--gb-glow),transparent_55%)]"
+            aria-hidden
+          />
+          <span className={`relative z-[2] flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${tones.iconWrap}`}>
+            {collapsedPulse ? (
+              <Loader2 className="h-5 w-5 animate-spin motion-reduce:animate-none text-violet-200" aria-hidden />
+            ) : (
+              <Sparkles className="h-5 w-5 text-violet-200" aria-hidden />
+            )}
           </span>
+          <span className="relative z-[2] min-w-0 flex-1 ps-1">
+            <span className="block text-[10px] font-semibold uppercase tracking-[0.2em] text-accent-cyan">
+              {t("panelEyebrow")}
+            </span>
+            <span className="mt-0.5 block truncate text-sm font-semibold text-white">
+              {headingCopy || t("collapsedSummary")}
+            </span>
+          </span>
+          <ChevronDown
+            className="relative z-[2] -rotate-90 h-5 w-5 shrink-0 text-white/45 transition-[color,transform] group-hover:text-white/85"
+            aria-hidden
+          />
         </button>
       </div>
     );
@@ -274,126 +373,205 @@ export function GenreBackfillGlobalBadge() {
   return (
     <section
       id="genre-backfill-global-badge-panel"
-      className="mb-4 rounded-xl border border-violet-200/80 bg-violet-50/70 px-4 py-3 dark:border-violet-900/50 dark:bg-violet-950/25"
+      className={`${GLASS_SHELL} mb-6 shadow-2xl transition-shadow hover:shadow-accent-violet/22 ${tones.glow}`}
       aria-labelledby={headingId}
+      aria-describedby={srSummaryId}
       role="region"
     >
-      <div className="flex flex-wrap items-start justify-between gap-2">
-        <p id={headingId} className="text-sm font-medium text-violet-900 dark:text-violet-100">
-          {hasBackfillInProgress
-            ? t("running")
-            : isPaused
-              ? t("pausedHeading")
-              : visibleJob.status === "failed"
-                ? t("failed")
-                : visibleJob.status === "cancelled"
-                  ? t("cancelledHeading")
-                  : t("completed")}
+      {GLASS_SHELL_BG}
+      <div
+        className="pointer-events-none absolute left-4 top-6 bottom-6 z-[1] w-1 rounded-full sm:left-5 sm:top-7 sm:bottom-7"
+        aria-hidden
+      >
+        <div className={`h-full w-full rounded-full ${tones.accentBar}`} />
+      </div>
+      <div
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_100%_0%,var(--gb-glow),transparent_55%)]"
+        aria-hidden
+      />
+      <div className="relative z-[2] p-5 pl-8 sm:p-6 sm:pl-10">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="flex min-w-0 flex-1 gap-3">
+            <div
+              className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${tones.iconWrap}`}
+              aria-hidden
+            >
+              {headlineIcon}
+            </div>
+            <div className="min-w-0 pt-0.5">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-accent-cyan">
+                {t("panelEyebrow")}
+              </p>
+              <h2 id={headingId} className="mt-1 text-base font-semibold leading-snug text-white sm:text-lg">
+                {headingCopy}
+              </h2>
+            </div>
+          </div>
+          <div className="flex shrink-0 items-center gap-0.5 rounded-xl border border-white/12 bg-white/8 p-0.5 backdrop-blur-md">
+            <button
+              type="button"
+              className="rounded-lg p-2 text-white/55 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950"
+              onClick={() => persistCollapsed(true)}
+              aria-label={t("collapseAria")}
+              title={t("collapseAria")}
+            >
+              <Minus className="h-4 w-4" strokeWidth={2.25} aria-hidden />
+            </button>
+            {isTerminal(visibleJob.status) ? (
+              <button
+                type="button"
+                className="rounded-lg p-2 text-white/55 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950"
+                onClick={dismissCurrentJob}
+                aria-label={t("dismissAria")}
+                title={t("dismissAria")}
+              >
+                <X className="h-4 w-4" strokeWidth={2.25} aria-hidden />
+              </button>
+            ) : null}
+          </div>
+        </div>
+
+        <p id={srSummaryId} className="sr-only">
+          {t("details", {
+            processed: visibleJob.artistsProcessed,
+            max: visibleJob.maxArtists,
+            ratio: ratioText,
+            target: visibleJob.targetUnknownPct.toFixed(1),
+          })}
         </p>
-        <div className="flex shrink-0 items-center gap-1">
-          <button
-            type="button"
-            className="rounded-md p-1.5 text-violet-800 transition-colors hover:bg-violet-200/50 dark:text-violet-200 dark:hover:bg-violet-900/50"
-            onClick={() => persistCollapsed(true)}
-            aria-label={t("collapseAria")}
-            title={t("collapseAria")}
-          >
-            <span aria-hidden className="text-xs font-bold">
-              −
+
+        <ul className="mt-4 flex flex-wrap gap-2">
+          <li className="inline-flex">
+            <span className="inline-flex items-center rounded-lg border border-white/15 bg-white/10 px-2.5 py-1 text-xs font-medium tabular-nums text-white/90 backdrop-blur-md">
+              {t("statTracksShort", {
+                processed: visibleJob.artistsProcessed,
+                max: visibleJob.maxArtists,
+              })}
             </span>
-          </button>
-          {isTerminal(visibleJob.status) ? (
-            <button
-              type="button"
-              className="rounded-md p-1.5 text-violet-800 transition-colors hover:bg-violet-200/50 dark:text-violet-200 dark:hover:bg-violet-900/50"
-              onClick={dismissCurrentJob}
-              aria-label={t("dismissAria")}
-              title={t("dismissAria")}
-            >
-              <span aria-hidden className="text-xs">
-                ×
-              </span>
-            </button>
-          ) : null}
-        </div>
-      </div>
-      <p className="mt-1 text-xs text-violet-800/90 dark:text-violet-200/90">
-        {t("details", {
-          processed: visibleJob.artistsProcessed,
-          max: visibleJob.maxArtists,
-          ratio: ratioText,
-          target: visibleJob.targetUnknownPct.toFixed(1),
-        })}
-      </p>
-      <div className="mt-2">
-        <div
-          className="h-2 w-full overflow-hidden rounded-full bg-violet-200/70 dark:bg-violet-900/60"
-          role="progressbar"
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-valuenow={progressValue}
-          aria-label={t("progressAria")}
-        >
-          <div
-            className="h-full rounded-full bg-accent-violet transition-[width] duration-300 ease-out"
-            style={{ width: `${progressValue}%` }}
-          />
-        </div>
-        <p className="mt-1 text-right text-[11px] font-medium tabular-nums text-violet-800 dark:text-violet-200">
-          {progressValue}%
-        </p>
-      </div>
-      {hasBackfillInProgress || isPaused ? (
-        <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-          {hasBackfillInProgress ? (
-            <button
-              type="button"
-              className="inline-flex min-h-[36px] items-center justify-center rounded-lg border border-violet-300/80 bg-white/80 px-3 py-1.5 text-xs font-semibold text-violet-900 transition-colors hover:bg-violet-100/80 disabled:cursor-not-allowed disabled:opacity-60 dark:border-violet-700/80 dark:bg-violet-950/40 dark:text-violet-100 dark:hover:bg-violet-900/50"
-              disabled={isPausing || isCancelling}
-              onClick={() => void pauseBackfill()}
-            >
-              {isPausing ? t("pausing") : t("pause")}
-            </button>
-          ) : (
-            <button
-              type="button"
-              className="inline-flex min-h-[36px] items-center justify-center rounded-lg bg-accent-violet px-3 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
-              disabled={isResuming || isCancelling}
-              onClick={() => void resumeBackfill()}
-            >
-              {isResuming ? t("resuming") : t("resume")}
-            </button>
-          )}
-          <button
-            type="button"
-            className="inline-flex min-h-[36px] items-center justify-center rounded-lg border border-red-300/70 bg-white/80 px-3 py-1.5 text-xs font-semibold text-red-800 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-200 dark:hover:bg-red-950/50"
-            disabled={isPausing || isCancelling || isResuming}
-            onClick={() => void cancelBackfill()}
-          >
-            {isCancelling ? t("cancelling") : t("cancel")}
-          </button>
-        </div>
-      ) : null}
-      {showNextSessionCta ? (
-        <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs text-violet-900/90 dark:text-violet-100/90">
-            {visibleJob.status === "failed"
-              ? t("nextSessionAfterError")
-              : t("nextSessionPrompt", {
-                  current: visibleJob.currentUnknownPct?.toFixed(1) ?? "0.0",
-                  target: visibleJob.targetUnknownPct.toFixed(1),
-                })}
+          </li>
+          <li className="inline-flex">
+            <span className="inline-flex items-center rounded-lg border border-white/15 bg-white/10 px-2.5 py-1 text-xs font-medium tabular-nums text-white/90 backdrop-blur-md">
+              {t("statUnknownShort", { ratio: ratioText })}
+            </span>
+          </li>
+          <li className="inline-flex">
+            <span className="inline-flex items-center rounded-lg border border-white/15 bg-white/10 px-2.5 py-1 text-xs font-medium tabular-nums text-white/90 backdrop-blur-md">
+              {t("statTargetShort", { target: visibleJob.targetUnknownPct.toFixed(1) })}
+            </span>
+          </li>
+        </ul>
+
+        {(hasBackfillInProgress || isPaused) &&
+          (visibleJob.maxArtists > 0 ? (
+            <div className="mt-5">
+              <div className="mb-2 flex items-baseline justify-between gap-2">
+                <span className="text-xs font-medium text-white/55">{t("progressLabel")}</span>
+                <span className="text-xs font-semibold tabular-nums text-white">
+                  {progressValue}%
+                </span>
+              </div>
+              <div
+                className="h-2.5 w-full overflow-hidden rounded-full bg-white/10 ring-1 ring-inset ring-white/15"
+                role="progressbar"
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={progressValue}
+                aria-label={t("progressAria")}
+              >
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-accent-violet to-cyan-500/90 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.22)] motion-safe:transition-[width] motion-safe:duration-500 motion-safe:ease-out"
+                  style={{ width: `${progressValue}%` }}
+                />
+              </div>
+            </div>
+          ) : hasBackfillInProgress ? (
+            <div className="mt-5 flex items-center gap-2 text-xs text-white/60" role="status">
+              <Loader2
+                className="h-3.5 w-3.5 shrink-0 animate-spin motion-reduce:animate-none text-violet-300"
+                aria-hidden
+              />
+              <span>{t("batchPreparing")}</span>
+            </div>
+          ) : null)}
+
+        {isTerminal(visibleJob.status) && !showNextSessionCta ? (
+          <p className="mt-4 text-xs leading-relaxed text-white/65">
+            {t("detailsInline", {
+              processed: visibleJob.artistsProcessed,
+              max: visibleJob.maxArtists,
+              ratio: ratioText,
+              target: visibleJob.targetUnknownPct.toFixed(1),
+            })}
           </p>
-          <button
-            type="button"
-            className="inline-flex min-h-[36px] items-center justify-center rounded-lg bg-accent-violet px-3 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
-            disabled={isStarting}
-            onClick={() => void startAnotherSession()}
-          >
-            {isStarting ? t("starting") : t("startNextSession")}
-          </button>
-        </div>
-      ) : null}
+        ) : null}
+
+        {hasBackfillInProgress || isPaused ? (
+          <div className="mt-5 flex flex-wrap gap-2 sm:gap-2.5">
+            {hasBackfillInProgress ? (
+              <button
+                type="button"
+                className="inline-flex min-h-[38px] items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold text-white shadow-inner shadow-white/5 backdrop-blur-md transition-colors hover:bg-white/[0.16] disabled:pointer-events-none disabled:opacity-50"
+                disabled={isPausing || isCancelling}
+                onClick={() => void pauseBackfill()}
+              >
+                <Pause className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                {isPausing ? t("pausing") : t("pause")}
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="group relative inline-flex min-h-[40px] items-center justify-center gap-2 overflow-hidden rounded-2xl border border-white/25 bg-brand-gradient px-5 py-2 text-xs font-semibold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:opacity-[0.98] hover:shadow-card-hover active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950 disabled:pointer-events-none disabled:translate-y-0 disabled:opacity-55 motion-safe:active:scale-[0.99]"
+                disabled={isResuming || isCancelling}
+                onClick={() => void resumeBackfill()}
+              >
+                <span
+                  className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/15 via-transparent to-white/20 opacity-50 transition-opacity group-hover:opacity-65"
+                  aria-hidden
+                />
+                <Play className="relative z-[1] h-3.5 w-3.5 shrink-0 drop-shadow-sm" aria-hidden strokeWidth={2.25} />
+                <span className="relative z-[1]">{isResuming ? t("resuming") : t("resume")}</span>
+              </button>
+            )}
+            <button
+              type="button"
+              className="group relative inline-flex min-h-[40px] items-center justify-center gap-2 overflow-hidden rounded-2xl border border-rose-400/40 bg-rose-500/[0.09] px-5 py-2 text-xs font-semibold text-rose-50 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)] backdrop-blur-md transition-all hover:border-rose-400/60 hover:bg-rose-500/[0.16] hover:shadow-[0_0_28px_-10px_rgba(244,63,94,0.45)] active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/55 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950 disabled:pointer-events-none disabled:opacity-50 motion-safe:hover:-translate-y-0.5 motion-safe:active:scale-[0.99]"
+              disabled={isPausing || isCancelling || isResuming}
+              onClick={() => void cancelBackfill()}
+            >
+              <span
+                className="pointer-events-none absolute inset-0 bg-gradient-to-br from-rose-400/10 via-transparent to-transparent opacity-80 group-hover:opacity-100"
+                aria-hidden
+              />
+              <X className="relative z-[1] h-3.5 w-3.5 shrink-0 opacity-95 group-hover:opacity-100" strokeWidth={2.25} aria-hidden />
+              <span className="relative z-[1]">{isCancelling ? t("cancelling") : t("cancel")}</span>
+            </button>
+          </div>
+        ) : null}
+
+        {showNextSessionCta ? (
+          <div className="mt-5 rounded-xl border border-white/15 bg-white/[0.08] px-4 py-3.5 shadow-inner shadow-black/20 backdrop-blur-md">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm leading-relaxed text-white/85">
+                {visibleJob.status === "failed"
+                  ? t("nextSessionAfterError")
+                  : t("nextSessionPrompt", {
+                      current: visibleJob.currentUnknownPct?.toFixed(1) ?? "0.0",
+                      target: visibleJob.targetUnknownPct.toFixed(1),
+                    })}
+              </p>
+              <button
+                type="button"
+                className="inline-flex min-h-[40px] shrink-0 items-center justify-center gap-2 rounded-xl bg-accent-violet px-4 py-2.5 text-sm font-semibold text-white shadow-brand-glow transition-all hover:opacity-[0.94] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950 disabled:pointer-events-none disabled:opacity-50"
+                disabled={isStarting || hasActiveGroqJob}
+                onClick={() => void startAnotherSession()}
+              >
+                <Sparkles className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
+                {isStarting ? t("starting") : t("startNextSession")}
+              </button>
+            </div>
+          </div>
+        ) : null}
+      </div>
     </section>
   );
 }

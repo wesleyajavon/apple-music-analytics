@@ -17,6 +17,7 @@ import {
 import { explainListeningHabitPrediction } from "@/lib/services/ai/listening-habit-explainer";
 import { isAiMasterEnabledForRequest } from "@/lib/services/ai/ai-master";
 import type { ListeningHabitPrediction, ListeningHabitResponse } from "@/lib/dto/predictions";
+import { hasPendingOrRunningGroqImportGenreBackfillForUser } from "@/lib/services/listening/groq-import-genre-backfill-ai-guard";
 
 export const dynamic = "force-dynamic";
 
@@ -65,16 +66,20 @@ export async function GET(request: NextRequest) {
         let cachedExpl = await getCachedExplanation(expLogicalKey);
 
         if (cachedExpl === null) {
-          const generated = await explainListeningHabitPrediction(
-            payload,
-            locale,
-          ).catch(() => "");
-          cachedExpl =
-            typeof generated === "string" && generated.trim().length > 0
-              ? generated.trim()
-              : "";
+          if (await hasPendingOrRunningGroqImportGenreBackfillForUser(userId)) {
+            cachedExpl = "";
+          } else {
+            const generated = await explainListeningHabitPrediction(
+              payload,
+              locale,
+            ).catch(() => "");
+            cachedExpl =
+              typeof generated === "string" && generated.trim().length > 0
+                ? generated.trim()
+                : "";
 
-          if (cachedExpl !== "") await setCachedExplanation(expLogicalKey, cachedExpl);
+            if (cachedExpl !== "") await setCachedExplanation(expLogicalKey, cachedExpl);
+          }
         }
 
         if (cachedExpl && cachedExpl.trim().length > 0) aiExplanation = cachedExpl;
@@ -110,16 +115,20 @@ export async function GET(request: NextRequest) {
       let cachedExpl = await getCachedExplanation(expLogicalKey);
 
       if (cachedExpl === null) {
-        const generated = await explainListeningHabitPrediction(
-          prediction,
-          locale,
-        ).catch(() => "");
-        cachedExpl =
-          typeof generated === "string" && generated.trim().length > 0
-            ? generated.trim()
-            : "";
+        if (await hasPendingOrRunningGroqImportGenreBackfillForUser(userId)) {
+          cachedExpl = "";
+        } else {
+          const generated = await explainListeningHabitPrediction(
+            prediction,
+            locale,
+          ).catch(() => "");
+          cachedExpl =
+            typeof generated === "string" && generated.trim().length > 0
+              ? generated.trim()
+              : "";
 
-        if (cachedExpl !== "") await setCachedExplanation(expLogicalKey, cachedExpl);
+          if (cachedExpl !== "") await setCachedExplanation(expLogicalKey, cachedExpl);
+        }
       }
 
       if (cachedExpl && cachedExpl.trim().length > 0) aiExplanation = cachedExpl;

@@ -5,8 +5,10 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useDashboardViewerUserId } from "@/lib/context/dashboard-viewer-context";
 import { GroqQuotaNotice } from "@/lib/components/error-state";
+import { InteractiveAiGenreBackfillNotice } from "@/lib/components/interactive-ai-genre-backfill-notice";
 import { isGroqDailyQuotaError } from "@/lib/utils/groq-quota-message";
 import { useListeningHabitPrediction } from "@/lib/hooks/use-listening-habit-prediction";
+import { useInteractiveAiBlockedByGenreBackfill } from "@/lib/hooks/use-interactive-ai-blocked-by-genre-backfill";
 import type { ListeningHabitApiResponse } from "@/lib/hooks/use-listening-habit-prediction";
 import type { InsufficientDataResponse } from "@/lib/dto/predictions";
 
@@ -99,8 +101,9 @@ export function WhenWillIListenWidget({
 }) {
   const t = useTranslations("when-will-i-listen");
   const viewerUserId = useDashboardViewerUserId();
+  const interactiveAiBlockedByGenreBackfill = useInteractiveAiBlockedByGenreBackfill();
   const { data, isLoading, error } = useListeningHabitPrediction({
-    includeExplanation,
+    includeExplanation: includeExplanation && !interactiveAiBlockedByGenreBackfill,
     userId: viewerUserId,
   });
 
@@ -305,6 +308,11 @@ export function WhenWillIListenWidget({
         </div>
       </div>
       <div className="p-6">
+        {includeExplanation && interactiveAiBlockedByGenreBackfill ? (
+          <div className="mb-4">
+            <InteractiveAiGenreBackfillNotice />
+          </div>
+        ) : null}
         <PredictionContent data={data} />
       </div>
     </div>

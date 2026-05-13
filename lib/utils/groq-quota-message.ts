@@ -9,6 +9,15 @@ export function isGroqDailyQuotaError(error: unknown): error is ApiError {
   return error instanceof ApiError && error.code === "GROQ_DAILY_QUOTA_EXCEEDED";
 }
 
+export const GROQ_GENRE_CLASSIFICATION_ACTIVE_CODE = "GROQ_GENRE_CLASSIFICATION_ACTIVE" as const;
+
+/** Réponse 423 : classification des genres en cours — fonctionnalités IA interactives mises en pause. */
+export function isGroqGenreClassificationBlockingError(error: unknown): error is ApiError {
+  return (
+    error instanceof ApiError && error.code === GROQ_GENRE_CLASSIFICATION_ACTIVE_CODE
+  );
+}
+
 /**
  * Message utilisateur pour quota IA (429 + code GROQ_DAILY_QUOTA_EXCEEDED), ou null si autre erreur.
  */

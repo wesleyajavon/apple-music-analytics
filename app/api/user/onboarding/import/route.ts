@@ -15,10 +15,16 @@ import type { NormalizedListenInput } from "@/lib/services/listening/onboarding-
 import { getPaletteInvitationStatus } from "@/lib/services/palette/palette-service";
 import { getGroqImportGenreBackfillEligibility } from "@/lib/services/listening/import-genre-backfill-queue";
 import { parseOnboardingImportJsonBody } from "@/lib/services/listening/onboarding-import-json-body";
+import {
+  enrichTopUserArtistsFromSpotify,
+  getSpotifyClientCredentialsFromEnv,
+} from "@/lib/services/spotify/artist-image-enrichment";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 export const maxDuration = 60;
+
+const ONBOARDING_SPOTIFY_ARTIST_IMAGE_TOP_N = 20;
 
 const RATE = {
   route: "/api/user/onboarding/import",
@@ -36,6 +42,38 @@ type Provider = "spotify" | "apple";
 
 function isProvider(s: string | null): s is Provider {
   return s === "spotify" || s === "apple";
+}
+
+async function enrichSpotifyArtistImagesForUserAfterOnboarding(userId: string) {
+  const creds = getSpotifyClientCredentialsFromEnv();
+  if (!creds) return undefined;
+
+  try {
+    const r = await enrichTopUserArtistsFromSpotify({
+      userId,
+      clientId: creds.clientId,
+      clientSecret: creds.clientSecret,
+      limit: ONBOARDING_SPOTIFY_ARTIST_IMAGE_TOP_N,
+      force: true,
+    });
+
+    return {
+      updated: r.updated,
+      skippedNoSpotifyMatch: r.skippedNoSpotifyMatch,
+      skippedNoImageUrl: r.skippedNoImageUrl,
+    };
+  } catch (e) {
+    console.error(
+      "[onboarding/import] Spotify artist image enrichment:",
+      e instanceof Error ? e.message : e
+    );
+    return {
+      updated: 0,
+      skippedNoSpotifyMatch: 0,
+      skippedNoImageUrl: 0,
+      error: true as const,
+    };
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -80,6 +118,11 @@ export async function POST(request: NextRequest) {
       let genreLlmBackfill: Awaited<
         ReturnType<typeof getGroqImportGenreBackfillEligibility>
       > | null = null;
+      let artistImagesSpotify:
+        | Awaited<
+            ReturnType<typeof enrichSpotifyArtistImagesForUserAfterOnboarding>
+          >
+        | undefined;
 
       if (isLastBatch) {
         paletteInvite = await getPaletteInvitationStatus(userId);
@@ -90,6 +133,8 @@ export async function POST(request: NextRequest) {
         const sessionImports = priorImported + result.imported;
         if (sessionImports > 0) {
           genreLlmBackfill = await getGroqImportGenreBackfillEligibility(userId);
+          artistImagesSpotify =
+            await enrichSpotifyArtistImagesForUserAfterOnboarding(userId);
         }
       }
 
@@ -103,6 +148,9 @@ export async function POST(request: NextRequest) {
         skippedInvalid: result.skippedInvalid,
         paletteInvitation: paletteInvite,
         genreLlmBackfill,
+        ...(artistImagesSpotify !== undefined && {
+          artistImagesSpotify,
+        }),
       });
     }
 
@@ -177,6 +225,11 @@ export async function POST(request: NextRequest) {
         ? await getGroqImportGenreBackfillEligibility(userId)
         : null;
 
+    const artistImagesSpotify =
+      result.imported > 0
+        ? await enrichSpotifyArtistImagesForUserAfterOnboarding(userId)
+        : undefined;
+
     return NextResponse.json({
       ok: true,
       provider: providerRaw,
@@ -186,6 +239,9 @@ export async function POST(request: NextRequest) {
       skippedInvalid: result.skippedInvalid,
       paletteInvitation: paletteInvite,
       genreLlmBackfill,
+      ...(artistImagesSpotify !== undefined && {
+        artistImagesSpotify,
+      }),
     });
   } catch (error) {
     return handleApiError(error, { route: RATE.route });

@@ -84,9 +84,16 @@
     "publicDemoIntro": "Bienvenue dans la démo. Choisissez une question prédéfinie pour explorer le profil public sans ouvrir le texte libre.",
     "inputLabel": "Question à poser à Ask your Soundprint",
     "inputPlaceholder": "Ex. Quels morceaux ai-je le plus écoutés pendant l’été 2022 ?",
+    "inputPlaceholderWithArtist": "Ex. : {artist} deepdive",
+    "artistDeepDiveQuestion": "Raconte-moi mon historique d’écoute avec {artist}.",
     "publicDemoPlaceholder": "Le texte libre est désactivé en mode démo.",
     "send": "Envoyer",
     "thinking": "Analyse de votre Soundprint…",
+    "thinkingStep0": "Lecture de votre Soundprint…",
+    "thinkingStep1": "Récupération des chiffres récents dans votre historique…",
+    "thinkingStep2": "Recoupement artistes, genres et plages de dates…",
+    "thinkingStep3": "Presque prêt — mise en forme d’une réponse claire…",
+    "thinkingPatience": "Les réponses détaillées peuvent prendre un peu de temps — merci de patienter.",
     "presetTitle": "Questions rapides",
     "presetDescription": "Utilisez ces exemples pour comprendre ce que l’agent sait traiter. Cliquez pour poser la question directement.",
     "customizeHint": "Ces questions sont des modèles : les utilisateurs connectés peuvent changer l’artiste, l’année, la période, les périodes à comparer, la taille de fenêtre ou la limite de résultats en texte libre.",
@@ -146,6 +153,7 @@
       },
       "artist-deep-dive": {
         "label": "Deep dive artiste",
+        "labelRich": "<em>artiste</em> deepdive",
         "question": "Raconte-moi mon historique d’écoute avec Radiohead."
       },
       "track-obsessions": {
@@ -438,7 +446,20 @@
       "collapsedSummary": "Classification des genres Groq — afficher le détail",
       "collapseAria": "Réduire le bandeau",
       "dismissAria": "Masquer ce résumé jusqu’à la prochaine session",
-      "progressAria": "Progression de la session"
+      "progressAria": "Progression de la session",
+      "panelEyebrow": "Genres IA",
+      "statTracksShort": "{processed}/{max} morceaux",
+      "statUnknownShort": "Unknown {ratio}",
+      "statTargetShort": "Cible ≤ {target} %",
+      "progressLabel": "Progression de la session",
+      "batchPreparing": "Calcul de la taille du lot… la barre arrive tout de suite.",
+      "detailsInline": "Morceaux : {processed}/{max} · Unknown : {ratio} · Objectif : ≤ {target} %"
+    },
+    "interactiveAi": {
+      "title": "Les fonctions IA font une petite pause",
+      "body": "Nous classons vos morceaux par genre en arrière-plan. Cette étape utilise la même capacité que les autres expériences IA : elles restent en attente jusqu’à la fin de la classification.",
+      "pauseHint": "Vous voulez retrouver l’IA tout de suite ? Mettez la classification en pause depuis la bannière de progression en haut du tableau de bord — vous pourrez la reprendre quand vous voulez.",
+      "openProgressCta": "Voir la progression de la classification"
     }
   },
   "footer": {
@@ -805,7 +826,33 @@
     "paginationNext": "Suivant",
     "paginationPage": "Page {page} / {totalPages}",
     "pageSizeLabel": "Lignes",
-    "paginationLoading": "Chargement de la page suivante..."
+    "paginationLoading": "Chargement de la page suivante...",
+    "artistInsightsAriaOpen": "Voir l’analyse d’écoute pour {name}",
+    "insightsCloseAria": "Fermer le panneau détail",
+    "insightsEyebrow": "Votre écoute",
+    "insightsUniqueTracksShort": "titres uniques",
+    "insightsEstPlayTimeUnavailable": "—",
+    "insightsEstPlayTimeHint": "temps joué estimé (durées des titres)",
+    "insightsTimelineHint": "Pour la période affichée · première écoute {first} · dernière {last}",
+    "insightsLoadError": "Impossible de charger les statistiques pour cet artiste.",
+    "insightsPeaksTitle": "Quand vous écoutez le plus cet artiste",
+    "insightsPeakHour": "Heure la plus forte",
+    "insightsPeakWeekday": "Jour le plus fort",
+    "insightsBusiestCalendarDay": "Jour calendaire le plus dense",
+    "insightsBusiestMeta": "{date} · {listens} écoutes",
+    "insightsNoSignal": "Pas assez de données pour dégager une tendance",
+    "insightsActiveDays": "Jours avec au moins une écoute",
+    "insightsSpanDays": "Étendue (première → dernière)",
+    "insightsByHour": "Écoutes par heure de la journée",
+    "insightsByWeekday": "Écoutes par jour de semaine",
+    "insightsTopTracks": "Titres les plus joués avec cet artiste",
+    "insightsSources": "Origine des écoutes",
+    "insightsFootnoteTz": "Les heures et jours reflètent l’horodatage stocké avec chaque écoute (souvent UTC selon l’export). Les totaux respectent les filtres de dates actifs.",
+    "sourceLastfm": "Last.fm",
+    "sourceAppleReplay": "Apple Music Replay",
+    "sourceSpotifyExport": "Export étendu Spotify",
+    "sourceSpotifyWebApi": "Spotify (API live)",
+    "sourceAppleMusicExport": "Export Apple Music"
   },
   "tracks": {
     "title": "Titres",
@@ -972,9 +1019,8 @@
   "musical-profile": {
     "title": "Profil musical",
     "subtitle": "Un replay premium de votre identité musicale, enrichi par l'IA.",
-    "heroBadge": "Replay enrichi par l'IA",
-    "heroTitle": "Votre profil musical, reconstruit à partir de vos données",
-    "heroSubtitle": "Une expérience façon Wrapped qui combine vos artistes, genres, titres les plus écoutés et une analyse IA unique générée depuis vos agrégats d'écoute.",
+    "heroTitle": "Retrouvez-vous dans la musique que vous aimez déjà.",
+    "heroSubtitle": "Vos artistes, genres et titres préférés — et des éclairages simples qui transforment vos écoutes en portrait musical auquel vous vous reconnaîtrez.",
     "heroSignature": "Signature sonore",
     "heroSignatureHint": "Ancrée dans {genre}",
     "heroSignatureHintFallback": "En attente de plus de signal genre",
@@ -993,7 +1039,7 @@
     "unknownGenre": "votre palette actuelle",
     "deterministicProfile": "Votre profil actuel penche vers {genre}, avec {artist} comme l'un des ancrages les plus forts sur cette période. Importez plus d'écoutes ou élargissez la plage de dates pour affiner le profil IA.",
     "identityTitle": "Votre identité sonore",
-    "identitySubtitle": "La section IA est générée depuis les mêmes statistiques agrégées que celles affichées ci-dessous : le rendu reste riche sans relire les écoutes brutes ni dupliquer les appels coûteux.",
+    "identitySubtitle": "Votre histoire s’appuie sur les mêmes artistes, genres et titres que le reste de vos analyses — le récit colle toujours à votre portrait d’écoute.",
     "aiCached": "Profil IA servi depuis le cache",
     "aiUnavailable": "L'IA est désactivée pour cet environnement ou ce navigateur ; cette page affiche donc un profil déterministe basé sur vos statistiques.",
     "aiErrorTitle": "Analyse IA indisponible. Affichage d'un résumé basé sur les données.",
@@ -1367,6 +1413,26 @@
       "exportCsvTitle": "Exporter les écoutes en CSV",
       "exportStatsTitle": "Exporter les statistiques en JSON",
       "exportPdfTitle": "Générer le rapport PDF annuel"
+    },
+    "notificationCenter": {
+      "openLabel": "Ouvrir les notifications",
+      "panelTitle": "Notifications",
+      "markAllRead": "Tout marquer comme lu",
+      "clearAll": "Tout effacer",
+      "empty": "Aucune notification pour l’instant.",
+      "exportSuccessTitle": "Export {type} terminé",
+      "exportSuccessBody": "Fichier {filename} téléchargé",
+      "exportErrorTitle": "Échec de l’export {type}",
+      "genreGroqNudge": {
+        "title": "Améliore tes genres avec l’IA",
+        "body": "Environ {count, plural, one {# titre} other {# titres}} (~{pct}% de ta bibliothèque) n’ont pas encore de genre. Lance une classification rapide avec Groq pour des graphiques et des analyses plus précis.",
+        "legacyBody": "Beaucoup de titres n’ont pas encore de genre. Utilise le bouton ci-dessous pour classifier avec Groq et affiner tes graphiques.",
+        "privacyHint": "Les titres et noms d’artistes sont envoyés à Groq pour étiqueter les genres — même flux que la bannière du tableau de bord.",
+        "classifyCta": "Classifier avec Groq",
+        "classifying": "Démarrage…",
+        "startedToast": "Classification des genres lancée en arrière-plan.",
+        "startError": "Impossible de lancer la classification des genres."
+      }
     },
     "periodSelector": {
       "label": "Grouper par",

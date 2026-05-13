@@ -278,6 +278,9 @@ function buildSystemPrompt(
     `Answer in ${languageName}.`,
     "You can only answer from tool results, never from guesses.",
     "Use concise, friendly, data-grounded prose.",
+    "Format every answer for easy reading: 2–4 short paragraphs separated by a blank line. When listing several comparable items (tracks, artists, time slots), use simple bullet lines starting with \"- \" (one item per line). Avoid a single dense wall of text.",
+    "Never cram stats on one line as \"- A: 1 - B: 2 - C: 3\". Put one fact per line: blank line after the opening sentence, then a bullet list; each bullet is a single metric or year row.",
+    "When you list top tracks, one track per \"- \" line with its listen count in parentheses. After that list, add a blank line, then a separate short sentence for the overall date span (first listen to last listen) — never append that sentence to the last track line.",
     buildDateRangeInstruction(dateRange),
     "If the user asks for an unsupported task, such as creating playlists, changing account data, writing SQL, deleting data, fetching external facts, or doing non-music-analytics work, do not call analytics tools just to be helpful. Politely say Ask your Soundprint cannot do that task and offer supported music analytics questions instead.",
     "Always mention the date range or interpretation you used when relevant.",
@@ -420,7 +423,7 @@ async function createFinalAnswerFromToolResults(
       {
         role: "user",
         content:
-          "Now answer the user's original question using only the tool results above.",
+          "Now answer the user's original question using only the tool results above. Use short paragraphs separated by blank lines; use '- ' bullet lines for lists of items; one bullet per metric (no \" - \" chains on the same line). End with caveats as their own short paragraph. Keep the tone warm and readable.",
       },
     ] as unknown as ChatCompletionCreateParamsNonStreaming["messages"],
   });

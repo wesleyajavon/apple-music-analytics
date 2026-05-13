@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import type { ArtistStatsDto } from "@/lib/dto/artist";
 import { useArtistStats } from "@/lib/hooks/use-artists";
 import { useDashboardViewerUserId } from "@/lib/context/dashboard-viewer-context";
 import { TopThreeArtists } from "@/lib/components/top-three-artists-cards";
@@ -11,6 +12,7 @@ import { ErrorState } from "@/lib/components/error-state";
 export type TopThreeArtistsOverviewWidgetProps = {
   startDate?: string;
   endDate?: string;
+  onOpenArtistInsights?: (artist: ArtistStatsDto, avatarColorIndex: number) => void;
 };
 
 /**
@@ -19,6 +21,7 @@ export type TopThreeArtistsOverviewWidgetProps = {
 export function TopThreeArtistsOverviewWidget({
   startDate,
   endDate,
+  onOpenArtistInsights,
 }: TopThreeArtistsOverviewWidgetProps) {
   const tArtists = useTranslations("artists");
   const tOverview = useTranslations("overview");
@@ -118,7 +121,13 @@ export function TopThreeArtistsOverviewWidget({
             </div>
           </div>
           <div className="p-6 pt-4">
-            <TopThreeArtists artists={topArtists} maxListens={maxListens} t={tArtists} locale={locale} />
+            <TopThreeArtists
+              artists={topArtists}
+              maxListens={maxListens}
+              t={tArtists}
+              locale={locale}
+              onArtistSelect={onOpenArtistInsights}
+            />
           </div>
         </div>
       </div>

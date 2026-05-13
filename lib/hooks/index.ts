@@ -11,5 +11,7 @@ export * from "./use-ai-insights";
 export * from "./use-taste-profile";
 export * from "./use-taste-evolution";
 export * from "./use-optimistic-filters";
+export * from "./use-public-demo-viewer";
+export * from "./use-interactive-ai-blocked-by-genre-backfill";
 export * from "./query-keys";
 

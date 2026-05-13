@@ -1,6 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 
+vi.mock("@/lib/services/listening/groq-import-genre-backfill-ai-guard", () => ({
+  resolveUserIdForGroqGenreBackfillGuard: vi.fn().mockResolvedValue(null),
+  assertInteractiveGroqNotBlockedByImportGenreBackfill: vi.fn().mockResolvedValue(undefined),
+}));
+
 /**
  * API tests for POST /api/ai/insights
  * Validates input validation and error handling.

@@ -25,6 +25,8 @@ import { TrackTrendsSummaryWidget } from "@/lib/components/track-trends-summary-
 import { TopThreeArtistsOverviewWidget } from "@/lib/components/top-three-artists-overview-widget";
 import { TasteProfileSummaryWidget } from "@/lib/components/taste-profile-summary-widget";
 import { AiInsightsSummaryWidget } from "@/lib/components/ai-insights-summary-widget";
+import type { ArtistStatsDto } from "@/lib/dto/artist";
+import { ArtistUserInsightsPanel } from "@/lib/components/artist-user-insights-panel";
 import { CHART_TOOLTIP_STYLES } from "@/lib/constants/config";
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
@@ -247,6 +249,15 @@ function OverviewContent() {
   const startDate = searchParams.get("startDate") || undefined;
   const endDate = searchParams.get("endDate") || undefined;
   const userId = searchParams.get("userId") ?? undefined;
+
+  const [artistInsightsTarget, setArtistInsightsTarget] = useState<{
+    artist: ArtistStatsDto;
+    avatarColorIndex: number;
+  } | null>(null);
+
+  const handleOpenArtistInsights = useCallback((artist: ArtistStatsDto, avatarColorIndex: number) => {
+    setArtistInsightsTarget({ artist, avatarColorIndex });
+  }, []);
 
   // Calculer la période précédente pour les comparaisons
   const previousPeriod = useMemo(
@@ -534,7 +545,11 @@ function OverviewContent() {
           </div>
         )}
 
-        <TopThreeArtistsOverviewWidget startDate={startDate} endDate={endDate} />
+        <TopThreeArtistsOverviewWidget
+          startDate={startDate}
+          endDate={endDate}
+          onOpenArtistInsights={handleOpenArtistInsights}
+        />
 
         <ArtistTrendsSummaryWidget startDate={startDate} endDate={endDate} />
 
@@ -555,281 +570,6 @@ function OverviewContent() {
           <OverviewStatsSectionSkeleton />
         )}
 
-        {/* Bloc large (2×1) : Top genres */}
-        {topGenres.length > 0 && (
-          <div className="sm:col-span-2 lg:col-span-2">
-            <div className="relative overflow-hidden rounded-2xl border border-indigo-300/25 bg-card-surface shadow-2xl ring-1 ring-rose-400/10 transition-all duration-300 hover:border-rose-400/40 hover:shadow-[0_0_50px_-12px_rgba(244,114,182,0.26)] dark:border-indigo-300/20 dark:ring-rose-400/20">
-              <div
-                className="pointer-events-none absolute inset-0 opacity-75 dark:opacity-50"
-                style={{
-                  background:
-                    "radial-gradient(circle at top left, rgba(129, 140, 248, 0.16), transparent 34%), radial-gradient(circle at 85% 20%, rgba(244, 114, 182, 0.12), transparent 28%), radial-gradient(circle at 50% 100%, rgba(251, 191, 36, 0.1), transparent 34%)",
-                }}
-              />
-              <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-indigo-400 via-rose-400 to-amber-300 opacity-80" />
-              <div className="relative border-b border-gray-100/80 dark:border-gray-700/50 px-6 py-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                      {t("topGenres")}
-                    </h2>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-                      {t("yourTopGenres")}
-                    </p>
-                  </div>
-                  <Link
-                href={genresHref}
-                className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium
-                  text-rose-600 hover:bg-rose-400/10 dark:text-rose-300 dark:hover:bg-rose-400/15
-                  transition-colors duration-200 shrink-0"
-              >
-                {t("seeAll")}
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-                </div>
-              </div>
-              <div className="relative p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Graphique en barres horizontal */}
-                <div className="h-64">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={topGenres.map((g) => ({
-                        name: g.genre,
-                        value: g.count,
-                        percentage: g.percentage,
-                      }))}
-                      layout="vertical"
-                      margin={{ top: 5, right: 30, left: 80, bottom: 5 }}
-                    >
-                      <defs>
-                        <linearGradient id="genreBarGradient" x1="0" y1="0" x2="1" y2="0">
-                        <stop offset="0%" stopColor="#818cf8" />
-                        <stop offset="50%" stopColor="#f472b6" />
-                        <stop offset="100%" stopColor="#f59e0b" />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
-                    <XAxis
-                      type="number"
-                      tick={{ fill: "#64748b", fontSize: 11 }}
-                      axisLine={false}
-                      tickLine={false}
-                    />
-                    <YAxis
-                      type="category"
-                      dataKey="name"
-                      tick={{ fill: "#475569", fontSize: 12, fontWeight: 500 }}
-                      axisLine={false}
-                      tickLine={false}
-                      width={75}
-                    />
-                    <Tooltip
-                      contentStyle={CHART_TOOLTIP_STYLES.contentStyle}
-                      labelStyle={CHART_TOOLTIP_STYLES.labelStyle}
-                      itemStyle={CHART_TOOLTIP_STYLES.itemStyle}
-                      formatter={(value: number, _name: string, props: { payload?: { percentage?: number } }) => {
-                        const pct = props?.payload?.percentage ?? 0;
-                        return [
-                          `${value.toLocaleString(locale)} ${t("listens")} (${pct.toFixed(1)}%)`,
-                          t("Listens"),
-                        ];
-                      }}
-                    />
-                    <Bar
-                      dataKey="value"
-                      fill="url(#genreBarGradient)"
-                      radius={[0, 6, 6, 0]}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-
-              {/* Liste des genres avec barres de progression */}
-              <div className="space-y-4">
-                {topGenres.map((genre, index) => {
-                  const maxCount = topGenres[0]?.count ?? 1;
-                  const widthPercent = (genre.count / maxCount) * 100;
-                  const rankColors = ["text-amber-500", "text-slate-400", "text-amber-700"];
-                  const rankBg = ["bg-amber-500/15", "bg-slate-400/15", "bg-amber-700/15"];
-                  const rankStyle = index < 3 ? rankColors[index] : "text-gray-400 dark:text-gray-500";
-                  const rankBgStyle = index < 3 ? rankBg[index] : "bg-gray-100 dark:bg-gray-800";
-                  return (
-                    <div key={genre.genre} className="group rounded-xl border border-white/70 bg-white/60 p-3 shadow-sm backdrop-blur transition-colors hover:bg-white/80 dark:border-white/10 dark:bg-white/[0.04] dark:hover:bg-white/[0.07]">
-                      <div className="flex items-center justify-between mb-1.5">
-                        <div className="flex items-center gap-3 min-w-0">
-                          <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold ${rankStyle} ${rankBgStyle}`}>
-                            {index + 1}
-                          </span>
-                          <span className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                            {genre.genre}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2 ml-2 shrink-0">
-                          <span className="text-sm font-semibold text-gray-900 dark:text-white tabular-nums">
-                            {genre.count.toLocaleString(locale)}
-                          </span>
-                          <span className="text-xs text-gray-500 dark:text-gray-400 w-10 text-right tabular-nums">
-                            {genre.percentage.toFixed(1)}%
-                          </span>
-                        </div>
-                      </div>
-                      <div className="ml-10 h-1.5 overflow-hidden rounded-full bg-gray-100/90 dark:bg-white/10">
-                        <div
-                          className="h-full rounded-full bg-gradient-to-r from-indigo-400 via-rose-400 to-amber-300 transition-all duration-500 ease-out"
-                          style={{ width: `${widthPercent}%` }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </div>
-          </div>
-        )}
-
-        {/* Bloc large (2×1) : Top artistes — à côté du top genres */}
-        {topArtistsForChart.length > 0 && (
-          <div className="sm:col-span-2 lg:col-span-2">
-            <div className="relative overflow-hidden rounded-2xl border border-cyan-300/25 bg-card-surface shadow-2xl ring-1 ring-violet-400/10 transition-all duration-300 hover:border-cyan-300/40 hover:shadow-[0_0_50px_-12px_rgba(6,182,212,0.28)] dark:border-cyan-300/20 dark:ring-violet-400/20">
-              <div
-                className="pointer-events-none absolute inset-0 opacity-75 dark:opacity-50"
-                style={{
-                  background:
-                    "radial-gradient(circle at top left, rgba(139, 92, 246, 0.16), transparent 34%), radial-gradient(circle at 85% 20%, rgba(6, 182, 212, 0.13), transparent 28%), radial-gradient(circle at 50% 100%, rgba(132, 204, 22, 0.1), transparent 34%)",
-                }}
-              />
-              <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-violet-400 via-cyan-300 to-lime-300 opacity-80" />
-              <div className="relative border-b border-gray-100/80 dark:border-gray-700/50 px-6 py-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                      {t("topArtists")}
-                    </h2>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-                      {t("yourTopArtists")}
-                    </p>
-                  </div>
-                  <Link
-                    href={`/dashboard/artists${artistsPageQuery}`}
-                    className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium
-                  text-cyan-700 hover:bg-cyan-400/10 dark:text-cyan-200 dark:hover:bg-cyan-400/15
-                  transition-colors duration-200 shrink-0"
-                  >
-                    {t("seeAll")}
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </Link>
-                </div>
-              </div>
-              <div className="relative p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="h-64 min-h-[256px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart
-                        data={topArtistsForChart.map((a) => ({
-                          name: a.name,
-                          shortName: truncateChartLabel(a.name),
-                          value: a.count,
-                          percentage: a.percentage,
-                        }))}
-                        layout="vertical"
-                        margin={{ top: 5, right: 30, left: 8, bottom: 5 }}
-                      >
-                        <defs>
-                          <linearGradient id="artistBarGradient" x1="0" y1="0" x2="1" y2="0">
-                            <stop offset="0%" stopColor="#8b5cf6" />
-                            <stop offset="48%" stopColor="#06b6d4" />
-                            <stop offset="100%" stopColor="#84cc16" />
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
-                        <XAxis
-                          type="number"
-                          tick={{ fill: "#64748b", fontSize: 11 }}
-                          axisLine={false}
-                          tickLine={false}
-                        />
-                        <YAxis
-                          type="category"
-                          dataKey="shortName"
-                          tick={{ fill: "#475569", fontSize: 11, fontWeight: 500 }}
-                          axisLine={false}
-                          tickLine={false}
-                          width={100}
-                        />
-                        <Tooltip
-                          contentStyle={CHART_TOOLTIP_STYLES.contentStyle}
-                          labelStyle={CHART_TOOLTIP_STYLES.labelStyle}
-                          itemStyle={CHART_TOOLTIP_STYLES.itemStyle}
-                          labelFormatter={(_, payload) =>
-                            (payload?.[0]?.payload as { name?: string })?.name ?? ""
-                          }
-                          formatter={(value: number, _name: string, props: { payload?: { percentage?: number } }) => {
-                            const pct = props?.payload?.percentage ?? 0;
-                            return [
-                              `${value.toLocaleString(locale)} ${t("listens")} (${pct.toFixed(1)}%)`,
-                              t("Listens"),
-                            ];
-                          }}
-                        />
-                        <Bar
-                          dataKey="value"
-                          fill="url(#artistBarGradient)"
-                          radius={[0, 6, 6, 0]}
-                        />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-
-                  <div className="space-y-4">
-                    {topArtistsForChart.map((artist, index) => {
-                      const maxCount = topArtistsForChart[0]?.count ?? 1;
-                      const widthPercent = (artist.count / maxCount) * 100;
-                      const rankColors = ["text-amber-500", "text-slate-400", "text-amber-700"];
-                      const rankBg = ["bg-amber-500/15", "bg-slate-400/15", "bg-amber-700/15"];
-                      const rankStyle = index < 3 ? rankColors[index] : "text-gray-400 dark:text-gray-500";
-                      const rankBgStyle = index < 3 ? rankBg[index] : "bg-gray-100 dark:bg-gray-800";
-                      return (
-                        <div key={artist.artistId} className="group rounded-xl border border-white/70 bg-white/60 p-3 shadow-sm backdrop-blur transition-colors hover:bg-white/80 dark:border-white/10 dark:bg-white/[0.04] dark:hover:bg-white/[0.07]">
-                          <div className="flex items-center justify-between mb-1.5 gap-2">
-                            <div className="flex items-center gap-3 min-w-0">
-                              <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold ${rankStyle} ${rankBgStyle}`}>
-                                {index + 1}
-                              </span>
-                              <span className="text-sm font-medium text-gray-900 dark:text-white truncate" title={artist.name}>
-                                {artist.name}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2 ml-2 shrink-0">
-                              <span className="text-sm font-semibold text-gray-900 dark:text-white tabular-nums">
-                                {artist.count.toLocaleString(locale)}
-                              </span>
-                              <span className="text-xs text-gray-500 dark:text-gray-400 w-10 text-right tabular-nums">
-                                {artist.percentage.toFixed(1)}%
-                              </span>
-                            </div>
-                          </div>
-                          <div className="ml-10 h-1.5 overflow-hidden rounded-full bg-gray-100/90 dark:bg-white/10">
-                            <div
-                              className="h-full rounded-full bg-gradient-to-r from-violet-400 via-cyan-300 to-lime-300 transition-all duration-500 ease-out"
-                              style={{ width: `${widthPercent}%` }}
-                            />
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
         {/* Bloc large (2×1) : Top titres */}
         {topTracksForChart.length > 0 && (
           <div className="sm:col-span-2 lg:col-span-2">
@@ -974,6 +714,281 @@ function OverviewContent() {
             </div>
           </div>
         )}
+        {/* Bloc large (2×1) : Top artistes — entre titres et genres */}
+        {topArtistsForChart.length > 0 && (
+          <div className="sm:col-span-2 lg:col-span-2">
+            <div className="relative overflow-hidden rounded-2xl border border-cyan-300/25 bg-card-surface shadow-2xl ring-1 ring-violet-400/10 transition-all duration-300 hover:border-cyan-300/40 hover:shadow-[0_0_50px_-12px_rgba(6,182,212,0.28)] dark:border-cyan-300/20 dark:ring-violet-400/20">
+              <div
+                className="pointer-events-none absolute inset-0 opacity-75 dark:opacity-50"
+                style={{
+                  background:
+                    "radial-gradient(circle at top left, rgba(139, 92, 246, 0.16), transparent 34%), radial-gradient(circle at 85% 20%, rgba(6, 182, 212, 0.13), transparent 28%), radial-gradient(circle at 50% 100%, rgba(132, 204, 22, 0.1), transparent 34%)",
+                }}
+              />
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-violet-400 via-cyan-300 to-lime-300 opacity-80" />
+              <div className="relative border-b border-gray-100/80 dark:border-gray-700/50 px-6 py-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                      {t("topArtists")}
+                    </h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                      {t("yourTopArtists")}
+                    </p>
+                  </div>
+                  <Link
+                    href={`/dashboard/artists${artistsPageQuery}`}
+                    className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium
+                  text-cyan-700 hover:bg-cyan-400/10 dark:text-cyan-200 dark:hover:bg-cyan-400/15
+                  transition-colors duration-200 shrink-0"
+                  >
+                    {t("seeAll")}
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </Link>
+                </div>
+              </div>
+              <div className="relative p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="h-64 min-h-[256px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={topArtistsForChart.map((a) => ({
+                          name: a.name,
+                          shortName: truncateChartLabel(a.name),
+                          value: a.count,
+                          percentage: a.percentage,
+                        }))}
+                        layout="vertical"
+                        margin={{ top: 5, right: 30, left: 8, bottom: 5 }}
+                      >
+                        <defs>
+                          <linearGradient id="artistBarGradient" x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0%" stopColor="#8b5cf6" />
+                            <stop offset="48%" stopColor="#06b6d4" />
+                            <stop offset="100%" stopColor="#84cc16" />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
+                        <XAxis
+                          type="number"
+                          tick={{ fill: "#64748b", fontSize: 11 }}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+                        <YAxis
+                          type="category"
+                          dataKey="shortName"
+                          tick={{ fill: "#475569", fontSize: 11, fontWeight: 500 }}
+                          axisLine={false}
+                          tickLine={false}
+                          width={100}
+                        />
+                        <Tooltip
+                          contentStyle={CHART_TOOLTIP_STYLES.contentStyle}
+                          labelStyle={CHART_TOOLTIP_STYLES.labelStyle}
+                          itemStyle={CHART_TOOLTIP_STYLES.itemStyle}
+                          labelFormatter={(_, payload) =>
+                            (payload?.[0]?.payload as { name?: string })?.name ?? ""
+                          }
+                          formatter={(value: number, _name: string, props: { payload?: { percentage?: number } }) => {
+                            const pct = props?.payload?.percentage ?? 0;
+                            return [
+                              `${value.toLocaleString(locale)} ${t("listens")} (${pct.toFixed(1)}%)`,
+                              t("Listens"),
+                            ];
+                          }}
+                        />
+                        <Bar
+                          dataKey="value"
+                          fill="url(#artistBarGradient)"
+                          radius={[0, 6, 6, 0]}
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  <div className="space-y-4">
+                    {topArtistsForChart.map((artist, index) => {
+                      const maxCount = topArtistsForChart[0]?.count ?? 1;
+                      const widthPercent = (artist.count / maxCount) * 100;
+                      const rankColors = ["text-amber-500", "text-slate-400", "text-amber-700"];
+                      const rankBg = ["bg-amber-500/15", "bg-slate-400/15", "bg-amber-700/15"];
+                      const rankStyle = index < 3 ? rankColors[index] : "text-gray-400 dark:text-gray-500";
+                      const rankBgStyle = index < 3 ? rankBg[index] : "bg-gray-100 dark:bg-gray-800";
+                      return (
+                        <div key={artist.artistId} className="group rounded-xl border border-white/70 bg-white/60 p-3 shadow-sm backdrop-blur transition-colors hover:bg-white/80 dark:border-white/10 dark:bg-white/[0.04] dark:hover:bg-white/[0.07]">
+                          <div className="flex items-center justify-between mb-1.5 gap-2">
+                            <div className="flex items-center gap-3 min-w-0">
+                              <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold ${rankStyle} ${rankBgStyle}`}>
+                                {index + 1}
+                              </span>
+                              <span className="text-sm font-medium text-gray-900 dark:text-white truncate" title={artist.name}>
+                                {artist.name}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2 ml-2 shrink-0">
+                              <span className="text-sm font-semibold text-gray-900 dark:text-white tabular-nums">
+                                {artist.count.toLocaleString(locale)}
+                              </span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400 w-10 text-right tabular-nums">
+                                {artist.percentage.toFixed(1)}%
+                              </span>
+                            </div>
+                          </div>
+                          <div className="ml-10 h-1.5 overflow-hidden rounded-full bg-gray-100/90 dark:bg-white/10">
+                            <div
+                              className="h-full rounded-full bg-gradient-to-r from-violet-400 via-cyan-300 to-lime-300 transition-all duration-500 ease-out"
+                              style={{ width: `${widthPercent}%` }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        {/* Bloc large (2×1) : Top genres */}
+        {topGenres.length > 0 && (
+          <div className="sm:col-span-2 lg:col-span-2">
+            <div className="relative overflow-hidden rounded-2xl border border-indigo-300/25 bg-card-surface shadow-2xl ring-1 ring-rose-400/10 transition-all duration-300 hover:border-rose-400/40 hover:shadow-[0_0_50px_-12px_rgba(244,114,182,0.26)] dark:border-indigo-300/20 dark:ring-rose-400/20">
+              <div
+                className="pointer-events-none absolute inset-0 opacity-75 dark:opacity-50"
+                style={{
+                  background:
+                    "radial-gradient(circle at top left, rgba(129, 140, 248, 0.16), transparent 34%), radial-gradient(circle at 85% 20%, rgba(244, 114, 182, 0.12), transparent 28%), radial-gradient(circle at 50% 100%, rgba(251, 191, 36, 0.1), transparent 34%)",
+                }}
+              />
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-indigo-400 via-rose-400 to-amber-300 opacity-80" />
+              <div className="relative border-b border-gray-100/80 dark:border-gray-700/50 px-6 py-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                      {t("topGenres")}
+                    </h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                      {t("yourTopGenres")}
+                    </p>
+                  </div>
+                  <Link
+                href={genresHref}
+                className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium
+                  text-rose-600 hover:bg-rose-400/10 dark:text-rose-300 dark:hover:bg-rose-400/15
+                  transition-colors duration-200 shrink-0"
+              >
+                {t("seeAll")}
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+                </div>
+              </div>
+              <div className="relative p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Graphique en barres horizontal */}
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={topGenres.map((g) => ({
+                        name: g.genre,
+                        value: g.count,
+                        percentage: g.percentage,
+                      }))}
+                      layout="vertical"
+                      margin={{ top: 5, right: 30, left: 80, bottom: 5 }}
+                    >
+                      <defs>
+                        <linearGradient id="genreBarGradient" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stopColor="#818cf8" />
+                        <stop offset="50%" stopColor="#f472b6" />
+                        <stop offset="100%" stopColor="#f59e0b" />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
+                    <XAxis
+                      type="number"
+                      tick={{ fill: "#64748b", fontSize: 11 }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      type="category"
+                      dataKey="name"
+                      tick={{ fill: "#475569", fontSize: 12, fontWeight: 500 }}
+                      axisLine={false}
+                      tickLine={false}
+                      width={75}
+                    />
+                    <Tooltip
+                      contentStyle={CHART_TOOLTIP_STYLES.contentStyle}
+                      labelStyle={CHART_TOOLTIP_STYLES.labelStyle}
+                      itemStyle={CHART_TOOLTIP_STYLES.itemStyle}
+                      formatter={(value: number, _name: string, props: { payload?: { percentage?: number } }) => {
+                        const pct = props?.payload?.percentage ?? 0;
+                        return [
+                          `${value.toLocaleString(locale)} ${t("listens")} (${pct.toFixed(1)}%)`,
+                          t("Listens"),
+                        ];
+                      }}
+                    />
+                    <Bar
+                      dataKey="value"
+                      fill="url(#genreBarGradient)"
+                      radius={[0, 6, 6, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Liste des genres avec barres de progression */}
+              <div className="space-y-4">
+                {topGenres.map((genre, index) => {
+                  const maxCount = topGenres[0]?.count ?? 1;
+                  const widthPercent = (genre.count / maxCount) * 100;
+                  const rankColors = ["text-amber-500", "text-slate-400", "text-amber-700"];
+                  const rankBg = ["bg-amber-500/15", "bg-slate-400/15", "bg-amber-700/15"];
+                  const rankStyle = index < 3 ? rankColors[index] : "text-gray-400 dark:text-gray-500";
+                  const rankBgStyle = index < 3 ? rankBg[index] : "bg-gray-100 dark:bg-gray-800";
+                  return (
+                    <div key={genre.genre} className="group rounded-xl border border-white/70 bg-white/60 p-3 shadow-sm backdrop-blur transition-colors hover:bg-white/80 dark:border-white/10 dark:bg-white/[0.04] dark:hover:bg-white/[0.07]">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold ${rankStyle} ${rankBgStyle}`}>
+                            {index + 1}
+                          </span>
+                          <span className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                            {genre.genre}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 ml-2 shrink-0">
+                          <span className="text-sm font-semibold text-gray-900 dark:text-white tabular-nums">
+                            {genre.count.toLocaleString(locale)}
+                          </span>
+                          <span className="text-xs text-gray-500 dark:text-gray-400 w-10 text-right tabular-nums">
+                            {genre.percentage.toFixed(1)}%
+                          </span>
+                        </div>
+                      </div>
+                      <div className="ml-10 h-1.5 overflow-hidden rounded-full bg-gray-100/90 dark:bg-white/10">
+                        <div
+                          className="h-full rounded-full bg-gradient-to-r from-indigo-400 via-rose-400 to-amber-300 transition-all duration-500 ease-out"
+                          style={{ width: `${widthPercent}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+          </div>
+        )}
+
 
         <div className="sm:col-span-2 lg:col-span-2 min-h-[280px] flex w-full min-w-0">
           <AiInsightsSummaryWidget />
@@ -983,6 +998,18 @@ function OverviewContent() {
       {/* Calendrier heatmap (aperçu — page complète : /dashboard/heatmap) */}
       <HeatmapCalendarOverviewWidget startDate={startDate} endDate={endDate} />
       </div>
+
+      <ArtistUserInsightsPanel
+        open={artistInsightsTarget != null}
+        artistId={artistInsightsTarget?.artist.artistId ?? null}
+        previewArtist={artistInsightsTarget?.artist ?? null}
+        startDate={startDate}
+        endDate={endDate}
+        userId={userId}
+        locale={locale}
+        colorIndex={artistInsightsTarget?.avatarColorIndex ?? 0}
+        onClose={() => setArtistInsightsTarget(null)}
+      />
     </div>
   );
 }

@@ -18,7 +18,10 @@ export function getArtistImageUrl(artist: ArtistStatsDto, size: number, colorInd
   return getAvatarUrl(artist.artistName, size, colorIndex);
 }
 
-type TopThreeArtistsT = (k: string) => string;
+type TopThreeArtistsT = (
+  key: string,
+  values?: Record<string, string | number>
+) => string;
 
 /**
  * Top 3 – grandes cartes hero style Apple Music Replay
@@ -29,11 +32,13 @@ export const TopThreeArtists = memo(
     maxListens,
     t,
     locale,
+    onArtistSelect,
   }: {
     artists: ArtistStatsDto[];
     maxListens: number;
     t: TopThreeArtistsT;
     locale: string;
+    onArtistSelect?: (artist: ArtistStatsDto, avatarColorIndex: number) => void;
   }) => {
     const gradientByRank = [
       "from-violet-500 via-cyan-400 to-lime-300",
@@ -41,18 +46,21 @@ export const TopThreeArtists = memo(
       "from-cyan-400 via-teal-400 to-orange-300",
     ];
 
+    const cardShell =
+      `group relative overflow-hidden rounded-3xl bg-gray-900
+              shadow-xl shadow-cyan-950/10 hover:shadow-2xl hover:shadow-violet-950/20 transition-all duration-300 hover:-translate-y-1
+              opacity-0 animate-fade-in-up ring-1 ring-white/10`;
+
+    const interactiveExtras = onArtistSelect
+      ? "w-full cursor-pointer text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[rgb(var(--background-rgb))] dark:focus-visible:ring-offset-slate-950"
+      : "";
+
     return (
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
         {artists.slice(0, 3).map((artist, index) => {
           const progress = maxListens > 0 ? (artist.listenCount / maxListens) * 100 : 0;
-          return (
-            <div
-              key={artist.artistId}
-              className="group relative overflow-hidden rounded-3xl bg-gray-900
-              shadow-xl shadow-cyan-950/10 hover:shadow-2xl hover:shadow-violet-950/20 transition-all duration-300 hover:-translate-y-1
-              opacity-0 animate-fade-in-up ring-1 ring-white/10"
-              style={{ animationDelay: `${index * 80}ms` }}
-            >
+          const body = (
+            <>
               <div className="absolute inset-0">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -98,6 +106,29 @@ export const TopThreeArtists = memo(
                   </div>
                 </div>
               </div>
+            </>
+          );
+
+          const styleDelay = { animationDelay: `${index * 80}ms` };
+
+          if (onArtistSelect) {
+            return (
+              <button
+                key={artist.artistId}
+                type="button"
+                className={`${cardShell} ${interactiveExtras}`}
+                style={styleDelay}
+                onClick={() => onArtistSelect(artist, index)}
+                aria-label={t("artistInsightsAriaOpen", { name: artist.artistName })}
+              >
+                {body}
+              </button>
+            );
+          }
+
+          return (
+            <div key={artist.artistId} className={cardShell} style={styleDelay}>
+              {body}
             </div>
           );
         })}

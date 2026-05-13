@@ -17,6 +17,10 @@ vi.mock("@/lib/services/ai/groq-user-quota", () => ({
   assertGroqUserQuotaForRequest: vi.fn(),
 }));
 
+vi.mock("@/lib/services/listening/groq-import-genre-backfill-ai-guard", () => ({
+  assertInteractiveGroqNotBlockedByImportGenreBackfill: vi.fn().mockResolvedValue(undefined),
+}));
+
 vi.mock("@/lib/services/ai/ai-master", () => ({
   AI_MASTER_DISABLED_COOKIE: "ai-master-disabled",
   isAiMasterEnvEnabled: vi.fn(() => true),

@@ -4,6 +4,7 @@ import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 import { useLocale } from "next-intl";
 import { apiClient, type ParsedRateLimitHeaders } from "@/lib/api-client";
 import { getAiInsightsLabels } from "@/lib/constants/ai-insights-labels";
+import { useInteractiveAiBlockedByGenreBackfill } from "@/lib/hooks/use-interactive-ai-blocked-by-genre-backfill";
 import type {
   TasteProfileInput,
   TasteProfileResponse,
@@ -227,13 +228,15 @@ export function useTasteProfile(
 ) {
   const locale = useLocale();
   const hasValidRange = !!startDate && !!endDate;
-  const { userId, ...queryOptions } = options ?? {};
+  const blockedByGenreBackfill = useInteractiveAiBlockedByGenreBackfill();
+  const { userId, enabled: enabledOption, ...queryOptions } = options ?? {};
 
   return useQuery<TasteProfileUiResponse, Error>({
     queryKey: tasteProfileKeys.list({ startDate, endDate, tone, locale, userId }),
     queryFn: () => fetchTasteProfile(startDate!, endDate!, tone, locale, userId),
-    enabled: hasValidRange,
     staleTime: TASTE_PROFILE_STALE_TIME,
     ...queryOptions,
+    enabled:
+      (enabledOption ?? true) && hasValidRange && !blockedByGenreBackfill,
   });
 }

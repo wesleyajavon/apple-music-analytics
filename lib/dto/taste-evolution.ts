@@ -88,4 +88,6 @@ export interface TasteEvolutionResponse {
   skippedWeeks: Array<{ weekStart: string; reason: string }>;
   /** True when AI commentary is disabled (AI_MASTER_ENABLED / cookie). */
   aiUnavailable?: boolean;
+  /** True when Groq genre classification is actively running — commentary skipped to reserve capacity. */
+  interactiveAiPausedForGenreClassification?: boolean;
 }

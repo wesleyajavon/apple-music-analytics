@@ -33,6 +33,7 @@ import {
   getArtistImageUrl,
   TopThreeArtists,
 } from "@/lib/components/top-three-artists-cards";
+import { ArtistUserInsightsPanel } from "@/lib/components/artist-user-insights-panel";
 import { Mic2 } from "lucide-react";
 
 /**
@@ -222,11 +223,13 @@ const ArtistCard = memo(({
   rank,
   t,
   locale,
+  onOpenInsights,
 }: {
   artist: ArtistStatsDto;
   rank: number;
   t: (k: string, v?: Record<string, string | number>) => string;
   locale: string;
+  onOpenInsights?: (artist: ArtistStatsDto, avatarColorIndex: number) => void;
 }) => {
   const isTop3 = rank <= 3;
   const rankStyles = ["from-amber-400 to-amber-600", "from-slate-300 to-slate-500", "from-amber-700 to-amber-800"];
@@ -238,13 +241,40 @@ const ArtistCard = memo(({
     day: "numeric",
   });
 
-  return (
-    <div
-      className="group relative min-h-[168px] overflow-hidden rounded-3xl border border-cyan-300/15
+  const cardClass =
+    `group relative min-h-[168px] overflow-hidden rounded-3xl border border-cyan-300/15
         bg-[radial-gradient(circle_at_15%_15%,_rgba(139,92,246,0.16),_transparent_34%),radial-gradient(circle_at_88%_78%,_rgba(132,204,22,0.12),_transparent_32%),linear-gradient(135deg,_rgb(var(--card-rgb)/0.98),_rgb(var(--card-rgb)/0.86))]
         shadow-lg shadow-violet-950/5 transition-all duration-300 hover:-translate-y-1 hover:border-cyan-300/30 hover:shadow-xl hover:shadow-cyan-950/10
-        dark:border-cyan-300/12 dark:bg-[radial-gradient(circle_at_15%_15%,_rgba(139,92,246,0.24),_transparent_34%),radial-gradient(circle_at_88%_78%,_rgba(6,182,212,0.18),_transparent_32%),linear-gradient(135deg,_rgb(var(--card-rgb)/0.96),_rgb(var(--card-rgb)/0.82))]"
-    >
+        dark:border-cyan-300/12 dark:bg-[radial-gradient(circle_at_15%_15%,_rgba(139,92,246,0.24),_transparent_34%),radial-gradient(circle_at_88%_78%,_rgba(6,182,212,0.18),_transparent_32%),linear-gradient(135deg,_rgb(var(--card-rgb)/0.96),_rgb(var(--card-rgb)/0.82))]`;
+
+  const interactiveRing =
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[rgb(var(--background-rgb))] dark:focus-visible:ring-offset-slate-950";
+
+  const interactiveExtras = onOpenInsights
+    ? `w-full cursor-pointer text-left ${interactiveRing}`
+    : "";
+
+  const statsRow = (
+    <div className="grid grid-cols-2 gap-2">
+      <div className="rounded-2xl border border-violet-300/15 bg-white/45 px-3 py-2 shadow-inner dark:border-violet-200/10 dark:bg-slate-950/20">
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+          {t("listens")} / {t("tracks").toLowerCase()}
+        </p>
+        <p className="mt-0.5 text-lg font-black tabular-nums text-violet-700 dark:text-violet-100">
+          {listensPerTrack.toLocaleString(locale, { maximumFractionDigits: 1 })}x
+        </p>
+      </div>
+      <div className="rounded-2xl border border-cyan-300/15 bg-white/45 px-3 py-2 shadow-inner dark:border-cyan-200/10 dark:bg-slate-950/20">
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{t("last")}</p>
+        <p className="mt-0.5 truncate text-lg font-black tabular-nums text-cyan-700 dark:text-cyan-100">
+          {lastListen}
+        </p>
+      </div>
+    </div>
+  );
+
+  const body = (
+    <>
       <div className="pointer-events-none absolute -right-12 -top-14 h-32 w-32 rounded-full bg-cyan-400/10 blur-2xl transition-opacity group-hover:opacity-100 dark:bg-cyan-300/15" />
       <div className="pointer-events-none absolute bottom-0 left-0 h-full w-1 bg-gradient-to-b from-violet-400 via-cyan-300 to-lime-300 opacity-70" />
       <div className="relative flex h-full flex-col justify-between gap-4 p-5">
@@ -294,27 +324,25 @@ const ArtistCard = memo(({
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-2">
-          <div className="rounded-2xl border border-violet-300/15 bg-white/45 px-3 py-2 shadow-inner dark:border-violet-200/10 dark:bg-slate-950/20">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-              {t("listens")} / {t("tracks").toLowerCase()}
-            </p>
-            <p className="mt-0.5 text-lg font-black tabular-nums text-violet-700 dark:text-violet-100">
-              {listensPerTrack.toLocaleString(locale, { maximumFractionDigits: 1 })}x
-            </p>
-          </div>
-          <div className="rounded-2xl border border-cyan-300/15 bg-white/45 px-3 py-2 shadow-inner dark:border-cyan-200/10 dark:bg-slate-950/20">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-              {t("last")}
-            </p>
-            <p className="mt-0.5 truncate text-lg font-black tabular-nums text-cyan-700 dark:text-cyan-100">
-              {lastListen}
-            </p>
-          </div>
-        </div>
+        {statsRow}
       </div>
-    </div>
+    </>
   );
+
+  if (onOpenInsights) {
+    return (
+      <button
+        type="button"
+        className={`${cardClass} ${interactiveExtras}`}
+        onClick={() => onOpenInsights(artist, rank - 1)}
+        aria-label={t("artistInsightsAriaOpen", { name: artist.artistName })}
+      >
+        {body}
+      </button>
+    );
+  }
+
+  return <div className={cardClass}>{body}</div>;
 });
 
 ArtistCard.displayName = "ArtistCard";
@@ -328,10 +356,12 @@ const AllArtistsGrid = memo(({
   topArtists,
   t,
   locale,
+  onOpenArtistInsights,
 }: {
   topArtists: ArtistStatsDto[];
   t: (k: string, v?: Record<string, string | number>) => string;
   locale: string;
+  onOpenArtistInsights: (artist: ArtistStatsDto, avatarColorIndex: number) => void;
 }) => {
   const [expanded, setExpanded] = useState(false);
   const visibleArtists = topArtists.slice(0, VISIBLE_ARTISTS_COUNT);
@@ -341,7 +371,14 @@ const AllArtistsGrid = memo(({
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {visibleArtists.map((artist, index) => (
-        <ArtistCard key={artist.artistId} artist={artist} rank={index + 1} t={t} locale={locale} />
+        <ArtistCard
+          key={artist.artistId}
+          artist={artist}
+          rank={index + 1}
+          t={t}
+          locale={locale}
+          onOpenInsights={onOpenArtistInsights}
+        />
       ))}
       {hasMore && (
         <div
@@ -367,6 +404,7 @@ const AllArtistsGrid = memo(({
           rank={VISIBLE_ARTISTS_COUNT + index + 1}
           t={t}
           locale={locale}
+          onOpenInsights={onOpenArtistInsights}
         />
       ))}
     </div>
@@ -617,6 +655,15 @@ function ArtistsContent() {
     ? Number.parseInt(searchParams.get("pageSize") ?? String(DEFAULT_PAGE_SIZE), 10)
     : DEFAULT_PAGE_SIZE;
   const offset = (page - 1) * pageSize;
+
+  const [artistInsightsTarget, setArtistInsightsTarget] = useState<{
+    artist: ArtistStatsDto;
+    avatarColorIndex: number;
+  } | null>(null);
+
+  const handleOpenArtistInsights = useCallback((artist: ArtistStatsDto, avatarColorIndex: number) => {
+    setArtistInsightsTarget({ artist, avatarColorIndex });
+  }, []);
 
   const updatePaginationParams = useCallback(
     (nextPage: number, nextPageSize: number) => {
@@ -907,7 +954,12 @@ function ArtistsContent() {
         {isTopLoading ? (
           <ArtistsGridSkeleton />
         ) : (
-          <AllArtistsGrid topArtists={topArtists} t={t} locale={locale} />
+          <AllArtistsGrid
+            topArtists={topArtists}
+            t={t}
+            locale={locale}
+            onOpenArtistInsights={handleOpenArtistInsights}
+          />
         )}
       </section>
 
@@ -925,6 +977,18 @@ function ArtistsContent() {
         onPageSizeChange={(nextPageSize) => updatePaginationParams(1, nextPageSize)}
         t={t}
         locale={locale}
+      />
+
+      <ArtistUserInsightsPanel
+        open={artistInsightsTarget != null}
+        artistId={artistInsightsTarget?.artist.artistId ?? null}
+        previewArtist={artistInsightsTarget?.artist ?? null}
+        startDate={startDate}
+        endDate={endDate}
+        userId={userId}
+        locale={locale}
+        colorIndex={artistInsightsTarget?.avatarColorIndex ?? 0}
+        onClose={() => setArtistInsightsTarget(null)}
       />
     </div>
   );

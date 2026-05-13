@@ -4,8 +4,11 @@ import { useTranslations } from "next-intl";
 import { useTasteProfile } from "@/lib/hooks/use-taste-profile";
 import { AiWidgetQuotaOrError } from "@/lib/components/error-state";
 import { AiFeatureDisabledPlaceholder } from "@/lib/components/ai-feature-disabled-placeholder";
+import { InteractiveAiGenreBackfillNotice } from "@/lib/components/interactive-ai-genre-backfill-notice";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
 import { useDashboardViewerUserId } from "@/lib/context/dashboard-viewer-context";
+import { useInteractiveAiBlockedByGenreBackfill } from "@/lib/hooks/use-interactive-ai-blocked-by-genre-backfill";
+import { isGroqGenreClassificationBlockingError } from "@/lib/utils/groq-quota-message";
 
 /**
  * Overview feature widget showing the AI-generated taste profile.
@@ -20,6 +23,21 @@ export function TasteProfileSummaryWidget() {
     userId: viewerUserId,
   });
   const isLoadingOrFetching = isRangeLoading || isLoading;
+  const interactiveAiBlockedByGenreBackfill = useInteractiveAiBlockedByGenreBackfill();
+
+  if (interactiveAiBlockedByGenreBackfill && !isRangeLoading) {
+    return (
+      <section className="relative min-h-[280px] w-full overflow-hidden rounded-2xl border border-accent-violet/25 bg-card-surface shadow-2xl ring-1 ring-accent-violet/10 dark:border-accent-violet/30 dark:ring-accent-violet/20">
+        <div className="relative border-b border-gray-100/80 px-6 py-5 dark:border-gray-700/50">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{t("title")}</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{t("subtitleShort")}</p>
+        </div>
+        <div className="relative p-6">
+          <InteractiveAiGenreBackfillNotice />
+        </div>
+      </section>
+    );
+  }
 
   if (isLoadingOrFetching) {
     return (
@@ -63,6 +81,19 @@ export function TasteProfileSummaryWidget() {
   }
 
   if (error) {
+    if (isGroqGenreClassificationBlockingError(error)) {
+      return (
+        <section className="relative min-h-[280px] w-full overflow-hidden rounded-2xl border border-accent-violet/25 bg-card-surface shadow-2xl ring-1 ring-accent-violet/10 dark:border-accent-violet/30 dark:ring-accent-violet/20">
+          <div className="relative border-b border-gray-100/80 px-6 py-5 dark:border-gray-700/50">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{t("title")}</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{t("subtitleShort")}</p>
+          </div>
+          <div className="relative p-6">
+            <InteractiveAiGenreBackfillNotice force />
+          </div>
+        </section>
+      );
+    }
     return (
       <AiWidgetQuotaOrError
         title={t("title")}

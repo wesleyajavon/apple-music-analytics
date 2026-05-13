@@ -8,11 +8,13 @@ import {
 } from "@tanstack/react-query";
 import { useLocale } from "next-intl";
 import { apiClient } from "@/lib/api-client";
+import { useInteractiveAiBlockedByGenreBackfill } from "@/lib/hooks/use-interactive-ai-blocked-by-genre-backfill";
 import {
   ArtistsResponseDto,
   ArtistSearchResponse,
   ArtistTrendsChartResponse,
   ArtistTrendsResponseDto,
+  type ArtistUserInsightsDto,
 } from "@/lib/dto/artist";
 import type { ArtistTrendsCommentaryApiResponse } from "@/lib/dto/artist-trends-ai";
 import { CACHE_STALE_TIME } from "@/lib/constants/config";
@@ -50,6 +52,12 @@ export const artistKeys = {
     mode?: "technical" | "light" | "both";
   }) => [...artistKeys.all, "artistTrendsCommentary", params] as const,
   search: (q: string) => [...artistKeys.all, "search", q] as const,
+  insights: (params: {
+    artistId: string;
+    startDate?: string;
+    endDate?: string;
+    userId?: string;
+  }) => [...artistKeys.all, "insights", params] as const,
 };
 
 /**
@@ -74,6 +82,53 @@ export async function fetchArtistStats(
   const endpoint = `/artists${queryString ? `?${queryString}` : ""}`;
   
   return apiClient.get<ArtistsResponseDto>(endpoint);
+}
+
+/**
+ * Agrégés « votre relation avec cet artiste » (titres les plus joués, rythmes, sources).
+ */
+export async function fetchArtistUserInsights(
+  artistId: string,
+  startDate?: string,
+  endDate?: string,
+  userId?: string
+): Promise<ArtistUserInsightsDto> {
+  const searchParams = new URLSearchParams();
+  if (startDate) searchParams.append("startDate", startDate);
+  if (endDate) searchParams.append("endDate", endDate);
+  if (userId) searchParams.append("userId", userId);
+  const qs = searchParams.toString();
+  const path = `/artists/${encodeURIComponent(artistId)}/insights${qs ? `?${qs}` : ""}`;
+  return apiClient.get<ArtistUserInsightsDto>(path);
+}
+
+export function useArtistUserInsights(
+  artistId: string | null,
+  startDate?: string,
+  endDate?: string,
+  userId?: string,
+  options?: Omit<
+    UseQueryOptions<ArtistUserInsightsDto, Error>,
+    "queryKey" | "queryFn" | "staleTime"
+  >
+) {
+  const id = artistId ?? "";
+  const { enabled: enabledOverride, ...queryOptions } = options ?? {};
+
+  const queryKey = artistKeys.insights({
+    artistId: id,
+    startDate,
+    endDate,
+    userId,
+  });
+
+  return useQuery<ArtistUserInsightsDto, Error>({
+    queryKey,
+    queryFn: () => fetchArtistUserInsights(id, startDate, endDate, userId),
+    staleTime: CACHE_STALE_TIME.OVERVIEW,
+    enabled: !!artistId && (enabledOverride ?? true),
+    ...queryOptions,
+  });
 }
 
 /**
@@ -273,6 +328,7 @@ export function useArtistTrendsCommentary(
   const locale = useLocale();
   const sortedIds = [...artistIds].sort();
   const { mode = "both", enabled: enabledOption, ...rest } = options ?? {};
+  const blockedByGenreBackfill = useInteractiveAiBlockedByGenreBackfill();
 
   const queryKey = artistKeys.artistTrendsCommentary({
     startDate,
@@ -299,7 +355,10 @@ export function useArtistTrendsCommentary(
     staleTime: CACHE_STALE_TIME.ARTIST_TRENDS_AI,
     ...rest,
     placeholderData: keepPreviousData,
-    enabled: (enabledOption ?? true) && sortedIds.length > 0,
+    enabled:
+      (enabledOption ?? true) &&
+      sortedIds.length > 0 &&
+      !blockedByGenreBackfill,
   });
 }
 

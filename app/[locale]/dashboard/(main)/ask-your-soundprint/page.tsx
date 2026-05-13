@@ -1,17 +1,22 @@
 "use client";
 
-import { Suspense, useMemo, useState, type FormEvent } from "react";
+import { Suspense, useEffect, useMemo, useState, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Bot, ChevronDown, Send, Sparkles, UserRound } from "lucide-react";
 import { ApiError } from "@/lib/api-client";
+import { AssistantChatMessageBody } from "@/lib/components/assistant-chat-message-body";
+import { InteractiveAiGenreBackfillNotice } from "@/lib/components/interactive-ai-genre-backfill-notice";
 import { useMusicChat } from "@/lib/hooks/use-music-chat";
+import { useArtistStats } from "@/lib/hooks/use-artists";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
 import { usePublicDemoViewer } from "@/lib/hooks/use-public-demo-viewer";
 import type {
   MusicChatMessage,
   MusicChatPresetQuestionId,
 } from "@/lib/dto/music-chat";
+import { isGroqGenreClassificationBlockingError } from "@/lib/utils/groq-quota-message";
+import { useInteractiveAiBlockedByGenreBackfill } from "@/lib/hooks/use-interactive-ai-blocked-by-genre-backfill";
 
 type QuickQuestionId =
   | "top-tracks"
@@ -35,6 +40,7 @@ const QUICK_QUESTION_SECTIONS: Array<{
   {
     titleKey: "core",
     examples: [
+      { id: "artist-deep-dive", presetQuestionId: "artist-deep-dive" },
       { id: "top-tracks", presetQuestionId: "summer-2022-top-tracks" },
       { id: "top-artists" },
       { id: "genre-breakdown" },
@@ -47,7 +53,6 @@ const QUICK_QUESTION_SECTIONS: Array<{
   {
     titleKey: "maestroUpgrade",
     examples: [
-      { id: "artist-deep-dive", presetQuestionId: "artist-deep-dive" },
       { id: "taste-shift", presetQuestionId: "taste-shift-2020-2024" },
       { id: "track-obsessions", presetQuestionId: "track-obsessions-2022" },
     ],
@@ -64,6 +69,9 @@ function MusicChatFallback() {
 }
 
 function formatError(error: unknown, fallback: string): string {
+  if (error instanceof ApiError && isGroqGenreClassificationBlockingError(error)) {
+    return "";
+  }
   if (error instanceof ApiError) return error.message;
   if (error instanceof Error) return error.message;
   return fallback;
@@ -76,15 +84,67 @@ function MusicChatContent() {
   const userId = searchParams.get("userId") ?? undefined;
   const isPublicDemoViewer = usePublicDemoViewer(userId);
   const musicChat = useMusicChat();
+  const interactiveAiBlockedByGenreBackfill = useInteractiveAiBlockedByGenreBackfill();
   const {
     startDate,
     endDate,
     isAll,
     isLoading: isDateRangeLoading,
   } = useListenDateRange();
+  const topArtistStats = useArtistStats(
+    startDate,
+    endDate,
+    userId,
+    1,
+    0,
+    {
+      enabled:
+        !isPublicDemoViewer && Boolean(startDate && endDate && !isDateRangeLoading),
+    }
+  );
+  const topArtistName = useMemo(() => {
+    if (isPublicDemoViewer) return null;
+    const name = topArtistStats.data?.topArtists?.[0]?.artistName?.trim();
+    return name || null;
+  }, [isPublicDemoViewer, topArtistStats.data]);
+
+  const personalizedPlaceholder = useMemo(() => {
+    if (!topArtistName) return null;
+    return t("inputPlaceholderWithArtist", { artist: topArtistName });
+  }, [topArtistName, t]);
   const [messages, setMessages] = useState<MusicChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [genreClassify423Notice, setGenreClassify423Notice] = useState(false);
+  const [thinkingStepIndex, setThinkingStepIndex] = useState(0);
+
+  useEffect(() => {
+    if (!interactiveAiBlockedByGenreBackfill) {
+      setGenreClassify423Notice(false);
+    }
+  }, [interactiveAiBlockedByGenreBackfill]);
+
+  const thinkingSteps = useMemo(
+    () => [
+      t("thinkingStep0"),
+      t("thinkingStep1"),
+      t("thinkingStep2"),
+      t("thinkingStep3"),
+    ],
+    [t]
+  );
+
+  useEffect(() => {
+    if (!musicChat.isPending) {
+      setThinkingStepIndex(0);
+      return;
+    }
+    setThinkingStepIndex(0);
+    const intervalId = window.setInterval(() => {
+      setThinkingStepIndex((prev) => (prev + 1) % thinkingSteps.length);
+    }, 4200);
+    return () => window.clearInterval(intervalId);
+  }, [musicChat.isPending, thinkingSteps.length]);
 
   const visibleMessages = useMemo(
     () =>
@@ -107,6 +167,7 @@ function MusicChatContent() {
   ) {
     const trimmed = content.trim();
     if (!trimmed && !presetQuestionId) return;
+    if (interactiveAiBlockedByGenreBackfill) return;
     setErrorMessage(null);
 
     const nextMessages: MusicChatMessage[] = [
@@ -148,6 +209,13 @@ function MusicChatContent() {
         { role: "assistant", content: response.answer },
       ]);
     } catch (error) {
+      if (error instanceof ApiError && isGroqGenreClassificationBlockingError(error)) {
+        setErrorMessage(null);
+        setGenreClassify423Notice(true);
+        setMessages(messages);
+        setInput(trimmed);
+        return;
+      }
       setErrorMessage(formatError(error, t("genericError")));
       setMessages(messages);
       setInput(trimmed);
@@ -155,11 +223,21 @@ function MusicChatContent() {
   }
 
   function handlePresetClick(presetQuestionId: MusicChatPresetQuestionId) {
+    if (presetQuestionId === "artist-deep-dive") {
+      sendMessage(
+        topArtistName
+          ? t("artistDeepDiveQuestion", { artist: topArtistName })
+          : t("presets.artist-deep-dive"),
+        presetQuestionId
+      );
+      return;
+    }
     sendMessage(t(`presets.${presetQuestionId}`), presetQuestionId);
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (interactiveAiBlockedByGenreBackfill) return;
     if (isPublicDemoViewer) {
       setErrorMessage(t("publicDemoFreeTextBlocked"));
       return;
@@ -195,6 +273,14 @@ function MusicChatContent() {
       </section>
 
       <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
+        {!isPublicDemoViewer &&
+        (interactiveAiBlockedByGenreBackfill || genreClassify423Notice) ? (
+          <div className="lg:col-span-2">
+            <InteractiveAiGenreBackfillNotice
+              force={genreClassify423Notice && !interactiveAiBlockedByGenreBackfill}
+            />
+          </div>
+        ) : null}
         <div className="rounded-2xl border border-card-border bg-card-surface shadow-card">
           <div className="max-h-[560px] min-h-[420px] space-y-4 overflow-y-auto p-4 sm:p-6">
             {visibleMessages.map((message, index) => {
@@ -210,13 +296,17 @@ function MusicChatContent() {
                     </div>
                   ) : null}
                   <div
-                    className={`max-w-[85%] whitespace-pre-wrap rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+                    className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
                       isAssistant
                         ? "border border-violet-200/30 bg-white/70 text-foreground dark:bg-slate-950/35"
-                        : "bg-violet-600 text-white shadow-sm shadow-violet-950/20"
+                        : "whitespace-pre-wrap bg-violet-600 text-white shadow-sm shadow-violet-950/20"
                     }`}
                   >
-                    {message.content}
+                    {isAssistant ? (
+                      <AssistantChatMessageBody content={message.content} />
+                    ) : (
+                      message.content
+                    )}
                   </div>
                   {!isAssistant ? (
                     <div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-violet-600 text-white">
@@ -229,10 +319,25 @@ function MusicChatContent() {
             {musicChat.isPending ? (
               <div className="flex gap-3">
                 <div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-violet-500/15 text-violet-700 dark:text-violet-200">
-                  <Bot className="h-5 w-5" aria-hidden />
+                  <Bot className="h-5 w-5 animate-pulse" aria-hidden />
                 </div>
-                <div className="rounded-2xl border border-violet-200/30 bg-white/70 px-4 py-3 text-sm text-muted-foreground dark:bg-slate-950/35">
-                  {t("thinking")}
+                <div
+                  className="max-w-[min(100%,28rem)] space-y-2 rounded-2xl border border-violet-200/30 bg-white/70 px-4 py-3 text-sm dark:bg-slate-950/35"
+                  aria-live="polite"
+                  aria-busy="true"
+                >
+                  <p className="font-medium leading-snug text-foreground transition-all duration-300">
+                    {thinkingSteps[thinkingStepIndex % thinkingSteps.length]}
+                  </p>
+                  <p className="text-xs leading-relaxed text-muted-foreground">
+                    {t("thinkingPatience")}
+                  </p>
+                  <div
+                    className="relative h-1 overflow-hidden rounded-full bg-violet-200/40 dark:bg-violet-500/20"
+                    aria-hidden
+                  >
+                    <div className="absolute inset-y-0 w-2/5 rounded-full bg-gradient-to-r from-violet-500/70 to-cyan-500/60 motion-safe:animate-onboarding-import-indeterminate dark:from-violet-400/80 dark:to-cyan-400/70" />
+                  </div>
                 </div>
               </div>
             ) : null}
@@ -252,18 +357,23 @@ function MusicChatContent() {
                 id="ask-soundprint-input"
                 value={input}
                 onChange={(event) => setInput(event.target.value)}
-                disabled={musicChat.isPending || isPublicDemoViewer}
+                disabled={musicChat.isPending || isPublicDemoViewer || interactiveAiBlockedByGenreBackfill}
                 placeholder={
                   isPublicDemoViewer
                     ? t("publicDemoPlaceholder")
-                    : t("inputPlaceholder")
+                    : (personalizedPlaceholder ?? t("inputPlaceholder"))
                 }
                 rows={2}
                 className="min-h-[52px] flex-1 resize-none rounded-2xl border border-card-border bg-background px-4 py-3 text-sm shadow-inner outline-none transition focus:border-violet-400 focus:ring-2 focus:ring-violet-400/20 disabled:cursor-not-allowed disabled:opacity-60"
               />
               <button
                 type="submit"
-                disabled={musicChat.isPending || isPublicDemoViewer || !input.trim()}
+                disabled={
+                  musicChat.isPending ||
+                  isPublicDemoViewer ||
+                  interactiveAiBlockedByGenreBackfill ||
+                  !input.trim()
+                }
                 className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-violet-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-violet-950/20 transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <Send className="h-4 w-4" aria-hidden />
@@ -308,7 +418,8 @@ function MusicChatContent() {
                           disabled={
                             musicChat.isPending ||
                             isDateRangeLoading ||
-                            isDemoBlocked
+                            isDemoBlocked ||
+                            interactiveAiBlockedByGenreBackfill
                           }
                           onClick={() =>
                             example.presetQuestionId
@@ -317,11 +428,29 @@ function MusicChatContent() {
                           }
                           className="w-full rounded-xl border border-card-border bg-background/80 px-4 py-3 text-left transition hover:border-violet-300 hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-60 dark:hover:bg-violet-950/25"
                         >
-                          <span className="block text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-violet-700 dark:text-violet-200">
-                            {t(`examples.${example.id}.label`)}
+                          <span
+                            className={
+                              example.id === "artist-deep-dive"
+                                ? "block text-[0.68rem] font-semibold tracking-[0.14em] text-violet-700 dark:text-violet-200"
+                                : "block text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-violet-700 dark:text-violet-200"
+                            }
+                          >
+                            {example.id === "artist-deep-dive"
+                              ? t.rich("examples.artist-deep-dive.labelRich", {
+                                  em: (chunks) => (
+                                    <em className="font-semibold italic text-violet-800 dark:text-violet-100">
+                                      {chunks}
+                                    </em>
+                                  ),
+                                })
+                              : t(`examples.${example.id}.label`)}
                           </span>
                           <span className="mt-1 block text-sm font-medium leading-snug text-foreground">
-                            {t(`examples.${example.id}.question`)}
+                            {example.id === "artist-deep-dive"
+                              ? topArtistName
+                                ? t("artistDeepDiveQuestion", { artist: topArtistName })
+                                : t("examples.artist-deep-dive.question")
+                              : t(`examples.${example.id}.question`)}
                           </span>
                           {isDemoBlocked ? (
                             <span className="mt-2 block text-xs text-muted-foreground">

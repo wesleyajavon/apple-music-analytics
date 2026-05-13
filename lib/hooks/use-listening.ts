@@ -20,6 +20,7 @@ import {
 import type { GenreTrendsCommentaryApiResponse } from "@/lib/dto/genre-trends-ai";
 import { listeningKeys } from "./query-keys";
 import { CACHE_STALE_TIME } from "@/lib/constants/config";
+import { useInteractiveAiBlockedByGenreBackfill } from "@/lib/hooks/use-interactive-ai-blocked-by-genre-backfill";
 
 /**
  * Type pour les statistiques d'overview avec les artistes les plus écoutés
@@ -382,6 +383,7 @@ export function useGenreTrendsCommentary(
   const locale = useLocale();
   const sortedGenres = [...genres].sort();
   const { mode = "both", enabled: enabledOption, ...rest } = options ?? {};
+  const blockedByGenreBackfill = useInteractiveAiBlockedByGenreBackfill();
 
   const queryKey = listeningKeys.genreTrendsCommentary({
     startDate,
@@ -407,7 +409,10 @@ export function useGenreTrendsCommentary(
       ),
     staleTime: CACHE_STALE_TIME.GENRE_TRENDS_AI,
     ...rest,
-    enabled: (enabledOption ?? true) && sortedGenres.length > 0,
+    enabled:
+      (enabledOption ?? true) &&
+      sortedGenres.length > 0 &&
+      !blockedByGenreBackfill,
   });
 }
 

@@ -4,7 +4,10 @@ import { redirect } from "@/i18n/navigation";
 import { getCurrentUserId } from "@/lib/auth/get-current-user-id";
 import { prisma } from "@/lib/prisma";
 import { DataExportOnboarding } from "@/lib/components/data-export-onboarding";
-import { wantsOnboardingImportReentry } from "@/lib/utils/onboarding-route";
+import {
+  wantsGenreAiConsentLanding,
+  wantsOnboardingImportReentry,
+} from "@/lib/utils/onboarding-route";
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -50,6 +53,9 @@ export default async function OnboardingPage({
   });
 
   return (
-    <DataExportOnboarding hasSpotifyWebConnection={Boolean(spotifyConnection)} />
+    <DataExportOnboarding
+      hasSpotifyWebConnection={Boolean(spotifyConnection)}
+      initialGenreAiLanding={wantsGenreAiConsentLanding(searchParams)}
+    />
   );
 }

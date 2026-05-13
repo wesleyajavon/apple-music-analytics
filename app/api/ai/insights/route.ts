@@ -20,6 +20,10 @@ import {
 import { handleApiError } from "@/lib/utils/error-handler";
 import { assertGroqUserQuotaForRequest } from "@/lib/services/ai/groq-user-quota";
 import {
+  assertInteractiveGroqNotBlockedByImportGenreBackfill,
+  resolveUserIdForGroqGenreBackfillGuard,
+} from "@/lib/services/listening/groq-import-genre-backfill-ai-guard";
+import {
   AI_MASTER_DISABLED_COOKIE,
   isAiMasterEnvEnabled,
 } from "@/lib/services/ai/ai-master";
@@ -151,6 +155,11 @@ export async function POST(request: NextRequest) {
         cached: true,
       };
       return NextResponse.json(response);
+    }
+
+    const guardUserId = await resolveUserIdForGroqGenreBackfillGuard(bodyUserId);
+    if (guardUserId) {
+      await assertInteractiveGroqNotBlockedByImportGenreBackfill(guardUserId);
     }
 
     await assertGroqUserQuotaForRequest(request, bodyUserId);

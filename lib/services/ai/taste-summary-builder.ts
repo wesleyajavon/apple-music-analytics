@@ -9,6 +9,7 @@
  */
 
 import type { TasteProfileInput } from "@/lib/dto/taste-profile";
+import { genreDistributionExcludingUnknown } from "@/lib/utils/genre-unknown-label";
 
 /**
  * Normalized taste summary - deterministic structure for hashing and prompts.
@@ -29,8 +30,11 @@ export interface TasteSummary {
  * @returns Normalized taste summary with text and structured representations
  */
 export function buildTasteSummary(input: TasteProfileInput): TasteSummary {
+  // Drop placeholder "Unknown" so LLM and diversity metrics reflect classified taste only
+  const knownGenreDistribution = genreDistributionExcludingUnknown(input.genreDistribution);
+
   // Top genres - sorted by count, top 10, deterministic order
-  const topGenres = [...input.genreDistribution]
+  const topGenres = [...knownGenreDistribution]
     .sort((a, b) => b.count - a.count)
     .slice(0, 10);
 

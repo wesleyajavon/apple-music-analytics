@@ -88,3 +88,41 @@ export interface ArtistTrendsChartResponse {
 export interface ArtistSearchResponse {
   artists: ArtistTrendsChartArtist[];
 }
+
+/** Titre le plus joué avec cet artiste (période filtrée). */
+export interface ArtistUserInsightsTrackDto {
+  trackId: string;
+  title: string;
+  listenCount: number;
+}
+
+export interface ArtistUserInsightsHourBucketDto {
+  hour: number;
+  listens: number;
+}
+
+/** 0 = lundi … 6 = dimanche (aligné analyse temporelle du dashboard). */
+export interface ArtistUserInsightsWeekdayBucketDto {
+  weekdayIndexMondayFirst: number;
+  listens: number;
+}
+
+export interface ArtistUserInsightsSourceBucketDto {
+  source: string;
+  listens: number;
+}
+
+/** Insight « relation » utilisateur × artiste (agrégés). */
+export interface ArtistUserInsightsDto {
+  artist: ArtistStatsDto;
+  topTracks: ArtistUserInsightsTrackDto[];
+  listensByHour: ArtistUserInsightsHourBucketDto[];
+  listensByWeekday: ArtistUserInsightsWeekdayBucketDto[];
+  listensBySource: ArtistUserInsightsSourceBucketDto[];
+  busiestDay: { date: string; listens: number } | null;
+  /** Jours distincts avec au moins une écoute (fenêtre sélectionnée). */
+  activeListeningDays: number;
+  listeningSpanDays: number;
+  peakListenHour: { hour: number; listens: number } | null;
+  peakWeekday: { weekdayIndexMondayFirst: number; listens: number } | null;
+}

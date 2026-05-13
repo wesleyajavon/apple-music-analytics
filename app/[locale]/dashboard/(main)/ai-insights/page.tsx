@@ -7,6 +7,9 @@ import { useAiInsights } from "@/lib/hooks/use-ai-insights";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
+import { InteractiveAiGenreBackfillNotice } from "@/lib/components/interactive-ai-genre-backfill-notice";
+import { useInteractiveAiBlockedByGenreBackfill } from "@/lib/hooks/use-interactive-ai-blocked-by-genre-backfill";
+import { isGroqGenreClassificationBlockingError } from "@/lib/utils/groq-quota-message";
 import type { AiInsightsStyle } from "@/lib/dto/ai-insights";
 
 /** Accent color variants for insight cards - creates visual variety */
@@ -192,6 +195,7 @@ function AiInsightsContent() {
     userId,
   });
   const isLoadingOrFetching = isRangeLoading || isLoading;
+  const interactiveAiBlockedByGenreBackfill = useInteractiveAiBlockedByGenreBackfill();
 
   const dateRangeLabel = formatDateRange(startDate, endDate, locale);
   const badgeLabelBase = dateRangeLabel || tOverview("allData");
@@ -199,6 +203,20 @@ function AiInsightsContent() {
   const handleRetry = useCallback(() => {
     refetch();
   }, [refetch]);
+
+  if (interactiveAiBlockedByGenreBackfill && !isRangeLoading) {
+    return (
+      <div className="mx-auto max-w-4xl space-y-8">
+        <AiInsightsHeroFrame
+          badgeLabel={badgeLabelBase}
+          description={t("yourInsights")}
+          stats={null}
+          aside={<InsightStyleToggle insightStyle={insightStyle} onStyleChange={setInsightStyle} />}
+        />
+        <InteractiveAiGenreBackfillNotice />
+      </div>
+    );
+  }
 
   if (isLoadingOrFetching) {
     return (
@@ -231,6 +249,21 @@ function AiInsightsContent() {
   }
 
   if (error) {
+    if (isGroqGenreClassificationBlockingError(error)) {
+      return (
+        <div className="mx-auto max-w-4xl space-y-8">
+          <AiInsightsHeroFrame
+            badgeLabel={badgeLabelBase}
+            description={t("yourInsights")}
+            stats={null}
+            aside={
+              <InsightStyleToggle insightStyle={insightStyle} onStyleChange={setInsightStyle} />
+            }
+          />
+          <InteractiveAiGenreBackfillNotice force />
+        </div>
+      );
+    }
     return (
       <div className="mx-auto max-w-4xl space-y-8">
         <AiInsightsHeroFrame

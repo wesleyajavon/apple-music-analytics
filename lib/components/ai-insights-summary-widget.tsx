@@ -6,8 +6,11 @@ import { useTranslations } from "next-intl";
 import { useAiInsights } from "@/lib/hooks/use-ai-insights";
 import { AiWidgetQuotaOrError } from "@/lib/components/error-state";
 import { AiFeatureDisabledPlaceholder } from "@/lib/components/ai-feature-disabled-placeholder";
+import { InteractiveAiGenreBackfillNotice } from "@/lib/components/interactive-ai-genre-backfill-notice";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
 import { useDashboardViewerUserId } from "@/lib/context/dashboard-viewer-context";
+import { useInteractiveAiBlockedByGenreBackfill } from "@/lib/hooks/use-interactive-ai-blocked-by-genre-backfill";
+import { isGroqGenreClassificationBlockingError } from "@/lib/utils/groq-quota-message";
 
 /** Number of insights to show in the overview widget */
 const PREVIEW_INSIGHTS_COUNT = 3;
@@ -27,6 +30,7 @@ export function AiInsightsSummaryWidget() {
     userId: viewerUserId,
   });
   const isLoadingOrFetching = isRangeLoading || isLoading;
+  const interactiveAiBlockedByGenreBackfill = useInteractiveAiBlockedByGenreBackfill();
 
   const seeMoreHref = useMemo(() => {
     const p = new URLSearchParams();
@@ -34,6 +38,20 @@ export function AiInsightsSummaryWidget() {
     const qs = p.toString();
     return qs ? `/dashboard/ai-insights?${qs}` : "/dashboard/ai-insights";
   }, [viewerUserId]);
+
+  if (interactiveAiBlockedByGenreBackfill && !isRangeLoading) {
+    return (
+      <div className="relative min-h-[220px] flex flex-col overflow-hidden rounded-2xl border border-accent-violet/25 bg-card-surface shadow-2xl ring-1 ring-accent-violet/10 dark:border-accent-violet/30 dark:ring-accent-violet/20">
+        <div className="relative border-b border-gray-100/80 dark:border-gray-700/50 px-6 py-4">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{t("title")}</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{t("subtitleShort")}</p>
+        </div>
+        <div className="relative p-6">
+          <InteractiveAiGenreBackfillNotice />
+        </div>
+      </div>
+    );
+  }
 
   if (isLoadingOrFetching) {
     return (
@@ -89,6 +107,19 @@ export function AiInsightsSummaryWidget() {
   }
 
   if (error) {
+    if (isGroqGenreClassificationBlockingError(error)) {
+      return (
+        <div className="relative min-h-[220px] flex flex-col overflow-hidden rounded-2xl border border-accent-violet/25 bg-card-surface shadow-2xl ring-1 ring-accent-violet/10 dark:border-accent-violet/30 dark:ring-accent-violet/20">
+          <div className="relative border-b border-gray-100/80 dark:border-gray-700/50 px-6 py-4">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{t("title")}</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{t("subtitleShort")}</p>
+          </div>
+          <div className="relative p-6">
+            <InteractiveAiGenreBackfillNotice force />
+          </div>
+        </div>
+      );
+    }
     return (
       <AiWidgetQuotaOrError
         title={t("title")}

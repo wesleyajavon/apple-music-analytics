@@ -477,3 +477,256 @@ function normalizeTrendDate(
   }
   return d.toISOString().slice(0, 10);
 }
+
+export interface ArtistUserInsights {
+  artist: ArtistStats;
+  topTracks: { trackId: string; title: string; listenCount: number }[];
+  listensByHour: { hour: number; listens: number }[];
+  listensByWeekday: { weekdayIndexMondayFirst: number; listens: number }[];
+  listensBySource: { source: string; listens: number }[];
+  busiestDay: { date: string; listens: number } | null;
+  activeListeningDays: number;
+  listeningSpanDays: number;
+  peakListenHour: { hour: number; listens: number } | null;
+  peakWeekday: { weekdayIndexMondayFirst: number; listens: number } | null;
+}
+
+const dowPgToMondayFirst = (pgDow: number) => (pgDow === 0 ? 6 : pgDow - 1);
+
+/**
+ * Agrégats « votre relation avec cet artiste » : tops morceaux, rythmes, sources,
+ * jour le plus dense. Retourne null si aucune écoute dans la fenêtre ou artiste inconnu.
+ */
+export async function getArtistUserInsights(
+  artistId: string,
+  startDate?: Date,
+  endDate?: Date,
+  userId?: string
+): Promise<ArtistUserInsights | null> {
+  const filters = Prisma.sql`
+    AND t."artistId" = ${artistId}
+    ${startDate ? Prisma.sql`AND l."playedAt" >= ${startDate}` : Prisma.sql``}
+    ${endDate ? Prisma.sql`AND l."playedAt" <= ${endDate}` : Prisma.sql``}
+    ${userId ? Prisma.sql`AND l."userId" = ${userId}` : Prisma.sql``}
+  `;
+
+  const [summaryRows, topTracksRows, hourRows, dowRows, sourceRows, busiestRows, distinctDaysRows] =
+    await Promise.all([
+      prisma.$queryRaw<
+        Array<{
+          artist_id: string;
+          artist_name: string;
+          image_url: string | null;
+          listen_count: bigint;
+          unique_tracks: bigint;
+          first_listen_date: Date;
+          last_listen_date: Date;
+          total_play_time: bigint;
+        }>
+      >(Prisma.sql`
+        SELECT
+          a.id AS artist_id,
+          a.name AS artist_name,
+          a."imageUrl" AS image_url,
+          COUNT(*)::bigint AS listen_count,
+          COUNT(DISTINCT t.id)::bigint AS unique_tracks,
+          MIN(l."playedAt") AS first_listen_date,
+          MAX(l."playedAt") AS last_listen_date,
+          COALESCE(SUM(t.duration), 0)::bigint AS total_play_time
+        FROM "Listen" l
+        JOIN "Track" t ON l."trackId" = t.id
+        JOIN "Artist" a ON t."artistId" = a.id
+        WHERE 1 = 1
+          ${filters}
+        GROUP BY a.id, a.name, a."imageUrl"
+      `),
+      prisma.$queryRaw<
+        Array<{
+          track_id: string;
+          title: string;
+          listen_count: bigint;
+        }>
+      >(Prisma.sql`
+        SELECT t.id AS track_id, t.title, COUNT(*)::bigint AS listen_count
+        FROM "Listen" l
+        JOIN "Track" t ON l."trackId" = t.id
+        WHERE 1 = 1
+          ${filters}
+        GROUP BY t.id, t.title
+        ORDER BY listen_count DESC
+        LIMIT 15
+      `),
+      prisma.$queryRaw<Array<{ hour: number; listens: bigint }>>(Prisma.sql`
+        SELECT
+          EXTRACT(HOUR FROM l."playedAt")::int AS hour,
+          COUNT(*)::bigint AS listens
+        FROM "Listen" l
+        JOIN "Track" t ON l."trackId" = t.id
+        WHERE 1 = 1
+          ${filters}
+        GROUP BY hour
+        ORDER BY hour ASC
+      `),
+      prisma.$queryRaw<Array<{ dow: number; listens: bigint }>>(Prisma.sql`
+        SELECT
+          EXTRACT(DOW FROM l."playedAt")::int AS dow,
+          COUNT(*)::bigint AS listens
+        FROM "Listen" l
+        JOIN "Track" t ON l."trackId" = t.id
+        WHERE 1 = 1
+          ${filters}
+        GROUP BY dow
+      `),
+      prisma.$queryRaw<Array<{ source: string; listens: bigint }>>(Prisma.sql`
+        SELECT l.source, COUNT(*)::bigint AS listens
+        FROM "Listen" l
+        JOIN "Track" t ON l."trackId" = t.id
+        WHERE 1 = 1
+          ${filters}
+        GROUP BY l.source
+        ORDER BY listens DESC
+      `),
+      prisma.$queryRaw<Array<{ date: Date; listens: bigint }>>(Prisma.sql`
+        SELECT
+          DATE(l."playedAt") AS date,
+          COUNT(*)::bigint AS listens
+        FROM "Listen" l
+        JOIN "Track" t ON l."trackId" = t.id
+        WHERE 1 = 1
+          ${filters}
+        GROUP BY DATE(l."playedAt")
+        ORDER BY listens DESC
+        LIMIT 1
+      `),
+      prisma.$queryRaw<Array<{ cnt: bigint }>>(Prisma.sql`
+        SELECT COUNT(DISTINCT DATE(l."playedAt"))::bigint AS cnt
+        FROM "Listen" l
+        JOIN "Track" t ON l."trackId" = t.id
+        WHERE 1 = 1
+          ${filters}
+      `),
+    ]);
+
+  const s = summaryRows[0];
+  if (!s) {
+    return null;
+  }
+
+  const transformed = transformBigIntToNumber({
+    listen_count: s.listen_count,
+    unique_tracks: s.unique_tracks,
+    total_play_time: s.total_play_time,
+  });
+
+  const artist: ArtistStats = {
+    artistId: s.artist_id,
+    artistName: s.artist_name,
+    imageUrl: s.image_url,
+    listenCount: transformed.listen_count,
+    uniqueTracks: transformed.unique_tracks,
+    firstListenDate: s.first_listen_date.toISOString(),
+    lastListenDate: s.last_listen_date.toISOString(),
+    totalPlayTime: transformed.total_play_time,
+  };
+
+  const topTracks = topTracksRows.map((row) => {
+    const bc = transformBigIntToNumber({ c: row.listen_count }).c;
+    return {
+      trackId: row.track_id,
+      title: row.title,
+      listenCount: bc,
+    };
+  });
+
+  const hourMap = new Map<number, number>();
+  for (const row of hourRows) {
+    hourMap.set(
+      row.hour,
+      transformBigIntToNumber({ c: row.listens }).c
+    );
+  }
+  const listensByHour = Array.from({ length: 24 }, (_, hour) => ({
+    hour,
+    listens: hourMap.get(hour) ?? 0,
+  }));
+
+  const mondayCounts = Array.from({ length: 7 }, () => 0);
+  for (const row of dowRows) {
+    const idx = dowPgToMondayFirst(row.dow);
+    mondayCounts[idx] =
+      transformBigIntToNumber({ c: row.listens }).c;
+  }
+  const listensByWeekday = mondayCounts.map((listens, weekdayIndexMondayFirst) => ({
+    weekdayIndexMondayFirst,
+    listens,
+  }));
+
+  const listensBySource = sourceRows.map((row) => ({
+    source: row.source,
+    listens: transformBigIntToNumber({ c: row.listens }).c,
+  }));
+
+  const busiest = busiestRows[0];
+  const busiestDay = busiest
+    ? {
+        date:
+          busiest.date instanceof Date
+            ? busiest.date.toISOString().slice(0, 10)
+            : String(busiest.date).slice(0, 10),
+        listens: transformBigIntToNumber({ c: busiest.listens }).c,
+      }
+    : null;
+
+  const distinctCount = distinctDaysRows[0]?.cnt;
+  const activeListeningDays =
+    typeof distinctCount === "bigint"
+      ? Number(distinctCount)
+      : typeof distinctCount === "number"
+        ? distinctCount
+        : Number(distinctCount ?? 0);
+
+  const first = new Date(artist.firstListenDate);
+  const last = new Date(artist.lastListenDate);
+  const listeningSpanDays =
+    artist.listenCount === 0
+      ? 0
+      : Math.max(
+          1,
+          Math.ceil((last.getTime() - first.getTime()) / 86_400_000) + 1
+        );
+
+  let peakListenHour: { hour: number; listens: number } | null = null;
+  for (const h of listensByHour) {
+    if (
+      !peakListenHour ||
+      h.listens > peakListenHour.listens
+    ) {
+      peakListenHour =
+        h.listens > 0 ? { hour: h.hour, listens: h.listens } : peakListenHour;
+    }
+  }
+
+  let peakWeekday: { weekdayIndexMondayFirst: number; listens: number } | null = null;
+  for (const w of listensByWeekday) {
+    if (
+      !peakWeekday ||
+      w.listens > peakWeekday.listens
+    ) {
+      peakWeekday =
+        w.listens > 0 ? { weekdayIndexMondayFirst: w.weekdayIndexMondayFirst, listens: w.listens } : peakWeekday;
+    }
+  }
+
+  return {
+    artist,
+    topTracks,
+    listensByHour,
+    listensByWeekday,
+    listensBySource,
+    busiestDay,
+    activeListeningDays,
+    listeningSpanDays,
+    peakListenHour,
+    peakWeekday,
+  };
+}

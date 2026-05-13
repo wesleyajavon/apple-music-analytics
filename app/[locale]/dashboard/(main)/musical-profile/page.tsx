@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Suspense, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
@@ -30,8 +31,12 @@ import {
   useTemporalAnalysis,
 } from "@/lib/hooks/use-listening";
 import { useTrackStats } from "@/lib/hooks/use-tracks";
-import { isGroqDailyQuotaError } from "@/lib/utils/groq-quota-message";
+import { isGroqDailyQuotaError, isGroqGenreClassificationBlockingError } from "@/lib/utils/groq-quota-message";
+import { InteractiveAiGenreBackfillNotice } from "@/lib/components/interactive-ai-genre-backfill-notice";
+import { useInteractiveAiBlockedByGenreBackfill } from "@/lib/hooks/use-interactive-ai-blocked-by-genre-backfill";
 import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
+import { firstKnownGenreName } from "@/lib/utils/genre-unknown-label";
+import { getArtistImageUrl, getAvatarUrl } from "@/lib/components/top-three-artists-cards";
 
 const TOP_LIMIT = 6;
 const PROFILE_AI_STALE_TIME = 5 * 60 * 1000;
@@ -72,17 +77,6 @@ function formatDateRange(startDate: string | undefined, endDate: string | undefi
 
 function formatNumber(value: number, locale: string): string {
   return new Intl.NumberFormat(locale).format(value);
-}
-
-function formatCompactNumber(value: number, locale: string): string {
-  return new Intl.NumberFormat(locale, { notation: "compact", maximumFractionDigits: 1 }).format(value);
-}
-
-function formatListeningTime(seconds: number, locale: string, t: ReturnType<typeof useTranslations<"musical-profile">>): string {
-  const hours = Math.round(seconds / 3600);
-  if (hours >= 1) return `${formatCompactNumber(hours, locale)} ${t("units.hours")}`;
-  const minutes = Math.max(1, Math.round(seconds / 60));
-  return `${formatCompactNumber(minutes, locale)} ${t("units.minutes")}`;
 }
 
 function getTopArtistFallback(artists: ArtistStatsDto[], overview?: OverviewStatsWithTopArtists) {
@@ -141,6 +135,7 @@ function usePreparedTasteProfile(params: {
   endDate?: string;
   locale: string;
   userId?: string;
+  interactiveAiBlockedByGenreBackfill?: boolean;
 }) {
   return useQuery<TasteProfileResponse, Error>({
     queryKey: [
@@ -163,77 +158,11 @@ function usePreparedTasteProfile(params: {
         locale: params.locale,
         userId: params.userId,
       }),
-    enabled: !!params.input,
+    enabled:
+      !!params.input && !params.interactiveAiBlockedByGenreBackfill,
     staleTime: PROFILE_AI_STALE_TIME,
     retry: false,
   });
-}
-
-function MetricCard({
-  label,
-  value,
-  hint,
-  accent,
-}: {
-  label: string;
-  value: string;
-  hint: string;
-  accent: string;
-}) {
-  return (
-    <div className="rounded-2xl border border-white/60 bg-white/80 p-5 shadow-xl shadow-gray-900/5 backdrop-blur dark:border-white/10 dark:bg-gray-900/70">
-      <div className={`mb-4 h-1.5 w-14 rounded-full ${accent}`} />
-      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">
-        {label}
-      </p>
-      <p className="mt-2 text-3xl font-bold tracking-tight text-gray-950 dark:text-white">
-        {value}
-      </p>
-      <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{hint}</p>
-    </div>
-  );
-}
-
-function MetricCardSkeleton() {
-  return (
-    <div className="rounded-2xl border border-white/60 bg-white/80 p-5 shadow-xl shadow-gray-900/5 backdrop-blur dark:border-white/10 dark:bg-gray-900/70">
-      <div className="mb-4 h-1.5 w-14 rounded-full bg-gray-200 animate-shimmer dark:bg-gray-700" />
-      <div className="h-3 w-28 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
-      <div className="mt-3 h-9 w-24 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
-      <div className="mt-2 h-4 w-36 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
-    </div>
-  );
-}
-
-function RankedArtistCard({
-  artist,
-  rank,
-  locale,
-  listensLabel,
-}: {
-  artist: ArtistStatsDto;
-  rank: number;
-  locale: string;
-  listensLabel: string;
-}) {
-  return (
-    <div className="group relative overflow-hidden rounded-2xl border border-card-border bg-card-surface p-5 shadow-card transition-all hover:-translate-y-0.5 hover:shadow-card-hover">
-      <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-accent-violet/10 blur-2xl transition-opacity group-hover:opacity-100 dark:bg-accent-violet/20" />
-      <div className="relative flex items-center gap-4">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-accent-violet to-accent-indigo text-lg font-bold text-white shadow-lg shadow-accent-violet/20">
-          {rank}
-        </div>
-        <div className="min-w-0">
-          <h3 className="truncate text-base font-semibold text-gray-950 dark:text-white">
-            {artist.artistName}
-          </h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            {formatNumber(artist.listenCount, locale)} {listensLabel}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 function RankedItemSkeleton() {
@@ -288,62 +217,6 @@ function RankedTrackCard({
   );
 }
 
-function GenreBar({
-  genre,
-  index,
-  locale,
-  listensLabel,
-  ofListensLabel,
-}: {
-  genre: GenreDistributionDto;
-  index: number;
-  locale: string;
-  listensLabel: string;
-  ofListensLabel: string;
-}) {
-  return (
-    <div className="rounded-2xl border border-card-border bg-card-surface p-4 shadow-card">
-      <div className="flex items-center justify-between gap-4">
-        <div className="min-w-0">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">
-            #{index + 1}
-          </p>
-          <h3 className="mt-1 truncate text-base font-semibold text-gray-950 dark:text-white">
-            {genre.genre}
-          </h3>
-        </div>
-        <p className="text-sm font-semibold tabular-nums text-gray-700 dark:text-gray-200">
-          {genre.percentage.toFixed(1)}%
-        </p>
-      </div>
-      <div className="mt-4 h-2 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
-        <div
-          className="h-full rounded-full bg-gradient-to-r from-accent-violet via-accent-indigo to-accent-cyan"
-          style={{ width: `${Math.min(100, Math.max(4, genre.percentage))}%` }}
-        />
-      </div>
-      <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
-        {formatNumber(genre.count, locale)} {listensLabel} {ofListensLabel}
-      </p>
-    </div>
-  );
-}
-
-function GenreBarSkeleton() {
-  return (
-    <div className="rounded-2xl border border-card-border bg-card-surface p-4 shadow-card">
-      <div className="mb-3 flex items-center justify-between gap-4">
-        <div className="h-4 w-40 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
-        <div className="h-4 w-12 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
-      </div>
-      <div className="h-3 rounded-full bg-gray-100 dark:bg-gray-800">
-        <div className="h-full w-2/3 rounded-full bg-gray-200 animate-shimmer dark:bg-gray-700" />
-      </div>
-      <div className="mt-3 h-3 w-24 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
-    </div>
-  );
-}
-
 function AiAttributeCard({
   title,
   body,
@@ -392,10 +265,6 @@ function MusicalProfileNoDataView({
           <div className="absolute -bottom-24 left-1/2 h-56 w-[80%] -translate-x-1/2 rounded-full bg-accent-violet/25 blur-3xl" />
           <div className="relative grid gap-10 lg:grid-cols-[1.25fr_0.75fr] lg:items-end">
             <div>
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-white/90 backdrop-blur">
-                <ProfileIcon className="h-5 w-5 text-accent-cyan" />
-                {t("heroBadge")}
-              </div>
               <h1 className="max-w-3xl text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">
                 {t("heroTitle")}
               </h1>
@@ -407,11 +276,28 @@ function MusicalProfileNoDataView({
               ) : null}
             </div>
             <div className="rounded-3xl border border-white/15 bg-white/10 p-5 backdrop-blur">
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-accent-cyan">
-                {t("heroSignature")}
-              </p>
-              <p className="mt-3 text-2xl font-bold leading-tight text-white/50">{t("unknownArtist")}</p>
-              <p className="mt-2 text-sm text-white/55">{t("heroSignatureHintFallback")}</p>
+              <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-center">
+                <div className="relative shrink-0">
+                  <div className="relative flex h-28 w-28 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 via-white/5 to-transparent shadow-2xl shadow-black/35 ring-2 ring-white/15 sm:h-32 sm:w-32">
+                    <ProfileIcon className="h-14 w-14 text-white/35 sm:h-16 sm:w-16" aria-hidden />
+                    <div
+                      className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-violet-600/15 via-transparent to-cyan-500/10"
+                      aria-hidden
+                    />
+                  </div>
+                  <div
+                    className="pointer-events-none absolute -inset-1 -z-10 rounded-[1.35rem] bg-gradient-to-br from-accent-violet/30 via-transparent to-accent-cyan/25 opacity-70 blur-md"
+                    aria-hidden
+                  />
+                </div>
+                <div className="min-w-0 flex-1 text-center sm:text-left">
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-accent-cyan">
+                    {t("heroSignature")}
+                  </p>
+                  <p className="mt-3 text-2xl font-bold leading-tight text-white/50">{t("unknownArtist")}</p>
+                  <p className="mt-2 text-sm text-white/55">{t("heroSignatureHintFallback")}</p>
+                </div>
+              </div>
             </div>
           </div>
         </motion.section>
@@ -461,6 +347,16 @@ function MusicalProfileNoDataView({
         message={t("noData")}
         description={t("importDescription")}
       />
+
+      <div className="flex justify-center pt-6">
+        <Link
+          href={withFilters("/dashboard/overview")}
+          className="inline-flex items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-5 py-3 text-sm font-bold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:shadow-card-hover focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
+        >
+          {t("overviewCallout.cta")}
+          <span aria-hidden="true">&rarr;</span>
+        </Link>
+      </div>
     </div>
   );
 }
@@ -474,6 +370,8 @@ function MusicalProfileContent() {
     () => (href: string) => mergeDashboardSearchParams(href, searchParams),
     [searchParams]
   );
+
+  const interactiveAiBlockedByGenreBackfill = useInteractiveAiBlockedByGenreBackfill();
 
   const { startDate, endDate, isLoading: isRangeLoading } = useListenDateRange();
   const { data: overview, isLoading: overviewLoading, error: overviewError, refetch } =
@@ -494,10 +392,6 @@ function MusicalProfileContent() {
   const topTracks = useMemo(
     () => tracksData?.topTracks ?? [],
     [tracksData?.topTracks]
-  );
-  const topGenres = useMemo(
-    () => genresData?.data.slice(0, TOP_LIMIT) ?? [],
-    [genresData?.data]
   );
 
   const profileInput = useMemo(() => {
@@ -526,6 +420,7 @@ function MusicalProfileContent() {
     endDate,
     locale,
     userId,
+    interactiveAiBlockedByGenreBackfill,
   });
 
   const isLoading =
@@ -557,7 +452,7 @@ function MusicalProfileContent() {
 
   const dateRangeLabel = formatDateRange(startDate, endDate, locale);
   const topArtistName = getTopArtistFallback(topArtists, overview);
-  const topGenreName = topGenres[0]?.genre ?? "";
+  const topGenreName = firstKnownGenreName(genresData?.data);
   const profileDescription =
     aiProfile?.description?.trim() ||
     t("deterministicProfile", {
@@ -579,10 +474,6 @@ function MusicalProfileContent() {
           <div className="absolute -bottom-24 left-1/2 h-56 w-[80%] -translate-x-1/2 rounded-full bg-accent-violet/25 blur-3xl" />
           <div className="relative grid gap-10 lg:grid-cols-[1.25fr_0.75fr] lg:items-end">
             <div>
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-white/90 backdrop-blur">
-                <ProfileIcon className="h-5 w-5 text-accent-cyan" />
-                {t("heroBadge")}
-              </div>
               <h1 className="max-w-3xl text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">
                 {t("heroTitle")}
               </h1>
@@ -594,17 +485,53 @@ function MusicalProfileContent() {
               )}
             </div>
             <div className="rounded-3xl border border-white/15 bg-white/10 p-5 backdrop-blur">
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-accent-cyan">
-                {t("heroSignature")}
-              </p>
-              <p className="mt-3 text-2xl font-bold leading-tight">
-                {topArtistName || t("unknownArtist")}
-              </p>
-              <p className="mt-2 text-sm text-white/65">
-                {topGenreName
-                  ? t("heroSignatureHint", { genre: topGenreName })
-                  : t("heroSignatureHintFallback")}
-              </p>
+              <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-center">
+                <div className="relative shrink-0">
+                  <div className="relative h-28 w-28 overflow-hidden rounded-2xl shadow-2xl shadow-black/35 ring-2 ring-white/20 sm:h-32 sm:w-32">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={
+                        topArtists[0]
+                          ? getArtistImageUrl(topArtists[0], 384, 0)
+                          : getAvatarUrl(topArtistName || t("unknownArtist"), 384, 0)
+                      }
+                      alt=""
+                      className="h-full w-full object-cover"
+                      loading="eager"
+                      decoding="async"
+                      referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        e.currentTarget.src = getAvatarUrl(
+                          topArtistName || t("unknownArtist"),
+                          384,
+                          0
+                        );
+                      }}
+                    />
+                    <div
+                      className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-tr from-violet-600/20 via-transparent to-cyan-500/15"
+                      aria-hidden
+                    />
+                  </div>
+                  <div
+                    className="pointer-events-none absolute -inset-1 -z-10 rounded-[1.35rem] bg-gradient-to-br from-accent-violet/40 via-transparent to-accent-cyan/35 opacity-80 blur-md"
+                    aria-hidden
+                  />
+                </div>
+                <div className="min-w-0 flex-1 text-center sm:text-left">
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-accent-cyan">
+                    {t("heroSignature")}
+                  </p>
+                  <p className="mt-3 text-2xl font-bold leading-tight">
+                    {topArtistName || t("unknownArtist")}
+                  </p>
+                  <p className="mt-2 text-sm text-white/65">
+                    {topGenreName
+                      ? t("heroSignatureHint", { genre: topGenreName })
+                      : t("heroSignatureHintFallback")}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </motion.section>
@@ -636,48 +563,19 @@ function MusicalProfileContent() {
         </section>
       </ScrollRevealSection>
 
-      {overviewLoading || isRangeLoading ? (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-busy="true">
-          {Array.from({ length: 4 }).map((_, index) => (
-            <MetricCardSkeleton key={index} />
-          ))}
-        </div>
-      ) : (
-        <StaggerContainer className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <MetricCard
-            label={t("metrics.totalListens")}
-            value={formatNumber(overview?.totalListens ?? 0, locale)}
-            hint={t("metrics.totalListensHint")}
-            accent="bg-accent-violet"
-          />
-          <MetricCard
-            label={t("metrics.listeningTime")}
-            value={formatListeningTime(overview?.totalPlayTime ?? 0, locale, t)}
-            hint={t("metrics.listeningTimeHint")}
-            accent="bg-accent-cyan"
-          />
-          <MetricCard
-            label={t("metrics.uniqueArtists")}
-            value={formatNumber(overview?.uniqueArtists ?? 0, locale)}
-            hint={t("metrics.uniqueArtistsHint")}
-            accent="bg-accent-rose"
-          />
-          <MetricCard
-            label={t("metrics.uniqueTracks")}
-            value={formatNumber(overview?.uniqueTracks ?? 0, locale)}
-            hint={t("metrics.uniqueTracksHint")}
-            accent="bg-accent-emerald"
-          />
-        </StaggerContainer>
-      )}
-
       <ScrollRevealSection>
         <section className="relative overflow-hidden rounded-[2rem] border-2 border-accent-violet/20 bg-card-surface shadow-2xl ring-2 ring-accent-violet/10">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(139,92,246,0.14),transparent_32%),radial-gradient(circle_at_90%_40%,rgba(6,182,212,0.1),transparent_28%)]" />
           <div className="relative grid gap-8 p-6 sm:p-8 lg:grid-cols-[0.8fr_1.2fr] lg:p-10">
             <div>
-              <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-accent-violet to-accent-indigo text-white shadow-lg shadow-accent-violet/20">
-                <SparkIcon className="h-7 w-7" />
+              <div className="mb-5 h-14 w-14 shrink-0 overflow-hidden rounded-2xl border border-accent-violet/25 bg-card-surface shadow-lg shadow-accent-violet/20 ring-2 ring-accent-violet/15">
+                <Image
+                  src="/brand/favicon.png"
+                  alt=""
+                  width={112}
+                  height={112}
+                  className="h-full w-full object-cover"
+                />
               </div>
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-accent-violet">
                 {t("sections.sonicIdentity")}
@@ -709,6 +607,15 @@ function MusicalProfileContent() {
               ) : aiError ? (
                 isGroqDailyQuotaError(aiError) ? (
                   <GroqQuotaNotice error={aiError} />
+                ) : isGroqGenreClassificationBlockingError(aiError) ? (
+                  <div className="space-y-4">
+                    {!interactiveAiBlockedByGenreBackfill ? (
+                      <InteractiveAiGenreBackfillNotice force />
+                    ) : null}
+                    <blockquote className="text-2xl font-semibold leading-9 tracking-tight text-gray-950 dark:text-white">
+                      &ldquo;{profileDescription}&rdquo;
+                    </blockquote>
+                  </div>
                 ) : (
                   <div role="alert" className="space-y-3">
                     <p className="text-sm font-semibold text-red-600 dark:text-red-400">
@@ -725,64 +632,6 @@ function MusicalProfileContent() {
                 </blockquote>
               )}
             </div>
-          </div>
-        </section>
-      </ScrollRevealSection>
-
-      <ScrollRevealSection className="grid grid-cols-1 gap-6 xl:grid-cols-[0.95fr_1.05fr] xl:items-start">
-        <section className="rounded-[2rem] border border-card-border bg-card-surface p-6 shadow-card sm:p-8">
-          <div className="mb-6 flex items-center justify-between gap-4">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-accent-violet">
-                {t("sections.topGenres")}
-              </p>
-              <h2 className="mt-2 text-2xl font-bold tracking-tight text-gray-950 dark:text-white">
-                {t("genreDnaTitle")}
-              </h2>
-            </div>
-            <BarsIcon className="h-7 w-7 text-accent-violet" />
-          </div>
-          <div className="space-y-3">
-            {genresLoading || isRangeLoading
-              ? Array.from({ length: TOP_LIMIT }).map((_, index) => (
-                  <GenreBarSkeleton key={index} />
-                ))
-              : topGenres.map((genre, index) => (
-                  <GenreBar
-                    key={genre.genre}
-                    genre={genre}
-                    index={index}
-                    locale={locale}
-                    listensLabel={t("labels.listens")}
-                    ofListensLabel={t("labels.ofListens")}
-                  />
-                ))}
-          </div>
-        </section>
-
-        <section className="rounded-[2rem] border border-card-border bg-card-surface p-6 shadow-card sm:p-8">
-          <div className="mb-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-accent-rose">
-              {t("sections.topArtists")}
-            </p>
-            <h2 className="mt-2 text-2xl font-bold tracking-tight text-gray-950 dark:text-white">
-              {t("artistConstellationTitle")}
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {artistsLoading || isRangeLoading
-              ? Array.from({ length: TOP_LIMIT }).map((_, index) => (
-                  <RankedItemSkeleton key={index} />
-                ))
-              : topArtists.map((artist, index) => (
-                  <RankedArtistCard
-                    key={artist.artistId}
-                    artist={artist}
-                    rank={index + 1}
-                    locale={locale}
-                    listensLabel={t("labels.listens")}
-                  />
-                ))}
           </div>
         </section>
       </ScrollRevealSection>
@@ -824,21 +673,29 @@ function MusicalProfileContent() {
           </h2>
         </div>
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-          <AiAttributeCard
-            title={t("cards.influences")}
-            body={aiProfile?.influences ?? ""}
-            icon={<SparkIcon className="h-5 w-5" />}
-          />
-          <AiAttributeCard
-            title={t("cards.coreGenres")}
-            body={aiProfile?.coreGenres ?? ""}
-            icon={<BarsIcon className="h-5 w-5" />}
-          />
-          <AiAttributeCard
-            title={t("cards.uniqueAspect")}
-            body={aiProfile?.uniqueAspect ?? ""}
-            icon={<ProfileIcon className="h-5 w-5" />}
-          />
+          {interactiveAiBlockedByGenreBackfill ? (
+            <div className="lg:col-span-3">
+              <InteractiveAiGenreBackfillNotice />
+            </div>
+          ) : (
+            <>
+              <AiAttributeCard
+                title={t("cards.influences")}
+                body={aiProfile?.influences ?? ""}
+                icon={<SparkIcon className="h-5 w-5" />}
+              />
+              <AiAttributeCard
+                title={t("cards.coreGenres")}
+                body={aiProfile?.coreGenres ?? ""}
+                icon={<BarsIcon className="h-5 w-5" />}
+              />
+              <AiAttributeCard
+                title={t("cards.uniqueAspect")}
+                body={aiProfile?.uniqueAspect ?? ""}
+                icon={<ProfileIcon className="h-5 w-5" />}
+              />
+            </>
+          )}
         </div>
       </ScrollRevealSection>
 
@@ -848,19 +705,35 @@ function MusicalProfileContent() {
         </h2>
         <StaggerContainer className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[
+            {
+              href: withFilters("/dashboard/overview"),
+              label: t("overviewCallout.cta"),
+              overviewCta: true as const,
+            },
             { href: "/dashboard/artists", label: t("ctas.artists"), icon: <ProfileIcon className="h-5 w-5" /> },
             { href: "/dashboard/tracks", label: t("ctas.tracks"), icon: <BarsIcon className="h-5 w-5" /> },
             { href: "/dashboard/genres", label: t("ctas.genres"), icon: <BarsIcon className="h-5 w-5" /> },
-          ].map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="flex items-center gap-3 rounded-2xl border border-card-border bg-card-surface p-4 text-sm font-medium text-gray-700 shadow-card transition-all hover:-translate-y-0.5 hover:border-accent-violet/30 hover:text-accent-violet hover:shadow-card-hover dark:text-gray-300"
-            >
-              <span className="text-accent-violet">{item.icon}</span>
-              {item.label}
-            </Link>
-          ))}
+          ].map((item) =>
+            "overviewCta" in item ? (
+              <Link
+                key="overview"
+                href={item.href}
+                className="flex w-full min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-5 py-3 text-sm font-bold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:shadow-card-hover focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
+              >
+                {item.label}
+                <span aria-hidden="true">&rarr;</span>
+              </Link>
+            ) : (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="flex min-h-[52px] items-center gap-3 rounded-2xl border border-card-border bg-card-surface p-4 text-sm font-medium text-gray-700 shadow-card transition-all hover:-translate-y-0.5 hover:border-accent-violet/30 hover:text-accent-violet hover:shadow-card-hover dark:text-gray-300"
+              >
+                <span className="text-accent-violet">{item.icon}</span>
+                {item.label}
+              </Link>
+            )
+          )}
         </StaggerContainer>
       </ScrollRevealSection>
     </div>
@@ -871,11 +744,6 @@ function MusicalProfileFallback() {
   return (
     <div className="space-y-8">
       <div className="h-72 rounded-[2rem] bg-gray-100 animate-shimmer dark:bg-gray-800" />
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, index) => (
-          <div key={index} className="h-36 rounded-2xl bg-gray-100 animate-shimmer dark:bg-gray-800" />
-        ))}
-      </div>
       <div className="h-80 rounded-[2rem] bg-gray-100 animate-shimmer dark:bg-gray-800" />
     </div>
   );

@@ -32,6 +32,7 @@ import {
   forbiddenResponse,
   unauthorizedResponse,
 } from "@/lib/auth/require-auth-user-id";
+import { hasPendingOrRunningGroqImportGenreBackfillForUser } from "@/lib/services/listening/groq-import-genre-backfill-ai-guard";
 
 export const dynamic = "force-dynamic";
 
@@ -107,10 +108,15 @@ export async function GET(request: NextRequest) {
     let commentaryLight: string | null = null;
     let commentaryCached = false;
     let aiUnavailable = false;
+    let interactiveAiPausedForGenreClassification = false;
 
     const aiOn = isAiMasterEnabledForRequest(request);
+    const genreBackfillBusy =
+      trends.length > 0 && aiOn
+        ? await hasPendingOrRunningGroqImportGenreBackfillForUser(userId)
+        : false;
 
-    if (trends.length > 0 && aiOn) {
+    if (trends.length > 0 && aiOn && !genreBackfillBusy) {
       // Technical version
       const cachedCommentary = await getCachedCommentary(trends, locale, false);
       if (cachedCommentary) {
@@ -141,6 +147,8 @@ export async function GET(request: NextRequest) {
           console.warn("Taste evolution light commentary generation failed:", err);
         }
       }
+    } else if (trends.length > 0 && aiOn && genreBackfillBusy) {
+      interactiveAiPausedForGenreClassification = true;
     } else if (trends.length > 0 && !aiOn) {
       aiUnavailable = true;
     }
@@ -152,6 +160,9 @@ export async function GET(request: NextRequest) {
       commentaryCached: commentary ? commentaryCached : undefined,
       skippedWeeks,
       ...(aiUnavailable ? { aiUnavailable: true } : {}),
+      ...(interactiveAiPausedForGenreClassification
+        ? { interactiveAiPausedForGenreClassification: true }
+        : {}),
     };
 
     return NextResponse.json(response);

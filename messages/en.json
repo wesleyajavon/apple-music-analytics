@@ -84,9 +84,16 @@
     "publicDemoIntro": "Welcome to the demo. Pick a preset question to explore the public profile without opening free text.",
     "inputLabel": "Question for Ask your Soundprint",
     "inputPlaceholder": "Example: What are the songs I listened to the most over summer 2022?",
+    "inputPlaceholderWithArtist": "Example: {artist} deepdive",
+    "artistDeepDiveQuestion": "Tell me my listening history with {artist}.",
     "publicDemoPlaceholder": "Free text is disabled in demo mode.",
     "send": "Send",
     "thinking": "Reading your Soundprint…",
+    "thinkingStep0": "Reading your Soundprint…",
+    "thinkingStep1": "Pulling fresh numbers from your listening history…",
+    "thinkingStep2": "Connecting artists, genres, and time ranges…",
+    "thinkingStep3": "Almost there — shaping a clear answer…",
+    "thinkingPatience": "Rich answers can take a moment — hang tight.",
     "presetTitle": "Quick questions",
     "presetDescription": "Use these examples to learn what the agent can answer. Click one to ask it directly.",
     "customizeHint": "These are templates: signed-in users can change the artist, year, date range, comparison periods, window size, or result limit in free text.",
@@ -146,6 +153,7 @@
       },
       "artist-deep-dive": {
         "label": "Artist deep dive",
+        "labelRich": "<em>artist</em> deepdive",
         "question": "Tell me my listening history with Radiohead."
       },
       "track-obsessions": {
@@ -438,7 +446,20 @@
       "collapsedSummary": "Groq genre classification — show details",
       "collapseAria": "Minimize banner",
       "dismissAria": "Hide this summary until the next session",
-      "progressAria": "Session progress"
+      "progressAria": "Session progress",
+      "panelEyebrow": "AI genres",
+      "statTracksShort": "{processed}/{max} tracks",
+      "statUnknownShort": "Unknown {ratio}",
+      "statTargetShort": "Target ≤ {target}%",
+      "progressLabel": "Session progress",
+      "batchPreparing": "Sizing your batch… progress appears in a moment.",
+      "detailsInline": "Tracks: {processed}/{max} · Unknown: {ratio} · Goal: ≤ {target}%"
+    },
+    "interactiveAi": {
+      "title": "AI features are paused for a moment",
+      "body": "We’re organizing your music by genre in the background. That step uses the same assistant as other AI features here, so those stay on hold until classification finishes.",
+      "pauseHint": "Want AI back right away? Pause classification from the progress banner at the top of the dashboard — you can resume anytime.",
+      "openProgressCta": "Open classification progress"
     }
   },
   "footer": {
@@ -805,7 +826,33 @@
     "paginationNext": "Next",
     "paginationPage": "Page {page} / {totalPages}",
     "pageSizeLabel": "Rows",
-    "paginationLoading": "Loading next page..."
+    "paginationLoading": "Loading next page...",
+    "artistInsightsAriaOpen": "Open listening insights for {name}",
+    "insightsCloseAria": "Close insights panel",
+    "insightsEyebrow": "Your listening",
+    "insightsUniqueTracksShort": "unique tracks",
+    "insightsEstPlayTimeUnavailable": "—",
+    "insightsEstPlayTimeHint": "est. play time (track durations)",
+    "insightsTimelineHint": "Across this period · first listen {first} · most recent {last}",
+    "insightsLoadError": "Could not load artist insights.",
+    "insightsPeaksTitle": "When you listened most",
+    "insightsPeakHour": "Peak hour",
+    "insightsPeakWeekday": "Peak weekday",
+    "insightsBusiestCalendarDay": "Busiest calendar day",
+    "insightsBusiestMeta": "{date} · {listens} listens",
+    "insightsNoSignal": "Not enough patterned data yet",
+    "insightsActiveDays": "Active days",
+    "insightsSpanDays": "Span (first→last)",
+    "insightsByHour": "Listening by hour of day",
+    "insightsByWeekday": "Listening by weekday",
+    "insightsTopTracks": "Your most played tracks with this artist",
+    "insightsSources": "Where listens come from",
+    "insightsFootnoteTz": "Hours and weekdays follow the timestamps stored with your listens (typically UTC depending on export). Totals reflect your active date filters.",
+    "sourceLastfm": "Last.fm",
+    "sourceAppleReplay": "Apple Music Replay",
+    "sourceSpotifyExport": "Spotify extended export",
+    "sourceSpotifyWebApi": "Spotify (live API)",
+    "sourceAppleMusicExport": "Apple Music export"
   },
   "tracks": {
     "title": "Tracks",
@@ -972,9 +1019,8 @@
   "musical-profile": {
     "title": "Musical Profile",
     "subtitle": "A premium, AI-assisted replay of your listening identity.",
-    "heroBadge": "AI-enhanced replay",
-    "heroTitle": "Your musical profile, rebuilt from your own data",
-    "heroSubtitle": "A Wrapped-style profile that blends your top artists, genres, tracks, and a single cached AI analysis prepared from aggregated listening data.",
+    "heroTitle": "See yourself through the music you already love.",
+    "heroSubtitle": "Your go-to artists, genres, and tracks — plus simple insights that turn your listening into a profile you'll actually recognize.",
     "heroSignature": "Signature sound",
     "heroSignatureHint": "Anchored in {genre}",
     "heroSignatureHintFallback": "Waiting for more genre signal",
@@ -993,7 +1039,7 @@
     "unknownGenre": "your current palette",
     "deterministicProfile": "Your current profile leans toward {genre}, with {artist} acting as one of the strongest anchors in the period. Import more listens or widen the date range to make the AI profile sharper.",
     "identityTitle": "Your sonic identity",
-    "identitySubtitle": "The AI section is generated from the same aggregated stats shown below, so it stays rich without rereading raw listens or duplicating expensive calls.",
+    "identitySubtitle": "Your story is woven from the same artists, genres, and tracks as the rest of your analytics — so what you read always lines up with your listening picture.",
     "aiCached": "AI profile served from cache",
     "aiUnavailable": "AI is currently disabled for this environment or browser, so this page is showing a deterministic profile from your stats.",
     "aiErrorTitle": "AI analysis unavailable. Showing a data-based summary instead.",
@@ -1367,6 +1413,26 @@
       "exportCsvTitle": "Export listens to CSV",
       "exportStatsTitle": "Export statistics to JSON",
       "exportPdfTitle": "Generate annual PDF report"
+    },
+    "notificationCenter": {
+      "openLabel": "Open notifications",
+      "panelTitle": "Notifications",
+      "markAllRead": "Mark all read",
+      "clearAll": "Clear all",
+      "empty": "No notifications yet.",
+      "exportSuccessTitle": "Export {type} completed",
+      "exportSuccessBody": "File {filename} downloaded",
+      "exportErrorTitle": "Export {type} failed",
+      "genreGroqNudge": {
+        "title": "Improve your genre data with AI",
+        "body": "About {count, plural, one {# track} other {# tracks}} (~{pct}% of your library) still have no genre. Run a quick Groq classification to make charts and insights more accurate.",
+        "legacyBody": "Many tracks still have no genre. Use the button below to classify with Groq and sharpen your charts.",
+        "privacyHint": "Artist and track titles are sent to Groq for labeling. Same flow as the dashboard genre banner.",
+        "classifyCta": "Classify with Groq",
+        "classifying": "Starting…",
+        "startedToast": "Genre classification started in the background.",
+        "startError": "Could not start genre classification."
+      }
     },
     "periodSelector": {
       "label": "Group by",

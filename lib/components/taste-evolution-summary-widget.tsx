@@ -5,8 +5,10 @@ import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { useTasteEvolution } from "@/lib/hooks/use-taste-evolution";
 import { AiWidgetQuotaOrError } from "@/lib/components/error-state";
+import { InteractiveAiGenreBackfillNotice } from "@/lib/components/interactive-ai-genre-backfill-notice";
 import { useDashboardViewerUserId } from "@/lib/context/dashboard-viewer-context";
 import type { WeekToWeekTrend } from "@/lib/dto/taste-evolution";
+import { useInteractiveAiBlockedByGenreBackfill } from "@/lib/hooks/use-interactive-ai-blocked-by-genre-backfill";
 
 function truncateCommentary(text: string, maxLength: number = 200): string {
   if (text.length <= maxLength) return text;
@@ -38,6 +40,7 @@ export function TasteEvolutionSummaryWidget() {
     range.endDate,
     viewerUserId
   );
+  const interactiveAiBlockedByGenreBackfill = useInteractiveAiBlockedByGenreBackfill();
 
   const seeMoreHref = useMemo(() => {
     const p = new URLSearchParams();
@@ -111,7 +114,7 @@ export function TasteEvolutionSummaryWidget() {
     );
   }
 
-  if (!latestTrend) {
+  if (!data || !latestTrend) {
     return null;
   }
 
@@ -171,14 +174,23 @@ export function TasteEvolutionSummaryWidget() {
             {latestTrend.diversityDelta.toFixed(2)}
           </span>
         </div>
-        {commentary && (
+        {commentary && !data.interactiveAiPausedForGenreClassification ? (
           <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
             {truncateCommentary(
               commentary.split("\n\n").filter(Boolean).pop() ?? commentary,
               220
             )}
           </p>
-        )}
+        ) : null}
+        {(data.interactiveAiPausedForGenreClassification ||
+          (interactiveAiBlockedByGenreBackfill && !commentary)) &&
+        !data.aiUnavailable ? (
+          <div className="mt-2">
+            <InteractiveAiGenreBackfillNotice
+              force={Boolean(data.interactiveAiPausedForGenreClassification && !interactiveAiBlockedByGenreBackfill)}
+            />
+          </div>
+        ) : null}
       </div>
     </div>
   );

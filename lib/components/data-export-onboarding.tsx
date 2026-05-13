@@ -15,6 +15,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { DashboardHeroTitle } from "@/lib/components/dashboard-hero-title";
+import { useGenreBackfillJobSafe } from "@/lib/context/genre-backfill-job-context";
 import {
   isRecentAuthRequiredError,
   redirectToRecentSignIn,
@@ -24,6 +25,7 @@ import { ONBOARDING_IMPORT_MAX_JSON_BATCH_ROWS } from "@/lib/services/listening/
 import type { NormalizedListenInput } from "@/lib/services/listening/onboarding-import-types";
 import { parseApplePlayHistoryDailyTracksCsv } from "@/lib/services/listening/parse-apple-play-history-daily-csv";
 import { parseSpotifyStreamingHistoryAudioJson } from "@/lib/services/listening/parse-spotify-streaming-history-json";
+import { isGroqGenreNudgeEligible } from "@/lib/utils/genre-ai-nudge-eligibility";
 import {
   clearGenreBackfillBannerBlockingPrefs,
   setGenreBackfillBannerOptOut,
@@ -295,11 +297,17 @@ type ImportOverlayKind = "file" | "spotify_web";
 
 export function DataExportOnboarding({
   hasSpotifyWebConnection = false,
+  initialGenreAiLanding = false,
 }: {
   hasSpotifyWebConnection?: boolean;
+  /** Ouvre directement la page de fin avec le bloc consentement Groq lorsque eligible (voir `genreAi` URL sur onboarding). */
+  initialGenreAiLanding?: boolean;
 } = {}) {
   const t = useTranslations("onboarding");
   const router = useRouter();
+  const genreBackfillShared = useGenreBackfillJobSafe();
+  const hasActiveGroqJobShared = genreBackfillShared?.hasActiveGroqJob ?? false;
+  const refreshGroqJobShared = genreBackfillShared?.refreshStatus;
   const [phase, setPhase] = useState<Phase>("welcome");
   const [provider, setProvider] = useState<MusicProvider | null>(null);
   const [stepIndex, setStepIndex] = useState(0);
@@ -332,6 +340,8 @@ export function DataExportOnboarding({
   const [genreLlmDeclined, setGenreLlmDeclined] = useState(false);
   const [isStartingLlmBackfill, setIsStartingLlmBackfill] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  /** Après redirection depuis la notification « Unknown majoritaire », défiler jusqu’au consentement IA. */
+  const genreAiScrollPendingRef = useRef(false);
 
   const steps = useMemo(() => {
     if (provider === "spotify") return SPOTIFY_STEPS;
@@ -364,6 +374,68 @@ export function DataExportOnboarding({
       // Best effort only.
     }
   }, []);
+
+  useEffect(() => {
+    if (!initialGenreAiLanding) return;
+
+    let cancelled = false;
+
+    async function openGenreAiLanding() {
+      if (typeof window !== "undefined" && getGenreBackfillBannerOptOut()) return;
+
+      try {
+        const res = await fetch(
+          "/api/user/onboarding/import/genre-backfill/status?includeTerminal=1&includeEligibility=1"
+        );
+        if (!res.ok || cancelled) return;
+        const data = (await res.json().catch(() => ({}))) as {
+          ok?: boolean;
+          job?: GenreBackfillJob | null;
+          eligibility?: {
+            groqConfigured: boolean;
+            unknownRatio: number;
+            unknownTrackCount: number;
+            totalTrackCount: number;
+          } | null;
+        };
+        if (data.ok !== true) return;
+
+        const eligibility = data.eligibility;
+        if (!eligibility || !isGroqGenreNudgeEligible(eligibility)) return;
+
+        const job = data.job;
+        const activeStatuses: GenreBackfillJobStatus[] = ["pending", "running", "paused"];
+        if (job && activeStatuses.includes(job.status)) return;
+
+        setGenreLlmAfterImport(eligibility);
+        setGenreLlmDeclined(false);
+        setGenreBackfillJob(null);
+        setImportSummary(null);
+        genreAiScrollPendingRef.current = true;
+        setPhase("finish");
+      } catch {
+        /* best effort */
+      }
+    }
+
+    void openGenreAiLanding();
+    return () => {
+      cancelled = true;
+    };
+  }, [initialGenreAiLanding]);
+
+  useEffect(() => {
+    if (!genreAiScrollPendingRef.current) return;
+    if (phase !== "finish" || !genreLlmAfterImport) return;
+    genreAiScrollPendingRef.current = false;
+    const id = window.setTimeout(() => {
+      document.getElementById("onboarding-genre-llm-consent-heading")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 300);
+    return () => window.clearTimeout(id);
+  }, [phase, genreLlmAfterImport]);
 
   useEffect(() => {
     if (phase !== "finish" || !genreBackfillJob?.id) return;
@@ -687,13 +759,17 @@ export function DataExportOnboarding({
         setGenreBackfillStatus(null);
         setGenreLlmAfterImport(null);
         toast.success(t("genreLlmConsent.startedToast"));
+        if (refreshGroqJobShared) {
+          await refreshGroqJobShared();
+          window.setTimeout(() => void refreshGroqJobShared(), 500);
+        }
       }
     } catch {
       toast.error(t("genreLlmConsent.startError"));
     } finally {
       setIsStartingLlmBackfill(false);
     }
-  }, [t]);
+  }, [t, refreshGroqJobShared]);
 
   const surfaceShellClass =
     "relative mx-auto w-full max-w-4xl rounded-3xl border border-card-border bg-card-surface p-6 shadow-card backdrop-blur-sm sm:p-8";
@@ -759,7 +835,8 @@ export function DataExportOnboarding({
       genreLlmAfterImport &&
         genreLlmAfterImport.unknownTrackCount > 0 &&
         !genreBackfillJob?.id &&
-        !genreLlmDeclined,
+        !genreLlmDeclined &&
+        !hasActiveGroqJobShared,
     ) || Boolean(effectiveBackfill);
 
   return (
@@ -1215,7 +1292,8 @@ export function DataExportOnboarding({
           {genreLlmAfterImport &&
           genreLlmAfterImport.unknownTrackCount > 0 &&
           !genreBackfillJob?.id &&
-          !genreLlmDeclined ? (
+          !genreLlmDeclined &&
+          !hasActiveGroqJobShared ? (
             <section aria-labelledby="onboarding-genre-llm-consent-heading">
               <GenreAiPanelChrome className="p-5 sm:p-6">
                 <div className="space-y-5">
@@ -1256,7 +1334,11 @@ export function DataExportOnboarding({
                     <button
                       type="button"
                       className={`${GENRE_AI_ACCEPT_BTN} sm:flex-1`}
-                      disabled={!genreLlmAfterImport.groqConfigured || isStartingLlmBackfill}
+                      disabled={
+                        !genreLlmAfterImport.groqConfigured ||
+                        isStartingLlmBackfill ||
+                        hasActiveGroqJobShared
+                      }
                       onClick={() => void startLlmGenreBackfill()}
                     >
                       {isStartingLlmBackfill ? (
@@ -1375,7 +1457,7 @@ export function DataExportOnboarding({
                       <button
                         type="button"
                         className={`${GENRE_AI_ACCEPT_BTN} w-full sm:w-auto`}
-                        disabled={isStartingLlmBackfill}
+                        disabled={isStartingLlmBackfill || hasActiveGroqJobShared}
                         onClick={() => void startLlmGenreBackfill()}
                       >
                         {isStartingLlmBackfill ? (

@@ -28,6 +28,7 @@ import { parseSpotifyStreamingHistoryAudioJson } from "@/lib/services/listening/
 import { isGroqGenreNudgeEligible } from "@/lib/utils/genre-ai-nudge-eligibility";
 import {
   clearGenreBackfillBannerBlockingPrefs,
+  getGenreBackfillBannerOptOut,
   setGenreBackfillBannerOptOut,
 } from "@/lib/utils/genre-backfill-banner-prefs";
 

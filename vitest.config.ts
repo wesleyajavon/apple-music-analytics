@@ -7,9 +7,6 @@ export default defineConfig({
     environment: 'node',
     isolate: true,
     setupFiles: ['./vitest.setup.ts'],
-    environmentMatchGlobs: [
-      ['**/__tests__/components/**/*.test.tsx', 'jsdom'],
-    ],
     // Sequential files avoid fork/worker issues with heavy Next route imports; keeps module mocks deterministic.
     fileParallelism: false,
     maxWorkers: 1,

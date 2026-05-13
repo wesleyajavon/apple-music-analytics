@@ -28,6 +28,12 @@ vi.mock("@/lib/security/rate-limit", () => ({
   assertRateLimit: vi.fn(),
 }));
 
+vi.mock("@/lib/services/listening/groq-import-genre-backfill-ai-guard", () => ({
+  hasPendingOrRunningGroqImportGenreBackfillForUser: vi.fn(() =>
+    Promise.resolve(false)
+  ),
+}));
+
 import { getListeningHabitPrediction } from "@/lib/services/predictions/listening-habit-service";
 import {
   getCachedPrediction,

@@ -1,5 +1,5 @@
-/** Ratio (tracks distincts `genre IS NULL` / bibliothèque) pour pousser la classification IA. */
-export const GENRE_AI_NUDGE_UNKNOWN_RATIO_MIN_PCT = 10;
+/** Ratio minimal (tracks distincts `genre IS NULL` / bibliothèque) pour considérer une « majorité » inconnue et pousser la classification IA (≥ cette valeur %). */
+export const GENRE_AI_NUDGE_UNKNOWN_RATIO_MIN_PCT = 50;
 
 /** Évite une notif hors sol sur des bibliothèques trop petites. */
 export const GENRE_AI_NUDGE_MIN_DISTINCT_TRACKS = 15;

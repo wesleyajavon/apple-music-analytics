@@ -11,7 +11,7 @@ import { clearGenreBackfillBannerBlockingPrefs } from "@/lib/utils/genre-backfil
 
 function formatNotificationDisplay(
   n: NotificationItem,
-  t: (key: string, values?: Record<string, string | number | boolean | Date>) => string
+  t: (key: string, values?: Record<string, string | number | Date>) => string
 ): { title: string; body?: string } {
   if (n.genreGroqNudge) {
     return {

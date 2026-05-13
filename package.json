@@ -33,6 +33,7 @@
     "auth:migrate-user-id": "node scripts/migrate-user-id-to-supabase.js",
     "db:check-capacity": "node scripts/check-db-capacity.js",
     "genres:backfill-llm": "npx tsx scripts/backfill-track-genres-llm.ts",
+    "spotify:enrich-artist-images": "node --import tsx scripts/enrich-artist-images-spotify.ts",
     "genres:backfill-cascade": "node scripts/backfill-track-genres-cascade.js",
     "genres:backfill-consensus": "node scripts/backfill-genre-from-artist-consensus.js",
     "genres:normalize": "node scripts/normalize-track-genres.js",

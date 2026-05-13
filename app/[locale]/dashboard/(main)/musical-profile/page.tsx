@@ -21,7 +21,6 @@ import type { ArtistStatsDto } from "@/lib/dto/artist";
 import type { GenreDistributionDto } from "@/lib/dto/genres";
 import type { TemporalAnalysisDto } from "@/lib/dto/listening";
 import type { TasteProfileInput, TasteProfileResponse } from "@/lib/dto/taste-profile";
-import type { TrackStatsDto } from "@/lib/dto/track";
 import { useArtistStats } from "@/lib/hooks/use-artists";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
 import {
@@ -30,7 +29,6 @@ import {
   useOverviewStats,
   useTemporalAnalysis,
 } from "@/lib/hooks/use-listening";
-import { useTrackStats } from "@/lib/hooks/use-tracks";
 import { isGroqDailyQuotaError, isGroqGenreClassificationBlockingError } from "@/lib/utils/groq-quota-message";
 import { InteractiveAiGenreBackfillNotice } from "@/lib/components/interactive-ai-genre-backfill-notice";
 import { useInteractiveAiBlockedByGenreBackfill } from "@/lib/hooks/use-interactive-ai-blocked-by-genre-backfill";
@@ -73,10 +71,6 @@ function formatDateRange(startDate: string | undefined, endDate: string | undefi
     year: "numeric",
   });
   return `${formatter.format(new Date(startDate))} - ${formatter.format(new Date(endDate))}`;
-}
-
-function formatNumber(value: number, locale: string): string {
-  return new Intl.NumberFormat(locale).format(value);
 }
 
 function getTopArtistFallback(artists: ArtistStatsDto[], overview?: OverviewStatsWithTopArtists) {
@@ -165,72 +159,20 @@ function usePreparedTasteProfile(params: {
   });
 }
 
-function RankedItemSkeleton() {
-  return (
-    <div className="rounded-2xl border border-card-border bg-card-surface p-5 shadow-card">
-      <div className="flex items-center gap-4">
-        <div className="h-12 w-12 shrink-0 rounded-2xl bg-gray-200 animate-shimmer dark:bg-gray-700" />
-        <div className="min-w-0 flex-1 space-y-2">
-          <div className="h-4 w-3/4 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
-          <div className="h-3 w-1/2 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function RankedTrackCard({
-  track,
-  rank,
-  locale,
-  listensLabel,
-  byLabel,
-}: {
-  track: TrackStatsDto;
-  rank: number;
-  locale: string;
-  listensLabel: string;
-  byLabel: string;
-}) {
-  return (
-    <div className="rounded-2xl border border-card-border bg-card-surface p-5 shadow-card">
-      <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent-rose">
-            #{rank}
-          </p>
-          <h3 className="mt-2 line-clamp-2 text-base font-semibold text-gray-950 dark:text-white">
-            {track.trackTitle}
-          </h3>
-          <p className="mt-1 truncate text-sm text-gray-500 dark:text-gray-400">
-            {byLabel} {track.artistName}
-          </p>
-        </div>
-        <div className="shrink-0 rounded-full bg-accent-rose/10 px-3 py-1 text-xs font-semibold text-accent-rose">
-          {formatNumber(track.listenCount, locale)}
-        </div>
-      </div>
-      <p className="mt-4 text-xs text-gray-500 dark:text-gray-400">
-        {formatNumber(track.listenCount, locale)} {listensLabel}
-      </p>
-    </div>
-  );
-}
-
-function AiAttributeCard({
+function LandingValueCard({
   title,
   body,
   icon,
+  accentClass,
 }: {
   title: string;
   body: string;
   icon: React.ReactNode;
+  accentClass: string;
 }) {
-  if (!body.trim()) return null;
-
   return (
-    <div className="rounded-2xl border border-card-border bg-card-surface p-6 shadow-card">
-      <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-accent-violet/10 text-accent-violet">
+    <div className="rounded-2xl border border-card-border bg-card-surface/90 p-6 shadow-card backdrop-blur-sm">
+      <div className={`mb-4 flex h-11 w-11 items-center justify-center rounded-2xl ${accentClass}`}>
         {icon}
       </div>
       <h3 className="text-base font-semibold text-gray-950 dark:text-white">{title}</h3>
@@ -378,8 +320,6 @@ function MusicalProfileContent() {
     useOverviewStats(startDate, endDate, userId);
   const { data: artistsData, isLoading: artistsLoading, error: artistsError } =
     useArtistStats(startDate, endDate, userId, TOP_LIMIT, 0);
-  const { data: tracksData, isLoading: tracksLoading, error: tracksError } =
-    useTrackStats(startDate, endDate, userId, TOP_LIMIT, 0);
   const { data: genresData, isLoading: genresLoading, error: genresError } =
     useGenres(startDate, endDate, userId);
   const { data: temporalData, isLoading: temporalLoading, error: temporalError } =
@@ -388,10 +328,6 @@ function MusicalProfileContent() {
   const topArtists = useMemo(
     () => artistsData?.topArtists ?? [],
     [artistsData?.topArtists]
-  );
-  const topTracks = useMemo(
-    () => tracksData?.topTracks ?? [],
-    [tracksData?.topTracks]
   );
 
   const profileInput = useMemo(() => {
@@ -427,12 +363,11 @@ function MusicalProfileContent() {
     isRangeLoading ||
     overviewLoading ||
     artistsLoading ||
-    tracksLoading ||
     genresLoading ||
     temporalLoading;
 
-  const dataError = overviewError ?? artistsError ?? tracksError ?? genresError ?? temporalError;
-  const hasListeningData = (overview?.totalListens ?? 0) > 0 || topArtists.length > 0 || topTracks.length > 0;
+  const dataError = overviewError ?? artistsError ?? genresError ?? temporalError;
+  const hasListeningData = (overview?.totalListens ?? 0) > 0 || topArtists.length > 0;
 
   if (!isLoading && dataError && !hasListeningData) {
     return (
@@ -636,105 +571,81 @@ function MusicalProfileContent() {
         </section>
       </ScrollRevealSection>
 
-      <ScrollRevealSection className="space-y-6">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-accent-cyan">
-            {t("sections.topTracks")}
-          </p>
-          <h2 className="mt-2 text-2xl font-bold tracking-tight text-gray-950 dark:text-white">
-            {t("trackObsessionTitle")}
-          </h2>
-        </div>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {tracksLoading || isRangeLoading
-            ? Array.from({ length: TOP_LIMIT }).map((_, index) => (
-                <RankedItemSkeleton key={index} />
-              ))
-            : topTracks.map((track, index) => (
-                <RankedTrackCard
-                  key={track.trackId}
-                  track={track}
-                  rank={index + 1}
-                  locale={locale}
-                  listensLabel={t("labels.listens")}
-                  byLabel={t("labels.by")}
-                />
-              ))}
-        </div>
-      </ScrollRevealSection>
-
-      <ScrollRevealSection className="space-y-6">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-accent-violet">
-            {t("sections.aiAttributes")}
-          </p>
-          <h2 className="mt-2 text-2xl font-bold tracking-tight text-gray-950 dark:text-white">
-            {t("aiAttributesTitle")}
-          </h2>
-        </div>
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-          {interactiveAiBlockedByGenreBackfill ? (
-            <div className="lg:col-span-3">
-              <InteractiveAiGenreBackfillNotice />
+      <ScrollRevealSection>
+        <section className="relative overflow-hidden rounded-[2rem] border border-accent-violet/20 bg-gradient-to-br from-card-surface via-card-surface to-accent-violet/[0.06] p-6 shadow-2xl ring-1 ring-accent-violet/10 sm:p-8 lg:p-10 dark:to-accent-violet/[0.09]">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_0%,rgba(139,92,246,0.12),transparent_32%),radial-gradient(circle_at_95%_80%,rgba(6,182,212,0.1),transparent_30%)]" />
+          <div className="relative space-y-8">
+            <div className="max-w-2xl">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-accent-violet">
+                {t("landing.badge")}
+              </p>
+              <h2 className="mt-3 text-2xl font-bold tracking-tight text-gray-950 dark:text-white sm:text-3xl">
+                {t("landing.title")}
+              </h2>
+              <p className="mt-3 text-sm leading-6 text-gray-600 dark:text-gray-300">{t("landing.lead")}</p>
             </div>
-          ) : (
-            <>
-              <AiAttributeCard
-                title={t("cards.influences")}
-                body={aiProfile?.influences ?? ""}
-                icon={<SparkIcon className="h-5 w-5" />}
-              />
-              <AiAttributeCard
-                title={t("cards.coreGenres")}
-                body={aiProfile?.coreGenres ?? ""}
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              <LandingValueCard
+                title={t("landing.cards.statsTitle")}
+                body={t("landing.cards.statsBody")}
                 icon={<BarsIcon className="h-5 w-5" />}
+                accentClass="bg-accent-violet/10 text-accent-violet"
               />
-              <AiAttributeCard
-                title={t("cards.uniqueAspect")}
-                body={aiProfile?.uniqueAspect ?? ""}
+              <LandingValueCard
+                title={t("landing.cards.movementTitle")}
+                body={t("landing.cards.movementBody")}
+                icon={<SparkIcon className="h-5 w-5" />}
+                accentClass="bg-accent-cyan/10 text-accent-cyan"
+              />
+              <LandingValueCard
+                title={t("landing.cards.mixTitle")}
+                body={t("landing.cards.mixBody")}
                 icon={<ProfileIcon className="h-5 w-5" />}
+                accentClass="bg-accent-indigo/10 text-accent-indigo"
               />
-            </>
-          )}
-        </div>
-      </ScrollRevealSection>
-
-      <ScrollRevealSection className="border-t border-gray-100 pt-8 dark:border-gray-800">
-        <h2 className="mb-4 text-lg font-semibold text-gray-950 dark:text-white">
-          {t("exploreMore")}
-        </h2>
-        <StaggerContainer className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {[
-            {
-              href: withFilters("/dashboard/overview"),
-              label: t("overviewCallout.cta"),
-              overviewCta: true as const,
-            },
-            { href: "/dashboard/artists", label: t("ctas.artists"), icon: <ProfileIcon className="h-5 w-5" /> },
-            { href: "/dashboard/tracks", label: t("ctas.tracks"), icon: <BarsIcon className="h-5 w-5" /> },
-            { href: "/dashboard/genres", label: t("ctas.genres"), icon: <BarsIcon className="h-5 w-5" /> },
-          ].map((item) =>
-            "overviewCta" in item ? (
+            </div>
+            <div className="flex flex-col items-stretch gap-4 sm:items-center">
               <Link
-                key="overview"
-                href={item.href}
-                className="flex w-full min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-5 py-3 text-sm font-bold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:shadow-card-hover focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
+                href={withFilters("/dashboard/overview")}
+                className="inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-6 py-3.5 text-sm font-bold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:shadow-card-hover focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background sm:w-auto sm:min-w-[280px]"
               >
-                {item.label}
+                {t("landing.primaryCta")}
                 <span aria-hidden="true">&rarr;</span>
               </Link>
-            ) : (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="flex min-h-[52px] items-center gap-3 rounded-2xl border border-card-border bg-card-surface p-4 text-sm font-medium text-gray-700 shadow-card transition-all hover:-translate-y-0.5 hover:border-accent-violet/30 hover:text-accent-violet hover:shadow-card-hover dark:text-gray-300"
-              >
-                <span className="text-accent-violet">{item.icon}</span>
-                {item.label}
-              </Link>
-            )
-          )}
-        </StaggerContainer>
+              <p className="text-center text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                {t("landing.secondaryHint")}
+              </p>
+              <StaggerContainer className="grid w-full max-w-3xl grid-cols-1 gap-3 sm:grid-cols-3">
+                {[
+                  {
+                    href: withFilters("/dashboard/artists"),
+                    label: t("ctas.artists"),
+                    icon: <ProfileIcon className="h-5 w-5" />,
+                  },
+                  {
+                    href: withFilters("/dashboard/tracks"),
+                    label: t("ctas.tracks"),
+                    icon: <BarsIcon className="h-5 w-5" />,
+                  },
+                  {
+                    href: withFilters("/dashboard/genres"),
+                    label: t("ctas.genres"),
+                    icon: <BarsIcon className="h-5 w-5" />,
+                  },
+                ].map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="flex min-h-[48px] items-center justify-center gap-2 rounded-2xl border border-card-border bg-card-surface/80 px-4 py-3 text-sm font-medium text-gray-700 shadow-card transition-all hover:-translate-y-0.5 hover:border-accent-violet/30 hover:text-accent-violet hover:shadow-card-hover dark:text-gray-300"
+                  >
+                    <span className="text-accent-violet">{item.icon}</span>
+                    {item.label}
+                  </Link>
+                ))}
+              </StaggerContainer>
+            </div>
+          </div>
+        </section>
       </ScrollRevealSection>
     </div>
   );

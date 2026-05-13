@@ -1020,18 +1020,18 @@
     "title": "Perfil musical",
     "subtitle": "Un replay premium de tu identidad musical, enriquecido con IA.",
     "heroTitle": "Descúbrete a través de la música que ya amas.",
-    "heroSubtitle": "Tus artistas, géneros y canciones de cabecera — más ideas sencillas que convierten tu escucha en un perfil con el que te identificarás.",
+    "heroSubtitle": "Una bienvenida breve a tu sonido—luego abre Your Music para el panel completo: estadísticas en vivo, gráficos de tendencia, artistas, canciones y herramientas de géneros.",
     "heroSignature": "Firma sonora",
     "heroSignatureHint": "Anclada en {genre}",
     "heroSignatureHintFallback": "Esperando más señal de género",
     "noData": "Aún no hay datos de escucha",
     "emptyFeature": {
-      "badge": "Qué desbloque esta página",
-      "title": "Un perfil tipo Wrapped a partir de tu historial real",
-      "lead": "Después de importar datos y elegir un rango de fechas, el perfil musical reúne:",
-      "item1": "Indicadores clave del período: escuchas, tiempo de escucha, artistas y canciones únicas",
-      "item2": "Rankings de artistas, géneros y canciones: tus podios personales",
-      "item3": "Una identidad sonora con IA en tono poético (en caché): influencias, géneros centrales y qué hace distinto tu gusto — sin volver a escanear los archivos en cada visita"
+      "badge": "Para qué sirve esta página",
+      "title": "Una entrada tipo landing antes de entrar en el análisis",
+      "lead": "El perfil musical es a propósito ligero. Tras importar datos y elegir un rango de fechas, obtienes:",
+      "item1": "Un momento destacado con tu artista firma y la señal de género del periodo",
+      "item2": "Una señal clara hacia Your Music, donde están los rankings y desgloses detallados",
+      "item3": "Una línea de identidad sonora poética (en caché) para que siga sintiéndose personal—sin sustituir el panel principal"
     },
     "importDescription": "Importa tu exportación de Spotify o Apple Music para generar un perfil musical desde tu historial real.",
     "errorLoading": "No se puede cargar tu perfil musical. Inténtalo de nuevo.",
@@ -1046,8 +1046,23 @@
     "overviewCallout": {
       "badge": "Empieza por el corazón de Soundprint-AI",
       "title": "Your Music es la vista general que conecta todo",
-      "body": "Usa Your Music como punto de partida: resume tus escuchas, artistas, canciones, tiempo de escucha, evolución reciente y mezcla de géneros antes de abrir vistas más profundas como este perfil.",
+      "body": "Usa Your Music como punto de partida: resume tus escuchas, artistas, canciones, tiempo de escucha, evolución reciente y mezcla de géneros antes de abrir vistas más profundas.",
       "cta": "Abrir Your Music"
+    },
+    "landing": {
+      "badge": "Un comienzo sencillo y cercano",
+      "title": "Your Music es donde están las herramientas de verdad",
+      "lead": "Esta página marca el tono. Your Music es el centro para comparaciones, gráficas y detalles—mismos filtros de fechas, más contexto.",
+      "primaryCta": "Ir a Your Music",
+      "secondaryHint": "O abrir una vista enfocada",
+      "cards": {
+        "statsTitle": "Instantánea del periodo",
+        "statsBody": "Escuchas, tiempo de escucha, artistas y canciones únicas—con comparación al rango anterior cuando lo necesites.",
+        "movementTitle": "Movimiento reciente",
+        "movementBody": "Gráficos de área y tendencias para ver el impulso, no solo totales.",
+        "mixTitle": "Géneros y contexto del gusto",
+        "mixBody": "Géneros principales y cómo cambia tu mezcla—alineado con el resto de tus analíticas."
+      }
     },
     "genreDnaTitle": "ADN de géneros",
     "artistConstellationTitle": "Constelación de artistas",

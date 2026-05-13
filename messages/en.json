@@ -1020,18 +1020,18 @@
     "title": "Musical Profile",
     "subtitle": "A premium, AI-assisted replay of your listening identity.",
     "heroTitle": "See yourself through the music you already love.",
-    "heroSubtitle": "Your go-to artists, genres, and tracks — plus simple insights that turn your listening into a profile you'll actually recognize.",
+    "heroSubtitle": "A short welcome snapshot of your sound—then open Your Music for the full dashboard: live stats, movement charts, artists, tracks, and genre tools.",
     "heroSignature": "Signature sound",
     "heroSignatureHint": "Anchored in {genre}",
     "heroSignatureHintFallback": "Waiting for more genre signal",
     "noData": "No listening data yet",
     "emptyFeature": {
-      "badge": "What this page unlocks",
-      "title": "A Wrapped-style profile built from your real listening history",
-      "lead": "After you import data and choose a date range, Musical Profile brings together:",
-      "item1": "Key stats for the period: listens, listening time, unique artists and tracks",
-      "item2": "Ranked artists, genres, and tracks — your personal leaderboards",
-      "item3": "A poetic AI sonic identity (cached) describing influences, core genres, and what makes your taste distinct — without rescanning raw files on every visit"
+      "badge": "What this page is for",
+      "title": "A landing-style welcome before you drop into analytics",
+      "lead": "Musical Profile is intentionally lightweight. After you import data and pick a date range, you get:",
+      "item1": "A headline moment with your signature artist and genre signal for the period",
+      "item2": "A single cue toward Your Music, where leaderboards and detailed breakdowns actually live",
+      "item3": "A poetic sonic identity line (cached) so the page still feels personal—without replacing the main dashboard"
     },
     "importDescription": "Import your Spotify or Apple Music export to generate a musical profile from real listening history.",
     "errorLoading": "Unable to load your musical profile. Please try again.",
@@ -1046,8 +1046,23 @@
     "overviewCallout": {
       "badge": "Start with the heart of Soundprint-AI",
       "title": "Your Music is the overview that ties everything together",
-      "body": "Use Your Music as your home base: it summarizes your listens, artists, tracks, time, recent movement, and genre mix before you dive into deeper pages like this profile.",
+      "body": "Use Your Music as your home base: it summarizes your listens, artists, tracks, time, recent movement, and genre mix before you dive into deeper pages.",
       "cta": "Open Your Music"
+    },
+    "landing": {
+      "badge": "A friendly place to start",
+      "title": "Your Music is where the real tools live",
+      "lead": "This page sets the tone. Your Music is the hub for comparisons, charts, and drill-downs—same date filters, fuller context.",
+      "primaryCta": "Go to Your Music",
+      "secondaryHint": "Or jump to a focused view",
+      "cards": {
+        "statsTitle": "Period snapshot",
+        "statsBody": "Listens, listening time, unique artists and tracks—with comparison to the previous range when you need it.",
+        "movementTitle": "Recent movement",
+        "movementBody": "Area charts and trend context so you see momentum, not only totals.",
+        "mixTitle": "Genre & taste context",
+        "mixBody": "Top genres and how your mix shifts—aligned with the rest of your analytics."
+      }
     },
     "genreDnaTitle": "Genre DNA",
     "artistConstellationTitle": "Artist constellation",

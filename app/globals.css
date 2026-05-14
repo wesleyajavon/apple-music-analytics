@@ -102,6 +102,21 @@ body {
   font-family: var(--font-inter), system-ui, sans-serif;
 }
 
+/*
+ * Champs date natifs (ex. filtre « Personnalisé ») : l’indicateur calendrier
+ * des moteurs WebKit/Blink reste souvent trop sombre sur fond sombre.
+ */
+html.dark input[type="date"] {
+  color-scheme: dark;
+}
+
+html.dark input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 1;
+  /* Rend l’indicateur lisible quel que soit le glyphe du navigateur */
+  filter: brightness(0) invert(1);
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;

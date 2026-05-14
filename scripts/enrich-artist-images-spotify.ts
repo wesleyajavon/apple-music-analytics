@@ -2,12 +2,13 @@
  * Pour les artistes les plus écoutés en base : recherche Spotify (Client Credentials),
  * récupération d’une image haute définition et mise à jour de Artist.imageUrl.
  *
- * Variables : DATABASE_URL, SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET
+ * Variables : DATABASE_URL (ou --database-url pour surcharger), SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET
  *
  * Usage :
  *   npx tsx scripts/enrich-artist-images-spotify.ts --dry-run --limit 50
  *   npx tsx scripts/enrich-artist-images-spotify.ts --limit 100 --delay-ms 500
  *   npx tsx scripts/enrich-artist-images-spotify.ts --user-id <uuid> --limit 30
+ *   npx tsx scripts/enrich-artist-images-spotify.ts --database-url "postgresql://..."  (surcharge DATABASE_URL)
  *   --artist-detail-concurrency 3   (défaut 3, max 3 : requêtes GET /artists/{id} en parallèle)
  *
  * Si Node affiche ECANCELED pendant le chargement (souvent avec iCloud Drive / lecteurs réseau),
@@ -57,6 +58,16 @@ loadEnvFile();
 
 const args = process.argv.slice(2);
 
+function maskDatabaseUrl(url: string): string {
+  try {
+    const u = new URL(url);
+    if (u.password) u.password = "****";
+    return u.toString();
+  } catch {
+    return "(URL non analysable, valeur masquée)";
+  }
+}
+
 function getArg(key: string): string | undefined {
   const equalFormat = args.find((arg) => arg.startsWith(`--${key}=`));
   if (equalFormat) {
@@ -83,6 +94,12 @@ const DELAY_MS = Math.max(
   parseInt(getArg("delay-ms") || "400", 10) || 400
 );
 const USER_ID = getArg("user-id")?.trim() || undefined;
+
+const DATABASE_URL_OVERRIDE =
+  getArg("database-url")?.trim() || undefined;
+if (DATABASE_URL_OVERRIDE) {
+  process.env.DATABASE_URL = DATABASE_URL_OVERRIDE;
+}
 
 const ARTIST_DETAIL_CONCURRENCY = Math.min(
   3,
@@ -127,6 +144,9 @@ async function main() {
         : "Mise à jour de Artist.imageUrl si vide uniquement.\n"
   );
   console.log(`Top artistes par nombre d’écoutes : ${LIMIT}`);
+  if (DATABASE_URL_OVERRIDE) {
+    console.log(`Base ciblée : ${maskDatabaseUrl(DATABASE_URL_OVERRIDE)} (--database-url)`);
+  }
   if (USER_ID) console.log(`Filtre userId : ${USER_ID}`);
   console.log(`Délai entre recherches : ${DELAY_MS} ms`);
   console.log(

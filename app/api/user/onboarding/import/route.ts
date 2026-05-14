@@ -18,13 +18,12 @@ import { parseOnboardingImportJsonBody } from "@/lib/services/listening/onboardi
 import {
   enrichTopUserArtistsFromSpotify,
   getSpotifyClientCredentialsFromEnv,
+  POST_IMPORT_SPOTIFY_ARTIST_IMAGE_LIMIT,
 } from "@/lib/services/spotify/artist-image-enrichment";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 export const maxDuration = 60;
-
-const ONBOARDING_SPOTIFY_ARTIST_IMAGE_TOP_N = 20;
 
 const RATE = {
   route: "/api/user/onboarding/import",
@@ -53,8 +52,8 @@ async function enrichSpotifyArtistImagesForUserAfterOnboarding(userId: string) {
       userId,
       clientId: creds.clientId,
       clientSecret: creds.clientSecret,
-      limit: ONBOARDING_SPOTIFY_ARTIST_IMAGE_TOP_N,
-      force: true,
+      limit: POST_IMPORT_SPOTIFY_ARTIST_IMAGE_LIMIT,
+      force: false,
     });
 
     return {

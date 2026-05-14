@@ -24,6 +24,7 @@ import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
 import { PaletteMappingNotice } from "@/lib/components/palette/palette-mapping-notice";
 import { GenresSkeleton } from "@/lib/components/skeleton-loaders";
 import { usePublicDemoViewer } from "@/lib/hooks/use-public-demo-viewer";
+import { useArtistSpotifyImageResolution } from "@/lib/hooks/use-artist-spotify-image-resolution";
 import { Tags } from "lucide-react";
 
 type ChartType = "pie" | "bar";
@@ -267,24 +268,27 @@ function ChevronIcon({ direction }: { direction: "up" | "down" }) {
   );
 }
 
-/** Une colonne d’image (top artiste du genre) pour le fond des cartes spotlight. */
-function TopGenreArtistBgSlot({
+const TopGenreArtistBgSlotHydrated = memo(function TopGenreArtistBgSlotHydrated({
+  artistId,
   imageUrl,
   label,
   fallbackClass,
 }: {
+  artistId: string;
   imageUrl: string | null;
   label: string;
   fallbackClass: string;
 }) {
   const [failed, setFailed] = useState(false);
-  const showImg = Boolean(imageUrl && !failed);
+  const resolved = useArtistSpotifyImageResolution(artistId, imageUrl);
+  const url = resolved?.trim() ?? null;
+  const showImg = Boolean(url && !failed);
   return (
     <div className="relative min-h-[120px] flex-1 min-w-0 border-r border-white/10 last:border-r-0 sm:min-h-[140px]">
       {showImg ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={imageUrl!}
+          src={url!}
           alt=""
           className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           loading="lazy"
@@ -300,6 +304,40 @@ function TopGenreArtistBgSlot({
       )}
       {label ? <span className="sr-only">{label}</span> : null}
     </div>
+  );
+});
+TopGenreArtistBgSlotHydrated.displayName = "TopGenreArtistBgSlotHydrated";
+
+/** Une colonne d’image (top artiste du genre) pour le fond des cartes spotlight. */
+function TopGenreArtistBgSlot({
+  artistId,
+  imageUrl,
+  label,
+  fallbackClass,
+}: {
+  artistId: string | null;
+  imageUrl: string | null;
+  label: string;
+  fallbackClass: string;
+}) {
+  if (!artistId) {
+    return (
+      <div className="relative min-h-[120px] flex-1 min-w-0 border-r border-white/10 last:border-r-0 sm:min-h-[140px]">
+        <div
+          className={`absolute inset-0 bg-gradient-to-br ${fallbackClass}`}
+          aria-hidden
+        />
+        {label ? <span className="sr-only">{label}</span> : null}
+      </div>
+    );
+  }
+  return (
+    <TopGenreArtistBgSlotHydrated
+      artistId={artistId}
+      imageUrl={imageUrl}
+      label={label}
+      fallbackClass={fallbackClass}
+    />
   );
 }
 
@@ -564,6 +602,7 @@ function GenresContent() {
                           {slots.map((artist, slotIdx) => (
                             <TopGenreArtistBgSlot
                               key={`${genre.name}-slot-${slotIdx}`}
+                              artistId={artist?.id ?? null}
                               imageUrl={artist?.imageUrl ?? null}
                               label={artist?.name ?? ""}
                               fallbackClass={slotFallbacks[slotIdx] ?? slotFallbacks[0]}

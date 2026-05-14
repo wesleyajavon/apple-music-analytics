@@ -12,6 +12,7 @@
 |------------|-------------------|---------------|
 | **Breakwater** | Durcir la démo publique quand coûts, trafic ou risque dépassent le confort actuel | [docs/BREAKWATER.md](docs/BREAKWATER.md) |
 | **CurtainCall** | Sessions expirantes avec timeout d’inactivité : demander une reconnexion après absence prolongée | [docs/CURTAINCALL.md](docs/CURTAINCALL.md) |
+| **Duet** | Réseau social léger : **amis**, **comparaison** des stats sur **un même graphe** (engagement, « qui écoute le plus cet artiste ») | [docs/DUET.md](docs/DUET.md) |
 | **Encore** | UI **Replay par année** (style Apple Music Replay), API déjà prête | [docs/ENCORE.md](docs/ENCORE.md) |
 | **Headliner** | Unifier **artiste principal vs featuring** pour des tops et agrégats plus justes (parsing, alias, mbid, ou crédits multiples) | [docs/HEADLINER.md](docs/HEADLINER.md) |
 | **Maestro** | Agent conversationnel IA pour poser des questions en langage naturel sur les données musicales de l’utilisateur | [docs/MAESTRO.md](docs/MAESTRO.md) |
@@ -35,6 +36,16 @@
 - **Pistes produit / sécurité** : définir un timeout d’inactivité clair (ex. 30 min, 2 h, 24 h), afficher un message de reconnexion propre, et décider si l’expiration doit être côté client seulement ou renforcée côté serveur pour les routes sensibles.
 - **Doc** : [docs/CURTAINCALL.md](docs/CURTAINCALL.md) (cadrage Supabase Auth, UX de reconnexion, garde serveur, prompt agent).
 - **Quand prioriser** : avant une démo publique élargie, si plusieurs personnes utilisent le même appareil, ou si des données utilisateur deviennent plus sensibles.
+
+---
+
+## Duet
+
+- **Idée** : donner une **dynamique sociale** à l’app — les utilisateurs ajoutent des **amis** (demandes / acceptation), puis **comparent leurs données** : graphes avec **les deux comptes** sur une même série (artistes, genres, fenêtre temporelle), mini-défis du type « qui a le plus écouté **cet artiste** sur la période », etc.
+- **Pourquoi** : fort potentiel **d’engagement** et de **fun** sans forcément transformer le produit en réseau généraliste ; la valeur reste ancrée dans les données d’écoute déjà au cœur du dashboard.
+- **À trancher tôt** : modèle **privacy** (opt-in par ami ? niveaux de visibilité ?), anti-abus (spam d’invitations), alignement **Breakwater** sur tout ce qui touche aux données d’un autre user ; conformité RGPD si contacts ou découverte.
+- **Doc** : [docs/DUET.md](docs/DUET.md) (visions MVP → v2, prompts agent).
+- **Quand prioriser** : après stabilité auth / onboarding ; quand tu veux pousser la rétention et le bouche-à-oreille ; idéalement avec une première version **minimaliste** (liste d’amis + 1 à 2 vues comparatives) avant d’élargir.
 
 ---
 
@@ -108,6 +119,7 @@ Quand une idée mérite son propre dossier, crée `docs/NOM_CODENAME.md` (comme 
 
 - **Breakwater** : `Breakwater`, `breakwater`, [docs/BREAKWATER.md](docs/BREAKWATER.md)
 - **CurtainCall** : `CurtainCall`, `curtain call`, `session`, `timeout`, `expiration`, `inactivité`, `reconnexion`, [docs/CURTAINCALL.md](docs/CURTAINCALL.md)
+- **Duet** : `Duet`, `duet`, `amis`, `friends`, `social`, `comparaison`, `compare`, `graphe`, `dual`, `who listened most`, [docs/DUET.md](docs/DUET.md)
 - **Encore** : `Encore`, `encore`, [docs/ENCORE.md](docs/ENCORE.md)
 - **Headliner** : `Headliner`, `headliner`, `featuring`, `feat.`, `artiste canonique`, [docs/HEADLINER.md](docs/HEADLINER.md)
 - **Maestro** : `Maestro`, `maestro`, `music-chat`, `agent conversationnel`, `Ask your music data`, [docs/MAESTRO.md](docs/MAESTRO.md)

@@ -28,11 +28,8 @@ import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
 import { OverviewSkeleton } from "@/lib/components/skeleton-loaders";
 import type { ArtistOverviewDto, ArtistStatsDto } from "@/lib/dto/artist";
-import {
-  getAvatarUrl,
-  getArtistImageUrl,
-  TopThreeArtists,
-} from "@/lib/components/top-three-artists-cards";
+import { TopThreeArtists } from "@/lib/components/top-three-artists-cards";
+import { ArtistAvatarHydrated } from "@/lib/components/artist-avatar-hydrated";
 import { ArtistUserInsightsPanel } from "@/lib/components/artist-user-insights-panel";
 import { Mic2 } from "lucide-react";
 
@@ -287,17 +284,17 @@ const ArtistCard = memo(({
                 height: avatarSize,
               }}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={getArtistImageUrl(artist, avatarSize * 2, rank - 1)}
+              <ArtistAvatarHydrated
+                artistId={artist.artistId}
+                artistName={artist.artistName}
+                imageUrl={artist.imageUrl}
+                avatarApiSize={avatarSize * 2}
+                colorIndex={rank - 1}
                 alt={artist.artistName}
                 width={avatarSize}
                 height={avatarSize}
                 className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 loading="lazy"
-                onError={(e) => {
-                  e.currentTarget.src = getAvatarUrl(artist.artistName, avatarSize * 2, rank - 1);
-                }}
               />
             </div>
             <span
@@ -446,6 +443,7 @@ const DetailedViewSection = memo(({
   isFetching,
   onPageChange,
   onPageSizeChange,
+  onOpenArtistInsights,
   t,
   locale,
 }: {
@@ -459,6 +457,7 @@ const DetailedViewSection = memo(({
   isFetching: boolean;
   onPageChange: (nextPage: number) => void;
   onPageSizeChange: (nextPageSize: number) => void;
+  onOpenArtistInsights: (artist: ArtistStatsDto, avatarColorIndex: number) => void;
   t: (k: string, v?: Record<string, string | number>) => string;
   locale: string;
 }) => {
@@ -524,8 +523,25 @@ const DetailedViewSection = memo(({
                 const rankBg = ["bg-amber-500/15", "bg-slate-400/15", "bg-amber-700/15"];
                 const rankStyle = index < 3 ? rankStyles[index] : "text-gray-400 dark:text-gray-500";
                 const rankBgStyle = index < 3 ? rankBg[index] : "bg-gray-100 dark:bg-gray-700/50";
+                const avatarColorIndex = offset + index;
+                const rowInteractive =
+                  "cursor-pointer hover:bg-cyan-50/70 dark:hover:bg-cyan-300/5 transition-colors " +
+                  "focus-visible:bg-cyan-50/70 dark:focus-visible:bg-cyan-300/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-cyan-400";
+                const openInsights = () => onOpenArtistInsights(artist, avatarColorIndex);
                 return (
-                  <tr key={artist.artistId} className="hover:bg-cyan-50/70 dark:hover:bg-cyan-300/5 transition-colors">
+                  <tr
+                    key={artist.artistId}
+                    className={rowInteractive}
+                    tabIndex={0}
+                    role="button"
+                    aria-label={t("artistInsightsAriaOpen", { name: artist.artistName })}
+                    onClick={openInsights}
+                    onKeyDown={(ev) => {
+                      if (ev.key !== "Enter" && ev.key !== " ") return;
+                      ev.preventDefault();
+                      openInsights();
+                    }}
+                  >
                     <td className="whitespace-nowrap px-6 py-4">
                       <span className={`inline-flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold ${rankStyle} ${rankBgStyle}`}>
                         {offset + index + 1}
@@ -534,16 +550,16 @@ const DetailedViewSection = memo(({
                     <td className="whitespace-nowrap px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={getArtistImageUrl(artist, 72, index)}
+                          <ArtistAvatarHydrated
+                            artistId={artist.artistId}
+                            artistName={artist.artistName}
+                            imageUrl={artist.imageUrl}
+                            avatarApiSize={72}
+                            colorIndex={avatarColorIndex}
                             alt=""
                             width={36}
                             height={36}
                             className="h-full w-full object-cover"
-                            onError={(e) => {
-                              e.currentTarget.src = getAvatarUrl(artist.artistName, 72, index);
-                            }}
                           />
                         </div>
                         <span className="text-sm font-medium text-gray-900 dark:text-white">{artist.artistName}</span>
@@ -837,7 +853,13 @@ function ArtistsContent() {
         {isTopLoading ? (
           <ArtistsGridSkeleton count={3} />
         ) : (
-          <TopThreeArtists artists={topArtists} maxListens={maxListens} t={t} locale={locale} />
+          <TopThreeArtists
+            artists={topArtists}
+            maxListens={maxListens}
+            t={t}
+            locale={locale}
+            onArtistSelect={handleOpenArtistInsights}
+          />
         )}
       </section>
 
@@ -975,6 +997,7 @@ function ArtistsContent() {
         isFetching={isPagedFetching || !pagedData}
         onPageChange={(nextPage) => updatePaginationParams(nextPage, pageSize)}
         onPageSizeChange={(nextPageSize) => updatePaginationParams(1, nextPageSize)}
+        onOpenArtistInsights={handleOpenArtistInsights}
         t={t}
         locale={locale}
       />

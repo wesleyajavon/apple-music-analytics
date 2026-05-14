@@ -15,7 +15,7 @@ import { X } from "lucide-react";
 import { CHART_TOOLTIP_STYLES } from "@/lib/constants/config";
 import type { ArtistStatsDto } from "@/lib/dto/artist";
 import { useArtistUserInsights } from "@/lib/hooks/use-artists";
-import { getArtistImageUrl, getAvatarUrl } from "@/lib/components/top-three-artists-cards";
+import { ArtistAvatarHydrated } from "@/lib/components/artist-avatar-hydrated";
 import { ErrorState } from "@/lib/components/error-state";
 
 const PANEL_SHELL =
@@ -175,16 +175,16 @@ export const ArtistUserInsightsPanel = memo(
             <div className="flex min-w-0 flex-1 items-start gap-4">
               <div className="relative shrink-0 overflow-hidden rounded-2xl ring-1 ring-white/50 dark:ring-white/15">
                 {displayArtist ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={getArtistImageUrl(displayArtist, 128, colorIndex)}
+                  <ArtistAvatarHydrated
+                    artistId={artistId}
+                    artistName={displayArtist.artistName}
+                    imageUrl={displayArtist.imageUrl}
+                    avatarApiSize={128}
+                    colorIndex={colorIndex}
                     alt=""
                     width={76}
                     height={76}
                     className="h-[76px] w-[76px] object-cover"
-                    onError={(e) => {
-                      e.currentTarget.src = getAvatarUrl(displayArtist.artistName, 128, colorIndex);
-                    }}
                   />
                 ) : null}
               </div>

@@ -34,7 +34,8 @@ import { InteractiveAiGenreBackfillNotice } from "@/lib/components/interactive-a
 import { useInteractiveAiBlockedByGenreBackfill } from "@/lib/hooks/use-interactive-ai-blocked-by-genre-backfill";
 import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
 import { firstKnownGenreName } from "@/lib/utils/genre-unknown-label";
-import { getArtistImageUrl, getAvatarUrl } from "@/lib/components/top-three-artists-cards";
+import { ArtistAvatarHydrated } from "@/lib/components/artist-avatar-hydrated";
+import { getAvatarUrl } from "@/lib/components/artist-avatar-utils";
 
 const TOP_LIMIT = 6;
 const PROFILE_AI_STALE_TIME = 5 * 60 * 1000;
@@ -423,26 +424,37 @@ function MusicalProfileContent() {
               <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-center">
                 <div className="relative shrink-0">
                   <div className="relative h-28 w-28 overflow-hidden rounded-2xl shadow-2xl shadow-black/35 ring-2 ring-white/20 sm:h-32 sm:w-32">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={
-                        topArtists[0]
-                          ? getArtistImageUrl(topArtists[0], 384, 0)
-                          : getAvatarUrl(topArtistName || t("unknownArtist"), 384, 0)
-                      }
-                      alt=""
-                      className="h-full w-full object-cover"
-                      loading="eager"
-                      decoding="async"
-                      referrerPolicy="no-referrer"
-                      onError={(e) => {
-                        e.currentTarget.src = getAvatarUrl(
-                          topArtistName || t("unknownArtist"),
-                          384,
-                          0
-                        );
-                      }}
-                    />
+                    {topArtists[0] ? (
+                      <ArtistAvatarHydrated
+                        artistId={topArtists[0].artistId}
+                        artistName={topArtists[0].artistName}
+                        imageUrl={topArtists[0].imageUrl}
+                        avatarApiSize={384}
+                        colorIndex={0}
+                        alt=""
+                        className="h-full w-full object-cover"
+                        loading="eager"
+                        decoding="async"
+                        referrerPolicy="no-referrer"
+                      />
+                    ) : (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img
+                        src={getAvatarUrl(topArtistName || t("unknownArtist"), 384, 0)}
+                        alt=""
+                        className="h-full w-full object-cover"
+                        loading="eager"
+                        decoding="async"
+                        referrerPolicy="no-referrer"
+                        onError={(e) => {
+                          e.currentTarget.src = getAvatarUrl(
+                            topArtistName || t("unknownArtist"),
+                            384,
+                            0
+                          );
+                        }}
+                      />
+                    )}
                     <div
                       className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-tr from-violet-600/20 via-transparent to-cyan-500/15"
                       aria-hidden

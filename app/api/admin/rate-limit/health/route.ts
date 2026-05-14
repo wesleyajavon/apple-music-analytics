@@ -15,6 +15,7 @@ const DEFAULT_ROUTES = [
   "/api/listens",
   "/api/artists/trends",
   "/api/artists/trends-chart",
+  "/api/artists/[artistId]/image",
   "/api/genres/trends",
   "/api/temporal-analysis",
   "/api/timeline",

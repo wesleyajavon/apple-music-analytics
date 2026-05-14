@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { importLastFmTracks, isLastFmConfigured } from "@/lib/services/lastfm";
+import { schedulePostImportSpotifyArtistImageEnrichment } from "@/lib/services/spotify/artist-image-enrichment";
 import { handleApiError, createValidationError } from "@/lib/utils/error-handler";
 import { resolveImportUserId } from "@/lib/auth/resolve-import-user-id";
 import {
@@ -88,6 +89,10 @@ export async function POST(request: NextRequest) {
       to: to ? parseInt(String(to), 10) : undefined,
       dryRun: dryRun === true,
     });
+
+    if (!result.dryRun && result.imported > 0) {
+      schedulePostImportSpotifyArtistImageEnrichment({ userId });
+    }
 
     const response = NextResponse.json({
       success: result.success,

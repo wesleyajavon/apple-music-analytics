@@ -1,6 +1,6 @@
 /**
  * Enrichissement de Artist.imageUrl via Spotify Web API (client_credentials).
- * Partagé par le script CLI et le flux d’import onboarding.
+ * Partagé par le script CLI, l’onboarding/import, sync Spotify, autres imports — et hydrate à la carte (route API image).
  */
 
 import { Prisma } from "@prisma/client";
@@ -444,6 +444,147 @@ export async function enrichTopUserArtistsFromSpotify(params: {
     skippedNoImageUrl: skippedNoUrl,
     searchFailures,
   };
+}
+
+export type EnrichSingleArtistImageIfMissingResult =
+  | {
+      ok: true;
+      /** true si une image a été résolue sur Spotify mais était déjà en base inchangée */
+      skippedAlreadyHad: boolean;
+      imageUrl: string | null;
+    }
+  | { ok: false; reason: "no_credentials" | "artist_not_found" | "spotify_auth_failed" };
+
+/**
+ * Résout l’URL d’image Spotify pour un artiste en base sans image (ou tous si force).
+ * Une requête de recherche + une requête GET /artists/{id} pour une image HD.
+ */
+export async function enrichArtistImageFromSpotifyIfMissing(params: {
+  artistDbId: string;
+  clientId: string;
+  clientSecret: string;
+  /** Quand false (défaut), ne fait rien si imageUrl existe déjà */
+  force?: boolean;
+  dryRun?: boolean;
+  db?: typeof defaultPrisma;
+}): Promise<EnrichSingleArtistImageIfMissingResult> {
+  const clientId = params.clientId.trim();
+  const clientSecret = params.clientSecret.trim();
+  if (!clientId || !clientSecret) {
+    return { ok: false, reason: "no_credentials" };
+  }
+
+  const db = params.db ?? defaultPrisma;
+  const force = params.force ?? false;
+  const dryRun = params.dryRun ?? false;
+
+  const artist = await db.artist.findUnique({
+    where: { id: params.artistDbId },
+    select: { id: true, name: true, imageUrl: true },
+  });
+
+  if (!artist) {
+    return { ok: false, reason: "artist_not_found" };
+  }
+
+  const hasImg = Boolean(artist.imageUrl?.trim());
+  if (!force && hasImg) {
+    return {
+      ok: true,
+      skippedAlreadyHad: true,
+      imageUrl: artist.imageUrl!.trim(),
+    };
+  }
+
+  let accessToken: string;
+  try {
+    accessToken = await fetchSpotifyClientCredentialsToken(
+      clientId,
+      clientSecret
+    );
+  } catch {
+    return { ok: false, reason: "spotify_auth_failed" };
+  }
+
+  let match;
+  try {
+    match = await spotifySearchFirstArtist(accessToken, artist.name, 2);
+  } catch {
+    return {
+      ok: true,
+      skippedAlreadyHad: hasImg,
+      imageUrl: artist.imageUrl?.trim() ?? null,
+    };
+  }
+
+  if (!match?.id) {
+    return {
+      ok: true,
+      skippedAlreadyHad: hasImg,
+      imageUrl: artist.imageUrl?.trim() ?? null,
+    };
+  }
+
+  let url: string | null = null;
+  try {
+    url = await fetchArtistDetailImageUrl(accessToken, match.id, 2);
+  } catch {
+    url = match.imageUrl ?? null;
+  }
+
+  const trimmed = url?.trim();
+  if (!trimmed) {
+    return {
+      ok: true,
+      skippedAlreadyHad: hasImg,
+      imageUrl: artist.imageUrl?.trim() ?? null,
+    };
+  }
+
+  if (!dryRun) {
+    await db.artist.update({
+      where: { id: artist.id },
+      data: { imageUrl: trimmed },
+    });
+  }
+
+  return {
+    ok: true,
+    skippedAlreadyHad: false,
+    imageUrl: trimmed,
+  };
+}
+
+/** Limite commune après import onboarding / sync — uniquement si imageUrl vide (force: false). */
+export const POST_IMPORT_SPOTIFY_ARTIST_IMAGE_LIMIT = 20;
+
+/**
+ * Enrichissement léger après sync : ne pas bloquer la réponse HTTP du sync.
+ */
+export function schedulePostImportSpotifyArtistImageEnrichment(params: {
+  userId: string;
+  /** Surcharge pour les tests uniquement */
+  limit?: number;
+  delayMs?: number;
+  log?: (msg: string) => void;
+}): void {
+  const creds = getSpotifyClientCredentialsFromEnv();
+  if (!creds) return;
+
+  void enrichTopUserArtistsFromSpotify({
+    userId: params.userId,
+    ...creds,
+    limit:
+      typeof params.limit === "number"
+        ? params.limit
+        : POST_IMPORT_SPOTIFY_ARTIST_IMAGE_LIMIT,
+    force: false,
+    delayMs: params.delayMs ?? 350,
+    log: params.log,
+  }).catch((e) => {
+    const msg = e instanceof Error ? e.message : String(e);
+    (params.log ?? console.error)(`Spotify post-import enrich: ${msg}`);
+  });
 }
 
 export function getSpotifyClientCredentialsFromEnv(): {

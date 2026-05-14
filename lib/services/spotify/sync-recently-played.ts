@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { importOnboardingListens } from "@/lib/services/listening/import-onboarding-listens";
+import { schedulePostImportSpotifyArtistImageEnrichment } from "@/lib/services/spotify/artist-image-enrichment";
 import { getValidSpotifyAccessTokenForUser } from "@/lib/services/spotify/get-valid-access-token";
 import { parseSpotifyApiErrorMessage } from "@/lib/services/spotify/spotify-http";
 import type { SpotifyRecentlyPlayedApiResponse } from "@/lib/services/spotify/recently-played-normalize";
@@ -100,6 +101,10 @@ export async function syncSpotifyRecentlyPlayedForUser(userId: string): Promise<
   }
 
   const importResult = await importOnboardingListens(userId, SOURCE, allRows);
+
+  if (importResult.imported > 0) {
+    schedulePostImportSpotifyArtistImageEnrichment({ userId });
+  }
 
   let maxPlayedMs =
     conn.syncCursorMs != null ? Number(conn.syncCursorMs) : 0;

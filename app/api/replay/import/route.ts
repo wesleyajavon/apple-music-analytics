@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { importReplayYearly } from "@/lib/services/replay/replay-service";
+import { schedulePostImportSpotifyArtistImageEnrichment } from "@/lib/services/spotify/artist-image-enrichment";
 import { handleApiError, createValidationError, AppError } from "@/lib/utils/error-handler";
 import { resolveImportUserId } from "@/lib/auth/resolve-import-user-id";
 import {
@@ -62,6 +63,8 @@ export async function POST(request: NextRequest) {
         }
       );
     }
+
+    schedulePostImportSpotifyArtistImageEnrichment({ userId });
 
     const response = NextResponse.json({
       message: "Replay data imported successfully",

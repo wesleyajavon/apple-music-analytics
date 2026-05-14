@@ -2,21 +2,9 @@
 
 import { memo } from "react";
 import type { ArtistStatsDto } from "@/lib/dto/artist";
+import { ArtistAvatarHydrated } from "@/lib/components/artist-avatar-hydrated";
 
-const AVATAR_BG_COLORS = [
-  "6d28d9", "059669", "d97706", "be123c", "7c2d12", "4d7c0f", "9333ea", "64748b",
-];
-
-export function getAvatarUrl(artistName: string, size: number, colorIndex: number = 0): string {
-  const bg = AVATAR_BG_COLORS[colorIndex % AVATAR_BG_COLORS.length];
-  return `https://ui-avatars.com/api/?name=${encodeURIComponent(artistName)}&size=${size}&background=${bg}&color=fff&bold=true`;
-}
-
-/** URL d'image : imageUrl en base si présente, sinon avatar par initiales */
-export function getArtistImageUrl(artist: ArtistStatsDto, size: number, colorIndex: number = 0): string {
-  if (artist.imageUrl?.trim()) return artist.imageUrl;
-  return getAvatarUrl(artist.artistName, size, colorIndex);
-}
+export { getAvatarUrl, getArtistImageUrl } from "@/lib/components/artist-avatar-utils";
 
 type TopThreeArtistsT = (
   key: string,
@@ -62,17 +50,17 @@ export const TopThreeArtists = memo(
           const body = (
             <>
               <div className="absolute inset-0">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={getArtistImageUrl(artist, 640, index)}
+                <ArtistAvatarHydrated
+                  artistId={artist.artistId}
+                  artistName={artist.artistName}
+                  imageUrl={artist.imageUrl}
+                  avatarApiSize={640}
+                  colorIndex={index}
                   alt=""
                   className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   loading="lazy"
                   decoding="async"
                   referrerPolicy="no-referrer"
-                  onError={(e) => {
-                    e.currentTarget.src = getAvatarUrl(artist.artistName, 640, index);
-                  }}
                 />
               </div>
               <div

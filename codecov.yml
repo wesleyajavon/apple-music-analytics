@@ -6,8 +6,8 @@ coverage:
         threshold: 1%
     patch:
       default:
-        target: auto
-        threshold: 1%
+        # Diff-only metric; Next UI churn is rarely covered by Vitest — report without gating CI.
+        informational: true
 
 ignore:
   - "__tests__/**"

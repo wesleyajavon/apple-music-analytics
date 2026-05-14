@@ -24,10 +24,8 @@ import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
 import { formatOverviewDateRangeLabel } from "@/lib/utils/overview-date-range-label";
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
-import {
-  HeatmapSkeleton,
-  DayDetailsSkeleton,
-} from "@/lib/components/skeleton-loaders";
+import { HeatmapDayDetailsPanel } from "@/lib/components/heatmap-day-details-panel";
+import { HeatmapSkeleton } from "@/lib/components/skeleton-loaders";
 import { CalendarDays } from "lucide-react";
 
 const CARD_CLASS =
@@ -516,215 +514,29 @@ function HeatmapContent() {
 
       {/* Détails du jour sélectionné */}
       {selectedDate && (
-        <div
+        <section
           ref={dayDetailsRef}
           className="mt-8 scroll-mt-8 animate-fade-in-up"
-          style={{ animationDelay: "0ms" }}
+          aria-labelledby="heatmap-day-details-title"
         >
-          <div className={CARD_CLASS}>
-            <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${HEATMAP_RAIL_CLASS} opacity-85`} />
-            <div className="pointer-events-none absolute -right-20 -top-24 h-48 w-48 rounded-full bg-violet-400/10 blur-3xl dark:bg-violet-400/15" />
-            <div className="relative flex items-center justify-between border-b border-sky-200/20 px-6 py-4 dark:border-sky-300/10">
-              <div>
-                <h2 className="text-lg font-semibold text-foreground">
-                  {t("dayDetails")}{" "}
-                  {(() => {
-                    const [year, month, day] = selectedDate
-                      .split("-")
-                      .map(Number);
-                    const date = new Date(year, month - 1, day);
-                    return date.toLocaleDateString(locale, {
-                      weekday: "long",
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    });
-                  })()}
-                </h2>
-                {dayListensData && (
-                  <p className="mt-0.5 text-sm text-muted">
-                    {dayListensData.total}{" "}
-                    {dayListensData.total > 1 ? t("listens") : t("listen")}{" "}
-                    {t("inTotal")}
-                  </p>
-                )}
-              </div>
-              <button
-                onClick={() => setSelectedDate(null)}
-                className="rounded-lg p-2 text-muted transition-colors hover:bg-sky-400/10 hover:text-sky-600 dark:hover:text-sky-300"
-                aria-label={t("closeDetails")}
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
-
-            {isLoadingDayListens ? (
-              <div className="relative p-6">
-                <DayDetailsSkeleton />
-              </div>
-            ) : dayListensData && dayListensData.data.length > 0 ? (
-              <div className="relative space-y-6 p-6">
-                {/* Statistiques du jour */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="rounded-xl border border-sky-200/20 bg-white/50 p-4 dark:border-sky-300/10 dark:bg-slate-950/20">
-                    <div className="text-sm font-medium text-muted">
-                      {t("totalListens")}
-                    </div>
-                    <div className="mt-1 text-2xl font-bold tracking-tight text-foreground">
-                      {dayListensData.total.toLocaleString(locale)}
-                    </div>
-                  </div>
-                  <div className="rounded-xl border border-sky-200/20 bg-white/50 p-4 dark:border-sky-300/10 dark:bg-slate-950/20">
-                    <div className="text-sm font-medium text-muted">
-                      {t("uniqueArtists")}
-                    </div>
-                    <div className="mt-1 text-2xl font-bold tracking-tight text-foreground">
-                      {new Set(
-                        dayListensData.data.map((l) => l.artistName),
-                      ).size.toLocaleString(locale)}
-                    </div>
-                  </div>
-                  <div className="rounded-xl border border-sky-200/20 bg-white/50 p-4 dark:border-sky-300/10 dark:bg-slate-950/20">
-                    <div className="text-sm font-medium text-muted">
-                      {t("uniqueTracks")}
-                    </div>
-                    <div className="mt-1 text-2xl font-bold tracking-tight text-foreground">
-                      {new Set(
-                        dayListensData.data.map(
-                          (l) => `${l.trackTitle}-${l.artistName}`,
-                        ),
-                      ).size.toLocaleString(locale)}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Top artistes du jour */}
-                <div>
-                  <h3 className="mb-3 text-sm font-semibold text-foreground">
-                    {t("topArtists")}
-                  </h3>
-                  <div className="space-y-2">
-                    {Array.from(
-                      dayListensData.data.reduce((acc, listen) => {
-                        acc.set(
-                          listen.artistName,
-                          (acc.get(listen.artistName) || 0) + 1,
-                        );
-                        return acc;
-                      }, new Map<string, number>()),
-                    )
-                      .sort((a, b) => b[1] - a[1])
-                      .slice(0, 5)
-                      .map(([artist, count], index) => {
-                        const rankColors = [
-                          "text-amber-500",
-                          "text-slate-400",
-                          "text-amber-700",
-                        ];
-                        const rankBg = [
-                          "bg-amber-500/15",
-                          "bg-slate-400/15",
-                          "bg-amber-700/15",
-                        ];
-                        const rankStyle =
-                          index < 3 ? rankColors[index] : "text-muted";
-                        const rankBgStyle =
-                          index < 3 ? rankBg[index] : "bg-surface-glass";
-                        return (
-                          <div
-                            key={artist}
-                            className="flex items-center justify-between rounded-xl border border-sky-200/20 bg-white/50 p-3 dark:border-sky-300/10 dark:bg-slate-950/20"
-                          >
-                            <div className="flex items-center gap-3 min-w-0">
-                              <span
-                                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold ${rankStyle} ${rankBgStyle}`}
-                              >
-                                {index + 1}
-                              </span>
-                              <span className="truncate text-sm font-medium text-foreground">
-                                {artist}
-                              </span>
-                            </div>
-                            <span className="ml-3 shrink-0 text-sm font-semibold text-foreground tabular-nums">
-                              {count} {count > 1 ? t("listens") : t("listen")}
-                            </span>
-                          </div>
-                        );
-                      })}
-                  </div>
-                </div>
-
-                {/* Liste des écoutes */}
-                <div>
-                  <h3 className="mb-3 text-sm font-semibold text-foreground">
-                    {t("detailedListens")}
-                  </h3>
-                  <div className="space-y-2 max-h-96 overflow-y-auto">
-                    {dayListensData.data
-                      .sort(
-                        (a, b) =>
-                          new Date(b.playedAt).getTime() -
-                          new Date(a.playedAt).getTime(),
-                      )
-                      .map((listen) => (
-                        <div
-                          key={listen.id}
-                          className="flex items-center justify-between rounded-xl border border-sky-200/20 bg-white/50 p-3 transition-colors hover:bg-sky-400/10 dark:border-sky-300/10 dark:bg-slate-950/20"
-                        >
-                          <div className="flex-1 min-w-0">
-                            <div className="truncate text-sm font-medium text-foreground">
-                              {listen.trackTitle}
-                            </div>
-                            <div className="truncate text-xs text-muted">
-                              {listen.artistName}
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-4 ml-4 shrink-0">
-                            <span className="text-xs text-muted tabular-nums">
-                              {new Date(listen.playedAt).toLocaleTimeString(
-                                locale,
-                                {
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                },
-                              )}
-                            </span>
-                            <span
-                              className={`text-xs px-2 py-1 rounded-lg font-medium ${
-                                listen.source === "lastfm"
-                                  ? "bg-violet-400/15 text-violet-600 dark:text-violet-300"
-                                  : "bg-emerald-400/15 text-emerald-600 dark:text-emerald-300"
-                              }`}
-                            >
-                              {listen.source === "lastfm"
-                                ? "Last.fm"
-                                : "Apple Music"}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                  </div>
-                </div>
-              </div>
-            ) : dayListensData && dayListensData.data.length === 0 ? (
-              <div className="p-6">
-                <EmptyState {...emptyStatePresets.noDayDetail} />
-              </div>
-            ) : null}
-          </div>
-        </div>
+          <HeatmapDayDetailsPanel
+            selectedDate={selectedDate}
+            locale={locale}
+            onClose={() => setSelectedDate(null)}
+            dayListens={dayListensData}
+            isLoading={isLoadingDayListens}
+            periodDailyAverage={
+              stats && stats.averageListens > 0 ? stats.averageListens : null
+            }
+            periodMaxListens={stats?.maxListens ?? 0}
+            periodMaxDayDate={
+              stats?.maxDay ? toDateOnly(stats.maxDay.date) : null
+            }
+            emptyStateNoPlays={
+              <EmptyState {...emptyStatePresets.noDayDetail} />
+            }
+          />
+        </section>
       )}
     </>
   );

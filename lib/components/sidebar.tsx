@@ -40,7 +40,11 @@ const icons = {
   ),
   tracks: (props: React.SVGProps<SVGSVGElement>) => (
     <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="m9 9 10.5-3m0 6.553v3.75a2.25 2.25 0 0 1-1.632 2.163l-1.32.377a1.803 1.803 0 1 1-.99-3.467l2.31-.66a2.25 2.25 0 0 0 1.632-2.163zm0 0V2.25L9 5.25v10.303m0 0v3.75a2.25 2.25 0 0 1-1.632 2.163l-1.32.377a1.803 1.803 0 0 1-.99-3.467l2.31-.66A2.25 2.25 0 0 0 9 15.553z" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 0 1 0 3.75H5.625a1.875 1.875 0 0 1 0-3.75Z"
+      />
     </svg>
   ),
   artists: (props: React.SVGProps<SVGSVGElement>) => (
@@ -50,7 +54,12 @@ const icons = {
   ),
   genres: (props: React.SVGProps<SVGSVGElement>) => (
     <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M9 9v10.303a2.25 2.25 0 0 1-1.632 2.163l-1.32.377a1.803 1.803 0 1 1-.99-3.467l2.31-.66A2.25 2.25 0 0 0 9 15.553V5.25l10.5-3v10.303a2.25 2.25 0 0 1-1.632 2.163l-1.32.377a1.803 1.803 0 1 1-.99-3.467l2.31-.66a2.25 2.25 0 0 0 1.632-2.163V2.25" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.331-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z"
+      />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6 6h.008v.008H6V6Z" />
     </svg>
   ),
   trends: (props: React.SVGProps<SVGSVGElement>) => (
@@ -78,6 +87,16 @@ const icons = {
   clock: (props: React.SVGProps<SVGSVGElement>) => (
     <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+    </svg>
+  ),
+  /** Chat / assistant — Ask your Soundprint */
+  askSoundprint: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z"
+      />
     </svg>
   ),
   aiInsights: (props: React.SVGProps<SVGSVGElement>) => (
@@ -155,7 +174,7 @@ const navGroups: NavGroup[] = [
       {
         href: "/dashboard/ask-your-soundprint",
         labelKey: "askSoundprint",
-        icon: icons.aiInsights,
+        icon: icons.askSoundprint,
         featured: true,
         badgeKey: "newAiBadge",
       },

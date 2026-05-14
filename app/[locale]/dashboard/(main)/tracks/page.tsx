@@ -187,7 +187,7 @@ function TracksContent() {
       params.set("page", String(Math.max(1, nextPage)));
       params.set("pageSize", String(nextPageSize));
       const qs = params.toString();
-      router.replace(qs ? `${pathname}?${qs}` : pathname);
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
     },
     [pathname, router, searchParams]
   );

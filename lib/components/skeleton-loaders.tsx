@@ -816,61 +816,84 @@ export function HeatmapSkeleton() {
  */
 export function DayDetailsSkeleton() {
   return (
-    <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-      <div className="flex items-center justify-between mb-4">
-        <div className="space-y-2">
-          <div className="h-6 w-64 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
-          <div className="h-4 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
-        </div>
-        <div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
-      </div>
-
-      {/* Statistiques du jour */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+    <div className="space-y-8">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 space-y-2">
-            <div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
-            <div className="h-8 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+          <div
+            key={i}
+            className="rounded-2xl border border-sky-200/20 bg-white/55 p-4 dark:border-sky-300/10 dark:bg-slate-950/35"
+          >
+            <div className="mb-2 h-3 w-28 rounded bg-slate-200/90 dark:bg-slate-600/80 animate-shimmer" />
+            <div className="h-9 w-20 rounded bg-slate-200/90 dark:bg-slate-600/80 animate-shimmer" />
           </div>
         ))}
       </div>
 
-      {/* Top artistes */}
-      <div className="mb-6">
-        <div className="h-5 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer mb-3" />
-        <div className="space-y-2">
-          {Array.from({ length: 5 }).map((_, i) => (
+      <div className="flex flex-wrap gap-2">
+        {Array.from({ length: 2 }).map((_, i) => (
+          <div
+            key={i}
+            className="h-8 w-36 rounded-full bg-slate-200/80 dark:bg-slate-600/70 animate-shimmer"
+          />
+        ))}
+      </div>
+
+      <div>
+        <div className="mb-3 h-4 w-40 rounded bg-slate-200/90 dark:bg-slate-600/80 animate-shimmer" />
+        <div className="flex h-24 items-end gap-1 rounded-xl border border-sky-200/15 bg-white/40 px-2 pb-2 dark:border-sky-300/10 dark:bg-slate-950/30">
+          {Array.from({ length: 24 }).map((_, h) => (
             <div
-              key={i}
-              className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg"
+              key={h}
+              className="flex min-w-0 flex-1 flex-col items-center justify-end"
             >
-              <div className="flex items-center gap-3">
-                <div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
-                <div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
-              </div>
-              <div className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+              <div
+                className="w-full max-w-[10px] rounded-t-sm bg-slate-200/90 dark:bg-slate-600/70 animate-shimmer"
+                style={{
+                  height: `${12 + ((h * 13) % 55)}%`,
+                  minHeight: "6px",
+                }}
+              />
             </div>
           ))}
         </div>
       </div>
 
-      {/* Liste des écoutes */}
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+        {Array.from({ length: 2 }).map((_, col) => (
+          <div key={`sk-col-${col}`}>
+            <div className="mb-3 h-4 w-32 rounded bg-slate-200/90 dark:bg-slate-600/80 animate-shimmer" />
+            <div className="space-y-2">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="flex items-center justify-between gap-3 rounded-xl border border-sky-200/15 bg-white/50 px-3 py-2.5 dark:border-sky-300/10 dark:bg-slate-950/25"
+                >
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div className="h-8 w-8 shrink-0 rounded-lg bg-slate-200/90 dark:bg-slate-600/70 animate-shimmer" />
+                    <div className="h-4 flex-1 max-w-[12rem] rounded bg-slate-200/90 dark:bg-slate-600/80 animate-shimmer" />
+                  </div>
+                  <div className="h-4 w-14 shrink-0 rounded bg-slate-200/90 dark:bg-slate-600/80 animate-shimmer" />
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
       <div>
-        <div className="h-5 w-40 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer mb-3" />
-        <div className="space-y-2 max-h-96 overflow-y-auto">
+        <div className="mb-3 h-4 w-40 rounded bg-slate-200/90 dark:bg-slate-600/80 animate-shimmer" />
+        <div className="max-h-[22rem] space-y-2 overflow-hidden sm:max-h-[28rem]">
           {Array.from({ length: 8 }).map((_, i) => (
             <div
               key={i}
-              className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg"
+              className="flex items-start gap-3 rounded-xl border border-sky-200/15 bg-white/50 px-3 py-2.5 dark:border-sky-300/10 dark:bg-slate-950/25"
             >
-              <div className="flex-1 space-y-2">
-                <div className="h-4 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
-                <div className="h-3 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
+              <div className="mt-0.5 h-4 w-12 shrink-0 rounded bg-slate-200/90 dark:bg-slate-600/80 animate-shimmer" />
+              <div className="min-w-0 flex-1 space-y-2">
+                <div className="h-4 w-[85%] max-w-xs rounded bg-slate-200/90 dark:bg-slate-600/80 animate-shimmer" />
+                <div className="h-3 w-[55%] max-w-[12rem] rounded bg-slate-200/90 dark:bg-slate-600/70 animate-shimmer" />
               </div>
-              <div className="flex items-center gap-4 ml-4">
-                <div className="h-3 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
-                <div className="h-5 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-shimmer" />
-              </div>
+              <div className="mt-0.5 h-5 w-16 shrink-0 rounded-lg bg-slate-200/90 dark:bg-slate-600/70 animate-shimmer" />
             </div>
           ))}
         </div>

@@ -19,7 +19,7 @@ import { ArtistAvatarHydrated } from "@/lib/components/artist-avatar-hydrated";
 import { ErrorState } from "@/lib/components/error-state";
 
 const PANEL_SHELL =
-  "flex h-full min-h-0 flex-col border-l border-cyan-300/20 bg-[radial-gradient(circle_at_12%_0%,_rgba(139,92,246,0.18),_transparent_38%),radial-gradient(circle_at_88%_88%,_rgba(6,182,212,0.12),_transparent_32%),rgb(var(--card-rgb)/0.98)] shadow-[-12px_0_48px_rgba(15,23,42,0.35)] backdrop-blur-sm dark:bg-[radial-gradient(circle_at_12%_0%,_rgba(139,92,246,0.22),_transparent_38%),radial-gradient(circle_at_88%_88%,_rgba(132,204,22,0.1),_transparent_32%),rgb(var(--card-rgb)/0.96)]";
+  "flex h-full min-h-0 flex-col border-l border-slate-200/90 bg-[radial-gradient(circle_at_12%_0%,_rgba(139,92,246,0.11),_transparent_40%),radial-gradient(circle_at_92%_88%,_rgba(6,182,212,0.09),_transparent_36%),linear-gradient(165deg,_#ffffff_0%,_#f8fafc_52%,_#f1f5f9_100%)] shadow-[-10px_0_36px_rgba(15,23,42,0.06),-1px_0_0_rgba(148,163,184,0.25)] backdrop-blur-md dark:border-cyan-300/20 dark:bg-[radial-gradient(circle_at_12%_0%,_rgba(139,92,246,0.22),_transparent_38%),radial-gradient(circle_at_88%_88%,_rgba(132,204,22,0.1),_transparent_32%),rgb(var(--card-rgb)/0.96)] dark:shadow-[-12px_0_48px_rgba(15,23,42,0.35)] dark:backdrop-blur-sm";
 
 function formatPlaySeconds(seconds: number, notAvailable: string): string {
   if (seconds <= 0) return notAvailable;
@@ -158,7 +158,7 @@ export const ArtistUserInsightsPanel = memo(
       <div className="fixed inset-0 z-[80] flex justify-end">
         <button
           type="button"
-          className="absolute inset-0 bg-slate-950/55 backdrop-blur-[2px]"
+          className="absolute inset-0 bg-slate-900/30 backdrop-blur-[2px] dark:bg-slate-950/55"
           aria-label={t("insightsCloseAria")}
           onClick={onClose}
         />
@@ -169,11 +169,11 @@ export const ArtistUserInsightsPanel = memo(
           aria-modal="true"
           aria-labelledby={headingId}
         >
-          <div className={`pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-violet-400 via-cyan-300 to-lime-300 opacity-90`} />
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-violet-400 via-cyan-300 to-lime-300 opacity-100 dark:opacity-90" />
 
-          <div className="flex items-start justify-between gap-3 border-b border-cyan-300/15 px-5 py-4 sm:px-6">
+          <div className="flex items-start justify-between gap-3 border-b border-slate-200/90 bg-white/40 px-5 py-4 backdrop-blur-[2px] sm:px-6 dark:border-cyan-300/15 dark:bg-transparent">
             <div className="flex min-w-0 flex-1 items-start gap-4">
-              <div className="relative shrink-0 overflow-hidden rounded-2xl ring-1 ring-white/50 dark:ring-white/15">
+              <div className="relative shrink-0 overflow-hidden rounded-2xl ring-1 ring-slate-300/70 shadow-sm dark:ring-white/15 dark:shadow-none">
                 {displayArtist ? (
                   <ArtistAvatarHydrated
                     artistId={artistId}
@@ -217,14 +217,14 @@ export const ArtistUserInsightsPanel = memo(
               ref={closeRef}
               type="button"
               onClick={onClose}
-              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-cyan-300/25 bg-white/90 text-cyan-950 shadow-lg transition hover:bg-cyan-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 dark:border-cyan-400/20 dark:bg-slate-900/80 dark:text-cyan-100 dark:hover:bg-slate-800"
+              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-slate-300/80 bg-white text-slate-800 shadow-md shadow-slate-900/8 transition hover:border-cyan-400/40 hover:bg-cyan-50/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500/50 dark:border-cyan-400/20 dark:bg-slate-900/80 dark:text-cyan-100 dark:shadow-lg dark:hover:bg-slate-800"
               aria-label={t("insightsCloseAria")}
             >
               <X className="h-5 w-5" strokeWidth={2} aria-hidden />
             </button>
           </div>
 
-          <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-6 sm:py-6">
+          <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-6 sm:py-6 [scrollbar-gutter:stable]">
             {firstLast ? (
               <p className="mb-5 text-xs leading-relaxed text-gray-600 dark:text-gray-400">
                 {t("insightsTimelineHint", {
@@ -259,7 +259,7 @@ export const ArtistUserInsightsPanel = memo(
                 <section>
                   <h3 className="text-sm font-semibold text-gray-900 dark:text-white">{t("insightsPeaksTitle")}</h3>
                   <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                    <div className="rounded-2xl border border-violet-300/18 bg-white/55 px-3 py-2.5 shadow-inner dark:border-violet-400/14 dark:bg-slate-950/25">
+                    <div className="rounded-2xl border border-violet-200/80 bg-white px-3 py-2.5 shadow-sm shadow-slate-900/5 ring-1 ring-violet-500/10 dark:border-violet-400/14 dark:bg-slate-950/25 dark:shadow-inner dark:ring-0">
                       <p className="text-[11px] font-semibold uppercase tracking-wider text-violet-800/85 dark:text-violet-100/75">
                         {t("insightsPeakHour")}
                       </p>
@@ -267,7 +267,7 @@ export const ArtistUserInsightsPanel = memo(
                         {peakHourLabel ?? t("insightsNoSignal")}
                       </p>
                     </div>
-                    <div className="rounded-2xl border border-cyan-300/18 bg-white/55 px-3 py-2.5 shadow-inner dark:border-cyan-400/14 dark:bg-slate-950/25">
+                    <div className="rounded-2xl border border-cyan-200/80 bg-white px-3 py-2.5 shadow-sm shadow-slate-900/5 ring-1 ring-cyan-500/10 dark:border-cyan-400/14 dark:bg-slate-950/25 dark:shadow-inner dark:ring-0">
                       <p className="text-[11px] font-semibold uppercase tracking-wider text-cyan-800/85 dark:text-cyan-100/75">
                         {t("insightsPeakWeekday")}
                       </p>
@@ -275,7 +275,7 @@ export const ArtistUserInsightsPanel = memo(
                         {peakWeekdayLabel ?? t("insightsNoSignal")}
                       </p>
                     </div>
-                    <div className="rounded-2xl border border-lime-300/22 bg-white/55 px-3 py-2.5 shadow-inner dark:border-lime-400/14 dark:bg-slate-950/25 sm:col-span-2">
+                    <div className="rounded-2xl border border-lime-200/85 bg-white px-3 py-2.5 shadow-sm shadow-slate-900/5 ring-1 ring-lime-500/12 dark:border-lime-400/14 dark:bg-slate-950/25 dark:shadow-inner dark:ring-0 sm:col-span-2">
                       <p className="text-[11px] font-semibold uppercase tracking-wider text-lime-800/90 dark:text-lime-100/75">
                         {t("insightsBusiestCalendarDay")}
                       </p>
@@ -285,7 +285,7 @@ export const ArtistUserInsightsPanel = memo(
                     </div>
                   </div>
                   <div className="mt-3 grid grid-cols-2 gap-2">
-                    <div className="rounded-xl border border-white/40 bg-white/40 px-3 py-2 text-center dark:border-white/10 dark:bg-white/5">
+                    <div className="rounded-xl border border-slate-200/90 bg-white px-3 py-2 text-center shadow-sm shadow-slate-900/4 dark:border-white/10 dark:bg-white/5 dark:shadow-none">
                       <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                         {t("insightsActiveDays")}
                       </p>
@@ -293,7 +293,7 @@ export const ArtistUserInsightsPanel = memo(
                         {query.data.activeListeningDays.toLocaleString(locale)}
                       </p>
                     </div>
-                    <div className="rounded-xl border border-white/40 bg-white/40 px-3 py-2 text-center dark:border-white/10 dark:bg-white/5">
+                    <div className="rounded-xl border border-slate-200/90 bg-white px-3 py-2 text-center shadow-sm shadow-slate-900/4 dark:border-white/10 dark:bg-white/5 dark:shadow-none">
                       <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                         {t("insightsSpanDays")}
                       </p>
@@ -304,7 +304,7 @@ export const ArtistUserInsightsPanel = memo(
                   </div>
                 </section>
 
-                <section className="rounded-2xl border border-cyan-300/14 bg-white/35 p-4 shadow-inner dark:border-cyan-300/12 dark:bg-slate-950/20">
+                <section className="rounded-2xl border border-slate-200/90 bg-white p-4 shadow-sm shadow-slate-900/5 ring-1 ring-cyan-500/8 dark:border-cyan-300/12 dark:bg-slate-950/20 dark:shadow-inner dark:ring-0">
                   <h3 className="mb-3 text-sm font-semibold text-gray-900 dark:text-white">{t("insightsByHour")}</h3>
                   <div className="h-44 w-full">
                     <ResponsiveContainer width="100%" height="100%">
@@ -315,7 +315,7 @@ export const ArtistUserInsightsPanel = memo(
                             <stop offset="100%" stopColor="#06b6d4" />
                           </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#67e8f9" strokeOpacity={0.15} vertical={false} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#94a3b8" strokeOpacity={0.28} vertical={false} />
                         <XAxis
                           dataKey="label"
                           tick={{ fill: "rgb(var(--muted-rgb))", fontSize: 9 }}
@@ -342,12 +342,12 @@ export const ArtistUserInsightsPanel = memo(
                   </div>
                 </section>
 
-                <section className="rounded-2xl border border-violet-300/14 bg-white/35 p-4 shadow-inner dark:border-violet-400/14 dark:bg-slate-950/20">
+                <section className="rounded-2xl border border-slate-200/90 bg-white p-4 shadow-sm shadow-slate-900/5 ring-1 ring-violet-500/8 dark:border-violet-400/14 dark:bg-slate-950/20 dark:shadow-inner dark:ring-0">
                   <h3 className="mb-3 text-sm font-semibold text-gray-900 dark:text-white">{t("insightsByWeekday")}</h3>
                   <div className="h-36 w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={weekdayChartData} margin={{ top: 4, right: 4, left: -18, bottom: 4 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#c4b5fd" strokeOpacity={0.2} vertical={false} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#94a3b8" strokeOpacity={0.28} vertical={false} />
                         <XAxis
                           dataKey="label"
                           tick={{ fill: "rgb(var(--muted-rgb))", fontSize: 10 }}
@@ -378,7 +378,7 @@ export const ArtistUserInsightsPanel = memo(
                     {query.data.topTracks.slice(0, 12).map((tr, idx) => (
                       <li
                         key={tr.trackId}
-                        className="flex items-baseline gap-3 rounded-xl border border-cyan-300/12 bg-white/40 px-3 py-2 dark:border-white/10 dark:bg-slate-950/15"
+                        className="flex items-baseline gap-3 rounded-xl border border-slate-200/90 bg-white px-3 py-2 shadow-sm shadow-slate-900/4 dark:border-white/10 dark:bg-slate-950/15 dark:shadow-none"
                       >
                         <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500/20 to-cyan-500/20 text-xs font-bold text-violet-800 dark:text-violet-100">
                           {idx + 1}
@@ -401,7 +401,7 @@ export const ArtistUserInsightsPanel = memo(
                       {query.data.listensBySource.map((row) => (
                         <li
                           key={row.source}
-                          className="flex items-center justify-between gap-3 rounded-xl border border-white/30 bg-white/35 px-3 py-2 text-sm dark:border-white/10 dark:bg-white/5"
+                          className="flex items-center justify-between gap-3 rounded-xl border border-slate-200/90 bg-white px-3 py-2 text-sm shadow-sm shadow-slate-900/4 dark:border-white/10 dark:bg-white/5 dark:shadow-none"
                         >
                           <span className="min-w-0 truncate font-medium text-gray-800 dark:text-gray-200">
                             {localizedListenSource(row.source, t)}

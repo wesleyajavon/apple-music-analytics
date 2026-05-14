@@ -2,8 +2,9 @@
 
 import { Suspense, useEffect, useMemo, useState, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
+import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
-import { Bot, ChevronDown, Send, Sparkles, UserRound } from "lucide-react";
+import { ChevronDown, Send, Sparkles, UserRound } from "lucide-react";
 import { ApiError } from "@/lib/api-client";
 import { AssistantChatMessageBody } from "@/lib/components/assistant-chat-message-body";
 import { InteractiveAiGenreBackfillNotice } from "@/lib/components/interactive-ai-genre-backfill-notice";
@@ -291,8 +292,14 @@ function MusicChatContent() {
                   className={`flex gap-3 ${isAssistant ? "" : "justify-end"}`}
                 >
                   {isAssistant ? (
-                    <div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-violet-500/15 text-violet-700 dark:text-violet-200">
-                      <Bot className="h-5 w-5" aria-hidden />
+                    <div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-violet-500/15">
+                      <Image
+                        src="/brand/favicon.png"
+                        alt=""
+                        width={48}
+                        height={48}
+                        className="h-6 w-6 object-contain"
+                      />
                     </div>
                   ) : null}
                   <div
@@ -318,8 +325,14 @@ function MusicChatContent() {
             })}
             {musicChat.isPending ? (
               <div className="flex gap-3">
-                <div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-violet-500/15 text-violet-700 dark:text-violet-200">
-                  <Bot className="h-5 w-5 animate-pulse" aria-hidden />
+                <div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-violet-500/15 motion-safe:animate-pulse">
+                  <Image
+                    src="/brand/favicon.png"
+                    alt=""
+                    width={48}
+                    height={48}
+                    className="h-6 w-6 object-contain"
+                  />
                 </div>
                 <div
                   className="max-w-[min(100%,28rem)] space-y-2 rounded-2xl border border-violet-200/30 bg-white/70 px-4 py-3 text-sm dark:bg-slate-950/35"

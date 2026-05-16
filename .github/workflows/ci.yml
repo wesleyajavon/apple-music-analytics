@@ -238,14 +238,31 @@ jobs:
           NODE_ENV: production
 
   # Job 4: E2E auth hardening (Playwright)
+  # Uses a Docker Postgres (not Neon pooler): prisma migrate deploy needs advisory locks,
+  # which time out or misbehave through Neon's pooled hostname (-pooler).
   e2e-auth-hardening:
     name: E2E Auth Hardening
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: e2e
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d e2e"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     env:
       NODE_ENV: test
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/e2e
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
       E2E_AUTH_EMAIL: ${{ secrets.E2E_AUTH_EMAIL }}

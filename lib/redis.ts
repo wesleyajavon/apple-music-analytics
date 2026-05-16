@@ -3,7 +3,7 @@
  * Singleton pattern for connection reuse across the application
  */
 
-import Redis from "ioredis";
+import Redis, { type RedisOptions } from "ioredis";
 
 const globalForRedis = globalThis as unknown as {
   redis: Redis | undefined;
@@ -20,7 +20,7 @@ function createRedisClient(): Redis {
     redisUrl = redisUrl.replace('redis://', 'rediss://');
   }
   
-  const options: Redis.Options = {
+  const options: RedisOptions = {
     /**
      * Never use `null` here: ioredis would retry queued commands indefinitely while reconnecting,
      * which can hang TPM/quota Redis calls and stall `/api/ai/*` for as long as the tab stays open.

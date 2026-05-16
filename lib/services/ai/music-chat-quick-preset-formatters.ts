@@ -599,7 +599,7 @@ export function formatTrackObsessionsPresetAnswer(
   }
   const lines = result.obsessionWindows.map((w) =>
     locale === "fr"
-      ? `- ${w.title} — ${w.artistName}, ${w.listensInWindow} écoutes sur ${w.windowDays} jours (${w.window.startDate}–${w.window.endDate}), ${w.totalListensInPeriod} sur toute la période`
+      ? `- ${w.title} — ${w.artistName}, ${w.listensInWindow} écoutes sur ${result.windowDays} jours (${w.window.startDate}–${w.window.endDate}), ${w.totalListensInPeriod} sur toute la période`
       : locale === "es"
         ? `- ${w.title} — ${w.artistName}, ${w.listensInWindow} reproducciones en ${result.windowDays} días (${w.window.startDate}–${w.window.endDate}), ${w.totalListensInPeriod} en el periodo completo`
         : `- ${w.title} — ${w.artistName}, ${w.listensInWindow} listens in ${result.windowDays} days (${w.window.startDate}–${w.window.endDate}), ${w.totalListensInPeriod} in the full span`

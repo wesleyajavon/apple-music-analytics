@@ -1159,10 +1159,10 @@
     "spotlightTitle": "En resumen",
     "spotlightHint": "Resumen rápido de la metodología",
     "summary": {
-      "patterns": "Patrones: Your Music, Timeline, Heatmap, Canciones, Artistas, Análisis temporal, Géneros, Perfil musical, Insights y páginas IA revelan tus hábitos de escucha.",
-      "calculations": "Cálculos: Agregaciones PostgreSQL (día/semana/mes), estadísticas globales, cascada de géneros (Track → ARTIST_TO_GENRE_MAP → Unknown), exportaciones CSV/JSON/PDF.",
-      "limitations": "Limitaciones: Cobertura del mapeo de géneros, completitud de fuentes, tiempo de escucha estimado, rendimiento a gran escala y normalización de nombres.",
-      "architecture": "Arquitectura: Next.js App Router, PostgreSQL + Prisma, caché Redis opcional, Recharts, e ingestión orientada al producto público vía exportaciones Spotify/Apple (Last.fm opcional)."
+      "patterns": "Patrones: la vista general resume KPIs y bloques de resumen; la biblioteca cubre canciones, artistas, vistas de tendencias y palette; timeline, heatmap y análisis temporal exploran el ritmo; la IA suma Ask your Soundprint, Insights IA, perfil musical y evolución del gusto. Las entradas de Cuenta (Spotify en vivo, playground de API, ajustes) y la página de demo en vídeo van al margen de ese núcleo: apoyan u operan el producto, pero no sustituyen el historial basado en exportaciones.",
+      "calculations": "Cálculos: agregaciones PostgreSQL (día/semana/mes), estadísticas globales, cascada de géneros (Track → ARTIST_TO_GENRE_MAP → Unknown), exportaciones CSV/JSON/PDF.",
+      "limitations": "Limitaciones: cobertura del mapeo de géneros, completitud de fuentes, API Spotify en vivo frente al historial por exportaciones, tiempo de escucha estimado, rendimiento a gran escala, normalización de nombres.",
+      "architecture": "Arquitectura: Next.js App Router, PostgreSQL + Prisma, Redis opcional (ioredis) más TanStack Query, IA con Groq y caché de insights en servidor, Recharts, ingestión prioritaria Spotify/Apple (Last.fm opcional)."
     },
     "expandSection": "Expandir sección",
     "collapseSection": "Colapsar sección",
@@ -1170,7 +1170,7 @@
       "sectionTitle": "Patrones revelados por los datos",
       "overview": {
         "title": "Your Music",
-        "paragraph": "La página <code>/dashboard/overview</code> muestra tus estadísticas musicales personales con comparación al período anterior: total de escuchas, artistas y canciones únicos, tiempo total. Un gráfico de evolución reciente (áreas) y los géneros más escuchados completan el panorama. También hay páginas complementarias: <code>/dashboard/tracks</code>, <code>/dashboard/artists</code>, <code>/dashboard/musical-profile</code> y esta página <code>/dashboard/insights</code>."
+        "paragraph": "La página <code>/dashboard/overview</code> es la vista principal: KPIs frente a la ventana previa de la misma duración, gráfico de área de escuchas recientes y enlaces a vistas detalladas. También incluye bloques de resumen — vista previa del heatmap, tarjetas de momentum de géneros/artistas/canciones, avance del perfil de gusto, extracto de insights IA, top artistas y paneles por artista alineados con el área de artistas. Rutas relacionadas: <code>/dashboard/tracks</code>, <code>/dashboard/artists</code>, <code>/dashboard/musical-profile</code> y esta metodología en <code>/dashboard/insights</code>."
       },
       "timeline": {
         "title": "Timeline y tendencias temporales",
@@ -1189,29 +1189,43 @@
       },
       "genres": {
         "title": "Diversidad y preferencias de géneros",
-        "paragraph": "Las páginas <code>/dashboard/genres</code> y <code>/dashboard/genres/trends</code> revelan el alcance de tu paleta musical: géneros dominantes, evolución temporal y diversidad de géneros. Las métricas (artistas únicos, canciones únicas) muestran el equilibrio entre repetición y exploración."
+        "paragraph": "Las páginas <code>/dashboard/genres</code>, <code>/dashboard/genres/trends</code> y <code>/dashboard/genres/palette</code> muestran el alcance de tu paleta: géneros dominantes, evolución temporal, métricas de diversidad y una visualización de palette. Las métricas (artistas únicos, canciones únicas) reflejan el equilibrio entre repetición y exploración."
+      },
+      "libraryTrends": {
+        "title": "Vistas de tendencias de canciones y artistas",
+        "paragraph": "Más allá de los resúmenes por género, <code>/dashboard/tracks/trends</code> y <code>/dashboard/artists/trends</code> muestran el volumen de escuchas en el rango filtrado con buckets día, semana o mes — para seguir canciones concretas o tus artistas más escuchados a lo largo del tiempo. Comparten el mismo filtro global de fechas que el resto del dashboard."
       },
       "ai": {
         "title": "Insights impulsados por IA",
-        "paragraph": "Varias páginas usan IA para analizar tus escuchas:",
-        "li1": "<code>/dashboard/ai-insights</code>: Insights en lenguaje natural generados a partir de tus datos (opcional, requiere Groq)",
-        "li2": "<code>/dashboard/musical-profile</code>: Combina tus estadísticas de escucha con una identidad musical generada por IA",
-        "li3": "<code>/dashboard/taste-evolution</code>: Cambios de gusto semana a semana con contexto IA"
+        "paragraph": "Varias experiencias usan modelos alojados en Groq sobre tus agregados y datos de escucha:",
+        "li1": "<code>/dashboard/ask-your-soundprint</code>: asistente conversacional con respuestas apoyadas en herramientas sobre tu biblioteca (respeta el filtro de fechas del dashboard)",
+        "li2": "<code>/dashboard/ai-insights</code>: tarjetas de insights en lenguaje natural (opcional; credenciales Groq en el servidor)",
+        "li3": "<code>/dashboard/musical-profile</code>: enriquece tus estadísticas con una identidad musical generada por IA",
+        "li4": "<code>/dashboard/taste-evolution</code>: cambios de gusto semana a semana con comentarios IA",
+        "li5": "Las peticiones repetidas de insights IA reutilizan una caché en servidor de 24 h si está configurado <code>REDIS_URL</code> (fallback en memoria en desarrollo local), para no llamar al modelo en cada recarga."
       },
       "dateRange": {
         "title": "Filtro de rango de fechas",
-        "paragraph": "La barra de filtros en la parte superior permite enfocarte en períodos específicos: 7 días, 30 días, año en curso, o todo. Las páginas principales de analytics respetan este filtro. Las exportaciones (CSV, JSON, PDF) también usan el período seleccionado."
+        "paragraph": "La barra superior acota los análisis a ajustes predefinidos (7 días, 30 días, año en curso, rango personalizado) o a todo el historial. Para el ajuste de todo el historial, el cliente obtiene las fechas min/max reales de las escuchas mediante <code>/api/date-range</code>, de modo que la IA (insights, perfil de gusto, etc.) use la historia completa en lugar de volver silenciosamente a una ventana corta. Las exportaciones (CSV, JSON, PDF) también respetan el rango seleccionado."
+      },
+      "accountTooling": {
+        "title": "Cuenta: Spotify en vivo, playground de API y ajustes",
+        "paragraph": "La sección Cuenta del menú lateral está separada a propósito del hilo del historial importado. <code>/dashboard/spotify-snapshot</code> muestra lo que devuelve hoy la Web API de Spotify — perfil, tops, reproducido recientemente — para comparar esa instantánea con las filas <code>Listen</code> construidas a partir de tus importaciones. La ruta está disponible con Spotify enlazado por OAuth incluso si el onboarding de export no está completo; refleja el estado de la API, no tu almacén de escuchas. <code>/dashboard/spotify-playground</code> ofrece las mismas familias de endpoints en JSON en bruto para depurar ámbitos y cargas; es herramienta operativa, no un panel de historial. <code>/dashboard/settings</code> agrupa preferencias, confirmaciones y acciones sensibles (p. ej. borrado de cuenta): cambian tu experiencia y el estado de la cuenta, no la definición de los agregados sobre escuchas almacenadas."
+      },
+      "productDemo": {
+        "title": "Vídeos de recorrido (demo)",
+        "paragraph": "<code>/dashboard/demo</code> incrusta vídeos de presentación para orientación y narrativa de producto. Son material ilustrativo — no se ingestan como datos de escucha, y los gráficos personalizados siguen leyendo las escuchas guardadas en tu cuenta."
       }
     },
     "calculations": {
       "sectionTitle": "Cómo se calculan los analytics",
       "aggregations": {
         "title": "Agregaciones temporales",
-        "paragraph": "Las agregaciones usan consultas SQL nativas de PostgreSQL para un rendimiento óptimo:",
-        "li1": "Diario: DATE(played_at) para agrupar por día",
-        "li2": "Semanal: DATE_TRUNC('week', played_at) para agrupar por semana (lunes-domingo)",
-        "li3": "Mensual: TO_CHAR(played_at, 'YYYY-MM') para agrupar por mes",
-        "li4": "Conteos: Uso de COUNT(*) y COUNT(DISTINCT ...) para las métricas agregadas"
+        "paragraph": "Las agregaciones usan SQL nativo de PostgreSQL (vía Prisma) para rendimiento:",
+        "li1": "Diario: agrupación por fecha a partir del timestamp Listen.playedAt",
+        "li2": "Semanal: DATE_TRUNC('week', playedAt), semanas ISO (lunes)",
+        "li3": "Mensual: bucket de mes calendario desde playedAt (típicamente YYYY-MM)",
+        "li4": "Conteos: COUNT(*) y COUNT(DISTINCT ...) sobre escuchas, canciones y artistas según necesidad"
       },
       "stats": {
         "title": "Estadísticas globales",
@@ -1251,6 +1265,12 @@
         "impact": "El riesgo principal son exportaciones faltantes o desactualizadas, más que la ausencia de scrobbles Last.fm. La cobertura depende de lo que los usuarios solicitan y suben.",
         "solution": "Diseñar onboarding y recordatorios in-app alrededor de los flujos de exportación/importación; dejar Last.fm como fallback avanzado para usuarios power."
       },
+      "liveSpotifyApi": {
+        "title": "API web de Spotify en vivo",
+        "limitation": "Snapshot y playground aplican las reglas vigentes de la API Spotify (ventanas, límites y cómo se definen listas «top» o «recientes»), no la misma exhaustividad ni la misma semántica de «replay» que una exportación de cuenta solicitada por el usuario e ingerida como filas Listen.",
+        "impact": "La comparación con tu almacén puede divergir (filtros de recencia, escuchas no expuestas por esos endpoints, tops curados frente a historial completo en exportaciones).",
+        "solution": "Usar vistas live para depuración o comprobaciones rápidas; apoyarse en escuchas importadas para paneles longitudinales, exportaciones y análisis histórico comparable."
+      },
       "listenTime": {
         "title": "Cálculo del tiempo de escucha",
         "limitation": "El tiempo total de escucha se estima sumando las duraciones de canciones, sin considerar interrupciones o escuchas parciales.",
@@ -1276,10 +1296,11 @@
         "title": "Stack tecnológico",
         "li1": "Backend: Next.js (App Router) con API Routes",
         "li2": "Base de datos: PostgreSQL con Prisma ORM",
-        "li3": "Cache: Redis opcional (REDIS_URL) y TanStack Query para cache en cliente",
+        "li3": "Caché: Redis opcional (<code>REDIS_URL</code>, ioredis; TLS compatible con Upstash) para caché de insights IA, y TanStack Query en el cliente",
         "li4": "Frontend: React 18, TanStack Query v5, Tailwind CSS, Sonner (toasts)",
         "li5": "Visualización: Recharts (líneas, barras, áreas, tartas)",
-        "li6": "API: Endpoints documentados en docs/API.md"
+        "li6": "API: endpoints documentados en docs/API.md",
+        "li7": "IA / LLM: Groq para textos generados y analytics conversacional; insights en caché en servidor (~24 h TTL) cuando Redis está disponible"
       },
       "model": {
         "title": "Modelo de datos",
@@ -1494,9 +1515,10 @@
   },
   "demo": {
     "title": "Demo de producto",
-    "subtitle": "Mira nuestro vídeo de demostración para descubrir lo que ofrecemos.",
+    "subtitle": "Mira nuestros vídeos de demostración para descubrir lo que ofrecemos.",
     "heroBadge": "Vídeo",
-    "videoTitle": "Vídeo de demostración de producto"
+    "videoTitle": "Vídeo de demostración de producto",
+    "videoTitle2": "Demostración de producto adicional"
   },
   "about": {
     "title": "Cómo funciona",

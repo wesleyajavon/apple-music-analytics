@@ -1159,10 +1159,10 @@
     "spotlightTitle": "At a glance",
     "spotlightHint": "Quick summary of the methodology",
     "summary": {
-      "patterns": "Patterns: Your Music, Timeline, Heatmap, Tracks, Artists, Temporal Analysis, Genres, Musical Profile, Insights, and AI pages highlight your listening behavior.",
+      "patterns": "Patterns: Overview surfaces KPIs plus embedded summaries; Library covers tracks/artists, trend pages, and genre palette; Timeline/heatmap/temporal analysis explore rhythm; AI adds Ask your Soundprint, AI Insights, musical profile, and taste evolution. Account tools (live Spotify, API playground, settings) and the demo videos sit beside that core—they inform or operate the product but do not replace export-backed history.",
       "calculations": "Calculations: PostgreSQL aggregations (daily/weekly/monthly), global stats, genre cascade (Track → ARTIST_TO_GENRE_MAP → Unknown), and CSV/JSON/PDF exports.",
-      "limitations": "Limitations: Genre mapping coverage, source-data completeness, estimated listen time, query performance at scale, and artist/track normalization.",
-      "architecture": "Architecture: Next.js App Router, PostgreSQL + Prisma, optional Redis cache, Recharts, and public-first ingestion via Spotify/Apple exports (Last.fm optional)."
+      "limitations": "Limitations: Genre mapping coverage, source-data completeness, live Spotify API vs export-backed history, estimated listen time, query performance at scale, and artist/track normalization.",
+      "architecture": "Architecture: Next.js App Router, PostgreSQL + Prisma, Redis (optional, ioredis) plus TanStack Query, Groq-backed AI with server-side insight caching, Recharts, Spotify/Apple-first ingestion (Last.fm optional)."
     },
     "expandSection": "Expand section",
     "collapseSection": "Collapse section",
@@ -1170,7 +1170,7 @@
       "sectionTitle": "Patterns Revealed by the Data",
       "overview": {
         "title": "Your Music",
-        "paragraph": "The <code>/dashboard/overview</code> page displays your personal music stats with comparison to the previous period: total listens, unique artists and tracks, total time. A recent evolution chart (area chart) and top genres complete the picture. Complementary pages include <code>/dashboard/tracks</code>, <code>/dashboard/artists</code>, <code>/dashboard/musical-profile</code>, and this page <code>/dashboard/insights</code>."
+        "paragraph": "The <code>/dashboard/overview</code> page is the main snapshot: headline KPIs versus the prior window of the same length, a recent-listens area chart, and links into deeper views. It also embeds summary widgets—heatmap preview, genre/artist/track momentum cards, taste profile teaser, an AI insights excerpt, top artists, and expandable per-artist breakdowns aligned with the artists area. Related routes include <code>/dashboard/tracks</code>, <code>/dashboard/artists</code>, <code>/dashboard/musical-profile</code>, and this methodology page at <code>/dashboard/insights</code>."
       },
       "timeline": {
         "title": "Timeline and Temporal Trends",
@@ -1189,29 +1189,43 @@
       },
       "genres": {
         "title": "Genre Diversity and Preferences",
-        "paragraph": "The <code>/dashboard/genres</code> and <code>/dashboard/genres/trends</code> pages reveal the extent of your musical palette: dominant genres, temporal evolution, and genre diversity. Metrics (unique artists, unique tracks) show the balance between repetition and exploration."
+        "paragraph": "The <code>/dashboard/genres</code>, <code>/dashboard/genres/trends</code>, and <code>/dashboard/genres/palette</code> pages reveal the extent of your musical palette: dominant genres, temporal evolution, diversity metrics, and a dedicated palette visualization. Unique artists and unique tracks highlight the balance between repetition and exploration."
+      },
+      "libraryTrends": {
+        "title": "Track and artist trend views",
+        "paragraph": "Beyond the high-level genre summaries, <code>/dashboard/tracks/trends</code> and <code>/dashboard/artists/trends</code> chart listen volume across the filtered range using day, week, or month buckets—so you can follow specific tracks or your top artists over time. They honor the same global date filter as the rest of the dashboard."
       },
       "ai": {
         "title": "AI-Powered Insights",
-        "paragraph": "Several pages use AI to analyze your listening:",
-        "li1": "<code>/dashboard/ai-insights</code>: Natural language insights generated from your data (optional, requires Groq)",
-        "li2": "<code>/dashboard/musical-profile</code>: Combines your listening stats with an AI-powered musical identity",
-        "li3": "<code>/dashboard/taste-evolution</code>: Week-to-week taste changes with AI context"
+        "paragraph": "Several experiences use Groq-hosted models on top of your analytics summary and listening data:",
+        "li1": "<code>/dashboard/ask-your-soundprint</code>: Conversational assistant with tool-backed answers over your library (honors the dashboard date filter)",
+        "li2": "<code>/dashboard/ai-insights</code>: Short natural-language insight cards (optional; requires Groq credentials server-side)",
+        "li3": "<code>/dashboard/musical-profile</code>: Enriches your stats with an AI-generated musical identity",
+        "li4": "<code>/dashboard/taste-evolution</code>: Week-to-week taste shifts with AI commentary",
+        "li5": "Repeated AI insight requests reuse a 24h server cache when <code>REDIS_URL</code> is configured (in-memory fallback in local dev) so identical inputs do not always call the model again."
       },
       "dateRange": {
         "title": "Date Range Filter",
-      "paragraph": "The filter bar at the top lets you focus on specific periods: 7 days, 30 days, year-to-date, or all time. Core analytics pages respect this filter. Exports (CSV, JSON, PDF) also use the selected period."
+        "paragraph": "The top filter scopes analytics to presets (7 days, 30 days, year-to-date, custom range) or all time. For the all-time preset, the client resolves the true min/max listen dates from <code>/api/date-range</code> so features such as AI insights and taste profile use your full history instead of silently falling back to a short default window. Exports (CSV, JSON, PDF) honor the selected range."
+      },
+      "accountTooling": {
+        "title": "Account: live Spotify, API playground, and settings",
+        "paragraph": "The Account section of the sidebar is deliberately separate from the export-backed analytics storyline. <code>/dashboard/spotify-snapshot</code> shows what the Spotify Web API returns today—profile, top tracks and artists, recently played—so you can compare that live snapshot with the long-term rows in your <code>Listen</code> table built from imports. That route can be used once Spotify is OAuth-linked even when full export onboarding is incomplete; it reflects API state, not your warehouse. <code>/dashboard/spotify-playground</code> is the same family of endpoints in raw JSON form for debugging scopes and payloads; it is operational tooling, not a listening-history dashboard. <code>/dashboard/settings</code> collects preferences, confirmations, and safety actions (such as deletion): they change your experience and account state, not how historical aggregates are defined from stored plays."
+      },
+      "productDemo": {
+        "title": "Walkthrough videos (demo)",
+        "paragraph": "<code>/dashboard/demo</code> embeds product walkthrough videos for orientation and storytelling. Treat them as illustrative—they are not ingested as data, and every personalized chart still derives from listens stored in your account."
       }
     },
     "calculations": {
       "sectionTitle": "How Analytics are Calculated",
       "aggregations": {
         "title": "Temporal Aggregations",
-        "paragraph": "Aggregations use native PostgreSQL SQL queries for optimal performance:",
-        "li1": "Daily: DATE(played_at) to group by day",
-        "li2": "Weekly: DATE_TRUNC('week', played_at) to group by week (Monday-Sunday)",
-        "li3": "Monthly: TO_CHAR(played_at, 'YYYY-MM') to group by month",
-        "li4": "Counts: Use of COUNT(*) and COUNT(DISTINCT ...) for aggregated metrics"
+        "paragraph": "Aggregations use native PostgreSQL SQL (via Prisma) for performance:",
+        "li1": "Daily: date bucket from the Listen.playedAt timestamp",
+        "li2": "Weekly: DATE_TRUNC('week', playedAt) buckets ISO weeks (Monday start)",
+        "li3": "Monthly: calendar month bucket from playedAt (typically YYYY-MM)",
+        "li4": "Counts: COUNT(*) and COUNT(DISTINCT ...) on listens, tracks, and artists as needed"
       },
       "stats": {
         "title": "Global Statistics",
@@ -1251,6 +1265,12 @@
         "impact": "The main risk is missing or stale export files, not missing Last.fm scrobbles. Coverage depends on what users actually request and upload.",
         "solution": "Design onboarding and in-app prompts around export-import flows; treat Last.fm as an advanced fallback for power users only."
       },
+      "liveSpotifyApi": {
+        "title": "Live Spotify Web API",
+        "limitation": "Snapshot and playground calls reflect Spotify's current API rules—time windows, limits, and how \"top\" or \"recent\" lists are defined—not the same completeness or replay semantics as a user-requested account export ingested into Listen.",
+        "impact": "Side-by-side comparison with your warehouse can diverge (e.g. recency filters, listening not exposed through these endpoints, curated tops vs. full history in exports).",
+        "solution": "Use live API views for debugging or quick checks; rely on imported listens for longitudinal dashboards, exports, and like-for-like historical analysis."
+      },
       "listenTime": {
         "title": "Listen Time Calculation",
         "limitation": "Total listening time is estimated by summing track durations, without accounting for interruptions or partial listens.",
@@ -1276,10 +1296,11 @@
         "title": "Technology Stack",
         "li1": "Backend: Next.js (App Router) with API Routes",
         "li2": "Database: PostgreSQL with Prisma ORM",
-        "li3": "Cache: optional Redis (REDIS_URL) and TanStack Query for client-side caching",
+        "li3": "Cache: optional Redis (<code>REDIS_URL</code>, ioredis; Upstash-compatible TLS) for AI insight caching plus TanStack Query on the client",
         "li4": "Frontend: React 18, TanStack Query v5, Tailwind CSS, Sonner (toasts)",
         "li5": "Visualization: Recharts (lines, bars, areas, pies)",
-        "li6": "API: Endpoints documented in docs/API.md"
+        "li6": "API: Endpoints documented in docs/API.md",
+        "li7": "AI/LLM: Groq for generated copy and conversational analytics; insight responses cached server-side (~24h TTL) when Redis is available"
       },
       "model": {
         "title": "Data Model",
@@ -1494,9 +1515,10 @@
   },
   "demo": {
     "title": "Product demo",
-    "subtitle": "Watch our product demo video to discover what we offer.",
+    "subtitle": "Watch our product demo videos to discover what we offer.",
     "heroBadge": "Video",
-    "videoTitle": "Product demo video"
+    "videoTitle": "Product demo video",
+    "videoTitle2": "Additional product demo"
   },
   "about": {
     "title": "How it works",

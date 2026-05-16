@@ -4,12 +4,15 @@ import { useTranslations } from "next-intl";
 import { Video } from "lucide-react";
 import { DashboardHeroTitle } from "@/lib/components/dashboard-hero-title";
 
-const YOUTUBE_VIDEO_ID = "bSSbz4yFeKo";
+const DEMO_VIDEOS = [
+  { id: "bSSbz4yFeKo", titleKey: "videoTitle" as const },
+  { id: "7QmzfMVb8-M", titleKey: "videoTitle2" as const },
+] as const;
 
 /**
- * Page Demo - Vidéo YouTube embarquée
+ * Page Demo - Vidéos YouTube embarquées
  *
- * Affiche une vidéo de démonstration produit embarquée.
+ * Affiche les démos produit en iframe.
  */
 function VideoIcon({ className }: { className?: string }) {
   return (
@@ -43,27 +46,34 @@ export default function DemoPage() {
         </p>
       </header>
 
-      <section className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card border-l-4 border-l-accent-violet">
-        <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-violet/15 text-accent-violet">
-              <VideoIcon className="w-6 h-6" />
-            </span>
-            {t("videoTitle")}
-          </h2>
-        </div>
-        <div className="p-6">
-          <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-gray-900">
-            <iframe
-              src={`https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}?rel=0`}
-              title={t("videoTitle")}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-              className="absolute inset-0 w-full h-full"
-            />
-          </div>
-        </div>
-      </section>
+      <div className="flex flex-col gap-8">
+        {DEMO_VIDEOS.map(({ id, titleKey }) => (
+          <section
+            key={id}
+            className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card border-l-4 border-l-accent-violet"
+          >
+            <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-3">
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-violet/15 text-accent-violet">
+                  <VideoIcon className="w-6 h-6" />
+                </span>
+                {t(titleKey)}
+              </h2>
+            </div>
+            <div className="p-6">
+              <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-gray-900">
+                <iframe
+                  src={`https://www.youtube.com/embed/${id}?rel=0`}
+                  title={t(titleKey)}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                  className="absolute inset-0 w-full h-full"
+                />
+              </div>
+            </div>
+          </section>
+        ))}
+      </div>
     </div>
   );
 }

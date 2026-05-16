@@ -251,6 +251,15 @@ export default function InsightsPage() {
 
             <div>
               <h3 className="font-semibold text-base mb-2 text-gray-900 dark:text-white">
+                {t("patterns.libraryTrends.title")}
+              </h3>
+              <p className="mb-2 text-sm leading-relaxed">
+                {t.rich("patterns.libraryTrends.paragraph", { code })}
+              </p>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-base mb-2 text-gray-900 dark:text-white">
                 {t("patterns.ai.title")}
               </h3>
               <p className="mb-2 text-sm leading-relaxed">
@@ -261,6 +270,7 @@ export default function InsightsPage() {
                 <li>{t.rich("patterns.ai.li2", { code })}</li>
                 <li>{t.rich("patterns.ai.li3", { code })}</li>
                 <li>{t.rich("patterns.ai.li4", { code })}</li>
+                <li>{t.rich("patterns.ai.li5", { code })}</li>
               </ul>
             </div>
 
@@ -270,6 +280,24 @@ export default function InsightsPage() {
               </h3>
               <p className="mb-2 text-sm leading-relaxed">
                 {t.rich("patterns.dateRange.paragraph", { code })}
+              </p>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-base mb-2 text-gray-900 dark:text-white">
+                {t("patterns.accountTooling.title")}
+              </h3>
+              <p className="mb-2 text-sm leading-relaxed">
+                {t.rich("patterns.accountTooling.paragraph", { code })}
+              </p>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-base mb-2 text-gray-900 dark:text-white">
+                {t("patterns.productDemo.title")}
+              </h3>
+              <p className="mb-2 text-sm leading-relaxed">
+                {t.rich("patterns.productDemo.paragraph", { code })}
               </p>
             </div>
           </div>
@@ -390,6 +418,21 @@ export default function InsightsPage() {
 
             <div>
               <h3 className="font-semibold text-base mb-2 text-gray-900 dark:text-white">
+                {t("limitations.liveSpotifyApi.title")}
+              </h3>
+              <p className="mb-2 text-sm leading-relaxed">
+                {t("limitations.liveSpotifyApi.limitation")}
+              </p>
+              <p className="mb-2 text-sm leading-relaxed">
+                {t("limitations.liveSpotifyApi.impact")}
+              </p>
+              <p className="mb-2 text-sm italic text-gray-500 dark:text-gray-400">
+                {t("limitations.liveSpotifyApi.solution")}
+              </p>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-base mb-2 text-gray-900 dark:text-white">
                 {t("limitations.listenTime.title")}
               </h3>
               <p className="mb-2 text-sm leading-relaxed">
@@ -453,10 +496,11 @@ export default function InsightsPage() {
               <ul className="space-y-2 ml-4 list-disc text-sm">
                 <li>{t("architecture.stack.li1")}</li>
                 <li>{t("architecture.stack.li2")}</li>
-                <li>{t("architecture.stack.li3")}</li>
+                <li>{t.rich("architecture.stack.li3", { code })}</li>
                 <li>{t("architecture.stack.li4")}</li>
                 <li>{t("architecture.stack.li5")}</li>
                 <li>{t("architecture.stack.li6")}</li>
+                <li>{t.rich("architecture.stack.li7", { code })}</li>
               </ul>
             </div>
 

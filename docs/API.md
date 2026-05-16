@@ -158,6 +158,14 @@ Données pivot multi-lignes : `period`, `topN` (1–50, défaut 30), `artists` (
 
 Recherche catalogue `Artist` (`q`, min. 2 caractères ; `limit` 1–50).
 
+### GET `/api/artists/[artistId]/insights`
+
+Insights détaillés pour un artiste donné (`artistId` = id base). **Auth lecture** identique aux autres analytics (`resolveAuthorizedDataUserId`) ; **`startDate` / `endDate`** optionnels (`YYYY-MM-DD`). **404** si aucune donnée pour cette période / artiste.
+
+### POST `/api/artists/[artistId]/image`
+
+**Session requise.** Hydratation paresseuse de l’image artiste via Spotify (client credentials serveur) si possible. L’utilisateur doit avoir **au moins une écoute** pour cet artiste — sinon **403**. Sans credentials Spotify en env : renvoie l’`imageUrl` déjà en base éventuelle avec `enrichmentDisabled: true` si besoin.
+
 ---
 
 ## Titres
@@ -236,6 +244,12 @@ Réponses possibles avec `aiUnavailable` si IA désactivée ou pas de clé Groq.
 
 Au moins un **`genres`** répété ; mêmes idées de dates / `period` / `locale` / `mode` que ci‑dessus.
 
+### POST `/api/ai/music-chat`
+
+Chat contextualisé sur l’historique d’écoute (Groq). **Auth** : même résolution utilisateur que les autres lectures analytics (`resolveAuthorizedDataUserId`) ; **`userId`** en query optionnel pour **démo publique** — dans ce cas **sans session**, seules les **`presetQuestionId`** sont autorisées (sinon **403** `PUBLIC_DEMO_PRESET_REQUIRED`). Avec session, soit historique **`messages`** (alternance user/assistant), soit **`presetQuestionId`** en complément.
+
+**Body JSON** : `messages` (max 12 entrées, `role`: `user` \| `assistant`, `content` 1–2000 car.), `locale` optionnel ; `presetQuestionId` / `presetArgs` (`artistName`, `earlierYear`, `laterYear`, `genreYear`) pour questions préréglées ; `dateRange` optionnel (`startDate`, `endDate`, `isAll`). **Rate limiting** : max 8 requêtes / 60 s par utilisateur résolu (`maxDuration` 180 s côté route). Respect du **cookie maître IA** (`aiUnavailableReason` `env` \| `client` si désactivé), du **quota utilisateur Groq**, et blocage tant qu’un job de **backfill genres LLM** post-import tourne encore.
+
 ---
 
 ## Palette (normalisation des genres hors import)
@@ -262,6 +276,28 @@ Proxy vers l’API Last.fm (ou mock si non configuré). **Pas** d’auth utilisa
 ### POST `/api/lastfm/import`
 
 Import dans la base — **session** ou **admin** (`resolveImportUserId`). Corps : `userId` (selon mode), `username`, pagination, fenêtre Unix, `dryRun` optionnel.
+
+---
+
+## Spotify (Web API)
+
+Toutes ces routes exigent une **session** utilisateur avec tokens Spotify valides sauf indication contraire. Runtime **nodejs** ; rate limiting par route utilisateur.
+
+### POST `/api/spotify/connection-verify`
+
+Vérifie que les tokens OAuth de l’utilisateur fonctionnent contre `GET /v1/me` Spotify. **Ne persiste aucune écoute** (flux onboarding partiel uniquement).
+
+### POST `/api/spotify/sync`
+
+Synchronisation **persistée** : récupère l’historique *recently played* Spotify et importe en base avec la source **`spotify_web_api`**. Réponse : compteurs `fetched`, `imported`, `skippedDuplicates`, `skippedInvalid`, `nextCursorMs`, etc.
+
+### GET `/api/spotify/playground`
+
+Sonde plusieurs endpoints Spotify en parallèle (`/me`, top titres / artistes à court périmètre, *recently-played*) et renvoie les réponses ou erreurs normalisées, plus les scopes OAuth enregistrés vs attendus (`SPOTIFY_WEB_API_OAUTH_SCOPES`).
+
+### GET `/api/spotify/top-tracks`
+
+Proxy typé vers `GET /v1/me/top/tracks`. **Query** : `time_range` (`short_term` \| `medium_term` \| `long_term`, défaut `medium_term`) ; **`limit`** 1–50 (défaut 20) ; **`offset`** 0–10000 (défaut 0). Réponse enveloppée `{ ok, time_range, limit, offset, data }` (pagination Spotify).
 
 ---
 

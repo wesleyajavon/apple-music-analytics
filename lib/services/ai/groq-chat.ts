@@ -16,7 +16,7 @@ const GROQ_MAX_SDK_RETRIES = 8;
 export { GROQ_DEFAULT_MODEL };
 
 /**
- * Creates a Groq chat completion after acquiring TPM budget (sliding window).
+ * Creates a Groq chat completion after acquiring TPM + RPM sliding-window budgets (60s).
  */
 export async function createGroqChatCompletion(
   params: ChatCompletionCreateParamsNonStreaming

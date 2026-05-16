@@ -1,31 +1,32 @@
-# Groq rate limiting (TPM)
+# Groq rate limiting (TPM + RPM)
 
-This app calls Groq for several features (insights, genre trends commentary, taste profile, etc.). Groq enforces **per-model limits** (tokens per minute, requests per minute) shown in the [Groq Cloud console — Limits](https://console.groq.com/settings/limits).
+This app calls Groq for several features (insights, genre trends commentary, taste profile, etc.). Groq enforces **per-model limits** (tokens per minute, requests per minute, plus optional daily caps) documented in [Groq — Rate limits](https://console.groq.com/docs/rate-limits) and shown for your org in the [Groq Cloud console — Limits](https://console.groq.com/settings/limits).
 
-To reduce **429 rate limit** errors under load, we implement a **client-side sliding-window budget** that approximates TPM before each chat completion.
+To reduce **429 rate limit** errors under load, we implement **client-side sliding-window budgets** that approximate **TPM and RPM** together before each chat completion (Groq applies whichever threshold you hit first).
 
 ## How it works
 
 | Piece | Role |
 |--------|------|
-| [`lib/services/ai/groq-config.ts`](../lib/services/ai/groq-config.ts) | Default model name, `GROQ_TPM_LIMIT`, safety factor, kill switch |
-| [`lib/services/ai/groq-rate-limiter.ts`](../lib/services/ai/groq-rate-limiter.ts) | `estimateGroqChatTokens`, `acquireGroqTokens`; Redis ZSET + Lua (distributed) or in-memory sliding window (fallback) |
-| [`lib/services/ai/groq-chat.ts`](../lib/services/ai/groq-chat.ts) | `createGroqChatCompletion` — **only** entry used by services: acquire budget, then Groq SDK (`maxRetries: 8`) |
+| [`lib/services/ai/groq-config.ts`](../lib/services/ai/groq-config.ts) | Default model name, `GROQ_TPM_LIMIT`, `GROQ_RPM_LIMIT`, shared safety factor, kill switch |
+| [`lib/services/ai/groq-rate-limiter.ts`](../lib/services/ai/groq-rate-limiter.ts) | `estimateGroqChatTokens`, `acquireGroqTokens`; Redis ZSET + Lua acquires **TPM cost + one RPM slot atomically**, or in-memory dual windows (fallback) |
+| [`lib/services/ai/groq-chat.ts`](../lib/services/ai/groq-chat.ts) | `createGroqChatCompletion` — **only** entry used by services: acquire budgets, then Groq SDK (`maxRetries: 8`) |
 
-**Rough token estimate:** `ceil(chars_in_messages / 4) + max_tokens`. This is conservative; real usage depends on tokenization.
+**Rough token estimate:** `ceil(chars_in_messages / 4) + min(max_tokens, cap)` for pacing (large `max_tokens` would stall the TPM window). Real usage depends on tokenization.
 
-**Sliding window:** 60 seconds. We only allow a **fraction** of your configured TPM (`GROQ_TPM_SAFETY`, default `0.72`) so parallel routes (e.g. genre trends technical + light) are less likely to burst past Groq’s limit.
+**Sliding window:** 60 seconds for both TPM and RPM. We only allow a **fraction** of each configured cap (`GROQ_TPM_SAFETY`, default `0.72`) so parallel routes (e.g. genre trends technical + light) are less likely to burst past Groq’s limits.
 
 ## Environment variables
 
 | Variable | Default | Meaning |
 |----------|---------|---------|
-| `GROQ_TPM_LIMIT` | `6000` | Align with **your** org limit for `llama-3.1-8b-instant` from the console |
-| `GROQ_TPM_SAFETY` | `0.72` | Fraction of TPM budget to use (0–1) |
+| `GROQ_TPM_LIMIT` | `6000` | TPM for `llama-3.1-8b-instant` — align with **your** org from the console |
+| `GROQ_RPM_LIMIT` | `30` | RPM for the same model (public table / console) |
+| `GROQ_TPM_SAFETY` | `0.72` | Fraction (0–1) applied to **both** TPM and RPM effective budgets |
 | `GROQ_RATE_LIMIT_ENABLED` | enabled | Set to `false` to disable our limiter (not recommended in production) |
-| `REDIS_URL` | — | When set, limits are **shared** across serverless instances via Redis keys `groq:tpm:window` and `groq:tpm:seq` |
+| `REDIS_URL` | — | When set, limits are **shared** across instances via Redis keys `groq:tpm:window`, `groq:tpm:seq`, `groq:rpm:window`, `groq:rpm:seq` |
 
-After changing org limits or upgrading tier, update `GROQ_TPM_LIMIT` to match [console limits](https://console.groq.com/settings/limits).
+After changing org limits or upgrading tier, update `GROQ_TPM_LIMIT` and `GROQ_RPM_LIMIT` to match [console limits](https://console.groq.com/settings/limits). **TPD / RPD / ITPM / OTPM** are not modeled locally; Groq still returns **429** if those apply — rely on SDK retries and prod tuning.
 
 ## Retries vs limiter
 
@@ -40,7 +41,7 @@ Both complement each other.
 
 | Situation | What helps | What this repo does **not** do automatically |
 |-----------|------------|-----------------------------------------------|
-| **429** — Too many tokens **per minute** (TPM window) | Limiter + SDK retries + (genre trends) extra retries | Does **not** guarantee zero 429 under heavy parallel load. |
+| **429** — TPM **or** RPM **per minute** (or other org caps) | Limiter + SDK retries + (genre trends) extra retries | Does **not** guarantee zero 429 under heavy parallel load; separate **ITPM/OTPM** caps are not modeled unless you mirror them into env tuning. |
 | **413** — Single request **too large** vs org limit (e.g. “Requested 6879” vs 6000 TPM cap for one shot) | Smaller prompt, split calls, or higher tier | **No** “shrink prompt and retry” path in code yet; see route matrix in [`GROQ_LOGS_ANALYSIS_SAMPLE.md`](./GROQ_LOGS_ANALYSIS_SAMPLE.md). |
 
 **Important:** `GROQ_RATE_LIMITING.md` and [`GROQ_SCALING_PLAYBOOK.md`](./GROQ_SCALING_PLAYBOOK.md) are **guides**; they improve outcomes when you follow them and add code where gaps remain. They do **not** replace implementing 413 recovery or unifying API error responses.
@@ -65,7 +66,7 @@ Use these in order when adding or changing Groq usage.
 
 ### 4. Add sliding-window limiter
 
-> Implement `acquireGroqTokens(estimatedTokens)` using a 60s sliding window and a budget of `floor(GROQ_TPM_LIMIT * GROQ_TPM_SAFETY)`. Use Redis (`getRedisClient`) with an atomic Lua script: ZSET scores = request time, members encode cost; prune entries older than 60s; if sum + cost > budget, return suggested wait from oldest entry. If Redis is null or errors, fall back to an in-memory window; serialize memory acquires with a promise chain to avoid races in dev.
+> Implement `acquireGroqTokens(estimatedTokens)` using a **shared** 60s sliding window with **two** budgets: TPM (`floor(GROQ_TPM_LIMIT * GROQ_TPM_SAFETY)`) and RPM (`floor(GROQ_RPM_LIMIT * GROQ_TPM_SAFETY)`). Use Redis with **one** atomic Lua script that prunes both ZSETs, checks TPM sum + cost and RPM cardinality + 1, then ZADDs both or returns a wait hint. If Redis is null or errors, fall back to in-memory dual windows; serialize memory acquires with a promise chain.
 
 ### 5. Wire limiter before each API call
 

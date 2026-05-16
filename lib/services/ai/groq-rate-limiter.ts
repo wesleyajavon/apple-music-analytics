@@ -1,37 +1,51 @@
 /**
- * Groq TPM-style sliding window: limits estimated token *budget* per rolling minute.
+ * Groq TPM + RPM sliding windows (same 60s window Groq documents for TPM/RPM headers).
+ * Reserves **both** dimensions atomically (Redis Lua) so we do not leak one slot when the other blocks.
  * Uses Redis when REDIS_URL is set (distributed across serverless instances),
- * otherwise an in-process sliding window (dev / single instance).
+ * otherwise in-process windows (dev / single instance), serialized to avoid races.
  */
 
 import { getRedisClient } from "@/lib/redis";
 import {
+  getGroqEffectiveRpmBudget,
   getGroqEffectiveTpmBudget,
   isGroqRateLimitEnabled,
 } from "@/lib/services/ai/groq-config";
 import type { ChatCompletionCreateParamsNonStreaming } from "groq-sdk/resources/chat/completions";
 
 const WINDOW_MS = 60_000;
-const REDIS_ZSET_KEY = "groq:tpm:window";
-const REDIS_SEQ_KEY = "groq:tpm:seq";
+const REDIS_TPM_ZSET_KEY = "groq:tpm:window";
+const REDIS_TPM_SEQ_KEY = "groq:tpm:seq";
+const REDIS_RPM_ZSET_KEY = "groq:rpm:window";
+const REDIS_RPM_SEQ_KEY = "groq:rpm:seq";
 const MAX_ACQUIRE_WAIT_MS = 120_000;
 
-const ACQUIRE_LUA = `
-local zkey = KEYS[1]
-local seqkey = KEYS[2]
+/** Atomically prune TPM/RPM windows, check both caps, then record one chat completion worth of usage. */
+const ACQUIRE_TPM_RPM_LUA = `
+local tpm_zkey = KEYS[1]
+local tpm_seqkey = KEYS[2]
+local rpm_zkey = KEYS[3]
+local rpm_seqkey = KEYS[4]
 local now = tonumber(ARGV[1])
 local window_ms = tonumber(ARGV[2])
-local cost = tonumber(ARGV[3])
-local limit = tonumber(ARGV[4])
+local tpm_cost = tonumber(ARGV[3])
+local tpm_limit = tonumber(ARGV[4])
+local rpm_limit = tonumber(ARGV[5])
 
-redis.call('ZREMRANGEBYSCORE', zkey, 0, now - window_ms)
-local members = redis.call('ZRANGE', zkey, 0, -1)
-local total = 0
-for i, m in ipairs(members) do
+local cutoff = now - window_ms
+redis.call('ZREMRANGEBYSCORE', tpm_zkey, 0, cutoff)
+redis.call('ZREMRANGEBYSCORE', rpm_zkey, 0, cutoff)
+
+local tpm_members = redis.call('ZRANGE', tpm_zkey, 0, -1)
+local tpm_total = 0
+for _, m in ipairs(tpm_members) do
   local c = tonumber(string.match(m, '^(%d+):'))
-  if c then total = total + c end
+  if c then tpm_total = tpm_total + c end
 end
-if total + cost > limit then
+
+local rpm_count = redis.call('ZCARD', rpm_zkey)
+
+local function wait_for(zkey)
   local oldest = redis.call('ZRANGE', zkey, 0, 0, 'WITHSCORES')
   local wait_ms = 500
   if oldest and #oldest >= 2 then
@@ -41,14 +55,29 @@ if total + cost > limit then
       if w > 0 then wait_ms = math.min(w, 30000) end
     end
   end
-  return {0, total, wait_ms}
+  return wait_ms
 end
-local uniq = redis.call('INCR', seqkey)
-redis.call('PEXPIRE', seqkey, 86400)
-local member = tostring(cost) .. ':' .. tostring(now) .. ':' .. tostring(uniq)
-redis.call('ZADD', zkey, now, member)
-redis.call('PEXPIRE', zkey, window_ms + 1000)
-return {1, total + cost, 0}
+
+if tpm_total + tpm_cost > tpm_limit then
+  return {0, 1, wait_for(tpm_zkey)}
+end
+if rpm_count + 1 > rpm_limit then
+  return {0, 2, wait_for(rpm_zkey)}
+end
+
+local tpm_uniq = redis.call('INCR', tpm_seqkey)
+redis.call('PEXPIRE', tpm_seqkey, 86400)
+local tpm_member = tostring(tpm_cost) .. ':' .. tostring(now) .. ':' .. tostring(tpm_uniq)
+redis.call('ZADD', tpm_zkey, now, tpm_member)
+redis.call('PEXPIRE', tpm_zkey, window_ms + 1000)
+
+local rpm_uniq = redis.call('INCR', rpm_seqkey)
+redis.call('PEXPIRE', rpm_seqkey, 86400)
+local rpm_member = '1:' .. tostring(now) .. ':' .. tostring(rpm_uniq)
+redis.call('ZADD', rpm_zkey, now, rpm_member)
+redis.call('PEXPIRE', rpm_zkey, window_ms + 1000)
+
+return {1, 0, 0}
 `;
 
 function sleep(ms: number): Promise<void> {
@@ -56,61 +85,79 @@ function sleep(ms: number): Promise<void> {
 }
 
 type MemoryEntry = { t: number; cost: number };
-const memoryWindow: MemoryEntry[] = [];
+const memoryTpmWindow: MemoryEntry[] = [];
+/** One entry per outbound completion attempt (cost always 1); mirrors RPM. */
+const memoryRpmWindow: MemoryEntry[] = [];
 let memoryChain: Promise<void> = Promise.resolve();
 
-function pruneMemory(now: number): void {
+function pruneMemoryWindow(entries: MemoryEntry[], now: number): void {
   for (;;) {
-    const first = memoryWindow[0];
+    const first = entries[0];
     if (!first || first.t > now - WINDOW_MS) break;
-    memoryWindow.shift();
+    entries.shift();
   }
 }
 
-function memoryWindowTotal(): number {
-  return memoryWindow.reduce((s, e) => s + e.cost, 0);
+function memoryTpmTotal(): number {
+  return memoryTpmWindow.reduce((s, e) => s + e.cost, 0);
 }
 
-async function acquireMemory(estimatedTokens: number): Promise<void> {
-  const limit = getGroqEffectiveTpmBudget();
+function memoryRpmTotal(): number {
+  return memoryRpmWindow.reduce((s, e) => s + e.cost, 0);
+}
+
+async function acquireMemoryCombined(estimatedTokens: number): Promise<void> {
+  const tpmLimit = getGroqEffectiveTpmBudget();
+  const rpmLimit = getGroqEffectiveRpmBudget();
   const started = Date.now();
   for (;;) {
     const now = Date.now();
     if (now - started > MAX_ACQUIRE_WAIT_MS) {
       return;
     }
-    pruneMemory(now);
-    const total = memoryWindowTotal();
-    if (total + estimatedTokens <= limit) {
-      memoryWindow.push({ t: now, cost: estimatedTokens });
+    pruneMemoryWindow(memoryTpmWindow, now);
+    pruneMemoryWindow(memoryRpmWindow, now);
+    const tpmSum = memoryTpmTotal();
+    const rpmSum = memoryRpmTotal();
+    if (tpmSum + estimatedTokens <= tpmLimit && rpmSum + 1 <= rpmLimit) {
+      memoryTpmWindow.push({ t: now, cost: estimatedTokens });
+      memoryRpmWindow.push({ t: now, cost: 1 });
       return;
     }
-    const oldest = memoryWindow[0];
-    const wait =
-      oldest && oldest.t <= now
-        ? Math.min(
-            WINDOW_MS - (now - oldest.t) + 50,
-            5000
-          )
-        : 500;
+    let wait = 500;
+    const tpmOldest = memoryTpmWindow[0];
+    const rpmOldest = memoryRpmWindow[0];
+    if (tpmSum + estimatedTokens > tpmLimit && tpmOldest && tpmOldest.t <= now) {
+      wait = Math.max(
+        wait,
+        Math.min(WINDOW_MS - (now - tpmOldest.t) + 50, 5000)
+      );
+    }
+    if (rpmSum + 1 > rpmLimit && rpmOldest && rpmOldest.t <= now) {
+      wait = Math.max(
+        wait,
+        Math.min(WINDOW_MS - (now - rpmOldest.t) + 50, 5000)
+      );
+    }
     await sleep(Math.max(50, Math.min(wait, 3000)));
   }
 }
 
 function acquireMemorySerialized(estimatedTokens: number): Promise<void> {
-  const next = memoryChain.then(() => acquireMemory(estimatedTokens));
+  const next = memoryChain.then(() => acquireMemoryCombined(estimatedTokens));
   memoryChain = next.catch(() => {});
   return next;
 }
 
-async function acquireRedis(estimatedTokens: number): Promise<void> {
+async function acquireRedisCombined(estimatedTokens: number): Promise<void> {
   const redis = getRedisClient();
   if (!redis) {
     await acquireMemorySerialized(estimatedTokens);
     return;
   }
 
-  const limit = getGroqEffectiveTpmBudget();
+  const tpmLimit = getGroqEffectiveTpmBudget();
+  const rpmLimit = getGroqEffectiveRpmBudget();
   const started = Date.now();
 
   for (;;) {
@@ -121,14 +168,17 @@ async function acquireRedis(estimatedTokens: number): Promise<void> {
 
     try {
       const raw = (await redis.eval(
-        ACQUIRE_LUA,
-        2,
-        REDIS_ZSET_KEY,
-        REDIS_SEQ_KEY,
+        ACQUIRE_TPM_RPM_LUA,
+        4,
+        REDIS_TPM_ZSET_KEY,
+        REDIS_TPM_SEQ_KEY,
+        REDIS_RPM_ZSET_KEY,
+        REDIS_RPM_SEQ_KEY,
         String(now),
         String(WINDOW_MS),
         String(estimatedTokens),
-        String(limit)
+        String(tpmLimit),
+        String(rpmLimit)
       )) as [number, number, number];
 
       const ok = raw[0];
@@ -179,12 +229,12 @@ export function estimateGroqChatTokens(
 }
 
 /**
- * Waits until this request would fit within the rolling TPM budget, then records it.
+ * Waits until this completion fits rolling **TPM** and **RPM** budgets (same 60s window), then records both.
  */
 export async function acquireGroqTokens(estimatedTokens: number): Promise<void> {
   if (!isGroqRateLimitEnabled()) {
     return;
   }
   const cost = Math.max(1, Math.ceil(estimatedTokens));
-  await acquireRedis(cost);
+  await acquireRedisCombined(cost);
 }

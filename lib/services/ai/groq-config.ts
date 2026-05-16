@@ -1,6 +1,7 @@
 /**
- * Central Groq model defaults and TPM-related env knobs.
- * Org limits: https://console.groq.com/settings/limits
+ * Central Groq model defaults and rate-limit env knobs (TPM + RPM).
+ * Published baselines (Developer plan table): https://console.groq.com/docs/rate-limits
+ * Org-specific values: https://console.groq.com/settings/limits
  *
  * Quota produit (routes /api/ai/*) : `GROQ_USER_DAILY_QUOTA` (défaut 40, 0 = illimité),
  * `GROQ_USER_QUOTA_ENABLED=false` pour désactiver.
@@ -14,10 +15,16 @@
 
 export const GROQ_DEFAULT_MODEL = "llama-3.1-8b-instant";
 
-/** Default TPM limit for llama-3.1-8b-instant on free tier (see Groq console). */
+/** Default TPM for `llama-3.1-8b-instant` per Groq public rate-limit table (adjust in console if your org differs). */
 const DEFAULT_GROQ_TPM = 6000;
 
-/** Use only a fraction of TPM to avoid bursts with parallel requests. */
+/** Default RPM for the same model (Groq may enforce RPM before TPM on small requests). */
+const DEFAULT_GROQ_RPM = 30;
+
+/**
+ * Fraction of TPM and RPM budgets to use locally (parallel routes / serverless cold starts).
+ * Same factor applies to both dimensions so one knob tracks “burst headroom”.
+ */
 const DEFAULT_GROQ_TPM_SAFETY = 0.72;
 
 export function getGroqTpmLimit(): number {
@@ -25,6 +32,13 @@ export function getGroqTpmLimit(): number {
   if (raw === undefined || raw === "") return DEFAULT_GROQ_TPM;
   const n = Number(raw);
   return Number.isFinite(n) && n > 0 ? Math.floor(n) : DEFAULT_GROQ_TPM;
+}
+
+export function getGroqRpmLimit(): number {
+  const raw = process.env.GROQ_RPM_LIMIT;
+  if (raw === undefined || raw === "") return DEFAULT_GROQ_RPM;
+  const n = Number(raw);
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : DEFAULT_GROQ_RPM;
 }
 
 export function getGroqTpmSafetyFactor(): number {
@@ -37,6 +51,10 @@ export function getGroqTpmSafetyFactor(): number {
 
 export function getGroqEffectiveTpmBudget(): number {
   return Math.max(1, Math.floor(getGroqTpmLimit() * getGroqTpmSafetyFactor()));
+}
+
+export function getGroqEffectiveRpmBudget(): number {
+  return Math.max(1, Math.floor(getGroqRpmLimit() * getGroqTpmSafetyFactor()));
 }
 
 export function isGroqRateLimitEnabled(): boolean {

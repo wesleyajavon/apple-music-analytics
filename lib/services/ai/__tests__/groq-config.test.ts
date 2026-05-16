@@ -1,20 +1,24 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import {
   getGroqTpmLimit,
+  getGroqRpmLimit,
   getGroqTpmSafetyFactor,
   getGroqEffectiveTpmBudget,
+  getGroqEffectiveRpmBudget,
   isGroqRateLimitEnabled,
 } from "../groq-config";
 
 describe("groq-config", () => {
   beforeEach(() => {
     delete process.env.GROQ_TPM_LIMIT;
+    delete process.env.GROQ_RPM_LIMIT;
     delete process.env.GROQ_TPM_SAFETY;
     delete process.env.GROQ_RATE_LIMIT_ENABLED;
   });
 
   afterEach(() => {
     delete process.env.GROQ_TPM_LIMIT;
+    delete process.env.GROQ_RPM_LIMIT;
     delete process.env.GROQ_TPM_SAFETY;
     delete process.env.GROQ_RATE_LIMIT_ENABLED;
   });
@@ -27,6 +31,16 @@ describe("groq-config", () => {
     expect(getGroqTpmLimit()).toBe(6000);
     process.env.GROQ_TPM_LIMIT = "0";
     expect(getGroqTpmLimit()).toBe(6000);
+  });
+
+  it("getGroqRpmLimit defaults and parses valid env", () => {
+    expect(getGroqRpmLimit()).toBe(30);
+    process.env.GROQ_RPM_LIMIT = "60";
+    expect(getGroqRpmLimit()).toBe(60);
+    process.env.GROQ_RPM_LIMIT = "nope";
+    expect(getGroqRpmLimit()).toBe(30);
+    process.env.GROQ_RPM_LIMIT = "0";
+    expect(getGroqRpmLimit()).toBe(30);
   });
 
   it("getGroqTpmSafetyFactor defaults and clamps", () => {
@@ -43,6 +57,12 @@ describe("groq-config", () => {
     process.env.GROQ_TPM_LIMIT = "1000";
     process.env.GROQ_TPM_SAFETY = "0.5";
     expect(getGroqEffectiveTpmBudget()).toBe(500);
+  });
+
+  it("getGroqEffectiveRpmBudget multiplies RPM limit by safety", () => {
+    process.env.GROQ_RPM_LIMIT = "100";
+    process.env.GROQ_TPM_SAFETY = "0.5";
+    expect(getGroqEffectiveRpmBudget()).toBe(50);
   });
 
   it("getGroqEffectiveTpmBudget is at least 1", () => {

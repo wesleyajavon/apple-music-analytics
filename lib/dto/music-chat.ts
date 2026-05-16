@@ -1,5 +1,8 @@
 import type { AiLocale } from "@/lib/services/ai/locale-utils";
 
+/** Rolling UTC calendar-day window for the late-night preset (bounded workload vs full history). */
+export const LATE_NIGHT_PRESET_RECENT_WINDOW_DAYS = 90;
+
 export type MusicChatRole = "user" | "assistant";
 
 export type MusicChatMessage = {
@@ -13,13 +16,27 @@ export type MusicChatDateRangeContext = {
   isAll?: boolean;
 };
 
+/** Optional structured fields for preset requests (e.g. artist deep dive). */
+export type MusicChatPresetArgs = {
+  artistName?: string;
+  /** Compare two calendar years (genre / compare presets). */
+  earlierYear?: number;
+  laterYear?: number;
+  /** Calendar year for genre-last-year preset (optional; server can derive). */
+  genreYear?: number;
+};
+
 export type MusicChatPresetQuestionId =
   | "summer-2022-top-tracks"
+  | "summer-2022-top-artists"
   | "consistent-artists"
   | "late-night-habits"
   | "artist-deep-dive"
   | "taste-shift-2020-2024"
-  | "track-obsessions-2022";
+  | "track-obsessions-2022"
+  | "genre-breakdown-last-year"
+  | "compare-listening-periods"
+  | "yearly-listening-trends";
 
 export type MusicChatSource =
   | "getTopTracksForPeriod"
@@ -31,6 +48,7 @@ export type MusicChatSource =
   | "getListeningTrendsByYear"
   | "getMostConsistentArtistsOverTime"
   | "getListeningHabitsByTimeOfDay"
+  | "getLateNightListeningProfile"
   | "getArtistDeepDive"
   | "resolveDateRange";
 

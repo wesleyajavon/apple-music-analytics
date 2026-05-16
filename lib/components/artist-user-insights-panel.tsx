@@ -152,6 +152,27 @@ export const ArtistUserInsightsPanel = memo(
           })
         : null;
 
+    const firstListenMoment = firstLast
+      ? {
+          weekday: new Date(firstLast.firstListenDate).toLocaleDateString(locale, { weekday: "long" }),
+          dateLine: new Date(firstLast.firstListenDate).toLocaleDateString(locale, {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          }),
+        }
+      : null;
+    const lastListenMoment = firstLast
+      ? {
+          weekday: new Date(firstLast.lastListenDate).toLocaleDateString(locale, { weekday: "long" }),
+          dateLine: new Date(firstLast.lastListenDate).toLocaleDateString(locale, {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          }),
+        }
+      : null;
+
     if (!open || !previewArtist || !artistId) return null;
 
     return (
@@ -225,21 +246,45 @@ export const ArtistUserInsightsPanel = memo(
           </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-6 sm:py-6 [scrollbar-gutter:stable]">
-            {firstLast ? (
-              <p className="mb-5 text-xs leading-relaxed text-gray-600 dark:text-gray-400">
-                {t("insightsTimelineHint", {
-                  first: new Date(firstLast.firstListenDate).toLocaleDateString(locale, {
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                  }),
-                  last: new Date(firstLast.lastListenDate).toLocaleDateString(locale, {
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                  }),
-                })}
-              </p>
+            {firstLast && firstListenMoment && lastListenMoment ? (
+              <section
+                className="mb-6 rounded-2xl border border-slate-200/90 bg-gradient-to-br from-violet-500/[0.07] via-white to-cyan-500/[0.07] p-4 shadow-md shadow-slate-900/[0.06] ring-1 ring-violet-500/10 dark:border-cyan-400/18 dark:from-violet-500/[0.14] dark:via-slate-950/40 dark:to-cyan-500/[0.12] dark:shadow-inner dark:ring-cyan-400/10 sm:p-5"
+                aria-label={t("insightsTimelineTitle")}
+              >
+                <h3 className="text-base font-bold tracking-tight text-gray-900 dark:text-white">
+                  {t("insightsTimelineTitle")}
+                </h3>
+                <p className="mt-1.5 text-xs leading-relaxed text-gray-600 dark:text-gray-400">
+                  {t("insightsTimelineLead")}
+                </p>
+                <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div className="rounded-2xl border border-violet-300/70 bg-white/95 px-4 py-4 shadow-sm shadow-violet-900/8 ring-1 ring-violet-500/15 dark:border-violet-400/25 dark:bg-slate-950/55 dark:shadow-inner dark:ring-violet-400/12">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-violet-800 dark:text-violet-100/90">
+                      {t("insightsFirstListenLabel")}
+                    </p>
+                    <p className="mt-3 text-xl font-black tabular-nums leading-none tracking-tight text-gray-900 dark:text-white">
+                      {firstListenMoment.dateLine}
+                    </p>
+                    <p className="mt-2 text-sm font-semibold capitalize text-violet-950/80 dark:text-violet-100/85">
+                      {firstListenMoment.weekday}
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-cyan-300/70 bg-white/95 px-4 py-4 shadow-sm shadow-cyan-900/8 ring-1 ring-cyan-500/15 dark:border-cyan-400/28 dark:bg-slate-950/55 dark:shadow-inner dark:ring-cyan-400/12">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-cyan-800 dark:text-cyan-100/90">
+                      {t("insightsMostRecentListenLabel")}
+                    </p>
+                    <p className="mt-3 text-xl font-black tabular-nums leading-none tracking-tight text-gray-900 dark:text-white">
+                      {lastListenMoment.dateLine}
+                    </p>
+                    <p className="mt-2 text-sm font-semibold capitalize text-cyan-950/80 dark:text-cyan-100/85">
+                      {lastListenMoment.weekday}
+                    </p>
+                  </div>
+                </div>
+                <p className="mt-3 text-[11px] leading-relaxed text-gray-500 dark:text-gray-500">
+                  {t("insightsTimelineFootnote")}
+                </p>
+              </section>
             ) : null}
 
             {query.isLoading ? (

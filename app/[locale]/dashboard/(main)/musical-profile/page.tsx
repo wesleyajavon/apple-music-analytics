@@ -10,12 +10,7 @@ import { Link } from "@/i18n/navigation";
 import { apiClient } from "@/lib/api-client";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
 import { ErrorState, GroqQuotaNotice } from "@/lib/components/error-state";
-import {
-  ParallaxHero,
-  ScrollProgressBar,
-  ScrollRevealSection,
-  StaggerContainer,
-} from "@/lib/components/overview-bis";
+import { ParallaxHero, ScrollRevealSection, StaggerContainer } from "@/lib/components/overview-bis";
 import { getAiInsightsLabels } from "@/lib/constants/ai-insights-labels";
 import type { ArtistStatsDto } from "@/lib/dto/artist";
 import type { GenreDistributionDto } from "@/lib/dto/genres";
@@ -675,7 +670,6 @@ function MusicalProfileFallback() {
 export default function MusicalProfilePage() {
   return (
     <div className="relative px-4 py-6 sm:px-0">
-      <ScrollProgressBar />
       <Suspense fallback={<MusicalProfileFallback />}>
         <MusicalProfileContent />
       </Suspense>

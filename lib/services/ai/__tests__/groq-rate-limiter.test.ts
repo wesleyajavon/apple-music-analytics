@@ -13,7 +13,7 @@ describe("groq-rate-limiter", () => {
     delete process.env.GROQ_RATE_LIMIT_ENABLED;
   });
 
-  it("estimateGroqChatTokens sums input (char/4) and max_tokens", () => {
+  it("estimateGroqChatTokens sums input (char/4) and capped reserved output", () => {
     expect(
       estimateGroqChatTokens({
         messages: [
@@ -23,6 +23,15 @@ describe("groq-rate-limiter", () => {
         max_tokens: 100,
       })
     ).toBe(200 + 100);
+  });
+
+  it("estimateGroqChatTokens caps large max_tokens so local TPM queue does not stall", () => {
+    expect(
+      estimateGroqChatTokens({
+        messages: [{ role: "user", content: "" }],
+        max_tokens: 8192,
+      })
+    ).toBe(3072);
   });
 
   it("defaults max_tokens to 500 when omitted", () => {

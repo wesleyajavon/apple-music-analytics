@@ -29,6 +29,8 @@ import type {
 } from "@/lib/dto/music-chat";
 
 export const dynamic = "force-dynamic";
+/** Hobby/Pro ceilings vary; keep client `timeout` in use-music-chat aligned with this value */
+export const maxDuration = 180;
 
 const MUSIC_CHAT_RATE_LIMIT = {
   route: "/api/ai/music-chat",
@@ -42,10 +44,20 @@ const MusicChatMessageSchema = z.object({
   content: z.string().trim().min(1).max(2_000),
 });
 
+const MusicChatPresetArgsSchema = z
+  .object({
+    artistName: z.string().max(200).optional(),
+    earlierYear: z.number().int().min(1900).max(2100).optional(),
+    laterYear: z.number().int().min(1900).max(2100).optional(),
+    genreYear: z.number().int().min(1900).max(2100).optional(),
+  })
+  .strict();
+
 const MusicChatInputSchema = z.object({
   messages: z.array(MusicChatMessageSchema).max(12).default([]),
   locale: z.string().optional(),
   presetQuestionId: z.string().optional(),
+  presetArgs: MusicChatPresetArgsSchema.optional(),
   dateRange: z
     .object({
       startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
@@ -81,11 +93,21 @@ export async function POST(request: NextRequest) {
       messages,
       locale: localeParam,
       presetQuestionId: rawPresetId,
+      presetArgs: rawPresetArgs,
       dateRange,
     } =
       parseResult.data;
     const presetQuestionId = isMusicChatPresetQuestionId(rawPresetId)
       ? rawPresetId
+      : undefined;
+
+    const presetArgs = rawPresetArgs
+      ? {
+          artistName: rawPresetArgs.artistName?.trim() || undefined,
+          earlierYear: rawPresetArgs.earlierYear,
+          laterYear: rawPresetArgs.laterYear,
+          genreYear: rawPresetArgs.genreYear,
+        }
       : undefined;
 
     if (rawPresetId && !presetQuestionId) {
@@ -165,6 +187,7 @@ export async function POST(request: NextRequest) {
       messages: effectiveMessages,
       locale,
       presetQuestionId,
+      presetArgs,
       dateRange: dateRange as MusicChatDateRangeContext | undefined,
     });
 

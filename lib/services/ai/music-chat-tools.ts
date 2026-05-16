@@ -5,9 +5,12 @@ import {
   getOverviewStats,
 } from "@/lib/services/listening/listening-stats";
 import { getTemporalAnalysis } from "@/lib/services/listening/temporal-analysis";
-import { ARTIST_TO_GENRE_MAP } from "@/lib/services/genre/genre-service";
+import { ARTIST_TO_GENRE_MAP, ARTIST_TO_GENRE_MAP_SQL_SAFE_ROW_LIMIT } from "@/lib/services/genre/genre-service";
 import { transformBigIntToNumber } from "@/lib/dto/transformers";
-import type { MusicChatPresetQuestionId } from "@/lib/dto/music-chat";
+import {
+  LATE_NIGHT_PRESET_RECENT_WINDOW_DAYS,
+  type MusicChatPresetQuestionId,
+} from "@/lib/dto/music-chat";
 
 const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const DEFAULT_LIMIT = 10;
@@ -24,6 +27,39 @@ const TASTE_SHIFT_MAX_LIMIT = 10;
 const TASTE_SHIFT_CANDIDATE_MULTIPLIER = 4;
 const TASTE_SHIFT_MAX_CANDIDATES = 40;
 const TASTE_SHIFT_MIN_LISTENS_PER_PERIOD = 5;
+
+/** Clock hours 22–03 inclusive (late evening through early morning), same EXTRACT semantics as `getListeningHabitsByTimeOfDay`. */
+const LATE_NIGHT_HOURS = [22, 23, 0, 1, 2, 3] as const;
+
+export { LATE_NIGHT_PRESET_RECENT_WINDOW_DAYS };
+
+export function getLateNightPresetDateRange(asOf: Date = new Date()): {
+  startDate: string;
+  endDate: string;
+} {
+  const MS_PER_DAY = 86_400_000;
+  const endUtc = Date.UTC(
+    asOf.getUTCFullYear(),
+    asOf.getUTCMonth(),
+    asOf.getUTCDate()
+  );
+  const startUtc =
+    endUtc - (LATE_NIGHT_PRESET_RECENT_WINDOW_DAYS - 1) * MS_PER_DAY;
+  return {
+    startDate: new Date(startUtc).toISOString().slice(0, 10),
+    endDate: new Date(endUtc).toISOString().slice(0, 10),
+  };
+}
+
+function lateNightHourOrderIndex(hour: number): number {
+  return hour >= 22 ? hour - 22 : hour + 2;
+}
+
+function sortLateNightHourRows<T extends { hour: number }>(rows: T[]): T[] {
+  return [...rows].sort(
+    (a, b) => lateNightHourOrderIndex(a.hour) - lateNightHourOrderIndex(b.hour)
+  );
+}
 
 type ExplicitPeriodArgs = {
   firstStartDate: string;
@@ -46,14 +82,22 @@ export const MUSIC_CHAT_PRESET_QUESTIONS: Record<
   MusicChatPresetQuestionId,
   string
 > = {
-  "summer-2022-top-tracks":
-    "What are the songs I listened to the most over summer 2022?",
+  /** Default English when preset is used without client messages (e.g. empty body fallback). */
+  "summer-2022-top-tracks": "What were my top tracks in 2022?",
+  "summer-2022-top-artists": "Who were my top artists in 2022?",
   "consistent-artists":
     "Who is the artist I've been listening to the most consistently over the years?",
-  "late-night-habits": "What do I usually listen to late at night?",
+  "late-night-habits":
+    "What have I been listening to late at night recently?",
   "artist-deep-dive": "Tell me my listening history with Radiohead.",
   "taste-shift-2020-2024": "How did my taste change between 2020 and 2024?",
   "track-obsessions-2022": "Which songs obsessed me in 2022?",
+  "genre-breakdown-last-year":
+    "What genres did I listen to most last year?",
+  "compare-listening-periods":
+    "Compare my top tracks and artists in 2021 vs 2024.",
+  "yearly-listening-trends":
+    "How did my listening volume change by year?",
 };
 
 export function getPresetQuestion(
@@ -578,6 +622,217 @@ export async function getListeningHabitsByTimeOfDay(
   };
 }
 
+export async function getLateNightListeningProfile(
+  userId: string,
+  args: { startDate?: string; endDate?: string; limit?: number }
+) {
+  const startDate = args.startDate ? parseDate(args.startDate) : undefined;
+  const endDate = args.endDate ? endOfDay(parseDate(args.endDate)) : undefined;
+  const limit = clampLimit(args.limit);
+
+  const dateFilters = Prisma.sql`
+    ${startDate ? Prisma.sql`AND l."playedAt" >= ${startDate}` : Prisma.sql``}
+    ${endDate ? Prisma.sql`AND l."playedAt" <= ${endDate}` : Prisma.sql``}
+  `;
+
+  const lateNightHourPredicate = Prisma.sql`EXTRACT(HOUR FROM l."playedAt")::int IN (${Prisma.join(
+    [...LATE_NIGHT_HOURS].map((h) => Prisma.sql`${h}`)
+  )})`;
+
+  const periodTotalRows = await prisma.$queryRaw<Array<{ total_listens: bigint }>>(
+    Prisma.sql`
+    SELECT COUNT(*)::bigint as total_listens
+    FROM "Listen" l
+    WHERE l."userId" = ${userId}
+      ${dateFilters}
+  `
+  );
+
+  const periodTotalListens = transformBigIntToNumber({
+    total_listens: periodTotalRows[0]?.total_listens ?? BigInt(0),
+  }).total_listens;
+
+  const lateNightAggRows = await prisma.$queryRaw<
+    Array<{
+      listen_count: bigint;
+      unique_tracks: bigint;
+      unique_artists: bigint;
+    }>
+  >(Prisma.sql`
+    SELECT
+      COUNT(*)::bigint as listen_count,
+      COUNT(DISTINCT t.id)::bigint as unique_tracks,
+      COUNT(DISTINCT t."artistId")::bigint as unique_artists
+    FROM "Listen" l
+    JOIN "Track" t ON l."trackId" = t.id
+    WHERE l."userId" = ${userId}
+      AND ${lateNightHourPredicate}
+      ${dateFilters}
+  `);
+
+  const lateNightTotals = transformBigIntToNumber({
+    listens: lateNightAggRows[0]?.listen_count ?? BigInt(0),
+    uniqueTracks: lateNightAggRows[0]?.unique_tracks ?? BigInt(0),
+    uniqueArtists: lateNightAggRows[0]?.unique_artists ?? BigInt(0),
+  });
+
+  const hourlyRows = await prisma.$queryRaw<
+    Array<{ hour: number; listen_count: bigint }>
+  >(Prisma.sql`
+    SELECT
+      EXTRACT(HOUR FROM l."playedAt")::int as hour,
+      COUNT(*)::bigint as listen_count
+    FROM "Listen" l
+    JOIN "Track" t ON l."trackId" = t.id
+    WHERE l."userId" = ${userId}
+      AND ${lateNightHourPredicate}
+      ${dateFilters}
+    GROUP BY hour
+    ORDER BY hour ASC
+  `);
+
+  const listensByHour = sortLateNightHourRows(
+    hourlyRows.map((row) => ({
+      hour: row.hour,
+      listens: transformBigIntToNumber({ listen_count: row.listen_count })
+        .listen_count,
+    }))
+  );
+
+  let peakHourWithinLateNight: { hour: number; listens: number } | null = null;
+  for (const row of listensByHour) {
+    if (
+      !peakHourWithinLateNight ||
+      row.listens > peakHourWithinLateNight.listens
+    ) {
+      peakHourWithinLateNight = { hour: row.hour, listens: row.listens };
+    }
+  }
+
+  const trackRows = await prisma.$queryRaw<
+    Array<{
+      track_id: string;
+      track_title: string;
+      artist_name: string;
+      listen_count: bigint;
+    }>
+  >(Prisma.sql`
+    SELECT
+      t.id as track_id,
+      t.title as track_title,
+      a.name as artist_name,
+      COUNT(*)::bigint as listen_count
+    FROM "Listen" l
+    JOIN "Track" t ON l."trackId" = t.id
+    JOIN "Artist" a ON t."artistId" = a.id
+    WHERE l."userId" = ${userId}
+      AND ${lateNightHourPredicate}
+      ${dateFilters}
+    GROUP BY t.id, t.title, a.name
+    ORDER BY listen_count DESC, t.title ASC
+    LIMIT ${limit}
+  `);
+
+  const artistRows = await prisma.$queryRaw<
+    Array<{
+      artist_id: string;
+      artist_name: string;
+      listen_count: bigint;
+      unique_tracks: bigint;
+    }>
+  >(Prisma.sql`
+    SELECT
+      a.id as artist_id,
+      a.name as artist_name,
+      COUNT(*)::bigint as listen_count,
+      COUNT(DISTINCT t.id)::bigint as unique_tracks
+    FROM "Listen" l
+    JOIN "Track" t ON l."trackId" = t.id
+    JOIN "Artist" a ON t."artistId" = a.id
+    WHERE l."userId" = ${userId}
+      AND ${lateNightHourPredicate}
+      ${dateFilters}
+    GROUP BY a.id, a.name
+    ORDER BY listen_count DESC, a.name ASC
+    LIMIT ${limit}
+  `);
+
+  const genreRows = await prisma.$queryRaw<
+    Array<{ genre_label: string; listen_count: bigint }>
+  >(Prisma.sql`
+    SELECT
+      COALESCE(NULLIF(TRIM(t.genre), ''), '(unknown)') as genre_label,
+      COUNT(*)::bigint as listen_count
+    FROM "Listen" l
+    JOIN "Track" t ON l."trackId" = t.id
+    WHERE l."userId" = ${userId}
+      AND ${lateNightHourPredicate}
+      ${dateFilters}
+    GROUP BY genre_label
+    ORDER BY listen_count DESC, genre_label ASC
+    LIMIT ${limit}
+  `);
+
+  const lateNightListenCount = lateNightTotals.listens;
+  const shareOfPeriodListensPct =
+    periodTotalListens > 0
+      ? Number(((lateNightListenCount / periodTotalListens) * 100).toFixed(2))
+      : null;
+
+  const topGenresRaw = genreRows.map((row) => ({
+    genre: row.genre_label,
+    listenCount: transformBigIntToNumber({ listen_count: row.listen_count })
+      .listen_count,
+  }));
+
+  const topGenres = topGenresRaw.map((g) => ({
+    genre: g.genre,
+    listenCount: g.listenCount,
+    percentage:
+      lateNightListenCount > 0
+        ? Number(((g.listenCount / lateNightListenCount) * 100).toFixed(2))
+        : 0,
+  }));
+
+  return {
+    definition: {
+      lateNightHours: [...LATE_NIGHT_HOURS],
+      description:
+        "Late night is clock hours 22, 23, 0, 1, 2, and 3 (22:00–03:59). Hour extraction matches other time-of-day analytics in this product.",
+    },
+    period: {
+      startDate: args.startDate ?? null,
+      endDate: args.endDate ?? null,
+    },
+    periodTotalListens,
+    lateNight: {
+      listens: lateNightListenCount,
+      uniqueTracks: lateNightTotals.uniqueTracks,
+      uniqueArtists: lateNightTotals.uniqueArtists,
+      shareOfPeriodListensPct,
+      peakHourWithinWindow: peakHourWithinLateNight,
+      listensByHour,
+    },
+    topTracks: trackRows.map((row) => ({
+      trackId: row.track_id,
+      title: row.track_title,
+      artistName: row.artist_name,
+      listenCount: transformBigIntToNumber({ listen_count: row.listen_count })
+        .listen_count,
+    })),
+    topArtists: artistRows.map((row) => ({
+      artistId: row.artist_id,
+      artistName: row.artist_name,
+      listenCount: transformBigIntToNumber({ listen_count: row.listen_count })
+        .listen_count,
+      uniqueTracks: transformBigIntToNumber({ unique_tracks: row.unique_tracks })
+        .unique_tracks,
+    })),
+    topGenres,
+    limits: { topLimit: limit },
+  };
+}
+
 export async function getListeningTrendsByYear(
   userId: string,
   args: { limit?: number }
@@ -600,12 +855,14 @@ export async function getListeningTrendsByYear(
     JOIN "Track" t ON l."trackId" = t.id
     WHERE l."userId" = ${userId}
     GROUP BY year
-    ORDER BY year ASC
+    ORDER BY year DESC
     LIMIT ${limit}
   `);
 
+  const chronological = [...rows].reverse();
+
   return {
-    years: rows.map((row) => ({
+    years: chronological.map((row) => ({
       year: row.year,
       ...transformBigIntToNumber({
         listenCount: row.listen_count,
@@ -767,7 +1024,10 @@ async function getGenreTasteShiftDeltas(
     };
   };
 
-  if (genreMapEntries.length === 0) {
+  if (
+    genreMapEntries.length === 0 ||
+    genreMapEntries.length > ARTIST_TO_GENRE_MAP_SQL_SAFE_ROW_LIMIT
+  ) {
     const rows = await prisma.$queryRaw<
       Array<{
         genre: string;
@@ -1155,6 +1415,30 @@ export async function getMostConsistentArtistsOverTime(
   };
 }
 
+/** Catalog match on Artist only (indexed / small scan); Listen joins pin to these ids instead of scanning every ILIKE hit. */
+const ARTIST_DEEP_DIVE_CATALOG_ROW_LIMIT = 64;
+
+function buildArtistDeepDiveCatalogCte(opts: {
+  requestedArtistName: string;
+  artistNameLower: string;
+  artistLikePattern: string;
+}): Prisma.Sql {
+  return Prisma.sql`catalog AS (
+    SELECT id, name,
+      CASE
+        WHEN name = ${opts.requestedArtistName} THEN 0
+        WHEN "nameLower" = ${opts.artistNameLower} THEN 1
+        ELSE 2
+      END AS match_rank
+    FROM "Artist"
+    WHERE name = ${opts.requestedArtistName}
+      OR "nameLower" = ${opts.artistNameLower}
+      OR name ILIKE ${opts.artistLikePattern} ESCAPE ${"\\"}
+    ORDER BY match_rank ASC, name ASC
+    LIMIT ${ARTIST_DEEP_DIVE_CATALOG_ROW_LIMIT}
+  )`;
+}
+
 export async function getArtistDeepDive(
   userId: string,
   args: {
@@ -1189,47 +1473,41 @@ export async function getArtistDeepDive(
       primary_artist_id: string;
       primary_artist_name: string;
       matched_artist_names: string[];
+      selected_artist_ids: string[];
       total_listens: bigint;
       unique_tracks: bigint;
       first_listen_at: Date | null;
       last_listen_at: Date | null;
     }>
   >(Prisma.sql`
-    WITH candidate_artists AS (
-      SELECT DISTINCT
-        a.id,
-        a.name,
-        CASE
-          WHEN a.name = ${requestedArtistName} THEN 0
-          WHEN a."nameLower" = ${artistNameLower} THEN 1
-          ELSE 2
-        END as match_rank
+    WITH ${buildArtistDeepDiveCatalogCte({
+      requestedArtistName,
+      artistNameLower,
+      artistLikePattern,
+    })},
+    listened_candidates AS (
+      SELECT DISTINCT v.id, v.name, v.match_rank
       FROM "Listen" l
       JOIN "Track" t ON l."trackId" = t.id
-      JOIN "Artist" a ON t."artistId" = a.id
+      INNER JOIN catalog v ON v.id = t."artistId"
       WHERE l."userId" = ${userId}
-        AND (
-          a.name = ${requestedArtistName}
-          OR a."nameLower" = ${artistNameLower}
-          OR a.name ILIKE ${artistLikePattern} ESCAPE ${"\\"}
-        )
     ),
     selected_artists AS (
-      SELECT *
-      FROM candidate_artists
-      WHERE match_rank = (SELECT MIN(match_rank) FROM candidate_artists)
+      SELECT * FROM listened_candidates
+      WHERE match_rank = (SELECT MIN(match_rank) FROM listened_candidates)
     )
     SELECT
       (SELECT id FROM selected_artists ORDER BY match_rank, name LIMIT 1) as primary_artist_id,
       (SELECT name FROM selected_artists ORDER BY match_rank, name LIMIT 1) as primary_artist_name,
       ARRAY(SELECT name FROM selected_artists ORDER BY match_rank, name) as matched_artist_names,
+      ARRAY(SELECT id FROM selected_artists ORDER BY match_rank, name) as selected_artist_ids,
       COUNT(*)::bigint as total_listens,
       COUNT(DISTINCT t.id)::bigint as unique_tracks,
       MIN(l."playedAt") as first_listen_at,
       MAX(l."playedAt") as last_listen_at
     FROM "Listen" l
     JOIN "Track" t ON l."trackId" = t.id
-    JOIN selected_artists sa ON t."artistId" = sa.id
+    JOIN selected_artists sa ON sa.id = t."artistId"
     WHERE l."userId" = ${userId}
       ${startDateFilter}
       ${endDateFilter}
@@ -1251,6 +1529,27 @@ export async function getArtistDeepDive(
     };
   }
 
+  const selectedArtistIds = Array.isArray(summary.selected_artist_ids)
+    ? summary.selected_artist_ids
+    : [];
+  if (selectedArtistIds.length === 0) {
+    return {
+      found: false,
+      requestedArtistName,
+      period,
+      totalListens: 0,
+      uniqueTracks: 0,
+      firstListenAt: null,
+      lastListenAt: null,
+      topTracks: [],
+      yearlyBreakdown: [],
+    };
+  }
+
+  const selectedIdInList = Prisma.join(
+    selectedArtistIds.map((id) => Prisma.sql`${id}`)
+  );
+
   const [topTrackRows, yearlyRows] = await Promise.all([
     prisma.$queryRaw<
       Array<{
@@ -1262,29 +1561,6 @@ export async function getArtistDeepDive(
         last_listen_at: Date;
       }>
     >(Prisma.sql`
-      WITH candidate_artists AS (
-        SELECT DISTINCT
-          a.id,
-          CASE
-            WHEN a.name = ${requestedArtistName} THEN 0
-            WHEN a."nameLower" = ${artistNameLower} THEN 1
-            ELSE 2
-          END as match_rank
-        FROM "Listen" l
-        JOIN "Track" t ON l."trackId" = t.id
-        JOIN "Artist" a ON t."artistId" = a.id
-        WHERE l."userId" = ${userId}
-          AND (
-            a.name = ${requestedArtistName}
-            OR a."nameLower" = ${artistNameLower}
-            OR a.name ILIKE ${artistLikePattern} ESCAPE ${"\\"}
-          )
-      ),
-      selected_artists AS (
-        SELECT *
-        FROM candidate_artists
-        WHERE match_rank = (SELECT MIN(match_rank) FROM candidate_artists)
-      )
       SELECT
         t.id as track_id,
         t.title as track_title,
@@ -1294,8 +1570,8 @@ export async function getArtistDeepDive(
         MAX(l."playedAt") as last_listen_at
       FROM "Listen" l
       JOIN "Track" t ON l."trackId" = t.id
-      JOIN selected_artists sa ON t."artistId" = sa.id
       WHERE l."userId" = ${userId}
+        AND t."artistId" IN (${selectedIdInList})
         ${startDateFilter}
         ${endDateFilter}
       GROUP BY t.id, t.title, t.genre
@@ -1309,43 +1585,28 @@ export async function getArtistDeepDive(
         unique_tracks: bigint;
       }>
     >(Prisma.sql`
-      WITH candidate_artists AS (
-        SELECT DISTINCT
-          a.id,
-          CASE
-            WHEN a.name = ${requestedArtistName} THEN 0
-            WHEN a."nameLower" = ${artistNameLower} THEN 1
-            ELSE 2
-          END as match_rank
-        FROM "Listen" l
-        JOIN "Track" t ON l."trackId" = t.id
-        JOIN "Artist" a ON t."artistId" = a.id
-        WHERE l."userId" = ${userId}
-          AND (
-            a.name = ${requestedArtistName}
-            OR a."nameLower" = ${artistNameLower}
-            OR a.name ILIKE ${artistLikePattern} ESCAPE ${"\\"}
-          )
-      ),
-      selected_artists AS (
-        SELECT *
-        FROM candidate_artists
-        WHERE match_rank = (SELECT MIN(match_rank) FROM candidate_artists)
-      )
       SELECT
         EXTRACT(YEAR FROM l."playedAt")::int as year,
         COUNT(*)::bigint as listen_count,
         COUNT(DISTINCT t.id)::bigint as unique_tracks
       FROM "Listen" l
       JOIN "Track" t ON l."trackId" = t.id
-      JOIN selected_artists sa ON t."artistId" = sa.id
       WHERE l."userId" = ${userId}
+        AND t."artistId" IN (${selectedIdInList})
         ${startDateFilter}
         ${endDateFilter}
       GROUP BY year
       ORDER BY year ASC
     `),
   ]);
+
+  const yearlyBreakdown = yearlyRows.map((row) => ({
+    year: row.year,
+    ...transformBigIntToNumber({
+      listenCount: row.listen_count,
+      uniqueTracks: row.unique_tracks,
+    }),
+  }));
 
   const counts = transformBigIntToNumber({
     totalListens: summary.total_listens,
@@ -1372,13 +1633,7 @@ export async function getArtistDeepDive(
       firstListenAt: row.first_listen_at.toISOString(),
       lastListenAt: row.last_listen_at.toISOString(),
     })),
-    yearlyBreakdown: yearlyRows.map((row) => ({
-      year: row.year,
-      ...transformBigIntToNumber({
-        listenCount: row.listen_count,
-        uniqueTracks: row.unique_tracks,
-      }),
-    })),
+    yearlyBreakdown,
   };
 }
 
@@ -1435,6 +1690,12 @@ export async function executeMusicChatTool(
       return getMostConsistentArtistsOverTime(userId, args as { limit?: number });
     case "getListeningHabitsByTimeOfDay":
       return getListeningHabitsByTimeOfDay(userId, args as { startDate?: string; endDate?: string });
+    case "getLateNightListeningProfile":
+      return getLateNightListeningProfile(userId, args as {
+        startDate?: string;
+        endDate?: string;
+        limit?: number;
+      });
     case "getArtistDeepDive":
       return getArtistDeepDive(
         userId,

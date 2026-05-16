@@ -639,6 +639,13 @@ export const ARTIST_TO_GENRE_MAP: Record<string, string> = {
 };
 
 /**
+ * Beyond this size, embedding `ARTIST_TO_GENRE_MAP` as a SQL `VALUES (...)`
+ * joined to every Listen row stalls Postgres on large histories. Aggregations
+ * then use `Track.genre` only (same path as an empty map).
+ */
+export const ARTIST_TO_GENRE_MAP_SQL_SAFE_ROW_LIMIT = 100;
+
+/**
  * Fonction helper pour obtenir le genre d'un artiste
  * Retourne "Unknown" si l'artiste n'est pas dans le mapping
  */

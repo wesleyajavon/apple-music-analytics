@@ -20,16 +20,18 @@ function createRedisClient(): Redis {
     redisUrl = redisUrl.replace('redis://', 'rediss://');
   }
   
-  // Configuration options
-  const options: any = {
-    maxRetriesPerRequest: null, // Disable automatic retries, we handle errors manually
+  const options: Redis.Options = {
+    /**
+     * Never use `null` here: ioredis would retry queued commands indefinitely while reconnecting,
+     * which can hang TPM/quota Redis calls and stall `/api/ai/*` for as long as the tab stays open.
+     */
+    maxRetriesPerRequest: 4,
     enableReadyCheck: true,
     lazyConnect: true,
-    connectTimeout: 5000, // 5 seconds timeout
-    retryStrategy: (times: number) => {
-      // Don't retry - fail fast
-      return null;
-    },
+    connectTimeout: 5000,
+    /** Fail stuck commands instead of blocking AI routes forever */
+    commandTimeout: 12_000,
+    retryStrategy: () => null,
   };
 
   // For Upstash, use IPv6 (required by some Upstash instances)

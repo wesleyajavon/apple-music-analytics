@@ -144,8 +144,14 @@ async function acquireRedis(estimatedTokens: number): Promise<void> {
 }
 
 /**
- * Rough token estimate for chat completions (input + reserved output).
- * Conservative enough to avoid TPM spikes on Groq free tier.
+ * TPM pre-acquire must not reserve the full Groq completion upper bound — large max_tokens would
+ * exceed the sliding minute budget and stall each step for MINUTE+ (music chat chains several calls).
+ * Groq TPM is enforced upstream; under-estimating here avoids self-deadlock while still pacing bursts.
+ */
+const GROQ_TPM_RESERVE_OUTPUT_CAP = 3072;
+
+/**
+ * Rough token estimate for chat completions (input + reserved output for sliding window pacing).
  */
 export function estimateGroqChatTokens(
   params: Pick<
@@ -167,8 +173,9 @@ export function estimateGroqChatTokens(
     }
   }
   const inputTokens = Math.ceil(chars / 4);
-  const output = params.max_tokens ?? 500;
-  return inputTokens + output;
+  const configured = params.max_tokens ?? 500;
+  const reservedOutput = Math.min(configured, GROQ_TPM_RESERVE_OUTPUT_CAP);
+  return inputTokens + reservedOutput;
 }
 
 /**

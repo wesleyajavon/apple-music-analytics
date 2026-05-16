@@ -6,7 +6,7 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "../../prisma";
 import { OverviewStatsDto } from "../../dto/listening";
-import { ARTIST_TO_GENRE_MAP } from "../genre/genre-service";
+import { ARTIST_TO_GENRE_MAP, ARTIST_TO_GENRE_MAP_SQL_SAFE_ROW_LIMIT } from "../genre/genre-service";
 import { transformBigIntToNumber } from "../../dto/transformers";
 
 /**
@@ -99,8 +99,11 @@ export async function getGenreDistribution(
   // Use COALESCE to prioritize track.genre, then fallback to ARTIST_TO_GENRE_MAP, then 'Unknown'
   const genreMapEntries = Object.entries(ARTIST_TO_GENRE_MAP);
   
-  // If there are no entries in the map, use a simpler query
-  if (genreMapEntries.length === 0) {
+  // Empty map, or map too large to inline as VALUES (see genre-service).
+  if (
+    genreMapEntries.length === 0 ||
+    genreMapEntries.length > ARTIST_TO_GENRE_MAP_SQL_SAFE_ROW_LIMIT
+  ) {
     const query = Prisma.sql`
       SELECT 
         COALESCE(t.genre, 'Unknown') as genre,
@@ -213,7 +216,10 @@ export async function getTopArtistsForGenres(
     }));
   };
 
-  if (genreMapEntries.length === 0) {
+  if (
+    genreMapEntries.length === 0 ||
+    genreMapEntries.length > ARTIST_TO_GENRE_MAP_SQL_SAFE_ROW_LIMIT
+  ) {
     const query = Prisma.sql`
       WITH listen_genres AS (
         SELECT 
@@ -337,7 +343,10 @@ export async function getGenreTrends(
         ? Prisma.raw('DATE_TRUNC(\'week\', l."playedAt")::date')
         : Prisma.raw('TO_CHAR(l."playedAt", \'YYYY-MM\')');
 
-  if (genreMapEntries.length === 0) {
+  if (
+    genreMapEntries.length === 0 ||
+    genreMapEntries.length > ARTIST_TO_GENRE_MAP_SQL_SAFE_ROW_LIMIT
+  ) {
     const query = Prisma.sql`
       SELECT 
         ${dateExpr}::text as date,

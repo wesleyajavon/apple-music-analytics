@@ -13,7 +13,7 @@ Exemples de questions cible :
 - "What are the songs I listened to the most over summer 2022?"
 - "Who's the artist I've been listening to the most consistently over the years?"
 - "How did my taste change between 2020 and 2024?"
-- "What do I usually listen to late at night?"
+- "What have I been listening to late at night recently?"
 
 ---
 

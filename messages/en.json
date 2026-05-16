@@ -83,9 +83,13 @@
     "emptyAssistantMessage": "Ask me something about your music data. I will answer only from server-side analytics aggregates.",
     "publicDemoIntro": "Welcome to the demo. Pick a preset question to explore the public profile without opening free text.",
     "inputLabel": "Question for Ask your Soundprint",
-    "inputPlaceholder": "Example: What are the songs I listened to the most over summer 2022?",
+    "inputPlaceholder": "Example: What were my top tracks in 2022?",
     "inputPlaceholderWithArtist": "Example: {artist} deepdive",
     "artistDeepDiveQuestion": "Tell me my listening history with {artist}.",
+    "topTracksYearQuestion": "What were my top tracks in {year}?",
+    "topArtistsYearQuestion": "Who were my top artists in {year}?",
+    "comparePeriodsQuestion": "Compare my top tracks and artists in {earlierYear} vs {laterYear}.",
+    "trackObsessionsYearQuestion": "Which songs obsessed me in {year}?",
     "publicDemoPlaceholder": "Free text is disabled in demo mode.",
     "send": "Send",
     "thinking": "Reading your Soundprint…",
@@ -93,10 +97,12 @@
     "thinkingStep1": "Pulling fresh numbers from your listening history…",
     "thinkingStep2": "Connecting artists, genres, and time ranges…",
     "thinkingStep3": "Almost there — shaping a clear answer…",
+    "thinkingStep4": "Crunching per-track and yearly stats (this can take a bit on large histories)…",
     "thinkingPatience": "Rich answers can take a moment — hang tight.",
     "presetTitle": "Quick questions",
     "presetDescription": "Use these examples to learn what the agent can answer. Click one to ask it directly.",
     "customizeHint": "These are templates: signed-in users can change the artist, year, date range, comparison periods, window size, or result limit in free text.",
+    "heavyPresetHistoryNotice": "Some presets analyze only a recent window (see each card) or follow your dashboard date filter so answers stay responsive—they are not always your full listening history.",
     "supportedGuideTitle": "What you can ask",
     "demoPresetOnlyHint": "Available for signed-in free text.",
     "presetSections": {
@@ -108,24 +114,29 @@
     "unsupportedExamples": "Playlist creation, account changes, data deletion/imports, external artist facts, free-form SQL, and general non-music tasks.",
     "publicDemoFreeTextBlocked": "Public demo mode only accepts preset questions.",
     "genericError": "Could not generate an answer. Please try again.",
+    "requestTimeoutError": "This answer took longer than the browser allows (about three minutes), so the request was stopped. Try a narrower date range on the dashboard, or ask again in a moment — the models or database may have been slow.",
     "aiDisabledClient": "AI is disabled for this browser. Turn the AI switch back on to use Ask your Soundprint.",
     "aiDisabledEnv": "AI is disabled server-side. Ask your Soundprint is not available here.",
     "presets": {
-      "summer-2022-top-tracks": "What are the songs I listened to the most over summer 2022?",
+      "summer-2022-top-tracks": "What were my top tracks in 2022?",
+      "summer-2022-top-artists": "Who were my top artists in 2022?",
       "consistent-artists": "Who's the artist I've been listening to the most consistently over the years?",
-      "late-night-habits": "What do I usually listen to late at night?",
+      "late-night-habits": "What have I been listening to late at night recently?",
       "artist-deep-dive": "Tell me my listening history with Radiohead.",
       "taste-shift-2020-2024": "How did my taste change between 2020 and 2024?",
-      "track-obsessions-2022": "Which songs obsessed me in 2022?"
+      "track-obsessions-2022": "Which songs obsessed me in 2022?",
+      "genre-breakdown-last-year": "What genres did I listen to most last year?",
+      "compare-listening-periods": "Compare my top tracks and artists in 2021 vs 2024.",
+      "yearly-listening-trends": "How did my listening volume change by year?"
     },
     "examples": {
       "top-tracks": {
         "label": "Top tracks",
-        "question": "What are the songs I listened to the most over summer 2022?"
+        "question": "What were my top tracks in a standout year from my history?"
       },
       "top-artists": {
         "label": "Top artists",
-        "question": "Who were my top artists in 2024?"
+        "question": "Who were my top artists in a standout year from my history?"
       },
       "genre-breakdown": {
         "label": "Genre breakdown",
@@ -133,7 +144,7 @@
       },
       "compare-periods": {
         "label": "Compare periods",
-        "question": "Compare my top tracks and artists in 2021 vs 2024."
+        "question": "Compare my top tracks and artists between two standout years from my history."
       },
       "taste-shift": {
         "label": "Taste shift",
@@ -149,7 +160,8 @@
       },
       "time-of-day": {
         "label": "Time habits",
-        "question": "What do I usually listen to late at night?"
+        "question": "What have I been listening to late at night recently?",
+        "recentWindowHint": "Uses about the last {days} days (UTC), not your full history—regardless of the dashboard date filter."
       },
       "artist-deep-dive": {
         "label": "Artist deep dive",
@@ -158,7 +170,7 @@
       },
       "track-obsessions": {
         "label": "Track obsessions",
-        "question": "Which songs obsessed me in 2022?"
+        "question": "Which songs obsessed me in a standout year from my history?"
       }
     }
   },
@@ -845,7 +857,11 @@
     "insightsUniqueTracksShort": "unique tracks",
     "insightsEstPlayTimeUnavailable": "—",
     "insightsEstPlayTimeHint": "est. play time (track durations)",
-    "insightsTimelineHint": "Across this period · first listen {first} · most recent {last}",
+    "insightsTimelineTitle": "First listen & most recent",
+    "insightsTimelineLead": "These two moments show when this artist entered your history for the selected range and when you last pressed play.",
+    "insightsFirstListenLabel": "First listen",
+    "insightsMostRecentListenLabel": "Most recent listen",
+    "insightsTimelineFootnote": "Dates respect your active filters (period and sources).",
     "insightsLoadError": "Could not load artist insights.",
     "insightsPeaksTitle": "When you listen the most",
     "insightsPeakHour": "Peak hour",
@@ -1050,7 +1066,7 @@
     "unknownArtist": "Unknown artist",
     "unknownGenre": "your current palette",
     "deterministicProfile": "Your current profile leans toward {genre}, with {artist} acting as one of the strongest anchors in the period. Import more listens or widen the date range to make the AI profile sharper.",
-    "identityTitle": "Your sonic identity",
+    "identityTitle": "Your soundprint identity",
     "identitySubtitle": "Your story is woven from the same artists, genres, and tracks as the rest of your analytics — so what you read always lines up with your listening picture.",
     "aiCached": "AI profile served from cache",
     "aiUnavailable": "AI is currently disabled for this environment or browser, so this page is showing a deterministic profile from your stats.",

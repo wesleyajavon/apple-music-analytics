@@ -5,6 +5,7 @@ import { apiClient, type ParsedRateLimitHeaders } from "@/lib/api-client";
 import type {
   MusicChatDateRangeContext,
   MusicChatMessage,
+  MusicChatPresetArgs,
   MusicChatPresetQuestionId,
   MusicChatResponse,
 } from "@/lib/dto/music-chat";
@@ -18,6 +19,7 @@ export type SendMusicChatInput = {
   locale: string;
   userId?: string;
   presetQuestionId?: MusicChatPresetQuestionId;
+  presetArgs?: MusicChatPresetArgs;
   dateRange?: MusicChatDateRangeContext;
 };
 
@@ -32,6 +34,7 @@ async function sendMusicChatMessage({
   locale,
   userId,
   presetQuestionId,
+  presetArgs,
   dateRange,
 }: SendMusicChatInput): Promise<MusicChatUiResponse> {
   const result = await apiClient.postWithMeta<MusicChatResponse>(
@@ -40,10 +43,12 @@ async function sendMusicChatMessage({
       messages,
       locale,
       presetQuestionId,
+      presetArgs,
       dateRange,
     },
     {
-      timeout: 45_000,
+      /** Tool rounds + Groq + DB — align with `maxDuration` on the API route */
+      timeout: 180_000,
       retries: 0,
     }
   );

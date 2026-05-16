@@ -9,6 +9,7 @@ import { DashboardViewerProvider } from "@/lib/context/dashboard-viewer-context"
 import { GenreGroqClassificationNudgeNotifier } from "@/lib/components/genre-groq-classification-nudge-notifier";
 import { GenreBackfillJobProvider } from "@/lib/context/genre-backfill-job-context";
 import { NotificationCenterProvider } from "@/lib/context/notification-center-context";
+import { ScrollProgressBar } from "@/lib/components/overview-bis";
 
 export function DashboardScrollWrapper({ children }: { children: React.ReactNode }) {
   const [filterElement, setFilterElement] = useState<HTMLDivElement | null>(null);
@@ -44,6 +45,7 @@ export function DashboardScrollWrapper({ children }: { children: React.ReactNode
 
   return (
     <div className="flex min-h-screen bg-background" style={dashboardStyle}>
+      <ScrollProgressBar />
       <Sidebar />
       <NotificationCenterProvider>
         <GenreBackfillJobProvider>

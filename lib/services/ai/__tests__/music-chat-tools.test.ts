@@ -8,6 +8,8 @@ vi.mock("@/lib/prisma", () => ({
 
 import {
   getArtistDeepDive,
+  getLateNightListeningProfile,
+  getLateNightPresetDateRange,
   getTasteShiftSummary,
   getTrackObsessionWindows,
   isMusicChatPresetQuestionId,
@@ -40,9 +42,11 @@ describe("music-chat-tools", () => {
 
   it("recognizes allowlisted demo preset ids only", () => {
     expect(isMusicChatPresetQuestionId("summer-2022-top-tracks")).toBe(true);
+    expect(isMusicChatPresetQuestionId("summer-2022-top-artists")).toBe(true);
     expect(isMusicChatPresetQuestionId("artist-deep-dive")).toBe(true);
     expect(isMusicChatPresetQuestionId("taste-shift-2020-2024")).toBe(true);
     expect(isMusicChatPresetQuestionId("track-obsessions-2022")).toBe(true);
+    expect(isMusicChatPresetQuestionId("late-night-habits")).toBe(true);
     expect(isMusicChatPresetQuestionId("free-text")).toBe(false);
     expect(isMusicChatPresetQuestionId(undefined)).toBe(false);
   });
@@ -102,6 +106,82 @@ describe("music-chat-tools", () => {
     expect(query.values).toContain(10);
   });
 
+  it("aggregates late-night window listens with tops and share", async () => {
+    vi.mocked(prisma.$queryRaw)
+      .mockResolvedValueOnce([{ total_listens: BigInt(1000) }])
+      .mockResolvedValueOnce([
+        {
+          listen_count: BigInt(100),
+          unique_tracks: BigInt(40),
+          unique_artists: BigInt(15),
+        },
+      ])
+      .mockResolvedValueOnce([
+        { hour: 23, listen_count: BigInt(60) },
+        { hour: 22, listen_count: BigInt(40) },
+      ])
+      .mockResolvedValueOnce([
+        {
+          track_id: "t1",
+          track_title: "Night Track",
+          artist_name: "Night Artist",
+          listen_count: BigInt(25),
+        },
+      ])
+      .mockResolvedValueOnce([
+        {
+          artist_id: "a1",
+          artist_name: "Night Artist",
+          listen_count: BigInt(50),
+          unique_tracks: BigInt(5),
+        },
+      ])
+      .mockResolvedValueOnce([
+        { genre_label: "Electronic", listen_count: BigInt(30) },
+      ]);
+
+    const result = await getLateNightListeningProfile("user-456", {
+      startDate: "2024-01-01",
+      endDate: "2024-01-31",
+      limit: 5,
+    });
+
+    expect(result.period).toEqual({
+      startDate: "2024-01-01",
+      endDate: "2024-01-31",
+    });
+    expect(result.periodTotalListens).toBe(1000);
+    expect(result.lateNight.listens).toBe(100);
+    expect(result.lateNight.shareOfPeriodListensPct).toBe(10);
+    expect(result.lateNight.peakHourWithinWindow).toEqual({
+      hour: 23,
+      listens: 60,
+    });
+    expect(result.lateNight.listensByHour).toEqual([
+      { hour: 22, listens: 40 },
+      { hour: 23, listens: 60 },
+    ]);
+    expect(result.topTracks[0]).toMatchObject({
+      title: "Night Track",
+      listenCount: 25,
+    });
+    expect(result.topGenres[0]).toMatchObject({
+      genre: "Electronic",
+      listenCount: 30,
+      percentage: 30,
+    });
+    expect(prisma.$queryRaw).toHaveBeenCalledTimes(6);
+  });
+
+  it("computes inclusive rolling UTC window for late-night preset", () => {
+    expect(
+      getLateNightPresetDateRange(new Date("2026-05-15T18:30:00.000Z"))
+    ).toEqual({
+      startDate: "2026-02-15",
+      endDate: "2026-05-15",
+    });
+  });
+
   it("returns an artist deep dive for an exact artist match", async () => {
     vi.mocked(prisma.$queryRaw)
       .mockResolvedValueOnce([
@@ -109,6 +189,7 @@ describe("music-chat-tools", () => {
           primary_artist_id: "artist-1",
           primary_artist_name: "Daft Punk",
           matched_artist_names: ["Daft Punk"],
+          selected_artist_ids: ["artist-1"],
           total_listens: BigInt(12),
           unique_tracks: BigInt(2),
           first_listen_at: new Date("2023-01-02T03:04:05.000Z"),
@@ -172,6 +253,7 @@ describe("music-chat-tools", () => {
           primary_artist_id: "artist-2",
           primary_artist_name: "Beyonce",
           matched_artist_names: ["Beyonce"],
+          selected_artist_ids: ["artist-2"],
           total_listens: BigInt(3),
           unique_tracks: BigInt(1),
           first_listen_at: new Date("2024-01-01T00:00:00.000Z"),
@@ -203,6 +285,7 @@ describe("music-chat-tools", () => {
           primary_artist_id: "artist-3",
           primary_artist_name: "Radiohead / Thom Yorke",
           matched_artist_names: ["Radiohead / Thom Yorke"],
+          selected_artist_ids: ["artist-3"],
           total_listens: BigInt(4),
           unique_tracks: BigInt(2),
           first_listen_at: new Date("2022-02-01T00:00:00.000Z"),
@@ -231,6 +314,7 @@ describe("music-chat-tools", () => {
     };
     expect(query.strings.join("")).toContain("ILIKE");
     expect(query.values).toContain("%Radiohead%");
+    expect(prisma.$queryRaw).toHaveBeenCalledTimes(3);
   });
 
   it("returns an empty artist deep dive when the artist is absent", async () => {

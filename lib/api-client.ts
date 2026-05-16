@@ -110,40 +110,42 @@ export class ApiClient {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), timeout);
 
-      const response = await fetch(url.toString(), {
-        ...fetchOptions,
-        signal: controller.signal,
-      });
+      try {
+        const response = await fetch(url.toString(), {
+          ...fetchOptions,
+          signal: controller.signal,
+        });
 
-      clearTimeout(timeoutId);
+        const parsedRateLimit = parseRateLimitHeaders(response.headers);
 
-      const parsedRateLimit = parseRateLimitHeaders(response.headers);
+        if (!response.ok) {
+          // Tenter de parser le body JSON pour obtenir les détails d'erreur
+          let errorData: ApiResponse<never> = {};
+          try {
+            errorData = await response.json();
+          } catch {
+            // Si le parsing JSON échoue, on utilise les valeurs par défaut
+            errorData = {};
+          }
 
-      if (!response.ok) {
-        // Tenter de parser le body JSON pour obtenir les détails d'erreur
-        let errorData: ApiResponse<never> = {};
-        try {
-          errorData = await response.json();
-        } catch {
-          // Si le parsing JSON échoue, on utilise les valeurs par défaut
-          errorData = {};
+          const errorMessage =
+            errorData.error ||
+            response.statusText ||
+            `HTTP ${response.status}`;
+
+          throw new ApiError(
+            response.status,
+            errorMessage,
+            errorData.code,
+            errorData.details,
+            parsedRateLimit
+          );
         }
 
-        const errorMessage =
-          errorData.error ||
-          response.statusText ||
-          `HTTP ${response.status}`;
-
-        throw new ApiError(
-          response.status,
-          errorMessage,
-          errorData.code,
-          errorData.details,
-          parsedRateLimit
-        );
+        return await response.json();
+      } finally {
+        clearTimeout(timeoutId);
       }
-
-      return response.json();
     } catch (error) {
       // Gestion du timeout (AbortError)
       if (error instanceof Error && error.name === 'AbortError') {
@@ -279,36 +281,39 @@ export class ApiClient {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), timeout);
 
-      const response = await fetch(url.toString(), {
-        ...fetchOptions,
-        signal: controller.signal,
-      });
+      try {
+        const response = await fetch(url.toString(), {
+          ...fetchOptions,
+          signal: controller.signal,
+        });
 
-      clearTimeout(timeoutId);
-      const parsedRateLimit = parseRateLimitHeaders(response.headers);
+        const parsedRateLimit = parseRateLimitHeaders(response.headers);
 
-      if (!response.ok) {
-        let errorData: ApiResponse<never> = {};
-        try {
-          errorData = await response.json();
-        } catch {
-          errorData = {};
+        if (!response.ok) {
+          let errorData: ApiResponse<never> = {};
+          try {
+            errorData = await response.json();
+          } catch {
+            errorData = {};
+          }
+          const errorMessage =
+            errorData.error || response.statusText || `HTTP ${response.status}`;
+          throw new ApiError(
+            response.status,
+            errorMessage,
+            errorData.code,
+            errorData.details,
+            parsedRateLimit
+          );
         }
-        const errorMessage =
-          errorData.error || response.statusText || `HTTP ${response.status}`;
-        throw new ApiError(
-          response.status,
-          errorMessage,
-          errorData.code,
-          errorData.details,
-          parsedRateLimit
-        );
-      }
 
-      return {
-        data: await response.json(),
-        rateLimit: parsedRateLimit,
-      };
+        return {
+          data: await response.json(),
+          rateLimit: parsedRateLimit,
+        };
+      } finally {
+        clearTimeout(timeoutId);
+      }
     } catch (error) {
       if (error instanceof Error && error.name === "AbortError") {
         const timeoutError = new ApiError(

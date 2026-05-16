@@ -172,6 +172,7 @@ model Listen {
   @@index([trackId])
   @@index([playedAt])
   @@index([userId, playedAt])
+  @@index([userId, trackId])
 }
 
 model ReplayYearly {

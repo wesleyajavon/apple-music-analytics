@@ -2,9 +2,8 @@
 
 import { Suspense, useEffect, useMemo, useState, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
-import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
-import { ChevronDown, Send, Sparkles, UserRound } from "lucide-react";
+import { Bot, ChevronDown, Send, Sparkles, UserRound } from "lucide-react";
 import { ApiError } from "@/lib/api-client";
 import { AssistantChatMessageBody } from "@/lib/components/assistant-chat-message-body";
 import { InteractiveAiGenreBackfillNotice } from "@/lib/components/interactive-ai-genre-backfill-notice";
@@ -12,9 +11,11 @@ import { useMusicChat } from "@/lib/hooks/use-music-chat";
 import { useArtistStats } from "@/lib/hooks/use-artists";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
 import { usePublicDemoViewer } from "@/lib/hooks/use-public-demo-viewer";
-import type {
-  MusicChatMessage,
-  MusicChatPresetQuestionId,
+import {
+  LATE_NIGHT_PRESET_RECENT_WINDOW_DAYS,
+  type MusicChatMessage,
+  type MusicChatPresetArgs,
+  type MusicChatPresetQuestionId,
 } from "@/lib/dto/music-chat";
 import { isGroqGenreClassificationBlockingError } from "@/lib/utils/groq-quota-message";
 import { useInteractiveAiBlockedByGenreBackfill } from "@/lib/hooks/use-interactive-ai-blocked-by-genre-backfill";
@@ -31,11 +32,67 @@ type QuickQuestionId =
   | "artist-deep-dive"
   | "track-obsessions";
 
+/** Artists loaded for the deep-dive preset; one is picked at random from this pool. */
+const ARTIST_DEEP_DIVE_POOL_LIMIT = 20;
+
+/** Fallback pair when listening bounds are missing (matches previous static copy). */
+const COMPARE_PERIODS_FALLBACK_EARLIER = 2021;
+const COMPARE_PERIODS_FALLBACK_LATER = 2024;
+
+/** Fallback single year when listening bounds are missing (should be rare once the date range has loaded). */
+const LISTEN_HISTORY_YEAR_FALLBACK = 2022;
+
+function pickRandomCalendarYearFromHistoryBounds(
+  startDate: string | undefined,
+  endDate: string | undefined
+): number | null {
+  if (!startDate || !endDate) return null;
+  const yStart = Number.parseInt(startDate.slice(0, 4), 10);
+  const yEnd = Number.parseInt(endDate.slice(0, 4), 10);
+  if (!Number.isFinite(yStart) || !Number.isFinite(yEnd)) return null;
+  const lo = Math.min(yStart, yEnd);
+  const hi = Math.max(yStart, yEnd);
+  return lo + Math.floor(Math.random() * (hi - lo + 1));
+}
+
+/**
+ * Two distinct calendar years for comparison, ordered earlier → later.
+ * If the history span is a single calendar year, uses the previous calendar year as the first period.
+ */
+function pickTwoDistinctCalendarYearsForCompare(
+  startDate: string | undefined,
+  endDate: string | undefined
+): { earlierYear: number; laterYear: number } | null {
+  if (!startDate || !endDate) return null;
+  const yStart = Number.parseInt(startDate.slice(0, 4), 10);
+  const yEnd = Number.parseInt(endDate.slice(0, 4), 10);
+  if (!Number.isFinite(yStart) || !Number.isFinite(yEnd)) return null;
+  const lo = Math.min(yStart, yEnd);
+  const hi = Math.max(yStart, yEnd);
+
+  if (lo === hi) {
+    return { earlierYear: lo - 1, laterYear: lo };
+  }
+
+  const span = hi - lo + 1;
+  let a = lo + Math.floor(Math.random() * span);
+  let b = lo + Math.floor(Math.random() * span);
+  let guard = 0;
+  while (b === a && guard < 48) {
+    b = lo + Math.floor(Math.random() * span);
+    guard += 1;
+  }
+  if (b === a) {
+    b = a === lo ? hi : lo;
+  }
+  return { earlierYear: Math.min(a, b), laterYear: Math.max(a, b) };
+}
+
 const QUICK_QUESTION_SECTIONS: Array<{
   titleKey: "core" | "maestroUpgrade";
   examples: Array<{
     id: QuickQuestionId;
-    presetQuestionId?: MusicChatPresetQuestionId;
+    presetQuestionId: MusicChatPresetQuestionId;
   }>;
 }> = [
   {
@@ -43,10 +100,10 @@ const QUICK_QUESTION_SECTIONS: Array<{
     examples: [
       { id: "artist-deep-dive", presetQuestionId: "artist-deep-dive" },
       { id: "top-tracks", presetQuestionId: "summer-2022-top-tracks" },
-      { id: "top-artists" },
-      { id: "genre-breakdown" },
-      { id: "compare-periods" },
-      { id: "yearly-trends" },
+      { id: "top-artists", presetQuestionId: "summer-2022-top-artists" },
+      { id: "genre-breakdown", presetQuestionId: "genre-breakdown-last-year" },
+      { id: "compare-periods", presetQuestionId: "compare-listening-periods" },
+      { id: "yearly-trends", presetQuestionId: "yearly-listening-trends" },
       { id: "consistent-artists", presetQuestionId: "consistent-artists" },
       { id: "time-of-day", presetQuestionId: "late-night-habits" },
     ],
@@ -69,13 +126,19 @@ function MusicChatFallback() {
   );
 }
 
-function formatError(error: unknown, fallback: string): string {
+function formatError(
+  error: unknown,
+  messages: { generic: string; timeout: string }
+): string {
   if (error instanceof ApiError && isGroqGenreClassificationBlockingError(error)) {
     return "";
   }
+  if (error instanceof ApiError && error.code === "TIMEOUT") {
+    return messages.timeout;
+  }
   if (error instanceof ApiError) return error.message;
   if (error instanceof Error) return error.message;
-  return fallback;
+  return messages.generic;
 }
 
 function MusicChatContent() {
@@ -96,23 +159,72 @@ function MusicChatContent() {
     startDate,
     endDate,
     userId,
-    1,
+    ARTIST_DEEP_DIVE_POOL_LIMIT,
     0,
     {
       enabled:
         !isPublicDemoViewer && Boolean(startDate && endDate && !isDateRangeLoading),
     }
   );
-  const topArtistName = useMemo(() => {
+  const deepDiveTopArtistIdsKey = useMemo(() => {
+    const list =
+      topArtistStats.data?.topArtists?.slice(0, ARTIST_DEEP_DIVE_POOL_LIMIT) ?? [];
+    return list.map((a) => a.artistId).join("|");
+  }, [topArtistStats.data]);
+
+  const deepDiveArtistName = useMemo(() => {
     if (isPublicDemoViewer) return null;
-    const name = topArtistStats.data?.topArtists?.[0]?.artistName?.trim();
-    return name || null;
-  }, [isPublicDemoViewer, topArtistStats.data]);
+    const pool =
+      topArtistStats.data?.topArtists?.slice(0, ARTIST_DEEP_DIVE_POOL_LIMIT) ?? [];
+    if (pool.length === 0) return null;
+    const idx = Math.floor(Math.random() * pool.length);
+    return pool[idx]?.artistName?.trim() || null;
+  }, [isPublicDemoViewer, deepDiveTopArtistIdsKey]);
+
+  const listenHistoryYearBoundsKey = useMemo(
+    () => `${startDate ?? ""}|${endDate ?? ""}`,
+    [startDate, endDate]
+  );
+
+  const topTracksRandomYear = useMemo(
+    () => pickRandomCalendarYearFromHistoryBounds(startDate, endDate),
+    [listenHistoryYearBoundsKey]
+  );
+
+  /** Separate draw so Top tracks and Top artists are not tied to the same random year. */
+  const topArtistsRandomYear = useMemo(
+    () => pickRandomCalendarYearFromHistoryBounds(startDate, endDate),
+    [listenHistoryYearBoundsKey]
+  );
+
+  const topTracksQuestionYear =
+    topTracksRandomYear ?? LISTEN_HISTORY_YEAR_FALLBACK;
+
+  const topArtistsQuestionYear =
+    topArtistsRandomYear ?? LISTEN_HISTORY_YEAR_FALLBACK;
+
+  const comparePeriodsYears = useMemo(
+    () => pickTwoDistinctCalendarYearsForCompare(startDate, endDate),
+    [listenHistoryYearBoundsKey]
+  );
+
+  const comparePeriodsEarlierYear =
+    comparePeriodsYears?.earlierYear ?? COMPARE_PERIODS_FALLBACK_EARLIER;
+  const comparePeriodsLaterYear =
+    comparePeriodsYears?.laterYear ?? COMPARE_PERIODS_FALLBACK_LATER;
+
+  const trackObsessionsRandomYear = useMemo(
+    () => pickRandomCalendarYearFromHistoryBounds(startDate, endDate),
+    [listenHistoryYearBoundsKey]
+  );
+
+  const trackObsessionsQuestionYear =
+    trackObsessionsRandomYear ?? LISTEN_HISTORY_YEAR_FALLBACK;
 
   const personalizedPlaceholder = useMemo(() => {
-    if (!topArtistName) return null;
-    return t("inputPlaceholderWithArtist", { artist: topArtistName });
-  }, [topArtistName, t]);
+    if (!deepDiveArtistName) return null;
+    return t("inputPlaceholderWithArtist", { artist: deepDiveArtistName });
+  }, [deepDiveArtistName, t]);
   const [messages, setMessages] = useState<MusicChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -131,6 +243,7 @@ function MusicChatContent() {
       t("thinkingStep1"),
       t("thinkingStep2"),
       t("thinkingStep3"),
+      t("thinkingStep4"),
     ],
     [t]
   );
@@ -164,7 +277,8 @@ function MusicChatContent() {
 
   async function sendMessage(
     content: string,
-    presetQuestionId?: MusicChatPresetQuestionId
+    presetQuestionId?: MusicChatPresetQuestionId,
+    presetArgs?: MusicChatPresetArgs
   ) {
     const trimmed = content.trim();
     if (!trimmed && !presetQuestionId) return;
@@ -184,6 +298,7 @@ function MusicChatContent() {
         locale,
         userId,
         presetQuestionId,
+        presetArgs,
         dateRange: {
           startDate,
           endDate,
@@ -217,18 +332,76 @@ function MusicChatContent() {
         setInput(trimmed);
         return;
       }
-      setErrorMessage(formatError(error, t("genericError")));
+      setErrorMessage(formatError(error, {
+        generic: t("genericError"),
+        timeout: t("requestTimeoutError"),
+      }));
       setMessages(messages);
       setInput(trimmed);
     }
   }
 
   function handlePresetClick(presetQuestionId: MusicChatPresetQuestionId) {
+    if (presetQuestionId === "compare-listening-periods") {
+      sendMessage(
+        t("comparePeriodsQuestion", {
+          earlierYear: comparePeriodsEarlierYear,
+          laterYear: comparePeriodsLaterYear,
+        }),
+        presetQuestionId,
+        {
+          earlierYear: comparePeriodsEarlierYear,
+          laterYear: comparePeriodsLaterYear,
+        }
+      );
+      return;
+    }
+    if (presetQuestionId === "genre-breakdown-last-year") {
+      const yEnd =
+        endDate && endDate.length >= 4
+          ? Number.parseInt(endDate.slice(0, 4), 10)
+          : new Date().getUTCFullYear();
+      const genreYear = (Number.isFinite(yEnd) ? yEnd : new Date().getUTCFullYear()) - 1;
+      sendMessage(
+        t("examples.genre-breakdown.question"),
+        presetQuestionId,
+        { genreYear }
+      );
+      return;
+    }
+    if (presetQuestionId === "yearly-listening-trends") {
+      sendMessage(t("examples.yearly-trends.question"), presetQuestionId);
+      return;
+    }
     if (presetQuestionId === "artist-deep-dive") {
       sendMessage(
-        topArtistName
-          ? t("artistDeepDiveQuestion", { artist: topArtistName })
+        deepDiveArtistName
+          ? t("artistDeepDiveQuestion", { artist: deepDiveArtistName })
           : t("presets.artist-deep-dive"),
+        presetQuestionId,
+        deepDiveArtistName ? { artistName: deepDiveArtistName } : undefined
+      );
+      return;
+    }
+    if (presetQuestionId === "summer-2022-top-artists") {
+      sendMessage(
+        t("topArtistsYearQuestion", { year: topArtistsQuestionYear }),
+        presetQuestionId
+      );
+      return;
+    }
+    if (presetQuestionId === "summer-2022-top-tracks") {
+      sendMessage(
+        t("topTracksYearQuestion", { year: topTracksQuestionYear }),
+        presetQuestionId
+      );
+      return;
+    }
+    if (presetQuestionId === "track-obsessions-2022") {
+      sendMessage(
+        t("trackObsessionsYearQuestion", {
+          year: trackObsessionsQuestionYear,
+        }),
         presetQuestionId
       );
       return;
@@ -292,14 +465,8 @@ function MusicChatContent() {
                   className={`flex gap-3 ${isAssistant ? "" : "justify-end"}`}
                 >
                   {isAssistant ? (
-                    <div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-violet-500/15">
-                      <Image
-                        src="/brand/favicon.png"
-                        alt=""
-                        width={48}
-                        height={48}
-                        className="h-6 w-6 object-contain"
-                      />
+                    <div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-violet-500/15 text-violet-600 dark:text-violet-400">
+                      <Bot className="h-5 w-5 shrink-0" aria-hidden />
                     </div>
                   ) : null}
                   <div
@@ -325,14 +492,8 @@ function MusicChatContent() {
             })}
             {musicChat.isPending ? (
               <div className="flex gap-3">
-                <div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-violet-500/15 motion-safe:animate-pulse">
-                  <Image
-                    src="/brand/favicon.png"
-                    alt=""
-                    width={48}
-                    height={48}
-                    className="h-6 w-6 object-contain"
-                  />
+                <div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-violet-500/15 text-violet-600 motion-safe:animate-pulse dark:text-violet-400">
+                  <Bot className="h-5 w-5 shrink-0" aria-hidden />
                 </div>
                 <div
                   className="max-w-[min(100%,28rem)] space-y-2 rounded-2xl border border-violet-200/30 bg-white/70 px-4 py-3 text-sm dark:bg-slate-950/35"
@@ -407,6 +568,9 @@ function MusicChatContent() {
             <p className="mt-2 rounded-xl border border-cyan-200/40 bg-cyan-50/70 px-3 py-2 text-xs leading-relaxed text-cyan-950 dark:border-cyan-300/15 dark:bg-cyan-950/25 dark:text-cyan-100">
               {t("customizeHint")}
             </p>
+            <p className="mt-2 rounded-xl border border-amber-200/50 bg-amber-50/80 px-3 py-2 text-xs leading-relaxed text-amber-950 dark:border-amber-300/20 dark:bg-amber-950/30 dark:text-amber-100">
+              {t("heavyPresetHistoryNotice")}
+            </p>
             <details open className="group mt-4">
               <summary className="flex cursor-pointer list-none items-center justify-between rounded-xl border border-violet-200/40 bg-violet-50/70 px-4 py-3 text-left text-sm font-semibold text-violet-950 transition hover:border-violet-300 hover:bg-violet-100 dark:border-violet-300/15 dark:bg-violet-950/25 dark:text-violet-100 dark:hover:bg-violet-900/35">
                 <span>{t("supportedGuideTitle")}</span>
@@ -422,8 +586,6 @@ function MusicChatContent() {
                       {t(`presetSections.${section.titleKey}`)}
                     </p>
                     {section.examples.map((example) => {
-                      const isDemoBlocked =
-                        isPublicDemoViewer && !example.presetQuestionId;
                       return (
                         <button
                           key={example.id}
@@ -431,14 +593,11 @@ function MusicChatContent() {
                           disabled={
                             musicChat.isPending ||
                             isDateRangeLoading ||
-                            isDemoBlocked ||
                             interactiveAiBlockedByGenreBackfill
                           }
-                          onClick={() =>
-                            example.presetQuestionId
-                              ? handlePresetClick(example.presetQuestionId)
-                              : sendMessage(t(`examples.${example.id}.question`))
-                          }
+                          onClick={() => {
+                            handlePresetClick(example.presetQuestionId);
+                          }}
                           className="w-full rounded-xl border border-card-border bg-background/80 px-4 py-3 text-left transition hover:border-violet-300 hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-60 dark:hover:bg-violet-950/25"
                         >
                           <span
@@ -460,14 +619,36 @@ function MusicChatContent() {
                           </span>
                           <span className="mt-1 block text-sm font-medium leading-snug text-foreground">
                             {example.id === "artist-deep-dive"
-                              ? topArtistName
-                                ? t("artistDeepDiveQuestion", { artist: topArtistName })
+                              ? deepDiveArtistName
+                                ? t("artistDeepDiveQuestion", { artist: deepDiveArtistName })
                                 : t("examples.artist-deep-dive.question")
-                              : t(`examples.${example.id}.question`)}
+                              : example.id === "top-tracks"
+                                ? t("topTracksYearQuestion", {
+                                    year: topTracksQuestionYear,
+                                  })
+                                : example.id === "top-artists"
+                                  ? t("topArtistsYearQuestion", {
+                                      year: topArtistsQuestionYear,
+                                    })
+                                  : example.id === "compare-periods"
+                                    ? t("comparePeriodsQuestion", {
+                                        earlierYear:
+                                          comparePeriodsEarlierYear,
+                                        laterYear:
+                                          comparePeriodsLaterYear,
+                                      })
+                                    : example.id === "track-obsessions"
+                                      ? t("trackObsessionsYearQuestion", {
+                                          year:
+                                            trackObsessionsQuestionYear,
+                                        })
+                                      : t(`examples.${example.id}.question`)}
                           </span>
-                          {isDemoBlocked ? (
-                            <span className="mt-2 block text-xs text-muted-foreground">
-                              {t("demoPresetOnlyHint")}
+                          {example.id === "time-of-day" ? (
+                            <span className="mt-2 block text-xs leading-relaxed text-muted-foreground">
+                              {t("examples.time-of-day.recentWindowHint", {
+                                days: LATE_NIGHT_PRESET_RECENT_WINDOW_DAYS,
+                              })}
                             </span>
                           ) : null}
                         </button>

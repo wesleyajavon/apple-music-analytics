@@ -21,10 +21,150 @@ vi.mock("@/lib/services/ai/music-chat-tools", async (importOriginal) => {
 });
 
 import { generateMusicChatAnswer } from "@/lib/services/ai/music-chat-service";
+import { getLateNightPresetDateRange } from "@/lib/services/ai/music-chat-tools";
 
 describe("music-chat-service", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  it("formats top-tracks preset without calling Groq", async () => {
+    mockExecuteMusicChatTool.mockResolvedValue({
+      period: { startDate: "2026-01-01", endDate: "2026-12-31" },
+      tracks: [
+        {
+          trackId: "t1",
+          title: "Hit",
+          artistName: "Band",
+          genre: null,
+          listenCount: 40,
+          firstListenAt: "2026-02-01T00:00:00.000Z",
+          lastListenAt: "2026-03-01T00:00:00.000Z",
+        },
+      ],
+    });
+
+    const response = await generateMusicChatAnswer({
+      userId: "user-123",
+      locale: "en",
+      messages: [
+        {
+          role: "user",
+          content: "What were my top tracks in 2026?",
+        },
+      ],
+      presetQuestionId: "summer-2022-top-tracks",
+    });
+
+    expect(mockExecuteMusicChatTool).toHaveBeenCalledTimes(1);
+    expect(mockExecuteMusicChatTool).toHaveBeenCalledWith(
+      "user-123",
+      "getTopTracksForPeriod",
+      {
+        startDate: "2026-01-01",
+        endDate: "2026-12-31",
+        limit: 10,
+      }
+    );
+    expect(mockCreateGroqChatCompletion).not.toHaveBeenCalled();
+    expect(response.answer).toContain("Hit — Band (40 listens)");
+    expect(response.sources).toHaveLength(1);
+  });
+
+  it("formats top-artists preset without calling Groq", async () => {
+    mockExecuteMusicChatTool.mockResolvedValue({
+      period: { startDate: "2025-01-01", endDate: "2025-12-31" },
+      artists: [
+        {
+          artistId: "a1",
+          artistName: "Daft Punk",
+          listenCount: 100,
+          uniqueTracks: 12,
+          firstListenAt: "2025-01-10T00:00:00.000Z",
+          lastListenAt: "2025-11-20T00:00:00.000Z",
+        },
+      ],
+    });
+
+    const response = await generateMusicChatAnswer({
+      userId: "user-456",
+      locale: "en",
+      messages: [
+        {
+          role: "user",
+          content: "Who were my top artists in 2025?",
+        },
+      ],
+      presetQuestionId: "summer-2022-top-artists",
+    });
+
+    expect(mockExecuteMusicChatTool).toHaveBeenCalledTimes(1);
+    expect(mockExecuteMusicChatTool).toHaveBeenCalledWith(
+      "user-456",
+      "getTopArtistsForPeriod",
+      {
+        startDate: "2025-01-01",
+        endDate: "2025-12-31",
+        limit: 10,
+      }
+    );
+    expect(mockCreateGroqChatCompletion).not.toHaveBeenCalled();
+    expect(response.answer).toContain("- Daft Punk");
+    expect(response.answer).toContain("100 listens");
+    expect(response.answer).toContain("12 unique tracks");
+    expect(response.sources).toHaveLength(1);
+  });
+
+  it("formats artist deep-dive preset without calling Groq", async () => {
+    mockExecuteMusicChatTool.mockResolvedValue({
+      found: true,
+      requestedArtistName: "Radiohead",
+      period: { startDate: null, endDate: null },
+      artist: { artistId: "a1", artistName: "Radiohead" },
+      totalListens: 25,
+      uniqueTracks: 6,
+      firstListenAt: "2021-01-01T00:00:00.000Z",
+      lastListenAt: "2025-01-01T00:00:00.000Z",
+      matchedArtistNames: ["Radiohead"],
+      topTracks: [
+        {
+          trackId: "t1",
+          title: "Paranoid Android",
+          genre: "Alternative",
+          listenCount: 10,
+          firstListenAt: "2021-01-01T00:00:00.000Z",
+          lastListenAt: "2024-01-01T00:00:00.000Z",
+        },
+      ],
+      yearlyBreakdown: [{ year: 2023, listenCount: 12, uniqueTracks: 4 }],
+    });
+
+    const response = await generateMusicChatAnswer({
+      userId: "user-789",
+      locale: "en",
+      messages: [
+        {
+          role: "user",
+          content: "Tell me my listening history with Radiohead.",
+        },
+      ],
+      presetQuestionId: "artist-deep-dive",
+      presetArgs: { artistName: "Radiohead" },
+    });
+
+    expect(mockExecuteMusicChatTool).toHaveBeenCalledTimes(1);
+    expect(mockExecuteMusicChatTool).toHaveBeenCalledWith(
+      "user-789",
+      "getArtistDeepDive",
+      {
+        artistName: "Radiohead",
+        limit: 10,
+      }
+    );
+    expect(mockCreateGroqChatCompletion).not.toHaveBeenCalled();
+    expect(response.answer).toContain("Radiohead");
+    expect(response.answer).toContain("Paranoid Android");
+    expect(response.sources).toHaveLength(1);
   });
 
   it("short-circuits the 2020 to 2024 taste shift preset to its known tool", async () => {
@@ -47,16 +187,6 @@ describe("music-chat-service", () => {
       },
       deltas: { artists: { rising: [], declining: [] }, genres: { rising: [], declining: [] } },
       dataQuality: { insufficientData: false },
-    });
-    mockCreateGroqChatCompletion.mockResolvedValue({
-      choices: [
-        {
-          message: {
-            content:
-              "Between 2020 and 2024, your listening shifted based on the preset summary.",
-          },
-        },
-      ],
     });
 
     const response = await generateMusicChatAnswer({
@@ -84,12 +214,104 @@ describe("music-chat-service", () => {
         deltaLimit: 5,
       }
     );
-    expect(mockCreateGroqChatCompletion).toHaveBeenCalledTimes(1);
-    const finalParams = mockCreateGroqChatCompletion.mock.calls[0]?.[0];
-    expect(JSON.stringify(finalParams.messages)).not.toContain("dataQuality");
-    expect(JSON.stringify(finalParams.messages)).not.toContain("insufficientData");
+    expect(mockCreateGroqChatCompletion).not.toHaveBeenCalled();
     expect(response.sources).toHaveLength(1);
-    expect(response.answer).toContain("Between 2020 and 2024");
+    expect(response.answer).toContain("2020-01-01");
+  });
+
+  it("short-circuits track obsessions preset to getTrackObsessionWindows for the calendar year in the user message", async () => {
+    mockExecuteMusicChatTool.mockResolvedValue({
+      period: { startDate: "2023-01-01", endDate: "2023-12-31" },
+      windowDays: 7,
+      minListensInWindow: 2,
+      limits: { limit: 5, maxLimit: 10, maxCandidateTracks: 200 },
+      obsessionWindows: [],
+    });
+
+    const response = await generateMusicChatAnswer({
+      userId: "user-123",
+      locale: "en",
+      messages: [
+        { role: "user", content: "Which songs obsessed me in 2023?" },
+      ],
+      presetQuestionId: "track-obsessions-2022",
+    });
+
+    expect(mockExecuteMusicChatTool).toHaveBeenCalledTimes(1);
+    expect(mockExecuteMusicChatTool).toHaveBeenCalledWith(
+      "user-123",
+      "getTrackObsessionWindows",
+      {
+        startDate: "2023-01-01",
+        endDate: "2023-12-31",
+        windowDays: 7,
+        limit: 5,
+        minListensInWindow: 2,
+      }
+    );
+    expect(mockCreateGroqChatCompletion).not.toHaveBeenCalled();
+    expect(response.sources).toHaveLength(1);
+    expect(response.answer).toContain("2023");
+  });
+
+  it("short-circuits late-night preset with rolling UTC recent window", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-05-15T12:00:00.000Z"));
+    mockExecuteMusicChatTool.mockResolvedValue({
+      definition: {
+        lateNightHours: [22, 23, 0, 1, 2, 3],
+        description: "Late night window.",
+      },
+      period: { startDate: "2026-02-15", endDate: "2026-05-15" },
+      periodTotalListens: 500,
+      lateNight: {
+        listens: 50,
+        uniqueTracks: 30,
+        uniqueArtists: 12,
+        shareOfPeriodListensPct: 10,
+        peakHourWithinWindow: { hour: 23, listens: 20 },
+        listensByHour: [{ hour: 23, listens: 20 }],
+      },
+      topTracks: [{ title: "X", artistName: "Y", listenCount: 3 }],
+      topArtists: [{ artistName: "Z", listenCount: 5 }],
+      topGenres: [],
+      limits: { topLimit: 10 },
+    });
+
+    const { startDate, endDate } = getLateNightPresetDateRange(
+      new Date("2026-05-15T12:00:00.000Z")
+    );
+
+    await generateMusicChatAnswer({
+      userId: "user-123",
+      locale: "en",
+      messages: [
+        {
+          role: "user",
+          content:
+            "What have I been listening to late at night recently?",
+        },
+      ],
+      presetQuestionId: "late-night-habits",
+      dateRange: {
+        startDate: "2019-01-01",
+        endDate: "2026-01-01",
+        isAll: true,
+      },
+    });
+
+    expect(mockExecuteMusicChatTool).toHaveBeenCalledTimes(1);
+    expect(mockExecuteMusicChatTool).toHaveBeenCalledWith(
+      "user-123",
+      "getLateNightListeningProfile",
+      {
+        limit: 10,
+        startDate,
+        endDate,
+      }
+    );
+    expect(mockCreateGroqChatCompletion).not.toHaveBeenCalled();
+    vi.useRealTimers();
   });
 
   it("removes raw data-quality metadata before the final answer prompt", async () => {

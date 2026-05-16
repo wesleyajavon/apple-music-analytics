@@ -83,9 +83,13 @@
     "emptyAssistantMessage": "Demandez-moi quelque chose sur vos données musicales. Je répondrai uniquement à partir d’agrégats calculés côté serveur.",
     "publicDemoIntro": "Bienvenue dans la démo. Choisissez une question prédéfinie pour explorer le profil public sans ouvrir le texte libre.",
     "inputLabel": "Question à poser à Ask your Soundprint",
-    "inputPlaceholder": "Ex. Quels morceaux ai-je le plus écoutés pendant l’été 2022 ?",
+    "inputPlaceholder": "Ex. quels étaient mes titres les plus écoutés en 2022 ?",
     "inputPlaceholderWithArtist": "Ex. : {artist} deepdive",
     "artistDeepDiveQuestion": "Raconte-moi mon historique d’écoute avec {artist}.",
+    "topTracksYearQuestion": "Quels étaient mes titres les plus écoutés en {year} ?",
+    "topArtistsYearQuestion": "Quels étaient mes artistes les plus écoutés en {year} ?",
+    "comparePeriodsQuestion": "Compare mes top titres et artistes pour {earlierYear} et pour {laterYear}.",
+    "trackObsessionsYearQuestion": "Quels morceaux m’ont obsédé en {year} ?",
     "publicDemoPlaceholder": "Le texte libre est désactivé en mode démo.",
     "send": "Envoyer",
     "thinking": "Analyse de votre Soundprint…",
@@ -93,10 +97,12 @@
     "thinkingStep1": "Récupération des chiffres récents dans votre historique…",
     "thinkingStep2": "Recoupement artistes, genres et plages de dates…",
     "thinkingStep3": "Presque prêt — mise en forme d’une réponse claire…",
+    "thinkingStep4": "Calcul des stats par titre et par année (cela peut prendre un peu sur un gros historique)…",
     "thinkingPatience": "Les réponses détaillées peuvent prendre un peu de temps — merci de patienter.",
     "presetTitle": "Questions rapides",
     "presetDescription": "Utilisez ces exemples pour comprendre ce que l’agent sait traiter. Cliquez pour poser la question directement.",
     "customizeHint": "Ces questions sont des modèles : les utilisateurs connectés peuvent changer l’artiste, l’année, la période, les périodes à comparer, la taille de fenêtre ou la limite de résultats en texte libre.",
+    "heavyPresetHistoryNotice": "Certaines questions rapides n’analysent qu’une fenêtre récente (voir chaque carte) ou la plage du tableau de bord pour garder des réponses rapides — ce n’est pas toujours tout votre historique.",
     "supportedGuideTitle": "Ce que vous pouvez demander",
     "demoPresetOnlyHint": "Disponible en texte libre pour les comptes connectés.",
     "presetSections": {
@@ -108,24 +114,29 @@
     "unsupportedExamples": "Création de playlists, changements de compte, suppression/import de données, faits externes sur les artistes, SQL libre et tâches générales hors analytics musicales.",
     "publicDemoFreeTextBlocked": "Le mode démo publique accepte uniquement les questions prédéfinies.",
     "genericError": "Impossible de générer une réponse. Réessayez.",
+    "requestTimeoutError": "La réponse a dépassé la durée maximale côté navigateur (environ trois minutes), la requête a donc été interrompue. Réessaie avec une plage de dates plus courte dans le tableau de bord, ou réessaie plus tard — le modèle ou la base peut avoir été lent.",
     "aiDisabledClient": "L’IA est désactivée pour ce navigateur. Réactivez le bouton IA pour utiliser Ask your Soundprint.",
     "aiDisabledEnv": "L’IA est désactivée côté serveur. Ask your Soundprint n’est pas disponible ici.",
     "presets": {
-      "summer-2022-top-tracks": "Quels morceaux ai-je le plus écoutés pendant l’été 2022 ?",
+      "summer-2022-top-tracks": "Quels étaient mes titres les plus écoutés en 2022 ?",
+      "summer-2022-top-artists": "Quels étaient mes artistes les plus écoutés en 2022 ?",
       "consistent-artists": "Quel artiste ai-je écouté le plus régulièrement au fil des années ?",
-      "late-night-habits": "Qu’est-ce que j’écoute le plus souvent tard le soir ?",
+      "late-night-habits": "Qu’est-ce que j’ai écouté tard le soir récemment ?",
       "artist-deep-dive": "Raconte-moi mon historique d’écoute avec Radiohead.",
       "taste-shift-2020-2024": "Comment mes goûts ont-ils changé entre 2020 et 2024 ?",
-      "track-obsessions-2022": "Quels morceaux m’ont obsédé en 2022 ?"
+      "track-obsessions-2022": "Quels morceaux m’ont obsédé en 2022 ?",
+      "genre-breakdown-last-year": "Quels genres ai-je le plus écoutés l’année dernière ?",
+      "compare-listening-periods": "Compare mes tops titres et artistes en 2021 et en 2024.",
+      "yearly-listening-trends": "Comment mon volume d’écoute a-t-il évolué année par année ?"
     },
     "examples": {
       "top-tracks": {
         "label": "Top titres",
-        "question": "Quels morceaux ai-je le plus écoutés pendant l’été 2022 ?"
+        "question": "Quels étaient mes titres les plus écoutés sur une année marquante de mon historique ?"
       },
       "top-artists": {
         "label": "Top artistes",
-        "question": "Quels étaient mes artistes les plus écoutés en 2024 ?"
+        "question": "Quels étaient mes artistes les plus écoutés sur une année marquante de mon historique ?"
       },
       "genre-breakdown": {
         "label": "Répartition genres",
@@ -133,7 +144,7 @@
       },
       "compare-periods": {
         "label": "Comparer deux périodes",
-        "question": "Compare mes top titres et artistes en 2021 vs 2024."
+        "question": "Compare mes top titres et artistes sur deux années différentes de mon historique."
       },
       "taste-shift": {
         "label": "Évolution des goûts",
@@ -149,7 +160,8 @@
       },
       "time-of-day": {
         "label": "Habitudes horaires",
-        "question": "Qu’est-ce que j’écoute le plus souvent tard le soir ?"
+        "question": "Qu’est-ce que j’ai écouté tard le soir récemment ?",
+        "recentWindowHint": "Environ les {days} derniers jours (UTC), pas tout l’historique — indépendamment du filtre du tableau de bord."
       },
       "artist-deep-dive": {
         "label": "Deep dive artiste",
@@ -158,7 +170,7 @@
       },
       "track-obsessions": {
         "label": "Morceaux obsession",
-        "question": "Quels morceaux m’ont obsédé en 2022 ?"
+        "question": "Quels morceaux m’ont obsédé sur une année marquante de mon historique ?"
       }
     }
   },
@@ -845,7 +857,11 @@
     "insightsUniqueTracksShort": "titres uniques",
     "insightsEstPlayTimeUnavailable": "—",
     "insightsEstPlayTimeHint": "temps joué estimé (durées des titres)",
-    "insightsTimelineHint": "Pour la période affichée · première écoute {first} · dernière {last}",
+    "insightsTimelineTitle": "Première écoute et plus récente",
+    "insightsTimelineLead": "Ces deux repères indiquent quand cet artiste apparaît dans votre historique sur la plage choisie et quand vous l’avez réécouté pour la dernière fois.",
+    "insightsFirstListenLabel": "Première écoute",
+    "insightsMostRecentListenLabel": "Écoute la plus récente",
+    "insightsTimelineFootnote": "Les dates tiennent compte de vos filtres actifs (période et sources).",
     "insightsLoadError": "Impossible de charger les statistiques pour cet artiste.",
     "insightsPeaksTitle": "Quand vous écoutez le plus cet artiste",
     "insightsPeakHour": "Heure la plus forte",
@@ -1050,7 +1066,7 @@
     "unknownArtist": "Artiste inconnu",
     "unknownGenre": "votre palette actuelle",
     "deterministicProfile": "Votre profil actuel penche vers {genre}, avec {artist} comme l'un des ancrages les plus forts sur cette période. Importez plus d'écoutes ou élargissez la plage de dates pour affiner le profil IA.",
-    "identityTitle": "Votre identité sonore",
+    "identityTitle": "Votre identité soundprint",
     "identitySubtitle": "Votre histoire s’appuie sur les mêmes artistes, genres et titres que le reste de vos analyses — le récit colle toujours à votre portrait d’écoute.",
     "aiCached": "Profil IA servi depuis le cache",
     "aiUnavailable": "L'IA est désactivée pour cet environnement ou ce navigateur ; cette page affiche donc un profil déterministe basé sur vos statistiques.",

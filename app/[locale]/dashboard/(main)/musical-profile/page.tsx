@@ -632,13 +632,13 @@ function MusicalProfileContent() {
               />
               <div className="relative flex flex-col gap-6 sm:flex-row sm:items-start">
                 <div className="shrink-0">
-                  <div className="relative overflow-hidden rounded-2xl border border-accent-violet/25 bg-white/90 p-2.5 shadow-md shadow-accent-violet/10 ring-1 ring-accent-violet/10 dark:bg-gray-950/80">
+                  <div className="relative h-14 w-14 overflow-hidden rounded-2xl border border-accent-violet/25 bg-card-surface shadow-lg shadow-accent-violet/20 ring-1 ring-accent-violet/15">
                     <Image
                       src="/brand/favicon.png"
                       alt={t("overviewCallout.philosophyLogoAlt")}
-                      width={80}
-                      height={80}
-                      className="h-16 w-16 object-contain sm:h-20 sm:w-20"
+                      width={112}
+                      height={112}
+                      className="h-full w-full object-cover"
                     />
                   </div>
                 </div>

@@ -3,6 +3,17 @@
 import { useCallback, Suspense, useState, type ReactNode } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
+import { LayoutDashboard, MessageSquareText } from "lucide-react";
+import { Link } from "@/i18n/navigation";
+import {
+  DASHBOARD_SPOTLIGHT_SHELL,
+  DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY,
+  DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET,
+  DASHBOARD_SPOTLIGHT_HEADER_BOTTOM,
+  DASHBOARD_SPOTLIGHT_INNER_WELL,
+  DASHBOARD_SPOTLIGHT_MUTED,
+  DASHBOARD_SPOTLIGHT_TITLE,
+} from "@/lib/constants/dashboard-spotlight";
 import { useAiInsights } from "@/lib/hooks/use-ai-insights";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
 import { ErrorState } from "@/lib/components/error-state";
@@ -12,19 +23,18 @@ import { useInteractiveAiBlockedByGenreBackfill } from "@/lib/hooks/use-interact
 import { isGroqGenreClassificationBlockingError } from "@/lib/utils/groq-quota-message";
 import type { AiInsightsStyle } from "@/lib/dto/ai-insights";
 
-/** Accent color variants for insight cards - creates visual variety */
+/** Accent color variants for insight cards */
 const INSIGHT_ACCENTS = [
-  { bg: "bg-white/70 dark:bg-slate-950/30", border: "border-l-cyan-300", icon: "text-cyan-600 dark:text-cyan-300", iconBg: "border border-cyan-300/20 bg-cyan-400/10" },
-  { bg: "bg-white/70 dark:bg-slate-950/30", border: "border-l-sky-300", icon: "text-sky-600 dark:text-sky-300", iconBg: "border border-sky-300/20 bg-sky-400/10" },
-  { bg: "bg-white/70 dark:bg-slate-950/30", border: "border-l-indigo-300", icon: "text-indigo-600 dark:text-indigo-300", iconBg: "border border-indigo-300/20 bg-indigo-400/10" },
-  { bg: "bg-white/70 dark:bg-slate-950/30", border: "border-l-blue-300", icon: "text-blue-600 dark:text-blue-300", iconBg: "border border-blue-300/20 bg-blue-400/10" },
-  { bg: "bg-white/70 dark:bg-slate-950/30", border: "border-l-cyan-300", icon: "text-cyan-600 dark:text-cyan-300", iconBg: "border border-cyan-300/20 bg-cyan-400/10" },
+  { bg: "bg-white dark:bg-slate-950/50", border: "border-l-cyan-500", icon: "text-cyan-600 dark:text-cyan-300", iconBg: "border border-cyan-200/80 bg-cyan-50 dark:border-cyan-300/20 dark:bg-cyan-400/10" },
+  { bg: "bg-white dark:bg-slate-950/50", border: "border-l-sky-500", icon: "text-sky-600 dark:text-sky-300", iconBg: "border border-sky-200/80 bg-sky-50 dark:border-sky-300/20 dark:bg-sky-400/10" },
+  { bg: "bg-white dark:bg-slate-950/50", border: "border-l-indigo-500", icon: "text-indigo-600 dark:text-indigo-300", iconBg: "border border-indigo-200/80 bg-indigo-50 dark:border-indigo-300/20 dark:bg-indigo-400/10" },
+  { bg: "bg-white dark:bg-slate-950/50", border: "border-l-blue-500", icon: "text-blue-600 dark:text-blue-300", iconBg: "border border-blue-200/80 bg-blue-50 dark:border-blue-300/20 dark:bg-blue-400/10" },
+  { bg: "bg-white dark:bg-slate-950/50", border: "border-l-violet-500", icon: "text-violet-600 dark:text-violet-300", iconBg: "border border-violet-200/80 bg-violet-50 dark:border-violet-300/20 dark:bg-violet-400/10" },
 ] as const;
-const AI_RAIL_CLASS = "bg-gradient-to-r from-indigo-400 via-cyan-400 to-sky-400";
-const AI_PANEL_CLASS =
-  "relative overflow-hidden rounded-2xl border border-violet-300/20 bg-[radial-gradient(circle_at_top_left,_rgba(139,92,246,0.13),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(34,211,238,0.1),_transparent_30%),rgb(var(--card-rgb)/0.92)] shadow-card backdrop-blur-sm dark:border-violet-300/15 dark:bg-[radial-gradient(circle_at_top_left,_rgba(139,92,246,0.18),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(34,211,238,0.14),_transparent_30%),rgb(var(--card-rgb)/0.9)]";
-const AI_HERO_SHELL_CLASS =
-  "relative overflow-hidden rounded-3xl border border-violet-300/25 bg-[radial-gradient(circle_at_top_left,_rgba(139,92,246,0.32),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(34,211,238,0.22),_transparent_30%),linear-gradient(135deg,_#020617_0%,_#0f172a_48%,_#4c1d95_100%)] px-6 py-8 shadow-2xl shadow-violet-950/40 sm:px-8 sm:py-10";
+
+/** Même shell hero que `/dashboard/timeline` — vibe startup / Vercel */
+const AI_INSIGHTS_HERO_SHELL_CLASS =
+  "relative overflow-hidden rounded-[2rem] border border-white/10 bg-gray-950 px-5 py-6 text-white shadow-2xl shadow-violet-500/15 sm:px-8 sm:py-9 lg:px-10 lg:py-10";
 
 /** Spark/lightning icon for AI insights */
 function SparkIcon({ className }: { className?: string }) {
@@ -44,44 +54,90 @@ function formatDateRange(startDate?: string, endDate?: string, locale?: string):
   return `${start.toLocaleDateString(loc, { month: "short", day: "numeric", year: "numeric" })} – ${end.toLocaleDateString(loc, { month: "short", day: "numeric", year: "numeric" })}`;
 }
 
+function AiInsightsHeroTrustPanel() {
+  const t = useTranslations("ai-insights");
+  return (
+    <ul className="mt-4 space-y-3 text-sm leading-6 text-white/75">
+      <li className="flex gap-2">
+        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.55)]" aria-hidden />
+        <span>{t("heroTrust1")}</span>
+      </li>
+      <li className="flex gap-2">
+        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.55)]" aria-hidden />
+        <span>{t("heroTrust2")}</span>
+      </li>
+      <li className="flex gap-2">
+        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.55)]" aria-hidden />
+        <span>{t("heroTrust3")}</span>
+      </li>
+    </ul>
+  );
+}
+
 function AiInsightsHeroFrame({
   badgeLabel,
   description,
   stats,
-  aside,
+  insightStyleToggle,
 }: {
   badgeLabel: string;
   description: string;
-  stats: ReactNode;
-  aside?: ReactNode;
+  stats: ReactNode | null;
+  insightStyleToggle: ReactNode;
 }) {
   const t = useTranslations("ai-insights");
   return (
-    <div className={AI_HERO_SHELL_CLASS}>
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(139,92,246,0.1)_1px,_transparent_1px),linear-gradient(90deg,_rgba(34,211,238,0.08)_1px,_transparent_1px)] bg-[size:32px_32px] opacity-30" />
-      <div className="absolute -right-20 -top-24 h-56 w-56 rounded-full bg-violet-400/18 blur-3xl" />
-      <div className="absolute -bottom-24 left-10 h-48 w-48 rounded-full bg-cyan-400/16 blur-3xl" />
-      <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${AI_RAIL_CLASS} opacity-90`} />
-      <div className="relative flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-        <div className="min-w-0 max-w-3xl flex-1">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-200/85">{t("heroEyebrow")}</p>
-          <h1 className="mt-3 flex items-center gap-3 text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            <SparkIcon className="h-9 w-9 shrink-0 text-violet-200/90 sm:h-10 sm:w-10" aria-hidden />
-            <span>{t("title")}</span>
+    <div className={AI_INSIGHTS_HERO_SHELL_CLASS}>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.26),transparent_30%),radial-gradient(circle_at_80%_12%,rgba(6,182,212,0.2),transparent_32%),linear-gradient(135deg,rgba(3,7,18,0.98),rgba(30,27,75,0.88)_48%,rgba(8,47,73,0.72))]" />
+      <div className="absolute -left-20 top-1/3 h-64 w-64 rounded-full bg-accent-violet/22 blur-3xl" />
+      <div className="absolute -bottom-28 right-10 h-72 w-72 rounded-full bg-accent-cyan/18 blur-3xl" />
+      <div className="relative grid gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-center">
+        <div>
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-violet-100 backdrop-blur">
+            <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_18px_rgb(22_199_132_/0.75)]" />
+            {t("heroEyebrow")}
+          </div>
+          <h1 className="flex flex-wrap items-center gap-3 text-4xl font-semibold tracking-[-0.06em] text-white sm:text-5xl lg:text-6xl">
+            <SparkIcon className="h-9 w-9 shrink-0 text-violet-200/90 sm:h-11 sm:w-11" aria-hidden />
+            <span className="max-w-4xl text-balance">{t("title")}</span>
           </h1>
-          <div
-            className={`mt-4 h-1.5 w-24 rounded-full ${AI_RAIL_CLASS} opacity-95 shadow-[0_0_24px_rgba(139,92,246,0.35)]`}
-            aria-hidden
-          />
-          <p className="mt-5 text-base leading-relaxed text-violet-100/90 sm:text-lg">{description}</p>
-          <p className="mt-2 text-sm font-medium text-cyan-100/90">
-            <span className="inline-flex items-center rounded-full border border-violet-200/30 bg-white/10 px-3 py-1">
+          <p className="mt-5 max-w-2xl text-base leading-7 text-white/70 sm:text-lg">{description}</p>
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            <span className="inline-flex items-center rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-white/90 backdrop-blur">
               {badgeLabel}
             </span>
-          </p>
-          {stats}
+          </div>
+          <div className="mt-5">{insightStyleToggle}</div>
+          <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <Link
+              href="/dashboard/ask-your-soundprint"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25 transition-all hover:-translate-y-0.5 hover:bg-gray-100"
+            >
+              <MessageSquareText className="h-4 w-4" aria-hidden />
+              {t("ctaAskSoundprint")}
+            </Link>
+            <Link
+              href="/dashboard/overview"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-black/20 backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white/15"
+            >
+              <LayoutDashboard className="h-4 w-4" aria-hidden />
+              {t("ctaOverview")}
+            </Link>
+          </div>
         </div>
-        {aside ? <div className="w-full shrink-0 lg:w-auto">{aside}</div> : null}
+
+        <div className="relative">
+          <div className="absolute -inset-4 rounded-[2rem] bg-brand-gradient-soft blur-2xl" aria-hidden />
+          <div className="relative overflow-hidden rounded-[1.75rem] border border-white/15 bg-white/10 p-3 shadow-2xl shadow-black/35 backdrop-blur-xl">
+            <div className="rounded-[1.35rem] border border-white/10 bg-slate-950/70 p-4">
+              <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                <p className="font-mono text-[0.66rem] font-semibold uppercase tracking-[0.24em] text-slate-400">{t("heroStatBadge")}</p>
+                <span className="rounded-full border border-violet-300/25 bg-violet-300/10 px-2.5 py-1 text-[0.66rem] font-semibold text-violet-100">{t("heroStatTag")}</span>
+              </div>
+              {stats ?? <AiInsightsHeroTrustPanel />}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -106,18 +162,18 @@ function AiInsightsHeroStats({
         ? t("cached")
         : t("heroFresh");
   return (
-    <div className="mt-6 flex flex-wrap gap-4 sm:gap-8">
-      <div className="rounded-xl border border-violet-200/15 bg-slate-950/35 px-4 py-3 shadow-lg shadow-violet-950/20 backdrop-blur-sm">
-        <p className="text-xs font-medium uppercase tracking-wider text-violet-100/80">{t("heroStatInsights")}</p>
-        <p className="text-2xl font-bold text-white">{insightCount}</p>
+    <div className="grid gap-2 pt-4 sm:grid-cols-3">
+      <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
+        <p className="text-xl font-semibold tracking-tight text-white tabular-nums">{insightCount}</p>
+        <p className="mt-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">{t("heroStatInsights")}</p>
       </div>
-      <div className="rounded-xl border border-cyan-200/15 bg-slate-950/35 px-4 py-3 shadow-lg shadow-cyan-950/20 backdrop-blur-sm">
-        <p className="text-xs font-medium uppercase tracking-wider text-cyan-100/80">{t("heroStatTone")}</p>
-        <p className="text-2xl font-bold text-white">{t(`styleToggle.${insightStyle}`)}</p>
+      <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
+        <p className="text-lg font-semibold tracking-tight text-white">{t(`styleToggle.${insightStyle}`)}</p>
+        <p className="mt-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">{t("heroStatTone")}</p>
       </div>
-      <div className="rounded-xl border border-rose-200/15 bg-slate-950/35 px-4 py-3 shadow-lg shadow-rose-950/20 backdrop-blur-sm">
-        <p className="text-xs font-medium uppercase tracking-wider text-rose-100/80">{t("heroStatStatus")}</p>
+      <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-3 sm:col-span-1">
         <p className="text-sm font-semibold leading-snug text-white">{statusText}</p>
+        <p className="mt-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">{t("heroStatStatus")}</p>
       </div>
     </div>
   );
@@ -125,14 +181,11 @@ function AiInsightsHeroStats({
 
 function AiInsightsHeroStatsSkeleton() {
   return (
-    <div className="mt-6 flex flex-wrap gap-4 sm:gap-8">
+    <div className="grid gap-2 pt-4 sm:grid-cols-3" aria-busy="true">
       {[0, 1, 2].map((i) => (
-        <div
-          key={i}
-          className="min-w-[140px] flex-1 animate-pulse rounded-xl border border-white/10 bg-slate-950/35 px-4 py-3 shadow-lg backdrop-blur-sm sm:flex-initial"
-        >
-          <div className="mb-2 h-3 w-20 rounded bg-white/15" />
-          <div className="h-8 w-16 rounded bg-white/20" />
+        <div key={i} className="animate-pulse rounded-2xl border border-white/10 bg-white/[0.06] p-3">
+          <div className="mb-2 h-7 w-16 rounded bg-white/20" />
+          <div className="h-3 w-20 rounded bg-white/15" />
         </div>
       ))}
     </div>
@@ -148,15 +201,9 @@ function InsightStyleToggle({
 }) {
   const t = useTranslations("ai-insights");
   return (
-    <div
-      className="flex w-full flex-col gap-2 sm:w-auto"
-      role="group"
-      aria-label={t("styleToggle.ariaLabel")}
-    >
-      <span className="text-[10px] font-semibold uppercase tracking-wider text-white/70">
-        {t("styleToggle.label")}
-      </span>
-      <div className="inline-flex rounded-xl border border-white/20 bg-white/10 p-1.5 shadow-sm backdrop-blur-sm">
+    <div className="flex w-full max-w-md flex-col gap-2" role="group" aria-label={t("styleToggle.ariaLabel")}>
+      <span className="text-[10px] font-semibold uppercase tracking-wider text-white/60">{t("styleToggle.label")}</span>
+      <div className="inline-flex rounded-xl border border-white/15 bg-white/10 p-1.5 shadow-sm backdrop-blur-sm">
         {(["human", "technical"] as const).map((style) => {
           const isActive = insightStyle === style;
           return (
@@ -167,7 +214,7 @@ function InsightStyleToggle({
               onClick={() => onStyleChange(style)}
               className={`rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-200 ${
                 isActive
-                  ? "bg-gradient-to-r from-violet-500 via-cyan-500 to-rose-500 text-white shadow-sm shadow-violet-950/20"
+                  ? "bg-white text-gray-950 shadow-sm shadow-black/20"
                   : "text-white/70 hover:text-white"
               }`}
             >
@@ -175,6 +222,21 @@ function InsightStyleToggle({
             </button>
           );
         })}
+      </div>
+    </div>
+  );
+}
+
+function InsightCardSkeleton() {
+  return (
+    <div className={`relative overflow-hidden ${DASHBOARD_SPOTLIGHT_INNER_WELL}`}>
+      <div className="flex gap-4">
+        <div className="h-10 w-10 shrink-0 animate-shimmer rounded-xl bg-slate-200 dark:bg-white/10" />
+        <div className="flex-1 space-y-2">
+          <div className="h-4 w-full animate-shimmer rounded bg-slate-200 dark:bg-white/10" />
+          <div className="h-4 w-5/6 animate-shimmer rounded bg-slate-200 dark:bg-white/10" />
+          <div className="h-4 w-4/5 animate-shimmer rounded bg-slate-200 dark:bg-white/10" />
+        </div>
       </div>
     </div>
   );
@@ -204,15 +266,22 @@ function AiInsightsContent() {
     refetch();
   }, [refetch]);
 
+  const styleToggle = <InsightStyleToggle insightStyle={insightStyle} onStyleChange={setInsightStyle} />;
+
   if (interactiveAiBlockedByGenreBackfill && !isRangeLoading) {
     return (
-      <div className="mx-auto max-w-4xl space-y-8">
-        <AiInsightsHeroFrame
-          badgeLabel={badgeLabelBase}
-          description={t("yourInsights")}
-          stats={null}
-          aside={<InsightStyleToggle insightStyle={insightStyle} onStyleChange={setInsightStyle} />}
-        />
+      <div className="mx-auto max-w-6xl space-y-8">
+        <section aria-labelledby="ai-insights-heading">
+          <h2 id="ai-insights-heading" className="sr-only">
+            {t("title")}
+          </h2>
+          <AiInsightsHeroFrame
+            badgeLabel={badgeLabelBase}
+            description={t("yourInsights")}
+            stats={null}
+            insightStyleToggle={styleToggle}
+          />
+        </section>
         <InteractiveAiGenreBackfillNotice />
       </div>
     );
@@ -220,29 +289,26 @@ function AiInsightsContent() {
 
   if (isLoadingOrFetching) {
     return (
-      <div className="mx-auto max-w-4xl space-y-8">
-        <AiInsightsHeroFrame
-          badgeLabel={t("loadingShort")}
-          description={t("generating")}
-          stats={<AiInsightsHeroStatsSkeleton />}
-          aside={
-            <InsightStyleToggle insightStyle={insightStyle} onStyleChange={setInsightStyle} />
-          }
-        />
-        <div className="space-y-4">
-          {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className={`${AI_PANEL_CLASS} p-6`}>
-              <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${AI_RAIL_CLASS} opacity-70`} />
-              <div className="flex gap-4">
-                <div className="h-10 w-10 shrink-0 rounded-xl bg-violet-200 animate-shimmer dark:bg-violet-900/45" />
-                <div className="flex-1 space-y-2">
-                  <div className="h-4 w-full animate-shimmer rounded bg-gray-200 dark:bg-gray-700" />
-                  <div className="h-4 w-5/6 animate-shimmer rounded bg-gray-200 dark:bg-gray-700" />
-                  <div className="h-4 w-4/5 animate-shimmer rounded bg-gray-200 dark:bg-gray-700" />
-                </div>
-              </div>
-            </div>
-          ))}
+      <div className="mx-auto max-w-6xl space-y-8">
+        <section aria-labelledby="ai-insights-heading">
+          <h2 id="ai-insights-heading" className="sr-only">
+            {t("title")}
+          </h2>
+          <AiInsightsHeroFrame
+            badgeLabel={t("loadingShort")}
+            description={t("generating")}
+            stats={<AiInsightsHeroStatsSkeleton />}
+            insightStyleToggle={styleToggle}
+          />
+        </section>
+        <div className={`relative ${DASHBOARD_SPOTLIGHT_SHELL}`}>
+          <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} aria-hidden />
+          <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} aria-hidden />
+          <div className="relative space-y-4 p-6 sm:p-8">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <InsightCardSkeleton key={i} />
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -251,40 +317,61 @@ function AiInsightsContent() {
   if (error) {
     if (isGroqGenreClassificationBlockingError(error)) {
       return (
-        <div className="mx-auto max-w-4xl space-y-8">
-          <AiInsightsHeroFrame
-            badgeLabel={badgeLabelBase}
-            description={t("yourInsights")}
-            stats={null}
-            aside={
-              <InsightStyleToggle insightStyle={insightStyle} onStyleChange={setInsightStyle} />
-            }
-          />
+        <div className="mx-auto max-w-6xl space-y-8">
+          <section aria-labelledby="ai-insights-heading">
+            <h2 id="ai-insights-heading" className="sr-only">
+              {t("title")}
+            </h2>
+            <AiInsightsHeroFrame
+              badgeLabel={badgeLabelBase}
+              description={t("yourInsights")}
+              stats={null}
+              insightStyleToggle={styleToggle}
+            />
+          </section>
           <InteractiveAiGenreBackfillNotice force />
         </div>
       );
     }
     return (
-      <div className="mx-auto max-w-4xl space-y-8">
-        <AiInsightsHeroFrame
-          badgeLabel={badgeLabelBase}
-          description={t("errorLoading")}
-          stats={null}
-        />
-        <ErrorState error={error} message={t("errorMessage")} onRetry={handleRetry} />
-        <p className="text-sm text-muted">{t("checkApiKey")}</p>
+      <div className="mx-auto max-w-6xl space-y-8">
+        <section aria-labelledby="ai-insights-heading">
+          <h2 id="ai-insights-heading" className="sr-only">
+            {t("title")}
+          </h2>
+          <AiInsightsHeroFrame
+            badgeLabel={badgeLabelBase}
+            description={t("errorLoading")}
+            stats={null}
+            insightStyleToggle={styleToggle}
+          />
+        </section>
+        <div className={`relative ${DASHBOARD_SPOTLIGHT_SHELL}`}>
+          <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} aria-hidden />
+          <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} aria-hidden />
+          <div className="relative p-6 sm:p-8">
+            <ErrorState error={error} message={t("errorMessage")} onRetry={handleRetry} />
+            <p className={`mt-4 ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("checkApiKey")}</p>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (!data || !data.insights.length) {
     return (
-      <div className="mx-auto max-w-4xl space-y-8">
-        <AiInsightsHeroFrame
-          badgeLabel={badgeLabelBase}
-          description={t("noInsights")}
-          stats={null}
-        />
+      <div className="mx-auto max-w-6xl space-y-8">
+        <section aria-labelledby="ai-insights-heading">
+          <h2 id="ai-insights-heading" className="sr-only">
+            {t("title")}
+          </h2>
+          <AiInsightsHeroFrame
+            badgeLabel={badgeLabelBase}
+            description={t("noInsights")}
+            stats={null}
+            insightStyleToggle={styleToggle}
+          />
+        </section>
         <EmptyState
           {...emptyStatePresets.importData}
           message={t("notEnoughData")}
@@ -295,47 +382,40 @@ function AiInsightsContent() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl space-y-8">
-      <AiInsightsHeroFrame
-        badgeLabel={badgeLabelBase}
-        description={t("yourInsights")}
-        stats={
-          <AiInsightsHeroStats
-            insightCount={data.insights.length}
-            insightStyle={insightStyle}
-            cached={data.cached}
-            rateLimitRemaining={data.rateLimit?.remaining}
-          />
-        }
-        aside={<InsightStyleToggle insightStyle={insightStyle} onStyleChange={setInsightStyle} />}
-      />
+    <div className="mx-auto max-w-6xl space-y-8">
+      <section aria-labelledby="ai-insights-heading">
+        <h2 id="ai-insights-heading" className="sr-only">
+          {t("title")}
+        </h2>
+        <AiInsightsHeroFrame
+          badgeLabel={badgeLabelBase}
+          description={t("yourInsights")}
+          stats={
+            <AiInsightsHeroStats
+              insightCount={data.insights.length}
+              insightStyle={insightStyle}
+              cached={data.cached}
+              rateLimitRemaining={data.rateLimit?.remaining}
+            />
+          }
+          insightStyleToggle={styleToggle}
+        />
+      </section>
 
-      {/* Spotlight: AI insights — carte principale avec gradient et effet de lumière */}
-      <section
-        className={`${AI_PANEL_CLASS} animate-fade-in-up transition-all duration-300 hover:shadow-card-hover`}
-        aria-labelledby="ai-insights-spotlight-title"
-      >
-        <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${AI_RAIL_CLASS} opacity-85`} />
-        <div className="pointer-events-none absolute -right-20 -top-24 h-56 w-56 rounded-full bg-cyan-400/12 blur-3xl dark:bg-cyan-400/16" />
-        <div className="pointer-events-none absolute -bottom-24 left-10 h-52 w-52 rounded-full bg-violet-400/12 blur-3xl dark:bg-violet-400/16" />
-        <div className="pointer-events-none absolute bottom-8 left-1/2 h-24 w-[90%] -translate-x-1/2 rounded-full bg-rose-400/10 blur-3xl dark:bg-rose-400/14" />
-
+      <section className={`relative ${DASHBOARD_SPOTLIGHT_SHELL} animate-fade-in-up transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-slate-900/10 dark:hover:shadow-black/35`} aria-labelledby="ai-insights-spotlight-title">
+        <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} aria-hidden />
+        <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} aria-hidden />
         <div className="relative">
-          <div className="border-b border-violet-200/20 px-6 py-5 dark:border-violet-300/10">
+          <div className={`${DASHBOARD_SPOTLIGHT_HEADER_BOTTOM} px-6 py-5 sm:px-8`}>
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-violet-300/25 bg-violet-300/10 text-violet-600 shadow-sm shadow-violet-950/10 dark:text-violet-200">
-                <SparkIcon className="w-5 h-5" aria-hidden />
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200/90 bg-slate-50 text-violet-600 shadow-sm dark:border-white/10 dark:bg-white/10 dark:text-violet-200">
+                <SparkIcon className="h-5 w-5" aria-hidden />
               </div>
               <div>
-                <h2
-                  id="ai-insights-spotlight-title"
-                  className="text-lg font-semibold tracking-tight text-gray-900 dark:text-white"
-                >
+                <h3 id="ai-insights-spotlight-title" className={DASHBOARD_SPOTLIGHT_TITLE}>
                   {t("spotlightTitle")}
-                </h2>
-                <p className="mt-0.5 text-sm text-violet-700/75 dark:text-violet-100/65">
-                  {t("spotlightHint")}
-                </p>
+                </h3>
+                <p className={`mt-0.5 ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("spotlightHint")}</p>
               </div>
             </div>
           </div>
@@ -346,31 +426,22 @@ function AiInsightsContent() {
                 <div
                   key={index}
                   className={`
-                    relative overflow-hidden rounded-xl border border-violet-200/20 border-l-4
-                    bg-white/65 dark:bg-slate-950/24 shadow-card
-                    transition-all duration-300 hover:shadow-card-hover
+                    relative overflow-hidden rounded-xl border border-slate-200/90 border-l-4 bg-white shadow-sm
+                    transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-slate-900/[0.06]
+                    dark:border-white/10 dark:bg-slate-950/60 dark:shadow-none dark:hover:shadow-black/25
                     ${accent.border} ${accent.bg}
                     opacity-0 animate-fade-in-up
                   `}
                   style={{ animationDelay: `${index * 80}ms` }}
                 >
-                  <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${AI_RAIL_CLASS} opacity-45`} />
-                  <div className="p-6 flex gap-4">
-                    <span
-                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${accent.iconBg} ${accent.icon}`}
-                      aria-hidden
-                    >
-                      <SparkIcon className="w-5 h-5" />
+                  <div className="flex gap-4 p-6">
+                    <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${accent.iconBg} ${accent.icon}`} aria-hidden>
+                      <SparkIcon className="h-5 w-5" />
                     </span>
-                    <div className="flex-1 min-w-0">
-                      <p className="leading-relaxed text-gray-700 dark:text-gray-300">
-                        {insight}
-                      </p>
+                    <div className="min-w-0 flex-1">
+                      <p className="leading-relaxed text-slate-700 dark:text-slate-300">{insight}</p>
                     </div>
-                    <span
-                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-cyan-300/15 bg-cyan-400/10 text-sm font-semibold text-cyan-700 dark:text-cyan-200"
-                      aria-hidden
-                    >
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-200/90 bg-slate-50 text-sm font-semibold text-slate-700 dark:border-white/10 dark:bg-white/10 dark:text-white" aria-hidden>
                       {index + 1}
                     </span>
                   </div>
@@ -387,32 +458,31 @@ function AiInsightsContent() {
 function AiInsightsFallback() {
   const t = useTranslations("ai-insights");
   return (
-    <div className="mx-auto max-w-4xl space-y-8">
-      <AiInsightsHeroFrame
-        badgeLabel={t("loadingShort")}
-        description={t("loadingShort")}
-        stats={<AiInsightsHeroStatsSkeleton />}
-        aside={
-          <div className="flex w-full flex-col gap-2 sm:w-auto">
-            <div className="h-3 w-20 animate-pulse rounded bg-white/15" />
-            <div className="h-10 w-48 animate-pulse rounded-xl bg-white/10" />
-          </div>
-        }
-      />
-      <div className="space-y-4">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className={`${AI_PANEL_CLASS} p-6`}>
-            <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${AI_RAIL_CLASS} opacity-70`} />
-            <div className="flex gap-4">
-              <div className="h-10 w-10 shrink-0 rounded-xl bg-violet-200 animate-shimmer dark:bg-violet-900/45" />
-              <div className="flex-1 space-y-2">
-                <div className="h-4 w-full animate-shimmer rounded bg-gray-200 dark:bg-gray-700" />
-                <div className="h-4 w-5/6 animate-shimmer rounded bg-gray-200 dark:bg-gray-700" />
-                <div className="h-4 w-4/5 animate-shimmer rounded bg-gray-200 dark:bg-gray-700" />
-              </div>
+    <div className="mx-auto max-w-6xl space-y-8">
+      <section aria-labelledby="ai-insights-heading">
+        <h2 id="ai-insights-heading" className="sr-only">
+          {t("title")}
+        </h2>
+        <AiInsightsHeroFrame
+          badgeLabel={t("loadingShort")}
+          description={t("loadingShort")}
+          stats={<AiInsightsHeroStatsSkeleton />}
+          insightStyleToggle={
+            <div className="flex w-full max-w-md flex-col gap-2">
+              <div className="h-3 w-24 animate-pulse rounded bg-white/15" />
+              <div className="h-11 w-full max-w-xs animate-pulse rounded-xl bg-white/10" />
             </div>
-          </div>
-        ))}
+          }
+        />
+      </section>
+      <div className={`relative ${DASHBOARD_SPOTLIGHT_SHELL}`}>
+        <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} aria-hidden />
+        <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} aria-hidden />
+        <div className="relative space-y-4 p-6 sm:p-8">
+          {[1, 2, 3].map((i) => (
+            <InsightCardSkeleton key={i} />
+          ))}
+        </div>
       </div>
     </div>
   );

@@ -27,7 +27,6 @@ import {
   useArtistTrendsChart,
   useArtistTrendsCommentary,
 } from "@/lib/hooks/use-artists";
-import type { ArtistTrendsChartDataPoint } from "@/lib/dto/artist";
 import { ErrorState, GroqQuotaNotice } from "@/lib/components/error-state";
 import { isGroqDailyQuotaError } from "@/lib/utils/groq-quota-message";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
@@ -38,6 +37,26 @@ import type { ArtistTrendsChartArtist } from "@/lib/dto/artist";
 import { useDebouncedValue } from "@/lib/hooks/use-debounced-value";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
 import { formatOverviewDateRangeLabel } from "@/lib/utils/overview-date-range-label";
+import {
+  OVERVIEW_STARTUP_SURFACE_BASE,
+  OVERVIEW_STARTUP_EYEBROW_PILL_CLASS,
+  OVERVIEW_STARTUP_INNER_PANEL_CLASS,
+  OverviewStartupSurfaceBg,
+} from "@/lib/components/overview-startup-surface";
+import {
+  DASHBOARD_SPOTLIGHT_SHELL,
+  DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY,
+  DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET,
+  DASHBOARD_SPOTLIGHT_HEADER_BOTTOM,
+  DASHBOARD_SPOTLIGHT_TITLE,
+  DASHBOARD_SPOTLIGHT_MUTED,
+  DASHBOARD_SPOTLIGHT_BADGE_VIOLET,
+  DASHBOARD_SPOTLIGHT_BADGE_DOT_VIOLET,
+  DASHBOARD_SPOTLIGHT_PILL_MUTED,
+  DASHBOARD_SPOTLIGHT_INNER_WELL,
+  DASHBOARD_CHART_THEME,
+} from "@/lib/constants/dashboard-spotlight";
+import { useTheme } from "@/lib/providers/theme-provider";
 import { ArrowLeft } from "lucide-react";
 
 const MAX_SERIES_ARTISTS = 50;
@@ -176,12 +195,12 @@ function ArtistTrendsHeroFrame({
 function ArtistPickerSkeleton() {
   return (
     <div className="space-y-4" aria-busy="true">
-      <div className="h-10 w-full max-w-md rounded-xl border border-slate-200/90 bg-slate-100/90 animate-shimmer" />
+      <div className="h-10 w-full max-w-md rounded-xl border border-border bg-surface animate-shimmer" />
       <div className="flex flex-wrap gap-2">
         {Array.from({ length: 10 }).map((_, index) => (
           <div
             key={index}
-            className="h-9 rounded-full border border-slate-200/80 bg-slate-100/80 animate-shimmer"
+            className="h-9 rounded-full border border-border bg-surface animate-shimmer"
             style={{ width: `${96 + ((index * 23) % 88)}px` }}
           />
         ))}
@@ -192,10 +211,10 @@ function ArtistPickerSkeleton() {
 
 function ArtistTrendsChartSkeleton() {
   return (
-    <div className="relative min-h-[500px] rounded-[1.35rem] border border-white/10 bg-black/30 p-6" aria-busy="true">
+    <div className="relative min-h-[500px] rounded-[1.35rem] border border-slate-200/80 bg-slate-100/50 p-6 dark:border-white/10 dark:bg-black/30" aria-busy="true">
       <div className="flex h-[452px] flex-col justify-between">
         {Array.from({ length: 6 }).map((_, index) => (
-          <div key={index} className="h-px bg-white/10" />
+          <div key={index} className="h-px bg-slate-200/90 dark:bg-white/10" />
         ))}
       </div>
       <div className="absolute inset-x-8 bottom-20 top-16">
@@ -220,7 +239,7 @@ function ArtistTrendsChartSkeleton() {
       </div>
       <div className="absolute inset-x-8 bottom-6 flex flex-wrap gap-3">
         {Array.from({ length: 4 }).map((_, index) => (
-          <div key={index} className="h-3 w-28 rounded bg-white/10 animate-shimmer" />
+          <div key={index} className="h-3 w-28 rounded bg-slate-200/90 animate-shimmer dark:bg-white/10" />
         ))}
       </div>
     </div>
@@ -284,57 +303,11 @@ function createTrendsTooltip(t: (k: string) => string, locale: string) {
   return TrendsTooltipInner;
 }
 
-export type ArtistTrendDelta = {
-  artistId: string;
-  artistName: string;
-  firstHalf: number;
-  secondHalf: number;
-  delta: number;
-  deltaPercent: number;
-  direction: "up" | "down" | "stable";
-};
-
-function computeRiseDecline(
-  data: ArtistTrendsChartDataPoint[],
-  artistIds: string[],
-  idToName: Map<string, string>
-): ArtistTrendDelta[] {
-  if (data.length === 0) return [];
-  const mid = Math.ceil(data.length / 2);
-  const first = data.slice(0, mid);
-  const second = data.slice(mid);
-
-  return artistIds.map((artistId) => {
-    const firstHalf = first.reduce(
-      (sum, row) => sum + (Number(row[artistId]) || 0),
-      0
-    );
-    const secondHalf = second.reduce(
-      (sum, row) => sum + (Number(row[artistId]) || 0),
-      0
-    );
-    const delta = secondHalf - firstHalf;
-    const base = firstHalf || 1;
-    const deltaPercent = Math.round((delta / base) * 100);
-    let direction: "up" | "down" | "stable" = "stable";
-    if (delta > 0) direction = "up";
-    else if (delta < 0) direction = "down";
-
-    return {
-      artistId,
-      artistName: idToName.get(artistId) ?? artistId,
-      firstHalf,
-      secondHalf,
-      delta,
-      deltaPercent,
-      direction,
-    };
-  });
-}
-
 function TrendsContent() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { resolvedTheme } = useTheme();
+  const chartTheme = DASHBOARD_CHART_THEME[resolvedTheme === "dark" ? "dark" : "light"];
   const t = useTranslations("artistTrends");
   const locale = useLocale();
   const emptyStatePresets = useEmptyStatePresets();
@@ -477,26 +450,6 @@ function TrendsContent() {
   const getArtistIndex = useCallback(
     (artistId: string) => pickerArtists.findIndex((a) => a.id === artistId),
     [pickerArtists]
-  );
-
-  const riseDecline = useMemo(
-    () => computeRiseDecline(chartData, selectedIds, idToName),
-    [chartData, selectedIds, idToName]
-  );
-
-  const rising = useMemo(
-    () =>
-      riseDecline
-        .filter((r) => r.direction === "up")
-        .sort((a, b) => b.deltaPercent - a.deltaPercent),
-    [riseDecline]
-  );
-  const declining = useMemo(
-    () =>
-      riseDecline
-        .filter((r) => r.direction === "down")
-        .sort((a, b) => a.deltaPercent - b.deltaPercent),
-    [riseDecline]
   );
 
   const commentaryQueryEnabled =
@@ -650,30 +603,30 @@ function TrendsContent() {
               title={t("sections.picker.title")}
               description={t("sections.picker.description")}
             />
-            <div className="relative overflow-hidden rounded-[2rem] border border-slate-200/90 bg-gradient-to-br from-white via-slate-50/90 to-white text-slate-900 shadow-xl shadow-slate-900/[0.07] ring-1 ring-slate-900/[0.04] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-2xl hover:shadow-slate-900/10 dark:border-slate-300/50 dark:from-slate-100 dark:via-white dark:to-slate-50 dark:text-slate-900 dark:hover:shadow-black/25">
+            <div className="relative overflow-hidden rounded-[2rem] border border-border bg-gradient-to-br from-card via-surface-dashboard to-background text-foreground shadow-card ring-1 ring-card-border transition-all duration-300 hover:-translate-y-0.5 hover:shadow-card-hover dark:from-card dark:via-surface-raised dark:to-card dark:hover:shadow-black/50">
               <div
-                className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.07),transparent_36%),radial-gradient(circle_at_92%_12%,rgba(6,182,212,0.06),transparent_32%)]"
+                className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.08),transparent_36%),radial-gradient(circle_at_92%_12%,rgba(79,144,224,0.06),transparent_32%)] dark:bg-[radial-gradient(circle_at_top_left,rgba(176,108,255,0.09),transparent_38%),radial-gradient(circle_at_92%_12%,rgba(79,144,224,0.06),transparent_32%)]"
                 aria-hidden
               />
-              <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-violet-300/50 to-transparent" aria-hidden />
-              <div className="relative border-b border-slate-200/80 px-5 py-5 sm:px-8 dark:border-slate-200/90">
+              <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-primary/35 to-transparent" aria-hidden />
+              <div className="relative border-b border-border px-5 py-5 sm:px-8">
                 <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div className="inline-flex items-center gap-2 text-sm font-semibold text-slate-800">
-                    <span className="h-2 w-2 rounded-full bg-violet-500 shadow-[0_0_14px_rgb(139_92_246_/0.45)]" aria-hidden />
+                  <div className="inline-flex items-center gap-2 text-sm font-semibold text-foreground">
+                    <span className="h-2 w-2 shrink-0 rounded-full bg-primary shadow-[0_0_14px_rgb(var(--primary-rgb)/0.5)]" aria-hidden />
                     {t("sections.picker.badge")}
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <button
                       type="button"
                       onClick={selectAll}
-                      className="rounded-xl border border-violet-200/80 bg-white px-4 py-2 text-sm font-semibold text-violet-950 shadow-sm transition-colors hover:bg-violet-50/90 dark:border-violet-300/50 dark:bg-white dark:text-violet-950 dark:hover:bg-violet-50/80"
+                      className="rounded-xl border border-primary/40 bg-primary/10 px-4 py-2 text-sm font-semibold text-primary shadow-sm transition-colors hover:bg-primary/[0.17]"
                     >
                       {t("all")}
                     </button>
                     <button
                       type="button"
                       onClick={selectNone}
-                      className="rounded-xl border border-slate-200/90 bg-slate-50/90 px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-300/60 dark:bg-slate-100/90 dark:text-slate-800 dark:hover:bg-slate-100"
+                      className="rounded-xl border border-border bg-muted/12 px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-muted/22"
                     >
                       {t("none")}
                     </button>
@@ -681,22 +634,20 @@ function TrendsContent() {
                 </div>
               </div>
               <div className="relative p-4 sm:p-6 lg:p-8">
-                <div className="rounded-[1.35rem] border border-slate-200/80 bg-white/95 p-4 shadow-inner shadow-slate-900/[0.04] sm:p-6 dark:border-slate-200/90 dark:bg-white">
+                <div className="rounded-[1.35rem] border border-border bg-card-surface p-4 shadow-inner sm:p-6">
                   {isLoading ? (
                     <ArtistPickerSkeleton />
                   ) : (
-                    <div className="[&_#artist-trends-search]:border-slate-200/90 [&_#artist-trends-search]:bg-white [&_#artist-trends-search]:text-slate-900 [&_#artist-trends-search]:placeholder:text-slate-500 [&_#artist-trends-listbox]:border-slate-200/80 [&_#artist-trends-listbox]:bg-slate-50/80">
-                      <ArtistTrendsArtistPicker
-                        catalogArtists={pickerArtists}
-                        selectedIds={selectedIds}
-                        onToggle={toggleArtist}
-                        getColor={getColor}
-                        getArtistIndex={getArtistIndex}
-                        enableRemoteSearch
-                        onPickRemoteArtist={handlePickRemoteArtist}
-                        maxSelectable={MAX_SERIES_ARTISTS}
-                      />
-                    </div>
+                    <ArtistTrendsArtistPicker
+                      catalogArtists={pickerArtists}
+                      selectedIds={selectedIds}
+                      onToggle={toggleArtist}
+                      getColor={getColor}
+                      getArtistIndex={getArtistIndex}
+                      enableRemoteSearch
+                      onPickRemoteArtist={handlePickRemoteArtist}
+                      maxSelectable={MAX_SERIES_ARTISTS}
+                    />
                   )}
                 </div>
               </div>
@@ -713,25 +664,22 @@ function TrendsContent() {
               title={t("sections.chart.title")}
               description={t("sections.chart.description")}
             />
-            <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950 text-white shadow-2xl shadow-black/25 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-black/35">
-              <div
-                className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(139,92,246,0.14),transparent_32%),radial-gradient(circle_at_12%_70%,rgba(6,182,212,0.1),transparent_34%)]"
-                aria-hidden
-              />
-              <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-violet-200/35 to-transparent" aria-hidden />
-              <div className="relative border-b border-white/10 px-5 py-5 sm:px-8">
+            <div className={DASHBOARD_SPOTLIGHT_SHELL}>
+              <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} aria-hidden />
+              <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} aria-hidden />
+              <div className={`relative ${DASHBOARD_SPOTLIGHT_HEADER_BOTTOM} px-5 py-5 sm:px-8`}>
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div>
-                    <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-violet-300/25 bg-violet-300/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-violet-100">
-                      <span className="h-2 w-2 rounded-full bg-violet-300 shadow-[0_0_14px_rgba(167,139,250,0.55)]" />
+                    <div className={`mb-2 ${DASHBOARD_SPOTLIGHT_BADGE_VIOLET}`}>
+                      <span className={DASHBOARD_SPOTLIGHT_BADGE_DOT_VIOLET} />
                       {t("sections.chart.badge")}
                     </div>
-                    <h2 id="artist-trends-spotlight-title" className="text-lg font-semibold tracking-tight text-white sm:text-xl">
+                    <h2 id="artist-trends-spotlight-title" className={`${DASHBOARD_SPOTLIGHT_TITLE} tracking-tight sm:text-xl`}>
                       {t("evolution")}
                     </h2>
-                    <p className="mt-1 text-sm text-slate-400">{t("chartHint")}</p>
+                    <p className={`mt-1 ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("chartHint")}</p>
                   </div>
-                  <span className="inline-flex w-fit items-center rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold text-slate-200">
+                  <span className={DASHBOARD_SPOTLIGHT_PILL_MUTED}>
                     {t("selectionCount", { selected: selectedIds.length, max: MAX_SERIES_ARTISTS })}
                   </span>
                 </div>
@@ -740,21 +688,18 @@ function TrendsContent() {
                 {isLoading ? (
                   <ArtistTrendsChartSkeleton />
                 ) : selectedIds.length === 0 ? (
-                  <div className="rounded-[1.35rem] border border-white/10 bg-black/30 px-6 py-12 text-center">
-                    <p className="text-sm text-slate-400">{t("selectAtLeastOne")}</p>
+                  <div className="rounded-[1.35rem] border border-slate-200/80 bg-slate-50/80 px-6 py-12 text-center dark:border-white/10 dark:bg-black/30">
+                    <p className="text-sm text-slate-600 dark:text-slate-400">{t("selectAtLeastOne")}</p>
                   </div>
                 ) : (
-                  <div
-                    className="relative min-h-[500px] rounded-[1.35rem] border border-white/10 bg-black/25 p-3 backdrop-blur-sm"
-                    aria-busy={chartDataSyncing}
-                  >
+                  <div className={`relative ${DASHBOARD_SPOTLIGHT_INNER_WELL} min-h-[500px]`} aria-busy={chartDataSyncing}>
                     {chartDataSyncing && (
-                      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 rounded-[1.35rem] bg-slate-950/80 backdrop-blur-[2px] px-4 text-center">
+                      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 rounded-[1.35rem] bg-white/90 px-4 text-center backdrop-blur-[2px] dark:bg-slate-950/80">
                         <span
-                          className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-violet-400 border-t-transparent"
+                          className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-violet-600 border-t-transparent dark:border-violet-400"
                           aria-hidden
                         />
-                        <span className="text-sm font-medium text-white">
+                        <span className="text-sm font-medium text-slate-900 dark:text-white">
                           {selectionPending ? t("selectionPending") : t("chartUpdating")}
                         </span>
                       </div>
@@ -764,18 +709,18 @@ function TrendsContent() {
                     >
                       <ResponsiveContainer width="100%" height={500}>
                         <RechartsLineChart data={chartData} margin={{ top: 8, right: 20, left: 4, bottom: 60 }}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.18)" />
+                          <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} />
                           <XAxis
                             dataKey="formattedDate"
-                            tick={{ fill: "#94a3b8", fontSize: 11 }}
-                            stroke="rgba(148,163,184,0.35)"
+                            tick={{ fill: chartTheme.tick, fontSize: 11 }}
+                            stroke={chartTheme.axisStroke}
                             angle={-45}
                             textAnchor="end"
                             height={78}
                           />
-                          <YAxis tick={{ fill: "#94a3b8", fontSize: 11 }} stroke="rgba(148,163,184,0.35)" width={40} />
+                          <YAxis tick={{ fill: chartTheme.tick, fontSize: 11 }} stroke={chartTheme.axisStroke} width={40} />
                           <Tooltip content={<TrendsTooltip />} />
-                          <Legend wrapperStyle={{ color: "#cbd5e1", paddingTop: 14, fontSize: "12px" }} />
+                          <Legend wrapperStyle={{ color: chartTheme.legend, paddingTop: 14, fontSize: "12px" }} />
                           {selectedIds.map((artistId) => {
                             const idx = getArtistIndex(artistId);
                             const name = idToName.get(artistId) ?? artistId;
@@ -805,197 +750,123 @@ function TrendsContent() {
 
           {debouncedSelectedIds.length > 0 && chartData.length > 0 && (
             <section
-              className="relative overflow-hidden rounded-2xl border border-gray-200/80 bg-white shadow-lg backdrop-blur-sm animate-fade-in-up transition-all duration-300 dark:border-gray-600/50 dark:bg-gray-800/90"
+              className={`${OVERVIEW_STARTUP_SURFACE_BASE} animate-fade-in-up`}
               aria-labelledby="artist-trends-ai-spotlight-title"
               aria-busy={aiRefreshing}
             >
-              <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-violet-700 via-emerald-600 to-amber-600 opacity-70" />
-              <div className="relative">
-                <div className="border-b border-gray-100 px-6 py-5 dark:border-gray-700/50">
-                  <div className="flex flex-wrap items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-violet-200/70 bg-violet-50 text-violet-700 dark:border-violet-500/25 dark:bg-violet-500/10 dark:text-violet-300">
-                        <svg
-                          className="w-5 h-5"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth={1.5}
-                          aria-hidden
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="m3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z"
-                          />
-                        </svg>
-                      </div>
-                      <div>
-                        <h2
-                          id="artist-trends-ai-spotlight-title"
-                          className="text-xl font-bold tracking-tight text-gray-900 dark:text-white"
-                        >
-                          {t("aiSpotlightTitle")}
-                        </h2>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-                          {t("aiSpotlightHint")}
-                          {displayAiCommentary &&
-                            ((summaryVersion === "technical" &&
-                              aiCommentary?.commentaryCached) ||
-                              (summaryVersion === "light" &&
-                                aiCommentary?.commentaryLightCached)) && (
-                              <span className="ml-1">{t("aiCached")}</span>
-                            )}
-                          {aiRefreshing && (
-                            <span className="ml-2 inline-flex items-center gap-1.5 text-violet-700/90 dark:text-violet-300/80">
-                              <span
-                                className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent"
-                                aria-hidden
-                              />
-                              <span>{t("aiUpdating")}</span>
-                            </span>
-                          )}
-                        </p>
-                      </div>
+              <OverviewStartupSurfaceBg />
+              <div className="relative border-b border-slate-200/90 px-6 py-5 dark:border-white/10 sm:px-8">
+                <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0">
+                    <div className={OVERVIEW_STARTUP_EYEBROW_PILL_CLASS}>
+                      <span
+                        className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_16px_rgb(22_199_132_/0.75)]"
+                        aria-hidden
+                      />
+                      {t("aiSpotlightEyebrow")}
                     </div>
-                    {(aiCommentary?.commentaryLight || aiCommentary?.commentary) && (
-                      <div
-                        className="flex rounded-lg border border-gray-200 bg-gray-50/80 p-1 dark:border-gray-600 dark:bg-gray-700/30"
-                        role="tablist"
-                        aria-label={t("aiExplanation")}
-                      >
-                        <button
-                          type="button"
-                          role="tab"
-                          aria-selected={summaryVersion === "light"}
-                          aria-busy={
-                            summaryVersion === "light" &&
-                            (lightAiLoading || lightAiFetching)
-                          }
-                          onClick={() => setSummaryVersion("light")}
-                          className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                            summaryVersion === "light"
-                              ? "bg-white text-violet-700 shadow-sm dark:bg-gray-800 dark:text-violet-300"
-                              : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-                          }`}
-                        >
-                          {t("summaryVersionLight")}
-                        </button>
-                        <button
-                          type="button"
-                          role="tab"
-                          aria-selected={summaryVersion === "technical"}
-                          aria-busy={
-                            summaryVersion === "technical" &&
-                            (techAiLoading || techAiFetching)
-                          }
-                          onClick={() => setSummaryVersion("technical")}
-                          className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                            summaryVersion === "technical"
-                              ? "bg-white text-violet-700 shadow-sm dark:bg-gray-800 dark:text-violet-300"
-                              : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-                          }`}
-                        >
-                          {t("summaryVersionTechnical")}
-                        </button>
-                      </div>
-                    )}
+                    <h2
+                      id="artist-trends-ai-spotlight-title"
+                      className="text-3xl font-semibold tracking-[-0.05em] text-slate-900 sm:text-4xl dark:text-white"
+                    >
+                      {t("aiSpotlightTitle")}
+                    </h2>
+                    <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base dark:text-slate-300">
+                      {t("aiSpotlightHint")}
+                      {displayAiCommentary &&
+                        ((summaryVersion === "technical" &&
+                          aiCommentary?.commentaryCached) ||
+                          (summaryVersion === "light" &&
+                            aiCommentary?.commentaryLightCached)) && (
+                          <span className="ml-1 text-slate-500 dark:text-slate-400">{t("aiCached")}</span>
+                        )}
+                      {aiRefreshing && (
+                        <span className="ml-2 inline-flex items-center gap-1.5 text-cyan-700 dark:text-cyan-200/90">
+                          <span
+                            className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent"
+                            aria-hidden
+                          />
+                          <span>{t("aiUpdating")}</span>
+                        </span>
+                      )}
+                    </p>
                   </div>
+                  {(aiCommentary?.commentaryLight || aiCommentary?.commentary) && (
+                    <div
+                      className="flex shrink-0 rounded-xl border border-slate-200/90 bg-slate-50/95 p-1 dark:border-white/15 dark:bg-white/5"
+                      role="tablist"
+                      aria-label={t("aiExplanation")}
+                    >
+                      <button
+                        type="button"
+                        role="tab"
+                        aria-selected={summaryVersion === "light"}
+                        aria-busy={
+                          summaryVersion === "light" &&
+                          (lightAiLoading || lightAiFetching)
+                        }
+                        onClick={() => setSummaryVersion("light")}
+                        className={`rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${
+                          summaryVersion === "light"
+                            ? "bg-white text-slate-900 shadow-sm dark:bg-white/15 dark:text-white"
+                            : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+                        }`}
+                      >
+                        {t("summaryVersionLight")}
+                      </button>
+                      <button
+                        type="button"
+                        role="tab"
+                        aria-selected={summaryVersion === "technical"}
+                        aria-busy={
+                          summaryVersion === "technical" &&
+                          (techAiLoading || techAiFetching)
+                        }
+                        onClick={() => setSummaryVersion("technical")}
+                        className={`rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${
+                          summaryVersion === "technical"
+                            ? "bg-white text-slate-900 shadow-sm dark:bg-white/15 dark:text-white"
+                            : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+                        }`}
+                      >
+                        {t("summaryVersionTechnical")}
+                      </button>
+                    </div>
+                  )}
                 </div>
-                <div className="p-6 sm:p-8">
+              </div>
+              <div className="relative p-6 sm:p-8">
+                <div className={OVERVIEW_STARTUP_INNER_PANEL_CLASS}>
                   {showAiSkeleton ? (
                     <div className="space-y-3 animate-pulse" aria-busy="true">
-                      <div className="h-4 bg-gray-200 rounded w-full max-w-3xl dark:bg-gray-700" />
-                      <div className="h-4 bg-gray-200 rounded w-full max-w-2xl dark:bg-gray-700" />
-                      <div className="h-4 bg-gray-200 rounded w-4/5 max-w-xl dark:bg-gray-700" />
+                      <div className="h-4 w-full max-w-3xl rounded bg-slate-200/80 dark:bg-white/10" />
+                      <div className="h-4 w-full max-w-2xl rounded bg-slate-200/80 dark:bg-white/10" />
+                      <div className="h-4 w-4/5 max-w-xl rounded bg-slate-200/80 dark:bg-white/10" />
                     </div>
                   ) : activeAiError ? (
                     isGroqDailyQuotaError(activeAiError) ? (
                       <GroqQuotaNotice error={activeAiError} />
                     ) : (
-                      <p
-                        className="text-sm text-red-600 dark:text-red-400"
-                        role="alert"
-                      >
+                      <p className="text-sm text-red-600 dark:text-red-300" role="alert">
                         {activeAiError.message}
                       </p>
                     )
                   ) : aiCommentary?.aiUnavailable ? (
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      {t("aiUnavailable")}
-                    </p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">{t("aiUnavailable")}</p>
                   ) : hasDisplayableAiParagraph ? (
                     <p
-                      className={`text-gray-700 leading-relaxed whitespace-pre-line transition-opacity duration-200 dark:text-gray-200 ${
+                      className={`whitespace-pre-line text-base leading-relaxed text-slate-700 transition-opacity duration-200 dark:text-slate-200 sm:text-[1.05rem] ${
                         aiRefreshing ? "opacity-60" : ""
                       }`}
                     >
                       {displayAiCommentary}
                     </p>
                   ) : (
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      {t("aiEmpty")}
-                    </p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">{t("aiEmpty")}</p>
                   )}
                 </div>
               </div>
             </section>
-          )}
-
-          {selectedIds.length > 0 && (rising.length > 0 || declining.length > 0) && (
-            <div
-              className={`grid grid-cols-1 md:grid-cols-2 gap-6 transition-opacity duration-200 ${
-                chartDataSyncing ? "opacity-60" : ""
-              }`}
-              aria-busy={chartDataSyncing}
-            >
-              <div className="relative overflow-hidden rounded-2xl border border-gray-200/80 bg-white p-6 shadow-lg backdrop-blur-sm dark:border-gray-600/50 dark:bg-gray-800/90">
-                <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-emerald-600 via-violet-700 to-transparent opacity-70" />
-                <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
-                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-emerald-200/70 bg-emerald-50 text-emerald-700 dark:border-emerald-500/25 dark:bg-emerald-500/10 dark:text-emerald-300">↑</span>
-                  {t("rising")}
-                </h2>
-                <ul className="space-y-2">
-                  {rising.map((r) => (
-                    <li
-                      key={r.artistId}
-                      className="flex items-center justify-between gap-3 rounded-xl border border-gray-200 bg-gray-50/80 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-700/30"
-                    >
-                      <span className="min-w-0 truncate text-gray-900 dark:text-white">
-                        {r.artistName}
-                      </span>
-                      <span className="shrink-0 rounded-full bg-emerald-50 px-2.5 py-1 font-medium tabular-nums text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">
-                        +{r.deltaPercent}% ({r.delta > 0 ? "+" : ""}
-                        {r.delta.toLocaleString(locale)} {t("listensDelta")})
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="relative overflow-hidden rounded-2xl border border-gray-200/80 bg-white p-6 shadow-lg backdrop-blur-sm dark:border-gray-600/50 dark:bg-gray-800/90">
-                <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-rose-700 via-violet-700 to-transparent opacity-70" />
-                <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
-                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-rose-200/70 bg-rose-50 text-rose-700 dark:border-rose-500/25 dark:bg-rose-500/10 dark:text-rose-300">↓</span>
-                  {t("declining")}
-                </h2>
-                <ul className="space-y-2">
-                  {declining.map((r) => (
-                    <li
-                      key={r.artistId}
-                      className="flex items-center justify-between gap-3 rounded-xl border border-gray-200 bg-gray-50/80 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-700/30"
-                    >
-                      <span className="min-w-0 truncate text-gray-900 dark:text-white">
-                        {r.artistName}
-                      </span>
-                      <span className="shrink-0 rounded-full bg-rose-50 px-2.5 py-1 font-medium tabular-nums text-rose-700 dark:bg-rose-500/10 dark:text-rose-300">
-                        {r.deltaPercent}% ({r.delta.toLocaleString(locale)}{" "}
-                        {t("listensDelta")})
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
           )}
         </div>
       </div>

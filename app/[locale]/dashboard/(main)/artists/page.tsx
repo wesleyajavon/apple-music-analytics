@@ -23,7 +23,35 @@ import {
   Cell,
 } from "recharts";
 import { artistKeys, fetchArtistStats, useArtistStats } from "@/lib/hooks/use-artists";
+import {
+  DASHBOARD_SPOTLIGHT_SHELL,
+  DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY,
+  DASHBOARD_SPOTLIGHT_GRADIENT_LIME,
+  DASHBOARD_SPOTLIGHT_GRADIENT_TABLE,
+  DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET,
+  DASHBOARD_SPOTLIGHT_HAIRLINE_LIME,
+  DASHBOARD_SPOTLIGHT_HEADER_BOTTOM,
+  DASHBOARD_SPOTLIGHT_TITLE,
+  DASHBOARD_SPOTLIGHT_MUTED,
+  DASHBOARD_SPOTLIGHT_BADGE_VIOLET,
+  DASHBOARD_SPOTLIGHT_BADGE_DOT_VIOLET,
+  DASHBOARD_SPOTLIGHT_BADGE_LIME,
+  DASHBOARD_SPOTLIGHT_BADGE_DOT_LIME,
+  DASHBOARD_SPOTLIGHT_BADGE_CYAN_COMPACT,
+  DASHBOARD_SPOTLIGHT_BADGE_DOT_CYAN,
+  DASHBOARD_SPOTLIGHT_INNER_WELL,
+  DASHBOARD_SPOTLIGHT_TABLE_HEAD,
+  DASHBOARD_SPOTLIGHT_TABLE_HEAD_CELL,
+  DASHBOARD_SPOTLIGHT_TABLE_ROW_HOVER,
+  DASHBOARD_SPOTLIGHT_FOOTER,
+  DASHBOARD_SPOTLIGHT_FOOTER_TEXT,
+  DASHBOARD_SPOTLIGHT_BTN_SECONDARY,
+  DASHBOARD_SPOTLIGHT_SELECT,
+  DASHBOARD_SPOTLIGHT_LABEL,
+  DASHBOARD_CHART_THEME,
+} from "@/lib/constants/dashboard-spotlight";
 import { CHART_TOOLTIP_STYLES } from "@/lib/constants/config";
+import { useTheme } from "@/lib/providers/theme-provider";
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
 import { OverviewSkeleton } from "@/lib/components/skeleton-loaders";
@@ -212,13 +240,13 @@ function ArtistsGridSkeleton({ count = 6 }: { count?: number }) {
 
 function ArtistsBarChartSkeleton() {
   return (
-    <div className="h-[360px] rounded-[1.35rem] border border-white/10 bg-black/30 p-5" aria-busy="true">
+    <div className="h-[360px] rounded-[1.35rem] border border-slate-200/80 bg-slate-100/50 p-5 dark:border-white/10 dark:bg-black/30" aria-busy="true">
       <div className="flex h-full flex-col justify-between">
         {Array.from({ length: 8 }).map((_, index) => (
           <div key={index} className="flex items-center gap-4">
-            <div className="h-3 w-24 rounded bg-white/10 animate-shimmer" />
+            <div className="h-3 w-24 rounded bg-slate-200/90 animate-shimmer dark:bg-white/10" />
             <div
-              className="h-5 rounded-r-lg bg-violet-400/20 animate-shimmer"
+              className="h-5 rounded-r-lg bg-violet-200/60 animate-shimmer dark:bg-violet-400/20"
               style={{ width: `${35 + ((index * 13) % 55)}%` }}
             />
           </div>
@@ -230,8 +258,8 @@ function ArtistsBarChartSkeleton() {
 
 function ArtistsPieChartSkeleton() {
   return (
-    <div className="flex h-[360px] items-center justify-center rounded-[1.35rem] border border-white/10 bg-black/30 p-6" aria-busy="true">
-      <div className="h-56 w-56 rounded-full border-[34px] border-violet-400/25 bg-white/10 animate-shimmer" />
+    <div className="flex h-[360px] items-center justify-center rounded-[1.35rem] border border-slate-200/80 bg-slate-100/50 p-6 dark:border-white/10 dark:bg-black/30" aria-busy="true">
+      <div className="h-56 w-56 rounded-full border-[34px] border-violet-200/50 bg-slate-200/40 animate-shimmer dark:border-violet-400/25 dark:bg-white/10" />
     </div>
   );
 }
@@ -512,89 +540,86 @@ const DetailedViewSection = memo(({
   const pageEnd = Math.min(offset + artists.length, total);
 
   return (
-    <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950 text-white shadow-2xl shadow-black/25 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-black/35">
-      <div
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.14),transparent_32%),radial-gradient(circle_at_86%_20%,rgba(6,182,212,0.1),transparent_30%)]"
-        aria-hidden
-      />
-      <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-violet-200/35 to-transparent" aria-hidden />
+    <div className={DASHBOARD_SPOTLIGHT_SHELL}>
+      <div className={DASHBOARD_SPOTLIGHT_GRADIENT_TABLE} aria-hidden />
+      <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} aria-hidden />
       <button
         type="button"
         onClick={() => setExpanded((e) => !e)}
-        className="relative flex w-full items-start justify-between gap-4 border-b border-white/10 px-5 py-5 text-left transition-colors hover:bg-white/[0.04] sm:px-8"
+        className={`relative flex w-full items-start justify-between gap-4 ${DASHBOARD_SPOTLIGHT_HEADER_BOTTOM} px-5 py-5 text-left transition-colors hover:bg-slate-50/90 dark:hover:bg-white/[0.04] sm:px-8`}
         aria-expanded={expanded}
       >
         <div>
-          <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-cyan-300/25 bg-cyan-300/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-100">
-            <span className="h-2 w-2 rounded-full bg-cyan-300 shadow-[0_0_14px_rgb(34_211_238_/0.45)]" aria-hidden />
+          <div className={`mb-2 ${DASHBOARD_SPOTLIGHT_BADGE_CYAN_COMPACT}`}>
+            <span className={DASHBOARD_SPOTLIGHT_BADGE_DOT_CYAN} aria-hidden />
             {t("sections.table.badge")}
           </div>
-          <h3 className="text-lg font-semibold text-white sm:text-xl">{t("sections.table.title")}</h3>
-          <p className="mt-1 text-sm text-slate-400">{t("datesAndTracks")}</p>
+          <h3 className={DASHBOARD_SPOTLIGHT_TITLE}>{t("sections.table.title")}</h3>
+          <p className={`mt-1 ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("datesAndTracks")}</p>
         </div>
-        <span className="text-slate-400">
+        <span className="text-slate-500 dark:text-slate-400">
           <ChevronIcon direction={expanded ? "up" : "down"} />
         </span>
       </button>
       {expanded && (
         <>
         <div className="relative max-h-[min(70vh,640px)] overflow-y-auto overflow-x-auto">
-          <table className="min-w-full divide-y divide-white/10">
-            <thead className="sticky top-0 z-10 border-b border-white/10 bg-slate-950/90 backdrop-blur-md">
+          <table className="min-w-full divide-y divide-slate-200/90 dark:divide-white/10">
+            <thead className={DASHBOARD_SPOTLIGHT_TABLE_HEAD}>
               <tr>
-                <th scope="col" className="px-5 py-3 text-left text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                <th scope="col" className={`px-5 py-3 text-left ${DASHBOARD_SPOTLIGHT_TABLE_HEAD_CELL}`}>
                   {t("rank")}
                 </th>
-                <th scope="col" className="px-5 py-3 text-left text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                <th scope="col" className={`px-5 py-3 text-left ${DASHBOARD_SPOTLIGHT_TABLE_HEAD_CELL}`}>
                   {t("artist")}
                 </th>
-                <th scope="col" className="px-5 py-3 text-right text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                <th scope="col" className={`px-5 py-3 text-right ${DASHBOARD_SPOTLIGHT_TABLE_HEAD_CELL}`}>
                   {t("listensLabel")}
                 </th>
-                <th scope="col" className="px-5 py-3 text-right text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                <th scope="col" className={`px-5 py-3 text-right ${DASHBOARD_SPOTLIGHT_TABLE_HEAD_CELL}`}>
                   {t("tracks")}
                 </th>
-                <th scope="col" className="px-5 py-3 text-right text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                <th scope="col" className={`px-5 py-3 text-right ${DASHBOARD_SPOTLIGHT_TABLE_HEAD_CELL}`}>
                   {t("first")}
                 </th>
-                <th scope="col" className="px-5 py-3 text-right text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                <th scope="col" className={`px-5 py-3 text-right ${DASHBOARD_SPOTLIGHT_TABLE_HEAD_CELL}`}>
                   {t("last")}
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="divide-y divide-slate-100 dark:divide-white/5">
               {isFetching
                 ? Array.from({ length: Math.min(pageSize, 10) }).map((_, index) => (
                     <tr key={`artist-skeleton-${index}`}>
                       <td className="whitespace-nowrap px-5 py-4">
-                        <div className="h-8 w-8 animate-pulse rounded-lg bg-white/10" />
+                        <div className="h-8 w-8 animate-pulse rounded-lg bg-slate-200/90 dark:bg-white/10" />
                       </td>
                       <td className="whitespace-nowrap px-5 py-4">
-                        <div className="h-4 w-44 animate-pulse rounded bg-white/10" />
+                        <div className="h-4 w-44 animate-pulse rounded bg-slate-200/90 dark:bg-white/10" />
                       </td>
                       <td className="whitespace-nowrap px-5 py-4">
-                        <div className="ml-auto h-4 w-16 animate-pulse rounded bg-white/10" />
+                        <div className="ml-auto h-4 w-16 animate-pulse rounded bg-slate-200/90 dark:bg-white/10" />
                       </td>
                       <td className="whitespace-nowrap px-5 py-4">
-                        <div className="ml-auto h-4 w-10 animate-pulse rounded bg-white/10" />
+                        <div className="ml-auto h-4 w-10 animate-pulse rounded bg-slate-200/90 dark:bg-white/10" />
                       </td>
                       <td className="whitespace-nowrap px-5 py-4">
-                        <div className="ml-auto h-4 w-24 animate-pulse rounded bg-white/10" />
+                        <div className="ml-auto h-4 w-24 animate-pulse rounded bg-slate-200/90 dark:bg-white/10" />
                       </td>
                       <td className="whitespace-nowrap px-5 py-4">
-                        <div className="ml-auto h-4 w-24 animate-pulse rounded bg-white/10" />
+                        <div className="ml-auto h-4 w-24 animate-pulse rounded bg-slate-200/90 dark:bg-white/10" />
                       </td>
                     </tr>
                   ))
                 : artists.map((artist, index) => {
-                const rankStyles = ["text-amber-400", "text-slate-300", "text-amber-500"];
-                const rankBg = ["bg-amber-400/20", "bg-slate-400/15", "bg-amber-500/20"];
-                const rankStyle = index < 3 ? rankStyles[index] : "text-slate-500";
-                const rankBgStyle = index < 3 ? rankBg[index] : "bg-white/10";
+                const rankStyles = ["text-amber-700 dark:text-amber-400", "text-slate-600 dark:text-slate-300", "text-amber-800 dark:text-amber-500"];
+                const rankBg = ["bg-amber-100 dark:bg-amber-400/20", "bg-slate-200 dark:bg-slate-400/15", "bg-amber-100 dark:bg-amber-500/20"];
+                const rankStyle = index < 3 ? rankStyles[index] : "text-slate-500 dark:text-slate-500";
+                const rankBgStyle = index < 3 ? rankBg[index] : "bg-slate-200/80 dark:bg-white/10";
                 const avatarColorIndex = offset + index;
                 const rowInteractive =
-                  "cursor-pointer transition-colors hover:bg-white/[0.04] " +
-                  "focus-visible:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-cyan-400/60";
+                  `cursor-pointer ${DASHBOARD_SPOTLIGHT_TABLE_ROW_HOVER} ` +
+                  "focus-visible:bg-slate-100/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-cyan-500/50 dark:focus-visible:bg-white/[0.06] dark:focus-visible:ring-cyan-400/60";
                 const openInsights = () => onOpenArtistInsights(artist, avatarColorIndex);
                 return (
                   <tr
@@ -630,19 +655,19 @@ const DetailedViewSection = memo(({
                             className="h-full w-full object-cover"
                           />
                         </div>
-                        <span className="text-sm font-semibold text-white">{artist.artistName}</span>
+                        <span className="text-sm font-semibold text-slate-900 dark:text-white">{artist.artistName}</span>
                       </div>
                     </td>
-                    <td className="whitespace-nowrap px-5 py-4 text-right text-sm font-semibold tabular-nums text-white">
+                    <td className="whitespace-nowrap px-5 py-4 text-right text-sm font-semibold tabular-nums text-slate-900 dark:text-white">
                       {artist.listenCount.toLocaleString(locale)}
                     </td>
-                    <td className="whitespace-nowrap px-5 py-4 text-right text-sm tabular-nums text-slate-400">
+                    <td className="whitespace-nowrap px-5 py-4 text-right text-sm tabular-nums text-slate-600 dark:text-slate-400">
                       {artist.uniqueTracks}
                     </td>
-                    <td className="whitespace-nowrap px-5 py-4 text-right text-sm text-slate-400">
+                    <td className="whitespace-nowrap px-5 py-4 text-right text-sm text-slate-600 dark:text-slate-400">
                       {new Date(artist.firstListenDate).toLocaleDateString(locale)}
                     </td>
-                    <td className="whitespace-nowrap px-5 py-4 text-right text-sm text-slate-400">
+                    <td className="whitespace-nowrap px-5 py-4 text-right text-sm text-slate-600 dark:text-slate-400">
                       {new Date(artist.lastListenDate).toLocaleDateString(locale)}
                     </td>
                   </tr>
@@ -651,8 +676,8 @@ const DetailedViewSection = memo(({
             </tbody>
           </table>
         </div>
-        <div className="relative flex flex-col gap-3 border-t border-white/10 bg-black/35 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8">
-          <p className="text-sm text-slate-400">
+        <div className={DASHBOARD_SPOTLIGHT_FOOTER}>
+          <p className={DASHBOARD_SPOTLIGHT_FOOTER_TEXT}>
             {t("paginationSummary", {
               start: pageStart,
               end: pageEnd,
@@ -664,37 +689,37 @@ const DetailedViewSection = memo(({
               type="button"
               onClick={() => onPageChange(page - 1)}
               disabled={page === 1}
-              className="inline-flex min-h-[40px] items-center justify-center rounded-xl border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-40"
+              className={DASHBOARD_SPOTLIGHT_BTN_SECONDARY}
             >
               {t("paginationPrevious")}
             </button>
-            <label className="ml-1 inline-flex items-center gap-2 text-sm text-slate-300">
+            <label className={DASHBOARD_SPOTLIGHT_LABEL}>
               <span>{t("pageSizeLabel")}</span>
               <select
                 value={pageSize}
                 onChange={(e) => onPageSizeChange(Number(e.target.value))}
-                className="rounded-xl border border-white/15 bg-white/10 px-3 py-2 text-sm font-medium text-white"
+                className={DASHBOARD_SPOTLIGHT_SELECT}
               >
                 <option value={20}>20</option>
                 <option value={50}>50</option>
                 <option value={100}>100</option>
               </select>
             </label>
-            <span className="px-2 text-sm text-slate-400">
+            <span className={`px-2 ${DASHBOARD_SPOTLIGHT_FOOTER_TEXT}`}>
               {t("paginationPage", { page, totalPages })}
             </span>
             <button
               type="button"
               onClick={() => onPageChange(page + 1)}
               disabled={!hasMore}
-              className="inline-flex min-h-[40px] items-center justify-center rounded-xl border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-40"
+              className={DASHBOARD_SPOTLIGHT_BTN_SECONDARY}
             >
               {t("paginationNext")}
             </button>
           </div>
         </div>
         {isFetching ? (
-          <div className="px-5 pb-4 text-xs text-slate-500 sm:px-8">{t("paginationLoading")}</div>
+          <div className="px-5 pb-4 text-xs text-slate-500 dark:text-slate-500 sm:px-8">{t("paginationLoading")}</div>
         ) : null}
         </>
       )}
@@ -706,6 +731,8 @@ DetailedViewSection.displayName = "DetailedViewSection";
 
 function ArtistsContent() {
   const DEFAULT_PAGE_SIZE = 20;
+  const { resolvedTheme } = useTheme();
+  const chartTheme = DASHBOARD_CHART_THEME[resolvedTheme === "dark" ? "dark" : "light"];
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -882,21 +909,18 @@ function ArtistsContent() {
           description={t("sections.charts.description")}
         />
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-          <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950 text-white shadow-2xl shadow-black/25 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-black/35">
-            <div
-              className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.2),transparent_32%),radial-gradient(circle_at_86%_18%,rgba(6,182,212,0.14),transparent_30%)]"
-              aria-hidden
-            />
-            <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-violet-200/45 to-transparent" aria-hidden />
-            <div className="relative border-b border-white/10 px-5 py-5 sm:px-8">
-              <div className="inline-flex items-center gap-2 rounded-full border border-violet-300/25 bg-violet-300/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-violet-100">
-                <span className="h-2 w-2 rounded-full bg-violet-300 shadow-[0_0_14px_rgba(167,139,250,0.55)]" aria-hidden />
+          <div className={DASHBOARD_SPOTLIGHT_SHELL}>
+            <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} aria-hidden />
+            <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} aria-hidden />
+            <div className={`relative ${DASHBOARD_SPOTLIGHT_HEADER_BOTTOM} px-5 py-5 sm:px-8`}>
+              <div className={DASHBOARD_SPOTLIGHT_BADGE_VIOLET}>
+                <span className={DASHBOARD_SPOTLIGHT_BADGE_DOT_VIOLET} aria-hidden />
                 {t("sections.charts.barBadge")}
               </div>
-              <h3 className="mt-3 text-lg font-semibold text-white sm:text-xl">{t("top10Listens")}</h3>
+              <h3 className={`mt-3 ${DASHBOARD_SPOTLIGHT_TITLE}`}>{t("top10Listens")}</h3>
             </div>
             <div className="relative p-5 sm:p-6 lg:p-8">
-              <div className="rounded-[1.35rem] border border-white/10 bg-black/25 p-3 backdrop-blur-sm sm:p-5">
+              <div className={DASHBOARD_SPOTLIGHT_INNER_WELL}>
                 {isTopLoading ? (
                   <ArtistsBarChartSkeleton />
                 ) : (
@@ -912,12 +936,12 @@ function ArtistsContent() {
                           <feDropShadow dx="0" dy="6" stdDeviation="5" floodColor="#8b5cf6" floodOpacity="0.22" />
                         </filter>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.18)" horizontal={false} />
-                      <XAxis type="number" tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} tickMargin={8} />
+                      <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} horizontal={false} />
+                      <XAxis type="number" tick={{ fill: chartTheme.tick, fontSize: 11 }} axisLine={false} tickLine={false} tickMargin={8} />
                       <YAxis
                         type="category"
                         dataKey="name"
-                        tick={{ fill: "#e2e8f0", fontSize: 12, fontWeight: 600 }}
+                        tick={{ fill: chartTheme.tickStrong, fontSize: 12, fontWeight: 600 }}
                         axisLine={false}
                         tickLine={false}
                         tickMargin={8}
@@ -941,21 +965,18 @@ function ArtistsContent() {
             </div>
           </div>
 
-          <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950 text-white shadow-2xl shadow-black/25 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-black/35">
-            <div
-              className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(132,204,22,0.14),transparent_32%),radial-gradient(circle_at_12%_70%,rgba(139,92,246,0.12),transparent_34%)]"
-              aria-hidden
-            />
-            <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-lime-200/40 to-transparent" aria-hidden />
-            <div className="relative border-b border-white/10 px-5 py-5 sm:px-8">
-              <div className="inline-flex items-center gap-2 rounded-full border border-lime-300/25 bg-lime-300/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-lime-100">
-                <span className="h-2 w-2 rounded-full bg-lime-300 shadow-[0_0_12px_rgba(190,242,100,0.45)]" aria-hidden />
+          <div className={DASHBOARD_SPOTLIGHT_SHELL}>
+            <div className={DASHBOARD_SPOTLIGHT_GRADIENT_LIME} aria-hidden />
+            <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_LIME} aria-hidden />
+            <div className={`relative ${DASHBOARD_SPOTLIGHT_HEADER_BOTTOM} px-5 py-5 sm:px-8`}>
+              <div className={DASHBOARD_SPOTLIGHT_BADGE_LIME}>
+                <span className={DASHBOARD_SPOTLIGHT_BADGE_DOT_LIME} aria-hidden />
                 {t("sections.charts.pieBadge")}
               </div>
-              <h3 className="mt-3 text-lg font-semibold text-white sm:text-xl">{t("distributionTop6")}</h3>
+              <h3 className={`mt-3 ${DASHBOARD_SPOTLIGHT_TITLE}`}>{t("distributionTop6")}</h3>
             </div>
             <div className="relative p-5 sm:p-6 lg:p-8">
-              <div className="rounded-[1.35rem] border border-white/10 bg-black/25 p-3 backdrop-blur-sm sm:p-5">
+              <div className={DASHBOARD_SPOTLIGHT_INNER_WELL}>
                 {isTopLoading ? (
                   <ArtistsPieChartSkeleton />
                 ) : (
@@ -982,7 +1003,7 @@ function ArtistsContent() {
                         filter="url(#artistPieGlow)"
                       >
                         {pieChartData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} stroke="rgba(15,23,42,0.85)" strokeWidth={2} />
+                          <Cell key={`cell-${index}`} fill={entry.color} stroke={chartTheme.pieStroke} strokeWidth={2} />
                         ))}
                       </Pie>
                       <Tooltip
@@ -1006,18 +1027,18 @@ function ArtistsContent() {
           title={t("sections.roster.title")}
           description={t("sections.roster.description")}
         />
-        <div className="relative overflow-hidden rounded-[2rem] border border-slate-200/90 bg-gradient-to-br from-white via-slate-50/90 to-white text-slate-900 shadow-xl shadow-slate-900/[0.07] ring-1 ring-slate-900/[0.04] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-2xl hover:shadow-slate-900/10 dark:border-slate-300/50 dark:from-slate-100 dark:via-white dark:to-slate-50 dark:text-slate-900 dark:hover:shadow-black/20">
+        <div className="relative overflow-hidden rounded-[2rem] border border-slate-200/90 bg-gradient-to-br from-white via-slate-50/90 to-white text-slate-900 shadow-xl shadow-slate-900/[0.07] ring-1 ring-slate-900/[0.04] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-2xl hover:shadow-slate-900/10 dark:border-white/10 dark:from-slate-950 dark:via-slate-950 dark:to-slate-950 dark:text-white dark:shadow-2xl dark:shadow-black/25 dark:ring-0 dark:hover:shadow-black/35">
           <div
-            className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.06),transparent_38%),radial-gradient(circle_at_90%_8%,rgba(6,182,212,0.05),transparent_32%)]"
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.06),transparent_38%),radial-gradient(circle_at_90%_8%,rgba(6,182,212,0.05),transparent_32%)] dark:bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.2),transparent_36%),radial-gradient(circle_at_86%_18%,rgba(6,182,212,0.14),transparent_30%)]"
             aria-hidden
           />
-          <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-violet-300/45 to-transparent" aria-hidden />
-          <div className="relative border-b border-slate-200/80 px-5 py-6 sm:px-8 dark:border-slate-200/90">
-            <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-violet-700">
-              <span className="h-2 w-2 rounded-full bg-violet-500 shadow-[0_0_12px_rgba(139,92,246,0.4)]" aria-hidden />
+          <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-violet-300/45 to-transparent dark:via-violet-200/45" aria-hidden />
+          <div className="relative border-b border-slate-200/80 px-5 py-6 sm:px-8 dark:border-white/10">
+            <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-violet-700 dark:text-violet-200">
+              <span className="h-2 w-2 rounded-full bg-violet-500 shadow-[0_0_12px_rgba(139,92,246,0.4)] dark:bg-violet-300 dark:shadow-[0_0_14px_rgba(167,139,250,0.55)]" aria-hidden />
               {t("sections.roster.top3Badge")}
             </div>
-            <h3 className="mt-3 text-lg font-semibold text-slate-900 sm:text-xl">{t("top3Title")}</h3>
+            <h3 className="mt-3 text-lg font-semibold text-slate-900 sm:text-xl dark:text-white">{t("top3Title")}</h3>
           </div>
           <div className="relative p-5 sm:p-6 lg:p-8">
             {isTopLoading ? (
@@ -1032,12 +1053,12 @@ function ArtistsContent() {
               />
             )}
           </div>
-          <div className="relative border-t border-slate-200/80 px-5 py-6 sm:px-8 dark:border-slate-200/90">
-            <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-800">
-              <span className="h-2 w-2 rounded-full bg-cyan-500 shadow-[0_0_12px_rgba(6,182,212,0.4)]" aria-hidden />
+          <div className="relative border-t border-slate-200/80 px-5 py-6 sm:px-8 dark:border-white/10">
+            <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-800 dark:text-cyan-200">
+              <span className="h-2 w-2 rounded-full bg-cyan-500 shadow-[0_0_12px_rgba(6,182,212,0.4)] dark:bg-cyan-300 dark:shadow-[0_0_14px_rgb(34_211_238_/0.45)]" aria-hidden />
               {t("sections.roster.gridBadge")}
             </div>
-            <h3 className="mt-3 text-lg font-semibold text-slate-900 sm:text-xl">{t("allArtists")}</h3>
+            <h3 className="mt-3 text-lg font-semibold text-slate-900 sm:text-xl dark:text-white">{t("allArtists")}</h3>
             <div className="mt-5">
               {isTopLoading ? (
                 <ArtistsGridSkeleton />

@@ -6,6 +6,12 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import {
+  DASHBOARD_SPOTLIGHT_SHELL,
+  DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY,
+  DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET,
+  DASHBOARD_SPOTLIGHT_HEADER_BOTTOM,
+} from "@/lib/constants/dashboard-spotlight";
 
 function HeatmapLegendText({ type }: { type: "less" | "more" }) {
   const t = useTranslations("common");
@@ -550,38 +556,30 @@ export function OverviewSkeleton() {
  */
 export function TasteEvolutionSpotlightSkeleton() {
   return (
-    <section
-      className="relative overflow-hidden rounded-2xl border-2 border-accent-violet/20 bg-white dark:bg-gray-800/95 shadow-2xl dark:shadow-none ring-2 ring-accent-violet/10 dark:ring-accent-violet/20"
-      aria-hidden
-    >
-      <div
-        className="pointer-events-none absolute inset-0 rounded-2xl opacity-60 dark:opacity-40"
-        style={{
-          background:
-            "radial-gradient(ellipse 80% 70% at 50% 40%, rgba(139, 92, 246, 0.08) 0%, rgba(99, 102, 241, 0.04) 40%, transparent 70%)",
-        }}
-      />
+    <section className={`relative ${DASHBOARD_SPOTLIGHT_SHELL}`} aria-hidden>
+      <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} />
+      <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} />
       <div className="relative">
-        <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-5">
+        <div className={`${DASHBOARD_SPOTLIGHT_HEADER_BOTTOM} px-6 py-5 sm:px-8`}>
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 shrink-0 rounded-xl bg-gray-200 dark:bg-gray-700 animate-shimmer" />
+              <div className="h-10 w-10 shrink-0 animate-shimmer rounded-xl bg-slate-200 dark:bg-white/10" />
               <div className="space-y-2">
-                <div className="h-6 w-56 max-w-[85vw] rounded bg-gray-200 dark:bg-gray-700 animate-shimmer" />
-                <div className="h-4 w-48 max-w-[70vw] rounded bg-gray-200 dark:bg-gray-700 animate-shimmer" />
+                <div className="h-6 w-56 max-w-[85vw] animate-shimmer rounded bg-slate-200 dark:bg-white/10" />
+                <div className="h-4 w-48 max-w-[70vw] animate-shimmer rounded bg-slate-200 dark:bg-white/10" />
               </div>
             </div>
-            <div className="flex h-9 rounded-lg bg-gray-100 dark:bg-gray-700/50 p-1 gap-1">
-              <div className="h-full w-16 rounded-md bg-gray-200 dark:bg-gray-600 animate-shimmer" />
-              <div className="h-full w-24 rounded-md bg-gray-200 dark:bg-gray-600 animate-shimmer" />
+            <div className="flex h-9 gap-1 rounded-lg bg-slate-100 p-1 dark:bg-white/10">
+              <div className="h-full w-16 animate-shimmer rounded-md bg-slate-200 dark:bg-white/15" />
+              <div className="h-full w-24 animate-shimmer rounded-md bg-slate-200 dark:bg-white/15" />
             </div>
           </div>
         </div>
-        <div className="p-6 sm:p-8 space-y-3">
-          <div className="h-4 w-full rounded bg-gray-200 dark:bg-gray-700 animate-shimmer" />
-          <div className="h-4 w-full rounded bg-gray-200 dark:bg-gray-700 animate-shimmer" />
-          <div className="h-4 w-[92%] rounded bg-gray-200 dark:bg-gray-700 animate-shimmer" />
-          <div className="h-4 w-[78%] rounded bg-gray-200 dark:bg-gray-700 animate-shimmer" />
+        <div className="space-y-3 p-6 sm:p-8">
+          <div className="h-4 w-full animate-shimmer rounded bg-slate-200 dark:bg-white/10" />
+          <div className="h-4 w-full animate-shimmer rounded bg-slate-200 dark:bg-white/10" />
+          <div className="h-4 w-[92%] animate-shimmer rounded bg-slate-200 dark:bg-white/10" />
+          <div className="h-4 w-[78%] animate-shimmer rounded bg-slate-200 dark:bg-white/10" />
         </div>
       </div>
     </section>

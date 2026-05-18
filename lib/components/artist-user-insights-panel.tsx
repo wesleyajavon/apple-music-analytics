@@ -13,13 +13,33 @@ import {
 } from "recharts";
 import { X } from "lucide-react";
 import { CHART_TOOLTIP_STYLES } from "@/lib/constants/config";
+import {
+  DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY,
+  DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET,
+  DASHBOARD_SPOTLIGHT_HEADER_BOTTOM,
+  DASHBOARD_SPOTLIGHT_INNER_WELL,
+  DASHBOARD_SPOTLIGHT_MUTED,
+  DASHBOARD_SPOTLIGHT_BADGE_CYAN_COMPACT,
+  DASHBOARD_SPOTLIGHT_BADGE_DOT_CYAN,
+  DASHBOARD_SPOTLIGHT_BTN_SECONDARY,
+  DASHBOARD_CHART_THEME,
+} from "@/lib/constants/dashboard-spotlight";
 import type { ArtistStatsDto } from "@/lib/dto/artist";
 import { useArtistUserInsights } from "@/lib/hooks/use-artists";
 import { ArtistAvatarHydrated } from "@/lib/components/artist-avatar-hydrated";
 import { ErrorState } from "@/lib/components/error-state";
+import { useTheme } from "@/lib/providers/theme-provider";
 
-const PANEL_SHELL =
-  "flex h-full min-h-0 flex-col border-l border-slate-200/90 bg-[radial-gradient(circle_at_12%_0%,_rgba(139,92,246,0.11),_transparent_40%),radial-gradient(circle_at_92%_88%,_rgba(6,182,212,0.09),_transparent_36%),linear-gradient(165deg,_#ffffff_0%,_#f8fafc_52%,_#f1f5f9_100%)] shadow-[-10px_0_36px_rgba(15,23,42,0.06),-1px_0_0_rgba(148,163,184,0.25)] backdrop-blur-md dark:border-cyan-300/20 dark:bg-[radial-gradient(circle_at_12%_0%,_rgba(139,92,246,0.22),_transparent_38%),radial-gradient(circle_at_88%_88%,_rgba(132,204,22,0.1),_transparent_32%),rgb(var(--card-rgb)/0.96)] dark:shadow-[-12px_0_48px_rgba(15,23,42,0.35)] dark:backdrop-blur-sm";
+const PANEL_DRAWER_SHELL =
+  "relative flex h-full min-h-0 w-full max-w-lg flex-col overflow-hidden border-l border-slate-200/90 bg-white text-slate-900 shadow-[-28px_0_80px_rgba(15,23,42,0.1)] ring-1 ring-black/[0.04] dark:border-white/10 dark:bg-slate-950 dark:text-white dark:shadow-[-32px_0_96px_rgba(0,0,0,0.45)] dark:ring-0 sm:rounded-l-[1.75rem]";
+
+const INSIGHT_CARD =
+  "rounded-2xl border border-slate-200/80 bg-slate-50/80 shadow-sm shadow-slate-900/[0.04] dark:border-white/10 dark:bg-black/25 dark:shadow-none";
+
+const INSIGHT_CARD_SOLID =
+  "rounded-2xl border border-slate-200/80 bg-white shadow-sm shadow-slate-900/[0.04] dark:border-white/10 dark:bg-white/[0.04] dark:shadow-none";
+
+const INSIGHT_SECTION_TITLE = "text-sm font-semibold text-slate-900 dark:text-white";
 
 function formatPlaySeconds(seconds: number, notAvailable: string): string {
   if (seconds <= 0) return notAvailable;
@@ -80,6 +100,35 @@ export const ArtistUserInsightsPanel = memo(
     const headingId = useId();
     const chartNs = useId().replace(/:/g, "");
     const closeRef = useRef<HTMLButtonElement>(null);
+    const { resolvedTheme } = useTheme();
+    const chartTheme = DASHBOARD_CHART_THEME[resolvedTheme === "dark" ? "dark" : "light"];
+    const chartTooltipStyles = useMemo(() => {
+      if (resolvedTheme === "dark") {
+        return {
+          contentStyle: {
+            backgroundColor: "rgb(15 23 42)",
+            border: "1px solid rgba(148, 163, 184, 0.22)",
+            borderRadius: "12px",
+            boxShadow: "0 16px 48px -12px rgba(0, 0, 0, 0.55)",
+            padding: "12px 16px",
+          },
+          labelStyle: {
+            color: "#f1f5f9",
+            fontWeight: 600,
+            marginBottom: "6px",
+          },
+          itemStyle: {
+            color: "#cbd5e1",
+            fontSize: "13px",
+          },
+        };
+      }
+      return {
+        contentStyle: { ...CHART_TOOLTIP_STYLES.contentStyle },
+        labelStyle: { ...CHART_TOOLTIP_STYLES.labelStyle },
+        itemStyle: { ...CHART_TOOLTIP_STYLES.itemStyle },
+      };
+    }, [resolvedTheme]);
 
     const query = useArtistUserInsights(open ? artistId : null, startDate, endDate, userId, {
       enabled: open && !!artistId,
@@ -179,22 +228,25 @@ export const ArtistUserInsightsPanel = memo(
       <div className="fixed inset-0 z-[80] flex justify-end">
         <button
           type="button"
-          className="absolute inset-0 bg-slate-900/30 backdrop-blur-[2px] dark:bg-slate-950/55"
+          className="absolute inset-0 bg-slate-950/20 backdrop-blur-[3px] transition-colors dark:bg-black/50 dark:backdrop-blur-sm"
           aria-label={t("insightsCloseAria")}
           onClick={onClose}
         />
 
         <aside
-          className={`relative z-[81] flex w-full max-w-lg flex-col ${PANEL_SHELL}`}
+          className={`z-[81] ${PANEL_DRAWER_SHELL}`}
           role="dialog"
           aria-modal="true"
           aria-labelledby={headingId}
         >
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-violet-400 via-cyan-300 to-lime-300 opacity-100 dark:opacity-90" />
+          <div className={`pointer-events-none absolute inset-0 ${DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY}`} aria-hidden />
+          <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} aria-hidden />
 
-          <div className="flex items-start justify-between gap-3 border-b border-slate-200/90 bg-white/40 px-5 py-4 backdrop-blur-[2px] sm:px-6 dark:border-cyan-300/15 dark:bg-transparent">
+          <div
+            className={`relative z-10 flex items-start justify-between gap-3 ${DASHBOARD_SPOTLIGHT_HEADER_BOTTOM} bg-white/90 px-5 py-4 backdrop-blur-md sm:px-6 dark:bg-slate-950/80`}
+          >
             <div className="flex min-w-0 flex-1 items-start gap-4">
-              <div className="relative shrink-0 overflow-hidden rounded-2xl ring-1 ring-slate-300/70 shadow-sm dark:ring-white/15 dark:shadow-none">
+              <div className="relative shrink-0 overflow-hidden rounded-2xl ring-1 ring-slate-200/90 shadow-sm dark:ring-white/12 dark:shadow-none">
                 {displayArtist ? (
                   <ArtistAvatarHydrated
                     artistId={artistId}
@@ -210,22 +262,26 @@ export const ArtistUserInsightsPanel = memo(
                 ) : null}
               </div>
               <div className="min-w-0">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-700/90 dark:text-cyan-100/75">
+                <div className={`mb-2 w-fit ${DASHBOARD_SPOTLIGHT_BADGE_CYAN_COMPACT}`}>
+                  <span className={DASHBOARD_SPOTLIGHT_BADGE_DOT_CYAN} aria-hidden />
                   {t("insightsEyebrow")}
-                </p>
-                <h2 id={headingId} className="mt-1 truncate text-xl font-bold text-gray-900 dark:text-white">
+                </div>
+                <h2
+                  id={headingId}
+                  className="truncate text-lg font-semibold tracking-[-0.04em] text-slate-900 sm:text-xl dark:text-white"
+                >
                   {displayArtist?.artistName ?? previewArtist.artistName}
                 </h2>
                 <div className="mt-2 flex flex-wrap gap-2">
-                  <span className="rounded-full bg-violet-500/10 px-2.5 py-1 text-xs font-semibold text-violet-700 dark:bg-violet-300/12 dark:text-violet-100">
+                  <span className="rounded-full border border-violet-200/90 bg-violet-50/90 px-2.5 py-1 text-xs font-semibold text-violet-800 dark:border-violet-300/25 dark:bg-violet-300/10 dark:text-violet-100">
                     {(displayArtist?.listenCount ?? previewArtist.listenCount).toLocaleString(locale)} {t("listensCount")}
                   </span>
-                  <span className="rounded-full bg-cyan-500/10 px-2.5 py-1 text-xs font-semibold text-cyan-700 dark:bg-cyan-300/12 dark:text-cyan-100">
+                  <span className="rounded-full border border-cyan-200/90 bg-cyan-50/90 px-2.5 py-1 text-xs font-semibold text-cyan-900 dark:border-cyan-300/25 dark:bg-cyan-300/10 dark:text-cyan-100">
                     {(displayArtist?.uniqueTracks ?? previewArtist.uniqueTracks).toLocaleString(locale)}{" "}
                     {t("insightsUniqueTracksShort")}
                   </span>
                   {displayArtist?.totalPlayTime != null ? (
-                    <span className="rounded-full bg-lime-500/10 px-2.5 py-1 text-xs font-semibold text-lime-800 dark:bg-lime-300/12 dark:text-lime-100">
+                    <span className="rounded-full border border-lime-200/90 bg-lime-50/90 px-2.5 py-1 text-xs font-semibold text-lime-900 dark:border-lime-300/25 dark:bg-lime-300/10 dark:text-lime-100">
                       ≈{" "}
                       {formatPlaySeconds(displayArtist.totalPlayTime, t("insightsEstPlayTimeUnavailable"))}{" "}
                       {t("insightsEstPlayTimeHint")}
@@ -238,50 +294,47 @@ export const ArtistUserInsightsPanel = memo(
               ref={closeRef}
               type="button"
               onClick={onClose}
-              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-slate-300/80 bg-white text-slate-800 shadow-md shadow-slate-900/8 transition hover:border-cyan-400/40 hover:bg-cyan-50/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500/50 dark:border-cyan-400/20 dark:bg-slate-900/80 dark:text-cyan-100 dark:shadow-lg dark:hover:bg-slate-800"
+              className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl p-0 ${DASHBOARD_SPOTLIGHT_BTN_SECONDARY}`}
               aria-label={t("insightsCloseAria")}
             >
-              <X className="h-5 w-5" strokeWidth={2} aria-hidden />
+              <X className="h-4 w-4" strokeWidth={2} aria-hidden />
             </button>
           </div>
 
-          <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-6 sm:py-6 [scrollbar-gutter:stable]">
+          <div className="relative z-10 min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-6 sm:py-6 [scrollbar-gutter:stable]">
             {firstLast && firstListenMoment && lastListenMoment ? (
-              <section
-                className="mb-6 rounded-2xl border border-slate-200/90 bg-gradient-to-br from-violet-500/[0.07] via-white to-cyan-500/[0.07] p-4 shadow-md shadow-slate-900/[0.06] ring-1 ring-violet-500/10 dark:border-cyan-400/18 dark:from-violet-500/[0.14] dark:via-slate-950/40 dark:to-cyan-500/[0.12] dark:shadow-inner dark:ring-cyan-400/10 sm:p-5"
-                aria-label={t("insightsTimelineTitle")}
-              >
-                <h3 className="text-base font-bold tracking-tight text-gray-900 dark:text-white">
+              <section className={`mb-6 ${INSIGHT_CARD} p-4 sm:p-5`} aria-label={t("insightsTimelineTitle")}>
+                <h3 className="text-base font-semibold tracking-[-0.02em] text-slate-900 dark:text-white">
                   {t("insightsTimelineTitle")}
                 </h3>
-                <p className="mt-1.5 text-xs leading-relaxed text-gray-600 dark:text-gray-400">
+                <p className={`mt-1.5 text-xs leading-relaxed ${DASHBOARD_SPOTLIGHT_MUTED}`}>
                   {t("insightsTimelineLead")}
                 </p>
                 <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <div className="rounded-2xl border border-violet-300/70 bg-white/95 px-4 py-4 shadow-sm shadow-violet-900/8 ring-1 ring-violet-500/15 dark:border-violet-400/25 dark:bg-slate-950/55 dark:shadow-inner dark:ring-violet-400/12">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-violet-800 dark:text-violet-100/90">
+                  <div className="rounded-2xl border border-violet-200/80 bg-white px-4 py-4 shadow-sm shadow-slate-900/[0.04] dark:border-violet-400/20 dark:bg-white/[0.04] dark:shadow-none">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-violet-800 dark:text-violet-200/90">
                       {t("insightsFirstListenLabel")}
                     </p>
-                    <p className="mt-3 text-xl font-black tabular-nums leading-none tracking-tight text-gray-900 dark:text-white">
+                    <p className="mt-3 text-xl font-bold tabular-nums leading-none tracking-tight text-slate-900 dark:text-white">
                       {firstListenMoment.dateLine}
                     </p>
-                    <p className="mt-2 text-sm font-semibold capitalize text-violet-950/80 dark:text-violet-100/85">
+                    <p className="mt-2 text-sm font-medium capitalize text-violet-950/75 dark:text-violet-100/80">
                       {firstListenMoment.weekday}
                     </p>
                   </div>
-                  <div className="rounded-2xl border border-cyan-300/70 bg-white/95 px-4 py-4 shadow-sm shadow-cyan-900/8 ring-1 ring-cyan-500/15 dark:border-cyan-400/28 dark:bg-slate-950/55 dark:shadow-inner dark:ring-cyan-400/12">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-cyan-800 dark:text-cyan-100/90">
+                  <div className="rounded-2xl border border-cyan-200/80 bg-white px-4 py-4 shadow-sm shadow-slate-900/[0.04] dark:border-cyan-400/22 dark:bg-white/[0.04] dark:shadow-none">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-cyan-800 dark:text-cyan-100/90">
                       {t("insightsMostRecentListenLabel")}
                     </p>
-                    <p className="mt-3 text-xl font-black tabular-nums leading-none tracking-tight text-gray-900 dark:text-white">
+                    <p className="mt-3 text-xl font-bold tabular-nums leading-none tracking-tight text-slate-900 dark:text-white">
                       {lastListenMoment.dateLine}
                     </p>
-                    <p className="mt-2 text-sm font-semibold capitalize text-cyan-950/80 dark:text-cyan-100/85">
+                    <p className="mt-2 text-sm font-medium capitalize text-cyan-950/75 dark:text-cyan-100/85">
                       {lastListenMoment.weekday}
                     </p>
                   </div>
                 </div>
-                <p className="mt-3 text-[11px] leading-relaxed text-gray-500 dark:text-gray-500">
+                <p className={`mt-3 text-[11px] leading-relaxed ${DASHBOARD_SPOTLIGHT_MUTED}`}>
                   {t("insightsTimelineFootnote")}
                 </p>
               </section>
@@ -289,9 +342,9 @@ export const ArtistUserInsightsPanel = memo(
 
             {query.isLoading ? (
               <div className="space-y-4" aria-busy="true">
-                <div className="h-24 animate-pulse rounded-2xl bg-gradient-to-br from-gray-200/70 to-gray-100/70 dark:from-gray-700/70 dark:to-gray-800/50" />
-                <div className="h-40 animate-pulse rounded-2xl bg-gradient-to-br from-gray-200/70 to-gray-100/70 dark:from-gray-700/70 dark:to-gray-800/50" />
-                <div className="h-36 animate-pulse rounded-2xl bg-gradient-to-br from-gray-200/70 to-gray-100/70 dark:from-gray-700/70 dark:to-gray-800/50" />
+                <div className="h-24 animate-pulse rounded-2xl bg-slate-200/90 dark:bg-white/[0.07]" />
+                <div className="h-40 animate-pulse rounded-2xl bg-slate-200/90 dark:bg-white/[0.07]" />
+                <div className="h-36 animate-pulse rounded-2xl bg-slate-200/90 dark:bg-white/[0.07]" />
               </div>
             ) : null}
 
@@ -302,133 +355,161 @@ export const ArtistUserInsightsPanel = memo(
             {query.data ? (
               <div className="space-y-8">
                 <section>
-                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white">{t("insightsPeaksTitle")}</h3>
+                  <h3 className={INSIGHT_SECTION_TITLE}>{t("insightsPeaksTitle")}</h3>
                   <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                    <div className="rounded-2xl border border-violet-200/80 bg-white px-3 py-2.5 shadow-sm shadow-slate-900/5 ring-1 ring-violet-500/10 dark:border-violet-400/14 dark:bg-slate-950/25 dark:shadow-inner dark:ring-0">
-                      <p className="text-[11px] font-semibold uppercase tracking-wider text-violet-800/85 dark:text-violet-100/75">
+                    <div className="rounded-2xl border border-violet-200/85 bg-white px-3 py-2.5 shadow-sm shadow-slate-900/[0.04] dark:border-violet-400/18 dark:bg-white/[0.04] dark:shadow-none">
+                      <p className="text-[11px] font-semibold uppercase tracking-wider text-violet-800 dark:text-violet-100/80">
                         {t("insightsPeakHour")}
                       </p>
-                      <p className="mt-1 text-sm font-semibold text-gray-900 dark:text-gray-50">
+                      <p className="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-50">
                         {peakHourLabel ?? t("insightsNoSignal")}
                       </p>
                     </div>
-                    <div className="rounded-2xl border border-cyan-200/80 bg-white px-3 py-2.5 shadow-sm shadow-slate-900/5 ring-1 ring-cyan-500/10 dark:border-cyan-400/14 dark:bg-slate-950/25 dark:shadow-inner dark:ring-0">
-                      <p className="text-[11px] font-semibold uppercase tracking-wider text-cyan-800/85 dark:text-cyan-100/75">
+                    <div className="rounded-2xl border border-cyan-200/85 bg-white px-3 py-2.5 shadow-sm shadow-slate-900/[0.04] dark:border-cyan-400/18 dark:bg-white/[0.04] dark:shadow-none">
+                      <p className="text-[11px] font-semibold uppercase tracking-wider text-cyan-800 dark:text-cyan-100/80">
                         {t("insightsPeakWeekday")}
                       </p>
-                      <p className="mt-1 text-sm font-semibold text-gray-900 dark:text-gray-50">
+                      <p className="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-50">
                         {peakWeekdayLabel ?? t("insightsNoSignal")}
                       </p>
                     </div>
-                    <div className="rounded-2xl border border-lime-200/85 bg-white px-3 py-2.5 shadow-sm shadow-slate-900/5 ring-1 ring-lime-500/12 dark:border-lime-400/14 dark:bg-slate-950/25 dark:shadow-inner dark:ring-0 sm:col-span-2">
-                      <p className="text-[11px] font-semibold uppercase tracking-wider text-lime-800/90 dark:text-lime-100/75">
+                    <div className="rounded-2xl border border-lime-200/90 bg-white px-3 py-2.5 shadow-sm shadow-slate-900/[0.04] dark:border-lime-400/18 dark:bg-white/[0.04] dark:shadow-none sm:col-span-2">
+                      <p className="text-[11px] font-semibold uppercase tracking-wider text-lime-900 dark:text-lime-100/80">
                         {t("insightsBusiestCalendarDay")}
                       </p>
-                      <p className="mt-1 text-sm font-semibold text-gray-900 dark:text-gray-50">
+                      <p className="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-50">
                         {busiestLine ?? t("insightsNoSignal")}
                       </p>
                     </div>
                   </div>
                   <div className="mt-3 grid grid-cols-2 gap-2">
-                    <div className="rounded-xl border border-slate-200/90 bg-white px-3 py-2 text-center shadow-sm shadow-slate-900/4 dark:border-white/10 dark:bg-white/5 dark:shadow-none">
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                    <div className={`${INSIGHT_CARD_SOLID} px-3 py-2 text-center`}>
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                         {t("insightsActiveDays")}
                       </p>
-                      <p className="mt-0.5 text-lg font-black tabular-nums text-gray-900 dark:text-white">
+                      <p className="mt-0.5 text-lg font-bold tabular-nums text-slate-900 dark:text-white">
                         {query.data.activeListeningDays.toLocaleString(locale)}
                       </p>
                     </div>
-                    <div className="rounded-xl border border-slate-200/90 bg-white px-3 py-2 text-center shadow-sm shadow-slate-900/4 dark:border-white/10 dark:bg-white/5 dark:shadow-none">
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                    <div className={`${INSIGHT_CARD_SOLID} px-3 py-2 text-center`}>
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                         {t("insightsSpanDays")}
                       </p>
-                      <p className="mt-0.5 text-lg font-black tabular-nums text-gray-900 dark:text-white">
+                      <p className="mt-0.5 text-lg font-bold tabular-nums text-slate-900 dark:text-white">
                         {query.data.listeningSpanDays.toLocaleString(locale)}
                       </p>
                     </div>
                   </div>
                 </section>
 
-                <section className="rounded-2xl border border-slate-200/90 bg-white p-4 shadow-sm shadow-slate-900/5 ring-1 ring-cyan-500/8 dark:border-cyan-300/12 dark:bg-slate-950/20 dark:shadow-inner dark:ring-0">
-                  <h3 className="mb-3 text-sm font-semibold text-gray-900 dark:text-white">{t("insightsByHour")}</h3>
-                  <div className="h-44 w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={hourChartData} margin={{ top: 4, right: 4, left: -18, bottom: 0 }}>
-                        <defs>
-                          <linearGradient id={`insHourBar-${chartNs}`} x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#8b5cf6" />
-                            <stop offset="100%" stopColor="#06b6d4" />
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#94a3b8" strokeOpacity={0.28} vertical={false} />
-                        <XAxis
-                          dataKey="label"
-                          tick={{ fill: "rgb(var(--muted-rgb))", fontSize: 9 }}
-                          interval={3}
-                          axisLine={false}
-                          tickLine={false}
-                          height={32}
-                        />
-                        <YAxis
-                          tick={{ fill: "rgb(var(--muted-rgb))", fontSize: 10 }}
-                          axisLine={false}
-                          tickLine={false}
-                          width={36}
-                        />
-                        <Tooltip
-                          contentStyle={CHART_TOOLTIP_STYLES.contentStyle}
-                          labelStyle={CHART_TOOLTIP_STYLES.labelStyle}
-                          itemStyle={CHART_TOOLTIP_STYLES.itemStyle}
-                          formatter={(v: number) => [`${v.toLocaleString(locale)} ${t("listensCount")}`, t("listensLabel")]}
-                        />
-                        <Bar dataKey="listens" fill={`url(#insHourBar-${chartNs})`} radius={[4, 4, 0, 0]} maxBarSize={10} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </section>
-
-                <section className="rounded-2xl border border-slate-200/90 bg-white p-4 shadow-sm shadow-slate-900/5 ring-1 ring-violet-500/8 dark:border-violet-400/14 dark:bg-slate-950/20 dark:shadow-inner dark:ring-0">
-                  <h3 className="mb-3 text-sm font-semibold text-gray-900 dark:text-white">{t("insightsByWeekday")}</h3>
-                  <div className="h-36 w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={weekdayChartData} margin={{ top: 4, right: 4, left: -18, bottom: 4 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#94a3b8" strokeOpacity={0.28} vertical={false} />
-                        <XAxis
-                          dataKey="label"
-                          tick={{ fill: "rgb(var(--muted-rgb))", fontSize: 10 }}
-                          axisLine={false}
-                          tickLine={false}
-                        />
-                        <YAxis
-                          tick={{ fill: "rgb(var(--muted-rgb))", fontSize: 10 }}
-                          axisLine={false}
-                          tickLine={false}
-                          width={36}
-                        />
-                        <Tooltip
-                          contentStyle={CHART_TOOLTIP_STYLES.contentStyle}
-                          labelStyle={CHART_TOOLTIP_STYLES.labelStyle}
-                          itemStyle={CHART_TOOLTIP_STYLES.itemStyle}
-                          formatter={(v: number) => [`${v.toLocaleString(locale)} ${t("listensCount")}`, t("listensLabel")]}
-                        />
-                        <Bar dataKey="listens" fill="#a855f7" radius={[4, 4, 0, 0]} maxBarSize={28} />
-                      </BarChart>
-                    </ResponsiveContainer>
+                <section>
+                  <h3 className={`mb-3 ${INSIGHT_SECTION_TITLE}`}>{t("insightsByHour")}</h3>
+                  <div className={DASHBOARD_SPOTLIGHT_INNER_WELL}>
+                    <div className="h-44 w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={hourChartData} margin={{ top: 4, right: 4, left: -18, bottom: 0 }}>
+                          <defs>
+                            <linearGradient id={`insHourBar-${chartNs}`} x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#8b5cf6" />
+                              <stop offset="100%" stopColor="#06b6d4" />
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid
+                            strokeDasharray="3 3"
+                            stroke={chartTheme.grid}
+                            vertical={false}
+                          />
+                          <XAxis
+                            dataKey="label"
+                            tick={{ fill: chartTheme.tick, fontSize: 9 }}
+                            interval={3}
+                            axisLine={false}
+                            tickLine={false}
+                            height={32}
+                          />
+                          <YAxis
+                            tick={{ fill: chartTheme.tick, fontSize: 10 }}
+                            axisLine={false}
+                            tickLine={false}
+                            width={36}
+                          />
+                          <Tooltip
+                            contentStyle={chartTooltipStyles.contentStyle}
+                            labelStyle={chartTooltipStyles.labelStyle}
+                            itemStyle={chartTooltipStyles.itemStyle}
+                            formatter={(v: number) => [`${v.toLocaleString(locale)} ${t("listensCount")}`, t("listensLabel")]}
+                          />
+                          <Bar
+                            dataKey="listens"
+                            fill={`url(#insHourBar-${chartNs})`}
+                            radius={[4, 4, 0, 0]}
+                            maxBarSize={10}
+                          />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
                   </div>
                 </section>
 
                 <section>
-                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white">{t("insightsTopTracks")}</h3>
+                  <h3 className={`mb-3 ${INSIGHT_SECTION_TITLE}`}>{t("insightsByWeekday")}</h3>
+                  <div className={DASHBOARD_SPOTLIGHT_INNER_WELL}>
+                    <div className="h-36 w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={weekdayChartData} margin={{ top: 4, right: 4, left: -18, bottom: 4 }}>
+                          <defs>
+                            <linearGradient id={`insWeekdayBar-${chartNs}`} x1="0" y1="0" x2="1" y2="0">
+                              <stop offset="0%" stopColor="#8b5cf6" />
+                              <stop offset="100%" stopColor="#84cc16" />
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid
+                            strokeDasharray="3 3"
+                            stroke={chartTheme.grid}
+                            vertical={false}
+                          />
+                          <XAxis
+                            dataKey="label"
+                            tick={{ fill: chartTheme.tick, fontSize: 10 }}
+                            axisLine={false}
+                            tickLine={false}
+                          />
+                          <YAxis
+                            tick={{ fill: chartTheme.tick, fontSize: 10 }}
+                            axisLine={false}
+                            tickLine={false}
+                            width={36}
+                          />
+                          <Tooltip
+                            contentStyle={chartTooltipStyles.contentStyle}
+                            labelStyle={chartTooltipStyles.labelStyle}
+                            itemStyle={chartTooltipStyles.itemStyle}
+                            formatter={(v: number) => [`${v.toLocaleString(locale)} ${t("listensCount")}`, t("listensLabel")]}
+                          />
+                          <Bar
+                            dataKey="listens"
+                            fill={`url(#insWeekdayBar-${chartNs})`}
+                            radius={[4, 4, 0, 0]}
+                            maxBarSize={28}
+                          />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                </section>
+
+                <section>
+                  <h3 className={INSIGHT_SECTION_TITLE}>{t("insightsTopTracks")}</h3>
                   <ol className="mt-3 space-y-2">
                     {query.data.topTracks.slice(0, 12).map((tr, idx) => (
                       <li
                         key={tr.trackId}
-                        className="flex items-baseline gap-3 rounded-xl border border-slate-200/90 bg-white px-3 py-2 shadow-sm shadow-slate-900/4 dark:border-white/10 dark:bg-slate-950/15 dark:shadow-none"
+                        className={`flex items-baseline gap-3 px-3 py-2 ${INSIGHT_CARD_SOLID}`}
                       >
-                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500/20 to-cyan-500/20 text-xs font-bold text-violet-800 dark:text-violet-100">
+                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500/12 to-cyan-500/12 text-xs font-semibold text-violet-800 ring-1 ring-slate-200/80 dark:text-violet-100 dark:ring-white/10">
                           {idx + 1}
                         </span>
-                        <span className="min-w-0 flex-1 truncate font-medium text-gray-900 dark:text-gray-50">
+                        <span className="min-w-0 flex-1 truncate font-medium text-slate-900 dark:text-slate-50">
                           {tr.title}
                         </span>
                         <span className="shrink-0 text-sm font-semibold tabular-nums text-cyan-700 dark:text-cyan-200">
@@ -441,17 +522,17 @@ export const ArtistUserInsightsPanel = memo(
 
                 {query.data.listensBySource.length > 1 ? (
                   <section>
-                    <h3 className="text-sm font-semibold text-gray-900 dark:text-white">{t("insightsSources")}</h3>
+                    <h3 className={INSIGHT_SECTION_TITLE}>{t("insightsSources")}</h3>
                     <ul className="mt-3 space-y-2">
                       {query.data.listensBySource.map((row) => (
                         <li
                           key={row.source}
-                          className="flex items-center justify-between gap-3 rounded-xl border border-slate-200/90 bg-white px-3 py-2 text-sm shadow-sm shadow-slate-900/4 dark:border-white/10 dark:bg-white/5 dark:shadow-none"
+                          className={`flex items-center justify-between gap-3 px-3 py-2 text-sm ${INSIGHT_CARD_SOLID}`}
                         >
-                          <span className="min-w-0 truncate font-medium text-gray-800 dark:text-gray-200">
+                          <span className="min-w-0 truncate font-medium text-slate-800 dark:text-slate-200">
                             {localizedListenSource(row.source, t)}
                           </span>
-                          <span className="shrink-0 font-semibold tabular-nums text-gray-900 dark:text-white">
+                          <span className="shrink-0 font-semibold tabular-nums text-slate-900 dark:text-white">
                             {row.listens.toLocaleString(locale)}
                           </span>
                         </li>
@@ -460,7 +541,7 @@ export const ArtistUserInsightsPanel = memo(
                   </section>
                 ) : null}
 
-                <p className="text-[11px] leading-relaxed text-gray-500 dark:text-gray-500">{t("insightsFootnoteTz")}</p>
+                <p className={`text-[11px] leading-relaxed ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("insightsFootnoteTz")}</p>
               </div>
             ) : null}
           </div>

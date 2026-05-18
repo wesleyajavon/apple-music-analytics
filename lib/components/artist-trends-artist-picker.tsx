@@ -155,7 +155,7 @@ export function ArtistTrendsArtistPicker({
           </label>
           <div className="relative">
             <span
-              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500"
+              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted"
               aria-hidden
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -175,7 +175,7 @@ export function ArtistTrendsArtistPicker({
               placeholder={t("searchPlaceholder")}
               autoComplete="off"
               spellCheck={false}
-              className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-9 pr-3 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-600/20 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-500"
+              className="w-full rounded-xl border border-border bg-surface-raised py-2.5 pl-9 pr-3 text-sm text-foreground shadow-sm placeholder:text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
               aria-controls="artist-trends-listbox"
               aria-describedby="artist-trends-search-hint"
               aria-activedescendant={
@@ -185,17 +185,17 @@ export function ArtistTrendsArtistPicker({
               }
             />
           </div>
-          <p id="artist-trends-search-hint" className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+          <p id="artist-trends-search-hint" className="mt-1 text-xs text-muted">
             {enableRemoteSearch ? t("searchKeyboardHintExtended") : t("searchKeyboardHint")}
           </p>
         </div>
         <div className="flex flex-col items-end gap-1 shrink-0">
           {query.trim() !== "" && (
-            <p className="text-xs text-gray-500 dark:text-gray-400 tabular-nums" aria-live="polite">
+            <p className="text-xs text-muted tabular-nums" aria-live="polite">
               {t("searchResultsCount", { count: filtered.length, total: catalogArtists.length })}
             </p>
           )}
-          <p className="rounded-full border border-gray-200 bg-gray-50/80 px-2.5 py-1 text-xs text-gray-500 tabular-nums dark:border-gray-600 dark:bg-gray-700/30 dark:text-gray-400">
+          <p className="rounded-full border border-border bg-surface px-2.5 py-1 text-xs text-muted tabular-nums">
             {t("selectionCount", { selected: selectedIds.length, max: maxSelectable })}
           </p>
         </div>
@@ -203,25 +203,25 @@ export function ArtistTrendsArtistPicker({
 
       {enableRemoteSearch && query.trim().length >= 2 && (
         <div
-          className="rounded-xl border border-gray-200 bg-white shadow-lg dark:border-gray-600 dark:bg-gray-800"
+          className="rounded-xl border border-border bg-card shadow-lg"
           role="region"
           aria-label={t("searchDatabaseRegion")}
         >
-          <div className="border-b border-gray-100 px-3 py-2 dark:border-gray-700/50">
-            <p className="text-xs font-semibold uppercase tracking-wider text-violet-700 dark:text-violet-300">
+          <div className="border-b border-border px-3 py-2">
+            <p className="text-xs font-semibold uppercase tracking-wider text-primary">
               {t("searchDatabaseTitle")}
             </p>
           </div>
           <div className="max-h-52 overflow-y-auto p-2">
             {remoteLoading ? (
-              <p className="px-2 py-4 text-center text-sm text-gray-500 dark:text-gray-400">{t("searchRemoteLoading")}</p>
+              <p className="px-2 py-4 text-center text-sm text-muted">{t("searchRemoteLoading")}</p>
             ) : remoteSuggestions.filter((a) => !catalogIdSet.has(a.id)).length === 0 &&
               remoteSuggestions.length > 0 ? (
-              <p className="px-2 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+              <p className="px-2 py-4 text-center text-sm text-muted">
                 {t("searchRemoteAllInCatalog")}
               </p>
             ) : remoteSuggestions.length === 0 ? (
-              <p className="px-2 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+              <p className="px-2 py-4 text-center text-sm text-muted">
                 {t("searchNoResults")}
               </p>
             ) : (
@@ -242,15 +242,15 @@ export function ArtistTrendsArtistPicker({
                           flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors
                           ${
                             inCatalog
-                              ? "cursor-default text-gray-400 dark:text-gray-500"
+                              ? "cursor-default text-muted/70"
                               : disabledAdd
-                                ? "cursor-not-allowed opacity-50 text-gray-500 dark:text-gray-400"
-                                : "text-gray-900 hover:bg-violet-50 dark:text-white dark:hover:bg-violet-500/10"
+                                ? "cursor-not-allowed text-muted opacity-55"
+                                : "text-foreground hover:bg-primary/12"
                           }
                         `}
                       >
                         <span className="min-w-0 truncate font-medium">{artist.name}</span>
-                        <span className="shrink-0 text-xs text-gray-500 dark:text-gray-400">
+                        <span className="shrink-0 text-xs text-muted">
                           {inCatalog
                             ? t("searchInCatalog")
                             : selected
@@ -272,10 +272,10 @@ export function ArtistTrendsArtistPicker({
         role="listbox"
         aria-label={t("artistsToDisplay")}
         aria-multiselectable="true"
-        className="mt-3 flex max-h-[min(50vh,22rem)] flex-wrap content-start gap-2 overflow-y-auto rounded-xl border border-gray-200 bg-gray-50/80 p-2 dark:border-gray-700 dark:bg-gray-700/30"
+        className="mt-3 flex max-h-[min(50vh,22rem)] flex-wrap content-start gap-2 overflow-y-auto rounded-xl border border-border bg-surface p-2"
       >
         {filtered.length === 0 ? (
-          <p className="px-2 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
+          <p className="px-2 py-6 text-center text-sm text-muted">
             {t("searchNoResults")}
           </p>
         ) : (
@@ -294,10 +294,10 @@ export function ArtistTrendsArtistPicker({
                   inline-flex max-w-[min(100%,260px)] cursor-pointer items-center gap-2 rounded-lg border px-3 py-1.5 transition-colors
                   ${
                     selected
-                      ? "border-violet-300/70 bg-violet-50 text-gray-900 shadow-sm dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-white"
+                      ? "border-primary/45 bg-primary/12 text-foreground shadow-sm"
                       : isHighlighted
-                        ? "border-violet-500/60 bg-violet-50 ring-2 ring-violet-500/25 dark:bg-violet-500/10"
-                        : "border-gray-200 bg-white text-gray-900 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700/50"
+                        ? "border-primary/55 bg-primary/10 text-foreground ring-2 ring-primary/28"
+                        : "border-border bg-card text-foreground hover:bg-surface-raised"
                   }
                 `}
               >
@@ -310,18 +310,17 @@ export function ArtistTrendsArtistPicker({
                     onToggle(artist.id);
                   }}
                   tabIndex={-1}
-                  className="rounded border-gray-300 text-violet-700 focus:ring-violet-600 disabled:opacity-40 dark:border-gray-600 dark:bg-gray-800"
+                  className="rounded border-border bg-card text-primary focus:ring-ring disabled:opacity-45"
                 />
                 <span
-                  className="w-3 h-3 shrink-0 rounded-full"
+                  className={`w-3 h-3 shrink-0 rounded-full border ${selected ? "border-transparent" : "border-muted bg-transparent"}`}
                   style={{
-                    backgroundColor: selected ? getColor(idx) : "transparent",
-                    border: selected ? "none" : "1px solid #9ca3af",
+                    backgroundColor: selected ? getColor(idx) : undefined,
                   }}
                   aria-hidden
                 />
                 <span
-                  className="truncate text-sm text-gray-900 dark:text-white"
+                  className="truncate text-sm text-foreground"
                   title={artist.name}
                 >
                   {artist.name}

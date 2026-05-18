@@ -21,6 +21,30 @@ import { OverviewSkeleton } from "@/lib/components/skeleton-loaders";
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
 import { CHART_TOOLTIP_STYLES } from "@/lib/constants/config";
+import {
+  DASHBOARD_SPOTLIGHT_SHELL,
+  DASHBOARD_SPOTLIGHT_GRADIENT_CYAN,
+  DASHBOARD_SPOTLIGHT_GRADIENT_TABLE,
+  DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET,
+  DASHBOARD_SPOTLIGHT_HAIRLINE_CYAN,
+  DASHBOARD_SPOTLIGHT_HEADER_BOTTOM,
+  DASHBOARD_SPOTLIGHT_TITLE,
+  DASHBOARD_SPOTLIGHT_BADGE_CYAN,
+  DASHBOARD_SPOTLIGHT_BADGE_DOT_CYAN,
+  DASHBOARD_SPOTLIGHT_BADGE_VIOLET,
+  DASHBOARD_SPOTLIGHT_BADGE_DOT_VIOLET,
+  DASHBOARD_SPOTLIGHT_INNER_WELL,
+  DASHBOARD_SPOTLIGHT_TABLE_HEAD,
+  DASHBOARD_SPOTLIGHT_TABLE_HEAD_CELL,
+  DASHBOARD_SPOTLIGHT_TABLE_ROW_HOVER,
+  DASHBOARD_SPOTLIGHT_FOOTER,
+  DASHBOARD_SPOTLIGHT_FOOTER_TEXT,
+  DASHBOARD_SPOTLIGHT_BTN_SECONDARY,
+  DASHBOARD_SPOTLIGHT_SELECT,
+  DASHBOARD_SPOTLIGHT_LABEL,
+  DASHBOARD_CHART_THEME,
+} from "@/lib/constants/dashboard-spotlight";
+import { useTheme } from "@/lib/providers/theme-provider";
 import type { TrackOverviewDto } from "@/lib/dto/track";
 import { LineChart } from "lucide-react";
 
@@ -130,13 +154,13 @@ function TracksSectionHeader({ eyebrow, title, description }: { eyebrow: string;
 
 function TracksChartSkeleton() {
   return (
-    <div className="h-[520px] min-w-[320px] rounded-[1.35rem] border border-white/10 bg-black/30 p-5">
+    <div className="h-[520px] min-w-[320px] rounded-[1.35rem] border border-slate-200/80 bg-slate-100/50 p-5 dark:border-white/10 dark:bg-black/30">
       <div className="flex h-full flex-col justify-between">
         {Array.from({ length: 12 }).map((_, index) => (
           <div key={index} className="flex items-center gap-4">
-            <div className="h-3 w-28 rounded bg-white/10 animate-shimmer" />
+            <div className="h-3 w-28 rounded bg-slate-200/90 animate-shimmer dark:bg-white/10" />
             <div
-              className="h-5 rounded-r-lg bg-cyan-400/20 animate-shimmer"
+              className="h-5 rounded-r-lg bg-cyan-200/50 animate-shimmer dark:bg-cyan-400/20"
               style={{ width: `${35 + ((index * 11) % 55)}%` }}
             />
           </div>
@@ -150,18 +174,18 @@ function TracksTableRowsSkeleton({ count }: { count: number }) {
   return (
     <>
       {Array.from({ length: count }).map((_, index) => (
-        <tr key={`skeleton-${index}`} className="border-b border-white/5">
+        <tr key={`skeleton-${index}`} className="border-b border-slate-100 dark:border-white/5">
           <td className="whitespace-nowrap px-5 py-4">
-            <div className="h-4 w-8 rounded bg-white/10 animate-shimmer" />
+            <div className="h-4 w-8 rounded bg-slate-200/90 animate-shimmer dark:bg-white/10" />
           </td>
           <td className="px-5 py-4">
-            <div className="h-4 w-40 rounded bg-white/10 animate-shimmer" />
+            <div className="h-4 w-40 rounded bg-slate-200/90 animate-shimmer dark:bg-white/10" />
           </td>
           <td className="px-5 py-4">
-            <div className="h-4 w-32 rounded bg-white/10 animate-shimmer" />
+            <div className="h-4 w-32 rounded bg-slate-200/90 animate-shimmer dark:bg-white/10" />
           </td>
           <td className="whitespace-nowrap px-5 py-4">
-            <div className="ml-auto h-4 w-16 rounded bg-white/10 animate-shimmer" />
+            <div className="ml-auto h-4 w-16 rounded bg-slate-200/90 animate-shimmer dark:bg-white/10" />
           </td>
         </tr>
       ))}
@@ -201,6 +225,8 @@ function TracksPageFallback() {
 
 function TracksContent() {
   const DEFAULT_PAGE_SIZE = 20;
+  const { resolvedTheme } = useTheme();
+  const chartTheme = DASHBOARD_CHART_THEME[resolvedTheme === "dark" ? "dark" : "light"];
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -327,28 +353,25 @@ function TracksContent() {
           title={t("sections.chart.title")}
           description={t("sections.chart.description")}
         />
-        <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950 text-white shadow-2xl shadow-black/25 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-black/35">
-          <div
-            className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(6,182,212,0.2),transparent_32%),radial-gradient(circle_at_86%_18%,rgba(139,92,246,0.16),transparent_30%),linear-gradient(135deg,rgba(255,255,255,0.06),transparent_42%)]"
-            aria-hidden
-          />
-          <div className="pointer-events-none absolute -bottom-24 left-1/4 h-64 w-64 rounded-full bg-accent-cyan/12 blur-3xl" aria-hidden />
-          <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-cyan-200/45 to-transparent" aria-hidden />
+        <div className={DASHBOARD_SPOTLIGHT_SHELL}>
+          <div className={DASHBOARD_SPOTLIGHT_GRADIENT_CYAN} aria-hidden />
+          <div className="pointer-events-none absolute -bottom-24 left-1/4 h-64 w-64 rounded-full bg-accent-cyan/8 blur-3xl dark:bg-accent-cyan/12" aria-hidden />
+          <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_CYAN} aria-hidden />
           <div className="relative px-5 py-6 sm:px-8 sm:py-8">
             <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-cyan-300/25 bg-cyan-300/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-100">
-                  <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_16px_rgb(22_199_132_/0.75)]" />
+                <div className={DASHBOARD_SPOTLIGHT_BADGE_CYAN}>
+                  <span className={DASHBOARD_SPOTLIGHT_BADGE_DOT_CYAN} />
                   {t("sections.chart.badge")}
                 </div>
-                <p className="font-mono text-xs text-slate-400">
+                <p className="font-mono text-xs text-slate-600 dark:text-slate-400">
                   {topData
                     ? `${topData.overview.totalListens.toLocaleString(locale)} ${t("listensCount")} · ${t("top20Listens")}`
                     : "—"}
                 </p>
               </div>
             </div>
-            <div className="rounded-[1.35rem] border border-white/10 bg-black/25 p-3 shadow-inner backdrop-blur-sm sm:p-5">
+            <div className={DASHBOARD_SPOTLIGHT_INNER_WELL}>
               {isTopLoading || !topData ? (
                 <TracksChartSkeleton />
               ) : (
@@ -365,12 +388,12 @@ function TracksContent() {
                         <feDropShadow dx="0" dy="4" stdDeviation="4" floodColor="#22d3ee" floodOpacity="0.2" />
                       </filter>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.18)" horizontal={false} />
-                    <XAxis type="number" tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} />
+                    <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} horizontal={false} />
+                    <XAxis type="number" tick={{ fill: chartTheme.tick, fontSize: 11 }} axisLine={false} tickLine={false} />
                     <YAxis
                       type="category"
                       dataKey="name"
-                      tick={{ fill: "#e2e8f0", fontSize: 12, fontWeight: 600 }}
+                      tick={{ fill: chartTheme.tickStrong, fontSize: 12, fontWeight: 600 }}
                       axisLine={false}
                       tickLine={false}
                       width={136}
@@ -400,46 +423,43 @@ function TracksContent() {
           title={t("sections.table.title")}
           description={t("sections.table.description")}
         />
-        <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950 text-white shadow-2xl shadow-black/25 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-black/35">
-          <div
-            className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(139,92,246,0.14),transparent_32%),radial-gradient(circle_at_20%_80%,rgba(6,182,212,0.12),transparent_34%)]"
-            aria-hidden
-          />
-          <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-violet-200/35 to-transparent" aria-hidden />
-          <div className="relative border-b border-white/10 px-5 py-5 sm:px-8">
-            <div className="inline-flex items-center gap-2 rounded-full border border-violet-300/25 bg-violet-300/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-violet-100">
-              <span className="h-2 w-2 rounded-full bg-violet-300 shadow-[0_0_14px_rgba(167,139,250,0.55)]" />
+        <div className={DASHBOARD_SPOTLIGHT_SHELL}>
+          <div className={DASHBOARD_SPOTLIGHT_GRADIENT_TABLE} aria-hidden />
+          <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} aria-hidden />
+          <div className={`relative ${DASHBOARD_SPOTLIGHT_HEADER_BOTTOM} px-5 py-5 sm:px-8`}>
+            <div className={DASHBOARD_SPOTLIGHT_BADGE_VIOLET}>
+              <span className={DASHBOARD_SPOTLIGHT_BADGE_DOT_VIOLET} />
               {t("sections.table.badge")}
             </div>
           </div>
           <div className="relative max-h-[min(70vh,640px)] overflow-x-auto overflow-y-auto">
-            <table className="min-w-full divide-y divide-white/10">
-              <thead className="sticky top-0 z-10 border-b border-white/10 bg-slate-950/90 backdrop-blur-md">
+            <table className="min-w-full divide-y divide-slate-200/90 dark:divide-white/10">
+              <thead className={DASHBOARD_SPOTLIGHT_TABLE_HEAD}>
                 <tr>
-                  <th scope="col" className="px-5 py-3 text-left text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                  <th scope="col" className={`px-5 py-3 text-left ${DASHBOARD_SPOTLIGHT_TABLE_HEAD_CELL}`}>
                     {t("rank")}
                   </th>
-                  <th scope="col" className="px-5 py-3 text-left text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                  <th scope="col" className={`px-5 py-3 text-left ${DASHBOARD_SPOTLIGHT_TABLE_HEAD_CELL}`}>
                     {t("track")}
                   </th>
-                  <th scope="col" className="px-5 py-3 text-left text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                  <th scope="col" className={`px-5 py-3 text-left ${DASHBOARD_SPOTLIGHT_TABLE_HEAD_CELL}`}>
                     {t("artist")}
                   </th>
-                  <th scope="col" className="px-5 py-3 text-right text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                  <th scope="col" className={`px-5 py-3 text-right ${DASHBOARD_SPOTLIGHT_TABLE_HEAD_CELL}`}>
                     {t("listens")}
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-slate-100 dark:divide-white/5">
                 {isPagedFetching || !pagedData ? (
                   <TracksTableRowsSkeleton count={Math.min(pageSize, 10)} />
                 ) : (
                   pagedTracks.map((track, index) => (
-                    <tr key={track.trackId} className="transition-colors hover:bg-white/[0.04]">
-                      <td className="whitespace-nowrap px-5 py-4 text-sm tabular-nums text-slate-400">{offset + index + 1}</td>
-                      <td className="px-5 py-4 text-sm font-semibold text-white">{track.trackTitle}</td>
-                      <td className="px-5 py-4 text-sm text-slate-400">{track.artistName}</td>
-                      <td className="whitespace-nowrap px-5 py-4 text-right text-sm font-semibold tabular-nums text-white">
+                    <tr key={track.trackId} className={DASHBOARD_SPOTLIGHT_TABLE_ROW_HOVER}>
+                      <td className="whitespace-nowrap px-5 py-4 text-sm tabular-nums text-slate-500 dark:text-slate-400">{offset + index + 1}</td>
+                      <td className="px-5 py-4 text-sm font-semibold text-slate-900 dark:text-white">{track.trackTitle}</td>
+                      <td className="px-5 py-4 text-sm text-slate-600 dark:text-slate-400">{track.artistName}</td>
+                      <td className="whitespace-nowrap px-5 py-4 text-right text-sm font-semibold tabular-nums text-slate-900 dark:text-white">
                         {track.listenCount.toLocaleString(locale)}
                       </td>
                     </tr>
@@ -449,8 +469,8 @@ function TracksContent() {
             </table>
           </div>
           {pagination ? (
-            <div className="flex flex-col gap-3 border-t border-white/10 bg-black/35 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8">
-              <p className="text-sm text-slate-400">
+            <div className={DASHBOARD_SPOTLIGHT_FOOTER}>
+              <p className={DASHBOARD_SPOTLIGHT_FOOTER_TEXT}>
                 {t("paginationSummary", {
                   start: pageStart,
                   end: pageEnd,
@@ -462,37 +482,37 @@ function TracksContent() {
                   type="button"
                   onClick={() => updatePaginationParams(page - 1, pageSize)}
                   disabled={page === 1}
-                  className="inline-flex min-h-[40px] items-center justify-center rounded-xl border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-40"
+                  className={DASHBOARD_SPOTLIGHT_BTN_SECONDARY}
                 >
                   {t("paginationPrevious")}
                 </button>
-                <label className="ml-1 inline-flex items-center gap-2 text-sm text-slate-300">
+                <label className={DASHBOARD_SPOTLIGHT_LABEL}>
                   <span>{t("pageSizeLabel")}</span>
                   <select
                     value={pageSize}
                     onChange={(e) => updatePaginationParams(1, Number(e.target.value))}
-                    className="rounded-xl border border-white/15 bg-white/10 px-3 py-2 text-sm font-medium text-white"
+                    className={DASHBOARD_SPOTLIGHT_SELECT}
                   >
                     <option value={20}>20</option>
                     <option value={50}>50</option>
                     <option value={100}>100</option>
                   </select>
                 </label>
-                <span className="px-2 text-sm text-slate-400">
+                <span className={`px-2 ${DASHBOARD_SPOTLIGHT_FOOTER_TEXT}`}>
                   {t("paginationPage", { page, totalPages })}
                 </span>
                 <button
                   type="button"
                   onClick={() => updatePaginationParams(page + 1, pageSize)}
                   disabled={!pagination.hasMore}
-                  className="inline-flex min-h-[40px] items-center justify-center rounded-xl border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-40"
+                  className={DASHBOARD_SPOTLIGHT_BTN_SECONDARY}
                 >
                   {t("paginationNext")}
                 </button>
               </div>
             </div>
           ) : null}
-          {isPagedFetching ? <div className="px-5 pb-4 text-xs text-slate-500 sm:px-8">{t("paginationLoading")}</div> : null}
+          {isPagedFetching ? <div className="px-5 pb-4 text-xs text-slate-500 dark:text-slate-500 sm:px-8">{t("paginationLoading")}</div> : null}
         </div>
       </section>
     </div>

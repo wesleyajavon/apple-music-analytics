@@ -3,6 +3,19 @@
 import { useState, useMemo, Suspense, type ReactNode } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
+import { LayoutDashboard, Sprout, TrendingUp, Zap } from "lucide-react";
+import { Link } from "@/i18n/navigation";
+import {
+  DASHBOARD_SPOTLIGHT_SHELL,
+  DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY,
+  DASHBOARD_SPOTLIGHT_GRADIENT_LIME,
+  DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET,
+  DASHBOARD_SPOTLIGHT_HAIRLINE_LIME,
+  DASHBOARD_SPOTLIGHT_HEADER_BOTTOM,
+  DASHBOARD_SPOTLIGHT_INNER_WELL,
+  DASHBOARD_SPOTLIGHT_MUTED,
+  DASHBOARD_SPOTLIGHT_TITLE,
+} from "@/lib/constants/dashboard-spotlight";
 import { useTasteEvolution } from "@/lib/hooks/use-taste-evolution";
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
@@ -12,26 +25,24 @@ import type {
   WeekToWeekTrend,
   TrendClassification,
 } from "@/lib/dto/taste-evolution";
-import { Sprout } from "lucide-react";
 
 const CLASSIFICATION_COLORS: Record<TrendClassification, string> = {
-  expansion: "border border-emerald-300/20 bg-emerald-400/10 text-emerald-700 dark:text-emerald-300",
-  consolidation: "border border-sky-300/20 bg-sky-400/10 text-sky-700 dark:text-sky-300",
-  exploration: "border border-indigo-300/20 bg-indigo-400/10 text-indigo-700 dark:text-indigo-300",
-  regression: "border border-rose-300/20 bg-rose-400/10 text-rose-700 dark:text-rose-300",
-  stable: "text-gray-500 dark:text-gray-400",
+  expansion: "border border-emerald-200/90 bg-emerald-50/90 text-emerald-800 dark:border-emerald-400/25 dark:bg-emerald-400/10 dark:text-emerald-200",
+  consolidation: "border border-sky-200/90 bg-sky-50/90 text-sky-800 dark:border-sky-400/25 dark:bg-sky-400/10 dark:text-sky-200",
+  exploration: "border border-indigo-200/90 bg-indigo-50/90 text-indigo-800 dark:border-indigo-400/25 dark:bg-indigo-400/10 dark:text-indigo-200",
+  regression: "border border-rose-200/90 bg-rose-50/90 text-rose-800 dark:border-rose-400/25 dark:bg-rose-400/10 dark:text-rose-200",
+  stable: "border border-slate-200/90 bg-slate-50/90 text-slate-600 dark:border-white/10 dark:bg-white/10 dark:text-slate-300",
 };
-const TASTE_RAIL_CLASS = "bg-gradient-to-r from-emerald-300 via-sky-400 to-indigo-400";
-const TASTE_HERO_SHELL_CLASS =
-  "relative overflow-hidden rounded-3xl border border-sky-300/25 bg-[radial-gradient(circle_at_top_left,_rgba(16,185,129,0.28),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(99,102,241,0.22),_transparent_30%),linear-gradient(135deg,_#020617_0%,_#0f172a_48%,_#134e4a_100%)] px-6 py-8 shadow-2xl shadow-emerald-950/35 sm:px-8 sm:py-10";
-const TASTE_PANEL_CLASS =
-  "relative overflow-hidden rounded-2xl border border-sky-300/20 bg-[radial-gradient(circle_at_top_left,_rgba(16,185,129,0.1),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(99,102,241,0.1),_transparent_30%),rgb(var(--card-rgb)/0.92)] shadow-card backdrop-blur-sm dark:border-sky-300/15 dark:bg-[radial-gradient(circle_at_top_left,_rgba(16,185,129,0.15),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(99,102,241,0.14),_transparent_30%),rgb(var(--card-rgb)/0.9)]";
-const TASTE_SUBCARD_CLASS =
-  "rounded-xl border border-sky-300/20 bg-[radial-gradient(circle_at_top_left,_rgba(56,189,248,0.1),_transparent_38%),rgb(var(--card-rgb)/0.68)] shadow-sm dark:border-sky-300/10 dark:bg-[radial-gradient(circle_at_top_left,_rgba(56,189,248,0.13),_transparent_38%),rgb(15_23_42/0.34)]";
+
+const TASTE_SUBCARD_CLASS = `${DASHBOARD_SPOTLIGHT_INNER_WELL} !rounded-xl`;
 const TASTE_POSITIVE_SUBCARD_CLASS =
-  "rounded-xl border border-emerald-300/20 bg-[radial-gradient(circle_at_top_left,_rgba(52,211,153,0.14),_transparent_40%),rgb(var(--card-rgb)/0.68)] shadow-sm dark:border-emerald-300/10 dark:bg-[radial-gradient(circle_at_top_left,_rgba(52,211,153,0.16),_transparent_40%),rgb(15_23_42/0.34)]";
+  "rounded-xl border border-emerald-200/90 bg-emerald-50/70 shadow-inner shadow-emerald-900/[0.03] dark:border-emerald-400/20 dark:bg-emerald-950/30 dark:shadow-none";
 const TASTE_NEGATIVE_SUBCARD_CLASS =
-  "rounded-xl border border-rose-300/20 bg-[radial-gradient(circle_at_top_left,_rgba(251,113,133,0.12),_transparent_40%),rgb(var(--card-rgb)/0.68)] shadow-sm dark:border-rose-300/10 dark:bg-[radial-gradient(circle_at_top_left,_rgba(251,113,133,0.14),_transparent_40%),rgb(15_23_42/0.34)]";
+  "rounded-xl border border-rose-200/90 bg-rose-50/70 shadow-inner shadow-rose-900/[0.03] dark:border-rose-400/20 dark:bg-rose-950/30 dark:shadow-none";
+
+/** Même shell hero que `/dashboard/timeline` — vibe startup / Vercel */
+const TASTE_EVOLUTION_HERO_SHELL_CLASS =
+  "relative overflow-hidden rounded-[2rem] border border-white/10 bg-gray-950 px-5 py-6 text-white shadow-2xl shadow-violet-500/15 sm:px-8 sm:py-9 lg:px-10 lg:py-10";
 
 function formatDateRange(startDate: string, endDate: string, locale?: string): string {
   const start = new Date(startDate);
@@ -40,44 +51,90 @@ function formatDateRange(startDate: string, endDate: string, locale?: string): s
   return `${start.toLocaleDateString(loc, { month: "short", day: "numeric", year: "numeric" })} – ${end.toLocaleDateString(loc, { month: "short", day: "numeric", year: "numeric" })}`;
 }
 
+function TasteEvolutionHeroTrustPanel() {
+  const t = useTranslations("taste-evolution");
+  return (
+    <ul className="mt-4 space-y-3 text-sm leading-6 text-white/75">
+      <li className="flex gap-2">
+        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.55)]" aria-hidden />
+        <span>{t("heroTrust1")}</span>
+      </li>
+      <li className="flex gap-2">
+        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.55)]" aria-hidden />
+        <span>{t("heroTrust2")}</span>
+      </li>
+      <li className="flex gap-2">
+        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.55)]" aria-hidden />
+        <span>{t("heroTrust3")}</span>
+      </li>
+    </ul>
+  );
+}
+
 function TasteEvolutionHeroFrame({
   badgeLabel,
   description,
   stats,
-  aside,
+  summaryToggle,
 }: {
   badgeLabel: string;
   description: string;
-  stats: ReactNode;
-  aside?: ReactNode;
+  stats: ReactNode | null;
+  summaryToggle?: ReactNode;
 }) {
   const t = useTranslations("taste-evolution");
   return (
-    <div className={TASTE_HERO_SHELL_CLASS}>
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(16,185,129,0.1)_1px,_transparent_1px),linear-gradient(90deg,_rgba(56,189,248,0.08)_1px,_transparent_1px)] bg-[size:32px_32px] opacity-30" />
-      <div className="absolute -right-20 -top-24 h-56 w-56 rounded-full bg-emerald-400/18 blur-3xl" />
-      <div className="absolute -bottom-24 left-10 h-48 w-48 rounded-full bg-indigo-400/16 blur-3xl" />
-      <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${TASTE_RAIL_CLASS} opacity-90`} />
-      <div className="relative flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-        <div className="min-w-0 max-w-3xl flex-1">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-200/85">{t("heroEyebrow")}</p>
-          <h1 className="mt-3 flex items-center gap-3 text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            <Sprout className="h-9 w-9 shrink-0 text-emerald-200/90 sm:h-10 sm:w-10" strokeWidth={1.75} aria-hidden />
-            <span>{t("title")}</span>
+    <div className={TASTE_EVOLUTION_HERO_SHELL_CLASS}>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.26),transparent_30%),radial-gradient(circle_at_80%_12%,rgba(6,182,212,0.2),transparent_32%),linear-gradient(135deg,rgba(3,7,18,0.98),rgba(30,27,75,0.88)_48%,rgba(8,47,73,0.72))]" />
+      <div className="absolute -left-20 top-1/3 h-64 w-64 rounded-full bg-accent-violet/22 blur-3xl" />
+      <div className="absolute -bottom-28 right-10 h-72 w-72 rounded-full bg-accent-cyan/18 blur-3xl" />
+      <div className="relative grid gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-center">
+        <div>
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-violet-100 backdrop-blur">
+            <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_18px_rgb(22_199_132_/0.75)]" />
+            {t("heroEyebrow")}
+          </div>
+          <h1 className="flex flex-wrap items-center gap-3 text-4xl font-semibold tracking-[-0.06em] text-white sm:text-5xl lg:text-6xl">
+            <Sprout className="h-9 w-9 shrink-0 text-emerald-200/90 sm:h-11 sm:w-11" strokeWidth={1.5} aria-hidden />
+            <span className="max-w-4xl text-balance">{t("title")}</span>
           </h1>
-          <div
-            className={`mt-4 h-1.5 w-24 rounded-full ${TASTE_RAIL_CLASS} opacity-95 shadow-[0_0_24px_rgba(16,185,129,0.35)]`}
-            aria-hidden
-          />
-          <p className="mt-5 text-base leading-relaxed text-sky-100/90 sm:text-lg">{description}</p>
-          <p className="mt-2 text-sm font-medium text-indigo-100/90">
-            <span className="inline-flex items-center rounded-full border border-sky-200/30 bg-white/10 px-3 py-1">
+          <p className="mt-5 max-w-2xl text-base leading-7 text-white/70 sm:text-lg">{description}</p>
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            <span className="inline-flex items-center rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-white/90 backdrop-blur">
               {badgeLabel}
             </span>
-          </p>
-          {stats}
+          </div>
+          {summaryToggle ? <div className="mt-5">{summaryToggle}</div> : null}
+          <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <Link
+              href="/dashboard/overview"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25 transition-all hover:-translate-y-0.5 hover:bg-gray-100"
+            >
+              <LayoutDashboard className="h-4 w-4" aria-hidden />
+              {t("ctaOverview")}
+            </Link>
+            <Link
+              href="/dashboard/genres/trends"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-black/20 backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white/15"
+            >
+              <TrendingUp className="h-4 w-4" aria-hidden />
+              {t("ctaGenreTrends")}
+            </Link>
+          </div>
         </div>
-        {aside ? <div className="w-full shrink-0 lg:w-auto">{aside}</div> : null}
+
+        <div className="relative">
+          <div className="absolute -inset-4 rounded-[2rem] bg-brand-gradient-soft blur-2xl" aria-hidden />
+          <div className="relative overflow-hidden rounded-[1.75rem] border border-white/15 bg-white/10 p-3 shadow-2xl shadow-black/35 backdrop-blur-xl">
+            <div className="rounded-[1.35rem] border border-white/10 bg-slate-950/70 p-4">
+              <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                <p className="font-mono text-[0.66rem] font-semibold uppercase tracking-[0.24em] text-slate-400">{t("heroStatBadge")}</p>
+                <span className="rounded-full border border-emerald-300/25 bg-emerald-300/10 px-2.5 py-1 text-[0.66rem] font-semibold text-emerald-100">{t("heroStatTag")}</span>
+              </div>
+              {stats ?? <TasteEvolutionHeroTrustPanel />}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -88,18 +145,18 @@ function TasteEvolutionHeroStats({ data }: { data: TasteEvolutionResponse }) {
   const latest = data.trends.length > 0 ? data.trends[data.trends.length - 1] : null;
   const latestLabel = latest ? t(`classifications.${latest.classification}`) : "—";
   return (
-    <div className="mt-6 flex flex-wrap gap-4 sm:gap-8">
-      <div className="rounded-xl border border-emerald-200/15 bg-slate-950/35 px-4 py-3 shadow-lg shadow-emerald-950/20 backdrop-blur-sm">
-        <p className="text-xs font-medium uppercase tracking-wider text-emerald-100/80">{t("heroStatComparisons")}</p>
-        <p className="text-2xl font-bold text-white">{data.trends.length}</p>
+    <div className="grid gap-2 pt-4 sm:grid-cols-3">
+      <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
+        <p className="text-xl font-semibold tracking-tight text-white tabular-nums">{data.trends.length}</p>
+        <p className="mt-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">{t("heroStatComparisons")}</p>
       </div>
-      <div className="rounded-xl border border-sky-200/15 bg-slate-950/35 px-4 py-3 shadow-lg shadow-sky-950/20 backdrop-blur-sm">
-        <p className="text-xs font-medium uppercase tracking-wider text-sky-100/80">{t("heroStatLatest")}</p>
-        <p className="text-2xl font-bold text-white">{latestLabel}</p>
+      <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
+        <p className="text-lg font-semibold leading-snug text-white">{latestLabel}</p>
+        <p className="mt-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">{t("heroStatLatest")}</p>
       </div>
-      <div className="rounded-xl border border-indigo-200/15 bg-slate-950/35 px-4 py-3 shadow-lg shadow-indigo-950/20 backdrop-blur-sm">
-        <p className="text-xs font-medium uppercase tracking-wider text-indigo-100/80">{t("heroStatSkipped")}</p>
-        <p className="text-2xl font-bold text-white">{data.skippedWeeks.length}</p>
+      <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
+        <p className="text-xl font-semibold tracking-tight text-white tabular-nums">{data.skippedWeeks.length}</p>
+        <p className="mt-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">{t("heroStatSkipped")}</p>
       </div>
     </div>
   );
@@ -107,14 +164,11 @@ function TasteEvolutionHeroStats({ data }: { data: TasteEvolutionResponse }) {
 
 function TasteEvolutionHeroStatsSkeleton() {
   return (
-    <div className="mt-6 flex flex-wrap gap-4 sm:gap-8">
+    <div className="grid gap-2 pt-4 sm:grid-cols-3" aria-busy="true">
       {[0, 1, 2].map((i) => (
-        <div
-          key={i}
-          className="min-w-[140px] flex-1 animate-pulse rounded-xl border border-white/10 bg-slate-950/35 px-4 py-3 shadow-lg backdrop-blur-sm sm:flex-initial"
-        >
-          <div className="mb-2 h-3 w-24 rounded bg-white/15" />
-          <div className="h-8 w-12 rounded bg-white/20" />
+        <div key={i} className="animate-pulse rounded-2xl border border-white/10 bg-white/[0.06] p-3">
+          <div className="mb-2 h-7 w-16 rounded bg-white/20" />
+          <div className="h-3 w-20 rounded bg-white/15" />
         </div>
       ))}
     </div>
@@ -130,11 +184,9 @@ function TasteSummaryVersionToggle({
 }) {
   const t = useTranslations("taste-evolution");
   return (
-    <div className="flex w-full flex-col gap-2 sm:w-auto" role="tablist" aria-label={t("aiExplanation")}>
-      <span className="text-[10px] font-semibold uppercase tracking-wider text-white/70">
-        {t("summaryStyleLabel")}
-      </span>
-      <div className="inline-flex rounded-xl border border-white/20 bg-white/10 p-1 shadow-sm backdrop-blur-sm">
+    <div className="flex w-full max-w-md flex-col gap-2" role="tablist" aria-label={t("aiExplanation")}>
+      <span className="text-[10px] font-semibold uppercase tracking-wider text-white/60">{t("summaryStyleLabel")}</span>
+      <div className="inline-flex rounded-xl border border-white/15 bg-white/10 p-1.5 shadow-sm backdrop-blur-sm">
         <button
           type="button"
           role="tab"
@@ -142,7 +194,7 @@ function TasteSummaryVersionToggle({
           onClick={() => onVersionChange("light")}
           className={`rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${
             summaryVersion === "light"
-              ? "bg-gradient-to-r from-emerald-400 via-sky-400 to-indigo-400 text-white shadow-sm shadow-sky-950/20"
+              ? "bg-white text-gray-950 shadow-sm shadow-black/20"
               : "text-white/70 hover:text-white"
           }`}
         >
@@ -155,7 +207,7 @@ function TasteSummaryVersionToggle({
           onClick={() => onVersionChange("technical")}
           className={`rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${
             summaryVersion === "technical"
-              ? "bg-gradient-to-r from-emerald-400 via-sky-400 to-indigo-400 text-white shadow-sm shadow-sky-950/20"
+              ? "bg-white text-gray-950 shadow-sm shadow-black/20"
               : "text-white/70 hover:text-white"
           }`}
         >
@@ -186,43 +238,34 @@ function TrendCardHeader({
   const content = (
     <>
       <div>
-        <h3 className="font-semibold text-gray-900 dark:text-white">
+        <h3 className="font-semibold text-slate-900 dark:text-white">
           {trend.timeRange.label} {t("vs")} {trend.previousWeekRange.label}
         </h3>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+        <p className="mt-0.5 text-sm text-slate-600 dark:text-slate-400">
           {trend.currentWeekListens} {t("listens")} ({t("vs")} {trend.previousWeekListens})
         </p>
       </div>
       <div className="flex items-center gap-3">
-        <span
-          className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${classificationColor}`}
-        >
-          {classificationLabel}
-        </span>
-        {isCollapsible && (
-          <span
-            className={`inline-flex items-center text-gray-400 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
-            aria-hidden
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <span className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${classificationColor}`}>{classificationLabel}</span>
+        {isCollapsible ? (
+          <span className={`inline-flex items-center text-slate-400 transition-transform duration-200 dark:text-slate-500 ${isExpanded ? "rotate-180" : ""}`} aria-hidden>
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </span>
-        )}
+        ) : null}
       </div>
     </>
   );
 
-  const borderClass = !isCollapsible || isExpanded
-    ? "border-b border-sky-200/20 dark:border-sky-300/10"
-    : "";
+  const borderClass = !isCollapsible || isExpanded ? `${DASHBOARD_SPOTLIGHT_HEADER_BOTTOM}` : "";
 
   if (isCollapsible && onToggle) {
     return (
       <button
         type="button"
         onClick={onToggle}
-        className={`w-full px-5 py-4 flex flex-wrap items-center justify-between gap-3 text-left hover:bg-sky-400/10 transition-colors cursor-pointer ${borderClass}`}
+        className={`flex w-full flex-wrap items-center justify-between gap-3 px-5 py-4 text-left transition-colors hover:bg-slate-50/90 dark:hover:bg-white/[0.04] ${borderClass}`}
         aria-expanded={isExpanded}
       >
         {content}
@@ -231,7 +274,7 @@ function TrendCardHeader({
   }
 
   return (
-    <div className={`px-5 py-4 flex flex-wrap items-center justify-between gap-3 ${borderClass}`}>
+    <div className={`flex flex-wrap items-center justify-between gap-3 px-5 py-4 ${borderClass}`}>
       {content}
     </div>
   );
@@ -252,148 +295,158 @@ function TrendCard({
   const isCollapsible = !isLastWeek;
 
   return (
-    <div className={`${TASTE_PANEL_CLASS} rounded-xl`}>
-      <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${TASTE_RAIL_CLASS} opacity-70`} />
-      <TrendCardHeader
-        trend={trend}
-        t={t}
-        classificationColor={classificationColor}
-        classificationLabel={classificationLabel}
-        isCollapsible={isCollapsible}
-        isExpanded={isExpanded}
-        onToggle={isCollapsible ? () => setIsExpanded((prev) => !prev) : undefined}
-      />
+    <div className={`relative ${DASHBOARD_SPOTLIGHT_SHELL} transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-slate-900/10 dark:hover:shadow-black/35`}>
+      <div className={DASHBOARD_SPOTLIGHT_GRADIENT_LIME} aria-hidden />
+      <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_LIME} aria-hidden />
+      <div className="relative">
+        <TrendCardHeader
+          trend={trend}
+          t={t}
+          classificationColor={classificationColor}
+          classificationLabel={classificationLabel}
+          isCollapsible={isCollapsible}
+          isExpanded={isExpanded}
+          onToggle={isCollapsible ? () => setIsExpanded((prev) => !prev) : undefined}
+        />
 
-      {(isLastWeek || isExpanded) && (
-      <div className="relative p-5 space-y-4">
-        {/* Volume & diversity */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className={(trend.volumeDelta >= 0 ? TASTE_POSITIVE_SUBCARD_CLASS : TASTE_NEGATIVE_SUBCARD_CLASS) + " p-3"}>
-            <p className="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
-              {t("volume")}
-            </p>
-            <p
-              className={`text-lg font-semibold tabular-nums ${
-                trend.volumeDelta >= 0
-                  ? "text-emerald-600 dark:text-emerald-400"
-                  : "text-rose-600 dark:text-rose-400"
-              }`}
-            >
-              {trend.volumeDelta >= 0 ? "+" : ""}
-              {trend.volumeDelta} ({trend.volumeDeltaPct >= 0 ? "+" : ""}
-              {trend.volumeDeltaPct.toFixed(1)}%)
-            </p>
-          </div>
-          <div className={(trend.diversityDelta >= 0 ? TASTE_POSITIVE_SUBCARD_CLASS : TASTE_NEGATIVE_SUBCARD_CLASS) + " p-3"}>
-            <p className="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
-              {t("diversity")}
-            </p>
-            <p
-              className={`text-lg font-semibold tabular-nums ${
-                trend.diversityDelta >= 0
-                  ? "text-emerald-600 dark:text-emerald-400"
-                  : "text-rose-600 dark:text-rose-400"
-              }`}
-            >
-              {trend.diversityDelta >= 0 ? "+" : ""}
-              {trend.diversityDelta.toFixed(2)}
-            </p>
-          </div>
-          <div className={TASTE_SUBCARD_CLASS + " p-3"}>
-            <p className="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
-              {t("genres")}
-            </p>
-            <p className="text-lg font-semibold tabular-nums text-gray-900 dark:text-white">
-              {trend.genreCountPrevious} → {trend.genreCountCurrent}
-            </p>
-          </div>
-        </div>
-
-        {/* Emerging / declining genres */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {trend.emergingGenres.length > 0 && (
-            <div className={TASTE_POSITIVE_SUBCARD_CLASS + " p-4"}>
-              <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                <span className="text-emerald-500" aria-hidden>↑</span>
-                {t("emergingGenres")}
-              </h4>
-              <ul className="space-y-1.5">
-                {trend.emergingGenres.slice(0, 5).map((g) => (
-                  <li
-                    key={g.genre}
-                    className="flex justify-between text-sm text-gray-600 dark:text-gray-400"
-                  >
-                    <span>{g.genre}</span>
-                    <span className="font-medium text-emerald-600 dark:text-emerald-400 tabular-nums">
-                      +{g.deltaPct.toFixed(1)} {t("pp")}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {trend.decliningGenres.length > 0 && (
-            <div className={TASTE_NEGATIVE_SUBCARD_CLASS + " p-4"}>
-              <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                <span className="text-rose-500" aria-hidden>↓</span>
-                {t("decliningGenres")}
-              </h4>
-              <ul className="space-y-1.5">
-                {trend.decliningGenres.slice(0, 5).map((g) => (
-                  <li
-                    key={g.genre}
-                    className="flex justify-between text-sm text-gray-600 dark:text-gray-400"
-                  >
-                    <span>{g.genre}</span>
-                    <span className="font-medium text-rose-600 dark:text-rose-400 tabular-nums">
-                      {g.deltaPct.toFixed(1)} {t("pp")}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-
-        {/* Artist movements */}
-        {trend.artistRankMovements.length > 0 && (
-          <div className={TASTE_SUBCARD_CLASS + " p-4"}>
-            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t("artistMovements")}
-            </h4>
-            <ul className="space-y-1.5">
-              {trend.artistRankMovements.slice(0, 5).map((a) => (
-                <li
-                  key={a.artistName}
-                  className="flex justify-between text-sm text-gray-600 dark:text-gray-400"
+        {(isLastWeek || isExpanded) && (
+          <div className="relative space-y-4 p-5">
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+              <div className={`${trend.volumeDelta >= 0 ? TASTE_POSITIVE_SUBCARD_CLASS : TASTE_NEGATIVE_SUBCARD_CLASS} p-3`}>
+                <p className="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">{t("volume")}</p>
+                <p
+                  className={`text-lg font-semibold tabular-nums ${
+                    trend.volumeDelta >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
+                  }`}
                 >
-                  <span>{a.artistName}</span>
-                  <span
-                    className={`font-medium tabular-nums ${
-                      a.rankChange > 0
-                        ? "text-emerald-600 dark:text-emerald-400"
-                        : a.rankChange < 0
-                          ? "text-rose-600 dark:text-rose-400"
-                          : "text-gray-500"
-                    }`}
-                  >
-                    {a.previousRank
-                      ? `#${a.previousRank} → #${a.currentRank}`
-                      : `${t("newRank")} #${a.currentRank}`}
-                    {a.rankChange !== 0 && (
-                      <span className="ml-1">
-                        ({a.rankChange > 0 ? "+" : ""}
-                        {a.rankChange})
+                  {trend.volumeDelta >= 0 ? "+" : ""}
+                  {trend.volumeDelta} ({trend.volumeDeltaPct >= 0 ? "+" : ""}
+                  {trend.volumeDeltaPct.toFixed(1)}%)
+                </p>
+              </div>
+              <div className={`${trend.diversityDelta >= 0 ? TASTE_POSITIVE_SUBCARD_CLASS : TASTE_NEGATIVE_SUBCARD_CLASS} p-3`}>
+                <p className="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">{t("diversity")}</p>
+                <p
+                  className={`text-lg font-semibold tabular-nums ${
+                    trend.diversityDelta >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
+                  }`}
+                >
+                  {trend.diversityDelta >= 0 ? "+" : ""}
+                  {trend.diversityDelta.toFixed(2)}
+                </p>
+              </div>
+              <div className={`${TASTE_SUBCARD_CLASS} p-3`}>
+                <p className="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">{t("genres")}</p>
+                <p className="text-lg font-semibold tabular-nums text-slate-900 dark:text-white">
+                  {trend.genreCountPrevious} → {trend.genreCountCurrent}
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              {trend.emergingGenres.length > 0 ? (
+                <div className={`${TASTE_POSITIVE_SUBCARD_CLASS} p-4`}>
+                  <h4 className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                    <span className="text-emerald-500" aria-hidden>
+                      ↑
+                    </span>
+                    {t("emergingGenres")}
+                  </h4>
+                  <ul className="space-y-1.5">
+                    {trend.emergingGenres.slice(0, 5).map((g) => (
+                      <li key={g.genre} className="flex justify-between text-sm text-slate-600 dark:text-slate-400">
+                        <span>{g.genre}</span>
+                        <span className="font-medium tabular-nums text-emerald-600 dark:text-emerald-400">
+                          +{g.deltaPct.toFixed(1)} {t("pp")}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+              {trend.decliningGenres.length > 0 ? (
+                <div className={`${TASTE_NEGATIVE_SUBCARD_CLASS} p-4`}>
+                  <h4 className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                    <span className="text-rose-500" aria-hidden>
+                      ↓
+                    </span>
+                    {t("decliningGenres")}
+                  </h4>
+                  <ul className="space-y-1.5">
+                    {trend.decliningGenres.slice(0, 5).map((g) => (
+                      <li key={g.genre} className="flex justify-between text-sm text-slate-600 dark:text-slate-400">
+                        <span>{g.genre}</span>
+                        <span className="font-medium tabular-nums text-rose-600 dark:text-rose-400">
+                          {g.deltaPct.toFixed(1)} {t("pp")}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+            </div>
+
+            {trend.artistRankMovements.length > 0 ? (
+              <div className={`${TASTE_SUBCARD_CLASS} p-4`}>
+                <h4 className="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">{t("artistMovements")}</h4>
+                <ul className="space-y-1.5">
+                  {trend.artistRankMovements.slice(0, 5).map((a) => (
+                    <li key={a.artistName} className="flex justify-between text-sm text-slate-600 dark:text-slate-400">
+                      <span>{a.artistName}</span>
+                      <span
+                        className={`font-medium tabular-nums ${
+                          a.rankChange > 0 ? "text-emerald-600 dark:text-emerald-400" : a.rankChange < 0 ? "text-rose-600 dark:text-rose-400" : "text-slate-500"
+                        }`}
+                      >
+                        {a.previousRank ? `#${a.previousRank} → #${a.currentRank}` : `${t("newRank")} #${a.currentRank}`}
+                        {a.rankChange !== 0 ? (
+                          <span className="ml-1">
+                            ({a.rankChange > 0 ? "+" : ""}
+                            {a.rankChange})
+                          </span>
+                        ) : null}
                       </span>
-                    )}
-                  </span>
-                </li>
-              ))}
-            </ul>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
           </div>
         )}
       </div>
-      )}
+    </div>
+  );
+}
+
+function SummaryToggleSkeleton() {
+  return (
+    <div className="flex w-full max-w-md flex-col gap-2">
+      <div className="h-3 w-28 animate-pulse rounded bg-white/15" />
+      <div className="h-11 w-full max-w-xs animate-pulse rounded-xl bg-white/10" />
+    </div>
+  );
+}
+
+function TrendCardSkeleton() {
+  return (
+    <div className={`relative ${DASHBOARD_SPOTLIGHT_SHELL}`}>
+      <div className={DASHBOARD_SPOTLIGHT_GRADIENT_LIME} aria-hidden />
+      <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_LIME} aria-hidden />
+      <div className={`flex flex-wrap items-center justify-between gap-3 px-5 py-4 ${DASHBOARD_SPOTLIGHT_HEADER_BOTTOM}`}>
+        <div className="min-w-[200px] flex-1 space-y-2">
+          <div className="h-5 w-56 max-w-full animate-shimmer rounded bg-slate-200 dark:bg-white/10" />
+          <div className="h-4 w-40 max-w-full animate-shimmer rounded bg-slate-200 dark:bg-white/10" />
+        </div>
+        <div className="h-8 w-28 shrink-0 animate-shimmer rounded-full bg-slate-200 dark:bg-white/10" />
+      </div>
+      <div className="grid grid-cols-2 gap-4 p-5 sm:grid-cols-4">
+        {[0, 1, 2, 3].map((j) => (
+          <div key={j} className="space-y-2">
+            <div className="h-3 w-16 animate-shimmer rounded bg-slate-200 dark:bg-white/10" />
+            <div className="h-6 w-24 animate-shimmer rounded bg-slate-200 dark:bg-white/10" />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -423,47 +476,32 @@ function TasteEvolutionContent() {
 
   const rangeLabel = formatDateRange(effectiveRange.startDate, effectiveRange.endDate, locale);
 
-  const { data, isLoading, error, refetch } = useTasteEvolution(
-    effectiveRange.startDate,
-    effectiveRange.endDate,
-    userId
-  );
+  const { data, isLoading, error, refetch } = useTasteEvolution(effectiveRange.startDate, effectiveRange.endDate, userId);
 
   const handleRetry = () => refetch();
 
+  const pageWrap = "mx-auto max-w-6xl space-y-8";
+
   if (isLoading) {
     return (
-      <div className="mx-auto max-w-4xl space-y-8">
-        <TasteEvolutionHeroFrame
-          badgeLabel={rangeLabel}
-          description={t("loading")}
-          stats={<TasteEvolutionHeroStatsSkeleton />}
-        />
+      <div className={pageWrap}>
+        <section aria-labelledby="taste-evolution-heading">
+          <h2 id="taste-evolution-heading" className="sr-only">
+            {t("title")}
+          </h2>
+          <TasteEvolutionHeroFrame
+            badgeLabel={rangeLabel}
+            description={t("loading")}
+            stats={<TasteEvolutionHeroStatsSkeleton />}
+            summaryToggle={<SummaryToggleSkeleton />}
+          />
+        </section>
         <TasteEvolutionSpotlightSkeleton />
         <div className="space-y-6">
-          <div className="h-8 max-w-full w-48 animate-shimmer rounded bg-gray-200 dark:bg-gray-700" />
+          <div className="h-8 w-56 max-w-full animate-shimmer rounded-lg bg-slate-200 dark:bg-white/10" />
           <div className="space-y-6">
             {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-card dark:border-gray-700/50 dark:bg-gray-800/90"
-              >
-                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 px-5 py-4 dark:border-gray-700/50">
-                  <div className="min-w-[200px] flex-1 space-y-2">
-                    <div className="h-5 w-56 max-w-full animate-shimmer rounded bg-gray-200 dark:bg-gray-700" />
-                    <div className="h-4 w-40 max-w-full animate-shimmer rounded bg-gray-200 dark:bg-gray-700" />
-                  </div>
-                  <div className="h-8 w-28 shrink-0 animate-shimmer rounded-full bg-gray-200 dark:bg-gray-700" />
-                </div>
-                <div className="grid grid-cols-2 gap-4 p-5 sm:grid-cols-4">
-                  {[0, 1, 2, 3].map((j) => (
-                    <div key={j} className="space-y-2">
-                      <div className="h-3 w-16 animate-shimmer rounded bg-gray-200 dark:bg-gray-700" />
-                      <div className="h-6 w-24 animate-shimmer rounded bg-gray-200 dark:bg-gray-700" />
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <TrendCardSkeleton key={i} />
             ))}
           </div>
         </div>
@@ -473,140 +511,110 @@ function TasteEvolutionContent() {
 
   if (error) {
     return (
-      <div className="mx-auto max-w-4xl space-y-8">
-        <TasteEvolutionHeroFrame
-          badgeLabel={rangeLabel}
-          description={t("errorLoading")}
-          stats={null}
-        />
-        <ErrorState
-          error={error}
-          message={t("errorMessage")}
-          onRetry={handleRetry}
-        />
+      <div className={pageWrap}>
+        <section aria-labelledby="taste-evolution-heading">
+          <h2 id="taste-evolution-heading" className="sr-only">
+            {t("title")}
+          </h2>
+          <TasteEvolutionHeroFrame badgeLabel={rangeLabel} description={t("errorLoading")} stats={null} />
+        </section>
+        <div className={`relative ${DASHBOARD_SPOTLIGHT_SHELL}`}>
+          <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} aria-hidden />
+          <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} aria-hidden />
+          <div className="relative p-6 sm:p-8">
+            <ErrorState error={error} message={t("errorMessage")} onRetry={handleRetry} />
+          </div>
+        </div>
       </div>
     );
   }
 
   if (!data || data.trends.length === 0) {
     return (
-      <div className="mx-auto max-w-4xl space-y-8">
-        <TasteEvolutionHeroFrame
-          badgeLabel={rangeLabel}
-          description={t("emptySubtitle")}
-          stats={null}
-        />
-        <EmptyState
-          {...emptyStatePresets.importData}
-          message={t("insufficientData")}
-          description={t("importDescription")}
-        />
+      <div className={pageWrap}>
+        <section aria-labelledby="taste-evolution-heading">
+          <h2 id="taste-evolution-heading" className="sr-only">
+            {t("title")}
+          </h2>
+          <TasteEvolutionHeroFrame badgeLabel={rangeLabel} description={t("emptySubtitle")} stats={null} />
+        </section>
+        <EmptyState {...emptyStatePresets.importData} message={t("insufficientData")} description={t("importDescription")} />
       </div>
     );
   }
 
   const hasCommentary = data.commentary || data.commentaryLight;
   const displayCommentary =
-    summaryVersion === "light" && data.commentaryLight
-      ? data.commentaryLight
-      : (data.commentary ?? data.commentaryLight);
+    summaryVersion === "light" && data.commentaryLight ? data.commentaryLight : (data.commentary ?? data.commentaryLight);
+
+  const summaryToggle =
+    data.commentary && data.commentaryLight ? (
+      <TasteSummaryVersionToggle summaryVersion={summaryVersion} onVersionChange={setSummaryVersion} />
+    ) : undefined;
 
   return (
-    <div className="mx-auto max-w-4xl space-y-8">
-      <TasteEvolutionHeroFrame
-        badgeLabel={rangeLabel}
-        description={t("subtitle")}
-        stats={<TasteEvolutionHeroStats data={data} />}
-        aside={
-          data.commentary && data.commentaryLight ? (
-            <TasteSummaryVersionToggle
-              summaryVersion={summaryVersion}
-              onVersionChange={setSummaryVersion}
-            />
-          ) : undefined
-        }
-      />
+    <div className={pageWrap}>
+      <section aria-labelledby="taste-evolution-heading">
+        <h2 id="taste-evolution-heading" className="sr-only">
+          {t("title")}
+        </h2>
+        <TasteEvolutionHeroFrame
+          badgeLabel={rangeLabel}
+          description={t("subtitle")}
+          stats={<TasteEvolutionHeroStats data={data} />}
+          summaryToggle={summaryToggle}
+        />
+      </section>
 
-      {/* Spotlight: AI Summary — main info in the spotlight */}
-      {hasCommentary && displayCommentary && (
+      {hasCommentary && displayCommentary ? (
         <section
-          className={`${TASTE_PANEL_CLASS} animate-fade-in-up transition-all duration-300 hover:shadow-card-hover`}
+          className={`relative ${DASHBOARD_SPOTLIGHT_SHELL} animate-fade-in-up transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-slate-900/10 dark:hover:shadow-black/35`}
           aria-labelledby="taste-evolution-spotlight-title"
         >
-          <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${TASTE_RAIL_CLASS} opacity-85`} />
-          <div className="pointer-events-none absolute -right-20 -top-24 h-56 w-56 rounded-full bg-sky-400/12 blur-3xl dark:bg-sky-400/16" />
-          <div className="pointer-events-none absolute -bottom-24 left-10 h-52 w-52 rounded-full bg-emerald-400/12 blur-3xl dark:bg-emerald-400/16" />
-
+          <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} aria-hidden />
+          <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} aria-hidden />
           <div className="relative">
-            <div className="border-b border-sky-200/20 px-6 py-5 dark:border-sky-300/10">
+            <div className={`${DASHBOARD_SPOTLIGHT_HEADER_BOTTOM} px-6 py-5 sm:px-8`}>
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-sky-300/25 bg-sky-300/10 text-sky-600 shadow-sm shadow-sky-950/10 dark:text-sky-200">
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={1.5}
-                    aria-hidden
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="m3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z"
-                    />
-                  </svg>
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200/90 bg-slate-50 text-violet-600 shadow-sm dark:border-white/10 dark:bg-white/10 dark:text-violet-200">
+                  <Zap className="h-5 w-5" aria-hidden />
                 </div>
                 <div>
-                  <h2
-                    id="taste-evolution-spotlight-title"
-                    className="text-lg font-semibold tracking-tight text-gray-900 dark:text-white"
-                  >
+                  <h3 id="taste-evolution-spotlight-title" className={DASHBOARD_SPOTLIGHT_TITLE}>
                     {t("spotlightTitle")}
-                  </h2>
-                  <p className="mt-0.5 text-sm text-sky-700/75 dark:text-sky-100/65">
+                  </h3>
+                  <p className={`mt-0.5 ${DASHBOARD_SPOTLIGHT_MUTED}`}>
                     {t("spotlightHint")}
-                    {data.commentaryCached && (
-                      <span className="ml-1">{t("cached")}</span>
-                    )}
+                    {data.commentaryCached ? <span className="ml-1">{t("cached")}</span> : null}
                   </p>
                 </div>
               </div>
             </div>
             <div className="p-6 sm:p-8">
-              <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">
-                {displayCommentary}
-              </p>
+              <p className="leading-relaxed whitespace-pre-line text-slate-700 dark:text-slate-300">{displayCommentary}</p>
             </div>
           </div>
         </section>
-      )}
+      ) : null}
 
-      {/* Skipped weeks notice */}
-      {data.skippedWeeks.length > 0 && (
-        <div className="rounded-lg border border-amber-300/20 bg-amber-400/10 px-4 py-3">
-          <p className="text-sm text-amber-800 dark:text-amber-200">
-            <strong>{t("skippedWeeks")} :</strong>{" "}
-            {data.skippedWeeks.map((s) => `${s.weekStart} (${s.reason})`).join(" ; ")}
+      {data.skippedWeeks.length > 0 ? (
+        <div className={`${DASHBOARD_SPOTLIGHT_INNER_WELL} border-amber-200/90 bg-amber-50/90 dark:border-amber-400/25 dark:bg-amber-950/35`}>
+          <p className="text-sm text-amber-950 dark:text-amber-100">
+            <strong>{t("skippedWeeks")}:</strong> {data.skippedWeeks.map((s) => `${s.weekStart} (${s.reason})`).join(" · ")}
           </p>
         </div>
-      )}
+      ) : null}
 
-      {/* Trend cards */}
-      <div className="space-y-6">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+      <section className="space-y-6" aria-labelledby="taste-weekly-trends-title">
+        <h3 id="taste-weekly-trends-title" className={DASHBOARD_SPOTLIGHT_TITLE}>
           {t("weeklyTrends")}
-        </h2>
+        </h3>
         <div className="space-y-6">
           {[...data.trends].reverse().map((trend, index) => (
-            <TrendCard
-              key={trend.timeRange.weekStart}
-              trend={trend}
-              t={t}
-              isLastWeek={index === 0}
-            />
+            <TrendCard key={trend.timeRange.weekStart} trend={trend} t={t} isLastWeek={index === 0} />
           ))}
         </div>
-      </div>
+      </section>
     </div>
   );
 }
@@ -617,50 +625,26 @@ function TasteEvolutionFallback() {
   const end = new Date();
   const start = new Date();
   start.setDate(start.getDate() - 56);
-  const rangeLabel = formatDateRange(
-    start.toISOString().split("T")[0],
-    end.toISOString().split("T")[0],
-    locale,
-  );
+  const rangeLabel = formatDateRange(start.toISOString().split("T")[0], end.toISOString().split("T")[0], locale);
   return (
-    <div className="mx-auto max-w-4xl space-y-8">
-      <TasteEvolutionHeroFrame
-        badgeLabel={rangeLabel}
-        description={t("loadingShort")}
-        stats={<TasteEvolutionHeroStatsSkeleton />}
-        aside={
-          <div className="flex w-full flex-col gap-2 sm:w-auto">
-            <div className="h-3 w-24 animate-pulse rounded bg-white/15" />
-            <div className="h-10 w-52 animate-pulse rounded-xl bg-white/10" />
-          </div>
-        }
-      />
+    <div className="mx-auto max-w-6xl space-y-8">
+      <section aria-labelledby="taste-evolution-heading">
+        <h2 id="taste-evolution-heading" className="sr-only">
+          {t("title")}
+        </h2>
+        <TasteEvolutionHeroFrame
+          badgeLabel={rangeLabel}
+          description={t("loadingShort")}
+          stats={<TasteEvolutionHeroStatsSkeleton />}
+          summaryToggle={<SummaryToggleSkeleton />}
+        />
+      </section>
       <TasteEvolutionSpotlightSkeleton />
       <div className="space-y-6">
-        <div className="h-8 w-48 rounded bg-gray-200 dark:bg-gray-700 animate-shimmer max-w-full" />
+        <div className="h-8 w-48 max-w-full animate-shimmer rounded-lg bg-slate-200 dark:bg-white/10" />
         <div className="space-y-6">
           {[1, 2].map((i) => (
-            <div
-              key={i}
-              className={TASTE_PANEL_CLASS}
-            >
-                <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${TASTE_RAIL_CLASS} opacity-70`} />
-                <div className="px-5 py-4 flex flex-wrap items-center justify-between gap-3 border-b border-sky-200/20 dark:border-sky-300/10">
-                <div className="space-y-2 flex-1 min-w-[200px]">
-                  <div className="h-5 w-56 max-w-full rounded bg-gray-200 dark:bg-gray-700 animate-shimmer" />
-                  <div className="h-4 w-40 max-w-full rounded bg-gray-200 dark:bg-gray-700 animate-shimmer" />
-                </div>
-                <div className="h-8 w-28 rounded-full bg-gray-200 dark:bg-gray-700 animate-shimmer shrink-0" />
-              </div>
-              <div className="p-5 grid grid-cols-2 sm:grid-cols-4 gap-4">
-                {[0, 1, 2, 3].map((j) => (
-                  <div key={j} className="space-y-2">
-                    <div className="h-3 w-16 rounded bg-gray-200 dark:bg-gray-700 animate-shimmer" />
-                    <div className="h-6 w-24 rounded bg-gray-200 dark:bg-gray-700 animate-shimmer" />
-                  </div>
-                ))}
-              </div>
-            </div>
+            <TrendCardSkeleton key={i} />
           ))}
         </div>
       </div>

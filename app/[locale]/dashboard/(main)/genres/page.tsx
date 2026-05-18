@@ -30,6 +30,23 @@ import { GenresSkeleton } from "@/lib/components/skeleton-loaders";
 import { usePublicDemoViewer } from "@/lib/hooks/use-public-demo-viewer";
 import { useArtistSpotifyImageResolution } from "@/lib/hooks/use-artist-spotify-image-resolution";
 import { LineChart } from "lucide-react";
+import {
+  DASHBOARD_SPOTLIGHT_SHELL,
+  DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY,
+  DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET,
+  DASHBOARD_SPOTLIGHT_HEADER_BOTTOM,
+  DASHBOARD_SPOTLIGHT_MUTED,
+  DASHBOARD_SPOTLIGHT_BADGE_VIOLET,
+  DASHBOARD_SPOTLIGHT_BADGE_DOT_VIOLET,
+  DASHBOARD_SPOTLIGHT_INNER_WELL,
+  DASHBOARD_SPOTLIGHT_FOOTER,
+  DASHBOARD_SPOTLIGHT_FOOTER_TEXT,
+  DASHBOARD_SPOTLIGHT_BTN_SECONDARY,
+  DASHBOARD_SPOTLIGHT_SELECT,
+  DASHBOARD_SPOTLIGHT_LABEL,
+  DASHBOARD_CHART_THEME,
+} from "@/lib/constants/dashboard-spotlight";
+import { useTheme } from "@/lib/providers/theme-provider";
 
 type ChartType = "pie" | "bar";
 
@@ -51,6 +68,10 @@ const GENRE_ACTIVE_TAB_CLASS =
 
 const GENRES_HERO_SHELL_CLASS =
   "relative overflow-hidden rounded-[2rem] border border-white/10 bg-gray-950 px-5 py-6 text-white shadow-2xl shadow-violet-500/15 sm:px-8 sm:py-9 lg:px-10 lg:py-10";
+
+/** Aligné sur `TopThreeArtists` — ombre forte et panneau d’infos au survol. */
+const GENRE_SPOTLIGHT_CARD_SHELL_CLASS =
+  "group relative overflow-hidden rounded-[1.75rem] border border-white/80 bg-white/90 p-2 shadow-card backdrop-blur transition-all duration-500 hover:-translate-y-1.5 hover:border-white hover:shadow-[0_28px_80px_-34px_rgba(80,42,130,0.65)] opacity-0 animate-fade-in-up ring-1 ring-card-border dark:border-white/10 dark:bg-black/30 dark:shadow-xl dark:shadow-black/40 dark:ring-white/10 dark:hover:border-white/20 dark:hover:shadow-[0_28px_70px_-40px_rgba(0,0,0,0.75)]";
 
 function GenresHeroFrame({
   trendsHref,
@@ -339,13 +360,13 @@ const TopGenreArtistBgSlotHydrated = memo(function TopGenreArtistBgSlotHydrated(
   const url = resolved?.trim() ?? null;
   const showImg = Boolean(url && !failed);
   return (
-    <div className="relative min-h-[120px] flex-1 min-w-0 border-r border-white/10 last:border-r-0 sm:min-h-[140px]">
+    <div className="relative min-h-[120px] flex-1 min-w-0 border-r border-slate-200/80 last:border-r-0 sm:min-h-[140px] dark:border-white/10">
       {showImg ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={url!}
           alt=""
-          className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110 group-focus-visible:scale-110"
           loading="lazy"
           decoding="async"
           referrerPolicy="no-referrer"
@@ -377,7 +398,7 @@ function TopGenreArtistBgSlot({
 }) {
   if (!artistId) {
     return (
-      <div className="relative min-h-[120px] flex-1 min-w-0 border-r border-white/10 last:border-r-0 sm:min-h-[140px]">
+      <div className="relative min-h-[120px] flex-1 min-w-0 border-r border-slate-200/80 last:border-r-0 sm:min-h-[140px] dark:border-white/10">
         <div
           className={`absolute inset-0 bg-gradient-to-br ${fallbackClass}`}
           aria-hidden
@@ -460,6 +481,8 @@ function PieChartLegend({
 
 function GenresContent() {
   const searchParams = useSearchParams();
+  const { resolvedTheme } = useTheme();
+  const chartTheme = DASHBOARD_CHART_THEME[resolvedTheme === "dark" ? "dark" : "light"];
   const userId = searchParams.get("userId") ?? undefined;
   const paletteAccessRestricted = searchParams.get("palette") === "restricted";
   const isPublicDemoViewer = usePublicDemoViewer(userId);
@@ -537,7 +560,7 @@ function GenresContent() {
         fill="currentColor"
         textAnchor="middle"
         dominantBaseline="central"
-        className="fill-slate-200"
+        className="fill-slate-700 dark:fill-slate-200"
         style={{ fontSize: "clamp(9px, 2vw, 12px)" }}
       >
         {`${pct.toFixed(1)}%`}
@@ -562,11 +585,6 @@ function GenresContent() {
       updateDetailPaginationParams(detailTotalPages, detailPageSize);
     }
   }, [detailPage, detailPageSize, detailTotalPages, updateDetailPaginationParams]);
-  const gradientByRank = [
-    "from-indigo-400 via-cyan-400 to-sky-400",
-    "from-fuchsia-500 via-rose-500 to-orange-400",
-    "from-violet-500 via-indigo-500 to-amber-400",
-  ];
   /** Fallback visuel par colonne si pas d’image ou moins de 3 artistes. */
   const slotFallbacks = [
     "from-indigo-800/95 via-sky-900/90 to-black/80",
@@ -635,64 +653,71 @@ function GenresContent() {
                 />
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
                   {top3Genres.map((genre, index) => {
-                    const maxCount = chartData[0]?.count ?? 1;
-                    const progress = (genre.count / maxCount) * 100;
                     const artists = topArtistsByGenre.get(genre.name) ?? [];
                     const slots = Array.from({ length: 3 }, (_, i) => artists[i] ?? null);
                     return (
                       <div
                         key={genre.name}
-                        className="group relative overflow-hidden rounded-3xl bg-gray-900
-                          shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1
-                          opacity-0 animate-fade-in-up ring-1 ring-white/10"
+                        className={GENRE_SPOTLIGHT_CARD_SHELL_CLASS}
                         style={{ animationDelay: `${index * 80}ms` }}
                       >
-                        <div className="absolute inset-0 flex">
-                          {slots.map((artist, slotIdx) => (
-                            <TopGenreArtistBgSlot
-                              key={`${genre.name}-slot-${slotIdx}`}
-                              artistId={artist?.id ?? null}
-                              imageUrl={artist?.imageUrl ?? null}
-                              label={artist?.name ?? ""}
-                              fallbackClass={slotFallbacks[slotIdx] ?? slotFallbacks[0]}
-                            />
-                          ))}
-                        </div>
-                        <div
-                          className={`absolute inset-0 bg-gradient-to-br ${gradientByRank[index]} opacity-[0.12] mix-blend-overlay`}
-                          aria-hidden
-                        />
-                        <div
-                          className="absolute inset-0 bg-gradient-to-t from-black via-black/75 to-black/35"
-                          aria-hidden
-                        />
-                        <div className="relative z-10 flex min-h-[280px] flex-col justify-end p-6 pt-16 sm:min-h-[300px]">
-                          <span className="absolute right-4 top-4 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-white text-sm font-black text-gray-900 shadow-lg ring-2 ring-black/20">
-                            {index + 1}
-                          </span>
-                          <div className="mb-3 flex flex-wrap gap-1.5">
-                            {artists.slice(0, 3).map((a) => (
-                              <span
-                                key={a.id}
-                                className="truncate rounded-full bg-white/15 px-2 py-0.5 text-[11px] font-medium text-white/95 backdrop-blur-sm max-w-full"
-                                title={a.name}
-                              >
-                                {a.name}
-                              </span>
+                        <div className="relative min-h-[280px] overflow-hidden rounded-[1.35rem] bg-slate-100 dark:bg-slate-900 sm:min-h-[300px]">
+                          <div className="absolute inset-0 flex">
+                            {slots.map((artist, slotIdx) => (
+                              <TopGenreArtistBgSlot
+                                key={`${genre.name}-slot-${slotIdx}`}
+                                artistId={artist?.id ?? null}
+                                imageUrl={artist?.imageUrl ?? null}
+                                label={artist?.name ?? ""}
+                                fallbackClass={slotFallbacks[slotIdx] ?? slotFallbacks[0]}
+                              />
                             ))}
                           </div>
-                          <h3 className="text-lg font-bold text-white drop-shadow-sm truncate">
-                            {genre.name}
-                          </h3>
-                          <p className="mt-1 text-2xl font-extrabold tabular-nums text-white drop-shadow-md">
-                            {genre.count.toLocaleString(locale)}
-                          </p>
-                          <p className="text-sm text-white/75">{t("listens")}</p>
-                          <div className="mt-4 h-2 w-full max-w-[200px] overflow-hidden rounded-full bg-white/20">
-                            <div
-                              className="h-full rounded-full bg-gradient-to-r from-white/90 to-white/60 transition-all duration-500"
-                              style={{ width: `${Math.min(progress, 100)}%` }}
-                            />
+                          <div
+                            className="absolute inset-0 bg-gradient-to-t from-white/20 via-transparent to-white/10 opacity-70 transition-opacity duration-500 group-hover:opacity-35 dark:from-black/45 dark:via-transparent dark:to-black/30 dark:opacity-85 dark:group-hover:opacity-40"
+                            aria-hidden
+                          />
+                          <div
+                            className="pointer-events-none absolute inset-x-0 bottom-0 z-[11] h-32 bg-gradient-to-t from-black/60 via-black/20 to-transparent transition-opacity duration-300 group-hover:opacity-0 dark:from-black/70 dark:via-black/25"
+                            aria-hidden
+                          />
+                          <span className="absolute right-4 top-4 z-[13] flex h-11 w-11 items-center justify-center rounded-full border border-white/70 bg-white/90 text-lg font-black text-gray-950 shadow-xl shadow-black/10 backdrop-blur ring-1 ring-black/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100 dark:border-white/20 dark:bg-slate-900/95 dark:text-white dark:shadow-black/40 dark:ring-white/10">
+                            {index + 1}
+                          </span>
+                          <div className="pointer-events-none absolute inset-x-4 bottom-4 z-[12] transition-opacity duration-300 group-hover:opacity-0">
+                            <h3 className="truncate text-xl font-semibold tracking-[-0.03em] text-white drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)]">
+                              {genre.name}
+                            </h3>
+                          </div>
+                          <div className="absolute inset-x-3 bottom-3 z-[14] translate-y-6 rounded-3xl border border-white/80 bg-white/90 p-4 opacity-0 shadow-2xl shadow-black/20 backdrop-blur-xl transition-all duration-500 ease-out group-hover:translate-y-0 group-hover:opacity-100 dark:border-white/10 dark:bg-slate-950/85">
+                            {artists.length > 0 ? (
+                              <div className="mb-3 flex flex-wrap gap-1.5">
+                                {artists.slice(0, 3).map((a) => (
+                                  <span
+                                    key={a.id}
+                                    className="truncate rounded-full border border-slate-200/90 bg-white/95 px-2 py-0.5 text-[11px] font-medium text-slate-800 shadow-sm backdrop-blur-sm max-w-full dark:border-white/15 dark:bg-white/12 dark:text-white/95"
+                                    title={a.name}
+                                  >
+                                    {a.name}
+                                  </span>
+                                ))}
+                              </div>
+                            ) : null}
+                            <div className="flex items-end justify-between gap-3">
+                              <div className="min-w-0">
+                                <h3 className="truncate text-xl font-semibold tracking-[-0.03em] text-gray-950 dark:text-white">
+                                  {genre.name}
+                                </h3>
+                              </div>
+                              <div className="shrink-0 text-right">
+                                <p className="text-3xl font-semibold tabular-nums tracking-[-0.04em] text-gray-950 dark:text-white">
+                                  {genre.count.toLocaleString(locale)}
+                                </p>
+                                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
+                                  {t("listens")}
+                                </p>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -708,15 +733,17 @@ function GenresContent() {
                 title={t("sections.distribution.title")}
                 description={t("sections.distribution.description")}
               />
-              <div className="relative mb-8 overflow-hidden rounded-[2rem] border border-slate-200/90 bg-gradient-to-br from-white via-slate-50/90 to-white px-5 py-4 shadow-xl shadow-slate-900/[0.06] ring-1 ring-slate-900/[0.04] dark:border-slate-300/50 dark:from-slate-100 dark:via-white dark:to-slate-50">
+              <div className="relative mb-8 overflow-hidden rounded-[2rem] border border-slate-200/90 bg-gradient-to-br from-white via-slate-50/90 to-white px-5 py-4 shadow-xl shadow-slate-900/[0.06] ring-1 ring-slate-900/[0.04] dark:border-white/10 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 dark:shadow-black/25 dark:ring-white/5">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted">{t("chart")}</span>
-                  <div className="flex w-fit items-center rounded-xl border border-slate-200/90 bg-white p-1.5 shadow-inner dark:border-slate-300/70 dark:bg-white">
+                  <div className="flex w-fit items-center rounded-xl border border-slate-200/90 bg-white p-1.5 shadow-inner dark:border-white/15 dark:bg-black/35 dark:shadow-inner dark:shadow-white/[0.04]">
                     <button
                       type="button"
                       onClick={() => setChartType("pie")}
                       className={`relative z-10 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-4 sm:text-sm ${
-                        chartType === "pie" ? GENRE_ACTIVE_TAB_CLASS : "text-slate-600 hover:text-slate-900"
+                        chartType === "pie"
+                          ? GENRE_ACTIVE_TAB_CLASS
+                          : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
                       }`}
                     >
                       {t("pie")}
@@ -725,7 +752,9 @@ function GenresContent() {
                       type="button"
                       onClick={() => setChartType("bar")}
                       className={`relative z-10 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-4 sm:text-sm ${
-                        chartType === "bar" ? GENRE_ACTIVE_TAB_CLASS : "text-slate-600 hover:text-slate-900"
+                        chartType === "bar"
+                          ? GENRE_ACTIVE_TAB_CLASS
+                          : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
                       }`}
                     >
                       {t("bar")}
@@ -734,18 +763,15 @@ function GenresContent() {
                 </div>
               </div>
 
-              <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950 text-white shadow-2xl shadow-black/25 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-black/35">
-                <div
-                  className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(139,92,246,0.14),transparent_32%),radial-gradient(circle_at_12%_70%,rgba(6,182,212,0.1),transparent_34%)]"
-                  aria-hidden
-                />
-                <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-violet-200/35 to-transparent" aria-hidden />
-                <div className="relative border-b border-white/10 px-5 py-5 sm:px-8">
-                  <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-violet-300/25 bg-violet-300/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-violet-100">
-                    <span className="h-2 w-2 rounded-full bg-violet-300 shadow-[0_0_14px_rgba(167,139,250,0.55)]" aria-hidden />
+              <div className={DASHBOARD_SPOTLIGHT_SHELL}>
+                <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} aria-hidden />
+                <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} aria-hidden />
+                <div className={`relative ${DASHBOARD_SPOTLIGHT_HEADER_BOTTOM} px-5 py-5 sm:px-8`}>
+                  <div className={`mb-2 ${DASHBOARD_SPOTLIGHT_BADGE_VIOLET}`}>
+                    <span className={DASHBOARD_SPOTLIGHT_BADGE_DOT_VIOLET} aria-hidden />
                     {t("distributionTitle")}
                   </div>
-                  <p className="text-sm text-slate-400">
+                  <p className={DASHBOARD_SPOTLIGHT_MUTED}>
                     {data
                       ? `${t("totalListens")}: ${data.totalListens.toLocaleString(locale)} ${t("listens")}`
                       : t("totalListens")}
@@ -755,7 +781,7 @@ function GenresContent() {
               {isLoadingOrFetching ? (
                 <GenreChartSkeleton type={chartType} />
               ) : chartType === "pie" ? (
-                <div className="relative mb-10 min-w-[260px] rounded-[1.35rem] border border-white/10 bg-black/25 p-3 h-[280px] sm:h-[380px] lg:h-[500px]">
+                <div className="relative mb-10 min-w-[260px] rounded-[1.35rem] border border-slate-200/80 bg-slate-50/70 p-3 dark:border-white/10 dark:bg-black/25 h-[280px] sm:h-[380px] lg:h-[500px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <defs>
@@ -779,7 +805,7 @@ function GenresContent() {
                         <Cell
                           key={`cell-${entry.name}-${index}`}
                           fill={COLORS[index % COLORS.length]}
-                          stroke="rgba(15,23,42,0.9)"
+                          stroke={chartTheme.pieStroke}
                           strokeWidth={2}
                         />
                       ))}
@@ -787,10 +813,10 @@ function GenresContent() {
                     <Tooltip content={CustomTooltip} />
                   </PieChart>
                 </ResponsiveContainer>
-                <PieChartLegend data={chartDisplayData} colors={COLORS} locale={locale} variant="dark" />
+                <PieChartLegend data={chartDisplayData} colors={COLORS} locale={locale} variant={resolvedTheme === "dark" ? "dark" : "light"} />
                 </div>
               ) : (
-                <div className="relative min-w-[280px] rounded-[1.35rem] border border-white/10 bg-black/25 p-3 h-[320px] sm:h-[400px] lg:h-[500px]">
+                <div className="relative min-w-[280px] rounded-[1.35rem] border border-slate-200/80 bg-slate-50/70 p-3 dark:border-white/10 dark:bg-black/25 h-[320px] sm:h-[400px] lg:h-[500px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
                     data={chartDisplayData}
@@ -808,7 +834,7 @@ function GenresContent() {
                     </defs>
                     <CartesianGrid
                       strokeDasharray="3 3"
-                      stroke="rgba(148,163,184,0.18)"
+                      stroke={chartTheme.grid}
                       vertical={false}
                     />
                     <XAxis
@@ -816,16 +842,16 @@ function GenresContent() {
                       angle={-45}
                       textAnchor="end"
                       height={80}
-                      tick={{ fill: "#94a3b8", fontSize: 10 }}
-                      stroke="rgba(148,163,184,0.35)"
+                      tick={{ fill: chartTheme.tick, fontSize: 10 }}
+                      stroke={chartTheme.axisStroke}
                       interval={0}
                     />
                     <YAxis
-                      tick={{ fill: "#94a3b8", fontSize: 12 }}
-                      stroke="rgba(148,163,184,0.35)"
+                      tick={{ fill: chartTheme.tick, fontSize: 12 }}
+                      stroke={chartTheme.axisStroke}
                     />
                     <Tooltip content={CustomTooltip} />
-                    <Legend wrapperStyle={{ color: "#cbd5e1", fontSize: 12 }} />
+                    <Legend wrapperStyle={{ color: chartTheme.legend, fontSize: 12 }} />
                     <Bar
                       dataKey="count"
                       name={t("Listens")}
@@ -838,8 +864,8 @@ function GenresContent() {
                 </div>
               )}
 
-              <div className="mt-12 border-t border-white/10 pt-8 sm:mt-14 sm:pt-10">
-                <h3 className="mb-3 text-xs font-semibold text-white sm:mb-4 sm:text-sm">
+              <div className="mt-12 border-t border-slate-200/90 pt-8 dark:border-white/10 sm:mt-14 sm:pt-10">
+                <h3 className="mb-3 text-xs font-semibold text-slate-900 sm:mb-4 sm:text-sm dark:text-white">
                   {t("detailByGenre")}
                 </h3>
                 {isLoadingOrFetching ? (
@@ -850,10 +876,10 @@ function GenresContent() {
                     const absoluteIndex = detailOffset + index;
                     const maxCount = chartData[0]?.count ?? 1;
                     const widthPercent = (item.count / maxCount) * 100;
-                    const rankColors = ["text-amber-400", "text-slate-300", "text-amber-500"];
-                    const rankBg = ["bg-amber-400/20", "bg-slate-400/15", "bg-amber-500/20"];
+                    const rankColors = ["text-amber-700 dark:text-amber-400", "text-slate-600 dark:text-slate-300", "text-amber-800 dark:text-amber-500"];
+                    const rankBg = ["bg-amber-100 dark:bg-amber-400/20", "bg-slate-200 dark:bg-slate-400/15", "bg-amber-100 dark:bg-amber-500/20"];
                     const rankStyle = absoluteIndex < 3 ? rankColors[absoluteIndex] : "text-slate-500";
-                    const rankBgStyle = absoluteIndex < 3 ? rankBg[absoluteIndex] : "bg-white/10";
+                    const rankBgStyle = absoluteIndex < 3 ? rankBg[absoluteIndex] : "bg-slate-200/80 dark:bg-white/10";
                     return (
                       <div key={item.name} className="group">
                         <div className="mb-1 flex flex-col gap-0.5 sm:mb-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
@@ -866,20 +892,20 @@ function GenresContent() {
                               style={{ backgroundColor: COLORS[absoluteIndex % COLORS.length] }}
                               aria-hidden
                             />
-                            <span className="min-w-0 truncate text-xs font-medium text-white sm:text-sm">
+                            <span className="min-w-0 truncate text-xs font-medium text-slate-900 sm:text-sm dark:text-white">
                               {item.name}
                             </span>
                           </div>
                           <div className="ml-8 flex shrink-0 items-center gap-2 sm:ml-0 sm:gap-4">
-                            <span className="text-xs font-semibold tabular-nums text-white sm:text-sm">
+                            <span className="text-xs font-semibold tabular-nums text-slate-900 sm:text-sm dark:text-white">
                               {item.count.toLocaleString(locale)}
                             </span>
-                            <span className="w-10 shrink-0 text-right text-[11px] tabular-nums text-slate-400 sm:w-12 sm:text-xs">
+                            <span className="w-10 shrink-0 text-right text-[11px] tabular-nums text-slate-600 sm:w-12 sm:text-xs dark:text-slate-400">
                               {item.percentage.toFixed(1)}%
                             </span>
                           </div>
                         </div>
-                        <div className="ml-8 h-1.5 overflow-hidden rounded-full bg-white/10 sm:ml-10">
+                        <div className="ml-8 h-1.5 overflow-hidden rounded-full bg-slate-200/90 sm:ml-10 dark:bg-white/10">
                           <div
                             className="h-full rounded-full shadow-[0_0_18px_-6px_currentColor] transition-all duration-500 ease-out"
                             style={{
@@ -893,8 +919,8 @@ function GenresContent() {
                   })}
                 </div>
                 )}
-                <div className="mt-4 flex flex-col gap-3 border-t border-white/10 bg-white/[0.04] pt-4 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="text-sm text-slate-300">
+                <div className={DASHBOARD_SPOTLIGHT_FOOTER}>
+                  <p className={DASHBOARD_SPOTLIGHT_FOOTER_TEXT}>
                     {t("paginationSummary", {
                       start: detailStart,
                       end: detailEnd,
@@ -906,30 +932,30 @@ function GenresContent() {
                       type="button"
                       onClick={() => updateDetailPaginationParams(detailPage - 1, detailPageSize)}
                       disabled={detailPage === 1}
-                      className="inline-flex min-h-[36px] items-center justify-center rounded-lg border border-white/15 bg-white/10 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-50"
+                      className={`${DASHBOARD_SPOTLIGHT_BTN_SECONDARY} min-h-[36px] px-3 py-1.5 text-sm font-medium`}
                     >
                       {t("paginationPrevious")}
                     </button>
-                    <label className="ml-2 inline-flex items-center gap-2 text-sm text-slate-300">
+                    <label className={`ml-2 ${DASHBOARD_SPOTLIGHT_LABEL}`}>
                       <span>{t("pageSizeLabel")}</span>
                       <select
                         value={detailPageSize}
                         onChange={(e) => updateDetailPaginationParams(1, Number(e.target.value))}
-                        className="rounded-lg border border-white/15 bg-slate-900 px-2 py-1 text-sm text-white"
+                        className={`${DASHBOARD_SPOTLIGHT_SELECT} rounded-lg px-2 py-1`}
                       >
                         <option value={10}>10</option>
                         <option value={20}>20</option>
                         <option value={50}>50</option>
                       </select>
                     </label>
-                    <span className="px-2 text-sm text-slate-300">
+                    <span className={`px-2 ${DASHBOARD_SPOTLIGHT_FOOTER_TEXT}`}>
                       {t("paginationPage", { page: detailPage, totalPages: detailTotalPages })}
                     </span>
                     <button
                       type="button"
                       onClick={() => updateDetailPaginationParams(detailPage + 1, detailPageSize)}
                       disabled={detailPage >= detailTotalPages}
-                      className="inline-flex min-h-[36px] items-center justify-center rounded-lg border border-white/15 bg-white/10 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-50"
+                      className={`${DASHBOARD_SPOTLIGHT_BTN_SECONDARY} min-h-[36px] px-3 py-1.5 text-sm font-medium`}
                     >
                       {t("paginationNext")}
                     </button>

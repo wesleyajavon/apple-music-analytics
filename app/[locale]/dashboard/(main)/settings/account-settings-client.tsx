@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
+import { LayoutDashboard, Settings2, Upload } from "lucide-react";
 import { Link, useRouter } from "@/i18n/navigation";
 import {
   isRecentAuthRequiredError,
@@ -15,9 +16,28 @@ import {
   setGenreBackfillBannerOptOut,
 } from "@/lib/utils/genre-backfill-banner-prefs";
 import { DASHBOARD_ONBOARDING_REIMPORT_PATH } from "@/lib/utils/onboarding-route";
+import {
+  DASHBOARD_SPOTLIGHT_SHELL,
+  DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY,
+  DASHBOARD_SPOTLIGHT_GRADIENT_CYAN,
+  DASHBOARD_SPOTLIGHT_GRADIENT_TABLE,
+  DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET,
+  DASHBOARD_SPOTLIGHT_HAIRLINE_CYAN,
+  DASHBOARD_SPOTLIGHT_HEADER_BOTTOM,
+  DASHBOARD_SPOTLIGHT_INNER_WELL,
+  DASHBOARD_SPOTLIGHT_MUTED,
+  DASHBOARD_SPOTLIGHT_BTN_SECONDARY,
+  DASHBOARD_SPOTLIGHT_PILL_MUTED,
+} from "@/lib/constants/dashboard-spotlight";
 
 const SUBNAV_STICKY_TOP =
   "top-[calc(var(--dashboard-filter-height,4.5rem)+0.5rem)]";
+
+const SETTINGS_HERO_SHELL_CLASS =
+  "relative overflow-hidden rounded-[2rem] border border-white/10 bg-gray-950 px-5 py-6 text-white shadow-2xl shadow-violet-500/15 sm:px-8 sm:py-9 lg:px-10 lg:py-10";
+
+const INPUT_CLASS =
+  "mt-2 w-full rounded-xl border border-slate-200/90 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-400/15 dark:border-white/10 dark:bg-black/30 dark:text-white dark:placeholder:text-slate-500";
 
 function SettingsSwitch({
   id,
@@ -41,12 +61,12 @@ function SettingsSwitch({
       aria-label={ariaLabel}
       disabled={disabled}
       onClick={() => !disabled && onChange(!checked)}
-      className={`relative inline-flex h-7 w-12 shrink-0 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
-        checked ? "bg-accent-emerald" : "bg-muted"
+      className={`relative inline-flex h-7 w-12 shrink-0 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950 ${
+        checked ? "bg-accent-emerald" : "bg-white/20"
       } ${disabled ? "cursor-not-allowed opacity-50" : ""}`}
     >
       <span
-        className={`pointer-events-none block h-6 w-6 translate-y-0.5 rounded-full bg-white shadow transition-transform dark:bg-foreground/95 ${
+        className={`pointer-events-none block h-6 w-6 translate-y-0.5 rounded-full bg-white shadow transition-transform ${
           checked ? "translate-x-5" : "translate-x-0.5"
         }`}
       />
@@ -54,34 +74,187 @@ function SettingsSwitch({
   );
 }
 
-function SectionCard({
+function SettingsHeroTrustPanel() {
+  const t = useTranslations("settings");
+  return (
+    <ul className="mt-4 space-y-3 text-sm leading-6 text-white/75">
+      <li className="flex gap-2">
+        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.55)]" aria-hidden />
+        <span>{t("heroTrust1")}</span>
+      </li>
+      <li className="flex gap-2">
+        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.55)]" aria-hidden />
+        <span>{t("heroTrust2")}</span>
+      </li>
+      <li className="flex gap-2">
+        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.55)]" aria-hidden />
+        <span>{t("heroTrust3")}</span>
+      </li>
+    </ul>
+  );
+}
+
+function SettingsHeroSignedOutTrustPanel() {
+  const t = useTranslations("settings");
+  return (
+    <ul className="mt-4 space-y-3 text-sm leading-6 text-white/75">
+      <li className="flex gap-2">
+        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.45)]" aria-hidden />
+        <span>{t("signedOutTrust1")}</span>
+      </li>
+      <li className="flex gap-2">
+        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.45)]" aria-hidden />
+        <span>{t("signedOutTrust2")}</span>
+      </li>
+      <li className="flex gap-2">
+        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.45)]" aria-hidden />
+        <span>{t("signedOutTrust3")}</span>
+      </li>
+    </ul>
+  );
+}
+
+function SettingsHeroConnected() {
+  const t = useTranslations("settings");
+  return (
+    <div className={SETTINGS_HERO_SHELL_CLASS}>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.26),transparent_30%),radial-gradient(circle_at_80%_12%,rgba(6,182,212,0.2),transparent_32%),linear-gradient(135deg,rgba(3,7,18,0.98),rgba(30,27,75,0.88)_48%,rgba(8,47,73,0.72))]" />
+      <div className="absolute -left-20 top-1/3 h-64 w-64 rounded-full bg-accent-violet/22 blur-3xl" />
+      <div className="absolute -bottom-28 right-10 h-72 w-72 rounded-full bg-accent-cyan/18 blur-3xl" />
+      <div className="relative grid gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-center">
+        <div>
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-violet-100 backdrop-blur">
+            <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_18px_rgb(22_199_132_/0.75)]" />
+            {t("heroEyebrow")}
+          </div>
+          <h1 className="flex flex-wrap items-center gap-3 text-4xl font-semibold tracking-[-0.06em] text-white sm:text-5xl lg:text-6xl">
+            <Settings2 className="h-9 w-9 shrink-0 text-violet-200/90 sm:h-11 sm:w-11" aria-hidden />
+            <span className="max-w-4xl text-balance">{t("title")}</span>
+          </h1>
+          <p className="mt-5 max-w-2xl text-base leading-7 text-white/70 sm:text-lg">{t("subtitle")}</p>
+          <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <Link
+              href="/dashboard/overview"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25 transition-all hover:-translate-y-0.5 hover:bg-gray-100"
+            >
+              <LayoutDashboard className="h-4 w-4" aria-hidden />
+              {t("ctaOverview")}
+            </Link>
+            <Link
+              href={DASHBOARD_ONBOARDING_REIMPORT_PATH}
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-black/20 backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white/15"
+            >
+              {t("importExportsCta")}
+            </Link>
+          </div>
+        </div>
+
+        <div className="relative">
+          <div className="absolute -inset-4 rounded-[2rem] bg-brand-gradient-soft blur-2xl" aria-hidden />
+          <div className="relative overflow-hidden rounded-[1.75rem] border border-white/15 bg-white/10 p-3 shadow-2xl shadow-black/35 backdrop-blur-xl">
+            <div className="rounded-[1.35rem] border border-white/10 bg-slate-950/70 p-4">
+              <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                <p className="font-mono text-[0.66rem] font-semibold uppercase tracking-[0.24em] text-slate-400">{t("heroStatBadge")}</p>
+                <span className="rounded-full border border-violet-300/25 bg-violet-300/10 px-2.5 py-1 text-[0.66rem] font-semibold text-violet-100">{t("heroStatTag")}</span>
+              </div>
+              <SettingsHeroTrustPanel />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SettingsHeroSignedOut() {
+  const t = useTranslations("settings");
+  return (
+    <div className={SETTINGS_HERO_SHELL_CLASS}>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.26),transparent_30%),radial-gradient(circle_at_80%_12%,rgba(6,182,212,0.2),transparent_32%),linear-gradient(135deg,rgba(3,7,18,0.98),rgba(30,27,75,0.88)_48%,rgba(8,47,73,0.72))]" />
+      <div className="absolute -left-20 top-1/3 h-64 w-64 rounded-full bg-accent-violet/22 blur-3xl" />
+      <div className="absolute -bottom-28 right-10 h-72 w-72 rounded-full bg-accent-cyan/18 blur-3xl" />
+      <div className="relative grid gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-center">
+        <div>
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-violet-100 backdrop-blur">
+            <span className="h-2 w-2 rounded-full bg-amber-400 shadow-[0_0_14px_rgba(251,191,36,0.55)]" />
+            {t("signedOutHeroEyebrow")}
+          </div>
+          <h1 className="flex flex-wrap items-center gap-3 text-4xl font-semibold tracking-[-0.06em] text-white sm:text-5xl lg:text-6xl">
+            <Settings2 className="h-9 w-9 shrink-0 text-violet-200/90 sm:h-11 sm:w-11" aria-hidden />
+            <span className="max-w-4xl text-balance">{t("title")}</span>
+          </h1>
+          <p className="mt-5 max-w-2xl text-base leading-7 text-white/70 sm:text-lg">{t("signedOutHint")}</p>
+          <div className="mt-7">
+            <Link
+              href="/sign-in"
+              className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25 transition-all hover:-translate-y-0.5 hover:bg-gray-100"
+            >
+              {t("signInCta")}
+            </Link>
+          </div>
+        </div>
+
+        <div className="relative">
+          <div className="absolute -inset-4 rounded-[2rem] bg-brand-gradient-soft blur-2xl" aria-hidden />
+          <div className="relative overflow-hidden rounded-[1.75rem] border border-white/15 bg-white/10 p-3 shadow-2xl shadow-black/35 backdrop-blur-xl">
+            <div className="rounded-[1.35rem] border border-white/10 bg-slate-950/70 p-4">
+              <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                <p className="font-mono text-[0.66rem] font-semibold uppercase tracking-[0.24em] text-slate-400">{t("signedOutStatBadge")}</p>
+                <span className="rounded-full border border-amber-300/25 bg-amber-300/10 px-2.5 py-1 text-[0.66rem] font-semibold text-amber-100">{t("signedOutStatTag")}</span>
+              </div>
+              <SettingsHeroSignedOutTrustPanel />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SettingsSpotlightSection({
+  gradientClass,
+  hairlineClass,
+  iconBgClass,
+  icon,
+  titleId,
+  heading,
+  lead,
   children,
-  className = "",
 }: {
+  gradientClass: string;
+  hairlineClass: string;
+  iconBgClass: string;
+  icon: ReactNode;
+  titleId: string;
+  heading: string;
+  lead: string;
   children: ReactNode;
-  className?: string;
 }) {
   return (
-    <div
-      className={`overflow-hidden rounded-2xl border border-card-border bg-card-surface shadow-card ${className}`}
-    >
-      {children}
+    <div className={`relative ${DASHBOARD_SPOTLIGHT_SHELL} transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-slate-900/10 dark:hover:shadow-black/35`}>
+      <div className={gradientClass} aria-hidden />
+      <div className={hairlineClass} aria-hidden />
+      <div className="relative">
+        <div className={`${DASHBOARD_SPOTLIGHT_HEADER_BOTTOM} px-5 py-4 sm:px-6 sm:py-5`}>
+          <div className="flex gap-3">
+            <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${iconBgClass}`}>{icon}</span>
+            <div className="min-w-0 flex-1">
+              <h2 id={titleId} className="text-lg font-semibold text-slate-900 dark:text-white">
+                {heading}
+              </h2>
+              <p className={`mt-1 ${DASHBOARD_SPOTLIGHT_MUTED}`}>{lead}</p>
+            </div>
+          </div>
+        </div>
+        <div className="px-5 pb-5 pt-0 sm:px-6 sm:pb-6">{children}</div>
+      </div>
     </div>
   );
 }
 
 function IconSliders() {
   return (
-    <svg
-      className="h-5 w-5 text-accent-violet"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.75"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
+    <svg className="h-5 w-5 text-violet-600 dark:text-violet-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
       <line x1="4" y1="21" x2="4" y2="14" />
       <line x1="4" y1="10" x2="4" y2="3" />
       <line x1="12" y1="21" x2="12" y2="12" />
@@ -97,16 +270,7 @@ function IconSliders() {
 
 function IconDataPrivacy() {
   return (
-    <svg
-      className="h-5 w-5 text-red-600 dark:text-red-400"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.75"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
+    <svg className="h-5 w-5 text-red-600 dark:text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
       <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
       <path d="M12 9v4" />
       <path d="M12 17h.01" />
@@ -116,16 +280,7 @@ function IconDataPrivacy() {
 
 function IconUser() {
   return (
-    <svg
-      className="h-5 w-5 text-accent-indigo"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.75"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
+    <svg className="h-5 w-5 text-indigo-600 dark:text-indigo-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
       <path d="M20 21a8 8 0 00-16 0" />
       <circle cx="12" cy="7" r="4" />
     </svg>
@@ -166,7 +321,7 @@ export function AccountSettingsClient() {
       setAuthReady(true);
     }
 
-    sync();
+    void sync();
 
     const {
       data: { subscription },
@@ -188,7 +343,7 @@ export function AccountSettingsClient() {
   useEffect(() => {
     if (!userId) return;
     let cancelled = false;
-    (async () => {
+    void (async () => {
       setProfileLoadError(null);
       try {
         const res = await fetch("/api/user/me");
@@ -349,124 +504,75 @@ export function AccountSettingsClient() {
     }
   }, [expectedPhrase, phraseInput, phraseOk, router, t]);
 
+  const outerClass = "mx-auto max-w-6xl space-y-8";
+
+  const primarySaveClass =
+    "inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-2xl bg-slate-950 px-5 text-sm font-semibold text-white shadow-xl shadow-slate-950/20 transition hover:-translate-y-0.5 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 dark:bg-white dark:text-slate-950 dark:shadow-black/25 dark:hover:bg-slate-100 sm:w-auto";
+
   if (!authReady) {
     return (
-      <div className="mx-auto max-w-3xl space-y-10">
-        <div className="space-y-3">
-          <div className="h-3 w-24 animate-pulse rounded-md bg-border" />
-          <div className="h-9 w-2/3 max-w-md animate-pulse rounded-lg bg-border" />
-          <div className="h-4 w-full max-w-lg animate-pulse rounded-md bg-border/80" />
-        </div>
+      <div className={outerClass}>
+        <div className="h-52 animate-pulse rounded-[2rem] border border-white/10 bg-gray-950 sm:h-60" aria-busy="true" />
         <div className="flex flex-wrap gap-2">
-          <div className="h-9 w-24 animate-pulse rounded-full bg-border/90" />
-          <div className="h-9 w-28 animate-pulse rounded-full bg-border/90" />
-          <div className="h-9 w-32 animate-pulse rounded-full bg-border/90" />
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-9 w-28 animate-pulse rounded-full bg-slate-200 dark:bg-white/10" />
+          ))}
         </div>
-        <div className="h-44 animate-pulse rounded-2xl bg-border/75" />
-        <div className="h-40 animate-pulse rounded-2xl bg-border/70" />
-        <div className="h-72 animate-pulse rounded-2xl bg-border/60" />
+        {[1, 2, 3].map((i) => (
+          <div key={i} className={`relative min-h-[200px] animate-pulse ${DASHBOARD_SPOTLIGHT_SHELL}`} aria-busy="true">
+            <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} aria-hidden />
+            <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} aria-hidden />
+          </div>
+        ))}
       </div>
     );
   }
 
   if (!userId) {
     return (
-      <div className="mx-auto max-w-3xl">
-        <header className="mb-8 border-b border-card-border pb-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
-            {t("pageEyebrow")}
-          </p>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight text-foreground">
-            {t("title")}
-          </h1>
-        </header>
-        <SectionCard className="p-6 sm:p-8">
-          <h2 className="text-lg font-semibold text-foreground">{t("signedOutTitle")}</h2>
-          <p className="mt-2 text-sm leading-relaxed text-muted">
-            {t("signedOutHint")}
-          </p>
-          <div className="mt-6">
-            <Link
-              href="/sign-in"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-md transition hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              {t("signInCta")}
-            </Link>
-          </div>
-        </SectionCard>
+      <div className={outerClass}>
+        <SettingsHeroSignedOut />
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <header className="relative mb-6 border-b border-card-border pb-8 sm:mb-8">
-        <div
-          className="pointer-events-none absolute -left-4 top-0 h-24 w-40 rounded-full bg-brand-gradient-soft opacity-70 blur-2xl sm:-left-6"
-          aria-hidden
-        />
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
-          {t("pageEyebrow")}
-        </p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-          {t("title")}
-        </h1>
-        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted sm:text-base">
-          {t("subtitle")}
-        </p>
-      </header>
+    <div className={outerClass}>
+      <SettingsHeroConnected />
 
       <nav
-        className={`-mx-1 mb-8 flex flex-wrap items-center gap-2 border-b border-transparent sm:sticky ${SUBNAV_STICKY_TOP} z-20 bg-surface-dashboard/90 pb-3 backdrop-blur-sm dark:bg-surface-dashboard/95`}
+        className={`sticky ${SUBNAV_STICKY_TOP} z-20 -mx-1 mb-2 flex flex-wrap items-center gap-2 border-b border-slate-200/80 bg-white/85 px-1 pb-3 backdrop-blur-md dark:border-white/10 dark:bg-slate-950/85`}
         aria-label={t("navOnThisPage")}
       >
-        <a
-          href="#settings-profile"
-          className="inline-flex min-h-9 items-center rounded-full border border-card-border bg-card-surface px-4 text-sm font-medium text-foreground shadow-sm transition hover:border-primary/30 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        >
+        <a href="#settings-profile" className={`${DASHBOARD_SPOTLIGHT_PILL_MUTED} px-4 py-2 text-sm font-semibold no-underline transition hover:border-violet-300/50 hover:bg-white dark:hover:bg-white/15`}>
           {t("sectionProfile")}
         </a>
-        <a
-          href="#settings-preferences"
-          className="inline-flex min-h-9 items-center rounded-full border border-card-border bg-card-surface px-4 text-sm font-medium text-foreground shadow-sm transition hover:border-primary/30 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        >
+        <a href="#settings-preferences" className={`${DASHBOARD_SPOTLIGHT_PILL_MUTED} px-4 py-2 text-sm font-semibold no-underline transition hover:border-violet-300/50 hover:bg-white dark:hover:bg-white/15`}>
           {t("sectionPreferences")}
         </a>
-        <a
-          href="#settings-data-privacy"
-          className="inline-flex min-h-9 items-center rounded-full border border-card-border bg-card-surface px-4 text-sm font-medium text-foreground shadow-sm transition hover:border-primary/30 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        >
+        <a href="#settings-data-privacy" className={`${DASHBOARD_SPOTLIGHT_PILL_MUTED} px-4 py-2 text-sm font-semibold no-underline transition hover:border-violet-300/50 hover:bg-white dark:hover:bg-white/15`}>
           {t("sectionDataPrivacy")}
         </a>
       </nav>
 
-      <div className="space-y-10">
-        <section
-          id="settings-profile"
-          className="scroll-mt-28"
-          aria-labelledby="settings-profile-heading"
-        >
-          <div className="mb-4">
-            <h2
-              id="settings-profile-heading"
-              className="flex items-center gap-2.5 text-lg font-semibold text-foreground"
-            >
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent-indigo/10 dark:bg-accent-indigo/20">
-                <IconUser />
-              </span>
-              {t("sectionProfile")}
-            </h2>
-            <p className="mt-1.5 text-sm text-muted">{t("sectionProfileLead")}</p>
-          </div>
-
-          <SectionCard>
+      <div className="space-y-8">
+        <section id="settings-profile" className="scroll-mt-28" aria-labelledby="settings-profile-heading">
+          <SettingsSpotlightSection
+            gradientClass={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY}
+            hairlineClass={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET}
+            iconBgClass="border border-indigo-200/80 bg-indigo-50 dark:border-indigo-400/20 dark:bg-indigo-400/10"
+            icon={<IconUser />}
+            titleId="settings-profile-heading"
+            heading={t("sectionProfile")}
+            lead={t("sectionProfileLead")}
+          >
             {profileLoadError ? (
-              <p className="p-5 text-sm font-medium text-red-700 dark:text-red-300 sm:p-6" role="alert">
+              <p className="text-sm font-medium text-red-700 dark:text-red-300" role="alert">
                 {profileLoadError}
               </p>
             ) : (
               <form
-                className="space-y-5 p-5 sm:p-6"
+                className="space-y-5"
                 onSubmit={(e) => {
                   e.preventDefault();
                   void saveProfile();
@@ -474,7 +580,7 @@ export function AccountSettingsClient() {
                 noValidate
               >
                 <div>
-                  <label htmlFor="settings-display-name" className="text-sm font-medium text-foreground">
+                  <label htmlFor="settings-display-name" className="text-sm font-medium text-slate-900 dark:text-white">
                     {t("profileNameLabel")}
                   </label>
                   <input
@@ -494,7 +600,7 @@ export function AccountSettingsClient() {
                     }}
                     aria-invalid={!!nameFieldError}
                     aria-describedby={nameFieldError ? "settings-name-error" : undefined}
-                    className="mt-2 w-full rounded-xl border border-border bg-white px-3 py-2.5 text-sm text-foreground shadow-sm placeholder:text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/30 dark:border-border dark:bg-surface-raised"
+                    className={INPUT_CLASS}
                   />
                   {nameFieldError ? (
                     <p id="settings-name-error" className="mt-1.5 text-sm text-red-600 dark:text-red-400" role="alert">
@@ -504,17 +610,17 @@ export function AccountSettingsClient() {
                 </div>
 
                 <div>
-                  <p className="text-sm font-medium text-foreground">{t("profileEmailLabel")}</p>
-                  <p className="mt-2 rounded-xl border border-dashed border-border bg-background/60 px-3 py-2.5 text-sm text-muted dark:bg-background/30">
+                  <p className="text-sm font-medium text-slate-900 dark:text-white">{t("profileEmailLabel")}</p>
+                  <p className="mt-2 rounded-xl border border-dashed border-slate-200/90 bg-slate-50/80 px-3 py-2.5 text-sm text-slate-600 dark:border-white/15 dark:bg-black/20 dark:text-slate-400">
                     {accountEmail ?? "—"}
                   </p>
-                  <p className="mt-1.5 text-xs text-muted">{t("profileEmailHint")}</p>
+                  <p className={`mt-1.5 text-xs ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("profileEmailHint")}</p>
                 </div>
 
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-h-6 text-sm">
                     {profileSaved ? (
-                      <span className="font-medium text-accent-emerald" role="status">
+                      <span className="font-medium text-emerald-600 dark:text-emerald-400" role="status">
                         {t("profileSaved")}
                       </span>
                     ) : null}
@@ -524,49 +630,32 @@ export function AccountSettingsClient() {
                       </span>
                     ) : null}
                   </div>
-                  <button
-                    type="submit"
-                    disabled={profileSaveDisabled}
-                    className="inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-md transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-auto"
-                  >
+                  <button type="submit" disabled={profileSaveDisabled} className={primarySaveClass}>
                     {profileSaving ? t("savingProfile") : t("saveProfile")}
                   </button>
                 </div>
               </form>
             )}
-          </SectionCard>
+          </SettingsSpotlightSection>
         </section>
 
-        <section
-          id="settings-preferences"
-          className="scroll-mt-28"
-          aria-labelledby="settings-preferences-heading"
-        >
-          <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <h2
-                id="settings-preferences-heading"
-                className="flex items-center gap-2.5 text-lg font-semibold text-foreground"
-              >
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent-violet/10 dark:bg-accent-violet/20">
-                  <IconSliders />
-                </span>
-                {t("sectionPreferences")}
-              </h2>
-              <p className="mt-1.5 text-sm text-muted">{t("sectionPreferencesLead")}</p>
-            </div>
-          </div>
-
-          <SectionCard>
-            <div className="flex flex-col gap-5 p-5 sm:p-6">
+        <section id="settings-preferences" className="scroll-mt-28" aria-labelledby="settings-preferences-heading">
+          <SettingsSpotlightSection
+            gradientClass={DASHBOARD_SPOTLIGHT_GRADIENT_CYAN}
+            hairlineClass={DASHBOARD_SPOTLIGHT_HAIRLINE_CYAN}
+            iconBgClass="border border-violet-200/80 bg-violet-50 dark:border-violet-400/20 dark:bg-violet-400/10"
+            icon={<IconSliders />}
+            titleId="settings-preferences-heading"
+            heading={t("sectionPreferences")}
+            lead={t("sectionPreferencesLead")}
+          >
+            <div className="flex flex-col gap-5">
               <div className="min-w-0">
-                <h3 className="text-sm font-semibold text-foreground">{t("genreBannerTitle")}</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-muted">
-                  {t("genreBannerDescription")}
-                </p>
+                <h3 className="text-sm font-semibold text-slate-900 dark:text-white">{t("genreBannerTitle")}</h3>
+                <p className={`mt-1.5 text-sm leading-relaxed ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("genreBannerDescription")}</p>
               </div>
-              <div className="flex flex-col gap-3 border-t border-card-border pt-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
-                <p className="text-sm font-medium text-foreground">{t("genreBannerHideLabel")}</p>
+              <div className={`flex flex-col gap-3 border-t border-slate-200/80 pt-4 dark:border-white/10 sm:flex-row sm:items-center sm:justify-between sm:gap-6`}>
+                <p className="text-sm font-medium text-slate-900 dark:text-white">{t("genreBannerHideLabel")}</p>
                 <div className="flex shrink-0 justify-end sm:justify-start">
                   <SettingsSwitch
                     aria-label={t("switchHideGenreAria")}
@@ -580,52 +669,41 @@ export function AccountSettingsClient() {
                 </div>
               </div>
             </div>
-          </SectionCard>
+          </SettingsSpotlightSection>
         </section>
 
-        <section
-          id="settings-data-privacy"
-          className="scroll-mt-28"
-          aria-labelledby="settings-data-heading"
-        >
-          <div className="mb-4">
-            <h2
-              id="settings-data-heading"
-              className="flex items-center gap-2.5 text-lg font-semibold text-foreground"
-            >
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-500/10 dark:bg-red-500/15">
+        <section id="settings-data-privacy" className="scroll-mt-28" aria-labelledby="settings-data-heading">
+          <div className="mb-2">
+            <h2 id="settings-data-heading" className="flex items-center gap-2.5 text-lg font-semibold text-slate-900 dark:text-white">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-red-200/80 bg-red-50 dark:border-red-400/25 dark:bg-red-400/10">
                 <IconDataPrivacy />
               </span>
               {t("sectionDataPrivacy")}
             </h2>
-            <p className="mt-1.5 text-sm text-muted">{t("sectionDataPrivacyLead")}</p>
+            <p className={`mt-1.5 text-sm ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("sectionDataPrivacyLead")}</p>
           </div>
 
-          <SectionCard className="mb-8 border border-card-border shadow-card">
-            <div className="space-y-3 p-5 sm:p-6">
-              <h3 className="text-base font-semibold text-foreground">{t("importExportsTitle")}</h3>
-              <p className="text-sm leading-relaxed text-muted">{t("importExportsBody")}</p>
-              <Link
-                href={DASHBOARD_ONBOARDING_REIMPORT_PATH}
-                className="inline-flex min-h-11 items-center justify-center rounded-xl border border-card-border bg-card-surface px-4 py-2.5 text-sm font-medium text-foreground shadow-sm transition hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                {t("importExportsCta")}
-              </Link>
-            </div>
-          </SectionCard>
+          <SettingsSpotlightSection
+            gradientClass={DASHBOARD_SPOTLIGHT_GRADIENT_TABLE}
+            hairlineClass={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET}
+            iconBgClass="border border-slate-200/80 bg-slate-50 dark:border-white/10 dark:bg-white/10"
+            icon={<Upload className="h-5 w-5 text-slate-700 dark:text-slate-200" aria-hidden />}
+            titleId="settings-import-heading"
+            heading={t("importExportsTitle")}
+            lead={t("importExportsBody")}
+          >
+            <Link href={DASHBOARD_ONBOARDING_REIMPORT_PATH} className={`${DASHBOARD_SPOTLIGHT_BTN_SECONDARY} no-underline inline-flex min-h-11 items-center`}>
+              {t("importExportsCta")}
+            </Link>
+          </SettingsSpotlightSection>
 
-          <div className="overflow-hidden rounded-2xl border border-red-200/80 bg-gradient-to-b from-red-50/90 to-red-50/40 shadow-card dark:border-red-900/50 dark:from-red-950/30 dark:to-red-950/10">
-            <div className="border-b border-red-200/60 p-4 sm:p-6 dark:border-red-900/40">
-              <h3
-                className="text-base font-semibold text-red-950 dark:text-red-200"
-                id="danger-heading"
-              >
+          <div className="mt-8 overflow-hidden rounded-[2rem] border border-red-200/90 bg-gradient-to-b from-red-50/95 to-red-50/50 shadow-xl shadow-red-900/10 dark:border-red-900/50 dark:from-red-950/40 dark:to-red-950/15 dark:shadow-black/25">
+            <div className={`${DASHBOARD_SPOTLIGHT_HEADER_BOTTOM} border-red-200/70 p-5 dark:border-red-900/40 sm:p-6`}>
+              <h3 className="text-base font-semibold text-red-950 dark:text-red-200" id="danger-heading">
                 {t("dangerTitle")}
               </h3>
-              <p className="mt-2 text-sm leading-relaxed text-red-900/90 dark:text-red-200/90">
-                {t("dangerBody")}
-              </p>
-              <ul className="mt-4 space-y-2 rounded-xl border border-red-200/50 bg-white/60 p-3 text-sm text-red-900/90 dark:border-red-900/40 dark:bg-red-950/20 dark:text-red-200/90">
+              <p className="mt-2 text-sm leading-relaxed text-red-900/90 dark:text-red-200/90">{t("dangerBody")}</p>
+              <ul className="mt-4 space-y-2 rounded-xl border border-red-200/60 bg-white/70 p-3 text-sm text-red-900/95 dark:border-red-900/40 dark:bg-red-950/25 dark:text-red-200/95">
                 <li className="flex gap-2">
                   <span className="mt-0.5 text-red-500 dark:text-red-400" aria-hidden>
                     •
@@ -647,24 +725,17 @@ export function AccountSettingsClient() {
               </ul>
             </div>
 
-            <div className="space-y-5 p-4 sm:p-6">
+            <div className="space-y-5 p-5 sm:p-6">
               {phraseLoadError ? (
                 <p className="text-sm font-medium text-red-800 dark:text-red-300" role="alert">
                   {phraseLoadError}
                 </p>
               ) : expectedPhrase ? (
                 <div className="space-y-3">
-                  <p className="text-sm text-foreground/90 dark:text-foreground/95">
-                    {t("phraseInstruction")}
-                  </p>
-                  <div className="rounded-xl border border-border bg-background/80 px-4 py-3 font-mono text-base font-semibold tracking-wide text-foreground dark:bg-background/50">
-                    {expectedPhrase}
-                  </div>
+                  <p className="text-sm text-slate-800 dark:text-slate-200">{t("phraseInstruction")}</p>
+                  <div className={`${DASHBOARD_SPOTLIGHT_INNER_WELL} font-mono text-base font-semibold tracking-wide text-slate-900 dark:text-white`}>{expectedPhrase}</div>
                   <div>
-                    <label
-                      className="text-sm font-medium text-foreground"
-                      htmlFor="deletion-confirmation-phrase"
-                    >
+                    <label className="text-sm font-medium text-slate-900 dark:text-white" htmlFor="deletion-confirmation-phrase">
                       {t("phraseLabel")}
                     </label>
                     <input
@@ -679,25 +750,25 @@ export function AccountSettingsClient() {
                         setError(null);
                       }}
                       placeholder={t("phrasePlaceholder")}
-                      className="mt-2 w-full rounded-xl border border-border bg-white px-3 py-2.5 font-mono text-sm text-foreground shadow-sm placeholder:text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/30 dark:border-border dark:bg-surface-raised"
+                      className={`${INPUT_CLASS} font-mono`}
                     />
-                    <p className="mt-2 text-xs text-muted">{t("phraseHint")}</p>
+                    <p className={`mt-2 text-xs ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("phraseHint")}</p>
                   </div>
                 </div>
               ) : (
-                <p className="text-sm text-muted">{tCommon("pleaseWait")}</p>
+                <p className={DASHBOARD_SPOTLIGHT_MUTED}>{tCommon("pleaseWait")}</p>
               )}
 
               <label
                 className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition-colors ${
                   understood
-                    ? "border-primary/40 bg-primary/5 dark:bg-primary/10"
-                    : "border-border bg-background/50 dark:bg-surface-raised/40"
+                    ? "border-violet-300/50 bg-violet-50/80 dark:border-violet-400/30 dark:bg-violet-950/25"
+                    : "border-slate-200/90 bg-slate-50/50 dark:border-white/10 dark:bg-white/[0.04]"
                 } ${!expectedPhrase || !!phraseLoadError ? "cursor-not-allowed opacity-60" : ""}`}
               >
                 <input
                   type="checkbox"
-                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-border text-primary focus:ring-ring/40"
+                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-violet-600 focus:ring-violet-500/40 dark:border-white/20"
                   checked={understood}
                   onChange={(e) => {
                     setUnderstood(e.target.checked);
@@ -706,7 +777,7 @@ export function AccountSettingsClient() {
                   disabled={!expectedPhrase || !!phraseLoadError}
                   aria-label={t("switchUnderstandAria")}
                 />
-                <span className="text-sm text-foreground">{t("confirmCheckbox")}</span>
+                <span className="text-sm text-slate-900 dark:text-white">{t("confirmCheckbox")}</span>
               </label>
 
               {error ? (
@@ -719,10 +790,8 @@ export function AccountSettingsClient() {
                 <button
                   type="button"
                   onClick={() => void runClear()}
-                  disabled={
-                    !understood || !phraseOk || clearing || !!phraseLoadError || !expectedPhrase
-                  }
-                  className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-red-300 bg-white px-5 text-sm font-semibold text-red-700 shadow-sm transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-red-800 dark:bg-red-950/50 dark:text-red-200 dark:hover:bg-red-950/80 sm:w-auto"
+                  disabled={!understood || !phraseOk || clearing || !!phraseLoadError || !expectedPhrase}
+                  className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl border border-red-300 bg-white px-5 text-sm font-semibold text-red-700 shadow-sm transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-red-800 dark:bg-red-950/50 dark:text-red-200 dark:hover:bg-red-950/80 sm:w-auto"
                 >
                   {clearing ? t("clearing") : t("clearDataButton")}
                 </button>

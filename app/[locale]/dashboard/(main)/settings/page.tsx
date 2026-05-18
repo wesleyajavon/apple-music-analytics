@@ -13,5 +13,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default function SettingsPage() {
-  return <AccountSettingsClient />;
+  return (
+    <div className="px-4 py-6 sm:px-0">
+      <AccountSettingsClient />
+    </div>
+  );
 }

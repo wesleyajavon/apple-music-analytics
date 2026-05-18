@@ -3,6 +3,7 @@
 import { Suspense, useMemo, useState, type ReactNode } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import type { TemporalAnalysisDto } from "@/lib/dto/listening";
 import {
   BarChart,
@@ -24,9 +25,27 @@ import { CHART_TOOLTIP_STYLES } from "@/lib/constants/config";
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
 import { TemporalAnalysisSkeleton } from "@/lib/components/skeleton-loaders";
-import { Clock } from "lucide-react";
+import { Clock, Activity, CalendarDays } from "lucide-react";
+import {
+  DASHBOARD_SPOTLIGHT_SHELL,
+  DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY,
+  DASHBOARD_SPOTLIGHT_GRADIENT_CYAN,
+  DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET,
+  DASHBOARD_SPOTLIGHT_HAIRLINE_CYAN,
+  DASHBOARD_SPOTLIGHT_INNER_WELL,
+  DASHBOARD_SPOTLIGHT_MUTED,
+  DASHBOARD_SPOTLIGHT_TITLE,
+  DASHBOARD_SPOTLIGHT_HEADER_BOTTOM,
+} from "@/lib/constants/dashboard-spotlight";
 
-// Formatter tooltip - créé dans le composant pour avoir accès à t et locale
+type DayOfWeekChartType = "bar" | "distribution" | "radar";
+type HourOfDayChartType = "bar" | "distribution" | "radar";
+
+const TEMPORAL_HERO_SHELL_CLASS =
+  "relative overflow-hidden rounded-[2rem] border border-white/10 bg-gray-950 px-5 py-6 text-white shadow-2xl shadow-violet-500/15 sm:px-8 sm:py-9 lg:px-10 lg:py-10";
+
+const TEMPORAL_SECTION_CLASS = `relative ${DASHBOARD_SPOTLIGHT_SHELL}`;
+
 const WEEKDAY_KEYS = [
   "sunday",
   "monday",
@@ -36,21 +55,6 @@ const WEEKDAY_KEYS = [
   "friday",
   "saturday",
 ] as const;
-
-type DayOfWeekChartType = "bar" | "distribution" | "radar";
-type HourOfDayChartType = "bar" | "distribution" | "radar";
-
-const CARD_CLASS =
-  "relative overflow-hidden rounded-2xl border border-blue-300/20 bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.12),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(217,70,239,0.1),_transparent_30%),rgb(var(--card-rgb)/0.92)] shadow-card backdrop-blur-sm dark:border-blue-300/15 dark:bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.18),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(217,70,239,0.14),_transparent_30%),rgb(var(--card-rgb)/0.9)]";
-
-const CHART_CARD_CLASS =
-  "relative overflow-hidden rounded-2xl border border-blue-300/20 bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.1),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(168,85,247,0.08),_transparent_30%),rgb(var(--card-rgb)/0.92)] shadow-card backdrop-blur-sm dark:border-blue-300/15 dark:bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.15),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(168,85,247,0.12),_transparent_30%),rgb(var(--card-rgb)/0.9)]";
-
-const CHART_PANEL_CLASS =
-  "relative rounded-2xl border border-blue-200/20 bg-white/50 p-3 shadow-inner dark:border-blue-300/10 dark:bg-slate-950/20";
-const TEMPORAL_RAIL_CLASS = "bg-gradient-to-r from-blue-400 via-violet-400 to-fuchsia-400";
-const TEMPORAL_HERO_SHELL_CLASS =
-  "relative overflow-hidden rounded-3xl border border-blue-300/25 bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.3),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(217,70,239,0.22),_transparent_30%),linear-gradient(135deg,_#020617_0%,_#0f172a_48%,_#1e1b4b_100%)] px-6 py-8 shadow-2xl shadow-blue-950/40 sm:px-8 sm:py-10";
 
 const TEMPORAL_CHART_COLORS = {
   clock: {
@@ -72,9 +76,9 @@ const TEMPORAL_CHART_COLORS = {
 } as const;
 
 function chartToggleClass(isActive: boolean): string {
-  return `relative z-10 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-4 sm:text-sm ${
+  return `relative z-10 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/40 sm:px-4 sm:text-sm ${
     isActive
-      ? "bg-gradient-to-r from-blue-500 via-violet-500 to-fuchsia-500 text-white shadow-sm shadow-blue-950/20"
+      ? "bg-slate-900 text-white shadow-sm dark:bg-white dark:text-slate-950"
       : "text-muted hover:text-foreground"
   }`;
 }
@@ -135,29 +139,57 @@ function TemporalHeroFrame({ badgeLabel, stats }: { badgeLabel: string; stats: R
   const t = useTranslations("temporal-analysis");
   return (
     <div className={TEMPORAL_HERO_SHELL_CLASS}>
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(59,130,246,0.1)_1px,_transparent_1px),linear-gradient(90deg,_rgba(217,70,239,0.08)_1px,_transparent_1px)] bg-[size:32px_32px] opacity-30" />
-      <div className="absolute -right-20 -top-24 h-56 w-56 rounded-full bg-blue-400/18 blur-3xl" />
-      <div className="absolute -bottom-24 left-10 h-48 w-48 rounded-full bg-fuchsia-400/16 blur-3xl" />
-      <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${TEMPORAL_RAIL_CLASS} opacity-90`} />
-      <div className="relative">
-        <div className="max-w-3xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-200/85">{t("heroEyebrow")}</p>
-          <h1 className="mt-3 flex items-center gap-3 text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            <Clock className="h-9 w-9 shrink-0 text-blue-200/90 sm:h-10 sm:w-10" strokeWidth={1.75} aria-hidden />
-            <span>{t("title")}</span>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.26),transparent_30%),radial-gradient(circle_at_80%_12%,rgba(6,182,212,0.2),transparent_32%),linear-gradient(135deg,rgba(3,7,18,0.98),rgba(30,27,75,0.88)_48%,rgba(8,47,73,0.72))]" />
+      <div className="absolute -left-20 top-1/3 h-64 w-64 rounded-full bg-accent-violet/22 blur-3xl" />
+      <div className="absolute -bottom-28 right-10 h-72 w-72 rounded-full bg-accent-cyan/18 blur-3xl" />
+      <div className="relative grid gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-start">
+        <div>
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-violet-100 backdrop-blur">
+            <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_18px_rgb(22_199_132_/0.75)]" />
+            {t("heroEyebrow")}
+          </div>
+          <h1 className="flex flex-wrap items-center gap-3 text-4xl font-semibold tracking-[-0.06em] text-white sm:text-5xl lg:text-6xl">
+            <Clock className="h-9 w-9 shrink-0 text-violet-200/90 sm:h-11 sm:w-11" strokeWidth={1.5} aria-hidden />
+            <span className="max-w-4xl text-balance">{t("title")}</span>
           </h1>
-          <div
-            className={`mt-4 h-1.5 w-24 rounded-full ${TEMPORAL_RAIL_CLASS} opacity-95 shadow-[0_0_24px_rgba(59,130,246,0.35)]`}
-            aria-hidden
-          />
-          <p className="mt-5 text-base leading-relaxed text-blue-100/90 sm:text-lg">{t("subtitle")}</p>
-          <p className="mt-2 text-sm font-medium text-fuchsia-100/90">
-            <span className="inline-flex items-center rounded-full border border-blue-200/30 bg-white/10 px-3 py-1">
+          <p className="mt-5 max-w-2xl text-base leading-7 text-white/70 sm:text-lg">{t("subtitle")}</p>
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            <span className="inline-flex items-center rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-white/90 backdrop-blur">
               {badgeLabel}
             </span>
-          </p>
+          </div>
+          <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <Link
+              href="/dashboard/timeline"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25 transition-all hover:-translate-y-0.5 hover:bg-gray-100"
+            >
+              <Activity className="h-4 w-4" aria-hidden />
+              {t("ctaTimeline")}
+            </Link>
+            <Link
+              href="/dashboard/heatmap"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-sm font-bold text-white backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white/15"
+            >
+              <CalendarDays className="h-4 w-4" aria-hidden />
+              {t("ctaHeatmap")}
+            </Link>
+          </div>
         </div>
-        {stats}
+
+        <div className="relative lg:mt-0">
+          <div className="absolute -inset-4 rounded-[2rem] bg-brand-gradient-soft blur-2xl" aria-hidden />
+          <div className="relative overflow-hidden rounded-[1.75rem] border border-white/15 bg-white/10 p-3 shadow-2xl shadow-black/35 backdrop-blur-xl">
+            <div className="rounded-[1.35rem] border border-white/10 bg-slate-950/70 p-4">
+              <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                <p className="font-mono text-[0.66rem] font-semibold uppercase tracking-[0.24em] text-slate-400">{t("heroStatBadge")}</p>
+                <span className="rounded-full border border-violet-300/25 bg-violet-300/10 px-2.5 py-1 text-[0.66rem] font-semibold text-violet-100">{t("heroStatTag")}</span>
+              </div>
+              {stats ?? (
+                <p className="pt-4 text-sm leading-6 text-white/60">{t("heroStatsPlaceholder")}</p>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -176,36 +208,28 @@ function TemporalHeroStats({ data, locale }: { data: TemporalAnalysisDto; locale
     ? formatHourForDisplay(data.peakHour.hour, locale)
     : "—";
   return (
-    <div className="mt-6 flex flex-wrap gap-4 sm:gap-8">
-      <div className="rounded-xl border border-blue-200/15 bg-slate-950/35 px-4 py-3 shadow-lg shadow-blue-950/20 backdrop-blur-sm">
-        <p className="text-xs font-medium uppercase tracking-wider text-blue-100/80">{t("heroStatTotal")}</p>
-        <p className="text-2xl font-bold text-white">{totalListens.toLocaleString(locale)}</p>
+    <div className="grid gap-2 pt-4 sm:grid-cols-3">
+      <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
+        <p className="text-xl font-semibold tracking-tight text-white tabular-nums">{totalListens.toLocaleString(locale)}</p>
+        <p className="mt-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">{t("heroStatTotal")}</p>
       </div>
-      <div className="rounded-xl border border-violet-200/15 bg-slate-950/35 px-4 py-3 shadow-lg shadow-violet-950/20 backdrop-blur-sm">
-        <p className="text-xs font-medium uppercase tracking-wider text-violet-100/80">{t("peakDay")}</p>
+      <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
+        <p className="text-xl font-semibold tracking-tight text-white truncate">{peakDayLabel}</p>
+        <p className="mt-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">{t("peakDay")}</p>
         {data.peakDay ? (
-          <>
-            <p className="text-2xl font-bold text-white">{peakDayLabel}</p>
-            <p className="mt-0.5 text-xs text-white/70">
-              {data.peakDay.listens.toLocaleString(locale)} {t("listens")}
-            </p>
-          </>
-        ) : (
-          <p className="text-2xl font-bold text-white/50">{peakDayLabel}</p>
-        )}
+          <p className="mt-0.5 text-xs text-white/65">
+            {data.peakDay.listens.toLocaleString(locale)} {t("listens")}
+          </p>
+        ) : null}
       </div>
-      <div className="rounded-xl border border-fuchsia-200/15 bg-slate-950/35 px-4 py-3 shadow-lg shadow-fuchsia-950/20 backdrop-blur-sm">
-        <p className="text-xs font-medium uppercase tracking-wider text-fuchsia-100/80">{t("peakHour")}</p>
+      <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-3 sm:col-span-1">
+        <p className="text-xl font-semibold tracking-tight text-white">{peakHourLabel}</p>
+        <p className="mt-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">{t("peakHour")}</p>
         {data.peakHour ? (
-          <>
-            <p className="text-2xl font-bold text-white">{peakHourLabel}</p>
-            <p className="mt-0.5 text-xs text-white/70">
-              {data.peakHour.listens.toLocaleString(locale)} {t("listens")}
-            </p>
-          </>
-        ) : (
-          <p className="text-2xl font-bold text-white/50">{peakHourLabel}</p>
-        )}
+          <p className="mt-0.5 text-xs text-white/65">
+            {data.peakHour.listens.toLocaleString(locale)} {t("listens")}
+          </p>
+        ) : null}
       </div>
     </div>
   );
@@ -213,14 +237,11 @@ function TemporalHeroStats({ data, locale }: { data: TemporalAnalysisDto; locale
 
 function TemporalHeroStatsSkeleton() {
   return (
-    <div className="mt-6 flex flex-wrap gap-4 sm:gap-8">
+    <div className="grid gap-2 pt-4 sm:grid-cols-3" aria-busy="true">
       {[0, 1, 2].map((i) => (
-        <div
-          key={i}
-          className="min-w-[140px] flex-1 animate-pulse rounded-xl border border-white/10 bg-slate-950/35 px-4 py-3 shadow-lg backdrop-blur-sm sm:flex-initial"
-        >
-          <div className="mb-2 h-3 w-20 rounded bg-white/15" />
-          <div className="h-8 w-24 rounded bg-white/20" />
+        <div key={i} className="animate-pulse rounded-2xl border border-white/10 bg-white/[0.06] p-3">
+          <div className="mb-2 h-7 w-20 rounded bg-white/20" />
+          <div className="h-3 w-24 rounded bg-white/15" />
         </div>
       ))}
     </div>
@@ -230,11 +251,15 @@ function TemporalHeroStatsSkeleton() {
 function TemporalNoteCallout() {
   const t = useTranslations("temporal-analysis");
   return (
-    <div className="rounded-xl border border-blue-300/20 bg-gradient-to-r from-blue-400/10 via-violet-400/10 to-fuchsia-400/10 p-4 shadow-sm shadow-blue-950/5">
-      <p className="text-sm leading-relaxed text-foreground/85">
-        <strong className="text-blue-600 dark:text-blue-300">{t("note")} :</strong>{" "}
-        {t("noteText")}
-      </p>
+    <div className={`${TEMPORAL_SECTION_CLASS}`}>
+      <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} aria-hidden />
+      <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} aria-hidden />
+      <div className={`relative ${DASHBOARD_SPOTLIGHT_INNER_WELL} mx-4 my-4 sm:mx-6 sm:my-6`}>
+        <p className={`text-sm leading-relaxed ${DASHBOARD_SPOTLIGHT_MUTED}`}>
+          <strong className="font-semibold text-slate-900 dark:text-white">{t("note")}</strong>{" "}
+          {t("noteText")}
+        </p>
+      </div>
     </div>
   );
 }
@@ -242,15 +267,15 @@ function TemporalNoteCallout() {
 function TemporalSpotlightSkeleton() {
   return (
     <section
-      className={`${CARD_CLASS} animate-pulse transition-all duration-300`}
+      className={`${TEMPORAL_SECTION_CLASS} animate-pulse transition-all duration-300`}
       aria-busy="true"
     >
-      <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${TEMPORAL_RAIL_CLASS} opacity-85`} />
-      <div className="pointer-events-none absolute -right-20 -top-24 h-56 w-56 rounded-full bg-fuchsia-400/12 blur-3xl dark:bg-fuchsia-400/16" />
+      <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} aria-hidden />
+      <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} aria-hidden />
       <div className="relative">
-        <div className="border-b border-blue-200/20 px-6 py-5 dark:border-blue-300/10">
+        <div className={`${DASHBOARD_SPOTLIGHT_HEADER_BOTTOM} px-6 py-5 sm:px-8`}>
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-blue-300/10" />
+            <div className="h-11 w-11 rounded-2xl bg-slate-200/80 dark:bg-white/10" />
             <div>
               <div className="h-5 w-44 rounded bg-muted/20" />
               <div className="mt-2 h-4 w-64 rounded bg-muted/15" />
@@ -259,11 +284,11 @@ function TemporalSpotlightSkeleton() {
         </div>
         <div className="p-4 sm:p-6 md:p-8">
           <div className="flex flex-col items-center gap-8 md:flex-row md:gap-12">
-            <div className="h-32 w-32 rounded-full bg-blue-400/10 sm:h-40 sm:w-40" />
+            <div className="h-32 w-32 rounded-full bg-violet-400/10 sm:h-40 sm:w-40" />
             <div className="w-full flex-1 space-y-4">
-              <div className="h-3 w-36 rounded bg-blue-400/20" />
+              <div className="h-3 w-36 rounded bg-violet-400/20" />
               <div className="h-8 w-72 max-w-full rounded bg-muted/20" />
-              <div className="h-8 w-40 rounded-full bg-blue-400/15" />
+              <div className="h-8 w-40 rounded-full bg-violet-400/15" />
               <div className="h-4 w-80 max-w-full rounded bg-muted/15" />
             </div>
           </div>
@@ -275,7 +300,7 @@ function TemporalSpotlightSkeleton() {
 
 function TemporalChartSkeleton() {
   return (
-    <div className={`${CHART_PANEL_CLASS} animate-pulse`} aria-busy="true">
+    <div className={`${DASHBOARD_SPOTLIGHT_INNER_WELL} animate-pulse`} aria-busy="true">
       <div className="flex h-[400px] items-end gap-3 p-4">
         {[52, 76, 44, 88, 64, 58, 72].map((height, index) => (
           <div key={index} className="flex flex-1 items-end">
@@ -373,11 +398,17 @@ function TemporalAnalysisContent() {
       <div className="space-y-8">
         <TemporalHeroFrame badgeLabel={t("heroBadge")} stats={null} />
         <TemporalNoteCallout />
-        <ErrorState
-          error={error}
-          message={t("errorLoading")}
-          onRetry={() => refetch()}
-        />
+        <section className={TEMPORAL_SECTION_CLASS}>
+          <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} aria-hidden />
+          <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} aria-hidden />
+          <div className="relative p-6 sm:p-8">
+            <ErrorState
+              error={error}
+              message={t("errorLoading")}
+              onRetry={() => refetch()}
+            />
+          </div>
+        </section>
       </div>
     );
   }
@@ -414,39 +445,25 @@ function TemporalAnalysisContent() {
               <TemporalSpotlightSkeleton />
             ) : data && (data.peakDay || data.peakHour) ? (
               <section
-                className={`${CARD_CLASS} animate-fade-in-up transition-all duration-300`}
+                className={`${TEMPORAL_SECTION_CLASS} animate-fade-in-up transition-all duration-300`}
                 aria-labelledby="temporal-spotlight-title"
               >
-                <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${TEMPORAL_RAIL_CLASS} opacity-85`} />
-                <div className="pointer-events-none absolute -right-20 -top-24 h-56 w-56 rounded-full bg-fuchsia-400/12 blur-3xl dark:bg-fuchsia-400/16" />
-                <div className="pointer-events-none absolute -bottom-24 left-10 h-52 w-52 rounded-full bg-blue-400/12 blur-3xl dark:bg-blue-400/16" />
+                <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} aria-hidden />
+                <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} aria-hidden />
                 <div className="relative">
-                  <div className="border-b border-blue-200/20 px-6 py-5 dark:border-blue-300/10">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-blue-300/25 bg-blue-300/10 text-blue-600 shadow-sm shadow-blue-950/10 dark:text-blue-200">
-                        <svg
-                          className="w-5 h-5"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth={1.5}
-                          aria-hidden
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
-                          />
-                        </svg>
+                  <div className={`${DASHBOARD_SPOTLIGHT_HEADER_BOTTOM} px-6 py-5 sm:px-8`}>
+                    <div className="flex items-start gap-4">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-slate-200/90 bg-slate-50/90 text-violet-600 shadow-sm dark:border-white/15 dark:bg-white/10 dark:text-violet-300">
+                        <Clock className="h-5 w-5" strokeWidth={1.75} aria-hidden />
                       </div>
                       <div>
                         <h2
                           id="temporal-spotlight-title"
-                          className="text-lg font-semibold tracking-tight text-foreground"
+                          className={DASHBOARD_SPOTLIGHT_TITLE}
                         >
                           {t("spotlightTitle")}
                         </h2>
-                        <p className="mt-0.5 text-sm text-blue-700/75 dark:text-blue-100/65">
+                        <p className={`mt-1 max-w-2xl ${DASHBOARD_SPOTLIGHT_MUTED}`}>
                           {t("spotlightHint")}
                         </p>
                       </div>
@@ -551,7 +568,7 @@ function TemporalAnalysisContent() {
                       )}
                       {/* Texte: moment de pic + rythme */}
                       <div className="flex-1 text-center md:text-left min-w-0">
-                        <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-blue-600 dark:text-blue-300">
+                        <p className="mb-2 font-mono text-xs font-semibold uppercase tracking-[0.24em] text-violet-600 dark:text-violet-300">
                           {t("peakMomentLabel")}
                         </p>
                         <p className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
@@ -592,15 +609,17 @@ function TemporalAnalysisContent() {
             ) : null}
 
             {/* Graphique par jour de la semaine - Barres ou distribution (comme heatmap) */}
-            <div className={CHART_CARD_CLASS}>
-              <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${TEMPORAL_RAIL_CLASS} opacity-80`} />
-              <div className="border-b border-blue-200/20 px-6 py-4 dark:border-blue-300/10">
+            <section className={TEMPORAL_SECTION_CLASS}>
+              <div className={DASHBOARD_SPOTLIGHT_GRADIENT_CYAN} aria-hidden />
+              <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_CYAN} aria-hidden />
+              <div className="relative">
+              <div className={`${DASHBOARD_SPOTLIGHT_HEADER_BOTTOM} px-6 py-4 sm:px-8`}>
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                   <div>
-                    <h2 className="text-lg font-semibold text-foreground">
+                    <h2 className={DASHBOARD_SPOTLIGHT_TITLE}>
                       {t("listensByWeekday")}
                     </h2>
-                    <p className="mt-0.5 text-sm text-blue-700/75 dark:text-blue-100/65">
+                    <p className={`mt-1 max-w-2xl ${DASHBOARD_SPOTLIGHT_MUTED}`}>
                       {t("listensByWeekdayHint")}
                     </p>
                   </div>
@@ -608,7 +627,7 @@ function TemporalAnalysisContent() {
                     <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">
                       {t("chart")}
                     </span>
-                    <div className="flex items-center rounded-xl border border-blue-300/20 bg-surface p-1.5 shadow-sm">
+                    <div className="flex items-center rounded-xl border border-slate-200/90 bg-slate-50/90 p-1.5 shadow-sm dark:border-white/10 dark:bg-black/25">
                       <button
                         onClick={() => setDayOfWeekChartType("bar")}
                         className={chartToggleClass(
@@ -642,7 +661,7 @@ function TemporalAnalysisContent() {
                 {isLoading ? (
                   <TemporalChartSkeleton />
                 ) : dayOfWeekChartType === "bar" ? (
-                  <div className={CHART_PANEL_CLASS}>
+                  <div className={DASHBOARD_SPOTLIGHT_INNER_WELL}>
                     <ResponsiveContainer width="100%" height={400}>
                       <BarChart
                         data={dayOfWeekData}
@@ -715,7 +734,7 @@ function TemporalAnalysisContent() {
                     </ResponsiveContainer>
                   </div>
                 ) : dayOfWeekChartType === "radar" ? (
-                  <div className={CHART_PANEL_CLASS}>
+                  <div className={DASHBOARD_SPOTLIGHT_INNER_WELL}>
                     <ResponsiveContainer width="100%" height={400}>
                       <RadarChart data={radarData}>
                         <PolarGrid stroke="#bfdbfe" strokeOpacity={0.55} />
@@ -753,7 +772,7 @@ function TemporalAnalysisContent() {
                     </ResponsiveContainer>
                   </div>
                 ) : (
-                  <div className={`${CHART_PANEL_CLASS} space-y-4`}>
+                  <div className={`${DASHBOARD_SPOTLIGHT_INNER_WELL} space-y-4`}>
                     {dayOfWeekData.map((item, index) => {
                       const maxCount = Math.max(
                         ...dayOfWeekData.map((d) => d.listens),
@@ -798,17 +817,20 @@ function TemporalAnalysisContent() {
                 )}
               </div>
             </div>
+            </section>
 
             {/* Graphique par heure de la journée - Barres, distribution ou radar */}
-            <div className={CHART_CARD_CLASS}>
-              <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${TEMPORAL_RAIL_CLASS} opacity-80`} />
-              <div className="border-b border-blue-200/20 px-6 py-4 dark:border-blue-300/10">
+            <section className={TEMPORAL_SECTION_CLASS}>
+              <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} aria-hidden />
+              <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} aria-hidden />
+              <div className="relative">
+              <div className={`${DASHBOARD_SPOTLIGHT_HEADER_BOTTOM} px-6 py-4 sm:px-8`}>
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                   <div>
-                    <h2 className="text-lg font-semibold text-foreground">
+                    <h2 className={DASHBOARD_SPOTLIGHT_TITLE}>
                       {t("listensByHour")}
                     </h2>
-                    <p className="mt-0.5 text-sm text-blue-700/75 dark:text-blue-100/65">
+                    <p className={`mt-1 max-w-2xl ${DASHBOARD_SPOTLIGHT_MUTED}`}>
                       {t("listensByHourHint")}
                     </p>
                   </div>
@@ -816,7 +838,7 @@ function TemporalAnalysisContent() {
                     <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">
                       {t("chart")}
                     </span>
-                    <div className="flex items-center rounded-xl border border-blue-300/20 bg-surface p-1.5 shadow-sm">
+                    <div className="flex items-center rounded-xl border border-slate-200/90 bg-slate-50/90 p-1.5 shadow-sm dark:border-white/10 dark:bg-black/25">
                       <button
                         onClick={() => setHourOfDayChartType("bar")}
                         className={chartToggleClass(
@@ -850,7 +872,7 @@ function TemporalAnalysisContent() {
                 {isLoading ? (
                   <TemporalChartSkeleton />
                 ) : hourOfDayChartType === "bar" ? (
-                  <div className={CHART_PANEL_CLASS}>
+                  <div className={DASHBOARD_SPOTLIGHT_INNER_WELL}>
                     <ResponsiveContainer width="100%" height={400}>
                       <BarChart
                         data={hourOfDayData}
@@ -926,7 +948,7 @@ function TemporalAnalysisContent() {
                     </ResponsiveContainer>
                   </div>
                 ) : hourOfDayChartType === "radar" ? (
-                  <div className={CHART_PANEL_CLASS}>
+                  <div className={DASHBOARD_SPOTLIGHT_INNER_WELL}>
                     <ResponsiveContainer width="100%" height={400}>
                       <RadarChart data={hourRadarData}>
                         <PolarGrid stroke="#bfdbfe" strokeOpacity={0.55} />
@@ -965,7 +987,7 @@ function TemporalAnalysisContent() {
                   </div>
                 ) : (
                   <div
-                    className={`${CHART_PANEL_CLASS} max-h-[500px] space-y-3 overflow-y-auto pr-2`}
+                    className={`${DASHBOARD_SPOTLIGHT_INNER_WELL} max-h-[500px] space-y-3 overflow-y-auto pr-2`}
                   >
                     {hourOfDayData.map((item, index) => {
                       const maxCount = Math.max(
@@ -1011,6 +1033,7 @@ function TemporalAnalysisContent() {
                 )}
               </div>
             </div>
+            </section>
       </div>
     </div>
   );
@@ -1029,7 +1052,7 @@ function TemporalAnalysisFallback() {
 
 export default function TemporalAnalysisPage() {
   return (
-    <div className="px-4 py-6 sm:px-0">
+    <div className="px-4 pb-6 pt-0 sm:px-0">
       <Suspense fallback={<TemporalAnalysisFallback />}>
         <TemporalAnalysisContent />
       </Suspense>

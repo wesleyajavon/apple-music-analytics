@@ -11,6 +11,7 @@ import {
 } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import {
   CalendarHeatmap,
   HeatmapDataPoint,
@@ -26,42 +27,71 @@ import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
 import { HeatmapDayDetailsPanel } from "@/lib/components/heatmap-day-details-panel";
 import { HeatmapSkeleton } from "@/lib/components/skeleton-loaders";
-import { CalendarDays } from "lucide-react";
+import { Activity, CalendarDays } from "lucide-react";
+import {
+  DASHBOARD_SPOTLIGHT_SHELL,
+  DASHBOARD_SPOTLIGHT_GRADIENT_LIME,
+  DASHBOARD_SPOTLIGHT_HAIRLINE_LIME,
+  DASHBOARD_SPOTLIGHT_INNER_WELL,
+  DASHBOARD_SPOTLIGHT_MUTED,
+  DASHBOARD_SPOTLIGHT_TITLE,
+  DASHBOARD_SPOTLIGHT_HEADER_BOTTOM,
+} from "@/lib/constants/dashboard-spotlight";
 
-const CARD_CLASS =
-  "relative overflow-hidden rounded-2xl border border-sky-300/20 bg-[radial-gradient(circle_at_top_left,_rgba(45,212,191,0.11),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(139,92,246,0.1),_transparent_30%),rgb(var(--card-rgb)/0.92)] shadow-card backdrop-blur-sm dark:border-sky-300/15 dark:bg-[radial-gradient(circle_at_top_left,_rgba(45,212,191,0.16),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(139,92,246,0.14),_transparent_30%),rgb(var(--card-rgb)/0.9)]";
-
-const HEATMAP_RAIL_CLASS = "bg-gradient-to-r from-emerald-300 via-sky-400 to-violet-400";
+/** Aligné hero `/dashboard/timeline` — startup / Vercel */
 const HEATMAP_HERO_SHELL_CLASS =
-  "relative overflow-hidden rounded-3xl border border-sky-300/25 bg-[radial-gradient(circle_at_top_left,_rgba(45,212,191,0.28),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(139,92,246,0.22),_transparent_30%),linear-gradient(135deg,_#020617_0%,_#0f172a_48%,_#0c4a6e_100%)] px-6 py-8 shadow-2xl shadow-sky-950/40 sm:px-8 sm:py-10";
+  "relative overflow-hidden rounded-[2rem] border border-white/10 bg-gray-950 px-5 py-6 text-white shadow-2xl shadow-violet-500/15 sm:px-8 sm:py-9 lg:px-10 lg:py-10";
+
+const HEATMAP_CALENDAR_SECTION_CLASS = `relative ${DASHBOARD_SPOTLIGHT_SHELL}`;
 
 function HeatmapHeroFrame({ badgeLabel, stats }: { badgeLabel: string; stats: ReactNode }) {
   const t = useTranslations("heatmap");
   return (
     <div className={HEATMAP_HERO_SHELL_CLASS}>
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(45,212,191,0.1)_1px,_transparent_1px),linear-gradient(90deg,_rgba(56,189,248,0.08)_1px,_transparent_1px)] bg-[size:32px_32px] opacity-30" />
-      <div className="absolute -right-20 -top-24 h-56 w-56 rounded-full bg-emerald-400/18 blur-3xl" />
-      <div className="absolute -bottom-24 left-10 h-48 w-48 rounded-full bg-violet-400/16 blur-3xl" />
-      <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${HEATMAP_RAIL_CLASS} opacity-90`} />
-      <div className="relative">
-        <div className="max-w-3xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-200/85">{t("heroEyebrow")}</p>
-          <h1 className="mt-3 flex items-center gap-3 text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            <CalendarDays className="h-9 w-9 shrink-0 text-emerald-200/90 sm:h-10 sm:w-10" strokeWidth={1.75} aria-hidden />
-            <span>{t("title")}</span>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.26),transparent_30%),radial-gradient(circle_at_80%_12%,rgba(6,182,212,0.2),transparent_32%),linear-gradient(135deg,rgba(3,7,18,0.98),rgba(30,27,75,0.88)_48%,rgba(8,47,73,0.72))]" />
+      <div className="absolute -left-20 top-1/3 h-64 w-64 rounded-full bg-accent-violet/22 blur-3xl" />
+      <div className="absolute -bottom-28 right-10 h-72 w-72 rounded-full bg-accent-cyan/18 blur-3xl" />
+      <div className="relative grid gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-start">
+        <div>
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-violet-100 backdrop-blur">
+            <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_18px_rgb(22_199_132_/0.75)]" />
+            {t("heroEyebrow")}
+          </div>
+          <h1 className="flex flex-wrap items-center gap-3 text-4xl font-semibold tracking-[-0.06em] text-white sm:text-5xl lg:text-6xl">
+            <CalendarDays className="h-9 w-9 shrink-0 text-violet-200/90 sm:h-11 sm:w-11" strokeWidth={1.5} aria-hidden />
+            <span className="max-w-4xl text-balance">{t("title")}</span>
           </h1>
-          <div
-            className={`mt-4 h-1.5 w-24 rounded-full ${HEATMAP_RAIL_CLASS} opacity-95 shadow-[0_0_24px_rgba(45,212,191,0.35)]`}
-            aria-hidden
-          />
-          <p className="mt-5 text-base leading-relaxed text-sky-100/90 sm:text-lg">{t("subtitle")}</p>
-          <p className="mt-2 text-sm font-medium text-violet-100/90">
-            <span className="inline-flex items-center rounded-full border border-sky-200/30 bg-white/10 px-3 py-1">
+          <p className="mt-5 max-w-2xl text-base leading-7 text-white/70 sm:text-lg">{t("subtitle")}</p>
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            <span className="inline-flex items-center rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-white/90 backdrop-blur">
               {badgeLabel}
             </span>
-          </p>
+          </div>
+          <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <Link
+              href="/dashboard/timeline"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25 transition-all hover:-translate-y-0.5 hover:bg-gray-100"
+            >
+              <Activity className="h-4 w-4" aria-hidden />
+              {t("ctaTimeline")}
+            </Link>
+          </div>
         </div>
-        {stats}
+
+        <div className="relative lg:mt-0">
+          <div className="absolute -inset-4 rounded-[2rem] bg-brand-gradient-soft blur-2xl" aria-hidden />
+          <div className="relative overflow-hidden rounded-[1.75rem] border border-white/15 bg-white/10 p-3 shadow-2xl shadow-black/35 backdrop-blur-xl">
+            <div className="rounded-[1.35rem] border border-white/10 bg-slate-950/70 p-4">
+              <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                <p className="font-mono text-[0.66rem] font-semibold uppercase tracking-[0.24em] text-slate-400">{t("heroStatBadge")}</p>
+                <span className="rounded-full border border-violet-300/25 bg-violet-300/10 px-2.5 py-1 text-[0.66rem] font-semibold text-violet-100">{t("heroStatTag")}</span>
+              </div>
+              {stats ?? (
+                <p className="pt-4 text-sm leading-6 text-white/60">{t("heroStatsPlaceholder")}</p>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -82,29 +112,27 @@ function HeatmapHeroStats({ stats, locale }: { stats: HeatmapSummaryStats; local
       ? Math.round((stats.daysWithListens / stats.totalDays) * 100)
       : 0;
   return (
-    <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      <div className="rounded-xl border border-emerald-200/15 bg-slate-950/35 px-4 py-3 shadow-lg shadow-emerald-950/20 backdrop-blur-sm">
-        <p className="text-xs font-medium uppercase tracking-wider text-emerald-100/80">{t("totalListens")}</p>
-        <p className="text-2xl font-bold text-white">{stats.totalListens.toLocaleString(locale)}</p>
+    <div className="grid grid-cols-2 gap-2 pt-4 sm:grid-cols-2 lg:gap-3">
+      <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
+        <p className="text-lg font-semibold tracking-tight text-white tabular-nums sm:text-xl">{stats.totalListens.toLocaleString(locale)}</p>
+        <p className="mt-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">{t("totalListens")}</p>
       </div>
-      <div className="rounded-xl border border-sky-200/15 bg-slate-950/35 px-4 py-3 shadow-lg shadow-sky-950/20 backdrop-blur-sm">
-        <p className="text-xs font-medium uppercase tracking-wider text-sky-100/80">{t("activeDays")}</p>
-        <p className="text-2xl font-bold text-white">
+      <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
+        <p className="text-lg font-semibold tracking-tight text-white tabular-nums sm:text-xl">
           {stats.daysWithListens.toLocaleString(locale)} / {stats.totalDays.toLocaleString(locale)}
         </p>
-        <p className="mt-0.5 text-xs text-white/70">
-          {pct}% {t("ofDays")}
-        </p>
+        <p className="mt-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">{t("activeDays")}</p>
+        <p className="mt-0.5 text-xs text-white/65">{pct}% {t("ofDays")}</p>
       </div>
-      <div className="rounded-xl border border-violet-200/15 bg-slate-950/35 px-4 py-3 shadow-lg shadow-violet-950/20 backdrop-blur-sm">
-        <p className="text-xs font-medium uppercase tracking-wider text-violet-100/80">{t("avgDaily")}</p>
-        <p className="text-2xl font-bold text-white">{stats.averageListens.toLocaleString(locale)}</p>
-        <p className="mt-0.5 text-xs text-white/70">{t("listensPerDay")}</p>
+      <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
+        <p className="text-lg font-semibold tracking-tight text-white tabular-nums sm:text-xl">{stats.averageListens.toLocaleString(locale)}</p>
+        <p className="mt-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">{t("avgDaily")}</p>
+        <p className="mt-0.5 text-xs text-white/65">{t("listensPerDay")}</p>
       </div>
-      <div className="rounded-xl border border-teal-200/15 bg-slate-950/35 px-4 py-3 shadow-lg shadow-teal-950/20 backdrop-blur-sm">
-        <p className="text-xs font-medium uppercase tracking-wider text-teal-100/80">{t("favoriteDay")}</p>
-        <p className="text-2xl font-bold text-white">{stats.mostActiveWeekday}</p>
-        <p className="mt-0.5 text-xs text-white/70">{t("favoriteDayHint")}</p>
+      <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
+        <p className="truncate text-lg font-semibold tracking-tight text-white sm:text-xl" title={stats.mostActiveWeekday}>{stats.mostActiveWeekday}</p>
+        <p className="mt-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">{t("favoriteDay")}</p>
+        <p className="mt-0.5 text-xs text-white/65">{t("favoriteDayHint")}</p>
       </div>
     </div>
   );
@@ -112,14 +140,11 @@ function HeatmapHeroStats({ stats, locale }: { stats: HeatmapSummaryStats; local
 
 function HeatmapHeroStatsSkeleton() {
   return (
-    <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid grid-cols-2 gap-2 pt-4 lg:gap-3" aria-busy="true">
       {[0, 1, 2, 3].map((i) => (
-        <div
-          key={i}
-          className="min-h-[92px] animate-pulse rounded-xl border border-white/10 bg-slate-950/35 px-4 py-3 shadow-lg backdrop-blur-sm"
-        >
-          <div className="mb-2 h-3 w-24 rounded bg-white/15" />
-          <div className="h-8 w-20 rounded bg-white/20" />
+        <div key={i} className="animate-pulse rounded-2xl border border-white/10 bg-white/[0.06] p-3">
+          <div className="mb-2 h-7 w-16 rounded bg-white/20" />
+          <div className="h-3 w-24 rounded bg-white/15" />
         </div>
       ))}
     </div>
@@ -135,7 +160,13 @@ function HeatmapPageFallback() {
         badgeLabel={tOverview("allData")}
         stats={<HeatmapHeroStatsSkeleton />}
       />
-      <HeatmapSkeleton />
+      <section className={HEATMAP_CALENDAR_SECTION_CLASS}>
+        <div className={DASHBOARD_SPOTLIGHT_GRADIENT_LIME} aria-hidden />
+        <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_LIME} aria-hidden />
+        <div className="relative p-6 sm:p-8">
+          <HeatmapSkeleton />
+        </div>
+      </section>
     </div>
   );
 }
@@ -167,8 +198,6 @@ function HeatmapContent() {
     }
   }, [selectedDate]);
 
-  // Même logique que /dashboard/overview : sans dates dans l’URL (« Tout »), undefined
-  // pour que la timeline / l’analyse temporelle utilisent toute l’historique (min–max côté API).
   const startDate = searchParams.get("startDate") || undefined;
   const endDate = searchParams.get("endDate") || undefined;
   const userId = searchParams.get("userId") ?? undefined;
@@ -183,7 +212,6 @@ function HeatmapContent() {
     ? t("dateRangeBadge", { range: badgeRangeLabel })
     : tOverview("allData");
 
-  // Récupérer les données de timeline (par jour)
   const {
     data: timelineData,
     isLoading,
@@ -191,15 +219,12 @@ function HeatmapContent() {
     refetch,
   } = useTimeline(startDate, endDate, "day", userId);
 
-  // Utiliser l'analyse temporelle pour "Jour préféré" - même logique que temporal-analysis
-  // (EXTRACT(DOW FROM playedAt) en SQL), évite les bugs de timezone de getDay() côté client
   const { data: temporalData } = useTemporalAnalysis(
     startDate,
     endDate,
     userId,
   );
 
-  // Bornes du calendrier : URL explicite, sinon min/max des points timeline (comme HeatmapCalendarOverviewWidget).
   const { rangeStart, rangeEnd } = useMemo(() => {
     if (startDate && endDate) {
       return { rangeStart: startDate, rangeEnd: endDate };
@@ -221,7 +246,6 @@ function HeatmapContent() {
   const calendarStart = startDate ?? rangeStart;
   const calendarEnd = endDate ?? rangeEnd;
 
-  // Transformer les données pour le heatmap
   const heatmapData: HeatmapDataPoint[] = useMemo(() => {
     if (!timelineData) return [];
 
@@ -231,7 +255,6 @@ function HeatmapContent() {
     }));
   }, [timelineData]);
 
-  // Calculer le nombre total de jours dans la plage (pour active days, etc.)
   const totalDaysInRange = useMemo(() => {
     if (!calendarStart || !calendarEnd) return 1;
     const start = new Date(calendarStart);
@@ -240,8 +263,6 @@ function HeatmapContent() {
     return Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1);
   }, [calendarStart, calendarEnd]);
 
-  // Pour la moyenne quotidienne : utiliser les jours du premier au dernier jour avec données
-  // (pas 365 ni la plage filtrée) — évite de diluer la moyenne avec des jours sans données
   const daysForDailyAverage = useMemo(() => {
     if (!timelineData || timelineData.length === 0) return 1;
     const dates = timelineData.map((p) => toDateOnly(p.date));
@@ -253,7 +274,6 @@ function HeatmapContent() {
     return Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1);
   }, [timelineData]);
 
-  // Calculer les statistiques
   const stats = useMemo(() => {
     if (!timelineData || timelineData.length === 0) {
       return null;
@@ -282,9 +302,6 @@ function HeatmapContent() {
       .filter((p) => p.listens > 0)
       .sort((a, b) => a.listens - b.listens)[0];
 
-    // Distribution par jour : utiliser temporalData (EXTRACT(DOW) en SQL) si dispo,
-    // sinon fallback sur timeline (évite bugs timezone de getDay())
-    // weekdayDistribution: index 0=Dimanche, 1=Lundi, ..., 6=Samedi (pour le chart)
     const weekdayDistribution = [0, 0, 0, 0, 0, 0, 0];
     const weekdaysT = [
       "sunday",
@@ -298,7 +315,7 @@ function HeatmapContent() {
     let mostActiveWeekday = "—";
     if (temporalData?.byDayOfWeek?.length) {
       temporalData.byDayOfWeek.forEach((d, i) => {
-        weekdayDistribution[(i + 1) % 7] = d.listens; // temporal: Lun=0..Dim=6 → 0=Dim,1=Lun..
+        weekdayDistribution[(i + 1) % 7] = d.listens;
       });
       if (temporalData.peakDay != null) {
         mostActiveWeekday = t(
@@ -367,24 +384,20 @@ function HeatmapContent() {
 
   const handleDayClick = useCallback((date: string, count: number) => {
     if (count === 0) {
-      // Si pas d'écoutes, ne rien faire
       setSelectedDate(null);
       return;
     }
 
-    // Stocker la date sélectionnée pour afficher les détails
     setSelectedDate(date);
   }, []);
 
-  // Récupérer les écoutes détaillées du jour sélectionné
-  // Le service listening-service.ts gère automatiquement l'inclusion de toute la journée
   const dayListensParams = useMemo(() => {
     if (!selectedDate) return undefined;
 
     return {
       startDate: selectedDate,
-      endDate: selectedDate, // Le service ajustera automatiquement pour inclure toute la journée
-      limit: 500, // Limite élevée pour avoir toutes les écoutes du jour
+      endDate: selectedDate,
+      limit: 500,
       userId,
     };
   }, [selectedDate, userId]);
@@ -402,11 +415,17 @@ function HeatmapContent() {
     return (
       <div className="space-y-8">
         <HeatmapHeroFrame badgeLabel={badgeLabel} stats={null} />
-        <ErrorState
-          error={error}
-          message={t("errorLoading")}
-          onRetry={handleRetry}
-        />
+        <section className={HEATMAP_CALENDAR_SECTION_CLASS}>
+          <div className={DASHBOARD_SPOTLIGHT_GRADIENT_LIME} aria-hidden />
+          <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_LIME} aria-hidden />
+          <div className="relative p-6 sm:p-8">
+            <ErrorState
+              error={error}
+              message={t("errorLoading")}
+              onRetry={handleRetry}
+            />
+          </div>
+        </section>
       </div>
     );
   }
@@ -443,67 +462,49 @@ function HeatmapContent() {
           }
         />
 
-        {/* Spotlight: Calendrier heatmap — élément principal mis en avant */}
         <section
-          className={`${CARD_CLASS} animate-fade-in-up transition-all duration-300`}
+          className={`${HEATMAP_CALENDAR_SECTION_CLASS} animate-fade-in-up transition-all duration-300`}
           aria-labelledby="heatmap-spotlight-title"
         >
-          <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${HEATMAP_RAIL_CLASS} opacity-85`} />
-          <div className="pointer-events-none absolute -right-20 -top-24 h-56 w-56 rounded-full bg-sky-400/12 blur-3xl dark:bg-sky-400/16" />
-          <div className="pointer-events-none absolute -bottom-24 left-10 h-52 w-52 rounded-full bg-emerald-400/12 blur-3xl dark:bg-emerald-400/16" />
+          <div className={DASHBOARD_SPOTLIGHT_GRADIENT_LIME} aria-hidden />
+          <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_LIME} aria-hidden />
           <div className="relative">
-            <div className="border-b border-sky-200/20 px-6 py-5 dark:border-sky-300/10">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-sky-300/25 bg-sky-300/10 text-sky-600 shadow-sm shadow-sky-950/10 dark:text-sky-200">
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={1.5}
-                    aria-hidden
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
-                    />
-                  </svg>
+            <div className={`${DASHBOARD_SPOTLIGHT_HEADER_BOTTOM} px-6 py-5 sm:px-8`}>
+              <div className="flex items-start gap-4">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-slate-200/90 bg-slate-50/90 text-lime-700 shadow-sm dark:border-white/15 dark:bg-white/10 dark:text-lime-300">
+                  <CalendarDays className="h-5 w-5" strokeWidth={1.75} aria-hidden />
                 </div>
                 <div>
-                  <h2
-                    id="heatmap-spotlight-title"
-                    className="text-lg font-semibold tracking-tight text-foreground"
-                  >
+                  <h2 id="heatmap-spotlight-title" className={DASHBOARD_SPOTLIGHT_TITLE}>
                     {t("calendarTitle")}
                   </h2>
-                  <p className="mt-0.5 text-sm text-sky-700/75 dark:text-sky-100/65">
-                    {t("calendarHint")}
-                  </p>
+                  <p className={`mt-1 max-w-2xl ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("calendarHint")}</p>
+                  {heatmapData.length === 0 && (
+                    <p className={`mt-2 text-xs ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("noDataPeriod")}</p>
+                  )}
                 </div>
               </div>
-              {heatmapData.length === 0 && (
-                <p className="mt-2 text-xs text-muted">{t("noDataPeriod")}</p>
-              )}
             </div>
             <div className="p-4 sm:p-6 md:p-8">
               {isLoading ? (
                 <HeatmapSkeleton />
               ) : heatmapData.length > 0 ? (
-                <div className="relative rounded-2xl border border-sky-200/20 bg-white/50 p-3 shadow-inner dark:border-sky-300/10 dark:bg-slate-950/20">
-                  <div className="pointer-events-none absolute left-1/2 top-10 h-64 w-64 -translate-x-1/2 rounded-full bg-violet-400/10 blur-3xl dark:bg-violet-400/15" />
-                  <CalendarHeatmap
-                    data={heatmapData}
-                    startDate={calendarStart}
-                    endDate={calendarEnd}
-                    selectedDate={selectedDate}
-                    onDayClick={handleDayClick}
-                    locale={locale}
-                    colorScheme="aurora"
-                  />
+                <div className={`relative ${DASHBOARD_SPOTLIGHT_INNER_WELL}`}>
+                  <div className="pointer-events-none absolute left-1/2 top-10 h-64 w-64 -translate-x-1/2 rounded-full bg-lime-400/10 blur-3xl dark:bg-violet-400/12" aria-hidden />
+                  <div className="relative">
+                    <CalendarHeatmap
+                      data={heatmapData}
+                      startDate={calendarStart}
+                      endDate={calendarEnd}
+                      selectedDate={selectedDate}
+                      onDayClick={handleDayClick}
+                      locale={locale}
+                      colorScheme="aurora"
+                    />
+                  </div>
                 </div>
               ) : (
-                <div className="rounded-xl border border-sky-200/20 bg-white/50 py-12 text-center text-muted dark:border-sky-300/10 dark:bg-slate-950/20">
+                <div className={`${DASHBOARD_SPOTLIGHT_INNER_WELL} py-12 text-center ${DASHBOARD_SPOTLIGHT_MUTED}`}>
                   <p>{t("noDataPeriod")}</p>
                 </div>
               )}
@@ -512,7 +513,6 @@ function HeatmapContent() {
         </section>
       </div>
 
-      {/* Détails du jour sélectionné */}
       {selectedDate && (
         <section
           ref={dayDetailsRef}
@@ -550,7 +550,7 @@ export default function HeatmapPage() {
   const filterKey = `${startDateParam}-${endDateParam}-${selectedDateParam}`;
 
   return (
-    <div className="px-4 py-6 sm:px-0">
+    <div className="px-4 pb-6 pt-0 sm:px-0">
       <Suspense fallback={<HeatmapPageFallback />}>
         <HeatmapContent key={filterKey} />
       </Suspense>

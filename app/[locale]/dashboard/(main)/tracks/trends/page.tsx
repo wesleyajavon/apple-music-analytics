@@ -27,6 +27,20 @@ import { useTrackTrendsChart } from "@/lib/hooks/use-tracks";
 import { getTrackLabel } from "@/lib/utils/track-trends-pivot";
 import { CHART_TOOLTIP_STYLES } from "@/lib/constants/config";
 import { ArrowLeft } from "lucide-react";
+import {
+  DASHBOARD_SPOTLIGHT_SHELL,
+  DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY,
+  DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET,
+  DASHBOARD_SPOTLIGHT_HEADER_BOTTOM,
+  DASHBOARD_SPOTLIGHT_TITLE,
+  DASHBOARD_SPOTLIGHT_MUTED,
+  DASHBOARD_SPOTLIGHT_BADGE_VIOLET,
+  DASHBOARD_SPOTLIGHT_BADGE_DOT_VIOLET,
+  DASHBOARD_SPOTLIGHT_INNER_WELL,
+  DASHBOARD_SPOTLIGHT_PILL_MUTED,
+  DASHBOARD_CHART_THEME,
+} from "@/lib/constants/dashboard-spotlight";
+import { useTheme } from "@/lib/providers/theme-provider";
 
 const COLORS = [
   "#22d3ee",
@@ -192,10 +206,10 @@ function TrackPickerSkeleton() {
 
 function TrackTrendsChartSkeleton() {
   return (
-    <div className="relative min-h-[500px] rounded-[1.35rem] border border-white/10 bg-black/30 p-6" aria-busy="true">
+    <div className="relative min-h-[500px] rounded-[1.35rem] border border-slate-200/80 bg-slate-100/50 p-6 dark:border-white/10 dark:bg-black/30" aria-busy="true">
       <div className="flex h-[452px] flex-col justify-between">
         {Array.from({ length: 6 }).map((_, index) => (
-          <div key={index} className="h-px bg-white/10" />
+          <div key={index} className="h-px bg-slate-200/90 dark:bg-white/10" />
         ))}
       </div>
       <div className="absolute inset-x-8 bottom-20 top-16">
@@ -220,7 +234,7 @@ function TrackTrendsChartSkeleton() {
       </div>
       <div className="absolute inset-x-8 bottom-6 flex flex-wrap gap-3">
         {Array.from({ length: 4 }).map((_, index) => (
-          <div key={index} className="h-3 w-28 rounded bg-white/10 animate-shimmer" />
+          <div key={index} className="h-3 w-28 rounded bg-slate-200/90 animate-shimmer dark:bg-white/10" />
         ))}
       </div>
     </div>
@@ -230,6 +244,8 @@ function TrackTrendsChartSkeleton() {
 function TrendsContent() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { resolvedTheme } = useTheme();
+  const chartTheme = DASHBOARD_CHART_THEME[resolvedTheme === "dark" ? "dark" : "light"];
   const t = useTranslations("trackTrends");
   const emptyStatePresets = useEmptyStatePresets();
   const badgeLabel = useTrackTrendsBadgeLabel();
@@ -459,23 +475,20 @@ function TrendsContent() {
             title={t("sections.chart.title")}
             description={t("sections.chart.description")}
           />
-          <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950 text-white shadow-2xl shadow-black/25 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-black/35">
-            <div
-              className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(139,92,246,0.14),transparent_32%),radial-gradient(circle_at_12%_70%,rgba(34,211,238,0.1),transparent_34%)]"
-              aria-hidden
-            />
-            <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-violet-200/35 to-transparent" aria-hidden />
-            <div className="relative border-b border-white/10 px-5 py-5 sm:px-8">
+          <div className={DASHBOARD_SPOTLIGHT_SHELL}>
+            <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} aria-hidden />
+            <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} aria-hidden />
+            <div className={`relative ${DASHBOARD_SPOTLIGHT_HEADER_BOTTOM} px-5 py-5 sm:px-8`}>
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                  <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-violet-300/25 bg-violet-300/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-violet-100">
-                    <span className="h-2 w-2 rounded-full bg-violet-300 shadow-[0_0_14px_rgba(167,139,250,0.55)]" />
+                  <div className={`mb-2 ${DASHBOARD_SPOTLIGHT_BADGE_VIOLET}`}>
+                    <span className={DASHBOARD_SPOTLIGHT_BADGE_DOT_VIOLET} />
                     {t("sections.chart.badge")}
                   </div>
-                  <h3 className="text-lg font-semibold tracking-tight text-white sm:text-xl">{t("evolution")}</h3>
-                  <p className="mt-1 text-sm text-slate-400">{t("chartHint")}</p>
+                  <h3 className={`${DASHBOARD_SPOTLIGHT_TITLE} tracking-tight sm:text-xl`}>{t("evolution")}</h3>
+                  <p className={`mt-1 ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("chartHint")}</p>
                 </div>
-                <span className="inline-flex w-fit items-center rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold text-slate-200">
+                <span className={DASHBOARD_SPOTLIGHT_PILL_MUTED}>
                   {t("selectionCount", { selected: selectedIds.length, max: MAX_SERIES_TRACKS })}
                 </span>
               </div>
@@ -484,15 +497,15 @@ function TrendsContent() {
               {isLoading ? (
                 <TrackTrendsChartSkeleton />
               ) : selectedIds.length === 0 ? (
-                <div className="rounded-[1.35rem] border border-white/10 bg-black/30 px-6 py-12 text-center">
-                  <p className="text-sm text-slate-400">{t("selectAtLeastOne")}</p>
+                <div className="rounded-[1.35rem] border border-slate-200/80 bg-slate-50/80 px-6 py-12 text-center dark:border-white/10 dark:bg-black/30">
+                  <p className="text-sm text-slate-600 dark:text-slate-400">{t("selectAtLeastOne")}</p>
                 </div>
               ) : (
-                <div className="relative min-h-[500px] rounded-[1.35rem] border border-white/10 bg-black/25 p-3 backdrop-blur-sm" aria-busy={isFetching || selectionPending}>
+                <div className={`relative ${DASHBOARD_SPOTLIGHT_INNER_WELL} min-h-[500px]`} aria-busy={isFetching || selectionPending}>
                   {(isFetching || selectionPending) && (
-                    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 rounded-[1.35rem] bg-slate-950/80 backdrop-blur-[2px] px-4 text-center">
-                      <span className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-cyan-400 border-t-transparent" aria-hidden />
-                      <span className="text-sm font-medium text-white">
+                    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 rounded-[1.35rem] bg-white/90 px-4 text-center backdrop-blur-[2px] dark:bg-slate-950/80">
+                      <span className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-cyan-600 border-t-transparent dark:border-cyan-400" aria-hidden />
+                      <span className="text-sm font-medium text-slate-900 dark:text-white">
                         {selectionPending ? t("selectionPending") : t("chartUpdating")}
                       </span>
                     </div>
@@ -500,19 +513,19 @@ function TrendsContent() {
                   <div className={`transition-opacity duration-200 ${isFetching || selectionPending ? "pointer-events-none opacity-40" : ""}`}>
                     <ResponsiveContainer width="100%" height={500}>
                       <RechartsLineChart data={chartData} margin={{ top: 8, right: 20, left: 4, bottom: 60 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.18)" />
+                        <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} />
                         <XAxis
                           dataKey="formattedDate"
-                          tick={{ fill: "#94a3b8", fontSize: 11 }}
-                          stroke="rgba(148,163,184,0.35)"
+                          tick={{ fill: chartTheme.tick, fontSize: 11 }}
+                          stroke={chartTheme.axisStroke}
                           angle={-45}
                           textAnchor="end"
                           height={78}
                         />
-                        <YAxis tick={{ fill: "#94a3b8", fontSize: 11 }} stroke="rgba(148,163,184,0.35)" width={40} />
+                        <YAxis tick={{ fill: chartTheme.tick, fontSize: 11 }} stroke={chartTheme.axisStroke} width={40} />
                         <Tooltip contentStyle={CHART_TOOLTIP_STYLES.contentStyle} labelStyle={CHART_TOOLTIP_STYLES.labelStyle} itemStyle={CHART_TOOLTIP_STYLES.itemStyle} />
                         <Legend
-                          wrapperStyle={{ color: "#cbd5e1", paddingTop: 14, fontSize: "12px" }}
+                          wrapperStyle={{ color: chartTheme.legend, paddingTop: 14, fontSize: "12px" }}
                           formatter={(value) => {
                             const track = idToTrack.get(String(value));
                             return track ? getTrackLabel(track) : String(value);

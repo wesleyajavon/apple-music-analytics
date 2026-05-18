@@ -33,7 +33,8 @@ export const TopThreeArtists = memo(
               p-2 shadow-card backdrop-blur transition-all duration-500 hover:-translate-y-1.5
               hover:border-white hover:shadow-[0_28px_80px_-34px_rgba(80,42,130,0.65)]
               opacity-0 animate-fade-in-up ring-1 ring-card-border
-              dark:border-white/10 dark:bg-slate-950/35 dark:ring-white/10`;
+              dark:border-white/10 dark:bg-black/30 dark:shadow-xl dark:shadow-black/40 dark:ring-white/10
+              dark:hover:border-white/20 dark:hover:shadow-[0_28px_70px_-40px_rgba(0,0,0,0.75)]`;
 
     const interactiveExtras = onArtistSelect
       ? "w-full cursor-pointer text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[rgb(var(--background-rgb))] dark:focus-visible:ring-offset-slate-950"
@@ -61,7 +62,7 @@ export const TopThreeArtists = memo(
                   className="absolute inset-0 bg-gradient-to-t from-white/20 via-transparent to-white/10 opacity-70 transition-opacity duration-500 group-hover:opacity-35 group-focus-visible:opacity-35 dark:from-black/20 dark:to-black/10"
                   aria-hidden
                 />
-                <span className="absolute right-4 top-4 z-20 flex h-11 w-11 items-center justify-center rounded-full border border-white/70 bg-white/90 text-lg font-black text-gray-950 shadow-xl shadow-black/10 backdrop-blur ring-1 ring-black/5">
+                <span className="absolute right-4 top-4 z-20 flex h-11 w-11 items-center justify-center rounded-full border border-white/70 bg-white/90 text-lg font-black text-gray-950 shadow-xl shadow-black/10 backdrop-blur ring-1 ring-black/5 dark:border-white/20 dark:bg-slate-900/95 dark:text-white dark:shadow-black/40 dark:ring-white/10">
                   {index + 1}
                 </span>
                 <div className="absolute inset-x-3 bottom-3 translate-y-5 rounded-3xl border border-white/80 bg-white/90 p-4 opacity-0 shadow-2xl shadow-black/20 backdrop-blur-xl transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100 dark:border-white/10 dark:bg-slate-950/80">

@@ -33,7 +33,11 @@ export default async function SpotifySnapshotPage({ params }: Props) {
   });
 
   if (conn) {
-    return <SpotifyPartialSyncPreviewClient spotifyDisplayName={conn.spotifyDisplayName} />;
+    return (
+      <div className="px-4 py-6 sm:px-0">
+        <SpotifyPartialSyncPreviewClient spotifyDisplayName={conn.spotifyDisplayName} />
+      </div>
+    );
   }
 
   redirect({ href: DASHBOARD_ONBOARDING_REIMPORT_PATH, locale });

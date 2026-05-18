@@ -19,21 +19,45 @@ import { ErrorState } from "@/lib/components/error-state";
 import { getTrackLabel } from "@/lib/utils/track-trends-pivot";
 
 const COLORS = [
-  "#3b82f6",
+  "#06b6d4",
+  "#84cc16",
   "#8b5cf6",
-  "#ec4899",
+  "#f43f5e",
   "#f59e0b",
   "#10b981",
-  "#ef4444",
-  "#06b6d4",
   "#f97316",
   "#6366f1",
   "#14b8a6",
+  "#ec4899",
 ];
 
 function getColor(index: number): string {
   return COLORS[index % COLORS.length];
 }
+
+const TRACK_TREND_CARD_CLASS =
+  "relative h-full overflow-hidden rounded-[2rem] border border-card-border bg-gradient-to-br from-white via-[#f8fdff] to-[#f4fff8] shadow-card ring-1 ring-white/70 transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan-300/40 hover:shadow-card-hover dark:from-slate-900/92 dark:via-slate-900/88 dark:to-slate-800/90 dark:ring-white/10";
+
+const TRACK_TREND_BACKGROUND = (
+  <>
+    <div
+      className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(6,182,212,0.14),transparent_30%),radial-gradient(circle_at_88%_12%,rgba(132,204,22,0.12),transparent_32%),radial-gradient(circle_at_52%_100%,rgba(139,92,246,0.1),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.72),transparent_45%)] dark:bg-[radial-gradient(circle_at_top_left,rgba(6,182,212,0.18),transparent_30%),radial-gradient(circle_at_88%_12%,rgba(132,204,22,0.14),transparent_32%),radial-gradient(circle_at_52%_100%,rgba(139,92,246,0.12),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.08),transparent_45%)]"
+      aria-hidden
+    />
+    <div
+      className="pointer-events-none absolute -right-20 -top-24 h-56 w-56 rounded-full bg-accent-cyan/20 blur-3xl dark:bg-accent-cyan/12"
+      aria-hidden
+    />
+    <div
+      className="pointer-events-none absolute -bottom-24 left-12 h-56 w-56 rounded-full bg-accent-emerald/16 blur-3xl dark:bg-accent-emerald/12"
+      aria-hidden
+    />
+    <div
+      className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-accent-cyan/55 to-transparent"
+      aria-hidden
+    />
+  </>
+);
 
 function createTrendsTooltip(t: (k: string) => string, locale: string) {
   const TrendsTooltipInner = memo(
@@ -137,13 +161,24 @@ export function TrackTrendsSummaryWidget({
   if (isLoading) {
     return (
       <div className="sm:col-span-2 lg:col-span-4 min-h-[320px] w-full min-w-0">
-        <div className="relative h-full overflow-hidden rounded-2xl border-2 border-accent-violet/20 bg-card-surface shadow-2xl dark:shadow-none ring-2 ring-accent-violet/10 dark:ring-accent-violet/20 animate-fade-in-up">
-          <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
-            <div className="h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-            <div className="mt-2 h-4 w-64 bg-gray-100 dark:bg-gray-700 rounded animate-pulse" />
+        <div className={`${TRACK_TREND_CARD_CLASS} animate-fade-in-up`} role="status" aria-label={t("evolution")}>
+          {TRACK_TREND_BACKGROUND}
+          <div className="relative border-b border-white/70 px-6 py-5 dark:border-white/10">
+            <div className="mb-3 h-7 w-36 animate-shimmer rounded-full bg-gray-200 dark:bg-gray-700" />
+            <div className="h-8 w-64 max-w-full animate-shimmer rounded bg-gray-200 dark:bg-gray-700" />
+            <div className="mt-3 h-4 w-80 max-w-full animate-shimmer rounded bg-gray-100 dark:bg-gray-700" />
           </div>
-          <div className="p-6 pt-2">
-            <div className="h-[260px] bg-gray-100 dark:bg-gray-700/50 rounded-xl animate-pulse" />
+          <div className="relative space-y-4 p-6">
+            <div className="flex flex-wrap gap-2">
+              {[0, 1, 2, 3, 4].map((i) => (
+                <div
+                  key={i}
+                  className="h-8 w-32 animate-shimmer rounded-full bg-white/70 dark:bg-white/10"
+                  style={{ animationDelay: `${i * 0.08}s` }}
+                />
+              ))}
+            </div>
+            <div className="h-[260px] animate-shimmer rounded-3xl border border-white/60 bg-white/50 shadow-inner dark:border-white/10 dark:bg-slate-950/20" />
           </div>
         </div>
       </div>
@@ -153,7 +188,8 @@ export function TrackTrendsSummaryWidget({
   if (error) {
     return (
       <div className="sm:col-span-2 lg:col-span-4 w-full min-w-0">
-        <div className="rounded-2xl border border-card-border bg-card-surface p-6">
+        <div className={`${TRACK_TREND_CARD_CLASS} p-6`}>
+          {TRACK_TREND_BACKGROUND}
           <ErrorState
             error={error}
             message={t("errorLoading")}
@@ -170,28 +206,29 @@ export function TrackTrendsSummaryWidget({
 
   return (
     <div className="sm:col-span-2 lg:col-span-4 min-h-[320px] w-full min-w-0">
-      <div className="relative h-full overflow-hidden rounded-2xl border-2 border-accent-violet/20 bg-card-surface shadow-2xl dark:shadow-none ring-2 ring-accent-violet/10 dark:ring-accent-violet/20 transition-all duration-300 hover:shadow-[0_0_50px_-12px_rgba(139,92,246,0.25)] hover:border-accent-violet/30 dark:hover:border-accent-violet/40 animate-fade-in-up">
-        <div
-          className="pointer-events-none absolute inset-0 rounded-2xl opacity-60 dark:opacity-40"
-          style={{
-            background:
-              "radial-gradient(ellipse 80% 70% at 50% 40%, rgba(139, 92, 246, 0.08) 0%, rgba(99, 102, 241, 0.04) 40%, transparent 70%)",
-          }}
-        />
+      <div className={`${TRACK_TREND_CARD_CLASS} animate-fade-in-up`}>
+        {TRACK_TREND_BACKGROUND}
         <div className="relative">
-          <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+          <div className="border-b border-white/70 px-6 py-5 dark:border-white/10">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+              <div className="max-w-2xl">
+                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-cyan-300/25 bg-white/70 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-700 shadow-sm backdrop-blur dark:bg-white/10 dark:text-cyan-100">
+                  <span
+                    className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_16px_rgb(22_199_132_/0.65)]"
+                    aria-hidden
+                  />
+                  {t("title")}
+                </div>
+                <h2 className="text-2xl font-semibold tracking-[-0.04em] text-gray-950 dark:text-white sm:text-3xl">
                   {t("evolution")}
                 </h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                <p className="mt-2 max-w-xl text-sm leading-6 text-muted sm:text-base">
                   {t("chartHint")}
                 </p>
               </div>
               <Link
                 href={`/dashboard/tracks/trends${trendsQuery}`}
-                className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-accent-violet hover:bg-accent-violet/10 dark:hover:bg-accent-violet/20 transition-colors duration-200 shrink-0 self-start"
+                className="inline-flex shrink-0 items-center justify-center gap-1.5 self-start rounded-2xl border border-card-border bg-white/70 px-4 py-2.5 text-sm font-semibold text-cyan-700 shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow-card dark:bg-white/10 dark:text-cyan-100 dark:hover:bg-white/15"
               >
                 {tOverview("seeMore")}
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -201,92 +238,118 @@ export function TrackTrendsSummaryWidget({
             </div>
           </div>
 
-          <div className="px-6 pb-3 pt-1">
-            <p className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
-              {t("tracksToDisplay")}
-            </p>
-            <div className="flex flex-wrap gap-1.5">
-              {availableTracks.map((track, idx) => {
-                const selected = selectedIds.includes(track.id);
-                return (
-                  <button
-                    key={track.id}
-                    type="button"
-                    onClick={() => toggleTrack(track.id)}
-                    className={`inline-flex max-w-[min(100%,220px)] items-center gap-1.5 rounded-md border px-2 py-1 text-xs transition-colors ${
-                      selected
-                        ? "border-accent-violet/40 bg-accent-violet/10 text-gray-900 dark:text-white"
-                        : "border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50"
-                    }`}
-                    title={getTrackLabel(track)}
-                  >
-                    <span
-                      className="h-2 w-2 shrink-0 rounded-full"
-                      style={{
-                        backgroundColor: selected ? getColor(idx) : "transparent",
-                        border: selected ? "none" : "1px solid #9ca3af",
-                      }}
-                    />
-                    <span className="truncate">{track.title}</span>
-                  </button>
-                );
-              })}
+          <div className="relative space-y-5 p-6">
+            <div className="rounded-3xl border border-white/70 bg-white/55 p-3 shadow-sm backdrop-blur dark:border-white/10 dark:bg-slate-950/22">
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted">
+                  {t("tracksToDisplay")}
+                </p>
+                <span className="rounded-full border border-cyan-300/25 bg-cyan-300/10 px-3 py-1 text-xs font-semibold tabular-nums text-cyan-700 dark:text-cyan-100">
+                  {selectedIds.length}/{availableTracks.length}
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {availableTracks.map((track, idx) => {
+                  const selected = selectedIds.includes(track.id);
+                  return (
+                    <button
+                      key={track.id}
+                      type="button"
+                      onClick={() => toggleTrack(track.id)}
+                      className={`group inline-flex max-w-[min(100%,240px)] items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 ${
+                        selected
+                          ? "border-cyan-300/30 bg-white/85 text-gray-950 shadow-card dark:border-white/15 dark:bg-white/12 dark:text-white"
+                          : "border-white/70 bg-white/45 text-muted hover:bg-white/75 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
+                      }`}
+                      title={getTrackLabel(track)}
+                    >
+                      <span
+                        className="h-2.5 w-2.5 shrink-0 rounded-full transition-transform group-hover:scale-110"
+                        style={{
+                          backgroundColor: selected ? getColor(idx) : "transparent",
+                          boxShadow: selected ? `0 0 16px ${getColor(idx)}66` : "none",
+                          border: selected ? "none" : "1px solid rgb(148 163 184 / 0.75)",
+                        }}
+                      />
+                      <span className="truncate">{track.title}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
 
-          <div className="p-6 pt-2">
             {selectedIds.length === 0 ? (
-              <p className="text-sm text-gray-500 dark:text-gray-400 py-8 text-center">
+              <p className="rounded-3xl border border-white/70 bg-white/55 py-10 text-center text-sm text-muted shadow-inner dark:border-white/10 dark:bg-slate-950/22">
                 {t("selectAtLeastOne")}
               </p>
             ) : (
-              <ResponsiveContainer width="100%" height={260}>
-                <LineChart
-                  data={chartData}
-                  margin={{ top: 5, right: 12, left: 0, bottom: 50 }}
-                >
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    stroke="#e5e7eb"
-                    className="dark:stroke-gray-700"
-                  />
-                  <XAxis
-                    dataKey="formattedDate"
-                    tick={{ fill: "currentColor", fontSize: 11 }}
-                    stroke="#6b7280"
-                    className="dark:stroke-gray-400"
-                    angle={-40}
-                    textAnchor="end"
-                    height={70}
-                  />
-                  <YAxis
-                    tick={{ fill: "currentColor", fontSize: 11 }}
-                    stroke="#6b7280"
-                    className="dark:stroke-gray-400"
-                    width={40}
-                  />
-                  <Tooltip content={<TrendsTooltip />} />
-                  <Legend wrapperStyle={{ fontSize: 12 }} />
-                  {selectedIds.map((trackId) => {
-                    const idx = availableTracks.findIndex((track) => track.id === trackId);
-                    const label = idToLabel.get(trackId) ?? trackId;
-                    return (
-                      <Line
-                        key={trackId}
-                        type="monotone"
-                        dataKey={trackId}
-                        name={label}
-                        stroke={getColor(idx >= 0 ? idx : 0)}
-                        strokeWidth={2}
-                        dot={{ r: 2 }}
-                        activeDot={{ r: 4 }}
-                        animationDuration={500}
-                        animationEasing="ease-in-out"
+              <div className="relative rounded-3xl border border-white/70 bg-white/60 p-3 shadow-inner backdrop-blur dark:border-white/10 dark:bg-slate-950/24">
+                <div className="pointer-events-none absolute left-1/2 top-8 h-56 w-56 -translate-x-1/2 rounded-full bg-accent-cyan/10 blur-3xl dark:bg-accent-cyan/15" />
+                <div className="relative h-[290px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart
+                      data={chartData}
+                      margin={{ top: 12, right: 16, left: 0, bottom: 50 }}
+                    >
+                      <CartesianGrid
+                        strokeDasharray="4 6"
+                        stroke="rgb(148 163 184 / 0.26)"
+                        vertical={false}
                       />
-                    );
-                  })}
-                </LineChart>
-              </ResponsiveContainer>
+                      <XAxis
+                        dataKey="formattedDate"
+                        tick={{ fill: "rgb(100 116 139)", fontSize: 11, fontWeight: 600 }}
+                        stroke="rgb(148 163 184 / 0.45)"
+                        tickLine={false}
+                        axisLine={false}
+                        angle={-40}
+                        textAnchor="end"
+                        height={70}
+                      />
+                      <YAxis
+                        tick={{ fill: "rgb(100 116 139)", fontSize: 11, fontWeight: 600 }}
+                        stroke="rgb(148 163 184 / 0.45)"
+                        tickLine={false}
+                        axisLine={false}
+                        width={42}
+                      />
+                      <Tooltip content={<TrendsTooltip />} />
+                      <Legend
+                        iconType="circle"
+                        wrapperStyle={{
+                          fontSize: 12,
+                          fontWeight: 600,
+                          paddingTop: 8,
+                        }}
+                      />
+                      {selectedIds.map((trackId) => {
+                        const idx = availableTracks.findIndex((track) => track.id === trackId);
+                        const label = idToLabel.get(trackId) ?? trackId;
+                        const color = getColor(idx >= 0 ? idx : 0);
+                        return (
+                          <Line
+                            key={trackId}
+                            type="monotone"
+                            dataKey={trackId}
+                            name={label}
+                            stroke={color}
+                            strokeWidth={2.75}
+                            dot={false}
+                            activeDot={{
+                              r: 5,
+                              stroke: "rgb(var(--card-rgb) / 0.95)",
+                              strokeWidth: 2,
+                              fill: color,
+                            }}
+                            animationDuration={650}
+                            animationEasing="ease-in-out"
+                          />
+                        );
+                      })}
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
             )}
           </div>
         </div>

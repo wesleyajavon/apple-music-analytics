@@ -12,6 +12,13 @@ import {
   isGroqDailyQuotaError,
 } from "@/lib/utils/groq-quota-message";
 import { AlertTriangle } from "lucide-react";
+import {
+  OVERVIEW_STARTUP_EYEBROW_PILL_CLASS,
+  OVERVIEW_STARTUP_HEADER_LINK_CLASS,
+  OVERVIEW_STARTUP_INNER_PANEL_CLASS,
+  OVERVIEW_STARTUP_SURFACE_BASE,
+  OverviewStartupSurfaceBg,
+} from "@/lib/components/overview-startup-surface";
 
 interface ErrorStateProps {
   error: Error | null;
@@ -129,42 +136,90 @@ export function AiWidgetQuotaOrError({
   seeMoreHref,
   seeMoreLabel,
   error,
+  surface = "standard",
+  eyebrow,
 }: {
   title: string;
   subtitle: string;
   seeMoreHref?: string;
   seeMoreLabel?: string;
   error: Error;
+  surface?: "standard" | "startup";
+  eyebrow?: string;
 }) {
+  const isStartup = surface === "startup";
   return (
-    <div className="overflow-hidden rounded-xl border border-card-border bg-card-surface shadow-card min-h-[220px] flex flex-col">
-      <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+    <div
+      className={
+        isStartup
+          ? `${OVERVIEW_STARTUP_SURFACE_BASE} flex min-h-[280px] flex-col`
+          : "flex min-h-[220px] flex-col overflow-hidden rounded-xl border border-card-border bg-card-surface shadow-card"
+      }
+    >
+      {isStartup ? <OverviewStartupSurfaceBg /> : null}
+      <div
+        className={
+          isStartup
+            ? "relative border-b border-white/10 px-6 py-5 sm:px-8"
+            : "border-b border-gray-100 px-6 py-4 dark:border-gray-700/50"
+        }
+      >
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0">
+            {isStartup && eyebrow ? (
+              <div className={OVERVIEW_STARTUP_EYEBROW_PILL_CLASS}>
+                <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_16px_rgb(22_199_132_/0.75)]" />
+                {eyebrow}
+              </div>
+            ) : null}
+            <h2
+              className={
+                isStartup
+                  ? "text-3xl font-semibold tracking-[-0.05em] text-white sm:text-4xl"
+                  : "text-lg font-semibold text-gray-900 dark:text-white"
+              }
+            >
               {title}
             </h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+            <p
+              className={
+                isStartup
+                  ? "mt-3 max-w-2xl text-sm leading-6 text-slate-300 sm:text-base"
+                  : "mt-0.5 text-sm text-gray-500 dark:text-gray-400"
+              }
+            >
               {subtitle}
             </p>
           </div>
-          {seeMoreHref && seeMoreLabel && (
+          {seeMoreHref && seeMoreLabel ? (
             <Link
               href={seeMoreHref}
-              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium
-                text-accent-violet hover:bg-accent-violet/10 dark:hover:bg-accent-violet/20
-                transition-colors duration-200 shrink-0"
+              className={
+                isStartup
+                  ? OVERVIEW_STARTUP_HEADER_LINK_CLASS
+                  : "inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-accent-violet transition-colors duration-200 hover:bg-accent-violet/10 dark:hover:bg-accent-violet/20"
+              }
             >
               {seeMoreLabel}
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </Link>
-          )}
+          ) : null}
         </div>
       </div>
-      <div className="p-6 flex-1">
-        {isGroqDailyQuotaError(error) ? (
+      <div className={isStartup ? "relative flex-1 p-6 sm:p-8" : "flex-1 p-6"}>
+        {isStartup ? (
+          <div className={OVERVIEW_STARTUP_INNER_PANEL_CLASS}>
+            {isGroqDailyQuotaError(error) ? (
+              <GroqQuotaNotice error={error} />
+            ) : (
+              <p className="text-sm text-red-300" role="alert">
+                {error.message}
+              </p>
+            )}
+          </div>
+        ) : isGroqDailyQuotaError(error) ? (
           <GroqQuotaNotice error={error} />
         ) : (
           <p className="text-sm text-red-600 dark:text-red-400" role="alert">

@@ -10,6 +10,26 @@ import { useDashboardViewerUserId } from "@/lib/context/dashboard-viewer-context
 import { useInteractiveAiBlockedByGenreBackfill } from "@/lib/hooks/use-interactive-ai-blocked-by-genre-backfill";
 import { isGroqGenreClassificationBlockingError } from "@/lib/utils/groq-quota-message";
 
+const WIDGET_SHELL_CLASS =
+  "relative min-h-[280px] w-full overflow-hidden rounded-[2rem] border border-accent-violet/20 bg-gradient-to-br from-white via-[#fbf8ff] to-[#eef7ff] shadow-card ring-1 ring-white/70 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent-violet/30 hover:shadow-card-hover dark:from-slate-900/92 dark:via-slate-900/88 dark:to-slate-800/90 dark:ring-white/10";
+
+const WIDGET_BACKGROUND = (
+  <>
+    <div
+      className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(240,64,104,0.13),transparent_30%),radial-gradient(circle_at_88%_12%,rgba(79,144,224,0.16),transparent_32%),linear-gradient(135deg,rgba(255,255,255,0.72),transparent_45%)] dark:bg-[radial-gradient(circle_at_top_left,rgba(240,64,104,0.18),transparent_30%),radial-gradient(circle_at_88%_12%,rgba(79,144,224,0.16),transparent_32%),linear-gradient(135deg,rgba(255,255,255,0.08),transparent_45%)]"
+      aria-hidden
+    />
+    <div
+      className="pointer-events-none absolute -right-20 -top-24 h-56 w-56 rounded-full bg-accent-cyan/20 blur-3xl dark:bg-accent-cyan/12"
+      aria-hidden
+    />
+    <div
+      className="pointer-events-none absolute -bottom-24 left-12 h-56 w-56 rounded-full bg-accent-violet/16 blur-3xl dark:bg-accent-violet/14"
+      aria-hidden
+    />
+  </>
+);
+
 /**
  * Overview feature widget showing the AI-generated taste profile.
  * Uses full listen range when "all" (tout) filter is selected.
@@ -27,10 +47,11 @@ export function TasteProfileSummaryWidget() {
 
   if (interactiveAiBlockedByGenreBackfill && !isRangeLoading) {
     return (
-      <section className="relative min-h-[280px] w-full overflow-hidden rounded-2xl border border-accent-violet/25 bg-card-surface shadow-2xl ring-1 ring-accent-violet/10 dark:border-accent-violet/30 dark:ring-accent-violet/20">
-        <div className="relative border-b border-gray-100/80 px-6 py-5 dark:border-gray-700/50">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{t("title")}</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{t("subtitleShort")}</p>
+      <section className={WIDGET_SHELL_CLASS}>
+        {WIDGET_BACKGROUND}
+        <div className="relative border-b border-white/70 px-6 py-5 dark:border-white/10">
+          <h2 className="text-lg font-semibold text-gray-950 dark:text-white">{t("title")}</h2>
+          <p className="mt-0.5 text-sm text-muted">{t("subtitleShort")}</p>
         </div>
         <div className="relative p-6">
           <InteractiveAiGenreBackfillNotice />
@@ -42,19 +63,13 @@ export function TasteProfileSummaryWidget() {
   if (isLoadingOrFetching) {
     return (
       <div
-        className="relative min-h-[280px] w-full overflow-hidden rounded-2xl border border-accent-violet/25 bg-card-surface shadow-2xl ring-1 ring-accent-violet/10 dark:border-accent-violet/30 dark:ring-accent-violet/20"
+        className={WIDGET_SHELL_CLASS}
         role="status"
         aria-label={t("loading")}
       >
-        <div
-          className="pointer-events-none absolute inset-0 opacity-70 dark:opacity-50"
-          style={{
-            background:
-              "radial-gradient(circle at top left, rgba(139, 92, 246, 0.18), transparent 34%), radial-gradient(circle at 85% 20%, rgba(34, 211, 238, 0.12), transparent 28%)",
-          }}
-        />
+        {WIDGET_BACKGROUND}
         {/* Header skeleton — matches real layout */}
-        <div className="relative border-b border-gray-100/80 px-6 py-5 dark:border-gray-700/50">
+        <div className="relative border-b border-white/70 px-6 py-5 dark:border-white/10">
           <div className="space-y-1.5">
             <div className="h-5 w-44 animate-shimmer rounded bg-gray-200 dark:bg-gray-700" />
             <div className="h-4 w-64 max-w-full animate-shimmer rounded bg-gray-200 dark:bg-gray-700" />
@@ -83,10 +98,11 @@ export function TasteProfileSummaryWidget() {
   if (error) {
     if (isGroqGenreClassificationBlockingError(error)) {
       return (
-        <section className="relative min-h-[280px] w-full overflow-hidden rounded-2xl border border-accent-violet/25 bg-card-surface shadow-2xl ring-1 ring-accent-violet/10 dark:border-accent-violet/30 dark:ring-accent-violet/20">
-          <div className="relative border-b border-gray-100/80 px-6 py-5 dark:border-gray-700/50">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{t("title")}</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{t("subtitleShort")}</p>
+        <section className={WIDGET_SHELL_CLASS}>
+          {WIDGET_BACKGROUND}
+          <div className="relative border-b border-white/70 px-6 py-5 dark:border-white/10">
+            <h2 className="text-lg font-semibold text-gray-950 dark:text-white">{t("title")}</h2>
+            <p className="mt-0.5 text-sm text-muted">{t("subtitleShort")}</p>
           </div>
           <div className="relative p-6">
             <InteractiveAiGenreBackfillNotice force />
@@ -118,58 +134,93 @@ export function TasteProfileSummaryWidget() {
   }
 
   return (
-    <section className="relative min-h-[280px] w-full overflow-hidden rounded-2xl border border-accent-violet/25 bg-card-surface shadow-2xl ring-1 ring-accent-violet/10 transition-all duration-300 hover:border-accent-violet/40 hover:shadow-[0_0_50px_-12px_rgba(139,92,246,0.28)] dark:border-accent-violet/30 dark:ring-accent-violet/20">
-      <div
-        className="pointer-events-none absolute inset-0 opacity-80 dark:opacity-50"
-        style={{
-          background:
-            "radial-gradient(circle at top left, rgba(139, 92, 246, 0.18), transparent 34%), radial-gradient(circle at 85% 20%, rgba(34, 211, 238, 0.12), transparent 28%)",
-        }}
-      />
-      <div className="relative border-b border-gray-100/80 px-6 py-5 dark:border-gray-700/50">
-        <div className="flex items-start justify-between gap-4">
+    <section className={WIDGET_SHELL_CLASS}>
+      {WIDGET_BACKGROUND}
+      <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-accent-cyan/50 to-transparent" />
+      <div className="relative border-b border-white/70 px-6 py-5 dark:border-white/10">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-accent-violet/20 bg-accent-violet/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-accent-violet dark:bg-accent-violet/15">
-              <span className="h-1.5 w-1.5 rounded-full bg-accent-violet" aria-hidden />
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-accent-violet/20 bg-white/70 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-accent-violet shadow-sm backdrop-blur dark:bg-white/10 dark:text-violet-100">
+              <span
+                className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_16px_rgb(22_199_132_/0.65)]"
+                aria-hidden
+              />
               {t("featureBadge")}
             </div>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <h2 className="text-2xl font-semibold tracking-[-0.04em] text-gray-950 dark:text-white sm:text-3xl">
               {t("title")}
             </h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+            <p className="mt-1 text-sm text-muted">
               {t("subtitleShort")}
             </p>
           </div>
+          {data.cached ? (
+            <p className="w-fit rounded-full border border-accent-cyan/20 bg-white/60 px-3 py-1.5 text-xs font-medium text-muted shadow-sm backdrop-blur dark:bg-white/10">
+              {t("cached")}
+            </p>
+          ) : null}
         </div>
       </div>
       <div className="relative space-y-6 p-6">
-        <p className="max-w-4xl text-base leading-8 text-gray-700 dark:text-gray-300">
+        <p className="max-w-4xl text-lg font-medium leading-8 text-gray-800 dark:text-slate-200">
           {data.description}
         </p>
-        <div className="grid gap-3 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-3">
           {[
-            { title: t("influences"), body: data.influences },
-            { title: t("coreGenres"), body: data.coreGenres },
-            { title: t("whatMakesYouUnique"), body: data.uniqueAspect },
+            {
+              title: t("influences"),
+              body: data.influences,
+              number: "01",
+              badge: "border-accent-violet/20 bg-accent-violet/10 text-accent-violet dark:text-violet-100",
+              dot: "bg-accent-violet",
+            },
+            {
+              title: t("coreGenres"),
+              body: data.coreGenres,
+              number: "02",
+              badge: "border-accent-cyan/20 bg-accent-cyan/10 text-accent-cyan dark:text-cyan-100",
+              dot: "bg-accent-cyan",
+            },
+            {
+              title: t("whatMakesYouUnique"),
+              body: data.uniqueAspect,
+              number: "03",
+              badge: "border-accent-emerald/20 bg-accent-emerald/10 text-accent-emerald dark:text-emerald-100",
+              dot: "bg-accent-emerald",
+            },
           ].map((section) => (
             <article
               key={section.title}
-              className="rounded-xl border border-white/70 bg-white/70 p-4 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/[0.04]"
+              className="group relative flex min-h-[220px] flex-col overflow-hidden rounded-3xl border border-card-border bg-white/88 p-5 shadow-card backdrop-blur transition-all hover:-translate-y-1 hover:bg-white hover:shadow-card-hover dark:border-white/10 dark:bg-slate-950/28 dark:hover:bg-slate-950/38"
             >
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+              <div
+                className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent opacity-90 dark:via-white/25"
+                aria-hidden
+              />
+              <div
+                className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.72),transparent_42%)] opacity-80 dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.05),transparent_42%)]"
+                aria-hidden
+              />
+              <div className="relative mb-5 flex items-center justify-between gap-3">
+                <span
+                  className={`inline-flex rounded-full border px-3 py-1 font-mono text-[0.68rem] font-semibold uppercase tracking-[0.22em] ${section.badge}`}
+                >
+                  {section.number}
+                </span>
+                <span
+                  className={`h-2.5 w-2.5 rounded-full ${section.dot} shadow-[0_0_18px_currentColor]`}
+                  aria-hidden
+                />
+              </div>
+              <h3 className="relative text-xl font-semibold tracking-[-0.03em] text-gray-950 dark:text-white">
                 {section.title}
               </h3>
-              <p className="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-400">
+              <p className="relative mt-3 text-sm leading-7 text-gray-600 dark:text-gray-300">
                 {section.body}
               </p>
             </article>
           ))}
         </div>
-        {data.cached && (
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-            {t("cached")}
-          </p>
-        )}
       </div>
     </section>
   );

@@ -69,6 +69,23 @@ function formatDateRange(startDate: string | undefined, endDate: string | undefi
   return `${formatter.format(new Date(startDate))} - ${formatter.format(new Date(endDate))}`;
 }
 
+function formatCompactNumber(value: number | undefined, locale: string): string {
+  return new Intl.NumberFormat(locale, {
+    notation: "compact",
+    maximumFractionDigits: 1,
+  }).format(value ?? 0);
+}
+
+function formatListeningTime(seconds: number | undefined, t: ReturnType<typeof useTranslations>): string {
+  const safeSeconds = Math.max(0, seconds ?? 0);
+  const totalMinutes = Math.round(safeSeconds / 60);
+  if (totalMinutes < 60) {
+    return `${totalMinutes}${t("units.minutes")}`;
+  }
+  const hours = Math.round(totalMinutes / 60);
+  return `${hours}${t("units.hours")}`;
+}
+
 function getTopArtistFallback(artists: ArtistStatsDto[], overview?: OverviewStatsWithTopArtists) {
   if (artists[0]) return artists[0].artistName;
   return overview?.topArtists?.[0]?.artistName ?? "";
@@ -167,12 +184,16 @@ function LandingValueCard({
   accentClass: string;
 }) {
   return (
-    <div className="rounded-2xl border border-card-border bg-card-surface/90 p-6 shadow-card backdrop-blur-sm">
-      <div className={`mb-4 flex h-11 w-11 items-center justify-center rounded-2xl ${accentClass}`}>
+    <div className="group relative overflow-hidden rounded-3xl border border-card-border bg-card-surface p-6 shadow-card backdrop-blur-sm transition-all hover:-translate-y-1 hover:shadow-card-hover">
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-br from-accent-violet/10 via-transparent to-accent-cyan/10 opacity-80 transition-opacity group-hover:opacity-100"
+        aria-hidden
+      />
+      <div className={`relative mb-4 flex h-11 w-11 items-center justify-center rounded-2xl ${accentClass}`}>
         {icon}
       </div>
-      <h3 className="text-base font-semibold text-gray-950 dark:text-white">{title}</h3>
-      <p className="mt-3 text-sm leading-6 text-gray-600 dark:text-gray-300">{body}</p>
+      <h3 className="relative text-base font-semibold text-gray-950 dark:text-white">{title}</h3>
+      <p className="relative mt-3 text-sm leading-6 text-gray-600 dark:text-gray-300">{body}</p>
     </div>
   );
 }
@@ -391,6 +412,28 @@ function MusicalProfileContent() {
       genre: topGenreName || t("unknownGenre"),
     });
   const showAiUnavailable = aiProfile?.aiUnavailable;
+  const profileMetrics = [
+    {
+      label: t("metrics.totalListens"),
+      value: formatCompactNumber(overview?.totalListens, locale),
+      hint: t("metrics.totalListensHint"),
+    },
+    {
+      label: t("metrics.listeningTime"),
+      value: formatListeningTime(overview?.totalPlayTime, t),
+      hint: t("metrics.listeningTimeHint"),
+    },
+    {
+      label: t("metrics.uniqueArtists"),
+      value: formatCompactNumber(overview?.uniqueArtists, locale),
+      hint: t("metrics.uniqueArtistsHint"),
+    },
+  ];
+  const genrePreview = (genresData?.data ?? []).slice(0, 3);
+  const topArtistShare =
+    overview?.totalListens && topArtists[0]?.listenCount
+      ? Math.round((topArtists[0].listenCount / overview.totalListens) * 100)
+      : 0;
 
   return (
     <div className="space-y-12 pb-10">
@@ -399,79 +442,144 @@ function MusicalProfileContent() {
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          className="relative overflow-hidden rounded-[2rem] border border-accent-violet/20 bg-gray-950 px-6 py-8 text-white shadow-2xl shadow-accent-violet/20 sm:px-10 sm:py-12"
+          className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-gray-950 px-5 py-6 text-white shadow-2xl shadow-accent-violet/20 sm:px-8 sm:py-9 lg:px-10 lg:py-10"
         >
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.45),transparent_35%),radial-gradient(circle_at_80%_20%,rgba(6,182,212,0.28),transparent_30%),linear-gradient(135deg,rgba(17,24,39,0.98),rgba(76,29,149,0.78))]" />
-          <div className="absolute -bottom-24 left-1/2 h-56 w-[80%] -translate-x-1/2 rounded-full bg-accent-violet/25 blur-3xl" />
-          <div className="relative grid gap-10 lg:grid-cols-[1.25fr_0.75fr] lg:items-end">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(240,64,104,0.28),transparent_30%),radial-gradient(circle_at_80%_10%,rgba(79,144,224,0.24),transparent_32%),linear-gradient(135deg,rgba(3,7,18,0.98),rgba(30,27,75,0.88)_48%,rgba(8,47,73,0.72))]" />
+          <div className="absolute -left-24 top-1/2 h-64 w-64 rounded-full bg-accent-violet/25 blur-3xl" />
+          <div className="absolute -bottom-28 right-10 h-72 w-72 rounded-full bg-accent-cyan/20 blur-3xl" />
+          <div className="relative grid gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-center">
             <div>
-              <h1 className="max-w-3xl text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">
+              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-100 backdrop-blur">
+                <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_18px_rgb(22_199_132_/0.75)]" />
+                {t("heroBadge")}
+              </div>
+              <h1 className="max-w-4xl text-balance text-4xl font-semibold tracking-[-0.06em] sm:text-5xl lg:text-6xl">
                 {t("heroTitle")}
               </h1>
-              <p className="mt-5 max-w-2xl text-base leading-7 text-white/72 sm:text-lg">
+              <p className="mt-5 max-w-2xl text-base leading-7 text-white/70 sm:text-lg">
                 {t("heroSubtitle")}
               </p>
-              {dateRangeLabel && (
-                <p className="mt-5 text-sm font-medium text-white/55">{dateRangeLabel}</p>
-              )}
+              <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+                <Link
+                  href={withFilters("/dashboard/overview")}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25 transition-all hover:-translate-y-0.5 hover:bg-gray-100"
+                >
+                  {t("overviewCallout.cta")}
+                  <span aria-hidden="true">&rarr;</span>
+                </Link>
+              </div>
+              {dateRangeLabel ? (
+                <p className="mt-5 inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-white/55">
+                  {dateRangeLabel}
+                </p>
+              ) : null}
             </div>
-            <div className="rounded-3xl border border-white/15 bg-white/10 p-5 backdrop-blur">
-              <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-center">
-                <div className="relative shrink-0">
-                  <div className="relative h-28 w-28 overflow-hidden rounded-2xl shadow-2xl shadow-black/35 ring-2 ring-white/20 sm:h-32 sm:w-32">
-                    {topArtists[0] ? (
-                      <ArtistAvatarHydrated
-                        artistId={topArtists[0].artistId}
-                        artistName={topArtists[0].artistName}
-                        imageUrl={topArtists[0].imageUrl}
-                        avatarApiSize={384}
-                        colorIndex={0}
-                        alt=""
-                        className="h-full w-full object-cover"
-                        loading="eager"
-                        decoding="async"
-                        referrerPolicy="no-referrer"
-                      />
-                    ) : (
-                      /* eslint-disable-next-line @next/next/no-img-element */
-                      <img
-                        src={getAvatarUrl(topArtistName || t("unknownArtist"), 384, 0)}
-                        alt=""
-                        className="h-full w-full object-cover"
-                        loading="eager"
-                        decoding="async"
-                        referrerPolicy="no-referrer"
-                        onError={(e) => {
-                          e.currentTarget.src = getAvatarUrl(
-                            topArtistName || t("unknownArtist"),
-                            384,
-                            0
-                          );
-                        }}
-                      />
-                    )}
-                    <div
-                      className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-tr from-violet-600/20 via-transparent to-cyan-500/15"
-                      aria-hidden
-                    />
+
+            <div className="relative">
+              <div className="absolute -inset-4 rounded-[2rem] bg-brand-gradient-soft blur-2xl" aria-hidden />
+              <div className="relative overflow-hidden rounded-[1.75rem] border border-white/15 bg-white/10 p-3 shadow-2xl shadow-black/35 backdrop-blur-xl">
+                <div className="rounded-[1.35rem] border border-white/10 bg-slate-950/70 p-4">
+                  <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                    <p className="font-mono text-[0.66rem] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                      {t("profileCockpit.label")}
+                    </p>
+                    <span className="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-2.5 py-1 text-[0.66rem] font-semibold text-cyan-100">
+                      {t("profileCockpit.live")}
+                    </span>
                   </div>
-                  <div
-                    className="pointer-events-none absolute -inset-1 -z-10 rounded-[1.35rem] bg-gradient-to-br from-accent-violet/40 via-transparent to-accent-cyan/35 opacity-80 blur-md"
-                    aria-hidden
-                  />
-                </div>
-                <div className="min-w-0 flex-1 text-center sm:text-left">
-                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-accent-cyan">
-                    {t("heroSignature")}
-                  </p>
-                  <p className="mt-3 text-2xl font-bold leading-tight">
-                    {topArtistName || t("unknownArtist")}
-                  </p>
-                  <p className="mt-2 text-sm text-white/65">
-                    {topGenreName
-                      ? t("heroSignatureHint", { genre: topGenreName })
-                      : t("heroSignatureHintFallback")}
-                  </p>
+
+                  <div className="mt-4 grid gap-4 sm:grid-cols-[auto_1fr] sm:items-center">
+                    <div className="relative mx-auto h-32 w-32 overflow-hidden rounded-3xl shadow-2xl shadow-black/35 ring-1 ring-white/15 sm:mx-0">
+                      {topArtists[0] ? (
+                        <ArtistAvatarHydrated
+                          artistId={topArtists[0].artistId}
+                          artistName={topArtists[0].artistName}
+                          imageUrl={topArtists[0].imageUrl}
+                          avatarApiSize={384}
+                          colorIndex={0}
+                          alt=""
+                          className="h-full w-full object-cover"
+                          loading="eager"
+                          decoding="async"
+                          referrerPolicy="no-referrer"
+                        />
+                      ) : (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img
+                          src={getAvatarUrl(topArtistName || t("unknownArtist"), 384, 0)}
+                          alt=""
+                          className="h-full w-full object-cover"
+                          loading="eager"
+                          decoding="async"
+                          referrerPolicy="no-referrer"
+                          onError={(e) => {
+                            e.currentTarget.src = getAvatarUrl(
+                              topArtistName || t("unknownArtist"),
+                              384,
+                              0
+                            );
+                          }}
+                        />
+                      )}
+                      <div
+                        className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-violet-600/20 via-transparent to-cyan-500/20"
+                        aria-hidden
+                      />
+                    </div>
+                    <div className="min-w-0 text-center sm:text-left">
+                      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-accent-cyan">
+                        {t("heroSignature")}
+                      </p>
+                      <p className="mt-2 truncate text-2xl font-semibold tracking-tight">
+                        {topArtistName || t("unknownArtist")}
+                      </p>
+                      <p className="mt-2 text-sm text-white/60">
+                        {topGenreName
+                          ? t("heroSignatureHint", { genre: topGenreName })
+                          : t("heroSignatureHintFallback")}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-5 grid gap-2 sm:grid-cols-3">
+                    {profileMetrics.map((metric) => (
+                      <div key={metric.label} className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
+                        <p className="text-xl font-semibold tracking-tight">{metric.value}</p>
+                        <p className="mt-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                          {metric.label}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4">
+                    <div className="mb-3 flex items-center justify-between gap-3 text-xs">
+                      <span className="font-semibold uppercase tracking-[0.18em] text-slate-400">
+                        {t("profileCockpit.genreMix")}
+                      </span>
+                      {topArtistShare > 0 ? (
+                        <span className="text-cyan-100">
+                          {t("profileCockpit.anchorShare", { percent: topArtistShare })}
+                        </span>
+                      ) : null}
+                    </div>
+                    <div className="space-y-2">
+                      {genrePreview.map((genre) => (
+                        <div key={genre.genre}>
+                          <div className="mb-1 flex items-center justify-between text-xs text-slate-300">
+                            <span className="truncate">{genre.genre}</span>
+                            <span>{Math.round(genre.percentage)}%</span>
+                          </div>
+                          <div className="h-2 overflow-hidden rounded-full bg-white/10">
+                            <div
+                              className="h-full rounded-full bg-gradient-to-r from-accent-violet to-accent-cyan"
+                              style={{ width: `${Math.min(100, Math.max(4, genre.percentage))}%` }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -480,37 +588,57 @@ function MusicalProfileContent() {
       </ParallaxHero>
 
       <ScrollRevealSection>
-        <section className="relative overflow-hidden rounded-[2rem] border border-accent-cyan/20 bg-gradient-to-br from-accent-violet/10 via-card-surface to-accent-cyan/10 p-6 shadow-card sm:p-8">
+        <section className="relative overflow-hidden rounded-[2rem] border border-card-border bg-surface-glass p-4 shadow-card backdrop-blur-xl sm:p-6">
           <div className="pointer-events-none absolute -right-20 -top-24 h-56 w-56 rounded-full bg-accent-cyan/20 blur-3xl" />
-          <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div className="pointer-events-none absolute -left-16 bottom-0 h-48 w-48 rounded-full bg-accent-violet/15 blur-3xl" />
+          <div className="relative grid gap-4 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-stretch">
             <div className="max-w-2xl">
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-accent-violet">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">
                 {t("overviewCallout.badge")}
               </p>
-              <h2 className="mt-3 text-2xl font-bold tracking-tight text-gray-950 dark:text-white sm:text-3xl">
+              <h2 className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-gray-950 dark:text-white sm:text-4xl">
                 {t("overviewCallout.title")}
               </h2>
               <p className="mt-3 text-sm leading-6 text-gray-600 dark:text-gray-300">
                 {t("overviewCallout.body")}
               </p>
+              <Link
+                href={withFilters("/dashboard/overview")}
+                className="mt-6 inline-flex items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-5 py-3 text-sm font-bold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:shadow-card-hover focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
+              >
+                {t("overviewCallout.cta")}
+                <span aria-hidden="true">&rarr;</span>
+              </Link>
             </div>
-            <Link
-              href={withFilters("/dashboard/overview")}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-5 py-3 text-sm font-bold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:shadow-card-hover focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
-            >
-              {t("overviewCallout.cta")}
-              <span aria-hidden="true">&rarr;</span>
-            </Link>
+            <div className="grid gap-3 sm:grid-cols-3">
+              {profileMetrics.map((metric) => (
+                <div
+                  key={metric.label}
+                  className="rounded-3xl border border-card-border bg-card-surface p-5 shadow-card"
+                >
+                  <p className="text-3xl font-semibold tracking-[-0.04em] text-gray-950 dark:text-white">
+                    {metric.value}
+                  </p>
+                  <p className="mt-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted">
+                    {metric.label}
+                  </p>
+                  <p className="mt-3 text-xs leading-5 text-muted">
+                    {metric.hint}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
       </ScrollRevealSection>
 
       <ScrollRevealSection>
-        <section className="relative overflow-hidden rounded-[2rem] border-2 border-accent-violet/20 bg-card-surface shadow-2xl ring-2 ring-accent-violet/10">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(139,92,246,0.14),transparent_32%),radial-gradient(circle_at_90%_40%,rgba(6,182,212,0.1),transparent_28%)]" />
+        <section className="relative overflow-hidden rounded-[2rem] border border-card-border bg-card-surface shadow-2xl ring-1 ring-accent-violet/10">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(152,80,208,0.16),transparent_32%),radial-gradient(circle_at_90%_40%,rgba(79,144,224,0.14),transparent_28%)]" />
+          <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-accent-cyan/60 to-transparent" />
           <div className="relative grid gap-8 p-6 sm:p-8 lg:grid-cols-[0.8fr_1.2fr] lg:p-10">
             <div>
-              <div className="mb-5 h-14 w-14 shrink-0 overflow-hidden rounded-2xl border border-accent-violet/25 bg-card-surface shadow-lg shadow-accent-violet/20 ring-2 ring-accent-violet/15">
+              <div className="mb-5 h-14 w-14 shrink-0 overflow-hidden rounded-2xl border border-accent-violet/25 bg-card-surface shadow-lg shadow-accent-violet/20 ring-1 ring-accent-violet/15">
                 <Image
                   src="/brand/favicon.png"
                   alt=""
@@ -539,12 +667,17 @@ function MusicalProfileContent() {
                 </p>
               )}
             </div>
-            <div className="rounded-3xl border border-card-border bg-white/70 p-6 dark:bg-gray-900/60 sm:p-8">
+            <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-slate-950 p-6 text-white shadow-2xl shadow-black/20 sm:p-8">
+              <div
+                className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(79,144,224,0.18),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.08),transparent_38%)]"
+                aria-hidden
+              />
+              <div className="relative">
               {aiLoading ? (
                 <div className="space-y-3 animate-pulse" aria-busy="true">
-                  <div className="h-5 w-full rounded bg-gray-200 dark:bg-gray-700" />
-                  <div className="h-5 w-11/12 rounded bg-gray-200 dark:bg-gray-700" />
-                  <div className="h-5 w-4/5 rounded bg-gray-200 dark:bg-gray-700" />
+                  <div className="h-5 w-full rounded bg-white/15" />
+                  <div className="h-5 w-11/12 rounded bg-white/15" />
+                  <div className="h-5 w-4/5 rounded bg-white/15" />
                 </div>
               ) : aiError ? (
                 isGroqDailyQuotaError(aiError) ? (
@@ -554,7 +687,7 @@ function MusicalProfileContent() {
                     {!interactiveAiBlockedByGenreBackfill ? (
                       <InteractiveAiGenreBackfillNotice force />
                     ) : null}
-                    <blockquote className="text-2xl font-semibold leading-9 tracking-tight text-gray-950 dark:text-white">
+                    <blockquote className="text-2xl font-semibold leading-9 tracking-tight text-white">
                       &ldquo;{profileDescription}&rdquo;
                     </blockquote>
                   </div>
@@ -563,16 +696,17 @@ function MusicalProfileContent() {
                     <p className="text-sm font-semibold text-red-600 dark:text-red-400">
                       {t("aiErrorTitle")}
                     </p>
-                    <p className="text-xl font-semibold leading-8 text-gray-900 dark:text-white">
+                    <p className="text-xl font-semibold leading-8 text-white">
                       {profileDescription}
                     </p>
                   </div>
                 )
               ) : (
-                <blockquote className="text-2xl font-semibold leading-9 tracking-tight text-gray-950 dark:text-white">
+                <blockquote className="text-2xl font-semibold leading-9 tracking-tight text-white">
                   &ldquo;{profileDescription}&rdquo;
                 </blockquote>
               )}
+              </div>
             </div>
           </div>
         </section>
@@ -643,7 +777,7 @@ function MusicalProfileContent() {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="flex min-h-[48px] items-center justify-center gap-2 rounded-2xl border border-card-border bg-card-surface/80 px-4 py-3 text-sm font-medium text-gray-700 shadow-card transition-all hover:-translate-y-0.5 hover:border-accent-violet/30 hover:text-accent-violet hover:shadow-card-hover dark:text-gray-300"
+                    className="flex min-h-[48px] items-center justify-center gap-2 rounded-2xl border border-card-border bg-card-surface px-4 py-3 text-sm font-medium text-gray-700 shadow-card transition-all hover:-translate-y-0.5 hover:border-accent-violet/30 hover:text-accent-violet hover:shadow-card-hover dark:text-gray-300"
                   >
                     <span className="text-accent-violet">{item.icon}</span>
                     {item.label}

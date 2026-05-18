@@ -1,6 +1,7 @@
 import Image from "next/image";
 
 type SoundprintLogoProps = {
+  src?: string;
   className?: string;
   imageClassName?: string;
   textClassName?: string;
@@ -11,6 +12,7 @@ type SoundprintLogoProps = {
 const LOGO_SRC = "/brand/soundprint-ai-logo.png";
 
 export function SoundprintLogo({
+  src = LOGO_SRC,
   className = "",
   imageClassName = "h-8 w-8 rounded-lg",
   textClassName = "text-sm font-semibold tracking-wide text-foreground",
@@ -20,7 +22,7 @@ export function SoundprintLogo({
   return (
     <span className={`inline-flex items-center gap-2 ${className}`}>
       <Image
-        src={LOGO_SRC}
+        src={src}
         alt={showText ? "" : "Soundprint-AI"}
         width={256}
         height={256}

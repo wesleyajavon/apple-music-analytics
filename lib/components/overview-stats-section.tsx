@@ -41,40 +41,30 @@ const StatIcons = {
 const ACCENT: Record<
   StatType,
   {
-    iconBg: string;
-    iconColor: string;
-    border: string;
+    gradient: string;
+    icon: string;
     glow: string;
-    orb: string;
   }
 > = {
   listens: {
-    iconBg: "bg-accent-rose/20",
-    iconColor: "text-accent-rose",
-    border: "border-accent-rose/25",
-    glow: "shadow-[0_0_40px_-12px_rgba(244,63,94,0.35)]",
-    orb: "bg-accent-rose/20",
+    gradient: "from-accent-rose/30 via-accent-violet/20 to-transparent",
+    icon: "bg-accent-rose/15 text-rose-100 ring-accent-rose/25",
+    glow: "bg-accent-rose/25",
   },
   artists: {
-    iconBg: "bg-accent-violet/20",
-    iconColor: "text-accent-violet",
-    border: "border-accent-violet/25",
-    glow: "shadow-[0_0_40px_-12px_rgba(139,92,246,0.35)]",
-    orb: "bg-accent-violet/20",
+    gradient: "from-accent-violet/30 via-accent-indigo/20 to-transparent",
+    icon: "bg-accent-violet/15 text-violet-100 ring-accent-violet/25",
+    glow: "bg-accent-violet/25",
   },
   tracks: {
-    iconBg: "bg-accent-indigo/20",
-    iconColor: "text-accent-indigo",
-    border: "border-accent-indigo/25",
-    glow: "shadow-[0_0_40px_-12px_rgba(99,102,241,0.35)]",
-    orb: "bg-accent-indigo/20",
+    gradient: "from-accent-indigo/30 via-accent-cyan/20 to-transparent",
+    icon: "bg-accent-indigo/15 text-indigo-100 ring-accent-indigo/25",
+    glow: "bg-accent-indigo/25",
   },
   time: {
-    iconBg: "bg-accent-cyan/20",
-    iconColor: "text-accent-cyan",
-    border: "border-accent-cyan/25",
-    glow: "shadow-[0_0_40px_-12px_rgba(6,182,212,0.35)]",
-    orb: "bg-accent-cyan/20",
+    gradient: "from-accent-cyan/30 via-accent-emerald/20 to-transparent",
+    icon: "bg-accent-cyan/15 text-cyan-100 ring-accent-cyan/25",
+    glow: "bg-accent-cyan/25",
   },
 };
 
@@ -113,26 +103,26 @@ const StatTile = memo(
     const a = ACCENT[iconType];
     return (
       <div
-        className={`
-          group relative flex min-h-[180px] flex-col overflow-hidden rounded-2xl border bg-card-surface/80 p-6
-          backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5
-          ${a.border} ${a.glow} dark:bg-card-surface/90
-        `}
+        className="group relative flex min-h-[172px] flex-col overflow-hidden rounded-3xl border border-white/10 bg-white/[0.06] p-5 shadow-2xl shadow-black/10 backdrop-blur transition-all duration-300 hover:-translate-y-1 hover:bg-white/[0.08] hover:shadow-black/20"
       >
         <div
-          className={`pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full blur-3xl ${a.orb} opacity-60 dark:opacity-40`}
+          className={`pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-br ${a.gradient} opacity-90 transition-opacity group-hover:opacity-100`}
+          aria-hidden
+        />
+        <div
+          className={`pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full blur-3xl ${a.glow} opacity-60`}
           aria-hidden
         />
         <div className="relative flex flex-1 flex-col">
-          <div className="mb-4 flex items-start justify-between gap-3">
+          <div className="mb-5 flex items-start justify-between gap-3">
             <div
-              className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl ${a.iconBg} ${a.iconColor} ring-1 ring-black/5 dark:ring-white/10`}
+              className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ring-1 ${a.icon}`}
             >
               {StatIcons[iconType]}
             </div>
           </div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{label}</p>
-          <p className="mt-2 text-3xl font-bold tabular-nums tracking-tight text-gray-900 dark:text-white sm:text-4xl">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">{label}</p>
+          <p className="mt-2 text-3xl font-semibold tabular-nums tracking-[-0.04em] text-white sm:text-4xl">
             {typeof value === "number" ? value.toLocaleString(locale) : value}
           </p>
           {change ? (
@@ -140,8 +130,8 @@ const StatTile = memo(
               <span
                 className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold tabular-nums ${
                   change.isPositive
-                    ? "bg-emerald-500/10 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400"
-                    : "bg-red-500/10 text-red-700 dark:bg-red-500/15 dark:text-red-400"
+                    ? "border border-emerald-300/20 bg-emerald-400/10 text-emerald-100"
+                    : "border border-rose-300/20 bg-rose-400/10 text-rose-100"
                 }`}
               >
                 {change.isPositive ? (
@@ -154,7 +144,7 @@ const StatTile = memo(
                   </svg>
                 )}
                 {change.displayValue}%
-                <span className="font-normal text-gray-600 dark:text-gray-400">· {vsLabel}</span>
+                <span className="font-normal text-slate-400">· {vsLabel}</span>
               </span>
             </div>
           ) : (
@@ -200,21 +190,22 @@ export function OverviewStatsSection({
   return (
     <div className="sm:col-span-2 lg:col-span-4">
       <section
-        className="relative overflow-hidden rounded-2xl border-2 border-emerald-500/15 bg-card-surface shadow-xl ring-1 ring-emerald-500/10 dark:border-emerald-500/20 dark:shadow-none dark:ring-emerald-500/15"
+        className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950 text-white shadow-2xl shadow-black/20"
         aria-labelledby="overview-stats-heading"
       >
         <div
-          className="pointer-events-none absolute inset-0 opacity-70 dark:opacity-50"
-          style={{
-            background:
-              "radial-gradient(ellipse 90% 80% at 100% 0%, rgba(16, 185, 129, 0.12) 0%, transparent 55%), radial-gradient(ellipse 70% 60% at 0% 100%, rgba(139, 92, 246, 0.08) 0%, transparent 50%)",
-          }}
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(240,64,104,0.18),transparent_30%),radial-gradient(circle_at_85%_15%,rgba(79,144,224,0.18),transparent_32%),linear-gradient(135deg,rgba(255,255,255,0.08),transparent_38%)]"
           aria-hidden
         />
-        <div className="relative border-b border-gray-100/80 px-6 py-6 dark:border-gray-700/50 sm:px-8 sm:py-8">
+        <div className="pointer-events-none absolute -left-24 top-10 h-64 w-64 rounded-full bg-accent-violet/20 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-28 right-0 h-72 w-72 rounded-full bg-accent-cyan/15 blur-3xl" />
+        <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-cyan-200/50 to-transparent" />
+
+        <div className="relative border-b border-white/10 px-5 py-6 sm:px-8 sm:py-8">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-2xl">
-              <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400">
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-100">
+                <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_16px_rgb(22_199_132_/0.75)]" />
                 <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path
                     strokeLinecap="round"
@@ -226,21 +217,23 @@ export function OverviewStatsSection({
               </div>
               <h2
                 id="overview-stats-heading"
-                className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl"
+                className="text-3xl font-semibold tracking-[-0.05em] text-white sm:text-4xl"
               >
                 {t("statsSectionTitle")}
               </h2>
-              <p className="mt-2 text-base text-gray-600 dark:text-gray-400">{t("statsSectionDescription")}</p>
+              <p className="mt-3 max-w-xl text-base leading-7 text-slate-300">
+                {t("statsSectionDescription")}
+              </p>
             </div>
             {showComparison ? (
-              <p className="max-w-sm shrink-0 rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-3 text-sm leading-relaxed text-gray-600 dark:border-emerald-500/25 dark:bg-emerald-500/10 dark:text-gray-300">
+              <p className="max-w-sm shrink-0 rounded-2xl border border-emerald-300/20 bg-emerald-400/10 px-4 py-3 text-sm leading-relaxed text-emerald-50">
                 {t("statsSectionComparisonNote")}
               </p>
             ) : null}
           </div>
         </div>
 
-        <div className="relative px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+        <div className="relative px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4 xl:gap-5">
             <StatTile
               iconType="listens"

@@ -50,8 +50,9 @@ export function TopThreeArtistsOverviewWidget({
   if (isLoading) {
     return (
       <div className="sm:col-span-2 lg:col-span-4 w-full min-w-0">
-        <div className="relative overflow-hidden rounded-2xl border-2 border-accent-violet/20 bg-card-surface shadow-2xl dark:shadow-none ring-2 ring-accent-violet/10 dark:ring-accent-violet/20 animate-fade-in-up">
-          <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
+        <div className="relative overflow-hidden rounded-[2rem] border border-card-border bg-gradient-to-br from-white via-[#fbf8ff] to-[#eef7ff] shadow-card ring-1 ring-white/70 animate-fade-in-up dark:from-slate-900/90 dark:via-slate-900/90 dark:to-slate-800/90 dark:ring-white/10">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(152,80,208,0.12),transparent_30%),radial-gradient(circle_at_90%_10%,rgba(79,144,224,0.14),transparent_32%)]" />
+          <div className="relative border-b border-white/70 px-6 py-5 dark:border-white/10">
             <div className="h-6 w-56 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
             <div className="mt-2 h-4 w-72 bg-gray-100 dark:bg-gray-700 rounded animate-pulse" />
           </div>
@@ -90,28 +91,37 @@ export function TopThreeArtistsOverviewWidget({
 
   return (
     <div className="sm:col-span-2 lg:col-span-4 w-full min-w-0">
-      <div className="relative h-full overflow-hidden rounded-2xl border-2 border-accent-violet/20 bg-card-surface shadow-2xl dark:shadow-none ring-2 ring-accent-violet/10 dark:ring-accent-violet/20 transition-all duration-300 hover:shadow-[0_0_50px_-12px_rgba(139,92,246,0.25)] hover:border-accent-violet/30 dark:hover:border-accent-violet/40 animate-fade-in-up">
+      <div className="relative h-full overflow-hidden rounded-[2rem] border border-card-border bg-gradient-to-br from-white via-[#fbf8ff] to-[#eef7ff] shadow-card ring-1 ring-white/70 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-card-hover dark:from-slate-900/90 dark:via-slate-900/90 dark:to-slate-800/90 dark:ring-white/10 animate-fade-in-up">
         <div
-          className="pointer-events-none absolute inset-0 rounded-2xl opacity-60 dark:opacity-40"
-          style={{
-            background:
-              "radial-gradient(ellipse 80% 70% at 50% 40%, rgba(139, 92, 246, 0.08) 0%, rgba(99, 102, 241, 0.04) 40%, transparent 70%)",
-          }}
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(152,80,208,0.12),transparent_30%),radial-gradient(circle_at_90%_10%,rgba(79,144,224,0.14),transparent_32%),linear-gradient(135deg,rgba(255,255,255,0.72),transparent_45%)] dark:bg-[radial-gradient(circle_at_top_left,rgba(152,80,208,0.16),transparent_30%),radial-gradient(circle_at_90%_10%,rgba(79,144,224,0.14),transparent_32%),linear-gradient(135deg,rgba(255,255,255,0.06),transparent_45%)]"
+          aria-hidden
+        />
+        <div
+          className="pointer-events-none absolute -right-20 -top-24 h-56 w-56 rounded-full bg-accent-cyan/20 blur-3xl dark:bg-accent-cyan/12"
+          aria-hidden
+        />
+        <div
+          className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-accent-cyan/50 to-transparent"
+          aria-hidden
         />
         <div className="relative">
-          <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
+          <div className="border-b border-white/70 px-6 py-5 dark:border-white/10">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  {tArtists("top3Title")}
+                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-accent-violet/20 bg-white/70 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-accent-violet shadow-sm backdrop-blur dark:bg-white/10 dark:text-violet-100">
+                  <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_16px_rgb(22_199_132_/0.65)]" />
+                  {tOverview("artistSpotlight.badge")}
+                </div>
+                <h2 className="text-3xl font-semibold tracking-[-0.05em] text-gray-950 dark:text-white sm:text-4xl">
+                  {tOverview("artistSpotlight.title")}
                 </h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-                  {tOverview("yourFavoriteArtists")}
+                <p className="mt-3 max-w-2xl text-sm leading-6 text-muted sm:text-base">
+                  {tOverview("artistSpotlight.description")}
                 </p>
               </div>
               <Link
                 href={`/dashboard/artists${artistsQuery}`}
-                className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-accent-violet hover:bg-accent-violet/10 dark:hover:bg-accent-violet/20 transition-colors duration-200 shrink-0 self-start"
+                className="inline-flex shrink-0 items-center justify-center gap-1.5 self-start rounded-2xl border border-card-border bg-white/70 px-4 py-2.5 text-sm font-semibold text-accent-violet shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow-card dark:bg-white/10 dark:text-violet-100 dark:hover:bg-white/15"
               >
                 {tOverview("seeAll")}
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

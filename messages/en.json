@@ -509,21 +509,57 @@
     "statsSectionComparisonNote": "Percent changes compare this period to the previous one of the same length (when earlier data exists).",
     "vsPreviousPeriod": "vs previous period",
     "notAvailable": "Not available",
-    "recentEvolution": "Recent evolution",
+    "momentumBadge": "Live trend",
+    "recentEvolution": "Listening momentum",
     "listensPerDay": "Plays per day",
-    "listensPerMonth": "Plays per month",
+    "listensPerMonth": "Track the surges, dips, and listening arcs that shape your music story month by month.",
     "seeMore": "See more",
-    "topGenres": "Top genres",
-    "yourTopGenres": "Your most-played genres",
-    "yourTopArtists": "Your most-played artists",
-    "yourTopTracks": "Your most-played tracks",
+    "topGenres": "Genres shaping your sound",
+    "yourTopGenres": "The styles setting the tone of your library.",
+    "yourTopArtists": "The names owning your rotation right now.",
+    "yourTopTracks": "The songs pulling you back again and again.",
     "seeAll": "See all",
-    "topArtists": "Top artists",
-    "topTracks": "Top tracks",
+    "artistSpotlight": {
+      "badge": "Artist spotlight",
+      "title": "The artists carrying your rotation.",
+      "description": "Hover each cover to reveal the plays, track variety, and listening weight behind your top three."
+    },
+    "libraryLeaders": {
+      "badge": "Library leaders",
+      "title": "Your listening leaderboard, rebuilt.",
+      "description": "A cleaner read on the tracks, artists, and genres carrying the most weight in your listening history.",
+      "topTrack": "Top track",
+      "topArtist": "Top artist",
+      "topGenre": "Top genre"
+    },
+    "topArtists": "Artists owning your rotation",
+    "topTracks": "Tracks on repeat",
     "yourFavoriteArtists": "Your standout artists by play count",
     "listens": "listens",
     "Listens": "Listens",
-    "errorLoading": "Unable to load statistics"
+    "errorLoading": "Unable to load statistics",
+    "sections": {
+      "snapshot": {
+        "eyebrow": "Snapshot",
+        "title": "Start with the shape of your listening.",
+        "description": "A high-level read of your taste, volume, and variety before you dive into the details."
+      },
+      "momentum": {
+        "eyebrow": "Momentum",
+        "title": "See what is moving right now.",
+        "description": "Trend widgets turn raw play counts into shifts, surges, and recent listening direction."
+      },
+      "library": {
+        "eyebrow": "Library signals",
+        "title": "The artists, tracks, and genres behind the story.",
+        "description": "Rankings keep the product grounded in concrete listening behavior."
+      },
+      "intelligence": {
+        "eyebrow": "AI & calendar",
+        "title": "Add context to the patterns.",
+        "description": "AI summaries and calendar intensity help explain when and why your listening changes."
+      }
+    }
   },
   "timeline": {
     "title": "Listening timeline",
@@ -697,8 +733,8 @@
     "paginationNext": "Next",
     "paginationPage": "Page {page} / {totalPages}",
     "selectAtLeastOne": "Select at least one genre to display the chart.",
-    "evolution": "Listening evolution by genre",
-    "chartHint": "Compare listen counts across your selected genres over time",
+    "evolution": "Your genre pulse, decoded",
+    "chartHint": "See which sounds are taking over your taste, and which ones are fading out.",
     "rising": "Rising",
     "declining": "Declining",
     "listensDelta": "listens",
@@ -717,9 +753,10 @@
     "apiMappingNoticeBody": "Use Palette to refine genres manually, or run Groq genre mapping to classify unknown tracks faster.",
     "apiMappingNoticeShort": "Palette and Groq genre mapping can help refine the genres used in these trends.",
     "apiMappingNoticeLink": "Open Palette",
-    "chartGenreAccuracyIntro": "Each line uses how listens are labeled in your library; exports rarely include a reliable genre for every track.",
-    "chartGenreAccuracyPalette": "<manualLabel>Manual mapping (Palette)</manualLabel>: you choose the genre yourself, one artist or track at a time. Most accurate. <palette>Open Palette</palette>.",
-    "chartGenreAccuracyGroq": "<aiLabel>Automatic mapping (Groq AI)</aiLabel>: AI suggests genres in bulk to clean Unknown faster. Fastest, but less precise.",
+    "chartGenreAccuracyTitle": "Genre confidence layer",
+    "chartGenreAccuracyIntro": "Your chart gets sharper as your library labels get cleaner. Tune the genre layer once, and every trend becomes easier to trust.",
+    "chartGenreAccuracyPalette": "<manualLabel>Palette control</manualLabel>: hand-pick genres for artists or tracks when precision matters most. <palette>Open Palette</palette>.",
+    "chartGenreAccuracyGroq": "<aiLabel>AI cleanup</aiLabel>: let Groq suggest genres in bulk to shrink Unknowns fast, then keep the final say.",
     "groqCheckingEligibility": "Checking whether Groq classification can run for your library…",
     "groqAuthUnavailable": "Your dashboard is open, but this API request cannot verify your session yet. Refresh the page or sign in again.",
     "groqEligibilityUnavailable": "Sign in with your account to check whether Groq classification can run here.",
@@ -775,8 +812,8 @@
     "all": "All",
     "none": "None",
     "selectAtLeastOne": "Select at least one artist to display the chart.",
-    "evolution": "Listening evolution by artist",
-    "chartHint": "Compare listen counts for your selected artists over time",
+    "evolution": "Your artist momentum map",
+    "chartHint": "Spot who's rising, fading, and owning your rotation.",
     "rising": "Rising",
     "declining": "Declining",
     "listensDelta": "listens",
@@ -918,8 +955,8 @@
     "all": "All",
     "none": "None",
     "selectAtLeastOne": "Select at least one track to display the chart.",
-    "evolution": "Track listen evolution",
-    "chartHint": "Compare selected track listens across time.",
+    "evolution": "Your hit replay engine",
+    "chartHint": "See which songs keep pulling you back, and which ones had their moment.",
     "listensDelta": "listens",
     "noTrackData": "No track data for this period",
     "changeDatesDescription": "Adjust date range or aggregation period in the filters bar.",
@@ -1047,11 +1084,18 @@
   "musical-profile": {
     "title": "Musical Profile",
     "subtitle": "A premium, AI-assisted replay of your listening identity.",
+    "heroBadge": "Profile cockpit",
     "heroTitle": "See yourself through the music you already love.",
     "heroSubtitle": "A short welcome snapshot of your sound—then open Your Music for the full dashboard: live stats, movement charts, artists, tracks, and genre tools.",
     "heroSignature": "Signature sound",
     "heroSignatureHint": "Anchored in {genre}",
     "heroSignatureHintFallback": "Waiting for more genre signal",
+    "profileCockpit": {
+      "label": "Musical profile",
+      "live": "Live range",
+      "genreMix": "Genre mix",
+      "anchorShare": "{percent}% anchor share"
+    },
     "noData": "No listening data yet",
     "emptyFeature": {
       "badge": "What this page is for",
@@ -1571,11 +1615,65 @@
   },
   "home": {
     "title": "Soundprint-AI",
+    "heroEyebrow": "Public demo available",
+    "heroGradient": "Designed like a product OS for your taste.",
     "welcome": "Your listening, clearly explained.",
     "welcomePersonal": "Welcome back, {name}",
     "subtitle": "See your music taste evolution, hidden patterns, and stats Apple/Spotify don't show you.",
     "goToDashboard": "Go to your dashboard",
     "accessDashboard": "Explore a public dashboard demo",
+    "nav": {
+      "product": "Product",
+      "insights": "Insights",
+      "demo": "Demo"
+    },
+    "stats": {
+      "imports": {
+        "value": "10y+",
+        "label": "History"
+      },
+      "signals": {
+        "value": "40+",
+        "label": "Signals"
+      },
+      "ai": {
+        "value": "AI",
+        "label": "Narratives"
+      }
+    },
+    "productPreview": {
+      "label": "Soundprint cockpit",
+      "cardTitle": "Listening minutes",
+      "cardMeta": "+24% vs previous period",
+      "chartBar": "Preview chart bar {index}",
+      "insightEyebrow": "Live insight",
+      "insightTitle": "Your late-night phase is becoming a real pattern.",
+      "insightCopy": "Soundprint connects artists, genres, dates, and playback habits so your dashboard feels less like a spreadsheet and more like a map of your taste."
+    },
+    "workflow": {
+      "import": "Import Apple Music or Spotify history",
+      "analyze": "Find shifts, obsessions, and listening rituals",
+      "share": "Open polished dashboards and AI summaries"
+    },
+    "featuresEyebrow": "Why it feels different",
+    "featuresTitle": "A personal analytics layer for music people.",
+    "featuresSubtitle": "Every surface is designed to make your listening archive feel fast, visual, and alive.",
+    "demoHighlights": {
+      "artistAnalysis": {
+        "eyebrow": "Artist intelligence",
+        "title": "Turn every favorite artist into a clear story.",
+        "description": "Soundprint shows why an artist keeps coming back in your listening life: when you play them most, how your taste around them changes, and what their patterns reveal about you.",
+        "metric": "From top artists to real listening context",
+        "videoLabel": "Artist analysis demo"
+      },
+      "listeningTrends": {
+        "eyebrow": "Deep listening data",
+        "title": "Go beyond totals with trends, graphs, and comparisons.",
+        "description": "Explore your music history with visual trend graphs, date ranges, and comparison tools that make it easy to spot growth, phases, obsessions, and shifts across your listening data.",
+        "metric": "Compare periods, artists, tracks, and habits",
+        "videoLabel": "Listening trends and comparison demo"
+      }
+    },
     "features": {
       "timeline": {
         "title": "Timeline",
@@ -1589,6 +1687,15 @@
         "title": "AI Insights",
         "description": "Get quick analyses based on your listening stats."
       }
+    },
+    "demoHighlightsSection": {
+      "eyebrow": "Recorded product tours",
+      "title": "See the dashboard moving, not just mocked up."
+    },
+    "closingCta": {
+      "eyebrow": "Start with your soundprint",
+      "title": "Make your music history feel like a modern data product.",
+      "subtitle": "Explore the public profile now, or sign in to turn your own listening archive into clean charts, context, and AI-powered takeaways."
     }
   },
   "metadata": {

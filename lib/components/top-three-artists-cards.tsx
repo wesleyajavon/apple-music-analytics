@@ -28,28 +28,23 @@ export const TopThreeArtists = memo(
     locale: string;
     onArtistSelect?: (artist: ArtistStatsDto, avatarColorIndex: number) => void;
   }) => {
-    const gradientByRank = [
-      "from-violet-500 via-cyan-400 to-lime-300",
-      "from-fuchsia-500 via-violet-500 to-cyan-300",
-      "from-cyan-400 via-teal-400 to-orange-300",
-    ];
-
     const cardShell =
-      `group relative overflow-hidden rounded-3xl bg-gray-900
-              shadow-xl shadow-cyan-950/10 hover:shadow-2xl hover:shadow-violet-950/20 transition-all duration-300 hover:-translate-y-1
-              opacity-0 animate-fade-in-up ring-1 ring-white/10`;
+      `group relative overflow-hidden rounded-[1.75rem] border border-white/80 bg-white/90
+              p-2 shadow-card backdrop-blur transition-all duration-500 hover:-translate-y-1.5
+              hover:border-white hover:shadow-[0_28px_80px_-34px_rgba(80,42,130,0.65)]
+              opacity-0 animate-fade-in-up ring-1 ring-card-border
+              dark:border-white/10 dark:bg-slate-950/35 dark:ring-white/10`;
 
     const interactiveExtras = onArtistSelect
-      ? "w-full cursor-pointer text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[rgb(var(--background-rgb))] dark:focus-visible:ring-offset-slate-950"
+      ? "w-full cursor-pointer text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[rgb(var(--background-rgb))] dark:focus-visible:ring-offset-slate-950"
       : "";
 
     return (
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
         {artists.slice(0, 3).map((artist, index) => {
-          const progress = maxListens > 0 ? (artist.listenCount / maxListens) * 100 : 0;
           const body = (
             <>
-              <div className="absolute inset-0">
+              <div className="relative min-h-[320px] overflow-hidden rounded-[1.35rem] bg-slate-100 dark:bg-slate-900 sm:min-h-[340px]">
                 <ArtistAvatarHydrated
                   artistId={artist.artistId}
                   artistName={artist.artistName}
@@ -57,40 +52,36 @@ export const TopThreeArtists = memo(
                   avatarApiSize={640}
                   colorIndex={index}
                   alt=""
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110 group-focus-visible:scale-110"
                   loading="lazy"
                   decoding="async"
                   referrerPolicy="no-referrer"
                 />
-              </div>
-              <div
-                className={`absolute inset-0 bg-gradient-to-br ${gradientByRank[index]} opacity-[0.18] mix-blend-overlay transition-opacity group-hover:opacity-25`}
-                aria-hidden
-              />
-              <div
-                className="absolute inset-0 bg-gradient-to-t from-black via-black/75 to-black/25"
-                aria-hidden
-              />
-              <div className="relative z-10 flex min-h-[280px] flex-col justify-end p-6 pt-16 sm:min-h-[300px]">
-                <span className="absolute right-4 top-4 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-white text-lg font-black text-gray-900 shadow-lg ring-2 ring-black/20">
+                <div
+                  className="absolute inset-0 bg-gradient-to-t from-white/20 via-transparent to-white/10 opacity-70 transition-opacity duration-500 group-hover:opacity-35 group-focus-visible:opacity-35 dark:from-black/20 dark:to-black/10"
+                  aria-hidden
+                />
+                <span className="absolute right-4 top-4 z-20 flex h-11 w-11 items-center justify-center rounded-full border border-white/70 bg-white/90 text-lg font-black text-gray-950 shadow-xl shadow-black/10 backdrop-blur ring-1 ring-black/5">
                   {index + 1}
                 </span>
-                <div>
-                  <h3 className="truncate text-xl font-bold text-white drop-shadow-sm">
-                    {artist.artistName}
-                  </h3>
-                  <p className="mt-1 text-3xl font-extrabold tabular-nums text-white drop-shadow-md">
-                    {artist.listenCount.toLocaleString(locale)}
-                  </p>
-                  <p className="text-sm text-white/75">{t("listensCount")}</p>
-                  <div className="mt-2 inline-flex rounded-full bg-white/15 px-2.5 py-1 text-xs font-medium text-white/90 backdrop-blur-sm">
-                    {artist.uniqueTracks.toLocaleString(locale)} {t("uniqueTracks")}
-                  </div>
-                  <div className="mt-4 h-2 w-full max-w-[200px] overflow-hidden rounded-full bg-white/20">
-                    <div
-                      className="h-full rounded-full bg-gradient-to-r from-white/95 via-cyan-100/85 to-lime-100/70 transition-all duration-500"
-                      style={{ width: `${Math.min(progress, 100)}%` }}
-                    />
+                <div className="absolute inset-x-3 bottom-3 translate-y-5 rounded-3xl border border-white/80 bg-white/90 p-4 opacity-0 shadow-2xl shadow-black/20 backdrop-blur-xl transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100 dark:border-white/10 dark:bg-slate-950/80">
+                  <div className="flex items-end justify-between gap-3">
+                    <div className="min-w-0">
+                      <h3 className="truncate text-xl font-semibold tracking-[-0.03em] text-gray-950 dark:text-white">
+                        {artist.artistName}
+                      </h3>
+                      <p className="mt-1 text-sm font-medium text-muted">
+                        {artist.uniqueTracks.toLocaleString(locale)} {t("uniqueTracks")}
+                      </p>
+                    </div>
+                    <div className="shrink-0 text-right">
+                      <p className="text-3xl font-semibold tabular-nums tracking-[-0.04em] text-gray-950 dark:text-white">
+                        {artist.listenCount.toLocaleString(locale)}
+                      </p>
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
+                        {t("listensCount")}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>

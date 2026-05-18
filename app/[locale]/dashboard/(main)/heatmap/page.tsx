@@ -420,6 +420,7 @@ function HeatmapContent() {
           <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_LIME} aria-hidden />
           <div className="relative p-6 sm:p-8">
             <ErrorState
+              variant="startup"
               error={error}
               message={t("errorLoading")}
               onRetry={handleRetry}
@@ -434,7 +435,7 @@ function HeatmapContent() {
     return (
       <div className="space-y-8">
         <HeatmapHeroFrame badgeLabel={badgeLabel} stats={null} />
-        <EmptyState {...emptyStatePresets.importData} />
+        <EmptyState variant="startup" {...emptyStatePresets.importData} />
       </div>
     );
   }
@@ -533,7 +534,7 @@ function HeatmapContent() {
               stats?.maxDay ? toDateOnly(stats.maxDay.date) : null
             }
             emptyStateNoPlays={
-              <EmptyState {...emptyStatePresets.noDayDetail} />
+              <EmptyState variant="startup" {...emptyStatePresets.noDayDetail} />
             }
           />
         </section>

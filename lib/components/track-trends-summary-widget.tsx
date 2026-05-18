@@ -16,6 +16,8 @@ import {
 import { useTrackTrendsChart } from "@/lib/hooks/use-tracks";
 import { useDashboardViewerUserId } from "@/lib/context/dashboard-viewer-context";
 import { ErrorState } from "@/lib/components/error-state";
+import { useTheme } from "@/lib/providers/theme-provider";
+import { DASHBOARD_CHART_THEME } from "@/lib/constants/dashboard-spotlight";
 import { getTrackLabel } from "@/lib/utils/track-trends-pivot";
 
 const COLORS = [
@@ -36,12 +38,12 @@ function getColor(index: number): string {
 }
 
 const TRACK_TREND_CARD_CLASS =
-  "relative h-full overflow-hidden rounded-[2rem] border border-card-border bg-gradient-to-br from-white via-[#f8fdff] to-[#f4fff8] shadow-card ring-1 ring-white/70 transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan-300/40 hover:shadow-card-hover dark:from-slate-900/92 dark:via-slate-900/88 dark:to-slate-800/90 dark:ring-white/10";
+  "relative h-full overflow-hidden rounded-[2rem] border border-card-border bg-gradient-to-br from-white via-[#f8fdff] to-[#f4fff8] shadow-card ring-1 ring-white/70 transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan-300/40 hover:shadow-card-hover dark:border-white/[0.08] dark:from-[#06070d] dark:via-[#070812] dark:to-[#0c0e18] dark:ring-white/[0.06]";
 
 const TRACK_TREND_BACKGROUND = (
   <>
     <div
-      className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(6,182,212,0.14),transparent_30%),radial-gradient(circle_at_88%_12%,rgba(132,204,22,0.12),transparent_32%),radial-gradient(circle_at_52%_100%,rgba(139,92,246,0.1),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.72),transparent_45%)] dark:bg-[radial-gradient(circle_at_top_left,rgba(6,182,212,0.18),transparent_30%),radial-gradient(circle_at_88%_12%,rgba(132,204,22,0.14),transparent_32%),radial-gradient(circle_at_52%_100%,rgba(139,92,246,0.12),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.08),transparent_45%)]"
+      className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(6,182,212,0.14),transparent_30%),radial-gradient(circle_at_88%_12%,rgba(132,204,22,0.12),transparent_32%),radial-gradient(circle_at_52%_100%,rgba(139,92,246,0.1),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.72),transparent_45%)] dark:bg-[radial-gradient(circle_at_top_left,rgba(6,182,212,0.14),transparent_34%),radial-gradient(circle_at_88%_12%,rgba(132,204,22,0.10),transparent_32%),radial-gradient(circle_at_52%_100%,rgba(139,92,246,0.08),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.03),transparent_48%)]"
       aria-hidden
     />
     <div
@@ -53,7 +55,7 @@ const TRACK_TREND_BACKGROUND = (
       aria-hidden
     />
     <div
-      className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-accent-cyan/55 to-transparent"
+      className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-accent-cyan/55 to-transparent dark:via-cyan-200/38"
       aria-hidden
     />
   </>
@@ -108,6 +110,8 @@ export function TrackTrendsSummaryWidget({
   const tOverview = useTranslations("overview");
   const locale = useLocale();
   const viewerUserId = useDashboardViewerUserId();
+  const { resolvedTheme } = useTheme();
+  const chartTheme = DASHBOARD_CHART_THEME[resolvedTheme === "dark" ? "dark" : "light"];
   const TrendsTooltip = useMemo(() => createTrendsTooltip(t, locale), [t, locale]);
 
   const { data, isLoading, error, refetch } = useTrackTrendsChart(
@@ -163,7 +167,7 @@ export function TrackTrendsSummaryWidget({
       <div className="sm:col-span-2 lg:col-span-4 min-h-[320px] w-full min-w-0">
         <div className={`${TRACK_TREND_CARD_CLASS} animate-fade-in-up`} role="status" aria-label={t("evolution")}>
           {TRACK_TREND_BACKGROUND}
-          <div className="relative border-b border-white/70 px-6 py-5 dark:border-white/10">
+          <div className="relative border-b border-white/70 px-6 py-5 dark:border-white/[0.06]">
             <div className="mb-3 h-7 w-36 animate-shimmer rounded-full bg-gray-200 dark:bg-gray-700" />
             <div className="h-8 w-64 max-w-full animate-shimmer rounded bg-gray-200 dark:bg-gray-700" />
             <div className="mt-3 h-4 w-80 max-w-full animate-shimmer rounded bg-gray-100 dark:bg-gray-700" />
@@ -173,12 +177,12 @@ export function TrackTrendsSummaryWidget({
               {[0, 1, 2, 3, 4].map((i) => (
                 <div
                   key={i}
-                  className="h-8 w-32 animate-shimmer rounded-full bg-white/70 dark:bg-white/10"
+                  className="h-8 w-32 animate-shimmer rounded-full bg-white/70 dark:bg-[#1a1d2a]"
                   style={{ animationDelay: `${i * 0.08}s` }}
                 />
               ))}
             </div>
-            <div className="h-[260px] animate-shimmer rounded-3xl border border-white/60 bg-white/50 shadow-inner dark:border-white/10 dark:bg-slate-950/20" />
+            <div className="h-[260px] animate-shimmer rounded-3xl border border-white/60 bg-white/50 shadow-inner dark:border-white/[0.06] dark:bg-[#0c0e18]" />
           </div>
         </div>
       </div>
@@ -209,10 +213,10 @@ export function TrackTrendsSummaryWidget({
       <div className={`${TRACK_TREND_CARD_CLASS} animate-fade-in-up`}>
         {TRACK_TREND_BACKGROUND}
         <div className="relative">
-          <div className="border-b border-white/70 px-6 py-5 dark:border-white/10">
+          <div className="border-b border-white/70 px-6 py-5 dark:border-white/[0.06]">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
               <div className="max-w-2xl">
-                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-cyan-300/25 bg-white/70 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-700 shadow-sm backdrop-blur dark:bg-white/10 dark:text-cyan-100">
+                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-cyan-300/25 bg-white/70 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-700 shadow-sm backdrop-blur dark:border-cyan-400/18 dark:bg-[#141622] dark:text-cyan-100">
                   <span
                     className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_16px_rgb(22_199_132_/0.65)]"
                     aria-hidden
@@ -222,13 +226,13 @@ export function TrackTrendsSummaryWidget({
                 <h2 className="text-2xl font-semibold tracking-[-0.04em] text-gray-950 dark:text-white sm:text-3xl">
                   {t("evolution")}
                 </h2>
-                <p className="mt-2 max-w-xl text-sm leading-6 text-muted sm:text-base">
+                <p className="mt-2 max-w-xl text-sm leading-6 text-muted dark:text-slate-400 sm:text-base">
                   {t("chartHint")}
                 </p>
               </div>
               <Link
                 href={`/dashboard/tracks/trends${trendsQuery}`}
-                className="inline-flex shrink-0 items-center justify-center gap-1.5 self-start rounded-2xl border border-card-border bg-white/70 px-4 py-2.5 text-sm font-semibold text-cyan-700 shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow-card dark:bg-white/10 dark:text-cyan-100 dark:hover:bg-white/15"
+                className="inline-flex shrink-0 items-center justify-center gap-1.5 self-start rounded-2xl border border-card-border bg-white/70 px-4 py-2.5 text-sm font-semibold text-cyan-700 shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow-card dark:border-white/[0.10] dark:bg-[#161822] dark:text-cyan-100 dark:hover:bg-[#1c2030]"
               >
                 {tOverview("seeMore")}
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -239,9 +243,9 @@ export function TrackTrendsSummaryWidget({
           </div>
 
           <div className="relative space-y-5 p-6">
-            <div className="rounded-3xl border border-white/70 bg-white/55 p-3 shadow-sm backdrop-blur dark:border-white/10 dark:bg-slate-950/22">
+            <div className="rounded-3xl border border-white/70 bg-white/55 p-3 shadow-sm backdrop-blur dark:border-white/[0.06] dark:bg-[#0c0e18]">
               <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted dark:text-slate-400">
                   {t("tracksToDisplay")}
                 </p>
                 <span className="rounded-full border border-cyan-300/25 bg-cyan-300/10 px-3 py-1 text-xs font-semibold tabular-nums text-cyan-700 dark:text-cyan-100">
@@ -258,8 +262,8 @@ export function TrackTrendsSummaryWidget({
                       onClick={() => toggleTrack(track.id)}
                       className={`group inline-flex max-w-[min(100%,240px)] items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 ${
                         selected
-                          ? "border-cyan-300/30 bg-white/85 text-gray-950 shadow-card dark:border-white/15 dark:bg-white/12 dark:text-white"
-                          : "border-white/70 bg-white/45 text-muted hover:bg-white/75 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
+                          ? "border-cyan-300/30 bg-white/85 text-gray-950 shadow-card dark:border-white/12 dark:bg-slate-800/95 dark:text-white"
+                          : "border-white/70 bg-white/45 text-muted hover:bg-white/75 dark:border-white/[0.07] dark:bg-[#12141f] dark:text-slate-300 dark:hover:bg-[#181b28]"
                       }`}
                       title={getTrackLabel(track)}
                     >
@@ -268,7 +272,11 @@ export function TrackTrendsSummaryWidget({
                         style={{
                           backgroundColor: selected ? getColor(idx) : "transparent",
                           boxShadow: selected ? `0 0 16px ${getColor(idx)}66` : "none",
-                          border: selected ? "none" : "1px solid rgb(148 163 184 / 0.75)",
+                          border: selected
+                            ? "none"
+                            : resolvedTheme === "dark"
+                              ? "1px solid rgba(148, 163, 184, 0.32)"
+                              : "1px solid rgba(148, 163, 184, 0.55)",
                         }}
                       />
                       <span className="truncate">{track.title}</span>
@@ -279,11 +287,11 @@ export function TrackTrendsSummaryWidget({
             </div>
 
             {selectedIds.length === 0 ? (
-              <p className="rounded-3xl border border-white/70 bg-white/55 py-10 text-center text-sm text-muted shadow-inner dark:border-white/10 dark:bg-slate-950/22">
+              <p className="rounded-3xl border border-white/70 bg-white/55 py-10 text-center text-sm text-muted shadow-inner dark:border-white/[0.06] dark:bg-[#0c0e18] dark:text-slate-400">
                 {t("selectAtLeastOne")}
               </p>
             ) : (
-              <div className="relative rounded-3xl border border-white/70 bg-white/60 p-3 shadow-inner backdrop-blur dark:border-white/10 dark:bg-slate-950/24">
+              <div className="relative rounded-3xl border border-white/70 bg-white/60 p-3 shadow-inner backdrop-blur dark:border-white/[0.06] dark:bg-[#080913]">
                 <div className="pointer-events-none absolute left-1/2 top-8 h-56 w-56 -translate-x-1/2 rounded-full bg-accent-cyan/10 blur-3xl dark:bg-accent-cyan/15" />
                 <div className="relative h-[290px]">
                   <ResponsiveContainer width="100%" height="100%">
@@ -293,13 +301,13 @@ export function TrackTrendsSummaryWidget({
                     >
                       <CartesianGrid
                         strokeDasharray="4 6"
-                        stroke="rgb(148 163 184 / 0.26)"
+                        stroke={chartTheme.grid}
                         vertical={false}
                       />
                       <XAxis
                         dataKey="formattedDate"
-                        tick={{ fill: "rgb(100 116 139)", fontSize: 11, fontWeight: 600 }}
-                        stroke="rgb(148 163 184 / 0.45)"
+                        tick={{ fill: chartTheme.tick, fontSize: 11, fontWeight: 600 }}
+                        stroke={chartTheme.axisStroke}
                         tickLine={false}
                         axisLine={false}
                         angle={-40}
@@ -307,8 +315,8 @@ export function TrackTrendsSummaryWidget({
                         height={70}
                       />
                       <YAxis
-                        tick={{ fill: "rgb(100 116 139)", fontSize: 11, fontWeight: 600 }}
-                        stroke="rgb(148 163 184 / 0.45)"
+                        tick={{ fill: chartTheme.tick, fontSize: 11, fontWeight: 600 }}
+                        stroke={chartTheme.axisStroke}
                         tickLine={false}
                         axisLine={false}
                         width={42}
@@ -320,6 +328,7 @@ export function TrackTrendsSummaryWidget({
                           fontSize: 12,
                           fontWeight: 600,
                           paddingTop: 8,
+                          color: chartTheme.legend,
                         }}
                       />
                       {selectedIds.map((trackId) => {
@@ -337,7 +346,7 @@ export function TrackTrendsSummaryWidget({
                             dot={false}
                             activeDot={{
                               r: 5,
-                              stroke: "rgb(var(--card-rgb) / 0.95)",
+                              stroke: chartTheme.pieStroke,
                               strokeWidth: 2,
                               fill: color,
                             }}

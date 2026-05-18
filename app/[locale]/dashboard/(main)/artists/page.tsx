@@ -856,7 +856,7 @@ function ArtistsContent() {
     return (
       <div className="space-y-12">
         <ArtistsHeroFrame trendsHref={trendsHref} badgeLabel={badgeLabel} stats={null} />
-        <ErrorState error={topError} message={t("errorLoading")} onRetry={refetchTop} />
+        <ErrorState variant="startup" error={topError} message={t("errorLoading")} onRetry={refetchTop} />
       </div>
     );
   }
@@ -864,7 +864,7 @@ function ArtistsContent() {
     return (
       <div className="space-y-12">
         <ArtistsHeroFrame trendsHref={trendsHref} badgeLabel={badgeLabel} stats={null} />
-        <EmptyState {...emptyStatePresets.importData} />
+        <EmptyState variant="startup" {...emptyStatePresets.importData} />
       </div>
     );
   }
@@ -882,7 +882,7 @@ function ArtistsContent() {
             )
           }
         />
-        <ErrorState error={pagedError} message={t("errorLoading")} onRetry={refetchPaged} />
+        <ErrorState variant="startup" error={pagedError} message={t("errorLoading")} onRetry={refetchPaged} />
       </div>
     );
   }

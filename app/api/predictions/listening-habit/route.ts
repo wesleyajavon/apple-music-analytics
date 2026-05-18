@@ -4,7 +4,7 @@ import {
   forbiddenResponse,
   unauthorizedResponse,
 } from "@/lib/auth/require-auth-user-id";
-import { assertRateLimit } from "@/lib/security/rate-limit";
+import { assertAnalyticsRateLimit } from "@/lib/security/analytics-rate-limit";
 import { handleApiError } from "@/lib/utils/error-handler";
 import { getListeningHabitPrediction } from "@/lib/services/predictions/listening-habit-service";
 import {
@@ -42,10 +42,7 @@ export async function GET(request: NextRequest) {
     }
     const { userId } = resolved;
 
-    await assertRateLimit(request, {
-      ...ROUTE_RATE_LIMIT,
-      userId,
-    });
+    await assertAnalyticsRateLimit(request, ROUTE_RATE_LIMIT, userId);
 
     const { searchParams } = new URL(request.url);
     const explain = searchParams.get("explain") === "true";

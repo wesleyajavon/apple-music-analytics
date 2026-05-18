@@ -10,7 +10,10 @@ import {
   forbiddenResponse,
   unauthorizedResponse,
 } from "@/lib/auth/require-auth-user-id";
-import { assertRateLimit } from "@/lib/security/rate-limit";
+import { assertAnalyticsRateLimit } from "@/lib/security/analytics-rate-limit";
+import { getPublicProfileUserId } from "@/lib/constants/public-profile";
+import { publicDemoJsonResponse } from "@/lib/http/public-demo-response";
+import { getPublicProfileArtistTrendsCached } from "@/lib/services/artist/public-artists-trends-cached";
 
 // Force dynamic rendering since we use request.url
 export const dynamic = "force-dynamic";
@@ -78,10 +81,11 @@ export async function GET(request: NextRequest) {
       return resolved.status === 403 ? forbiddenResponse() : unauthorizedResponse();
     }
     const { userId } = resolved;
-    await assertRateLimit(request, {
-      ...ARTISTS_TRENDS_RATE_LIMIT,
-      userId,
-    });
+    await assertAnalyticsRateLimit(request, ARTISTS_TRENDS_RATE_LIMIT, userId);
+
+    const publicProfileId = getPublicProfileUserId();
+    const isPublicDemoDataset =
+      publicProfileId !== null && userId === publicProfileId;
     
     const { searchParams } = new URL(request.url);
     const periodParam = searchParams.get("period") || "day";
@@ -105,16 +109,28 @@ export async function GET(request: NextRequest) {
     }
 
     const period = periodParam as "day" | "week" | "month";
-    const data = await getArtistTrends(startDate, endDate, period, userId, topN);
+    const response: ArtistTrendsResponseDto = isPublicDemoDataset
+      ? await getPublicProfileArtistTrendsCached(
+          userId,
+          startDate,
+          endDate,
+          period,
+          topN
+        )
+      : {
+          data: await getArtistTrends(
+            startDate,
+            endDate,
+            period,
+            userId,
+            topN
+          ),
+          period,
+          startDate: startDate.toISOString().split("T")[0],
+          endDate: endDate.toISOString().split("T")[0],
+        };
 
-    const response: ArtistTrendsResponseDto = {
-      data,
-      period,
-      startDate: startDate.toISOString().split("T")[0],
-      endDate: endDate.toISOString().split("T")[0],
-    };
-
-    return NextResponse.json(response);
+    return publicDemoJsonResponse(response, isPublicDemoDataset);
   } catch (error) {
     return handleApiError(error, { route: '/api/artists/trends' });
   }

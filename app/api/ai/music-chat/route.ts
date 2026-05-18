@@ -7,7 +7,7 @@ import {
 } from "@/lib/auth/require-auth-user-id";
 import { getCurrentUserId } from "@/lib/auth/get-current-user-id";
 import { handleApiError } from "@/lib/utils/error-handler";
-import { assertRateLimit } from "@/lib/security/rate-limit";
+import { assertAnalyticsRateLimit } from "@/lib/security/analytics-rate-limit";
 import { assertGroqUserQuotaForRequest } from "@/lib/services/ai/groq-user-quota";
 import {
   AI_MASTER_DISABLED_COOKIE,
@@ -147,10 +147,7 @@ export async function POST(request: NextRequest) {
       return validationError({ messages: ["At least one message is required."] });
     }
 
-    await assertRateLimit(request, {
-      ...MUSIC_CHAT_RATE_LIMIT,
-      userId,
-    });
+    await assertAnalyticsRateLimit(request, MUSIC_CHAT_RATE_LIMIT, userId);
 
     const locale = parseAiLocale(localeParam);
 

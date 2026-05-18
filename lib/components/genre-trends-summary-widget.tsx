@@ -17,7 +17,10 @@ import { useGenreTrends } from "@/lib/hooks/use-listening";
 import { useDashboardViewerUserId } from "@/lib/context/dashboard-viewer-context";
 import { ErrorState } from "@/lib/components/error-state";
 import { usePublicDemoViewer } from "@/lib/hooks/use-public-demo-viewer";
+import { Sparkles } from "lucide-react";
 import { GroqGenreBackfillCta } from "@/lib/components/palette/groq-genre-backfill-cta";
+import { useTheme } from "@/lib/providers/theme-provider";
+import { DASHBOARD_CHART_THEME } from "@/lib/constants/dashboard-spotlight";
 
 const COLORS = [
   "#818cf8",
@@ -37,12 +40,12 @@ function getColor(index: number): string {
 }
 
 const GENRE_TREND_CARD_CLASS =
-  "relative h-full overflow-hidden rounded-[2rem] border border-card-border bg-gradient-to-br from-white via-[#fff8fb] to-[#f3f7ff] shadow-card ring-1 ring-white/70 transition-all duration-300 hover:-translate-y-0.5 hover:border-rose-300/40 hover:shadow-card-hover dark:from-slate-900/92 dark:via-slate-900/88 dark:to-slate-800/90 dark:ring-white/10";
+  "relative h-full overflow-hidden rounded-[2rem] border border-card-border bg-gradient-to-br from-white via-[#fff8fb] to-[#f3f7ff] shadow-card ring-1 ring-white/70 transition-all duration-300 hover:-translate-y-0.5 hover:border-rose-300/40 hover:shadow-card-hover dark:border-white/[0.08] dark:from-[#06070d] dark:via-[#070812] dark:to-[#0c0e18] dark:ring-white/[0.06]";
 
 const GENRE_TREND_BACKGROUND = (
   <>
     <div
-      className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(129,140,248,0.16),transparent_30%),radial-gradient(circle_at_88%_12%,rgba(244,114,182,0.14),transparent_32%),radial-gradient(circle_at_52%_100%,rgba(245,158,11,0.1),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.72),transparent_45%)] dark:bg-[radial-gradient(circle_at_top_left,rgba(129,140,248,0.2),transparent_30%),radial-gradient(circle_at_88%_12%,rgba(244,114,182,0.16),transparent_32%),radial-gradient(circle_at_52%_100%,rgba(245,158,11,0.12),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.08),transparent_45%)]"
+      className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(129,140,248,0.16),transparent_30%),radial-gradient(circle_at_88%_12%,rgba(244,114,182,0.14),transparent_32%),radial-gradient(circle_at_52%_100%,rgba(245,158,11,0.1),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.72),transparent_45%)] dark:bg-[radial-gradient(circle_at_top_left,rgba(129,140,248,0.14),transparent_34%),radial-gradient(circle_at_88%_12%,rgba(244,114,182,0.10),transparent_32%),radial-gradient(circle_at_52%_100%,rgba(245,158,11,0.08),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.03),transparent_48%)]"
       aria-hidden
     />
     <div
@@ -54,7 +57,7 @@ const GENRE_TREND_BACKGROUND = (
       aria-hidden
     />
     <div
-      className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-rose-300/60 to-transparent"
+      className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-rose-300/60 to-transparent dark:via-rose-200/35"
       aria-hidden
     />
   </>
@@ -114,6 +117,8 @@ export function GenreTrendsSummaryWidget({
   const locale = useLocale();
   const viewerUserId = useDashboardViewerUserId();
   const isPublicDemoViewer = usePublicDemoViewer(viewerUserId);
+  const { resolvedTheme } = useTheme();
+  const chartTheme = DASHBOARD_CHART_THEME[resolvedTheme === "dark" ? "dark" : "light"];
   const TrendsTooltip = useMemo(() => createTrendsTooltip(t, locale), [t, locale]);
 
   const { data, isLoading, error, refetch } = useGenreTrends(
@@ -164,7 +169,7 @@ export function GenreTrendsSummaryWidget({
       <div className="sm:col-span-2 lg:col-span-4 min-h-[320px] w-full min-w-0">
         <div className={`${GENRE_TREND_CARD_CLASS} animate-fade-in-up`} role="status" aria-label={t("evolution")}>
           {GENRE_TREND_BACKGROUND}
-          <div className="relative border-b border-white/70 px-6 py-5 dark:border-white/10">
+          <div className="relative border-b border-white/70 px-6 py-5 dark:border-white/[0.06]">
             <div className="mb-3 h-7 w-36 animate-shimmer rounded-full bg-gray-200 dark:bg-gray-700" />
             <div className="h-8 w-64 max-w-full animate-shimmer rounded bg-gray-200 dark:bg-gray-700" />
             <div className="mt-3 h-4 w-80 max-w-full animate-shimmer rounded bg-gray-100 dark:bg-gray-700" />
@@ -174,12 +179,12 @@ export function GenreTrendsSummaryWidget({
               {[0, 1, 2, 3, 4].map((i) => (
                 <div
                   key={i}
-                  className="h-8 w-24 animate-shimmer rounded-full bg-white/70 dark:bg-white/10"
+                  className="h-8 w-24 animate-shimmer rounded-full bg-white/70 dark:bg-[#1a1d2a]"
                   style={{ animationDelay: `${i * 0.08}s` }}
                 />
               ))}
             </div>
-            <div className="h-[260px] animate-shimmer rounded-3xl border border-white/60 bg-white/50 shadow-inner dark:border-white/10 dark:bg-slate-950/20" />
+            <div className="h-[260px] animate-shimmer rounded-3xl border border-white/60 bg-white/50 shadow-inner dark:border-white/[0.06] dark:bg-[#0c0e18]" />
           </div>
         </div>
       </div>
@@ -210,10 +215,10 @@ export function GenreTrendsSummaryWidget({
       <div className={`${GENRE_TREND_CARD_CLASS} animate-fade-in-up`}>
         {GENRE_TREND_BACKGROUND}
         <div className="relative">
-          <div className="border-b border-white/70 px-6 py-5 dark:border-white/10">
+          <div className="border-b border-white/70 px-6 py-5 dark:border-white/[0.06]">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
               <div className="max-w-2xl">
-                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-rose-300/25 bg-white/70 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-rose-600 shadow-sm backdrop-blur dark:bg-white/10 dark:text-rose-100">
+                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-rose-300/25 bg-white/70 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-rose-600 shadow-sm backdrop-blur dark:border-rose-400/18 dark:bg-[#141622] dark:text-rose-100">
                   <span
                     className="h-2 w-2 rounded-full bg-amber-400 shadow-[0_0_16px_rgb(251_191_36_/0.7)]"
                     aria-hidden
@@ -223,63 +228,51 @@ export function GenreTrendsSummaryWidget({
                 <h2 className="text-2xl font-semibold tracking-[-0.04em] text-gray-950 dark:text-white sm:text-3xl">
                   {t("evolution")}
                 </h2>
-                <p className="mt-2 max-w-xl text-sm leading-6 text-muted sm:text-base">
+                <p className="mt-2 max-w-xl text-sm leading-6 text-muted dark:text-slate-400 sm:text-base">
                   {t("chartHint")}
                 </p>
                 {!isPublicDemoViewer ? (
-                  <div className="mt-4 overflow-hidden rounded-3xl border border-white/70 bg-white/58 shadow-sm backdrop-blur dark:border-white/10 dark:bg-slate-950/24">
+                  <div className="relative mt-4 overflow-hidden rounded-[1.5rem] border border-slate-200/85 bg-gradient-to-br from-white via-slate-50/90 to-white shadow-lg shadow-slate-900/[0.05] ring-1 ring-slate-900/[0.04] backdrop-blur dark:border-white/[0.06] dark:from-[#0a0b10] dark:via-[#090a0f] dark:to-[#080913]">
+                    <div
+                      className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.08),transparent_40%),radial-gradient(circle_at_92%_8%,rgba(6,182,212,0.07),transparent_34%)] dark:bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.14),transparent_38%),radial-gradient(circle_at_92%_8%,rgba(6,182,212,0.09),transparent_34%)]"
+                      aria-hidden
+                    />
+                    <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-violet-300/45 to-transparent dark:via-violet-400/28" aria-hidden />
                     <div className="relative p-4">
-                      <div
-                        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(251,191,36,0.16),transparent_36%),radial-gradient(circle_at_95%_10%,rgba(244,114,182,0.12),transparent_32%)] dark:bg-[radial-gradient(circle_at_top_left,rgba(251,191,36,0.12),transparent_36%),radial-gradient(circle_at_95%_10%,rgba(244,114,182,0.1),transparent_32%)]"
-                        aria-hidden
-                      />
                       <div className="relative flex items-start gap-3">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-amber-300/25 bg-amber-300/12 text-amber-700 shadow-sm dark:text-amber-100">
-                          <svg
-                            className="h-5 w-5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth={1.7}
-                            aria-hidden
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                            />
-                          </svg>
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-violet-200/85 bg-violet-50/95 text-violet-700 shadow-sm ring-1 ring-violet-500/[0.06] dark:border-violet-400/30 dark:bg-violet-950/45 dark:text-violet-200">
+                          <Sparkles className="h-5 w-5" strokeWidth={1.7} aria-hidden />
                         </div>
                         <div className="min-w-0">
-                          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-700 dark:text-amber-100">
+                          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-700 dark:text-violet-300">
                             {t("chartGenreAccuracyTitle")}
                           </p>
-                          <p className="mt-1 text-sm leading-6 text-gray-700 dark:text-slate-200">
+                          <p className="mt-1 text-sm leading-6 text-slate-700 dark:text-slate-200">
                             {t("chartGenreAccuracyIntro")}
                           </p>
                         </div>
                       </div>
 
                       <div className="relative mt-4 grid gap-3 sm:grid-cols-2">
-                        <div className="rounded-2xl border border-amber-300/20 bg-white/72 p-3 text-xs leading-5 text-gray-700 shadow-sm dark:border-white/10 dark:bg-white/8 dark:text-slate-200">
+                        <div className="rounded-2xl border border-slate-200/75 bg-white/88 p-3 text-xs leading-5 text-slate-700 shadow-sm ring-1 ring-slate-900/[0.03] dark:border-white/[0.06] dark:bg-[#0f111a] dark:text-slate-200">
                           {t.rich("chartGenreAccuracyPalette", {
                             manualLabel: (chunks) => (
-                              <span className="font-semibold text-gray-950 dark:text-white">{chunks}</span>
+                              <span className="font-semibold text-slate-950 dark:text-white">{chunks}</span>
                             ),
                             palette: (chunks) => (
                               <Link
                                 href="/dashboard/genres/palette"
-                                className="font-semibold text-rose-600 underline underline-offset-2 hover:text-rose-700 dark:text-rose-100 dark:hover:text-white"
+                                className="font-semibold text-violet-600 underline decoration-violet-300/50 underline-offset-2 hover:text-violet-800 dark:text-violet-300 dark:decoration-violet-400/45 dark:hover:text-white"
                               >
                                 {chunks}
                               </Link>
                             ),
                           })}
                         </div>
-                        <div className="rounded-2xl border border-rose-300/20 bg-white/72 p-3 text-xs leading-5 text-gray-700 shadow-sm dark:border-white/10 dark:bg-white/8 dark:text-slate-200">
+                        <div className="rounded-2xl border border-slate-200/75 bg-white/88 p-3 text-xs leading-5 text-slate-700 shadow-sm ring-1 ring-slate-900/[0.03] dark:border-white/[0.06] dark:bg-[#0f111a] dark:text-slate-200">
                           {t.rich("chartGenreAccuracyGroq", {
                             aiLabel: (chunks) => (
-                              <span className="font-semibold text-gray-950 dark:text-white">{chunks}</span>
+                              <span className="font-semibold text-slate-950 dark:text-white">{chunks}</span>
                             ),
                           })}
                         </div>
@@ -287,9 +280,9 @@ export function GenreTrendsSummaryWidget({
 
                       <GroqGenreBackfillCta
                         viewerUserId={viewerUserId}
-                        className="relative mt-4 space-y-2 border-t border-amber-300/25 pt-3 dark:border-white/10"
-                        textClassName="text-[11px] leading-snug text-gray-600 dark:text-slate-300"
-                        buttonClassName="group relative inline-flex min-h-[36px] items-center justify-center overflow-hidden rounded-full border border-white/20 bg-brand-gradient px-3.5 py-2 text-[11px] font-semibold text-white shadow-brand-glow transition-all duration-300 hover:-translate-y-0.5 hover:opacity-[0.98] hover:shadow-card-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-60"
+                        className="relative mt-4 space-y-2 border-t border-slate-200/70 pt-3 dark:border-white/[0.06]"
+                        textClassName="text-[11px] leading-snug text-slate-600 dark:text-slate-300"
+                        buttonClassName="group relative inline-flex min-h-[36px] items-center justify-center overflow-hidden rounded-xl border border-white/20 bg-brand-gradient px-3.5 py-2 text-[11px] font-semibold text-white shadow-brand-glow transition-all duration-300 hover:-translate-y-0.5 hover:opacity-[0.98] hover:shadow-card-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/50 disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-60"
                       />
                     </div>
                   </div>
@@ -297,7 +290,7 @@ export function GenreTrendsSummaryWidget({
               </div>
               <Link
                 href={`/dashboard/genres/trends${trendsQuery}`}
-                className="inline-flex shrink-0 items-center justify-center gap-1.5 self-start rounded-2xl border border-card-border bg-white/70 px-4 py-2.5 text-sm font-semibold text-rose-600 shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow-card dark:bg-white/10 dark:text-rose-100 dark:hover:bg-white/15"
+                className="inline-flex shrink-0 items-center justify-center gap-1.5 self-start rounded-2xl border border-card-border bg-white/70 px-4 py-2.5 text-sm font-semibold text-rose-600 shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow-card dark:border-white/[0.10] dark:bg-[#161822] dark:text-rose-100 dark:hover:bg-[#1c2030]"
               >
                 {tOverview("seeMore")}
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -308,9 +301,9 @@ export function GenreTrendsSummaryWidget({
           </div>
 
           <div className="relative space-y-5 p-6">
-            <div className="rounded-3xl border border-white/70 bg-white/55 p-3 shadow-sm backdrop-blur dark:border-white/10 dark:bg-slate-950/22">
+            <div className="rounded-3xl border border-white/70 bg-white/55 p-3 shadow-sm backdrop-blur dark:border-white/[0.06] dark:bg-[#0c0e18]">
               <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted dark:text-slate-400">
                   {t("genresToDisplay")}
                 </p>
                 <span className="rounded-full border border-rose-300/25 bg-rose-300/10 px-3 py-1 text-xs font-semibold tabular-nums text-rose-700 dark:text-rose-100">
@@ -327,8 +320,8 @@ export function GenreTrendsSummaryWidget({
                       onClick={() => toggleGenre(genre)}
                       className={`group inline-flex max-w-[min(100%,220px)] items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 ${
                         selected
-                          ? "border-rose-300/30 bg-white/85 text-gray-950 shadow-card dark:border-white/15 dark:bg-white/12 dark:text-white"
-                          : "border-white/70 bg-white/45 text-muted hover:bg-white/75 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
+                          ? "border-rose-300/30 bg-white/85 text-gray-950 shadow-card dark:border-white/12 dark:bg-slate-800/95 dark:text-white"
+                          : "border-white/70 bg-white/45 text-muted hover:bg-white/75 dark:border-white/[0.07] dark:bg-[#12141f] dark:text-slate-300 dark:hover:bg-[#181b28]"
                       }`}
                       title={genre}
                     >
@@ -337,7 +330,11 @@ export function GenreTrendsSummaryWidget({
                         style={{
                           backgroundColor: selected ? getColor(idx) : "transparent",
                           boxShadow: selected ? `0 0 16px ${getColor(idx)}66` : "none",
-                          border: selected ? "none" : "1px solid rgb(148 163 184 / 0.75)",
+                          border: selected
+                            ? "none"
+                            : resolvedTheme === "dark"
+                              ? "1px solid rgba(148, 163, 184, 0.32)"
+                              : "1px solid rgba(148, 163, 184, 0.55)",
                         }}
                       />
                       <span className="truncate">{genre}</span>
@@ -348,11 +345,11 @@ export function GenreTrendsSummaryWidget({
             </div>
 
             {selectedGenres.length === 0 ? (
-              <p className="rounded-3xl border border-white/70 bg-white/55 py-10 text-center text-sm text-muted shadow-inner dark:border-white/10 dark:bg-slate-950/22">
+              <p className="rounded-3xl border border-white/70 bg-white/55 py-10 text-center text-sm text-muted shadow-inner dark:border-white/[0.06] dark:bg-[#0c0e18] dark:text-slate-400">
                 {t("selectAtLeastOne")}
               </p>
             ) : (
-              <div className="relative rounded-3xl border border-white/70 bg-white/60 p-3 shadow-inner backdrop-blur dark:border-white/10 dark:bg-slate-950/24">
+              <div className="relative rounded-3xl border border-white/70 bg-white/60 p-3 shadow-inner backdrop-blur dark:border-white/[0.06] dark:bg-[#080913]">
                 <div className="pointer-events-none absolute left-1/2 top-8 h-56 w-56 -translate-x-1/2 rounded-full bg-rose-300/10 blur-3xl dark:bg-rose-300/14" />
                 <div className="relative h-[290px]">
                   <ResponsiveContainer width="100%" height="100%">
@@ -362,13 +359,13 @@ export function GenreTrendsSummaryWidget({
                     >
                       <CartesianGrid
                         strokeDasharray="4 6"
-                        stroke="rgb(148 163 184 / 0.26)"
+                        stroke={chartTheme.grid}
                         vertical={false}
                       />
                       <XAxis
                         dataKey="formattedDate"
-                        tick={{ fill: "rgb(100 116 139)", fontSize: 11, fontWeight: 600 }}
-                        stroke="rgb(148 163 184 / 0.45)"
+                        tick={{ fill: chartTheme.tick, fontSize: 11, fontWeight: 600 }}
+                        stroke={chartTheme.axisStroke}
                         tickLine={false}
                         axisLine={false}
                         angle={-40}
@@ -376,8 +373,8 @@ export function GenreTrendsSummaryWidget({
                         height={70}
                       />
                       <YAxis
-                        tick={{ fill: "rgb(100 116 139)", fontSize: 11, fontWeight: 600 }}
-                        stroke="rgb(148 163 184 / 0.45)"
+                        tick={{ fill: chartTheme.tick, fontSize: 11, fontWeight: 600 }}
+                        stroke={chartTheme.axisStroke}
                         tickLine={false}
                         axisLine={false}
                         width={42}
@@ -389,6 +386,7 @@ export function GenreTrendsSummaryWidget({
                           fontSize: 12,
                           fontWeight: 600,
                           paddingTop: 8,
+                          color: chartTheme.legend,
                         }}
                       />
                       {selectedGenres.map((genre) => {
@@ -404,7 +402,7 @@ export function GenreTrendsSummaryWidget({
                             dot={false}
                             activeDot={{
                               r: 5,
-                              stroke: "rgb(var(--card-rgb) / 0.95)",
+                              stroke: chartTheme.pieStroke,
                               strokeWidth: 2,
                               fill: color,
                             }}

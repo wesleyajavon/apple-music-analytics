@@ -33,6 +33,8 @@ import {
   unauthorizedResponse,
 } from "@/lib/auth/require-auth-user-id";
 import { hasPendingOrRunningGroqImportGenreBackfillForUser } from "@/lib/services/listening/groq-import-genre-backfill-ai-guard";
+import { getPublicProfileUserId } from "@/lib/constants/public-profile";
+import { publicDemoJsonResponse } from "@/lib/http/public-demo-response";
 
 export const dynamic = "force-dynamic";
 
@@ -44,6 +46,10 @@ export async function GET(request: NextRequest) {
     }
     const { userId } = resolved;
 
+    const publicProfileId = getPublicProfileUserId();
+    const isPublicDemoDataset =
+      publicProfileId !== null && userId === publicProfileId;
+
     const { searchParams } = new URL(request.url);
     const hasStartDate = searchParams.has("startDate");
     const hasEndDate = searchParams.has("endDate");
@@ -54,12 +60,15 @@ export async function GET(request: NextRequest) {
     if (!hasStartDate && !hasEndDate) {
       const range = await getListenDateRange(userId);
       if (!range) {
-        return NextResponse.json({
-          trends: [],
-          commentary: null,
-          commentaryLight: null,
-          skippedWeeks: [],
-        });
+        return publicDemoJsonResponse(
+          {
+            trends: [],
+            commentary: null,
+            commentaryLight: null,
+            skippedWeeks: [],
+          },
+          isPublicDemoDataset
+        );
       }
       startDate = range.minDate;
       endDate = range.maxDate;
@@ -165,7 +174,7 @@ export async function GET(request: NextRequest) {
         : {}),
     };
 
-    return NextResponse.json(response);
+    return publicDemoJsonResponse(response, isPublicDemoDataset);
   } catch (error) {
     return handleApiError(error, { route: "/api/analytics/taste-evolution" });
   }

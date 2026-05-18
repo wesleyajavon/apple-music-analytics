@@ -10,6 +10,9 @@ import {
   forbiddenResponse,
   unauthorizedResponse,
 } from "@/lib/auth/require-auth-user-id";
+import { getPublicProfileUserId } from "@/lib/constants/public-profile";
+import { publicDemoJsonResponse } from "@/lib/http/public-demo-response";
+import { getPublicProfileArtistsListCached } from "@/lib/services/artist/public-artists-list-cached";
 
 // Force dynamic rendering since we use request.url
 export const dynamic = "force-dynamic";
@@ -66,6 +69,10 @@ export async function GET(request: NextRequest) {
       return resolved.status === 403 ? forbiddenResponse() : unauthorizedResponse();
     }
     const { userId } = resolved;
+
+    const publicProfileId = getPublicProfileUserId();
+    const isPublicDemoDataset =
+      publicProfileId !== null && userId === publicProfileId;
     
     // Extraire le paramètre limit
     const { searchParams } = new URL(request.url);
@@ -88,24 +95,34 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const [overview, total, topArtists] = await Promise.all([
-      getArtistOverview(startDate, endDate, userId),
-      countArtistsForRange(startDate, endDate, userId),
-      getArtistStats(startDate, endDate, userId, limit, offset)
-    ]);
-
-    const response: ArtistsResponseDto = {
-      overview,
-      topArtists,
-      pagination: {
+    let response: ArtistsResponseDto;
+    if (isPublicDemoDataset) {
+      response = await getPublicProfileArtistsListCached(
+        userId,
+        startDate,
+        endDate,
         limit,
-        offset,
-        total,
-        hasMore: offset + topArtists.length < total,
-      },
-    };
+        offset
+      );
+    } else {
+      const [overview, total, topArtists] = await Promise.all([
+        getArtistOverview(startDate, endDate, userId),
+        countArtistsForRange(startDate, endDate, userId),
+        getArtistStats(startDate, endDate, userId, limit, offset),
+      ]);
+      response = {
+        overview,
+        topArtists,
+        pagination: {
+          limit,
+          offset,
+          total,
+          hasMore: offset + topArtists.length < total,
+        },
+      };
+    }
 
-    return NextResponse.json(response);
+    return publicDemoJsonResponse(response, isPublicDemoDataset);
   } catch (error) {
     return handleApiError(error, { route: '/api/artists' });
   }

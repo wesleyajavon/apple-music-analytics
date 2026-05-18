@@ -1,6 +1,11 @@
 "use client";
 
-import { useQuery, UseQueryOptions, useQueryClient } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useQuery,
+  UseQueryOptions,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useLocale } from "next-intl";
 import { apiClient } from "@/lib/api-client";
 import {
@@ -309,27 +314,22 @@ export function useGenreTrends(
   >
 ) {
   const locale = useLocale();
-  const queryClient = useQueryClient();
+  const genresForKey =
+    genres?.length && genres.length > 0 ? [...genres].sort() : undefined;
   const queryKey = listeningKeys.genreTrends({
     startDate,
     endDate,
     period,
-    genres,
+    genres: genresForKey,
     userId,
   });
-
-  // Récupérer les données précédentes du cache pour les utiliser comme placeholder
-  const previousData = findLatestCachedData<GenreTrendsResponse>(
-    queryClient,
-    queryKey
-  );
 
   return useQuery<GenreTrendsResponse, Error>({
     queryKey,
     queryFn: () =>
       fetchGenreTrends(startDate, endDate, period, genres, userId, locale),
     staleTime: CACHE_STALE_TIME.GENRE_TRENDS,
-    placeholderData: previousData,
+    placeholderData: keepPreviousData,
     ...options,
   });
 }

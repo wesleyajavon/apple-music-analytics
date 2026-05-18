@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import {
   getArtistTrendsChartRows,
   getArtistTrendsChartRowsForArtistIds,
@@ -23,7 +23,13 @@ import {
   forbiddenResponse,
   unauthorizedResponse,
 } from "@/lib/auth/require-auth-user-id";
-import { assertRateLimit } from "@/lib/security/rate-limit";
+import { assertAnalyticsRateLimit } from "@/lib/security/analytics-rate-limit";
+import { getPublicProfileUserId } from "@/lib/constants/public-profile";
+import { publicDemoJsonResponse } from "@/lib/http/public-demo-response";
+import {
+  getPublicProfileArtistTrendsChartAllTimeCached,
+  getPublicProfileArtistTrendsChartRangeCached,
+} from "@/lib/services/artist/public-artists-trends-chart-cached";
 
 export const dynamic = "force-dynamic";
 const ARTISTS_TRENDS_CHART_RATE_LIMIT = {
@@ -106,14 +112,30 @@ export async function GET(request: NextRequest) {
       return resolved.status === 403 ? forbiddenResponse() : unauthorizedResponse();
     }
     const { userId } = resolved;
-    await assertRateLimit(request, {
-      ...ARTISTS_TRENDS_CHART_RATE_LIMIT,
-      userId,
-    });
+    await assertAnalyticsRateLimit(request, ARTISTS_TRENDS_CHART_RATE_LIMIT, userId);
+
+    const publicProfileId = getPublicProfileUserId();
+    const isPublicDemoDataset =
+      publicProfileId !== null && userId === publicProfileId;
 
     const { searchParams } = new URL(request.url);
     const hasStartDate = searchParams.has("startDate");
     const hasEndDate = searchParams.has("endDate");
+    const period = extractPeriod(request, "month") as TrendPeriod;
+    const artistsFilter = extractArtistIdsFilter(request);
+    const topN = extractTopN(request);
+    const locale = parseAiLocale(extractOptionalString(request, "locale"));
+
+    if (isPublicDemoDataset && !hasStartDate && !hasEndDate) {
+      const response = await getPublicProfileArtistTrendsChartAllTimeCached(
+        userId,
+        period,
+        artistsFilter,
+        topN,
+        locale
+      );
+      return publicDemoJsonResponse(response, true);
+    }
 
     let startDate: Date;
     let endDate: Date;
@@ -121,7 +143,10 @@ export async function GET(request: NextRequest) {
     if (!hasStartDate && !hasEndDate) {
       const range = await getListenDateRange(userId);
       if (!range) {
-        return NextResponse.json({ data: [], availableArtists: [] });
+        return publicDemoJsonResponse(
+          { data: [], availableArtists: [] },
+          isPublicDemoDataset
+        );
       }
       startDate = range.minDate;
       endDate = range.maxDate;
@@ -138,12 +163,19 @@ export async function GET(request: NextRequest) {
       endDate = extracted.endDate;
     }
 
-    const period = extractPeriod(request, "month") as TrendPeriod;
-    const artistsFilter = extractArtistIdsFilter(request);
-    const topN = extractTopN(request);
-    const locale = parseAiLocale(extractOptionalString(request, "locale"));
+    let response: ArtistTrendsChartResponse;
 
-    if (artistsFilter && artistsFilter.length > 0) {
+    if (isPublicDemoDataset) {
+      response = await getPublicProfileArtistTrendsChartRangeCached(
+        userId,
+        startDate,
+        endDate,
+        period,
+        artistsFilter,
+        topN,
+        locale
+      );
+    } else if (artistsFilter && artistsFilter.length > 0) {
       const rows = await getArtistTrendsChartRowsForArtistIds(
         startDate,
         endDate,
@@ -167,33 +199,32 @@ export async function GET(request: NextRequest) {
       );
       const catalogArtists = mergeCatalogPickers(catalogTop, availableArtists);
 
-      const response: ArtistTrendsChartResponse = {
+      response = {
         data,
         availableArtists,
         catalogArtists,
       };
-      return NextResponse.json(response);
+    } else {
+      const rows = await getArtistTrendsChartRows(
+        startDate,
+        endDate,
+        period,
+        userId,
+        topN
+      );
+      const { data, availableArtists } = pivotArtistTrends(
+        rows,
+        period,
+        locale
+      );
+
+      response = {
+        data,
+        availableArtists,
+      };
     }
 
-    const rows = await getArtistTrendsChartRows(
-      startDate,
-      endDate,
-      period,
-      userId,
-      topN
-    );
-    const { data, availableArtists } = pivotArtistTrends(
-      rows,
-      period,
-      locale
-    );
-
-    const response: ArtistTrendsChartResponse = {
-      data,
-      availableArtists,
-    };
-
-    return NextResponse.json(response);
+    return publicDemoJsonResponse(response, isPublicDemoDataset);
   } catch (error) {
     return handleApiError(error, { route: "/api/artists/trends-chart" });
   }

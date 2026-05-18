@@ -4,12 +4,15 @@ import { handleApiError } from "@/lib/utils/error-handler";
 import { extractOptionalDateRange } from "@/lib/middleware/validation";
 import { resolveAuthorizedDataUserId } from "@/lib/auth/resolve-authorized-data-user-id";
 import { forbiddenResponse, unauthorizedResponse } from "@/lib/auth/require-auth-user-id";
-import { assertRateLimit } from "@/lib/security/rate-limit";
+import { assertAnalyticsRateLimit } from "@/lib/security/analytics-rate-limit";
 import {
   countTracksForRange,
   getTrackOverview,
   getTrackStats,
 } from "@/lib/services/track/track-service";
+import { getPublicProfileUserId } from "@/lib/constants/public-profile";
+import { publicDemoJsonResponse } from "@/lib/http/public-demo-response";
+import { getPublicProfileTracksListCached } from "@/lib/services/track/public-tracks-list-cached";
 
 export const dynamic = "force-dynamic";
 const TRACKS_RATE_LIMIT = {
@@ -28,7 +31,11 @@ export async function GET(request: NextRequest) {
     }
     const { userId } = resolved;
 
-    await assertRateLimit(request, { ...TRACKS_RATE_LIMIT, userId });
+    await assertAnalyticsRateLimit(request, TRACKS_RATE_LIMIT, userId);
+
+    const publicProfileId = getPublicProfileUserId();
+    const isPublicDemoDataset =
+      publicProfileId !== null && userId === publicProfileId;
 
     const { searchParams } = new URL(request.url);
     const limitParam = searchParams.get("limit");
@@ -49,23 +56,33 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const [overview, total, topTracks] = await Promise.all([
-      getTrackOverview(startDate, endDate, userId),
-      countTracksForRange(startDate, endDate, userId),
-      getTrackStats(startDate, endDate, userId, limit, offset),
-    ]);
-
-    const response: TracksResponseDto = {
-      overview,
-      topTracks,
-      pagination: {
+    let response: TracksResponseDto;
+    if (isPublicDemoDataset) {
+      response = await getPublicProfileTracksListCached(
+        userId,
+        startDate,
+        endDate,
         limit,
-        offset,
-        total,
-        hasMore: offset + topTracks.length < total,
-      },
-    };
-    return NextResponse.json(response);
+        offset
+      );
+    } else {
+      const [overview, total, topTracks] = await Promise.all([
+        getTrackOverview(startDate, endDate, userId),
+        countTracksForRange(startDate, endDate, userId),
+        getTrackStats(startDate, endDate, userId, limit, offset),
+      ]);
+      response = {
+        overview,
+        topTracks,
+        pagination: {
+          limit,
+          offset,
+          total,
+          hasMore: offset + topTracks.length < total,
+        },
+      };
+    }
+    return publicDemoJsonResponse(response, isPublicDemoDataset);
   } catch (error) {
     return handleApiError(error, { route: "/api/tracks" });
   }

@@ -190,12 +190,12 @@ function TrackTrendsHeroFrame({
 function TrackPickerSkeleton() {
   return (
     <div className="space-y-4" aria-busy="true">
-      <div className="h-10 w-full max-w-md rounded-xl border border-slate-200/90 bg-slate-100/90 animate-shimmer" />
+      <div className="h-10 w-full max-w-md rounded-xl border border-slate-200/90 bg-slate-100/90 animate-shimmer dark:border-white/10 dark:bg-white/[0.06]" />
       <div className="flex flex-wrap gap-2">
         {Array.from({ length: 10 }).map((_, index) => (
           <div
             key={index}
-            className="h-9 rounded-full border border-slate-200/80 bg-slate-100/80 animate-shimmer"
+            className="h-9 rounded-full border border-slate-200/80 bg-slate-100/80 animate-shimmer dark:border-white/10 dark:bg-white/[0.06]"
             style={{ width: `${96 + ((index * 19) % 90)}px` }}
           />
         ))}
@@ -369,7 +369,7 @@ function TrendsContent() {
             badgeLabel={badgeLabel}
             panel={<TrackTrendsHeroPanel period={period} selectedCount={selectedIds.length} />}
           />
-          <ErrorState error={error} message={t("errorLoading")} onRetry={() => refetch()} />
+          <ErrorState variant="startup" error={error} message={t("errorLoading")} onRetry={() => refetch()} />
         </div>
       </>
     );
@@ -389,6 +389,7 @@ function TrendsContent() {
             panel={<TrackTrendsHeroPanel period={period} selectedCount={selectedIds.length} />}
           />
           <EmptyState
+            variant="startup"
             {...emptyStatePresets.changeDates(pathname)}
             message={t("noTrackData")}
             description={t("changeDatesDescription")}
@@ -418,30 +419,30 @@ function TrendsContent() {
             title={t("sections.picker.title")}
             description={t("sections.picker.description")}
           />
-          <div className="relative overflow-hidden rounded-[2rem] border border-slate-200/90 bg-gradient-to-br from-white via-slate-50/90 to-white text-slate-900 shadow-xl shadow-slate-900/[0.07] ring-1 ring-slate-900/[0.04] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-2xl hover:shadow-slate-900/10 dark:border-slate-300/50 dark:from-slate-100 dark:via-white dark:to-slate-50 dark:text-slate-900 dark:hover:shadow-black/25">
+          <div className="relative overflow-hidden rounded-[2rem] border border-slate-200/90 bg-gradient-to-br from-white via-slate-50/90 to-white text-slate-900 shadow-xl shadow-slate-900/[0.07] ring-1 ring-slate-900/[0.04] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-2xl hover:shadow-slate-900/10 dark:border-white/10 dark:bg-gradient-to-br dark:from-surface-raised dark:via-surface dark:to-surface-dashboard dark:text-foreground dark:shadow-black/40 dark:ring-white/[0.06] dark:hover:shadow-black/50">
             <div
-              className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(6,182,212,0.08),transparent_36%),radial-gradient(circle_at_92%_12%,rgba(139,92,246,0.06),transparent_32%)]"
+              className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(6,182,212,0.08),transparent_36%),radial-gradient(circle_at_92%_12%,rgba(139,92,246,0.06),transparent_32%)] dark:bg-[radial-gradient(circle_at_top_left,rgba(6,182,212,0.12),transparent_40%),radial-gradient(circle_at_92%_12%,rgba(139,92,246,0.1),transparent_36%)]"
               aria-hidden
             />
-            <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/55 to-transparent" aria-hidden />
-            <div className="relative border-b border-slate-200/80 px-5 py-5 sm:px-8 dark:border-slate-200/90">
+            <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/55 to-transparent dark:via-cyan-400/30" aria-hidden />
+            <div className="relative border-b border-slate-200/80 px-5 py-5 sm:px-8 dark:border-white/10">
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="inline-flex items-center gap-2 text-sm font-semibold text-slate-800">
-                  <span className="h-2 w-2 rounded-full bg-cyan-500 shadow-[0_0_14px_rgb(6_182_212_/0.45)]" aria-hidden />
+                <div className="inline-flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-foreground">
+                  <span className="h-2 w-2 rounded-full bg-cyan-500 shadow-[0_0_14px_rgb(6_182_212_/0.45)] dark:bg-cyan-400 dark:shadow-[0_0_14px_rgb(34_211_238_/0.35)]" aria-hidden />
                   {t("sections.picker.badge")}
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
                     onClick={selectAll}
-                    className="rounded-xl border border-cyan-200/80 bg-white px-4 py-2 text-sm font-semibold text-cyan-950 shadow-sm transition-colors hover:bg-cyan-50/90 dark:border-cyan-300/50 dark:bg-white dark:text-cyan-950 dark:hover:bg-cyan-50/80"
+                    className="rounded-xl border border-cyan-200/80 bg-white px-4 py-2 text-sm font-semibold text-cyan-950 shadow-sm transition-colors hover:bg-cyan-50/90 dark:border-cyan-400/35 dark:bg-cyan-500/15 dark:text-cyan-100 dark:shadow-none dark:hover:bg-cyan-400/20 dark:hover:text-white"
                   >
                     {t("all")}
                   </button>
                   <button
                     type="button"
                     onClick={selectNone}
-                    className="rounded-xl border border-slate-200/90 bg-slate-50/90 px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-300/60 dark:bg-slate-100/90 dark:text-slate-800 dark:hover:bg-slate-100"
+                    className="rounded-xl border border-slate-200/90 bg-slate-50/90 px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:border-white/12 dark:bg-white/5 dark:text-foreground/90 dark:hover:bg-white/10"
                   >
                     {t("none")}
                   </button>
@@ -449,7 +450,7 @@ function TrendsContent() {
               </div>
             </div>
             <div className="relative p-4 sm:p-6 lg:p-8">
-              <div className="rounded-[1.35rem] border border-slate-200/80 bg-white/95 p-4 shadow-inner shadow-slate-900/[0.04] sm:p-6 dark:border-slate-200/90 dark:bg-white">
+              <div className="rounded-[1.35rem] border border-slate-200/80 bg-white/95 p-4 shadow-inner shadow-slate-900/[0.04] sm:p-6 dark:border-white/10 dark:bg-card-surface dark:shadow-[inset_0_2px_12px_0_rgb(0_0_0/0.35)]">
                 {isLoading ? (
                   <TrackPickerSkeleton />
                 ) : (

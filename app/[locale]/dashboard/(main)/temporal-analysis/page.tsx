@@ -403,6 +403,7 @@ function TemporalAnalysisContent() {
           <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} aria-hidden />
           <div className="relative p-6 sm:p-8">
             <ErrorState
+              variant="startup"
               error={error}
               message={t("errorLoading")}
               onRetry={() => refetch()}
@@ -421,7 +422,7 @@ function TemporalAnalysisContent() {
       <div className="space-y-8">
         <TemporalHeroFrame badgeLabel={t("heroBadge")} stats={null} />
         <TemporalNoteCallout />
-        <EmptyState {...emptyStatePresets.importData} />
+        <EmptyState variant="startup" {...emptyStatePresets.importData} />
       </div>
     );
   }

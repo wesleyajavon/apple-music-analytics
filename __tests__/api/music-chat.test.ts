@@ -9,8 +9,8 @@ vi.mock("@/lib/auth/resolve-authorized-data-user-id", () => ({
   resolveAuthorizedDataUserId: vi.fn(),
 }));
 
-vi.mock("@/lib/security/rate-limit", () => ({
-  assertRateLimit: vi.fn(),
+vi.mock("@/lib/security/analytics-rate-limit", () => ({
+  assertAnalyticsRateLimit: vi.fn(),
 }));
 
 vi.mock("@/lib/services/ai/groq-user-quota", () => ({
@@ -32,7 +32,7 @@ vi.mock("@/lib/services/ai/music-chat-service", () => ({
 
 import { getCurrentUserId } from "@/lib/auth/get-current-user-id";
 import { resolveAuthorizedDataUserId } from "@/lib/auth/resolve-authorized-data-user-id";
-import { assertRateLimit } from "@/lib/security/rate-limit";
+import { assertAnalyticsRateLimit } from "@/lib/security/analytics-rate-limit";
 import { assertGroqUserQuotaForRequest } from "@/lib/services/ai/groq-user-quota";
 import { generateMusicChatAnswer } from "@/lib/services/ai/music-chat-service";
 import { POST } from "@/app/api/ai/music-chat/route";
@@ -72,7 +72,7 @@ describe("POST /api/ai/music-chat", () => {
     expect(await response.json()).toMatchObject({
       code: "PUBLIC_DEMO_PRESET_REQUIRED",
     });
-    expect(assertRateLimit).not.toHaveBeenCalled();
+    expect(assertAnalyticsRateLimit).not.toHaveBeenCalled();
     expect(generateMusicChatAnswer).not.toHaveBeenCalled();
   });
 
@@ -89,7 +89,7 @@ describe("POST /api/ai/music-chat", () => {
     expect(await response.json()).toMatchObject({
       code: "VALIDATION_ERROR",
     });
-    expect(assertRateLimit).not.toHaveBeenCalled();
+    expect(assertAnalyticsRateLimit).not.toHaveBeenCalled();
     expect(generateMusicChatAnswer).not.toHaveBeenCalled();
   });
 
@@ -103,9 +103,10 @@ describe("POST /api/ai/music-chat", () => {
     );
 
     expect(response.status).toBe(200);
-    expect(assertRateLimit).toHaveBeenCalledWith(
+    expect(assertAnalyticsRateLimit).toHaveBeenCalledWith(
       expect.any(NextRequest),
-      expect.objectContaining({ userId: "public-user" })
+      expect.objectContaining({ route: "/api/ai/music-chat" }),
+      "public-user"
     );
     expect(assertGroqUserQuotaForRequest).toHaveBeenCalledWith(
       expect.any(NextRequest),

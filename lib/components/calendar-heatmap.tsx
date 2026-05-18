@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { useTranslations, useLocale } from "next-intl";
+import { useTheme } from "@/lib/providers/theme-provider";
 
 export interface HeatmapDataPoint {
   date: string; // YYYY-MM-DD
@@ -104,6 +105,52 @@ export function CalendarHeatmap({
   const locale = localeProp ?? defaultLocale;
   const t = useTranslations("heatmap");
   const tCommon = useTranslations("common");
+  const { resolvedTheme } = useTheme();
+
+  const heatmapPalette = useMemo(() => {
+    const isDark = resolvedTheme === "dark";
+    if (colorScheme === "aurora") {
+      if (isDark) {
+        return {
+          intensityColors: [
+            "rgba(255,255,255,0.07)",
+            "rgba(13,148,136,0.45)",
+            "rgba(6,182,212,0.55)",
+            "rgba(56,189,248,0.78)",
+            "rgba(167,139,250,0.94)",
+          ],
+          outlineColor: "rgba(255,255,255,0.11)",
+          selectedOutline: "2px solid rgb(34 211 238)",
+          hoverShadow:
+            "0 0 0 2px rgba(34, 211, 238, 0.45), 0 0 20px -6px rgba(167, 139, 250, 0.5)",
+        };
+      }
+      return {
+        intensityColors: ["#ecfeff", "#a7f3d0", "#5eead4", "#38bdf8", "#8b5cf6"],
+        outlineColor: "rgba(14, 165, 233, 0.16)",
+        selectedOutline: "2px solid rgb(56 189 248)",
+        hoverShadow:
+          "0 0 0 2px rgba(56, 189, 248, 0.42), 0 0 18px -6px rgba(139, 92, 246, 0.72)",
+      };
+    }
+    if (isDark) {
+      return {
+        intensityColors: ["#161b22", "#0e4429", "#006d32", "#26a641", "#39d353"],
+        outlineColor: "rgba(255,255,255,0.08)",
+        selectedOutline: "2px solid rgb(57 211 83)",
+        hoverShadow:
+          "0 0 0 2px rgba(57, 211, 83, 0.45), 0 0 18px -6px rgba(0, 0, 0, 0.45)",
+      };
+    }
+    return {
+      intensityColors: ["#ebedf0", "#c6e48b", "#7bc96f", "#239a3b", "#196127"],
+      outlineColor: "rgba(27, 31, 35, 0.06)",
+      selectedOutline: "2px solid rgb(139 92 246)",
+      hoverShadow: "0 0 0 2px rgba(139, 92, 246, 0.4)",
+    };
+  }, [colorScheme, resolvedTheme]);
+
+  const { intensityColors, outlineColor, selectedOutline, hoverShadow } = heatmapPalette;
 
   // Créer un Map pour un accès rapide aux données par date
   const dataMap = useMemo(() => {
@@ -259,20 +306,6 @@ export function CalendarHeatmap({
   const SQUARE_GAP = 2; // px - espacement entre les carrés
   const WEEK_GAP = 2; // px - espacement entre les semaines (colonnes)
   const WEEK_WIDTH = SQUARE_SIZE + WEEK_GAP; // Largeur totale d'une semaine
-  const intensityColors =
-    colorScheme === "aurora"
-      ? ["#ecfeff", "#a7f3d0", "#5eead4", "#38bdf8", "#8b5cf6"]
-      : ["#ebedf0", "#c6e48b", "#7bc96f", "#239a3b", "#196127"];
-  const outlineColor =
-    colorScheme === "aurora"
-      ? "rgba(14, 165, 233, 0.16)"
-      : "rgba(27, 31, 35, 0.06)";
-  const selectedOutline =
-    colorScheme === "aurora" ? "2px solid rgb(56 189 248)" : "2px solid rgb(139 92 246)";
-  const hoverShadow =
-    colorScheme === "aurora"
-      ? "0 0 0 2px rgba(56, 189, 248, 0.42), 0 0 18px -6px rgba(139, 92, 246, 0.72)"
-      : "0 0 0 2px rgba(139, 92, 246, 0.4)";
 
   return (
     <div
@@ -287,9 +320,9 @@ export function CalendarHeatmap({
       >
         <span className="mr-2 text-[10px] leading-none">{t("legendLess")}</span>
         <div className="flex gap-1" aria-hidden="true">
-          {intensityColors.map((color) => (
+          {intensityColors.map((color, idx) => (
             <div
-              key={color}
+              key={`intensity-${idx}`}
               style={{
                 width: "11px",
                 height: "11px",

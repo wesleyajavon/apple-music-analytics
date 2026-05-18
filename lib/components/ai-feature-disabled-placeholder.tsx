@@ -8,6 +8,9 @@ import {
   OVERVIEW_STARTUP_HEADER_LINK_CLASS,
   OVERVIEW_STARTUP_INNER_PANEL_CLASS,
   OVERVIEW_STARTUP_SURFACE_BASE,
+  OVERVIEW_STARTUP_WIDGET_HEADER_BORDER_CLASS,
+  OVERVIEW_STARTUP_WIDGET_SUBTITLE_CLASS,
+  OVERVIEW_STARTUP_WIDGET_TITLE_CLASS,
   OverviewStartupSurfaceBg,
 } from "@/lib/components/overview-startup-surface";
 
@@ -52,7 +55,7 @@ export function AiFeatureDisabledPlaceholder({
       <div
         className={
           isStartup
-            ? "relative border-b border-white/10 px-6 py-5 sm:px-8"
+            ? `relative ${OVERVIEW_STARTUP_WIDGET_HEADER_BORDER_CLASS} px-6 py-5 sm:px-8`
             : "border-b border-gray-100 px-6 py-4 dark:border-gray-700/50"
         }
       >
@@ -67,7 +70,7 @@ export function AiFeatureDisabledPlaceholder({
             <h2
               className={
                 isStartup
-                  ? "text-3xl font-semibold tracking-[-0.05em] text-white sm:text-4xl"
+                  ? OVERVIEW_STARTUP_WIDGET_TITLE_CLASS
                   : "text-lg font-semibold text-gray-900 dark:text-white"
               }
             >
@@ -76,7 +79,7 @@ export function AiFeatureDisabledPlaceholder({
             <p
               className={
                 isStartup
-                  ? "mt-3 max-w-2xl text-sm leading-6 text-slate-300 sm:text-base"
+                  ? OVERVIEW_STARTUP_WIDGET_SUBTITLE_CLASS
                   : "mt-0.5 text-sm text-gray-500 dark:text-gray-400"
               }
             >
@@ -111,7 +114,7 @@ export function AiFeatureDisabledPlaceholder({
           <div className={OVERVIEW_STARTUP_INNER_PANEL_CLASS}>
             <div className="flex gap-3">
               <span
-                className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/10 text-cyan-100"
+                className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-slate-100 text-slate-700 dark:border-white/10 dark:bg-white/10 dark:text-cyan-100"
                 aria-hidden
               >
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -122,7 +125,7 @@ export function AiFeatureDisabledPlaceholder({
                   />
                 </svg>
               </span>
-              <p className="text-sm leading-relaxed text-slate-200">{hint}</p>
+              <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-200">{hint}</p>
             </div>
           </div>
         ) : (

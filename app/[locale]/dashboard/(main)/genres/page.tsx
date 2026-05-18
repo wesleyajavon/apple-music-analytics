@@ -627,12 +627,13 @@ function GenresContent() {
       />
       {!isLoadingOrFetching && error ? (
         <ErrorState
+          variant="startup"
           error={error}
           message={t("errorLoading")}
           onRetry={() => refetch()}
         />
       ) : !isLoadingOrFetching && (!data || data.data.length === 0) ? (
-        <EmptyState {...emptyStatePresets.changeDates(pathname)} />
+        <EmptyState variant="startup" {...emptyStatePresets.changeDates(pathname)} />
       ) : (
         <div className="space-y-12">
             {isLoadingOrFetching ? (

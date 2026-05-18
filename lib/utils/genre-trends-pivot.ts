@@ -77,3 +77,23 @@ export function pivotTrends(
 
   return { data, availableGenres: genres };
 }
+
+/**
+ * Pivot pour l’API : `data` ne contient que les séries demandées (plus léger),
+ * `availableGenres` reste le catalogue complet trié (sélecteur inchangé).
+ */
+export function buildGenreTrendsResponse(
+  rows: GenreTrendRow[],
+  period: GenreTrendPeriod,
+  locale: string,
+  genresFilter?: string[]
+): { data: GenreTrendsDataPoint[]; availableGenres: string[] } {
+  const full = pivotTrends(rows, period, locale, undefined);
+  if (!genresFilter?.length) {
+    return full;
+  }
+  return {
+    data: pivotTrends(rows, period, locale, genresFilter).data,
+    availableGenres: full.availableGenres,
+  };
+}

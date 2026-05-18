@@ -28,7 +28,7 @@ type StatusResponse = {
 
 /**
  * Notification lorsque la majorité des titres (genre NULL) est encore inconnue et Groq est dispo ;
- * action « Classifier avec Groq » dans le panneau (POST /genre-backfill/start).
+ * Action lancée depuis le panneau (POST /genre-backfill/start).
  */
 export function GenreGroqClassificationNudgeNotifier() {
   const searchParams = useSearchParams();

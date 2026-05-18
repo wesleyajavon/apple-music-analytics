@@ -522,7 +522,7 @@ function TasteEvolutionContent() {
           <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} aria-hidden />
           <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} aria-hidden />
           <div className="relative p-6 sm:p-8">
-            <ErrorState error={error} message={t("errorMessage")} onRetry={handleRetry} />
+            <ErrorState variant="startup" error={error} message={t("errorMessage")} onRetry={handleRetry} />
           </div>
         </div>
       </div>
@@ -538,7 +538,7 @@ function TasteEvolutionContent() {
           </h2>
           <TasteEvolutionHeroFrame badgeLabel={rangeLabel} description={t("emptySubtitle")} stats={null} />
         </section>
-        <EmptyState {...emptyStatePresets.importData} message={t("insufficientData")} description={t("importDescription")} />
+        <EmptyState variant="startup" {...emptyStatePresets.importData} message={t("insufficientData")} description={t("importDescription")} />
       </div>
     );
   }

@@ -21,6 +21,7 @@ import { InteractiveAiGenreBackfillNotice } from "@/lib/components/interactive-a
 import { useMusicChat } from "@/lib/hooks/use-music-chat";
 import { useArtistStats } from "@/lib/hooks/use-artists";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
+import { useOverviewStats } from "@/lib/hooks/use-listening";
 import { usePublicDemoViewer } from "@/lib/hooks/use-public-demo-viewer";
 import {
   LATE_NIGHT_PRESET_RECENT_WINDOW_DAYS,
@@ -255,6 +256,19 @@ function MusicChatContent() {
     isAll,
     isLoading: isDateRangeLoading,
   } = useListenDateRange();
+  const { data: lifetimeOverview, isLoading: isLifetimeOverviewLoading } = useOverviewStats(
+    undefined,
+    undefined,
+    userId,
+    { enabled: !isPublicDemoViewer }
+  );
+  const disableQuickQuestionsNoListeningData =
+    !isPublicDemoViewer &&
+    (isDateRangeLoading ||
+      isLifetimeOverviewLoading ||
+      !startDate ||
+      !endDate ||
+      (lifetimeOverview?.totalListens ?? 0) < 1);
   const topArtistStats = useArtistStats(
     startDate,
     endDate,
@@ -682,8 +696,8 @@ function MusicChatContent() {
                             type="button"
                             disabled={
                               musicChat.isPending ||
-                              isDateRangeLoading ||
-                              interactiveAiBlockedByGenreBackfill
+                              interactiveAiBlockedByGenreBackfill ||
+                              disableQuickQuestionsNoListeningData
                             }
                             onClick={() => {
                               handlePresetClick(example.presetQuestionId);

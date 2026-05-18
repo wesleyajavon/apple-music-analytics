@@ -550,6 +550,7 @@ function TrendsContent() {
             panel={<ArtistTrendsHeroPanel period={period} selectedCount={selectedIds.length} />}
           />
           <ErrorState
+            variant="startup"
             error={error}
             message={t("errorLoading")}
             onRetry={() => refetch()}
@@ -573,6 +574,7 @@ function TrendsContent() {
             panel={<ArtistTrendsHeroPanel period={period} selectedCount={selectedIds.length} />}
           />
           <EmptyState
+            variant="startup"
             {...emptyStatePresets.changeDates(pathname)}
             message={t("noArtistData")}
             description={t("changeDatesDescription")}

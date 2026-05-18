@@ -24,8 +24,8 @@ vi.mock("@/lib/services/ai/listening-habit-explainer", () => ({
 vi.mock("@/lib/auth/resolve-authorized-data-user-id", () => ({
   resolveAuthorizedDataUserId: vi.fn(),
 }));
-vi.mock("@/lib/security/rate-limit", () => ({
-  assertRateLimit: vi.fn(),
+vi.mock("@/lib/security/analytics-rate-limit", () => ({
+  assertAnalyticsRateLimit: vi.fn(),
 }));
 
 vi.mock("@/lib/services/listening/groq-import-genre-backfill-ai-guard", () => ({

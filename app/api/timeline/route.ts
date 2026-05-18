@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import {
   getDailyAggregatedListens,
   getWeeklyAggregatedListens,
@@ -15,7 +15,13 @@ import {
   forbiddenResponse,
   unauthorizedResponse,
 } from "@/lib/auth/require-auth-user-id";
-import { assertRateLimit } from "@/lib/security/rate-limit";
+import { getPublicProfileUserId } from "@/lib/constants/public-profile";
+import { publicDemoJsonResponse } from "@/lib/http/public-demo-response";
+import {
+  getPublicProfileTimelineAllTimeCached,
+  getPublicProfileTimelineRangeCached,
+} from "@/lib/services/listening/public-timeline-cached";
+import { assertAnalyticsRateLimit } from "@/lib/security/analytics-rate-limit";
 
 // Force dynamic rendering since we use request.url
 export const dynamic = "force-dynamic";
@@ -97,23 +103,32 @@ export async function GET(request: NextRequest) {
       return resolved.status === 403 ? forbiddenResponse() : unauthorizedResponse();
     }
     const { userId } = resolved;
-    await assertRateLimit(request, {
-      ...TIMELINE_RATE_LIMIT,
-      userId,
-    });
+    await assertAnalyticsRateLimit(request, TIMELINE_RATE_LIMIT, userId);
+
+    const publicProfileId = getPublicProfileUserId();
+    const isPublicDemoDataset =
+      publicProfileId !== null && userId === publicProfileId;
 
     const { searchParams } = new URL(request.url);
     const hasStartDate = searchParams.has("startDate");
     const hasEndDate = searchParams.has("endDate");
+    const period = extractPeriod(request, "day");
+
+    if (!hasStartDate && !hasEndDate && isPublicDemoDataset) {
+      const chartData = await getPublicProfileTimelineAllTimeCached(
+        userId,
+        period
+      );
+      return publicDemoJsonResponse(chartData, true);
+    }
 
     let startDate: Date;
     let endDate: Date;
 
     if (!hasStartDate && !hasEndDate) {
-      // "All" filter: use actual min/max from DB
       const range = await getListenDateRange(userId);
       if (!range) {
-        return NextResponse.json([]);
+        return publicDemoJsonResponse([], false);
       }
       startDate = range.minDate;
       endDate = range.maxDate;
@@ -129,7 +144,6 @@ export async function GET(request: NextRequest) {
       startDate = extracted.startDate;
       endDate = extracted.endDate;
     }
-    const period = extractPeriod(request, "day");
 
     let chartData: Array<{
       date: string;
@@ -138,52 +152,61 @@ export async function GET(request: NextRequest) {
       uniqueArtists: number;
     }>;
 
-    switch (period) {
-      case "day": {
-        const dailyData = await getDailyAggregatedListens(
-          startDate,
-          endDate,
-          userId
-        );
-        chartData = dailyData.map((day) => ({
-          date: day.date,
-          listens: day.listens,
-          uniqueTracks: day.uniqueTracks,
-          uniqueArtists: day.uniqueArtists,
-        }));
-        break;
-      }
-      case "week": {
-        const weeklyData = await getWeeklyAggregatedListens(
-          startDate,
-          endDate,
-          userId
-        );
-        chartData = weeklyData.map((week) => ({
-          date: week.weekStart,
-          listens: week.listens,
-          uniqueTracks: week.uniqueTracks,
-          uniqueArtists: week.uniqueArtists,
-        }));
-        break;
-      }
-      case "month": {
-        const monthlyData = await getMonthlyAggregatedListens(
-          startDate,
-          endDate,
-          userId
-        );
-        chartData = monthlyData.map((month) => ({
-          date: month.month,
-          listens: month.listens,
-          uniqueTracks: month.uniqueTracks,
-          uniqueArtists: month.uniqueArtists,
-        }));
-        break;
+    if (isPublicDemoDataset && (hasStartDate || hasEndDate)) {
+      chartData = await getPublicProfileTimelineRangeCached(
+        userId,
+        startDate,
+        endDate,
+        period
+      );
+    } else {
+      switch (period) {
+        case "day": {
+          const dailyData = await getDailyAggregatedListens(
+            startDate,
+            endDate,
+            userId
+          );
+          chartData = dailyData.map((day) => ({
+            date: day.date,
+            listens: day.listens,
+            uniqueTracks: day.uniqueTracks,
+            uniqueArtists: day.uniqueArtists,
+          }));
+          break;
+        }
+        case "week": {
+          const weeklyData = await getWeeklyAggregatedListens(
+            startDate,
+            endDate,
+            userId
+          );
+          chartData = weeklyData.map((week) => ({
+            date: week.weekStart,
+            listens: week.listens,
+            uniqueTracks: week.uniqueTracks,
+            uniqueArtists: week.uniqueArtists,
+          }));
+          break;
+        }
+        case "month": {
+          const monthlyData = await getMonthlyAggregatedListens(
+            startDate,
+            endDate,
+            userId
+          );
+          chartData = monthlyData.map((month) => ({
+            date: month.month,
+            listens: month.listens,
+            uniqueTracks: month.uniqueTracks,
+            uniqueArtists: month.uniqueArtists,
+          }));
+          break;
+        }
       }
     }
 
-    return NextResponse.json(chartData);
+    return publicDemoJsonResponse(chartData, isPublicDemoDataset);
   } catch (error) {
     return handleApiError(error, { route: '/api/timeline' });
   }

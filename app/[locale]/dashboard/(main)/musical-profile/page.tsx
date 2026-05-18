@@ -302,6 +302,7 @@ function MusicalProfileNoDataView({
       </section>
 
       <EmptyState
+        variant="startup"
         {...emptyStatePresets.importData}
         message={t("noData")}
         description={t("importDescription")}
@@ -390,6 +391,7 @@ function MusicalProfileContent() {
     return (
       <div className="max-w-4xl">
         <ErrorState
+          variant="startup"
           error={dataError}
           message={t("errorLoading")}
           onRetry={() => void refetch()}

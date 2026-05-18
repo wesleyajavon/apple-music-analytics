@@ -64,6 +64,28 @@ describe("GET /api/genres/trends", () => {
     expect(period).toBe("month");
   });
 
+  it("returns full availableGenres but chart data only for requested genres", async () => {
+    const mockRows = [
+      { date: "2024-01", genre: "Rock", count: 50 },
+      { date: "2024-01", genre: "Pop", count: 30 },
+      { date: "2024-02", genre: "Rock", count: 60 },
+      { date: "2024-02", genre: "Pop", count: 25 },
+    ];
+    vi.mocked(getGenreTrends).mockResolvedValue(mockRows);
+
+    const request = new NextRequest("http://localhost/api/genres/trends?genres=Rock");
+    const response = await GET(request);
+
+    expect(response.status).toBe(200);
+    const data = await response.json();
+    expect(data.availableGenres).toContain("Rock");
+    expect(data.availableGenres).toContain("Pop");
+    expect(data.data).toHaveLength(2);
+    expect(data.data[0]).toHaveProperty("Rock");
+    expect(data.data[0].Rock).toBe(50);
+    expect(data.data[0].Pop).toBeUndefined();
+  });
+
   it("should pass startDate, endDate, period from query", async () => {
     vi.mocked(getGenreTrends).mockResolvedValue([]);
 

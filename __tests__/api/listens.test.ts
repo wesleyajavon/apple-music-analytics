@@ -11,21 +11,32 @@ vi.mock('@/lib/services/listening/listening-aggregation', () => ({
   getAggregatedListens: vi.fn(),
 }));
 vi.mock('@/lib/auth/resolve-authorized-data-user-id', () => ({
-  resolveAuthorizedDataUserId: vi.fn().mockResolvedValue({
-    ok: true,
-    userId: 'user-1',
-  }),
+  resolveAuthorizedDataUserId: vi.fn(),
 }));
-vi.mock('@/lib/security/rate-limit', () => ({
-  assertRateLimit: vi.fn(),
+vi.mock("@/lib/security/analytics-rate-limit", () => ({
+  assertAnalyticsRateLimit: vi.fn(),
+}));
+vi.mock("@/lib/services/listening/public-listens-cached", () => ({
+  getPublicProfileListensRawCached: vi.fn(),
+  getPublicProfileListensAggregatedCached: vi.fn(),
 }));
 
 import { getListens } from '@/lib/services/listening/listening-service';
 import { getAggregatedListens } from '@/lib/services/listening/listening-aggregation';
+import { resolveAuthorizedDataUserId } from '@/lib/auth/resolve-authorized-data-user-id';
+import {
+  getPublicProfileListensRawCached,
+  getPublicProfileListensAggregatedCached,
+} from '@/lib/services/listening/public-listens-cached';
+import { DEFAULT_PUBLIC_PROFILE_USER_ID } from '@/lib/constants/public-profile';
 
 describe('GET /api/listens', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(resolveAuthorizedDataUserId).mockResolvedValue({
+      ok: true,
+      userId: 'user-1',
+    });
   });
 
   describe('Raw listens mode (without aggregate)', () => {
@@ -57,6 +68,7 @@ describe('GET /api/listens', () => {
       expect(data).toHaveProperty('limit', 50);
       expect(data).toHaveProperty('offset', 0);
       expect(getListens).toHaveBeenCalledOnce();
+      expect(response.headers.get('Cache-Control')).toContain('private');
     });
 
     it('should use default limit and offset when not provided', async () => {
@@ -150,6 +162,7 @@ describe('GET /api/listens', () => {
       expect(data).toHaveProperty('startDate', '2024-01-01');
       expect(data).toHaveProperty('endDate', '2024-01-31');
       expect(getAggregatedListens).toHaveBeenCalledOnce();
+      expect(response.headers.get('Cache-Control')).toContain('private');
     });
 
     it('should accept period parameter as alias for aggregate', async () => {
@@ -187,6 +200,56 @@ describe('GET /api/listens', () => {
       // Si aggregate n'est pas dans la liste, ça devrait retourner en mode raw listens
       // ou une erreur selon l'implémentation
       expect([200, 400]).toContain(response.status);
+    });
+  });
+
+  describe('Public demo dataset (cached)', () => {
+    beforeEach(() => {
+      vi.mocked(resolveAuthorizedDataUserId).mockResolvedValue({
+        ok: true,
+        userId: DEFAULT_PUBLIC_PROFILE_USER_ID,
+      });
+    });
+
+    it('uses cached raw listens and public Cache-Control', async () => {
+      vi.mocked(getPublicProfileListensRawCached).mockResolvedValue({
+        data: [],
+        total: 0,
+        limit: 100,
+        offset: 0,
+      });
+
+      const request = new NextRequest('http://localhost/api/listens');
+      const response = await GET(request);
+
+      expect(response.status).toBe(200);
+      expect(getPublicProfileListensRawCached).toHaveBeenCalledWith(
+        DEFAULT_PUBLIC_PROFILE_USER_ID,
+        expect.objectContaining({ limit: 100, offset: 0 })
+      );
+      expect(getListens).not.toHaveBeenCalled();
+      const cc = response.headers.get('Cache-Control') ?? '';
+      expect(cc).toContain('public');
+      expect(cc).toContain('s-maxage=60');
+    });
+
+    it('uses cached aggregated listens and public Cache-Control', async () => {
+      vi.mocked(getPublicProfileListensAggregatedCached).mockResolvedValue({
+        data: [],
+        period: 'day',
+        startDate: '2024-01-01',
+        endDate: '2024-01-31',
+      });
+
+      const request = new NextRequest(
+        'http://localhost/api/listens?aggregate=day&startDate=2024-01-01&endDate=2024-01-31'
+      );
+      const response = await GET(request);
+
+      expect(response.status).toBe(200);
+      expect(getPublicProfileListensAggregatedCached).toHaveBeenCalled();
+      expect(getAggregatedListens).not.toHaveBeenCalled();
+      expect(response.headers.get('Cache-Control')).toContain('public');
     });
   });
 

@@ -249,9 +249,9 @@ export function TrackTrendsTrackPicker({
                   inline-flex max-w-[min(100%,320px)] cursor-pointer items-center gap-2 rounded-lg border px-3 py-1.5 transition-colors
                   ${
                     selected
-                      ? "border-cyan-400/35 bg-cyan-400/10 text-foreground shadow-sm"
+                      ? "border-cyan-500/50 bg-cyan-100 text-cyan-950 shadow-sm dark:border-cyan-400/55 dark:bg-slate-950 dark:text-cyan-100 dark:shadow-none"
                       : isHighlighted
-                        ? "border-cyan-400/60 bg-cyan-400/10 ring-2 ring-cyan-400/25"
+                        ? "border-cyan-500/65 bg-cyan-50 text-cyan-950 ring-2 ring-cyan-400/35 dark:border-cyan-400/60 dark:bg-slate-950 dark:text-cyan-100 dark:ring-cyan-400/40"
                         : "border-card-border bg-card-surface text-foreground hover:bg-surface-glass"
                   }
                 `}
@@ -265,7 +265,7 @@ export function TrackTrendsTrackPicker({
                     onToggle(track.id);
                   }}
                   tabIndex={-1}
-                  className="rounded border-card-border text-primary focus:ring-ring disabled:opacity-40"
+                  className="rounded border-card-border bg-surface-raised text-primary accent-primary focus:ring-ring disabled:opacity-40 dark:bg-slate-900 dark:border-white/25"
                 />
                 <span
                   className="w-3 h-3 shrink-0 rounded-full"
@@ -275,7 +275,7 @@ export function TrackTrendsTrackPicker({
                   }}
                   aria-hidden
                 />
-                <span className="truncate text-sm text-foreground" title={getTrackLabel(track)}>
+                <span className="truncate text-sm text-inherit" title={getTrackLabel(track)}>
                   {getTrackLabel(track)}
                 </span>
               </label>

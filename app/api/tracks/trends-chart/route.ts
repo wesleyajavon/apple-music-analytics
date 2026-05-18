@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { getListenDateRange } from "@/lib/services/listening/listening-service";
 import type { TrackTrendsChartResponse, TrackTrendsChartTrack } from "@/lib/dto/track";
 import { handleApiError } from "@/lib/utils/error-handler";
@@ -10,7 +10,13 @@ import {
 import { parseAiLocale } from "@/lib/services/ai/locale-utils";
 import { resolveAuthorizedDataUserId } from "@/lib/auth/resolve-authorized-data-user-id";
 import { forbiddenResponse, unauthorizedResponse } from "@/lib/auth/require-auth-user-id";
-import { assertRateLimit } from "@/lib/security/rate-limit";
+import { assertAnalyticsRateLimit } from "@/lib/security/analytics-rate-limit";
+import { getPublicProfileUserId } from "@/lib/constants/public-profile";
+import { publicDemoJsonResponse } from "@/lib/http/public-demo-response";
+import {
+  getPublicProfileTrackTrendsChartAllTimeCached,
+  getPublicProfileTrackTrendsChartRangeCached,
+} from "@/lib/services/track/public-tracks-trends-chart-cached";
 import {
   getTopTrackCatalogForRange,
   getTrackTrendsChartRows,
@@ -73,18 +79,40 @@ export async function GET(request: NextRequest) {
       return resolved.status === 403 ? forbiddenResponse() : unauthorizedResponse();
     }
     const { userId } = resolved;
-    await assertRateLimit(request, { ...TRACKS_TRENDS_RATE_LIMIT, userId });
+    await assertAnalyticsRateLimit(request, TRACKS_TRENDS_RATE_LIMIT, userId);
+
+    const publicProfileId = getPublicProfileUserId();
+    const isPublicDemoDataset =
+      publicProfileId !== null && userId === publicProfileId;
 
     const { searchParams } = new URL(request.url);
     const hasStartDate = searchParams.has("startDate");
     const hasEndDate = searchParams.has("endDate");
+    const period = extractPeriod(request, "month") as TrendPeriod;
+    const tracksFilter = extractTrackIdsFilter(request);
+    const topN = extractTopN(request);
+    const locale = parseAiLocale(extractOptionalString(request, "locale"));
+
+    if (isPublicDemoDataset && !hasStartDate && !hasEndDate) {
+      const response = await getPublicProfileTrackTrendsChartAllTimeCached(
+        userId,
+        period,
+        tracksFilter,
+        topN,
+        locale
+      );
+      return publicDemoJsonResponse(response, true);
+    }
 
     let startDate: Date;
     let endDate: Date;
     if (!hasStartDate && !hasEndDate) {
       const range = await getListenDateRange(userId);
       if (!range) {
-        return NextResponse.json({ data: [], availableTracks: [] });
+        return publicDemoJsonResponse(
+          { data: [], availableTracks: [] },
+          isPublicDemoDataset
+        );
       }
       startDate = range.minDate;
       endDate = range.maxDate;
@@ -97,12 +125,19 @@ export async function GET(request: NextRequest) {
       endDate = extracted.endDate;
     }
 
-    const period = extractPeriod(request, "month") as TrendPeriod;
-    const tracksFilter = extractTrackIdsFilter(request);
-    const topN = extractTopN(request);
-    const locale = parseAiLocale(extractOptionalString(request, "locale"));
+    let response: TrackTrendsChartResponse;
 
-    if (tracksFilter && tracksFilter.length > 0) {
+    if (isPublicDemoDataset) {
+      response = await getPublicProfileTrackTrendsChartRangeCached(
+        userId,
+        startDate,
+        endDate,
+        period,
+        tracksFilter,
+        topN,
+        locale
+      );
+    } else if (tracksFilter && tracksFilter.length > 0) {
       const rows = await getTrackTrendsChartRowsForTrackIds(
         startDate,
         endDate,
@@ -121,14 +156,14 @@ export async function GET(request: NextRequest) {
 
       const catalogTop = await getTopTrackCatalogForRange(startDate, endDate, userId, topN);
       const catalogTracks = mergeCatalogTracks(catalogTop, availableTracks);
-      const response: TrackTrendsChartResponse = { data, availableTracks, catalogTracks };
-      return NextResponse.json(response);
+      response = { data, availableTracks, catalogTracks };
+    } else {
+      const rows = await getTrackTrendsChartRows(startDate, endDate, period, userId, topN);
+      const { data, availableTracks } = pivotTrackTrends(rows, period, locale);
+      response = { data, availableTracks };
     }
 
-    const rows = await getTrackTrendsChartRows(startDate, endDate, period, userId, topN);
-    const { data, availableTracks } = pivotTrackTrends(rows, period, locale);
-    const response: TrackTrendsChartResponse = { data, availableTracks };
-    return NextResponse.json(response);
+    return publicDemoJsonResponse(response, isPublicDemoDataset);
   } catch (error) {
     return handleApiError(error, { route: "/api/tracks/trends-chart" });
   }

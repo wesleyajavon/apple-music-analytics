@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { getOverviewStats, getTopArtists } from "@/lib/services/listening/listening-stats";
 import { OverviewStatsDto, TopArtistDto } from "@/lib/dto/listening";
 import { handleApiError } from "@/lib/utils/error-handler";
@@ -10,7 +10,12 @@ import {
   forbiddenResponse,
   unauthorizedResponse,
 } from "@/lib/auth/require-auth-user-id";
-import { assertRateLimit } from "@/lib/security/rate-limit";
+import { getPublicProfileUserId } from "@/lib/constants/public-profile";
+import { publicDemoJsonResponse } from "@/lib/http/public-demo-response";
+import {
+  getPublicProfileOverviewCached,
+} from "@/lib/services/listening/public-overview-cached";
+import { assertAnalyticsRateLimit } from "@/lib/security/analytics-rate-limit";
 
 // Force dynamic rendering since we use request.url
 export const dynamic = "force-dynamic";
@@ -75,22 +80,24 @@ export async function GET(request: NextRequest) {
       return resolved.status === 403 ? forbiddenResponse() : unauthorizedResponse();
     }
     const { userId } = resolved;
-    await assertRateLimit(request, {
-      ...OVERVIEW_RATE_LIMIT,
-      userId,
-    });
+    await assertAnalyticsRateLimit(request, OVERVIEW_RATE_LIMIT, userId);
 
-    const [stats, topArtists] = await Promise.all([
-      getOverviewStats(startDate, endDate, userId),
-      getTopArtists(startDate, endDate, userId, 6)
-    ]);
+    const publicProfileId = getPublicProfileUserId();
+    const isPublicDemoDataset =
+      publicProfileId !== null && userId === publicProfileId;
 
-    const response: OverviewStatsDto & { topArtists: TopArtistDto[] } = {
-      ...stats,
-      topArtists
-    };
+    let payload: OverviewStatsDto & { topArtists: TopArtistDto[] };
+    if (isPublicDemoDataset) {
+      payload = await getPublicProfileOverviewCached(userId, startDate, endDate);
+    } else {
+      const [stats, topArtists] = await Promise.all([
+        getOverviewStats(startDate, endDate, userId),
+        getTopArtists(startDate, endDate, userId, 6),
+      ]);
+      payload = { ...stats, topArtists };
+    }
 
-    return NextResponse.json(response);
+    return publicDemoJsonResponse(payload, isPublicDemoDataset);
   } catch (error) {
     return handleApiError(error, { route: '/api/overview' });
   }

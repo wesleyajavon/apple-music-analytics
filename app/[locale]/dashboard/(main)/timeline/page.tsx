@@ -404,6 +404,7 @@ function TimelineContent() {
             <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_CYAN} aria-hidden />
             <div className="relative p-6 sm:p-8">
               <ErrorState
+                variant="startup"
                 error={error}
                 message={t("errorLoading")}
                 onRetry={() => refetch()}
@@ -411,7 +412,7 @@ function TimelineContent() {
             </div>
           </div>
         ) : !isLoading && (!data || data.length === 0) ? (
-          <EmptyState {...emptyStatePresets.changeDates(pathname)} />
+          <EmptyState variant="startup" {...emptyStatePresets.changeDates(pathname)} />
         ) : (
           <section className={TIMELINE_CHART_SECTION_CLASS} aria-labelledby="timeline-spotlight-title">
             <div className={DASHBOARD_SPOTLIGHT_GRADIENT_CYAN} aria-hidden />

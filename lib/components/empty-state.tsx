@@ -9,7 +9,12 @@ import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { getPublicProfileUserId } from "@/lib/constants/public-profile";
 import { DASHBOARD_ONBOARDING_REIMPORT_PATH } from "@/lib/utils/onboarding-route";
-import { Inbox } from "lucide-react";
+import {
+  OVERVIEW_STARTUP_EYEBROW_PILL_CLASS,
+  OVERVIEW_STARTUP_SURFACE_BASE,
+  OverviewStartupSurfaceBg,
+} from "@/lib/components/overview-startup-surface";
+import { BarChart3, Inbox } from "lucide-react";
 
 export interface EmptyStateAction {
   label: string;
@@ -29,6 +34,9 @@ interface EmptyStateProps {
   /** Actions suggérées (boutons/liens) */
   actions?: EmptyStateAction[];
   className?: string;
+  variant?: "default" | "startup";
+  eyebrow?: string;
+  aside?: string;
 }
 
 /** Illustrations SVG légères pour les états vides */
@@ -134,6 +142,9 @@ export function EmptyState({
   illustration,
   actions,
   className = "",
+  variant = "default",
+  eyebrow,
+  aside,
 }: EmptyStateProps) {
   const t = useTranslations("components.emptyState");
   const displayMessage = message ?? t("defaultMessage");
@@ -150,6 +161,81 @@ export function EmptyState({
     ) : (
       <DefaultEmptyIllustration />
     ));
+
+  if (variant === "startup") {
+    const statusEyebrow = eyebrow ?? t("startupEmptyEyebrow");
+    const asideLabel = aside ?? t("startupEmptyAside");
+
+    return (
+      <div className={`w-full ${className}`} role="status" aria-label={displayMessage}>
+        <div className={`${OVERVIEW_STARTUP_SURFACE_BASE} relative flex min-h-[320px] flex-col sm:min-h-[300px]`}>
+          <OverviewStartupSurfaceBg />
+          <div className="relative grid gap-8 p-6 sm:p-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-center">
+            <div className="min-w-0">
+              {statusEyebrow ? (
+                <div className={OVERVIEW_STARTUP_EYEBROW_PILL_CLASS}>
+                  <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_16px_rgb(22_199_132_/0.75)]" />
+                  {statusEyebrow}
+                </div>
+              ) : null}
+              <h3 className="mt-2 text-pretty text-2xl font-semibold tracking-[-0.04em] text-slate-900 dark:text-white sm:text-3xl">
+                {displayMessage}
+              </h3>
+              {description ? (
+                <p className="mt-3 max-w-xl text-sm leading-6 text-slate-600 dark:text-slate-300 sm:text-base">
+                  {description}
+                </p>
+              ) : null}
+              {actions && actions.length > 0 ? (
+                <div className="mt-7 flex flex-wrap gap-3">
+                  {actions.map((action, idx) => {
+                    const isPrimary = idx === 0;
+                    const primaryClass =
+                      "inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-slate-900/25 transition-all hover:-translate-y-0.5 hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 dark:bg-white dark:text-slate-950 dark:shadow-black/30 dark:hover:bg-gray-100 dark:focus-visible:ring-offset-slate-900";
+                    const secondaryClass =
+                      "inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200/90 bg-white px-5 py-3 text-sm font-bold text-slate-900 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 dark:border-white/15 dark:bg-white/10 dark:text-white dark:shadow-none dark:hover:bg-white/15 dark:focus-visible:ring-offset-slate-900";
+
+                    if (action.href) {
+                      return (
+                        <Link
+                          key={`${action.label}-${idx}`}
+                          href={action.href}
+                          className={isPrimary ? primaryClass : secondaryClass}
+                        >
+                          {action.label}
+                        </Link>
+                      );
+                    }
+                    return (
+                      <button
+                        key={`${action.label}-${idx}`}
+                        type="button"
+                        onClick={action.onClick}
+                        className={isPrimary ? primaryClass : secondaryClass}
+                      >
+                        {action.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : null}
+            </div>
+            <div className="relative min-w-0">
+              <div className="pointer-events-none absolute -inset-1 rounded-[1.75rem] bg-gradient-to-br from-violet-500/12 via-transparent to-cyan-500/14 blur-xl dark:from-violet-400/18" />
+              <div className="relative flex flex-col items-center justify-center gap-4 rounded-[1.75rem] border border-slate-200/90 bg-slate-50/80 px-6 py-10 dark:border-white/10 dark:bg-slate-900/60">
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-slate-200/90 bg-white shadow-sm dark:border-white/15 dark:bg-white/5">
+                  <BarChart3 className="h-8 w-8 text-slate-500 dark:text-slate-300" strokeWidth={1.25} aria-hidden />
+                </div>
+                <p className="text-center font-mono text-[0.7rem] font-medium uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                  {asideLabel}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div

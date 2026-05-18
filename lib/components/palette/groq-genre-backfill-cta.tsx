@@ -29,7 +29,7 @@ type GroqGenreBackfillCtaProps = {
 };
 
 const DEFAULT_BUTTON_CLASS =
-  "group relative inline-flex min-h-[42px] items-center justify-center overflow-hidden rounded-full border border-white/20 bg-brand-gradient px-5 py-2.5 text-xs font-semibold text-white shadow-brand-glow transition-all duration-300 hover:-translate-y-0.5 hover:opacity-[0.98] hover:shadow-card-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-60";
+  "group relative inline-flex min-h-[42px] items-center justify-center overflow-hidden rounded-xl border border-white/20 bg-brand-gradient px-5 py-2.5 text-xs font-semibold text-white shadow-brand-glow transition-all duration-300 hover:-translate-y-0.5 hover:opacity-[0.98] hover:shadow-card-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/45 disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-60";
 
 export function GroqGenreBackfillCta({
   viewerUserId,
@@ -221,7 +221,7 @@ export function GroqGenreBackfillCta({
       >
         <span className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.34),_transparent_34%),linear-gradient(120deg,_transparent,_rgba(255,255,255,0.18),_transparent)] opacity-70 transition-opacity group-hover:opacity-100" />
         <span className="relative inline-flex items-center gap-2">
-          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/18 text-[10px] font-black tracking-tight shadow-inner shadow-white/10">
+          <span className="flex h-5 w-5 items-center justify-center rounded-md bg-white/18 text-[9px] font-black tracking-tight shadow-inner shadow-white/10 ring-1 ring-white/15">
             AI
           </span>
           <span>{isStarting ? tConsent("starting") : tConsent("accept")}</span>

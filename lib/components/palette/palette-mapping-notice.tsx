@@ -20,8 +20,8 @@ export function PaletteMappingNotice({
   body,
   linkLabel,
   isPublicDemoViewer,
-  className = "max-w-3xl rounded-xl border border-amber-200 bg-amber-50/80 px-4 py-3 text-sm text-amber-900 shadow-sm shadow-amber-950/5 dark:border-amber-400/25 dark:bg-amber-950/30 dark:text-amber-100",
-  linkClassName = "font-semibold underline decoration-amber-500/60 underline-offset-2 hover:decoration-amber-600 dark:decoration-amber-300/70",
+  className = "relative max-w-3xl overflow-hidden rounded-[1.25rem] border border-slate-200/85 bg-gradient-to-br from-white via-slate-50/95 to-white px-4 py-3.5 text-sm text-slate-800 shadow-lg shadow-slate-900/[0.05] ring-1 ring-slate-900/[0.04] dark:border-white/10 dark:from-slate-950/50 dark:via-slate-950/35 dark:to-slate-950/25 dark:text-slate-100",
+  linkClassName = "font-semibold text-violet-600 underline decoration-violet-300/55 underline-offset-2 hover:text-violet-800 dark:text-violet-300 dark:decoration-violet-400/45 dark:hover:text-white",
   showGroqCta = false,
   viewerUserId,
 }: PaletteMappingNoticeProps) {
@@ -31,20 +31,27 @@ export function PaletteMappingNotice({
 
   return (
     <div className={className}>
-      <p className="font-semibold">{title}</p>
-      <p className="mt-1">
-        {body}
-        {" "}
-        <Link href="/dashboard/genres/palette" className={linkClassName}>
-          {linkLabel}
-        </Link>
-      </p>
-      {showGroqCta ? (
-        <GroqGenreBackfillCta
-          viewerUserId={viewerUserId}
-          className="mt-3 space-y-2 border-t border-amber-200/70 pt-2.5 dark:border-amber-800/50"
-        />
-      ) : null}
+      <div
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.06),transparent_42%),radial-gradient(circle_at_100%_0%,rgba(6,182,212,0.05),transparent_38%)]"
+        aria-hidden
+      />
+      <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-violet-300/40 to-transparent dark:via-violet-400/25" aria-hidden />
+      <div className="relative">
+        <p className="font-semibold text-slate-900 dark:text-white">{title}</p>
+        <p className="mt-1 text-slate-700 dark:text-slate-200">
+          {body}
+          {" "}
+          <Link href="/dashboard/genres/palette" className={linkClassName}>
+            {linkLabel}
+          </Link>
+        </p>
+        {showGroqCta ? (
+          <GroqGenreBackfillCta
+            viewerUserId={viewerUserId}
+            className="mt-3 space-y-2 border-t border-slate-200/75 pt-2.5 dark:border-white/10"
+          />
+        ) : null}
+      </div>
     </div>
   );
 }

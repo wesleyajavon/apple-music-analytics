@@ -322,7 +322,7 @@ function TracksContent() {
     return (
       <div className="space-y-12">
         <TracksHeroFrame trendsHref={trendsHref} badgeLabel={badgeLabel} stats={null} />
-        <ErrorState error={topError} message={t("errorLoading")} onRetry={refetchTop} />
+        <ErrorState variant="startup" error={topError} message={t("errorLoading")} onRetry={refetchTop} />
       </div>
     );
   }
@@ -330,7 +330,7 @@ function TracksContent() {
     return (
       <div className="space-y-12">
         <TracksHeroFrame trendsHref={trendsHref} badgeLabel={badgeLabel} stats={null} />
-        <EmptyState {...emptyStatePresets.importData} />
+        <EmptyState variant="startup" {...emptyStatePresets.importData} />
       </div>
     );
   }
@@ -338,7 +338,7 @@ function TracksContent() {
     return (
       <div className="space-y-12">
         <TracksHeroFrame trendsHref={trendsHref} badgeLabel={badgeLabel} stats={heroStats} />
-        <ErrorState error={pagedError} message={t("errorLoading")} onRetry={refetchPaged} />
+        <ErrorState variant="startup" error={pagedError} message={t("errorLoading")} onRetry={refetchPaged} />
       </div>
     );
   }

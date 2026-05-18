@@ -509,17 +509,30 @@ function SidebarContent() {
             <Link
               href={isPublicDemoViewer ? "/" : withFilters("/dashboard")}
               prefetch={isPublicDemoViewer ? undefined : prefetchDashboardNav}
-              className={`flex items-center gap-3 group ${isCollapsed ? "justify-center" : ""}`}
+              className={`group inline-flex items-center gap-3 rounded-xl outline-none transition-all hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+                isCollapsed ? "justify-center" : ""
+              }`}
               onClick={() => setIsMobileMenuOpen(false)}
               title={isCollapsed ? t("logo") : undefined}
             >
-              <SoundprintLogo
-                showText={false}
-                imageClassName="h-12 w-12 rounded-xl shadow-brand-glow transition-transform group-hover:scale-105 ring-1 ring-card-border/40"
-              />
+              <span className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-brand-gradient shadow-brand-glow ring-1 ring-white/20 transition-transform group-hover:rotate-[-2deg] group-hover:scale-105">
+                <SoundprintLogo
+                  src="/brand/favicon.png"
+                  showText={false}
+                  imageClassName="h-8 w-8 rounded-xl"
+                  priority
+                />
+              </span>
               {!isCollapsed && (
-                <div className="flex min-w-0 flex-col justify-center gap-0.5">
-                  <span className="truncate text-xl font-bold tracking-tight text-foreground">{t("logo")}</span>
+                <div className="flex min-w-0 flex-col justify-center gap-1">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <span className="truncate text-base font-semibold tracking-[-0.03em] text-foreground">
+                      Soundprint
+                    </span>
+                    <span className="shrink-0 rounded-full border border-primary/15 bg-primary/10 px-1.5 py-0.5 text-[0.62rem] font-bold uppercase tracking-[0.18em] text-primary">
+                      AI
+                    </span>
+                  </div>
                   <span className="text-[11px] font-medium leading-snug text-muted">{t("tagline")}</span>
                 </div>
               )}

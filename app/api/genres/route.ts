@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import {
   getGenreDistribution,
   getTopArtistsForGenres,
@@ -13,6 +13,9 @@ import {
   forbiddenResponse,
   unauthorizedResponse,
 } from "@/lib/auth/require-auth-user-id";
+import { getPublicProfileUserId } from "@/lib/constants/public-profile";
+import { publicDemoJsonResponse } from "@/lib/http/public-demo-response";
+import { getPublicProfileGenresDistributionCached } from "@/lib/services/listening/public-genres-distribution-cached";
 
 // Force dynamic rendering since we use request.url
 export const dynamic = "force-dynamic";
@@ -80,38 +83,39 @@ export async function GET(request: NextRequest) {
     }
     const { userId } = resolved;
 
-    // Récupérer la distribution des genres
-    const genreCounts = await getGenreDistribution(startDate, endDate, userId);
+    const publicProfileId = getPublicProfileUserId();
+    const isPublicDemoDataset =
+      publicProfileId !== null && userId === publicProfileId;
 
-    // Calculer le total
-    const totalListens = genreCounts.reduce((sum, item) => sum + item.count, 0);
-
-    // Ajouter les pourcentages
-    const data = genreCounts.map((item) => ({
-      genre: item.genre,
-      count: item.count,
-      percentage: totalListens > 0 ? (item.count / totalListens) * 100 : 0,
-    }));
-
-    const topGenreNames = genreCounts.slice(0, 3).map((g) => g.genre);
-    const topArtistsForTopGenres =
-      topGenreNames.length > 0
-        ? await getTopArtistsForGenres(
-            topGenreNames,
+    const response: GenreDistributionResponse = isPublicDemoDataset
+      ? await getPublicProfileGenresDistributionCached(userId, startDate, endDate)
+      : await (async () => {
+          const genreCounts = await getGenreDistribution(
             startDate,
             endDate,
-            userId,
-            3
-          )
-        : [];
+            userId
+          );
+          const totalListens = genreCounts.reduce((sum, item) => sum + item.count, 0);
+          const data = genreCounts.map((item) => ({
+            genre: item.genre,
+            count: item.count,
+            percentage: totalListens > 0 ? (item.count / totalListens) * 100 : 0,
+          }));
+          const topGenreNames = genreCounts.slice(0, 3).map((g) => g.genre);
+          const topArtistsForTopGenres =
+            topGenreNames.length > 0
+              ? await getTopArtistsForGenres(
+                  topGenreNames,
+                  startDate,
+                  endDate,
+                  userId,
+                  3
+                )
+              : [];
+          return { data, totalListens, topArtistsForTopGenres };
+        })();
 
-    const response: GenreDistributionResponse = {
-      data,
-      totalListens,
-      topArtistsForTopGenres,
-    };
-
-    return NextResponse.json(response);
+    return publicDemoJsonResponse(response, isPublicDemoDataset);
   } catch (error) {
     return handleApiError(error, { route: '/api/genres' });
   }

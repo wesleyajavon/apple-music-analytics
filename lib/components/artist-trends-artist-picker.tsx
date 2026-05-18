@@ -294,9 +294,9 @@ export function ArtistTrendsArtistPicker({
                   inline-flex max-w-[min(100%,260px)] cursor-pointer items-center gap-2 rounded-lg border px-3 py-1.5 transition-colors
                   ${
                     selected
-                      ? "border-primary/45 bg-primary/12 text-foreground shadow-sm"
+                      ? "border-primary/45 bg-primary/12 text-foreground shadow-sm dark:border-primary/60 dark:bg-slate-950 dark:text-violet-100 dark:shadow-none"
                       : isHighlighted
-                        ? "border-primary/55 bg-primary/10 text-foreground ring-2 ring-primary/28"
+                        ? "border-primary/55 bg-primary/10 text-foreground ring-2 ring-primary/28 dark:border-primary/60 dark:bg-slate-950 dark:text-violet-100 dark:ring-primary/40"
                         : "border-border bg-card text-foreground hover:bg-surface-raised"
                   }
                 `}
@@ -310,7 +310,7 @@ export function ArtistTrendsArtistPicker({
                     onToggle(artist.id);
                   }}
                   tabIndex={-1}
-                  className="rounded border-border bg-card text-primary focus:ring-ring disabled:opacity-45"
+                  className="rounded border-border bg-surface-raised text-primary accent-primary focus:ring-ring disabled:opacity-45 dark:bg-slate-900 dark:border-white/25"
                 />
                 <span
                   className={`w-3 h-3 shrink-0 rounded-full border ${selected ? "border-transparent" : "border-muted bg-transparent"}`}
@@ -320,7 +320,7 @@ export function ArtistTrendsArtistPicker({
                   aria-hidden
                 />
                 <span
-                  className="truncate text-sm text-foreground"
+                  className="truncate text-sm text-inherit"
                   title={artist.name}
                 >
                   {artist.name}

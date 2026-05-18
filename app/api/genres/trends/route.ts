@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { getGenreTrends, type GenreTrendPeriod } from "@/lib/services/listening/listening-stats";
 import { getListenDateRange } from "@/lib/services/listening/listening-service";
 import type { GenreTrendsResponse } from "@/lib/dto/genres";
@@ -9,13 +9,19 @@ import {
   extractOptionalString,
 } from "@/lib/middleware/validation";
 import { parseAiLocale } from "@/lib/services/ai/locale-utils";
-import { pivotTrends } from "@/lib/utils/genre-trends-pivot";
+import { buildGenreTrendsResponse } from "@/lib/utils/genre-trends-pivot";
 import { resolveAuthorizedDataUserId } from "@/lib/auth/resolve-authorized-data-user-id";
 import {
   forbiddenResponse,
   unauthorizedResponse,
 } from "@/lib/auth/require-auth-user-id";
-import { assertRateLimit } from "@/lib/security/rate-limit";
+import { assertAnalyticsRateLimit } from "@/lib/security/analytics-rate-limit";
+import { getPublicProfileUserId } from "@/lib/constants/public-profile";
+import { publicDemoJsonResponse } from "@/lib/http/public-demo-response";
+import {
+  getPublicProfileGenreTrendsAllTimeCached,
+  getPublicProfileGenreTrendsRangeCached,
+} from "@/lib/services/listening/public-genres-trends-cached";
 
 export const dynamic = "force-dynamic";
 const GENRES_TRENDS_RATE_LIMIT = {
@@ -52,7 +58,7 @@ function extractGenresFilter(request: NextRequest): string[] | undefined {
  *       - in: query
  *         name: genres
  *         schema: { type: array, items: { type: string } }
- *         description: Filter displayed genres (repeat parameter for multiple)
+ *         description: Limit chart series to these genres; `availableGenres` still lists the full catalog for the range (repeat parameter for multiple)
  *       - in: query
  *         name: userId
  *         schema: { type: string }
@@ -71,14 +77,28 @@ export async function GET(request: NextRequest) {
       return resolved.status === 403 ? forbiddenResponse() : unauthorizedResponse();
     }
     const { userId } = resolved;
-    await assertRateLimit(request, {
-      ...GENRES_TRENDS_RATE_LIMIT,
-      userId,
-    });
+    await assertAnalyticsRateLimit(request, GENRES_TRENDS_RATE_LIMIT, userId);
+
+    const publicProfileId = getPublicProfileUserId();
+    const isPublicDemoDataset =
+      publicProfileId !== null && userId === publicProfileId;
 
     const { searchParams } = new URL(request.url);
     const hasStartDate = searchParams.has("startDate");
     const hasEndDate = searchParams.has("endDate");
+    const period = extractPeriod(request, "month") as GenreTrendPeriod;
+    const genresFilter = extractGenresFilter(request);
+    const locale = parseAiLocale(extractOptionalString(request, "locale"));
+
+    if (isPublicDemoDataset && !hasStartDate && !hasEndDate) {
+      const response = await getPublicProfileGenreTrendsAllTimeCached(
+        userId,
+        period,
+        locale,
+        genresFilter
+      );
+      return publicDemoJsonResponse(response, true);
+    }
 
     let startDate: Date;
     let endDate: Date;
@@ -86,7 +106,10 @@ export async function GET(request: NextRequest) {
     if (!hasStartDate && !hasEndDate) {
       const range = await getListenDateRange(userId);
       if (!range) {
-        return NextResponse.json({ data: [], availableGenres: [] });
+        return publicDemoJsonResponse(
+          { data: [], availableGenres: [] },
+          isPublicDemoDataset
+        );
       }
       startDate = range.minDate;
       endDate = range.maxDate;
@@ -102,24 +125,28 @@ export async function GET(request: NextRequest) {
       startDate = extracted.startDate;
       endDate = extracted.endDate;
     }
-    const period = extractPeriod(request, "month") as GenreTrendPeriod;
-    const genresFilter = extractGenresFilter(request);
-    const locale = parseAiLocale(extractOptionalString(request, "locale"));
 
-    const rows = await getGenreTrends(startDate, endDate, period, userId);
-    const { data, availableGenres } = pivotTrends(
-      rows,
-      period,
-      locale,
-      genresFilter
-    );
+    let response: GenreTrendsResponse;
+    if (isPublicDemoDataset) {
+      response = await getPublicProfileGenreTrendsRangeCached(
+        userId,
+        startDate,
+        endDate,
+        period,
+        locale,
+        genresFilter
+      );
+    } else {
+      const rows = await getGenreTrends(
+        startDate,
+        endDate,
+        period,
+        userId
+      );
+      response = buildGenreTrendsResponse(rows, period, locale, genresFilter);
+    }
 
-    const response: GenreTrendsResponse = {
-      data,
-      availableGenres,
-    };
-
-    return NextResponse.json(response);
+    return publicDemoJsonResponse(response, isPublicDemoDataset);
   } catch (error) {
     return handleApiError(error, { route: "/api/genres/trends" });
   }

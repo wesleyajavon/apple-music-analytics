@@ -35,10 +35,25 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
         <header className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-5 sm:px-6">
           <Link
             href="/"
-            className="rounded-xl bg-surface-glass px-3 py-2 shadow-card ring-1 ring-card-border backdrop-blur transition-colors hover:bg-card-surface"
+            className="group inline-flex items-center gap-3 rounded-full py-1.5 pr-2 outline-none transition-all hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:pr-3"
             aria-label={t("homeLinkAriaLabel")}
           >
-            <SoundprintLogo />
+            <span className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-brand-gradient shadow-brand-glow ring-1 ring-white/20 transition-transform group-hover:rotate-[-2deg] group-hover:scale-105">
+              <SoundprintLogo
+                src="/brand/favicon.png"
+                showText={false}
+                imageClassName="h-8 w-8 rounded-xl"
+                priority
+              />
+            </span>
+            <span className="flex min-w-0 items-center gap-2">
+              <span className="text-base font-semibold tracking-[-0.03em] text-foreground">
+                Soundprint
+              </span>
+              <span className="rounded-full border border-primary/15 bg-primary/10 px-1.5 py-0.5 text-[0.62rem] font-bold uppercase tracking-[0.18em] text-primary">
+                AI
+              </span>
+            </span>
           </Link>
           <nav
             className="flex flex-wrap items-center justify-end gap-2 sm:gap-3"

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { getListens } from "@/lib/services/listening/listening-service";
 import { getAggregatedListens } from "@/lib/services/listening/listening-aggregation";
 import { ListensResponse, AggregatedListensResponse } from "@/lib/dto/listening";
@@ -14,7 +14,13 @@ import {
   forbiddenResponse,
   unauthorizedResponse,
 } from "@/lib/auth/require-auth-user-id";
-import { assertRateLimit } from "@/lib/security/rate-limit";
+import { assertAnalyticsRateLimit } from "@/lib/security/analytics-rate-limit";
+import { getPublicProfileUserId } from "@/lib/constants/public-profile";
+import { publicDemoJsonResponse } from "@/lib/http/public-demo-response";
+import {
+  getPublicProfileListensAggregatedCached,
+  getPublicProfileListensRawCached,
+} from "@/lib/services/listening/public-listens-cached";
 import { isListenRecordSource } from "@/lib/constants/listen-source";
 
 // Force dynamic rendering since we use request.url
@@ -149,10 +155,11 @@ export async function GET(request: NextRequest) {
       return resolved.status === 403 ? forbiddenResponse() : unauthorizedResponse();
     }
     const { userId } = resolved;
-    await assertRateLimit(request, {
-      ...LISTENS_RATE_LIMIT,
-      userId,
-    });
+    await assertAnalyticsRateLimit(request, LISTENS_RATE_LIMIT, userId);
+
+    const publicProfileId = getPublicProfileUserId();
+    const isPublicDemoDataset =
+      publicProfileId !== null && userId === publicProfileId;
 
     const { searchParams } = new URL(request.url);
     const aggregate =
@@ -163,22 +170,32 @@ export async function GET(request: NextRequest) {
     // If aggregate is requested, return aggregated data
     if (aggregate && ["day", "week", "month"].includes(aggregate)) {
       const { startDate, endDate } = extractRequiredDateRange(request);
+      const period = aggregate as "day" | "week" | "month";
 
-      const aggregatedData = await getAggregatedListens(
-        startDate,
-        endDate,
-        aggregate as "day" | "week" | "month",
-        userId
-      );
+      let response: AggregatedListensResponse;
+      if (isPublicDemoDataset) {
+        response = await getPublicProfileListensAggregatedCached(
+          userId,
+          startDate,
+          endDate,
+          period
+        );
+      } else {
+        const aggregatedData = await getAggregatedListens(
+          startDate,
+          endDate,
+          period,
+          userId
+        );
+        response = {
+          data: aggregatedData,
+          period,
+          startDate: startDate.toISOString().split("T")[0],
+          endDate: endDate.toISOString().split("T")[0],
+        };
+      }
 
-      const response: AggregatedListensResponse = {
-        data: aggregatedData,
-        period: aggregate as "day" | "week" | "month",
-        startDate: startDate.toISOString().split("T")[0],
-        endDate: endDate.toISOString().split("T")[0],
-      };
-
-      return NextResponse.json(response);
+      return publicDemoJsonResponse(response, isPublicDemoDataset);
     }
 
     // Otherwise, return raw listens
@@ -199,23 +216,28 @@ export async function GET(request: NextRequest) {
     const startDate = startDateObj?.toISOString().split("T")[0];
     const endDate = endDateObj?.toISOString().split("T")[0];
 
-    const { data, total } = await getListens({
-      startDate,
-      endDate,
-      userId,
-      limit,
-      offset,
-      source,
-    });
+    let response: ListensResponse;
+    if (isPublicDemoDataset) {
+      response = await getPublicProfileListensRawCached(userId, {
+        startDate,
+        endDate,
+        limit,
+        offset,
+        source,
+      });
+    } else {
+      const { data, total } = await getListens({
+        startDate,
+        endDate,
+        userId,
+        limit,
+        offset,
+        source,
+      });
+      response = { data, total, limit, offset };
+    }
 
-    const response: ListensResponse = {
-      data,
-      total,
-      limit,
-      offset,
-    };
-
-    return NextResponse.json(response);
+    return publicDemoJsonResponse(response, isPublicDemoDataset);
   } catch (error) {
     return handleApiError(error, { route: '/api/listens' });
   }

@@ -213,6 +213,50 @@ function OverviewHeroStatsSkeleton() {
   );
 }
 
+function OverviewHeroStatsErrorPlaceholder() {
+  const t = useTranslations("overview");
+  return (
+    <div className="grid gap-2 pt-4 sm:grid-cols-3">
+      {(["totalListens", "uniqueArtists", "uniqueTracks"] as const).map((key) => (
+        <div
+          key={key}
+          className="rounded-2xl border border-dashed border-white/30 bg-white/[0.05] p-3"
+        >
+          <p className="text-xl font-semibold tracking-tight text-white/40">—</p>
+          <p className="mt-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-500">
+            {t(`stats.${key}`)}
+          </p>
+          <p className="mt-2 font-mono text-[0.62rem] font-medium uppercase tracking-[0.16em] text-cyan-200/45">
+            {t("errorStateMetricStatus")}
+          </p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function OverviewHeroStatsEmptyPlaceholder() {
+  const t = useTranslations("overview");
+  return (
+    <div className="grid gap-2 pt-4 sm:grid-cols-3">
+      {(["totalListens", "uniqueArtists", "uniqueTracks"] as const).map((key) => (
+        <div
+          key={key}
+          className="rounded-2xl border border-dashed border-white/25 bg-white/[0.04] p-3"
+        >
+          <p className="text-xl font-semibold tracking-tight text-white/55">0</p>
+          <p className="mt-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-500">
+            {t(`stats.${key}`)}
+          </p>
+          <p className="mt-2 font-mono text-[0.62rem] font-medium uppercase tracking-[0.16em] text-cyan-200/50">
+            {t("emptyStateMetricHint")}
+          </p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function OverviewSectionHeader({
   eyebrow,
   title,
@@ -343,7 +387,7 @@ function TopLibraryRow({
 }) {
   const widthPercent = maxCount > 0 ? Math.max(4, (item.count / maxCount) * 100) : 0;
   return (
-    <div className="group rounded-2xl border border-white/70 bg-white/62 p-3 shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white/85 hover:shadow-card dark:border-white/10 dark:bg-white/[0.05] dark:hover:bg-white/[0.08]">
+    <div className="group rounded-2xl border border-white/70 bg-white/62 p-3 shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white/85 hover:shadow-card dark:border-white/[0.07] dark:bg-[#12141f] dark:hover:bg-[#181b28]">
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-start gap-3">
           <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border text-xs font-black ${accent.badge}`}>
@@ -354,7 +398,7 @@ function TopLibraryRow({
               {item.title}
             </p>
             {item.subtitle ? (
-              <p className="mt-0.5 truncate text-xs text-muted" title={item.subtitle}>
+              <p className="mt-0.5 truncate text-xs text-muted dark:text-slate-400" title={item.subtitle}>
                 {item.subtitle}
               </p>
             ) : null}
@@ -364,12 +408,12 @@ function TopLibraryRow({
           <p className="text-sm font-semibold tabular-nums text-gray-950 dark:text-white">
             {item.count.toLocaleString(locale)}
           </p>
-          <p className="text-[11px] font-medium text-muted">
+          <p className="text-[11px] font-medium text-muted dark:text-slate-400">
             {item.percentage.toFixed(1)}% · {listensLabel}
           </p>
         </div>
       </div>
-      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-200/70 dark:bg-white/10">
+      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-200/70 dark:bg-[#2a2d3d]">
         <div
           className={`h-full rounded-full bg-gradient-to-r ${accent.progress} transition-all duration-500 ease-out`}
           style={{ width: `${widthPercent}%` }}
@@ -400,7 +444,7 @@ function TopLibraryCard({
 }) {
   const maxCount = items[0]?.count ?? 1;
   return (
-    <article className="relative overflow-hidden rounded-[2rem] border border-card-border bg-gradient-to-br from-white via-white/90 to-slate-50/80 p-4 shadow-card ring-1 ring-white/70 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-card-hover dark:from-slate-900/92 dark:via-slate-900/88 dark:to-slate-800/90 dark:ring-white/10">
+    <article className="relative overflow-hidden rounded-[2rem] border border-card-border bg-gradient-to-br from-white via-white/90 to-slate-50/80 p-4 shadow-card ring-1 ring-white/70 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-card-hover dark:border-white/[0.08] dark:from-[#06070d] dark:via-[#070812] dark:to-[#0c0e18] dark:ring-white/[0.06]">
       <div className={`pointer-events-none absolute -right-20 -top-20 h-48 w-48 rounded-full ${accent.glow} blur-3xl`} />
       <div className={`pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent ${accent.rail} to-transparent opacity-80`} />
       <div className="relative">
@@ -410,11 +454,11 @@ function TopLibraryCard({
               <span className={`h-2 w-2 rounded-full ${accent.soft} shadow-[0_0_16px_currentColor]`} />
               {title}
             </div>
-            <p className="text-sm leading-6 text-muted">{description}</p>
+            <p className="text-sm leading-6 text-muted dark:text-slate-400">{description}</p>
           </div>
           <Link
             href={href}
-            className={`inline-flex shrink-0 items-center gap-1.5 rounded-2xl border border-card-border bg-white/70 px-3 py-2 text-sm font-semibold shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow-card dark:bg-white/10 dark:hover:bg-white/15 ${accent.text}`}
+            className={`inline-flex shrink-0 items-center gap-1.5 rounded-2xl border border-card-border bg-white/70 px-3 py-2 text-sm font-semibold shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow-card dark:border-white/[0.10] dark:bg-[#161822] dark:hover:bg-[#1c2030] ${accent.text}`}
           >
             {ctaLabel}
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -450,9 +494,14 @@ function OverviewContent() {
   const badgeLabel = dateRangeLabel || t("allData");
   const hasComparison = !isAll && !!rangeStart && !!rangeEnd;
 
+  const startDate = searchParams.get("startDate") || undefined;
+  const endDate = searchParams.get("endDate") || undefined;
+  const userId = searchParams.get("userId") ?? undefined;
+
   const [firstName, setFirstName] = useState<string | null>(null);
   useEffect(() => {
     let mounted = true;
+    setFirstName(null);
 
     function extractFirstName(rawName?: string | null) {
       if (!rawName) return null;
@@ -461,26 +510,26 @@ function OverviewContent() {
       return cleaned.split(/\s+/)[0] ?? null;
     }
 
-    async function hydrateUserNameFromDb() {
-      const response = await fetch("/api/user/me", { method: "GET" });
+    async function hydrateDashboardSubjectDisplayName() {
+      const params = new URLSearchParams();
+      if (userId) params.set("userId", userId);
+      const qs = params.toString();
+      const url = qs ? `/api/user/dashboard-subject?${qs}` : "/api/user/dashboard-subject";
+      const response = await fetch(url, { method: "GET" });
       if (!response.ok) return;
       const payload = (await response.json()) as { user?: { name?: string | null } | null };
       if (!mounted) return;
       setFirstName(extractFirstName(payload.user?.name ?? null));
     }
 
-    hydrateUserNameFromDb();
+    hydrateDashboardSubjectDisplayName();
 
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [userId]);
 
   const overviewTitle = firstName ? t("titlePersonal", { name: firstName }) : t("title");
-
-  const startDate = searchParams.get("startDate") || undefined;
-  const endDate = searchParams.get("endDate") || undefined;
-  const userId = searchParams.get("userId") ?? undefined;
 
   const [artistInsightsTarget, setArtistInsightsTarget] = useState<{
     artist: ArtistStatsDto;
@@ -631,13 +680,15 @@ function OverviewContent() {
       <div className="space-y-8">
         <OverviewHeroFrame
           title={overviewTitle}
-          description={t("errorLoading")}
+          description={t("errorStateHint")}
           badgeLabel={badgeLabel}
           hasComparison={hasComparison}
           featureHref={musicAgentHref}
-          stats={null}
+          stats={<OverviewHeroStatsErrorPlaceholder />}
         />
         <ErrorState
+          variant="startup"
+          eyebrow={t("errorStateEyebrow")}
           error={error}
           message={t("errorLoading")}
           onRetry={handleRetry}
@@ -647,17 +698,25 @@ function OverviewContent() {
   }
 
   if (!isLoading && (!data || data.totalListens === 0)) {
+    const empty = emptyStatePresets.importData;
     return (
       <div className="space-y-8">
         <OverviewHeroFrame
           title={overviewTitle}
-          description={t("subtitle")}
+          description={t("emptyStateHeroDescription")}
           badgeLabel={badgeLabel}
           hasComparison={hasComparison}
           featureHref={musicAgentHref}
-          stats={null}
+          stats={<OverviewHeroStatsEmptyPlaceholder />}
         />
-        <EmptyState {...emptyStatePresets.importData} />
+        <EmptyState
+          variant="startup"
+          eyebrow={t("emptyStateEyebrow")}
+          aside={t("emptyStateAside")}
+          message={empty.message}
+          description={empty.description}
+          actions={empty.actions}
+        />
       </div>
     );
   }

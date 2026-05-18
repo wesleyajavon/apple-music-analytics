@@ -25,9 +25,9 @@ import {
   forbiddenResponse,
   unauthorizedResponse,
 } from "@/lib/auth/require-auth-user-id";
+import { assertAnalyticsRateLimit } from "@/lib/security/analytics-rate-limit";
 import {
   applyRateLimitHeaders,
-  assertRateLimit,
   type RateLimitResult,
 } from "@/lib/security/rate-limit";
 import { assertInteractiveGroqNotBlockedByImportGenreBackfill } from "@/lib/services/listening/groq-import-genre-backfill-ai-guard";
@@ -63,10 +63,7 @@ export async function GET(request: NextRequest) {
       return resolved.status === 403 ? forbiddenResponse() : unauthorizedResponse();
     }
     const { userId } = resolved;
-    rateLimit = await assertRateLimit(request, {
-      ...AI_GENRE_TRENDS_RATE_LIMIT,
-      userId,
-    });
+    rateLimit = await assertAnalyticsRateLimit(request, AI_GENRE_TRENDS_RATE_LIMIT, userId);
 
     const genres = extractGenres(request);
     if (genres.length === 0) {

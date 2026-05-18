@@ -13,6 +13,9 @@ import {
   OVERVIEW_STARTUP_HEADER_LINK_CLASS,
   OVERVIEW_STARTUP_INNER_PANEL_CLASS,
   OVERVIEW_STARTUP_SURFACE_BASE,
+  OVERVIEW_STARTUP_WIDGET_HEADER_BORDER_CLASS,
+  OVERVIEW_STARTUP_WIDGET_SUBTITLE_CLASS,
+  OVERVIEW_STARTUP_WIDGET_TITLE_CLASS,
   OverviewStartupSurfaceBg,
 } from "@/lib/components/overview-startup-surface";
 
@@ -107,14 +110,14 @@ export function HeatmapCalendarOverviewWidget({
         aria-label={tHeatmap("calendarTitle")}
       >
         <OverviewStartupSurfaceBg />
-        <div className="relative border-b border-white/10 px-6 py-5 sm:px-8">
+        <div className={`relative ${OVERVIEW_STARTUP_WIDGET_HEADER_BORDER_CLASS} px-6 py-5 sm:px-8`}>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0 flex-1 space-y-3">
-              <div className="h-6 w-44 max-w-full rounded-full bg-white/10 animate-shimmer" />
-              <div className="h-8 w-64 max-w-full rounded-lg bg-white/10 animate-shimmer" />
-              <div className="h-4 w-full max-w-md rounded-lg bg-white/10 animate-shimmer" />
+              <div className="h-6 w-44 max-w-full rounded-full bg-slate-200/80 animate-shimmer dark:bg-[#1a1d2a]" />
+              <div className="h-8 w-64 max-w-full rounded-lg bg-slate-200/80 animate-shimmer dark:bg-[#1a1d2a]" />
+              <div className="h-4 w-full max-w-md rounded-lg bg-slate-200/80 animate-shimmer dark:bg-[#1a1d2a]" />
             </div>
-            <div className="h-11 w-28 shrink-0 rounded-2xl bg-white/10 animate-shimmer sm:self-start" />
+            <div className="h-11 w-28 shrink-0 rounded-2xl bg-slate-200/80 animate-shimmer dark:bg-[#1a1d2a] sm:self-start" />
           </div>
         </div>
         <div className="relative flex-1 p-6 sm:p-8">
@@ -133,15 +136,15 @@ export function HeatmapCalendarOverviewWidget({
         aria-labelledby="overview-heatmap-calendar-title"
       >
         <OverviewStartupSurfaceBg />
-        <div className="relative border-b border-white/10 px-6 py-5 sm:px-8">
+        <div className={`relative ${OVERVIEW_STARTUP_WIDGET_HEADER_BORDER_CLASS} px-6 py-5 sm:px-8`}>
           <div className={OVERVIEW_STARTUP_EYEBROW_PILL_CLASS}>
             <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_16px_rgb(22_199_132_/0.75)]" />
             {tHeatmap("heroEyebrow")}
           </div>
-          <h2 id="overview-heatmap-calendar-title" className="text-3xl font-semibold tracking-[-0.05em] text-white sm:text-4xl">
+          <h2 id="overview-heatmap-calendar-title" className={OVERVIEW_STARTUP_WIDGET_TITLE_CLASS}>
             {tHeatmap("calendarTitle")}
           </h2>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-300 sm:text-base">{tHeatmap("overviewCalendarHint")}</p>
+          <p className={OVERVIEW_STARTUP_WIDGET_SUBTITLE_CLASS}>{tHeatmap("overviewCalendarHint")}</p>
         </div>
         <div className="relative flex-1 p-6 sm:p-8">
           <div className={OVERVIEW_STARTUP_INNER_PANEL_CLASS}>
@@ -165,17 +168,17 @@ export function HeatmapCalendarOverviewWidget({
       <OverviewStartupSurfaceBg />
 
       <div className="relative">
-        <div className="border-b border-white/10 px-6 py-5 sm:px-8">
+        <div className={`${OVERVIEW_STARTUP_WIDGET_HEADER_BORDER_CLASS} px-6 py-5 sm:px-8`}>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
               <div className={OVERVIEW_STARTUP_EYEBROW_PILL_CLASS}>
                 <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_16px_rgb(22_199_132_/0.75)]" />
                 {tHeatmap("heroEyebrow")}
               </div>
-              <h2 id="overview-heatmap-calendar-title" className="text-3xl font-semibold tracking-[-0.05em] text-white sm:text-4xl">
+              <h2 id="overview-heatmap-calendar-title" className={OVERVIEW_STARTUP_WIDGET_TITLE_CLASS}>
                 {tHeatmap("calendarTitle")}
               </h2>
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-300 sm:text-base">{tHeatmap("overviewCalendarHint")}</p>
+              <p className={OVERVIEW_STARTUP_WIDGET_SUBTITLE_CLASS}>{tHeatmap("overviewCalendarHint")}</p>
             </div>
             <Link href={heatmapPageHref} className={OVERVIEW_STARTUP_HEADER_LINK_CLASS}>
               {tOverview("seeMore")}
@@ -185,7 +188,7 @@ export function HeatmapCalendarOverviewWidget({
             </Link>
           </div>
           {heatmapData.length === 0 ? (
-            <p className="mt-3 text-xs text-slate-400">{tHeatmap("noDataPeriod")}</p>
+            <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">{tHeatmap("noDataPeriod")}</p>
           ) : null}
         </div>
         <div className="p-6 sm:p-8">
@@ -202,7 +205,7 @@ export function HeatmapCalendarOverviewWidget({
               />
             </div>
           ) : (
-            <div className="rounded-[1.5rem] border border-white/10 bg-black/20 py-12 text-center text-sm text-slate-400 shadow-2xl shadow-black/20 backdrop-blur">
+            <div className="rounded-[1.5rem] border border-slate-200/90 bg-slate-50/90 py-12 text-center text-sm text-slate-600 shadow-inner shadow-slate-900/[0.04] backdrop-blur dark:border-white/[0.06] dark:bg-[#0c0e18] dark:text-slate-400 dark:shadow-none">
               <p>{tHeatmap("noDataPeriod")}</p>
             </div>
           )}

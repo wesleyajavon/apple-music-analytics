@@ -11,12 +11,12 @@ import { useInteractiveAiBlockedByGenreBackfill } from "@/lib/hooks/use-interact
 import { isGroqGenreClassificationBlockingError } from "@/lib/utils/groq-quota-message";
 
 const WIDGET_SHELL_CLASS =
-  "relative min-h-[280px] w-full overflow-hidden rounded-[2rem] border border-accent-violet/20 bg-gradient-to-br from-white via-[#fbf8ff] to-[#eef7ff] shadow-card ring-1 ring-white/70 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent-violet/30 hover:shadow-card-hover dark:from-slate-900/92 dark:via-slate-900/88 dark:to-slate-800/90 dark:ring-white/10";
+  "relative min-h-[280px] w-full overflow-hidden rounded-[2rem] border border-accent-violet/20 bg-gradient-to-br from-white via-[#fbf8ff] to-[#eef7ff] shadow-card ring-1 ring-white/70 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent-violet/30 hover:shadow-card-hover dark:border-white/[0.08] dark:from-[#06070d] dark:via-[#070812] dark:to-[#0b0d16] dark:ring-white/[0.06]";
 
 const WIDGET_BACKGROUND = (
   <>
     <div
-      className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(240,64,104,0.13),transparent_30%),radial-gradient(circle_at_88%_12%,rgba(79,144,224,0.16),transparent_32%),linear-gradient(135deg,rgba(255,255,255,0.72),transparent_45%)] dark:bg-[radial-gradient(circle_at_top_left,rgba(240,64,104,0.18),transparent_30%),radial-gradient(circle_at_88%_12%,rgba(79,144,224,0.16),transparent_32%),linear-gradient(135deg,rgba(255,255,255,0.08),transparent_45%)]"
+      className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(240,64,104,0.13),transparent_30%),radial-gradient(circle_at_88%_12%,rgba(79,144,224,0.16),transparent_32%),linear-gradient(135deg,rgba(255,255,255,0.72),transparent_45%)] dark:bg-[radial-gradient(circle_at_top_left,rgba(240,64,104,0.12),transparent_32%),radial-gradient(circle_at_88%_12%,rgba(79,144,224,0.12),transparent_32%),linear-gradient(135deg,rgba(255,255,255,0.03),transparent_48%)]"
       aria-hidden
     />
     <div
@@ -49,9 +49,9 @@ export function TasteProfileSummaryWidget() {
     return (
       <section className={WIDGET_SHELL_CLASS}>
         {WIDGET_BACKGROUND}
-        <div className="relative border-b border-white/70 px-6 py-5 dark:border-white/10">
+        <div className="relative border-b border-white/70 px-6 py-5 dark:border-white/[0.06]">
           <h2 className="text-lg font-semibold text-gray-950 dark:text-white">{t("title")}</h2>
-          <p className="mt-0.5 text-sm text-muted">{t("subtitleShort")}</p>
+          <p className="mt-0.5 text-sm text-muted dark:text-slate-400">{t("subtitleShort")}</p>
         </div>
         <div className="relative p-6">
           <InteractiveAiGenreBackfillNotice />
@@ -69,7 +69,7 @@ export function TasteProfileSummaryWidget() {
       >
         {WIDGET_BACKGROUND}
         {/* Header skeleton — matches real layout */}
-        <div className="relative border-b border-white/70 px-6 py-5 dark:border-white/10">
+        <div className="relative border-b border-white/70 px-6 py-5 dark:border-white/[0.06]">
           <div className="space-y-1.5">
             <div className="h-5 w-44 animate-shimmer rounded bg-gray-200 dark:bg-gray-700" />
             <div className="h-4 w-64 max-w-full animate-shimmer rounded bg-gray-200 dark:bg-gray-700" />
@@ -100,9 +100,9 @@ export function TasteProfileSummaryWidget() {
       return (
         <section className={WIDGET_SHELL_CLASS}>
           {WIDGET_BACKGROUND}
-          <div className="relative border-b border-white/70 px-6 py-5 dark:border-white/10">
+          <div className="relative border-b border-white/70 px-6 py-5 dark:border-white/[0.06]">
             <h2 className="text-lg font-semibold text-gray-950 dark:text-white">{t("title")}</h2>
-            <p className="mt-0.5 text-sm text-muted">{t("subtitleShort")}</p>
+            <p className="mt-0.5 text-sm text-muted dark:text-slate-400">{t("subtitleShort")}</p>
           </div>
           <div className="relative p-6">
             <InteractiveAiGenreBackfillNotice force />
@@ -136,11 +136,11 @@ export function TasteProfileSummaryWidget() {
   return (
     <section className={WIDGET_SHELL_CLASS}>
       {WIDGET_BACKGROUND}
-      <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-accent-cyan/50 to-transparent" />
-      <div className="relative border-b border-white/70 px-6 py-5 dark:border-white/10">
+      <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-accent-cyan/50 to-transparent dark:via-cyan-200/30" />
+      <div className="relative border-b border-white/70 px-6 py-5 dark:border-white/[0.06]">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-accent-violet/20 bg-white/70 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-accent-violet shadow-sm backdrop-blur dark:bg-white/10 dark:text-violet-100">
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-accent-violet/20 bg-white/70 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-accent-violet shadow-sm backdrop-blur dark:border-violet-400/18 dark:bg-[#141622] dark:text-violet-100">
               <span
                 className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_16px_rgb(22_199_132_/0.65)]"
                 aria-hidden
@@ -150,12 +150,12 @@ export function TasteProfileSummaryWidget() {
             <h2 className="text-2xl font-semibold tracking-[-0.04em] text-gray-950 dark:text-white sm:text-3xl">
               {t("title")}
             </h2>
-            <p className="mt-1 text-sm text-muted">
+            <p className="mt-1 text-sm text-muted dark:text-slate-400">
               {t("subtitleShort")}
             </p>
           </div>
           {data.cached ? (
-            <p className="w-fit rounded-full border border-accent-cyan/20 bg-white/60 px-3 py-1.5 text-xs font-medium text-muted shadow-sm backdrop-blur dark:bg-white/10">
+            <p className="w-fit rounded-full border border-accent-cyan/20 bg-white/60 px-3 py-1.5 text-xs font-medium text-muted shadow-sm backdrop-blur dark:border-white/[0.08] dark:bg-[#12141f] dark:text-slate-400">
               {t("cached")}
             </p>
           ) : null}
@@ -191,7 +191,7 @@ export function TasteProfileSummaryWidget() {
           ].map((section) => (
             <article
               key={section.title}
-              className="group relative flex min-h-[220px] flex-col overflow-hidden rounded-3xl border border-card-border bg-white/88 p-5 shadow-card backdrop-blur transition-all hover:-translate-y-1 hover:bg-white hover:shadow-card-hover dark:border-white/10 dark:bg-slate-950/28 dark:hover:bg-slate-950/38"
+              className="group relative flex min-h-[220px] flex-col overflow-hidden rounded-3xl border border-card-border bg-white/88 p-5 shadow-card backdrop-blur transition-all hover:-translate-y-1 hover:bg-white hover:shadow-card-hover dark:border-white/[0.06] dark:bg-[#0c0e18] dark:hover:bg-[#101521]"
             >
               <div
                 className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent opacity-90 dark:via-white/25"
@@ -215,7 +215,7 @@ export function TasteProfileSummaryWidget() {
               <h3 className="relative text-xl font-semibold tracking-[-0.03em] text-gray-950 dark:text-white">
                 {section.title}
               </h3>
-              <p className="relative mt-3 text-sm leading-7 text-gray-600 dark:text-gray-300">
+              <p className="relative mt-3 text-sm leading-7 text-gray-600 dark:text-slate-300">
                 {section.body}
               </p>
             </article>

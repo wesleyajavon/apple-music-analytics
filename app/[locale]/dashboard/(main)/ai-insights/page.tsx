@@ -350,7 +350,7 @@ function AiInsightsContent() {
           <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} aria-hidden />
           <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} aria-hidden />
           <div className="relative p-6 sm:p-8">
-            <ErrorState error={error} message={t("errorMessage")} onRetry={handleRetry} />
+            <ErrorState variant="startup" error={error} message={t("errorMessage")} onRetry={handleRetry} />
             <p className={`mt-4 ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("checkApiKey")}</p>
           </div>
         </div>
@@ -373,6 +373,7 @@ function AiInsightsContent() {
           />
         </section>
         <EmptyState
+          variant="startup"
           {...emptyStatePresets.importData}
           message={t("notEnoughData")}
           description={t("importDescription")}

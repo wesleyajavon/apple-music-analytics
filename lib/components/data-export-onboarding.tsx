@@ -7,12 +7,15 @@ import { useRouter } from "@/i18n/navigation";
 import { toast } from "sonner";
 import {
   ArrowRight,
+  Check,
   CheckCircle2,
+  ChevronDown,
   Loader2,
   Music2,
   Palette,
   SkipForward,
   Sparkles,
+  UploadCloud,
 } from "lucide-react";
 import { DashboardHeroTitle } from "@/lib/components/dashboard-hero-title";
 import { useGenreBackfillJobSafe } from "@/lib/context/genre-backfill-job-context";
@@ -34,6 +37,9 @@ import {
 
 type Phase = "welcome" | "pick" | "guide" | "import" | "finish";
 type MusicProvider = "spotify" | "apple";
+
+const SPOTIFY_LOGO_SRC = "/brand/providers/spotify-icon.svg";
+const APPLE_MUSIC_LOGO_SRC = "/brand/providers/apple-music-icon.svg";
 
 type GuideStep = {
   titleKey:
@@ -165,32 +171,51 @@ const APPLE_STEPS: GuideStep[] = [
 const VERCEL_SAFE_MULTIPART_MAX_BYTES = 4 * 1024 * 1024;
 const MAX_ONBOARDING_PARSED_ROWS = 75_000;
 
-/** Aligné sur le hero « Overview » (violet / cyan). */
-const ONBOARDING_RAIL_CLASS = "bg-gradient-to-r from-violet-400 via-indigo-500 to-cyan-400";
+/** Trait / remplissage brand (s’aligne sur --brand-* en clair et sombre). */
+const ONBOARDING_RAIL_CLASS = "bg-brand-gradient";
 const ONBOARDING_HERO_SHELL_CLASS =
-  "relative overflow-hidden rounded-3xl border border-violet-300/25 bg-[radial-gradient(circle_at_top_left,_rgba(139,92,246,0.28),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(6,182,212,0.2),_transparent_30%),linear-gradient(135deg,_#020617_0%,_#0f172a_48%,_#2e1065_100%)] px-6 py-8 shadow-2xl shadow-violet-950/40 sm:px-8 sm:py-10";
+  "relative overflow-hidden rounded-2xl border border-card-border bg-gradient-to-br from-surface-dashboard via-card to-surface px-5 py-7 shadow-card ring-1 ring-primary/[0.1] sm:rounded-3xl sm:px-8 sm:py-10 dark:from-[rgb(var(--surface-rgb))] dark:via-card dark:to-surface-raised dark:ring-primary/[0.14]";
+
+const FLOW_RAIL_KEYS = ["intro", "choose", "export", "upload", "done"] as const;
+
+function getFlowRailActiveIndex(phase: Phase): number {
+  switch (phase) {
+    case "welcome":
+      return 0;
+    case "pick":
+      return 1;
+    case "guide":
+      return 2;
+    case "import":
+      return 3;
+    case "finish":
+      return 4;
+    default:
+      return 0;
+  }
+}
 
 function OnboardingHeroShell({ children }: { children: ReactNode }) {
   return (
     <div className={ONBOARDING_HERO_SHELL_CLASS}>
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(139,92,246,0.1)_1px,_transparent_1px),linear-gradient(90deg,_rgba(34,211,238,0.08)_1px,_transparent_1px)] bg-[size:32px_32px] opacity-30" />
-      <div className="absolute -right-20 -top-24 h-56 w-56 rounded-full bg-violet-400/18 blur-3xl" />
-      <div className="absolute -bottom-24 left-10 h-48 w-48 rounded-full bg-cyan-400/16 blur-3xl" />
+      <div className="absolute inset-0 bg-[linear-gradient(rgb(var(--border-rgb)_/_0.65)_1px,transparent_1px),linear-gradient(90deg,rgb(var(--border-rgb)_/_0.52)_1px,transparent_1px)] bg-[size:28px_28px] opacity-[0.55] dark:opacity-[0.32]" />
+      <div className="pointer-events-none absolute -right-20 -top-24 h-56 w-56 rounded-full bg-primary/11 blur-3xl dark:bg-primary/16" />
+      <div className="pointer-events-none absolute -bottom-24 left-10 h-48 w-48 rounded-full bg-accent-cyan/9 blur-3xl dark:bg-accent-cyan/14" />
       <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${ONBOARDING_RAIL_CLASS} opacity-90`} />
       <div className="relative">{children}</div>
     </div>
   );
 }
 
-/** Carte « genres IA » — même langage que le hero (violet / cyan). */
+/** Carte « genres IA » — surfaces thème + accents brand (pas de violet/cyan Tailwind hors tokens). */
 const GENRE_AI_SURFACE =
-  "relative overflow-hidden rounded-2xl border border-violet-300/25 bg-[radial-gradient(circle_at_top_left,_rgba(139,92,246,0.16),_transparent_42%),radial-gradient(circle_at_bottom_right,_rgba(34,211,238,0.12),_transparent_40%),linear-gradient(145deg,_rgb(15_23_42_/_0.94)_0%,_rgb(49_46_129_/_0.38)_100%)] shadow-lg shadow-violet-950/30 ring-1 ring-white/[0.06]";
+  "relative overflow-hidden rounded-2xl border border-card-border bg-card-surface bg-gradient-to-br from-primary/[0.07] via-transparent to-accent-cyan/[0.05] shadow-card ring-1 ring-primary/[0.12] dark:from-primary/[0.11] dark:to-accent-indigo/[0.06] dark:ring-primary/[0.16]";
 
 const GENRE_AI_ACCEPT_BTN =
   "group inline-flex min-h-[48px] w-full shrink-0 items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-5 py-3 text-sm font-semibold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:opacity-[0.98] hover:shadow-card-hover active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 sm:w-auto sm:min-w-[min(100%,260px)]";
 
 const GENRE_AI_DECLINE_BTN =
-  "inline-flex min-h-[48px] w-full shrink-0 items-center justify-center gap-2 rounded-2xl border border-white/18 bg-white/[0.07] px-5 py-3 text-sm font-semibold text-foreground shadow-[inset_0_1px_0_0_rgb(255_255_255_/0.08)] backdrop-blur-sm transition-all hover:border-white/28 hover:bg-white/[0.12] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/35 disabled:cursor-not-allowed disabled:opacity-55 sm:w-auto sm:min-w-[min(100%,200px)]";
+  "inline-flex min-h-[48px] w-full shrink-0 items-center justify-center gap-2 rounded-2xl border border-card-border bg-surface-raised px-5 py-3 text-sm font-semibold text-foreground shadow-sm transition-all hover:border-primary/28 hover:bg-primary/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-55 dark:border-white/12 dark:bg-white/[0.06] dark:hover:border-white/22 dark:hover:bg-white/[0.1] sm:w-auto sm:min-w-[min(100%,200px)]";
 
 function GenreAiPanelChrome({
   children,
@@ -201,7 +226,7 @@ function GenreAiPanelChrome({
 }) {
   return (
     <div className={`${GENRE_AI_SURFACE} ${className}`}>
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(139,92,246,0.07)_1px,_transparent_1px),linear-gradient(90deg,_rgba(34,211,238,0.05)_1px,_transparent_1px)] bg-[size:24px_24px] opacity-[0.38]" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(var(--border-rgb)_/_0.5)_1px,transparent_1px),linear-gradient(90deg,rgb(var(--border-rgb)_/_0.42)_1px,transparent_1px)] bg-[size:22px_22px] opacity-[0.45] dark:opacity-[0.28]" />
       <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${ONBOARDING_RAIL_CLASS} opacity-85`} />
       <div className="relative">{children}</div>
     </div>
@@ -267,7 +292,7 @@ function OnboardingFlowProgressBar({
 }) {
   const trough =
     variant === "hero"
-      ? "bg-white/[0.12] ring-1 ring-inset ring-white/[0.06]"
+      ? "bg-muted/30 ring-1 ring-inset ring-primary/10 dark:bg-foreground/[0.08] dark:ring-white/[0.08]"
       : "bg-border";
   return (
     <div
@@ -279,10 +304,59 @@ function OnboardingFlowProgressBar({
       className={`h-1.5 w-full max-w-md overflow-hidden rounded-full ${trough}`}
     >
       <div
-        className={`h-full rounded-full ${ONBOARDING_RAIL_CLASS} shadow-[0_0_20px_rgba(139,92,246,0.35)] transition-[width] duration-500 ease-out`}
+        className={`h-full rounded-full ${ONBOARDING_RAIL_CLASS} shadow-glow transition-[width] duration-500 ease-out`}
         style={{ width: `${percent}%` }}
       />
     </div>
+  );
+}
+
+function OnboardingFlowRail({ activeIndex }: { activeIndex: number }) {
+  const t = useTranslations("onboarding");
+  return (
+    <nav
+      aria-label={t("flowRail.ariaLabel")}
+      className="rounded-2xl border border-card-border bg-card-surface px-3 py-2.5 shadow-[0_1px_0_0_rgb(var(--primary-rgb)_/_0.1)] backdrop-blur-md dark:bg-card-surface/90"
+    >
+      <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-2">
+        <ol className="flex flex-wrap items-center gap-x-0.5 gap-y-2 sm:gap-x-1">
+          {FLOW_RAIL_KEYS.map((stepKey, i) => {
+            const label = t(`flowRail.${stepKey}` as Parameters<typeof t>[0]);
+            const isComplete = i < activeIndex;
+            const isCurrent = i === activeIndex;
+            return (
+              <li
+                key={stepKey}
+                className="contents"
+                {...(isCurrent ? { "aria-current": "step" as const } : {})}
+              >
+                <span
+                  className={[
+                    "inline-flex min-h-[34px] min-w-[2.75rem] items-center gap-2 rounded-full border px-3 py-1.5 font-mono text-[11px] font-medium uppercase tracking-wide transition-colors sm:min-h-0",
+                    isComplete
+                      ? "border-primary/30 bg-primary/10 text-primary"
+                      : isCurrent
+                        ? "border-primary/40 bg-primary/[0.07] text-primary shadow-[inset_0_0_0_1px_rgb(var(--primary-rgb)_/_0.12)]"
+                        : "border-border bg-muted/8 text-muted",
+                  ].join(" ")}
+                  title={label}
+                >
+                  {isComplete ? (
+                    <Check className="h-3.5 w-3.5 shrink-0 opacity-90" aria-hidden strokeWidth={2.5} />
+                  ) : (
+                    <span className="w-5 text-center tabular-nums">{i + 1}</span>
+                  )}
+                  <span className="hidden truncate sm:inline sm:max-w-[6.5rem]">{label}</span>
+                </span>
+                {i < FLOW_RAIL_KEYS.length - 1 ? (
+                  <span className="hidden h-px w-4 shrink-0 bg-border sm:block" aria-hidden />
+                ) : null}
+              </li>
+            );
+          })}
+        </ol>
+      </div>
+    </nav>
   );
 }
 
@@ -773,10 +847,10 @@ export function DataExportOnboarding({
   }, [t, refreshGroqJobShared]);
 
   const surfaceShellClass =
-    "relative mx-auto w-full max-w-4xl rounded-3xl border border-card-border bg-card-surface p-6 shadow-card backdrop-blur-sm sm:p-8";
+    "relative mx-auto w-full max-w-4xl rounded-2xl border border-card-border bg-card-surface p-6 shadow-card ring-1 ring-black/[0.04] backdrop-blur-sm dark:ring-white/[0.055] sm:p-8";
 
   const primaryBtn =
-    "inline-flex min-h-[44px] items-center justify-center rounded-xl bg-accent-violet px-5 py-2.5 text-sm font-semibold text-white shadow-brand-glow transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60";
+    "inline-flex min-h-[44px] items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-brand-glow transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60";
 
   const secondaryBtn =
     "inline-flex min-h-[44px] items-center justify-center rounded-xl border border-card-border bg-surface-raised px-5 py-2.5 text-sm font-semibold text-foreground transition-colors hover:border-primary/30 hover:bg-primary/5 dark:hover:bg-white/5";
@@ -785,9 +859,9 @@ export function DataExportOnboarding({
   const welcomeContinueBtn =
     "group inline-flex min-h-[48px] w-full shrink-0 items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-6 py-3 text-sm font-semibold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:opacity-[0.98] hover:shadow-card-hover active:translate-y-0 sm:w-auto";
 
-  /** Passer sans importer — overlay hero sombre */
+  /** Passer sans importer — même langage que les boutons ghost du dashboard */
   const welcomeSkipBtn =
-    "inline-flex min-h-[48px] w-full shrink-0 items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/[0.08] px-5 py-3 text-sm font-medium text-violet-100 shadow-[inset_0_1px_0_0_rgb(255_255_255_/0.12)] backdrop-blur-sm transition-all hover:border-white/35 hover:bg-white/[0.14] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 disabled:opacity-55 sm:w-auto";
+    "inline-flex min-h-[48px] w-full shrink-0 items-center justify-center gap-2 rounded-2xl border border-card-border bg-surface-raised px-5 py-3 text-sm font-medium text-muted shadow-sm backdrop-blur-sm transition-all hover:border-primary/35 hover:bg-primary/[0.05] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-55 dark:border-white/12 dark:bg-white/[0.06] dark:text-foreground dark:hover:bg-white/[0.1] sm:w-auto";
 
   /** Passer depuis l’étape « choix » — surface claire */
   const pickSkipBtn =
@@ -842,13 +916,17 @@ export function DataExportOnboarding({
 
   return (
     <div className="mx-auto max-w-4xl space-y-8 pb-16">
+      <OnboardingFlowRail activeIndex={getFlowRailActiveIndex(phase)} />
+
       {phase === "welcome" && (
         <OnboardingHeroShell>
           <div className="max-w-3xl space-y-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-200/85">
-              {t("welcomeEyebrow")}
-            </p>
-            <DashboardHeroTitle icon={Sparkles} variant="hero">
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/90 px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-primary backdrop-blur-sm dark:bg-primary/10 dark:text-primary">
+                {t("welcomeEyebrow")}
+              </p>
+            </div>
+            <DashboardHeroTitle icon={Sparkles} variant="onboarding">
               {t("welcomeTitle")}
             </DashboardHeroTitle>
             <OnboardingFlowProgressBar
@@ -856,21 +934,42 @@ export function DataExportOnboarding({
               variant="hero"
               ariaLabel={flowProgressAria}
             />
-            <section
-              className="rounded-xl border border-violet-200/15 bg-slate-950/40 px-4 py-4 text-sm leading-relaxed backdrop-blur-sm"
-              aria-labelledby="onboarding-why-not-api-heading"
-            >
-              <h2
-                id="onboarding-why-not-api-heading"
-                className="text-base font-semibold text-white"
+            <p className="text-[0.9375rem] leading-relaxed text-muted sm:text-base">{t("welcomeBody")}</p>
+            <div className="rounded-xl border border-card-border bg-surface/80 px-4 py-4 backdrop-blur-sm dark:bg-white/[0.04]">
+              <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-primary">{t("welcomePlanTitle")}</p>
+              <ul className="mt-4 space-y-3 text-sm leading-snug text-foreground">
+                {(["welcomeBullet1", "welcomeBullet2", "welcomeBullet3"] as const).map((key) => (
+                  <li key={key} className="flex gap-3">
+                    <span
+                      className="mt-1.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-primary/15 ring-1 ring-primary/25 dark:bg-primary/20"
+                      aria-hidden
+                    >
+                      <Check className="h-3 w-3 text-primary" strokeWidth={2.8} />
+                    </span>
+                    <span>{t(key)}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <details className="group rounded-xl border border-card-border bg-surface/60 text-left backdrop-blur-sm dark:bg-white/[0.03] [&_summary::-webkit-details-marker]:hidden">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-xl px-4 py-3.5 font-mono text-xs font-semibold uppercase tracking-wide text-foreground hover:bg-primary/[0.04] dark:hover:bg-white/[0.04]">
+                <span>{t("whyNotApiSummary")}</span>
+                <ChevronDown
+                  className="h-4 w-4 shrink-0 text-muted transition-transform duration-200 group-open:rotate-180"
+                  aria-hidden
+                  strokeWidth={2.25}
+                />
+              </summary>
+              <div
+                className="border-t border-card-border px-4 pb-4 pt-3 text-sm leading-relaxed text-muted"
+                id="onboarding-why-not-api-panel"
               >
-                {t("whyNotApiTitle")}
-              </h2>
-              <p className="mt-2 text-violet-100/90">{t("whyNotApiBody")}</p>
-            </section>
-            <p className="text-base leading-relaxed text-violet-100/92 sm:text-lg">{t("welcomeBody")}</p>
-            <p className="rounded-xl border border-amber-400/35 bg-amber-500/[0.12] px-4 py-3 text-sm leading-relaxed text-amber-50 backdrop-blur-sm">
-              <strong className="font-semibold text-amber-100">{t("welcomeNoteStrong")}</strong>
+                <p className="font-semibold text-foreground">{t("whyNotApiTitle")}</p>
+                <p className="mt-2">{t("whyNotApiBody")}</p>
+              </div>
+            </details>
+            <p className="rounded-xl border border-amber-600/28 bg-amber-500/[0.1] px-4 py-3 text-sm leading-relaxed text-amber-950 dark:border-amber-400/35 dark:bg-amber-500/[0.12] dark:text-amber-50">
+              <strong className="font-semibold text-amber-900 dark:text-amber-100">{t("welcomeNoteStrong")}</strong>
               {t("welcomeNoteRest")}
             </p>
             <div className="flex flex-col gap-3 pt-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-start">
@@ -891,7 +990,7 @@ export function DataExportOnboarding({
                 <span>{t("skipForNow")}</span>
               </button>
             </div>
-            <p className="text-xs text-violet-300/85">{t("skipHint")}</p>
+            <p className="text-xs text-muted">{t("skipHint")}</p>
           </div>
         </OnboardingHeroShell>
       )}
@@ -900,7 +999,7 @@ export function DataExportOnboarding({
         <>
           <OnboardingHeroShell>
             <div className="max-w-3xl">
-              <DashboardHeroTitle icon={Music2} variant="hero">
+              <DashboardHeroTitle icon={Music2} variant="onboarding">
                 {t("pickTitle")}
               </DashboardHeroTitle>
               <div className="mt-5">
@@ -910,7 +1009,7 @@ export function DataExportOnboarding({
                   ariaLabel={flowProgressAria}
                 />
               </div>
-              <p className="mt-5 text-base leading-relaxed text-violet-100/90">{t("pickSubtitle")}</p>
+              <p className="mt-5 text-base leading-relaxed text-muted">{t("pickSubtitle")}</p>
             </div>
           </OnboardingHeroShell>
 
@@ -919,25 +1018,66 @@ export function DataExportOnboarding({
               <button
                 type="button"
                 onClick={() => selectProvider("spotify")}
-                className="group flex flex-col items-start rounded-2xl border border-card-border bg-gradient-to-br from-[#1DB954]/14 to-transparent p-6 text-left shadow-card ring-1 ring-[#1DB954]/25 transition-all hover:border-[#1DB954]/55 hover:shadow-brand-glow dark:from-[#1DB954]/18 dark:hover:border-[#1DB954]/50"
+                className="group relative flex flex-col overflow-hidden rounded-2xl border border-card-border bg-surface-raised text-left shadow-card ring-1 ring-black/[0.03] transition-all hover:-translate-y-[1px] hover:border-[#169c46]/45 hover:shadow-brand-glow dark:ring-white/[0.06] dark:hover:border-[#1ed760]/40"
               >
-                <span className="text-lg font-bold text-foreground">{t("pickSpotify")}</span>
-                <span className="mt-1 text-sm text-muted">{t("pickSpotifyHint")}</span>
-                <span className="mt-4 text-sm font-semibold text-[#169c46] group-hover:underline dark:text-[#1ed760]">
-                  {t("continue")} →
-                </span>
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#1DB954]/12 via-transparent to-transparent opacity-95 dark:from-[#1DB954]/16" aria-hidden />
+                <div className="relative flex flex-1 flex-col p-6">
+                  <div className="flex items-start justify-between gap-3">
+                    <span className="rounded-lg border border-border bg-background/65 px-2 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">
+                      {t("pickBadgeSpotify")}
+                    </span>
+                    <span className="relative block shrink-0" aria-hidden>
+                      <Image
+                        src={SPOTIFY_LOGO_SRC}
+                        alt=""
+                        width={44}
+                        height={44}
+                        className="h-11 w-11 rounded-[10px] object-contain shadow-sm ring-1 ring-black/[0.06] dark:ring-white/10"
+                        unoptimized
+                      />
+                    </span>
+                  </div>
+                  <span className="mt-6 text-xl font-bold tracking-tight text-foreground">{t("pickSpotify")}</span>
+                  <span className="mt-2 flex-1 text-sm leading-snug text-muted">{t("pickSpotifyHint")}</span>
+                  <span className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[#169c46] transition-transform group-hover:translate-x-px dark:text-[#1ed760]">
+                    <span>{t("continue")}</span>
+                    <ArrowRight className="h-4 w-4" aria-hidden />
+                  </span>
+                </div>
               </button>
 
               <button
                 type="button"
                 onClick={() => selectProvider("apple")}
-                className="group flex flex-col items-start rounded-2xl border border-card-border bg-gradient-to-br from-accent-violet/10 via-transparent to-accent-cyan/10 p-6 text-left shadow-card ring-1 ring-primary/15 transition-all hover:border-primary/40 hover:shadow-brand-glow"
+                className="group relative flex flex-col overflow-hidden rounded-2xl border border-card-border bg-surface-raised text-left shadow-card ring-1 ring-black/[0.03] transition-all hover:-translate-y-[1px] hover:border-primary/42 hover:shadow-brand-glow dark:ring-white/[0.06]"
               >
-                <span className="text-lg font-bold text-foreground">{t("pickApple")}</span>
-                <span className="mt-1 text-sm text-muted">{t("pickAppleHint")}</span>
-                <span className="mt-4 text-sm font-semibold text-accent-violet group-hover:underline">
-                  {t("continue")} →
-                </span>
+                <div
+                  className="pointer-events-none absolute inset-0 bg-gradient-to-br from-accent-violet/12 via-transparent to-accent-cyan/10 opacity-95"
+                  aria-hidden
+                />
+                <div className="relative flex flex-1 flex-col p-6">
+                  <div className="flex items-start justify-between gap-3">
+                    <span className="rounded-lg border border-border bg-background/65 px-2 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">
+                      {t("pickBadgeApple")}
+                    </span>
+                    <span className="relative block shrink-0" aria-hidden>
+                      <Image
+                        src={APPLE_MUSIC_LOGO_SRC}
+                        alt=""
+                        width={44}
+                        height={44}
+                        className="h-11 w-11 rounded-[10px] object-contain shadow-sm ring-1 ring-black/[0.06] dark:ring-white/10"
+                        unoptimized
+                      />
+                    </span>
+                  </div>
+                  <span className="mt-6 text-xl font-bold tracking-tight text-foreground">{t("pickApple")}</span>
+                  <span className="mt-2 flex-1 text-sm leading-snug text-muted">{t("pickAppleHint")}</span>
+                  <span className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-primary transition-transform group-hover:translate-x-px">
+                    <span>{t("continue")}</span>
+                    <ArrowRight className="h-4 w-4" aria-hidden />
+                  </span>
+                </div>
               </button>
             </div>
 
@@ -961,10 +1101,21 @@ export function DataExportOnboarding({
 
       {phase === "guide" && provider && steps[stepIndex] && (
         <div className={`${surfaceShellClass} space-y-6`}>
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary" aria-live="polite">
-              {t("stepProgress", { current: stepIndex + 1, total: steps.length })}
-            </p>
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+            <div className="space-y-1">
+              <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-primary">
+                {t("guidePhaseLabel")}
+              </p>
+              <span className="sr-only">
+                {t("stepProgress", { current: stepIndex + 1, total: steps.length })}
+              </span>
+            </div>
+            <span className="font-mono text-xs tabular-nums text-muted sm:text-[13px]" aria-live="polite">
+              {t("guideStepCounterLabel", {
+                current: stepIndex + 1,
+                total: steps.length,
+              })}
+            </span>
           </div>
           <OnboardingFlowProgressBar
             percent={flowProgressPercent}
@@ -1034,14 +1185,14 @@ export function DataExportOnboarding({
         >
           {isImporting ? (
             <div
-              className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 rounded-3xl bg-surface-glass px-6 py-8 text-center shadow-inner backdrop-blur-md"
+              className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 rounded-2xl bg-surface-glass px-6 py-8 text-center shadow-inner backdrop-blur-md"
               role="status"
               aria-live="polite"
               aria-busy="true"
             >
               <div className="relative mb-1">
                 <div
-                  className="h-14 w-14 animate-spin rounded-full border-4 border-border border-t-accent-violet"
+                  className="h-14 w-14 animate-spin rounded-full border-4 border-border border-t-primary"
                   aria-hidden
                 />
               </div>
@@ -1057,7 +1208,7 @@ export function DataExportOnboarding({
               </p>
               {importOverlayKind === "file" && importFile ? (
                 <p
-                  className="mt-1 max-w-full truncate px-2 text-xs font-medium text-accent-violet"
+                  className="mt-1 max-w-full truncate px-2 text-xs font-medium text-primary"
                   title={importFile.name}
                 >
                   {importFile.name}
@@ -1067,7 +1218,7 @@ export function DataExportOnboarding({
                 className="mt-4 h-1.5 w-full max-w-[220px] overflow-hidden rounded-full bg-border"
                 aria-hidden
               >
-                <div className="h-full w-1/3 rounded-full bg-accent-violet shadow-glow animate-onboarding-import-indeterminate" />
+                <div className="h-full w-1/3 rounded-full bg-primary shadow-glow animate-onboarding-import-indeterminate" />
               </div>
             </div>
           ) : null}
@@ -1088,8 +1239,8 @@ export function DataExportOnboarding({
           </p>
 
           {provider === "spotify" && hasSpotifyWebConnection ? (
-            <div className="space-y-4 rounded-2xl border border-[#1DB954]/35 bg-[#1DB954]/[0.07] p-5 shadow-inner ring-1 ring-[#1DB954]/20 dark:ring-[#1DB954]/25">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#169c46] dark:text-[#1ed760]">
+            <div className="space-y-4 rounded-2xl border border-card-border bg-surface p-5 shadow-inner ring-1 ring-[#169c46]/35 dark:bg-[#1DB954]/[0.08] dark:ring-[#1ed760]/30">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#047857] dark:text-[#86efac]">
                 {t("import.spotifyWebEyebrow")}
               </p>
               <h3 className="text-lg font-bold tracking-tight text-foreground">
@@ -1173,7 +1324,7 @@ export function DataExportOnboarding({
           />
           <button
             type="button"
-            className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-card-border bg-surface px-4 py-10 text-center text-sm text-foreground transition-colors hover:border-accent-violet/40 hover:bg-accent-violet/5 disabled:pointer-events-none disabled:opacity-50 dark:hover:bg-accent-violet/10"
+            className="group flex w-full flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-card-border bg-gradient-to-b from-surface to-background px-5 py-12 text-center text-sm text-foreground shadow-[inset_0_1px_0_0_rgb(255_255_255_/_0.04)] transition-all hover:border-primary/42 hover:bg-primary/[0.04] hover:shadow-brand-glow/30 disabled:pointer-events-none disabled:opacity-50 dark:from-surface dark:to-surface-raised dark:hover:bg-primary/[0.07]"
             disabled={isImporting}
             onClick={() => fileInputRef.current?.click()}
             onDragOver={(e) => e.preventDefault()}
@@ -1184,12 +1335,18 @@ export function DataExportOnboarding({
               if (f) setImportFile(f);
             }}
           >
-            <span className="font-semibold text-foreground">{t("import.dropTitle")}</span>
-            <span className="text-xs text-muted">
+            <span
+              className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/[0.08] ring-1 ring-primary/[0.2] transition-transform duration-200 group-hover:scale-[1.03] group-hover:ring-primary/35"
+              aria-hidden
+            >
+              <UploadCloud className="h-7 w-7 text-primary" strokeWidth={1.85} />
+            </span>
+            <span className="font-semibold tracking-tight text-foreground">{t("import.dropTitle")}</span>
+            <span className="max-w-xs text-xs leading-relaxed text-muted">
               {provider === "spotify" ? t("import.dropSubSpotify") : t("import.dropSubApple")}
             </span>
             {importFile ? (
-              <span className="mt-1 text-xs font-medium text-accent-violet">
+              <span className="mt-1 text-xs font-medium text-primary">
                 {t("import.selectedFile", { name: importFile.name })}
               </span>
             ) : null}
@@ -1236,10 +1393,10 @@ export function DataExportOnboarding({
           {importSummary ? (
             <OnboardingHeroShell>
               <div className="max-w-3xl space-y-6">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-200/90">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent-emerald">
                   {t("finishSuccessEyebrow")}
                 </p>
-                <DashboardHeroTitle icon={CheckCircle2} variant="hero">
+                <DashboardHeroTitle icon={CheckCircle2} variant="onboarding">
                   {t("finishTitle")}
                 </DashboardHeroTitle>
                 <OnboardingFlowProgressBar
@@ -1254,29 +1411,29 @@ export function DataExportOnboarding({
                   })}
                 </p>
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="rounded-2xl border border-emerald-400/30 bg-emerald-500/[0.12] px-5 py-4 shadow-[inset_0_1px_0_0_rgb(255_255_255_/0.06)] backdrop-blur-sm">
-                    <p className="text-3xl font-bold tabular-nums tracking-tight text-white sm:text-4xl">
+                  <div className="rounded-2xl border border-accent-emerald/30 bg-accent-emerald/[0.1] px-5 py-4 shadow-[inset_0_1px_0_0_rgb(255_255_255_/0.05)] backdrop-blur-sm dark:border-accent-emerald/35 dark:bg-accent-emerald/[0.12]">
+                    <p className="text-3xl font-bold tabular-nums tracking-tight text-foreground sm:text-4xl">
                       {importSummary.imported.toLocaleString()}
                     </p>
-                    <p className="mt-1 text-sm font-medium text-emerald-100/90">{t("finishImportedLabel")}</p>
+                    <p className="mt-1 text-sm font-medium text-accent-emerald">{t("finishImportedLabel")}</p>
                   </div>
-                  <div className="rounded-2xl border border-violet-200/20 bg-slate-950/45 px-5 py-4 shadow-[inset_0_1px_0_0_rgb(255_255_255_/0.05)] backdrop-blur-sm">
-                    <p className="text-3xl font-bold tabular-nums tracking-tight text-violet-50 sm:text-4xl">
+                  <div className="rounded-2xl border border-accent-cyan/30 bg-accent-cyan/[0.08] px-5 py-4 shadow-[inset_0_1px_0_0_rgb(255_255_255_/0.05)] backdrop-blur-sm dark:border-accent-indigo/30 dark:bg-accent-indigo/[0.1]">
+                    <p className="text-3xl font-bold tabular-nums tracking-tight text-foreground sm:text-4xl">
                       {importSummary.skippedDuplicates.toLocaleString()}
                     </p>
-                    <p className="mt-1 text-sm font-medium text-violet-100/85">{t("finishSkippedLabel")}</p>
+                    <p className="mt-1 text-sm font-medium text-accent-indigo">{t("finishSkippedLabel")}</p>
                   </div>
                 </div>
-                <p className="text-base leading-relaxed text-violet-100/90 sm:text-[1.05rem]">{t("finishNextHint")}</p>
+                <p className="text-base leading-relaxed text-muted sm:text-[1.05rem]">{t("finishNextHint")}</p>
               </div>
             </OnboardingHeroShell>
           ) : (
             <OnboardingHeroShell>
               <div className="max-w-3xl space-y-6">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-200/85">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
                   {t("finishSkippedEyebrow")}
                 </p>
-                <DashboardHeroTitle icon={Sparkles} variant="hero">
+                <DashboardHeroTitle icon={Sparkles} variant="onboarding">
                   {t("finishTitle")}
                 </DashboardHeroTitle>
                 <OnboardingFlowProgressBar
@@ -1284,7 +1441,7 @@ export function DataExportOnboarding({
                   variant="hero"
                   ariaLabel={flowProgressAria}
                 />
-                <p className="text-base leading-relaxed text-violet-100/92 sm:text-lg">{t("finishBody")}</p>
+                <p className="text-base leading-relaxed text-muted sm:text-lg">{t("finishBody")}</p>
               </div>
             </OnboardingHeroShell>
           )}
@@ -1301,10 +1458,10 @@ export function DataExportOnboarding({
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div className="flex min-w-0 gap-3 sm:gap-4">
                       <div
-                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,_rgba(139,92,246,0.38),_rgba(34,211,238,0.22))] shadow-[inset_0_1px_0_0_rgb(255_255_255_/0.15)] ring-1 ring-white/15"
+                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/14 shadow-[inset_0_1px_0_0_rgb(255_255_255_/0.12)] ring-1 ring-primary/25 dark:bg-primary/20"
                         aria-hidden
                       >
-                        <Sparkles className="h-5 w-5 text-cyan-50 drop-shadow-[0_0_12px_rgba(34,211,238,0.45)]" />
+                        <Sparkles className="h-5 w-5 text-accent-cyan" />
                       </div>
                       <div className="min-w-0 space-y-2">
                         <h3
@@ -1327,7 +1484,7 @@ export function DataExportOnboarding({
                       {t("genreLlmConsent.missingKey")}
                     </div>
                   ) : (
-                    <div className="rounded-xl border border-white/12 bg-black/[0.18] px-4 py-3 text-xs leading-relaxed text-violet-100/85 shadow-[inset_0_1px_0_0_rgb(255_255_255_/0.06)]">
+                    <div className="rounded-xl border border-card-border bg-surface px-4 py-3 text-xs leading-relaxed text-muted shadow-inner dark:bg-surface-raised/80">
                       {t("genreLlmConsent.privacy")}
                     </div>
                   )}
@@ -1376,20 +1533,20 @@ export function DataExportOnboarding({
                 <div className="space-y-5">
                   <div className="flex gap-3 sm:gap-4">
                     <div
-                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,_rgba(139,92,246,0.38),_rgba(34,211,238,0.22))] shadow-[inset_0_1px_0_0_rgb(255_255_255_/0.15)] ring-1 ring-white/15"
+                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/14 shadow-[inset_0_1px_0_0_rgb(255_255_255_/0.08)] ring-1 ring-primary/25 dark:bg-primary/20"
                       aria-hidden
                     >
                       {hasBackfillInProgress ? (
-                        <Loader2 className="h-5 w-5 animate-spin text-cyan-50" />
+                        <Loader2 className="h-5 w-5 animate-spin text-primary" />
                       ) : (
-                        <Sparkles className="h-5 w-5 text-cyan-50 drop-shadow-[0_0_12px_rgba(34,211,238,0.45)]" />
+                        <Sparkles className="h-5 w-5 text-accent-cyan" />
                       )}
                     </div>
                     <div className="min-w-0 flex-1 space-y-2">
                       <p className="text-base font-semibold leading-snug text-foreground sm:text-[1.05rem]">
                         {t("genreBackfill.title")}
                       </p>
-                      <p className="text-xs leading-relaxed text-violet-100/85 sm:text-sm">
+                      <p className="text-xs leading-relaxed text-muted sm:text-sm">
                         {hasBackfillInProgress
                           ? effectiveBackfill.status === "paused"
                             ? t("genreBackfill.paused")
@@ -1402,30 +1559,30 @@ export function DataExportOnboarding({
                       </p>
                     </div>
                   </div>
-                  <div className="h-2 w-full overflow-hidden rounded-full bg-white/[0.1] ring-1 ring-inset ring-white/[0.06]">
+                  <div className="h-2 w-full overflow-hidden rounded-full bg-muted/25 ring-1 ring-inset ring-border dark:bg-white/[0.08] dark:ring-white/[0.06]">
                     <div
-                      className={`h-full rounded-full ${ONBOARDING_RAIL_CLASS} shadow-[0_0_18px_rgba(139,92,246,0.35)] transition-[width] duration-500 ease-out`}
+                      className={`h-full rounded-full ${ONBOARDING_RAIL_CLASS} shadow-glow transition-[width] duration-500 ease-out`}
                       style={{ width: `${Math.round(backfillProgressRatio * 100)}%` }}
                     />
                   </div>
                   <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="rounded-xl border border-emerald-400/25 bg-emerald-500/[0.09] px-4 py-3 shadow-[inset_0_1px_0_0_rgb(255_255_255_/0.06)]">
-                      <p className="text-xs font-medium text-emerald-100/90">
+                    <div className="rounded-xl border border-accent-emerald/28 bg-accent-emerald/[0.08] px-4 py-3 shadow-inner dark:bg-accent-emerald/[0.11]">
+                      <p className="text-xs font-medium text-accent-emerald">
                         {t("genreBackfill.artistsProcessed", { count: effectiveBackfill.artistsProcessed })}
                       </p>
                     </div>
-                    <div className="rounded-xl border border-violet-300/25 bg-violet-500/[0.08] px-4 py-3 shadow-[inset_0_1px_0_0_rgb(255_255_255_/0.06)]">
-                      <p className="text-xs font-medium text-violet-100/90">
+                    <div className="rounded-xl border border-primary/28 bg-primary/[0.08] px-4 py-3 shadow-inner dark:bg-primary/[0.12]">
+                      <p className="text-xs font-medium text-primary">
                         {t("genreBackfill.artistsMapped", { count: effectiveBackfill.artistsMapped })}
                       </p>
                     </div>
-                    <div className="rounded-xl border border-cyan-400/25 bg-cyan-500/[0.08] px-4 py-3 shadow-[inset_0_1px_0_0_rgb(255_255_255_/0.06)]">
-                      <p className="text-xs font-medium text-cyan-100/90">
+                    <div className="rounded-xl border border-accent-cyan/28 bg-accent-cyan/[0.07] px-4 py-3 shadow-inner dark:bg-accent-cyan/[0.1]">
+                      <p className="text-xs font-medium text-accent-cyan">
                         {t("genreBackfill.tracksUpdated", { count: effectiveBackfill.tracksUpdated })}
                       </p>
                     </div>
-                    <div className="rounded-xl border border-white/15 bg-black/[0.15] px-4 py-3 shadow-[inset_0_1px_0_0_rgb(255_255_255_/0.06)]">
-                      <p className="text-xs font-medium text-violet-100/85">
+                    <div className="rounded-xl border border-border bg-muted/12 px-4 py-3 shadow-inner dark:bg-white/[0.04]">
+                      <p className="text-xs font-medium text-muted">
                         {t("genreBackfill.requestsUsed", { count: effectiveBackfill.apiRequestsUsed })}
                       </p>
                     </div>
@@ -1441,13 +1598,13 @@ export function DataExportOnboarding({
                     </p>
                   ) : null}
                   {effectiveBackfill.errorMessage ? (
-                    <p className="rounded-xl border border-red-400/35 bg-red-500/[0.12] px-4 py-3 text-xs leading-relaxed text-red-100">
+                    <p className="rounded-xl border border-accent-rose/40 bg-accent-rose/[0.1] px-4 py-3 text-xs leading-relaxed text-foreground dark:bg-accent-rose/[0.12] dark:text-foreground">
                       {t("genreBackfill.error", { message: effectiveBackfill.errorMessage })}
                     </p>
                   ) : null}
                   {shouldOfferNextLlmSession || shouldOfferRetryLlmSession ? (
-                    <div className="space-y-3 rounded-xl border border-violet-300/25 bg-black/[0.2] p-4 shadow-inner ring-1 ring-white/[0.04]">
-                      <p className="text-sm leading-relaxed text-violet-50/95">
+                    <div className="space-y-3 rounded-xl border border-card-border bg-surface px-4 py-4 shadow-inner ring-1 ring-primary/10 dark:bg-surface-raised/60">
+                      <p className="text-sm leading-relaxed text-muted">
                         {shouldOfferRetryLlmSession
                           ? t("genreLlmConsent.nextSessionAfterError")
                           : t("genreLlmConsent.nextSessionPrompt", {
@@ -1512,7 +1669,7 @@ export function DataExportOnboarding({
                 onClick={() => void completeOnboarding("/dashboard/genres/palette")}
                 disabled={isSubmitting}
               >
-                <Palette className="h-4 w-4 shrink-0 text-accent-violet opacity-90" aria-hidden />
+                <Palette className="h-4 w-4 shrink-0 text-primary opacity-90" aria-hidden />
                 <span>
                   {t("finishPaletteCta", { count: paletteInvitation.unknownArtists })}
                 </span>

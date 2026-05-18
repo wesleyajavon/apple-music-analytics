@@ -8,6 +8,9 @@ import {
 import { handleApiError } from "@/lib/utils/error-handler";
 import { getArtistUserInsights, type ArtistUserInsights } from "@/lib/services/artist/artist-service";
 import type { ArtistUserInsightsDto } from "@/lib/dto/artist";
+import { getPublicProfileUserId } from "@/lib/constants/public-profile";
+import { publicDemoJsonResponse } from "@/lib/http/public-demo-response";
+import { getPublicProfileArtistUserInsightsCached } from "@/lib/services/artist/public-artist-insights-cached";
 
 export const dynamic = "force-dynamic";
 
@@ -52,12 +55,18 @@ export async function GET(
     }
     const { userId } = resolved;
 
-    const insights = await getArtistUserInsights(
-      artistId,
-      startDate,
-      endDate,
-      userId
-    );
+    const publicProfileId = getPublicProfileUserId();
+    const isPublicDemoDataset =
+      publicProfileId !== null && userId === publicProfileId;
+
+    const insights: ArtistUserInsights | null = isPublicDemoDataset
+      ? await getPublicProfileArtistUserInsightsCached(
+          userId,
+          artistId,
+          startDate,
+          endDate
+        )
+      : await getArtistUserInsights(artistId, startDate, endDate, userId);
 
     if (!insights) {
       return NextResponse.json(
@@ -66,7 +75,7 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(toDto(insights));
+    return publicDemoJsonResponse(toDto(insights), isPublicDemoDataset);
   } catch (error) {
     return handleApiError(error, { route: "/api/artists/[artistId]/insights" });
   }

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { getTemporalAnalysis } from "@/lib/services/listening/temporal-analysis";
 import { handleApiError } from "@/lib/utils/error-handler";
 import {
@@ -10,7 +10,10 @@ import {
   forbiddenResponse,
   unauthorizedResponse,
 } from "@/lib/auth/require-auth-user-id";
-import { assertRateLimit } from "@/lib/security/rate-limit";
+import { assertAnalyticsRateLimit } from "@/lib/security/analytics-rate-limit";
+import { getPublicProfileUserId } from "@/lib/constants/public-profile";
+import { publicDemoJsonResponse } from "@/lib/http/public-demo-response";
+import { getPublicProfileTemporalAnalysisCached } from "@/lib/services/listening/public-temporal-analysis-cached";
 
 // Force dynamic rendering since we use request.url
 export const dynamic = "force-dynamic";
@@ -100,6 +103,39 @@ const TEMPORAL_ANALYSIS_RATE_LIMIT = {
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
+function mapTemporalToDto(result: Awaited<ReturnType<typeof getTemporalAnalysis>>): TemporalAnalysisDto {
+  return {
+    byDayOfWeek: result.byDayOfWeek.map((day) => ({
+      dayOfWeek: day.dayOfWeek,
+      listens: day.listens,
+      uniqueTracks: day.uniqueTracks,
+      uniqueArtists: day.uniqueArtists,
+    })),
+    byHourOfDay: result.byHourOfDay.map((hour) => ({
+      hour: hour.hour,
+      listens: hour.listens,
+      uniqueTracks: hour.uniqueTracks,
+      uniqueArtists: hour.uniqueArtists,
+    })),
+    peakDay: result.peakDay
+      ? {
+          dayOfWeek: result.peakDay.dayOfWeek,
+          listens: result.peakDay.listens,
+          uniqueTracks: result.peakDay.uniqueTracks,
+          uniqueArtists: result.peakDay.uniqueArtists,
+        }
+      : null,
+    peakHour: result.peakHour
+      ? {
+          hour: result.peakHour.hour,
+          listens: result.peakHour.listens,
+          uniqueTracks: result.peakHour.uniqueTracks,
+          uniqueArtists: result.peakHour.uniqueArtists,
+        }
+      : null,
+  };
+}
+
 export async function GET(request: NextRequest) {
   try {
     // Pour l'analyse temporelle, on utilise toutes les données si aucune date n'est fournie
@@ -110,46 +146,19 @@ export async function GET(request: NextRequest) {
       return resolved.status === 403 ? forbiddenResponse() : unauthorizedResponse();
     }
     const { userId } = resolved;
-    await assertRateLimit(request, {
-      ...TEMPORAL_ANALYSIS_RATE_LIMIT,
-      userId,
-    });
+    await assertAnalyticsRateLimit(request, TEMPORAL_ANALYSIS_RATE_LIMIT, userId);
 
-    const result = await getTemporalAnalysis(startDate, endDate, userId);
+    const publicProfileId = getPublicProfileUserId();
+    const isPublicDemoDataset =
+      publicProfileId !== null && userId === publicProfileId;
 
-    // Mapper les résultats du service vers les DTOs
-    const dto: TemporalAnalysisDto = {
-      byDayOfWeek: result.byDayOfWeek.map((day) => ({
-        dayOfWeek: day.dayOfWeek,
-        listens: day.listens,
-        uniqueTracks: day.uniqueTracks,
-        uniqueArtists: day.uniqueArtists,
-      })),
-      byHourOfDay: result.byHourOfDay.map((hour) => ({
-        hour: hour.hour,
-        listens: hour.listens,
-        uniqueTracks: hour.uniqueTracks,
-        uniqueArtists: hour.uniqueArtists,
-      })),
-      peakDay: result.peakDay
-        ? {
-            dayOfWeek: result.peakDay.dayOfWeek,
-            listens: result.peakDay.listens,
-            uniqueTracks: result.peakDay.uniqueTracks,
-            uniqueArtists: result.peakDay.uniqueArtists,
-          }
-        : null,
-      peakHour: result.peakHour
-        ? {
-            hour: result.peakHour.hour,
-            listens: result.peakHour.listens,
-            uniqueTracks: result.peakHour.uniqueTracks,
-            uniqueArtists: result.peakHour.uniqueArtists,
-          }
-        : null,
-    };
+    const dto: TemporalAnalysisDto = isPublicDemoDataset
+      ? await getPublicProfileTemporalAnalysisCached(userId, startDate, endDate)
+      : mapTemporalToDto(
+          await getTemporalAnalysis(startDate, endDate, userId)
+        );
 
-    return NextResponse.json(dto);
+    return publicDemoJsonResponse(dto, isPublicDemoDataset);
   } catch (error) {
     return handleApiError(error, { route: "/api/temporal-analysis" });
   }

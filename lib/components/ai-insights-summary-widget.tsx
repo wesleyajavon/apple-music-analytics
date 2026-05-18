@@ -16,6 +16,9 @@ import {
   OVERVIEW_STARTUP_HEADER_LINK_CLASS,
   OVERVIEW_STARTUP_INNER_PANEL_CLASS,
   OVERVIEW_STARTUP_SURFACE_BASE,
+  OVERVIEW_STARTUP_WIDGET_HEADER_BORDER_CLASS,
+  OVERVIEW_STARTUP_WIDGET_SUBTITLE_CLASS,
+  OVERVIEW_STARTUP_WIDGET_TITLE_CLASS,
   OverviewStartupSurfaceBg,
 } from "@/lib/components/overview-startup-surface";
 
@@ -50,13 +53,13 @@ export function AiInsightsSummaryWidget() {
     return (
       <div className={`${OVERVIEW_STARTUP_SURFACE_BASE} flex min-h-[280px] flex-col animate-fade-in-up`}>
         <OverviewStartupSurfaceBg />
-        <div className="relative border-b border-white/10 px-6 py-5 sm:px-8">
+        <div className={`relative ${OVERVIEW_STARTUP_WIDGET_HEADER_BORDER_CLASS} px-6 py-5 sm:px-8`}>
           <div className={OVERVIEW_STARTUP_EYEBROW_PILL_CLASS}>
             <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_16px_rgb(22_199_132_/0.75)]" />
             {t("heroEyebrow")}
           </div>
-          <h2 className="text-3xl font-semibold tracking-[-0.05em] text-white sm:text-4xl">{t("title")}</h2>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-300 sm:text-base">{t("subtitleShort")}</p>
+          <h2 className={OVERVIEW_STARTUP_WIDGET_TITLE_CLASS}>{t("title")}</h2>
+          <p className={OVERVIEW_STARTUP_WIDGET_SUBTITLE_CLASS}>{t("subtitleShort")}</p>
         </div>
         <div className="relative flex-1 p-6 sm:p-8">
           <div className={OVERVIEW_STARTUP_INNER_PANEL_CLASS}>
@@ -75,36 +78,38 @@ export function AiInsightsSummaryWidget() {
         aria-label={t("loading")}
       >
         <OverviewStartupSurfaceBg />
-        <div className="relative border-b border-white/10 px-6 py-5 sm:px-8">
+        <div className={`relative ${OVERVIEW_STARTUP_WIDGET_HEADER_BORDER_CLASS} px-6 py-5 sm:px-8`}>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0 flex-1 space-y-3">
-              <div className="h-6 w-40 rounded-full bg-white/10 animate-shimmer" />
-              <div className="h-8 w-3/4 max-w-sm rounded-lg bg-white/10 animate-shimmer" />
-              <div className="h-4 w-2/3 max-w-md rounded-lg bg-white/10 animate-shimmer" />
+              <div className="h-6 w-40 rounded-full bg-slate-200/80 animate-shimmer dark:bg-[#1a1d2a]" />
+              <div className="h-8 w-3/4 max-w-sm rounded-lg bg-slate-200/80 animate-shimmer dark:bg-[#1a1d2a]" />
+              <div className="h-4 w-2/3 max-w-md rounded-lg bg-slate-200/80 animate-shimmer dark:bg-[#1a1d2a]" />
             </div>
-            <div className="h-11 w-28 shrink-0 rounded-2xl bg-white/10 animate-shimmer sm:self-start" />
+            <div className="h-11 w-28 shrink-0 rounded-2xl bg-slate-200/80 animate-shimmer dark:bg-[#1a1d2a] sm:self-start" />
           </div>
         </div>
         <div className="relative flex-1 space-y-3 p-6 sm:p-8">
-          <p className="text-xs font-medium uppercase tracking-wider text-slate-400">{t("loading")}</p>
+          <p className="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            {t("loading")}
+          </p>
           <div className={OVERVIEW_STARTUP_INNER_PANEL_CLASS}>
             <div className="space-y-3">
               {[0, 1, 2].map((i) => (
                 <div
                   key={i}
-                  className="flex gap-3 rounded-xl border border-white/10 border-l-4 border-l-white/25 bg-white/[0.06] p-3"
+                  className="flex gap-3 rounded-xl border border-slate-200/80 border-l-4 border-l-slate-300/80 bg-slate-100/50 p-3 dark:border-white/[0.06] dark:border-l-white/20 dark:bg-[#0f111a]"
                 >
                   <div
-                    className="h-6 w-6 shrink-0 rounded-md bg-white/10 animate-shimmer"
+                    className="h-6 w-6 shrink-0 rounded-md bg-slate-200/80 animate-shimmer dark:bg-[#252836]"
                     style={{ animationDelay: `${i * 0.15}s` }}
                   />
                   <div className="min-w-0 flex-1 space-y-2">
                     <div
-                      className="h-3.5 w-full rounded bg-white/10 animate-shimmer"
+                      className="h-3.5 w-full rounded bg-slate-200/80 animate-shimmer dark:bg-[#252836]"
                       style={{ animationDelay: `${i * 0.15}s` }}
                     />
                     <div
-                      className="h-3.5 w-4/5 rounded bg-white/10 animate-shimmer"
+                      className="h-3.5 w-4/5 rounded bg-slate-200/80 animate-shimmer dark:bg-[#252836]"
                       style={{ animationDelay: `${i * 0.15}s` }}
                     />
                   </div>
@@ -122,13 +127,13 @@ export function AiInsightsSummaryWidget() {
       return (
         <div className={`${OVERVIEW_STARTUP_SURFACE_BASE} flex min-h-[280px] flex-col animate-fade-in-up`}>
           <OverviewStartupSurfaceBg />
-          <div className="relative border-b border-white/10 px-6 py-5 sm:px-8">
+          <div className={`relative ${OVERVIEW_STARTUP_WIDGET_HEADER_BORDER_CLASS} px-6 py-5 sm:px-8`}>
             <div className={OVERVIEW_STARTUP_EYEBROW_PILL_CLASS}>
               <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_16px_rgb(22_199_132_/0.75)]" />
               {t("heroEyebrow")}
             </div>
-            <h2 className="text-3xl font-semibold tracking-[-0.05em] text-white sm:text-4xl">{t("title")}</h2>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-300 sm:text-base">{t("subtitleShort")}</p>
+            <h2 className={OVERVIEW_STARTUP_WIDGET_TITLE_CLASS}>{t("title")}</h2>
+            <p className={OVERVIEW_STARTUP_WIDGET_SUBTITLE_CLASS}>{t("subtitleShort")}</p>
           </div>
           <div className="relative flex-1 p-6 sm:p-8">
             <div className={OVERVIEW_STARTUP_INNER_PANEL_CLASS}>
@@ -171,23 +176,23 @@ export function AiInsightsSummaryWidget() {
 
   const previewInsights = data.insights.slice(0, PREVIEW_INSIGHTS_COUNT);
   const INSIGHT_ACCENTS = [
-    "border-l-cyan-300/80",
-    "border-l-violet-300/80",
-    "border-l-emerald-300/80",
+    "border-l-cyan-600/85 dark:border-l-cyan-300/80",
+    "border-l-violet-600/85 dark:border-l-violet-300/80",
+    "border-l-emerald-600/85 dark:border-l-emerald-300/80",
   ] as const;
 
   return (
     <div className={`${OVERVIEW_STARTUP_SURFACE_BASE} flex min-h-[280px] flex-col animate-fade-in-up`}>
       <OverviewStartupSurfaceBg />
-      <div className="relative border-b border-white/10 px-6 py-5 sm:px-8">
+      <div className={`relative ${OVERVIEW_STARTUP_WIDGET_HEADER_BORDER_CLASS} px-6 py-5 sm:px-8`}>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
             <div className={OVERVIEW_STARTUP_EYEBROW_PILL_CLASS}>
               <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_16px_rgb(22_199_132_/0.75)]" />
               {t("heroEyebrow")}
             </div>
-            <h2 className="text-3xl font-semibold tracking-[-0.05em] text-white sm:text-4xl">{t("title")}</h2>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-300 sm:text-base">{t("subtitleShort")}</p>
+            <h2 className={OVERVIEW_STARTUP_WIDGET_TITLE_CLASS}>{t("title")}</h2>
+            <p className={OVERVIEW_STARTUP_WIDGET_SUBTITLE_CLASS}>{t("subtitleShort")}</p>
           </div>
           <Link href={seeMoreHref} className={OVERVIEW_STARTUP_HEADER_LINK_CLASS}>
             {t("seeMore")}
@@ -203,19 +208,21 @@ export function AiInsightsSummaryWidget() {
             {previewInsights.map((insight, index) => (
               <div
                 key={index}
-                className={`flex gap-3 rounded-xl border border-white/10 border-l-4 bg-white/[0.06] p-3 backdrop-blur ${INSIGHT_ACCENTS[index % INSIGHT_ACCENTS.length]}`}
+                className={`flex gap-3 rounded-xl border border-slate-200/90 bg-white p-3 shadow-sm backdrop-blur dark:border-white/[0.06] dark:bg-[#0f111a] dark:shadow-none ${INSIGHT_ACCENTS[index % INSIGHT_ACCENTS.length]}`}
               >
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/10 text-xs font-semibold text-cyan-100">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-slate-100 text-xs font-semibold text-slate-800 dark:border-white/[0.08] dark:bg-[#1a1d2a] dark:text-cyan-100">
                   {index + 1}
                 </span>
-                <span className="min-w-0 flex-1 text-sm leading-relaxed text-slate-200">{insight}</span>
+                <span className="min-w-0 flex-1 text-sm leading-relaxed text-slate-700 dark:text-slate-200">
+                  {insight}
+                </span>
               </div>
             ))}
           </div>
         </div>
         {data.cached ? (
-          <p className="flex items-center gap-1.5 text-xs text-slate-400">
-            <span className="inline-block h-1.5 w-1.5 rounded-full bg-cyan-300/70" aria-hidden />
+          <p className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-cyan-500/80 dark:bg-cyan-300/70" aria-hidden />
             {t("cached")}
           </p>
         ) : null}

@@ -25,7 +25,7 @@ function getSystemTheme(): ResolvedTheme {
 }
 
 function getStoredTheme(): Theme {
-  if (typeof window === "undefined") return "system";
+  if (typeof window === "undefined") return "dark";
   const stored = localStorage.getItem(STORAGE_KEY);
   if (VALID_THEMES.includes(stored as Theme)) {
     return stored as Theme;
@@ -33,7 +33,7 @@ function getStoredTheme(): Theme {
   // Migration: anciens thèmes colorés → light/dark
   if (stored?.startsWith("dark")) return "dark";
   if (stored?.startsWith("light")) return "light";
-  return "system";
+  return "dark";
 }
 
 function resolveTheme(theme: Theme): ResolvedTheme {
@@ -50,8 +50,8 @@ interface ThemeContextValue {
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("system");
-  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>("light");
+  const [theme, setThemeState] = useState<Theme>("dark");
+  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>("dark");
   const [mounted, setMounted] = useState(false);
 
   const setTheme = useCallback((newTheme: Theme) => {

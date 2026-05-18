@@ -1844,9 +1844,12 @@
   "home": {
     "title": "Soundprint-AI",
     "heroEyebrow": "Public demo available",
-    "heroGradient": "Designed like a product OS for your taste.",
-    "welcome": "Your listening, clearly explained.",
+    "heroGradient": "real insights.",
+    "welcome": "Turn your streaming history into",
     "welcomePersonal": "Welcome back, {name}",
+    "supportedStreamingCaption": "Works with",
+    "spotifyLogoAlt": "Spotify",
+    "appleMusicLogoAlt": "Apple Music",
     "subtitle": "See your music taste evolution, hidden patterns, and stats Apple/Spotify don't show you.",
     "goToDashboard": "Go to your dashboard",
     "accessDashboard": "Explore a public dashboard demo",
@@ -1854,20 +1857,6 @@
       "product": "Product",
       "insights": "Insights",
       "demo": "Demo"
-    },
-    "stats": {
-      "imports": {
-        "value": "10y+",
-        "label": "History"
-      },
-      "signals": {
-        "value": "40+",
-        "label": "Signals"
-      },
-      "ai": {
-        "value": "AI",
-        "label": "Narratives"
-      }
     },
     "productPreview": {
       "label": "Soundprint cockpit",

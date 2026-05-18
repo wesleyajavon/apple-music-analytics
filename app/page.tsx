@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SoundprintLogo } from "@/lib/components/soundprint-logo";
+import { StreamingProviderLogos } from "@/lib/components/streaming-provider-logos";
 import { DEFAULT_PUBLIC_PROFILE_USER_ID } from "@/lib/constants/public-profile";
 
 export default function Home() {
@@ -22,11 +23,17 @@ export default function Home() {
           priority
         />
         <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-4 tracking-tight">
-          Your listening, clearly explained.
+          Turn your streaming history into real insights.
         </h1>
-        <p className="text-muted text-lg mb-10 max-w-md">
+        <p className="text-muted text-lg mb-6 max-w-md">
           See your music taste evolution, hidden patterns, and stats Apple/Spotify don&apos;t show you.
         </p>
+        <StreamingProviderLogos
+          caption="Works with"
+          spotifyLogoAlt="Spotify"
+          appleMusicLogoAlt="Apple Music"
+          className="mb-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-5"
+        />
         <Link
           href={`/dashboard/overview?userId=${DEFAULT_PUBLIC_PROFILE_USER_ID}`}
           className="group inline-flex items-center gap-2 px-8 py-4 bg-brand-gradient text-white font-semibold rounded-xl shadow-brand-glow transition-all duration-200 hover:scale-[1.02] hover:opacity-95 active:scale-[0.98]"

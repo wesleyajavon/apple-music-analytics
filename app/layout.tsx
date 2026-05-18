@@ -38,8 +38,20 @@ export default async function RootLayout({
               (function() {
                 var stored = localStorage.getItem('apple-music-analytics-theme');
                 var systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                var isDark = stored === 'dark' || (stored && stored.indexOf('dark') === 0) ||
-                  ((!stored || stored === 'system' || (stored !== 'light' && stored.indexOf('light') !== 0)) && systemDark);
+                var isDark;
+                if (!stored) {
+                  isDark = true;
+                } else if (stored === 'light') {
+                  isDark = false;
+                } else if (stored === 'system') {
+                  isDark = systemDark;
+                } else if (stored === 'dark' || stored.indexOf('dark') === 0) {
+                  isDark = true;
+                } else if (stored.indexOf('light') === 0) {
+                  isDark = false;
+                } else {
+                  isDark = true;
+                }
                 document.documentElement.classList.toggle('dark', isDark);
               })();
             `,

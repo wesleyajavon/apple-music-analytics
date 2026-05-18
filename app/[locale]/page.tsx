@@ -9,6 +9,7 @@ import { Footer } from "@/lib/components/footer";
 import { SoundprintLogo } from "@/lib/components/soundprint-logo";
 import { ThemeSwitcher } from "@/lib/components/theme-switcher";
 import { DemoTerminalHero } from "@/lib/components/demo-terminal-hero";
+import { StreamingProviderLogos } from "@/lib/components/streaming-provider-logos";
 import { DEFAULT_PUBLIC_PROFILE_USER_ID } from "@/lib/constants/public-profile";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
@@ -110,12 +111,6 @@ export default function Home() {
       reverse: true,
     },
   ] as const;
-
-  const stats = [
-    { value: t("stats.imports.value"), label: t("stats.imports.label") },
-    { value: t("stats.signals.value"), label: t("stats.signals.label") },
-    { value: t("stats.ai.value"), label: t("stats.ai.label") },
-  ];
 
   const featureCards = [
     {
@@ -222,15 +217,24 @@ export default function Home() {
               <ArrowRightIcon className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
             </Link>
 
-            <h1 className="max-w-4xl text-balance text-5xl font-semibold tracking-[-0.06em] text-foreground sm:text-6xl lg:text-7xl">
+            <h1 className="max-w-4xl overflow-visible text-balance text-5xl font-semibold leading-snug tracking-[-0.06em] text-foreground sm:text-6xl lg:text-7xl lg:leading-[1.12]">
               {welcomeMessage}
-              <span className="block bg-brand-gradient bg-clip-text text-transparent">
-                {t("heroGradient")}
-              </span>
+              {!firstName ? (
+                <span className="mt-1 block bg-brand-gradient bg-clip-text pb-1.5 leading-normal text-transparent sm:pb-2">
+                  {t("heroGradient")}
+                </span>
+              ) : null}
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-muted sm:text-xl">
               {t("subtitle")}
             </p>
+
+            <StreamingProviderLogos
+              caption={t("supportedStreamingCaption")}
+              spotifyLogoAlt={t("spotifyLogoAlt")}
+              appleMusicLogoAlt={t("appleMusicLogoAlt")}
+              className="mt-5"
+            />
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               {isAuthenticated ? (
@@ -264,22 +268,6 @@ export default function Home() {
               >
                 {t("accessDashboard")}
               </Link>
-            </div>
-
-            <div className="mt-10 grid max-w-2xl grid-cols-3 gap-3">
-              {stats.map((stat) => (
-                <div
-                  key={stat.label}
-                  className="rounded-2xl border border-card-border bg-card-surface p-4 shadow-card backdrop-blur"
-                >
-                  <p className="text-2xl font-semibold tracking-tight text-foreground">
-                    {stat.value}
-                  </p>
-                  <p className="mt-1 text-xs font-medium uppercase tracking-[0.18em] text-muted">
-                    {stat.label}
-                  </p>
-                </div>
-              ))}
             </div>
           </div>
 

@@ -1856,7 +1856,8 @@
     "nav": {
       "product": "Product",
       "insights": "Insights",
-      "demo": "Demo"
+      "demo": "Demo",
+      "aiChat": "AI Chat"
     },
     "productPreview": {
       "label": "Soundprint cockpit",
@@ -1908,6 +1909,31 @@
     "demoHighlightsSection": {
       "eyebrow": "Recorded product tours",
       "title": "See the dashboard moving, not just mocked up."
+    },
+    "soundprintAiChatDemo": {
+      "sectionEyebrow": "Soundprint Chat",
+      "sectionTitle": "Ask your archive out loud—instant, tool-backed replies.",
+      "sectionSubtitle": "Dig into tops and streaks, stack one era against another, or narrate late-night moods. The assistant only answers from analytics built on your imports—never made-up listens.",
+      "heroEyebrow": "Recorded walkthrough · AI chat",
+      "heroSubtitle": "Same spotlight layout as our hero demo—you see presets, transcripts, and how answers cite your data.",
+      "heroBadge": "AI demo",
+      "videoLabel": "Soundprint Chat AI assistant demo recording",
+      "cta": "Open Soundprint Chat (public demo)",
+      "ctaSignedIn": "Open your Soundprint Chat",
+      "features": {
+        "compareEras": {
+          "label": "Compare chapters",
+          "supporting": "YEAR VS YEAR · VOLUME CURVES · TASTE SHIFT STORIES"
+        },
+        "plainLanguage": {
+          "label": "Talk like a fan",
+          "supporting": "ARTIST DEEP DIVES · GENRE SHARES · FREE TEXT WHEN SIGNED IN"
+        },
+        "groundedAnswers": {
+          "label": "Answers you can trace",
+          "supporting": "READ-ONLY TOOLS · DASH FILTERS RESPECTED · NO PLAYLIST HACKS"
+        }
+      }
     },
     "closingCta": {
       "eyebrow": "Start with your soundprint",

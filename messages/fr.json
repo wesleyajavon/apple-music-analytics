@@ -1856,7 +1856,8 @@
     "nav": {
       "product": "Produit",
       "insights": "Insights",
-      "demo": "Démo"
+      "demo": "Démo",
+      "aiChat": "Chat IA"
     },
     "productPreview": {
       "label": "Cockpit Soundprint",
@@ -1908,6 +1909,31 @@
     "demoHighlightsSection": {
       "eyebrow": "Tours produit enregistrés",
       "title": "Voyez le dashboard en mouvement, pas seulement en maquette."
+    },
+    "soundprintAiChatDemo": {
+      "sectionEyebrow": "Soundprint Chat",
+      "sectionTitle": "Posez des questions à votre archive — réponses sourcées, tout de suite.",
+      "sectionSubtitle": "Creuser tops et séries, confronter deux époques ou raconter vos nuits tardives : l’agent s’appuie uniquement sur vos analytics issue des imports — jamais d’écoute inventée.",
+      "heroEyebrow": "Parcours enregistré · chat IA",
+      "heroSubtitle": "Même mise en avant que la grande démo : presets, transcripts et citations autour de vos données.",
+      "heroBadge": "Démo IA",
+      "videoLabel": "Enregistrement de démo Soundprint Chat",
+      "cta": "Ouvrir Soundprint Chat (démo publique)",
+      "ctaSignedIn": "Ouvrir votre Soundprint Chat",
+      "features": {
+        "compareEras": {
+          "label": "Comparer des chapitres",
+          "supporting": "ANNÉE VS ANNÉE · VOLUMES · RÉCITS DE CHANGEMENTS DE GOÛT"
+        },
+        "plainLanguage": {
+          "label": "Comme avec un ami",
+          "supporting": "DEEP DIVES ARTISTE · GENRES · TEXTE LIBRE CONNECTÉ"
+        },
+        "groundedAnswers": {
+          "label": "Des réponses traçables",
+          "supporting": "LECTURE SEULE · FILTRES DASHBOARD · PAS DE HACK PLAYLIST"
+        }
+      }
     },
     "closingCta": {
       "eyebrow": "Commencez avec votre soundprint",

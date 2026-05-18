@@ -136,6 +136,17 @@ export default function Home() {
     t("workflow.share"),
   ];
 
+  const soundprintAiChatFeatures = useMemo(
+    () =>
+      (
+        ["compareEras", "plainLanguage", "groundedAnswers"] as const
+      ).map((key) => ({
+        label: t(`soundprintAiChatDemo.features.${key}.label`),
+        supportingText: t(`soundprintAiChatDemo.features.${key}.supporting`),
+      })),
+    [t],
+  );
+
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       <main className="relative flex flex-1 flex-col overflow-hidden bg-app-shell">
@@ -186,6 +197,12 @@ export default function Home() {
               </a>
               <a href="#demo" className="transition-colors hover:text-foreground">
                 {t("nav.demo")}
+              </a>
+              <a
+                href="#soundprint-ai-chat"
+                className="transition-colors hover:text-foreground"
+              >
+                {t("nav.aiChat")}
               </a>
             </div>
 
@@ -448,6 +465,51 @@ export default function Home() {
                 </div>
               </section>
             ))}
+          </div>
+        </section>
+
+        <section
+          id="soundprint-ai-chat"
+          className="mx-auto w-full max-w-7xl px-4 pb-20 sm:px-6 lg:px-8"
+        >
+          <div className="mb-10 text-center lg:mb-12">
+            <p className="font-mono text-xs font-semibold uppercase tracking-[0.28em] text-primary">
+              {t("soundprintAiChatDemo.sectionEyebrow")}
+            </p>
+            <h2 className="mx-auto mt-3 max-w-4xl text-3xl font-semibold tracking-[-0.04em] text-foreground sm:text-5xl">
+              {t("soundprintAiChatDemo.sectionTitle")}
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-muted sm:text-lg">
+              {t("soundprintAiChatDemo.sectionSubtitle")}
+            </p>
+          </div>
+
+          <DemoTerminalHero
+            videoSrc="/media/aichat.mp4"
+            videoLabel={t("soundprintAiChatDemo.videoLabel")}
+            eyebrow={t("soundprintAiChatDemo.heroEyebrow")}
+            subtitle={t("soundprintAiChatDemo.heroSubtitle")}
+            badge={t("soundprintAiChatDemo.heroBadge")}
+            features={soundprintAiChatFeatures}
+            className="max-w-6xl"
+          />
+
+          <div className="mt-10 flex justify-center">
+            <Link
+              href={
+                isAuthenticated
+                  ? "/dashboard/ask-your-soundprint"
+                  : `/dashboard/ask-your-soundprint?userId=${DEFAULT_PUBLIC_PROFILE_USER_ID}`
+              }
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-gradient px-6 py-3 text-sm font-semibold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:opacity-95"
+            >
+              {t(
+                isAuthenticated
+                  ? "soundprintAiChatDemo.ctaSignedIn"
+                  : "soundprintAiChatDemo.cta",
+              )}
+              <ArrowRightIcon />
+            </Link>
           </div>
         </section>
 

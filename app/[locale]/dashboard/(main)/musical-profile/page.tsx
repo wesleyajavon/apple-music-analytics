@@ -610,23 +610,58 @@ function MusicalProfileContent() {
                 <span aria-hidden="true">&rarr;</span>
               </Link>
             </div>
-            <div className="grid gap-3 sm:grid-cols-3">
-              {profileMetrics.map((metric) => (
-                <div
-                  key={metric.label}
-                  className="rounded-3xl border border-card-border bg-card-surface p-5 shadow-card"
-                >
-                  <p className="text-3xl font-semibold tracking-[-0.04em] text-gray-950 dark:text-white">
-                    {metric.value}
-                  </p>
-                  <p className="mt-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted">
-                    {metric.label}
-                  </p>
-                  <p className="mt-3 text-xs leading-5 text-muted">
-                    {metric.hint}
-                  </p>
+            <div className="relative flex min-h-[220px] flex-col justify-center overflow-hidden rounded-3xl border border-card-border bg-card-surface p-6 shadow-card">
+              <div
+                className="pointer-events-none absolute inset-0 opacity-[0.28] dark:opacity-[0.18]"
+                style={{
+                  backgroundImage:
+                    "radial-gradient(circle at 1px 1px, rgb(139 92 246 / 0.22) 1px, transparent 0)",
+                  backgroundSize: "22px 22px",
+                }}
+                aria-hidden
+              />
+              <div
+                className="pointer-events-none absolute -right-20 top-1/2 h-44 w-44 -translate-y-1/2 rounded-full bg-accent-cyan/15 blur-3xl dark:bg-accent-cyan/10"
+                aria-hidden
+              />
+              <div
+                className="pointer-events-none absolute -left-16 bottom-0 h-36 w-36 rounded-full bg-accent-violet/10 blur-2xl"
+                aria-hidden
+              />
+              <div className="relative flex flex-col gap-6 sm:flex-row sm:items-start">
+                <div className="shrink-0">
+                  <div className="relative overflow-hidden rounded-2xl border border-accent-violet/25 bg-white/90 p-2.5 shadow-md shadow-accent-violet/10 ring-1 ring-accent-violet/10 dark:bg-gray-950/80">
+                    <Image
+                      src="/brand/favicon.png"
+                      alt={t("overviewCallout.philosophyLogoAlt")}
+                      width={80}
+                      height={80}
+                      className="h-16 w-16 object-contain sm:h-20 sm:w-20"
+                    />
+                  </div>
                 </div>
-              ))}
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+                    {t("overviewCallout.philosophyEyebrow")}
+                  </p>
+                  <ul className="mt-4 list-none space-y-4">
+                    <li className="flex gap-3 text-sm leading-6 text-gray-700 dark:text-gray-300">
+                      <span
+                        className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-violet"
+                        aria-hidden
+                      />
+                      <span>{t("overviewCallout.philosophyBullet1")}</span>
+                    </li>
+                    <li className="flex gap-3 text-sm leading-6 text-gray-700 dark:text-gray-300">
+                      <span
+                        className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-cyan"
+                        aria-hidden
+                      />
+                      <span>{t("overviewCallout.philosophyBullet2")}</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
             </div>
           </div>
         </section>

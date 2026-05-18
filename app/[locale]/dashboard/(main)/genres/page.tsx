@@ -5,6 +5,10 @@ import { useTranslations, useLocale } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import {
+  getDateRangePresetFromSearchParams,
+  type DateRangePreset,
+} from "@/lib/components/date-range-filter";
+import {
   PieChart,
   Pie,
   Cell,
@@ -25,7 +29,7 @@ import { PaletteMappingNotice } from "@/lib/components/palette/palette-mapping-n
 import { GenresSkeleton } from "@/lib/components/skeleton-loaders";
 import { usePublicDemoViewer } from "@/lib/hooks/use-public-demo-viewer";
 import { useArtistSpotifyImageResolution } from "@/lib/hooks/use-artist-spotify-image-resolution";
-import { Tags } from "lucide-react";
+import { LineChart } from "lucide-react";
 
 type ChartType = "pie" | "bar";
 
@@ -42,57 +46,61 @@ const COLORS = [
   "#38bdf8", // sky
   "#f97316", // orange
 ];
-const GENRE_RAIL_CLASS = "bg-gradient-to-r from-indigo-400 via-rose-400 to-amber-300";
 const GENRE_ACTIVE_TAB_CLASS =
-  "bg-gradient-to-r from-indigo-500 via-rose-500 to-amber-400 text-white shadow-sm shadow-rose-950/20";
+  "bg-white text-violet-950 shadow-sm dark:bg-white dark:text-violet-950";
 
 const GENRES_HERO_SHELL_CLASS =
-  "relative overflow-hidden rounded-3xl border border-indigo-300/20 bg-[radial-gradient(circle_at_top_left,_rgba(129,140,248,0.32),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(244,114,182,0.24),_transparent_30%),linear-gradient(135deg,_#020617_0%,_#111827_48%,_#312e81_100%)] px-6 py-8 shadow-2xl shadow-indigo-950/40 sm:px-8 sm:py-10";
-
-const TRENDS_CTA_CLASS =
-  "inline-flex min-h-[44px] w-fit shrink-0 items-center justify-center rounded-full border border-indigo-100/30 bg-white/95 px-5 py-2.5 text-sm font-semibold text-indigo-950 shadow-lg shadow-indigo-950/20 transition hover:-translate-y-0.5 hover:bg-indigo-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80";
+  "relative overflow-hidden rounded-[2rem] border border-white/10 bg-gray-950 px-5 py-6 text-white shadow-2xl shadow-violet-500/15 sm:px-8 sm:py-9 lg:px-10 lg:py-10";
 
 function GenresHeroFrame({
   trendsHref,
   stats,
-  dateSummary,
-  genreExtras,
+  badgeLabel,
 }: {
   trendsHref: string;
   stats: ReactNode;
-  dateSummary: string;
-  genreExtras?: string;
+  badgeLabel: string;
 }) {
   const t = useTranslations("genres");
-  const meta = [dateSummary, genreExtras].filter(Boolean).join(" · ");
   return (
     <div className={GENRES_HERO_SHELL_CLASS}>
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(129,140,248,0.11)_1px,_transparent_1px),linear-gradient(90deg,_rgba(251,191,36,0.08)_1px,_transparent_1px)] bg-[size:32px_32px] opacity-30" />
-      <div className="absolute -right-20 -top-24 h-56 w-56 rounded-full bg-rose-400/20 blur-3xl" />
-      <div className="absolute -bottom-24 left-10 h-48 w-48 rounded-full bg-cyan-400/16 blur-3xl" />
-      <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${GENRE_RAIL_CLASS} opacity-90`} />
-      <div className="relative flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-        <div className="max-w-3xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-indigo-200/85">{t("heroEyebrow")}</p>
-          <h1 className="mt-3 flex items-center gap-3 text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            <Tags className="h-9 w-9 shrink-0 text-indigo-200/90 sm:h-10 sm:w-10" strokeWidth={1.75} aria-hidden />
-            <span>{t("title")}</span>
-          </h1>
-          <div
-            className={`mt-4 h-1.5 w-24 rounded-full ${GENRE_RAIL_CLASS} opacity-95 shadow-[0_0_24px_rgba(129,140,248,0.35)]`}
-            aria-hidden
-          />
-          <p className="mt-5 text-base leading-relaxed text-indigo-100/90 sm:text-lg">{t("subtitle")}</p>
-          {meta ? (
-            <p className="mt-2 text-sm font-medium tracking-wide text-amber-100/90" aria-live="polite">
-              {meta}
-            </p>
-          ) : null}
-          {stats}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.26),transparent_30%),radial-gradient(circle_at_80%_12%,rgba(6,182,212,0.2),transparent_32%),linear-gradient(135deg,rgba(3,7,18,0.98),rgba(30,27,75,0.88)_48%,rgba(8,47,73,0.72))]" />
+      <div className="absolute -left-20 top-1/3 h-64 w-64 rounded-full bg-accent-violet/22 blur-3xl" />
+      <div className="absolute -bottom-28 right-10 h-72 w-72 rounded-full bg-accent-cyan/18 blur-3xl" />
+      <div className="relative grid gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-center">
+        <div>
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-violet-100 backdrop-blur">
+            <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_18px_rgb(22_199_132_/0.75)]" />
+            {t("heroEyebrow")}
+          </div>
+          <h1 className="max-w-4xl text-balance text-4xl font-semibold tracking-[-0.06em] text-white sm:text-5xl lg:text-6xl">{t("title")}</h1>
+          <p className="mt-5 max-w-2xl text-base leading-7 text-white/70 sm:text-lg">{t("subtitle")}</p>
+          <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <Link
+              href={trendsHref}
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25 transition-all hover:-translate-y-0.5 hover:bg-gray-100"
+            >
+              <LineChart className="h-4 w-4" aria-hidden />
+              {t("viewTrends")}
+            </Link>
+            <span className="inline-flex items-center justify-center rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-sm font-bold text-white backdrop-blur">
+              {badgeLabel}
+            </span>
+          </div>
         </div>
-        <Link href={trendsHref} className={TRENDS_CTA_CLASS}>
-          {t("viewTrends")}
-        </Link>
+
+        <div className="relative">
+          <div className="absolute -inset-4 rounded-[2rem] bg-brand-gradient-soft blur-2xl" aria-hidden />
+          <div className="relative overflow-hidden rounded-[1.75rem] border border-white/15 bg-white/10 p-3 shadow-2xl shadow-black/35 backdrop-blur-xl">
+            <div className="rounded-[1.35rem] border border-white/10 bg-slate-950/70 p-4">
+              <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                <p className="font-mono text-[0.66rem] font-semibold uppercase tracking-[0.24em] text-slate-400">{t("heroStatBadge")}</p>
+                <span className="rounded-full border border-violet-300/25 bg-violet-300/10 px-2.5 py-1 text-[0.66rem] font-semibold text-violet-100">{t("heroStatTag")}</span>
+              </div>
+              {stats}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -111,18 +119,18 @@ function GenresHeroStats({
 }) {
   const t = useTranslations("genres");
   return (
-    <div className="mt-6 flex flex-wrap gap-4 sm:gap-8">
-      <div className="rounded-xl border border-indigo-200/15 bg-slate-950/35 px-4 py-3 shadow-lg shadow-indigo-950/20 backdrop-blur-sm">
-        <p className="text-xs font-medium uppercase tracking-wider text-indigo-100/80">{t("statGenres")}</p>
-        <p className="text-2xl font-bold text-white">{genreCount.toLocaleString(locale)}</p>
+    <div className="grid gap-2 pt-4 sm:grid-cols-3">
+      <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
+        <p className="text-xl font-semibold tracking-tight text-white">{genreCount.toLocaleString(locale)}</p>
+        <p className="mt-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">{t("statGenres")}</p>
       </div>
-      <div className="rounded-xl border border-rose-200/15 bg-slate-950/35 px-4 py-3 shadow-lg shadow-rose-950/20 backdrop-blur-sm">
-        <p className="text-xs font-medium uppercase tracking-wider text-rose-100/80">{t("totalListens")}</p>
-        <p className="text-2xl font-bold text-white">{totalListens.toLocaleString(locale)}</p>
+      <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
+        <p className="text-xl font-semibold tracking-tight text-white">{totalListens.toLocaleString(locale)}</p>
+        <p className="mt-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">{t("totalListens")}</p>
       </div>
-      <div className="rounded-xl border border-amber-200/15 bg-slate-950/35 px-4 py-3 shadow-lg shadow-amber-950/20 backdrop-blur-sm">
-        <p className="text-xs font-medium uppercase tracking-wider text-amber-100/80">{t("statTopGenre")}</p>
-        <p className="text-2xl font-bold text-white truncate max-w-[200px]">{topGenreName}</p>
+      <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
+        <p className="text-xl font-semibold tracking-tight text-white truncate">{topGenreName}</p>
+        <p className="mt-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">{t("statTopGenre")}</p>
       </div>
     </div>
   );
@@ -130,16 +138,25 @@ function GenresHeroStats({
 
 function GenresHeroStatsSkeleton() {
   return (
-    <div className="mt-6 flex flex-wrap gap-4 sm:gap-8">
+    <div className="grid gap-2 pt-4 sm:grid-cols-3">
       {[0, 1, 2].map((i) => (
-        <div
-          key={i}
-          className="min-w-[140px] flex-1 animate-pulse rounded-xl border border-white/10 bg-slate-950/35 px-4 py-3 shadow-lg backdrop-blur-sm sm:flex-initial"
-        >
-          <div className="mb-2 h-3 w-20 rounded bg-white/15" />
-          <div className="h-8 w-24 rounded bg-white/20" />
+        <div key={i} className="animate-pulse rounded-2xl border border-white/10 bg-white/[0.06] p-3">
+          <div className="mb-2 h-7 w-20 rounded bg-white/20" />
+          <div className="h-3 w-24 rounded bg-white/15" />
         </div>
       ))}
+    </div>
+  );
+}
+
+function GenresSectionHeader({ eyebrow, title, description }: { eyebrow: string; title: string; description: string }) {
+  return (
+    <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+      <div>
+        <p className="font-mono text-xs font-semibold uppercase tracking-[0.24em] text-primary">{eyebrow}</p>
+        <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-foreground sm:text-3xl">{title}</h2>
+      </div>
+      <p className="max-w-xl text-sm leading-6 text-muted">{description}</p>
     </div>
   );
 }
@@ -210,6 +227,44 @@ function useGenresTrendsHref() {
     const qs = params.toString();
     return qs ? `/dashboard/genres/trends?${qs}` : "/dashboard/genres/trends";
   }, [searchParams]);
+}
+
+function formatDateRangeShort(startDate: string | undefined, endDate: string | undefined, locale: string): string {
+  if (!startDate || !endDate) return "";
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const opts: Intl.DateTimeFormatOptions = {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  };
+  return `${start.toLocaleDateString(locale, opts)} – ${end.toLocaleDateString(locale, opts)}`;
+}
+
+function useGenresHeroBadge() {
+  const locale = useLocale();
+  const t = useTranslations("genres");
+  const searchParams = useSearchParams();
+  const preset = getDateRangePresetFromSearchParams(searchParams);
+  const { startDate: rangeStart, endDate: rangeEnd, isLoading: rangeLoading } = useListenDateRange();
+  return useMemo(() => {
+    const presetLabel: Record<DateRangePreset, string> = {
+      "7d": t("periodLast7Days"),
+      "30d": t("periodLast30Days"),
+      ytd: t("periodYearToDate"),
+      all: t("periodAllTime"),
+      custom: t("periodCustom"),
+    };
+    const name = presetLabel[preset];
+    const dates = formatDateRangeShort(rangeStart, rangeEnd, locale);
+    if (dates) {
+      return `${name} · ${dates}`;
+    }
+    if (preset === "all" && rangeLoading) {
+      return name;
+    }
+    return name;
+  }, [preset, rangeStart, rangeEnd, rangeLoading, locale, t]);
 }
 
 /** Tranches max. sous le camembert / barres (le reste → « Autres »). 8 évite une légende illisible. */
@@ -366,11 +421,15 @@ function PieChartLegend({
   data,
   colors,
   locale,
+  variant = "light",
 }: {
   data: Array<{ name: string; percentage: number }>;
   colors: string[];
   locale: string;
+  variant?: "light" | "dark";
 }) {
+  const nameClass = variant === "dark" ? "text-slate-200" : "text-gray-700 dark:text-gray-300";
+  const pctClass = variant === "dark" ? "text-slate-400" : "text-gray-500 dark:text-gray-400";
   return (
     <div
       className="mt-4 mb-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-2.5 max-w-3xl mx-auto"
@@ -387,10 +446,10 @@ function PieChartLegend({
             style={{ backgroundColor: colors[index % colors.length] }}
             aria-hidden
           />
-          <span className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 truncate">
+          <span className={`text-xs sm:text-sm truncate ${nameClass}`}>
             {item.name}
           </span>
-          <span className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 tabular-nums shrink-0">
+          <span className={`text-[11px] sm:text-xs tabular-nums shrink-0 ${pctClass}`}>
             {item.percentage.toFixed(1)}%
           </span>
         </div>
@@ -407,7 +466,6 @@ function GenresContent() {
   const pathname = usePathname();
   const router = useRouter();
   const t = useTranslations("genres");
-  const tCommon = useTranslations("common");
   const locale = useLocale();
   const CustomTooltip = useMemo(() => createCustomTooltip(t, locale), [t, locale]);
 
@@ -479,7 +537,7 @@ function GenresContent() {
         fill="currentColor"
         textAnchor="middle"
         dominantBaseline="central"
-        className="fill-gray-700 dark:fill-gray-300"
+        className="fill-slate-200"
         style={{ fontSize: "clamp(9px, 2vw, 12px)" }}
       >
         {`${pct.toFixed(1)}%`}
@@ -489,11 +547,7 @@ function GenresContent() {
 
   const emptyStatePresets = useEmptyStatePresets();
 
-  const formatDateRange = (start: string, end: string) => {
-    const s = new Date(start);
-    const e = new Date(end);
-    return `${s.toLocaleDateString(locale, { month: "short", day: "numeric", year: "numeric" })} – ${e.toLocaleDateString(locale, { month: "short", day: "numeric", year: "numeric" })}`;
-  };
+  const badgeLabel = useGenresHeroBadge();
 
   const top3Genres = chartData.slice(0, 3);
   const detailRows = chartData.slice(detailOffset, detailOffset + detailPageSize);
@@ -525,11 +579,6 @@ function GenresContent() {
     return new Map(entries.map((e) => [e.genre, e.artists]));
   }, [data?.topArtistsForTopGenres]);
 
-  const dateSummary = startDate && endDate ? formatDateRange(startDate, endDate) : t("allData");
-  const genreExtras =
-    !isLoadingOrFetching && chartData.length > 0
-      ? `${chartData.length} ${t("statGenres")}`
-      : undefined;
   const heroStats = isLoadingOrFetching ? (
     <GenresHeroStatsSkeleton />
   ) : error || !data || data.data.length === 0 ? null : (
@@ -542,13 +591,8 @@ function GenresContent() {
   );
 
   return (
-    <div className="space-y-8">
-      <GenresHeroFrame
-        trendsHref={trendsHref}
-        stats={heroStats}
-        dateSummary={dateSummary}
-        genreExtras={genreExtras}
-      />
+    <div className="space-y-12">
+      <GenresHeroFrame trendsHref={trendsHref} stats={heroStats} badgeLabel={badgeLabel} />
       {paletteAccessRestricted ? (
         <div className="max-w-3xl rounded-xl border border-cyan-200 bg-cyan-50/80 px-4 py-3 text-sm text-cyan-950 shadow-sm shadow-cyan-950/5 dark:border-cyan-400/25 dark:bg-cyan-950/30 dark:text-cyan-100">
           <p className="font-semibold">{t("paletteRestrictedTitle")}</p>
@@ -572,18 +616,23 @@ function GenresContent() {
       ) : !isLoadingOrFetching && (!data || data.data.length === 0) ? (
         <EmptyState {...emptyStatePresets.changeDates(pathname)} />
       ) : (
-        <div className="space-y-8">
-            {/* Top 3 genres spotlight – style Replay */}
+        <div className="space-y-12">
             {isLoadingOrFetching ? (
-              <section>
-                <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">{t("top3Title")}</h3>
-                <p className="mb-6 text-sm text-gray-500 dark:text-gray-400 max-w-2xl">{t("top3Subtitle")}</p>
+              <section className="relative animate-fade-in-up">
+                <GenresSectionHeader
+                  eyebrow={t("sections.spotlight.eyebrow")}
+                  title={t("sections.spotlight.title")}
+                  description={t("sections.spotlight.description")}
+                />
                 <TopGenresSpotlightSkeleton />
               </section>
-            ) : top3Genres.length > 0 && (
-              <section>
-                <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">{t("top3Title")}</h3>
-                <p className="mb-6 text-sm text-gray-500 dark:text-gray-400 max-w-2xl">{t("top3Subtitle")}</p>
+            ) : top3Genres.length > 0 ? (
+              <section className="relative animate-fade-in-up">
+                <GenresSectionHeader
+                  eyebrow={t("sections.spotlight.eyebrow")}
+                  title={t("sections.spotlight.title")}
+                  description={t("sections.spotlight.description")}
+                />
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
                   {top3Genres.map((genre, index) => {
                     const maxCount = chartData[0]?.count ?? 1;
@@ -651,54 +700,62 @@ function GenresContent() {
                   })}
                 </div>
               </section>
-            )}
+            ) : null}
 
-            {/* Chart type selector */}
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted shrink-0">
-                {t("chart")}
-              </span>
-              <div className="flex w-fit items-center rounded-xl border border-indigo-300/20 bg-surface p-1.5 shadow-sm">
-                <button
-                  onClick={() => setChartType("pie")}
-                  className={`
-                    relative z-10 px-3 py-2 sm:px-4 text-xs sm:text-sm font-semibold rounded-lg transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
-                    ${chartType === "pie" ? GENRE_ACTIVE_TAB_CLASS : "text-muted hover:text-foreground"}
-                  `}
-                >
-                  {t("pie")}
-                </button>
-                <button
-                  onClick={() => setChartType("bar")}
-                  className={`
-                    relative z-10 px-3 py-2 sm:px-4 text-xs sm:text-sm font-semibold rounded-lg transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
-                    ${chartType === "bar" ? GENRE_ACTIVE_TAB_CLASS : "text-muted hover:text-foreground"}
-                  `}
-                >
-                  {t("bar")}
-                </button>
+            <section className="relative animate-fade-in-up" style={{ animationDelay: "40ms" }}>
+              <GenresSectionHeader
+                eyebrow={t("sections.distribution.eyebrow")}
+                title={t("sections.distribution.title")}
+                description={t("sections.distribution.description")}
+              />
+              <div className="relative mb-8 overflow-hidden rounded-[2rem] border border-slate-200/90 bg-gradient-to-br from-white via-slate-50/90 to-white px-5 py-4 shadow-xl shadow-slate-900/[0.06] ring-1 ring-slate-900/[0.04] dark:border-slate-300/50 dark:from-slate-100 dark:via-white dark:to-slate-50">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted">{t("chart")}</span>
+                  <div className="flex w-fit items-center rounded-xl border border-slate-200/90 bg-white p-1.5 shadow-inner dark:border-slate-300/70 dark:bg-white">
+                    <button
+                      type="button"
+                      onClick={() => setChartType("pie")}
+                      className={`relative z-10 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-4 sm:text-sm ${
+                        chartType === "pie" ? GENRE_ACTIVE_TAB_CLASS : "text-slate-600 hover:text-slate-900"
+                      }`}
+                    >
+                      {t("pie")}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setChartType("bar")}
+                      className={`relative z-10 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-4 sm:text-sm ${
+                        chartType === "bar" ? GENRE_ACTIVE_TAB_CLASS : "text-slate-600 hover:text-slate-900"
+                      }`}
+                    >
+                      {t("bar")}
+                    </button>
+                  </div>
+                </div>
               </div>
-            </div>
 
-            {/* Chart */}
-            <div className="relative overflow-hidden rounded-2xl border border-indigo-300/20 border-l-4 border-l-rose-400 bg-[radial-gradient(circle_at_top_left,_rgba(129,140,248,0.1),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(244,114,182,0.08),_transparent_30%),rgb(var(--card-rgb)/0.92)] shadow-card transition-shadow duration-300 hover:shadow-card-hover dark:border-indigo-300/15 dark:bg-[radial-gradient(circle_at_top_left,_rgba(129,140,248,0.16),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(244,114,182,0.12),_transparent_30%),rgb(var(--card-rgb)/0.9)]">
-              <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${GENRE_RAIL_CLASS} opacity-80`} />
-              <div className="border-b border-indigo-200/20 px-4 py-3 dark:border-indigo-300/10 sm:px-6 sm:py-4">
-                <h2 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
-                  {t("distributionTitle")}
-                </h2>
-                <p className="mt-0.5 text-xs text-indigo-700/80 dark:text-indigo-100/70 sm:text-sm">
-                  {data
-                    ? `${t("totalListens")}: ${data.totalListens.toLocaleString(locale)} ${t("listens")}`
-                    : t("totalListens")}
-                </p>
-              </div>
-              <div className="relative overflow-x-auto p-4 sm:p-6">
-              <div className="pointer-events-none absolute left-1/2 top-16 h-64 w-64 -translate-x-1/2 rounded-full bg-rose-400/10 blur-3xl dark:bg-rose-400/15" />
+              <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950 text-white shadow-2xl shadow-black/25 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-black/35">
+                <div
+                  className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(139,92,246,0.14),transparent_32%),radial-gradient(circle_at_12%_70%,rgba(6,182,212,0.1),transparent_34%)]"
+                  aria-hidden
+                />
+                <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-violet-200/35 to-transparent" aria-hidden />
+                <div className="relative border-b border-white/10 px-5 py-5 sm:px-8">
+                  <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-violet-300/25 bg-violet-300/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-violet-100">
+                    <span className="h-2 w-2 rounded-full bg-violet-300 shadow-[0_0_14px_rgba(167,139,250,0.55)]" aria-hidden />
+                    {t("distributionTitle")}
+                  </div>
+                  <p className="text-sm text-slate-400">
+                    {data
+                      ? `${t("totalListens")}: ${data.totalListens.toLocaleString(locale)} ${t("listens")}`
+                      : t("totalListens")}
+                  </p>
+                </div>
+                <div className="relative overflow-x-auto p-4 sm:p-6 lg:p-8">
               {isLoadingOrFetching ? (
                 <GenreChartSkeleton type={chartType} />
               ) : chartType === "pie" ? (
-                <div className="relative mb-10 min-w-[260px] rounded-2xl border border-indigo-200/20 bg-white/50 p-3 shadow-inner dark:border-indigo-300/10 dark:bg-slate-950/20 h-[280px] sm:h-[380px] lg:h-[500px]">
+                <div className="relative mb-10 min-w-[260px] rounded-[1.35rem] border border-white/10 bg-black/25 p-3 h-[280px] sm:h-[380px] lg:h-[500px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <defs>
@@ -722,7 +779,7 @@ function GenresContent() {
                         <Cell
                           key={`cell-${entry.name}-${index}`}
                           fill={COLORS[index % COLORS.length]}
-                          stroke="rgb(var(--card-rgb) / 0.95)"
+                          stroke="rgba(15,23,42,0.9)"
                           strokeWidth={2}
                         />
                       ))}
@@ -730,10 +787,10 @@ function GenresContent() {
                     <Tooltip content={CustomTooltip} />
                   </PieChart>
                 </ResponsiveContainer>
-                <PieChartLegend data={chartDisplayData} colors={COLORS} locale={locale} />
+                <PieChartLegend data={chartDisplayData} colors={COLORS} locale={locale} variant="dark" />
                 </div>
               ) : (
-                <div className="relative min-w-[280px] rounded-2xl border border-indigo-200/20 bg-white/50 p-3 shadow-inner dark:border-indigo-300/10 dark:bg-slate-950/20 h-[320px] sm:h-[400px] lg:h-[500px]">
+                <div className="relative min-w-[280px] rounded-[1.35rem] border border-white/10 bg-black/25 p-3 h-[320px] sm:h-[400px] lg:h-[500px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
                     data={chartDisplayData}
@@ -751,8 +808,7 @@ function GenresContent() {
                     </defs>
                     <CartesianGrid
                       strokeDasharray="3 3"
-                      stroke="#c7d2fe"
-                      strokeOpacity={0.32}
+                      stroke="rgba(148,163,184,0.18)"
                       vertical={false}
                     />
                     <XAxis
@@ -760,18 +816,16 @@ function GenresContent() {
                       angle={-45}
                       textAnchor="end"
                       height={80}
-                      tick={{ fill: "currentColor", fontSize: 10 }}
-                      stroke="#6366f1"
-                      className="dark:stroke-gray-400"
+                      tick={{ fill: "#94a3b8", fontSize: 10 }}
+                      stroke="rgba(148,163,184,0.35)"
                       interval={0}
                     />
                     <YAxis
-                      tick={{ fill: "currentColor", fontSize: 12 }}
-                      stroke="#6366f1"
-                      className="dark:stroke-gray-400"
+                      tick={{ fill: "#94a3b8", fontSize: 12 }}
+                      stroke="rgba(148,163,184,0.35)"
                     />
                     <Tooltip content={CustomTooltip} />
-                    <Legend wrapperStyle={{ color: "rgb(var(--muted-rgb))", fontSize: 12 }} />
+                    <Legend wrapperStyle={{ color: "#cbd5e1", fontSize: 12 }} />
                     <Bar
                       dataKey="count"
                       name={t("Listens")}
@@ -784,49 +838,48 @@ function GenresContent() {
                 </div>
               )}
 
-              {/* Liste des genres avec barres de progression - design moderne */}
-              <div className="mt-12 border-t border-indigo-200/20 pt-8 dark:border-indigo-300/10 sm:mt-14 sm:pt-10">
-                <h3 className="text-xs sm:text-sm font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4">
+              <div className="mt-12 border-t border-white/10 pt-8 sm:mt-14 sm:pt-10">
+                <h3 className="mb-3 text-xs font-semibold text-white sm:mb-4 sm:text-sm">
                   {t("detailByGenre")}
                 </h3>
                 {isLoadingOrFetching ? (
                   <GenreDetailRowsSkeleton />
                 ) : (
-                <div className="max-h-[460px] overflow-y-auto pr-1 space-y-3 sm:space-y-4">
+                <div className="max-h-[460px] space-y-3 overflow-y-auto pr-1 sm:space-y-4">
                   {detailRows.map((item, index) => {
                     const absoluteIndex = detailOffset + index;
                     const maxCount = chartData[0]?.count ?? 1;
                     const widthPercent = (item.count / maxCount) * 100;
-                    const rankColors = ["text-amber-500", "text-slate-400", "text-amber-700"];
-                    const rankBg = ["bg-amber-500/15", "bg-slate-400/15", "bg-amber-700/15"];
-                    const rankStyle = absoluteIndex < 3 ? rankColors[absoluteIndex] : "text-gray-400 dark:text-gray-500";
-                    const rankBgStyle = absoluteIndex < 3 ? rankBg[absoluteIndex] : "bg-gray-100 dark:bg-gray-800";
+                    const rankColors = ["text-amber-400", "text-slate-300", "text-amber-500"];
+                    const rankBg = ["bg-amber-400/20", "bg-slate-400/15", "bg-amber-500/20"];
+                    const rankStyle = absoluteIndex < 3 ? rankColors[absoluteIndex] : "text-slate-500";
+                    const rankBgStyle = absoluteIndex < 3 ? rankBg[absoluteIndex] : "bg-white/10";
                     return (
                       <div key={item.name} className="group">
-                        <div className="flex flex-col gap-0.5 sm:flex-row sm:items-center sm:justify-between sm:gap-2 mb-1 sm:mb-1.5">
-                          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                            <span className={`flex h-6 w-6 sm:h-7 sm:w-7 shrink-0 items-center justify-center rounded-lg text-[10px] sm:text-xs font-bold ${rankStyle} ${rankBgStyle}`}>
+                        <div className="mb-1 flex flex-col gap-0.5 sm:mb-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
+                          <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
+                            <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-lg text-[10px] font-bold sm:h-7 sm:w-7 sm:text-xs ${rankStyle} ${rankBgStyle}`}>
                               {absoluteIndex + 1}
                             </span>
                             <div
-                              className="w-2.5 h-2.5 sm:w-3 sm:h-3 shrink-0 rounded-full"
+                              className="h-2.5 w-2.5 shrink-0 rounded-full sm:h-3 sm:w-3"
                               style={{ backgroundColor: COLORS[absoluteIndex % COLORS.length] }}
                               aria-hidden
                             />
-                            <span className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white truncate min-w-0">
+                            <span className="min-w-0 truncate text-xs font-medium text-white sm:text-sm">
                               {item.name}
                             </span>
                           </div>
-                          <div className="flex items-center gap-2 sm:gap-4 ml-8 sm:ml-0 shrink-0">
-                            <span className="text-xs sm:text-sm font-semibold text-gray-900 dark:text-white tabular-nums">
+                          <div className="ml-8 flex shrink-0 items-center gap-2 sm:ml-0 sm:gap-4">
+                            <span className="text-xs font-semibold tabular-nums text-white sm:text-sm">
                               {item.count.toLocaleString(locale)}
                             </span>
-                            <span className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 w-10 sm:w-12 text-right tabular-nums shrink-0">
+                            <span className="w-10 shrink-0 text-right text-[11px] tabular-nums text-slate-400 sm:w-12 sm:text-xs">
                               {item.percentage.toFixed(1)}%
                             </span>
                           </div>
                         </div>
-                        <div className="ml-8 h-1.5 overflow-hidden rounded-full bg-indigo-100/70 dark:bg-indigo-950/45 sm:ml-10">
+                        <div className="ml-8 h-1.5 overflow-hidden rounded-full bg-white/10 sm:ml-10">
                           <div
                             className="h-full rounded-full shadow-[0_0_18px_-6px_currentColor] transition-all duration-500 ease-out"
                             style={{
@@ -840,8 +893,8 @@ function GenresContent() {
                   })}
                 </div>
                 )}
-                <div className="mt-4 flex flex-col gap-3 border-t border-indigo-200/30 bg-indigo-50/25 pt-4 dark:border-indigo-400/15 dark:bg-indigo-950/15 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="text-sm text-indigo-900/75 dark:text-indigo-100/75">
+                <div className="mt-4 flex flex-col gap-3 border-t border-white/10 bg-white/[0.04] pt-4 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-sm text-slate-300">
                     {t("paginationSummary", {
                       start: detailStart,
                       end: detailEnd,
@@ -853,30 +906,30 @@ function GenresContent() {
                       type="button"
                       onClick={() => updateDetailPaginationParams(detailPage - 1, detailPageSize)}
                       disabled={detailPage === 1}
-                      className="inline-flex min-h-[36px] items-center justify-center rounded-lg border border-indigo-200/70 bg-white/90 px-3 py-1.5 text-sm font-medium text-indigo-950 transition-colors hover:bg-indigo-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-indigo-500/30 dark:bg-slate-900/60 dark:text-indigo-50 dark:hover:bg-indigo-950/35"
+                      className="inline-flex min-h-[36px] items-center justify-center rounded-lg border border-white/15 bg-white/10 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {t("paginationPrevious")}
                     </button>
-                    <label className="ml-2 inline-flex items-center gap-2 text-sm text-indigo-900/85 dark:text-indigo-100/80">
+                    <label className="ml-2 inline-flex items-center gap-2 text-sm text-slate-300">
                       <span>{t("pageSizeLabel")}</span>
                       <select
                         value={detailPageSize}
                         onChange={(e) => updateDetailPaginationParams(1, Number(e.target.value))}
-                        className="rounded-lg border border-indigo-200/70 bg-white px-2 py-1 text-sm text-indigo-950 dark:border-indigo-500/30 dark:bg-slate-900 dark:text-indigo-50"
+                        className="rounded-lg border border-white/15 bg-slate-900 px-2 py-1 text-sm text-white"
                       >
                         <option value={10}>10</option>
                         <option value={20}>20</option>
                         <option value={50}>50</option>
                       </select>
                     </label>
-                    <span className="px-2 text-sm text-indigo-900/85 dark:text-indigo-100/80">
+                    <span className="px-2 text-sm text-slate-300">
                       {t("paginationPage", { page: detailPage, totalPages: detailTotalPages })}
                     </span>
                     <button
                       type="button"
                       onClick={() => updateDetailPaginationParams(detailPage + 1, detailPageSize)}
                       disabled={detailPage >= detailTotalPages}
-                      className="inline-flex min-h-[36px] items-center justify-center rounded-lg border border-indigo-200/70 bg-white/90 px-3 py-1.5 text-sm font-medium text-indigo-950 transition-colors hover:bg-indigo-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-indigo-500/30 dark:bg-slate-900/60 dark:text-indigo-50 dark:hover:bg-indigo-950/35"
+                      className="inline-flex min-h-[36px] items-center justify-center rounded-lg border border-white/15 bg-white/10 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {t("paginationNext")}
                     </button>
@@ -885,7 +938,8 @@ function GenresContent() {
               </div>
               </div>
             </div>
-          </div>
+            </section>
+        </div>
         )}
     </div>
   );
@@ -893,22 +947,10 @@ function GenresContent() {
 
 function GenresFallback() {
   const trendsHref = useGenresTrendsHref();
-  const t = useTranslations("genres");
-  const locale = useLocale();
-  const { startDate, endDate } = useListenDateRange();
-  const formatDateRange = (start: string, end: string) => {
-    const s = new Date(start);
-    const e = new Date(end);
-    return `${s.toLocaleDateString(locale, { month: "short", day: "numeric", year: "numeric" })} – ${e.toLocaleDateString(locale, { month: "short", day: "numeric", year: "numeric" })}`;
-  };
-  const dateSummary = startDate && endDate ? formatDateRange(startDate, endDate) : t("allData");
+  const badgeLabel = useGenresHeroBadge();
   return (
-    <div className="space-y-8">
-      <GenresHeroFrame
-        trendsHref={trendsHref}
-        stats={<GenresHeroStatsSkeleton />}
-        dateSummary={dateSummary}
-      />
+    <div className="space-y-12">
+      <GenresHeroFrame trendsHref={trendsHref} stats={<GenresHeroStatsSkeleton />} badgeLabel={badgeLabel} />
       <GenresSkeleton />
     </div>
   );
@@ -916,7 +958,7 @@ function GenresFallback() {
 
 export default function GenresPage() {
   return (
-    <div className="px-4 py-6 sm:px-0">
+    <div className="px-4 pb-6 pt-0 sm:px-0">
       <Suspense fallback={<GenresFallback />}>
         <GenresContent />
       </Suspense>

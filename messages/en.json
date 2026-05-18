@@ -711,6 +711,25 @@
     "paletteRestrictedTitle": "Palette is reserved for signed-in accounts",
     "paletteRestrictedBody": "The public demo can show genre analytics, but manual mapping, suggestions, and skip decisions require a signed-in account.",
     "viewTrends": "View genre trends",
+    "heroStatBadge": "Context",
+    "heroStatTag": "This range",
+    "periodLast7Days": "Last 7 days",
+    "periodLast30Days": "Last 30 days",
+    "periodYearToDate": "Year to date",
+    "periodAllTime": "All time",
+    "periodCustom": "Custom range",
+    "sections": {
+      "spotlight": {
+        "eyebrow": "Spotlight",
+        "title": "Your top genres",
+        "description": "The lanes you play most often—ranked and framed by the artists behind them."
+      },
+      "distribution": {
+        "eyebrow": "Breakdown",
+        "title": "How your listens split",
+        "description": "Switch chart geometry, then page through the full ladder with the same filters as the rest of the dashboard."
+      }
+    },
     "paginationSummary": "Showing {start}-{end} of {total}",
     "paginationPrevious": "Previous",
     "paginationNext": "Next",
@@ -720,6 +739,24 @@
   "genreTrends": {
     "title": "Genre trends",
     "heroEyebrow": "Listening over time",
+    "heroStatBadge": "Context",
+    "heroStatTag": "This range",
+    "heroPanelGroupBy": "Group by",
+    "heroPanelSeries": "Series on chart",
+    "sections": {
+      "picker": {
+        "eyebrow": "Curate",
+        "title": "Choose your lines",
+        "description": "Toggle which genres paint the chart—up to 30 series within your filtered window.",
+        "badge": "Selection"
+      },
+      "chart": {
+        "eyebrow": "Trajectory",
+        "title": "Listen volume over time",
+        "description": "Each line tracks one genre; bucket size comes from the sticky control bar.",
+        "badge": "Multi-series"
+      }
+    },
     "backToGenres": "Back to genre overview",
     "subtitle": "Evolution of your musical preferences over time",
     "subtitleExtended": "Evolution of your musical preferences over time. Compare how each selected genre rises or declines across the period.",
@@ -804,6 +841,24 @@
   "artistTrends": {
     "title": "Artist trends",
     "heroEyebrow": "Listening over time",
+    "heroStatBadge": "Context",
+    "heroStatTag": "This range",
+    "heroPanelGroupBy": "Group by",
+    "heroPanelSeries": "Series on chart",
+    "sections": {
+      "picker": {
+        "eyebrow": "Curate",
+        "title": "Choose your lines",
+        "description": "Toggle from your top artists, search the full catalog, stack up to 50 on one canvas.",
+        "badge": "Selection"
+      },
+      "chart": {
+        "eyebrow": "Trajectory",
+        "title": "Listen volume over time",
+        "description": "Each line follows one artist; bucket size comes from the control bar above.",
+        "badge": "Multi-series"
+      }
+    },
     "backToArtists": "Back to artist rankings",
     "subtitle": "How your top artists evolve over time",
     "subtitleExtended": "How your top artists evolve over time. Compare how each selected artist gains or declines across the period.",
@@ -849,6 +904,30 @@
     "title": "Artists",
     "subtitle": "Discover your favorite artists, their stats and the evolution of your listening.",
     "errorLoading": "Unable to load artist statistics",
+    "heroStatBadge": "Context",
+    "heroStatTag": "This range",
+    "sections": {
+      "charts": {
+        "eyebrow": "Signals",
+        "title": "Rank depth & concentration",
+        "description": "Bar chart for who dominates your hours; donut for how the top six split your listens.",
+        "barBadge": "Top 10",
+        "pieBadge": "Top 6 split"
+      },
+      "roster": {
+        "eyebrow": "Spotlight",
+        "title": "Your artist cards",
+        "description": "Tap a card to open listening insights—same filters as the rest of the dashboard.",
+        "top3Badge": "Podium",
+        "gridBadge": "Gallery"
+      },
+      "table": {
+        "eyebrow": "Full index",
+        "title": "Detailed ranking",
+        "description": "Expand for timestamps, track counts, and pagination through the full list.",
+        "badge": "Dataset"
+      }
+    },
     "heroEyebrow": "Rankings & overview",
     "yourArtists": "Your artists",
     "overviewSubtitle": "Your listening snapshot",
@@ -923,6 +1002,22 @@
     "title": "Tracks",
     "subtitle": "Your most played tracks at a glance, starting with your top 20.",
     "errorLoading": "Unable to load track statistics",
+    "heroStatBadge": "Rollup",
+    "heroStatTag": "This range",
+    "sections": {
+      "chart": {
+        "eyebrow": "Leaderboard",
+        "title": "Top 20 by listens",
+        "description": "The songs you repeat most—ranked by total plays under your current filters.",
+        "badge": "Replay surface"
+      },
+      "table": {
+        "eyebrow": "Full index",
+        "title": "Every ranked track",
+        "description": "Paginate the complete list. Same ordering counts as the chart; respects the same date window.",
+        "badge": "Dataset"
+      }
+    },
     "heroEyebrow": "Rankings & overview",
     "heroTitle": "Your tracks",
     "heroSubtitle": "Top tracks for the selected period",
@@ -947,6 +1042,24 @@
   "trackTrends": {
     "title": "Track trends",
     "heroEyebrow": "Listening over time",
+    "heroStatBadge": "Context",
+    "heroStatTag": "This range",
+    "heroPanelGroupBy": "Group by",
+    "heroPanelSeries": "Series on chart",
+    "sections": {
+      "picker": {
+        "eyebrow": "Curate",
+        "title": "Choose your lines",
+        "description": "Toggle from your top plays, search the full catalog, stack up to 50 tracks on one canvas.",
+        "badge": "Selection"
+      },
+      "chart": {
+        "eyebrow": "Trajectory",
+        "title": "Listen volume over time",
+        "description": "Each line follows one track; bucket size comes from the control bar above.",
+        "badge": "Multi-series"
+      }
+    },
     "backToTracks": "Back to track rankings",
     "subtitle": "Evolution of your most played tracks",
     "subtitleExtended": "Compare track evolution over time. Start with top 20, then add other tracks via catalog search.",
@@ -1119,7 +1232,11 @@
       "badge": "Start with the heart of Soundprint-AI",
       "title": "Your Music is the overview that ties everything together",
       "body": "Use Your Music as your home base: it summarizes your plays, artists, tracks, time spent listening, recent movement, and genre mix before you dive into deeper pages.",
-      "cta": "Open Your Music"
+      "cta": "Open Your Music",
+      "philosophyLogoAlt": "Soundprint-AI",
+      "philosophyEyebrow": "What Soundprint stands for",
+      "philosophyBullet1": "Your musical identity is grounded in the listens you actually logged—not a generic taste label or a one-off mood.",
+      "philosophyBullet2": "Every screen draws from the same history and date filters, so the story up top and the details below never fight each other."
     },
     "landing": {
       "badge": "A friendly place to start",

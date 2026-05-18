@@ -15,48 +15,69 @@ import {
   YAxis,
 } from "recharts";
 import { fetchTrackStats, trackKeys, useTrackStats } from "@/lib/hooks/use-tracks";
+import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
+import { formatOverviewDateRangeLabel } from "@/lib/utils/overview-date-range-label";
 import { OverviewSkeleton } from "@/lib/components/skeleton-loaders";
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
 import { CHART_TOOLTIP_STYLES } from "@/lib/constants/config";
 import type { TrackOverviewDto } from "@/lib/dto/track";
-import { ListMusic } from "lucide-react";
-
-const TRACK_RAIL_CLASS = "bg-gradient-to-r from-cyan-300 via-emerald-400 to-lime-300";
-const TRACK_PANEL_CLASS =
-  "relative overflow-hidden rounded-2xl border border-cyan-300/20 bg-[radial-gradient(circle_at_top_left,_rgba(34,211,238,0.1),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(132,204,22,0.08),_transparent_30%),rgb(var(--card-rgb)/0.92)] shadow-card transition-shadow duration-300 hover:shadow-card-hover dark:border-cyan-300/15 dark:bg-[radial-gradient(circle_at_top_left,_rgba(34,211,238,0.15),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(132,204,22,0.12),_transparent_30%),rgb(var(--card-rgb)/0.9)]";
+import { LineChart } from "lucide-react";
 
 const TRACKS_HERO_SHELL_CLASS =
-  "relative overflow-hidden rounded-3xl border border-cyan-300/25 bg-[radial-gradient(circle_at_top_left,_rgba(34,211,238,0.34),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(132,204,22,0.22),_transparent_30%),linear-gradient(135deg,_#020617_0%,_#0f172a_48%,_#063b36_100%)] px-6 py-8 shadow-2xl shadow-emerald-950/40 sm:px-8 sm:py-10";
+  "relative overflow-hidden rounded-[2rem] border border-white/10 bg-gray-950 px-5 py-6 text-white shadow-2xl shadow-accent-cyan/15 sm:px-8 sm:py-9 lg:px-10 lg:py-10";
 
-const TRENDS_CTA_CLASS =
-  "inline-flex min-h-[44px] w-fit shrink-0 items-center justify-center rounded-full border border-cyan-100/30 bg-white/95 px-5 py-2.5 text-sm font-semibold text-cyan-950 shadow-lg shadow-cyan-950/20 transition hover:-translate-y-0.5 hover:bg-cyan-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80";
-
-function TracksHeroFrame({ trendsHref, stats }: { trendsHref: string; stats: ReactNode }) {
+function TracksHeroFrame({
+  trendsHref,
+  stats,
+  badgeLabel,
+}: {
+  trendsHref: string;
+  stats: ReactNode;
+  badgeLabel: string;
+}) {
   const t = useTranslations("tracks");
   return (
     <div className={TRACKS_HERO_SHELL_CLASS}>
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(34,211,238,0.11)_1px,_transparent_1px),linear-gradient(90deg,_rgba(132,204,22,0.08)_1px,_transparent_1px)] bg-[size:32px_32px] opacity-30" />
-      <div className="absolute -right-20 -top-24 h-56 w-56 rounded-full bg-lime-300/18 blur-3xl" />
-      <div className="absolute -bottom-24 left-10 h-48 w-48 rounded-full bg-cyan-400/18 blur-3xl" />
-      <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${TRACK_RAIL_CLASS} opacity-90`} />
-      <div className="relative flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-        <div className="max-w-3xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-200/85">{t("heroEyebrow")}</p>
-          <h1 className="mt-3 flex items-center gap-3 text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            <ListMusic className="h-9 w-9 shrink-0 text-cyan-200/90 sm:h-10 sm:w-10" strokeWidth={1.75} aria-hidden />
-            <span>{t("title")}</span>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(6,182,212,0.24),transparent_30%),radial-gradient(circle_at_80%_12%,rgba(139,92,246,0.2),transparent_32%),linear-gradient(135deg,rgba(3,7,18,0.98),rgba(15,23,42,0.9)_48%,rgba(6,78,59,0.5))]" />
+      <div className="absolute -left-20 top-1/3 h-64 w-64 rounded-full bg-accent-cyan/20 blur-3xl" />
+      <div className="absolute -bottom-28 right-8 h-72 w-72 rounded-full bg-accent-emerald/18 blur-3xl" />
+      <div className="relative grid gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-center">
+        <div>
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-100 backdrop-blur">
+            <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_18px_rgb(22_199_132_/0.75)]" />
+            {t("heroEyebrow")}
+          </div>
+          <h1 className="max-w-4xl text-balance text-4xl font-semibold tracking-[-0.06em] text-white sm:text-5xl lg:text-6xl">
+            {t("title")}
           </h1>
-          <div
-            className={`mt-4 h-1.5 w-24 rounded-full ${TRACK_RAIL_CLASS} opacity-95 shadow-[0_0_24px_rgba(34,211,238,0.35)]`}
-            aria-hidden
-          />
-          <p className="mt-5 text-base leading-relaxed text-cyan-100/90 sm:text-lg">{t("subtitle")}</p>
-          {stats}
+          <p className="mt-5 max-w-2xl text-base leading-7 text-white/70 sm:text-lg">{t("subtitle")}</p>
+          <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <Link
+              href={trendsHref}
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25 transition-all hover:-translate-y-0.5 hover:bg-gray-100"
+            >
+              <LineChart className="h-4 w-4" aria-hidden />
+              {t("viewTrends")}
+            </Link>
+            <span className="inline-flex items-center justify-center rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-sm font-bold text-white backdrop-blur">
+              {badgeLabel}
+            </span>
+          </div>
         </div>
-        <Link href={trendsHref} className={TRENDS_CTA_CLASS}>
-          {t("viewTrends")}
-        </Link>
+
+        <div className="relative">
+          <div className="absolute -inset-4 rounded-[2rem] bg-brand-gradient-soft blur-2xl" aria-hidden />
+          <div className="relative overflow-hidden rounded-[1.75rem] border border-white/15 bg-white/10 p-3 shadow-2xl shadow-black/35 backdrop-blur-xl">
+            <div className="rounded-[1.35rem] border border-white/10 bg-slate-950/70 p-4">
+              <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                <p className="font-mono text-[0.66rem] font-semibold uppercase tracking-[0.24em] text-slate-400">{t("heroStatBadge")}</p>
+                <span className="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-2.5 py-1 text-[0.66rem] font-semibold text-cyan-100">{t("heroStatTag")}</span>
+              </div>
+              {stats}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -65,18 +86,18 @@ function TracksHeroFrame({ trendsHref, stats }: { trendsHref: string; stats: Rea
 function TracksHeroStats({ overview, locale }: { overview: TrackOverviewDto; locale: string }) {
   const t = useTranslations("tracks");
   return (
-    <div className="mt-6 flex flex-wrap gap-4 sm:gap-8">
-      <div className="rounded-xl border border-cyan-300/20 bg-slate-950/35 px-4 py-3 shadow-lg shadow-cyan-950/20 backdrop-blur-sm">
-        <p className="text-xs font-medium uppercase tracking-wider text-cyan-100/80">{t("tracks")}</p>
-        <p className="text-2xl font-bold text-white">{overview.totalTracks.toLocaleString(locale)}</p>
+    <div className="grid gap-2 pt-4 sm:grid-cols-3">
+      <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
+        <p className="text-xl font-semibold tracking-tight text-white">{overview.totalTracks.toLocaleString(locale)}</p>
+        <p className="mt-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">{t("tracks")}</p>
       </div>
-      <div className="rounded-xl border border-emerald-300/20 bg-slate-950/35 px-4 py-3 shadow-lg shadow-emerald-950/20 backdrop-blur-sm">
-        <p className="text-xs font-medium uppercase tracking-wider text-emerald-100/80">{t("listens")}</p>
-        <p className="text-2xl font-bold text-white">{overview.totalListens.toLocaleString(locale)}</p>
+      <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
+        <p className="text-xl font-semibold tracking-tight text-white">{overview.totalListens.toLocaleString(locale)}</p>
+        <p className="mt-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">{t("listens")}</p>
       </div>
-      <div className="rounded-xl border border-lime-300/20 bg-slate-950/35 px-4 py-3 shadow-lg shadow-lime-950/20 backdrop-blur-sm">
-        <p className="text-xs font-medium uppercase tracking-wider text-lime-100/80">{t("topTrack")}</p>
-        <p className="text-2xl font-bold text-white">{overview.topTrackListenCount.toLocaleString(locale)}</p>
+      <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-3 sm:col-span-1">
+        <p className="text-xl font-semibold tracking-tight text-white">{overview.topTrackListenCount.toLocaleString(locale)}</p>
+        <p className="mt-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">{t("topTrack")}</p>
       </div>
     </div>
   );
@@ -84,29 +105,38 @@ function TracksHeroStats({ overview, locale }: { overview: TrackOverviewDto; loc
 
 function TracksHeroStatsSkeleton() {
   return (
-    <div className="mt-6 flex flex-wrap gap-4 sm:gap-8">
+    <div className="grid gap-2 pt-4 sm:grid-cols-3">
       {[0, 1, 2].map((i) => (
-        <div
-          key={i}
-          className="min-w-[140px] flex-1 animate-pulse rounded-xl border border-white/10 bg-slate-950/35 px-4 py-3 shadow-lg backdrop-blur-sm sm:flex-initial"
-        >
-          <div className="mb-2 h-3 w-20 rounded bg-white/15" />
-          <div className="h-8 w-24 rounded bg-white/20" />
+        <div key={i} className="animate-pulse rounded-2xl border border-white/10 bg-white/[0.06] p-3">
+          <div className="mb-2 h-7 w-20 rounded bg-white/20" />
+          <div className="h-3 w-24 rounded bg-white/15" />
         </div>
       ))}
     </div>
   );
 }
 
+function TracksSectionHeader({ eyebrow, title, description }: { eyebrow: string; title: string; description: string }) {
+  return (
+    <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+      <div>
+        <p className="font-mono text-xs font-semibold uppercase tracking-[0.24em] text-primary">{eyebrow}</p>
+        <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-foreground sm:text-3xl">{title}</h2>
+      </div>
+      <p className="max-w-xl text-sm leading-6 text-muted">{description}</p>
+    </div>
+  );
+}
+
 function TracksChartSkeleton() {
   return (
-    <div className="h-[560px] min-w-[360px] rounded-2xl border border-cyan-200/20 bg-white/50 p-6 shadow-inner dark:border-cyan-300/10 dark:bg-slate-950/20">
+    <div className="h-[520px] min-w-[320px] rounded-[1.35rem] border border-white/10 bg-black/30 p-5">
       <div className="flex h-full flex-col justify-between">
         {Array.from({ length: 12 }).map((_, index) => (
           <div key={index} className="flex items-center gap-4">
-            <div className="h-3 w-28 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
+            <div className="h-3 w-28 rounded bg-white/10 animate-shimmer" />
             <div
-              className="h-5 rounded-r-lg bg-cyan-200 animate-shimmer dark:bg-cyan-900/70"
+              className="h-5 rounded-r-lg bg-cyan-400/20 animate-shimmer"
               style={{ width: `${35 + ((index * 11) % 55)}%` }}
             />
           </div>
@@ -120,18 +150,18 @@ function TracksTableRowsSkeleton({ count }: { count: number }) {
   return (
     <>
       {Array.from({ length: count }).map((_, index) => (
-        <tr key={`skeleton-${index}`}>
-          <td className="whitespace-nowrap px-6 py-4">
-            <div className="h-4 w-8 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
+        <tr key={`skeleton-${index}`} className="border-b border-white/5">
+          <td className="whitespace-nowrap px-5 py-4">
+            <div className="h-4 w-8 rounded bg-white/10 animate-shimmer" />
           </td>
-          <td className="px-6 py-4">
-            <div className="h-4 w-40 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
+          <td className="px-5 py-4">
+            <div className="h-4 w-40 rounded bg-white/10 animate-shimmer" />
           </td>
-          <td className="px-6 py-4">
-            <div className="h-4 w-32 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
+          <td className="px-5 py-4">
+            <div className="h-4 w-32 rounded bg-white/10 animate-shimmer" />
           </td>
-          <td className="whitespace-nowrap px-6 py-4">
-            <div className="ml-auto h-4 w-16 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
+          <td className="whitespace-nowrap px-5 py-4">
+            <div className="ml-auto h-4 w-16 rounded bg-white/10 animate-shimmer" />
           </td>
         </tr>
       ))}
@@ -150,11 +180,20 @@ function useTracksTrendsHref() {
   }, [searchParams]);
 }
 
+function useTracksBadgeLabel() {
+  const locale = useLocale();
+  const tOverview = useTranslations("overview");
+  const { startDate, endDate } = useListenDateRange();
+  const dateRangeLabel = formatOverviewDateRangeLabel(startDate, endDate, locale);
+  return dateRangeLabel || tOverview("allData");
+}
+
 function TracksPageFallback() {
   const trendsHref = useTracksTrendsHref();
+  const badgeLabel = useTracksBadgeLabel();
   return (
     <div className="space-y-8">
-      <TracksHeroFrame trendsHref={trendsHref} stats={<TracksHeroStatsSkeleton />} />
+      <TracksHeroFrame trendsHref={trendsHref} badgeLabel={badgeLabel} stats={<TracksHeroStatsSkeleton />} />
       <OverviewSkeleton />
     </div>
   );
@@ -169,6 +208,7 @@ function TracksContent() {
   const t = useTranslations("tracks");
   const locale = useLocale();
   const emptyStatePresets = useEmptyStatePresets();
+  const badgeLabel = useTracksBadgeLabel();
   const startDate = searchParams.get("startDate") || undefined;
   const endDate = searchParams.get("endDate") || undefined;
   const userId = searchParams.get("userId") || undefined;
@@ -197,26 +237,14 @@ function TracksContent() {
     isLoading: isTopLoading,
     error: topError,
     refetch: refetchTop,
-  } = useTrackStats(
-    startDate,
-    endDate,
-    userId,
-    20,
-    0
-  );
+  } = useTrackStats(startDate, endDate, userId, 20, 0);
   const {
     data: pagedData,
     isLoading: isPagedLoading,
     isFetching: isPagedFetching,
     error: pagedError,
     refetch: refetchPaged,
-  } = useTrackStats(
-    startDate,
-    endDate,
-    userId,
-    pageSize,
-    offset
-  );
+  } = useTrackStats(startDate, endDate, userId, pageSize, offset);
 
   const topTracks = useMemo(() => topData?.topTracks ?? [], [topData?.topTracks]);
   const pagedTracks = useMemo(() => pagedData?.topTracks ?? [], [pagedData?.topTracks]);
@@ -246,15 +274,8 @@ function TracksContent() {
       }),
       queryFn: () => fetchTrackStats(startDate, endDate, userId, pageSize, nextOffset),
     });
-  }, [
-    endDate,
-    offset,
-    pageSize,
-    pagination?.hasMore,
-    queryClient,
-    startDate,
-    userId,
-  ]);
+  }, [endDate, offset, pageSize, pagination?.hasMore, queryClient, startDate, userId]);
+
   const chartData = useMemo(
     () =>
       topTracks.slice(0, 20).map((track) => ({
@@ -265,184 +286,214 @@ function TracksContent() {
     [topTracks]
   );
 
+  const heroStats = topData ? (
+    <TracksHeroStats overview={topData.overview} locale={locale} />
+  ) : (
+    <TracksHeroStatsSkeleton />
+  );
+
   if (!isTopLoading && topError && !topData) {
     return (
-      <div className="space-y-8">
-        <TracksHeroFrame trendsHref={trendsHref} stats={null} />
+      <div className="space-y-12">
+        <TracksHeroFrame trendsHref={trendsHref} badgeLabel={badgeLabel} stats={null} />
         <ErrorState error={topError} message={t("errorLoading")} onRetry={refetchTop} />
       </div>
     );
   }
   if (!isTopLoading && (!topData || topData.topTracks.length === 0)) {
     return (
-      <div className="space-y-8">
-        <TracksHeroFrame trendsHref={trendsHref} stats={null} />
+      <div className="space-y-12">
+        <TracksHeroFrame trendsHref={trendsHref} badgeLabel={badgeLabel} stats={null} />
         <EmptyState {...emptyStatePresets.importData} />
       </div>
     );
   }
   if (!isPagedLoading && pagedError && !pagedData) {
     return (
-      <div className="space-y-8">
-        <TracksHeroFrame
-          trendsHref={trendsHref}
-          stats={
-            topData ? (
-              <TracksHeroStats overview={topData.overview} locale={locale} />
-            ) : (
-              <TracksHeroStatsSkeleton />
-            )
-          }
-        />
+      <div className="space-y-12">
+        <TracksHeroFrame trendsHref={trendsHref} badgeLabel={badgeLabel} stats={heroStats} />
         <ErrorState error={pagedError} message={t("errorLoading")} onRetry={refetchPaged} />
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
-      <TracksHeroFrame
-        trendsHref={trendsHref}
-        stats={
-          topData ? (
-            <TracksHeroStats overview={topData.overview} locale={locale} />
-          ) : (
-            <TracksHeroStatsSkeleton />
-          )
-        }
-      />
+    <div className="space-y-12">
+      <TracksHeroFrame trendsHref={trendsHref} badgeLabel={badgeLabel} stats={heroStats} />
 
-      <section className={`${TRACK_PANEL_CLASS} animate-fade-in-up`}>
-        <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${TRACK_RAIL_CLASS} opacity-80`} />
-        <div className="border-b border-cyan-200/20 px-6 py-4 dark:border-cyan-300/10">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{t("top20Listens")}</h3>
-          <p className="mt-0.5 text-sm text-cyan-700/80 dark:text-cyan-100/70">
-            {topData
-              ? `${topData.overview.totalListens.toLocaleString(locale)} ${t("listensCount")}`
-              : t("heroSubtitle")}
-          </p>
-        </div>
-        <div className="relative overflow-x-auto p-6">
-          <div className="pointer-events-none absolute right-12 top-12 h-64 w-64 rounded-full bg-emerald-400/10 blur-3xl dark:bg-emerald-400/15" />
-          <div className="relative min-w-[360px] rounded-2xl border border-cyan-200/20 bg-white/50 p-3 shadow-inner dark:border-cyan-300/10 dark:bg-slate-950/20">
-            {isTopLoading || !topData ? (
-              <TracksChartSkeleton />
-            ) : (
-              <ResponsiveContainer width="100%" height={560}>
-                <BarChart data={chartData} layout="vertical" margin={{ top: 5, right: 30, left: 150, bottom: 5 }}>
-                  <defs>
-                    <linearGradient id="trackBarGradient" x1="0" y1="0" x2="1" y2="0">
-                      <stop offset="0%" stopColor="#22d3ee" />
-                      <stop offset="45%" stopColor="#2dd4bf" />
-                      <stop offset="78%" stopColor="#34d399" />
-                      <stop offset="100%" stopColor="#bef264" />
-                    </linearGradient>
-                    <filter id="trackBarGlow" x="-20%" y="-35%" width="150%" height="170%">
-                      <feDropShadow dx="0" dy="6" stdDeviation="5" floodColor="#22d3ee" floodOpacity="0.24" />
-                    </filter>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#67e8f9" strokeOpacity={0.24} horizontal={false} />
-                  <XAxis type="number" tick={{ fill: "#0891b2", fontSize: 11 }} axisLine={false} tickLine={false} />
-                  <YAxis type="category" dataKey="name" tick={{ fill: "#0f766e", fontSize: 12, fontWeight: 600 }} axisLine={false} tickLine={false} width={140} />
-                  <Tooltip
-                    contentStyle={CHART_TOOLTIP_STYLES.contentStyle}
-                    labelStyle={CHART_TOOLTIP_STYLES.labelStyle}
-                    itemStyle={CHART_TOOLTIP_STYLES.itemStyle}
-                    formatter={(value: number, name: string, props: { payload?: { fullName?: string } }) => {
-                      const fullName = props?.payload?.fullName ?? t("track");
-                      if (name === "listens") return [`${value.toLocaleString(locale)} ${t("listensCount")}`, fullName];
-                      return [value, name];
-                    }}
-                  />
-                  <Bar dataKey="listens" fill="url(#trackBarGradient)" filter="url(#trackBarGlow)" radius={[0, 8, 8, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            )}
+      <section className="relative animate-fade-in-up">
+        <TracksSectionHeader
+          eyebrow={t("sections.chart.eyebrow")}
+          title={t("sections.chart.title")}
+          description={t("sections.chart.description")}
+        />
+        <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950 text-white shadow-2xl shadow-black/25 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-black/35">
+          <div
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(6,182,212,0.2),transparent_32%),radial-gradient(circle_at_86%_18%,rgba(139,92,246,0.16),transparent_30%),linear-gradient(135deg,rgba(255,255,255,0.06),transparent_42%)]"
+            aria-hidden
+          />
+          <div className="pointer-events-none absolute -bottom-24 left-1/4 h-64 w-64 rounded-full bg-accent-cyan/12 blur-3xl" aria-hidden />
+          <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-cyan-200/45 to-transparent" aria-hidden />
+          <div className="relative px-5 py-6 sm:px-8 sm:py-8">
+            <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-cyan-300/25 bg-cyan-300/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-100">
+                  <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_16px_rgb(22_199_132_/0.75)]" />
+                  {t("sections.chart.badge")}
+                </div>
+                <p className="font-mono text-xs text-slate-400">
+                  {topData
+                    ? `${topData.overview.totalListens.toLocaleString(locale)} ${t("listensCount")} · ${t("top20Listens")}`
+                    : "—"}
+                </p>
+              </div>
+            </div>
+            <div className="rounded-[1.35rem] border border-white/10 bg-black/25 p-3 shadow-inner backdrop-blur-sm sm:p-5">
+              {isTopLoading || !topData ? (
+                <TracksChartSkeleton />
+              ) : (
+                <ResponsiveContainer width="100%" height={520}>
+                  <BarChart data={chartData} layout="vertical" margin={{ top: 8, right: 24, left: 148, bottom: 8 }}>
+                    <defs>
+                      <linearGradient id="trackBarGradient" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stopColor="#22d3ee" />
+                        <stop offset="45%" stopColor="#2dd4bf" />
+                        <stop offset="78%" stopColor="#34d399" />
+                        <stop offset="100%" stopColor="#a7f3d0" />
+                      </linearGradient>
+                      <filter id="trackBarGlow" x="-20%" y="-35%" width="150%" height="170%">
+                        <feDropShadow dx="0" dy="4" stdDeviation="4" floodColor="#22d3ee" floodOpacity="0.2" />
+                      </filter>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.18)" horizontal={false} />
+                    <XAxis type="number" tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} />
+                    <YAxis
+                      type="category"
+                      dataKey="name"
+                      tick={{ fill: "#e2e8f0", fontSize: 12, fontWeight: 600 }}
+                      axisLine={false}
+                      tickLine={false}
+                      width={136}
+                    />
+                    <Tooltip
+                      contentStyle={CHART_TOOLTIP_STYLES.contentStyle}
+                      labelStyle={CHART_TOOLTIP_STYLES.labelStyle}
+                      itemStyle={CHART_TOOLTIP_STYLES.itemStyle}
+                      formatter={(value: number, name: string, props: { payload?: { fullName?: string } }) => {
+                        const fullName = props?.payload?.fullName ?? t("track");
+                        if (name === "listens") return [`${value.toLocaleString(locale)} ${t("listensCount")}`, fullName];
+                        return [value, name];
+                      }}
+                    />
+                    <Bar dataKey="listens" fill="url(#trackBarGradient)" filter="url(#trackBarGlow)" radius={[0, 10, 10, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </div>
           </div>
         </div>
       </section>
 
-      <section className={`${TRACK_PANEL_CLASS} animate-fade-in-up`} style={{ animationDelay: "60ms" }}>
-        <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${TRACK_RAIL_CLASS} opacity-80`} />
-        <div className="border-b border-cyan-200/20 px-6 py-4 dark:border-cyan-300/10">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{t("allTracks")}</h3>
-          <p className="mt-0.5 text-sm text-cyan-700/80 dark:text-cyan-100/70">
-            {t("heroSubtitle")}
-          </p>
-        </div>
-        <div className="max-h-[520px] overflow-y-auto overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead className="sticky top-0 z-10 bg-cyan-50/95 backdrop-blur supports-[backdrop-filter]:bg-cyan-50/80 dark:bg-slate-900/95 dark:supports-[backdrop-filter]:bg-slate-900/80">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">{t("rank")}</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">{t("track")}</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">{t("artist")}</th>
-                <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">{t("listens")}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-              {isPagedFetching || !pagedData
-                ? <TracksTableRowsSkeleton count={Math.min(pageSize, 10)} />
-                : pagedTracks.map((track, index) => (
-                    <tr key={track.trackId} className="transition-colors hover:bg-cyan-50/70 dark:hover:bg-cyan-950/20">
-                      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-300">{offset + index + 1}</td>
-                      <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">{track.trackTitle}</td>
-                      <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">{track.artistName}</td>
-                      <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-semibold tabular-nums text-gray-900 dark:text-white">
+      <section className="relative animate-fade-in-up" style={{ animationDelay: "60ms" }}>
+        <TracksSectionHeader
+          eyebrow={t("sections.table.eyebrow")}
+          title={t("sections.table.title")}
+          description={t("sections.table.description")}
+        />
+        <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950 text-white shadow-2xl shadow-black/25 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-black/35">
+          <div
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(139,92,246,0.14),transparent_32%),radial-gradient(circle_at_20%_80%,rgba(6,182,212,0.12),transparent_34%)]"
+            aria-hidden
+          />
+          <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-violet-200/35 to-transparent" aria-hidden />
+          <div className="relative border-b border-white/10 px-5 py-5 sm:px-8">
+            <div className="inline-flex items-center gap-2 rounded-full border border-violet-300/25 bg-violet-300/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-violet-100">
+              <span className="h-2 w-2 rounded-full bg-violet-300 shadow-[0_0_14px_rgba(167,139,250,0.55)]" />
+              {t("sections.table.badge")}
+            </div>
+          </div>
+          <div className="relative max-h-[min(70vh,640px)] overflow-x-auto overflow-y-auto">
+            <table className="min-w-full divide-y divide-white/10">
+              <thead className="sticky top-0 z-10 border-b border-white/10 bg-slate-950/90 backdrop-blur-md">
+                <tr>
+                  <th scope="col" className="px-5 py-3 text-left text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                    {t("rank")}
+                  </th>
+                  <th scope="col" className="px-5 py-3 text-left text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                    {t("track")}
+                  </th>
+                  <th scope="col" className="px-5 py-3 text-left text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                    {t("artist")}
+                  </th>
+                  <th scope="col" className="px-5 py-3 text-right text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                    {t("listens")}
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {isPagedFetching || !pagedData ? (
+                  <TracksTableRowsSkeleton count={Math.min(pageSize, 10)} />
+                ) : (
+                  pagedTracks.map((track, index) => (
+                    <tr key={track.trackId} className="transition-colors hover:bg-white/[0.04]">
+                      <td className="whitespace-nowrap px-5 py-4 text-sm tabular-nums text-slate-400">{offset + index + 1}</td>
+                      <td className="px-5 py-4 text-sm font-semibold text-white">{track.trackTitle}</td>
+                      <td className="px-5 py-4 text-sm text-slate-400">{track.artistName}</td>
+                      <td className="whitespace-nowrap px-5 py-4 text-right text-sm font-semibold tabular-nums text-white">
                         {track.listenCount.toLocaleString(locale)}
                       </td>
                     </tr>
-                  ))}
-            </tbody>
-          </table>
-        </div>
-        {pagination ? (
-          <div className="flex flex-col gap-3 border-t border-cyan-200/20 bg-cyan-50/30 px-6 py-4 dark:border-cyan-400/10 dark:bg-cyan-950/10 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-cyan-900/70 dark:text-cyan-100/75">
-              {t("paginationSummary", {
-                start: pageStart,
-                end: pageEnd,
-                total: totalTracksInRange,
-              })}
-            </p>
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                onClick={() => updatePaginationParams(page - 1, pageSize)}
-                disabled={page === 1}
-                className="inline-flex min-h-[36px] items-center justify-center rounded-lg border border-cyan-200/60 bg-white/90 px-3 py-1.5 text-sm font-medium text-cyan-950 transition-colors hover:bg-cyan-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-cyan-500/25 dark:bg-slate-900/60 dark:text-cyan-50 dark:hover:bg-cyan-950/40"
-              >
-                {t("paginationPrevious")}
-              </button>
-              <label className="ml-2 inline-flex items-center gap-2 text-sm text-cyan-900/80 dark:text-cyan-100/80">
-                <span>{t("pageSizeLabel")}</span>
-                <select
-                  value={pageSize}
-                  onChange={(e) => updatePaginationParams(1, Number(e.target.value))}
-                  className="rounded-lg border border-cyan-200/60 bg-white px-2 py-1 text-sm text-cyan-950 dark:border-cyan-500/25 dark:bg-slate-900 dark:text-cyan-50"
-                >
-                  <option value={20}>20</option>
-                  <option value={50}>50</option>
-                  <option value={100}>100</option>
-                </select>
-              </label>
-              <span className="px-2 text-sm text-cyan-900/80 dark:text-cyan-100/80">
-                {t("paginationPage", { page, totalPages })}
-              </span>
-              <button
-                type="button"
-                onClick={() => updatePaginationParams(page + 1, pageSize)}
-                disabled={!pagination.hasMore}
-                className="inline-flex min-h-[36px] items-center justify-center rounded-lg border border-cyan-200/60 bg-white/90 px-3 py-1.5 text-sm font-medium text-cyan-950 transition-colors hover:bg-cyan-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-cyan-500/25 dark:bg-slate-900/60 dark:text-cyan-50 dark:hover:bg-cyan-950/40"
-              >
-                {t("paginationNext")}
-              </button>
-            </div>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
-        ) : null}
-        {isPagedFetching ? (
-          <div className="px-6 pb-4 text-xs text-cyan-800/70 dark:text-cyan-200/60">{t("paginationLoading")}</div>
-        ) : null}
+          {pagination ? (
+            <div className="flex flex-col gap-3 border-t border-white/10 bg-black/35 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+              <p className="text-sm text-slate-400">
+                {t("paginationSummary", {
+                  start: pageStart,
+                  end: pageEnd,
+                  total: totalTracksInRange,
+                })}
+              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => updatePaginationParams(page - 1, pageSize)}
+                  disabled={page === 1}
+                  className="inline-flex min-h-[40px] items-center justify-center rounded-xl border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  {t("paginationPrevious")}
+                </button>
+                <label className="ml-1 inline-flex items-center gap-2 text-sm text-slate-300">
+                  <span>{t("pageSizeLabel")}</span>
+                  <select
+                    value={pageSize}
+                    onChange={(e) => updatePaginationParams(1, Number(e.target.value))}
+                    className="rounded-xl border border-white/15 bg-white/10 px-3 py-2 text-sm font-medium text-white"
+                  >
+                    <option value={20}>20</option>
+                    <option value={50}>50</option>
+                    <option value={100}>100</option>
+                  </select>
+                </label>
+                <span className="px-2 text-sm text-slate-400">
+                  {t("paginationPage", { page, totalPages })}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => updatePaginationParams(page + 1, pageSize)}
+                  disabled={!pagination.hasMore}
+                  className="inline-flex min-h-[40px] items-center justify-center rounded-xl border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  {t("paginationNext")}
+                </button>
+              </div>
+            </div>
+          ) : null}
+          {isPagedFetching ? <div className="px-5 pb-4 text-xs text-slate-500 sm:px-8">{t("paginationLoading")}</div> : null}
+        </div>
       </section>
     </div>
   );

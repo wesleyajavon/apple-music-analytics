@@ -31,7 +31,7 @@ import type { ArtistOverviewDto, ArtistStatsDto } from "@/lib/dto/artist";
 import { TopThreeArtists } from "@/lib/components/top-three-artists-cards";
 import { ArtistAvatarHydrated } from "@/lib/components/artist-avatar-hydrated";
 import { ArtistUserInsightsPanel } from "@/lib/components/artist-user-insights-panel";
-import { Mic2 } from "lucide-react";
+import { LineChart } from "lucide-react";
 
 /**
  * Couleurs pour avatars et graphiques (sans # pour UI Avatars)
@@ -49,49 +49,47 @@ const CHART_COLORS = [
 const ARTIST_RAIL_CLASS = "bg-gradient-to-r from-violet-400 via-cyan-300 to-lime-300";
 
 const ARTISTS_HERO_SHELL_CLASS =
-  "relative overflow-hidden rounded-3xl border border-cyan-300/20 bg-[radial-gradient(circle_at_top_left,_rgba(139,92,246,0.34),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(132,204,22,0.22),_transparent_30%),linear-gradient(135deg,_#020617_0%,_#111827_48%,_#164e63_100%)] px-6 py-8 shadow-2xl shadow-cyan-950/40 sm:px-8 sm:py-10";
+  "relative overflow-hidden rounded-[2rem] border border-white/10 bg-gray-950 px-5 py-6 text-white shadow-2xl shadow-violet-500/15 sm:px-8 sm:py-9 lg:px-10 lg:py-10";
 
-const TRENDS_CTA_CLASS =
-  "inline-flex min-h-[44px] w-fit shrink-0 items-center justify-center rounded-full border border-cyan-100/30 bg-white/95 px-5 py-2.5 text-sm font-semibold text-cyan-950 shadow-lg shadow-cyan-950/20 transition hover:-translate-y-0.5 hover:bg-cyan-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80";
-
-function ArtistsHeroFrame({
-  trendsHref,
-  stats,
-  periodLine,
-}: {
-  trendsHref: string;
-  stats: ReactNode;
-  periodLine?: string;
-}) {
+function ArtistsHeroFrame({ trendsHref, stats, badgeLabel }: { trendsHref: string; stats: ReactNode; badgeLabel: string }) {
   const t = useTranslations("artists");
   return (
     <div className={ARTISTS_HERO_SHELL_CLASS}>
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(6,182,212,0.1)_1px,_transparent_1px),linear-gradient(90deg,_rgba(132,204,22,0.08)_1px,_transparent_1px)] bg-[size:32px_32px] opacity-30" />
-      <div className="absolute -right-20 -top-24 h-56 w-56 rounded-full bg-violet-400/20 blur-3xl" />
-      <div className="absolute -bottom-24 left-10 h-48 w-48 rounded-full bg-lime-300/16 blur-3xl" />
-      <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${ARTIST_RAIL_CLASS} opacity-90`} />
-      <div className="relative flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-        <div className="max-w-3xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-200/85">{t("heroEyebrow")}</p>
-          <h1 className="mt-3 flex items-center gap-3 text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            <Mic2 className="h-9 w-9 shrink-0 text-cyan-200/90 sm:h-10 sm:w-10" strokeWidth={1.75} aria-hidden />
-            <span>{t("title")}</span>
-          </h1>
-          <div
-            className={`mt-4 h-1.5 w-24 rounded-full ${ARTIST_RAIL_CLASS} opacity-95 shadow-[0_0_24px_rgba(139,92,246,0.35)]`}
-            aria-hidden
-          />
-          <p className="mt-5 text-base leading-relaxed text-cyan-100/90 sm:text-lg">{t("subtitle")}</p>
-          {periodLine ? (
-            <p className="mt-2 text-sm font-medium tracking-wide text-lime-100/85" aria-live="polite">
-              {periodLine}
-            </p>
-          ) : null}
-          {stats}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.26),transparent_30%),radial-gradient(circle_at_80%_12%,rgba(6,182,212,0.2),transparent_32%),linear-gradient(135deg,rgba(3,7,18,0.98),rgba(30,27,75,0.88)_48%,rgba(8,47,73,0.72))]" />
+      <div className="absolute -left-20 top-1/3 h-64 w-64 rounded-full bg-accent-violet/22 blur-3xl" />
+      <div className="absolute -bottom-28 right-10 h-72 w-72 rounded-full bg-accent-cyan/18 blur-3xl" />
+      <div className="relative grid gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-center">
+        <div>
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-violet-100 backdrop-blur">
+            <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_18px_rgb(22_199_132_/0.75)]" />
+            {t("heroEyebrow")}
+          </div>
+          <h1 className="max-w-4xl text-balance text-4xl font-semibold tracking-[-0.06em] text-white sm:text-5xl lg:text-6xl">{t("title")}</h1>
+          <p className="mt-5 max-w-2xl text-base leading-7 text-white/70 sm:text-lg">{t("subtitle")}</p>
+          <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <Link
+              href={trendsHref}
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25 transition-all hover:-translate-y-0.5 hover:bg-gray-100"
+            >
+              <LineChart className="h-4 w-4" aria-hidden />
+              {t("viewTrends")}
+            </Link>
+            <span className="inline-flex items-center justify-center rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-sm font-bold text-white backdrop-blur">{badgeLabel}</span>
+          </div>
         </div>
-        <Link href={trendsHref} className={TRENDS_CTA_CLASS}>
-          {t("viewTrends")}
-        </Link>
+
+        <div className="relative">
+          <div className="absolute -inset-4 rounded-[2rem] bg-brand-gradient-soft blur-2xl" aria-hidden />
+          <div className="relative overflow-hidden rounded-[1.75rem] border border-white/15 bg-white/10 p-3 shadow-2xl shadow-black/35 backdrop-blur-xl">
+            <div className="rounded-[1.35rem] border border-white/10 bg-slate-950/70 p-4">
+              <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                <p className="font-mono text-[0.66rem] font-semibold uppercase tracking-[0.24em] text-slate-400">{t("heroStatBadge")}</p>
+                <span className="rounded-full border border-violet-300/25 bg-violet-300/10 px-2.5 py-1 text-[0.66rem] font-semibold text-violet-100">{t("heroStatTag")}</span>
+              </div>
+              {stats}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -100,18 +98,18 @@ function ArtistsHeroFrame({
 function ArtistsHeroStats({ overview, locale }: { overview: ArtistOverviewDto; locale: string }) {
   const t = useTranslations("artists");
   return (
-    <div className="mt-6 flex flex-wrap gap-4 sm:gap-8">
-      <div className="rounded-xl border border-violet-200/15 bg-slate-950/35 px-4 py-3 shadow-lg shadow-violet-950/20 backdrop-blur-sm">
-        <p className="text-xs font-medium uppercase tracking-wider text-violet-100/85">{t("artists")}</p>
-        <p className="text-2xl font-bold text-white">{overview.totalArtists.toLocaleString(locale)}</p>
+    <div className="grid gap-2 pt-4 sm:grid-cols-3">
+      <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
+        <p className="text-xl font-semibold tracking-tight text-white">{overview.totalArtists.toLocaleString(locale)}</p>
+        <p className="mt-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">{t("artists")}</p>
       </div>
-      <div className="rounded-xl border border-cyan-200/15 bg-slate-950/35 px-4 py-3 shadow-lg shadow-cyan-950/20 backdrop-blur-sm">
-        <p className="text-xs font-medium uppercase tracking-wider text-cyan-100/85">{t("listens")}</p>
-        <p className="text-2xl font-bold text-white">{overview.totalListens.toLocaleString(locale)}</p>
+      <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
+        <p className="text-xl font-semibold tracking-tight text-white">{overview.totalListens.toLocaleString(locale)}</p>
+        <p className="mt-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">{t("listens")}</p>
       </div>
-      <div className="rounded-xl border border-lime-200/15 bg-slate-950/35 px-4 py-3 shadow-lg shadow-lime-950/20 backdrop-blur-sm">
-        <p className="text-xs font-medium uppercase tracking-wider text-lime-100/85">{t("topArtist")}</p>
-        <p className="text-2xl font-bold text-white">{overview.topArtistListenCount.toLocaleString(locale)}</p>
+      <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
+        <p className="text-xl font-semibold tracking-tight text-white">{overview.topArtistListenCount.toLocaleString(locale)}</p>
+        <p className="mt-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">{t("topArtist")}</p>
       </div>
     </div>
   );
@@ -119,18 +117,65 @@ function ArtistsHeroStats({ overview, locale }: { overview: ArtistOverviewDto; l
 
 function ArtistsHeroStatsSkeleton() {
   return (
-    <div className="mt-6 flex flex-wrap gap-4 sm:gap-8">
+    <div className="grid gap-2 pt-4 sm:grid-cols-3">
       {[0, 1, 2].map((i) => (
-        <div
-          key={i}
-          className="min-w-[140px] flex-1 animate-pulse rounded-xl border border-white/10 bg-slate-950/35 px-4 py-3 shadow-lg backdrop-blur-sm sm:flex-initial"
-        >
-          <div className="mb-2 h-3 w-20 rounded bg-white/15" />
-          <div className="h-8 w-24 rounded bg-white/20" />
+        <div key={i} className="animate-pulse rounded-2xl border border-white/10 bg-white/[0.06] p-3">
+          <div className="mb-2 h-7 w-20 rounded bg-white/20" />
+          <div className="h-3 w-24 rounded bg-white/15" />
         </div>
       ))}
     </div>
   );
+}
+
+function ArtistsSectionHeader({ eyebrow, title, description }: { eyebrow: string; title: string; description: string }) {
+  return (
+    <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+      <div>
+        <p className="font-mono text-xs font-semibold uppercase tracking-[0.24em] text-primary">{eyebrow}</p>
+        <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-foreground sm:text-3xl">{title}</h2>
+      </div>
+      <p className="max-w-xl text-sm leading-6 text-muted">{description}</p>
+    </div>
+  );
+}
+
+function formatDateRange(startDate: string | undefined, endDate: string | undefined, locale: string): string {
+  if (!startDate || !endDate) return "";
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const opts: Intl.DateTimeFormatOptions = {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  };
+  return `${start.toLocaleDateString(locale, opts)} – ${end.toLocaleDateString(locale, opts)}`;
+}
+
+function useArtistsHeroBadge() {
+  const locale = useLocale();
+  const t = useTranslations("artists");
+  const searchParams = useSearchParams();
+  const preset = getDateRangePresetFromSearchParams(searchParams);
+  const { startDate: rangeStart, endDate: rangeEnd, isLoading: rangeLoading } = useListenDateRange();
+  return useMemo(() => {
+    const presetLabel: Record<DateRangePreset, string> = {
+      "7d": t("periodLast7Days"),
+      "30d": t("periodLast30Days"),
+      ytd: t("periodYearToDate"),
+      all: t("periodAllTime"),
+      custom: t("periodCustom"),
+    };
+    const name = presetLabel[preset];
+    const dates = formatDateRange(rangeStart, rangeEnd, locale);
+    if (dates) {
+      return `${name} · ${dates}`;
+    }
+    if (preset === "all" && rangeLoading) {
+      return name;
+    }
+    return name;
+  }, [preset, rangeStart, rangeEnd, rangeLoading, locale, t]);
 }
 
 function ArtistCardSkeleton() {
@@ -167,13 +212,13 @@ function ArtistsGridSkeleton({ count = 6 }: { count?: number }) {
 
 function ArtistsBarChartSkeleton() {
   return (
-    <div className="h-[360px] rounded-2xl border border-cyan-200/20 bg-white/40 p-6 shadow-inner dark:border-cyan-300/10 dark:bg-slate-950/20" aria-busy="true">
+    <div className="h-[360px] rounded-[1.35rem] border border-white/10 bg-black/30 p-5" aria-busy="true">
       <div className="flex h-full flex-col justify-between">
         {Array.from({ length: 8 }).map((_, index) => (
           <div key={index} className="flex items-center gap-4">
-            <div className="h-3 w-24 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
+            <div className="h-3 w-24 rounded bg-white/10 animate-shimmer" />
             <div
-              className="h-5 rounded-r-lg bg-cyan-200 animate-shimmer dark:bg-cyan-900/70"
+              className="h-5 rounded-r-lg bg-violet-400/20 animate-shimmer"
               style={{ width: `${35 + ((index * 13) % 55)}%` }}
             />
           </div>
@@ -185,8 +230,8 @@ function ArtistsBarChartSkeleton() {
 
 function ArtistsPieChartSkeleton() {
   return (
-    <div className="flex h-[360px] items-center justify-center rounded-2xl border border-cyan-200/20 bg-white/40 p-6 shadow-inner dark:border-cyan-300/10 dark:bg-slate-950/20" aria-busy="true">
-      <div className="h-56 w-56 rounded-full border-[34px] border-cyan-100 bg-gray-100 animate-shimmer dark:border-cyan-900/50 dark:bg-gray-800" />
+    <div className="flex h-[360px] items-center justify-center rounded-[1.35rem] border border-white/10 bg-black/30 p-6" aria-busy="true">
+      <div className="h-56 w-56 rounded-full border-[34px] border-violet-400/25 bg-white/10 animate-shimmer" />
     </div>
   );
 }
@@ -204,9 +249,10 @@ function useArtistsTrendsHref() {
 
 function ArtistsPageFallback() {
   const trendsHref = useArtistsTrendsHref();
+  const badgeLabel = useArtistsHeroBadge();
   return (
-    <div className="space-y-8">
-      <ArtistsHeroFrame trendsHref={trendsHref} stats={<ArtistsHeroStatsSkeleton />} />
+    <div className="space-y-12">
+      <ArtistsHeroFrame trendsHref={trendsHref} badgeLabel={badgeLabel} stats={<ArtistsHeroStatsSkeleton />} />
       <OverviewSkeleton />
     </div>
   );
@@ -466,67 +512,89 @@ const DetailedViewSection = memo(({
   const pageEnd = Math.min(offset + artists.length, total);
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-violet-300/20 bg-[radial-gradient(circle_at_top_left,_rgba(139,92,246,0.08),_transparent_34%),rgb(var(--card-rgb)/0.94)] shadow-lg shadow-violet-950/5 dark:border-cyan-300/15 dark:bg-[radial-gradient(circle_at_top_left,_rgba(139,92,246,0.16),_transparent_34%),rgb(var(--card-rgb)/0.9)]">
-      <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${ARTIST_RAIL_CLASS} opacity-75`} />
+    <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950 text-white shadow-2xl shadow-black/25 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-black/35">
+      <div
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.14),transparent_32%),radial-gradient(circle_at_86%_20%,rgba(6,182,212,0.1),transparent_30%)]"
+        aria-hidden
+      />
+      <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-violet-200/35 to-transparent" aria-hidden />
       <button
         type="button"
         onClick={() => setExpanded((e) => !e)}
-        className="flex w-full items-start justify-between gap-4 border-b border-violet-200/20 px-6 py-4 text-left transition-colors hover:bg-cyan-500/5 dark:border-cyan-300/10 dark:hover:bg-cyan-300/5"
+        className="relative flex w-full items-start justify-between gap-4 border-b border-white/10 px-5 py-5 text-left transition-colors hover:bg-white/[0.04] sm:px-8"
         aria-expanded={expanded}
       >
         <div>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{t("detailedView")}</h3>
-          <p className="mt-0.5 text-sm text-cyan-700/75 dark:text-cyan-100/70">{t("datesAndTracks")}</p>
+          <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-cyan-300/25 bg-cyan-300/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-100">
+            <span className="h-2 w-2 rounded-full bg-cyan-300 shadow-[0_0_14px_rgb(34_211_238_/0.45)]" aria-hidden />
+            {t("sections.table.badge")}
+          </div>
+          <h3 className="text-lg font-semibold text-white sm:text-xl">{t("sections.table.title")}</h3>
+          <p className="mt-1 text-sm text-slate-400">{t("datesAndTracks")}</p>
         </div>
-        <ChevronIcon direction={expanded ? "up" : "down"} />
+        <span className="text-slate-400">
+          <ChevronIcon direction={expanded ? "up" : "down"} />
+        </span>
       </button>
       {expanded && (
         <>
-        <div className="max-h-[520px] overflow-y-auto overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead className="sticky top-0 z-10 bg-cyan-50/95 backdrop-blur supports-[backdrop-filter]:bg-cyan-50/80 dark:bg-slate-900/95 dark:supports-[backdrop-filter]:bg-slate-900/80">
+        <div className="relative max-h-[min(70vh,640px)] overflow-y-auto overflow-x-auto">
+          <table className="min-w-full divide-y divide-white/10">
+            <thead className="sticky top-0 z-10 border-b border-white/10 bg-slate-950/90 backdrop-blur-md">
               <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t("rank")}</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t("artist")}</th>
-                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t("listensLabel")}</th>
-                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t("tracks")}</th>
-                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t("first")}</th>
-                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t("last")}</th>
+                <th scope="col" className="px-5 py-3 text-left text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                  {t("rank")}
+                </th>
+                <th scope="col" className="px-5 py-3 text-left text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                  {t("artist")}
+                </th>
+                <th scope="col" className="px-5 py-3 text-right text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                  {t("listensLabel")}
+                </th>
+                <th scope="col" className="px-5 py-3 text-right text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                  {t("tracks")}
+                </th>
+                <th scope="col" className="px-5 py-3 text-right text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                  {t("first")}
+                </th>
+                <th scope="col" className="px-5 py-3 text-right text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                  {t("last")}
+                </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody className="divide-y divide-white/5">
               {isFetching
                 ? Array.from({ length: Math.min(pageSize, 10) }).map((_, index) => (
                     <tr key={`artist-skeleton-${index}`}>
-                      <td className="whitespace-nowrap px-6 py-4">
-                        <div className="h-8 w-8 animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700" />
+                      <td className="whitespace-nowrap px-5 py-4">
+                        <div className="h-8 w-8 animate-pulse rounded-lg bg-white/10" />
                       </td>
-                      <td className="whitespace-nowrap px-6 py-4">
-                        <div className="h-4 w-44 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+                      <td className="whitespace-nowrap px-5 py-4">
+                        <div className="h-4 w-44 animate-pulse rounded bg-white/10" />
                       </td>
-                      <td className="whitespace-nowrap px-6 py-4">
-                        <div className="ml-auto h-4 w-16 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+                      <td className="whitespace-nowrap px-5 py-4">
+                        <div className="ml-auto h-4 w-16 animate-pulse rounded bg-white/10" />
                       </td>
-                      <td className="whitespace-nowrap px-6 py-4">
-                        <div className="ml-auto h-4 w-10 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+                      <td className="whitespace-nowrap px-5 py-4">
+                        <div className="ml-auto h-4 w-10 animate-pulse rounded bg-white/10" />
                       </td>
-                      <td className="whitespace-nowrap px-6 py-4">
-                        <div className="ml-auto h-4 w-24 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+                      <td className="whitespace-nowrap px-5 py-4">
+                        <div className="ml-auto h-4 w-24 animate-pulse rounded bg-white/10" />
                       </td>
-                      <td className="whitespace-nowrap px-6 py-4">
-                        <div className="ml-auto h-4 w-24 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+                      <td className="whitespace-nowrap px-5 py-4">
+                        <div className="ml-auto h-4 w-24 animate-pulse rounded bg-white/10" />
                       </td>
                     </tr>
                   ))
                 : artists.map((artist, index) => {
-                const rankStyles = ["text-amber-500", "text-slate-400", "text-amber-700"];
-                const rankBg = ["bg-amber-500/15", "bg-slate-400/15", "bg-amber-700/15"];
-                const rankStyle = index < 3 ? rankStyles[index] : "text-gray-400 dark:text-gray-500";
-                const rankBgStyle = index < 3 ? rankBg[index] : "bg-gray-100 dark:bg-gray-700/50";
+                const rankStyles = ["text-amber-400", "text-slate-300", "text-amber-500"];
+                const rankBg = ["bg-amber-400/20", "bg-slate-400/15", "bg-amber-500/20"];
+                const rankStyle = index < 3 ? rankStyles[index] : "text-slate-500";
+                const rankBgStyle = index < 3 ? rankBg[index] : "bg-white/10";
                 const avatarColorIndex = offset + index;
                 const rowInteractive =
-                  "cursor-pointer hover:bg-cyan-50/70 dark:hover:bg-cyan-300/5 transition-colors " +
-                  "focus-visible:bg-cyan-50/70 dark:focus-visible:bg-cyan-300/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-cyan-400";
+                  "cursor-pointer transition-colors hover:bg-white/[0.04] " +
+                  "focus-visible:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-cyan-400/60";
                 const openInsights = () => onOpenArtistInsights(artist, avatarColorIndex);
                 return (
                   <tr
@@ -542,12 +610,12 @@ const DetailedViewSection = memo(({
                       openInsights();
                     }}
                   >
-                    <td className="whitespace-nowrap px-6 py-4">
+                    <td className="whitespace-nowrap px-5 py-4">
                       <span className={`inline-flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold ${rankStyle} ${rankBgStyle}`}>
                         {offset + index + 1}
                       </span>
                     </td>
-                    <td className="whitespace-nowrap px-6 py-4">
+                    <td className="whitespace-nowrap px-5 py-4">
                       <div className="flex items-center gap-3">
                         <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full">
                           <ArtistAvatarHydrated
@@ -562,19 +630,19 @@ const DetailedViewSection = memo(({
                             className="h-full w-full object-cover"
                           />
                         </div>
-                        <span className="text-sm font-medium text-gray-900 dark:text-white">{artist.artistName}</span>
+                        <span className="text-sm font-semibold text-white">{artist.artistName}</span>
                       </div>
                     </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-semibold tabular-nums text-gray-900 dark:text-white">
+                    <td className="whitespace-nowrap px-5 py-4 text-right text-sm font-semibold tabular-nums text-white">
                       {artist.listenCount.toLocaleString(locale)}
                     </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-right text-sm text-gray-500 dark:text-gray-400 tabular-nums">
+                    <td className="whitespace-nowrap px-5 py-4 text-right text-sm tabular-nums text-slate-400">
                       {artist.uniqueTracks}
                     </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-right text-sm text-gray-500 dark:text-gray-400">
+                    <td className="whitespace-nowrap px-5 py-4 text-right text-sm text-slate-400">
                       {new Date(artist.firstListenDate).toLocaleDateString(locale)}
                     </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-right text-sm text-gray-500 dark:text-gray-400">
+                    <td className="whitespace-nowrap px-5 py-4 text-right text-sm text-slate-400">
                       {new Date(artist.lastListenDate).toLocaleDateString(locale)}
                     </td>
                   </tr>
@@ -583,8 +651,8 @@ const DetailedViewSection = memo(({
             </tbody>
           </table>
         </div>
-        <div className="flex flex-col gap-3 border-t border-violet-200/30 bg-violet-50/25 px-6 py-4 dark:border-violet-400/15 dark:bg-violet-950/15 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-violet-900/75 dark:text-violet-100/75">
+        <div className="relative flex flex-col gap-3 border-t border-white/10 bg-black/35 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+          <p className="text-sm text-slate-400">
             {t("paginationSummary", {
               start: pageStart,
               end: pageEnd,
@@ -596,37 +664,37 @@ const DetailedViewSection = memo(({
               type="button"
               onClick={() => onPageChange(page - 1)}
               disabled={page === 1}
-              className="inline-flex min-h-[36px] items-center justify-center rounded-lg border border-violet-200/70 bg-white/90 px-3 py-1.5 text-sm font-medium text-violet-950 transition-colors hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-violet-500/30 dark:bg-slate-900/60 dark:text-violet-50 dark:hover:bg-violet-950/35"
+              className="inline-flex min-h-[40px] items-center justify-center rounded-xl border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {t("paginationPrevious")}
             </button>
-            <label className="ml-2 inline-flex items-center gap-2 text-sm text-violet-900/85 dark:text-violet-100/80">
+            <label className="ml-1 inline-flex items-center gap-2 text-sm text-slate-300">
               <span>{t("pageSizeLabel")}</span>
               <select
                 value={pageSize}
                 onChange={(e) => onPageSizeChange(Number(e.target.value))}
-                className="rounded-lg border border-violet-200/70 bg-white px-2 py-1 text-sm text-violet-950 dark:border-violet-500/30 dark:bg-slate-900 dark:text-violet-50"
+                className="rounded-xl border border-white/15 bg-white/10 px-3 py-2 text-sm font-medium text-white"
               >
                 <option value={20}>20</option>
                 <option value={50}>50</option>
                 <option value={100}>100</option>
               </select>
             </label>
-            <span className="px-2 text-sm text-violet-900/85 dark:text-violet-100/80">
+            <span className="px-2 text-sm text-slate-400">
               {t("paginationPage", { page, totalPages })}
             </span>
             <button
               type="button"
               onClick={() => onPageChange(page + 1)}
               disabled={!hasMore}
-              className="inline-flex min-h-[36px] items-center justify-center rounded-lg border border-violet-200/70 bg-white/90 px-3 py-1.5 text-sm font-medium text-violet-950 transition-colors hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-violet-500/30 dark:bg-slate-900/60 dark:text-violet-50 dark:hover:bg-violet-950/35"
+              className="inline-flex min-h-[40px] items-center justify-center rounded-xl border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {t("paginationNext")}
             </button>
           </div>
         </div>
         {isFetching ? (
-          <div className="px-6 pb-4 text-xs text-violet-800/70 dark:text-violet-200/60">{t("paginationLoading")}</div>
+          <div className="px-5 pb-4 text-xs text-slate-500 sm:px-8">{t("paginationLoading")}</div>
         ) : null}
         </>
       )}
@@ -635,22 +703,6 @@ const DetailedViewSection = memo(({
 });
 
 DetailedViewSection.displayName = "DetailedViewSection";
-
-function formatDateRange(
-  startDate: string | undefined,
-  endDate: string | undefined,
-  locale: string
-): string {
-  if (!startDate || !endDate) return "";
-  const start = new Date(startDate);
-  const end = new Date(endDate);
-  const opts: Intl.DateTimeFormatOptions = {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  };
-  return `${start.toLocaleDateString(locale, opts)} – ${end.toLocaleDateString(locale, opts)}`;
-}
 
 function ArtistsContent() {
   const DEFAULT_PAGE_SIZE = 20;
@@ -692,31 +744,7 @@ function ArtistsContent() {
     [pathname, router, searchParams]
   );
 
-  const preset = getDateRangePresetFromSearchParams(searchParams);
-  const {
-    startDate: rangeStart,
-    endDate: rangeEnd,
-    isLoading: rangeLoading,
-  } = useListenDateRange();
-
-  const periodLine = useMemo(() => {
-    const presetLabel: Record<DateRangePreset, string> = {
-      "7d": t("periodLast7Days"),
-      "30d": t("periodLast30Days"),
-      ytd: t("periodYearToDate"),
-      all: t("periodAllTime"),
-      custom: t("periodCustom"),
-    };
-    const name = presetLabel[preset];
-    const dates = formatDateRange(rangeStart, rangeEnd, locale);
-    if (dates) {
-      return `${name} · ${dates}`;
-    }
-    if (preset === "all" && rangeLoading) {
-      return name;
-    }
-    return name;
-  }, [preset, rangeStart, rangeEnd, rangeLoading, locale, t]);
+  const badgeLabel = useArtistsHeroBadge();
 
   const {
     data: topData,
@@ -799,25 +827,26 @@ function ArtistsContent() {
 
   if (!isTopLoading && topError && !topData) {
     return (
-      <div className="space-y-8">
-        <ArtistsHeroFrame trendsHref={trendsHref} stats={null} periodLine={periodLine} />
+      <div className="space-y-12">
+        <ArtistsHeroFrame trendsHref={trendsHref} badgeLabel={badgeLabel} stats={null} />
         <ErrorState error={topError} message={t("errorLoading")} onRetry={refetchTop} />
       </div>
     );
   }
   if (!isTopLoading && (!topData || topData.topArtists.length === 0)) {
     return (
-      <div className="space-y-8">
-        <ArtistsHeroFrame trendsHref={trendsHref} stats={null} periodLine={periodLine} />
+      <div className="space-y-12">
+        <ArtistsHeroFrame trendsHref={trendsHref} badgeLabel={badgeLabel} stats={null} />
         <EmptyState {...emptyStatePresets.importData} />
       </div>
     );
   }
   if (!isPagedLoading && pagedError && !pagedData) {
     return (
-      <div className="space-y-8">
+      <div className="space-y-12">
         <ArtistsHeroFrame
           trendsHref={trendsHref}
+          badgeLabel={badgeLabel}
           stats={
             topData ? (
               <ArtistsHeroStats overview={topData.overview} locale={locale} />
@@ -825,7 +854,6 @@ function ArtistsContent() {
               <ArtistsHeroStatsSkeleton />
             )
           }
-          periodLine={periodLine}
         />
         <ErrorState error={pagedError} message={t("errorLoading")} onRetry={refetchPaged} />
       </div>
@@ -834,9 +862,10 @@ function ArtistsContent() {
   const overview = topData?.overview;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-12">
       <ArtistsHeroFrame
         trendsHref={trendsHref}
+        badgeLabel={badgeLabel}
         stats={
           overview ? (
             <ArtistsHeroStats overview={overview} locale={locale} />
@@ -844,163 +873,209 @@ function ArtistsContent() {
             <ArtistsHeroStatsSkeleton />
           )
         }
-        periodLine={periodLine}
       />
 
-      {/* Top 3 – grandes cartes style Replay */}
-      <section className="animate-fade-in-up">
-        <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">{t("top3Title")}</h3>
-        {isTopLoading ? (
-          <ArtistsGridSkeleton count={3} />
-        ) : (
-          <TopThreeArtists
-            artists={topArtists}
-            maxListens={maxListens}
-            t={t}
-            locale={locale}
-            onArtistSelect={handleOpenArtistInsights}
-          />
-        )}
-      </section>
-
-      {/* Graphiques – Top 10 listens + Distribution Top 6 */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 animate-fade-in-up" style={{ animationDelay: "40ms" }}>
-        <div className="relative overflow-hidden rounded-2xl border border-cyan-300/20 border-l-4 border-l-violet-400 bg-[radial-gradient(circle_at_top_left,_rgba(139,92,246,0.1),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(6,182,212,0.08),_transparent_30%),rgb(var(--card-rgb)/0.92)] shadow-card transition-shadow duration-300 hover:shadow-card-hover dark:border-cyan-300/15 dark:bg-[radial-gradient(circle_at_top_left,_rgba(139,92,246,0.16),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(132,204,22,0.1),_transparent_30%),rgb(var(--card-rgb)/0.9)]">
-          <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${ARTIST_RAIL_CLASS} opacity-80`} />
-          <div className="border-b border-cyan-200/20 px-6 py-4 dark:border-cyan-300/10">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{t("top10Listens")}</h3>
+      <section className="relative animate-fade-in-up">
+        <ArtistsSectionHeader
+          eyebrow={t("sections.charts.eyebrow")}
+          title={t("sections.charts.title")}
+          description={t("sections.charts.description")}
+        />
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+          <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950 text-white shadow-2xl shadow-black/25 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-black/35">
+            <div
+              className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.2),transparent_32%),radial-gradient(circle_at_86%_18%,rgba(6,182,212,0.14),transparent_30%)]"
+              aria-hidden
+            />
+            <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-violet-200/45 to-transparent" aria-hidden />
+            <div className="relative border-b border-white/10 px-5 py-5 sm:px-8">
+              <div className="inline-flex items-center gap-2 rounded-full border border-violet-300/25 bg-violet-300/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-violet-100">
+                <span className="h-2 w-2 rounded-full bg-violet-300 shadow-[0_0_14px_rgba(167,139,250,0.55)]" aria-hidden />
+                {t("sections.charts.barBadge")}
+              </div>
+              <h3 className="mt-3 text-lg font-semibold text-white sm:text-xl">{t("top10Listens")}</h3>
+            </div>
+            <div className="relative p-5 sm:p-6 lg:p-8">
+              <div className="rounded-[1.35rem] border border-white/10 bg-black/25 p-3 backdrop-blur-sm sm:p-5">
+                {isTopLoading ? (
+                  <ArtistsBarChartSkeleton />
+                ) : (
+                  <ResponsiveContainer width="100%" height={360}>
+                    <BarChart data={barChartData} layout="vertical" margin={{ top: 8, right: 28, left: 104, bottom: 8 }}>
+                      <defs>
+                        <linearGradient id="barGradientArtists" x1="0" y1="0" x2="1" y2="0">
+                          <stop offset="0%" stopColor="#8b5cf6" />
+                          <stop offset="50%" stopColor="#06b6d4" />
+                          <stop offset="100%" stopColor="#84cc16" />
+                        </linearGradient>
+                        <filter id="artistBarGlow" x="-20%" y="-20%" width="140%" height="150%">
+                          <feDropShadow dx="0" dy="6" stdDeviation="5" floodColor="#8b5cf6" floodOpacity="0.22" />
+                        </filter>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.18)" horizontal={false} />
+                      <XAxis type="number" tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} tickMargin={8} />
+                      <YAxis
+                        type="category"
+                        dataKey="name"
+                        tick={{ fill: "#e2e8f0", fontSize: 12, fontWeight: 600 }}
+                        axisLine={false}
+                        tickLine={false}
+                        tickMargin={8}
+                        width={96}
+                      />
+                      <Tooltip
+                        contentStyle={CHART_TOOLTIP_STYLES.contentStyle}
+                        labelStyle={CHART_TOOLTIP_STYLES.labelStyle}
+                        itemStyle={CHART_TOOLTIP_STYLES.itemStyle}
+                        formatter={(value: number, name: string, props: { payload?: { fullName?: string } }) => {
+                          const fullName = props?.payload?.fullName;
+                          if (name === "listens") return [`${value.toLocaleString(locale)} ${t("listensCount")}`, fullName || t("artistTooltip")];
+                          return [value, name];
+                        }}
+                      />
+                      <Bar dataKey="listens" fill="url(#barGradientArtists)" filter="url(#artistBarGlow)" radius={[0, 10, 10, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+              </div>
+            </div>
           </div>
-          <div className="relative p-6">
-            <div className="pointer-events-none absolute left-1/3 top-16 h-48 w-48 rounded-full bg-cyan-400/10 blur-3xl dark:bg-cyan-400/15" />
-            {isTopLoading ? (
-              <ArtistsBarChartSkeleton />
-            ) : (
-              <ResponsiveContainer width="100%" height={360}>
-                <BarChart data={barChartData} layout="vertical" margin={{ top: 5, right: 30, left: 100, bottom: 5 }}>
-                  <defs>
-                    <linearGradient id="barGradient" x1="0" y1="0" x2="1" y2="0">
-                      <stop offset="0%" stopColor="#8b5cf6" />
-                      <stop offset="50%" stopColor="#06b6d4" />
-                      <stop offset="100%" stopColor="#84cc16" />
-                    </linearGradient>
-                    <filter id="artistBarGlow" x="-20%" y="-20%" width="140%" height="150%">
-                      <feDropShadow dx="0" dy="8" stdDeviation="6" floodColor="#06b6d4" floodOpacity="0.2" />
-                    </filter>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#67e8f9" strokeOpacity={0.28} horizontal={false} />
-                  <XAxis
-                    type="number"
-                    tick={{ fill: "rgb(var(--muted-rgb))", fontSize: 11 }}
-                    axisLine={false}
-                    tickLine={false}
-                    tickMargin={8}
-                  />
-                  <YAxis
-                    type="category"
-                    dataKey="name"
-                    tick={{ fill: "rgb(var(--muted-rgb))", fontSize: 12, fontWeight: 500 }}
-                    axisLine={false}
-                    tickLine={false}
-                    tickMargin={8}
-                    width={95}
-                  />
-                  <Tooltip
-                    contentStyle={CHART_TOOLTIP_STYLES.contentStyle}
-                    labelStyle={CHART_TOOLTIP_STYLES.labelStyle}
-                    itemStyle={CHART_TOOLTIP_STYLES.itemStyle}
-                    formatter={(value: number, name: string, props: { payload?: { fullName?: string } }) => {
-                      const fullName = props?.payload?.fullName;
-                      if (name === "listens") return [`${value.toLocaleString(locale)} ${t("listensCount")}`, fullName || t("artistTooltip")];
-                      return [value, name];
-                    }}
-                  />
-                  <Bar dataKey="listens" fill="url(#barGradient)" filter="url(#artistBarGlow)" radius={[0, 8, 8, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            )}
+
+          <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950 text-white shadow-2xl shadow-black/25 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-black/35">
+            <div
+              className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(132,204,22,0.14),transparent_32%),radial-gradient(circle_at_12%_70%,rgba(139,92,246,0.12),transparent_34%)]"
+              aria-hidden
+            />
+            <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-lime-200/40 to-transparent" aria-hidden />
+            <div className="relative border-b border-white/10 px-5 py-5 sm:px-8">
+              <div className="inline-flex items-center gap-2 rounded-full border border-lime-300/25 bg-lime-300/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-lime-100">
+                <span className="h-2 w-2 rounded-full bg-lime-300 shadow-[0_0_12px_rgba(190,242,100,0.45)]" aria-hidden />
+                {t("sections.charts.pieBadge")}
+              </div>
+              <h3 className="mt-3 text-lg font-semibold text-white sm:text-xl">{t("distributionTop6")}</h3>
+            </div>
+            <div className="relative p-5 sm:p-6 lg:p-8">
+              <div className="rounded-[1.35rem] border border-white/10 bg-black/25 p-3 backdrop-blur-sm sm:p-5">
+                {isTopLoading ? (
+                  <ArtistsPieChartSkeleton />
+                ) : (
+                  <ResponsiveContainer width="100%" height={360}>
+                    <PieChart>
+                      <defs>
+                        <filter id="artistPieGlow" x="-30%" y="-30%" width="160%" height="160%">
+                          <feDropShadow dx="0" dy="8" stdDeviation="10" floodColor="#8b5cf6" floodOpacity="0.2" />
+                        </filter>
+                      </defs>
+                      <Pie
+                        data={pieChartData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        label={({ name, percent }) =>
+                          `${name.length > 12 ? name.substring(0, 12) + "…" : name} (${(percent * 100).toFixed(1)}%)`
+                        }
+                        innerRadius={58}
+                        outerRadius={116}
+                        paddingAngle={2}
+                        fill="#a855f7"
+                        dataKey="value"
+                        filter="url(#artistPieGlow)"
+                      >
+                        {pieChartData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} stroke="rgba(15,23,42,0.85)" strokeWidth={2} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        contentStyle={CHART_TOOLTIP_STYLES.contentStyle}
+                        labelStyle={CHART_TOOLTIP_STYLES.labelStyle}
+                        itemStyle={CHART_TOOLTIP_STYLES.itemStyle}
+                        formatter={(value: number) => [`${value.toLocaleString(locale)} ${t("listensCount")}`, t("listens")]}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                )}
+              </div>
+            </div>
           </div>
         </div>
-
-        <div className="relative overflow-hidden rounded-2xl border border-cyan-300/20 border-l-4 border-l-lime-400 bg-[radial-gradient(circle_at_top_left,_rgba(132,204,22,0.1),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(139,92,246,0.08),_transparent_30%),rgb(var(--card-rgb)/0.92)] shadow-card transition-shadow duration-300 hover:shadow-card-hover dark:border-cyan-300/15 dark:bg-[radial-gradient(circle_at_top_left,_rgba(132,204,22,0.16),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(139,92,246,0.12),_transparent_30%),rgb(var(--card-rgb)/0.9)]">
-          <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${ARTIST_RAIL_CLASS} opacity-80`} />
-          <div className="border-b border-cyan-200/20 px-6 py-4 dark:border-cyan-300/10">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{t("distributionTop6")}</h3>
-          </div>
-          <div className="relative p-6">
-            <div className="pointer-events-none absolute left-1/2 top-16 h-56 w-56 -translate-x-1/2 rounded-full bg-lime-300/10 blur-3xl dark:bg-lime-300/15" />
-            {isTopLoading ? (
-              <ArtistsPieChartSkeleton />
-            ) : (
-              <ResponsiveContainer width="100%" height={360}>
-                <PieChart>
-                  <defs>
-                    <filter id="artistPieGlow" x="-30%" y="-30%" width="160%" height="160%">
-                      <feDropShadow dx="0" dy="8" stdDeviation="10" floodColor="#8b5cf6" floodOpacity="0.18" />
-                    </filter>
-                  </defs>
-                  <Pie
-                    data={pieChartData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }) =>
-                      `${name.length > 12 ? name.substring(0, 12) + "…" : name} (${(percent * 100).toFixed(1)}%)`
-                    }
-                    innerRadius={58}
-                    outerRadius={116}
-                    paddingAngle={2}
-                    fill="#a855f7"
-                    dataKey="value"
-                    filter="url(#artistPieGlow)"
-                  >
-                    {pieChartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} stroke="rgb(var(--card-rgb) / 0.95)" strokeWidth={2} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    contentStyle={CHART_TOOLTIP_STYLES.contentStyle}
-                    labelStyle={CHART_TOOLTIP_STYLES.labelStyle}
-                    itemStyle={CHART_TOOLTIP_STYLES.itemStyle}
-                    formatter={(value: number) => [`${value.toLocaleString(locale)} ${t("listensCount")}`, t("listens")]}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Grille d'artistes – top 8 visibles, reste togglable (toggle en 9e position) */}
-      <section className="animate-fade-in-up" style={{ animationDelay: "80ms" }}>
-        <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">{t("allArtists")}</h3>
-        {isTopLoading ? (
-          <ArtistsGridSkeleton />
-        ) : (
-          <AllArtistsGrid
-            topArtists={topArtists}
-            t={t}
-            locale={locale}
-            onOpenArtistInsights={handleOpenArtistInsights}
-          />
-        )}
       </section>
 
-      {/* Tableau détaillé – togglable */}
-      <DetailedViewSection
-        artists={pagedArtists}
-        page={page}
-        pageSize={pageSize}
-        totalPages={totalPages}
-        total={totalArtistsInRange}
-        hasMore={pagination?.hasMore ?? false}
-        offset={offset}
-        isFetching={isPagedFetching || !pagedData}
-        onPageChange={(nextPage) => updatePaginationParams(nextPage, pageSize)}
-        onPageSizeChange={(nextPageSize) => updatePaginationParams(1, nextPageSize)}
-        onOpenArtistInsights={handleOpenArtistInsights}
-        t={t}
-        locale={locale}
-      />
+      <section className="relative animate-fade-in-up" style={{ animationDelay: "60ms" }}>
+        <ArtistsSectionHeader
+          eyebrow={t("sections.roster.eyebrow")}
+          title={t("sections.roster.title")}
+          description={t("sections.roster.description")}
+        />
+        <div className="relative overflow-hidden rounded-[2rem] border border-slate-200/90 bg-gradient-to-br from-white via-slate-50/90 to-white text-slate-900 shadow-xl shadow-slate-900/[0.07] ring-1 ring-slate-900/[0.04] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-2xl hover:shadow-slate-900/10 dark:border-slate-300/50 dark:from-slate-100 dark:via-white dark:to-slate-50 dark:text-slate-900 dark:hover:shadow-black/20">
+          <div
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.06),transparent_38%),radial-gradient(circle_at_90%_8%,rgba(6,182,212,0.05),transparent_32%)]"
+            aria-hidden
+          />
+          <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-violet-300/45 to-transparent" aria-hidden />
+          <div className="relative border-b border-slate-200/80 px-5 py-6 sm:px-8 dark:border-slate-200/90">
+            <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-violet-700">
+              <span className="h-2 w-2 rounded-full bg-violet-500 shadow-[0_0_12px_rgba(139,92,246,0.4)]" aria-hidden />
+              {t("sections.roster.top3Badge")}
+            </div>
+            <h3 className="mt-3 text-lg font-semibold text-slate-900 sm:text-xl">{t("top3Title")}</h3>
+          </div>
+          <div className="relative p-5 sm:p-6 lg:p-8">
+            {isTopLoading ? (
+              <ArtistsGridSkeleton count={3} />
+            ) : (
+              <TopThreeArtists
+                artists={topArtists}
+                maxListens={maxListens}
+                t={t}
+                locale={locale}
+                onArtistSelect={handleOpenArtistInsights}
+              />
+            )}
+          </div>
+          <div className="relative border-t border-slate-200/80 px-5 py-6 sm:px-8 dark:border-slate-200/90">
+            <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-800">
+              <span className="h-2 w-2 rounded-full bg-cyan-500 shadow-[0_0_12px_rgba(6,182,212,0.4)]" aria-hidden />
+              {t("sections.roster.gridBadge")}
+            </div>
+            <h3 className="mt-3 text-lg font-semibold text-slate-900 sm:text-xl">{t("allArtists")}</h3>
+            <div className="mt-5">
+              {isTopLoading ? (
+                <ArtistsGridSkeleton />
+              ) : (
+                <AllArtistsGrid
+                  topArtists={topArtists}
+                  t={t}
+                  locale={locale}
+                  onOpenArtistInsights={handleOpenArtistInsights}
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="relative animate-fade-in-up" style={{ animationDelay: "100ms" }}>
+        <ArtistsSectionHeader
+          eyebrow={t("sections.table.eyebrow")}
+          title={t("sections.table.title")}
+          description={t("sections.table.description")}
+        />
+        <DetailedViewSection
+          artists={pagedArtists}
+          page={page}
+          pageSize={pageSize}
+          totalPages={totalPages}
+          total={totalArtistsInRange}
+          hasMore={pagination?.hasMore ?? false}
+          offset={offset}
+          isFetching={isPagedFetching || !pagedData}
+          onPageChange={(nextPage) => updatePaginationParams(nextPage, pageSize)}
+          onPageSizeChange={(nextPageSize) => updatePaginationParams(1, nextPageSize)}
+          onOpenArtistInsights={handleOpenArtistInsights}
+          t={t}
+          locale={locale}
+        />
+      </section>
 
       <ArtistUserInsightsPanel
         open={artistInsightsTarget != null}

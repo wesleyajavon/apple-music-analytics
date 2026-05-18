@@ -711,6 +711,25 @@
     "paletteRestrictedTitle": "Palette est réservée aux comptes connectés",
     "paletteRestrictedBody": "La démo publique peut afficher les analyses de genres, mais le mapping manuel, les suggestions et les décisions de passage nécessitent un compte connecté.",
     "viewTrends": "Voir les tendances de genres",
+    "heroStatBadge": "Contexte",
+    "heroStatTag": "Cette plage",
+    "periodLast7Days": "7 derniers jours",
+    "periodLast30Days": "30 derniers jours",
+    "periodYearToDate": "Depuis le début de l’année",
+    "periodAllTime": "Tout l’historique",
+    "periodCustom": "Plage personnalisée",
+    "sections": {
+      "spotlight": {
+        "eyebrow": "Spotlight",
+        "title": "Vos genres phares",
+        "description": "Les styles les plus joués — classés et illustrés par les artistes qui les portent."
+      },
+      "distribution": {
+        "eyebrow": "Répartition",
+        "title": "Comment se divisent vos écoutes",
+        "description": "Changez le type de graphique, puis parcourez tout le classement avec les mêmes filtres que le reste du dashboard."
+      }
+    },
     "paginationSummary": "Affichage de {start} à {end} sur {total}",
     "paginationPrevious": "Précédent",
     "paginationNext": "Suivant",
@@ -720,6 +739,24 @@
   "genreTrends": {
     "title": "Tendances de genres",
     "heroEyebrow": "Écoute dans le temps",
+    "heroStatBadge": "Contexte",
+    "heroStatTag": "Cette plage",
+    "heroPanelGroupBy": "Regrouper par",
+    "heroPanelSeries": "Séries sur le graphique",
+    "sections": {
+      "picker": {
+        "eyebrow": "Sélection",
+        "title": "Choisissez vos courbes",
+        "description": "Activez les genres affichés sur le graphique — jusqu’à 30 séries dans votre fenêtre filtrée.",
+        "badge": "Sélection"
+      },
+      "chart": {
+        "eyebrow": "Trajectoire",
+        "title": "Volume d’écoute dans le temps",
+        "description": "Chaque ligne suit un genre ; la taille des paquets vient de la barre de contrôle.",
+        "badge": "Multi-séries"
+      }
+    },
     "backToGenres": "Retour à la vue genres",
     "subtitle": "Évolution de vos préférences musicales dans le temps",
     "subtitleExtended": "Évolution de vos préférences musicales dans le temps. Comparez la progression ou le recul de chaque genre sélectionné sur la période.",
@@ -804,6 +841,24 @@
   "artistTrends": {
     "title": "Tendances d'artistes",
     "heroEyebrow": "Écoute dans le temps",
+    "heroStatBadge": "Contexte",
+    "heroStatTag": "Cette période",
+    "heroPanelGroupBy": "Grouper par",
+    "heroPanelSeries": "Séries sur le graphique",
+    "sections": {
+      "picker": {
+        "eyebrow": "Sélection",
+        "title": "Choisir les courbes",
+        "description": "Activez vos artistes les plus joués, cherchez dans tout le catalogue, empilez jusqu'à 50 entités.",
+        "badge": "Sélection"
+      },
+      "chart": {
+        "eyebrow": "Trajectoire",
+        "title": "Volume d'écoutes dans le temps",
+        "description": "Chaque ligne suit un artiste ; le pas temporel vient du sélecteur en haut de page.",
+        "badge": "Multi-séries"
+      }
+    },
     "backToArtists": "Retour au classement des artistes",
     "subtitle": "Évolution de vos artistes les plus écoutés dans le temps",
     "subtitleExtended": "Évolution de vos artistes les plus écoutés dans le temps. Comparez la progression ou le recul de chaque artiste sélectionné sur la période.",
@@ -849,6 +904,30 @@
     "title": "Artistes",
     "subtitle": "Découvrez vos artistes préférés, leurs statistiques et l'évolution de vos écoutes.",
     "errorLoading": "Impossible de charger les statistiques des artistes",
+    "heroStatBadge": "Contexte",
+    "heroStatTag": "Cette période",
+    "sections": {
+      "charts": {
+        "eyebrow": "Signaux",
+        "title": "Profondeur du classement",
+        "description": "Histogramme des têtes d’affiche ; donut de la répartition du top 6.",
+        "barBadge": "Top 10",
+        "pieBadge": "Part top 6"
+      },
+      "roster": {
+        "eyebrow": "Spotlight",
+        "title": "Fiches artistes",
+        "description": "Touchez une fiche pour ouvrir l’analyse d’écoute — mêmes filtres que le dashboard.",
+        "top3Badge": "Podium",
+        "gridBadge": "Galerie"
+      },
+      "table": {
+        "eyebrow": "Index complet",
+        "title": "Classement détaillé",
+        "description": "Dépliez pour les dates, le nombre de titres et la pagination complète.",
+        "badge": "Jeu de données"
+      }
+    },
     "heroEyebrow": "Classement et vue d'ensemble",
     "yourArtists": "Vos artistes",
     "overviewSubtitle": "Snapshot de votre écoute",
@@ -923,6 +1002,22 @@
     "title": "Titres",
     "subtitle": "Vos titres les plus écoutés en un coup d'oeil, en commençant par votre top 20.",
     "errorLoading": "Impossible de charger les statistiques des titres",
+    "heroStatBadge": "Synthèse",
+    "heroStatTag": "Cette période",
+    "sections": {
+      "chart": {
+        "eyebrow": "Classement",
+        "title": "Top 20 par écoutes",
+        "description": "Les morceaux que vous réécoutez le plus, classés par nombre d'écoutes sur vos filtres actuels.",
+        "badge": "Surface replay"
+      },
+      "table": {
+        "eyebrow": "Index complet",
+        "title": "Tout le classement",
+        "description": "Parcourez la liste paginée. Même ordre que le graphique, sur la même fenêtre de dates.",
+        "badge": "Jeu de données"
+      }
+    },
     "heroEyebrow": "Classement et vue d'ensemble",
     "heroTitle": "Vos titres",
     "heroSubtitle": "Top titres les plus écoutés sur la période",
@@ -947,6 +1042,24 @@
   "trackTrends": {
     "title": "Tendances de titres",
     "heroEyebrow": "Écoute dans le temps",
+    "heroStatBadge": "Contexte",
+    "heroStatTag": "Cette période",
+    "heroPanelGroupBy": "Grouper par",
+    "heroPanelSeries": "Séries sur le graphique",
+    "sections": {
+      "picker": {
+        "eyebrow": "Sélection",
+        "title": "Choisir les courbes",
+        "description": "Activez vos titres les plus joués, cherchez dans tout le catalogue, empilez jusqu'à 50 pistes.",
+        "badge": "Sélection"
+      },
+      "chart": {
+        "eyebrow": "Trajectoire",
+        "title": "Volume d'écoutes dans le temps",
+        "description": "Chaque ligne suit un titre ; le pas temporel vient du sélecteur en haut de page.",
+        "badge": "Multi-séries"
+      }
+    },
     "backToTracks": "Retour au classement des titres",
     "subtitle": "Évolution de vos titres les plus écoutés",
     "subtitleExtended": "Comparez l'évolution de vos titres dans le temps. Sélectionnez le top 20 ou ajoutez d'autres titres via la recherche catalogue.",
@@ -1119,7 +1232,11 @@
       "badge": "Commencez par le cœur de Soundprint-AI",
       "title": "Your Music est la vue d'ensemble qui relie tout",
       "body": "Utilisez Your Music comme point de départ : cette page résume vos écoutes, artistes, titres, temps d'écoute, évolutions récentes et genres avant d'ouvrir des vues plus poussées.",
-      "cta": "Ouvrir Your Music"
+      "cta": "Ouvrir Your Music",
+      "philosophyLogoAlt": "Soundprint-AI",
+      "philosophyEyebrow": "L’esprit Soundprint",
+      "philosophyBullet1": "Votre identité musicale repose sur les écoutes réellement enregistrées — pas sur une étiquette de goût toute faite ni sur une humeur du moment.",
+      "philosophyBullet2": "Chaque écran s’appuie sur le même historique et les mêmes filtres de dates : le récit d’introduction et les vues détaillées restent alignés."
     },
     "landing": {
       "badge": "Un accueil tout en douceur",

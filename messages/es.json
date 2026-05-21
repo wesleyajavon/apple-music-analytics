@@ -99,6 +99,7 @@
     "comparePeriodsQuestion": "Compara mis tops de canciones y artistas entre {earlierYear} y {laterYear}.",
     "trackObsessionsYearQuestion": "¿Qué canciones me obsesionaron en {year}?",
     "publicDemoPlaceholder": "El texto libre está desactivado en modo demo.",
+    "noListeningDataPlaceholder": "Importa tu historial de escucha para hacer preguntas.",
     "send": "Enviar",
     "thinking": "Leyendo tu Soundprint…",
     "thinkingStep0": "Leyendo tu Soundprint…",

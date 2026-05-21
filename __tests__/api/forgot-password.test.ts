@@ -85,8 +85,7 @@ describe("POST /api/auth/forgot-password", () => {
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({ outcome: "email_sent" });
     expect(resetPasswordForEmail).toHaveBeenCalledWith("local@example.com", {
-      redirectTo:
-        "http://localhost/auth/callback?next=%2Ffr%2Fupdate-password",
+      redirectTo: "http://localhost/fr/update-password",
     });
   });
 

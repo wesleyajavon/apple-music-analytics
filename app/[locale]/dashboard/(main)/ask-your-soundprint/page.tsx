@@ -269,6 +269,15 @@ function MusicChatContent() {
       !startDate ||
       !endDate ||
       (lifetimeOverview?.totalListens ?? 0) < 1);
+  const showNoListeningDataPlaceholder =
+    disableQuickQuestionsNoListeningData &&
+    !isDateRangeLoading &&
+    !isLifetimeOverviewLoading;
+  const freeTextDisabled =
+    musicChat.isPending ||
+    isPublicDemoViewer ||
+    interactiveAiBlockedByGenreBackfill ||
+    disableQuickQuestionsNoListeningData;
   const topArtistStats = useArtistStats(
     startDate,
     endDate,
@@ -530,6 +539,7 @@ function MusicChatContent() {
       setErrorMessage(t("publicDemoFreeTextBlocked"));
       return;
     }
+    if (disableQuickQuestionsNoListeningData) return;
     sendMessage(input);
   }
 
@@ -633,23 +643,20 @@ function MusicChatContent() {
                   id="ask-soundprint-input"
                   value={input}
                   onChange={(event) => setInput(event.target.value)}
-                  disabled={musicChat.isPending || isPublicDemoViewer || interactiveAiBlockedByGenreBackfill}
+                  disabled={freeTextDisabled}
                   placeholder={
                     isPublicDemoViewer
                       ? t("publicDemoPlaceholder")
-                      : (personalizedPlaceholder ?? t("inputPlaceholder"))
+                      : showNoListeningDataPlaceholder
+                        ? t("noListeningDataPlaceholder")
+                        : (personalizedPlaceholder ?? t("inputPlaceholder"))
                   }
                   rows={2}
                   className="min-h-[52px] flex-1 resize-none rounded-2xl border border-slate-200/90 bg-white px-4 py-3 text-sm text-slate-900 shadow-inner outline-none transition placeholder:text-slate-400 focus:border-violet-400 focus:ring-2 focus:ring-violet-400/15 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-black/30 dark:text-white dark:placeholder:text-slate-500"
                 />
                 <button
                   type="submit"
-                  disabled={
-                    musicChat.isPending ||
-                    isPublicDemoViewer ||
-                    interactiveAiBlockedByGenreBackfill ||
-                    !input.trim()
-                  }
+                  disabled={freeTextDisabled || !input.trim()}
                   className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white shadow-xl shadow-slate-950/20 transition hover:-translate-y-0.5 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-white dark:text-slate-950 dark:shadow-black/25 dark:hover:bg-slate-100"
                 >
                   <Send className="h-4 w-4" aria-hidden />

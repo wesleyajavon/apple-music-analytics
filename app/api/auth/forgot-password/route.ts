@@ -30,8 +30,8 @@ const ForgotPasswordBodySchema = z.object({
 
 function buildPasswordResetRedirectUrl(request: NextRequest, locale: string): string {
   const origin = new URL(request.url).origin;
-  const next = `/${locale}/update-password`;
-  return `${origin}/auth/callback?next=${encodeURIComponent(next)}`;
+  // Direct link: recovery emails use hash tokens that a server redirect (e.g. /auth/callback) would drop.
+  return `${origin}/${locale}/update-password`;
 }
 
 export async function POST(request: NextRequest) {

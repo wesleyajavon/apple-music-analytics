@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useId, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
+import { establishPasswordRecoverySession } from "@/lib/auth/establish-password-recovery-session";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 export default function UpdatePasswordPage() {
@@ -19,24 +20,34 @@ export default function UpdatePasswordPage() {
 
   useEffect(() => {
     let cancelled = false;
+    const supabase = createSupabaseBrowserClient();
 
-    async function checkSession() {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (cancelled) return;
+      if (event === "PASSWORD_RECOVERY" || (event === "SIGNED_IN" && session)) {
+        setHasSession(true);
+        setIsCheckingSession(false);
+      }
+    });
+
+    void (async () => {
       try {
-        const supabase = createSupabaseBrowserClient();
-        const { data } = await supabase.auth.getUser();
+        const ok = await establishPasswordRecoverySession(supabase);
         if (!cancelled) {
-          setHasSession(Boolean(data.user));
+          setHasSession(ok);
         }
       } finally {
         if (!cancelled) {
           setIsCheckingSession(false);
         }
       }
-    }
+    })();
 
-    void checkSession();
     return () => {
       cancelled = true;
+      subscription.unsubscribe();
     };
   }, []);
 

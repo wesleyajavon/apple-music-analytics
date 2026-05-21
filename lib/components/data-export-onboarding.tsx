@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
+import { useLocale, useTranslations } from "next-intl";
+import { getPathname, useRouter } from "@/i18n/navigation";
 import { toast } from "sonner";
 import {
   ArrowRight,
@@ -380,6 +380,7 @@ export function DataExportOnboarding({
 } = {}) {
   const t = useTranslations("onboarding");
   const router = useRouter();
+  const locale = useLocale();
   const genreBackfillShared = useGenreBackfillJobSafe();
   const hasActiveGroqJobShared = genreBackfillShared?.hasActiveGroqJob ?? false;
   const refreshGroqJobShared = genreBackfillShared?.refreshStatus;
@@ -527,15 +528,15 @@ export function DataExportOnboarding({
       try {
         const res = await fetch("/api/user/onboarding/complete", { method: "POST" });
         if (!res.ok) throw new Error("complete_failed");
-        router.refresh();
-        router.replace(nextPath);
+        // Full navigation avoids a soft-nav redirect loop: onboarding page revalidation
+        // can redirect to overview while `(main)/layout` still serves stale RSC data.
+        window.location.assign(getPathname({ href: nextPath, locale }));
       } catch {
         toast.error(t("completeError"));
-      } finally {
         setIsSubmitting(false);
       }
     },
-    [router, t],
+    [locale, t],
   );
 
   const spotifyPrivacyUrl = t("spotifyUrls.privacy");

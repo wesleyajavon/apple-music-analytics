@@ -8,6 +8,8 @@ type Props = {
   params: Promise<{ locale: string }>;
 };
 
+export const dynamic = "force-dynamic";
+
 /**
  * Authenticated users who have not finished the data-export onboarding
  * are redirected to /dashboard/onboarding (public demo viewers are unaffected).

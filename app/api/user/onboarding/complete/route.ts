@@ -32,9 +32,8 @@ export async function POST(request: NextRequest) {
     });
 
     for (const locale of routing.locales) {
-      revalidatePath(`/${locale}/dashboard/overview`, "layout");
+      revalidatePath(`/${locale}/dashboard`, "layout");
       revalidatePath(`/${locale}/dashboard/onboarding`, "page");
-      revalidatePath(`/${locale}/dashboard/spotify-snapshot`, "page");
     }
 
     return NextResponse.json({ ok: true });

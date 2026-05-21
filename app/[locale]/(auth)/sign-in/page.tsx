@@ -192,6 +192,14 @@ export default function SignInPage() {
               aria-invalid={error ? true : undefined}
               aria-describedby={error ? errorId : undefined}
             />
+            <p className="mt-2 text-right">
+              <Link
+                href="/forgot-password"
+                className="text-sm font-medium text-primary hover:underline"
+              >
+                {t("forgotPasswordLink")}
+              </Link>
+            </p>
           </div>
 
           {error && (

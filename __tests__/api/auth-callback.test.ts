@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
 const exchangeCodeForSession = vi.fn();
+const verifyOtp = vi.fn();
 
 vi.mock("@/lib/supabase/server", () => ({
   createSupabaseRouteHandlerClient: vi.fn(),
@@ -42,8 +43,12 @@ describe("GET /auth/callback", () => {
       data: { session: null },
       error: null,
     });
+    verifyOtp.mockResolvedValue({
+      data: { session: null },
+      error: null,
+    });
     vi.mocked(createSupabaseRouteHandlerClient).mockResolvedValue({
-      auth: { exchangeCodeForSession },
+      auth: { exchangeCodeForSession, verifyOtp },
     } as unknown as Awaited<ReturnType<typeof createSupabaseRouteHandlerClient>>);
     vi.mocked(ensureAppUserFromSession).mockResolvedValue(undefined);
     vi.mocked(persistSpotifyConnectionFromSupabaseSession).mockResolvedValue(
@@ -86,6 +91,50 @@ describe("GET /auth/callback", () => {
     const detail = parsed.searchParams.get("detail");
     expect(detail).toHaveLength(501);
     expect(detail?.endsWith("…")).toBe(true);
+  });
+
+  it("verifies signup token_hash, persists session, then redirects to next", async () => {
+    const session = {
+      user: { id: "user-1" },
+      access_token: "at",
+    };
+    verifyOtp.mockResolvedValue({
+      data: { session },
+      error: null,
+    });
+
+    const url =
+      "http://localhost/auth/callback?token_hash=abc123&type=email&next=/fr/dashboard/overview";
+    const response = await GET(new Request(url));
+
+    expect(verifyOtp).toHaveBeenCalledWith({
+      token_hash: "abc123",
+      type: "email",
+    });
+    expect(ensureAppUserFromSession).toHaveBeenCalledWith(session.user);
+    expect(persistSpotifyConnectionFromSupabaseSession).toHaveBeenCalledWith(
+      session
+    );
+    expect(exchangeCodeForSession).not.toHaveBeenCalled();
+    expect(locationOf(response)).toBe(
+      new URL("/fr/dashboard/overview", "http://localhost").href
+    );
+  });
+
+  it("redirects to sign-in when signup token_hash verification fails", async () => {
+    verifyOtp.mockResolvedValue({
+      data: { session: null },
+      error: { message: "invalid_token" },
+    });
+
+    const url = "http://localhost/auth/callback?token_hash=bad&type=email";
+    const response = await GET(new Request(url));
+
+    const parsed = new URL(locationOf(response));
+    expect(parsed.pathname).toContain("/sign-in");
+    expect(parsed.searchParams.get("oauth_error")).toBe("1");
+    expect(parsed.searchParams.get("detail")).toBe("invalid_token");
+    expect(exchangeCodeForSession).not.toHaveBeenCalled();
   });
 
   it("exchanges code, persists user and Spotify connection, then redirects to next", async () => {

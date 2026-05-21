@@ -3,11 +3,12 @@ import { establishPasswordRecoverySession } from "@/lib/auth/establish-password-
 
 const setSession = vi.fn();
 const exchangeCodeForSession = vi.fn();
+const verifyOtp = vi.fn();
 const getUser = vi.fn();
 
 function createMockSupabase() {
   return {
-    auth: { setSession, exchangeCodeForSession, getUser },
+    auth: { setSession, exchangeCodeForSession, verifyOtp, getUser },
   };
 }
 
@@ -43,6 +44,10 @@ describe("establishPasswordRecoverySession", () => {
       data: { session: { user: { id: "u1" } } },
       error: null,
     });
+    verifyOtp.mockResolvedValue({
+      data: { session: { user: { id: "u1" } } },
+      error: null,
+    });
     getUser.mockResolvedValue({ data: { user: null }, error: null });
   });
 
@@ -69,6 +74,25 @@ describe("establishPasswordRecoverySession", () => {
     expect(getUser).not.toHaveBeenCalled();
   });
 
+  it("verifies token_hash from query params and strips recovery params from the URL", async () => {
+    window.history.replaceState(
+      {},
+      "",
+      "/en/update-password?token_hash=abc123&type=recovery"
+    );
+
+    const ok = await establishPasswordRecoverySession(createMockSupabase() as never);
+
+    expect(ok).toBe(true);
+    expect(verifyOtp).toHaveBeenCalledWith({
+      token_hash: "abc123",
+      type: "recovery",
+    });
+    expect(window.location.search).toBe("");
+    expect(setSession).not.toHaveBeenCalled();
+    expect(exchangeCodeForSession).not.toHaveBeenCalled();
+  });
+
   it("exchanges PKCE code from query params and removes code from the URL", async () => {
     window.history.replaceState({}, "", "/en/update-password?code=pkce-code");
 
@@ -89,6 +113,19 @@ describe("establishPasswordRecoverySession", () => {
     expect(setSession).not.toHaveBeenCalled();
     expect(exchangeCodeForSession).not.toHaveBeenCalled();
     expect(getUser).toHaveBeenCalled();
+  });
+
+  it("returns false when verifyOtp fails", async () => {
+    window.history.replaceState(
+      {},
+      "",
+      "/en/update-password?token_hash=bad&type=recovery"
+    );
+    verifyOtp.mockResolvedValue({ data: { session: null }, error: { message: "invalid" } });
+
+    const ok = await establishPasswordRecoverySession(createMockSupabase() as never);
+
+    expect(ok).toBe(false);
   });
 
   it("returns false when setSession fails", async () => {

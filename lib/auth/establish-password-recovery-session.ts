@@ -4,12 +4,14 @@ function stripRecoveryParamsFromUrl() {
   const cleanUrl = new URL(window.location.href);
   cleanUrl.hash = "";
   cleanUrl.searchParams.delete("code");
+  cleanUrl.searchParams.delete("token_hash");
+  cleanUrl.searchParams.delete("type");
   window.history.replaceState(null, "", cleanUrl.pathname + cleanUrl.search);
 }
 
 /**
  * Establishes a Supabase session after a password-reset email link.
- * Handles implicit-flow hash tokens, PKCE `code` query params, and existing cookies.
+ * Handles implicit-flow hash tokens, custom `token_hash` query params, PKCE `code`, and existing cookies.
  */
 export async function establishPasswordRecoverySession(
   supabase: SupabaseClient
@@ -31,7 +33,20 @@ export async function establishPasswordRecoverySession(
     }
   }
 
-  const code = new URLSearchParams(window.location.search).get("code");
+  const searchParams = new URLSearchParams(window.location.search);
+  const tokenHash = searchParams.get("token_hash");
+  const recoveryType = searchParams.get("type");
+
+  if (tokenHash && recoveryType === "recovery") {
+    const { data, error } = await supabase.auth.verifyOtp({
+      token_hash: tokenHash,
+      type: "recovery",
+    });
+    stripRecoveryParamsFromUrl();
+    return Boolean(!error && data.session);
+  }
+
+  const code = searchParams.get("code");
   if (code) {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     stripRecoveryParamsFromUrl();

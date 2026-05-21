@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { NextRequest } from "next/server";
-import { POST } from "@/app/api/auth/forgot-password/route";
 
 vi.mock("@/lib/security/rate-limit", () => ({
   assertRateLimit: vi.fn().mockResolvedValue({
@@ -17,23 +16,30 @@ vi.mock("@/lib/supabase/config", () => ({
   })),
 }));
 
-const findAuthUserByEmail = vi.fn();
-const getSupabaseAdminClient = vi.fn();
-const resetPasswordForEmail = vi.fn();
+const mocks = vi.hoisted(() => ({
+  findAuthUserByEmail: vi.fn(),
+  getSupabaseAdminClient: vi.fn(),
+  resetPasswordForEmail: vi.fn(),
+}));
 
 vi.mock("@/lib/auth/find-auth-user-by-email", () => ({
-  findAuthUserByEmail,
+  findAuthUserByEmail: mocks.findAuthUserByEmail,
 }));
 
 vi.mock("@/lib/supabase/admin", () => ({
-  getSupabaseAdminClient,
+  getSupabaseAdminClient: mocks.getSupabaseAdminClient,
 }));
 
 vi.mock("@supabase/supabase-js", () => ({
   createClient: vi.fn(() => ({
-    auth: { resetPasswordForEmail },
+    auth: { resetPasswordForEmail: mocks.resetPasswordForEmail },
   })),
 }));
+
+const { findAuthUserByEmail, getSupabaseAdminClient, resetPasswordForEmail } =
+  mocks;
+
+import { POST } from "@/app/api/auth/forgot-password/route";
 
 describe("POST /api/auth/forgot-password", () => {
   beforeEach(() => {

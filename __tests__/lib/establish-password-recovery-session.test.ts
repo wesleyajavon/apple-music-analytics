@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { establishPasswordRecoverySession } from "@/lib/auth/establish-password-recovery-session";
 
 const setSession = vi.fn();
@@ -11,16 +11,43 @@ function createMockSupabase() {
   };
 }
 
+function installWindowUrl(url: string) {
+  const parsed = new URL(url, "http://localhost");
+  const location = {
+    href: parsed.href,
+    pathname: parsed.pathname,
+    search: parsed.search,
+    hash: parsed.hash,
+  };
+
+  vi.stubGlobal("window", {
+    location,
+    history: {
+      replaceState(_state: unknown, _title: string, newUrl: string) {
+        const next = new URL(newUrl, "http://localhost");
+        location.href = next.href;
+        location.pathname = next.pathname;
+        location.search = next.search;
+        location.hash = next.hash;
+      },
+    },
+  });
+}
+
 describe("establishPasswordRecoverySession", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    window.history.replaceState({}, "", "/en/update-password");
+    installWindowUrl("/en/update-password");
     setSession.mockResolvedValue({ data: { session: { user: { id: "u1" } } }, error: null });
     exchangeCodeForSession.mockResolvedValue({
       data: { session: { user: { id: "u1" } } },
       error: null,
     });
     getUser.mockResolvedValue({ data: { user: null }, error: null });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it("sets session from recovery hash tokens and strips the hash", async () => {

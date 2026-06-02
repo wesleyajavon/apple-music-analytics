@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
+import { Link, usePathname } from "@/i18n/navigation";
 
 type FooterVariant = "dashboard" | "home";
 
@@ -10,6 +10,9 @@ type FooterVariant = "dashboard" | "home";
  */
 export function Footer({ variant = "dashboard" }: { variant?: FooterVariant }) {
   const t = useTranslations("footer");
+  const pathname = usePathname();
+  const hideOnMobileOnboarding =
+    variant === "dashboard" && pathname.includes("/dashboard/onboarding");
 
   const currentYear = new Date().getFullYear();
 
@@ -27,9 +30,10 @@ export function Footer({ variant = "dashboard" }: { variant?: FooterVariant }) {
     <footer
       className={`
         shrink-0 px-4 sm:px-6 lg:px-8 py-5
+        ${hideOnMobileOnboarding ? "max-lg:hidden" : ""}
         ${isHome
-          ? "border-t border-card-border bg-surface-glass backdrop-blur-sm"
-          : "border-t border-card-border"
+          ? "border-t border-card-border bg-surface-glass pb-24 backdrop-blur-sm md:pb-5"
+          : "border-t border-card-border pb-20 lg:pb-5"
         }
       `}
       role="contentinfo"

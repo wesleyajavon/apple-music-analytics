@@ -301,7 +301,7 @@ export function HeatmapDayDetailsPanel({
           <button
             type="button"
             onClick={onClose}
-            className="shrink-0 self-start rounded-xl border border-white/15 bg-white/5 p-2.5 text-sky-100/90 transition-colors hover:border-white/25 hover:bg-white/10 hover:text-white"
+            className="inline-flex h-11 w-11 shrink-0 items-center justify-center self-start rounded-xl border border-white/15 bg-white/5 text-sky-100/90 transition-colors hover:border-white/25 hover:bg-white/10 hover:text-white"
             aria-label={t("closeDetails")}
           >
             <X className="h-5 w-5" strokeWidth={2} />

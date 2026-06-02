@@ -5,6 +5,12 @@ import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { establishPasswordRecoverySession } from "@/lib/auth/establish-password-recovery-session";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import {
+  AUTH_CARD_CLASS,
+  AUTH_INPUT_CLASS,
+  AUTH_MAIN_CLASS,
+  AUTH_PRIMARY_BUTTON_CLASS,
+} from "@/lib/constants/auth-form-styles";
 
 export default function UpdatePasswordPage() {
   const t = useTranslations("auth");
@@ -82,16 +88,9 @@ export default function UpdatePasswordPage() {
     }
   }
 
-  const inputClassName =
-    "w-full rounded-lg border border-card-border bg-surface-raised px-3 py-2.5 text-sm text-foreground outline-none transition-shadow ring-ring focus:border-primary focus:ring-2 focus:ring-ring";
-
   if (isCheckingSession) {
     return (
-      <main
-        id="auth-main"
-        tabIndex={-1}
-        className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-4 py-8 sm:py-12"
-      >
+      <main id="auth-main" tabIndex={-1} className={AUTH_MAIN_CLASS}>
         <p className="text-center text-sm text-muted">{t("updatePasswordCheckingSession")}</p>
       </main>
     );
@@ -99,18 +98,11 @@ export default function UpdatePasswordPage() {
 
   if (!hasSession) {
     return (
-      <main
-        id="auth-main"
-        tabIndex={-1}
-        className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-4 py-8 sm:py-12"
-      >
-        <section
-          className="w-full rounded-2xl border border-card-border bg-card-surface p-6 shadow-card backdrop-blur-sm sm:p-8"
-          aria-labelledby="update-password-expired-heading"
-        >
+      <main id="auth-main" tabIndex={-1} className={AUTH_MAIN_CLASS}>
+        <section className={AUTH_CARD_CLASS} aria-labelledby="update-password-expired-heading">
           <h1
             id="update-password-expired-heading"
-            className="text-2xl font-bold tracking-tight text-foreground"
+            className="text-xl font-bold tracking-tight text-foreground lg:text-2xl"
           >
             {t("updatePasswordExpiredTitle")}
           </h1>
@@ -131,21 +123,14 @@ export default function UpdatePasswordPage() {
   }
 
   return (
-    <main
-      id="auth-main"
-      tabIndex={-1}
-      className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-4 py-8 sm:py-12"
-    >
-      <section
-        className="w-full rounded-2xl border border-card-border bg-card-surface p-6 shadow-card backdrop-blur-sm sm:p-8"
-        aria-labelledby="update-password-heading"
-      >
+    <main id="auth-main" tabIndex={-1} className={AUTH_MAIN_CLASS}>
+      <section className={AUTH_CARD_CLASS} aria-labelledby="update-password-heading">
         <p className="text-xs font-semibold uppercase tracking-widest text-primary">
           {t("updatePasswordEyebrow")}
         </p>
         <h1
           id="update-password-heading"
-          className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl"
+          className="mt-2 text-xl font-bold tracking-tight text-foreground lg:text-3xl"
         >
           {t("updatePasswordTitle")}
         </h1>
@@ -170,7 +155,7 @@ export default function UpdatePasswordPage() {
               minLength={8}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className={inputClassName}
+              className={AUTH_INPUT_CLASS}
               aria-invalid={error ? true : undefined}
               aria-describedby={error ? errorId : undefined}
             />
@@ -192,7 +177,7 @@ export default function UpdatePasswordPage() {
               minLength={8}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className={inputClassName}
+              className={AUTH_INPUT_CLASS}
               aria-invalid={error ? true : undefined}
               aria-describedby={error ? errorId : undefined}
             />
@@ -211,7 +196,7 @@ export default function UpdatePasswordPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full rounded-xl bg-brand-gradient px-4 py-2.5 text-sm font-semibold text-white shadow-brand-glow transition-opacity hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
+            className={AUTH_PRIMARY_BUTTON_CLASS}
           >
             {isLoading ? t("updatePasswordSaving") : t("updatePasswordSubmit")}
           </button>

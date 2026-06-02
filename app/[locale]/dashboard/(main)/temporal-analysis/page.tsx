@@ -13,7 +13,6 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  ResponsiveContainer,
   RadarChart,
   PolarGrid,
   PolarAngleAxis,
@@ -21,6 +20,7 @@ import {
   Radar,
 } from "recharts";
 import { useTemporalAnalysis } from "@/lib/hooks/use-listening";
+import { ChartResponsiveContainer } from "@/lib/components/chart-responsive-container";
 import { CHART_TOOLTIP_STYLES } from "@/lib/constants/config";
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
@@ -663,7 +663,7 @@ function TemporalAnalysisContent() {
                   <TemporalChartSkeleton />
                 ) : dayOfWeekChartType === "bar" ? (
                   <div className={DASHBOARD_SPOTLIGHT_INNER_WELL}>
-                    <ResponsiveContainer width="100%" height={400}>
+                    <ChartResponsiveContainer token="temporalMain">
                       <BarChart
                         data={dayOfWeekData}
                         margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
@@ -732,11 +732,11 @@ function TemporalAnalysisContent() {
                           radius={[8, 8, 0, 0]}
                         />
                       </BarChart>
-                    </ResponsiveContainer>
+                    </ChartResponsiveContainer>
                   </div>
                 ) : dayOfWeekChartType === "radar" ? (
                   <div className={DASHBOARD_SPOTLIGHT_INNER_WELL}>
-                    <ResponsiveContainer width="100%" height={400}>
+                    <ChartResponsiveContainer token="temporalMain">
                       <RadarChart data={radarData}>
                         <PolarGrid stroke="#bfdbfe" strokeOpacity={0.55} />
                         <PolarAngleAxis
@@ -770,7 +770,7 @@ function TemporalAnalysisContent() {
                         />
                         <Legend />
                       </RadarChart>
-                    </ResponsiveContainer>
+                    </ChartResponsiveContainer>
                   </div>
                 ) : (
                   <div className={`${DASHBOARD_SPOTLIGHT_INNER_WELL} space-y-4`}>
@@ -874,7 +874,7 @@ function TemporalAnalysisContent() {
                   <TemporalChartSkeleton />
                 ) : hourOfDayChartType === "bar" ? (
                   <div className={DASHBOARD_SPOTLIGHT_INNER_WELL}>
-                    <ResponsiveContainer width="100%" height={400}>
+                    <ChartResponsiveContainer token="temporalMain">
                       <BarChart
                         data={hourOfDayData}
                         margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
@@ -946,11 +946,11 @@ function TemporalAnalysisContent() {
                           radius={[8, 8, 0, 0]}
                         />
                       </BarChart>
-                    </ResponsiveContainer>
+                    </ChartResponsiveContainer>
                   </div>
                 ) : hourOfDayChartType === "radar" ? (
                   <div className={DASHBOARD_SPOTLIGHT_INNER_WELL}>
-                    <ResponsiveContainer width="100%" height={400}>
+                    <ChartResponsiveContainer token="temporalMain">
                       <RadarChart data={hourRadarData}>
                         <PolarGrid stroke="#bfdbfe" strokeOpacity={0.55} />
                         <PolarAngleAxis
@@ -984,7 +984,7 @@ function TemporalAnalysisContent() {
                         />
                         <Legend />
                       </RadarChart>
-                    </ResponsiveContainer>
+                    </ChartResponsiveContainer>
                   </div>
                 ) : (
                   <div

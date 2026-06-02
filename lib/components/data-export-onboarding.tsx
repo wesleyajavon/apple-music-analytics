@@ -18,6 +18,7 @@ import {
   UploadCloud,
 } from "lucide-react";
 import { DashboardHeroTitle } from "@/lib/components/dashboard-hero-title";
+import { OnboardingMobileStickyActions } from "@/lib/components/onboarding-mobile-sticky-actions";
 import { useGenreBackfillJobSafe } from "@/lib/context/genre-backfill-job-context";
 import {
   isRecentAuthRequiredError,
@@ -174,7 +175,7 @@ const MAX_ONBOARDING_PARSED_ROWS = 75_000;
 /** Trait / remplissage brand (s’aligne sur --brand-* en clair et sombre). */
 const ONBOARDING_RAIL_CLASS = "bg-brand-gradient";
 const ONBOARDING_HERO_SHELL_CLASS =
-  "relative overflow-hidden rounded-2xl border border-card-border bg-gradient-to-br from-surface-dashboard via-card to-surface px-5 py-7 shadow-card ring-1 ring-primary/[0.1] sm:rounded-3xl sm:px-8 sm:py-10 dark:from-[rgb(var(--surface-rgb))] dark:via-card dark:to-surface-raised dark:ring-primary/[0.14]";
+  "relative overflow-hidden rounded-2xl border border-card-border bg-gradient-to-br from-surface-dashboard via-card to-surface px-4 py-6 shadow-card ring-1 ring-primary/[0.1] sm:rounded-3xl lg:px-8 lg:py-10 dark:from-[rgb(var(--surface-rgb))] dark:via-card dark:to-surface-raised dark:ring-primary/[0.14]";
 
 const FLOW_RAIL_KEYS = ["intro", "choose", "export", "upload", "done"] as const;
 
@@ -316,10 +317,10 @@ function OnboardingFlowRail({ activeIndex }: { activeIndex: number }) {
   return (
     <nav
       aria-label={t("flowRail.ariaLabel")}
-      className="rounded-2xl border border-card-border bg-card-surface px-3 py-2.5 shadow-[0_1px_0_0_rgb(var(--primary-rgb)_/_0.1)] backdrop-blur-md dark:bg-card-surface/90"
+      className="rounded-2xl border border-card-border bg-card-surface px-3 py-2.5 shadow-[0_1px_0_0_rgb(var(--primary-rgb)_/_0.1)] backdrop-blur-md dark:bg-card-surface/90 max-lg:-mx-1 max-lg:overflow-x-auto max-lg:overscroll-x-contain"
     >
-      <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-2">
-        <ol className="flex flex-wrap items-center gap-x-0.5 gap-y-2 sm:gap-x-1">
+      <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-2 max-lg:min-w-0">
+        <ol className="flex flex-wrap items-center gap-x-0.5 gap-y-2 sm:gap-x-1 max-lg:flex-nowrap max-lg:pb-0.5">
           {FLOW_RAIL_KEYS.map((stepKey, i) => {
             const label = t(`flowRail.${stepKey}` as Parameters<typeof t>[0]);
             const isComplete = i < activeIndex;
@@ -332,7 +333,7 @@ function OnboardingFlowRail({ activeIndex }: { activeIndex: number }) {
               >
                 <span
                   className={[
-                    "inline-flex min-h-[34px] min-w-[2.75rem] items-center gap-2 rounded-full border px-3 py-1.5 font-mono text-[11px] font-medium uppercase tracking-wide transition-colors sm:min-h-0",
+                    "inline-flex min-h-11 min-w-[2.75rem] items-center gap-2 rounded-full border px-3 py-1.5 font-mono text-[11px] font-medium uppercase tracking-wide transition-colors lg:min-h-0",
                     isComplete
                       ? "border-primary/30 bg-primary/10 text-primary"
                       : isCurrent
@@ -848,13 +849,13 @@ export function DataExportOnboarding({
   }, [t, refreshGroqJobShared]);
 
   const surfaceShellClass =
-    "relative mx-auto w-full max-w-4xl rounded-2xl border border-card-border bg-card-surface p-6 shadow-card ring-1 ring-black/[0.04] backdrop-blur-sm dark:ring-white/[0.055] sm:p-8";
+    "relative mx-auto w-full max-w-4xl rounded-2xl border border-card-border bg-card-surface p-5 shadow-card ring-1 ring-black/[0.04] backdrop-blur-sm dark:ring-white/[0.055] lg:p-8";
 
   const primaryBtn =
-    "inline-flex min-h-[44px] items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-brand-glow transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60";
+    "inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-brand-glow transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 lg:w-auto";
 
   const secondaryBtn =
-    "inline-flex min-h-[44px] items-center justify-center rounded-xl border border-card-border bg-surface-raised px-5 py-2.5 text-sm font-semibold text-foreground transition-colors hover:border-primary/30 hover:bg-primary/5 dark:hover:bg-white/5";
+    "inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-card-border bg-surface-raised px-5 py-2.5 text-sm font-semibold text-foreground transition-colors hover:border-primary/30 hover:bg-primary/5 dark:hover:bg-white/5 lg:w-auto";
 
   /** CTA principal onboarding (welcome) — dégradé marque comme la connexion */
   const welcomeContinueBtn =
@@ -866,7 +867,7 @@ export function DataExportOnboarding({
 
   /** Passer depuis l’étape « choix » — surface claire */
   const pickSkipBtn =
-    "inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-transparent px-5 py-2.5 text-sm font-medium text-muted transition-all hover:border-primary/35 hover:bg-primary/[0.06] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-55";
+    "inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-transparent px-5 py-2.5 text-sm font-medium text-muted transition-all hover:border-primary/35 hover:bg-primary/[0.06] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-55 lg:w-auto";
 
   const effectiveBackfill = useMemo(
     () =>
@@ -916,7 +917,7 @@ export function DataExportOnboarding({
     ) || Boolean(effectiveBackfill);
 
   return (
-    <div className="mx-auto max-w-4xl space-y-8 pb-16">
+    <div className="mx-auto max-w-4xl space-y-6 pb-4 lg:space-y-8 lg:pb-16">
       <OnboardingFlowRail activeIndex={getFlowRailActiveIndex(phase)} />
 
       {phase === "welcome" && (
@@ -1022,7 +1023,7 @@ export function DataExportOnboarding({
                 className="group relative flex flex-col overflow-hidden rounded-2xl border border-card-border bg-surface-raised text-left shadow-card ring-1 ring-black/[0.03] transition-all hover:-translate-y-[1px] hover:border-[#169c46]/45 hover:shadow-brand-glow dark:ring-white/[0.06] dark:hover:border-[#1ed760]/40"
               >
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#1DB954]/12 via-transparent to-transparent opacity-95 dark:from-[#1DB954]/16" aria-hidden />
-                <div className="relative flex flex-1 flex-col p-6">
+                <div className="relative flex min-h-[8.5rem] flex-1 flex-col p-5 lg:min-h-0 lg:p-6">
                   <div className="flex items-start justify-between gap-3">
                     <span className="rounded-lg border border-border bg-background/65 px-2 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">
                       {t("pickBadgeSpotify")}
@@ -1056,7 +1057,7 @@ export function DataExportOnboarding({
                   className="pointer-events-none absolute inset-0 bg-gradient-to-br from-accent-violet/12 via-transparent to-accent-cyan/10 opacity-95"
                   aria-hidden
                 />
-                <div className="relative flex flex-1 flex-col p-6">
+                <div className="relative flex min-h-[8.5rem] flex-1 flex-col p-5 lg:min-h-0 lg:p-6">
                   <div className="flex items-start justify-between gap-3">
                     <span className="rounded-lg border border-border bg-background/65 px-2 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">
                       {t("pickBadgeApple")}
@@ -1082,7 +1083,7 @@ export function DataExportOnboarding({
               </button>
             </div>
 
-            <div className="flex flex-col gap-3 border-t border-card-border pt-6 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-3 border-t border-card-border pt-6 lg:flex-row lg:items-center lg:justify-between">
               <button type="button" className={secondaryBtn} onClick={() => setPhase("welcome")}>
                 {t("back")}
               </button>
@@ -1124,7 +1125,7 @@ export function DataExportOnboarding({
             ariaLabel={flowProgressAria}
           />
 
-          <h2 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+          <h2 className="text-lg font-bold tracking-tight text-foreground lg:text-2xl">
             {t(`${provider}.${steps[stepIndex].titleKey}` as Parameters<typeof t>[0])}
           </h2>
           <p className="text-sm leading-relaxed text-muted">
@@ -1135,7 +1136,7 @@ export function DataExportOnboarding({
             href={provider === "spotify" ? spotifyPrivacyUrl : applePrivacyUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className={`${secondaryBtn} w-fit`}
+            className={secondaryBtn}
             aria-label={`${provider === "spotify" ? t("openSpotifyPrivacy") : t("openApplePrivacy")} (${t("externalLinkAria")})`}
           >
             {provider === "spotify" ? t("openSpotifyPrivacy") : t("openApplePrivacy")} ↗
@@ -1167,7 +1168,7 @@ export function DataExportOnboarding({
             ) : null}
           </div>
 
-          <div className="flex flex-col-reverse gap-3 border-t border-card-border pt-6 sm:flex-row sm:justify-between">
+          <div className="hidden flex-col-reverse gap-3 border-t border-card-border pt-6 lg:flex lg:flex-row lg:justify-between">
             <button type="button" className={secondaryBtn} onClick={goBackGuide}>
               {t("back")}
             </button>
@@ -1232,7 +1233,7 @@ export function DataExportOnboarding({
             variant="surface"
             ariaLabel={flowProgressAria}
           />
-          <h2 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+          <h2 className="text-lg font-bold tracking-tight text-foreground lg:text-2xl">
             {provider === "spotify" ? t("import.spotifyTitle") : t("import.appleTitle")}
           </h2>
           <p className="text-sm leading-relaxed text-muted">
@@ -1306,7 +1307,7 @@ export function DataExportOnboarding({
               href={appleArchiveUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className={`${secondaryBtn} w-fit`}
+              className={secondaryBtn}
               aria-label={`${t("import.openAppleDownloads")} (${t("externalLinkAria")})`}
             >
               {t("import.openAppleDownloads")} ↗
@@ -1325,7 +1326,7 @@ export function DataExportOnboarding({
           />
           <button
             type="button"
-            className="group flex w-full flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-card-border bg-gradient-to-b from-surface to-background px-5 py-12 text-center text-sm text-foreground shadow-[inset_0_1px_0_0_rgb(255_255_255_/_0.04)] transition-all hover:border-primary/42 hover:bg-primary/[0.04] hover:shadow-brand-glow/30 disabled:pointer-events-none disabled:opacity-50 dark:from-surface dark:to-surface-raised dark:hover:bg-primary/[0.07]"
+            className="group flex min-h-[11rem] w-full flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-card-border bg-gradient-to-b from-surface to-background px-5 py-10 text-center text-sm text-foreground shadow-[inset_0_1px_0_0_rgb(255_255_255_/_0.04)] transition-all hover:border-primary/42 hover:bg-primary/[0.04] hover:shadow-brand-glow/30 disabled:pointer-events-none disabled:opacity-50 dark:from-surface dark:to-surface-raised dark:hover:bg-primary/[0.07] lg:min-h-0 lg:py-12"
             disabled={isImporting}
             onClick={() => fileInputRef.current?.click()}
             onDragOver={(e) => e.preventDefault()}
@@ -1353,11 +1354,11 @@ export function DataExportOnboarding({
             ) : null}
           </button>
 
-          <div className="flex flex-col-reverse gap-3 border-t border-card-border pt-6 sm:flex-row sm:justify-between">
+          <div className="hidden flex-col-reverse gap-3 border-t border-card-border pt-6 lg:flex lg:flex-row lg:justify-between">
             <button type="button" className={secondaryBtn} onClick={goBackImport} disabled={isImporting}>
               {t("back")}
             </button>
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
               <button
                 type="button"
                 className={`${secondaryBtn} text-muted`}
@@ -1389,6 +1390,29 @@ export function DataExportOnboarding({
         </div>
       )}
 
+      {phase === "guide" && provider ? (
+        <OnboardingMobileStickyActions
+          mode="guide"
+          onBack={goBackGuide}
+          onPrimary={goNextGuide}
+          primaryLabel={t("next")}
+        />
+      ) : null}
+
+      {phase === "import" && provider ? (
+        <OnboardingMobileStickyActions
+          mode="import"
+          onBack={goBackImport}
+          onPrimary={() => void submitImport()}
+          primaryLabel={isImporting ? t("import.importing") : t("import.importSubmit")}
+          primaryDisabled={isImporting || !importFile}
+          secondaryLabel={t("import.skipImport")}
+          onSecondary={skipImportToFinish}
+          secondaryDisabled={isImporting}
+          isLoading={isImporting}
+        />
+      ) : null}
+
       {phase === "finish" && (
         <div className="space-y-8">
           {importSummary ? (
@@ -1413,13 +1437,13 @@ export function DataExportOnboarding({
                 </p>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="rounded-2xl border border-accent-emerald/30 bg-accent-emerald/[0.1] px-5 py-4 shadow-[inset_0_1px_0_0_rgb(255_255_255_/0.05)] backdrop-blur-sm dark:border-accent-emerald/35 dark:bg-accent-emerald/[0.12]">
-                    <p className="text-3xl font-bold tabular-nums tracking-tight text-foreground sm:text-4xl">
+                    <p className="text-2xl font-bold tabular-nums tracking-tight text-foreground lg:text-4xl">
                       {importSummary.imported.toLocaleString()}
                     </p>
                     <p className="mt-1 text-sm font-medium text-accent-emerald">{t("finishImportedLabel")}</p>
                   </div>
                   <div className="rounded-2xl border border-accent-cyan/30 bg-accent-cyan/[0.08] px-5 py-4 shadow-[inset_0_1px_0_0_rgb(255_255_255_/0.05)] backdrop-blur-sm dark:border-accent-indigo/30 dark:bg-accent-indigo/[0.1]">
-                    <p className="text-3xl font-bold tabular-nums tracking-tight text-foreground sm:text-4xl">
+                    <p className="text-2xl font-bold tabular-nums tracking-tight text-foreground lg:text-4xl">
                       {importSummary.skippedDuplicates.toLocaleString()}
                     </p>
                     <p className="mt-1 text-sm font-medium text-accent-indigo">{t("finishSkippedLabel")}</p>
@@ -1489,7 +1513,7 @@ export function DataExportOnboarding({
                       {t("genreLlmConsent.privacy")}
                     </div>
                   )}
-                  <div className="flex flex-col gap-3 pt-1 sm:flex-row sm:flex-wrap sm:items-stretch">
+                  <div className="flex flex-col gap-3 pt-1 lg:flex-row lg:flex-wrap lg:items-stretch">
                     <button
                       type="button"
                       className={`${GENRE_AI_ACCEPT_BTN} sm:flex-1`}

@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, useEffect, useMemo } from "react";
+import { Suspense, useState, useEffect, useMemo, createContext, useContext, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { Link, usePathname } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
@@ -12,6 +12,53 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { getPublicProfileUserId } from "@/lib/constants/public-profile";
 
 const STORAGE_KEY = "sidebar-collapsed";
+
+interface MobileSidebarContextValue {
+  isOpen: boolean;
+  toggle: () => void;
+  open: () => void;
+  close: () => void;
+}
+
+const MobileSidebarContext = createContext<MobileSidebarContextValue | null>(null);
+
+export function useMobileSidebar() {
+  const context = useContext(MobileSidebarContext);
+  if (!context) {
+    throw new Error("useMobileSidebar must be used within SidebarProvider");
+  }
+  return context;
+}
+
+export function SidebarProvider({ children }: { children: React.ReactNode }) {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const toggle = useCallback(() => {
+    setIsMobileMenuOpen((prev) => !prev);
+  }, []);
+
+  const open = useCallback(() => {
+    setIsMobileMenuOpen(true);
+  }, []);
+
+  const close = useCallback(() => {
+    setIsMobileMenuOpen(false);
+  }, []);
+
+  const value = useMemo(
+    () => ({
+      isOpen: isMobileMenuOpen,
+      toggle,
+      open,
+      close,
+    }),
+    [isMobileMenuOpen, toggle, open, close]
+  );
+
+  return (
+    <MobileSidebarContext.Provider value={value}>{children}</MobileSidebarContext.Provider>
+  );
+}
 
 interface NavItem {
   href: string;
@@ -225,7 +272,7 @@ function getActiveParentKeys(groups: NavGroup[], pathname: string): string[] {
 function SidebarFallback() {
   return (
     <aside
-      className="fixed top-0 left-0 z-40 h-screen w-64 flex-shrink-0 -translate-x-full border-r border-card-border bg-surface-sidebar shadow-card transition-all lg:sticky lg:top-0 lg:z-auto lg:translate-x-0"
+      className="fixed top-0 left-0 z-40 h-dvh max-h-dvh w-64 flex-shrink-0 -translate-x-full border-r border-card-border bg-surface-sidebar shadow-card transition-all lg:sticky lg:top-0 lg:z-auto lg:h-screen lg:max-h-none lg:translate-x-0"
       aria-hidden
     >
       <div className="min-h-[5.25rem] animate-pulse border-b border-card-border bg-card-surface" />
@@ -244,7 +291,7 @@ function SidebarFallback() {
 function SidebarContent() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { isOpen: isMobileMenuOpen, close: closeMobileMenu } = useMobileSidebar();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [openNavKeys, setOpenNavKeys] = useState<Record<string, boolean>>({});
   const [authEmail, setAuthEmail] = useState<string | null>(null);
@@ -270,6 +317,7 @@ function SidebarContent() {
     () => getActiveParentKeys(navGroups, pathname),
     [pathname]
   );
+  const displayCollapsed = isCollapsed && !isMobileMenuOpen;
 
   /** Évite de mettre en cache une navigation vers le dashboard principal tant que l’onboarding n’est pas marqué complété (sinon redirection → onboarding peut rester « collée » au prefetch). */
   const prefetchDashboardNav = !pathname.includes("/dashboard/onboarding");
@@ -278,6 +326,19 @@ function SidebarContent() {
   useEffect(() => {
     setIsCollapsed(getStoredCollapsed());
   }, []);
+
+  useEffect(() => {
+    closeMobileMenu();
+  }, [pathname, closeMobileMenu]);
+
+  useEffect(() => {
+    if (!isMobileMenuOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isMobileMenuOpen]);
 
   useEffect(() => {
     if (activeParentKeys.length === 0) return;
@@ -360,13 +421,14 @@ function SidebarContent() {
     const hasChildren = !!item.children?.length;
     const isDirectActive = pathname === item.href;
     const isActive = isNavItemActive(item, pathname);
-    const isOpen = !isCollapsed && hasChildren && !!openNavKeys[key];
+    const isOpen = !displayCollapsed && hasChildren && !!openNavKeys[key];
     const isFeatured = !!item.featured;
     const Icon = item.icon;
     const label = t(`items.${item.labelKey}`);
     const itemClassName = `
       group flex items-center rounded-xl text-sm font-medium transition-all duration-200
-      ${isCollapsed ? "justify-center px-2 py-2.5" : "gap-3 px-3 py-2.5"}
+      ${displayCollapsed ? "justify-center px-2 py-2.5" : "gap-3 px-3 py-2.5"}
+      ${isMobileMenuOpen && !displayCollapsed ? "min-h-11" : ""}
       ${
         isActive
           ? isFeatured
@@ -394,14 +456,14 @@ function SidebarContent() {
             <Link
               href={withFilters(item.href)}
               prefetch={prefetchDashboardNav}
-              onClick={() => setIsMobileMenuOpen(false)}
-              title={isCollapsed ? label : undefined}
-              className={`flex min-w-0 flex-1 items-center ${isCollapsed ? "justify-center" : "gap-3"}`}
+              onClick={closeMobileMenu}
+              title={displayCollapsed ? label : undefined}
+              className={`flex min-w-0 flex-1 items-center ${displayCollapsed ? "justify-center" : "gap-3"}`}
             >
               <Icon className={iconClassName} />
-              {!isCollapsed && <span className="flex-1 truncate">{label}</span>}
+              {!displayCollapsed && <span className="flex-1 truncate">{label}</span>}
             </Link>
-            {!isCollapsed && (
+            {!displayCollapsed && (
               <>
                 {isDirectActive && <div className="w-1 h-5 rounded-full bg-brand-gradient shrink-0" />}
                 <button
@@ -437,15 +499,15 @@ function SidebarContent() {
         key={key}
         href={withFilters(item.href)}
         prefetch={prefetchDashboardNav}
-        onClick={() => setIsMobileMenuOpen(false)}
-        title={isCollapsed ? label : undefined}
+        onClick={closeMobileMenu}
+        title={displayCollapsed ? label : undefined}
         className={`
           ${itemClassName}
-          ${depth > 0 && !isCollapsed ? "py-2 text-[13px]" : ""}
+          ${depth > 0 && !displayCollapsed ? "py-2 text-[13px]" : ""}
         `}
       >
         <Icon className={iconClassName} />
-        {!isCollapsed && (
+        {!displayCollapsed && (
           <>
             <span className="flex-1 truncate">{label}</span>
             {isFeatured && !isDirectActive && (
@@ -462,58 +524,43 @@ function SidebarContent() {
 
   return (
     <>
-      {/* Mobile menu button */}
-      <div className="lg:hidden fixed top-4 left-4 z-50">
-        <button
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="p-2.5 rounded-xl text-muted bg-surface-glass border border-card-border shadow-card hover:text-primary hover:shadow-card-hover transition-all focus:outline-none focus:ring-2 focus:ring-ring"
-          aria-label={t("openMenu")}
-        >
-          <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            {isMobileMenuOpen ? (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            ) : (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            )}
-          </svg>
-        </button>
-      </div>
-
       {/* Mobile overlay */}
       {isMobileMenuOpen && (
         <div
           className="fixed inset-0 bg-background/55 backdrop-blur-sm z-40 lg:hidden transition-opacity"
-          onClick={() => setIsMobileMenuOpen(false)}
+          onClick={closeMobileMenu}
         />
       )}
 
       {/* Sidebar */}
       <aside
         className={`
-          fixed top-0 left-0 z-40 h-screen transition-all duration-300 ease-out flex-shrink-0
-          lg:sticky lg:top-0 lg:self-start lg:translate-x-0 lg:z-auto
+          fixed top-0 left-0 z-40 h-dvh max-h-dvh transition-all duration-300 ease-out flex-shrink-0
+          lg:sticky lg:top-0 lg:self-start lg:h-screen lg:max-h-none lg:translate-x-0 lg:z-auto
           ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
-          w-64 ${isCollapsed ? "lg:w-20" : "lg:w-64"}
+          w-[min(100vw-3rem,16rem)] max-w-[16rem] sm:w-64
+          ${isCollapsed ? "lg:w-20" : "lg:w-64"}
           bg-surface-sidebar
           border-r border-card-border
           shadow-[2px_0_18px_-8px_rgb(152_80_208_/_0.32)]
+          pt-[env(safe-area-inset-top)]
         `}
       >
-        <div className="flex flex-col h-full w-full">
-          {/* Logo + Toggle */}
+        <div className="flex h-full min-h-0 w-full flex-col">
+          {/* Logo + mobile close */}
           <div
-            className={`flex items-center min-h-[5.25rem] py-3 border-b border-card-border transition-all duration-300 ${
-              isCollapsed ? "px-3 justify-center" : "px-6"
+            className={`flex shrink-0 items-center min-h-[5.25rem] py-3 border-b border-card-border transition-all duration-300 ${
+              displayCollapsed ? "px-3 justify-center" : "justify-between gap-2 px-4 sm:px-6"
             }`}
           >
             <Link
               href={isPublicDemoViewer ? "/" : withFilters("/dashboard")}
               prefetch={isPublicDemoViewer ? undefined : prefetchDashboardNav}
-              className={`group inline-flex items-center gap-3 rounded-xl outline-none transition-all hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
-                isCollapsed ? "justify-center" : ""
+              className={`group inline-flex min-w-0 items-center gap-3 rounded-xl outline-none transition-all hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+                displayCollapsed ? "justify-center" : ""
               }`}
-              onClick={() => setIsMobileMenuOpen(false)}
-              title={isCollapsed ? t("logo") : undefined}
+              onClick={closeMobileMenu}
+              title={displayCollapsed ? t("logo") : undefined}
             >
               <span className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-brand-gradient shadow-brand-glow ring-1 ring-white/20 transition-transform group-hover:rotate-[-2deg] group-hover:scale-105">
                 <SoundprintLogo
@@ -523,7 +570,7 @@ function SidebarContent() {
                   priority
                 />
               </span>
-              {!isCollapsed && (
+              {!displayCollapsed && (
                 <div className="flex min-w-0 flex-col justify-center gap-1">
                   <div className="flex min-w-0 items-center gap-2">
                     <span className="truncate text-base font-semibold tracking-[-0.03em] text-foreground">
@@ -537,6 +584,18 @@ function SidebarContent() {
                 </div>
               )}
             </Link>
+            {isMobileMenuOpen && (
+              <button
+                type="button"
+                onClick={closeMobileMenu}
+                className="shrink-0 rounded-xl border border-card-border p-2.5 text-muted transition-all hover:bg-primary/10 hover:text-primary focus:outline-none focus:ring-2 focus:ring-ring lg:hidden"
+                aria-label={t("closeMenu")}
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
           </div>
 
           {/* Desktop collapse toggle */}
@@ -563,10 +622,10 @@ function SidebarContent() {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-3 py-5 overflow-y-auto">
+          <nav className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-5">
             {navGroups.map((group) => (
               <div key={group.labelKey} className="mb-6 last:mb-0">
-                {!isCollapsed && (
+                {!displayCollapsed && (
                   <div className="px-3 mb-2">
                     <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">
                       {t(`groups.${group.labelKey}`)}
@@ -582,33 +641,33 @@ function SidebarContent() {
 
           {/* Theme & Language switchers */}
           <div
-            className={`px-3 py-4 border-t border-card-border space-y-4 transition-all duration-300 ${
-              isCollapsed ? "flex flex-col items-center gap-2" : ""
+            className={`shrink-0 px-3 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] border-t border-card-border space-y-4 transition-all duration-300 ${
+              displayCollapsed ? "flex flex-col items-center gap-2" : ""
             }`}
           >
-            {!isCollapsed && (
+            {!displayCollapsed && (
               <div className="px-3 mb-2">
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">
                   {t("appearance")}
                 </span>
               </div>
             )}
-            <div className={isCollapsed && !isMobileMenuOpen ? "w-full flex justify-center" : ""}>
-              <ThemeSwitcher placement="top" collapsed={isCollapsed && !isMobileMenuOpen} />
+            <div className={displayCollapsed ? "w-full flex justify-center" : ""}>
+              <ThemeSwitcher placement="top" collapsed={displayCollapsed} />
             </div>
-            {!isCollapsed && (
+            {!displayCollapsed && (
               <div className="px-3 mb-2">
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">
                   {t("language")}
                 </span>
               </div>
             )}
-            <div className={isCollapsed && !isMobileMenuOpen ? "w-full flex justify-center" : ""}>
+            <div className={displayCollapsed ? "w-full flex justify-center" : ""}>
               <Suspense fallback={<div className="h-10 rounded-xl bg-gray-100 dark:bg-gray-800 animate-pulse" />}>
-                <LanguageSwitcher collapsed={isCollapsed && !isMobileMenuOpen} />
+                <LanguageSwitcher collapsed={displayCollapsed} />
               </Suspense>
             </div>
-            {!isCollapsed && (
+            {!displayCollapsed && (
               <div className="space-y-2 px-3">
                 {authEmail ? (
                   <>

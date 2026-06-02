@@ -97,7 +97,7 @@ function AiInsightsHeroFrame({
             <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_18px_rgb(22_199_132_/0.75)]" />
             {t("heroEyebrow")}
           </div>
-          <h1 className="flex flex-wrap items-center gap-3 text-4xl font-semibold tracking-[-0.06em] text-white sm:text-5xl lg:text-6xl">
+          <h1 className="flex flex-wrap items-center gap-3 text-3xl font-semibold tracking-[-0.06em] text-white sm:text-5xl lg:text-6xl">
             <SparkIcon className="h-9 w-9 shrink-0 text-violet-200/90 sm:h-11 sm:w-11" aria-hidden />
             <span className="max-w-4xl text-balance">{t("title")}</span>
           </h1>
@@ -203,7 +203,7 @@ function InsightStyleToggle({
   return (
     <div className="flex w-full max-w-md flex-col gap-2" role="group" aria-label={t("styleToggle.ariaLabel")}>
       <span className="text-[10px] font-semibold uppercase tracking-wider text-white/60">{t("styleToggle.label")}</span>
-      <div className="inline-flex rounded-xl border border-white/15 bg-white/10 p-1.5 shadow-sm backdrop-blur-sm">
+      <div className="inline-flex max-w-full flex-wrap gap-1 rounded-xl border border-white/15 bg-white/10 p-1.5 shadow-sm backdrop-blur-sm sm:flex-nowrap">
         {(["human", "technical"] as const).map((style) => {
           const isActive = insightStyle === style;
           return (
@@ -212,7 +212,7 @@ function InsightStyleToggle({
               type="button"
               aria-pressed={isActive}
               onClick={() => onStyleChange(style)}
-              className={`rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-200 ${
+              className={`min-h-11 rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-200 ${
                 isActive
                   ? "bg-white text-gray-950 shadow-sm shadow-black/20"
                   : "text-white/70 hover:text-white"

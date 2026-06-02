@@ -3,7 +3,6 @@
 import { memo, useEffect, useId, useMemo, useRef } from "react";
 import { useTranslations } from "next-intl";
 import {
-  ResponsiveContainer,
   BarChart,
   Bar,
   XAxis,
@@ -29,9 +28,11 @@ import { useArtistUserInsights } from "@/lib/hooks/use-artists";
 import { ArtistAvatarHydrated } from "@/lib/components/artist-avatar-hydrated";
 import { ErrorState } from "@/lib/components/error-state";
 import { useTheme } from "@/lib/providers/theme-provider";
+import { ChartResponsiveContainer } from "@/lib/components/chart-responsive-container";
+import { useIsLgChartViewport } from "@/lib/hooks/use-chart-viewport";
 
 const PANEL_DRAWER_SHELL =
-  "relative flex h-full min-h-0 w-full max-w-lg flex-col overflow-hidden border-l border-slate-200/90 bg-white text-slate-900 shadow-[-28px_0_80px_rgba(15,23,42,0.1)] ring-1 ring-black/[0.04] dark:border-white/10 dark:bg-slate-950 dark:text-white dark:shadow-[-32px_0_96px_rgba(0,0,0,0.45)] dark:ring-0 sm:rounded-l-[1.75rem]";
+  "relative flex min-h-0 w-full flex-col overflow-hidden border-slate-200/90 bg-white text-slate-900 ring-1 ring-black/[0.04] dark:border-white/10 dark:bg-slate-950 dark:text-white dark:ring-0 max-lg:max-h-[min(92dvh,720px)] max-lg:overflow-y-auto max-lg:rounded-t-[1.75rem] max-lg:border-t max-lg:shadow-[0_-16px_48px_rgba(15,23,42,0.12)] lg:h-full lg:max-w-lg lg:border-l lg:shadow-[-28px_0_80px_rgba(15,23,42,0.1)] lg:rounded-l-[1.75rem] dark:max-lg:shadow-[0_-16px_48px_rgba(0,0,0,0.35)] dark:lg:shadow-[-32px_0_96px_rgba(0,0,0,0.45)]";
 
 const INSIGHT_CARD =
   "rounded-2xl border border-slate-200/80 bg-slate-50/80 shadow-sm shadow-slate-900/[0.04] dark:border-white/10 dark:bg-black/25 dark:shadow-none";
@@ -102,6 +103,7 @@ export const ArtistUserInsightsPanel = memo(
     const closeRef = useRef<HTMLButtonElement>(null);
     const { resolvedTheme } = useTheme();
     const chartTheme = DASHBOARD_CHART_THEME[resolvedTheme === "dark" ? "dark" : "light"];
+    const isLgChart = useIsLgChartViewport();
     const chartTooltipStyles = useMemo(() => {
       if (resolvedTheme === "dark") {
         return {
@@ -225,7 +227,7 @@ export const ArtistUserInsightsPanel = memo(
     if (!open || !previewArtist || !artistId) return null;
 
     return (
-      <div className="fixed inset-0 z-[80] flex justify-end">
+      <div className="fixed inset-0 z-[80] flex flex-col justify-end lg:flex-row lg:justify-end">
         <button
           type="button"
           className="absolute inset-0 bg-slate-950/20 backdrop-blur-[3px] transition-colors dark:bg-black/50 dark:backdrop-blur-sm"
@@ -238,7 +240,12 @@ export const ArtistUserInsightsPanel = memo(
           role="dialog"
           aria-modal="true"
           aria-labelledby={headingId}
+          style={{ paddingBottom: "max(0px, env(safe-area-inset-bottom))" }}
         >
+          <div
+            className="mx-auto mb-1 mt-2 h-1 w-10 shrink-0 rounded-full bg-slate-300/80 dark:bg-white/20 lg:hidden"
+            aria-hidden
+          />
           <div className={`pointer-events-none absolute inset-0 ${DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY}`} aria-hidden />
           <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} aria-hidden />
 
@@ -294,7 +301,7 @@ export const ArtistUserInsightsPanel = memo(
               ref={closeRef}
               type="button"
               onClick={onClose}
-              className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl p-0 ${DASHBOARD_SPOTLIGHT_BTN_SECONDARY}`}
+              className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl p-0 ${DASHBOARD_SPOTLIGHT_BTN_SECONDARY}`}
               aria-label={t("insightsCloseAria")}
             >
               <X className="h-4 w-4" strokeWidth={2} aria-hidden />
@@ -405,8 +412,7 @@ export const ArtistUserInsightsPanel = memo(
                 <section>
                   <h3 className={`mb-3 ${INSIGHT_SECTION_TITLE}`}>{t("insightsByHour")}</h3>
                   <div className={DASHBOARD_SPOTLIGHT_INNER_WELL}>
-                    <div className="h-44 w-full">
-                      <ResponsiveContainer width="100%" height="100%">
+                    <ChartResponsiveContainer token="insightsHourBar">
                         <BarChart data={hourChartData} margin={{ top: 4, right: 4, left: -18, bottom: 0 }}>
                           <defs>
                             <linearGradient id={`insHourBar-${chartNs}`} x1="0" y1="0" x2="0" y2="1">
@@ -421,11 +427,11 @@ export const ArtistUserInsightsPanel = memo(
                           />
                           <XAxis
                             dataKey="label"
-                            tick={{ fill: chartTheme.tick, fontSize: 9 }}
-                            interval={3}
+                            tick={{ fill: chartTheme.tick, fontSize: isLgChart ? 9 : 8 }}
+                            interval={isLgChart ? 3 : 5}
                             axisLine={false}
                             tickLine={false}
-                            height={32}
+                            height={isLgChart ? 32 : 28}
                           />
                           <YAxis
                             tick={{ fill: chartTheme.tick, fontSize: 10 }}
@@ -446,16 +452,14 @@ export const ArtistUserInsightsPanel = memo(
                             maxBarSize={10}
                           />
                         </BarChart>
-                      </ResponsiveContainer>
-                    </div>
+                    </ChartResponsiveContainer>
                   </div>
                 </section>
 
                 <section>
                   <h3 className={`mb-3 ${INSIGHT_SECTION_TITLE}`}>{t("insightsByWeekday")}</h3>
                   <div className={DASHBOARD_SPOTLIGHT_INNER_WELL}>
-                    <div className="h-36 w-full">
-                      <ResponsiveContainer width="100%" height="100%">
+                    <ChartResponsiveContainer token="insightsWeekdayBar">
                         <BarChart data={weekdayChartData} margin={{ top: 4, right: 4, left: -18, bottom: 4 }}>
                           <defs>
                             <linearGradient id={`insWeekdayBar-${chartNs}`} x1="0" y1="0" x2="1" y2="0">
@@ -470,15 +474,15 @@ export const ArtistUserInsightsPanel = memo(
                           />
                           <XAxis
                             dataKey="label"
-                            tick={{ fill: chartTheme.tick, fontSize: 10 }}
+                            tick={{ fill: chartTheme.tick, fontSize: isLgChart ? 10 : 9 }}
                             axisLine={false}
                             tickLine={false}
                           />
                           <YAxis
-                            tick={{ fill: chartTheme.tick, fontSize: 10 }}
+                            tick={{ fill: chartTheme.tick, fontSize: isLgChart ? 10 : 9 }}
                             axisLine={false}
                             tickLine={false}
-                            width={36}
+                            width={isLgChart ? 36 : 32}
                           />
                           <Tooltip
                             contentStyle={chartTooltipStyles.contentStyle}
@@ -490,11 +494,10 @@ export const ArtistUserInsightsPanel = memo(
                             dataKey="listens"
                             fill={`url(#insWeekdayBar-${chartNs})`}
                             radius={[4, 4, 0, 0]}
-                            maxBarSize={28}
+                            maxBarSize={isLgChart ? 28 : 22}
                           />
                         </BarChart>
-                      </ResponsiveContainer>
-                    </div>
+                    </ChartResponsiveContainer>
                   </div>
                 </section>
 

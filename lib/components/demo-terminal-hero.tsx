@@ -89,7 +89,7 @@ export function DemoTerminalHero({
     >
       <motion.div
         aria-hidden
-        className="absolute -inset-8 rounded-[2rem] bg-[radial-gradient(circle_at_50%_0%,rgba(34,211,238,0.28),rgba(139,92,246,0.18)_32%,transparent_68%)] blur-3xl"
+        className="absolute -inset-8 hidden rounded-[2rem] bg-[radial-gradient(circle_at_50%_0%,rgba(34,211,238,0.28),rgba(139,92,246,0.18)_32%,transparent_68%)] blur-3xl md:block"
         animate={{
           opacity: [0.46, 0.78, 0.46],
           scale: [0.98, 1.03, 0.98],

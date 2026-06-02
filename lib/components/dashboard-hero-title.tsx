@@ -29,7 +29,7 @@ export function DashboardHeroTitle({
     variant === "hero"
       ? "mt-3 flex items-center gap-3 text-3xl font-bold tracking-tight text-white sm:text-4xl"
       : variant === "onboarding"
-        ? "mt-3 flex items-center gap-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl"
+        ? "mt-3 flex items-center gap-3 text-2xl font-bold tracking-tight text-foreground lg:text-4xl"
         : "flex items-center gap-3 text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl";
 
   return (

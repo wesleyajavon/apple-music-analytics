@@ -11,10 +11,10 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  ResponsiveContainer,
 } from "recharts";
 import { Activity, CalendarDays } from "lucide-react";
 import { useTimeline, type TimelineDataPoint } from "@/lib/hooks/use-listening";
+import { ChartResponsiveContainer } from "@/lib/components/chart-responsive-container";
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
 import { PeriodSelector, PeriodType } from "@/lib/components/period-selector";
@@ -279,7 +279,10 @@ const TimelineListeningChart = memo(function TimelineListeningChart({
   listensLabel: string;
 }) {
   return (
-    <ResponsiveContainer width="100%" height={500}>
+    <ChartResponsiveContainer
+      token="timelineMain"
+      minWidth={chartData.length > 10 ? Math.max(320, chartData.length * 32) : undefined}
+    >
       <LineChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: 60 }}>
         <defs>
           <linearGradient id="timelineListeningGradient" x1="0" y1="0" x2="1" y2="0">
@@ -334,7 +337,7 @@ const TimelineListeningChart = memo(function TimelineListeningChart({
           animationEasing="ease-in-out"
         />
       </LineChart>
-    </ResponsiveContainer>
+    </ChartResponsiveContainer>
   );
 });
 TimelineListeningChart.displayName = "TimelineListeningChart";

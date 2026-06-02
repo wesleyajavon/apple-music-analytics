@@ -6,6 +6,8 @@ import { defineConfig, devices } from '@playwright/test';
  */
 const e2ePort = process.env.PLAYWRIGHT_TEST_PORT || "3100";
 const baseURL = process.env.PLAYWRIGHT_TEST_BASE_URL || `http://localhost:${e2ePort}`;
+const useExternalDevServer =
+  !!process.env.PLAYWRIGHT_TEST_BASE_URL || !!process.env.PLAYWRIGHT_SKIP_WEBSERVER;
 
 export default defineConfig({
   testDir: "./__tests__/e2e",
@@ -38,24 +40,22 @@ export default defineConfig({
       use: { ...devices['Desktop Safari'] },
     },
 
-    /* Mobile browsers */
-    // {
-    //   name: 'Mobile Chrome',
-    //   use: { ...devices['Pixel 5'] },
-    // },
-    // {
-    //   name: 'Mobile Safari',
-    //   use: { ...devices['iPhone 12'] },
-    // },
+    {
+      name: "mobile-chrome",
+      use: { ...devices["Pixel 5"] },
+      testMatch: /mobile-dashboard\.spec\.ts/,
+    },
   ],
 
-  /* Start dev server before tests */
-  webServer: {
-    command: `npm run dev -- --port ${e2ePort}`,
-    url: baseURL,
-    reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000,
-  },
+  /* Start dev server before tests (skip when PLAYWRIGHT_TEST_BASE_URL points at a running app) */
+  webServer: useExternalDevServer
+    ? undefined
+    : {
+        command: `npm run dev -- --port ${e2ePort}`,
+        url: baseURL,
+        reuseExistingServer: !process.env.CI,
+        timeout: 120 * 1000,
+      },
 });
 
 

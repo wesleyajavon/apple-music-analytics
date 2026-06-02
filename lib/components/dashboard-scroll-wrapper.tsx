@@ -1,15 +1,16 @@
 "use client";
 
 import { Suspense, useCallback, useLayoutEffect, useState, type CSSProperties } from "react";
-import { Sidebar } from "@/lib/components/sidebar";
-import { DateRangeFilter } from "@/lib/components/date-range-filter";
-import { DashboardToolbarBrand } from "@/lib/components/dashboard-toolbar-brand";
+import { Sidebar, SidebarProvider } from "@/lib/components/sidebar";
+import { DashboardStickyHeader } from "@/lib/components/dashboard-sticky-header";
+import { DashboardMainArea } from "@/lib/components/dashboard-main-area";
 import { Footer } from "@/lib/components/footer";
 import { DashboardViewerProvider } from "@/lib/context/dashboard-viewer-context";
 import { GenreGroqClassificationNudgeNotifier } from "@/lib/components/genre-groq-classification-nudge-notifier";
 import { GenreBackfillJobProvider } from "@/lib/context/genre-backfill-job-context";
 import { NotificationCenterProvider } from "@/lib/context/notification-center-context";
 import { ScrollProgressBar } from "@/lib/components/overview-bis";
+import { DashboardMobileBottomNav } from "@/lib/components/dashboard-mobile-bottom-nav";
 
 export function DashboardScrollWrapper({ children }: { children: React.ReactNode }) {
   const [filterElement, setFilterElement] = useState<HTMLDivElement | null>(null);
@@ -44,44 +45,26 @@ export function DashboardScrollWrapper({ children }: { children: React.ReactNode
   } as CSSProperties;
 
   return (
-    <div className="flex min-h-screen bg-background" style={dashboardStyle}>
-      <ScrollProgressBar />
-      <Sidebar />
-      <NotificationCenterProvider>
+    <SidebarProvider>
+      <div className="flex min-h-screen bg-background" style={dashboardStyle}>
+        <ScrollProgressBar />
+        <Sidebar />
+        <NotificationCenterProvider>
         <GenreBackfillJobProvider>
           <GenreGroqClassificationNudgeNotifier />
           <div className="min-w-0 flex-1 bg-surface-dashboard shadow-[0_0_0_1px_rgb(152_80_208_/_0.08)]">
-          <Suspense
-            fallback={
-              <div className="sticky top-0 z-30 shrink-0 border-b border-card-border bg-surface-glass shadow-[0_1px_0_0_rgb(152_80_208_/_0.1)] backdrop-blur-md">
-                <div className="border-b border-card-border/70 px-4 py-3 lg:hidden">
-                  <div className="h-9 w-40 animate-pulse rounded-lg bg-card-surface" />
-                </div>
-                <div className="px-4 py-3 sm:px-6 lg:px-8">
-                  <div className="h-10 w-64 animate-pulse rounded-xl bg-card-surface" />
-                </div>
-              </div>
-            }
-          >
-            <div
-              ref={filterRef}
-              className="sticky top-0 z-30 shrink-0 border-b border-card-border bg-surface-glass shadow-[0_1px_0_0_rgb(152_80_208_/_0.1)] backdrop-blur-md"
-            >
-              <DashboardToolbarBrand />
-              <DateRangeFilter />
-            </div>
-          </Suspense>
+          <DashboardStickyHeader filterRef={filterRef} />
           <Suspense fallback={<main className="min-w-0"><div className="p-4 sm:p-6 lg:p-8">{children}</div></main>}>
             <DashboardViewerProvider>
-              <main className="min-w-0">
-                <div className="p-4 sm:p-6 lg:p-8">{children}</div>
-              </main>
+              <DashboardMainArea>{children}</DashboardMainArea>
               <Footer />
+              <DashboardMobileBottomNav />
             </DashboardViewerProvider>
           </Suspense>
           </div>
         </GenreBackfillJobProvider>
       </NotificationCenterProvider>
-    </div>
+      </div>
+    </SidebarProvider>
   );
 }

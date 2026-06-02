@@ -224,7 +224,7 @@ function MusicalProfileNoDataView({
           <div className="absolute -bottom-24 left-1/2 h-56 w-[80%] -translate-x-1/2 rounded-full bg-accent-violet/25 blur-3xl" />
           <div className="relative grid gap-10 lg:grid-cols-[1.25fr_0.75fr] lg:items-end">
             <div>
-              <h1 className="max-w-3xl text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">
+              <h1 className="max-w-3xl text-3xl font-black tracking-tight sm:text-5xl lg:text-6xl">
                 {t("heroTitle")}
               </h1>
               <p className="mt-5 max-w-2xl text-base leading-7 text-white/72 sm:text-lg">
@@ -438,7 +438,7 @@ function MusicalProfileContent() {
       : 0;
 
   return (
-    <div className="space-y-12 pb-10">
+    <div className="space-y-12 pb-6 lg:pb-10">
       <ParallaxHero>
         <motion.section
           initial={{ opacity: 0, y: 24 }}
@@ -455,7 +455,7 @@ function MusicalProfileContent() {
                 <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_18px_rgb(22_199_132_/0.75)]" />
                 {t("heroBadge")}
               </div>
-              <h1 className="max-w-4xl text-balance text-4xl font-semibold tracking-[-0.06em] sm:text-5xl lg:text-6xl">
+              <h1 className="max-w-4xl text-balance text-3xl font-semibold tracking-[-0.06em] sm:text-5xl lg:text-6xl">
                 {t("heroTitle")}
               </h1>
               <p className="mt-5 max-w-2xl text-base leading-7 text-white/70 sm:text-lg">
@@ -464,7 +464,7 @@ function MusicalProfileContent() {
               <div className="mt-7 flex flex-col gap-3 sm:flex-row">
                 <Link
                   href={withFilters("/dashboard/overview")}
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25 transition-all hover:-translate-y-0.5 hover:bg-gray-100"
+                  className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25 transition-all hover:-translate-y-0.5 hover:bg-gray-100 sm:w-auto"
                 >
                   {t("overviewCallout.cta")}
                   <span aria-hidden="true">&rarr;</span>
@@ -598,7 +598,7 @@ function MusicalProfileContent() {
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">
                 {t("overviewCallout.badge")}
               </p>
-              <h2 className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-gray-950 dark:text-white sm:text-4xl">
+              <h2 className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-gray-950 dark:text-white sm:text-3xl lg:text-4xl">
                 {t("overviewCallout.title")}
               </h2>
               <p className="mt-3 text-sm leading-6 text-gray-600 dark:text-gray-300">
@@ -687,7 +687,7 @@ function MusicalProfileContent() {
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-accent-violet">
                 {t("sections.sonicIdentity")}
               </p>
-              <h2 className="mt-3 text-3xl font-bold tracking-tight text-gray-950 dark:text-white">
+              <h2 className="mt-3 text-2xl font-bold tracking-tight text-gray-950 dark:text-white sm:text-3xl">
                 {t("identityTitle")}
               </h2>
               <p className="mt-3 text-sm leading-6 text-gray-500 dark:text-gray-400">

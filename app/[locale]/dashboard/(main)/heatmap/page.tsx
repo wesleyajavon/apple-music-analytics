@@ -26,6 +26,7 @@ import { formatOverviewDateRangeLabel } from "@/lib/utils/overview-date-range-la
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
 import { HeatmapDayDetailsPanel } from "@/lib/components/heatmap-day-details-panel";
+import { MobileBottomSheet } from "@/lib/components/mobile-bottom-sheet";
 import { HeatmapSkeleton } from "@/lib/components/skeleton-loaders";
 import { Activity, CalendarDays } from "lucide-react";
 import {
@@ -57,7 +58,7 @@ function HeatmapHeroFrame({ badgeLabel, stats }: { badgeLabel: string; stats: Re
             <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_18px_rgb(22_199_132_/0.75)]" />
             {t("heroEyebrow")}
           </div>
-          <h1 className="flex flex-wrap items-center gap-3 text-4xl font-semibold tracking-[-0.06em] text-white sm:text-5xl lg:text-6xl">
+          <h1 className="flex flex-wrap items-center gap-3 text-3xl font-semibold tracking-[-0.06em] text-white sm:text-5xl lg:text-6xl">
             <CalendarDays className="h-9 w-9 shrink-0 text-violet-200/90 sm:h-11 sm:w-11" strokeWidth={1.5} aria-hidden />
             <span className="max-w-4xl text-balance">{t("title")}</span>
           </h1>
@@ -70,7 +71,7 @@ function HeatmapHeroFrame({ badgeLabel, stats }: { badgeLabel: string; stats: Re
           <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <Link
               href="/dashboard/timeline"
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25 transition-all hover:-translate-y-0.5 hover:bg-gray-100"
+              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25 transition-all hover:-translate-y-0.5 hover:bg-gray-100 sm:w-auto"
             >
               <Activity className="h-4 w-4" aria-hidden />
               {t("ctaTimeline")}
@@ -514,31 +515,37 @@ function HeatmapContent() {
         </section>
       </div>
 
-      {selectedDate && (
-        <section
-          ref={dayDetailsRef}
-          className="mt-8 scroll-mt-8 animate-fade-in-up"
-          aria-labelledby="heatmap-day-details-title"
-        >
-          <HeatmapDayDetailsPanel
-            selectedDate={selectedDate}
-            locale={locale}
-            onClose={() => setSelectedDate(null)}
-            dayListens={dayListensData}
-            isLoading={isLoadingDayListens}
-            periodDailyAverage={
-              stats && stats.averageListens > 0 ? stats.averageListens : null
-            }
-            periodMaxListens={stats?.maxListens ?? 0}
-            periodMaxDayDate={
-              stats?.maxDay ? toDateOnly(stats.maxDay.date) : null
-            }
-            emptyStateNoPlays={
-              <EmptyState variant="startup" {...emptyStatePresets.noDayDetail} />
-            }
-          />
-        </section>
-      )}
+      <MobileBottomSheet
+        open={!!selectedDate}
+        onClose={() => setSelectedDate(null)}
+        ariaLabelledBy="heatmap-day-details-title"
+      >
+        {selectedDate ? (
+          <section
+            ref={dayDetailsRef}
+            className="scroll-mt-8 animate-fade-in-up lg:mt-8"
+            aria-labelledby="heatmap-day-details-title"
+          >
+            <HeatmapDayDetailsPanel
+              selectedDate={selectedDate}
+              locale={locale}
+              onClose={() => setSelectedDate(null)}
+              dayListens={dayListensData}
+              isLoading={isLoadingDayListens}
+              periodDailyAverage={
+                stats && stats.averageListens > 0 ? stats.averageListens : null
+              }
+              periodMaxListens={stats?.maxListens ?? 0}
+              periodMaxDayDate={
+                stats?.maxDay ? toDateOnly(stats.maxDay.date) : null
+              }
+              emptyStateNoPlays={
+                <EmptyState variant="startup" {...emptyStatePresets.noDayDetail} />
+              }
+            />
+          </section>
+        ) : null}
+      </MobileBottomSheet>
     </>
   );
 }
@@ -551,7 +558,7 @@ export default function HeatmapPage() {
   const filterKey = `${startDateParam}-${endDateParam}-${selectedDateParam}`;
 
   return (
-    <div className="px-4 pb-6 pt-0 sm:px-0">
+    <div className="px-4 pb-4 pt-0 sm:px-0 lg:pb-6">
       <Suspense fallback={<HeatmapPageFallback />}>
         <HeatmapContent key={filterKey} />
       </Suspense>

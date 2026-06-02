@@ -9,7 +9,6 @@ import {
   Legend,
   Line,
   LineChart as RechartsLineChart,
-  ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
@@ -34,6 +33,7 @@ import {
   DASHBOARD_CHART_THEME,
 } from "@/lib/constants/dashboard-spotlight";
 import { useTheme } from "@/lib/providers/theme-provider";
+import { ChartResponsiveContainer } from "@/lib/components/chart-responsive-container";
 
 /** Aligné sur le hero `/dashboard/genres` — shell startup / Vercel-friendly. */
 const PALETTE_HERO_SHELL_CLASS =
@@ -41,6 +41,8 @@ const PALETTE_HERO_SHELL_CLASS =
 
 const PALETTE_MODE_ACTIVE_TAB_CLASS =
   "bg-white text-violet-950 shadow-sm shadow-black/25 dark:bg-white dark:text-violet-950";
+
+const PALETTE_INPUT_CLASS = `${DASHBOARD_SPOTLIGHT_SELECT} text-base focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-400/25 sm:text-sm`;
 
 const PALETTE_SPOTLIGHT_CARD_CLASS = `relative ${DASHBOARD_SPOTLIGHT_SHELL}`;
 
@@ -104,7 +106,7 @@ function PaletteMiniChart({
   );
 
   return (
-    <ResponsiveContainer width="100%" height={180}>
+    <ChartResponsiveContainer token="paletteMini">
       <RechartsLineChart data={data}>
         <CartesianGrid strokeDasharray="3 3" stroke={chartPalette.grid} />
         <XAxis
@@ -139,7 +141,7 @@ function PaletteMiniChart({
           animationDuration={300}
         />
       </RechartsLineChart>
-    </ResponsiveContainer>
+    </ChartResponsiveContainer>
   );
 }
 
@@ -154,7 +156,7 @@ function PaletteHeroStats({
 }) {
   const pct = Math.round(data.progress.completionRatio * 100);
   return (
-    <div className="grid gap-2 pt-4 sm:grid-cols-3">
+    <div className="grid grid-cols-1 gap-2 pt-4 sm:grid-cols-3">
       <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
         <p className="text-xl font-semibold tracking-tight text-white tabular-nums">{pct}%</p>
         <p className="mt-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">{t("heroMetricProgress")}</p>
@@ -173,7 +175,7 @@ function PaletteHeroStats({
 
 function PaletteHeroStatsSkeleton() {
   return (
-    <div className="grid gap-2 pt-4 sm:grid-cols-3" aria-busy="true">
+    <div className="grid grid-cols-1 gap-2 pt-4 sm:grid-cols-3" aria-busy="true">
       {[0, 1, 2].map((i) => (
         <div key={i} className="animate-pulse rounded-2xl border border-white/10 bg-white/[0.06] p-3">
           <div className="mb-2 h-7 w-16 rounded bg-white/20" />
@@ -225,7 +227,7 @@ function PaletteMappingSkeleton() {
 
 function PaletteMiniChartSkeleton() {
   return (
-    <div className="relative h-[180px] rounded-xl border border-card-border bg-surface/60 p-4" aria-busy="true">
+    <div className="relative h-[160px] rounded-xl border border-card-border bg-surface/60 p-4 lg:h-[180px]" aria-busy="true">
       <div className="flex h-full flex-col justify-between">
         {Array.from({ length: 5 }).map((_, index) => (
           <div key={index} className="h-px bg-gray-200 dark:bg-gray-700" />
@@ -349,18 +351,18 @@ export function PaletteWorkbench() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 lg:space-y-8">
       <div className={PALETTE_HERO_SHELL_CLASS}>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.26),transparent_30%),radial-gradient(circle_at_80%_12%,rgba(6,182,212,0.2),transparent_32%),linear-gradient(135deg,rgba(3,7,18,0.98),rgba(30,27,75,0.88)_48%,rgba(8,47,73,0.72))]" />
         <div className="absolute -left-20 top-1/3 h-64 w-64 rounded-full bg-accent-violet/22 blur-3xl" />
         <div className="absolute -bottom-28 right-10 h-72 w-72 rounded-full bg-accent-cyan/18 blur-3xl" />
-        <div className="relative grid gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-center">
+        <div className="relative grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-center">
           <div>
             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-violet-100 backdrop-blur">
               <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_18px_rgb(22_199_132_/0.75)]" />
               {t("heroEyebrow")}
             </div>
-            <h1 className="max-w-4xl text-balance text-4xl font-semibold tracking-[-0.06em] text-white sm:text-5xl lg:text-6xl">{t("title")}</h1>
+            <h1 className="max-w-4xl text-balance text-3xl font-semibold tracking-[-0.06em] text-white lg:text-6xl">{t("title")}</h1>
             <p className="mt-5 max-w-2xl text-base leading-7 text-white/70 sm:text-lg">
               {paletteMode === "tracks" ? t("subtitleTracks") : t("subtitleArtists")}
             </p>
@@ -373,7 +375,7 @@ export function PaletteWorkbench() {
                 <button
                   type="button"
                   onClick={() => setPaletteMode("artists")}
-                  className={`rounded-xl px-3 py-2 text-xs font-semibold transition-colors ${
+                  className={`min-h-11 rounded-xl px-3 py-2 text-xs font-semibold transition-colors ${
                     paletteMode === "artists"
                       ? PALETTE_MODE_ACTIVE_TAB_CLASS
                       : "text-white/75 hover:text-white"
@@ -384,7 +386,7 @@ export function PaletteWorkbench() {
                 <button
                   type="button"
                   onClick={() => setPaletteMode("tracks")}
-                  className={`rounded-xl px-3 py-2 text-xs font-semibold transition-colors ${
+                  className={`min-h-11 rounded-xl px-3 py-2 text-xs font-semibold transition-colors ${
                     paletteMode === "tracks"
                       ? PALETTE_MODE_ACTIVE_TAB_CLASS
                       : "text-white/75 hover:text-white"
@@ -400,14 +402,14 @@ export function PaletteWorkbench() {
             <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <Link
                 href="/dashboard/genres"
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25 transition-all hover:-translate-y-0.5 hover:bg-gray-100"
+                className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25 transition-all hover:-translate-y-0.5 hover:bg-gray-100 sm:w-auto"
               >
                 <ArrowLeft className="h-4 w-4" aria-hidden />
                 {t("backToGenres")}
               </Link>
               <Link
                 href="/dashboard/genres/trends"
-                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-sm font-bold text-white backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white/15"
+                className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-sm font-bold text-white backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white/15 sm:w-auto"
               >
                 <LineChart className="h-4 w-4" aria-hidden />
                 {tGenres("viewTrends")}
@@ -443,7 +445,7 @@ export function PaletteWorkbench() {
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-5">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
         <section className={`${PALETTE_SPOTLIGHT_CARD_CLASS} lg:col-span-3`}>
           <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} aria-hidden />
           <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} aria-hidden />
@@ -468,7 +470,7 @@ export function PaletteWorkbench() {
                 </p>
                 {paletteMode === "tracks" && track ? (
                   <>
-                    <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-foreground sm:text-3xl">
+                    <h2 className="mt-2 text-xl font-semibold tracking-[-0.04em] text-foreground lg:text-3xl">
                       {track.trackTitle}
                     </h2>
                     <p className={`mt-1 text-sm font-medium ${DASHBOARD_SPOTLIGHT_MUTED}`}>
@@ -489,7 +491,7 @@ export function PaletteWorkbench() {
                   </>
                 ) : artist ? (
                   <>
-                    <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-foreground sm:text-3xl">
+                    <h2 className="mt-2 text-xl font-semibold tracking-[-0.04em] text-foreground lg:text-3xl">
                       {artist.artistName}
                     </h2>
                     <div className="mt-4 flex flex-wrap gap-2">
@@ -525,7 +527,7 @@ export function PaletteWorkbench() {
                                 setSelectedGenre(s.genre);
                                 setCustomGenre("");
                               }}
-                              className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                              className={`min-h-11 rounded-full border px-3 py-2 text-xs font-medium transition-colors ${
                                 isActive
                                   ? "border-violet-600 bg-violet-600 text-white shadow-sm dark:border-violet-400 dark:bg-violet-400 dark:text-slate-950"
                                   : "border-violet-300/50 bg-white/80 text-violet-900 hover:bg-violet-100 dark:border-white/15 dark:bg-black/30 dark:text-violet-100 dark:hover:bg-white/10"
@@ -552,7 +554,7 @@ export function PaletteWorkbench() {
                       setSelectedGenre(event.target.value);
                       setSelectedSuggestionId(null);
                     }}
-                    className={`w-full ${DASHBOARD_SPOTLIGHT_SELECT} focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-400/25`}
+                    className={`w-full ${PALETTE_INPUT_CLASS}`}
                     placeholder={t("existingGenresPlaceholder")}
                   />
                   <datalist id="palette-genre-suggestions">
@@ -572,17 +574,17 @@ export function PaletteWorkbench() {
                       setCustomGenre(event.target.value);
                       setSelectedSuggestionId(null);
                     }}
-                    className={`w-full ${DASHBOARD_SPOTLIGHT_SELECT} focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-400/25`}
+                    className={`w-full ${PALETTE_INPUT_CLASS}`}
                     placeholder={t("customGenrePlaceholder")}
                   />
                 </div>
 
-                <div className="mt-6 flex flex-wrap gap-3">
+                <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                   <button
                     type="button"
                     onClick={handleMap}
                     disabled={!canSubmit}
-                    className="inline-flex min-h-[44px] items-center justify-center rounded-2xl bg-slate-950 px-5 py-2.5 text-sm font-bold text-white shadow-xl shadow-slate-900/15 transition-all hover:-translate-y-0.5 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-white dark:text-slate-950 dark:hover:bg-gray-100"
+                    className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-slate-950 px-5 py-2.5 text-sm font-bold text-white shadow-xl shadow-slate-900/15 transition-all hover:-translate-y-0.5 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-white dark:text-slate-950 dark:hover:bg-gray-100 sm:w-auto"
                   >
                     {isBusy ? t("saving") : t("apply")}
                   </button>
@@ -590,7 +592,7 @@ export function PaletteWorkbench() {
                     type="button"
                     onClick={handleSkip}
                     disabled={isBusy}
-                    className={`inline-flex min-h-[44px] items-center justify-center px-5 py-2.5 ${DASHBOARD_SPOTLIGHT_BTN_SECONDARY}`}
+                    className={`inline-flex min-h-11 w-full items-center justify-center px-5 py-2.5 sm:w-auto ${DASHBOARD_SPOTLIGHT_BTN_SECONDARY}`}
                   >
                     {t("skip")}
                   </button>

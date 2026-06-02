@@ -9,6 +9,8 @@ import { Footer } from "@/lib/components/footer";
 import { SoundprintLogo } from "@/lib/components/soundprint-logo";
 import { ThemeSwitcher } from "@/lib/components/theme-switcher";
 import { DemoTerminalHero } from "@/lib/components/demo-terminal-hero";
+import { HomeMobileNav } from "@/lib/components/home-mobile-nav";
+import { HomeMobileStickyCta } from "@/lib/components/home-mobile-sticky-cta";
 import { StreamingProviderLogos } from "@/lib/components/streaming-provider-logos";
 import { DEFAULT_PUBLIC_PROFILE_USER_ID } from "@/lib/constants/public-profile";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -149,36 +151,26 @@ export default function Home() {
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
-      <main className="relative flex flex-1 flex-col overflow-hidden bg-app-shell">
-        <div
-          className="absolute left-1/2 top-0 -z-10 h-[34rem] w-[34rem] -translate-x-1/2 rounded-full bg-accent-violet/20 blur-3xl"
-          aria-hidden
-        />
-        <div
-          className="absolute -left-32 top-36 -z-10 h-72 w-72 rounded-full bg-accent-rose/20 blur-3xl"
-          aria-hidden
-        />
-        <div
-          className="absolute -right-40 top-[28rem] -z-10 h-96 w-96 rounded-full bg-accent-cyan/20 blur-3xl"
-          aria-hidden
-        />
-
-        <header className="sticky top-0 z-30 border-b border-card-border bg-surface-glass backdrop-blur-xl">
-          <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+      <main className="relative flex flex-1 flex-col bg-app-shell">
+        <header
+          className="sticky top-0 z-30 border-b border-card-border bg-surface-glass backdrop-blur-xl"
+          style={{ paddingTop: "max(0px, env(safe-area-inset-top))" }}
+        >
+          <div className="relative mx-auto flex w-full max-w-7xl items-center justify-between gap-2 px-4 py-3 sm:gap-4 sm:px-6 sm:py-4 lg:px-8">
             <Link
               href="/"
-              className="group inline-flex items-center gap-3 rounded-full py-1.5 pr-2 outline-none transition-all hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:pr-3"
+              className="group inline-flex min-w-0 shrink items-center gap-2 rounded-full py-1.5 pr-1 outline-none transition-all hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:gap-3 sm:pr-3"
               aria-label="Soundprint-AI"
             >
-              <span className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-brand-gradient shadow-brand-glow ring-1 ring-white/20 transition-transform group-hover:rotate-[-2deg] group-hover:scale-105">
+              <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-brand-gradient shadow-brand-glow ring-1 ring-white/20 transition-transform group-hover:rotate-[-2deg] group-hover:scale-105 sm:h-11 sm:w-11">
                 <SoundprintLogo
                   src="/brand/favicon.png"
                   showText={false}
-                  imageClassName="h-8 w-8 rounded-xl"
+                  imageClassName="h-7 w-7 rounded-xl sm:h-8 sm:w-8"
                   priority
                 />
               </span>
-              <span className="flex min-w-0 items-center gap-2">
+              <span className="hidden min-w-0 items-center gap-2 sm:flex">
                 <span className="text-base font-semibold tracking-[-0.03em] text-foreground">
                   Soundprint
                 </span>
@@ -206,24 +198,45 @@ export default function Home() {
               </a>
             </div>
 
-            <div className="flex items-center gap-2 sm:gap-3">
-              <ThemeSwitcher placement="bottom" />
+            <div className="flex shrink-0 items-center gap-1 sm:gap-3">
+              <HomeMobileNav />
+              <ThemeSwitcher placement="bottom" compactOnMobile />
               <Suspense
-                fallback={<div className="h-10 w-28 animate-pulse rounded-xl bg-card-surface" />}
+                fallback={<div className="h-10 w-10 animate-pulse rounded-xl bg-card-surface sm:w-28" />}
               >
-                <LanguageSwitcher placement="bottom" />
+                <LanguageSwitcher placement="bottom" compactOnMobile />
               </Suspense>
               <Link
                 href={isAuthenticated ? "/dashboard" : "/sign-in"}
-                className="hidden rounded-xl border border-card-border bg-card-surface px-4 py-2 text-sm font-semibold text-foreground shadow-card transition-all hover:-translate-y-0.5 hover:shadow-card-hover sm:inline-flex"
+                className="inline-flex min-h-11 max-w-[7.5rem] items-center justify-center truncate rounded-xl border border-card-border bg-card-surface px-3 text-xs font-semibold text-foreground shadow-card transition-all hover:-translate-y-0.5 hover:shadow-card-hover sm:max-w-none sm:px-4 sm:text-sm md:hover:shadow-card-hover"
+                title={isAuthenticated ? t("goToDashboard") : tAuth("signIn")}
               >
-                {isAuthenticated ? t("goToDashboard") : tAuth("signIn")}
+                <span className="md:hidden">
+                  {isAuthenticated ? t("goToDashboardShort") : tAuth("signIn")}
+                </span>
+                <span className="hidden md:inline">
+                  {isAuthenticated ? t("goToDashboard") : tAuth("signIn")}
+                </span>
               </Link>
             </div>
           </div>
         </header>
 
-        <section className="mx-auto grid w-full max-w-7xl items-center gap-12 px-4 pb-20 pt-14 sm:px-6 lg:grid-cols-[0.94fr_1.06fr] lg:px-8 lg:pb-28 lg:pt-20">
+        <div className="relative flex-1 overflow-x-hidden">
+        <div
+          className="absolute left-1/2 top-0 -z-10 hidden h-[34rem] w-[34rem] -translate-x-1/2 rounded-full bg-accent-violet/20 blur-3xl md:block"
+          aria-hidden
+        />
+        <div
+          className="absolute -left-32 top-36 -z-10 hidden h-72 w-72 rounded-full bg-accent-rose/20 blur-3xl md:block"
+          aria-hidden
+        />
+        <div
+          className="absolute -right-40 top-[28rem] -z-10 hidden h-96 w-96 rounded-full bg-accent-cyan/20 blur-3xl md:block"
+          aria-hidden
+        />
+
+        <section className="mx-auto grid w-full max-w-7xl scroll-mt-24 items-center gap-8 px-4 pb-16 pt-10 sm:gap-12 sm:px-6 sm:pb-20 sm:pt-14 lg:grid-cols-[0.94fr_1.06fr] lg:gap-12 lg:px-8 lg:pb-28 lg:pt-20">
           <div className="text-left">
             <Link
               href={`/dashboard/overview?userId=${DEFAULT_PUBLIC_PROFILE_USER_ID}`}
@@ -234,7 +247,7 @@ export default function Home() {
               <ArrowRightIcon className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
             </Link>
 
-            <h1 className="max-w-4xl overflow-visible text-balance text-5xl font-semibold leading-snug tracking-[-0.06em] text-foreground sm:text-6xl lg:text-7xl lg:leading-[1.12]">
+            <h1 className="max-w-4xl overflow-visible text-balance text-[2.35rem] font-semibold leading-[1.15] tracking-[-0.05em] text-foreground sm:text-6xl sm:leading-snug sm:tracking-[-0.06em] lg:text-7xl lg:leading-[1.12]">
               {welcomeMessage}
               {!firstName ? (
                 <span className="mt-1 block bg-brand-gradient bg-clip-text pb-1.5 leading-normal text-transparent sm:pb-2">
@@ -242,7 +255,7 @@ export default function Home() {
                 </span>
               ) : null}
             </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-muted sm:text-xl">
+            <p className="mt-5 max-w-2xl text-base leading-7 text-muted sm:mt-6 sm:text-xl sm:leading-8">
               {t("subtitle")}
             </p>
 
@@ -253,11 +266,11 @@ export default function Home() {
               className="mt-5"
             />
 
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               {isAuthenticated ? (
                 <Link
                   href="/dashboard"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-gradient px-6 py-3 text-sm font-semibold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:opacity-95"
+                  className="hidden min-h-11 items-center justify-center gap-2 rounded-xl bg-brand-gradient px-6 py-3 text-sm font-semibold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:opacity-95 md:inline-flex"
                 >
                   {t("goToDashboard")}
                   <ArrowRightIcon />
@@ -266,14 +279,14 @@ export default function Home() {
                 <>
                   <Link
                     href="/sign-up"
-                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-gradient px-6 py-3 text-sm font-semibold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:opacity-95"
+                    className="hidden min-h-11 items-center justify-center gap-2 rounded-xl bg-brand-gradient px-6 py-3 text-sm font-semibold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:opacity-95 md:inline-flex"
                   >
                     {tAuth("signUp")}
                     <ArrowRightIcon />
                   </Link>
                   <Link
                     href="/sign-in"
-                    className="inline-flex items-center justify-center rounded-xl border border-card-border bg-surface-glass px-6 py-3 text-sm font-semibold text-foreground backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-card-surface"
+                    className="hidden min-h-11 items-center justify-center rounded-xl border border-card-border bg-surface-glass px-6 py-3 text-sm font-semibold text-foreground backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-card-surface md:inline-flex"
                   >
                     {tAuth("signIn")}
                   </Link>
@@ -281,14 +294,14 @@ export default function Home() {
               )}
               <Link
                 href={`/dashboard/overview?userId=${DEFAULT_PUBLIC_PROFILE_USER_ID}`}
-                className="inline-flex items-center justify-center rounded-xl px-6 py-3 text-sm font-semibold text-primary transition-colors hover:bg-primary/10"
+                className="inline-flex min-h-11 w-full items-center justify-center rounded-xl px-6 py-3 text-center text-sm font-semibold text-primary transition-colors hover:bg-primary/10 md:w-auto"
               >
                 {t("accessDashboard")}
               </Link>
             </div>
           </div>
 
-          <div id="product" className="relative">
+          <div id="product" className="relative scroll-mt-24">
             <div
               className="absolute -inset-6 rounded-[2rem] bg-brand-gradient-soft blur-2xl"
               aria-hidden
@@ -370,14 +383,14 @@ export default function Home() {
 
         <section
           id="insights"
-          className="mx-auto w-full max-w-7xl px-4 pb-20 sm:px-6 lg:px-8"
+          className="mx-auto w-full max-w-7xl scroll-mt-24 px-4 pb-16 sm:px-6 sm:pb-20 lg:px-8"
         >
           <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div>
               <p className="font-mono text-xs font-semibold uppercase tracking-[0.28em] text-primary">
                 {t("featuresEyebrow")}
               </p>
-              <h2 className="mt-3 max-w-2xl text-3xl font-semibold tracking-[-0.04em] text-foreground sm:text-5xl">
+              <h2 className="mt-3 max-w-2xl text-2xl font-semibold tracking-[-0.04em] text-foreground sm:text-5xl">
                 {t("featuresTitle")}
               </h2>
             </div>
@@ -410,14 +423,17 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="demo" className="mx-auto w-full max-w-7xl px-4 pb-20 sm:px-6 lg:px-8">
+        <section
+          id="demo"
+          className="mx-auto w-full max-w-7xl scroll-mt-24 px-4 pb-16 sm:px-6 sm:pb-20 lg:px-8"
+        >
           <DemoTerminalHero className="mb-8" />
 
           <div className="mb-8 text-center">
             <p className="font-mono text-xs font-semibold uppercase tracking-[0.28em] text-primary">
               {t("demoHighlightsSection.eyebrow")}
             </p>
-            <h2 className="mx-auto mt-3 max-w-3xl text-3xl font-semibold tracking-[-0.04em] text-foreground sm:text-5xl">
+            <h2 className="mx-auto mt-3 max-w-3xl text-2xl font-semibold tracking-[-0.04em] text-foreground sm:text-5xl">
               {t("demoHighlightsSection.title")}
             </h2>
           </div>
@@ -426,7 +442,7 @@ export default function Home() {
             {demoHighlights.map((highlight) => (
               <section
                 key={highlight.id}
-                className="grid items-center gap-6 rounded-[2rem] border border-card-border bg-surface-glass p-4 text-left shadow-card backdrop-blur-xl md:p-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-8"
+                className="grid items-center gap-5 rounded-3xl border border-card-border bg-surface-glass p-4 text-left shadow-card backdrop-blur-xl sm:gap-6 sm:rounded-[2rem] md:p-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-8"
               >
                 <div
                   className={
@@ -470,13 +486,13 @@ export default function Home() {
 
         <section
           id="soundprint-ai-chat"
-          className="mx-auto w-full max-w-7xl px-4 pb-20 sm:px-6 lg:px-8"
+          className="mx-auto w-full max-w-7xl scroll-mt-24 px-4 pb-16 sm:px-6 sm:pb-20 lg:px-8"
         >
           <div className="mb-10 text-center lg:mb-12">
             <p className="font-mono text-xs font-semibold uppercase tracking-[0.28em] text-primary">
               {t("soundprintAiChatDemo.sectionEyebrow")}
             </p>
-            <h2 className="mx-auto mt-3 max-w-4xl text-3xl font-semibold tracking-[-0.04em] text-foreground sm:text-5xl">
+            <h2 className="mx-auto mt-3 max-w-4xl text-2xl font-semibold tracking-[-0.04em] text-foreground sm:text-5xl">
               {t("soundprintAiChatDemo.sectionTitle")}
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-muted sm:text-lg">
@@ -501,7 +517,7 @@ export default function Home() {
                   ? "/dashboard/ask-your-soundprint"
                   : `/dashboard/ask-your-soundprint?userId=${DEFAULT_PUBLIC_PROFILE_USER_ID}`
               }
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-gradient px-6 py-3 text-sm font-semibold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:opacity-95"
+              className="inline-flex min-h-11 w-full max-w-md items-center justify-center gap-2 rounded-xl bg-brand-gradient px-6 py-3 text-sm font-semibold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:opacity-95 sm:w-auto"
             >
               {t(
                 isAuthenticated
@@ -513,12 +529,12 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="mx-auto w-full max-w-7xl px-4 pb-24 sm:px-6 lg:px-8">
-          <div className="overflow-hidden rounded-[2rem] border border-card-border bg-slate-950 px-6 py-10 text-center shadow-2xl shadow-black/20 sm:px-10 sm:py-14">
+        <section className="mx-auto w-full max-w-7xl px-4 pb-28 sm:px-6 sm:pb-24 md:pb-24 lg:px-8">
+          <div className="overflow-hidden rounded-3xl border border-card-border bg-slate-950 px-5 py-8 text-center shadow-2xl shadow-black/20 sm:rounded-[2rem] sm:px-10 sm:py-14">
             <p className="font-mono text-xs font-semibold uppercase tracking-[0.28em] text-cyan-200">
               {t("closingCta.eyebrow")}
             </p>
-            <h2 className="mx-auto mt-4 max-w-3xl text-3xl font-semibold tracking-[-0.04em] text-white sm:text-5xl">
+            <h2 className="mx-auto mt-4 max-w-3xl text-2xl font-semibold tracking-[-0.04em] text-white sm:text-5xl">
               {t("closingCta.title")}
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-slate-300">
@@ -527,21 +543,23 @@ export default function Home() {
             <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
               <Link
                 href={isAuthenticated ? "/dashboard" : "/sign-up"}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-slate-950 transition-all hover:-translate-y-0.5 hover:bg-slate-100"
+                className="hidden min-h-11 items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-slate-950 transition-all hover:-translate-y-0.5 hover:bg-slate-100 md:inline-flex"
               >
                 {isAuthenticated ? t("goToDashboard") : tAuth("signUp")}
                 <ArrowRightIcon />
               </Link>
               <Link
                 href={`/dashboard/overview?userId=${DEFAULT_PUBLIC_PROFILE_USER_ID}`}
-                className="inline-flex items-center justify-center rounded-xl border border-white/15 bg-white/10 px-6 py-3 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-white/15"
+                className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-white/15 bg-white/10 px-6 py-3 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-white/15 md:w-auto"
               >
                 {t("accessDashboard")}
               </Link>
             </div>
           </div>
         </section>
+        </div>
       </main>
+      <HomeMobileStickyCta isAuthenticated={isAuthenticated} />
       <Footer variant="home" />
     </div>
   );

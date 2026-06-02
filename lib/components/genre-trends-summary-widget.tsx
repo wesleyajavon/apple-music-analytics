@@ -11,8 +11,8 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  ResponsiveContainer,
 } from "recharts";
+import { ChartResponsiveContainer } from "@/lib/components/chart-responsive-container";
 import { useGenreTrends } from "@/lib/hooks/use-listening";
 import { useDashboardViewerUserId } from "@/lib/context/dashboard-viewer-context";
 import { ErrorState } from "@/lib/components/error-state";
@@ -20,6 +20,7 @@ import { usePublicDemoViewer } from "@/lib/hooks/use-public-demo-viewer";
 import { Sparkles } from "lucide-react";
 import { GroqGenreBackfillCta } from "@/lib/components/palette/groq-genre-backfill-cta";
 import { useTheme } from "@/lib/providers/theme-provider";
+import { useIsLgChartViewport } from "@/lib/hooks/use-chart-viewport";
 import { DASHBOARD_CHART_THEME } from "@/lib/constants/dashboard-spotlight";
 
 const COLORS = [
@@ -119,6 +120,7 @@ export function GenreTrendsSummaryWidget({
   const isPublicDemoViewer = usePublicDemoViewer(viewerUserId);
   const { resolvedTheme } = useTheme();
   const chartTheme = DASHBOARD_CHART_THEME[resolvedTheme === "dark" ? "dark" : "light"];
+  const isLgChart = useIsLgChartViewport();
   const TrendsTooltip = useMemo(() => createTrendsTooltip(t, locale), [t, locale]);
 
   const { data, isLoading, error, refetch } = useGenreTrends(
@@ -138,6 +140,10 @@ export function GenreTrendsSummaryWidget({
     [availableGenres]
   );
   const chartData = useMemo(() => data?.data ?? [], [data?.data]);
+  const trendsMinWidth = useMemo(
+    () => (chartData.length > 8 ? Math.max(280, chartData.length * 28) : undefined),
+    [chartData.length],
+  );
 
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
 
@@ -351,11 +357,10 @@ export function GenreTrendsSummaryWidget({
             ) : (
               <div className="relative rounded-3xl border border-white/70 bg-white/60 p-3 shadow-inner backdrop-blur dark:border-white/[0.06] dark:bg-[#080913]">
                 <div className="pointer-events-none absolute left-1/2 top-8 h-56 w-56 -translate-x-1/2 rounded-full bg-rose-300/10 blur-3xl dark:bg-rose-300/14" />
-                <div className="relative h-[290px]">
-                  <ResponsiveContainer width="100%" height="100%">
+                <ChartResponsiveContainer token="trendsLine" minWidth={trendsMinWidth}>
                     <LineChart
                       data={chartData}
-                      margin={{ top: 12, right: 16, left: 0, bottom: 50 }}
+                      margin={{ top: 12, right: 16, left: 0, bottom: isLgChart ? 50 : 44 }}
                     >
                       <CartesianGrid
                         strokeDasharray="4 6"
@@ -368,9 +373,9 @@ export function GenreTrendsSummaryWidget({
                         stroke={chartTheme.axisStroke}
                         tickLine={false}
                         axisLine={false}
-                        angle={-40}
+                        angle={isLgChart ? -40 : -35}
                         textAnchor="end"
-                        height={70}
+                        height={isLgChart ? 70 : 58}
                       />
                       <YAxis
                         tick={{ fill: chartTheme.tick, fontSize: 11, fontWeight: 600 }}
@@ -412,8 +417,7 @@ export function GenreTrendsSummaryWidget({
                         );
                       })}
                     </LineChart>
-                  </ResponsiveContainer>
-                </div>
+                </ChartResponsiveContainer>
               </div>
             )}
           </div>

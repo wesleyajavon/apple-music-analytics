@@ -17,12 +17,13 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  ResponsiveContainer,
   PieChart,
   Pie,
   Cell,
 } from "recharts";
 import { artistKeys, fetchArtistStats, useArtistStats } from "@/lib/hooks/use-artists";
+import { useIsLgChartViewport } from "@/lib/hooks/use-chart-viewport";
+import { ChartResponsiveContainer } from "@/lib/components/chart-responsive-container";
 import {
   DASHBOARD_SPOTLIGHT_SHELL,
   DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY,
@@ -563,7 +564,54 @@ const DetailedViewSection = memo(({
       </button>
       {expanded && (
         <>
-        <div className="relative max-h-[min(70vh,640px)] overflow-y-auto overflow-x-auto">
+        <div className="divide-y divide-slate-200/90 dark:divide-white/10 lg:hidden">
+          {isFetching
+            ? Array.from({ length: Math.min(pageSize, 6) }).map((_, index) => (
+                <div key={`artist-mobile-skeleton-${index}`} className="flex items-center gap-3 px-4 py-4">
+                  <div className="h-10 w-10 shrink-0 animate-pulse rounded-full bg-slate-200/90 dark:bg-white/10" />
+                  <div className="min-w-0 flex-1 space-y-2">
+                    <div className="h-4 w-32 animate-pulse rounded bg-slate-200/90 dark:bg-white/10" />
+                    <div className="h-3 w-20 animate-pulse rounded bg-slate-200/90 dark:bg-white/10" />
+                  </div>
+                </div>
+              ))
+            : artists.map((artist, index) => {
+                const avatarColorIndex = offset + index;
+                const openInsights = () => onOpenArtistInsights(artist, avatarColorIndex);
+                return (
+                  <button
+                    key={artist.artistId}
+                    type="button"
+                    className="flex min-h-[56px] w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-slate-50/90 active:bg-slate-100/90 dark:hover:bg-white/[0.04] dark:active:bg-white/[0.06]"
+                    onClick={openInsights}
+                  >
+                    <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-200/80 text-sm font-bold text-slate-600 dark:bg-white/10 dark:text-slate-300">
+                      {offset + index + 1}
+                    </span>
+                    <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full">
+                      <ArtistAvatarHydrated
+                        artistId={artist.artistId}
+                        artistName={artist.artistName}
+                        imageUrl={artist.imageUrl}
+                        avatarApiSize={72}
+                        colorIndex={avatarColorIndex}
+                        alt=""
+                        width={40}
+                        height={40}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">{artist.artistName}</p>
+                      <p className="mt-0.5 text-xs text-slate-600 dark:text-slate-400">
+                        {artist.listenCount.toLocaleString(locale)} {t("listensLabel")} · {artist.uniqueTracks} {t("tracks")}
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
+        </div>
+        <div className="relative hidden max-h-[min(70vh,640px)] overflow-x-auto overflow-y-auto lg:block">
           <table className="min-w-full divide-y divide-slate-200/90 dark:divide-white/10">
             <thead className={DASHBOARD_SPOTLIGHT_TABLE_HEAD}>
               <tr>
@@ -733,6 +781,7 @@ function ArtistsContent() {
   const DEFAULT_PAGE_SIZE = 20;
   const { resolvedTheme } = useTheme();
   const chartTheme = DASHBOARD_CHART_THEME[resolvedTheme === "dark" ? "dark" : "light"];
+  const isLgChart = useIsLgChartViewport();
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -924,8 +973,12 @@ function ArtistsContent() {
                 {isTopLoading ? (
                   <ArtistsBarChartSkeleton />
                 ) : (
-                  <ResponsiveContainer width="100%" height={360}>
-                    <BarChart data={barChartData} layout="vertical" margin={{ top: 8, right: 28, left: 104, bottom: 8 }}>
+                  <ChartResponsiveContainer token="spotlightBar">
+                    <BarChart
+                      data={barChartData}
+                      layout="vertical"
+                      margin={{ top: 8, right: 28, left: isLgChart ? 104 : 88, bottom: 8 }}
+                    >
                       <defs>
                         <linearGradient id="barGradientArtists" x1="0" y1="0" x2="1" y2="0">
                           <stop offset="0%" stopColor="#8b5cf6" />
@@ -959,7 +1012,7 @@ function ArtistsContent() {
                       />
                       <Bar dataKey="listens" fill="url(#barGradientArtists)" filter="url(#artistBarGlow)" radius={[0, 10, 10, 0]} />
                     </BarChart>
-                  </ResponsiveContainer>
+                  </ChartResponsiveContainer>
                 )}
               </div>
             </div>
@@ -980,7 +1033,7 @@ function ArtistsContent() {
                 {isTopLoading ? (
                   <ArtistsPieChartSkeleton />
                 ) : (
-                  <ResponsiveContainer width="100%" height={360}>
+                  <ChartResponsiveContainer token="spotlightBar">
                     <PieChart>
                       <defs>
                         <filter id="artistPieGlow" x="-30%" y="-30%" width="160%" height="160%">
@@ -1013,7 +1066,7 @@ function ArtistsContent() {
                         formatter={(value: number) => [`${value.toLocaleString(locale)} ${t("listensCount")}`, t("listens")]}
                       />
                     </PieChart>
-                  </ResponsiveContainer>
+                  </ChartResponsiveContainer>
                 )}
               </div>
             </div>

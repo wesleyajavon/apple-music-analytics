@@ -11,6 +11,7 @@ import {
 } from "@/lib/auth/recent-auth-client";
 import { useOptimisticFilters } from "@/lib/hooks/use-optimistic-filters";
 import { NotificationCenter } from "@/lib/components/notification-center";
+import { useMobileSidebar } from "@/lib/components/sidebar";
 import { useNotifications } from "@/lib/context/notification-center-context";
 import { useHideNotificationCenterForPublicDemo } from "@/lib/hooks/use-public-demo-viewer";
 
@@ -95,13 +96,120 @@ export function getDateRangePresetFromSearchParams(searchParams: {
   return "all";
 }
 
+function DashboardExportMenu({
+  open,
+  onToggle,
+  onClose,
+  onCsv,
+  onStats,
+  onPdf,
+}: {
+  open: boolean;
+  onToggle: () => void;
+  onClose: () => void;
+  onCsv: () => void;
+  onStats: () => void;
+  onPdf: () => void;
+}) {
+  const t = useTranslations("components.dateRangeFilter");
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handlePointerDown = (e: MouseEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) {
+        onClose();
+      }
+    };
+    document.addEventListener("mousedown", handlePointerDown);
+    return () => document.removeEventListener("mousedown", handlePointerDown);
+  }, [open, onClose]);
+
+  useEffect(() => {
+    if (!open) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [open, onClose]);
+
+  return (
+    <div ref={wrapRef} className="relative shrink-0 lg:hidden">
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={open}
+        aria-haspopup="menu"
+        aria-label={t("exportMenuLabel")}
+        title={t("exportLabel")}
+        className="flex h-9 w-9 items-center justify-center rounded-lg text-muted transition-colors hover:bg-primary/10 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+          />
+        </svg>
+      </button>
+      {open ? (
+        <div
+          role="menu"
+          className="absolute right-0 top-[calc(100%+0.25rem)] z-50 w-[min(14rem,calc(100vw-5rem))] overflow-hidden rounded-xl border border-card-border bg-surface-raised py-1 shadow-card"
+        >
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              onCsv();
+              onClose();
+            }}
+            className="flex min-h-10 w-full items-center gap-2 px-3 text-left text-sm font-medium text-foreground transition-colors hover:bg-accent-emerald/10 hover:text-accent-emerald"
+          >
+            <span className="font-mono text-xs text-muted">CSV</span>
+            <span className="min-w-0 truncate">{t("exportMenuCsv")}</span>
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              onStats();
+              onClose();
+            }}
+            className="flex min-h-10 w-full items-center gap-2 px-3 text-left text-sm font-medium text-foreground transition-colors hover:bg-accent-indigo/10 hover:text-accent-indigo"
+          >
+            <span className="font-mono text-xs text-muted">JSON</span>
+            <span className="min-w-0 truncate">{t("exportMenuJson")}</span>
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              onPdf();
+              onClose();
+            }}
+            className="flex min-h-10 w-full items-center gap-2 px-3 text-left text-sm font-medium text-foreground transition-colors hover:bg-accent-rose/10 hover:text-accent-rose"
+          >
+            <span className="font-mono text-xs text-muted">PDF</span>
+            <span className="min-w-0 truncate">{t("exportMenuPdf")}</span>
+          </button>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 export function DateRangeFilter() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { prefetchWithOptimisticUpdate } = useOptimisticFilters();
   const t = useTranslations("components.dateRangeFilter");
+  const tSidebar = useTranslations("sidebar");
   const tNotifications = useTranslations("components.notificationCenter");
+  const { toggle: toggleMobileSidebar } = useMobileSidebar();
   const { addNotification } = useNotifications();
   const hideNotificationCenter = useHideNotificationCenterForPublicDemo(
     searchParams.get("userId")
@@ -111,6 +219,7 @@ export function DateRangeFilter() {
   const currentPreset: DateRangePreset = getDateRangePresetFromSearchParams(searchParams);
 
   const [customOpen, setCustomOpen] = useState(false);
+  const [exportMenuOpen, setExportMenuOpen] = useState(false);
   const [customStart, setCustomStart] = useState("");
   const [customEnd, setCustomEnd] = useState("");
   const customWrapRef = useRef<HTMLDivElement>(null);
@@ -419,170 +528,187 @@ export function DateRangeFilter() {
     await downloadFile(exportUrl, "rapport.pdf", "PDF");
   }, [searchParams, downloadFile, locale]);
 
-  return (
-    <div className="px-4 py-3 sm:px-6 lg:px-8">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted shrink-0">
-            {t("period")}
-          </span>
-          <div
-            ref={containerRef}
-            className="relative flex items-center bg-surface p-1.5 rounded-xl border border-card-border"
+  const presetButtonClass = (active: boolean) =>
+    [
+      "relative z-10 shrink-0 whitespace-nowrap rounded-md px-2.5 py-1.5 text-[11px] font-semibold transition-all duration-200",
+      "max-lg:min-h-8 lg:min-h-0 lg:px-4 lg:py-2 lg:text-sm",
+      active ? "text-white" : "text-muted hover:text-foreground",
+    ].join(" ");
+
+  const presetStrip = (
+    <div
+      ref={containerRef}
+      className="relative flex min-w-0 flex-1 items-center overflow-x-auto overscroll-x-contain rounded-xl border border-card-border bg-surface p-0.5 [-ms-overflow-style:none] [scrollbar-width:none] lg:max-w-full lg:overflow-visible lg:p-1 [&::-webkit-scrollbar]:hidden"
+    >
+      {indicatorStyle ? (
+        <div
+          className="absolute top-1 h-[calc(100%-8px)] bg-brand-gradient rounded-lg transition-all duration-300 ease-out shadow-sm lg:top-1.5 lg:h-[calc(100%-12px)]"
+          style={{
+            left: `${indicatorStyle.left}px`,
+            width: `${indicatorStyle.width}px`,
+          }}
+        />
+      ) : null}
+      {presetEntries.map(([key]) => {
+        const isActive = currentPreset === key;
+        return (
+          <button
+            key={key}
+            ref={(el) => {
+              buttonRefs.current[key] = el;
+            }}
+            onClick={() => updateDateRange(key)}
+            title={t(`presets.${key}`)}
+            className={presetButtonClass(isActive)}
           >
-            {indicatorStyle && (
-              <div
-                className="absolute h-[calc(100%-12px)] top-1.5 bg-brand-gradient rounded-lg transition-all duration-300 ease-out shadow-sm"
-                style={{
-                  left: `${indicatorStyle.left}px`,
-                  width: `${indicatorStyle.width}px`,
-                }}
-              />
-            )}
-            {presetEntries.map(([key]) => {
-              const isActive = currentPreset === key;
-              return (
+            {t(`presets.${key}`)}
+          </button>
+        );
+      })}
+      <div ref={customWrapRef} className="relative z-10">
+        <button
+          type="button"
+          ref={(el) => {
+            buttonRefs.current.custom = el;
+          }}
+          onClick={() => setCustomOpen((v) => !v)}
+          title={t("presets.custom")}
+          aria-expanded={customOpen}
+          aria-haspopup="dialog"
+          className={presetButtonClass(currentPreset === "custom")}
+        >
+          {t("presets.custom")}
+        </button>
+        {customOpen ? (
+          <div
+            role="dialog"
+            aria-label={t("customDialogLabel")}
+            className="absolute left-0 top-[calc(100%+0.5rem)] z-50 min-w-[min(100vw-2rem,18rem)] rounded-xl border border-card-border bg-surface-raised p-4 shadow-card max-lg:fixed max-lg:inset-x-4 max-lg:bottom-[calc(5.5rem+env(safe-area-inset-bottom))] max-lg:top-auto max-lg:min-w-0"
+          >
+            <div className="flex flex-col gap-3">
+              <label className="flex flex-col gap-1.5 text-xs font-medium text-muted">
+                {t("customStart")}
+                <input
+                  type="date"
+                  value={customStart}
+                  onChange={(e) => setCustomStart(e.target.value)}
+                  className="rounded-lg border border-card-border bg-card px-2 py-2.5 text-base text-foreground lg:py-1.5 lg:text-sm"
+                />
+              </label>
+              <label className="flex flex-col gap-1.5 text-xs font-medium text-muted">
+                {t("customEnd")}
+                <input
+                  type="date"
+                  value={customEnd}
+                  onChange={(e) => setCustomEnd(e.target.value)}
+                  className="rounded-lg border border-card-border bg-card px-2 py-2.5 text-base text-foreground lg:py-1.5 lg:text-sm"
+                />
+              </label>
+              <div className="flex justify-end gap-2 pt-1">
                 <button
-                  key={key}
-                  ref={(el) => {
-                    buttonRefs.current[key] = el;
-                  }}
-                  onClick={() => updateDateRange(key)}
-                  title={t(`presets.${key}`)}
-                  className={`
-                    relative z-10 px-4 py-2 text-sm font-semibold rounded-md
-                    transition-all duration-200
-                    ${
-                      isActive
-                        ? "text-white"
-                        : "text-muted hover:text-foreground"
-                    }
-                  `}
+                  type="button"
+                  onClick={() => setCustomOpen(false)}
+                  className="min-h-10 rounded-lg px-3 py-2 text-sm font-medium text-muted hover:bg-primary/10 lg:min-h-0 lg:py-1.5"
                 >
-                  {t(`presets.${key}`)}
+                  {t("customCancel")}
                 </button>
-              );
-            })}
-            <div ref={customWrapRef} className="relative z-10">
-              <button
-                type="button"
-                ref={(el) => {
-                  buttonRefs.current.custom = el;
-                }}
-                onClick={() => setCustomOpen((v) => !v)}
-                title={t("presets.custom")}
-                aria-expanded={customOpen}
-                aria-haspopup="dialog"
-                className={`
-                  relative px-4 py-2 text-sm font-semibold rounded-md
-                  transition-all duration-200
-                  ${
-                    currentPreset === "custom"
-                      ? "text-white"
-                      : "text-muted hover:text-foreground"
-                  }
-                `}
-              >
-                {t("presets.custom")}
-              </button>
-              {customOpen ? (
-                <div
-                  role="dialog"
-                  aria-label={t("customDialogLabel")}
-                  className="absolute left-0 top-[calc(100%+0.5rem)] z-50 min-w-[min(100vw-2rem,18rem)] rounded-xl border border-card-border bg-surface-raised p-4 shadow-card"
+                <button
+                  type="button"
+                  onClick={applyCustomRange}
+                  className="min-h-10 rounded-lg bg-brand-gradient px-3 py-2 text-sm font-semibold text-white hover:opacity-95 lg:min-h-0 lg:py-1.5"
                 >
-                  <div className="flex flex-col gap-3">
-                    <label className="flex flex-col gap-1.5 text-xs font-medium text-muted">
-                      {t("customStart")}
-                      <input
-                        type="date"
-                        value={customStart}
-                        onChange={(e) => setCustomStart(e.target.value)}
-                        className="rounded-lg border border-card-border bg-card px-2 py-1.5 text-sm text-foreground"
-                      />
-                    </label>
-                    <label className="flex flex-col gap-1.5 text-xs font-medium text-muted">
-                      {t("customEnd")}
-                      <input
-                        type="date"
-                        value={customEnd}
-                        onChange={(e) => setCustomEnd(e.target.value)}
-                        className="rounded-lg border border-card-border bg-card px-2 py-1.5 text-sm text-foreground"
-                      />
-                    </label>
-                    <div className="flex justify-end gap-2 pt-1">
-                      <button
-                        type="button"
-                        onClick={() => setCustomOpen(false)}
-                        className="rounded-lg px-3 py-1.5 text-sm font-medium text-muted hover:bg-primary/10"
-                      >
-                        {t("customCancel")}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={applyCustomRange}
-                        className="rounded-lg bg-brand-gradient px-3 py-1.5 text-sm font-semibold text-white hover:opacity-95"
-                      >
-                        {t("customApply")}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ) : null}
+                  {t("customApply")}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        ) : null}
+      </div>
+    </div>
+  );
 
-        <div className="flex items-center gap-2 sm:gap-3">
-          {!hideNotificationCenter ? <NotificationCenter /> : null}
-          <div className="flex items-center gap-1 border-l border-card-border pl-3 sm:pl-4">
-            <span className="mr-2 hidden text-[10px] font-semibold uppercase tracking-wider text-muted sm:inline">
-              {t("exportLabel")}
-            </span>
-            <button
-              onClick={handleExportCsv}
-              className="rounded-lg p-2.5 text-muted transition-colors hover:bg-accent-emerald/10 hover:text-accent-emerald"
-              title={t("exportCsvTitle")}
-            >
-              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-            </button>
-            <button
-              onClick={handleExportStats}
-              className="rounded-lg p-2.5 text-muted transition-colors hover:bg-accent-indigo/10 hover:text-accent-indigo"
-              title={t("exportStatsTitle")}
-            >
-              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
-                />
-              </svg>
-            </button>
-            <button
-              onClick={handleExportPdf}
-              className="rounded-lg p-2.5 text-muted transition-colors hover:bg-accent-rose/10 hover:text-accent-rose"
-              title={t("exportPdfTitle")}
-            >
-              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
-                />
-              </svg>
-            </button>
-          </div>
-        </div>
+  const headerActions = (
+    <>
+      {!hideNotificationCenter ? <NotificationCenter /> : null}
+      <DashboardExportMenu
+        open={exportMenuOpen}
+        onToggle={() => setExportMenuOpen((v) => !v)}
+        onClose={() => setExportMenuOpen(false)}
+        onCsv={handleExportCsv}
+        onStats={handleExportStats}
+        onPdf={handleExportPdf}
+      />
+      <div className="hidden items-center gap-1 border-l border-card-border pl-4 lg:flex">
+        <span className="mr-2 text-[10px] font-semibold uppercase tracking-wider text-muted">
+          {t("exportLabel")}
+        </span>
+        <button
+          type="button"
+          onClick={handleExportCsv}
+          className="flex items-center justify-center rounded-lg p-2.5 text-muted transition-colors hover:bg-accent-emerald/10 hover:text-accent-emerald"
+          title={t("exportCsvTitle")}
+        >
+          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            />
+          </svg>
+        </button>
+        <button
+          type="button"
+          onClick={handleExportStats}
+          className="flex items-center justify-center rounded-lg p-2.5 text-muted transition-colors hover:bg-accent-indigo/10 hover:text-accent-indigo"
+          title={t("exportStatsTitle")}
+        >
+          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
+            />
+          </svg>
+        </button>
+        <button
+          type="button"
+          onClick={handleExportPdf}
+          className="flex items-center justify-center rounded-lg p-2.5 text-muted transition-colors hover:bg-accent-rose/10 hover:text-accent-rose"
+          title={t("exportPdfTitle")}
+        >
+          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+            />
+          </svg>
+        </button>
+      </div>
+    </>
+  );
+
+  return (
+    <div className="px-3 py-2 lg:px-8 lg:py-3">
+      <div className="flex min-w-0 items-center gap-2 lg:justify-between lg:gap-4">
+        <button
+          type="button"
+          onClick={toggleMobileSidebar}
+          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-card-border bg-card-surface text-muted transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden"
+          aria-label={tSidebar("openMenu")}
+        >
+          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+        <span className="hidden shrink-0 text-[10px] font-semibold uppercase tracking-wider text-muted lg:inline">
+          {t("period")}
+        </span>
+        {presetStrip}
+        <div className="flex shrink-0 items-center gap-0.5 lg:gap-3">{headerActions}</div>
       </div>
     </div>
   );

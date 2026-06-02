@@ -19,9 +19,15 @@ interface LanguageSwitcherProps {
   placement?: "top" | "bottom";
   /** Sidebar collapsed: icon only, dropdown opens to the right */
   collapsed?: boolean;
+  /** Header toolbar: icon-only below sm, full label from sm up */
+  compactOnMobile?: boolean;
 }
 
-export function LanguageSwitcher({ placement = "top", collapsed = false }: LanguageSwitcherProps) {
+export function LanguageSwitcher({
+  placement = "top",
+  collapsed = false,
+  compactOnMobile = false,
+}: LanguageSwitcherProps) {
   const router = useRouter();
   const nextRouter = useNextRouter();
   const pathname = usePathname();
@@ -56,18 +62,27 @@ export function LanguageSwitcher({ placement = "top", collapsed = false }: Langu
     nextRouter.refresh();
   };
 
+  const showIconOnly = collapsed;
+  const showCompactLabel = compactOnMobile && !collapsed;
+
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className="relative shrink-0" ref={dropdownRef}>
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={`flex items-center rounded-xl text-sm font-medium text-muted hover:text-foreground hover:bg-primary/10 transition-all duration-200 ${
-          collapsed ? "justify-center p-2.5" : "gap-2 w-full px-3 py-2.5"
+          showIconOnly
+            ? "justify-center p-2.5"
+            : showCompactLabel
+              ? "justify-center p-2.5 sm:gap-2 sm:justify-start sm:px-3 sm:py-2.5"
+              : "gap-2 w-full px-3 py-2.5"
         }`}
         aria-label={t("ariaLabel")}
         aria-expanded={isOpen}
         aria-haspopup="listbox"
-        title={collapsed ? LOCALE_LABELS[locale] ?? locale : undefined}
+        title={
+          showIconOnly || showCompactLabel ? LOCALE_LABELS[locale] ?? locale : undefined
+        }
       >
         <svg
           className="w-5 h-5 shrink-0 text-muted"
@@ -83,11 +98,19 @@ export function LanguageSwitcher({ placement = "top", collapsed = false }: Langu
             d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"
           />
         </svg>
-        {!collapsed && (
+        {!showIconOnly && (
           <>
-            <span className="flex-1 text-left truncate">{LOCALE_LABELS[locale] ?? locale}</span>
+            <span
+              className={`flex-1 text-left truncate ${
+                showCompactLabel ? "hidden sm:block" : ""
+              }`}
+            >
+              {LOCALE_LABELS[locale] ?? locale}
+            </span>
             <svg
-              className={`w-4 h-4 shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`}
+              className={`w-4 h-4 shrink-0 transition-transform ${isOpen ? "rotate-180" : ""} ${
+                showCompactLabel ? "hidden sm:block" : ""
+              }`}
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -105,7 +128,9 @@ export function LanguageSwitcher({ placement = "top", collapsed = false }: Langu
           className={`absolute py-1 bg-surface-raised border border-card-border rounded-xl shadow-card overflow-hidden z-50 min-w-[120px] ${
             collapsed
               ? "left-full ml-1 top-0"
-              : `left-0 right-0 ${placement === "top" ? "bottom-full mb-1" : "top-full mt-1"}`
+              : showCompactLabel
+                ? `right-0 w-max ${placement === "top" ? "bottom-full mb-1" : "top-full mt-1"} sm:left-0 sm:right-0 sm:w-auto`
+                : `left-0 right-0 ${placement === "top" ? "bottom-full mb-1" : "top-full mt-1"}`
           }`}
         >
           {locales.map((loc) => {

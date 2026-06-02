@@ -5,6 +5,12 @@ import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { DEFAULT_PUBLIC_PROFILE_USER_ID } from "@/lib/constants/public-profile";
+import {
+  AUTH_CARD_CLASS,
+  AUTH_INPUT_CLASS,
+  AUTH_MAIN_CLASS,
+  AUTH_PRIMARY_BUTTON_CLASS,
+} from "@/lib/constants/auth-form-styles";
 
 export default function SignUpPage() {
   const t = useTranslations("auth");
@@ -46,27 +52,17 @@ export default function SignUpPage() {
     }
   }
 
-  const inputClassName =
-    "w-full rounded-lg border border-card-border bg-surface-raised px-3 py-2.5 text-sm text-foreground outline-none transition-shadow ring-ring focus:border-primary focus:ring-2 focus:ring-ring";
-
   const statusId = error ? errorId : success ? successId : undefined;
 
   return (
-    <main
-      id="auth-main"
-      tabIndex={-1}
-      className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-4 py-8 sm:py-12"
-    >
-      <section
-        className="w-full rounded-2xl border border-card-border bg-card-surface p-6 shadow-card backdrop-blur-sm sm:p-8"
-        aria-labelledby="sign-up-heading"
-      >
+    <main id="auth-main" tabIndex={-1} className={AUTH_MAIN_CLASS}>
+      <section className={AUTH_CARD_CLASS} aria-labelledby="sign-up-heading">
         <p className="text-xs font-semibold uppercase tracking-widest text-primary">
           {t("signUpEyebrow")}
         </p>
         <h1
           id="sign-up-heading"
-          className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl"
+          className="mt-2 text-xl font-bold tracking-tight text-foreground lg:text-3xl"
         >
           {t("signUpTitle")}
         </h1>
@@ -90,7 +86,7 @@ export default function SignUpPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className={inputClassName}
+              className={AUTH_INPUT_CLASS}
               aria-invalid={error ? true : undefined}
               aria-describedby={statusId}
             />
@@ -112,7 +108,7 @@ export default function SignUpPage() {
               minLength={8}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className={inputClassName}
+              className={AUTH_INPUT_CLASS}
               aria-invalid={error ? true : undefined}
               aria-describedby={statusId}
             />
@@ -141,7 +137,7 @@ export default function SignUpPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full rounded-xl bg-brand-gradient px-4 py-2.5 text-sm font-semibold text-white shadow-brand-glow transition-opacity hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
+            className={AUTH_PRIMARY_BUTTON_CLASS}
           >
             {isLoading ? t("creatingAccount") : t("signUp")}
           </button>

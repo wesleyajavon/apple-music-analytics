@@ -22,11 +22,19 @@
     "label": "IA",
     "ariaLabel": "Activar o desactivar las funciones de IA en este navegador",
     "lockedHint": "La IA está desactivada en el servidor (AI_MASTER_ENABLED=false). Este control no puede activarla.",
-    "widgetHint": "La IA está desactivada en este navegador. Usa el interruptor «IA» abajo a la derecha para cargar este contenido.",
+    "widgetHint": "La IA está desactivada en este navegador. Actívala desde el menú Más (móvil) o el interruptor «IA» abajo a la derecha (escritorio).",
     "widgetHintEnvLocked": "La IA está desactivada en el servidor. Este contenido no puede generarse aquí."
   },
   "sidebar": {
     "openMenu": "Abrir menú",
+    "closeMenu": "Cerrar menú",
+    "menu": "Menú",
+    "mobileBottomNavLabel": "Navegación principal del dashboard",
+    "mobilePlusOpenLabel": "Abrir más destinos",
+    "mobilePlusSheetTitle": "Más",
+    "mobilePlusOpenFullMenu": "Todas las secciones",
+    "mobilePlusHint": "Mapa de calor, IA, ajustes y el menú completo están aquí.",
+    "mobilePlusAiHint": "Controla resúmenes y widgets de IA en este navegador.",
     "collapseSidebar": "Contraer barra lateral",
     "expandSidebar": "Expandir barra lateral",
     "collapseSection": "Contraer {label}",
@@ -1747,6 +1755,10 @@
     "dateRangeFilter": {
       "period": "Período",
       "exportLabel": "Exportar",
+      "exportMenuLabel": "Opciones de exportación",
+      "exportMenuCsv": "Escuchas",
+      "exportMenuJson": "Estadísticas",
+      "exportMenuPdf": "Informe anual",
       "presets": {
         "7d": "7d",
         "30d": "30d",
@@ -1878,12 +1890,18 @@
     "appleMusicLogoAlt": "Apple Music",
     "subtitle": "Descubre la evolución de tus gustos musicales, patrones ocultos y estadísticas que Apple/Spotify no te muestran.",
     "goToDashboard": "Volver a tu dashboard",
+    "goToDashboardShort": "Dashboard",
     "accessDashboard": "Explorar una demo pública del dashboard",
     "nav": {
       "product": "Producto",
       "insights": "Insights",
       "demo": "Demo",
       "aiChat": "Chat IA"
+    },
+    "mobileNav": {
+      "openMenu": "Abrir menú de secciones",
+      "closeMenu": "Cerrar menú",
+      "menuLabel": "Secciones de la página"
     },
     "productPreview": {
       "label": "Cockpit Soundprint",

@@ -11,12 +11,13 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  ResponsiveContainer,
 } from "recharts";
+import { ChartResponsiveContainer } from "@/lib/components/chart-responsive-container";
 import { useTrackTrendsChart } from "@/lib/hooks/use-tracks";
 import { useDashboardViewerUserId } from "@/lib/context/dashboard-viewer-context";
 import { ErrorState } from "@/lib/components/error-state";
 import { useTheme } from "@/lib/providers/theme-provider";
+import { useIsLgChartViewport } from "@/lib/hooks/use-chart-viewport";
 import { DASHBOARD_CHART_THEME } from "@/lib/constants/dashboard-spotlight";
 import { getTrackLabel } from "@/lib/utils/track-trends-pivot";
 
@@ -112,6 +113,7 @@ export function TrackTrendsSummaryWidget({
   const viewerUserId = useDashboardViewerUserId();
   const { resolvedTheme } = useTheme();
   const chartTheme = DASHBOARD_CHART_THEME[resolvedTheme === "dark" ? "dark" : "light"];
+  const isLgChart = useIsLgChartViewport();
   const TrendsTooltip = useMemo(() => createTrendsTooltip(t, locale), [t, locale]);
 
   const { data, isLoading, error, refetch } = useTrackTrendsChart(
@@ -128,6 +130,10 @@ export function TrackTrendsSummaryWidget({
     [data?.availableTracks]
   );
   const chartData = useMemo(() => data?.data ?? [], [data?.data]);
+  const trendsMinWidth = useMemo(
+    () => (chartData.length > 8 ? Math.max(280, chartData.length * 28) : undefined),
+    [chartData.length],
+  );
 
   const idToLabel = useMemo(() => {
     const map = new Map<string, string>();
@@ -293,11 +299,10 @@ export function TrackTrendsSummaryWidget({
             ) : (
               <div className="relative rounded-3xl border border-white/70 bg-white/60 p-3 shadow-inner backdrop-blur dark:border-white/[0.06] dark:bg-[#080913]">
                 <div className="pointer-events-none absolute left-1/2 top-8 h-56 w-56 -translate-x-1/2 rounded-full bg-accent-cyan/10 blur-3xl dark:bg-accent-cyan/15" />
-                <div className="relative h-[290px]">
-                  <ResponsiveContainer width="100%" height="100%">
+                <ChartResponsiveContainer token="trendsLine" minWidth={trendsMinWidth}>
                     <LineChart
                       data={chartData}
-                      margin={{ top: 12, right: 16, left: 0, bottom: 50 }}
+                      margin={{ top: 12, right: 16, left: 0, bottom: isLgChart ? 50 : 44 }}
                     >
                       <CartesianGrid
                         strokeDasharray="4 6"
@@ -310,9 +315,9 @@ export function TrackTrendsSummaryWidget({
                         stroke={chartTheme.axisStroke}
                         tickLine={false}
                         axisLine={false}
-                        angle={-40}
+                        angle={isLgChart ? -40 : -35}
                         textAnchor="end"
-                        height={70}
+                        height={isLgChart ? 70 : 58}
                       />
                       <YAxis
                         tick={{ fill: chartTheme.tick, fontSize: 11, fontWeight: 600 }}
@@ -356,8 +361,7 @@ export function TrackTrendsSummaryWidget({
                         );
                       })}
                     </LineChart>
-                  </ResponsiveContainer>
-                </div>
+                </ChartResponsiveContainer>
               </div>
             )}
           </div>

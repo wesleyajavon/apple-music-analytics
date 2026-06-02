@@ -22,11 +22,19 @@
     "label": "AI",
     "ariaLabel": "Enable or disable AI features for this browser",
     "lockedHint": "AI is off server-side (AI_MASTER_ENABLED=false). This toggle cannot enable it.",
-    "widgetHint": "AI is turned off for this browser. Use the AI switch at the bottom-right to load this content.",
+    "widgetHint": "AI is turned off for this browser. Use the AI switch in the Plus menu (mobile) or bottom-right (desktop) to load this content.",
     "widgetHintEnvLocked": "AI is disabled on the server. This content cannot be generated here."
   },
   "sidebar": {
     "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "menu": "Menu",
+    "mobileBottomNavLabel": "Main dashboard navigation",
+    "mobilePlusOpenLabel": "Open more destinations",
+    "mobilePlusSheetTitle": "More",
+    "mobilePlusOpenFullMenu": "All sections",
+    "mobilePlusHint": "Heatmap, AI, settings, and the full sidebar are here.",
+    "mobilePlusAiHint": "Controls AI summaries and widgets in this browser.",
     "collapseSidebar": "Collapse sidebar",
     "expandSidebar": "Expand sidebar",
     "collapseSection": "Collapse {label}",
@@ -1747,6 +1755,10 @@
     "dateRangeFilter": {
       "period": "Period",
       "exportLabel": "Export",
+      "exportMenuLabel": "Export options",
+      "exportMenuCsv": "Listens",
+      "exportMenuJson": "Statistics",
+      "exportMenuPdf": "Annual report",
       "presets": {
         "7d": "7d",
         "30d": "30d",
@@ -1878,12 +1890,18 @@
     "appleMusicLogoAlt": "Apple Music",
     "subtitle": "See your music taste evolution, hidden patterns, and stats Apple/Spotify don't show you.",
     "goToDashboard": "Go to your dashboard",
+    "goToDashboardShort": "Dashboard",
     "accessDashboard": "Explore a public dashboard demo",
     "nav": {
       "product": "Product",
       "insights": "Insights",
       "demo": "Demo",
       "aiChat": "AI Chat"
+    },
+    "mobileNav": {
+      "openMenu": "Open page sections menu",
+      "closeMenu": "Close menu",
+      "menuLabel": "Page sections"
     },
     "productPreview": {
       "label": "Soundprint cockpit",

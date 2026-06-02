@@ -24,9 +24,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: t("title"),
     description: t("description"),
+    manifest: "/manifest.webmanifest",
+    appleWebApp: {
+      capable: true,
+      title: "Soundprint",
+      statusBarStyle: "black-translucent",
+    },
     icons: {
       icon: [{ url: faviconUrl, type: "image/png" }],
-      apple: faviconUrl,
+      apple: [{ url: faviconUrl, sizes: "180x180", type: "image/png" }],
     },
     openGraph: {
       title: t("title"),

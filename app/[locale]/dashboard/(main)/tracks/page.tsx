@@ -9,7 +9,6 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
-  ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
@@ -21,6 +20,7 @@ import { OverviewSkeleton } from "@/lib/components/skeleton-loaders";
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
 import { CHART_TOOLTIP_STYLES } from "@/lib/constants/config";
+import { ChartResponsiveContainer } from "@/lib/components/chart-responsive-container";
 import {
   DASHBOARD_SPOTLIGHT_SHELL,
   DASHBOARD_SPOTLIGHT_GRADIENT_CYAN,
@@ -375,7 +375,7 @@ function TracksContent() {
               {isTopLoading || !topData ? (
                 <TracksChartSkeleton />
               ) : (
-                <ResponsiveContainer width="100%" height={520}>
+                <ChartResponsiveContainer token="tracksMain">
                   <BarChart data={chartData} layout="vertical" margin={{ top: 8, right: 24, left: 148, bottom: 8 }}>
                     <defs>
                       <linearGradient id="trackBarGradient" x1="0" y1="0" x2="1" y2="0">
@@ -410,7 +410,7 @@ function TracksContent() {
                     />
                     <Bar dataKey="listens" fill="url(#trackBarGradient)" filter="url(#trackBarGlow)" radius={[0, 10, 10, 0]} />
                   </BarChart>
-                </ResponsiveContainer>
+                </ChartResponsiveContainer>
               )}
             </div>
           </div>
@@ -432,7 +432,37 @@ function TracksContent() {
               {t("sections.table.badge")}
             </div>
           </div>
-          <div className="relative max-h-[min(70vh,640px)] overflow-x-auto overflow-y-auto">
+          <div className="divide-y divide-slate-200/90 dark:divide-white/10 lg:hidden">
+            {isPagedFetching || !pagedData ? (
+              Array.from({ length: Math.min(pageSize, 6) }).map((_, index) => (
+                <div key={`track-mobile-skeleton-${index}`} className="space-y-2 px-4 py-4">
+                  <div className="h-4 w-3/4 animate-pulse rounded bg-slate-200/90 dark:bg-white/10" />
+                  <div className="h-3 w-1/2 animate-pulse rounded bg-slate-200/90 dark:bg-white/10" />
+                </div>
+              ))
+            ) : (
+              pagedTracks.map((track, index) => (
+                <div
+                  key={track.trackId}
+                  className="flex min-h-[56px] flex-col justify-center gap-0.5 px-4 py-3"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="min-w-0 flex-1 text-sm font-semibold leading-snug text-slate-900 dark:text-white">
+                      {track.trackTitle}
+                    </p>
+                    <span className="shrink-0 text-xs font-semibold tabular-nums text-slate-500 dark:text-slate-400">
+                      #{offset + index + 1}
+                    </span>
+                  </div>
+                  <p className="truncate text-xs text-slate-600 dark:text-slate-400">{track.artistName}</p>
+                  <p className="text-xs font-semibold tabular-nums text-slate-900 dark:text-white">
+                    {track.listenCount.toLocaleString(locale)} {t("listens")}
+                  </p>
+                </div>
+              ))
+            )}
+          </div>
+          <div className="relative hidden max-h-[min(70vh,640px)] overflow-x-auto overflow-y-auto lg:block">
             <table className="min-w-full divide-y divide-slate-200/90 dark:divide-white/10">
               <thead className={DASHBOARD_SPOTLIGHT_TABLE_HEAD}>
                 <tr>

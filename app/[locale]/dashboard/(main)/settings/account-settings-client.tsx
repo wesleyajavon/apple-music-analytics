@@ -37,7 +37,7 @@ const SETTINGS_HERO_SHELL_CLASS =
   "relative overflow-hidden rounded-[2rem] border border-white/10 bg-gray-950 px-5 py-6 text-white shadow-2xl shadow-violet-500/15 sm:px-8 sm:py-9 lg:px-10 lg:py-10";
 
 const INPUT_CLASS =
-  "mt-2 w-full rounded-xl border border-slate-200/90 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-400/15 dark:border-white/10 dark:bg-black/30 dark:text-white dark:placeholder:text-slate-500";
+  "mt-2 w-full rounded-xl border border-slate-200/90 bg-white px-3 py-2.5 text-base text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-400/15 sm:text-sm dark:border-white/10 dark:bg-black/30 dark:text-white dark:placeholder:text-slate-500";
 
 function SettingsSwitch({
   id,
@@ -127,7 +127,7 @@ function SettingsHeroConnected() {
             <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_18px_rgb(22_199_132_/0.75)]" />
             {t("heroEyebrow")}
           </div>
-          <h1 className="flex flex-wrap items-center gap-3 text-4xl font-semibold tracking-[-0.06em] text-white sm:text-5xl lg:text-6xl">
+          <h1 className="flex flex-wrap items-center gap-3 text-3xl font-semibold tracking-[-0.06em] text-white sm:text-5xl lg:text-6xl">
             <Settings2 className="h-9 w-9 shrink-0 text-violet-200/90 sm:h-11 sm:w-11" aria-hidden />
             <span className="max-w-4xl text-balance">{t("title")}</span>
           </h1>
@@ -135,14 +135,14 @@ function SettingsHeroConnected() {
           <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <Link
               href="/dashboard/overview"
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25 transition-all hover:-translate-y-0.5 hover:bg-gray-100"
+              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25 transition-all hover:-translate-y-0.5 hover:bg-gray-100 sm:w-auto"
             >
               <LayoutDashboard className="h-4 w-4" aria-hidden />
               {t("ctaOverview")}
             </Link>
             <Link
               href={DASHBOARD_ONBOARDING_REIMPORT_PATH}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-black/20 backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white/15"
+              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-black/20 backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white/15 sm:w-auto"
             >
               {t("importExportsCta")}
             </Link>
@@ -179,7 +179,7 @@ function SettingsHeroSignedOut() {
             <span className="h-2 w-2 rounded-full bg-amber-400 shadow-[0_0_14px_rgba(251,191,36,0.55)]" />
             {t("signedOutHeroEyebrow")}
           </div>
-          <h1 className="flex flex-wrap items-center gap-3 text-4xl font-semibold tracking-[-0.06em] text-white sm:text-5xl lg:text-6xl">
+          <h1 className="flex flex-wrap items-center gap-3 text-3xl font-semibold tracking-[-0.06em] text-white sm:text-5xl lg:text-6xl">
             <Settings2 className="h-9 w-9 shrink-0 text-violet-200/90 sm:h-11 sm:w-11" aria-hidden />
             <span className="max-w-4xl text-balance">{t("title")}</span>
           </h1>
@@ -541,16 +541,16 @@ export function AccountSettingsClient() {
       <SettingsHeroConnected />
 
       <nav
-        className={`sticky ${SUBNAV_STICKY_TOP} z-20 -mx-1 mb-2 flex flex-wrap items-center gap-2 border-b border-slate-200/80 bg-white/85 px-1 pb-3 backdrop-blur-md dark:border-white/10 dark:bg-slate-950/85`}
+        className={`sticky ${SUBNAV_STICKY_TOP} z-20 -mx-1 mb-2 flex gap-2 overflow-x-auto overscroll-x-contain border-b border-slate-200/80 bg-white/85 px-1 pb-3 backdrop-blur-md [-ms-overflow-style:none] [scrollbar-width:none] dark:border-white/10 dark:bg-slate-950/85 lg:flex-wrap lg:overflow-visible [&::-webkit-scrollbar]:hidden`}
         aria-label={t("navOnThisPage")}
       >
-        <a href="#settings-profile" className={`${DASHBOARD_SPOTLIGHT_PILL_MUTED} px-4 py-2 text-sm font-semibold no-underline transition hover:border-violet-300/50 hover:bg-white dark:hover:bg-white/15`}>
+        <a href="#settings-profile" className={`${DASHBOARD_SPOTLIGHT_PILL_MUTED} shrink-0 whitespace-nowrap px-4 py-2.5 text-sm font-semibold no-underline transition hover:border-violet-300/50 hover:bg-white dark:hover:bg-white/15`}>
           {t("sectionProfile")}
         </a>
-        <a href="#settings-preferences" className={`${DASHBOARD_SPOTLIGHT_PILL_MUTED} px-4 py-2 text-sm font-semibold no-underline transition hover:border-violet-300/50 hover:bg-white dark:hover:bg-white/15`}>
+        <a href="#settings-preferences" className={`${DASHBOARD_SPOTLIGHT_PILL_MUTED} shrink-0 whitespace-nowrap px-4 py-2.5 text-sm font-semibold no-underline transition hover:border-violet-300/50 hover:bg-white dark:hover:bg-white/15`}>
           {t("sectionPreferences")}
         </a>
-        <a href="#settings-data-privacy" className={`${DASHBOARD_SPOTLIGHT_PILL_MUTED} px-4 py-2 text-sm font-semibold no-underline transition hover:border-violet-300/50 hover:bg-white dark:hover:bg-white/15`}>
+        <a href="#settings-data-privacy" className={`${DASHBOARD_SPOTLIGHT_PILL_MUTED} shrink-0 whitespace-nowrap px-4 py-2.5 text-sm font-semibold no-underline transition hover:border-violet-300/50 hover:bg-white dark:hover:bg-white/15`}>
           {t("sectionDataPrivacy")}
         </a>
       </nav>

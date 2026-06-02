@@ -88,14 +88,14 @@ function TasteEvolutionHeroFrame({
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.26),transparent_30%),radial-gradient(circle_at_80%_12%,rgba(6,182,212,0.2),transparent_32%),linear-gradient(135deg,rgba(3,7,18,0.98),rgba(30,27,75,0.88)_48%,rgba(8,47,73,0.72))]" />
       <div className="absolute -left-20 top-1/3 h-64 w-64 rounded-full bg-accent-violet/22 blur-3xl" />
       <div className="absolute -bottom-28 right-10 h-72 w-72 rounded-full bg-accent-cyan/18 blur-3xl" />
-      <div className="relative grid gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-center">
+      <div className="relative grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-center">
         <div>
           <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-violet-100 backdrop-blur">
             <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_18px_rgb(22_199_132_/0.75)]" />
             {t("heroEyebrow")}
           </div>
-          <h1 className="flex flex-wrap items-center gap-3 text-4xl font-semibold tracking-[-0.06em] text-white sm:text-5xl lg:text-6xl">
-            <Sprout className="h-9 w-9 shrink-0 text-emerald-200/90 sm:h-11 sm:w-11" strokeWidth={1.5} aria-hidden />
+          <h1 className="flex flex-wrap items-center gap-3 text-3xl font-semibold tracking-[-0.06em] text-white lg:text-6xl">
+            <Sprout className="h-8 w-8 shrink-0 text-emerald-200/90 lg:h-11 lg:w-11" strokeWidth={1.5} aria-hidden />
             <span className="max-w-4xl text-balance">{t("title")}</span>
           </h1>
           <p className="mt-5 max-w-2xl text-base leading-7 text-white/70 sm:text-lg">{description}</p>
@@ -108,14 +108,14 @@ function TasteEvolutionHeroFrame({
           <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <Link
               href="/dashboard/overview"
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25 transition-all hover:-translate-y-0.5 hover:bg-gray-100"
+              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25 transition-all hover:-translate-y-0.5 hover:bg-gray-100 sm:w-auto"
             >
               <LayoutDashboard className="h-4 w-4" aria-hidden />
               {t("ctaOverview")}
             </Link>
             <Link
               href="/dashboard/genres/trends"
-              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-black/20 backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white/15"
+              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-black/20 backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white/15 sm:w-auto"
             >
               <TrendingUp className="h-4 w-4" aria-hidden />
               {t("ctaGenreTrends")}
@@ -145,7 +145,7 @@ function TasteEvolutionHeroStats({ data }: { data: TasteEvolutionResponse }) {
   const latest = data.trends.length > 0 ? data.trends[data.trends.length - 1] : null;
   const latestLabel = latest ? t(`classifications.${latest.classification}`) : "—";
   return (
-    <div className="grid gap-2 pt-4 sm:grid-cols-3">
+    <div className="grid grid-cols-1 gap-2 pt-4 sm:grid-cols-3">
       <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
         <p className="text-xl font-semibold tracking-tight text-white tabular-nums">{data.trends.length}</p>
         <p className="mt-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">{t("heroStatComparisons")}</p>
@@ -164,7 +164,7 @@ function TasteEvolutionHeroStats({ data }: { data: TasteEvolutionResponse }) {
 
 function TasteEvolutionHeroStatsSkeleton() {
   return (
-    <div className="grid gap-2 pt-4 sm:grid-cols-3" aria-busy="true">
+    <div className="grid grid-cols-1 gap-2 pt-4 sm:grid-cols-3" aria-busy="true">
       {[0, 1, 2].map((i) => (
         <div key={i} className="animate-pulse rounded-2xl border border-white/10 bg-white/[0.06] p-3">
           <div className="mb-2 h-7 w-16 rounded bg-white/20" />
@@ -186,13 +186,13 @@ function TasteSummaryVersionToggle({
   return (
     <div className="flex w-full max-w-md flex-col gap-2" role="tablist" aria-label={t("aiExplanation")}>
       <span className="text-[10px] font-semibold uppercase tracking-wider text-white/60">{t("summaryStyleLabel")}</span>
-      <div className="inline-flex rounded-xl border border-white/15 bg-white/10 p-1.5 shadow-sm backdrop-blur-sm">
+      <div className="inline-flex w-full max-w-md rounded-xl border border-white/15 bg-white/10 p-1.5 shadow-sm backdrop-blur-sm">
         <button
           type="button"
           role="tab"
           aria-selected={summaryVersion === "light"}
           onClick={() => onVersionChange("light")}
-          className={`rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${
+          className={`min-h-11 flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${
             summaryVersion === "light"
               ? "bg-white text-gray-950 shadow-sm shadow-black/20"
               : "text-white/70 hover:text-white"
@@ -205,7 +205,7 @@ function TasteSummaryVersionToggle({
           role="tab"
           aria-selected={summaryVersion === "technical"}
           onClick={() => onVersionChange("technical")}
-          className={`rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${
+          className={`min-h-11 flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${
             summaryVersion === "technical"
               ? "bg-white text-gray-950 shadow-sm shadow-black/20"
               : "text-white/70 hover:text-white"
@@ -265,7 +265,7 @@ function TrendCardHeader({
       <button
         type="button"
         onClick={onToggle}
-        className={`flex w-full flex-wrap items-center justify-between gap-3 px-5 py-4 text-left transition-colors hover:bg-slate-50/90 dark:hover:bg-white/[0.04] ${borderClass}`}
+        className={`flex min-h-11 w-full flex-wrap items-center justify-between gap-3 px-5 py-4 text-left transition-colors hover:bg-slate-50/90 dark:hover:bg-white/[0.04] ${borderClass}`}
         aria-expanded={isExpanded}
       >
         {content}
@@ -311,7 +311,7 @@ function TrendCard({
 
         {(isLastWeek || isExpanded) && (
           <div className="relative space-y-4 p-5">
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <div className={`${trend.volumeDelta >= 0 ? TASTE_POSITIVE_SUBCARD_CLASS : TASTE_NEGATIVE_SUBCARD_CLASS} p-3`}>
                 <p className="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">{t("volume")}</p>
                 <p
@@ -343,7 +343,7 @@ function TrendCard({
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               {trend.emergingGenres.length > 0 ? (
                 <div className={`${TASTE_POSITIVE_SUBCARD_CLASS} p-4`}>
                   <h4 className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
@@ -439,7 +439,7 @@ function TrendCardSkeleton() {
         </div>
         <div className="h-8 w-28 shrink-0 animate-shimmer rounded-full bg-slate-200 dark:bg-white/10" />
       </div>
-      <div className="grid grid-cols-2 gap-4 p-5 sm:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 p-5 sm:grid-cols-2 lg:grid-cols-4">
         {[0, 1, 2, 3].map((j) => (
           <div key={j} className="space-y-2">
             <div className="h-3 w-16 animate-shimmer rounded bg-slate-200 dark:bg-white/10" />
@@ -480,7 +480,7 @@ function TasteEvolutionContent() {
 
   const handleRetry = () => refetch();
 
-  const pageWrap = "mx-auto max-w-6xl space-y-8";
+  const pageWrap = "mx-auto max-w-6xl space-y-6 lg:space-y-8";
 
   if (isLoading) {
     return (
@@ -606,7 +606,7 @@ function TasteEvolutionContent() {
       ) : null}
 
       <section className="space-y-6" aria-labelledby="taste-weekly-trends-title">
-        <h3 id="taste-weekly-trends-title" className={DASHBOARD_SPOTLIGHT_TITLE}>
+        <h3 id="taste-weekly-trends-title" className={`${DASHBOARD_SPOTLIGHT_TITLE} text-xl lg:text-2xl`}>
           {t("weeklyTrends")}
         </h3>
         <div className="space-y-6">
@@ -627,7 +627,7 @@ function TasteEvolutionFallback() {
   start.setDate(start.getDate() - 56);
   const rangeLabel = formatDateRange(start.toISOString().split("T")[0], end.toISOString().split("T")[0], locale);
   return (
-    <div className="mx-auto max-w-6xl space-y-8">
+    <div className="mx-auto max-w-6xl space-y-6 lg:space-y-8">
       <section aria-labelledby="taste-evolution-heading">
         <h2 id="taste-evolution-heading" className="sr-only">
           {t("title")}
@@ -654,7 +654,7 @@ function TasteEvolutionFallback() {
 
 export default function TasteEvolutionPage() {
   return (
-    <div className="px-4 py-6 sm:px-0">
+    <div className="px-4 pb-4 pt-0 sm:px-0 lg:py-6">
       <Suspense fallback={<TasteEvolutionFallback />}>
         <TasteEvolutionContent />
       </Suspense>

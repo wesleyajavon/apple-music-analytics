@@ -7,6 +7,14 @@ import { useTranslations } from "next-intl";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { DEFAULT_PUBLIC_PROFILE_USER_ID } from "@/lib/constants/public-profile";
 import { SPOTIFY_WEB_API_OAUTH_SCOPES } from "@/lib/services/spotify/spotify-web-api-scopes";
+import {
+  AUTH_CARD_CLASS,
+  AUTH_INPUT_CLASS,
+  AUTH_MAIN_CLASS,
+  AUTH_INLINE_LINK_CLASS,
+  AUTH_OAUTH_BUTTON_CLASS,
+  AUTH_PRIMARY_BUTTON_CLASS,
+} from "@/lib/constants/auth-form-styles";
 
 export default function SignInPage() {
   const t = useTranslations("auth");
@@ -103,25 +111,15 @@ export default function SignInPage() {
     }
   }
 
-  const inputClassName =
-    "w-full rounded-lg border border-card-border bg-surface-raised px-3 py-2.5 text-sm text-foreground outline-none transition-shadow ring-ring focus:border-primary focus:ring-2 focus:ring-ring";
-
   return (
-    <main
-      id="auth-main"
-      tabIndex={-1}
-      className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-4 py-8 sm:py-12"
-    >
-      <section
-        className="w-full rounded-2xl border border-card-border bg-card-surface p-6 shadow-card backdrop-blur-sm sm:p-8"
-        aria-labelledby="sign-in-heading"
-      >
+    <main id="auth-main" tabIndex={-1} className={AUTH_MAIN_CLASS}>
+      <section className={AUTH_CARD_CLASS} aria-labelledby="sign-in-heading">
         <p className="text-xs font-semibold uppercase tracking-widest text-primary">
           {t("signInEyebrow")}
         </p>
         <h1
           id="sign-in-heading"
-          className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl"
+          className="mt-2 text-xl font-bold tracking-tight text-foreground lg:text-3xl"
         >
           {t("signInTitle")}
         </h1>
@@ -167,7 +165,7 @@ export default function SignInPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className={inputClassName}
+              className={AUTH_INPUT_CLASS}
               aria-invalid={error ? true : undefined}
               aria-describedby={error ? errorId : undefined}
             />
@@ -188,14 +186,14 @@ export default function SignInPage() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className={inputClassName}
+              className={AUTH_INPUT_CLASS}
               aria-invalid={error ? true : undefined}
               aria-describedby={error ? errorId : undefined}
             />
             <p className="mt-2 text-right">
               <Link
                 href="/forgot-password"
-                className="text-sm font-medium text-primary hover:underline"
+                className={AUTH_INLINE_LINK_CLASS}
               >
                 {t("forgotPasswordLink")}
               </Link>
@@ -215,7 +213,7 @@ export default function SignInPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full rounded-xl bg-brand-gradient px-4 py-2.5 text-sm font-semibold text-white shadow-brand-glow transition-opacity hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
+            className={AUTH_PRIMARY_BUTTON_CLASS}
           >
             {isLoading ? t("signingIn") : t("signIn")}
           </button>
@@ -235,7 +233,7 @@ export default function SignInPage() {
             type="button"
             onClick={onGoogleSignIn}
             disabled={isLoading}
-            className="flex w-full items-center justify-center gap-2 rounded-xl border border-card-border bg-surface-raised px-4 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-card-surface disabled:cursor-not-allowed disabled:opacity-60"
+            className={AUTH_OAUTH_BUTTON_CLASS}
           >
             <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" aria-hidden>
               <path
@@ -262,7 +260,7 @@ export default function SignInPage() {
             type="button"
             onClick={onSpotifySignIn}
             disabled={isLoading}
-            className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#1ed760]/35 bg-[#191414] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#282828] disabled:cursor-not-allowed disabled:opacity-60"
+            className={`${AUTH_OAUTH_BUTTON_CLASS} border-[#1ed760]/35 bg-[#191414] text-white hover:bg-[#282828] hover:text-white`}
           >
             <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" aria-hidden>
               <path

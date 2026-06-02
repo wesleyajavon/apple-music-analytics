@@ -9,7 +9,6 @@ import {
   Legend,
   Line,
   LineChart as RechartsLineChart,
-  ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
@@ -26,6 +25,7 @@ import type { TrackTrendsChartTrack } from "@/lib/dto/track";
 import { useTrackTrendsChart } from "@/lib/hooks/use-tracks";
 import { getTrackLabel } from "@/lib/utils/track-trends-pivot";
 import { CHART_TOOLTIP_STYLES } from "@/lib/constants/config";
+import { ChartResponsiveContainer } from "@/lib/components/chart-responsive-container";
 import { ArrowLeft } from "lucide-react";
 import {
   DASHBOARD_SPOTLIGHT_SHELL,
@@ -502,7 +502,10 @@ function TrendsContent() {
                   <p className="text-sm text-slate-600 dark:text-slate-400">{t("selectAtLeastOne")}</p>
                 </div>
               ) : (
-                <div className={`relative ${DASHBOARD_SPOTLIGHT_INNER_WELL} min-h-[500px]`} aria-busy={isFetching || selectionPending}>
+                <div
+                  className={`relative ${DASHBOARD_SPOTLIGHT_INNER_WELL} min-h-[280px] lg:min-h-[500px]`}
+                  aria-busy={isFetching || selectionPending}
+                >
                   {(isFetching || selectionPending) && (
                     <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 rounded-[1.35rem] bg-white/90 px-4 text-center backdrop-blur-[2px] dark:bg-slate-950/80">
                       <span className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-cyan-600 border-t-transparent dark:border-cyan-400" aria-hidden />
@@ -512,7 +515,10 @@ function TrendsContent() {
                     </div>
                   )}
                   <div className={`transition-opacity duration-200 ${isFetching || selectionPending ? "pointer-events-none opacity-40" : ""}`}>
-                    <ResponsiveContainer width="100%" height={500}>
+                    <ChartResponsiveContainer
+                      token="tracksMain"
+                      minWidth={chartData.length > 10 ? Math.max(320, chartData.length * 32) : undefined}
+                    >
                       <RechartsLineChart data={chartData} margin={{ top: 8, right: 20, left: 4, bottom: 60 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} />
                         <XAxis
@@ -551,7 +557,7 @@ function TrendsContent() {
                           );
                         })}
                       </RechartsLineChart>
-                    </ResponsiveContainer>
+                    </ChartResponsiveContainer>
                   </div>
                 </div>
               )}

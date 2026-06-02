@@ -10,6 +10,8 @@ interface ThemeSwitcherProps {
   placement?: "top" | "bottom";
   /** Sidebar collapsed: icon only, dropdown opens to the right */
   collapsed?: boolean;
+  /** Header toolbar: icon-only below sm, full label from sm up */
+  compactOnMobile?: boolean;
 }
 
 const THEMES: Theme[] = ["light", "dark", "system"];
@@ -83,7 +85,11 @@ function ThemeIcon({ theme }: { theme: Theme }) {
   }
 }
 
-export function ThemeSwitcher({ placement = "top", collapsed = false }: ThemeSwitcherProps) {
+export function ThemeSwitcher({
+  placement = "top",
+  collapsed = false,
+  compactOnMobile = false,
+}: ThemeSwitcherProps) {
   const { theme, setTheme } = useTheme();
   const t = useTranslations("themeSwitcher");
   const [isOpen, setIsOpen] = useState(false);
@@ -127,25 +133,40 @@ export function ThemeSwitcher({ placement = "top", collapsed = false }: ThemeSwi
     );
   };
 
+  const showIconOnly = collapsed;
+  const showCompactLabel = compactOnMobile && !collapsed;
+
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className="relative shrink-0" ref={dropdownRef}>
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={`flex items-center rounded-xl text-sm font-medium text-muted hover:text-foreground hover:bg-primary/10 transition-all duration-200 ${
-          collapsed ? "justify-center p-2.5" : "gap-2 w-full px-3 py-2.5"
+          showIconOnly
+            ? "justify-center p-2.5"
+            : showCompactLabel
+              ? "justify-center p-2.5 sm:gap-2 sm:justify-start sm:px-3 sm:py-2.5"
+              : "gap-2 w-full px-3 py-2.5"
         }`}
         aria-label={t("ariaLabel")}
         aria-expanded={isOpen}
         aria-haspopup="listbox"
-        title={collapsed ? t(theme) : undefined}
+        title={showIconOnly || showCompactLabel ? t(theme) : undefined}
       >
         <ThemeIcon theme={theme} />
-        {!collapsed && (
+        {!showIconOnly && (
           <>
-            <span className="flex-1 text-left truncate">{t(theme)}</span>
+            <span
+              className={`flex-1 text-left truncate ${
+                showCompactLabel ? "hidden sm:block" : ""
+              }`}
+            >
+              {t(theme)}
+            </span>
             <svg
-              className={`w-4 h-4 shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`}
+              className={`w-4 h-4 shrink-0 transition-transform ${isOpen ? "rotate-180" : ""} ${
+                showCompactLabel ? "hidden sm:block" : ""
+              }`}
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -163,7 +184,9 @@ export function ThemeSwitcher({ placement = "top", collapsed = false }: ThemeSwi
           className={`absolute py-1 bg-surface-raised border border-card-border rounded-xl shadow-card overflow-hidden z-50 min-w-[140px] ${
             collapsed
               ? "left-full ml-1 top-0"
-              : `left-0 right-0 ${placement === "top" ? "bottom-full mb-1" : "top-full mt-1"}`
+              : showCompactLabel
+                ? `right-0 w-max ${placement === "top" ? "bottom-full mb-1" : "top-full mt-1"} sm:left-0 sm:right-0 sm:w-auto`
+                : `left-0 right-0 ${placement === "top" ? "bottom-full mb-1" : "top-full mt-1"}`
           }`}
         >
           {THEMES.map(renderThemeOption)}

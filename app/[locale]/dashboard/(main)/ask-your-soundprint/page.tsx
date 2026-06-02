@@ -71,7 +71,7 @@ function AskSoundprintHero({ isPublicDemoViewer }: { isPublicDemoViewer: boolean
             <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_18px_rgb(22_199_132_/0.75)]" />
             {t("eyebrow")}
           </div>
-          <h1 className="flex flex-wrap items-center gap-3 text-4xl font-semibold tracking-[-0.06em] text-white sm:text-5xl lg:text-6xl">
+          <h1 className="flex flex-wrap items-center gap-3 text-3xl font-semibold tracking-[-0.06em] text-white sm:text-5xl lg:text-6xl">
             <Sparkles className="h-9 w-9 shrink-0 text-violet-200/90 sm:h-11 sm:w-11" aria-hidden />
             <span className="max-w-4xl text-balance">{t("title")}</span>
           </h1>
@@ -568,7 +568,7 @@ function MusicChatContent() {
           <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} aria-hidden />
           <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} aria-hidden />
           <div className="relative flex min-h-0 flex-1 flex-col">
-            <div className={`${DASHBOARD_SPOTLIGHT_INNER_WELL} mx-4 mt-4 max-h-[560px] min-h-[420px] flex-1 space-y-4 overflow-y-auto sm:mx-5 sm:mt-5`}>
+            <div className={`${DASHBOARD_SPOTLIGHT_INNER_WELL} mx-4 mt-4 max-h-[min(50dvh,360px)] min-h-[280px] flex-1 space-y-4 overflow-y-auto sm:mx-5 sm:mt-5 lg:max-h-[560px] lg:min-h-[420px]`}>
               {visibleMessages.map((message, index) => {
                 const isAssistant = message.role === "assistant";
                 return (

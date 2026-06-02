@@ -12,8 +12,8 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  ResponsiveContainer,
 } from "recharts";
+import { ChartResponsiveContainer } from "@/lib/components/chart-responsive-container";
 import { useOverviewStats, useTimeline, useGenres } from "@/lib/hooks/use-listening";
 import { useTrackStats } from "@/lib/hooks/use-tracks";
 import { HeatmapCalendarOverviewWidget } from "@/lib/components/heatmap-calendar-overview-widget";
@@ -779,7 +779,7 @@ function OverviewContent() {
 
         {/* Timeline pleine largeur */}
         {chartData.length > 0 && (
-          <div className="min-h-[320px] sm:col-span-2 lg:col-span-4">
+          <div className="min-h-[240px] sm:col-span-2 sm:min-h-[280px] lg:col-span-4 lg:min-h-[320px]">
             <div className="relative h-full overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950 text-white shadow-2xl shadow-black/20 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-black/30">
               <div
                 className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(152,80,208,0.26),transparent_32%),radial-gradient(circle_at_86%_20%,rgba(79,144,224,0.22),transparent_30%),linear-gradient(135deg,rgba(255,255,255,0.08),transparent_42%)]"
@@ -821,7 +821,10 @@ function OverviewContent() {
                 </div>
               <div className="px-3 py-5 sm:px-6">
                 <div className="rounded-[1.5rem] border border-white/10 bg-black/20 p-3 shadow-2xl shadow-black/20 backdrop-blur sm:p-5">
-                <ResponsiveContainer width="100%" height={280}>
+                <ChartResponsiveContainer
+                  token="overviewArea"
+                  minWidth={chartData.length > 8 ? Math.max(300, chartData.length * 28) : undefined}
+                >
               <AreaChart data={chartData} margin={{ top: 10, right: 14, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
@@ -865,7 +868,7 @@ function OverviewContent() {
                   animationEasing="ease-out"
                 />
               </AreaChart>
-                </ResponsiveContainer>
+                </ChartResponsiveContainer>
                 </div>
               </div>
               </div>

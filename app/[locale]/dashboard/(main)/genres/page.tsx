@@ -19,8 +19,9 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  ResponsiveContainer,
 } from "recharts";
+import { ChartResponsiveContainer } from "@/lib/components/chart-responsive-container";
+import { useChartHeight, useIsLgChartViewport } from "@/lib/hooks/use-chart-viewport";
 import { useGenres } from "@/lib/hooks/use-listening";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
 import { ErrorState } from "@/lib/components/error-state";
@@ -94,12 +95,12 @@ function GenresHeroFrame({
             <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_18px_rgb(22_199_132_/0.75)]" />
             {t("heroEyebrow")}
           </div>
-          <h1 className="max-w-4xl text-balance text-4xl font-semibold tracking-[-0.06em] text-white sm:text-5xl lg:text-6xl">{t("title")}</h1>
+          <h1 className="max-w-4xl text-balance text-3xl font-semibold tracking-[-0.06em] text-white lg:text-6xl">{t("title")}</h1>
           <p className="mt-5 max-w-2xl text-base leading-7 text-white/70 sm:text-lg">{t("subtitle")}</p>
           <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <Link
               href={trendsHref}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25 transition-all hover:-translate-y-0.5 hover:bg-gray-100"
+              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25 transition-all hover:-translate-y-0.5 hover:bg-gray-100 sm:w-auto"
             >
               <LineChart className="h-4 w-4" aria-hidden />
               {t("viewTrends")}
@@ -140,7 +141,7 @@ function GenresHeroStats({
 }) {
   const t = useTranslations("genres");
   return (
-    <div className="grid gap-2 pt-4 sm:grid-cols-3">
+    <div className="grid grid-cols-1 gap-2 pt-4 sm:grid-cols-3">
       <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
         <p className="text-xl font-semibold tracking-tight text-white">{genreCount.toLocaleString(locale)}</p>
         <p className="mt-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">{t("statGenres")}</p>
@@ -159,7 +160,7 @@ function GenresHeroStats({
 
 function GenresHeroStatsSkeleton() {
   return (
-    <div className="grid gap-2 pt-4 sm:grid-cols-3">
+    <div className="grid grid-cols-1 gap-2 pt-4 sm:grid-cols-3">
       {[0, 1, 2].map((i) => (
         <div key={i} className="animate-pulse rounded-2xl border border-white/10 bg-white/[0.06] p-3">
           <div className="mb-2 h-7 w-20 rounded bg-white/20" />
@@ -175,7 +176,7 @@ function GenresSectionHeader({ eyebrow, title, description }: { eyebrow: string;
     <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
       <div>
         <p className="font-mono text-xs font-semibold uppercase tracking-[0.24em] text-primary">{eyebrow}</p>
-        <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-foreground sm:text-3xl">{title}</h2>
+        <h2 className="mt-2 text-xl font-semibold tracking-[-0.04em] text-foreground lg:text-3xl">{title}</h2>
       </div>
       <p className="max-w-xl text-sm leading-6 text-muted">{description}</p>
     </div>
@@ -195,14 +196,14 @@ function TopGenresSpotlightSkeleton() {
 function GenreChartSkeleton({ type }: { type: ChartType }) {
   if (type === "pie") {
     return (
-      <div className="relative mb-10 flex min-w-[260px] items-center justify-center rounded-2xl border border-indigo-200/20 bg-white/50 p-3 shadow-inner dark:border-indigo-300/10 dark:bg-slate-950/20 h-[280px] sm:h-[380px] lg:h-[500px]" aria-busy="true">
+      <div className="relative mb-10 flex min-w-[260px] items-center justify-center rounded-2xl border border-indigo-200/20 bg-white/50 p-3 shadow-inner dark:border-indigo-300/10 dark:bg-slate-950/20 h-[260px] lg:h-[500px]" aria-busy="true">
         <div className="h-44 w-44 rounded-full border-[28px] border-indigo-100 bg-gray-100 animate-shimmer dark:border-indigo-900/60 dark:bg-gray-800 sm:h-60 sm:w-60 sm:border-[38px]" />
       </div>
     );
   }
 
   return (
-    <div className="relative min-w-[280px] rounded-2xl border border-indigo-200/20 bg-white/50 p-6 shadow-inner dark:border-indigo-300/10 dark:bg-slate-950/20 h-[320px] sm:h-[400px] lg:h-[500px]" aria-busy="true">
+    <div className="relative min-w-[280px] rounded-2xl border border-indigo-200/20 bg-white/50 p-6 shadow-inner dark:border-indigo-300/10 dark:bg-slate-950/20 h-[300px] lg:h-[500px]" aria-busy="true">
       <div className="flex h-full items-end justify-between gap-3">
         {Array.from({ length: 10 }).map((_, index) => (
           <div
@@ -491,6 +492,7 @@ function GenresContent() {
   const t = useTranslations("genres");
   const locale = useLocale();
   const CustomTooltip = useMemo(() => createCustomTooltip(t, locale), [t, locale]);
+  const isLgChart = useIsLgChartViewport();
 
   const { startDate, endDate, isLoading: isRangeLoading } = useListenDateRange();
 
@@ -541,6 +543,14 @@ function GenresContent() {
         t("other")
       ),
     [chartData, data?.totalListens, t]
+  );
+
+  const genresBarMinWidth = useMemo(
+    () =>
+      chartDisplayData.length > 6
+        ? Math.max(280, chartDisplayData.length * (isLgChart ? 48 : 40))
+        : undefined,
+    [chartDisplayData.length, isLgChart]
   );
 
   // Label pour le pie chart - affichage conditionnel + taille réduite pour éviter le débordement mobile
@@ -609,7 +619,7 @@ function GenresContent() {
   );
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-8 lg:space-y-12">
       <GenresHeroFrame trendsHref={trendsHref} stats={heroStats} badgeLabel={badgeLabel} />
       {paletteAccessRestricted ? (
         <div className="max-w-3xl rounded-xl border border-cyan-200 bg-cyan-50/80 px-4 py-3 text-sm text-cyan-950 shadow-sm shadow-cyan-950/5 dark:border-cyan-400/25 dark:bg-cyan-950/30 dark:text-cyan-100">
@@ -635,7 +645,7 @@ function GenresContent() {
       ) : !isLoadingOrFetching && (!data || data.data.length === 0) ? (
         <EmptyState variant="startup" {...emptyStatePresets.changeDates(pathname)} />
       ) : (
-        <div className="space-y-12">
+        <div className="space-y-8 lg:space-y-12">
             {isLoadingOrFetching ? (
               <section className="relative animate-fade-in-up">
                 <GenresSectionHeader
@@ -662,7 +672,7 @@ function GenresContent() {
                         className={GENRE_SPOTLIGHT_CARD_SHELL_CLASS}
                         style={{ animationDelay: `${index * 80}ms` }}
                       >
-                        <div className="relative min-h-[280px] overflow-hidden rounded-[1.35rem] bg-slate-100 dark:bg-slate-900 sm:min-h-[300px]">
+                        <div className="relative min-h-[220px] overflow-hidden rounded-[1.35rem] bg-slate-100 dark:bg-slate-900 lg:min-h-[300px]">
                           <div className="absolute inset-0 flex">
                             {slots.map((artist, slotIdx) => (
                               <TopGenreArtistBgSlot
@@ -741,7 +751,7 @@ function GenresContent() {
                     <button
                       type="button"
                       onClick={() => setChartType("pie")}
-                      className={`relative z-10 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-4 sm:text-sm ${
+                      className={`relative z-10 min-h-11 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:min-h-0 sm:px-4 sm:text-sm ${
                         chartType === "pie"
                           ? GENRE_ACTIVE_TAB_CLASS
                           : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
@@ -752,7 +762,7 @@ function GenresContent() {
                     <button
                       type="button"
                       onClick={() => setChartType("bar")}
-                      className={`relative z-10 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-4 sm:text-sm ${
+                      className={`relative z-10 min-h-11 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:min-h-0 sm:px-4 sm:text-sm ${
                         chartType === "bar"
                           ? GENRE_ACTIVE_TAB_CLASS
                           : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
@@ -778,12 +788,12 @@ function GenresContent() {
                       : t("totalListens")}
                   </p>
                 </div>
-                <div className="relative overflow-x-auto p-4 sm:p-6 lg:p-8">
+                <div className="relative p-4 sm:p-6 lg:p-8">
               {isLoadingOrFetching ? (
                 <GenreChartSkeleton type={chartType} />
               ) : chartType === "pie" ? (
-                <div className="relative mb-10 min-w-[260px] rounded-[1.35rem] border border-slate-200/80 bg-slate-50/70 p-3 dark:border-white/10 dark:bg-black/25 h-[280px] sm:h-[380px] lg:h-[500px]">
-                <ResponsiveContainer width="100%" height="100%">
+                <div className="relative mb-10 min-w-0 rounded-[1.35rem] border border-slate-200/80 bg-slate-50/70 p-3 dark:border-white/10 dark:bg-black/25">
+                <ChartResponsiveContainer token="genresPie">
                   <PieChart>
                     <defs>
                       <filter id="genrePieGlow" x="-30%" y="-30%" width="160%" height="160%">
@@ -813,15 +823,20 @@ function GenresContent() {
                     </Pie>
                     <Tooltip content={CustomTooltip} />
                   </PieChart>
-                </ResponsiveContainer>
+                </ChartResponsiveContainer>
                 <PieChartLegend data={chartDisplayData} colors={COLORS} locale={locale} variant={resolvedTheme === "dark" ? "dark" : "light"} />
                 </div>
               ) : (
-                <div className="relative min-w-[280px] rounded-[1.35rem] border border-slate-200/80 bg-slate-50/70 p-3 dark:border-white/10 dark:bg-black/25 h-[320px] sm:h-[400px] lg:h-[500px]">
-                <ResponsiveContainer width="100%" height="100%">
+                <div className="relative min-w-0 rounded-[1.35rem] border border-slate-200/80 bg-slate-50/70 p-3 dark:border-white/10 dark:bg-black/25">
+                <ChartResponsiveContainer token="genresBar" minWidth={genresBarMinWidth}>
                   <BarChart
                     data={chartDisplayData}
-                    margin={{ top: 18, right: 18, left: 0, bottom: 80 }}
+                    margin={{
+                      top: 18,
+                      right: 12,
+                      left: 0,
+                      bottom: isLgChart ? 80 : 64,
+                    }}
                   >
                     <defs>
                       <linearGradient id="genreBarGradient" x1="0" y1="0" x2="0" y2="1">
@@ -840,10 +855,10 @@ function GenresContent() {
                     />
                     <XAxis
                       dataKey="name"
-                      angle={-45}
+                      angle={isLgChart ? -45 : -35}
                       textAnchor="end"
-                      height={80}
-                      tick={{ fill: chartTheme.tick, fontSize: 10 }}
+                      height={isLgChart ? 80 : 64}
+                      tick={{ fill: chartTheme.tick, fontSize: isLgChart ? 10 : 9 }}
                       stroke={chartTheme.axisStroke}
                       interval={0}
                     />
@@ -861,7 +876,7 @@ function GenresContent() {
                       radius={[8, 8, 0, 0]}
                     />
                   </BarChart>
-                </ResponsiveContainer>
+                </ChartResponsiveContainer>
                 </div>
               )}
 
@@ -933,7 +948,7 @@ function GenresContent() {
                       type="button"
                       onClick={() => updateDetailPaginationParams(detailPage - 1, detailPageSize)}
                       disabled={detailPage === 1}
-                      className={`${DASHBOARD_SPOTLIGHT_BTN_SECONDARY} min-h-[36px] px-3 py-1.5 text-sm font-medium`}
+                      className={`${DASHBOARD_SPOTLIGHT_BTN_SECONDARY} min-h-11 px-3 py-2 text-sm font-medium lg:min-h-[36px] lg:py-1.5`}
                     >
                       {t("paginationPrevious")}
                     </button>
@@ -942,7 +957,7 @@ function GenresContent() {
                       <select
                         value={detailPageSize}
                         onChange={(e) => updateDetailPaginationParams(1, Number(e.target.value))}
-                        className={`${DASHBOARD_SPOTLIGHT_SELECT} rounded-lg px-2 py-1`}
+                        className={`${DASHBOARD_SPOTLIGHT_SELECT} min-h-11 rounded-lg px-2 py-2 text-base lg:min-h-0 lg:py-1 lg:text-sm`}
                       >
                         <option value={10}>10</option>
                         <option value={20}>20</option>
@@ -956,7 +971,7 @@ function GenresContent() {
                       type="button"
                       onClick={() => updateDetailPaginationParams(detailPage + 1, detailPageSize)}
                       disabled={detailPage >= detailTotalPages}
-                      className={`${DASHBOARD_SPOTLIGHT_BTN_SECONDARY} min-h-[36px] px-3 py-1.5 text-sm font-medium`}
+                      className={`${DASHBOARD_SPOTLIGHT_BTN_SECONDARY} min-h-11 px-3 py-2 text-sm font-medium lg:min-h-[36px] lg:py-1.5`}
                     >
                       {t("paginationNext")}
                     </button>
@@ -976,7 +991,7 @@ function GenresFallback() {
   const trendsHref = useGenresTrendsHref();
   const badgeLabel = useGenresHeroBadge();
   return (
-    <div className="space-y-12">
+    <div className="space-y-8 lg:space-y-12">
       <GenresHeroFrame trendsHref={trendsHref} stats={<GenresHeroStatsSkeleton />} badgeLabel={badgeLabel} />
       <GenresSkeleton />
     </div>
@@ -985,7 +1000,7 @@ function GenresFallback() {
 
 export default function GenresPage() {
   return (
-    <div className="px-4 pb-6 pt-0 sm:px-0">
+    <div className="px-4 pb-4 pt-0 sm:px-0 lg:pb-6">
       <Suspense fallback={<GenresFallback />}>
         <GenresContent />
       </Suspense>

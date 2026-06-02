@@ -21,8 +21,8 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  ResponsiveContainer,
 } from "recharts";
+import { ChartResponsiveContainer } from "@/lib/components/chart-responsive-container";
 import {
   useArtistTrendsChart,
   useArtistTrendsCommentary,
@@ -211,8 +211,8 @@ function ArtistPickerSkeleton() {
 
 function ArtistTrendsChartSkeleton() {
   return (
-    <div className="relative min-h-[500px] rounded-[1.35rem] border border-slate-200/80 bg-slate-100/50 p-6 dark:border-white/10 dark:bg-black/30" aria-busy="true">
-      <div className="flex h-[452px] flex-col justify-between">
+    <div className="relative min-h-[280px] rounded-[1.35rem] border border-slate-200/80 bg-slate-100/50 p-6 dark:border-white/10 dark:bg-black/30 lg:min-h-[500px]" aria-busy="true">
+      <div className="flex h-[232px] flex-col justify-between lg:h-[452px]">
         {Array.from({ length: 6 }).map((_, index) => (
           <div key={index} className="h-px bg-slate-200/90 dark:bg-white/10" />
         ))}
@@ -694,7 +694,10 @@ function TrendsContent() {
                     <p className="text-sm text-slate-600 dark:text-slate-400">{t("selectAtLeastOne")}</p>
                   </div>
                 ) : (
-                  <div className={`relative ${DASHBOARD_SPOTLIGHT_INNER_WELL} min-h-[500px]`} aria-busy={chartDataSyncing}>
+                  <div
+                    className={`relative ${DASHBOARD_SPOTLIGHT_INNER_WELL} min-h-[280px] lg:min-h-[500px]`}
+                    aria-busy={chartDataSyncing}
+                  >
                     {chartDataSyncing && (
                       <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 rounded-[1.35rem] bg-white/90 px-4 text-center backdrop-blur-[2px] dark:bg-slate-950/80">
                         <span
@@ -709,7 +712,10 @@ function TrendsContent() {
                     <div
                       className={`transition-opacity duration-200 ${chartDataSyncing ? "pointer-events-none opacity-40" : ""}`}
                     >
-                      <ResponsiveContainer width="100%" height={500}>
+                      <ChartResponsiveContainer
+                        token="tracksMain"
+                        minWidth={chartData.length > 10 ? Math.max(320, chartData.length * 32) : undefined}
+                      >
                         <RechartsLineChart data={chartData} margin={{ top: 8, right: 20, left: 4, bottom: 60 }}>
                           <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} />
                           <XAxis
@@ -742,7 +748,7 @@ function TrendsContent() {
                             );
                           })}
                         </RechartsLineChart>
-                      </ResponsiveContainer>
+                      </ChartResponsiveContainer>
                     </div>
                   </div>
                 )}

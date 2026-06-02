@@ -1,0 +1,95 @@
+"use client";
+
+import { useCallback, useEffect, useId, useState } from "react";
+import { useTranslations } from "next-intl";
+
+const NAV_ITEMS = [
+  { href: "#product", labelKey: "product" },
+  { href: "#insights", labelKey: "insights" },
+  { href: "#demo", labelKey: "demo" },
+  { href: "#soundprint-ai-chat", labelKey: "aiChat" },
+] as const;
+
+export function HomeMobileNav() {
+  const t = useTranslations("home");
+  const tNav = useTranslations("home.nav");
+  const [isOpen, setIsOpen] = useState(false);
+  const panelId = useId();
+
+  const close = useCallback(() => setIsOpen(false), []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") close();
+    };
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [isOpen, close]);
+
+  return (
+    <div className="md:hidden">
+      <button
+        type="button"
+        className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-card-border bg-card-surface text-foreground shadow-card transition-colors hover:bg-card-surface/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        aria-expanded={isOpen}
+        aria-controls={panelId}
+        aria-label={isOpen ? t("mobileNav.closeMenu") : t("mobileNav.openMenu")}
+        onClick={() => setIsOpen((prev) => !prev)}
+      >
+        {isOpen ? (
+          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        ) : (
+          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+          </svg>
+        )}
+      </button>
+
+      {isOpen ? (
+        <>
+          <button
+            type="button"
+            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[2px]"
+            aria-label={t("mobileNav.closeMenu")}
+            onClick={close}
+          />
+          <nav
+            id={panelId}
+            className="absolute left-0 right-0 top-[calc(100%+0.25rem)] z-50 rounded-2xl border border-card-border bg-surface-glass p-2 shadow-card backdrop-blur-xl"
+            aria-label={t("mobileNav.menuLabel")}
+          >
+            <ul className="flex flex-col gap-0.5">
+              {NAV_ITEMS.map((item) => (
+                <li key={item.href}>
+                  <a
+                    href={item.href}
+                    className="flex min-h-11 items-center rounded-xl px-4 text-sm font-semibold text-foreground transition-colors hover:bg-card-surface active:bg-card-surface"
+                    onClick={close}
+                  >
+                    {tNav(item.labelKey)}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </>
+      ) : null}
+    </div>
+  );
+}

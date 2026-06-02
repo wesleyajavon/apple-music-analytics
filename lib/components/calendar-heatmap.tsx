@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { useTheme } from "@/lib/providers/theme-provider";
+import { useIsLgChartViewport } from "@/lib/hooks/use-chart-viewport";
 
 export interface HeatmapDataPoint {
   date: string; // YYYY-MM-DD
@@ -106,6 +107,7 @@ export function CalendarHeatmap({
   const t = useTranslations("heatmap");
   const tCommon = useTranslations("common");
   const { resolvedTheme } = useTheme();
+  const isLgChart = useIsLgChartViewport();
 
   const heatmapPalette = useMemo(() => {
     const isDark = resolvedTheme === "dark";
@@ -301,10 +303,9 @@ export function CalendarHeatmap({
     );
   }
 
-  // Styles GitHub-like
-  const SQUARE_SIZE = 11; // px - taille GitHub
-  const SQUARE_GAP = 2; // px - espacement entre les carrés
-  const WEEK_GAP = 2; // px - espacement entre les semaines (colonnes)
+  const SQUARE_SIZE = isLgChart ? 11 : 9;
+  const SQUARE_GAP = 2;
+  const WEEK_GAP = 2;
   const WEEK_WIDTH = SQUARE_SIZE + WEEK_GAP; // Largeur totale d'une semaine
 
   return (

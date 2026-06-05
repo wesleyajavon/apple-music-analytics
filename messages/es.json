@@ -1930,6 +1930,17 @@
     "spotifyLogoAlt": "Spotify",
     "appleMusicLogoAlt": "Apple Music",
     "subtitle": "Descubre la evolución de tus gustos musicales, patrones ocultos y estadísticas que Apple/Spotify no te muestran.",
+    "heroPrimaryCta": "Revela tu Soundprint",
+    "heroInsightChips": {
+      "lateNight": "Fase nocturna detectada",
+      "tasteShift": "Cambio de gusto: Indie → Electrónica",
+      "artistStreak": "Racha de artista top: 42 días"
+    },
+    "heroProof": {
+      "private": "Privado por diseño",
+      "demoFirst": "Prueba primero la demo pública",
+      "appleSpotify": "Listo para Apple Music + Spotify"
+    },
     "goToDashboard": "Volver a tu dashboard",
     "goToDashboardShort": "Dashboard",
     "accessDashboard": "Explorar una demo pública del dashboard",
@@ -1949,9 +1960,21 @@
       "cardTitle": "Minutos de escucha",
       "cardMeta": "+24% vs periodo anterior",
       "chartBar": "Barra de gráfico de vista previa {index}",
+      "liveBadge": "Live",
+      "waveformLabel": "Pulso de gusto",
       "insightEyebrow": "Insight en vivo",
       "insightTitle": "Tu fase nocturna se está convirtiendo en un patrón real.",
-      "insightCopy": "Soundprint conecta artistas, géneros, fechas y hábitos de reproducción para que tu dashboard se sienta menos como una hoja de cálculo y más como un mapa de tu gusto."
+      "insightCopy": "Soundprint conecta artistas, géneros, fechas y hábitos de reproducción para que tu dashboard se sienta menos como una hoja de cálculo y más como un mapa de tu gusto.",
+      "signalRows": {
+        "obsession": "Obsesión más larga",
+        "shift": "Subida de género",
+        "ritual": "Ritual pico"
+      },
+      "genrePills": {
+        "indie": "Indie",
+        "electronic": "Electrónica",
+        "altPop": "Alt pop"
+      }
     },
     "workflow": {
       "import": "Importa tu historial de Apple Music o Spotify",
@@ -1988,7 +2011,30 @@
       },
       "aiInsights": {
         "title": "AI Insights",
-        "description": "Obten analisis rapidos basados en tus estadisticas."
+        "description": "Obtén análisis rápidos basados en tus estadísticas.",
+        "demoQuestion": "¿Por qué cambió mi gusto?",
+        "demoAnswer": "Tus escuchas de synth-pop se duplicaron después de junio."
+      }
+    },
+    "discoveriesEyebrow": "Lo que Soundprint encuentra",
+    "discoveriesTitle": "Patrones que tus apps de streaming dejan enterrados.",
+    "discoveriesSubtitle": "Soundprint convierte reproducciones crudas en momentos memorables: fases, rituales y cambios que hacen que tu historial se sienta personal.",
+    "discoveries": {
+      "lateNight": {
+        "label": "Ritual",
+        "title": "La hora en que tu gusto musical cambia de carácter."
+      },
+      "artistStreak": {
+        "label": "Racha",
+        "title": "El artista que discretamente se volvió tu temporada."
+      },
+      "tasteShift": {
+        "label": "Cambio",
+        "title": "La subida de género que marca un nuevo capítulo."
+      },
+      "hiddenEra": {
+        "label": "Era",
+        "title": "El año al que tu archivo sigue llevándote de vuelta."
       }
     },
     "demoHighlightsSection": {
@@ -2023,7 +2069,21 @@
     "closingCta": {
       "eyebrow": "Empieza con tu soundprint",
       "title": "Haz que tu historial musical se sienta como un producto de datos moderno.",
-      "subtitle": "Explora el perfil público ahora, o inicia sesión para convertir tu propio archivo de escucha en gráficos limpios, contexto y conclusiones con AI."
+      "subtitle": "Explora el perfil público ahora, o inicia sesión para convertir tu propio archivo de escucha en gráficos limpios, contexto y conclusiones con AI.",
+      "highlights": {
+        "import": {
+          "label": "Importar",
+          "value": "Trae tu archivo de escucha en minutos."
+        },
+        "patterns": {
+          "label": "Revelar",
+          "value": "Ve las fases y rituales ocultos en tus reproducciones."
+        },
+        "ai": {
+          "label": "Preguntar",
+          "value": "Chatea con respuestas basadas en tus datos reales."
+        }
+      }
     }
   },
   "metadata": {

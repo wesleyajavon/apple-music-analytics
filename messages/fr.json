@@ -1930,6 +1930,17 @@
     "spotifyLogoAlt": "Spotify",
     "appleMusicLogoAlt": "Apple Music",
     "subtitle": "Découvrez l'évolution de vos goûts musicaux, les patterns cachés et les stats qu'Apple/Spotify ne vous montrent pas.",
+    "heroPrimaryCta": "Révéler votre Soundprint",
+    "heroInsightChips": {
+      "lateNight": "Phase late-night détectée",
+      "tasteShift": "Changement de goût : Indie → Électro",
+      "artistStreak": "Série artiste top : 42 jours"
+    },
+    "heroProof": {
+      "private": "Pensé pour rester privé",
+      "demoFirst": "Essayez d'abord la démo publique",
+      "appleSpotify": "Prêt pour Apple Music + Spotify"
+    },
     "goToDashboard": "Retourner a votre dashboard",
     "goToDashboardShort": "Dashboard",
     "accessDashboard": "Explorer une démo publique du dashboard",
@@ -1949,9 +1960,21 @@
       "cardTitle": "Minutes d'écoute",
       "cardMeta": "+24% vs période précédente",
       "chartBar": "Barre de graphique d'aperçu {index}",
+      "liveBadge": "Live",
+      "waveformLabel": "Pulse de goût",
       "insightEyebrow": "Insight live",
       "insightTitle": "Votre phase late-night devient un vrai pattern.",
-      "insightCopy": "Soundprint relie artistes, genres, dates et habitudes de lecture pour que votre dashboard ressemble moins à une feuille de calcul et plus à une carte de vos goûts."
+      "insightCopy": "Soundprint relie artistes, genres, dates et habitudes de lecture pour que votre dashboard ressemble moins à une feuille de calcul et plus à une carte de vos goûts.",
+      "signalRows": {
+        "obsession": "Plus longue obsession",
+        "shift": "Hausse de genre",
+        "ritual": "Rituel de pointe"
+      },
+      "genrePills": {
+        "indie": "Indie",
+        "electronic": "Électro",
+        "altPop": "Alt pop"
+      }
     },
     "workflow": {
       "import": "Importez votre historique Apple Music ou Spotify",
@@ -1988,7 +2011,30 @@
       },
       "aiInsights": {
         "title": "AI Insights",
-        "description": "Obtenez des analyses rapides basees sur vos statistiques."
+        "description": "Obtenez des analyses rapides basées sur vos statistiques.",
+        "demoQuestion": "Pourquoi mes goûts ont changé ?",
+        "demoAnswer": "Vos écoutes synth-pop ont doublé après juin."
+      }
+    },
+    "discoveriesEyebrow": "Ce que Soundprint révèle",
+    "discoveriesTitle": "Les patterns que vos apps de streaming laissent cachés.",
+    "discoveriesSubtitle": "Soundprint transforme les écoutes brutes en moments mémorables : phases, rituels et changements qui rendent votre historique vraiment personnel.",
+    "discoveries": {
+      "lateNight": {
+        "label": "Rituel",
+        "title": "L'heure où vos goûts changent de caractère."
+      },
+      "artistStreak": {
+        "label": "Série",
+        "title": "L'artiste qui est discrètement devenu votre saison."
+      },
+      "tasteShift": {
+        "label": "Shift",
+        "title": "La hausse de genre qui marque un nouveau chapitre."
+      },
+      "hiddenEra": {
+        "label": "Ère",
+        "title": "L'année vers laquelle votre archive vous ramène encore."
       }
     },
     "demoHighlightsSection": {
@@ -2023,7 +2069,21 @@
     "closingCta": {
       "eyebrow": "Commencez avec votre soundprint",
       "title": "Transformez votre historique musical en data product moderne.",
-      "subtitle": "Explorez le profil public maintenant, ou connectez-vous pour convertir votre propre archive d'écoute en graphes propres, contexte et analyses AI."
+      "subtitle": "Explorez le profil public maintenant, ou connectez-vous pour convertir votre propre archive d'écoute en graphes propres, contexte et analyses AI.",
+      "highlights": {
+        "import": {
+          "label": "Importer",
+          "value": "Ajoutez votre archive d'écoute en quelques minutes."
+        },
+        "patterns": {
+          "label": "Révéler",
+          "value": "Voyez les phases et rituels cachés dans vos écoutes."
+        },
+        "ai": {
+          "label": "Demander",
+          "value": "Discutez avec des réponses ancrées dans vos vraies données."
+        }
+      }
     }
   },
   "metadata": {

@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
-import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { LayoutDashboard, Settings2, Upload } from "lucide-react";
 import { Link, useRouter } from "@/i18n/navigation";
@@ -17,6 +16,7 @@ import {
   setGenreBackfillBannerOptOut,
 } from "@/lib/utils/genre-backfill-banner-prefs";
 import { DASHBOARD_ONBOARDING_REIMPORT_PATH } from "@/lib/utils/onboarding-route";
+import { UserAvatar } from "@/lib/components/user-avatar";
 import {
   DASHBOARD_SPOTLIGHT_SHELL,
   DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY,
@@ -47,16 +47,6 @@ const SUPPORTED_AVATAR_TYPES = new Set([
   "image/webp",
   "image/gif",
 ]);
-
-function getProfileInitials(name: string, email: string | null) {
-  const source = name.trim() || email?.trim() || "User";
-  const words = source.split(/[\s@._-]+/).filter(Boolean);
-  const initials = words
-    .slice(0, 2)
-    .map((word) => word[0]?.toUpperCase())
-    .join("");
-  return initials || "U";
-}
 
 function SettingsSwitch({
   id,
@@ -623,7 +613,6 @@ export function AccountSettingsClient() {
 
   const primarySaveClass =
     "inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-2xl bg-slate-950 px-5 text-sm font-semibold text-white shadow-xl shadow-slate-950/20 transition hover:-translate-y-0.5 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 dark:bg-white dark:text-slate-950 dark:shadow-black/25 dark:hover:bg-slate-100 sm:w-auto";
-  const profileInitials = getProfileInitials(nameInput, accountEmail);
 
   if (!authReady) {
     return (
@@ -696,23 +685,13 @@ export function AccountSettingsClient() {
                 noValidate
               >
                 <div className="flex flex-col gap-4 rounded-2xl border border-slate-200/80 bg-slate-50/80 p-4 dark:border-white/10 dark:bg-black/20 sm:flex-row sm:items-center">
-                  <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-3xl border border-white/70 bg-brand-gradient shadow-lg shadow-violet-500/15 dark:border-white/10">
-                    {avatarUrl ? (
-                      <Image
-                        src={avatarUrl}
-                        alt={t("profileImageAlt")}
-                        fill
-                        sizes="96px"
-                        unoptimized
-                        className="object-cover"
-                        onError={() => setAvatarUrl(null)}
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center text-2xl font-bold text-white">
-                        {profileInitials}
-                      </div>
-                    )}
-                  </div>
+                  <UserAvatar
+                    src={avatarUrl}
+                    name={nameInput}
+                    email={accountEmail}
+                    size="xl"
+                    alt={t("profileImageAlt")}
+                  />
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-slate-900 dark:text-white">{t("profileImageLabel")}</p>
                     <p className={`mt-1.5 text-sm leading-relaxed ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("profileImageHint")}</p>

@@ -1930,6 +1930,17 @@
     "spotifyLogoAlt": "Spotify",
     "appleMusicLogoAlt": "Apple Music",
     "subtitle": "See your music taste evolution, hidden patterns, and stats Apple/Spotify don't show you.",
+    "heroPrimaryCta": "Reveal your Soundprint",
+    "heroInsightChips": {
+      "lateNight": "Late-night phase detected",
+      "tasteShift": "Taste shift: Indie → Electronic",
+      "artistStreak": "Top artist streak: 42 days"
+    },
+    "heroProof": {
+      "private": "Private by design",
+      "demoFirst": "Try the public demo first",
+      "appleSpotify": "Apple Music + Spotify ready"
+    },
     "goToDashboard": "Go to your dashboard",
     "goToDashboardShort": "Dashboard",
     "accessDashboard": "Explore a public dashboard demo",
@@ -1949,9 +1960,21 @@
       "cardTitle": "Listening minutes",
       "cardMeta": "+24% vs previous period",
       "chartBar": "Preview chart bar {index}",
+      "liveBadge": "Live",
+      "waveformLabel": "Taste pulse",
       "insightEyebrow": "Live insight",
       "insightTitle": "Your late-night phase is becoming a real pattern.",
-      "insightCopy": "Soundprint connects artists, genres, dates, and playback habits so your dashboard feels less like a spreadsheet and more like a map of your taste."
+      "insightCopy": "Soundprint connects artists, genres, dates, and playback habits so your dashboard feels less like a spreadsheet and more like a map of your taste.",
+      "signalRows": {
+        "obsession": "Longest obsession",
+        "shift": "Genre lift",
+        "ritual": "Peak ritual"
+      },
+      "genrePills": {
+        "indie": "Indie",
+        "electronic": "Electronic",
+        "altPop": "Alt pop"
+      }
     },
     "workflow": {
       "import": "Import Apple Music or Spotify history",
@@ -1988,7 +2011,30 @@
       },
       "aiInsights": {
         "title": "AI Insights",
-        "description": "Get quick analyses based on your listening stats."
+        "description": "Get quick analyses based on your listening stats.",
+        "demoQuestion": "Why did my taste shift?",
+        "demoAnswer": "Your synth-pop plays doubled after June."
+      }
+    },
+    "discoveriesEyebrow": "What Soundprint finds",
+    "discoveriesTitle": "Patterns your streaming apps leave buried.",
+    "discoveriesSubtitle": "Soundprint turns raw plays into memorable moments: the phases, rituals, and shifts that make your listening history feel personal.",
+    "discoveries": {
+      "lateNight": {
+        "label": "Ritual",
+        "title": "The hour your music taste changes character."
+      },
+      "artistStreak": {
+        "label": "Streak",
+        "title": "The artist who quietly became your season."
+      },
+      "tasteShift": {
+        "label": "Shift",
+        "title": "The genre lift that marks a new chapter."
+      },
+      "hiddenEra": {
+        "label": "Era",
+        "title": "The year your archive still keeps pulling you back to."
       }
     },
     "demoHighlightsSection": {
@@ -2023,7 +2069,21 @@
     "closingCta": {
       "eyebrow": "Start with your soundprint",
       "title": "Make your music history feel like a modern data product.",
-      "subtitle": "Explore the public profile now, or sign in to turn your own listening archive into clean charts, context, and AI-powered takeaways."
+      "subtitle": "Explore the public profile now, or sign in to turn your own listening archive into clean charts, context, and AI-powered takeaways.",
+      "highlights": {
+        "import": {
+          "label": "Import",
+          "value": "Bring your listening archive in minutes."
+        },
+        "patterns": {
+          "label": "Reveal",
+          "value": "See the phases and rituals hidden in your plays."
+        },
+        "ai": {
+          "label": "Ask",
+          "value": "Chat with answers grounded in your real data."
+        }
+      }
     }
   },
   "metadata": {

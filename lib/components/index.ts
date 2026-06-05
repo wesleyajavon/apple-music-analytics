@@ -16,4 +16,5 @@ export * from "./ai-insights-summary-widget";
 export * from "./footer";
 export * from "./soundprint-logo";
 export * from "./demo-terminal-hero";
+export * from "./user-avatar";
 

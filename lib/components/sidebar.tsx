@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { LanguageSwitcher } from "@/lib/components/language-switcher";
 import { SoundprintLogo } from "@/lib/components/soundprint-logo";
 import { ThemeSwitcher } from "@/lib/components/theme-switcher";
+import { UserAvatar } from "@/lib/components/user-avatar";
 import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { getPublicProfileUserId } from "@/lib/constants/public-profile";
@@ -295,6 +296,8 @@ function SidebarContent() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [openNavKeys, setOpenNavKeys] = useState<Record<string, boolean>>({});
   const [authEmail, setAuthEmail] = useState<string | null>(null);
+  const [profileName, setProfileName] = useState<string | null>(null);
+  const [profileAvatarUrl, setProfileAvatarUrl] = useState<string | null>(null);
   const [authUserId, setAuthUserId] = useState<string | null | undefined>(
     undefined
   );
@@ -318,6 +321,7 @@ function SidebarContent() {
     [pathname]
   );
   const displayCollapsed = isCollapsed && !isMobileMenuOpen;
+  const accountDisplayName = profileName?.trim() || authEmail || null;
 
   /** Évite de mettre en cache une navigation vers le dashboard principal tant que l’onboarding n’est pas marqué complété (sinon redirection → onboarding peut rester « collée » au prefetch). */
   const prefetchDashboardNav = !pathname.includes("/dashboard/onboarding");
@@ -358,11 +362,35 @@ function SidebarContent() {
     let mounted = true;
     const supabase = createSupabaseBrowserClient();
 
+    async function loadProfile() {
+      try {
+        const res = await fetch("/api/user/me", { credentials: "same-origin" });
+        const data = (await res.json().catch(() => ({}))) as {
+          user?: {
+            name: string | null;
+            email: string | null;
+            avatarUrl: string | null;
+          } | null;
+        };
+        if (!mounted || !res.ok) return;
+        setProfileName(data.user?.name ?? null);
+        setAuthEmail(data.user?.email ?? null);
+        setProfileAvatarUrl(data.user?.avatarUrl ?? null);
+      } catch {
+        // Keep auth metadata fallback if the profile endpoint is temporarily unavailable.
+      }
+    }
+
     async function loadAuthUser() {
       const { data } = await supabase.auth.getUser();
       if (!mounted) return;
       setAuthEmail(data.user?.email ?? null);
       setAuthUserId(data.user?.id ?? null);
+      if (data.user) void loadProfile();
+      else {
+        setProfileName(null);
+        setProfileAvatarUrl(null);
+      }
     }
 
     loadAuthUser();
@@ -373,6 +401,11 @@ function SidebarContent() {
       if (!mounted) return;
       setAuthEmail(session?.user?.email ?? null);
       setAuthUserId(session?.user?.id ?? null);
+      if (session?.user) void loadProfile();
+      else {
+        setProfileName(null);
+        setProfileAvatarUrl(null);
+      }
     });
 
     return () => {
@@ -667,16 +700,48 @@ function SidebarContent() {
                 <LanguageSwitcher collapsed={displayCollapsed} />
               </Suspense>
             </div>
-            {!displayCollapsed && (
-              <div className="space-y-2 px-3">
-                {authEmail ? (
+            <div className={displayCollapsed ? "flex w-full justify-center" : "space-y-2 px-3"}>
+              {authEmail ? (
+                displayCollapsed ? (
+                  <Link
+                    href={withFilters("/dashboard/settings")}
+                    prefetch={prefetchDashboardNav}
+                    onClick={closeMobileMenu}
+                    title={accountDisplayName ?? t("items.settings")}
+                    className="rounded-2xl outline-none transition-transform hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                  >
+                    <UserAvatar
+                      src={profileAvatarUrl}
+                      name={profileName}
+                      email={authEmail}
+                      size="md"
+                    />
+                  </Link>
+                ) : (
                   <>
-                    <p
-                      className="truncate text-xs text-muted"
-                      title={authEmail}
+                    <Link
+                      href={withFilters("/dashboard/settings")}
+                      prefetch={prefetchDashboardNav}
+                      onClick={closeMobileMenu}
+                      className="flex min-w-0 items-center gap-3 rounded-2xl border border-card-border bg-card-surface/70 p-2.5 transition-all hover:-translate-y-0.5 hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-ring"
                     >
-                      {authEmail}
-                    </p>
+                      <UserAvatar
+                        src={profileAvatarUrl}
+                        name={profileName}
+                        email={authEmail}
+                        size="md"
+                      />
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-sm font-semibold text-foreground">
+                          {accountDisplayName}
+                        </span>
+                        {authEmail ? (
+                          <span className="block truncate text-xs text-muted" title={authEmail}>
+                            {authEmail}
+                          </span>
+                        ) : null}
+                      </span>
+                    </Link>
                     <button
                       onClick={handleSignOut}
                       disabled={isSigningOut}
@@ -685,24 +750,24 @@ function SidebarContent() {
                       {isSigningOut ? t("signingOut") : t("signOut")}
                     </button>
                   </>
-                ) : (
-                  <div className="grid grid-cols-2 gap-2">
-                    <Link
-                      href="/sign-in"
-                      className="rounded-lg border border-card-border px-3 py-2 text-center text-sm font-medium text-foreground transition-colors hover:bg-primary/10"
-                    >
-                      {t("signIn")}
-                    </Link>
-                    <Link
-                      href="/sign-up"
-                      className="rounded-lg bg-brand-gradient px-3 py-2 text-center text-sm font-medium text-white transition-opacity hover:opacity-95"
-                    >
-                      {t("signUp")}
-                    </Link>
-                  </div>
-                )}
-              </div>
-            )}
+                )
+              ) : !displayCollapsed ? (
+                <div className="grid grid-cols-2 gap-2">
+                  <Link
+                    href="/sign-in"
+                    className="rounded-lg border border-card-border px-3 py-2 text-center text-sm font-medium text-foreground transition-colors hover:bg-primary/10"
+                  >
+                    {t("signIn")}
+                  </Link>
+                  <Link
+                    href="/sign-up"
+                    className="rounded-lg bg-brand-gradient px-3 py-2 text-center text-sm font-medium text-white transition-opacity hover:opacity-95"
+                  >
+                    {t("signUp")}
+                  </Link>
+                </div>
+              ) : null}
+            </div>
           </div>
         </div>
       </aside>

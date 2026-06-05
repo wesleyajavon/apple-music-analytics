@@ -11,6 +11,13 @@ export async function ensureAppUserFromSession(user: SupabaseUser) {
     (user.user_metadata?.full_name as string | undefined) ??
     undefined;
   const safeName = metadataName?.trim() ? metadataName.trim() : undefined;
+  const metadataAvatarUrl =
+    (user.user_metadata?.avatar_url as string | undefined) ??
+    (user.user_metadata?.picture as string | undefined) ??
+    undefined;
+  const safeAvatarUrl = metadataAvatarUrl?.trim()
+    ? metadataAvatarUrl.trim()
+    : undefined;
 
   await prisma.user.upsert({
     where: { id: user.id },
@@ -23,6 +30,14 @@ export async function ensureAppUserFromSession(user: SupabaseUser) {
       id: user.id,
       email: user.email ?? null,
       name: safeName ?? null,
+      avatarUrl: safeAvatarUrl ?? null,
     },
   });
+
+  if (safeAvatarUrl !== undefined) {
+    await prisma.user.updateMany({
+      where: { id: user.id, avatarUrl: null },
+      data: { avatarUrl: safeAvatarUrl },
+    });
+  }
 }

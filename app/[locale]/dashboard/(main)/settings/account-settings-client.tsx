@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { LayoutDashboard, Settings2, Upload } from "lucide-react";
 import { Link, useRouter } from "@/i18n/navigation";
@@ -38,6 +39,24 @@ const SETTINGS_HERO_SHELL_CLASS =
 
 const INPUT_CLASS =
   "mt-2 w-full rounded-xl border border-slate-200/90 bg-white px-3 py-2.5 text-base text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-400/15 sm:text-sm dark:border-white/10 dark:bg-black/30 dark:text-white dark:placeholder:text-slate-500";
+
+const MAX_AVATAR_BYTES = 2 * 1024 * 1024;
+const SUPPORTED_AVATAR_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+]);
+
+function getProfileInitials(name: string, email: string | null) {
+  const source = name.trim() || email?.trim() || "User";
+  const words = source.split(/[\s@._-]+/).filter(Boolean);
+  const initials = words
+    .slice(0, 2)
+    .map((word) => word[0]?.toUpperCase())
+    .join("");
+  return initials || "U";
+}
 
 function SettingsSwitch({
   id,
@@ -291,6 +310,7 @@ export function AccountSettingsClient() {
   const t = useTranslations("settings");
   const tCommon = useTranslations("common");
   const router = useRouter();
+  const avatarInputRef = useRef<HTMLInputElement | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [authReady, setAuthReady] = useState(false);
   const [expectedPhrase, setExpectedPhrase] = useState<string | null>(null);
@@ -303,6 +323,10 @@ export function AccountSettingsClient() {
   const [nameInput, setNameInput] = useState("");
   const [initialName, setInitialName] = useState<string | null>(null);
   const [accountEmail, setAccountEmail] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [avatarDeleting, setAvatarDeleting] = useState(false);
+  const [avatarError, setAvatarError] = useState<string | null>(null);
   const [profileLoadError, setProfileLoadError] = useState<string | null>(null);
   const [nameFieldError, setNameFieldError] = useState<string | null>(null);
   const [profileSaveError, setProfileSaveError] = useState<string | null>(null);
@@ -348,7 +372,11 @@ export function AccountSettingsClient() {
       try {
         const res = await fetch("/api/user/me");
         const data = (await res.json().catch(() => ({}))) as {
-          user?: { name: string | null; email: string | null } | null;
+          user?: {
+            name: string | null;
+            email: string | null;
+            avatarUrl: string | null;
+          } | null;
         };
         if (cancelled) return;
         if (!res.ok) {
@@ -359,6 +387,7 @@ export function AccountSettingsClient() {
         setNameInput(n);
         setInitialName(n);
         setAccountEmail(data.user?.email ?? null);
+        setAvatarUrl(data.user?.avatarUrl ?? null);
       } catch {
         if (!cancelled) setProfileLoadError(t("profileLoadError"));
       }
@@ -445,7 +474,7 @@ export function AccountSettingsClient() {
         credentials: "same-origin",
       });
       const data = (await res.json().catch(() => ({}))) as {
-        user?: { name: string | null; email: string | null };
+        user?: { name: string | null; email: string | null; avatarUrl: string | null };
         error?: string;
       };
       if (!res.ok) {
@@ -456,6 +485,7 @@ export function AccountSettingsClient() {
       setNameInput(n);
       setInitialName(n);
       if (data.user?.email !== undefined) setAccountEmail(data.user.email);
+      if (data.user?.avatarUrl !== undefined) setAvatarUrl(data.user.avatarUrl);
       setProfileSaved(true);
       setProfileKey((k) => k + 1);
     } catch {
@@ -464,6 +494,91 @@ export function AccountSettingsClient() {
       setProfileSaving(false);
     }
   }, [initialName, nameFieldError, nameInput, profileLoadError, profileSaving, t]);
+
+  const uploadAvatar = useCallback(
+    async (file: File | null | undefined) => {
+      if (!file) return;
+      setAvatarError(null);
+      setProfileSaved(false);
+
+      if (!SUPPORTED_AVATAR_TYPES.has(file.type)) {
+        setAvatarError(t("profileImageUnsupported"));
+        return;
+      }
+      if (file.size > MAX_AVATAR_BYTES) {
+        setAvatarError(t("profileImageTooLarge"));
+        return;
+      }
+
+      const formData = new FormData();
+      formData.set("avatar", file);
+      setAvatarUploading(true);
+      try {
+        const res = await fetch("/api/user/avatar", {
+          method: "POST",
+          body: formData,
+          credentials: "same-origin",
+        });
+        const data = (await res.json().catch(() => ({}))) as {
+          user?: { name: string | null; email: string | null; avatarUrl: string | null };
+          error?: string;
+        };
+        if (!res.ok) {
+          setAvatarError(data.error ?? t("profileImageError"));
+          return;
+        }
+        if (data.user?.avatarUrl !== undefined) setAvatarUrl(data.user.avatarUrl);
+        if (data.user?.email !== undefined) setAccountEmail(data.user.email);
+        if (data.user?.name !== undefined) {
+          const n = data.user.name ?? "";
+          setNameInput(n);
+          setInitialName(n);
+        }
+        setProfileSaved(true);
+        setProfileKey((k) => k + 1);
+      } catch {
+        setAvatarError(t("profileImageError"));
+      } finally {
+        setAvatarUploading(false);
+        if (avatarInputRef.current) avatarInputRef.current.value = "";
+      }
+    },
+    [t]
+  );
+
+  const deleteAvatar = useCallback(async () => {
+    if (!avatarUrl || avatarDeleting || avatarUploading) return;
+    setAvatarError(null);
+    setProfileSaved(false);
+    setAvatarDeleting(true);
+    try {
+      const res = await fetch("/api/user/avatar", {
+        method: "DELETE",
+        credentials: "same-origin",
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        user?: { name: string | null; email: string | null; avatarUrl: string | null };
+        error?: string;
+      };
+      if (!res.ok) {
+        setAvatarError(data.error ?? t("profileImageError"));
+        return;
+      }
+      setAvatarUrl(data.user?.avatarUrl ?? null);
+      if (data.user?.email !== undefined) setAccountEmail(data.user.email);
+      if (data.user?.name !== undefined) {
+        const n = data.user.name ?? "";
+        setNameInput(n);
+        setInitialName(n);
+      }
+      setProfileSaved(true);
+      setProfileKey((k) => k + 1);
+    } catch {
+      setAvatarError(t("profileImageError"));
+    } finally {
+      setAvatarDeleting(false);
+    }
+  }, [avatarDeleting, avatarUploading, avatarUrl, t]);
 
   const runClear = useCallback(async () => {
     if (!expectedPhrase || !phraseOk) return;
@@ -508,6 +623,7 @@ export function AccountSettingsClient() {
 
   const primarySaveClass =
     "inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-2xl bg-slate-950 px-5 text-sm font-semibold text-white shadow-xl shadow-slate-950/20 transition hover:-translate-y-0.5 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 dark:bg-white dark:text-slate-950 dark:shadow-black/25 dark:hover:bg-slate-100 sm:w-auto";
+  const profileInitials = getProfileInitials(nameInput, accountEmail);
 
   if (!authReady) {
     return (
@@ -579,6 +695,71 @@ export function AccountSettingsClient() {
                 }}
                 noValidate
               >
+                <div className="flex flex-col gap-4 rounded-2xl border border-slate-200/80 bg-slate-50/80 p-4 dark:border-white/10 dark:bg-black/20 sm:flex-row sm:items-center">
+                  <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-3xl border border-white/70 bg-brand-gradient shadow-lg shadow-violet-500/15 dark:border-white/10">
+                    {avatarUrl ? (
+                      <Image
+                        src={avatarUrl}
+                        alt={t("profileImageAlt")}
+                        fill
+                        sizes="96px"
+                        unoptimized
+                        className="object-cover"
+                        onError={() => setAvatarUrl(null)}
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-2xl font-bold text-white">
+                        {profileInitials}
+                      </div>
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-slate-900 dark:text-white">{t("profileImageLabel")}</p>
+                    <p className={`mt-1.5 text-sm leading-relaxed ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("profileImageHint")}</p>
+                    <input
+                      ref={avatarInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/gif"
+                      className="sr-only"
+                      onChange={(e) => {
+                        void uploadAvatar(e.target.files?.[0]);
+                      }}
+                    />
+                    <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                      <button
+                        type="button"
+                        className={DASHBOARD_SPOTLIGHT_BTN_SECONDARY}
+                        disabled={avatarUploading || avatarDeleting}
+                        onClick={() => avatarInputRef.current?.click()}
+                      >
+                        <Upload className="h-4 w-4" aria-hidden />
+                        {avatarUploading
+                          ? t("profileImageUploading")
+                          : avatarUrl
+                            ? t("profileImageReplace")
+                            : t("profileImageUpload")}
+                      </button>
+                      {avatarUrl ? (
+                        <button
+                          type="button"
+                          className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl border border-red-200/80 bg-red-50 px-5 text-sm font-semibold text-red-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 dark:border-red-400/20 dark:bg-red-400/10 dark:text-red-200 dark:hover:bg-red-400/15 sm:w-auto"
+                          disabled={avatarUploading || avatarDeleting}
+                          onClick={() => {
+                            void deleteAvatar();
+                          }}
+                        >
+                          {avatarDeleting ? t("profileImageDeleting") : t("profileImageRemove")}
+                        </button>
+                      ) : null}
+                    </div>
+                    {avatarError ? (
+                      <p className="mt-2 text-sm font-medium text-red-600 dark:text-red-400" role="alert">
+                        {avatarError}
+                      </p>
+                    ) : null}
+                  </div>
+                </div>
+
                 <div>
                   <label htmlFor="settings-display-name" className="text-sm font-medium text-slate-900 dark:text-white">
                     {t("profileNameLabel")}

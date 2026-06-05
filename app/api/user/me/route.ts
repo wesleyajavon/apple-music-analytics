@@ -34,11 +34,15 @@ export async function GET(request: NextRequest) {
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { name: true, email: true },
+      select: { name: true, email: true, avatarUrl: true },
     });
 
     return NextResponse.json({
-      user: { name: user?.name ?? null, email: user?.email ?? null },
+      user: {
+        name: user?.name ?? null,
+        email: user?.email ?? null,
+        avatarUrl: user?.avatarUrl ?? null,
+      },
     });
   } catch (error) {
     return handleApiError(error, { route: ROUTE });
@@ -106,11 +110,15 @@ export async function PATCH(request: NextRequest) {
     const updated = await prisma.user.update({
       where: { id: userId },
       data: { name: displayName },
-      select: { name: true, email: true },
+      select: { name: true, email: true, avatarUrl: true },
     });
 
     return NextResponse.json({
-      user: { name: updated.name, email: updated.email },
+      user: {
+        name: updated.name,
+        email: updated.email,
+        avatarUrl: updated.avatarUrl,
+      },
     });
   } catch (error) {
     return handleApiError(error, { route: ROUTE });

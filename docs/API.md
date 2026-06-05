@@ -62,11 +62,19 @@ Les routes concernées peuvent renvoyer : `X-RateLimit-Limit`, `X-RateLimit-Re
 
 ### GET `/api/user/me`
 
-Profil léger (**nom**, **email**). Sans session : `{ "user": null }`.
+Profil léger (**nom**, **email**, **avatarUrl**). Sans session : `{ "user": null }`.
 
 ### PATCH `/api/user/me`
 
 Body JSON : `{ "name": string }` (nom d’affichage, trimming ; chaîne vide → `null`). Met à jour Prisma **et** les métadonnées Supabase Auth. **401** si non connecté.
+
+### POST `/api/user/avatar`
+
+Upload multipart avec champ `avatar`. Formats acceptés : JPG, PNG, WebP, GIF ; taille max 2 Mo. Stocke l’image dans Supabase Storage (`avatars/{userId}/avatar.*`), met à jour `User.avatarUrl`, puis renvoie le profil léger.
+
+### DELETE `/api/user/avatar`
+
+Supprime l’image de profil Supabase Storage et remet `User.avatarUrl` à `null`.
 
 ### GET `/api/user/clear-analytics`
 

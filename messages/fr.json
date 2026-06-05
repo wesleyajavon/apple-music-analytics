@@ -391,6 +391,19 @@
       "importing": "Import en cours…",
       "importingOverlayTitle": "Envoi et analyse de votre fichier…",
       "importingOverlayHint": "Les archives volumineuses peuvent prendre jusqu’à une minute. Gardez cet onglet ouvert.",
+      "progressAriaLabel": "Progression de l’import",
+      "progressPercent": "{percent}% terminé",
+      "progressWithRows": "{percent}% terminé · {processed}/{total} écoutes",
+      "progressWorking": "Traitement en cours…",
+      "progressBatch": "Lot {current}/{total}",
+      "progressPhase": {
+        "checking": "Vérification de la connexion…",
+        "reading": "Lecture locale du fichier…",
+        "parsing": "Préparation de votre historique d’écoute…",
+        "validating": "Vérification des écoutes reconnues…",
+        "uploading": "Enregistrement des écoutes dans votre compte…",
+        "finalizing": "Finalisation de votre profil…"
+      },
       "skipImport": "Je n’ai pas encore le fichier",
       "toastSuccess": "{count, plural, one {# écoute importée.} other {# écoutes importées.}}",
       "importError": "L’import a échoué. Vérifiez le fichier et réessayez.",
@@ -412,6 +425,22 @@
     },
     "finishTitle": "C’est noté",
     "finishSuccessEyebrow": "Import terminé",
+    "finishSuccessTitle": "Votre historique d’écoute est prêt",
+    "finishSuccessBody": "Nous avons importé {imported} écoutes dans votre compte et ignoré {skipped} doublons. Vous pouvez maintenant découvrir votre profil musical.",
+    "finishSuccessSteps": {
+      "requested": {
+        "title": "Données demandées",
+        "body": "Vous avez récupéré votre export officiel."
+      },
+      "imported": {
+        "title": "Import terminé",
+        "body": "Votre historique d’écoute est enregistré."
+      },
+      "current": {
+        "title": "Vous êtes ici",
+        "body": "Ouvrez votre première vue personnalisée."
+      }
+    },
     "finishSkippedEyebrow": "Presque prêt",
     "finishBody": "Vous pouvez passer cette étape si votre export n’est pas encore prêt : le tableau de bord reste accessible, et les vues se rempliront après un import ultérieur.",
     "finishAfterImport": "{imported} écoutes ont été ajoutées à votre profil. Doublons ignorés : {skipped}.",
@@ -420,6 +449,7 @@
     "finishNextHint": "Ensuite : vue d’ensemble, tendances d’écoute et stats façon Replay. Vous pourrez importer un autre export depuis le tableau de bord.",
     "finishPaletteCta": "Ouvrir Palette ({count, plural, one {# artiste à mapper} other {# artistes à mapper}})",
     "goToDashboard": "Accéder au tableau de bord",
+    "goToMusicalProfile": "Voir mon profil musical",
     "finishing": "Enregistrement…",
     "skipForNow": "Passer pour l’instant",
     "skipHint": "Vous pourrez refaire la demande d’export plus tard ; nous ne vous bloquons pas.",

@@ -15,6 +15,7 @@ import type { NormalizedListenInput } from "@/lib/services/listening/onboarding-
 import { getPaletteInvitationStatus } from "@/lib/services/palette/palette-service";
 import { getGroqImportGenreBackfillEligibility } from "@/lib/services/listening/import-genre-backfill-queue";
 import { parseOnboardingImportJsonBody } from "@/lib/services/listening/onboarding-import-json-body";
+import { ONBOARDING_IMPORT_MAX_PARSED_ROWS } from "@/lib/services/listening/onboarding-import-constants";
 import {
   enrichTopUserArtistsFromSpotify,
   getSpotifyClientCredentialsFromEnv,
@@ -35,7 +36,6 @@ const RATE = {
 
 const MAX_ZIP_BYTES = 45 * 1024 * 1024;
 const MAX_CSV_BYTES = 25 * 1024 * 1024;
-const MAX_PARSED_ROWS = 75_000;
 
 type Provider = "spotify" | "apple";
 
@@ -101,9 +101,9 @@ export async function POST(request: NextRequest) {
       const { provider: providerRaw, rows, batch, sessionTotalImported } =
         parseOnboardingImportJsonBody(raw);
 
-      if (rows.length > MAX_PARSED_ROWS) {
+      if (rows.length > ONBOARDING_IMPORT_MAX_PARSED_ROWS) {
         throw createValidationError(
-          `This export contains more than ${MAX_PARSED_ROWS.toLocaleString()} plays. Contact support or split the data.`
+          `This export contains more than ${ONBOARDING_IMPORT_MAX_PARSED_ROWS.toLocaleString()} plays. Contact support or split the data.`
         );
       }
 
@@ -208,9 +208,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (rows.length > MAX_PARSED_ROWS) {
+    if (rows.length > ONBOARDING_IMPORT_MAX_PARSED_ROWS) {
       throw createValidationError(
-        `This export contains more than ${MAX_PARSED_ROWS.toLocaleString()} plays. Contact support or split the data.`
+        `This export contains more than ${ONBOARDING_IMPORT_MAX_PARSED_ROWS.toLocaleString()} plays. Contact support or split the data.`
       );
     }
 

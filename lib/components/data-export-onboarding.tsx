@@ -25,7 +25,10 @@ import {
   redirectToRecentSignIn,
 } from "@/lib/auth/recent-auth-client";
 import { extractSpotifyStreamingHistoryJsonTextsFromZip } from "@/lib/services/listening/extract-spotify-export-zip";
-import { ONBOARDING_IMPORT_MAX_JSON_BATCH_ROWS } from "@/lib/services/listening/onboarding-import-constants";
+import {
+  ONBOARDING_IMPORT_MAX_JSON_BATCH_ROWS,
+  ONBOARDING_IMPORT_MAX_PARSED_ROWS,
+} from "@/lib/services/listening/onboarding-import-constants";
 import type { NormalizedListenInput } from "@/lib/services/listening/onboarding-import-types";
 import { parseApplePlayHistoryDailyTracksCsv } from "@/lib/services/listening/parse-apple-play-history-daily-csv";
 import { parseSpotifyStreamingHistoryAudioJson } from "@/lib/services/listening/parse-spotify-streaming-history-json";
@@ -170,7 +173,6 @@ const APPLE_STEPS: GuideStep[] = [
 
 /** En dessous de ~4,5 Mo (plafond Vercel sur le corps des requêtes), l’upload multipart classique suffit. */
 const VERCEL_SAFE_MULTIPART_MAX_BYTES = 4 * 1024 * 1024;
-const MAX_ONBOARDING_PARSED_ROWS = 75_000;
 
 /** Trait / remplissage brand (s’aligne sur --brand-* en clair et sombre). */
 const ONBOARDING_RAIL_CLASS = "bg-brand-gradient";
@@ -370,6 +372,33 @@ function listensToJsonRows(rows: NormalizedListenInput[]) {
 }
 
 type ImportOverlayKind = "file" | "spotify_web";
+type ImportProgressPhase =
+  | "checking"
+  | "reading"
+  | "parsing"
+  | "validating"
+  | "uploading"
+  | "finalizing";
+
+type ImportProgress = {
+  phase: ImportProgressPhase;
+  percent: number;
+  processedRows?: number;
+  totalRows?: number;
+  batchIndex?: number;
+  batchCount?: number;
+  isDeterminate: boolean;
+};
+
+function clampProgressPercent(percent: number) {
+  return Math.max(0, Math.min(100, Math.round(percent)));
+}
+
+function yieldToBrowser() {
+  return new Promise<void>((resolve) => {
+    window.setTimeout(resolve, 0);
+  });
+}
 
 export function DataExportOnboarding({
   hasSpotifyWebConnection = false,
@@ -393,6 +422,7 @@ export function DataExportOnboarding({
   const [isImporting, setIsImporting] = useState(false);
   const [importOverlayKind, setImportOverlayKind] =
     useState<ImportOverlayKind>("file");
+  const [importProgress, setImportProgress] = useState<ImportProgress | null>(null);
   const [importSummary, setImportSummary] = useState<{
     imported: number;
     skippedDuplicates: number;
@@ -578,6 +608,11 @@ export function DataExportOnboarding({
 
   const verifySpotifyWebConnection = useCallback(async () => {
     setImportOverlayKind("spotify_web");
+    setImportProgress({
+      phase: "checking",
+      percent: 35,
+      isDeterminate: false,
+    });
     setIsImporting(true);
     try {
       type VerifyOkJson = {
@@ -614,6 +649,7 @@ export function DataExportOnboarding({
     } finally {
       setIsImporting(false);
       setImportOverlayKind("file");
+      setImportProgress(null);
     }
   }, [t, router]);
 
@@ -623,6 +659,11 @@ export function DataExportOnboarding({
       return;
     }
     setImportOverlayKind("file");
+    setImportProgress({
+      phase: "reading",
+      percent: 5,
+      isDeterminate: true,
+    });
     setIsImporting(true);
     try {
       const useLargeFilePath = importFile.size >= VERCEL_SAFE_MULTIPART_MAX_BYTES;
@@ -647,6 +688,11 @@ export function DataExportOnboarding({
       };
 
       if (!useLargeFilePath) {
+        setImportProgress({
+          phase: "uploading",
+          percent: 40,
+          isDeterminate: false,
+        });
         const fd = new FormData();
         fd.append("provider", provider);
         fd.append("file", importFile);
@@ -661,6 +707,11 @@ export function DataExportOnboarding({
           toast.error(data?.error ?? t("import.importError"));
           return;
         }
+        setImportProgress({
+          phase: "finalizing",
+          percent: 95,
+          isDeterminate: true,
+        });
         const imported = data.imported ?? 0;
         const skippedDuplicates = data.skippedDuplicates ?? 0;
         setImportSummary({ imported, skippedDuplicates });
@@ -698,7 +749,19 @@ export function DataExportOnboarding({
           toast.error(t("import.importError"));
           return;
         }
+        setImportProgress({
+          phase: "reading",
+          percent: 8,
+          isDeterminate: true,
+        });
+        await yieldToBrowser();
         const buf = await importFile.arrayBuffer();
+        setImportProgress({
+          phase: "parsing",
+          percent: 18,
+          isDeterminate: true,
+        });
+        await yieldToBrowser();
         const jsonTexts = await extractSpotifyStreamingHistoryJsonTextsFromZip(buf);
         if (jsonTexts.length === 0) {
           toast.error(t("import.zipMissingAudioJson"));
@@ -710,16 +773,36 @@ export function DataExportOnboarding({
           toast.error(t("import.importError"));
           return;
         }
+        setImportProgress({
+          phase: "reading",
+          percent: 8,
+          isDeterminate: true,
+        });
+        await yieldToBrowser();
         const csvText = await importFile.text();
+        setImportProgress({
+          phase: "parsing",
+          percent: 18,
+          isDeterminate: true,
+        });
+        await yieldToBrowser();
         allRows = parseApplePlayHistoryDailyTracksCsv(csvText);
       }
 
+      setImportProgress({
+        phase: "validating",
+        percent: 25,
+        totalRows: allRows.length,
+        isDeterminate: true,
+      });
       if (allRows.length === 0) {
         toast.error(t("import.noParsedListens"));
         return;
       }
-      if (allRows.length > MAX_ONBOARDING_PARSED_ROWS) {
-        toast.error(t("import.tooManyPlays", { max: MAX_ONBOARDING_PARSED_ROWS.toLocaleString() }));
+      if (allRows.length > ONBOARDING_IMPORT_MAX_PARSED_ROWS) {
+        toast.error(
+          t("import.tooManyPlays", { max: ONBOARDING_IMPORT_MAX_PARSED_ROWS.toLocaleString() })
+        );
         return;
       }
 
@@ -729,6 +812,15 @@ export function DataExportOnboarding({
       let lastPayload: ImportOkJson | null = null;
 
       for (let i = 0; i < chunks.length; i++) {
+        setImportProgress({
+          phase: "uploading",
+          percent: clampProgressPercent(30 + (i / chunks.length) * 60),
+          processedRows: Math.min(i * ONBOARDING_IMPORT_MAX_JSON_BATCH_ROWS, allRows.length),
+          totalRows: allRows.length,
+          batchIndex: i + 1,
+          batchCount: chunks.length,
+          isDeterminate: true,
+        });
         const body: Record<string, unknown> = {
           provider,
           rows: listensToJsonRows(chunks[i]!),
@@ -758,6 +850,15 @@ export function DataExportOnboarding({
         sumImported += data.imported ?? 0;
         sumSkippedDup += data.skippedDuplicates ?? 0;
         lastPayload = data;
+        setImportProgress({
+          phase: "uploading",
+          percent: clampProgressPercent(30 + ((i + 1) / chunks.length) * 60),
+          processedRows: Math.min((i + 1) * ONBOARDING_IMPORT_MAX_JSON_BATCH_ROWS, allRows.length),
+          totalRows: allRows.length,
+          batchIndex: i + 1,
+          batchCount: chunks.length,
+          isDeterminate: true,
+        });
       }
 
       if (!lastPayload) {
@@ -765,6 +866,14 @@ export function DataExportOnboarding({
         return;
       }
 
+      setImportProgress({
+        phase: "finalizing",
+        percent: 95,
+        processedRows: allRows.length,
+        totalRows: allRows.length,
+        batchCount: chunks.length,
+        isDeterminate: true,
+      });
       setImportSummary({
         imported: sumImported,
         skippedDuplicates: sumSkippedDup,
@@ -797,6 +906,7 @@ export function DataExportOnboarding({
       toast.error(t("import.importError"));
     } finally {
       setIsImporting(false);
+      setImportProgress(null);
     }
   }, [importFile, provider, t]);
 
@@ -1187,27 +1297,36 @@ export function DataExportOnboarding({
         >
           {isImporting ? (
             <div
-              className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 rounded-2xl bg-surface-glass px-6 py-8 text-center shadow-inner backdrop-blur-md"
+              className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 rounded-2xl bg-surface-glass px-6 py-8 text-center shadow-inner backdrop-blur-md"
               role="status"
               aria-live="polite"
               aria-busy="true"
             >
-              <div className="relative mb-1">
+              <div className="relative mb-1 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/[0.1] ring-1 ring-primary/20">
                 <div
-                  className="h-14 w-14 animate-spin rounded-full border-4 border-border border-t-primary"
+                  className="absolute inset-2 animate-spin rounded-full border-4 border-border border-t-primary"
                   aria-hidden
                 />
+                <span className="text-sm font-bold tabular-nums text-primary">
+                  {importProgress?.isDeterminate
+                    ? `${clampProgressPercent(importProgress.percent)}%`
+                    : "…"}
+                </span>
               </div>
-              <p className="text-base font-semibold text-foreground">
-                {importOverlayKind === "spotify_web"
-                  ? t("import.importingOverlayTitleWebApi")
-                  : t("import.importingOverlayTitle")}
-              </p>
-              <p className="max-w-sm text-sm leading-relaxed text-muted">
-                {importOverlayKind === "spotify_web"
-                  ? t("import.importingOverlayHintWebApi")
-                  : t("import.importingOverlayHint")}
-              </p>
+              <div className="space-y-2">
+                <p className="text-base font-semibold text-foreground">
+                  {importOverlayKind === "spotify_web"
+                    ? t("import.importingOverlayTitleWebApi")
+                    : t("import.importingOverlayTitle")}
+                </p>
+                <p className="max-w-sm text-sm leading-relaxed text-muted">
+                  {importProgress
+                    ? t(`import.progressPhase.${importProgress.phase}`)
+                    : importOverlayKind === "spotify_web"
+                      ? t("import.importingOverlayHintWebApi")
+                      : t("import.importingOverlayHint")}
+                </p>
+              </div>
               {importOverlayKind === "file" && importFile ? (
                 <p
                   className="mt-1 max-w-full truncate px-2 text-xs font-medium text-primary"
@@ -1216,11 +1335,54 @@ export function DataExportOnboarding({
                   {importFile.name}
                 </p>
               ) : null}
-              <div
-                className="mt-4 h-1.5 w-full max-w-[220px] overflow-hidden rounded-full bg-border"
-                aria-hidden
-              >
-                <div className="h-full w-1/3 rounded-full bg-primary shadow-glow animate-onboarding-import-indeterminate" />
+              <div className="mt-2 w-full max-w-sm space-y-3">
+                <div
+                  className="h-2.5 w-full overflow-hidden rounded-full bg-border shadow-inner"
+                  role="progressbar"
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-valuenow={
+                    importProgress?.isDeterminate
+                      ? clampProgressPercent(importProgress.percent)
+                      : undefined
+                  }
+                  aria-label={t("import.progressAriaLabel")}
+                >
+                  {importProgress?.isDeterminate ? (
+                    <div
+                      className="h-full rounded-full bg-primary shadow-glow transition-[width] duration-300 ease-out"
+                      style={{ width: `${clampProgressPercent(importProgress.percent)}%` }}
+                    />
+                  ) : (
+                    <div className="h-full w-1/3 rounded-full bg-primary shadow-glow animate-onboarding-import-indeterminate" />
+                  )}
+                </div>
+                {importProgress ? (
+                  <div className="flex flex-col gap-1 text-xs leading-relaxed text-muted sm:flex-row sm:items-center sm:justify-between">
+                    <span className="font-semibold tabular-nums text-foreground">
+                      {importProgress.totalRows !== undefined &&
+                      importProgress.processedRows !== undefined
+                        ? t("import.progressWithRows", {
+                            percent: clampProgressPercent(importProgress.percent),
+                            processed: importProgress.processedRows.toLocaleString(),
+                            total: importProgress.totalRows.toLocaleString(),
+                          })
+                        : importProgress.isDeterminate
+                          ? t("import.progressPercent", {
+                              percent: clampProgressPercent(importProgress.percent),
+                            })
+                          : t("import.progressWorking")}
+                    </span>
+                    {importProgress.batchCount && importProgress.batchIndex ? (
+                      <span className="tabular-nums text-primary">
+                        {t("import.progressBatch", {
+                          current: importProgress.batchIndex,
+                          total: importProgress.batchCount,
+                        })}
+                      </span>
+                    ) : null}
+                  </div>
+                ) : null}
               </div>
             </div>
           ) : null}
@@ -1414,16 +1576,29 @@ export function DataExportOnboarding({
       ) : null}
 
       {phase === "finish" && (
-        <div className="space-y-8">
-          {importSummary ? (
+        importSummary ? (
             <OnboardingHeroShell>
-              <div className="max-w-3xl space-y-6">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent-emerald">
-                  {t("finishSuccessEyebrow")}
-                </p>
-                <DashboardHeroTitle icon={CheckCircle2} variant="onboarding">
-                  {t("finishTitle")}
-                </DashboardHeroTitle>
+              <div className="mx-auto max-w-2xl space-y-7 text-center">
+                <div
+                  className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-accent-emerald/[0.12] ring-1 ring-accent-emerald/30"
+                  aria-hidden
+                >
+                  <CheckCircle2 className="h-8 w-8 text-accent-emerald" strokeWidth={1.8} />
+                </div>
+                <div className="space-y-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent-emerald">
+                    {t("finishSuccessEyebrow")}
+                  </p>
+                  <DashboardHeroTitle icon={CheckCircle2} variant="onboarding">
+                    {t("finishSuccessTitle")}
+                  </DashboardHeroTitle>
+                  <p className="mx-auto max-w-xl text-base leading-relaxed text-muted sm:text-lg">
+                    {t("finishSuccessBody", {
+                      imported: importSummary.imported.toLocaleString(),
+                      skipped: importSummary.skippedDuplicates.toLocaleString(),
+                    })}
+                  </p>
+                </div>
                 <OnboardingFlowProgressBar
                   percent={flowProgressPercent}
                   variant="hero"
@@ -1435,24 +1610,62 @@ export function DataExportOnboarding({
                     skipped: importSummary.skippedDuplicates,
                   })}
                 </p>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="rounded-2xl border border-accent-emerald/30 bg-accent-emerald/[0.1] px-5 py-4 shadow-[inset_0_1px_0_0_rgb(255_255_255_/0.05)] backdrop-blur-sm dark:border-accent-emerald/35 dark:bg-accent-emerald/[0.12]">
-                    <p className="text-2xl font-bold tabular-nums tracking-tight text-foreground lg:text-4xl">
-                      {importSummary.imported.toLocaleString()}
-                    </p>
-                    <p className="mt-1 text-sm font-medium text-accent-emerald">{t("finishImportedLabel")}</p>
-                  </div>
-                  <div className="rounded-2xl border border-accent-cyan/30 bg-accent-cyan/[0.08] px-5 py-4 shadow-[inset_0_1px_0_0_rgb(255_255_255_/0.05)] backdrop-blur-sm dark:border-accent-indigo/30 dark:bg-accent-indigo/[0.1]">
-                    <p className="text-2xl font-bold tabular-nums tracking-tight text-foreground lg:text-4xl">
-                      {importSummary.skippedDuplicates.toLocaleString()}
-                    </p>
-                    <p className="mt-1 text-sm font-medium text-accent-indigo">{t("finishSkippedLabel")}</p>
-                  </div>
+                <ol className="mx-auto grid max-w-xl gap-3 text-left sm:grid-cols-3">
+                  {(["requested", "imported", "current"] as const).map((step, index) => (
+                    <li
+                      key={step}
+                      className={`rounded-2xl border px-4 py-4 shadow-inner ${
+                        step === "current"
+                          ? "border-primary/30 bg-primary/[0.08] ring-1 ring-primary/15"
+                          : "border-card-border bg-surface/70"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                            step === "current"
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-accent-emerald/[0.14] text-accent-emerald"
+                          }`}
+                          aria-hidden
+                        >
+                          {step === "current" ? index + 1 : <Check className="h-3.5 w-3.5" />}
+                        </span>
+                        <span className="text-sm font-semibold text-foreground">
+                          {t(`finishSuccessSteps.${step}.title`)}
+                        </span>
+                      </div>
+                      <p className="mt-2 text-xs leading-relaxed text-muted">
+                        {t(`finishSuccessSteps.${step}.body`)}
+                      </p>
+                    </li>
+                  ))}
+                </ol>
+                <div className="flex justify-center pt-2">
+                  <button
+                    type="button"
+                    className={`${welcomeContinueBtn} w-full disabled:pointer-events-none disabled:opacity-60 sm:w-auto`}
+                    onClick={() => void completeOnboarding("/dashboard/musical-profile")}
+                    disabled={isSubmitting}
+                  >
+                    <span>{isSubmitting ? t("finishing") : t("goToMusicalProfile")}</span>
+                    {!isSubmitting ? (
+                      <ArrowRight
+                        className="h-[1.125rem] w-[1.125rem] shrink-0 transition-transform duration-200 group-hover:translate-x-0.5"
+                        aria-hidden
+                      />
+                    ) : (
+                      <span
+                        className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-white/40 border-t-white"
+                        aria-hidden
+                      />
+                    )}
+                  </button>
                 </div>
-                <p className="text-base leading-relaxed text-muted sm:text-[1.05rem]">{t("finishNextHint")}</p>
               </div>
             </OnboardingHeroShell>
-          ) : (
+        ) : (
+        <div className="space-y-8">
             <OnboardingHeroShell>
               <div className="max-w-3xl space-y-6">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
@@ -1469,7 +1682,6 @@ export function DataExportOnboarding({
                 <p className="text-base leading-relaxed text-muted sm:text-lg">{t("finishBody")}</p>
               </div>
             </OnboardingHeroShell>
-          )}
 
           <div className={`${surfaceShellClass} space-y-6`}>
           {genreLlmAfterImport &&
@@ -1703,6 +1915,7 @@ export function DataExportOnboarding({
           </div>
           </div>
         </div>
+        )
       )}
     </div>
   );

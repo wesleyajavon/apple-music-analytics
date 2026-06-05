@@ -391,6 +391,19 @@
       "importing": "Importando…",
       "importingOverlayTitle": "Subiendo y procesando tu archivo…",
       "importingOverlayHint": "Los archivos grandes pueden tardar hasta un minuto. No cierres esta pestaña.",
+      "progressAriaLabel": "Progreso de la importación",
+      "progressPercent": "{percent}% completado",
+      "progressWithRows": "{percent}% completado · {processed}/{total} escuchas",
+      "progressWorking": "Procesando…",
+      "progressBatch": "Lote {current}/{total}",
+      "progressPhase": {
+        "checking": "Comprobando la conexión…",
+        "reading": "Leyendo el archivo localmente…",
+        "parsing": "Preparando tu historial de escucha…",
+        "validating": "Comprobando las escuchas reconocidas…",
+        "uploading": "Guardando escuchas en tu cuenta…",
+        "finalizing": "Finalizando tu perfil…"
+      },
       "skipImport": "Aún no tengo el archivo",
       "toastSuccess": "{count, plural, one {# escucha importada.} other {# escuchas importadas.}}",
       "importError": "La importación falló. Revisa el archivo e inténtalo de nuevo.",
@@ -412,6 +425,22 @@
     },
     "finishTitle": "Listo",
     "finishSuccessEyebrow": "Importación lista",
+    "finishSuccessTitle": "Tu historial de escucha está listo",
+    "finishSuccessBody": "Importamos {imported} escuchas en tu cuenta y omitimos {skipped} duplicados. Ya puedes descubrir tu perfil musical.",
+    "finishSuccessSteps": {
+      "requested": {
+        "title": "Datos solicitados",
+        "body": "Descargaste tu export oficial."
+      },
+      "imported": {
+        "title": "Importación lista",
+        "body": "Tu historial de escucha quedó guardado."
+      },
+      "current": {
+        "title": "Estás aquí",
+        "body": "Abre tu primera vista personalizada."
+      }
+    },
     "finishSkippedEyebrow": "Casi listo",
     "finishBody": "Puedes omitir este paso si el export aún no está listo: el panel sigue disponible y los gráficos se completarán cuando importes más adelante.",
     "finishAfterImport": "Se añadieron {imported} escuchas a tu perfil. Duplicados omitidos: {skipped}.",
@@ -420,6 +449,7 @@
     "finishNextHint": "Siguiente: resumen, tendencias de escucha y estadísticas estilo Replay. Podrás importar otro export cuando quieras desde el panel.",
     "finishPaletteCta": "Abrir Palette ({count, plural, one {# artista por mapear} other {# artistas por mapear}})",
     "goToDashboard": "Ir al panel",
+    "goToMusicalProfile": "Ver mi perfil musical",
     "finishing": "Guardando…",
     "skipForNow": "Omitir por ahora",
     "skipHint": "Podrás solicitar el export más tarde; no te bloqueamos.",

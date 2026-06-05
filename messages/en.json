@@ -391,6 +391,19 @@
       "importing": "Importing…",
       "importingOverlayTitle": "Uploading and processing your file…",
       "importingOverlayHint": "Large archives can take up to a minute. Please keep this tab open.",
+      "progressAriaLabel": "Import progress",
+      "progressPercent": "{percent}% complete",
+      "progressWithRows": "{percent}% complete · {processed}/{total} listens",
+      "progressWorking": "Working…",
+      "progressBatch": "Batch {current}/{total}",
+      "progressPhase": {
+        "checking": "Checking the connection…",
+        "reading": "Reading the file locally…",
+        "parsing": "Preparing your listening history…",
+        "validating": "Checking the parsed listens…",
+        "uploading": "Saving listens to your account…",
+        "finalizing": "Finalizing your profile…"
+      },
       "skipImport": "I don’t have the file yet",
       "toastSuccess": "{count, plural, one {# listen imported.} other {# listens imported.}}",
       "importError": "Import failed. Check the file and try again.",
@@ -412,6 +425,22 @@
     },
     "finishTitle": "You’re set",
     "finishSuccessEyebrow": "Import complete",
+    "finishSuccessTitle": "Your listening history is ready",
+    "finishSuccessBody": "We imported {imported} listens into your account and skipped {skipped} duplicates. You are now ready to discover your musical profile.",
+    "finishSuccessSteps": {
+      "requested": {
+        "title": "Data requested",
+        "body": "You downloaded your official export."
+      },
+      "imported": {
+        "title": "Import done",
+        "body": "Your listening history is saved."
+      },
+      "current": {
+        "title": "You are here",
+        "body": "Open your first personalized view."
+      }
+    },
     "finishSkippedEyebrow": "You’re almost there",
     "finishBody": "You can skip this step if your export is not ready yet — the dashboard stays available, and charts will fill in after you import later.",
     "finishAfterImport": "{imported} listens were added to your profile. Skipped duplicates: {skipped}.",
@@ -420,6 +449,7 @@
     "finishNextHint": "Next up: your overview, listening trends, and Replay-style stats. You can add another export anytime from the dashboard.",
     "finishPaletteCta": "Open Palette ({count, plural, one {# artist to map} other {# artists to map}})",
     "goToDashboard": "Go to dashboard",
+    "goToMusicalProfile": "View my musical profile",
     "finishing": "Saving…",
     "skipForNow": "Skip for now",
     "skipHint": "You can request your export later; we won’t keep blocking you.",

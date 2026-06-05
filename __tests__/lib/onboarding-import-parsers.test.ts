@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { parseOnboardingImportJsonBody } from "@/lib/services/listening/onboarding-import-json-body";
 import { parseSpotifyStreamingHistoryAudioJson } from "@/lib/services/listening/parse-spotify-streaming-history-json";
 import { parseApplePlayHistoryDailyTracksCsv } from "@/lib/services/listening/parse-apple-play-history-daily-csv";
+import { ONBOARDING_IMPORT_MAX_PARSED_ROWS } from "@/lib/services/listening/onboarding-import-constants";
 
 describe("parseSpotifyStreamingHistoryAudioJson", () => {
   it("parses valid audio rows with ts and ms_played", () => {
@@ -75,6 +76,10 @@ describe("parseApplePlayHistoryDailyTracksCsv", () => {
 });
 
 describe("parseOnboardingImportJsonBody", () => {
+  it("keeps the full onboarding import limit aligned with large Apple exports", () => {
+    expect(ONBOARDING_IMPORT_MAX_PARSED_ROWS).toBe(250_000);
+  });
+
   it("parses rows and batch metadata", () => {
     const parsed = parseOnboardingImportJsonBody({
       provider: "spotify",

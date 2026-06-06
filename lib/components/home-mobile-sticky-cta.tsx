@@ -21,7 +21,7 @@ export function HomeMobileStickyCta({ isAuthenticated }: HomeMobileStickyCtaProp
         {isAuthenticated ? (
           <Link
             href="/dashboard"
-            className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-brand-gradient px-4 text-sm font-semibold text-white shadow-brand-glow"
+            className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-brand-gradient px-4 text-sm font-semibold text-white shadow-brand-glow active:scale-[0.98]"
           >
             {t("goToDashboard")}
           </Link>
@@ -30,20 +30,20 @@ export function HomeMobileStickyCta({ isAuthenticated }: HomeMobileStickyCtaProp
             <div className="flex gap-2">
               <Link
                 href="/sign-up"
-                className="flex min-h-11 flex-1 items-center justify-center rounded-xl bg-brand-gradient px-4 text-sm font-semibold text-white shadow-brand-glow"
+                className="flex min-h-11 flex-1 items-center justify-center rounded-xl bg-brand-gradient px-4 text-sm font-semibold text-white shadow-brand-glow active:scale-[0.98]"
               >
                 {tAuth("signUp")}
               </Link>
               <Link
                 href="/sign-in"
-                className="flex min-h-11 shrink-0 items-center justify-center rounded-xl border border-card-border bg-card-surface px-4 text-sm font-semibold text-foreground"
+                className="flex min-h-11 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 px-4 text-sm font-semibold text-primary shadow-card active:scale-[0.98]"
               >
                 {tAuth("signIn")}
               </Link>
             </div>
             <Link
               href={`/dashboard/overview?userId=${DEFAULT_PUBLIC_PROFILE_USER_ID}`}
-              className="text-center text-xs font-semibold text-primary underline-offset-2 hover:underline"
+              className="flex min-h-10 items-center justify-center rounded-xl border border-card-border bg-card-surface px-4 text-center text-xs font-semibold text-foreground shadow-sm active:scale-[0.98]"
             >
               {t("accessDashboard")}
             </Link>

@@ -36,6 +36,7 @@ import { useDebouncedValue } from "@/lib/hooks/use-debounced-value";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
 import { formatOverviewDateRangeLabel } from "@/lib/utils/overview-date-range-label";
 import { ArrowLeft } from "lucide-react";
+import type { GenreTrendsDataPoint } from "@/lib/dto/genres";
 import {
   DASHBOARD_SPOTLIGHT_SHELL,
   DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY,
@@ -80,6 +81,20 @@ const TRENDS_HERO_SHELL_CLASS =
 
 const GROUP_BY_BAR_CLASS =
   "sticky top-[var(--dashboard-filter-height)] z-20 -mx-4 -mt-4 border-b border-white/10 bg-surface-glass/95 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:-mt-6 sm:px-6 lg:-mx-8 lg:-mt-8 lg:px-8";
+
+type GenreTrendSignal = {
+  genre: string;
+  color: string;
+  total: number;
+  first: number;
+  last: number;
+  delta: number;
+  peak: number;
+  peakDate: string;
+  activeBuckets: number;
+};
+
+type ChartTheme = (typeof DASHBOARD_CHART_THEME)[keyof typeof DASHBOARD_CHART_THEME];
 
 function useGenresListHref() {
   const searchParams = useSearchParams();
@@ -255,8 +270,507 @@ function GenreTrendsChartSkeleton() {
   );
 }
 
+function GenreTrendsMobileSkeleton() {
+  return (
+    <div className="space-y-4" aria-busy="true">
+      <div className="rounded-[1.75rem] border border-white/10 bg-gray-950 p-5 shadow-xl shadow-violet-500/10">
+        <div className="h-4 w-28 animate-shimmer rounded bg-white/15" />
+        <div className="mt-5 h-8 w-56 animate-shimmer rounded bg-white/20" />
+        <div className="mt-3 h-4 w-full animate-shimmer rounded bg-white/10" />
+        <div className="mt-5 h-24 animate-shimmer rounded-[1.35rem] bg-white/10" />
+      </div>
+      <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-1">
+        {[0, 1, 2].map((item) => (
+          <div key={item} className="h-24 min-w-[9.5rem] animate-shimmer rounded-2xl border border-card-border bg-card-surface" />
+        ))}
+      </div>
+      <div className="h-64 animate-shimmer rounded-[1.5rem] border border-card-border bg-surface/70" />
+    </div>
+  );
+}
+
+function GenreTrendsMobileEmptyHero({
+  genresHref,
+  badgeLabel,
+}: {
+  genresHref: string;
+  badgeLabel: string;
+}) {
+  const t = useTranslations("genreTrends");
+
+  return (
+    <div className="overflow-hidden rounded-[1.75rem] border border-white/10 bg-gray-950 p-5 text-white shadow-xl shadow-violet-500/10">
+      <div className="flex items-center justify-between gap-3">
+        <p className="font-mono text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-violet-200">{t("mobile.eyebrow")}</p>
+        <span className="shrink-0 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[0.68rem] font-semibold text-white/75">{badgeLabel}</span>
+      </div>
+      <h1 className="mt-4 text-3xl font-semibold tracking-[-0.055em] text-white">{t("mobile.heroTitle")}</h1>
+      <p className="mt-3 text-sm leading-6 text-white/68">{t("mobile.heroSubtitle")}</p>
+      <Link
+        href={genresHref}
+        className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-white px-4 text-sm font-bold text-gray-950 shadow-lg shadow-black/20"
+      >
+        <ArrowLeft className="h-4 w-4" aria-hidden />
+        {t("backToGenres")}
+      </Link>
+    </div>
+  );
+}
+
+function GenreTrendsMobileExperience({
+  genresHref,
+  badgeLabel,
+  period,
+  selectedGenres,
+  availableGenres,
+  visibleGenres,
+  visibleGenreStart,
+  visibleGenreEnd,
+  genreFilterPage,
+  genreFilterPageCount,
+  chartData,
+  isLoading,
+  isFetching,
+  selectionPending,
+  chartTheme,
+  toggleGenre,
+  selectAll,
+  selectNone,
+  setGenreFilterPage,
+  displayAiCommentary,
+  hasDisplayableAiParagraph,
+  showAiSkeleton,
+  activeAiError,
+  aiUnavailable,
+  aiRefreshing,
+  canShowAiTabs,
+  summaryVersion,
+  setSummaryVersion,
+}: {
+  genresHref: string;
+  badgeLabel: string;
+  period: PeriodType;
+  selectedGenres: string[];
+  availableGenres: string[];
+  visibleGenres: string[];
+  visibleGenreStart: number;
+  visibleGenreEnd: number;
+  genreFilterPage: number;
+  genreFilterPageCount: number;
+  chartData: GenreTrendsDataPoint[];
+  isLoading: boolean;
+  isFetching: boolean;
+  selectionPending: boolean;
+  chartTheme: ChartTheme;
+  toggleGenre: (genre: string) => void;
+  selectAll: () => void;
+  selectNone: () => void;
+  setGenreFilterPage: (updater: (page: number) => number) => void;
+  displayAiCommentary: string;
+  hasDisplayableAiParagraph: boolean;
+  showAiSkeleton: boolean;
+  activeAiError: Error | null;
+  aiUnavailable: boolean;
+  aiRefreshing: boolean;
+  canShowAiTabs: boolean;
+  summaryVersion: "light" | "technical";
+  setSummaryVersion: (version: "light" | "technical") => void;
+}) {
+  const locale = useLocale();
+  const t = useTranslations("genreTrends");
+  const tPeriod = useTranslations("components.periodSelector");
+  const TrendsTooltip = useMemo(() => createTrendsTooltip(t, locale), [t, locale]);
+  const numberFormatter = useMemo(() => new Intl.NumberFormat(locale), [locale]);
+  const signals = useMemo(
+    () => buildGenreTrendSignals({ chartData, selectedGenres, availableGenres }),
+    [availableGenres, chartData, selectedGenres]
+  );
+  const visibleSignals = signals.slice(0, 5);
+  const chartGenres = visibleSignals.map((signal) => signal.genre);
+  const leadSignal = signals[0];
+  const movementSignal = signals.reduce<GenreTrendSignal | undefined>((best, signal) => {
+    if (!best) return signal;
+    return Math.abs(signal.delta) > Math.abs(best.delta) ? signal : best;
+  }, undefined);
+  const remainingSelectedCount = Math.max(0, selectedGenres.length - visibleSignals.length);
+  const isUpdating = isFetching || selectionPending;
+
+  if (isLoading) return <GenreTrendsMobileSkeleton />;
+
+  return (
+    <div className="space-y-5">
+      <section className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-gray-950 p-5 text-white shadow-xl shadow-violet-500/10">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.24),transparent_34%),radial-gradient(circle_at_88%_10%,rgba(6,182,212,0.22),transparent_34%),linear-gradient(150deg,rgba(3,7,18,0.98),rgba(30,27,75,0.84)_55%,rgba(8,47,73,0.6))]" aria-hidden />
+        <div className="relative">
+          <div className="flex items-center justify-between gap-3">
+            <p className="font-mono text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-violet-200">{t("mobile.eyebrow")}</p>
+            <span className="shrink-0 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[0.68rem] font-semibold text-white/75">{badgeLabel}</span>
+          </div>
+          <h1 className="mt-4 text-3xl font-semibold tracking-[-0.055em] text-white">{t("mobile.heroTitle")}</h1>
+          <p className="mt-3 text-sm leading-6 text-white/68">{t("mobile.heroSubtitle")}</p>
+
+          <div className="mt-5 rounded-[1.35rem] border border-white/12 bg-white/10 p-4 backdrop-blur">
+            <p className="text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-cyan-100/80">{t("mobile.topGenreLabel")}</p>
+            {leadSignal ? (
+              <>
+                <p className="mt-2 line-clamp-2 text-2xl font-semibold tracking-[-0.045em] text-white">{leadSignal.genre}</p>
+                <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold text-white/78">
+                  <span className="rounded-full bg-white/10 px-3 py-1.5">{t("mobile.listenCount", { count: numberFormatter.format(leadSignal.total) })}</span>
+                  <span className="rounded-full bg-white/10 px-3 py-1.5">
+                    {leadSignal.peak > 0
+                      ? t("mobile.peakLine", { count: numberFormatter.format(leadSignal.peak), date: leadSignal.peakDate })
+                      : t("mobile.noPeak")}
+                  </span>
+                </div>
+              </>
+            ) : (
+              <p className="mt-2 text-sm leading-6 text-white/70">{t("mobile.topGenreFallback")}</p>
+            )}
+          </div>
+
+          <Link
+            href={genresHref}
+            className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-white px-4 text-sm font-bold text-gray-950 shadow-lg shadow-black/20"
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden />
+            {t("backToGenres")}
+          </Link>
+        </div>
+      </section>
+
+      <section aria-label={t("mobile.signalsLabel")} className="-mx-4 overflow-x-auto px-4 pb-1">
+        <div className="flex gap-3">
+          <div className="min-w-[9rem] rounded-2xl border border-card-border bg-card-surface p-4 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">{t("mobile.periodSignal")}</p>
+            <p className="mt-2 text-lg font-semibold text-foreground">{tPeriod(periodToLabelKey(period))}</p>
+          </div>
+          <div className="min-w-[9rem] rounded-2xl border border-card-border bg-card-surface p-4 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">{t("mobile.selectedSignal")}</p>
+            <p className="mt-2 text-lg font-semibold text-foreground">{selectedGenres.length}</p>
+          </div>
+          <div className="min-w-[9rem] rounded-2xl border border-card-border bg-card-surface p-4 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">{t("mobile.bucketsSignal")}</p>
+            <p className="mt-2 text-lg font-semibold text-foreground">{chartData.length}</p>
+          </div>
+          <div className="min-w-[10rem] rounded-2xl border border-card-border bg-card-surface p-4 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">{t("mobile.moverSignal")}</p>
+            <p className="mt-2 truncate text-lg font-semibold text-foreground">{movementSignal?.genre ?? t("mobile.noMover")}</p>
+            {movementSignal && (
+              <p className="mt-1 text-xs font-medium text-muted">
+                {movementSignal.delta > 0
+                  ? t("mobile.deltaUp", { count: numberFormatter.format(movementSignal.delta) })
+                  : movementSignal.delta < 0
+                    ? t("mobile.deltaDown", { count: numberFormatter.format(Math.abs(movementSignal.delta)) })
+                    : t("mobile.deltaFlat")}
+              </p>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <section className="rounded-[1.5rem] border border-card-border bg-card-surface p-4 shadow-sm">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-semibold tracking-[-0.035em] text-foreground">{t("mobile.quickFocusTitle")}</h2>
+            <p className="mt-1 text-sm leading-6 text-muted">{t("mobile.quickFocusDescription")}</p>
+          </div>
+          {remainingSelectedCount > 0 && (
+            <span className="shrink-0 rounded-full border border-card-border bg-surface px-3 py-1 text-xs font-semibold text-muted">
+              {t("mobile.moreSelected", { count: remainingSelectedCount })}
+            </span>
+          )}
+        </div>
+        <div className="mt-4 space-y-2">
+          {visibleSignals.length === 0 ? (
+            <p className="rounded-2xl border border-dashed border-card-border px-4 py-5 text-sm text-muted">{t("selectAtLeastOne")}</p>
+          ) : (
+            visibleSignals.map((signal, index) => (
+              <div key={signal.genre} className="flex min-h-11 items-center gap-3 rounded-2xl border border-card-border bg-surface/70 px-3 py-2">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white" style={{ backgroundColor: signal.color }}>
+                  {index + 1}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold text-foreground">{signal.genre}</p>
+                  <p className="text-xs text-muted">
+                    {t("mobile.listenCount", { count: numberFormatter.format(signal.total) })} · {t("mobile.activeBuckets", { count: numberFormatter.format(signal.activeBuckets) })}
+                  </p>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </section>
+
+      <section className="rounded-[1.5rem] border border-card-border bg-card-surface p-4 shadow-sm">
+        <div className="mb-4 flex items-start justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{t("sections.chart.eyebrow")}</p>
+            <h2 className="mt-1 text-lg font-semibold tracking-[-0.035em] text-foreground">{t("mobile.chartTitle")}</h2>
+            <p className="mt-1 text-sm leading-6 text-muted">{t("mobile.chartSubtitle")}</p>
+          </div>
+          {selectedGenres.length > chartGenres.length && (
+            <span className="shrink-0 rounded-full border border-card-border bg-surface px-3 py-1 text-xs font-semibold text-muted">
+              {t("mobile.chartLimited", { count: chartGenres.length })}
+            </span>
+          )}
+        </div>
+
+        {selectedGenres.length === 0 ? (
+          <div className="rounded-[1.25rem] border border-dashed border-card-border px-4 py-8 text-center text-sm text-muted">{t("selectAtLeastOne")}</div>
+        ) : (
+          <div className="relative min-h-[260px] rounded-[1.25rem] border border-card-border bg-surface/70 p-2" aria-busy={isUpdating}>
+            {isUpdating && (
+              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 rounded-[1.25rem] bg-white/90 px-4 text-center backdrop-blur-[2px] dark:bg-slate-950/80">
+                <span className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-violet-600 border-t-transparent dark:border-violet-400" aria-hidden />
+                <span className="text-sm font-medium text-slate-900 dark:text-white">{selectionPending ? t("selectionPending") : t("chartUpdating")}</span>
+              </div>
+            )}
+            <div className={`transition-opacity duration-200 ${isUpdating ? "pointer-events-none opacity-40" : ""}`}>
+              <ChartResponsiveContainer token="tracksMain">
+                <RechartsLineChart data={chartData} margin={{ top: 12, right: 10, left: -18, bottom: 18 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} />
+                  <XAxis dataKey="formattedDate" tick={{ fill: chartTheme.tick, fontSize: 10 }} stroke={chartTheme.axisStroke} minTickGap={18} />
+                  <YAxis tick={{ fill: chartTheme.tick, fontSize: 10 }} stroke={chartTheme.axisStroke} width={34} />
+                  <Tooltip content={<TrendsTooltip />} />
+                  {chartGenres.map((genre) => {
+                    const signal = visibleSignals.find((item) => item.genre === genre);
+                    return (
+                      <Line
+                        key={genre}
+                        type="monotone"
+                        dataKey={genre}
+                        name={genre}
+                        stroke={signal?.color ?? getColor(0)}
+                        strokeWidth={2.5}
+                        dot={false}
+                        activeDot={{ r: 5 }}
+                        animationDuration={500}
+                        animationEasing="ease-in-out"
+                      />
+                    );
+                  })}
+                </RechartsLineChart>
+              </ChartResponsiveContainer>
+            </div>
+          </div>
+        )}
+      </section>
+
+      {(showAiSkeleton || activeAiError || aiUnavailable || hasDisplayableAiParagraph) && (
+        <details className="group rounded-[1.5rem] border border-card-border bg-card-surface shadow-sm" aria-busy={aiRefreshing}>
+          <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-left [&::-webkit-details-marker]:hidden">
+            <span>
+              <span className="block text-sm font-semibold text-foreground">{t("mobile.insightsTitle")}</span>
+              <span className="mt-0.5 block text-xs leading-5 text-muted">{t("mobile.insightsDescription")}</span>
+            </span>
+            <span className="rounded-full border border-card-border bg-surface px-3 py-1 text-xs font-semibold text-muted transition group-open:bg-primary group-open:text-primary-foreground">
+              {t("mobile.openSummary")}
+            </span>
+          </summary>
+          <div className="border-t border-card-border p-4">
+            {canShowAiTabs && (
+              <div className="mb-4 flex rounded-xl border border-card-border bg-surface p-1" role="tablist" aria-label={t("aiExplanation")}>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={summaryVersion === "light"}
+                  onClick={() => setSummaryVersion("light")}
+                  className={`min-h-11 flex-1 rounded-lg px-3 text-sm font-semibold transition-colors ${
+                    summaryVersion === "light"
+                      ? "bg-card-surface text-foreground shadow-sm"
+                      : "text-muted hover:text-foreground"
+                  }`}
+                >
+                  {t("summaryVersionLight")}
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={summaryVersion === "technical"}
+                  onClick={() => setSummaryVersion("technical")}
+                  className={`min-h-11 flex-1 rounded-lg px-3 text-sm font-semibold transition-colors ${
+                    summaryVersion === "technical"
+                      ? "bg-card-surface text-foreground shadow-sm"
+                      : "text-muted hover:text-foreground"
+                  }`}
+                >
+                  {t("summaryVersionTechnical")}
+                </button>
+              </div>
+            )}
+            {showAiSkeleton ? (
+              <div className="space-y-3 animate-pulse" aria-busy="true">
+                <div className="h-4 w-full rounded bg-slate-200/80 dark:bg-white/10" />
+                <div className="h-4 w-11/12 rounded bg-slate-200/80 dark:bg-white/10" />
+                <div className="h-4 w-4/5 rounded bg-slate-200/80 dark:bg-white/10" />
+              </div>
+            ) : activeAiError ? (
+              isGroqDailyQuotaError(activeAiError) ? (
+                <GroqQuotaNotice error={activeAiError} />
+              ) : (
+                <p className="text-sm text-red-600 dark:text-red-300" role="alert">
+                  {activeAiError.message}
+                </p>
+              )
+            ) : aiUnavailable ? (
+              <p className="text-sm text-slate-500 dark:text-slate-400">{t("aiUnavailable")}</p>
+            ) : hasDisplayableAiParagraph ? (
+              <p className={`whitespace-pre-line text-sm leading-6 text-slate-700 transition-opacity duration-200 dark:text-slate-200 ${aiRefreshing ? "opacity-60" : ""}`}>
+                {displayAiCommentary}
+              </p>
+            ) : null}
+          </div>
+        </details>
+      )}
+
+      <details className="group rounded-[1.5rem] border border-card-border bg-card-surface shadow-sm">
+        <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-left [&::-webkit-details-marker]:hidden">
+          <span>
+            <span className="block text-sm font-semibold text-foreground">{t("mobile.editTitle")}</span>
+            <span className="mt-0.5 block text-xs leading-5 text-muted">{t("mobile.editDescription")}</span>
+          </span>
+          <span className="rounded-full border border-card-border bg-surface px-3 py-1 text-xs font-semibold text-muted transition group-open:bg-primary group-open:text-primary-foreground">
+            {t("mobile.editSummary")}
+          </span>
+        </summary>
+        <div className="border-t border-card-border p-4">
+          <div className="mb-4 flex gap-2">
+            <button
+              type="button"
+              onClick={selectAll}
+              className="min-h-11 flex-1 rounded-2xl border border-violet-200/80 bg-white px-4 text-sm font-semibold text-violet-950 shadow-sm transition-colors hover:bg-violet-50/90 dark:border-violet-400/35 dark:bg-violet-500/15 dark:text-violet-100 dark:shadow-none dark:hover:bg-violet-400/25"
+            >
+              {t("all")}
+            </button>
+            <button
+              type="button"
+              onClick={selectNone}
+              className="min-h-11 flex-1 rounded-2xl border border-card-border bg-surface px-4 text-sm font-semibold text-foreground transition-colors hover:bg-surface-glass"
+            >
+              {t("none")}
+            </button>
+          </div>
+
+          {availableGenres.length > GENRE_FILTER_PAGE_SIZE && (
+            <div className="mb-4 rounded-2xl border border-card-border bg-surface/70 p-3">
+              <p className="text-xs text-muted">
+                {t("paginationSummary", {
+                  start: visibleGenreStart + 1,
+                  end: visibleGenreEnd,
+                  total: availableGenres.length,
+                })}{" "}
+                · {t("paginationPage", { page: genreFilterPage + 1, totalPages: genreFilterPageCount })}
+              </p>
+              <div className="mt-3 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setGenreFilterPage((page) => Math.max(0, page - 1))}
+                  disabled={genreFilterPage === 0}
+                  className="min-h-11 flex-1 rounded-2xl border border-card-border bg-card-surface px-4 text-sm font-semibold text-foreground transition-colors hover:bg-surface-glass disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {t("paginationPrevious")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setGenreFilterPage((page) => Math.min(genreFilterPageCount - 1, page + 1))}
+                  disabled={genreFilterPage >= genreFilterPageCount - 1}
+                  className="min-h-11 flex-1 rounded-2xl border border-card-border bg-card-surface px-4 text-sm font-semibold text-foreground transition-colors hover:bg-surface-glass disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {t("paginationNext")}
+                </button>
+              </div>
+            </div>
+          )}
+
+          <div className="flex max-h-[min(48vh,24rem)] flex-wrap content-start gap-2 overflow-y-auto rounded-2xl border border-card-border bg-surface/70 p-2">
+            {visibleGenres.map((genre) => {
+              const selected = selectedGenres.includes(genre);
+              const disabled = !selected && selectedGenres.length >= MAX_SERIES_GENRES;
+              const idx = availableGenres.indexOf(genre);
+              return (
+                <label
+                  key={genre}
+                  className={`inline-flex min-h-11 items-center gap-2 rounded-2xl border px-3 text-sm font-semibold transition-colors ${
+                    selected
+                      ? "border-violet-400/65 bg-violet-100 text-violet-950 shadow-sm dark:border-violet-400/55 dark:bg-slate-950 dark:text-violet-100 dark:shadow-none"
+                      : "border-card-border bg-card-surface text-foreground hover:bg-surface-glass"
+                  } ${disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selected}
+                    disabled={disabled}
+                    onChange={() => toggleGenre(genre)}
+                    className="rounded border-slate-300 bg-violet-50 text-violet-600 accent-violet-600 focus:ring-violet-500 disabled:opacity-40 dark:border-white/25 dark:bg-slate-900 dark:accent-violet-400"
+                  />
+                  <span className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: selected ? getColor(idx) : "transparent", border: selected ? "none" : "1px solid #9ca3af" }} />
+                  <span>{genre}</span>
+                </label>
+              );
+            })}
+          </div>
+        </div>
+      </details>
+    </div>
+  );
+}
+
 function getColor(index: number): string {
   return COLORS[index % COLORS.length];
+}
+
+function getNumericTrendValue(point: GenreTrendsDataPoint, genre: string): number {
+  const value = point[genre];
+  if (typeof value === "number") return value;
+  if (typeof value === "string") return Number(value) || 0;
+  return 0;
+}
+
+function buildGenreTrendSignals({
+  chartData,
+  selectedGenres,
+  availableGenres,
+}: {
+  chartData: GenreTrendsDataPoint[];
+  selectedGenres: string[];
+  availableGenres: string[];
+}): GenreTrendSignal[] {
+  return selectedGenres
+    .map((genre) => {
+      let total = 0;
+      let peak = 0;
+      let peakDate = "";
+      let activeBuckets = 0;
+
+      chartData.forEach((point) => {
+        const value = getNumericTrendValue(point, genre);
+        total += value;
+        if (value > 0) activeBuckets += 1;
+        if (value > peak) {
+          peak = value;
+          peakDate = String(point.formattedDate || point.date || "");
+        }
+      });
+
+      const first = chartData[0] ? getNumericTrendValue(chartData[0], genre) : 0;
+      const last = chartData[chartData.length - 1]
+        ? getNumericTrendValue(chartData[chartData.length - 1], genre)
+        : 0;
+      const genreIndex = Math.max(0, availableGenres.indexOf(genre));
+
+      return {
+        genre,
+        color: getColor(genreIndex),
+        total,
+        first,
+        last,
+        delta: last - first,
+        peak,
+        peakDate,
+        activeBuckets,
+      };
+    })
+    .sort((a, b) => b.total - a.total);
 }
 
 function genresEqualSorted(a: string[], b: string[]): boolean {
@@ -520,7 +1034,16 @@ function TrendsContent() {
         <div className={GROUP_BY_BAR_CLASS}>
           <PeriodSelector defaultPeriod="month" value={period} />
         </div>
-        <div className="mt-6 space-y-12">
+        <div className="mt-5 space-y-6 lg:hidden">
+          <GenreTrendsMobileEmptyHero genresHref={genresHref} badgeLabel={badgeLabel} />
+          <ErrorState
+            variant="startup"
+            error={error}
+            message={t("errorLoading")}
+            onRetry={() => refetch()}
+          />
+        </div>
+        <div className="mt-6 hidden space-y-12 lg:block">
           <GenreTrendsHeroFrame
             genresHref={genresHref}
             subtitleKey="subtitleExtended"
@@ -544,7 +1067,16 @@ function TrendsContent() {
         <div className={GROUP_BY_BAR_CLASS}>
           <PeriodSelector defaultPeriod="month" value={period} />
         </div>
-        <div className="mt-6 space-y-12">
+        <div className="mt-5 space-y-6 lg:hidden">
+          <GenreTrendsMobileEmptyHero genresHref={genresHref} badgeLabel={badgeLabel} />
+          <EmptyState
+            variant="startup"
+            {...emptyStatePresets.changeDates(pathname)}
+            message={t("noGenreData")}
+            description={t("changeDatesDescription")}
+          />
+        </div>
+        <div className="mt-6 hidden space-y-12 lg:block">
           <GenreTrendsHeroFrame
             genresHref={genresHref}
             subtitleKey="subtitleExtended"
@@ -568,7 +1100,40 @@ function TrendsContent() {
         <PeriodSelector defaultPeriod="month" value={period} />
       </div>
 
-      <div className="mt-6 space-y-12">
+      <div className="mt-5 lg:hidden">
+        <GenreTrendsMobileExperience
+          genresHref={genresHref}
+          badgeLabel={badgeLabel}
+          period={period}
+          selectedGenres={selectedGenres}
+          availableGenres={availableGenres}
+          visibleGenres={visibleGenres}
+          visibleGenreStart={visibleGenreStart}
+          visibleGenreEnd={visibleGenreEnd}
+          genreFilterPage={genreFilterPage}
+          genreFilterPageCount={genreFilterPageCount}
+          chartData={chartData}
+          isLoading={isLoading}
+          isFetching={chartFetching}
+          selectionPending={selectionPending}
+          chartTheme={chartTheme}
+          toggleGenre={toggleGenre}
+          selectAll={selectAll}
+          selectNone={selectNone}
+          setGenreFilterPage={setGenreFilterPage}
+          displayAiCommentary={displayAiCommentary}
+          hasDisplayableAiParagraph={hasDisplayableAiParagraph}
+          showAiSkeleton={showAiSkeleton}
+          activeAiError={activeAiError}
+          aiUnavailable={Boolean(aiCommentary?.aiUnavailable)}
+          aiRefreshing={aiRefreshing}
+          canShowAiTabs={Boolean(aiCommentary?.commentaryLight || aiCommentary?.commentary)}
+          summaryVersion={summaryVersion}
+          setSummaryVersion={setSummaryVersion}
+        />
+      </div>
+
+      <div className="mt-6 hidden space-y-12 lg:block">
         <GenreTrendsHeroFrame
           genresHref={genresHref}
           subtitleKey="subtitleExtended"
@@ -977,7 +1542,10 @@ function GenreTrendsFallback() {
       <div className={GROUP_BY_BAR_CLASS}>
         <div className="h-10 w-64 animate-pulse rounded-xl border border-white/10 bg-white/10" />
       </div>
-      <div className="mt-6 space-y-12">
+      <div className="mt-5 lg:hidden">
+        <GenreTrendsMobileSkeleton />
+      </div>
+      <div className="mt-6 hidden space-y-12 lg:block">
         <GenreTrendsHeroFrame
           genresHref={genresHref}
           subtitleKey="subtitle"

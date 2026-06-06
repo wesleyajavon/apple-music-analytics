@@ -685,6 +685,40 @@
         "title": "Ajoutez du contexte aux patterns.",
         "description": "Les résumés AI et l'intensité calendrier aident à expliquer quand et pourquoi votre écoute change."
       }
+    },
+    "mobile": {
+      "heroEyebrow": "Écoute",
+      "askAgentCta": "Interroger Soundprint",
+      "comparisonHint": "Comparé à la période précédente équivalente lorsque disponible.",
+      "vsShort": "vs préc.",
+      "primaryInsight": {
+        "topTrackEyebrow": "Votre signal le plus fort",
+        "topTrackBody": "C’est le titre qui vous ramène le plus sur cette fenêtre, porté par {artist}.",
+        "topArtistEyebrow": "L’ancre de votre rotation",
+        "topArtistBody": "Cet artiste pèse le plus dans votre écoute actuelle.",
+        "libraryEyebrow": "La forme de votre écoute",
+        "libraryBody": "La vue commence par le volume, la variété et les patterns qui les expliquent."
+      },
+      "momentum": {
+        "eyebrow": "Momentum",
+        "title": "Comment votre écoute a bougé",
+        "total": "Écoutes tracées",
+        "peak": "Mois de pic"
+      },
+      "disclosures": {
+        "leaders": {
+          "title": "Signaux principaux",
+          "description": "Trois classements rapides pour titres, artistes et genres."
+        },
+        "taste": {
+          "title": "Profil de goût",
+          "description": "Ouvrez le profil complet seulement quand vous voulez plus de contexte."
+        },
+        "context": {
+          "title": "Contexte IA et calendrier",
+          "description": "Les explications secondaires restent à un toucher sur mobile."
+        }
+      }
     }
   },
   "timeline": {
@@ -873,7 +907,25 @@
     "paginationPrevious": "Précédent",
     "paginationNext": "Suivant",
     "paginationPage": "Page {page} / {totalPages}",
-    "pageSizeLabel": "Lignes"
+    "pageSizeLabel": "Lignes",
+    "mobile": {
+      "eyebrow": "Récit des genres",
+      "title": "Votre son commence ici",
+      "heroInsight": "{genre} mène cette période avec {percentage}% de vos écoutes : la page commence donc par ce signal avant d’ouvrir la répartition complète.",
+      "topGenreLabel": "Genre n°1",
+      "topThreeLabel": "Top 3",
+      "shareLabel": "Part",
+      "primarySignal": "Signal principal",
+      "topLanesTitle": "Les couloirs qui portent vos goûts",
+      "artistContext": "Artistes derrière",
+      "noArtistContext": "Le contexte artiste n’est pas encore disponible pour ce genre.",
+      "supportingMetrics": "Signaux d’appui",
+      "distributionTitle": "La répartition compacte",
+      "distributionDescription": "{total} écoutes sont regroupées par genre. Les cinq premières restent visibles ; le reste attend dans le détail.",
+      "showMoreGenres": "Voir les genres 6 à 10",
+      "accuracySummary": "À propos de la précision des genres",
+      "loading": "Chargement"
+    }
   },
   "genreTrends": {
     "title": "Tendances de genres",
@@ -943,7 +995,39 @@
     "groqUnavailableInViewedProfile": "La classification Groq est disponible uniquement sur votre propre dashboard, pas lorsque vous consultez un autre profil ou des données de démo.",
     "groqSessionRunningHint": "Une session de classification Groq est déjà en cours.",
     "groqProgressAnchor": "Voir le bandeau de progression",
-    "groqStartNoUnknown": "Toutes les pistes que vous avez écoutées ont déjà un genre dans vos données ; il ne reste rien à classifier ici avec Groq."
+    "groqStartNoUnknown": "Toutes les pistes que vous avez écoutées ont déjà un genre dans vos données ; il ne reste rien à classifier ici avec Groq.",
+    "mobile": {
+      "eyebrow": "Récit genres",
+      "heroTitle": "Quel son mène cette période ?",
+      "heroSubtitle": "Commencez par le genre qui porte vos écoutes, puis parcourez les changements qui méritent attention.",
+      "topGenreLabel": "Genre dominant",
+      "topGenreFallback": "Sélectionnez au moins un genre pour révéler le signal principal de cette période.",
+      "listenCount": "{count} écoutes",
+      "peakLine": "Pic {count} le {date}",
+      "noPeak": "Aucun pic pour l’instant",
+      "signalsLabel": "Signaux de tendances genres",
+      "periodSignal": "Regroupé par",
+      "selectedSignal": "Sélectionnés",
+      "bucketsSignal": "Périodes",
+      "moverSignal": "Plus gros mouvement",
+      "noMover": "Aucun mouvement",
+      "deltaUp": "+{count} du début à la fin",
+      "deltaDown": "-{count} du début à la fin",
+      "deltaFlat": "Stable du début à la fin",
+      "quickFocusTitle": "Les genres à suivre",
+      "quickFocusDescription": "Les cinq premiers signaux gardent la lecture mobile ciblée ; modifiez la sélection complète plus bas.",
+      "moreSelected": "+{count} autres",
+      "activeBuckets": "{count} périodes actives",
+      "chartTitle": "Trajectoire mobile",
+      "chartSubtitle": "Un graphique simplifié suit les genres sélectionnés les plus forts, avec les détails accessibles au toucher.",
+      "chartLimited": "Top {count}",
+      "insightsTitle": "Lire le motif",
+      "insightsDescription": "Ouvrez la narration IA quand vous voulez l’interprétation détaillée.",
+      "openSummary": "Ouvrir",
+      "editTitle": "Modifier les genres",
+      "editDescription": "Changez les courbes sélectionnées sans densifier le récit mobile principal.",
+      "editSummary": "Modifier"
+    }
   },
   "palette": {
     "title": "Palette",
@@ -984,7 +1068,27 @@
     "doneHintArtists": "Vous avez traité toute la file (artistes).",
     "doneHintTracks": "Vous avez traité toute la file (titres).",
     "suggestionsTitle": "Genres suggérés",
-    "suggestionsHint": "Les suggestions sont uniquement des aides et ne sont jamais appliquées automatiquement."
+    "suggestionsHint": "Les suggestions sont uniquement des aides et ne sont jamais appliquées automatiquement.",
+    "mobile": {
+      "eyebrow": "File Palette",
+      "heroTitle": "Corrigez d’abord le genre qui a le plus d’impact.",
+      "heroSubtitleArtists": "Commencez par l’artiste qui pèse le plus dans vos écoutes Unknown, puis avancez décision par décision.",
+      "heroSubtitleTracks": "Commencez par le titre qui pèse le plus dans vos écoutes Unknown, puis gardez une file facile à traiter sur mobile.",
+      "nowFixing": "À corriger",
+      "nextBestMatch": "Élément le plus impactant de cette file",
+      "impactSignal": "Impact",
+      "remainingSignal": "Restants",
+      "mappedSignal": "Mappés",
+      "suggestionsSignal": "Aides",
+      "decisionEyebrow": "Prochaine décision",
+      "decisionTitle": "Choisir le genre à appliquer",
+      "decisionSubtitle": "Utilisez une suggestion, choisissez un genre existant, ou ouvrez le champ libre seulement si nécessaire.",
+      "highImpact": "Fort impact",
+      "pickGenre": "Choisir dans vos genres",
+      "customGenreTitle": "Besoin d’un genre libre ?",
+      "progressDetailsTitle": "Détails de progression",
+      "whyDetailsTitle": "Pourquoi cette page existe"
+    }
   },
   "artistTrends": {
     "title": "Tendances d'artistes",
@@ -1045,7 +1149,39 @@
     "aiEmpty": "Aucun résumé pour cette sélection.",
     "chartUpdating": "Mise à jour du graphique…",
     "selectionPending": "Application de la sélection…",
-    "aiUpdating": "Mise à jour du résumé…"
+    "aiUpdating": "Mise à jour du résumé…",
+    "mobile": {
+      "eyebrow": "Récit artistes",
+      "heroTitle": "Qui porte cette fenêtre d’écoute ?",
+      "heroSubtitle": "Commencez par l’artiste qui structure la période, puis parcourez les signaux avant d’ouvrir la comparaison complète.",
+      "topArtistLabel": "Le plus présent",
+      "topArtistFallback": "Sélectionnez des artistes pour faire ressortir le leader de cette période.",
+      "listenCount": "{count} écoutes",
+      "peakLine": "Pic {count} · {date}",
+      "noPeak": "Pas encore de pic",
+      "signalsLabel": "Signaux des tendances artistes",
+      "periodSignal": "Cadence",
+      "selectedSignal": "Sélection",
+      "bucketsSignal": "Points",
+      "riserSignal": "Plus fort mouvement",
+      "noRiser": "Stable",
+      "deltaUp": "+{count} depuis le début",
+      "deltaDown": "-{count} depuis le début",
+      "deltaFlat": "Aucun changement",
+      "quickFocusTitle": "Focus actuel",
+      "quickFocusDescription": "Sur mobile, la première lecture reste limitée aux artistes sélectionnés les plus forts pour garder une histoire lisible.",
+      "moreSelected": "+{count} autres",
+      "activeBuckets": "{count} points actifs",
+      "aiTitle": "Lire le mouvement",
+      "aiDescription": "Ouvrez le résumé IA après les premiers signaux.",
+      "readSummary": "Lire",
+      "chartTitle": "Forme des lignes clés",
+      "chartSubtitle": "Le graphique mobile affiche jusqu’à cinq artistes sélectionnés ; ajustez la comparaison plus bas pour le reste.",
+      "chartLimited": "5 sur {count}",
+      "editTitle": "Ajuster la comparaison",
+      "editDescription": "Cherchez, ajoutez ou retirez des artistes. Le récit du dessus se met à jour avec votre sélection.",
+      "editSummary": "Modifier"
+    }
   },
   "artists": {
     "title": "Artistes",
@@ -1073,6 +1209,33 @@
         "title": "Classement détaillé",
         "description": "Dépliez pour les dates, le nombre de titres et la pagination complète.",
         "badge": "Jeu de données"
+      }
+    },
+    "mobile": {
+      "heroEyebrow": "Pouls artistes",
+      "heroTitle": "Qui tient votre rotation ?",
+      "heroSubtitle": "Commencez par l’artiste qui porte cette fenêtre, puis ouvrez le classement détaillé seulement quand vous voulez tout parcourir.",
+      "primaryInsightEyebrow": "Ancre de rotation",
+      "primaryInsightBody": "{name} est l’artiste qui pèse le plus dans votre écoute en ce moment.",
+      "primaryInsightFallback": "Importez des données d’écoute pour révéler l’artiste leader de cette période.",
+      "listenCount": "{count} écoutes",
+      "shareLabel": "{share} des écoutes",
+      "signalsLabel": "Signaux de vue artistes",
+      "avgSignal": "Moy. / artiste",
+      "concentrationSignal": "Part du top",
+      "topFiveEyebrow": "Top cinq",
+      "topFiveTitle": "Les artistes qui donnent le ton",
+      "topFiveDescription": "Une lecture compacte des noms qui pèsent le plus dans vos écoutes actuelles.",
+      "open": "Ouvrir",
+      "disclosures": {
+        "supporting": {
+          "title": "Ouvrir le reste du top 20",
+          "description": "Révélez les artistes de soutien sans transformer le premier écran en mur de graphiques."
+        },
+        "index": {
+          "title": "Parcourir tout l’index artistes",
+          "description": "Utilisez la pagination quand vous voulez chaque artiste classé sur cette fenêtre."
+        }
       }
     },
     "heroEyebrow": "Classement et vue d'ensemble",
@@ -1165,6 +1328,32 @@
         "badge": "Jeu de données"
       }
     },
+    "mobile": {
+      "heroEyebrow": "Signal replay",
+      "primaryInsightEyebrow": "Le plus réécouté",
+      "primaryInsightBody": "C'est le titre auquel vous êtes le plus revenu sur cette fenêtre, porté par {artist}.",
+      "shareLabel": "Part des écoutes",
+      "trendsCta": "Voir son évolution",
+      "topFiveEyebrow": "Top cinq",
+      "topFiveTitle": "Les titres qui donnent le ton",
+      "topFiveDescription": "Une lecture compacte des morceaux qui pèsent le plus dans vos écoutes actuelles.",
+      "stats": {
+        "uniqueTracks": "Titres uniques présents dans cette période.",
+        "totalListens": "Toutes les écoutes enregistrées derrière ce classement.",
+        "averageLabel": "Moy. / titre",
+        "average": "À quel point vos réécoutes sont concentrées."
+      },
+      "disclosures": {
+        "top20": {
+          "title": "Ouvrir le reste du top 20",
+          "description": "Révélez les titres de soutien sans transformer le premier écran en mur de graphiques."
+        },
+        "ranking": {
+          "title": "Parcourir tout le classement",
+          "description": "Utilisez la pagination quand vous voulez l'index complet des titres."
+        }
+      }
+    },
     "heroEyebrow": "Classement et vue d'ensemble",
     "heroTitle": "Vos titres",
     "heroSubtitle": "Top titres les plus écoutés sur la période",
@@ -1233,7 +1422,36 @@
     "searchAdd": "Ajouter",
     "selectionCount": "{selected} / {max} sur le graphique",
     "chartUpdating": "Mise à jour du graphique…",
-    "selectionPending": "Application de la sélection…"
+    "selectionPending": "Application de la sélection…",
+    "mobile": {
+      "eyebrow": "Récit titres",
+      "heroTitle": "Qu’est-ce qui bouge dans vos replays ?",
+      "heroSubtitle": "Commencez par les titres les plus actifs sur cette fenêtre, puis ouvrez les réglages seulement quand vous voulez affiner la comparaison.",
+      "topTrackLabel": "Le plus présent",
+      "topTrackFallback": "Sélectionnez des titres pour faire ressortir le morceau leader de cette période.",
+      "listenCount": "{count} écoutes",
+      "peakLine": "Pic {count} · {date}",
+      "noPeak": "Pas encore de pic",
+      "signalsLabel": "Signaux des tendances de titres",
+      "periodSignal": "Cadence",
+      "selectedSignal": "Sélection",
+      "bucketsSignal": "Points",
+      "riserSignal": "Plus fort mouvement",
+      "noRiser": "Stable",
+      "deltaUp": "+{count} depuis le début",
+      "deltaDown": "-{count} depuis le début",
+      "deltaFlat": "Aucun changement",
+      "quickFocusTitle": "Focus actuel",
+      "quickFocusDescription": "Sur mobile, la première lecture reste limitée aux courbes sélectionnées les plus fortes pour garder une histoire lisible.",
+      "moreSelected": "+{count} autres",
+      "activeBuckets": "{count} points actifs",
+      "chartTitle": "Forme des lignes clés",
+      "chartSubtitle": "Le graphique mobile affiche jusqu’à cinq titres sélectionnés ; la comparaison complète reste disponible plus bas.",
+      "chartLimited": "5 sur {count}",
+      "editTitle": "Ajuster la comparaison",
+      "editDescription": "Cherchez, ajoutez ou retirez des titres. Le récit du dessus se met à jour avec votre sélection.",
+      "editSummary": "Modifier"
+    }
   },
   "ai-insights": {
     "title": "AI Insights",
@@ -1389,6 +1607,20 @@
     "aiCached": "Profil IA servi depuis le cache",
     "aiUnavailable": "L'IA est désactivée pour cet environnement ou ce navigateur ; cette page affiche donc un profil déterministe basé sur vos statistiques.",
     "aiErrorTitle": "Analyse IA indisponible. Affichage d'un résumé basé sur les données.",
+    "mobile": {
+      "dateRangeFallback": "Période",
+      "signatureLabel": "Ancrage",
+      "genreFallback": "Signal genre en attente",
+      "storyTitle": "Ce que raconte cette période",
+      "genresTitle": "Mix dominant",
+      "genresHint": "Les signaux genres principaux, raccourcis pour la lecture mobile.",
+      "anchorShare": "{percent}% via l'artiste principal",
+      "artistsTitle": "Artistes qui structurent le profil",
+      "artistsHint": "Ouvrez seulement si vous voulez le signal de soutien.",
+      "nextTitle": "Approfondir au bon moment",
+      "nextLead": "Your Music garde les grands graphiques, comparaisons et outils détaillés.",
+      "overviewCta": "Ouvrir le dashboard complet"
+    },
     "overviewCallout": {
       "badge": "Commencez par le cœur de Soundprint-AI",
       "title": "Your Music est la vue d'ensemble qui relie tout",

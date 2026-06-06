@@ -299,6 +299,12 @@ type ChartRow = {
   count: number;
 };
 
+type GenreArtist = {
+  id: string;
+  name: string;
+  imageUrl: string | null;
+};
+
 function aggregateChartSeries(
   rows: ChartRow[],
   totalListens: number,
@@ -480,6 +486,294 @@ function PieChartLegend({
   );
 }
 
+function MobileGenresSkeleton({ badgeLabel }: { badgeLabel: string }) {
+  const t = useTranslations("genres");
+  return (
+    <div className="space-y-5 lg:hidden" aria-busy="true">
+      <section className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-gray-950 p-5 text-white shadow-2xl shadow-violet-500/15">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.24),transparent_34%),radial-gradient(circle_at_85%_8%,rgba(6,182,212,0.18),transparent_34%),linear-gradient(135deg,rgba(3,7,18,0.98),rgba(30,27,75,0.9)_52%,rgba(8,47,73,0.74))]" />
+        <div className="relative">
+          <div className="mb-4 inline-flex items-center rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-violet-100">
+            {badgeLabel}
+          </div>
+          <div className="h-9 w-56 rounded bg-white/20 animate-shimmer" />
+          <div className="mt-3 h-4 w-full rounded bg-white/15 animate-shimmer" />
+          <div className="mt-2 h-4 w-4/5 rounded bg-white/15 animate-shimmer" />
+          <div className="mt-5 grid grid-cols-3 gap-2">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
+                <div className="h-6 w-12 rounded bg-white/20 animate-shimmer" />
+                <div className="mt-2 h-3 w-16 rounded bg-white/15 animate-shimmer" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+      <section className="rounded-[1.5rem] border border-card-border bg-card-surface p-4 shadow-card">
+        <div className="mb-4 flex items-center justify-between">
+          <div>
+            <div className="h-3 w-24 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
+            <div className="mt-2 h-6 w-40 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
+          </div>
+          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">{t("mobile.loading")}</span>
+        </div>
+        <div className="space-y-3">
+          {[0, 1, 2, 3, 4].map((i) => (
+            <div key={i} className="rounded-2xl border border-card-border/80 bg-muted/25 p-3">
+              <div className="flex items-center justify-between gap-3">
+                <div className="h-4 w-32 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
+                <div className="h-4 w-12 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
+              </div>
+              <div className="mt-3 h-2 rounded-full bg-gray-200 animate-shimmer dark:bg-gray-700" />
+            </div>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function MobileGenresExperience({
+  chartData,
+  totalListens,
+  badgeLabel,
+  trendsHref,
+  topArtistsByGenre,
+  paletteAccessRestricted,
+  locale,
+}: {
+  chartData: ChartRow[];
+  totalListens: number;
+  badgeLabel: string;
+  trendsHref: string;
+  topArtistsByGenre: Map<string, GenreArtist[]>;
+  paletteAccessRestricted: boolean;
+  locale: string;
+}) {
+  const t = useTranslations("genres");
+  const topGenre = chartData[0];
+  const top3Genres = chartData.slice(0, 3);
+  const top5Genres = chartData.slice(0, 5);
+  const nextGenres = chartData.slice(5, 10);
+  const topThreeShare = top3Genres.reduce((sum, genre) => sum + genre.percentage, 0);
+  const maxCount = chartData[0]?.count ?? 1;
+
+  if (!topGenre) return null;
+
+  return (
+    <div className="space-y-5 lg:hidden">
+      <section className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-gray-950 p-5 text-white shadow-2xl shadow-violet-500/15">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.24),transparent_34%),radial-gradient(circle_at_85%_8%,rgba(6,182,212,0.18),transparent_34%),linear-gradient(135deg,rgba(3,7,18,0.98),rgba(30,27,75,0.9)_52%,rgba(8,47,73,0.74))]" />
+        <div className="absolute -bottom-20 right-2 h-44 w-44 rounded-full bg-accent-cyan/18 blur-3xl" aria-hidden />
+        <div className="relative">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-violet-100 backdrop-blur">
+            <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_18px_rgb(22_199_132_/0.75)]" />
+            {t("mobile.eyebrow")}
+          </div>
+          <h1 className="text-balance text-3xl font-semibold tracking-[-0.055em] text-white">
+            {t("mobile.title")}
+          </h1>
+          <p className="mt-3 text-base leading-7 text-white/74">
+            {t("mobile.heroInsight", {
+              genre: topGenre.name,
+              percentage: topGenre.percentage.toFixed(1),
+            })}
+          </p>
+
+          <div className="mt-5 grid grid-cols-3 gap-2">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
+              <p className="text-xl font-semibold tracking-tight text-white">{topGenre.percentage.toFixed(1)}%</p>
+              <p className="mt-1 text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-slate-400">{t("mobile.topGenreLabel")}</p>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
+              <p className="text-xl font-semibold tracking-tight text-white">{chartData.length.toLocaleString(locale)}</p>
+              <p className="mt-1 text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-slate-400">{t("statGenres")}</p>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
+              <p className="text-xl font-semibold tracking-tight text-white">{topThreeShare.toFixed(0)}%</p>
+              <p className="mt-1 text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-slate-400">{t("mobile.topThreeLabel")}</p>
+            </div>
+          </div>
+
+          <div className="mt-5 flex flex-col gap-2">
+            <Link
+              href={trendsHref}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25 transition-all active:scale-[0.99]"
+            >
+              <LineChart className="h-4 w-4" aria-hidden />
+              {t("viewTrends")}
+            </Link>
+            <p className="text-center text-xs font-medium text-white/50">{badgeLabel}</p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div className="mb-3 flex items-end justify-between gap-3">
+          <div>
+            <p className="font-mono text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-primary">
+              {t("mobile.primarySignal")}
+            </p>
+            <h2 className="mt-1 text-xl font-semibold tracking-[-0.04em] text-foreground">
+              {t("mobile.topLanesTitle")}
+            </h2>
+          </div>
+          <span className="rounded-full border border-card-border bg-card-surface px-3 py-1.5 text-xs font-semibold text-muted shadow-sm">
+            Top 3
+          </span>
+        </div>
+        <div className="-mx-4 overflow-x-auto px-4 pb-2 [scrollbar-width:none]">
+          <div className="flex gap-3">
+            {top3Genres.map((genre, index) => {
+              const artists = topArtistsByGenre.get(genre.name) ?? [];
+              return (
+                <article
+                  key={genre.name}
+                  className="min-w-[76vw] overflow-hidden rounded-[1.5rem] border border-card-border bg-card-surface p-4 shadow-card"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <span className="inline-flex h-8 min-w-8 items-center justify-center rounded-xl bg-primary/10 px-2 text-xs font-black text-primary">
+                        #{index + 1}
+                      </span>
+                      <h3 className="mt-3 truncate text-2xl font-semibold tracking-[-0.05em] text-foreground">
+                        {genre.name}
+                      </h3>
+                    </div>
+                    <div className="shrink-0 text-right">
+                      <p className="text-3xl font-semibold tabular-nums tracking-[-0.05em] text-foreground">
+                        {genre.percentage.toFixed(0)}%
+                      </p>
+                      <p className="text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-muted">
+                        {t("mobile.shareLabel")}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-4 h-2 overflow-hidden rounded-full bg-muted">
+                    <div
+                      className="h-full rounded-full shadow-[0_0_18px_-6px_currentColor]"
+                      style={{
+                        width: `${Math.max(8, (genre.count / maxCount) * 100)}%`,
+                        backgroundColor: COLORS[index % COLORS.length],
+                      }}
+                    />
+                  </div>
+                  <details className="mt-4 rounded-2xl border border-card-border/80 bg-muted/25">
+                    <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 px-3 py-2 text-sm font-semibold text-foreground [&::-webkit-details-marker]:hidden">
+                      {t("mobile.artistContext")}
+                      <ChevronIcon direction="down" />
+                    </summary>
+                    <div className="border-t border-card-border/70 px-3 py-3">
+                      {artists.length > 0 ? (
+                        <div className="flex flex-wrap gap-2">
+                          {artists.slice(0, 3).map((artist) => (
+                            <span
+                              key={artist.id}
+                              className="max-w-full truncate rounded-full border border-card-border bg-card-surface px-3 py-1.5 text-xs font-medium text-foreground"
+                            >
+                              {artist.name}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm leading-6 text-muted">{t("mobile.noArtistContext")}</p>
+                      )}
+                    </div>
+                  </details>
+                </article>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section className="overflow-hidden rounded-[1.5rem] border border-card-border bg-card-surface shadow-card">
+        <div className="border-b border-card-border px-4 py-4">
+          <p className="font-mono text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-primary">
+            {t("mobile.supportingMetrics")}
+          </p>
+          <h2 className="mt-1 text-xl font-semibold tracking-[-0.04em] text-foreground">
+            {t("mobile.distributionTitle")}
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-muted">
+            {t("mobile.distributionDescription", {
+              total: totalListens.toLocaleString(locale),
+            })}
+          </p>
+        </div>
+        <div className="space-y-3 p-4">
+          {top5Genres.map((genre, index) => (
+            <div key={genre.name} className="rounded-2xl border border-card-border/80 bg-muted/20 p-3">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex min-w-0 items-center gap-2">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-card-surface text-xs font-bold text-muted shadow-sm">
+                    {index + 1}
+                  </span>
+                  <span className="truncate text-sm font-semibold text-foreground">{genre.name}</span>
+                </div>
+                <div className="shrink-0 text-right">
+                  <p className="text-sm font-semibold tabular-nums text-foreground">
+                    {genre.count.toLocaleString(locale)}
+                  </p>
+                  <p className="text-[0.68rem] tabular-nums text-muted">{genre.percentage.toFixed(1)}%</p>
+                </div>
+              </div>
+              <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted">
+                <div
+                  className="h-full rounded-full"
+                  style={{
+                    width: `${Math.max(6, (genre.count / maxCount) * 100)}%`,
+                    backgroundColor: COLORS[index % COLORS.length],
+                  }}
+                />
+              </div>
+            </div>
+          ))}
+
+          {nextGenres.length > 0 ? (
+            <details className="rounded-2xl border border-dashed border-card-border bg-card-surface/60">
+              <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-sm font-semibold text-foreground [&::-webkit-details-marker]:hidden">
+                {t("mobile.showMoreGenres")}
+                <ChevronIcon direction="down" />
+              </summary>
+              <div className="space-y-2 border-t border-card-border px-4 py-3">
+                {nextGenres.map((genre, index) => (
+                  <div key={genre.name} className="flex items-center justify-between gap-3 text-sm">
+                    <span className="min-w-0 truncate text-muted">
+                      {index + 6}. {genre.name}
+                    </span>
+                    <span className="shrink-0 font-semibold tabular-nums text-foreground">
+                      {genre.percentage.toFixed(1)}%
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </details>
+          ) : null}
+        </div>
+      </section>
+
+      <details className="rounded-[1.35rem] border border-cyan-200/70 bg-cyan-50/75 text-cyan-950 shadow-sm shadow-cyan-950/5 dark:border-cyan-400/25 dark:bg-cyan-950/24 dark:text-cyan-100">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-sm font-semibold [&::-webkit-details-marker]:hidden">
+          {paletteAccessRestricted ? t("paletteRestrictedTitle") : t("mobile.accuracySummary")}
+          <ChevronIcon direction="down" />
+        </summary>
+        <div className="border-t border-cyan-200/70 px-4 py-3 text-sm leading-6 dark:border-cyan-400/20">
+          <p>{paletteAccessRestricted ? t("paletteRestrictedBody") : t("apiMappingNoticeBody")}</p>
+          {!paletteAccessRestricted ? (
+            <Link
+              href="/dashboard/genres/palette"
+              className="mt-3 inline-flex min-h-11 items-center justify-center rounded-2xl bg-cyan-950 px-4 py-2 text-sm font-semibold text-white dark:bg-cyan-100 dark:text-cyan-950"
+            >
+              {t("apiMappingNoticeLink")}
+            </Link>
+          ) : null}
+        </div>
+      </details>
+    </div>
+  );
+}
+
 function GenresContent() {
   const searchParams = useSearchParams();
   const { resolvedTheme } = useTheme();
@@ -620,21 +914,27 @@ function GenresContent() {
 
   return (
     <div className="space-y-8 lg:space-y-12">
-      <GenresHeroFrame trendsHref={trendsHref} stats={heroStats} badgeLabel={badgeLabel} />
-      {paletteAccessRestricted ? (
-        <div className="max-w-3xl rounded-xl border border-cyan-200 bg-cyan-50/80 px-4 py-3 text-sm text-cyan-950 shadow-sm shadow-cyan-950/5 dark:border-cyan-400/25 dark:bg-cyan-950/30 dark:text-cyan-100">
-          <p className="font-semibold">{t("paletteRestrictedTitle")}</p>
-          <p className="mt-1">{t("paletteRestrictedBody")}</p>
+      <div className="hidden lg:block">
+        <GenresHeroFrame trendsHref={trendsHref} stats={heroStats} badgeLabel={badgeLabel} />
+      </div>
+      <div className="hidden lg:block">
+        {paletteAccessRestricted ? (
+          <div className="max-w-3xl rounded-xl border border-cyan-200 bg-cyan-50/80 px-4 py-3 text-sm text-cyan-950 shadow-sm shadow-cyan-950/5 dark:border-cyan-400/25 dark:bg-cyan-950/30 dark:text-cyan-100">
+            <p className="font-semibold">{t("paletteRestrictedTitle")}</p>
+            <p className="mt-1">{t("paletteRestrictedBody")}</p>
+          </div>
+        ) : null}
+        <div className={paletteAccessRestricted ? "mt-6" : undefined}>
+          <PaletteMappingNotice
+            title={t("apiMappingNoticeTitle")}
+            body={t("apiMappingNoticeBody")}
+            linkLabel={t("apiMappingNoticeLink")}
+            isPublicDemoViewer={isPublicDemoViewer}
+            showGroqCta
+            viewerUserId={userId}
+          />
         </div>
-      ) : null}
-      <PaletteMappingNotice
-        title={t("apiMappingNoticeTitle")}
-        body={t("apiMappingNoticeBody")}
-        linkLabel={t("apiMappingNoticeLink")}
-        isPublicDemoViewer={isPublicDemoViewer}
-        showGroqCta
-        viewerUserId={userId}
-      />
+      </div>
       {!isLoadingOrFetching && error ? (
         <ErrorState
           variant="startup"
@@ -646,6 +946,20 @@ function GenresContent() {
         <EmptyState variant="startup" {...emptyStatePresets.changeDates(pathname)} />
       ) : (
         <div className="space-y-8 lg:space-y-12">
+            {isLoadingOrFetching ? (
+              <MobileGenresSkeleton badgeLabel={badgeLabel} />
+            ) : data ? (
+              <MobileGenresExperience
+                chartData={chartData}
+                totalListens={data.totalListens}
+                badgeLabel={badgeLabel}
+                trendsHref={trendsHref}
+                topArtistsByGenre={topArtistsByGenre}
+                paletteAccessRestricted={paletteAccessRestricted}
+                locale={locale}
+              />
+            ) : null}
+          <div className="hidden lg:block space-y-12">
             {isLoadingOrFetching ? (
               <section className="relative animate-fade-in-up">
                 <GenresSectionHeader
@@ -981,6 +1295,7 @@ function GenresContent() {
               </div>
             </div>
             </section>
+          </div>
         </div>
         )}
     </div>
@@ -992,8 +1307,13 @@ function GenresFallback() {
   const badgeLabel = useGenresHeroBadge();
   return (
     <div className="space-y-8 lg:space-y-12">
-      <GenresHeroFrame trendsHref={trendsHref} stats={<GenresHeroStatsSkeleton />} badgeLabel={badgeLabel} />
-      <GenresSkeleton />
+      <MobileGenresSkeleton badgeLabel={badgeLabel} />
+      <div className="hidden lg:block">
+        <GenresHeroFrame trendsHref={trendsHref} stats={<GenresHeroStatsSkeleton />} badgeLabel={badgeLabel} />
+      </div>
+      <div className="hidden lg:block">
+        <GenresSkeleton />
+      </div>
     </div>
   );
 }

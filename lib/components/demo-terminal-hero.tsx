@@ -16,6 +16,7 @@ type DemoTerminalHeroProps = {
   subtitle?: string;
   badge?: string;
   features?: readonly DemoTerminalFeature[];
+  showFeaturesOnMobile?: boolean;
 } & Omit<
   ComponentProps<typeof motion.section>,
   "children" | "variants" | "initial" | "whileInView" | "viewport"
@@ -75,6 +76,7 @@ export function DemoTerminalHero({
   subtitle = "Single-app overview",
   badge = "Desktop demo",
   features = defaultFeatures,
+  showFeaturesOnMobile = true,
   className,
   ...props
 }: DemoTerminalHeroProps) {
@@ -168,7 +170,10 @@ export function DemoTerminalHero({
 
         <motion.div
           variants={itemVariants}
-          className="relative grid grid-cols-1 border-t border-white/10 sm:grid-cols-3"
+          className={cx(
+            "relative grid-cols-1 border-t border-white/10 sm:grid-cols-3",
+            showFeaturesOnMobile ? "grid" : "hidden md:grid",
+          )}
         >
           {features.map((feature, index) => (
             <div

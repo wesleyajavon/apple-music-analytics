@@ -23,6 +23,7 @@ type Props = {
   enableRemoteSearch?: boolean;
   onPickRemoteTrack?: (track: TrackTrendsChartTrack) => void;
   maxSelectable?: number;
+  idPrefix?: string;
 };
 
 export function TrackTrendsTrackPicker({
@@ -34,11 +35,15 @@ export function TrackTrendsTrackPicker({
   enableRemoteSearch = false,
   onPickRemoteTrack,
   maxSelectable = 50,
+  idPrefix = "track-trends",
 }: Props) {
   const t = useTranslations("trackTrends");
   const [query, setQuery] = useState("");
   const [highlightIndex, setHighlightIndex] = useState(-1);
   const optionRefs = useRef<Map<string, HTMLLabelElement>>(new Map());
+  const searchInputId = `${idPrefix}-search`;
+  const listboxId = `${idPrefix}-listbox`;
+  const searchHintId = `${idPrefix}-search-hint`;
 
   const { data: remoteData, isFetching: remoteLoading } = useTrackSearch(
     enableRemoteSearch ? query : ""
@@ -125,7 +130,7 @@ export function TrackTrendsTrackPicker({
     <div className="space-y-3">
       <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
         <div className="min-w-0 flex-1">
-          <label htmlFor="track-trends-search" className="sr-only">
+          <label htmlFor={searchInputId} className="sr-only">
             {t("searchAriaLabel")}
           </label>
           <div className="relative">
@@ -138,7 +143,7 @@ export function TrackTrendsTrackPicker({
               </svg>
             </span>
             <input
-              id="track-trends-search"
+              id={searchInputId}
               type="search"
               role="combobox"
               aria-expanded={true}
@@ -151,16 +156,16 @@ export function TrackTrendsTrackPicker({
               autoComplete="off"
               spellCheck={false}
               className="w-full rounded-xl border border-card-border bg-surface py-2.5 pl-9 pr-3 text-sm text-foreground shadow-sm placeholder:text-muted/70 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/20"
-              aria-controls="track-trends-listbox"
-              aria-describedby="track-trends-search-hint"
+              aria-controls={listboxId}
+              aria-describedby={searchHintId}
               aria-activedescendant={
                 highlightIndex >= 0 && filtered[highlightIndex]
-                  ? `track-opt-${filtered[highlightIndex].id}`
+                  ? `${idPrefix}-opt-${filtered[highlightIndex].id}`
                   : undefined
               }
             />
           </div>
-          <p id="track-trends-search-hint" className="mt-1 text-xs text-muted">
+          <p id={searchHintId} className="mt-1 text-xs text-muted">
             {enableRemoteSearch ? t("searchKeyboardHintExtended") : t("searchKeyboardHint")}
           </p>
         </div>
@@ -225,7 +230,7 @@ export function TrackTrendsTrackPicker({
       )}
 
       <div
-        id="track-trends-listbox"
+        id={listboxId}
         role="listbox"
         aria-label={t("tracksToDisplay")}
         aria-multiselectable="true"
@@ -241,7 +246,7 @@ export function TrackTrendsTrackPicker({
             return (
               <label
                 key={track.id}
-                id={`track-opt-${track.id}`}
+                id={`${idPrefix}-opt-${track.id}`}
                 ref={(el) => setOptionRef(track.id, el)}
                 role="option"
                 aria-selected={selected}

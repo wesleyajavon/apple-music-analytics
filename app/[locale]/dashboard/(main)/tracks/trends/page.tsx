@@ -21,7 +21,7 @@ import { TrackTrendsTrackPicker } from "@/lib/components/track-trends-track-pick
 import { useDebouncedValue } from "@/lib/hooks/use-debounced-value";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
 import { formatOverviewDateRangeLabel } from "@/lib/utils/overview-date-range-label";
-import type { TrackTrendsChartTrack } from "@/lib/dto/track";
+import type { TrackTrendsChartDataPoint, TrackTrendsChartTrack } from "@/lib/dto/track";
 import { useTrackTrendsChart } from "@/lib/hooks/use-tracks";
 import { getTrackLabel } from "@/lib/utils/track-trends-pivot";
 import { CHART_TOOLTIP_STYLES } from "@/lib/constants/config";
@@ -63,6 +63,21 @@ const TRENDS_HERO_SHELL_CLASS =
 const GROUP_BY_BAR_CLASS =
   "sticky top-[var(--dashboard-filter-height)] z-20 -mx-4 -mt-4 border-b border-white/10 bg-surface-glass/95 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:-mt-6 sm:px-6 lg:-mx-8 lg:-mt-8 lg:px-8";
 
+type TrackTrendSignal = {
+  id: string;
+  label: string;
+  color: string;
+  total: number;
+  first: number;
+  last: number;
+  delta: number;
+  peak: number;
+  peakDate: string;
+  activeBuckets: number;
+};
+
+type ChartTheme = (typeof DASHBOARD_CHART_THEME)[keyof typeof DASHBOARD_CHART_THEME];
+
 function idsEqualSorted(a: string[], b: string[]): boolean {
   if (a.length !== b.length) return false;
   const sa = [...a].sort();
@@ -78,6 +93,63 @@ function periodToLabelKey(period: PeriodType): "daily" | "weekly" | "monthly" {
   if (period === "day") return "daily";
   if (period === "week") return "weekly";
   return "monthly";
+}
+
+function getNumericTrendValue(point: TrackTrendsChartDataPoint, trackId: string): number {
+  const value = point[trackId];
+  if (typeof value === "number") return value;
+  if (typeof value === "string") return Number(value) || 0;
+  return 0;
+}
+
+function buildTrackTrendSignals({
+  chartData,
+  selectedIds,
+  idToTrack,
+  getTrackIndex,
+}: {
+  chartData: TrackTrendsChartDataPoint[];
+  selectedIds: string[];
+  idToTrack: Map<string, TrackTrendsChartTrack>;
+  getTrackIndex: (trackId: string) => number;
+}): TrackTrendSignal[] {
+  return selectedIds
+    .map((trackId) => {
+      const track = idToTrack.get(trackId);
+      const label = track ? getTrackLabel(track) : trackId;
+      let total = 0;
+      let peak = 0;
+      let peakDate = "";
+      let activeBuckets = 0;
+
+      chartData.forEach((point) => {
+        const value = getNumericTrendValue(point, trackId);
+        total += value;
+        if (value > 0) activeBuckets += 1;
+        if (value > peak) {
+          peak = value;
+          peakDate = String(point.formattedDate || point.date || "");
+        }
+      });
+
+      const first = chartData[0] ? getNumericTrendValue(chartData[0], trackId) : 0;
+      const last = chartData[chartData.length - 1] ? getNumericTrendValue(chartData[chartData.length - 1], trackId) : 0;
+      const idx = getTrackIndex(trackId);
+
+      return {
+        id: trackId,
+        label,
+        color: getColor(idx >= 0 ? idx : 0),
+        total,
+        first,
+        last,
+        delta: last - first,
+        peak,
+        peakDate,
+        activeBuckets,
+      };
+    })
+    .sort((a, b) => b.total - a.total);
 }
 
 function useTrackTrendsBadgeLabel() {
@@ -241,6 +313,310 @@ function TrackTrendsChartSkeleton() {
   );
 }
 
+function TrackTrendsMobileSkeleton() {
+  return (
+    <div className="space-y-4" aria-busy="true">
+      <div className="rounded-[1.75rem] border border-white/10 bg-gray-950 p-5 shadow-xl shadow-violet-500/10">
+        <div className="h-4 w-28 animate-shimmer rounded bg-white/15" />
+        <div className="mt-5 h-8 w-56 animate-shimmer rounded bg-white/20" />
+        <div className="mt-3 h-4 w-full animate-shimmer rounded bg-white/10" />
+      </div>
+      <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-1">
+        {[0, 1, 2].map((item) => (
+          <div key={item} className="h-24 min-w-[9.5rem] animate-shimmer rounded-2xl border border-card-border bg-card-surface" />
+        ))}
+      </div>
+      <div className="h-64 animate-shimmer rounded-[1.5rem] border border-card-border bg-surface/70" />
+    </div>
+  );
+}
+
+function TrackTrendsMobileEmptyHero({
+  tracksHref,
+  badgeLabel,
+}: {
+  tracksHref: string;
+  badgeLabel: string;
+}) {
+  const t = useTranslations("trackTrends");
+
+  return (
+    <div className="overflow-hidden rounded-[1.75rem] border border-white/10 bg-gray-950 p-5 text-white shadow-xl shadow-violet-500/10">
+      <div className="flex items-center justify-between gap-3">
+        <p className="font-mono text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-cyan-200">{t("mobile.eyebrow")}</p>
+        <span className="shrink-0 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[0.68rem] font-semibold text-white/75">{badgeLabel}</span>
+      </div>
+      <h1 className="mt-4 text-3xl font-semibold tracking-[-0.055em] text-white">{t("mobile.heroTitle")}</h1>
+      <p className="mt-3 text-sm leading-6 text-white/68">{t("mobile.heroSubtitle")}</p>
+      <Link
+        href={tracksHref}
+        className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-white px-4 text-sm font-bold text-gray-950 shadow-lg shadow-black/20"
+      >
+        <ArrowLeft className="h-4 w-4" aria-hidden />
+        {t("backToTracks")}
+      </Link>
+    </div>
+  );
+}
+
+function TrackTrendsMobileExperience({
+  tracksHref,
+  badgeLabel,
+  period,
+  selectedIds,
+  pickerTracks,
+  chartData,
+  isLoading,
+  isFetching,
+  selectionPending,
+  idToTrack,
+  toggleTrack,
+  getTrackIndex,
+  selectAll,
+  selectNone,
+  handlePickRemoteTrack,
+  chartTheme,
+}: {
+  tracksHref: string;
+  badgeLabel: string;
+  period: PeriodType;
+  selectedIds: string[];
+  pickerTracks: TrackTrendsChartTrack[];
+  chartData: TrackTrendsChartDataPoint[];
+  isLoading: boolean;
+  isFetching: boolean;
+  selectionPending: boolean;
+  idToTrack: Map<string, TrackTrendsChartTrack>;
+  toggleTrack: (id: string) => void;
+  getTrackIndex: (trackId: string) => number;
+  selectAll: () => void;
+  selectNone: () => void;
+  handlePickRemoteTrack: (track: TrackTrendsChartTrack) => void;
+  chartTheme: ChartTheme;
+}) {
+  const locale = useLocale();
+  const t = useTranslations("trackTrends");
+  const tPeriod = useTranslations("components.periodSelector");
+  const numberFormatter = useMemo(() => new Intl.NumberFormat(locale), [locale]);
+  const signals = useMemo(
+    () => buildTrackTrendSignals({ chartData, selectedIds, idToTrack, getTrackIndex }),
+    [chartData, getTrackIndex, idToTrack, selectedIds]
+  );
+  const visibleSignals = signals.slice(0, 5);
+  const leadSignal = signals[0];
+  const movementSignal = signals.reduce<TrackTrendSignal | undefined>((best, signal) => {
+    if (!best) return signal;
+    return Math.abs(signal.delta) > Math.abs(best.delta) ? signal : best;
+  }, undefined);
+  const chartTrackIds = visibleSignals.map((signal) => signal.id);
+  const remainingSelectedCount = Math.max(0, selectedIds.length - visibleSignals.length);
+  const isUpdating = isFetching || selectionPending;
+
+  if (isLoading) return <TrackTrendsMobileSkeleton />;
+
+  return (
+    <div className="space-y-5">
+      <section className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-gray-950 p-5 text-white shadow-xl shadow-violet-500/10">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.22),transparent_34%),radial-gradient(circle_at_88%_12%,rgba(139,92,246,0.24),transparent_35%),linear-gradient(150deg,rgba(3,7,18,0.98),rgba(30,27,75,0.82)_55%,rgba(8,47,73,0.58))]" aria-hidden />
+        <div className="relative">
+          <div className="flex items-center justify-between gap-3">
+            <p className="font-mono text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-cyan-200">{t("mobile.eyebrow")}</p>
+            <span className="shrink-0 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[0.68rem] font-semibold text-white/75">{badgeLabel}</span>
+          </div>
+          <h1 className="mt-4 text-3xl font-semibold tracking-[-0.055em] text-white">{t("mobile.heroTitle")}</h1>
+          <p className="mt-3 text-sm leading-6 text-white/68">{t("mobile.heroSubtitle")}</p>
+
+          <div className="mt-5 rounded-[1.35rem] border border-white/12 bg-white/10 p-4 backdrop-blur">
+            <p className="text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-cyan-100/80">{t("mobile.topTrackLabel")}</p>
+            {leadSignal ? (
+              <>
+                <p className="mt-2 line-clamp-2 text-2xl font-semibold tracking-[-0.045em] text-white">{leadSignal.label}</p>
+                <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold text-white/78">
+                  <span className="rounded-full bg-white/10 px-3 py-1.5">{t("mobile.listenCount", { count: numberFormatter.format(leadSignal.total) })}</span>
+                  <span className="rounded-full bg-white/10 px-3 py-1.5">
+                    {leadSignal.peak > 0
+                      ? t("mobile.peakLine", { count: numberFormatter.format(leadSignal.peak), date: leadSignal.peakDate })
+                      : t("mobile.noPeak")}
+                  </span>
+                </div>
+              </>
+            ) : (
+              <p className="mt-2 text-sm leading-6 text-white/70">{t("mobile.topTrackFallback")}</p>
+            )}
+          </div>
+
+          <Link
+            href={tracksHref}
+            className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-white px-4 text-sm font-bold text-gray-950 shadow-lg shadow-black/20"
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden />
+            {t("backToTracks")}
+          </Link>
+        </div>
+      </section>
+
+      <section aria-label={t("mobile.signalsLabel")} className="-mx-4 overflow-x-auto px-4 pb-1">
+        <div className="flex gap-3">
+          <div className="min-w-[9rem] rounded-2xl border border-card-border bg-card-surface p-4 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">{t("mobile.periodSignal")}</p>
+            <p className="mt-2 text-lg font-semibold text-foreground">{tPeriod(periodToLabelKey(period))}</p>
+          </div>
+          <div className="min-w-[9rem] rounded-2xl border border-card-border bg-card-surface p-4 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">{t("mobile.selectedSignal")}</p>
+            <p className="mt-2 text-lg font-semibold text-foreground">{selectedIds.length}</p>
+          </div>
+          <div className="min-w-[9rem] rounded-2xl border border-card-border bg-card-surface p-4 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">{t("mobile.bucketsSignal")}</p>
+            <p className="mt-2 text-lg font-semibold text-foreground">{chartData.length}</p>
+          </div>
+          <div className="min-w-[10rem] rounded-2xl border border-card-border bg-card-surface p-4 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">{t("mobile.riserSignal")}</p>
+            <p className="mt-2 truncate text-lg font-semibold text-foreground">{movementSignal?.label ?? t("mobile.noRiser")}</p>
+            {movementSignal && (
+              <p className="mt-1 text-xs font-medium text-muted">
+                {movementSignal.delta > 0
+                  ? t("mobile.deltaUp", { count: numberFormatter.format(movementSignal.delta) })
+                  : movementSignal.delta < 0
+                    ? t("mobile.deltaDown", { count: numberFormatter.format(Math.abs(movementSignal.delta)) })
+                    : t("mobile.deltaFlat")}
+              </p>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <section className="rounded-[1.5rem] border border-card-border bg-card-surface p-4 shadow-sm">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-semibold tracking-[-0.035em] text-foreground">{t("mobile.quickFocusTitle")}</h2>
+            <p className="mt-1 text-sm leading-6 text-muted">{t("mobile.quickFocusDescription")}</p>
+          </div>
+          {remainingSelectedCount > 0 && (
+            <span className="shrink-0 rounded-full border border-card-border bg-surface px-3 py-1 text-xs font-semibold text-muted">
+              {t("mobile.moreSelected", { count: remainingSelectedCount })}
+            </span>
+          )}
+        </div>
+        <div className="mt-4 space-y-2">
+          {visibleSignals.length === 0 ? (
+            <p className="rounded-2xl border border-dashed border-card-border px-4 py-5 text-sm text-muted">{t("selectAtLeastOne")}</p>
+          ) : (
+            visibleSignals.map((signal, index) => (
+              <div key={signal.id} className="flex min-h-11 items-center gap-3 rounded-2xl border border-card-border bg-surface/70 px-3 py-2">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white" style={{ backgroundColor: signal.color }}>
+                  {index + 1}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold text-foreground">{signal.label}</p>
+                  <p className="text-xs text-muted">
+                    {t("mobile.listenCount", { count: numberFormatter.format(signal.total) })} · {t("mobile.activeBuckets", { count: numberFormatter.format(signal.activeBuckets) })}
+                  </p>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </section>
+
+      <section className="rounded-[1.5rem] border border-card-border bg-card-surface p-4 shadow-sm">
+        <div className="mb-4 flex items-start justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{t("sections.chart.eyebrow")}</p>
+            <h2 className="mt-1 text-lg font-semibold tracking-[-0.035em] text-foreground">{t("mobile.chartTitle")}</h2>
+            <p className="mt-1 text-sm leading-6 text-muted">{t("mobile.chartSubtitle")}</p>
+          </div>
+          {selectedIds.length > chartTrackIds.length && (
+            <span className="shrink-0 rounded-full border border-card-border bg-surface px-3 py-1 text-xs font-semibold text-muted">
+              {t("mobile.chartLimited", { count: selectedIds.length })}
+            </span>
+          )}
+        </div>
+
+        {selectedIds.length === 0 ? (
+          <div className="rounded-[1.25rem] border border-dashed border-card-border px-4 py-8 text-center text-sm text-muted">{t("selectAtLeastOne")}</div>
+        ) : (
+          <div className="relative min-h-[260px] rounded-[1.25rem] border border-card-border bg-surface/70 p-2" aria-busy={isUpdating}>
+            {isUpdating && (
+              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 rounded-[1.25rem] bg-white/90 px-4 text-center backdrop-blur-[2px] dark:bg-slate-950/80">
+                <span className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-cyan-600 border-t-transparent dark:border-cyan-400" aria-hidden />
+                <span className="text-sm font-medium text-slate-900 dark:text-white">{selectionPending ? t("selectionPending") : t("chartUpdating")}</span>
+              </div>
+            )}
+            <div className={`transition-opacity duration-200 ${isUpdating ? "pointer-events-none opacity-40" : ""}`}>
+              <ChartResponsiveContainer token="tracksMain">
+                <RechartsLineChart data={chartData} margin={{ top: 12, right: 10, left: -18, bottom: 18 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} />
+                  <XAxis dataKey="formattedDate" tick={{ fill: chartTheme.tick, fontSize: 10 }} stroke={chartTheme.axisStroke} minTickGap={18} />
+                  <YAxis tick={{ fill: chartTheme.tick, fontSize: 10 }} stroke={chartTheme.axisStroke} width={34} />
+                  <Tooltip contentStyle={CHART_TOOLTIP_STYLES.contentStyle} labelStyle={CHART_TOOLTIP_STYLES.labelStyle} itemStyle={CHART_TOOLTIP_STYLES.itemStyle} />
+                  {chartTrackIds.map((trackId) => {
+                    const signal = visibleSignals.find((item) => item.id === trackId);
+                    return (
+                      <Line
+                        key={trackId}
+                        type="monotone"
+                        dataKey={trackId}
+                        name={signal?.label ?? trackId}
+                        stroke={signal?.color ?? getColor(0)}
+                        strokeWidth={2.5}
+                        dot={false}
+                        activeDot={{ r: 5 }}
+                        animationDuration={500}
+                        animationEasing="ease-in-out"
+                      />
+                    );
+                  })}
+                </RechartsLineChart>
+              </ChartResponsiveContainer>
+            </div>
+          </div>
+        )}
+      </section>
+
+      <details className="group rounded-[1.5rem] border border-card-border bg-card-surface shadow-sm">
+        <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-left [&::-webkit-details-marker]:hidden">
+          <span>
+            <span className="block text-sm font-semibold text-foreground">{t("mobile.editTitle")}</span>
+            <span className="mt-0.5 block text-xs leading-5 text-muted">{t("mobile.editDescription")}</span>
+          </span>
+          <span className="rounded-full border border-card-border bg-surface px-3 py-1 text-xs font-semibold text-muted transition group-open:bg-primary group-open:text-primary-foreground">
+            {t("mobile.editSummary")}
+          </span>
+        </summary>
+        <div className="border-t border-card-border p-4">
+          <div className="mb-4 flex gap-2">
+            <button
+              type="button"
+              onClick={selectAll}
+              className="min-h-11 flex-1 rounded-2xl border border-cyan-200/80 bg-white px-4 text-sm font-semibold text-cyan-950 shadow-sm transition-colors hover:bg-cyan-50/90 dark:border-cyan-400/35 dark:bg-cyan-500/15 dark:text-cyan-100 dark:shadow-none dark:hover:bg-cyan-400/20"
+            >
+              {t("all")}
+            </button>
+            <button
+              type="button"
+              onClick={selectNone}
+              className="min-h-11 flex-1 rounded-2xl border border-card-border bg-surface px-4 text-sm font-semibold text-foreground transition-colors hover:bg-surface-glass"
+            >
+              {t("none")}
+            </button>
+          </div>
+          <TrackTrendsTrackPicker
+            catalogTracks={pickerTracks}
+            selectedIds={selectedIds}
+            onToggle={toggleTrack}
+            getColor={getColor}
+            getTrackIndex={getTrackIndex}
+            enableRemoteSearch
+            onPickRemoteTrack={handlePickRemoteTrack}
+            maxSelectable={MAX_SERIES_TRACKS}
+            idPrefix="mobile-track-trends"
+          />
+        </div>
+      </details>
+    </div>
+  );
+}
+
 function TrendsContent() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -362,14 +738,17 @@ function TrendsContent() {
         <div className={GROUP_BY_BAR_CLASS}>
           <PeriodSelector defaultPeriod="month" value={period} />
         </div>
-        <div className="mt-6 space-y-12">
+        <div className="mt-5 space-y-6 lg:hidden">
+          <TrackTrendsMobileEmptyHero tracksHref={tracksHref} badgeLabel={badgeLabel} />
+          <ErrorState variant="startup" error={error} message={t("errorLoading")} onRetry={() => refetch()} />
+        </div>
+        <div className="mt-6 hidden space-y-12 lg:block">
           <TrackTrendsHeroFrame
             tracksHref={tracksHref}
             subtitleKey="subtitleExtended"
             badgeLabel={badgeLabel}
             panel={<TrackTrendsHeroPanel period={period} selectedCount={selectedIds.length} />}
           />
-          <ErrorState variant="startup" error={error} message={t("errorLoading")} onRetry={() => refetch()} />
         </div>
       </>
     );
@@ -381,18 +760,21 @@ function TrendsContent() {
         <div className={GROUP_BY_BAR_CLASS}>
           <PeriodSelector defaultPeriod="month" value={period} />
         </div>
-        <div className="mt-6 space-y-12">
-          <TrackTrendsHeroFrame
-            tracksHref={tracksHref}
-            subtitleKey="subtitleExtended"
-            badgeLabel={badgeLabel}
-            panel={<TrackTrendsHeroPanel period={period} selectedCount={selectedIds.length} />}
-          />
+        <div className="mt-5 space-y-6 lg:hidden">
+          <TrackTrendsMobileEmptyHero tracksHref={tracksHref} badgeLabel={badgeLabel} />
           <EmptyState
             variant="startup"
             {...emptyStatePresets.changeDates(pathname)}
             message={t("noTrackData")}
             description={t("changeDatesDescription")}
+          />
+        </div>
+        <div className="mt-6 hidden space-y-12 lg:block">
+          <TrackTrendsHeroFrame
+            tracksHref={tracksHref}
+            subtitleKey="subtitleExtended"
+            badgeLabel={badgeLabel}
+            panel={<TrackTrendsHeroPanel period={period} selectedCount={selectedIds.length} />}
           />
         </div>
       </>
@@ -405,7 +787,28 @@ function TrendsContent() {
         <PeriodSelector defaultPeriod="month" value={period} />
       </div>
 
-      <div className="mt-6 space-y-12">
+      <div className="mt-5 lg:hidden">
+        <TrackTrendsMobileExperience
+          tracksHref={tracksHref}
+          badgeLabel={badgeLabel}
+          period={period}
+          selectedIds={selectedIds}
+          pickerTracks={pickerTracks}
+          chartData={chartData}
+          isLoading={isLoading}
+          isFetching={isFetching}
+          selectionPending={selectionPending}
+          idToTrack={idToTrack}
+          toggleTrack={toggleTrack}
+          getTrackIndex={getTrackIndex}
+          selectAll={selectAll}
+          selectNone={selectNone}
+          handlePickRemoteTrack={handlePickRemoteTrack}
+          chartTheme={chartTheme}
+        />
+      </div>
+
+      <div className="mt-6 hidden space-y-12 lg:block">
         <TrackTrendsHeroFrame
           tracksHref={tracksHref}
           subtitleKey="subtitleExtended"
@@ -584,7 +987,10 @@ function TrackTrendsFallback() {
       <div className={GROUP_BY_BAR_CLASS}>
         <div className="h-10 w-64 animate-pulse rounded-xl border border-white/10 bg-white/10" />
       </div>
-      <div className="mt-6 space-y-12">
+      <div className="mt-5 lg:hidden">
+        <TrackTrendsMobileSkeleton />
+      </div>
+      <div className="mt-6 hidden space-y-12 lg:block">
         <TrackTrendsHeroFrame
           tracksHref={tracksHref}
           subtitleKey="subtitle"

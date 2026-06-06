@@ -685,6 +685,40 @@
         "title": "Add context to the patterns.",
         "description": "AI summaries and calendar intensity help explain when and why your listening changes."
       }
+    },
+    "mobile": {
+      "heroEyebrow": "Now",
+      "askAgentCta": "Ask your Soundprint",
+      "comparisonHint": "Compared with the previous matching period when available.",
+      "vsShort": "vs prev.",
+      "primaryInsight": {
+        "topTrackEyebrow": "Your strongest signal",
+        "topTrackBody": "This is the track pulling you back most in this window, led by {artist}.",
+        "topArtistEyebrow": "Your rotation anchor",
+        "topArtistBody": "This artist carries the most weight in your listening right now.",
+        "libraryEyebrow": "Your listening shape",
+        "libraryBody": "Your overview starts with volume, variety, and the patterns behind them."
+      },
+      "momentum": {
+        "eyebrow": "Momentum",
+        "title": "How your listening moved",
+        "total": "Plays plotted",
+        "peak": "Peak month"
+      },
+      "disclosures": {
+        "leaders": {
+          "title": "Top signals",
+          "description": "Three quick ladders for tracks, artists, and genres."
+        },
+        "taste": {
+          "title": "Taste profile",
+          "description": "Open the larger profile only when you want more context."
+        },
+        "context": {
+          "title": "AI and calendar context",
+          "description": "Secondary explanations stay one tap deeper on mobile."
+        }
+      }
     }
   },
   "timeline": {
@@ -873,7 +907,25 @@
     "paginationPrevious": "Previous",
     "paginationNext": "Next",
     "paginationPage": "Page {page} / {totalPages}",
-    "pageSizeLabel": "Rows"
+    "pageSizeLabel": "Rows",
+    "mobile": {
+      "eyebrow": "Genre story",
+      "title": "Your sound starts here",
+      "heroInsight": "{genre} leads this window with {percentage}% of your plays, so the page opens with that signal before the full breakdown.",
+      "topGenreLabel": "Top genre",
+      "topThreeLabel": "Top 3",
+      "shareLabel": "Share",
+      "primarySignal": "Primary signal",
+      "topLanesTitle": "The lanes carrying your taste",
+      "artistContext": "Artists behind it",
+      "noArtistContext": "Artist context is not available for this genre yet.",
+      "supportingMetrics": "Supporting metrics",
+      "distributionTitle": "The compact breakdown",
+      "distributionDescription": "{total} listens are grouped by genre. The first five stay upfront; the rest stays tucked away.",
+      "showMoreGenres": "Show genres 6-10",
+      "accuracySummary": "About genre accuracy",
+      "loading": "Loading"
+    }
   },
   "genreTrends": {
     "title": "Genre trends",
@@ -943,7 +995,39 @@
     "groqUnavailableInViewedProfile": "Groq classification is available only on your own dashboard, not while viewing another profile or demo data.",
     "groqSessionRunningHint": "A Groq classification session is already in progress.",
     "groqProgressAnchor": "View the progress banner",
-    "groqStartNoUnknown": "Every track you have listened to already has a genre in your data; there is nothing left for Groq to classify here."
+    "groqStartNoUnknown": "Every track you have listened to already has a genre in your data; there is nothing left for Groq to classify here.",
+    "mobile": {
+      "eyebrow": "Genre story",
+      "heroTitle": "What sound is leading this window?",
+      "heroSubtitle": "Start with the genre carrying your listening, then scan the shifts worth investigating.",
+      "topGenreLabel": "Leading genre",
+      "topGenreFallback": "Select at least one genre to reveal the strongest signal in this window.",
+      "listenCount": "{count} listens",
+      "peakLine": "Peak {count} on {date}",
+      "noPeak": "No peak yet",
+      "signalsLabel": "Genre trend signals",
+      "periodSignal": "Grouped by",
+      "selectedSignal": "Selected",
+      "bucketsSignal": "Periods",
+      "moverSignal": "Biggest move",
+      "noMover": "No movement",
+      "deltaUp": "+{count} from first to last",
+      "deltaDown": "-{count} from first to last",
+      "deltaFlat": "Flat from first to last",
+      "quickFocusTitle": "The genres to watch",
+      "quickFocusDescription": "The first five signals keep mobile scanning focused; edit the full set below.",
+      "moreSelected": "+{count} more",
+      "activeBuckets": "{count} active periods",
+      "chartTitle": "Small-screen trajectory",
+      "chartSubtitle": "A simplified chart follows the strongest selected genres, with details available by tap.",
+      "chartLimited": "Top {count}",
+      "insightsTitle": "Read the pattern",
+      "insightsDescription": "Open the AI narration once you want the deeper interpretation.",
+      "openSummary": "Open",
+      "editTitle": "Edit genres",
+      "editDescription": "Change the selected lines without making the main mobile story dense.",
+      "editSummary": "Edit"
+    }
   },
   "palette": {
     "title": "Palette",
@@ -984,7 +1068,27 @@
     "doneHintArtists": "You have processed every artist in this queue.",
     "doneHintTracks": "You have processed every track in this queue.",
     "suggestionsTitle": "Suggested genres",
-    "suggestionsHint": "Suggestions are hints only and are never auto-applied."
+    "suggestionsHint": "Suggestions are hints only and are never auto-applied.",
+    "mobile": {
+      "eyebrow": "Palette queue",
+      "heroTitle": "Fix the genre with the biggest payoff first.",
+      "heroSubtitleArtists": "Start with the artist affecting the most Unknown listens, then move through the queue one decision at a time.",
+      "heroSubtitleTracks": "Start with the track affecting the most Unknown listens, then keep the queue moving in short mobile sessions.",
+      "nowFixing": "Now fixing",
+      "nextBestMatch": "Highest-impact item in this queue",
+      "impactSignal": "Impact",
+      "remainingSignal": "Left",
+      "mappedSignal": "Mapped",
+      "suggestionsSignal": "Hints",
+      "decisionEyebrow": "Next decision",
+      "decisionTitle": "Choose the genre to apply",
+      "decisionSubtitle": "Use a suggestion, pick an existing genre, or open the custom field only when you need it.",
+      "highImpact": "High impact",
+      "pickGenre": "Pick from your genres",
+      "customGenreTitle": "Need a custom genre?",
+      "progressDetailsTitle": "Progress details",
+      "whyDetailsTitle": "Why this exists"
+    }
   },
   "artistTrends": {
     "title": "Artist trends",
@@ -1045,7 +1149,39 @@
     "aiEmpty": "No summary for this selection.",
     "chartUpdating": "Updating chart…",
     "selectionPending": "Applying selection…",
-    "aiUpdating": "Updating summary…"
+    "aiUpdating": "Updating summary…",
+    "mobile": {
+      "eyebrow": "Artist story",
+      "heroTitle": "Who is carrying this listening window?",
+      "heroSubtitle": "Start with the artist shaping the period, then scan the supporting signals before opening the full comparison.",
+      "topArtistLabel": "Most present",
+      "topArtistFallback": "Select artists to reveal the leader for this period.",
+      "listenCount": "{count} listens",
+      "peakLine": "Peak {count} · {date}",
+      "noPeak": "No peak yet",
+      "signalsLabel": "Artist trend signals",
+      "periodSignal": "Cadence",
+      "selectedSignal": "Selection",
+      "bucketsSignal": "Points",
+      "riserSignal": "Biggest move",
+      "noRiser": "Stable",
+      "deltaUp": "+{count} since start",
+      "deltaDown": "-{count} since start",
+      "deltaFlat": "No change",
+      "quickFocusTitle": "Current focus",
+      "quickFocusDescription": "On mobile, the first read stays limited to the strongest selected artists so the story remains legible.",
+      "moreSelected": "+{count} more",
+      "activeBuckets": "{count} active points",
+      "aiTitle": "Read the pattern",
+      "aiDescription": "Open the AI summary after the top signals.",
+      "readSummary": "Read",
+      "chartTitle": "Shape of the key lines",
+      "chartSubtitle": "The mobile chart shows up to five selected artists; edit the comparison below for the full set.",
+      "chartLimited": "5 of {count}",
+      "editTitle": "Adjust the comparison",
+      "editDescription": "Search, add, or remove artists. The story above updates with your selection.",
+      "editSummary": "Edit"
+    }
   },
   "artists": {
     "title": "Artists",
@@ -1073,6 +1209,33 @@
         "title": "Detailed ranking",
         "description": "Expand for timestamps, track counts, and pagination through the full list.",
         "badge": "Dataset"
+      }
+    },
+    "mobile": {
+      "heroEyebrow": "Artist pulse",
+      "heroTitle": "Who owns your rotation?",
+      "heroSubtitle": "Start with the artist carrying this window, then open the deeper ranking only when you want the full index.",
+      "primaryInsightEyebrow": "Rotation anchor",
+      "primaryInsightBody": "{name} is the artist with the most weight in your listening right now.",
+      "primaryInsightFallback": "Import listening data to reveal the artist leading this period.",
+      "listenCount": "{count} listens",
+      "shareLabel": "{share} of listens",
+      "signalsLabel": "Artist overview signals",
+      "avgSignal": "Avg / artist",
+      "concentrationSignal": "Top share",
+      "topFiveEyebrow": "First five",
+      "topFiveTitle": "The artists setting the tone",
+      "topFiveDescription": "A compact read of the names carrying the most listening weight right now.",
+      "open": "Open",
+      "disclosures": {
+        "supporting": {
+          "title": "Open the rest of the top 20",
+          "description": "Reveal supporting artists without turning the first screen into a chart wall."
+        },
+        "index": {
+          "title": "Browse the full artist index",
+          "description": "Use pagination when you want every ranked artist in this date window."
+        }
       }
     },
     "heroEyebrow": "Rankings & overview",
@@ -1165,6 +1328,32 @@
         "badge": "Dataset"
       }
     },
+    "mobile": {
+      "heroEyebrow": "Replay signal",
+      "primaryInsightEyebrow": "Most replayed",
+      "primaryInsightBody": "This is the track you returned to most in this window, led by {artist}.",
+      "shareLabel": "Share of listens",
+      "trendsCta": "See how it moved",
+      "topFiveEyebrow": "First five",
+      "topFiveTitle": "The songs setting the tone",
+      "topFiveDescription": "A compact read of the tracks carrying the most listening weight right now.",
+      "stats": {
+        "uniqueTracks": "Unique songs represented in this range.",
+        "totalListens": "Every saved play behind this ranking.",
+        "averageLabel": "Avg / track",
+        "average": "How concentrated your repeats are."
+      },
+      "disclosures": {
+        "top20": {
+          "title": "Open the rest of the top 20",
+          "description": "Reveal the supporting tracks without turning the first screen into a chart wall."
+        },
+        "ranking": {
+          "title": "Browse the full ranking",
+          "description": "Use pagination when you want the complete track index."
+        }
+      }
+    },
     "heroEyebrow": "Rankings & overview",
     "heroTitle": "Your tracks",
     "heroSubtitle": "Top tracks for the selected period",
@@ -1233,7 +1422,36 @@
     "searchAdd": "Add",
     "selectionCount": "{selected} / {max} on chart",
     "chartUpdating": "Updating chart…",
-    "selectionPending": "Applying selection…"
+    "selectionPending": "Applying selection…",
+    "mobile": {
+      "eyebrow": "Track story",
+      "heroTitle": "What is moving in your replay?",
+      "heroSubtitle": "Start with the songs doing the most in this window, then open the deeper controls only when you want to tune the comparison.",
+      "topTrackLabel": "Most present",
+      "topTrackFallback": "Select tracks to reveal the lead song for this period.",
+      "listenCount": "{count} listens",
+      "peakLine": "Peak {count} · {date}",
+      "noPeak": "No peak yet",
+      "signalsLabel": "Track trend signals",
+      "periodSignal": "Cadence",
+      "selectedSignal": "Selected",
+      "bucketsSignal": "Points",
+      "riserSignal": "Biggest move",
+      "noRiser": "Flat",
+      "deltaUp": "+{count} since start",
+      "deltaDown": "-{count} since start",
+      "deltaFlat": "No change",
+      "quickFocusTitle": "Now in focus",
+      "quickFocusDescription": "Mobile keeps the first read to the strongest selected lines so the story stays scannable.",
+      "moreSelected": "+{count} more",
+      "activeBuckets": "{count} active points",
+      "chartTitle": "Shape of the top lines",
+      "chartSubtitle": "The phone chart shows up to five selected tracks; the full comparison stays available below.",
+      "chartLimited": "5 of {count}",
+      "editTitle": "Tune the comparison",
+      "editDescription": "Search, add, or remove tracks. The story above updates with your picks.",
+      "editSummary": "Edit"
+    }
   },
   "ai-insights": {
     "title": "AI Insights",
@@ -1389,6 +1607,20 @@
     "aiCached": "AI profile served from cache",
     "aiUnavailable": "AI is currently disabled for this environment or browser, so this page is showing a deterministic profile from your stats.",
     "aiErrorTitle": "AI analysis unavailable. Showing a data-based summary instead.",
+    "mobile": {
+      "dateRangeFallback": "Range",
+      "signatureLabel": "Anchor",
+      "genreFallback": "Genre signal pending",
+      "storyTitle": "What this period says",
+      "genresTitle": "Dominant mix",
+      "genresHint": "Top genre signals, kept short for mobile reading.",
+      "anchorShare": "{percent}% from top artist",
+      "artistsTitle": "Artists shaping it",
+      "artistsHint": "Open only when you want the supporting signal.",
+      "nextTitle": "Go deeper when ready",
+      "nextLead": "Your Music keeps the larger charts, comparisons, and detailed tools.",
+      "overviewCta": "Open full dashboard"
+    },
     "overviewCallout": {
       "badge": "Start with the heart of Soundprint-AI",
       "title": "Your Music is the overview that ties everything together",

@@ -15,6 +15,7 @@ import {
 } from "recharts";
 import { ChartResponsiveContainer } from "@/lib/components/chart-responsive-container";
 import { useOverviewStats, useTimeline, useGenres } from "@/lib/hooks/use-listening";
+import type { OverviewStatsWithTopArtists } from "@/lib/hooks/use-listening";
 import { useTrackStats } from "@/lib/hooks/use-tracks";
 import { HeatmapCalendarOverviewWidget } from "@/lib/components/heatmap-calendar-overview-widget";
 import { GenreTrendsSummaryWidget } from "@/lib/components/genre-trends-summary-widget";
@@ -32,10 +33,19 @@ import {
   OverviewSkeleton,
   OverviewStatsSectionSkeleton,
 } from "@/lib/components/skeleton-loaders";
-import { OverviewStatsSection } from "@/lib/components/overview-stats-section";
+import { OverviewStatsSection, type OverviewStatsChanges } from "@/lib/components/overview-stats-section";
 import { formatOverviewDateRangeLabel } from "@/lib/utils/overview-date-range-label";
 import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
 import { Sparkles } from "lucide-react";
+
+const MOBILE_DATE_OPTS = { month: "2-digit", day: "2-digit", year: "2-digit" } as const;
+
+function formatMobileDateRangeLabel(startDate?: string, endDate?: string, locale?: string): string {
+  if (!startDate || !endDate) return "";
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  return `${start.toLocaleDateString(locale, MOBILE_DATE_OPTS)}–${end.toLocaleDateString(locale, MOBILE_DATE_OPTS)}`;
+}
 
 /**
  * Calcule la période précédente basée sur la période actuelle
@@ -484,6 +494,636 @@ function TopLibraryCard({
   );
 }
 
+type MobileOverviewStat = {
+  label: string;
+  value: string;
+  change?: {
+    displayValue: string;
+    isPositive: boolean;
+  } | null;
+};
+
+type MobileLeaderItem = LibraryLeaderItem & {
+  href?: string;
+};
+
+type MobileChartPoint = {
+  formattedDate: string;
+  listens: number;
+};
+
+function formatListeningTime(totalSeconds: number, notAvailable: string) {
+  if (totalSeconds <= 0) return notAvailable;
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  if (hours > 0) return `${hours}h ${minutes}min`;
+  return `${minutes}min`;
+}
+
+function MobileChangePill({
+  change,
+  label,
+}: {
+  change?: MobileOverviewStat["change"];
+  label: string;
+}) {
+  if (!change) return null;
+
+  return (
+    <span
+      className={`inline-flex min-h-8 items-center rounded-full px-2.5 text-[11px] font-semibold tabular-nums ${
+        change.isPositive
+          ? "border border-emerald-300/20 bg-emerald-400/10 text-emerald-100"
+          : "border border-rose-300/20 bg-rose-400/10 text-rose-100"
+      }`}
+    >
+      {change.isPositive ? "+" : "-"}
+      {change.displayValue}% {label}
+    </span>
+  );
+}
+
+function MobileMetricRail({
+  stats,
+  comparisonLabel,
+}: {
+  stats: MobileOverviewStat[];
+  comparisonLabel: string;
+}) {
+  return (
+    <div className="-mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none]">
+      {stats.map((stat) => (
+        <article
+          key={stat.label}
+          className="min-w-[9.75rem] snap-start rounded-3xl border border-white/10 bg-slate-950 p-4 text-white shadow-lg shadow-black/10 backdrop-blur"
+        >
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+            {stat.label}
+          </p>
+          <p className="mt-2 text-2xl font-semibold tabular-nums tracking-[-0.04em]">
+            {stat.value}
+          </p>
+          <div className="mt-3 min-h-8">
+            <MobileChangePill change={stat.change} label={comparisonLabel} />
+          </div>
+        </article>
+      ))}
+    </div>
+  );
+}
+
+function MobileLeaderRow({
+  item,
+  index,
+  locale,
+  listensLabel,
+}: {
+  item: MobileLeaderItem;
+  index: number;
+  locale: string;
+  listensLabel: string;
+}) {
+  const content = (
+    <>
+      <div className="flex min-w-0 items-center gap-3">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.07] text-xs font-black text-white">
+          {index + 1}
+        </span>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold text-white" title={item.title}>
+            {item.title}
+          </p>
+          {item.subtitle ? (
+            <p className="mt-0.5 truncate text-xs text-slate-400" title={item.subtitle}>
+              {item.subtitle}
+            </p>
+          ) : null}
+        </div>
+      </div>
+      <div className="shrink-0 text-right">
+        <p className="text-sm font-semibold tabular-nums text-white">
+          {item.count.toLocaleString(locale)}
+        </p>
+        <p className="text-[11px] text-slate-400">
+          {item.percentage.toFixed(1)}% · {listensLabel}
+        </p>
+      </div>
+    </>
+  );
+
+  const className =
+    "flex min-h-14 items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.05] px-3 py-2.5";
+
+  if (item.href) {
+    return (
+      <Link href={item.href} className={className}>
+        {content}
+      </Link>
+    );
+  }
+
+  return <div className={className}>{content}</div>;
+}
+
+function MobileDisclosure({
+  title,
+  description,
+  children,
+  defaultOpen = false,
+}: {
+  title: string;
+  description: string;
+  children: ReactNode;
+  defaultOpen?: boolean;
+}) {
+  return (
+    <details
+      className="group rounded-[1.75rem] border border-card-border bg-white/80 shadow-card backdrop-blur dark:border-white/[0.08] dark:bg-[#090b14]"
+      open={defaultOpen}
+    >
+      <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-4">
+        <span>
+          <span className="block text-sm font-semibold text-foreground dark:text-white">
+            {title}
+          </span>
+          <span className="mt-1 block text-xs leading-5 text-muted dark:text-slate-400">
+            {description}
+          </span>
+        </span>
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-card-border bg-white/70 text-muted transition-transform group-open:rotate-90 dark:border-white/[0.10] dark:bg-white/[0.06] dark:text-slate-300">
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </span>
+      </summary>
+      <div className="border-t border-card-border px-4 py-4 dark:border-white/[0.08]">
+        {children}
+      </div>
+    </details>
+  );
+}
+
+function MobileTimelineCard({
+  chartData,
+  timelineHref,
+  locale,
+}: {
+  chartData: MobileChartPoint[];
+  timelineHref: string;
+  locale: string;
+}) {
+  const t = useTranslations("overview");
+  const totalListens = chartData.reduce((sum, point) => sum + point.listens, 0);
+  const peakPoint = chartData.reduce<MobileChartPoint | null>(
+    (peak, point) => (!peak || point.listens > peak.listens ? point : peak),
+    null
+  );
+
+  if (chartData.length === 0) return null;
+
+  return (
+    <article className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-slate-950 p-4 text-white shadow-2xl shadow-black/20">
+      <div
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(103,232,249,0.18),transparent_32%),radial-gradient(circle_at_85%_20%,rgba(167,139,250,0.20),transparent_30%)]"
+        aria-hidden
+      />
+      <div className="relative">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-100">
+              {t("mobile.momentum.eyebrow")}
+            </p>
+            <h2 className="mt-2 text-xl font-semibold tracking-[-0.04em]">
+              {t("mobile.momentum.title")}
+            </h2>
+          </div>
+          <Link
+            href={timelineHref}
+            className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-2xl border border-white/15 bg-white/10 px-3 text-xs font-semibold text-white"
+          >
+            {t("seeMore")}
+          </Link>
+        </div>
+
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+              {t("mobile.momentum.total")}
+            </p>
+            <p className="mt-1 text-xl font-semibold tabular-nums">
+              {totalListens.toLocaleString(locale)}
+            </p>
+          </div>
+          <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+              {t("mobile.momentum.peak")}
+            </p>
+            <p className="mt-1 truncate text-xl font-semibold">
+              {peakPoint?.formattedDate ?? t("notAvailable")}
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-4 rounded-[1.25rem] border border-white/10 bg-black/20 p-2">
+          <ChartResponsiveContainer
+            token="overviewArea"
+            minWidth={chartData.length > 8 ? Math.max(320, chartData.length * 34) : undefined}
+          >
+            <AreaChart data={chartData} margin={{ top: 8, right: 10, left: -18, bottom: 0 }}>
+              <defs>
+                <linearGradient id="mobileOverviewAreaGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#67e8f9" stopOpacity={0.38} />
+                  <stop offset="60%" stopColor="#a78bfa" stopOpacity={0.12} />
+                  <stop offset="100%" stopColor="#67e8f9" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <XAxis
+                dataKey="formattedDate"
+                tick={{ fill: "#94a3b8", fontSize: 10 }}
+                axisLine={false}
+                tickLine={false}
+                interval="preserveStartEnd"
+                minTickGap={18}
+              />
+              <YAxis hide />
+              <Tooltip
+                contentStyle={CHART_TOOLTIP_STYLES.contentStyle}
+                labelStyle={CHART_TOOLTIP_STYLES.labelStyle}
+                itemStyle={CHART_TOOLTIP_STYLES.itemStyle}
+                formatter={(value: number) => [
+                  `${value.toLocaleString(locale)} ${t("listens")}`,
+                  t("Listens"),
+                ]}
+              />
+              <Area
+                type="monotone"
+                dataKey="listens"
+                stroke="#67e8f9"
+                strokeWidth={3}
+                fill="url(#mobileOverviewAreaGradient)"
+                animationDuration={600}
+                animationEasing="ease-out"
+              />
+            </AreaChart>
+          </ChartResponsiveContainer>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function MobileOverviewFlow({
+  title,
+  badgeLabel,
+  hasComparison,
+  data,
+  changes,
+  chartData,
+  topTracks,
+  topArtists,
+  topGenres,
+  locale,
+  timelineHref,
+  tracksHref,
+  artistsHref,
+  genresHref,
+  musicAgentHref,
+  startDate,
+  endDate,
+}: {
+  title: string;
+  badgeLabel: string;
+  hasComparison: boolean;
+  data: OverviewStatsWithTopArtists;
+  changes: OverviewStatsChanges;
+  chartData: MobileChartPoint[];
+  topTracks: Array<{
+    trackId: string;
+    name: string;
+    artistName: string;
+    count: number;
+    percentage: number;
+  }>;
+  topArtists: Array<{
+    artistId: string;
+    name: string;
+    count: number;
+    percentage: number;
+  }>;
+  topGenres: Array<{
+    genre: string;
+    count: number;
+    percentage: number;
+  }>;
+  locale: string;
+  timelineHref: string;
+  tracksHref: string;
+  artistsHref: string;
+  genresHref: string;
+  musicAgentHref: string;
+  startDate?: string;
+  endDate?: string;
+}) {
+  const t = useTranslations("overview");
+  const topTrack = topTracks[0];
+  const topArtist = topArtists[0];
+  const topGenre = topGenres[0];
+  const primaryInsight = topTrack
+    ? {
+        eyebrow: t("mobile.primaryInsight.topTrackEyebrow"),
+        title: topTrack.name,
+        subtitle: t("mobile.primaryInsight.topTrackBody", { artist: topTrack.artistName }),
+        metric: topTrack.count.toLocaleString(locale),
+        metricLabel: t("listens"),
+      }
+    : topArtist
+      ? {
+          eyebrow: t("mobile.primaryInsight.topArtistEyebrow"),
+          title: topArtist.name,
+          subtitle: t("mobile.primaryInsight.topArtistBody"),
+          metric: topArtist.count.toLocaleString(locale),
+          metricLabel: t("listens"),
+        }
+      : {
+          eyebrow: t("mobile.primaryInsight.libraryEyebrow"),
+          title,
+          subtitle: t("mobile.primaryInsight.libraryBody"),
+          metric: data.totalListens.toLocaleString(locale),
+          metricLabel: t("stats.totalListens"),
+        };
+
+  const stats: MobileOverviewStat[] = [
+    {
+      label: t("stats.totalListens"),
+      value: data.totalListens.toLocaleString(locale),
+      change: changes?.totalListens,
+    },
+    {
+      label: t("stats.uniqueArtists"),
+      value: data.uniqueArtists.toLocaleString(locale),
+      change: changes?.uniqueArtists,
+    },
+    {
+      label: t("stats.totalTime"),
+      value: formatListeningTime(data.totalPlayTime, t("notAvailable")),
+      change: changes?.totalPlayTime,
+    },
+  ];
+
+  const leaderSections = [
+    {
+      key: "tracks",
+      title: t("topTracks"),
+      description: t("yourTopTracks"),
+      href: tracksHref,
+      items: topTracks.slice(0, 3).map((track) => ({
+        id: track.trackId,
+        title: track.name,
+        subtitle: track.artistName,
+        count: track.count,
+        percentage: track.percentage,
+      })),
+    },
+    {
+      key: "artists",
+      title: t("topArtists"),
+      description: t("yourTopArtists"),
+      href: artistsHref,
+      items: topArtists.slice(0, 3).map((artist) => ({
+        id: artist.artistId,
+        title: artist.name,
+        count: artist.count,
+        percentage: artist.percentage,
+      })),
+    },
+    {
+      key: "genres",
+      title: t("topGenres"),
+      description: t("yourTopGenres"),
+      href: genresHref,
+      items: topGenres.slice(0, 3).map((genre) => ({
+        id: genre.genre,
+        title: genre.genre,
+        count: genre.count,
+        percentage: genre.percentage,
+      })),
+    },
+  ].filter((section) => section.items.length > 0);
+
+  return (
+    <div className="space-y-5">
+      <section className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-slate-950 p-5 text-white shadow-2xl shadow-accent-violet/20">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(240,64,104,0.24),transparent_34%),radial-gradient(circle_at_86%_18%,rgba(79,144,224,0.20),transparent_34%),linear-gradient(135deg,rgba(3,7,18,0.98),rgba(30,27,75,0.86)_48%,rgba(8,47,73,0.72))]" />
+        <div className="relative">
+          <div className="flex items-center justify-between gap-3">
+            <p className="inline-flex min-h-8 shrink-0 items-center whitespace-nowrap rounded-full border border-white/15 bg-white/10 px-2.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-100">
+              {t("mobile.heroEyebrow")}
+            </p>
+            <span className="inline-flex min-h-8 shrink-0 items-center whitespace-nowrap rounded-full border border-white/15 bg-white/10 px-2.5 text-[11px] font-semibold text-white/85">
+              {badgeLabel}
+            </span>
+          </div>
+
+          <div className="mt-6">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
+              {primaryInsight.eyebrow}
+            </p>
+            <h1 className="mt-3 text-balance text-3xl font-semibold tracking-[-0.06em]">
+              {primaryInsight.title}
+            </h1>
+            <p className="mt-3 text-sm leading-6 text-slate-300">
+              {primaryInsight.subtitle}
+            </p>
+          </div>
+
+          <div className="mt-5 flex items-end justify-between gap-4 rounded-3xl border border-white/10 bg-white/[0.07] p-4">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                {primaryInsight.metricLabel}
+              </p>
+              <p className="mt-1 text-4xl font-semibold tabular-nums tracking-[-0.06em]">
+                {primaryInsight.metric}
+              </p>
+            </div>
+            {topGenre ? (
+              <div className="max-w-[8rem] text-right">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                  {t("libraryLeaders.topGenre")}
+                </p>
+                <p className="mt-1 truncate text-sm font-semibold text-cyan-100" title={topGenre.genre}>
+                  {topGenre.genre}
+                </p>
+              </div>
+            ) : null}
+          </div>
+
+          <div className="mt-4 flex flex-col gap-3">
+            <Link
+              href={musicAgentHref}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-white px-4 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25"
+              aria-label={t("musicAgentPromoAria")}
+            >
+              <Sparkles className="h-4 w-4" aria-hidden />
+              {t("mobile.askAgentCta")}
+            </Link>
+            {hasComparison ? (
+              <p className="text-center text-xs font-medium text-emerald-100">
+                {t("mobile.comparisonHint")}
+              </p>
+            ) : null}
+          </div>
+        </div>
+      </section>
+
+      <MobileMetricRail stats={stats} comparisonLabel={t("mobile.vsShort")} />
+      <MobileTimelineCard chartData={chartData} timelineHref={timelineHref} locale={locale} />
+
+      <div className="space-y-3">
+        <MobileDisclosure
+          title={t("mobile.disclosures.leaders.title")}
+          description={t("mobile.disclosures.leaders.description")}
+          defaultOpen
+        >
+          <div className="space-y-4">
+            {leaderSections.map((section) => (
+              <section key={section.key} className="rounded-3xl bg-slate-950 p-3">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <div>
+                    <h3 className="text-sm font-semibold text-white">{section.title}</h3>
+                    <p className="mt-0.5 text-xs text-slate-400">{section.description}</p>
+                  </div>
+                  <Link
+                    href={section.href}
+                    className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] px-3 text-xs font-semibold text-white"
+                  >
+                    {t("seeAll")}
+                  </Link>
+                </div>
+                <div className="space-y-2">
+                  {section.items.map((item, index) => (
+                    <MobileLeaderRow
+                      key={item.id}
+                      item={item}
+                      index={index}
+                      locale={locale}
+                      listensLabel={t("listens")}
+                    />
+                  ))}
+                </div>
+              </section>
+            ))}
+          </div>
+        </MobileDisclosure>
+
+        <MobileDisclosure
+          title={t("mobile.disclosures.taste.title")}
+          description={t("mobile.disclosures.taste.description")}
+        >
+          <div className="min-h-[260px]">
+            <TasteProfileSummaryWidget />
+          </div>
+        </MobileDisclosure>
+
+        <MobileDisclosure
+          title={t("mobile.disclosures.context.title")}
+          description={t("mobile.disclosures.context.description")}
+        >
+          <div className="space-y-4">
+            <AiInsightsSummaryWidget />
+            <HeatmapCalendarOverviewWidget startDate={startDate} endDate={endDate} />
+          </div>
+        </MobileDisclosure>
+      </div>
+    </div>
+  );
+}
+
+function MobileOverviewLoadingFallback({
+  title,
+  badgeLabel,
+}: {
+  title: string;
+  badgeLabel: string;
+}) {
+  const t = useTranslations("overview");
+  return (
+    <div className="space-y-5 lg:hidden">
+      <section className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-slate-950 p-5 text-white shadow-2xl shadow-accent-violet/20">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(240,64,104,0.20),transparent_34%),radial-gradient(circle_at_86%_18%,rgba(79,144,224,0.18),transparent_34%)]" />
+        <div className="relative">
+          <div className="flex items-center justify-between gap-3">
+            <p className="inline-flex min-h-8 shrink-0 items-center whitespace-nowrap rounded-full border border-white/15 bg-white/10 px-2.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-100">
+              {t("mobile.heroEyebrow")}
+            </p>
+            <span className="inline-flex min-h-8 shrink-0 items-center whitespace-nowrap rounded-full border border-white/15 bg-white/10 px-2.5 text-[11px] font-semibold">
+              {badgeLabel}
+            </span>
+          </div>
+          <h1 className="mt-6 text-3xl font-semibold tracking-[-0.06em]">{title}</h1>
+          <div className="mt-5 space-y-3">
+            <div className="h-4 w-11/12 animate-pulse rounded bg-white/15" />
+            <div className="h-4 w-8/12 animate-pulse rounded bg-white/10" />
+          </div>
+          <div className="mt-5 rounded-3xl border border-white/10 bg-white/[0.07] p-4">
+            <div className="h-10 w-28 animate-pulse rounded bg-white/20" />
+            <div className="mt-3 h-3 w-24 animate-pulse rounded bg-white/10" />
+          </div>
+        </div>
+      </section>
+      <div className="-mx-4 flex gap-3 overflow-hidden px-4">
+        {[0, 1, 2].map((i) => (
+          <div
+            key={i}
+            className="h-32 min-w-[9.75rem] animate-pulse rounded-3xl border border-white/10 bg-slate-950/80"
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function MobileOverviewUnavailable({
+  title,
+  description,
+  badgeLabel,
+  statusLabel,
+  children,
+}: {
+  title: string;
+  description: string;
+  badgeLabel: string;
+  statusLabel: string;
+  children: ReactNode;
+}) {
+  const t = useTranslations("overview");
+  return (
+    <div className="space-y-5 lg:hidden">
+      <section className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-slate-950 p-5 text-white shadow-2xl shadow-accent-violet/20">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(240,64,104,0.20),transparent_34%),radial-gradient(circle_at_86%_18%,rgba(79,144,224,0.18),transparent_34%)]" />
+        <div className="relative">
+          <div className="flex items-center justify-between gap-3">
+            <p className="inline-flex min-h-8 shrink-0 items-center whitespace-nowrap rounded-full border border-white/15 bg-white/10 px-2.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-100">
+              {t("mobile.heroEyebrow")}
+            </p>
+            <span className="inline-flex min-h-8 shrink-0 items-center whitespace-nowrap rounded-full border border-white/15 bg-white/10 px-2.5 text-[11px] font-semibold">
+              {badgeLabel}
+            </span>
+          </div>
+          <h1 className="mt-6 text-3xl font-semibold tracking-[-0.06em]">{title}</h1>
+          <p className="mt-3 text-sm leading-6 text-slate-300">{description}</p>
+          <div className="mt-5 rounded-3xl border border-dashed border-white/25 bg-white/[0.05] p-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+              {statusLabel}
+            </p>
+            <p className="mt-2 text-3xl font-semibold tabular-nums">—</p>
+          </div>
+        </div>
+      </section>
+      {children}
+    </div>
+  );
+}
+
 function OverviewContent() {
   const searchParams = useSearchParams();
   const t = useTranslations("overview");
@@ -492,6 +1132,7 @@ function OverviewContent() {
   const { startDate: rangeStart, endDate: rangeEnd, isAll } = useListenDateRange();
   const dateRangeLabel = formatOverviewDateRangeLabel(rangeStart, rangeEnd, locale);
   const badgeLabel = dateRangeLabel || t("allData");
+  const mobileBadgeLabel = formatMobileDateRangeLabel(rangeStart, rangeEnd, locale) || t("allData");
   const hasComparison = !isAll && !!rangeStart && !!rangeEnd;
 
   const startDate = searchParams.get("startDate") || undefined;
@@ -678,21 +1319,37 @@ function OverviewContent() {
   if (!isLoading && error) {
     return (
       <div className="space-y-8">
-        <OverviewHeroFrame
+        <MobileOverviewUnavailable
           title={overviewTitle}
           description={t("errorStateHint")}
-          badgeLabel={badgeLabel}
-          hasComparison={hasComparison}
-          featureHref={musicAgentHref}
-          stats={<OverviewHeroStatsErrorPlaceholder />}
-        />
-        <ErrorState
-          variant="startup"
-          eyebrow={t("errorStateEyebrow")}
-          error={error}
-          message={t("errorLoading")}
-          onRetry={handleRetry}
-        />
+          badgeLabel={mobileBadgeLabel}
+          statusLabel={t("errorStateMetricStatus")}
+        >
+          <ErrorState
+            variant="startup"
+            eyebrow={t("errorStateEyebrow")}
+            error={error}
+            message={t("errorLoading")}
+            onRetry={handleRetry}
+          />
+        </MobileOverviewUnavailable>
+        <div className="hidden space-y-8 lg:block">
+          <OverviewHeroFrame
+            title={overviewTitle}
+            description={t("errorStateHint")}
+            badgeLabel={badgeLabel}
+            hasComparison={hasComparison}
+            featureHref={musicAgentHref}
+            stats={<OverviewHeroStatsErrorPlaceholder />}
+          />
+          <ErrorState
+            variant="startup"
+            eyebrow={t("errorStateEyebrow")}
+            error={error}
+            message={t("errorLoading")}
+            onRetry={handleRetry}
+          />
+        </div>
       </div>
     );
   }
@@ -701,48 +1358,91 @@ function OverviewContent() {
     const empty = emptyStatePresets.importData;
     return (
       <div className="space-y-8">
-        <OverviewHeroFrame
+        <MobileOverviewUnavailable
           title={overviewTitle}
           description={t("emptyStateHeroDescription")}
-          badgeLabel={badgeLabel}
-          hasComparison={hasComparison}
-          featureHref={musicAgentHref}
-          stats={<OverviewHeroStatsEmptyPlaceholder />}
-        />
-        <EmptyState
-          variant="startup"
-          eyebrow={t("emptyStateEyebrow")}
-          aside={t("emptyStateAside")}
-          message={empty.message}
-          description={empty.description}
-          actions={empty.actions}
-        />
+          badgeLabel={mobileBadgeLabel}
+          statusLabel={t("emptyStateMetricHint")}
+        >
+          <EmptyState
+            variant="startup"
+            eyebrow={t("emptyStateEyebrow")}
+            aside={t("emptyStateAside")}
+            message={empty.message}
+            description={empty.description}
+            actions={empty.actions}
+          />
+        </MobileOverviewUnavailable>
+        <div className="hidden space-y-8 lg:block">
+          <OverviewHeroFrame
+            title={overviewTitle}
+            description={t("emptyStateHeroDescription")}
+            badgeLabel={badgeLabel}
+            hasComparison={hasComparison}
+            featureHref={musicAgentHref}
+            stats={<OverviewHeroStatsEmptyPlaceholder />}
+          />
+          <EmptyState
+            variant="startup"
+            eyebrow={t("emptyStateEyebrow")}
+            aside={t("emptyStateAside")}
+            message={empty.message}
+            description={empty.description}
+            actions={empty.actions}
+          />
+        </div>
       </div>
     );
   }
 
   return (
     <div className="space-y-8">
-      <OverviewHeroFrame
-        title={overviewTitle}
-        description={t("subtitle")}
-        badgeLabel={badgeLabel}
-        hasComparison={hasComparison}
-        featureHref={musicAgentHref}
-        stats={
-          data ? (
-            <OverviewHeroStats
-              totalListens={data.totalListens}
-              uniqueArtists={data.uniqueArtists}
-              uniqueTracks={data.uniqueTracks}
-              locale={locale}
-            />
-          ) : (
-            <OverviewHeroStatsSkeleton />
-          )
-        }
-      />
-      <div className="space-y-12">
+      {data ? (
+        <div className="lg:hidden">
+          <MobileOverviewFlow
+            title={overviewTitle}
+            badgeLabel={mobileBadgeLabel}
+            hasComparison={hasComparison}
+            data={data}
+            changes={changes}
+            chartData={chartData}
+            topTracks={topTracksForChart}
+            topArtists={topArtistsForChart}
+            topGenres={topGenres}
+            locale={locale}
+            timelineHref={timelineHref}
+            tracksHref={tracksHref}
+            artistsHref={`/dashboard/artists${artistsPageQuery}`}
+            genresHref={genresHref}
+            musicAgentHref={musicAgentHref}
+            startDate={startDate}
+            endDate={endDate}
+          />
+        </div>
+      ) : (
+        <MobileOverviewLoadingFallback title={overviewTitle} badgeLabel={mobileBadgeLabel} />
+      )}
+      <div className="hidden space-y-8 lg:block">
+        <OverviewHeroFrame
+          title={overviewTitle}
+          description={t("subtitle")}
+          badgeLabel={badgeLabel}
+          hasComparison={hasComparison}
+          featureHref={musicAgentHref}
+          stats={
+            data ? (
+              <OverviewHeroStats
+                totalListens={data.totalListens}
+                uniqueArtists={data.uniqueArtists}
+                uniqueTracks={data.uniqueTracks}
+                locale={locale}
+              />
+            ) : (
+              <OverviewHeroStatsSkeleton />
+            )
+          }
+        />
+        <div className="space-y-12">
         <section className="relative">
           <OverviewSectionHeader
             eyebrow={t("sections.snapshot.eyebrow")}
@@ -1047,6 +1747,7 @@ function OverviewContent() {
             </div>
           </div>
         </section>
+        </div>
       </div>
 
       <ArtistUserInsightsPanel
@@ -1070,18 +1771,22 @@ function OverviewPageFallback() {
   const { startDate, endDate, isAll } = useListenDateRange();
   const dateRangeLabel = formatOverviewDateRangeLabel(startDate, endDate, locale);
   const badgeLabel = dateRangeLabel || t("allData");
+  const mobileBadgeLabel = formatMobileDateRangeLabel(startDate, endDate, locale) || t("allData");
   const hasComparison = !isAll && !!startDate && !!endDate;
 
   return (
     <div className="space-y-8">
-      <OverviewHeroFrame
-        title={t("title")}
-        description={t("subtitle")}
-        badgeLabel={badgeLabel}
-        hasComparison={hasComparison}
-        stats={<OverviewHeroStatsSkeleton />}
-      />
-      <OverviewSkeleton />
+      <MobileOverviewLoadingFallback title={t("title")} badgeLabel={mobileBadgeLabel} />
+      <div className="hidden space-y-8 lg:block">
+        <OverviewHeroFrame
+          title={t("title")}
+          description={t("subtitle")}
+          badgeLabel={badgeLabel}
+          hasComparison={hasComparison}
+          stats={<OverviewHeroStatsSkeleton />}
+        />
+        <OverviewSkeleton />
+      </div>
     </div>
   );
 }

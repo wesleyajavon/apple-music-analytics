@@ -280,10 +280,15 @@ function ArtistsPageFallback() {
   const trendsHref = useArtistsTrendsHref();
   const badgeLabel = useArtistsHeroBadge();
   return (
-    <div className="space-y-12">
-      <ArtistsHeroFrame trendsHref={trendsHref} badgeLabel={badgeLabel} stats={<ArtistsHeroStatsSkeleton />} />
-      <OverviewSkeleton />
-    </div>
+    <>
+      <div className="lg:hidden">
+        <ArtistsMobileSkeleton />
+      </div>
+      <div className="hidden space-y-12 lg:block">
+        <ArtistsHeroFrame trendsHref={trendsHref} badgeLabel={badgeLabel} stats={<ArtistsHeroStatsSkeleton />} />
+        <OverviewSkeleton />
+      </div>
+    </>
   );
 }
 
@@ -484,6 +489,371 @@ const AllArtistsGrid = memo(({
 });
 
 AllArtistsGrid.displayName = "AllArtistsGrid";
+
+function ArtistsMobileSkeleton() {
+  return (
+    <div className="space-y-4" aria-busy="true">
+      <div className="rounded-[1.75rem] border border-white/10 bg-gray-950 p-5 shadow-xl shadow-violet-500/10">
+        <div className="h-3 w-28 animate-shimmer rounded bg-white/15" />
+        <div className="mt-5 h-8 w-48 animate-shimmer rounded bg-white/20" />
+        <div className="mt-3 h-4 w-full animate-shimmer rounded bg-white/10" />
+        <div className="mt-5 h-28 animate-shimmer rounded-[1.35rem] bg-white/10" />
+      </div>
+      <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-1">
+        {[0, 1, 2].map((item) => (
+          <div key={item} className="h-24 min-w-[9.5rem] animate-shimmer rounded-2xl border border-card-border bg-card-surface" />
+        ))}
+      </div>
+      <div className="space-y-2 rounded-[1.5rem] border border-card-border bg-card-surface p-4">
+        {[0, 1, 2, 3, 4].map((item) => (
+          <div key={item} className="h-14 animate-shimmer rounded-2xl bg-surface/80" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ArtistsMobileEmptyHero({ trendsHref, badgeLabel }: { trendsHref: string; badgeLabel: string }) {
+  const t = useTranslations("artists");
+
+  return (
+    <div className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-gray-950 p-5 text-white shadow-xl shadow-violet-500/10">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.26),transparent_34%),radial-gradient(circle_at_86%_10%,rgba(6,182,212,0.22),transparent_34%),linear-gradient(150deg,rgba(3,7,18,0.98),rgba(30,27,75,0.84)_55%,rgba(8,47,73,0.6))]" aria-hidden />
+      <div className="relative">
+        <div className="flex items-center justify-between gap-3">
+          <p className="font-mono text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-violet-100">{t("mobile.heroEyebrow")}</p>
+          <span className="shrink-0 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[0.68rem] font-semibold text-white/75">{badgeLabel}</span>
+        </div>
+        <h1 className="mt-4 text-3xl font-semibold tracking-[-0.055em] text-white">{t("mobile.heroTitle")}</h1>
+        <p className="mt-3 text-sm leading-6 text-white/68">{t("mobile.heroSubtitle")}</p>
+        <Link
+          href={trendsHref}
+          className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-white px-4 text-sm font-bold text-gray-950 shadow-lg shadow-black/20"
+        >
+          <LineChart className="h-4 w-4" aria-hidden />
+          {t("viewTrends")}
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+function MobileArtistRow({
+  artist,
+  rank,
+  locale,
+  maxListens,
+  onOpenInsights,
+}: {
+  artist: ArtistStatsDto;
+  rank: number;
+  locale: string;
+  maxListens: number;
+  onOpenInsights: (artist: ArtistStatsDto, avatarColorIndex: number) => void;
+}) {
+  const t = useTranslations("artists");
+  const width = Math.max(8, Math.round((artist.listenCount / Math.max(1, maxListens)) * 100));
+  return (
+    <button
+      type="button"
+      className="group flex min-h-14 w-full items-center gap-3 rounded-2xl border border-card-border bg-surface/70 px-3 py-2 text-left transition-colors active:bg-surface-glass"
+      onClick={() => onOpenInsights(artist, rank - 1)}
+      aria-label={t("artistInsightsAriaOpen", { name: artist.artistName })}
+    >
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-xs font-bold text-white dark:bg-white dark:text-slate-950">
+        {rank}
+      </span>
+      <div className="h-10 w-10 shrink-0 overflow-hidden rounded-xl">
+        <ArtistAvatarHydrated
+          artistId={artist.artistId}
+          artistName={artist.artistName}
+          imageUrl={artist.imageUrl}
+          avatarApiSize={80}
+          colorIndex={rank - 1}
+          alt=""
+          width={40}
+          height={40}
+          className="h-full w-full object-cover"
+          loading="lazy"
+        />
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-baseline justify-between gap-3">
+          <p className="truncate text-sm font-semibold text-foreground">{artist.artistName}</p>
+          <p className="shrink-0 text-xs font-semibold tabular-nums text-muted">{artist.listenCount.toLocaleString(locale)}</p>
+        </div>
+        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-200/80 dark:bg-white/10">
+          <div className="h-full rounded-full bg-gradient-to-r from-violet-500 via-cyan-400 to-lime-300" style={{ width: `${width}%` }} />
+        </div>
+      </div>
+    </button>
+  );
+}
+
+function ArtistsMobileExperience({
+  trendsHref,
+  badgeLabel,
+  overview,
+  topArtists,
+  pagedArtists,
+  isTopLoading,
+  isPagedFetching,
+  page,
+  pageSize,
+  totalPages,
+  total,
+  hasMore,
+  offset,
+  onPageChange,
+  onPageSizeChange,
+  onOpenArtistInsights,
+  locale,
+}: {
+  trendsHref: string;
+  badgeLabel: string;
+  overview: ArtistOverviewDto | undefined;
+  topArtists: ArtistStatsDto[];
+  pagedArtists: ArtistStatsDto[];
+  isTopLoading: boolean;
+  isPagedFetching: boolean;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  total: number;
+  hasMore: boolean;
+  offset: number;
+  onPageChange: (nextPage: number) => void;
+  onPageSizeChange: (nextPageSize: number) => void;
+  onOpenArtistInsights: (artist: ArtistStatsDto, avatarColorIndex: number) => void;
+  locale: string;
+}) {
+  const t = useTranslations("artists");
+  const topArtist = topArtists[0];
+  const topFive = topArtists.slice(0, 5);
+  const supportingArtists = topArtists.slice(5, 20);
+  const maxListens = topArtist?.listenCount ?? 1;
+  const topShare = overview && overview.totalListens > 0 && topArtist
+    ? topArtist.listenCount / overview.totalListens
+    : 0;
+  const formatter = useMemo(() => new Intl.NumberFormat(locale), [locale]);
+  const percentFormatter = useMemo(
+    () => new Intl.NumberFormat(locale, { style: "percent", maximumFractionDigits: 1 }),
+    [locale]
+  );
+  const pageStart = total === 0 ? 0 : offset + 1;
+  const pageEnd = Math.min(offset + pagedArtists.length, total);
+
+  if (isTopLoading) return <ArtistsMobileSkeleton />;
+
+  return (
+    <div className="space-y-5">
+      <section className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-gray-950 p-5 text-white shadow-xl shadow-violet-500/10">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.26),transparent_34%),radial-gradient(circle_at_86%_10%,rgba(6,182,212,0.22),transparent_34%),linear-gradient(150deg,rgba(3,7,18,0.98),rgba(30,27,75,0.84)_55%,rgba(8,47,73,0.6))]" aria-hidden />
+        <div className="relative">
+          <div className="flex items-center justify-between gap-3">
+            <p className="font-mono text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-violet-100">{t("mobile.heroEyebrow")}</p>
+            <span className="shrink-0 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[0.68rem] font-semibold text-white/75">{badgeLabel}</span>
+          </div>
+          <h1 className="mt-4 text-3xl font-semibold tracking-[-0.055em] text-white">{t("mobile.heroTitle")}</h1>
+          <p className="mt-3 text-sm leading-6 text-white/68">{t("mobile.heroSubtitle")}</p>
+
+          <div className="mt-5 rounded-[1.35rem] border border-white/12 bg-white/10 p-4 backdrop-blur">
+            <p className="text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-cyan-100/80">{t("mobile.primaryInsightEyebrow")}</p>
+            {topArtist ? (
+              <div className="mt-3 flex items-center gap-3">
+                <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl ring-1 ring-white/20">
+                  <ArtistAvatarHydrated
+                    artistId={topArtist.artistId}
+                    artistName={topArtist.artistName}
+                    imageUrl={topArtist.imageUrl}
+                    avatarApiSize={128}
+                    colorIndex={0}
+                    alt=""
+                    width={64}
+                    height={64}
+                    className="h-full w-full object-cover"
+                    loading="eager"
+                  />
+                </div>
+                <div className="min-w-0">
+                  <p className="line-clamp-2 text-2xl font-semibold tracking-[-0.045em] text-white">{topArtist.artistName}</p>
+                  <p className="mt-1 text-xs leading-5 text-white/68">{t("mobile.primaryInsightBody", { name: topArtist.artistName })}</p>
+                </div>
+              </div>
+            ) : (
+              <p className="mt-2 text-sm leading-6 text-white/70">{t("mobile.primaryInsightFallback")}</p>
+            )}
+            {topArtist && (
+              <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-white/78">
+                <span className="rounded-full bg-white/10 px-3 py-1.5">
+                  {t("mobile.listenCount", { count: formatter.format(topArtist.listenCount) })}
+                </span>
+                <span className="rounded-full bg-white/10 px-3 py-1.5">
+                  {t("mobile.shareLabel", { share: percentFormatter.format(topShare) })}
+                </span>
+              </div>
+            )}
+          </div>
+
+          <Link
+            href={trendsHref}
+            className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-white px-4 text-sm font-bold text-gray-950 shadow-lg shadow-black/20"
+          >
+            <LineChart className="h-4 w-4" aria-hidden />
+            {t("viewTrends")}
+          </Link>
+        </div>
+      </section>
+
+      <section aria-label={t("mobile.signalsLabel")} className="-mx-4 overflow-x-auto px-4 pb-1">
+        <div className="flex gap-3">
+          <div className="min-w-[9rem] rounded-2xl border border-card-border bg-card-surface p-4 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">{t("artists")}</p>
+            <p className="mt-2 text-lg font-semibold text-foreground">{formatter.format(overview?.totalArtists ?? 0)}</p>
+          </div>
+          <div className="min-w-[9rem] rounded-2xl border border-card-border bg-card-surface p-4 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">{t("listens")}</p>
+            <p className="mt-2 text-lg font-semibold text-foreground">{formatter.format(overview?.totalListens ?? 0)}</p>
+          </div>
+          <div className="min-w-[9rem] rounded-2xl border border-card-border bg-card-surface p-4 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">{t("mobile.avgSignal")}</p>
+            <p className="mt-2 text-lg font-semibold text-foreground">
+              {(overview?.averageListensPerArtist ?? 0).toLocaleString(locale, { maximumFractionDigits: 1 })}
+            </p>
+          </div>
+          <div className="min-w-[10rem] rounded-2xl border border-card-border bg-card-surface p-4 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">{t("mobile.concentrationSignal")}</p>
+            <p className="mt-2 text-lg font-semibold text-foreground">{percentFormatter.format(topShare)}</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="rounded-[1.5rem] border border-card-border bg-card-surface p-4 shadow-sm">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{t("mobile.topFiveEyebrow")}</p>
+            <h2 className="mt-1 text-lg font-semibold tracking-[-0.035em] text-foreground">{t("mobile.topFiveTitle")}</h2>
+            <p className="mt-1 text-sm leading-6 text-muted">{t("mobile.topFiveDescription")}</p>
+          </div>
+        </div>
+        <div className="mt-4 space-y-2">
+          {topFive.map((artist, index) => (
+            <MobileArtistRow
+              key={artist.artistId}
+              artist={artist}
+              rank={index + 1}
+              locale={locale}
+              maxListens={maxListens}
+              onOpenInsights={onOpenArtistInsights}
+            />
+          ))}
+        </div>
+      </section>
+
+      {supportingArtists.length > 0 && (
+        <details className="group rounded-[1.5rem] border border-card-border bg-card-surface shadow-sm">
+          <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-left [&::-webkit-details-marker]:hidden">
+            <span>
+              <span className="block text-sm font-semibold text-foreground">{t("mobile.disclosures.supporting.title")}</span>
+              <span className="mt-0.5 block text-xs leading-5 text-muted">{t("mobile.disclosures.supporting.description")}</span>
+            </span>
+            <span className="rounded-full border border-card-border bg-surface px-3 py-1 text-xs font-semibold text-muted transition group-open:bg-primary group-open:text-primary-foreground">
+              {t("showMoreArtists", { count: supportingArtists.length })}
+            </span>
+          </summary>
+          <div className="space-y-2 border-t border-card-border p-4">
+            {supportingArtists.map((artist, index) => (
+              <MobileArtistRow
+                key={artist.artistId}
+                artist={artist}
+                rank={index + 6}
+                locale={locale}
+                maxListens={maxListens}
+                onOpenInsights={onOpenArtistInsights}
+              />
+            ))}
+          </div>
+        </details>
+      )}
+
+      <details className="group rounded-[1.5rem] border border-card-border bg-card-surface shadow-sm">
+        <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-left [&::-webkit-details-marker]:hidden">
+          <span>
+            <span className="block text-sm font-semibold text-foreground">{t("mobile.disclosures.index.title")}</span>
+            <span className="mt-0.5 block text-xs leading-5 text-muted">{t("mobile.disclosures.index.description")}</span>
+          </span>
+          <span className="rounded-full border border-card-border bg-surface px-3 py-1 text-xs font-semibold text-muted transition group-open:bg-primary group-open:text-primary-foreground">
+            {t("mobile.open")}
+          </span>
+        </summary>
+        <div className="border-t border-card-border">
+          <div className="divide-y divide-card-border">
+            {isPagedFetching
+              ? Array.from({ length: Math.min(pageSize, 6) }).map((_, index) => (
+                  <div key={`artist-mobile-page-skeleton-${index}`} className="flex min-h-14 items-center gap-3 px-4 py-3">
+                    <div className="h-10 w-10 animate-shimmer rounded-xl bg-slate-200/90 dark:bg-white/10" />
+                    <div className="min-w-0 flex-1 space-y-2">
+                      <div className="h-4 w-32 animate-shimmer rounded bg-slate-200/90 dark:bg-white/10" />
+                      <div className="h-3 w-20 animate-shimmer rounded bg-slate-200/90 dark:bg-white/10" />
+                    </div>
+                  </div>
+                ))
+              : pagedArtists.map((artist, index) => (
+                  <MobileArtistRow
+                    key={artist.artistId}
+                    artist={artist}
+                    rank={offset + index + 1}
+                    locale={locale}
+                    maxListens={maxListens}
+                    onOpenInsights={onOpenArtistInsights}
+                  />
+                ))}
+          </div>
+          <div className="flex flex-col gap-3 border-t border-card-border p-4">
+            <p className="text-xs text-muted">
+              {t("paginationSummary", {
+                start: pageStart,
+                end: pageEnd,
+                total,
+              })}
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => onPageChange(page - 1)}
+                disabled={page === 1}
+                className="min-h-11 flex-1 rounded-2xl border border-card-border bg-surface px-4 text-sm font-semibold text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {t("paginationPrevious")}
+              </button>
+              <span className="shrink-0 px-2 text-xs font-semibold text-muted">{t("paginationPage", { page, totalPages })}</span>
+              <button
+                type="button"
+                onClick={() => onPageChange(page + 1)}
+                disabled={!hasMore}
+                className="min-h-11 flex-1 rounded-2xl border border-card-border bg-surface px-4 text-sm font-semibold text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {t("paginationNext")}
+              </button>
+            </div>
+            <label className="flex min-h-11 items-center justify-between gap-3 rounded-2xl border border-card-border bg-surface px-4 text-sm font-semibold text-foreground">
+              <span>{t("pageSizeLabel")}</span>
+              <select
+                value={pageSize}
+                onChange={(e) => onPageSizeChange(Number(e.target.value))}
+                className="rounded-xl border border-card-border bg-card-surface px-3 py-2 text-sm"
+              >
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+            </label>
+          </div>
+        </div>
+      </details>
+    </div>
+  );
+}
 
 function ChevronIcon({ direction }: { direction: "up" | "down" }) {
   return (
@@ -903,42 +1273,112 @@ function ArtistsContent() {
 
   if (!isTopLoading && topError && !topData) {
     return (
-      <div className="space-y-12">
-        <ArtistsHeroFrame trendsHref={trendsHref} badgeLabel={badgeLabel} stats={null} />
-        <ErrorState variant="startup" error={topError} message={t("errorLoading")} onRetry={refetchTop} />
-      </div>
+      <>
+        <div className="space-y-6 lg:hidden">
+          <ArtistsMobileEmptyHero trendsHref={trendsHref} badgeLabel={badgeLabel} />
+          <ErrorState variant="startup" error={topError} message={t("errorLoading")} onRetry={refetchTop} />
+        </div>
+        <div className="hidden space-y-12 lg:block">
+          <ArtistsHeroFrame trendsHref={trendsHref} badgeLabel={badgeLabel} stats={null} />
+          <ErrorState variant="startup" error={topError} message={t("errorLoading")} onRetry={refetchTop} />
+        </div>
+      </>
     );
   }
   if (!isTopLoading && (!topData || topData.topArtists.length === 0)) {
     return (
-      <div className="space-y-12">
-        <ArtistsHeroFrame trendsHref={trendsHref} badgeLabel={badgeLabel} stats={null} />
-        <EmptyState variant="startup" {...emptyStatePresets.importData} />
-      </div>
+      <>
+        <div className="space-y-6 lg:hidden">
+          <ArtistsMobileEmptyHero trendsHref={trendsHref} badgeLabel={badgeLabel} />
+          <EmptyState variant="startup" {...emptyStatePresets.importData} />
+        </div>
+        <div className="hidden space-y-12 lg:block">
+          <ArtistsHeroFrame trendsHref={trendsHref} badgeLabel={badgeLabel} stats={null} />
+          <EmptyState variant="startup" {...emptyStatePresets.importData} />
+        </div>
+      </>
     );
   }
   if (!isPagedLoading && pagedError && !pagedData) {
     return (
-      <div className="space-y-12">
-        <ArtistsHeroFrame
-          trendsHref={trendsHref}
-          badgeLabel={badgeLabel}
-          stats={
-            topData ? (
-              <ArtistsHeroStats overview={topData.overview} locale={locale} />
-            ) : (
-              <ArtistsHeroStatsSkeleton />
-            )
-          }
+      <>
+        <div className="space-y-6 lg:hidden">
+          <ArtistsMobileExperience
+            trendsHref={trendsHref}
+            badgeLabel={badgeLabel}
+            overview={topData?.overview}
+            topArtists={topArtists}
+            pagedArtists={[]}
+            isTopLoading={isTopLoading}
+            isPagedFetching={false}
+            page={page}
+            pageSize={pageSize}
+            totalPages={totalPages}
+            total={totalArtistsInRange}
+            hasMore={false}
+            offset={offset}
+            onPageChange={(nextPage) => updatePaginationParams(nextPage, pageSize)}
+            onPageSizeChange={(nextPageSize) => updatePaginationParams(1, nextPageSize)}
+            onOpenArtistInsights={handleOpenArtistInsights}
+            locale={locale}
+          />
+          <ErrorState variant="startup" error={pagedError} message={t("errorLoading")} onRetry={refetchPaged} />
+        </div>
+        <div className="hidden space-y-12 lg:block">
+          <ArtistsHeroFrame
+            trendsHref={trendsHref}
+            badgeLabel={badgeLabel}
+            stats={
+              topData ? (
+                <ArtistsHeroStats overview={topData.overview} locale={locale} />
+              ) : (
+                <ArtistsHeroStatsSkeleton />
+              )
+            }
+          />
+          <ErrorState variant="startup" error={pagedError} message={t("errorLoading")} onRetry={refetchPaged} />
+        </div>
+        <ArtistUserInsightsPanel
+          open={artistInsightsTarget != null}
+          artistId={artistInsightsTarget?.artist.artistId ?? null}
+          previewArtist={artistInsightsTarget?.artist ?? null}
+          startDate={startDate}
+          endDate={endDate}
+          userId={userId}
+          locale={locale}
+          colorIndex={artistInsightsTarget?.avatarColorIndex ?? 0}
+          onClose={() => setArtistInsightsTarget(null)}
         />
-        <ErrorState variant="startup" error={pagedError} message={t("errorLoading")} onRetry={refetchPaged} />
-      </div>
+      </>
     );
   }
   const overview = topData?.overview;
 
   return (
-    <div className="space-y-12">
+    <>
+    <div className="lg:hidden">
+      <ArtistsMobileExperience
+        trendsHref={trendsHref}
+        badgeLabel={badgeLabel}
+        overview={overview}
+        topArtists={topArtists}
+        pagedArtists={pagedArtists}
+        isTopLoading={isTopLoading}
+        isPagedFetching={isPagedFetching || !pagedData}
+        page={page}
+        pageSize={pageSize}
+        totalPages={totalPages}
+        total={totalArtistsInRange}
+        hasMore={pagination?.hasMore ?? false}
+        offset={offset}
+        onPageChange={(nextPage) => updatePaginationParams(nextPage, pageSize)}
+        onPageSizeChange={(nextPageSize) => updatePaginationParams(1, nextPageSize)}
+        onOpenArtistInsights={handleOpenArtistInsights}
+        locale={locale}
+      />
+    </div>
+
+    <div className="hidden space-y-12 lg:block">
       <ArtistsHeroFrame
         trendsHref={trendsHref}
         badgeLabel={badgeLabel}
@@ -1150,19 +1590,19 @@ function ArtistsContent() {
           locale={locale}
         />
       </section>
-
-      <ArtistUserInsightsPanel
-        open={artistInsightsTarget != null}
-        artistId={artistInsightsTarget?.artist.artistId ?? null}
-        previewArtist={artistInsightsTarget?.artist ?? null}
-        startDate={startDate}
-        endDate={endDate}
-        userId={userId}
-        locale={locale}
-        colorIndex={artistInsightsTarget?.avatarColorIndex ?? 0}
-        onClose={() => setArtistInsightsTarget(null)}
-      />
     </div>
+    <ArtistUserInsightsPanel
+      open={artistInsightsTarget != null}
+      artistId={artistInsightsTarget?.artist.artistId ?? null}
+      previewArtist={artistInsightsTarget?.artist ?? null}
+      startDate={startDate}
+      endDate={endDate}
+      userId={userId}
+      locale={locale}
+      colorIndex={artistInsightsTarget?.avatarColorIndex ?? 0}
+      onClose={() => setArtistInsightsTarget(null)}
+    />
+    </>
   );
 }
 

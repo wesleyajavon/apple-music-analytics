@@ -463,13 +463,14 @@ export default function Home() {
               )}
               <Link
                 href={`/dashboard/overview?userId=${DEFAULT_PUBLIC_PROFILE_USER_ID}`}
-                className={`inline-flex min-h-12 w-full items-center justify-center rounded-2xl px-6 py-3 text-center text-sm font-semibold transition-all hover:-translate-y-0.5 md:w-auto ${
+                className={`group inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-transparent bg-brand-gradient px-6 py-3 text-center text-sm font-semibold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:opacity-95 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background md:w-auto md:bg-none md:shadow-none md:hover:opacity-100 md:active:scale-100 ${
                   isAuthenticated
-                    ? "border border-card-border bg-surface-glass text-muted backdrop-blur hover:bg-card-surface hover:text-foreground"
-                    : "border border-primary/15 bg-primary/10 text-primary shadow-card backdrop-blur hover:bg-primary/15"
+                    ? "md:border-card-border md:bg-surface-glass md:text-muted md:backdrop-blur md:hover:bg-card-surface md:hover:text-foreground"
+                    : "md:border-primary/15 md:bg-primary/10 md:text-primary md:shadow-card md:backdrop-blur md:hover:bg-primary/15"
                 }`}
               >
                 {t("accessDashboard")}
+                <ArrowRightIcon className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </Link>
             </div>
             <div className="mt-5 flex flex-wrap gap-2">
@@ -897,31 +898,6 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="rounded-3xl border border-card-border bg-card-surface p-5 shadow-card md:hidden">
-            <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-gradient p-1.5 shadow-brand-glow ring-1 ring-white/20">
-              <SoundprintLogo
-                src="/brand/favicon.png"
-                showText={false}
-                imageClassName="h-full w-full rounded-xl"
-              />
-            </div>
-            <div className="space-y-3">
-              {soundprintAiChatFeatures.map((feature) => (
-                <div
-                  key={feature.label}
-                  className="rounded-2xl border border-card-border bg-surface-glass/70 p-3"
-                >
-                  <p className="text-sm font-semibold text-foreground">
-                    {feature.label}
-                  </p>
-                  <p className="mt-1 font-mono text-[0.65rem] font-medium uppercase leading-5 tracking-[0.18em] text-muted">
-                    {feature.supportingText}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-
           <DemoTerminalHero
             videoSrc="/media/aichat.mp4"
             videoLabel={t("soundprintAiChatDemo.videoLabel")}
@@ -929,7 +905,8 @@ export default function Home() {
             subtitle={t("soundprintAiChatDemo.heroSubtitle")}
             badge={t("soundprintAiChatDemo.heroBadge")}
             features={soundprintAiChatFeatures}
-            className="hidden max-w-6xl md:block"
+            showFeaturesOnMobile={false}
+            className="max-w-6xl"
           />
 
           <div className="mt-10 flex justify-center">
@@ -994,9 +971,10 @@ export default function Home() {
                   </Link>
                   <Link
                     href={`/dashboard/overview?userId=${DEFAULT_PUBLIC_PROFILE_USER_ID}`}
-                    className="inline-flex min-h-12 w-full items-center justify-center rounded-2xl border border-white/15 bg-white/10 px-6 py-3 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-white/15 md:w-auto"
+                    className="group inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-white/25 bg-white px-6 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-white/10 transition-all hover:-translate-y-0.5 hover:bg-slate-100 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-white/70 focus:ring-offset-2 focus:ring-offset-slate-950 md:w-auto md:bg-white/10 md:text-white md:shadow-none md:hover:bg-white/15 md:hover:text-white md:active:scale-100"
                   >
                     {t("accessDashboard")}
+                    <ArrowRightIcon className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                   </Link>
                 </div>
               </div>

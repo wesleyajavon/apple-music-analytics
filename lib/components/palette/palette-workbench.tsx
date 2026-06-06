@@ -1,8 +1,8 @@
 "use client";
 
-import { memo, useMemo, useState } from "react";
+import { memo, useMemo, useState, type ReactNode } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { ArrowLeft, LineChart } from "lucide-react";
+import { ArrowLeft, ChevronDown, LineChart } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import {
   CartesianGrid,
@@ -50,6 +50,11 @@ type PaletteChartTranslationKey =
   | "stepLabel"
   | "unknownSeries"
   | "mappedSeries";
+
+type PaletteTranslation = (
+  key: string,
+  values?: Record<string, string | number>,
+) => string;
 
 function createPaletteTooltip(
   t: (key: PaletteChartTranslationKey) => string,
@@ -257,6 +262,429 @@ function PaletteMiniChartSkeleton() {
   );
 }
 
+function PaletteMobileSignalCard({
+  label,
+  value,
+  tone = "default",
+}: {
+  label: string;
+  value: string;
+  tone?: "default" | "violet" | "cyan" | "emerald";
+}) {
+  const toneClass =
+    tone === "violet"
+      ? "border-violet-200/80 bg-violet-50/80 text-violet-950 dark:border-violet-300/20 dark:bg-violet-300/10 dark:text-violet-100"
+      : tone === "cyan"
+        ? "border-cyan-200/80 bg-cyan-50/80 text-cyan-950 dark:border-cyan-300/20 dark:bg-cyan-300/10 dark:text-cyan-100"
+        : tone === "emerald"
+          ? "border-emerald-200/80 bg-emerald-50/80 text-emerald-950 dark:border-emerald-300/20 dark:bg-emerald-300/10 dark:text-emerald-100"
+          : "border-slate-200/85 bg-white/85 text-slate-950 dark:border-white/10 dark:bg-white/[0.06] dark:text-white";
+
+  return (
+    <div className={`rounded-2xl border px-3 py-3 shadow-sm shadow-slate-900/[0.04] ${toneClass}`}>
+      <p className="text-[0.66rem] font-semibold uppercase tracking-[0.18em] opacity-70">
+        {label}
+      </p>
+      <p className="mt-1 text-lg font-semibold tracking-[-0.03em] tabular-nums">
+        {value}
+      </p>
+    </div>
+  );
+}
+
+function PaletteMobileDetails({
+  title,
+  children,
+}: {
+  title: string;
+  children: ReactNode;
+}) {
+  return (
+    <details className="group rounded-[1.35rem] border border-slate-200/85 bg-white/80 shadow-sm shadow-slate-900/[0.04] dark:border-white/10 dark:bg-white/[0.04] [&_summary::-webkit-details-marker]:hidden">
+      <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-sm font-semibold text-slate-900 dark:text-white">
+        {title}
+        <ChevronDown
+          className="h-4 w-4 shrink-0 text-slate-500 transition-transform group-open:rotate-180 dark:text-slate-400"
+          aria-hidden
+        />
+      </summary>
+      <div className="border-t border-slate-200/80 px-4 py-4 dark:border-white/10">
+        {children}
+      </div>
+    </details>
+  );
+}
+
+function PaletteMobileSkeleton({ t }: { t: PaletteTranslation }) {
+  return (
+    <div className="space-y-4 lg:hidden" aria-busy="true">
+      <section className="overflow-hidden rounded-[1.75rem] border border-white/10 bg-slate-950 p-5 text-white shadow-2xl shadow-violet-500/15">
+        <div className="h-6 w-32 rounded-full bg-white/15 animate-shimmer" />
+        <div className="mt-5 h-9 w-4/5 rounded bg-white/15 animate-shimmer" />
+        <div className="mt-3 h-4 w-full rounded bg-white/10 animate-shimmer" />
+        <div className="mt-5 grid grid-cols-2 gap-2">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <div key={index} className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
+              <div className="h-3 w-16 rounded bg-white/15 animate-shimmer" />
+              <div className="mt-3 h-6 w-14 rounded bg-white/20 animate-shimmer" />
+            </div>
+          ))}
+        </div>
+      </section>
+      <section className={PALETTE_SPOTLIGHT_CARD_CLASS}>
+        <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} aria-hidden />
+        <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} aria-hidden />
+        <div className="relative p-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-700 dark:text-violet-200">
+            {t("mobile.decisionEyebrow")}
+          </p>
+          <div className="mt-4">
+            <PaletteMappingSkeleton />
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function PaletteMobileExperience({
+  data,
+  paletteMode,
+  setPaletteMode,
+  activeCard,
+  track,
+  artist,
+  suggestions,
+  selectedGenre,
+  setSelectedGenre,
+  customGenre,
+  setCustomGenre,
+  selectedSuggestionId,
+  setSelectedSuggestionId,
+  canSubmit,
+  isBusy,
+  onMap,
+  onSkip,
+  locale,
+  t,
+  tGenres,
+  chartPalette,
+}: {
+  data: PaletteSessionDto;
+  paletteMode: PaletteMode;
+  setPaletteMode: (mode: PaletteMode) => void;
+  activeCard: PaletteSessionDto["nextArtist"] | PaletteSessionDto["nextTrack"];
+  track: PaletteSessionDto["nextTrack"];
+  artist: PaletteSessionDto["nextArtist"];
+  suggestions: Array<{ id: string; genre: string; confidence: number; reason: string; provider: string }>;
+  selectedGenre: string;
+  setSelectedGenre: (value: string) => void;
+  customGenre: string;
+  setCustomGenre: (value: string) => void;
+  selectedSuggestionId: string | null;
+  setSelectedSuggestionId: (value: string | null) => void;
+  canSubmit: boolean;
+  isBusy: boolean;
+  onMap: () => void;
+  onSkip: () => void;
+  locale: string;
+  t: PaletteTranslation;
+  tGenres: PaletteTranslation;
+  chartPalette: (typeof DASHBOARD_CHART_THEME)[keyof typeof DASHBOARD_CHART_THEME];
+}) {
+  const progressPct = Math.round(data.progress.completionRatio * 100);
+  const activeTitle =
+    paletteMode === "tracks" && track
+      ? track.trackTitle
+      : artist?.artistName ?? t("doneTitle");
+  const activeSubtitle =
+    paletteMode === "tracks" && track ? track.artistName : t("mobile.nextBestMatch");
+  const impactedListens = activeCard?.unknownListens ?? 0;
+  const impactedTracks = activeCard?.impactedTracks ?? 0;
+
+  return (
+    <div className="space-y-4 lg:hidden">
+      <section className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-gray-950 p-5 text-white shadow-2xl shadow-violet-500/15">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.3),transparent_34%),radial-gradient(circle_at_86%_12%,rgba(6,182,212,0.22),transparent_30%),linear-gradient(145deg,rgba(3,7,18,0.98),rgba(30,27,75,0.9)_52%,rgba(8,47,73,0.72))]" />
+        <div className="absolute -bottom-24 -right-16 h-56 w-56 rounded-full bg-cyan-400/20 blur-3xl" aria-hidden />
+        <div className="relative">
+          <div className="flex items-center justify-between gap-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-violet-100">
+              <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_16px_rgb(22_199_132_/0.75)]" />
+              {t("mobile.eyebrow")}
+            </div>
+            <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold tabular-nums text-white">
+              {progressPct}%
+            </span>
+          </div>
+
+          <h1 className="mt-5 text-balance text-3xl font-semibold tracking-[-0.055em]">
+            {t("mobile.heroTitle")}
+          </h1>
+          <p className="mt-3 text-sm leading-6 text-white/72">
+            {paletteMode === "tracks"
+              ? t("mobile.heroSubtitleTracks")
+              : t("mobile.heroSubtitleArtists")}
+          </p>
+
+          <div
+            className="mt-5 grid grid-cols-2 gap-1 rounded-2xl border border-white/15 bg-white/10 p-1"
+            role="group"
+            aria-label={t("modeAriaLabel")}
+          >
+            <button
+              type="button"
+              onClick={() => setPaletteMode("artists")}
+              className={`min-h-11 rounded-xl px-3 py-2 text-sm font-semibold transition-colors ${
+                paletteMode === "artists"
+                  ? PALETTE_MODE_ACTIVE_TAB_CLASS
+                  : "text-white/75 hover:text-white"
+              }`}
+            >
+              {t("modeArtists")}
+            </button>
+            <button
+              type="button"
+              onClick={() => setPaletteMode("tracks")}
+              className={`min-h-11 rounded-xl px-3 py-2 text-sm font-semibold transition-colors ${
+                paletteMode === "tracks"
+                  ? PALETTE_MODE_ACTIVE_TAB_CLASS
+                  : "text-white/75 hover:text-white"
+              }`}
+            >
+              {t("modeTracks")}
+            </button>
+          </div>
+
+          <div className="mt-5 rounded-[1.35rem] border border-white/10 bg-white/[0.07] p-4 backdrop-blur">
+            <p className="text-[0.66rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+              {activeCard ? t("mobile.nowFixing") : t("doneTitle")}
+            </p>
+            <p className="mt-2 line-clamp-2 text-2xl font-semibold tracking-[-0.045em]">
+              {activeTitle}
+            </p>
+            <p className="mt-1 text-sm text-white/68">{activeSubtitle}</p>
+          </div>
+
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <PaletteMobileSignalCard
+              label={t("mobile.impactSignal")}
+              value={impactedListens.toLocaleString(locale)}
+              tone="violet"
+            />
+            <PaletteMobileSignalCard
+              label={t("mobile.remainingSignal")}
+              value={data.progress.remaining.toLocaleString(locale)}
+              tone="cyan"
+            />
+            <PaletteMobileSignalCard
+              label={t("mobile.mappedSignal")}
+              value={data.mappedListensTotal.toLocaleString(locale)}
+              tone="emerald"
+            />
+            <PaletteMobileSignalCard
+              label={t("mobile.suggestionsSignal")}
+              value={suggestions.length.toLocaleString(locale)}
+            />
+          </div>
+
+          <div className="mt-5 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <Link
+              href="/dashboard/genres"
+              className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-2xl bg-white px-4 py-2 text-sm font-bold text-gray-950 shadow-xl shadow-black/20"
+            >
+              <ArrowLeft className="h-4 w-4" aria-hidden />
+              {t("backToGenres")}
+            </Link>
+            <Link
+              href="/dashboard/genres/trends"
+              className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-4 py-2 text-sm font-bold text-white"
+            >
+              <LineChart className="h-4 w-4" aria-hidden />
+              {tGenres("viewTrends")}
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className={PALETTE_SPOTLIGHT_CARD_CLASS}>
+        <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} aria-hidden />
+        <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} aria-hidden />
+        <div className="relative p-4">
+          <p className="font-mono text-xs font-semibold uppercase tracking-[0.22em] text-violet-700 dark:text-violet-200">
+            {t("mobile.decisionEyebrow")}
+          </p>
+          <h2 className="mt-2 text-2xl font-semibold tracking-[-0.045em] text-slate-950 dark:text-white">
+            {activeCard ? t("mobile.decisionTitle") : t("doneTitle")}
+          </h2>
+          <p className={`mt-2 ${DASHBOARD_SPOTLIGHT_MUTED}`}>
+            {activeCard
+              ? t("mobile.decisionSubtitle")
+              : paletteMode === "tracks"
+                ? t("doneHintTracks")
+                : t("doneHintArtists")}
+          </p>
+
+          {activeCard ? (
+            <div className="mt-5 space-y-5">
+              <div className={DASHBOARD_SPOTLIGHT_INNER_WELL}>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                      {paletteMode === "tracks" ? t("nextTrackCard") : t("nextArtistCard")}
+                    </p>
+                    <p className="mt-2 line-clamp-2 text-xl font-semibold tracking-[-0.035em] text-slate-950 dark:text-white">
+                      {activeTitle}
+                    </p>
+                    {paletteMode === "tracks" ? (
+                      <p className="mt-1 text-sm font-medium text-slate-600 dark:text-slate-400">
+                        {activeSubtitle}
+                      </p>
+                    ) : null}
+                  </div>
+                  <span className="shrink-0 rounded-full border border-violet-200 bg-violet-50 px-2.5 py-1 text-xs font-semibold text-violet-900 dark:border-violet-300/20 dark:bg-violet-300/10 dark:text-violet-100">
+                    {t("mobile.highImpact")}
+                  </span>
+                </div>
+                <div className="mt-4 flex gap-2 overflow-x-auto pb-1 text-sm [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                  <span className="shrink-0 rounded-full border border-slate-200/90 bg-white px-3 py-2 text-slate-700 dark:border-white/10 dark:bg-white/10 dark:text-slate-200">
+                    {t("listensImpacted", { count: impactedListens.toLocaleString(locale) })}
+                  </span>
+                  <span className="shrink-0 rounded-full border border-slate-200/90 bg-white px-3 py-2 text-slate-700 dark:border-white/10 dark:bg-white/10 dark:text-slate-200">
+                    {t("tracksImpacted", { count: impactedTracks.toLocaleString(locale) })}
+                  </span>
+                </div>
+              </div>
+
+              {suggestions.length > 0 ? (
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-800 dark:text-violet-200">
+                    {t("suggestionsTitle")}
+                  </p>
+                  <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                    {suggestions.map((s) => {
+                      const isActive = selectedSuggestionId === s.id;
+                      return (
+                        <button
+                          key={s.id}
+                          type="button"
+                          onClick={() => {
+                            setSelectedSuggestionId(s.id);
+                            setSelectedGenre(s.genre);
+                            setCustomGenre("");
+                          }}
+                          className={`min-h-11 shrink-0 rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
+                            isActive
+                              ? "border-violet-600 bg-violet-600 text-white shadow-sm dark:border-violet-400 dark:bg-violet-400 dark:text-slate-950"
+                              : "border-violet-300/60 bg-violet-50 text-violet-950 hover:bg-violet-100 dark:border-white/15 dark:bg-white/[0.06] dark:text-violet-100 dark:hover:bg-white/10"
+                          }`}
+                          title={`${s.reason} • ${s.provider}`}
+                        >
+                          {s.genre} ({Math.round(s.confidence * 100)}%)
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : null}
+
+              <div className="space-y-3">
+                <label className="block text-sm font-semibold text-slate-900 dark:text-white">
+                  {t("mobile.pickGenre")}
+                </label>
+                <input
+                  list="palette-mobile-genre-suggestions"
+                  value={selectedGenre}
+                  onChange={(event) => {
+                    setSelectedGenre(event.target.value);
+                    setSelectedSuggestionId(null);
+                  }}
+                  className={`min-h-11 w-full ${PALETTE_INPUT_CLASS}`}
+                  placeholder={t("existingGenresPlaceholder")}
+                />
+                <datalist id="palette-mobile-genre-suggestions">
+                  {data.existingGenres.map((genre) => (
+                    <option key={genre} value={genre} />
+                  ))}
+                </datalist>
+              </div>
+
+              <PaletteMobileDetails title={t("mobile.customGenreTitle")}>
+                <div className="space-y-3">
+                  <label className="block text-sm font-semibold text-slate-900 dark:text-white">
+                    {t("customGenre")}
+                  </label>
+                  <input
+                    value={customGenre}
+                    onChange={(event) => {
+                      setCustomGenre(event.target.value);
+                      setSelectedSuggestionId(null);
+                    }}
+                    className={`min-h-11 w-full ${PALETTE_INPUT_CLASS}`}
+                    placeholder={t("customGenrePlaceholder")}
+                  />
+                </div>
+              </PaletteMobileDetails>
+
+              <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-3">
+                <button
+                  type="button"
+                  onClick={onMap}
+                  disabled={!canSubmit}
+                  className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-slate-950 px-5 py-3 text-sm font-bold text-white shadow-xl shadow-slate-900/15 transition-all hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-white dark:text-slate-950 dark:hover:bg-gray-100"
+                >
+                  {isBusy ? t("saving") : t("apply")}
+                </button>
+                <button
+                  type="button"
+                  onClick={onSkip}
+                  disabled={isBusy}
+                  className={`inline-flex min-h-12 items-center justify-center px-4 py-3 ${DASHBOARD_SPOTLIGHT_BTN_SECONDARY}`}
+                >
+                  {t("skip")}
+                </button>
+              </div>
+            </div>
+          ) : null}
+        </div>
+      </section>
+
+      <PaletteMobileDetails title={t("mobile.progressDetailsTitle")}>
+        <div className={DASHBOARD_SPOTLIGHT_INNER_WELL}>
+          <PaletteMiniChart
+            data={data.compactTrends}
+            t={t}
+            locale={locale}
+            chartPalette={chartPalette}
+          />
+        </div>
+        <div className="mt-3 grid grid-cols-1 gap-2 text-sm text-slate-600 dark:text-slate-400">
+          <p className={`${DASHBOARD_SPOTLIGHT_INNER_WELL} !p-3`}>
+            {t("unknownTotal", {
+              count: data.unknownListensTotal.toLocaleString(locale),
+            })}
+          </p>
+          <p className={`${DASHBOARD_SPOTLIGHT_INNER_WELL} !p-3`}>
+            {t("mappedTotal", {
+              count: data.mappedListensTotal.toLocaleString(locale),
+            })}
+          </p>
+        </div>
+      </PaletteMobileDetails>
+
+      <PaletteMobileDetails title={t("mobile.whyDetailsTitle")}>
+        <div className="text-sm leading-6 text-slate-700 dark:text-slate-300">
+          <p className="font-semibold text-slate-950 dark:text-white">
+            {t("whyImplementedTitle")}
+          </p>
+          <p className="mt-2">{t("whyImplementedBody")}</p>
+          <p className="mt-2">{t("whyImplementedOutcome")}</p>
+        </div>
+      </PaletteMobileDetails>
+    </div>
+  );
+}
+
 export function PaletteWorkbench() {
   const t = useTranslations("palette");
   const tGenres = useTranslations("genres");
@@ -351,6 +779,36 @@ export function PaletteWorkbench() {
   }
 
   return (
+    <>
+      {isLoading || !data ? (
+        <PaletteMobileSkeleton t={t} />
+      ) : (
+        <PaletteMobileExperience
+          data={data}
+          paletteMode={paletteMode}
+          setPaletteMode={setPaletteMode}
+          activeCard={activeCard}
+          track={track}
+          artist={artist}
+          suggestions={suggestions}
+          selectedGenre={selectedGenre}
+          setSelectedGenre={setSelectedGenre}
+          customGenre={customGenre}
+          setCustomGenre={setCustomGenre}
+          selectedSuggestionId={selectedSuggestionId}
+          setSelectedSuggestionId={setSelectedSuggestionId}
+          canSubmit={canSubmit}
+          isBusy={isBusy}
+          onMap={handleMap}
+          onSkip={handleSkip}
+          locale={locale}
+          t={t}
+          tGenres={tGenres}
+          chartPalette={chartPalette}
+        />
+      )}
+
+    <div className="hidden lg:block">
     <div className="space-y-6 lg:space-y-8">
       <div className={PALETTE_HERO_SHELL_CLASS}>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.26),transparent_30%),radial-gradient(circle_at_80%_12%,rgba(6,182,212,0.2),transparent_32%),linear-gradient(135deg,rgba(3,7,18,0.98),rgba(30,27,75,0.88)_48%,rgba(8,47,73,0.72))]" />
@@ -647,5 +1105,7 @@ export function PaletteWorkbench() {
         </aside>
       </div>
     </div>
+    </div>
+    </>
   );
 }

@@ -34,6 +34,7 @@ import { getAvatarUrl } from "@/lib/components/artist-avatar-utils";
 
 const TOP_LIMIT = 6;
 const PROFILE_AI_STALE_TIME = 5 * 60 * 1000;
+const MOBILE_DATE_OPTS = { month: "2-digit", day: "2-digit", year: "2-digit" } as const;
 
 function SparkIcon({ className }: { className?: string }) {
   return (
@@ -67,6 +68,11 @@ function formatDateRange(startDate: string | undefined, endDate: string | undefi
     year: "numeric",
   });
   return `${formatter.format(new Date(startDate))} - ${formatter.format(new Date(endDate))}`;
+}
+
+function formatMobileDateRange(startDate: string | undefined, endDate: string | undefined, locale: string): string {
+  if (!startDate || !endDate) return "";
+  return `${new Date(startDate).toLocaleDateString(locale, MOBILE_DATE_OPTS)}–${new Date(endDate).toLocaleDateString(locale, MOBILE_DATE_OPTS)}`;
 }
 
 function formatCompactNumber(value: number | undefined, locale: string): string {
@@ -194,6 +200,306 @@ function LandingValueCard({
       </div>
       <h3 className="relative text-base font-semibold text-gray-950 dark:text-white">{title}</h3>
       <p className="relative mt-3 text-sm leading-6 text-gray-600 dark:text-gray-300">{body}</p>
+    </div>
+  );
+}
+
+function MobileMetricPill({
+  label,
+  value,
+  hint,
+}: {
+  label: string;
+  value: string;
+  hint: string;
+}) {
+  return (
+    <div className="min-w-[9.25rem] rounded-3xl border border-white/10 bg-gray-950 p-4 shadow-lg shadow-black/10">
+      <p className="text-2xl font-semibold tracking-tight text-white">{value}</p>
+      <p className="mt-1 text-xs font-semibold uppercase tracking-[0.16em] text-white/45">{label}</p>
+      <p className="mt-2 text-xs leading-5 text-white/55">{hint}</p>
+    </div>
+  );
+}
+
+function MobileAiStory({
+  aiError,
+  aiLoading,
+  interactiveAiBlockedByGenreBackfill,
+  profileDescription,
+}: {
+  aiError: Error | null;
+  aiLoading: boolean;
+  interactiveAiBlockedByGenreBackfill: boolean;
+  profileDescription: string;
+}) {
+  const t = useTranslations("musical-profile");
+
+  if (aiLoading) {
+    return (
+      <div className="space-y-3 animate-pulse" aria-busy="true">
+        <div className="h-4 w-full rounded-full bg-white/15" />
+        <div className="h-4 w-11/12 rounded-full bg-white/15" />
+        <div className="h-4 w-3/4 rounded-full bg-white/15" />
+      </div>
+    );
+  }
+
+  if (!aiError) {
+    return <p className="text-lg font-semibold leading-8 text-white">&ldquo;{profileDescription}&rdquo;</p>;
+  }
+
+  if (isGroqDailyQuotaError(aiError)) {
+    return <GroqQuotaNotice error={aiError} />;
+  }
+
+  if (isGroqGenreClassificationBlockingError(aiError)) {
+    return (
+      <div className="space-y-4">
+        {!interactiveAiBlockedByGenreBackfill ? <InteractiveAiGenreBackfillNotice force /> : null}
+        <p className="text-lg font-semibold leading-8 text-white">&ldquo;{profileDescription}&rdquo;</p>
+      </div>
+    );
+  }
+
+  return (
+    <div role="alert" className="space-y-2">
+      <p className="text-sm font-semibold text-red-200">{t("aiErrorTitle")}</p>
+      <p className="text-base font-semibold leading-7 text-white">{profileDescription}</p>
+    </div>
+  );
+}
+
+function MobileMusicalProfileView({
+  aiError,
+  aiLoading,
+  dateRangeLabel,
+  genrePreview,
+  interactiveAiBlockedByGenreBackfill,
+  locale,
+  profileDescription,
+  profileMetrics,
+  showAiUnavailable,
+  topArtistName,
+  topArtistShare,
+  topArtists,
+  topGenreName,
+  withFilters,
+}: {
+  aiError: Error | null;
+  aiLoading: boolean;
+  dateRangeLabel: string;
+  genrePreview: GenreDistributionDto[];
+  interactiveAiBlockedByGenreBackfill: boolean;
+  locale: string;
+  profileDescription: string;
+  profileMetrics: Array<{ label: string; value: string; hint: string }>;
+  showAiUnavailable?: boolean;
+  topArtistName: string;
+  topArtistShare: number;
+  topArtists: ArtistStatsDto[];
+  topGenreName: string | undefined;
+  withFilters: (href: string) => string;
+}) {
+  const t = useTranslations("musical-profile");
+  const primaryArtist = topArtists[0];
+
+  return (
+    <div className="space-y-5 pb-8 lg:hidden">
+      <section className="relative overflow-hidden rounded-[2rem] bg-gray-950 p-4 text-white shadow-2xl shadow-accent-violet/20">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_10%_0%,rgba(240,64,104,0.35),transparent_34%),radial-gradient(circle_at_90%_20%,rgba(6,182,212,0.26),transparent_32%),linear-gradient(160deg,rgba(3,7,18,0.98),rgba(30,27,75,0.9)_52%,rgba(8,47,73,0.76))]" />
+        <div className="relative space-y-5">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-2xl border border-white/15 bg-white/10 p-1.5 shadow-lg shadow-black/20 ring-1 ring-white/10">
+              <Image
+                src="/brand/favicon.png"
+                alt={t("overviewCallout.philosophyLogoAlt")}
+                width={80}
+                height={80}
+                className="h-full w-full rounded-xl object-cover"
+                priority
+              />
+            </div>
+            <p className="shrink-0 whitespace-nowrap rounded-full bg-white/10 px-2.5 py-1.5 text-[11px] font-medium text-white/60">
+              {dateRangeLabel || t("mobile.dateRangeFallback")}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-[5rem_minmax(0,1fr)] items-center gap-4">
+            <div className="relative h-20 w-20 overflow-hidden rounded-[1.35rem] shadow-2xl shadow-black/35 ring-1 ring-white/15">
+              {primaryArtist ? (
+                <ArtistAvatarHydrated
+                  artistId={primaryArtist.artistId}
+                  artistName={primaryArtist.artistName}
+                  imageUrl={primaryArtist.imageUrl}
+                  avatarApiSize={256}
+                  colorIndex={0}
+                  alt=""
+                  className="h-full w-full object-cover"
+                  loading="eager"
+                  decoding="async"
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={getAvatarUrl(topArtistName || t("unknownArtist"), 256, 0)}
+                  alt=""
+                  className="h-full w-full object-cover"
+                  loading="eager"
+                  decoding="async"
+                  referrerPolicy="no-referrer"
+                />
+              )}
+              <div
+                className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-violet-600/20 via-transparent to-cyan-500/20"
+                aria-hidden
+              />
+            </div>
+            <div className="min-w-0">
+              <p className="whitespace-nowrap text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-cyan">
+                {t("mobile.signatureLabel")}
+              </p>
+              <h1 className="mt-2 truncate text-3xl font-semibold tracking-[-0.06em]">
+                {topArtistName || t("unknownArtist")}
+              </h1>
+              <p className="mt-2 line-clamp-2 text-sm leading-6 text-white/62">
+                {topGenreName ? t("heroSignatureHint", { genre: topGenreName }) : t("mobile.genreFallback")}
+              </p>
+            </div>
+          </div>
+
+          <div className="rounded-3xl border border-white/10 bg-white/[0.07] p-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/45">
+              {t("mobile.storyTitle")}
+            </p>
+            <div className="mt-3">
+              <MobileAiStory
+                aiError={aiError}
+                aiLoading={aiLoading}
+                interactiveAiBlockedByGenreBackfill={interactiveAiBlockedByGenreBackfill}
+                profileDescription={profileDescription}
+              />
+            </div>
+            {showAiUnavailable ? (
+              <p className="mt-4 rounded-2xl border border-amber-200/20 bg-amber-300/10 px-4 py-3 text-sm leading-6 text-amber-50">
+                {t("aiUnavailable")}
+              </p>
+            ) : null}
+          </div>
+        </div>
+      </section>
+
+      <section className="-mx-4 overflow-x-auto px-4 pb-1">
+        <div className="flex gap-3">
+          {profileMetrics.map((metric) => (
+            <MobileMetricPill key={metric.label} {...metric} />
+          ))}
+        </div>
+      </section>
+
+      <section className="rounded-[1.75rem] border border-card-border bg-card-surface p-4 shadow-card">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+              {t("mobile.genresTitle")}
+            </p>
+            <p className="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">{t("mobile.genresHint")}</p>
+          </div>
+          {topArtistShare > 0 ? (
+            <span className="shrink-0 rounded-full bg-accent-cyan/10 px-3 py-1 text-xs font-semibold text-accent-cyan">
+              {t("mobile.anchorShare", { percent: topArtistShare })}
+            </span>
+          ) : null}
+        </div>
+        <div className="mt-4 space-y-3">
+          {genrePreview.map((genre) => (
+            <div key={genre.genre}>
+              <div className="mb-1.5 flex items-center justify-between gap-3 text-sm">
+                <span className="truncate font-medium text-gray-800 dark:text-gray-100">{genre.genre}</span>
+                <span className="text-gray-500 dark:text-gray-400">{Math.round(genre.percentage)}%</span>
+              </div>
+              <div className="h-2.5 overflow-hidden rounded-full bg-gray-100 dark:bg-white/10">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-accent-violet to-accent-cyan"
+                  style={{ width: `${Math.min(100, Math.max(4, genre.percentage))}%` }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <details className="group rounded-[1.75rem] border border-card-border bg-card-surface p-4 shadow-card">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 text-left">
+          <span>
+            <span className="block text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+              {t("mobile.artistsTitle")}
+            </span>
+            <span className="mt-1 block text-sm text-gray-500 dark:text-gray-400">{t("mobile.artistsHint")}</span>
+          </span>
+          <span className="rounded-full border border-card-border px-3 py-1 text-xs font-semibold text-gray-500 transition group-open:rotate-45 dark:text-gray-300">
+            +
+          </span>
+        </summary>
+        <div className="mt-4 space-y-3">
+          {topArtists.slice(0, 4).map((artist, index) => (
+            <div key={artist.artistId ?? artist.artistName} className="flex items-center gap-3">
+              <div className="h-11 w-11 overflow-hidden rounded-2xl bg-gray-100 dark:bg-white/10">
+                <ArtistAvatarHydrated
+                  artistId={artist.artistId}
+                  artistName={artist.artistName}
+                  imageUrl={artist.imageUrl}
+                  avatarApiSize={128}
+                  colorIndex={index}
+                  alt=""
+                  className="h-full w-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                  referrerPolicy="no-referrer"
+                />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold text-gray-900 dark:text-white">{artist.artistName}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  {formatCompactNumber(artist.listenCount, locale)} {t("labels.listens")}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </details>
+
+      <section className="rounded-[1.75rem] border border-accent-violet/20 bg-gradient-to-br from-card-surface to-accent-violet/[0.08] p-4 shadow-card">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent-violet">
+          {t("mobile.nextTitle")}
+        </p>
+        <p className="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-300">{t("mobile.nextLead")}</p>
+        <div className="mt-4 grid gap-3">
+          <Link
+            href={withFilters("/dashboard/overview")}
+            className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-5 py-3 text-sm font-bold text-white shadow-brand-glow"
+          >
+            {t("mobile.overviewCta")}
+            <span aria-hidden="true">&rarr;</span>
+          </Link>
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              { href: withFilters("/dashboard/artists"), label: t("ctas.artists") },
+              { href: withFilters("/dashboard/tracks"), label: t("ctas.tracks") },
+              { href: withFilters("/dashboard/genres"), label: t("ctas.genres") },
+            ].map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="flex min-h-11 items-center justify-center rounded-2xl border border-card-border bg-card-surface px-2 py-2 text-center text-xs font-semibold text-gray-700 dark:text-gray-300"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
@@ -405,6 +711,7 @@ function MusicalProfileContent() {
   }
 
   const dateRangeLabel = formatDateRange(startDate, endDate, locale);
+  const mobileDateRangeLabel = formatMobileDateRange(startDate, endDate, locale);
   const topArtistName = getTopArtistFallback(topArtists, overview);
   const topGenreName = firstKnownGenreName(genresData?.data);
   const profileDescription =
@@ -438,14 +745,32 @@ function MusicalProfileContent() {
       : 0;
 
   return (
-    <div className="space-y-12 pb-6 lg:pb-10">
-      <ParallaxHero>
-        <motion.section
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-gray-950 px-5 py-6 text-white shadow-2xl shadow-accent-violet/20 sm:px-8 sm:py-9 lg:px-10 lg:py-10"
-        >
+    <>
+      <MobileMusicalProfileView
+        aiError={aiError ?? null}
+        aiLoading={aiLoading}
+        dateRangeLabel={mobileDateRangeLabel}
+        genrePreview={genrePreview}
+        interactiveAiBlockedByGenreBackfill={interactiveAiBlockedByGenreBackfill}
+        locale={locale}
+        profileDescription={profileDescription}
+        profileMetrics={profileMetrics}
+        showAiUnavailable={showAiUnavailable}
+        topArtistName={topArtistName}
+        topArtistShare={topArtistShare}
+        topArtists={topArtists}
+        topGenreName={topGenreName}
+        withFilters={withFilters}
+      />
+
+      <div className="hidden space-y-12 pb-6 lg:block lg:pb-10">
+        <ParallaxHero>
+          <motion.section
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-gray-950 px-5 py-6 text-white shadow-2xl shadow-accent-violet/20 sm:px-8 sm:py-9 lg:px-10 lg:py-10"
+          >
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(240,64,104,0.28),transparent_30%),radial-gradient(circle_at_80%_10%,rgba(79,144,224,0.24),transparent_32%),linear-gradient(135deg,rgba(3,7,18,0.98),rgba(30,27,75,0.88)_48%,rgba(8,47,73,0.72))]" />
           <div className="absolute -left-24 top-1/2 h-64 w-64 rounded-full bg-accent-violet/25 blur-3xl" />
           <div className="absolute -bottom-28 right-10 h-72 w-72 rounded-full bg-accent-cyan/20 blur-3xl" />
@@ -824,8 +1149,9 @@ function MusicalProfileContent() {
             </div>
           </div>
         </section>
-      </ScrollRevealSection>
-    </div>
+        </ScrollRevealSection>
+      </div>
+    </>
   );
 }
 

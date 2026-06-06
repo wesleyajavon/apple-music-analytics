@@ -11,6 +11,7 @@ describe("security-headers", () => {
   it("includes CSP with Supabase and Sentry hosts", () => {
     const csp = buildContentSecurityPolicy();
     expect(csp).toContain("default-src 'self'");
+    expect(csp).toContain("worker-src 'self' blob:");
     expect(csp).toContain("https://*.supabase.co");
     expect(csp).toContain("https://*.ingest.sentry.io");
   });

@@ -21,6 +21,9 @@ vi.mock("@/lib/services/listening/public-timeline-cached", () => ({
   getPublicProfileTimelineAllTimeCached: vi.fn(),
   getPublicProfileTimelineRangeCached: vi.fn(),
 }));
+vi.mock("@/lib/services/user/public-profile-access", () => ({
+  isActivePublicProfileUserId: vi.fn(),
+}));
 
 import {
   getDailyAggregatedListens,
@@ -34,6 +37,7 @@ import {
   getPublicProfileTimelineRangeCached,
 } from '@/lib/services/listening/public-timeline-cached';
 import { DEFAULT_PUBLIC_PROFILE_USER_ID } from '@/lib/constants/public-profile';
+import { isActivePublicProfileUserId } from '@/lib/services/user/public-profile-access';
 
 describe('GET /api/timeline', () => {
   beforeEach(() => {
@@ -42,6 +46,7 @@ describe('GET /api/timeline', () => {
       ok: true,
       userId: 'user-1',
     });
+    vi.mocked(isActivePublicProfileUserId).mockResolvedValue(false);
   });
 
   it('should return timeline data with valid dates and default period (day)', async () => {
@@ -224,6 +229,7 @@ describe('GET /api/timeline', () => {
         ok: true,
         userId: DEFAULT_PUBLIC_PROFILE_USER_ID,
       });
+      vi.mocked(isActivePublicProfileUserId).mockResolvedValue(true);
     });
 
     it('uses all-time cached timeline and public Cache-Control', async () => {

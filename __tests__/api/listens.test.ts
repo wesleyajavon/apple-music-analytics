@@ -20,6 +20,9 @@ vi.mock("@/lib/services/listening/public-listens-cached", () => ({
   getPublicProfileListensRawCached: vi.fn(),
   getPublicProfileListensAggregatedCached: vi.fn(),
 }));
+vi.mock("@/lib/services/user/public-profile-access", () => ({
+  isActivePublicProfileUserId: vi.fn(),
+}));
 
 import { getListens } from '@/lib/services/listening/listening-service';
 import { getAggregatedListens } from '@/lib/services/listening/listening-aggregation';
@@ -29,6 +32,7 @@ import {
   getPublicProfileListensAggregatedCached,
 } from '@/lib/services/listening/public-listens-cached';
 import { DEFAULT_PUBLIC_PROFILE_USER_ID } from '@/lib/constants/public-profile';
+import { isActivePublicProfileUserId } from '@/lib/services/user/public-profile-access';
 
 describe('GET /api/listens', () => {
   beforeEach(() => {
@@ -37,6 +41,7 @@ describe('GET /api/listens', () => {
       ok: true,
       userId: 'user-1',
     });
+    vi.mocked(isActivePublicProfileUserId).mockResolvedValue(false);
   });
 
   describe('Raw listens mode (without aggregate)', () => {
@@ -209,6 +214,7 @@ describe('GET /api/listens', () => {
         ok: true,
         userId: DEFAULT_PUBLIC_PROFILE_USER_ID,
       });
+      vi.mocked(isActivePublicProfileUserId).mockResolvedValue(true);
     });
 
     it('uses cached raw listens and public Cache-Control', async () => {

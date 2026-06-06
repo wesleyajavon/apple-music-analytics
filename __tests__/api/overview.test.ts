@@ -15,11 +15,18 @@ vi.mock('@/lib/services/listening/public-overview-cached', () => ({
   getPublicProfileOverviewCached: vi.fn(),
   publicOverviewCacheRevalidateSeconds: 60,
 }));
+vi.mock("@/lib/security/analytics-rate-limit", () => ({
+  assertAnalyticsRateLimit: vi.fn(),
+}));
+vi.mock("@/lib/services/user/public-profile-access", () => ({
+  isActivePublicProfileUserId: vi.fn(),
+}));
 
 import { getOverviewStats, getTopArtists } from '@/lib/services/listening/listening-stats';
 import { resolveAuthorizedDataUserId } from '@/lib/auth/resolve-authorized-data-user-id';
 import { getPublicProfileOverviewCached } from '@/lib/services/listening/public-overview-cached';
 import { DEFAULT_PUBLIC_PROFILE_USER_ID } from '@/lib/constants/public-profile';
+import { isActivePublicProfileUserId } from '@/lib/services/user/public-profile-access';
 
 describe('GET /api/overview', () => {
   beforeEach(() => {
@@ -29,6 +36,7 @@ describe('GET /api/overview', () => {
       userId: 'user-1',
     });
     vi.mocked(getTopArtists).mockResolvedValue([]);
+    vi.mocked(isActivePublicProfileUserId).mockResolvedValue(false);
   });
 
   it('should return overview stats without date range', async () => {
@@ -127,6 +135,7 @@ describe('GET /api/overview', () => {
       ok: true,
       userId: DEFAULT_PUBLIC_PROFILE_USER_ID,
     });
+    vi.mocked(isActivePublicProfileUserId).mockResolvedValue(true);
     vi.mocked(getPublicProfileOverviewCached).mockResolvedValue({
       totalListens: 10,
       uniqueArtists: 2,

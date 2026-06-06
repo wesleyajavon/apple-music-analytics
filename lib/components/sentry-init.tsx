@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { scrubSentryEvent } from '@/lib/utils/sentry-scrub';
+import type { Integration } from '@sentry/core';
 import * as Sentry from '@sentry/react';
 
 type SentryInitProps = {
@@ -43,7 +44,7 @@ export function SentryInit({ enableReplay = false }: SentryInitProps) {
     }
 
     try {
-      const integrations = [Sentry.browserTracingIntegration()];
+      const integrations: Integration[] = [Sentry.browserTracingIntegration()];
 
       if (enableReplay) {
         integrations.push(

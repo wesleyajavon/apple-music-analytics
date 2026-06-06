@@ -1,13 +1,4 @@
-type SentryEventLike = {
-  user?: Record<string, unknown>;
-  request?: {
-    cookies?: unknown;
-    headers?: Record<string, string>;
-    query_string?: string;
-  };
-  extra?: Record<string, unknown>;
-  contexts?: Record<string, unknown>;
-};
+import type { Event } from "@sentry/core";
 
 const EMAIL_RE = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
 const JWT_RE = /eyJ[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+/g;
@@ -42,7 +33,7 @@ function scrubValue(value: unknown): unknown {
 }
 
 /** Strip common PII from Sentry events before upload. */
-export function scrubSentryEvent<T extends SentryEventLike>(event: T): T | null {
+export function scrubSentryEvent<T extends Event>(event: T): T | null {
   if (event.user) {
     delete event.user.email;
     delete event.user.username;

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { NextRequest, NextResponse } from "next/server";
 
 const mocks = vi.hoisted(() => ({
@@ -26,6 +26,19 @@ describe("middleware public Palette access", () => {
       response: NextResponse.next(),
       user: null,
     });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(
+          JSON.stringify({ active: true, userId: PUBLIC_PROFILE_ID }),
+          { status: 200 }
+        )
+      )
+    );
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it("redirects anonymous public-profile viewers away from Palette", async () => {

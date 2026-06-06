@@ -10,7 +10,7 @@ import {
   forbiddenResponse,
   unauthorizedResponse,
 } from "@/lib/auth/require-auth-user-id";
-import { getPublicProfileUserId } from "@/lib/constants/public-profile";
+import { isActivePublicProfileUserId } from "@/lib/services/user/public-profile-access";
 import { publicDemoJsonResponse } from "@/lib/http/public-demo-response";
 import {
   getPublicProfileOverviewCached,
@@ -82,9 +82,7 @@ export async function GET(request: NextRequest) {
     const { userId } = resolved;
     await assertAnalyticsRateLimit(request, OVERVIEW_RATE_LIMIT, userId);
 
-    const publicProfileId = getPublicProfileUserId();
-    const isPublicDemoDataset =
-      publicProfileId !== null && userId === publicProfileId;
+    const isPublicDemoDataset = await isActivePublicProfileUserId(userId);
 
     let payload: OverviewStatsDto & { topArtists: TopArtistDto[] };
     if (isPublicDemoDataset) {

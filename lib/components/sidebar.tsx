@@ -10,7 +10,7 @@ import { ThemeSwitcher } from "@/lib/components/theme-switcher";
 import { UserAvatar } from "@/lib/components/user-avatar";
 import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import { getPublicProfileUserId } from "@/lib/constants/public-profile";
+import { usePublicDemo } from "@/lib/providers/public-demo-provider";
 
 const STORAGE_KEY = "sidebar-collapsed";
 
@@ -303,7 +303,7 @@ function SidebarContent() {
   );
   const [isSigningOut, setIsSigningOut] = useState(false);
   const t = useTranslations("sidebar");
-  const publicProfileUserId = useMemo(() => getPublicProfileUserId(), []);
+  const { publicProfileUserId } = usePublicDemo();
 
   const withFilters = useMemo(
     () => (href: string) => mergeDashboardSearchParams(href, searchParams),

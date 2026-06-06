@@ -34,6 +34,10 @@ import type {
   TasteProfileTone,
 } from "@/lib/dto/taste-profile";
 import { assertRateLimit } from "@/lib/security/rate-limit";
+import {
+  requireAuthenticatedUserId,
+  unauthorizedResponse,
+} from "@/lib/auth/require-auth-user-id";
 
 export const dynamic = "force-dynamic";
 const AI_TASTE_PROFILE_RATE_LIMIT = {
@@ -102,6 +106,9 @@ const TasteProfileInputSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    const userId = await requireAuthenticatedUserId(request);
+    if (!userId) return unauthorizedResponse();
+
     const body = await request.json();
     const parseResult = TasteProfileInputSchema.safeParse(body);
 
@@ -116,11 +123,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { tone, locale: localeParam, userId: bodyUserId, ...analyticsInput } =
-      parseResult.data;
+    const { tone, locale: localeParam, ...analyticsInput } = parseResult.data;
     await assertRateLimit(request, {
       ...AI_TASTE_PROFILE_RATE_LIMIT,
-      userId: bodyUserId,
+      userId,
     });
     const input: TasteProfileInput = analyticsInput;
     const locale = parseAiLocale(localeParam);
@@ -165,12 +171,8 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const guardUserId = await resolveUserIdForGroqGenreBackfillGuard(bodyUserId);
-    if (guardUserId) {
-      await assertInteractiveGroqNotBlockedByImportGenreBackfill(guardUserId);
-    }
-
-    await assertGroqUserQuotaForRequest(request, bodyUserId);
+    await assertInteractiveGroqNotBlockedByImportGenreBackfill(userId);
+    await assertGroqUserQuotaForRequest(request, userId);
 
     // 4. Generate profile via LLM
     const profile = await generateTasteProfile(summary, tone, locale);

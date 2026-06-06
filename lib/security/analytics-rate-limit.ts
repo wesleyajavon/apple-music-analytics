@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server";
 import { getCurrentUserId } from "@/lib/auth/get-current-user-id";
-import { getPublicProfileUserId } from "@/lib/constants/public-profile";
+import { isActivePublicProfileUserId } from "@/lib/services/user/public-profile-access";
 import {
   assertRateLimit,
   type RateLimitConfig,
@@ -17,8 +17,7 @@ export async function resolveAnalyticsRateLimitUserId(
   request: NextRequest,
   authorizedDataUserId: string
 ): Promise<string | null> {
-  const publicId = getPublicProfileUserId();
-  if (publicId && authorizedDataUserId === publicId) {
+  if (await isActivePublicProfileUserId(authorizedDataUserId)) {
     const sessionUserId = (await getCurrentUserId(request))?.trim();
     return sessionUserId || null;
   }

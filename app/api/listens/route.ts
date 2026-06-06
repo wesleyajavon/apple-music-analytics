@@ -15,7 +15,7 @@ import {
   unauthorizedResponse,
 } from "@/lib/auth/require-auth-user-id";
 import { assertAnalyticsRateLimit } from "@/lib/security/analytics-rate-limit";
-import { getPublicProfileUserId } from "@/lib/constants/public-profile";
+import { isActivePublicProfileUserId } from "@/lib/services/user/public-profile-access";
 import { publicDemoJsonResponse } from "@/lib/http/public-demo-response";
 import {
   getPublicProfileListensAggregatedCached,
@@ -157,9 +157,7 @@ export async function GET(request: NextRequest) {
     const { userId } = resolved;
     await assertAnalyticsRateLimit(request, LISTENS_RATE_LIMIT, userId);
 
-    const publicProfileId = getPublicProfileUserId();
-    const isPublicDemoDataset =
-      publicProfileId !== null && userId === publicProfileId;
+    const isPublicDemoDataset = await isActivePublicProfileUserId(userId);
 
     const { searchParams } = new URL(request.url);
     const aggregate =

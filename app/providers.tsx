@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/lib/providers/theme-provider";
+import { CookieConsentProvider } from "@/lib/providers/cookie-consent-provider";
 
 // Provider TanStack Query avec configuration optimisée pour un dashboard analytique
 // staleTime: 60s pour réduire les requêtes inutiles sur des données qui changent peu
@@ -28,6 +29,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   );
 
   return (
+    <CookieConsentProvider>
     <ThemeProvider>
       <QueryClientProvider client={queryClient}>
         {children}
@@ -38,6 +40,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         />
       </QueryClientProvider>
     </ThemeProvider>
+    </CookieConsentProvider>
   );
 }
 

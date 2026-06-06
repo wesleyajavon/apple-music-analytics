@@ -4,7 +4,8 @@ import { FormEvent, useId, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import { DEFAULT_PUBLIC_PROFILE_USER_ID } from "@/lib/constants/public-profile";
+import { usePublicDemo } from "@/lib/providers/public-demo-provider";
+import { TERMS_CONSENT_VERSION } from "@/lib/constants/legal-consent";
 import {
   AUTH_CARD_CLASS,
   AUTH_INPUT_CLASS,
@@ -23,9 +24,15 @@ export default function SignUpPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const { publicDemoOverviewPath: publicDemoPath } = usePublicDemo();
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!termsAccepted) {
+      setError(t("termsConsentRequired"));
+      return;
+    }
     setIsLoading(true);
     setError(null);
     setSuccess(null);
@@ -45,6 +52,16 @@ export default function SignUpPage() {
         setError(signUpError.message);
         return;
       }
+
+      void fetch("/api/user/consent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          consentType: "terms",
+          consentVersion: TERMS_CONSENT_VERSION,
+          granted: true,
+        }),
+      });
 
       setSuccess(t("signUpSuccess"));
     } finally {
@@ -114,6 +131,33 @@ export default function SignUpPage() {
             />
           </div>
 
+          <label className="flex items-start gap-3 text-sm text-muted">
+            <input
+              type="checkbox"
+              className="mt-1 h-4 w-4 shrink-0 rounded border-border text-primary focus:ring-primary/30"
+              checked={termsAccepted}
+              onChange={(e) => {
+                setTermsAccepted(e.target.checked);
+                if (error === t("termsConsentRequired")) setError(null);
+              }}
+              required
+            />
+            <span>
+              {t.rich("termsConsentLabel", {
+                terms: (chunks) => (
+                  <Link href="/legal/terms" className="font-medium text-primary underline-offset-2 hover:underline">
+                    {t("termsLink")}
+                  </Link>
+                ),
+                privacy: (chunks) => (
+                  <Link href="/legal/privacy" className="font-medium text-primary underline-offset-2 hover:underline">
+                    {t("privacyLink")}
+                  </Link>
+                ),
+              })}
+            </span>
+          </label>
+
           {error && (
             <p
               id={errorId}
@@ -150,14 +194,16 @@ export default function SignUpPage() {
           </Link>
         </p>
 
-        <p className="mt-4 text-center sm:hidden">
-          <Link
-            href={`/dashboard/overview?userId=${DEFAULT_PUBLIC_PROFILE_USER_ID}`}
-            className="text-sm font-medium text-muted underline-offset-4 hover:text-primary hover:underline"
-          >
-            {t("dashboardLink")}
-          </Link>
-        </p>
+        {publicDemoPath ? (
+          <p className="mt-4 text-center sm:hidden">
+            <Link
+              href={publicDemoPath}
+              className="text-sm font-medium text-muted underline-offset-4 hover:text-primary hover:underline"
+            >
+              {t("dashboardLink")}
+            </Link>
+          </p>
+        ) : null}
       </section>
     </main>
   );

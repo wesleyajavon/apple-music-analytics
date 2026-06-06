@@ -269,6 +269,20 @@
     "phraseMismatch": "La frase no coincide con tu perfil.",
     "phraseLoadError": "No se pudo cargar la frase de confirmación. Inténtalo de nuevo.",
     "noPhraseError": "No podemos generar una frase a partir de tu perfil (nombre o correo). Actualiza tu nombre en la cuenta o contacta con soporte.",
+    "exportAllDataTitle": "Exportar todos mis datos",
+    "exportAllDataBody": "Descarga un JSON con tu perfil, escuchas, imports Replay, decisiones de paleta, metadatos de Spotify e historial de consentimientos.",
+    "exportAllDataButton": "Descargar mis datos (JSON)",
+    "exporting": "Preparando exportación…",
+    "exportError": "No se pudieron exportar tus datos. Inténtalo más tarde.",
+    "deleteAccountTitle": "Eliminar mi cuenta",
+    "deleteAccountBody": "Elimina permanentemente tu cuenta, perfil, avatar, conexión Spotify y todos los datos asociados. Esta acción es irreversible.",
+    "deleteAccountBulletProfile": "Perfil, email y avatar",
+    "deleteAccountBulletSpotify": "Conexión Spotify y tokens",
+    "deleteAccountBulletAllData": "Historial de escucha, Replay, paleta y trabajos IA",
+    "deleteAccountCheckbox": "Entiendo que eliminar mi cuenta es permanente.",
+    "deleteAccountButton": "Eliminar permanentemente mi cuenta",
+    "deletingAccount": "Eliminando cuenta…",
+    "deleteAccountError": "No se pudo eliminar la cuenta. Inténtalo más tarde.",
     "clearDataButton": "Borrar todos mis datos de analytics",
     "clearing": "Borrando…",
     "clearError": "No se pudieron borrar los datos. Inténtalo más tarde.",
@@ -276,6 +290,17 @@
     "genreBannerTitle": "Aviso de géneros Groq",
     "genreBannerDescription": "Tras importar puedes ocultar la franja del panel sobre la clasificación Groq. Reactívala aquí cuando quieras.",
     "genreBannerHideLabel": "Ocultar en el panel avisos y resúmenes de clasificación de géneros con Groq",
+    "groqConsentTitle": "Clasificación de géneros Groq (IA)",
+    "groqConsentDescription": "Si está activado, los títulos de artistas y pistas de tu biblioteca pueden enviarse a Groq para completar géneros faltantes. Desactivarlo detiene nuevas ejecuciones y cancela cualquier trabajo en curso.",
+    "groqConsentLabel": "Permitir que Groq clasifique géneros faltantes",
+    "groqConsentError": "No se pudo actualizar la preferencia de privacidad de Groq. Inténtalo de nuevo.",
+    "groqConsentSaving": "Guardando…",
+    "publicProfileTitle": "Demo pública del panel",
+    "publicProfileDescription": "Si está activado, los visitantes sin cuenta pueden ver tus analíticas mediante el enlace de demo pública. Puedes desactivarlo en cualquier momento.",
+    "publicProfileLabel": "Permitir que mi perfil se muestre en la demo pública",
+    "publicProfileError": "No se pudo actualizar la preferencia de demo pública. Inténtalo de nuevo.",
+    "consentTableMissing": "El almacenamiento de consentimientos no está listo. Ejecuta npm run db:migrate y reinicia el servidor de desarrollo.",
+    "publicProfileSaving": "Guardando…",
     "mobile": {
       "eyebrow": "Centro de cuenta",
       "storyTitle": "Tu cuenta, tus controles",
@@ -323,6 +348,10 @@
     "noAccount": "¿No tienes cuenta?",
     "alreadyAccount": "¿Ya tienes cuenta?",
     "signUpSuccess": "Cuenta creada. Revisa tu email para confirmar el registro.",
+    "termsConsentLabel": "Acepto los {terms} y la {privacy}.",
+    "termsLink": "términos de servicio",
+    "privacyLink": "política de privacidad",
+    "termsConsentRequired": "Debes aceptar los términos y la política de privacidad para crear una cuenta.",
     "skipToContent": "Ir al formulario de inicio de sesión",
     "homeLinkAriaLabel": "Soundprint-AI — inicio",
     "authNavAriaLabel": "Navegación de cuenta",
@@ -684,6 +713,9 @@
     "demo": "Demo",
     "methodology": "Metodología",
     "apiDocs": "API Docs",
+    "privacy": "Privacidad",
+    "terms": "Términos",
+    "cookies": "Cookies",
     "copyright": "Soundprint-AI. Todos los derechos reservados.",
     "madeWith": "Hecho para quienes aman la música",
     "creatorCredit": "Creado por Wesley Ajavon",
@@ -2428,6 +2460,170 @@
           "label": "Preguntar",
           "value": "Chatea con respuestas basadas en tus datos reales."
         }
+      }
+    }
+  },
+  "cookieConsent": {
+    "title": "Cookies y rastreadores",
+    "description": "Usamos cookies estrictamente necesarias para la autenticación y, con tu consentimiento, rastreadores para medir audiencia y detectar errores.",
+    "learnMore": "Más información",
+    "customize": "Personalizar",
+    "savePreferences": "Guardar mis preferencias",
+    "rejectNonEssential": "Rechazar cookies no esenciales",
+    "acceptAll": "Aceptar todo",
+    "necessaryTitle": "Estrictamente necesarias",
+    "necessaryDesc": "Cookies de sesión Supabase — necesarias para tu cuenta.",
+    "analyticsTitle": "Medición de audiencia",
+    "analyticsDesc": "Vercel Analytics y Speed Insights.",
+    "monitoringTitle": "Monitorización de errores",
+    "monitoringDesc": "Sentry — informes de errores (sin grabación de pantalla).",
+    "replayTitle": "Repetición de sesión",
+    "replayDesc": "Sentry Replay — reproducción anonimizada (texto enmascarado)."
+  },
+  "legal": {
+    "nav": {
+      "privacy": "Privacidad",
+      "terms": "Términos",
+      "cookies": "Cookies"
+    },
+    "privacy": {
+      "eyebrow": "Legal",
+      "title": "Política de privacidad",
+      "lastUpdated": "Última actualización: 5 de junio de 2026",
+      "intro": "Un resumen claro de cómo Soundprint-AI maneja tus datos. Creamos esta app para tus estadísticas de escucha — no para vender tu información.",
+      "sections": [
+        {
+          "title": "Quién es responsable",
+          "paragraphs": [
+            "Wesley Ajavon (Soundprint-AI) es responsable de tus datos. ¿Preguntas? Contáctanos desde la configuración de la cuenta o el canal de soporte del sitio."
+          ]
+        },
+        {
+          "title": "Qué recopilamos",
+          "paragraphs": ["Solo lo necesario para hacer funcionar tu panel:"],
+          "bullets": [
+            "Cuenta — email, nombre, foto de perfil y cómo inicias sesión.",
+            "Historial de escucha — artistas, canciones y cuándo las escuchaste.",
+            "Conexiones — si vinculas Spotify u otros servicios similares.",
+            "Tus elecciones — preferencias de cookies, ajustes de IA y otros consentimientos."
+          ]
+        },
+        {
+          "title": "Por qué lo usamos",
+          "paragraphs": [
+            "Para mostrar tus estadísticas, mantener tu sesión y mejorar la app. La analítica y los informes de errores opcionales solo funcionan si aceptas en la configuración de cookies.",
+            "Las funciones de IA que envían nombres de artistas o canciones a un proveedor solo se activan si das tu consentimiento."
+          ]
+        },
+        {
+          "title": "Cuánto tiempo lo guardamos",
+          "paragraphs": [
+            "Tus datos de cuenta y escucha permanecen mientras tu cuenta esté activa. Si eliminas tu cuenta, borramos tus datos en un plazo de 30 días."
+          ]
+        },
+        {
+          "title": "Tus derechos",
+          "paragraphs": [
+            "Puedes acceder, exportar, corregir o eliminar tus datos. Ve a Ajustes → Datos y privacidad para exportar o eliminar tu cuenta.",
+            "También puedes cambiar tus elecciones de cookies e IA en cualquier momento. Si estás en la UE, puedes contactar a tu autoridad de protección de datos."
+          ]
+        }
+      ],
+      "related": {
+        "title": "Políticas relacionadas",
+        "description": "Ver también:",
+        "termsLink": "Términos de servicio",
+        "cookiesLink": "Política de cookies"
+      }
+    },
+    "terms": {
+      "eyebrow": "Condiciones",
+      "title": "Términos de servicio",
+      "lastUpdated": "Última actualización: 5 de junio de 2026",
+      "intro": "Un resumen claro de tus derechos y los nuestros al usar Soundprint-AI. Al usar la app, aceptas estos términos.",
+      "sections": [
+        {
+          "title": "Qué es esto",
+          "paragraphs": [
+            "Soundprint-AI es tu panel personal de escucha. Importa tu historial o conecta servicios como Spotify para explorar tus estadísticas."
+          ]
+        },
+        {
+          "title": "Tu cuenta",
+          "paragraphs": [
+            "Protege tu acceso. Usa información veraz y no suplantar a otras personas."
+          ]
+        },
+        {
+          "title": "Tus datos musicales",
+          "paragraphs": [
+            "Tus datos de escucha siguen siendo tuyos. Nos autorizas a procesarlos solo para hacer funcionar el panel. Sube solo datos que te pertenezcan o estés autorizado a usar."
+          ]
+        },
+        {
+          "title": "Servicios conectados",
+          "paragraphs": [
+            "Si vinculas Spotify, Apple Music, Last.fm o funciones de IA, sus reglas también aplican. Soundprint-AI no está afiliado a Apple, Spotify ni Last.fm."
+          ]
+        },
+        {
+          "title": "Algunas expectativas",
+          "paragraphs": [
+            "Ofrecemos el servicio tal cual. Las estadísticas dependen de lo que importes — pueden no ser perfectas.",
+            "No somos responsables de interrupciones causadas por servicios de terceros."
+          ]
+        },
+        {
+          "title": "Dejar el servicio",
+          "paragraphs": [
+            "Puedes eliminar tu cuenta en cualquier momento desde Ajustes.",
+            "Podemos suspender cuentas que abusen del servicio o infrinjan la ley."
+          ]
+        }
+      ],
+      "related": {
+        "title": "Políticas relacionadas",
+        "description": "Ver también:",
+        "privacyLink": "Política de privacidad",
+        "cookiesLink": "Política de cookies"
+      }
+    },
+    "cookies": {
+      "eyebrow": "Cookies",
+      "title": "Política de cookies",
+      "lastUpdated": "Última actualización: 5 de junio de 2026",
+      "intro": "Usamos unas pocas cookies para mantener tu sesión y recordar tus elecciones. Las opcionales nos ayudan a mejorar la app — solo si aceptas.",
+      "sections": [
+        {
+          "title": "Qué usamos",
+          "paragraphs": [
+            "En pocas palabras:"
+          ],
+          "bullets": [
+            "Esenciales — necesarias para iniciar sesión y usar la app.",
+            "Preferencias — tema, visualización, etc.",
+            "Analítica opcional — nos ayuda a ver qué páginas se usan.",
+            "Informes de errores opcionales — nos ayudan a corregir fallos más rápido."
+          ]
+        },
+        {
+          "title": "Tus elecciones",
+          "paragraphs": [
+            "Usa el panel de abajo para aceptar, rechazar o personalizar las cookies opcionales en cualquier momento.",
+            "Rechazar las cookies opcionales no te impide usar Soundprint-AI. También puedes borrarlas en la configuración del navegador."
+          ]
+        }
+      ],
+      "preferences": {
+        "title": "Gestionar tus preferencias",
+        "description": "Elige con qué te sientes cómodo. Los cambios se aplican de inmediato en este navegador.",
+        "saved": "Tus preferencias se han guardado."
+      },
+      "related": {
+        "title": "Políticas relacionadas",
+        "description": "Ver también:",
+        "privacyLink": "Política de privacidad",
+        "termsLink": "Términos de servicio"
       }
     }
   },

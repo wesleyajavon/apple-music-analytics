@@ -8,7 +8,7 @@ import { SoundprintLogo } from "@/lib/components/soundprint-logo";
 import { useMobileSidebar } from "@/lib/components/sidebar";
 import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import { getPublicProfileUserId } from "@/lib/constants/public-profile";
+import { usePublicDemo } from "@/lib/providers/public-demo-provider";
 
 /**
  * Rappel de marque dans la zone principale du dashboard (surtout mobile, où la sidebar est repliée).
@@ -18,7 +18,7 @@ export function DashboardToolbarBrand() {
   const t = useTranslations("sidebar");
   const { toggle: toggleMobileSidebar } = useMobileSidebar();
   const [authUserId, setAuthUserId] = useState<string | null>(null);
-  const publicProfileUserId = useMemo(() => getPublicProfileUserId(), []);
+  const { publicProfileUserId } = usePublicDemo();
 
   useEffect(() => {
     let mounted = true;

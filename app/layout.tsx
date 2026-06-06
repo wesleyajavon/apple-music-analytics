@@ -2,14 +2,16 @@ import { Inter } from "next/font/google";
 import { headers } from "next/headers";
 import "./globals.css";
 import { WebVitals } from "@/lib/components/web-vitals";
-import { SentryInit } from "@/lib/components/sentry-init";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { routing } from "@/i18n/routing";
+import { resolveActivePublicProfileUserId } from "@/lib/services/user/public-profile-access";
+import { PublicDemoProvider } from "@/lib/providers/public-demo-provider";
 import { Providers } from "./providers";
 import { AiMasterToggle } from "@/lib/components/ai-master-toggle";
-import { Analytics } from "@vercel/analytics/next";
-import { SpeedInsights } from "@vercel/speed-insights/next";
+import { ConditionalAnalytics } from "@/lib/components/conditional-analytics";
+import { ConditionalSentry } from "@/lib/components/conditional-sentry";
+import { CookieConsentBanner } from "@/lib/components/cookie-consent-banner";
 
 
 const inter = Inter({
@@ -28,10 +30,16 @@ export default async function RootLayout({
     headersList.get("x-next-intl-locale") || routing.defaultLocale;
 
   const messages = await getMessages();
+  const publicProfileUserId = await resolveActivePublicProfileUserId();
 
   return (
     <html lang={locale} className={inter.variable} suppressHydrationWarning>
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.__AMA_PUBLIC_PROFILE_USER_ID__=${JSON.stringify(publicProfileUserId)};`,
+          }}
+        />
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -59,16 +67,18 @@ export default async function RootLayout({
         />
       </head>
       <body className="font-sans antialiased">
-        <SentryInit />
         <WebVitals />
         <Providers>
-          <NextIntlClientProvider messages={messages}>
-            {children}
-            <AiMasterToggle />
-          </NextIntlClientProvider>
+          <PublicDemoProvider publicProfileUserId={publicProfileUserId}>
+            <ConditionalSentry />
+            <NextIntlClientProvider messages={messages}>
+              {children}
+              <AiMasterToggle />
+              <CookieConsentBanner />
+            </NextIntlClientProvider>
+            <ConditionalAnalytics />
+          </PublicDemoProvider>
         </Providers>
-        <Analytics />
-        <SpeedInsights />
       </body>
     </html>
   );

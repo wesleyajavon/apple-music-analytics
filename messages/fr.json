@@ -269,6 +269,20 @@
     "phraseMismatch": "La phrase ne correspond pas à votre profil.",
     "phraseLoadError": "Impossible de charger la phrase de confirmation. Réessayez.",
     "noPhraseError": "Nous ne pouvons pas générer de phrase à partir de votre profil (nom ou e-mail). Mettez à jour votre nom dans les paramètres du compte ou contactez le support.",
+    "exportAllDataTitle": "Exporter toutes mes données",
+    "exportAllDataBody": "Téléchargez un fichier JSON contenant votre profil, écoutes, imports Replay, décisions palette, métadonnées Spotify et historique de consentements.",
+    "exportAllDataButton": "Télécharger mes données (JSON)",
+    "exporting": "Préparation de l'export…",
+    "exportError": "Impossible d'exporter vos données. Réessayez plus tard.",
+    "deleteAccountTitle": "Supprimer mon compte",
+    "deleteAccountBody": "Supprime définitivement votre compte, votre profil, votre avatar, votre connexion Spotify et toutes les données associées. Cette action est irréversible.",
+    "deleteAccountBulletProfile": "Profil, e-mail et avatar",
+    "deleteAccountBulletSpotify": "Connexion Spotify et tokens",
+    "deleteAccountBulletAllData": "Historique d'écoute, Replay, palette et jobs IA",
+    "deleteAccountCheckbox": "Je comprends que la suppression de mon compte est définitive.",
+    "deleteAccountButton": "Supprimer définitivement mon compte",
+    "deletingAccount": "Suppression du compte…",
+    "deleteAccountError": "Impossible de supprimer le compte. Réessayez plus tard.",
     "clearDataButton": "Effacer toutes mes données d’analytics",
     "clearing": "Suppression en cours…",
     "clearError": "Impossible d’effacer les données. Réessayez plus tard.",
@@ -276,6 +290,17 @@
     "genreBannerTitle": "Bandeau Groq (genres)",
     "genreBannerDescription": "Après l’import, vous pouvez masquer le bandeau du tableau de bord sur la classification Groq. Réactivez-le ici à tout moment.",
     "genreBannerHideLabel": "Masquer sur le tableau de bord les invites et résumés de classification Groq",
+    "groqConsentTitle": "Classification des genres Groq (IA)",
+    "groqConsentDescription": "Si activé, les titres d’artistes et de morceaux de votre bibliothèque peuvent être envoyés à Groq pour compléter les genres manquants. La désactivation arrête les nouvelles passes et annule tout job en cours.",
+    "groqConsentLabel": "Autoriser Groq à classifier les genres manquants",
+    "groqConsentError": "Impossible de mettre à jour la préférence Groq. Réessayez.",
+    "groqConsentSaving": "Enregistrement…",
+    "publicProfileTitle": "Démo publique du tableau de bord",
+    "publicProfileDescription": "Si activé, les visiteurs sans compte peuvent consulter vos analytics via le lien de démo publique. Vous pouvez désactiver à tout moment.",
+    "publicProfileLabel": "Autoriser l’affichage de mon profil dans la démo publique",
+    "publicProfileError": "Impossible de mettre à jour la préférence de démo publique. Réessayez.",
+    "consentTableMissing": "Le stockage des consentements n’est pas prêt. Lancez npm run db:migrate, puis redémarrez le serveur de dev.",
+    "publicProfileSaving": "Enregistrement…",
     "mobile": {
       "eyebrow": "Espace compte",
       "storyTitle": "Votre compte, vos réglages",
@@ -323,6 +348,10 @@
     "noAccount": "Vous n'avez pas de compte ?",
     "alreadyAccount": "Vous avez déjà un compte ?",
     "signUpSuccess": "Compte créé. Vérifiez votre email pour confirmer votre inscription.",
+    "termsConsentLabel": "J'accepte les {terms} et la {privacy}.",
+    "termsLink": "conditions générales",
+    "privacyLink": "politique de confidentialité",
+    "termsConsentRequired": "Vous devez accepter les conditions et la politique de confidentialité pour créer un compte.",
     "skipToContent": "Aller au formulaire de connexion",
     "homeLinkAriaLabel": "Soundprint-AI — accueil",
     "authNavAriaLabel": "Navigation compte",
@@ -684,6 +713,9 @@
     "demo": "Démo",
     "methodology": "Méthodologie",
     "apiDocs": "API Docs",
+    "privacy": "Confidentialité",
+    "terms": "CGU",
+    "cookies": "Cookies",
     "copyright": "Soundprint-AI. Tous droits réservés.",
     "madeWith": "Pensé avec soin pour les passionnés de musique",
     "creatorCredit": "Créé par Wesley Ajavon",
@@ -2446,6 +2478,172 @@
           "label": "Demander",
           "value": "Discutez avec des réponses ancrées dans vos vraies données."
         }
+      }
+    }
+  },
+  "cookieConsent": {
+    "title": "Cookies et traceurs",
+    "description": "Nous utilisons des cookies strictement nécessaires pour l'authentification et, avec votre accord, des traceurs pour mesurer l'audience et détecter les erreurs.",
+    "learnMore": "En savoir plus",
+    "customize": "Personnaliser",
+    "savePreferences": "Enregistrer mes choix",
+    "rejectNonEssential": "Refuser les cookies non essentiels",
+    "acceptAll": "Tout accepter",
+    "necessaryTitle": "Strictement nécessaires",
+    "necessaryDesc": "Session de connexion (Supabase) — requis pour utiliser votre compte.",
+    "analyticsTitle": "Mesure d'audience",
+    "analyticsDesc": "Vercel Analytics et Speed Insights — pages vues et performances.",
+    "monitoringTitle": "Surveillance des erreurs",
+    "monitoringDesc": "Sentry — rapports d'erreurs et performances (sans enregistrement d'écran).",
+    "replayTitle": "Enregistrement de session (replay)",
+    "replayDesc": "Sentry Replay — relecture anonymisée en cas d'erreur (texte masqué)."
+  },
+  "legal": {
+    "nav": {
+      "privacy": "Confidentialité",
+      "terms": "CGU",
+      "cookies": "Cookies"
+    },
+    "privacy": {
+      "eyebrow": "Mentions légales",
+      "title": "Politique de confidentialité",
+      "lastUpdated": "Dernière mise à jour : 5 juin 2026",
+      "intro": "Un résumé clair de la façon dont Soundprint-AI gère vos données. Cette app sert à vos stats d'écoute — pas à vendre vos informations.",
+      "sections": [
+        {
+          "title": "Qui est responsable",
+          "paragraphs": [
+            "Wesley Ajavon (Soundprint-AI) est responsable de vos données. Des questions ? Contactez-nous via les paramètres du compte ou le support indiqué sur le site."
+          ]
+        },
+        {
+          "title": "Ce que nous collectons",
+          "paragraphs": [
+            "Uniquement ce qui est nécessaire pour faire fonctionner votre tableau de bord :"
+          ],
+          "bullets": [
+            "Compte — e-mail, nom, photo de profil et mode de connexion.",
+            "Historique d'écoute — artistes, titres et dates d'écoute.",
+            "Connexions — si vous liez Spotify ou des services similaires.",
+            "Vos choix — préférences cookies, réglages IA et autres consentements."
+          ]
+        },
+        {
+          "title": "Pourquoi nous les utilisons",
+          "paragraphs": [
+            "Pour afficher vos stats, vous garder connecté et améliorer l'app. L'analytique et le signalement d'erreurs optionnels ne s'activent que si vous acceptez dans les paramètres cookies.",
+            "Les fonctions IA qui envoient des noms d'artistes ou de titres à un prestataire ne s'activent que si vous y consentez."
+          ]
+        },
+        {
+          "title": "Combien de temps nous les gardons",
+          "paragraphs": [
+            "Vos données de compte et d'écoute restent tant que votre compte est actif. Si vous supprimez votre compte, nous effaçons vos données sous 30 jours."
+          ]
+        },
+        {
+          "title": "Vos droits",
+          "paragraphs": [
+            "Vous pouvez accéder à vos données, les exporter, les corriger ou les supprimer. Allez dans Paramètres → Données et confidentialité pour exporter ou supprimer votre compte.",
+            "Vous pouvez aussi modifier vos choix cookies et IA à tout moment. Si vous êtes dans l'UE, vous pouvez contacter votre autorité de protection des données."
+          ]
+        }
+      ],
+      "related": {
+        "title": "Documents connexes",
+        "description": "Voir aussi :",
+        "termsLink": "Conditions d'utilisation",
+        "cookiesLink": "Politique cookies"
+      }
+    },
+    "terms": {
+      "eyebrow": "Conditions d'utilisation",
+      "title": "Conditions générales d'utilisation",
+      "lastUpdated": "Dernière mise à jour : 5 juin 2026",
+      "intro": "Un aperçu simple de vos droits et des nôtres lorsque vous utilisez Soundprint-AI. En utilisant l'application, vous acceptez ces conditions.",
+      "sections": [
+        {
+          "title": "De quoi il s'agit",
+          "paragraphs": [
+            "Soundprint-AI est votre tableau de bord d'écoute personnel. Importez votre historique ou connectez des services comme Spotify pour explorer vos stats."
+          ]
+        },
+        {
+          "title": "Votre compte",
+          "paragraphs": [
+            "Protégez vos identifiants. Utilisez des informations exactes et n'usurpez pas l'identité d'autrui."
+          ]
+        },
+        {
+          "title": "Vos données musicales",
+          "paragraphs": [
+            "Vos données d'écoute restent les vôtres. Vous nous autorisez à les traiter uniquement pour faire fonctionner le tableau de bord. N'importez que des données que vous possédez ou êtes autorisé à utiliser."
+          ]
+        },
+        {
+          "title": "Services connectés",
+          "paragraphs": [
+            "Si vous liez Spotify, Apple Music, Last.fm ou des fonctions IA, leurs règles s'appliquent aussi. Soundprint-AI n'est pas affilié à Apple, Spotify ou Last.fm."
+          ]
+        },
+        {
+          "title": "Quelques attentes",
+          "paragraphs": [
+            "Le service est fourni en l'état. Les statistiques dépendent de ce que vous importez — elles peuvent ne pas être parfaites.",
+            "Nous ne sommes pas responsables des interruptions causées par des services tiers."
+          ]
+        },
+        {
+          "title": "Quitter le service",
+          "paragraphs": [
+            "Vous pouvez supprimer votre compte à tout moment dans les paramètres.",
+            "Nous pouvons suspendre un compte en cas d'abus ou d'usage illégal."
+          ]
+        }
+      ],
+      "related": {
+        "title": "Documents connexes",
+        "description": "Voir aussi :",
+        "privacyLink": "Politique de confidentialité",
+        "cookiesLink": "Politique cookies"
+      }
+    },
+    "cookies": {
+      "eyebrow": "Politique cookies",
+      "title": "Politique relative aux cookies",
+      "lastUpdated": "Dernière mise à jour : 5 juin 2026",
+      "intro": "Nous utilisons quelques cookies pour vous garder connecté et mémoriser vos choix. Les optionnels nous aident à améliorer l'app — seulement si vous acceptez.",
+      "sections": [
+        {
+          "title": "Ce que nous utilisons",
+          "paragraphs": [
+            "En résumé :"
+          ],
+          "bullets": [
+            "Essentiels — nécessaires pour vous connecter et utiliser l'app.",
+            "Préférences — thème, affichage, etc.",
+            "Analytique optionnelle — nous aide à voir quelles pages sont utilisées.",
+            "Signalement d'erreurs optionnel — nous aide à corriger les bugs plus vite."
+          ]
+        },
+        {
+          "title": "Vos choix",
+          "paragraphs": [
+            "Utilisez le panneau ci-dessous pour accepter, refuser ou personnaliser les cookies optionnels à tout moment.",
+            "Refuser les cookies optionnels ne vous empêche pas d'utiliser Soundprint-AI. Vous pouvez aussi les supprimer dans les paramètres de votre navigateur."
+          ]
+        }
+      ],
+      "preferences": {
+        "title": "Gérer vos préférences",
+        "description": "Choisissez ce qui vous convient. Les changements s'appliquent immédiatement sur ce navigateur.",
+        "saved": "Vos préférences ont été enregistrées."
+      },
+      "related": {
+        "title": "Documents connexes",
+        "description": "Voir aussi :",
+        "privacyLink": "Politique de confidentialité",
+        "termsLink": "Conditions d'utilisation"
       }
     }
   },

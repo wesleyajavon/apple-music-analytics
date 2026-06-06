@@ -10,7 +10,7 @@ import {
   getTrackOverview,
   getTrackStats,
 } from "@/lib/services/track/track-service";
-import { getPublicProfileUserId } from "@/lib/constants/public-profile";
+import { isActivePublicProfileUserId } from "@/lib/services/user/public-profile-access";
 import { publicDemoJsonResponse } from "@/lib/http/public-demo-response";
 import { getPublicProfileTracksListCached } from "@/lib/services/track/public-tracks-list-cached";
 
@@ -33,9 +33,7 @@ export async function GET(request: NextRequest) {
 
     await assertAnalyticsRateLimit(request, TRACKS_RATE_LIMIT, userId);
 
-    const publicProfileId = getPublicProfileUserId();
-    const isPublicDemoDataset =
-      publicProfileId !== null && userId === publicProfileId;
+    const isPublicDemoDataset = await isActivePublicProfileUserId(userId);
 
     const { searchParams } = new URL(request.url);
     const limitParam = searchParams.get("limit");

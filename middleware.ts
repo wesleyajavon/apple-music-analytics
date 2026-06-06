@@ -2,7 +2,7 @@ import createMiddleware from "next-intl/middleware";
 import { NextRequest, NextResponse } from "next/server";
 import { routing } from "./i18n/routing";
 import { updateSession } from "@/lib/supabase/middleware";
-import { getPublicProfileUserId } from "@/lib/constants/public-profile";
+import { getConfiguredPublicProfileUserId } from "@/lib/constants/public-profile";
 
 const handleI18nRouting = createMiddleware(routing);
 
@@ -56,18 +56,34 @@ export default async function middleware(request: NextRequest) {
     normalizedPath === "/dashboard" || normalizedPath.startsWith("/dashboard/");
 
   if (isDashboardRoute && !user) {
-    const publicProfileId = getPublicProfileUserId();
+    const configuredPublicId = getConfiguredPublicProfileUserId();
     const userIdParam = request.nextUrl.searchParams.get("userId");
     const locale = getLocaleFromPathname(request.nextUrl.pathname);
 
+    let activePublicId: string | null = null;
+    if (configuredPublicId && userIdParam === configuredPublicId) {
+      try {
+        const statusUrl = new URL("/api/public-demo/status", request.url);
+        const statusRes = await fetch(statusUrl, { cache: "no-store" });
+        if (statusRes.ok) {
+          const payload = (await statusRes.json()) as { active?: boolean; userId?: string | null };
+          if (payload.active && payload.userId === configuredPublicId) {
+            activePublicId = configuredPublicId;
+          }
+        }
+      } catch {
+        activePublicId = null;
+      }
+    }
+
     if (normalizedPath === "/dashboard/genres/palette") {
-      if (publicProfileId && userIdParam === publicProfileId) {
-        return redirectToPublicPaletteFallback(request, locale, publicProfileId);
+      if (activePublicId) {
+        return redirectToPublicPaletteFallback(request, locale, activePublicId);
       }
       return redirectToPublicHome(request, locale);
     }
 
-    if (publicProfileId && userIdParam === publicProfileId) {
+    if (activePublicId) {
       return sessionResponse;
     }
     return redirectToPublicHome(request, locale);

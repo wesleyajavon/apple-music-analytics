@@ -30,6 +30,10 @@ import {
 import { parseAiLocale } from "@/lib/services/ai/locale-utils";
 import type { AiInsightsInput, AiInsightsResponse } from "@/lib/dto/ai-insights";
 import { assertRateLimit } from "@/lib/security/rate-limit";
+import {
+  requireAuthenticatedUserId,
+  unauthorizedResponse,
+} from "@/lib/auth/require-auth-user-id";
 
 export const dynamic = "force-dynamic";
 const AI_INSIGHTS_RATE_LIMIT = {
@@ -94,6 +98,9 @@ const AiInsightsInputSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    const userId = await requireAuthenticatedUserId(request);
+    if (!userId) return unauthorizedResponse();
+
     const body = await request.json();
     const parseResult = AiInsightsInputSchema.safeParse(body);
 
@@ -108,16 +115,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const {
-      locale: localeParam,
-      userId: bodyUserId,
-      insightStyle,
-      ...inputData
-    } =
-      parseResult.data;
+    const { locale: localeParam, insightStyle, ...inputData } = parseResult.data;
     await assertRateLimit(request, {
       ...AI_INSIGHTS_RATE_LIMIT,
-      userId: bodyUserId,
+      userId,
     });
     const input = inputData as AiInsightsInput;
     const locale = parseAiLocale(localeParam);
@@ -157,12 +158,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(response);
     }
 
-    const guardUserId = await resolveUserIdForGroqGenreBackfillGuard(bodyUserId);
-    if (guardUserId) {
-      await assertInteractiveGroqNotBlockedByImportGenreBackfill(guardUserId);
-    }
-
-    await assertGroqUserQuotaForRequest(request, bodyUserId);
+    await assertInteractiveGroqNotBlockedByImportGenreBackfill(userId);
+    await assertGroqUserQuotaForRequest(request, userId);
 
     // 4. Generate insights via LLM
     const insights = await generateInsights(summary, locale, insightStyle);

@@ -33,7 +33,7 @@ import {
   unauthorizedResponse,
 } from "@/lib/auth/require-auth-user-id";
 import { hasPendingOrRunningGroqImportGenreBackfillForUser } from "@/lib/services/listening/groq-import-genre-backfill-ai-guard";
-import { getPublicProfileUserId } from "@/lib/constants/public-profile";
+import { isActivePublicProfileUserId } from "@/lib/services/user/public-profile-access";
 import { publicDemoJsonResponse } from "@/lib/http/public-demo-response";
 
 export const dynamic = "force-dynamic";
@@ -46,9 +46,7 @@ export async function GET(request: NextRequest) {
     }
     const { userId } = resolved;
 
-    const publicProfileId = getPublicProfileUserId();
-    const isPublicDemoDataset =
-      publicProfileId !== null && userId === publicProfileId;
+    const isPublicDemoDataset = await isActivePublicProfileUserId(userId);
 
     const { searchParams } = new URL(request.url);
     const hasStartDate = searchParams.has("startDate");

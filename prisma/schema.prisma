@@ -28,6 +28,25 @@ model User {
   paletteSuggestions PaletteSuggestion[]
   paletteSuggestionDecisions PaletteSuggestionDecision[]
   spotifyConnection SpotifyConnection?
+  consents UserConsent[]
+}
+
+/// GDPR consent audit trail (cookies, terms, IA, etc.)
+model UserConsent {
+  id             String   @id @default(cuid())
+  userId         String?
+  user           User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  anonymousId    String?
+  consentType    String
+  consentVersion String
+  granted        Boolean
+  categories     Json?
+  ipHash         String?
+  userAgent      String?
+  createdAt      DateTime @default(now())
+
+  @@index([userId, consentType, createdAt])
+  @@index([anonymousId, consentType, createdAt])
 }
 
 /// OAuth Spotify (Web API) — tokens chiffrés au repos ; Option A Supabase provider.

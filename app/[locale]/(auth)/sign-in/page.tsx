@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import { DEFAULT_PUBLIC_PROFILE_USER_ID } from "@/lib/constants/public-profile";
+import { usePublicDemo } from "@/lib/providers/public-demo-provider";
 import { SPOTIFY_WEB_API_OAUTH_SCOPES } from "@/lib/services/spotify/spotify-web-api-scopes";
 import {
   AUTH_CARD_CLASS,
@@ -18,6 +18,7 @@ import {
 
 export default function SignInPage() {
   const t = useTranslations("auth");
+  const { publicDemoOverviewPath: publicDemoPath } = usePublicDemo();
   const searchParams = useSearchParams();
   const emailId = useId();
   const passwordId = useId();
@@ -279,14 +280,16 @@ export default function SignInPage() {
           </Link>
         </p>
 
-        <p className="mt-4 text-center sm:hidden">
-          <Link
-            href={`/dashboard/overview?userId=${DEFAULT_PUBLIC_PROFILE_USER_ID}`}
-            className="text-sm font-medium text-muted underline-offset-4 hover:text-primary hover:underline"
-          >
-            {t("dashboardLink")}
-          </Link>
-        </p>
+        {publicDemoPath ? (
+          <p className="mt-4 text-center sm:hidden">
+            <Link
+              href={publicDemoPath}
+              className="text-sm font-medium text-muted underline-offset-4 hover:text-primary hover:underline"
+            >
+              {t("dashboardLink")}
+            </Link>
+          </p>
+        ) : null}
       </section>
     </main>
   );

@@ -7,6 +7,10 @@ import { NextResponse } from 'next/server';
  * Lance une erreur intentionnelle pour tester la capture d'erreurs côté serveur
  */
 export async function GET() {
+  if (process.env.NODE_ENV === "production") {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
   try {
     // Lance une erreur intentionnelle
     throw new Error('Erreur de test Sentry côté serveur - Route API de test');

@@ -279,8 +279,20 @@ export function AccountSettingsClient() {
   const [phraseInput, setPhraseInput] = useState("");
   const [understood, setUnderstood] = useState(false);
   const [clearing, setClearing] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
+  const [deleteAccountUnderstood, setDeleteAccountUnderstood] = useState(false);
+  const [deleteAccountPhraseInput, setDeleteAccountPhraseInput] = useState("");
+  const [deletingAccount, setDeletingAccount] = useState(false);
+  const [deleteAccountError, setDeleteAccountError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [hideGenreBanner, setHideGenreBanner] = useState(false);
+  const [groqConsentGranted, setGroqConsentGranted] = useState(false);
+  const [publicProfileEligible, setPublicProfileEligible] = useState(false);
+  const [publicProfileGranted, setPublicProfileGranted] = useState(false);
+  const [privacyPrefsLoaded, setPrivacyPrefsLoaded] = useState(false);
+  const [privacySaving, setPrivacySaving] = useState(false);
+  const [privacyError, setPrivacyError] = useState<string | null>(null);
   const [nameInput, setNameInput] = useState("");
   const [initialName, setInitialName] = useState<string | null>(null);
   const [accountEmail, setAccountEmail] = useState<string | null>(null);
@@ -324,6 +336,86 @@ export function AccountSettingsClient() {
   useEffect(() => {
     setHideGenreBanner(getGenreBackfillBannerOptOut());
   }, [userId]);
+
+  useEffect(() => {
+    if (!userId) {
+      setPrivacyPrefsLoaded(false);
+      return;
+    }
+    let cancelled = false;
+    void (async () => {
+      setPrivacyError(null);
+      try {
+        const res = await fetch("/api/user/privacy-preferences");
+        const data = (await res.json().catch(() => ({}))) as {
+          groqGenreConsent?: { granted?: boolean };
+          publicProfile?: { eligible?: boolean; granted?: boolean };
+        };
+        if (cancelled) return;
+        if (!res.ok) {
+          setPrivacyError(t("groqConsentError"));
+          setPrivacyPrefsLoaded(true);
+          return;
+        }
+        setGroqConsentGranted(data.groqGenreConsent?.granted ?? false);
+        setPublicProfileEligible(data.publicProfile?.eligible ?? false);
+        setPublicProfileGranted(data.publicProfile?.granted ?? false);
+        setPrivacyPrefsLoaded(true);
+      } catch {
+        if (!cancelled) {
+          setPrivacyError(t("groqConsentError"));
+          setPrivacyPrefsLoaded(true);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [t, userId]);
+
+  const patchPrivacyPreference = useCallback(
+    async (payload: { groqGenreConsent?: boolean; publicProfile?: boolean }) => {
+      setPrivacySaving(true);
+      setPrivacyError(null);
+      try {
+        const res = await fetch("/api/user/privacy-preferences", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const data = (await res.json().catch(() => ({}))) as {
+          groqGenreConsent?: { granted?: boolean };
+          publicProfile?: { eligible?: boolean; granted?: boolean };
+          error?: string;
+          code?: string;
+        };
+        if (!res.ok) {
+          setPrivacyError(
+            typeof data.error === "string" && data.error.length > 0
+              ? data.error
+              : payload.publicProfile !== undefined
+                ? t("publicProfileError")
+                : t("groqConsentError")
+          );
+          return false;
+        }
+        setGroqConsentGranted(data.groqGenreConsent?.granted ?? false);
+        setPublicProfileEligible(data.publicProfile?.eligible ?? false);
+        setPublicProfileGranted(data.publicProfile?.granted ?? false);
+        return true;
+      } catch {
+        if (payload.publicProfile !== undefined) {
+          setPrivacyError(t("publicProfileError"));
+        } else {
+          setPrivacyError(t("groqConsentError"));
+        }
+        return false;
+      } finally {
+        setPrivacySaving(false);
+      }
+    },
+    [t]
+  );
 
   useEffect(() => {
     if (!userId) return;
@@ -408,6 +500,11 @@ export function AccountSettingsClient() {
     expectedPhrase != null &&
     phraseInput.length > 0 &&
     deletionPhrasesMatch(phraseInput, expectedPhrase);
+
+  const deleteAccountPhraseOk =
+    expectedPhrase != null &&
+    deleteAccountPhraseInput.length > 0 &&
+    deletionPhrasesMatch(deleteAccountPhraseInput, expectedPhrase);
 
   const nameDirty =
     initialName !== null && nameInput.trim() !== (initialName ?? "").trim();
@@ -541,6 +638,78 @@ export function AccountSettingsClient() {
     }
   }, [avatarDeleting, avatarUploading, avatarUrl, t]);
 
+  const runExport = useCallback(async () => {
+    setExportError(null);
+    setExporting(true);
+    try {
+      const res = await fetch("/api/user/export");
+      if (!res.ok) {
+        const data = (await res.json().catch(() => ({}))) as { error?: string; code?: string };
+        if (isRecentAuthRequiredError(data)) {
+          setExportError(t("recentAuthRequired"));
+          redirectToRecentSignIn(window.location.pathname + window.location.search);
+          return;
+        }
+        setExportError(data.error ?? t("exportError"));
+        return;
+      }
+      const blob = await res.blob();
+      const disposition = res.headers.get("Content-Disposition") ?? "";
+      const match = disposition.match(/filename="([^"]+)"/);
+      const filename = match?.[1] ?? "soundprint-user-data.json";
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = filename;
+      anchor.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      setExportError(t("exportError"));
+    } finally {
+      setExporting(false);
+    }
+  }, [t]);
+
+  const runDeleteAccount = useCallback(async () => {
+    if (!expectedPhrase || !deleteAccountPhraseOk) return;
+    setDeleteAccountError(null);
+    setDeletingAccount(true);
+    try {
+      const res = await fetch("/api/user/delete-account", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ confirm: true, phrase: deleteAccountPhraseInput }),
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        code?: string;
+      };
+      if (!res.ok) {
+        if (isRecentAuthRequiredError(data)) {
+          setDeleteAccountError(t("recentAuthRequired"));
+          redirectToRecentSignIn(window.location.pathname + window.location.search);
+          return;
+        }
+        if (data.code === "PHRASE_MISMATCH") {
+          setDeleteAccountError(t("phraseMismatch"));
+        } else if (data.code === "NO_CONFIRMATION_PHRASE") {
+          setDeleteAccountError(t("noPhraseError"));
+        } else {
+          setDeleteAccountError(data.error ?? t("deleteAccountError"));
+        }
+        return;
+      }
+      router.push("/");
+      router.refresh();
+    } catch {
+      setDeleteAccountError(t("deleteAccountError"));
+    } finally {
+      setDeletingAccount(false);
+      setDeleteAccountUnderstood(false);
+      setDeleteAccountPhraseInput("");
+    }
+  }, [deleteAccountPhraseInput, deleteAccountPhraseOk, expectedPhrase, router, t]);
+
   const runClear = useCallback(async () => {
     if (!expectedPhrase || !phraseOk) return;
     setError(null);
@@ -619,6 +788,18 @@ export function AccountSettingsClient() {
       if (next) setGenreBackfillBannerOptOut(true);
       else clearGenreBackfillBannerBlockingPrefs();
       setHideGenreBanner(next);
+    },
+    groqConsentGranted,
+    publicProfileEligible,
+    publicProfileGranted,
+    privacyPrefsLoaded,
+    privacySaving,
+    privacyError,
+    onGroqConsentChange: (next: boolean) => {
+      void patchPrivacyPreference({ groqGenreConsent: next });
+    },
+    onPublicProfileChange: (next: boolean) => {
+      void patchPrivacyPreference({ publicProfile: next });
     },
     expectedPhrase,
     phraseLoadError,
@@ -862,6 +1043,60 @@ export function AccountSettingsClient() {
                   />
                 </div>
               </div>
+
+              <div className="border-t border-slate-200/80 pt-5 dark:border-white/10">
+                <h3 className="text-sm font-semibold text-slate-900 dark:text-white">{t("groqConsentTitle")}</h3>
+                <p className={`mt-1.5 text-sm leading-relaxed ${DASHBOARD_SPOTLIGHT_MUTED}`}>
+                  {t("groqConsentDescription")}
+                </p>
+                <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+                  <p className="text-sm font-medium text-slate-900 dark:text-white">{t("groqConsentLabel")}</p>
+                  <div className="flex shrink-0 items-center justify-end gap-2 sm:justify-start">
+                    {privacySaving ? (
+                      <span className={`text-xs ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("groqConsentSaving")}</span>
+                    ) : null}
+                    <SettingsSwitch
+                      aria-label={t("groqConsentLabel")}
+                      checked={groqConsentGranted}
+                      disabled={!privacyPrefsLoaded || privacySaving}
+                      onChange={(next) => {
+                        void patchPrivacyPreference({ groqGenreConsent: next });
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {publicProfileEligible ? (
+                <div className="border-t border-slate-200/80 pt-5 dark:border-white/10">
+                  <h3 className="text-sm font-semibold text-slate-900 dark:text-white">{t("publicProfileTitle")}</h3>
+                  <p className={`mt-1.5 text-sm leading-relaxed ${DASHBOARD_SPOTLIGHT_MUTED}`}>
+                    {t("publicProfileDescription")}
+                  </p>
+                  <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+                    <p className="text-sm font-medium text-slate-900 dark:text-white">{t("publicProfileLabel")}</p>
+                    <div className="flex shrink-0 items-center justify-end gap-2 sm:justify-start">
+                      {privacySaving ? (
+                        <span className={`text-xs ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("publicProfileSaving")}</span>
+                      ) : null}
+                      <SettingsSwitch
+                        aria-label={t("publicProfileLabel")}
+                        checked={publicProfileGranted}
+                        disabled={!privacyPrefsLoaded || privacySaving}
+                        onChange={(next) => {
+                          void patchPrivacyPreference({ publicProfile: next });
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+
+              {privacyError ? (
+                <p className="text-sm font-medium text-red-700 dark:text-red-300" role="alert">
+                  {privacyError}
+                </p>
+              ) : null}
             </div>
           </SettingsSpotlightSection>
         </section>
@@ -890,6 +1125,32 @@ export function AccountSettingsClient() {
               {t("importExportsCta")}
             </Link>
           </SettingsSpotlightSection>
+
+          <div className="mt-8">
+            <SettingsSpotlightSection
+              gradientClass={DASHBOARD_SPOTLIGHT_GRADIENT_CYAN}
+              hairlineClass={DASHBOARD_SPOTLIGHT_HAIRLINE_CYAN}
+              iconBgClass="border border-slate-200/80 bg-slate-50 dark:border-white/10 dark:bg-white/10"
+              icon={<Upload className="h-5 w-5 text-slate-700 dark:text-slate-200" aria-hidden />}
+              titleId="settings-export-heading"
+              heading={t("exportAllDataTitle")}
+              lead={t("exportAllDataBody")}
+            >
+              {exportError ? (
+                <p className="text-sm font-medium text-red-700 dark:text-red-300" role="alert">
+                  {exportError}
+                </p>
+              ) : null}
+              <button
+                type="button"
+                onClick={() => void runExport()}
+                disabled={exporting}
+                className={`${DASHBOARD_SPOTLIGHT_BTN_SECONDARY} inline-flex min-h-11 items-center`}
+              >
+                {exporting ? t("exporting") : t("exportAllDataButton")}
+              </button>
+            </SettingsSpotlightSection>
+          </div>
 
           <div className="mt-8 overflow-hidden rounded-[2rem] border border-red-200/90 bg-gradient-to-b from-red-50/95 to-red-50/50 shadow-xl shadow-red-900/10 dark:border-red-900/50 dark:from-red-950/40 dark:to-red-950/15 dark:shadow-black/25">
             <div className={`${DASHBOARD_SPOTLIGHT_HEADER_BOTTOM} border-red-200/70 p-5 dark:border-red-900/40 sm:p-6`}>
@@ -988,6 +1249,96 @@ export function AccountSettingsClient() {
                   className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl border border-red-300 bg-white px-5 text-sm font-semibold text-red-700 shadow-sm transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-red-800 dark:bg-red-950/50 dark:text-red-200 dark:hover:bg-red-950/80 sm:w-auto"
                 >
                   {clearing ? t("clearing") : t("clearDataButton")}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-8 overflow-hidden rounded-[2rem] border border-red-300 bg-gradient-to-b from-red-100/90 to-red-50/60 shadow-xl shadow-red-900/15 dark:border-red-800 dark:from-red-950/50 dark:to-red-950/20">
+            <div className={`${DASHBOARD_SPOTLIGHT_HEADER_BOTTOM} border-red-300/70 p-5 dark:border-red-900/50 sm:p-6`}>
+              <h3 className="text-base font-semibold text-red-950 dark:text-red-200">
+                {t("deleteAccountTitle")}
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-red-900/90 dark:text-red-200/90">
+                {t("deleteAccountBody")}
+              </p>
+              <ul className="mt-4 space-y-2 rounded-xl border border-red-200/60 bg-white/70 p-3 text-sm text-red-900/95 dark:border-red-900/40 dark:bg-red-950/25 dark:text-red-200/95">
+                <li className="flex gap-2">
+                  <span className="mt-0.5 text-red-500 dark:text-red-400" aria-hidden>•</span>
+                  <span>{t("deleteAccountBulletProfile")}</span>
+                </li>
+                <li className="flex gap-2">
+                  <span className="mt-0.5 text-red-500 dark:text-red-400" aria-hidden>•</span>
+                  <span>{t("deleteAccountBulletSpotify")}</span>
+                </li>
+                <li className="flex gap-2">
+                  <span className="mt-0.5 text-red-500 dark:text-red-400" aria-hidden>•</span>
+                  <span>{t("deleteAccountBulletAllData")}</span>
+                </li>
+              </ul>
+            </div>
+            <div className="space-y-5 p-5 sm:p-6">
+              {expectedPhrase ? (
+                <div className="space-y-3">
+                  <p className="text-sm text-slate-800 dark:text-slate-200">{t("phraseInstruction")}</p>
+                  <div className={`${DASHBOARD_SPOTLIGHT_INNER_WELL} font-mono text-base font-semibold tracking-wide text-slate-900 dark:text-white`}>
+                    {expectedPhrase}
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-900 dark:text-white" htmlFor="delete-account-confirmation-phrase">
+                      {t("phraseLabel")}
+                    </label>
+                    <input
+                      id="delete-account-confirmation-phrase"
+                      type="text"
+                      name="delete-account-confirmation-phrase"
+                      autoComplete="off"
+                      spellCheck={false}
+                      value={deleteAccountPhraseInput}
+                      onChange={(e) => {
+                        setDeleteAccountPhraseInput(e.target.value);
+                        setDeleteAccountError(null);
+                      }}
+                      placeholder={t("phrasePlaceholder")}
+                      className={`${INPUT_CLASS} font-mono`}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <p className={DASHBOARD_SPOTLIGHT_MUTED}>{tCommon("pleaseWait")}</p>
+              )}
+              <label className="flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition-colors border-slate-200/90 bg-slate-50/50 dark:border-white/10 dark:bg-white/[0.04]">
+                <input
+                  type="checkbox"
+                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-violet-600 focus:ring-violet-500/40 dark:border-white/20"
+                  checked={deleteAccountUnderstood}
+                  onChange={(e) => {
+                    setDeleteAccountUnderstood(e.target.checked);
+                    setDeleteAccountError(null);
+                  }}
+                  disabled={!expectedPhrase || !!phraseLoadError}
+                />
+                <span className="text-sm text-slate-900 dark:text-white">{t("deleteAccountCheckbox")}</span>
+              </label>
+              {deleteAccountError ? (
+                <p className="text-sm font-medium text-red-700 dark:text-red-300" role="alert">
+                  {deleteAccountError}
+                </p>
+              ) : null}
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => void runDeleteAccount()}
+                  disabled={
+                    !deleteAccountUnderstood ||
+                    !deleteAccountPhraseOk ||
+                    deletingAccount ||
+                    !!phraseLoadError ||
+                    !expectedPhrase
+                  }
+                  className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl border border-red-400 bg-red-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-red-800 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+                >
+                  {deletingAccount ? t("deletingAccount") : t("deleteAccountButton")}
                 </button>
               </div>
             </div>

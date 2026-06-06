@@ -13,7 +13,8 @@ import { HomeMobileNav } from "@/lib/components/home-mobile-nav";
 import { HomeMobileStickyCta } from "@/lib/components/home-mobile-sticky-cta";
 import { StreamingProviderLogos } from "@/lib/components/streaming-provider-logos";
 import { UserAvatar } from "@/lib/components/user-avatar";
-import { DEFAULT_PUBLIC_PROFILE_USER_ID } from "@/lib/constants/public-profile";
+import { withPublicDemoUserId } from "@/lib/constants/public-profile";
+import { usePublicDemo } from "@/lib/providers/public-demo-provider";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 function ArrowRightIcon({ className = "h-4 w-4" }: { className?: string }) {
@@ -38,6 +39,8 @@ function ArrowRightIcon({ className = "h-4 w-4" }: { className?: string }) {
 export default function Home() {
   const t = useTranslations("home");
   const tAuth = useTranslations("auth");
+  const { publicDemoOverviewPath: publicDemoPath, publicProfileUserId: publicProfileId } =
+    usePublicDemo();
   const [firstName, setFirstName] = useState<string | null>(null);
   const [profileName, setProfileName] = useState<string | null>(null);
   const [profileEmail, setProfileEmail] = useState<string | null>(null);
@@ -363,16 +366,16 @@ export default function Home() {
                 </div>
                 <ArrowRightIcon className="h-4 w-4 shrink-0 text-primary transition-transform group-hover:translate-x-0.5" />
               </Link>
-            ) : (
+            ) : publicDemoPath ? (
               <Link
-                href={`/dashboard/overview?userId=${DEFAULT_PUBLIC_PROFILE_USER_ID}`}
+                href={publicDemoPath}
                 className="group mb-6 inline-flex items-center gap-2 rounded-full border border-card-border bg-card-surface px-3 py-1.5 text-sm font-semibold text-primary shadow-card backdrop-blur transition-all hover:-translate-y-0.5 hover:shadow-card-hover"
               >
                 <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_16px_rgb(22_199_132_/0.7)]" />
                 {t("heroEyebrow")}
                 <ArrowRightIcon className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
               </Link>
-            )}
+            ) : null}
 
             <h1 className="max-w-4xl overflow-visible text-balance text-[2.35rem] font-semibold leading-[1.15] tracking-[-0.05em] text-foreground sm:text-6xl sm:leading-snug sm:tracking-[-0.06em] lg:text-7xl lg:leading-[1.12]">
               {welcomeMessage}
@@ -419,17 +422,19 @@ export default function Home() {
                   </Link>
                 </>
               )}
-              <Link
-                href={`/dashboard/overview?userId=${DEFAULT_PUBLIC_PROFILE_USER_ID}`}
-                className={`group inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-transparent bg-brand-gradient px-6 py-3 text-center text-sm font-semibold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:opacity-95 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background md:w-auto md:bg-none md:shadow-none md:hover:opacity-100 md:active:scale-100 ${
-                  isAuthenticated
-                    ? "md:border-card-border md:bg-surface-glass md:text-muted md:backdrop-blur md:hover:bg-card-surface md:hover:text-foreground"
-                    : "md:border-primary/15 md:bg-primary/10 md:text-primary md:shadow-card md:backdrop-blur md:hover:bg-primary/15"
-                }`}
-              >
-                {t("accessDashboard")}
-                <ArrowRightIcon className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-              </Link>
+              {publicDemoPath ? (
+                <Link
+                  href={publicDemoPath}
+                  className={`group inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-transparent bg-brand-gradient px-6 py-3 text-center text-sm font-semibold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:opacity-95 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background md:w-auto md:bg-none md:shadow-none md:hover:opacity-100 md:active:scale-100 ${
+                    isAuthenticated
+                      ? "md:border-card-border md:bg-surface-glass md:text-muted md:backdrop-blur md:hover:bg-card-surface md:hover:text-foreground"
+                      : "md:border-primary/15 md:bg-primary/10 md:text-primary md:shadow-card md:backdrop-blur md:hover:bg-primary/15"
+                  }`}
+                >
+                  {t("accessDashboard")}
+                  <ArrowRightIcon className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                </Link>
+              ) : null}
             </div>
             <div className="mt-5 flex flex-wrap gap-2">
               {heroProofPills.map((pill) => (
@@ -808,7 +813,9 @@ export default function Home() {
               href={
                 isAuthenticated
                   ? "/dashboard/ask-your-soundprint"
-                  : `/dashboard/ask-your-soundprint?userId=${DEFAULT_PUBLIC_PROFILE_USER_ID}`
+                  : publicProfileId
+                    ? withPublicDemoUserId("/dashboard/ask-your-soundprint", publicProfileId)
+                    : "/sign-in"
               }
               className="inline-flex min-h-11 w-full max-w-md items-center justify-center gap-2 rounded-xl bg-brand-gradient px-6 py-3 text-sm font-semibold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:opacity-95 sm:w-auto"
             >
@@ -863,13 +870,15 @@ export default function Home() {
                     {isAuthenticated ? t("goToDashboard") : t("heroPrimaryCta")}
                     <ArrowRightIcon />
                   </Link>
-                  <Link
-                    href={`/dashboard/overview?userId=${DEFAULT_PUBLIC_PROFILE_USER_ID}`}
-                    className="group inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-white/25 bg-white px-6 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-white/10 transition-all hover:-translate-y-0.5 hover:bg-slate-100 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-white/70 focus:ring-offset-2 focus:ring-offset-slate-950 md:w-auto md:bg-white/10 md:text-white md:shadow-none md:hover:bg-white/15 md:hover:text-white md:active:scale-100"
-                  >
-                    {t("accessDashboard")}
-                    <ArrowRightIcon className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                  </Link>
+                  {publicDemoPath ? (
+                    <Link
+                      href={publicDemoPath}
+                      className="group inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-white/25 bg-white px-6 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-white/10 transition-all hover:-translate-y-0.5 hover:bg-slate-100 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-white/70 focus:ring-offset-2 focus:ring-offset-slate-950 md:w-auto md:bg-white/10 md:text-white md:shadow-none md:hover:bg-white/15 md:hover:text-white md:active:scale-100"
+                    >
+                      {t("accessDashboard")}
+                      <ArrowRightIcon className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                    </Link>
+                  ) : null}
                 </div>
               </div>
 

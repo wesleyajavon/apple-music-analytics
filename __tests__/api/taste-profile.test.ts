@@ -6,6 +6,13 @@ vi.mock("@/lib/services/listening/groq-import-genre-backfill-ai-guard", () => ({
   assertInteractiveGroqNotBlockedByImportGenreBackfill: vi.fn().mockResolvedValue(undefined),
 }));
 
+vi.mock("@/lib/auth/require-auth-user-id", () => ({
+  requireAuthenticatedUserId: vi.fn().mockResolvedValue("test-user-id"),
+  unauthorizedResponse: vi.fn(() =>
+    new Response(JSON.stringify({ error: "Authentication required" }), { status: 401 })
+  ),
+}));
+
 /**
  * API tests for POST /api/ai/taste-profile
  * Validates input validation and error handling.

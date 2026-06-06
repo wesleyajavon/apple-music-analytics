@@ -11,7 +11,7 @@ import {
   unauthorizedResponse,
 } from "@/lib/auth/require-auth-user-id";
 import { assertAnalyticsRateLimit } from "@/lib/security/analytics-rate-limit";
-import { getPublicProfileUserId } from "@/lib/constants/public-profile";
+import { isActivePublicProfileUserId } from "@/lib/services/user/public-profile-access";
 import { publicDemoJsonResponse } from "@/lib/http/public-demo-response";
 import { getPublicProfileTemporalAnalysisCached } from "@/lib/services/listening/public-temporal-analysis-cached";
 
@@ -148,9 +148,7 @@ export async function GET(request: NextRequest) {
     const { userId } = resolved;
     await assertAnalyticsRateLimit(request, TEMPORAL_ANALYSIS_RATE_LIMIT, userId);
 
-    const publicProfileId = getPublicProfileUserId();
-    const isPublicDemoDataset =
-      publicProfileId !== null && userId === publicProfileId;
+    const isPublicDemoDataset = await isActivePublicProfileUserId(userId);
 
     const dto: TemporalAnalysisDto = isPublicDemoDataset
       ? await getPublicProfileTemporalAnalysisCached(userId, startDate, endDate)

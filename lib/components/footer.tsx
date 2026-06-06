@@ -2,6 +2,8 @@
 
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
+import { withPublicDemoUserId } from "@/lib/constants/public-profile";
+import { usePublicDemo } from "@/lib/providers/public-demo-provider";
 
 type FooterVariant = "dashboard" | "home";
 
@@ -15,13 +17,23 @@ export function Footer({ variant = "dashboard" }: { variant?: FooterVariant }) {
     variant === "dashboard" && pathname.includes("/dashboard/onboarding");
 
   const currentYear = new Date().getFullYear();
+  const { publicProfileUserId, publicDemoOverviewPath } = usePublicDemo();
+
+  const hrefWithDemo = (href: string) =>
+    publicProfileUserId ? withPublicDemoUserId(href, publicProfileUserId) : href;
 
   const links = [
-    { href: "/dashboard/overview", label: t("overview") },
-    { href: "/dashboard/about", label: t("about") },
-    { href: "/dashboard/demo", label: t("demo") },
-    { href: "/dashboard/insights", label: t("methodology") },
+    { href: hrefWithDemo("/dashboard/overview"), label: t("overview") },
+    { href: hrefWithDemo("/dashboard/about"), label: t("about") },
+    {
+      href: publicDemoOverviewPath ?? hrefWithDemo("/dashboard/demo"),
+      label: t("demo"),
+    },
+    { href: hrefWithDemo("/dashboard/insights"), label: t("methodology") },
     { href: "/api-docs", label: t("apiDocs") },
+    { href: "/legal/privacy", label: t("privacy") },
+    { href: "/legal/terms", label: t("terms") },
+    { href: "/legal/cookies", label: t("cookies") },
   ];
 
   const isHome = variant === "home";
@@ -45,7 +57,7 @@ export function Footer({ variant = "dashboard" }: { variant?: FooterVariant }) {
         >
           {links.map((link) => (
             <Link
-              key={link.href}
+              key={link.label}
               href={link.href}
               className="text-sm text-muted hover:text-primary transition-colors duration-200"
             >

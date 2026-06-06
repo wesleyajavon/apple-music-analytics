@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { SoundprintLogo } from "@/lib/components/soundprint-logo";
 import { StreamingProviderLogos } from "@/lib/components/streaming-provider-logos";
-import { DEFAULT_PUBLIC_PROFILE_USER_ID } from "@/lib/constants/public-profile";
+import { resolvePublicDemoOverviewPath } from "@/lib/services/user/public-profile-access";
 
-export default function Home() {
+export default async function Home() {
+  const publicDemoPath = await resolvePublicDemoOverviewPath();
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-24 relative overflow-hidden">
       <div className="absolute inset-0 -z-10 bg-app-shell" aria-hidden />
@@ -34,8 +35,9 @@ export default function Home() {
           appleMusicLogoAlt="Apple Music"
           className="mb-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-5"
         />
+        {publicDemoPath ? (
         <Link
-          href={`/dashboard/overview?userId=${DEFAULT_PUBLIC_PROFILE_USER_ID}`}
+          href={publicDemoPath}
           className="group inline-flex items-center gap-2 px-8 py-4 bg-brand-gradient text-white font-semibold rounded-xl shadow-brand-glow transition-all duration-200 hover:scale-[1.02] hover:opacity-95 active:scale-[0.98]"
         >
           Explore a public dashboard demo
@@ -54,6 +56,7 @@ export default function Home() {
             />
           </svg>
         </Link>
+        ) : null}
       </div>
     </main>
   );

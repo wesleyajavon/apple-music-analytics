@@ -8,6 +8,10 @@ import {
   getGroqImportGenreBackfillEligibility,
   triggerImportGenreBackfillWorkerRunOnce,
 } from "@/lib/services/listening/import-genre-backfill-queue";
+import {
+  grantGroqGenreConsent,
+  isGroqGenreConsentRevoked,
+} from "@/lib/services/user/privacy-preferences";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -39,6 +43,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (await isGroqGenreConsentRevoked(userId)) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error:
+            "Groq genre classification was disabled in your privacy settings. Re-enable it in Settings to continue.",
+        },
+        { status: 403 }
+      );
+    }
+
     const eligibility = await getGroqImportGenreBackfillEligibility(userId);
     if (eligibility.unknownTrackCount === 0 || eligibility.totalTrackCount === 0) {
       return NextResponse.json(
@@ -46,6 +61,8 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    await grantGroqGenreConsent(userId, request);
 
     const queued = await enqueueGroqImportGenreBackfillJob(userId);
     // Kick one serverless-safe slice immediately.

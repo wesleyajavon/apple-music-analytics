@@ -13,7 +13,7 @@ import {
   forbiddenResponse,
   unauthorizedResponse,
 } from "@/lib/auth/require-auth-user-id";
-import { getPublicProfileUserId } from "@/lib/constants/public-profile";
+import { isActivePublicProfileUserId } from "@/lib/services/user/public-profile-access";
 import { publicDemoJsonResponse } from "@/lib/http/public-demo-response";
 import { getPublicProfileGenresDistributionCached } from "@/lib/services/listening/public-genres-distribution-cached";
 
@@ -83,9 +83,7 @@ export async function GET(request: NextRequest) {
     }
     const { userId } = resolved;
 
-    const publicProfileId = getPublicProfileUserId();
-    const isPublicDemoDataset =
-      publicProfileId !== null && userId === publicProfileId;
+    const isPublicDemoDataset = await isActivePublicProfileUserId(userId);
 
     const response: GenreDistributionResponse = isPublicDemoDataset
       ? await getPublicProfileGenresDistributionCached(userId, startDate, endDate)

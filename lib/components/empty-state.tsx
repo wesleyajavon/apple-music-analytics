@@ -7,7 +7,7 @@
 
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
-import { getPublicProfileUserId } from "@/lib/constants/public-profile";
+import { usePublicDemo } from "@/lib/providers/public-demo-provider";
 import { DASHBOARD_ONBOARDING_REIMPORT_PATH } from "@/lib/utils/onboarding-route";
 import {
   OVERVIEW_STARTUP_EYEBROW_PILL_CLASS,
@@ -299,11 +299,7 @@ export function EmptyState({
 /** Hook qui retourne les presets d'état vide traduits */
 export function useEmptyStatePresets() {
   const t = useTranslations("components.emptyState");
-  const publicProfileId = getPublicProfileUserId();
-  const publicDemoHref =
-    publicProfileId !== null
-      ? `/dashboard/overview?userId=${encodeURIComponent(publicProfileId)}`
-      : null;
+  const { publicDemoOverviewPath: publicDemoHref } = usePublicDemo();
 
   const actionsWithPublicDemo = (primaryHref: string, primaryLabel: string): EmptyStateAction[] => [
     { label: primaryLabel, href: primaryHref },

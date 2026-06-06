@@ -10,7 +10,7 @@ import {
   forbiddenResponse,
   unauthorizedResponse,
 } from "@/lib/auth/require-auth-user-id";
-import { getPublicProfileUserId } from "@/lib/constants/public-profile";
+import { isActivePublicProfileUserId } from "@/lib/services/user/public-profile-access";
 import { publicDemoJsonResponse } from "@/lib/http/public-demo-response";
 import { getPublicProfileArtistsListCached } from "@/lib/services/artist/public-artists-list-cached";
 
@@ -70,9 +70,7 @@ export async function GET(request: NextRequest) {
     }
     const { userId } = resolved;
 
-    const publicProfileId = getPublicProfileUserId();
-    const isPublicDemoDataset =
-      publicProfileId !== null && userId === publicProfileId;
+    const isPublicDemoDataset = await isActivePublicProfileUserId(userId);
     
     // Extraire le paramètre limit
     const { searchParams } = new URL(request.url);

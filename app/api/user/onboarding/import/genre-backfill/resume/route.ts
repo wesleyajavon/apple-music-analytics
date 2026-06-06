@@ -4,6 +4,7 @@ import { unauthorizedResponse } from "@/lib/auth/require-auth-user-id";
 import { assertRateLimit } from "@/lib/security/rate-limit";
 import { handleApiError } from "@/lib/utils/error-handler";
 import { resumeGroqImportGenreBackfillForUser } from "@/lib/services/listening/import-genre-backfill-queue";
+import { assertGroqGenreConsent } from "@/lib/services/user/privacy-preferences";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -31,6 +32,8 @@ export async function POST(request: NextRequest) {
         { status: 503 }
       );
     }
+
+    await assertGroqGenreConsent(userId);
 
     const result = await resumeGroqImportGenreBackfillForUser(userId);
     if (!result.ok) {

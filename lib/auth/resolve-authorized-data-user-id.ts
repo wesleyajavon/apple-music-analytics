@@ -1,10 +1,8 @@
 import { NextRequest } from "next/server";
 import { getCurrentUserId } from "@/lib/auth/get-current-user-id";
 import { extractOptionalUserId } from "@/lib/middleware/validation";
-import {
-  getPublicProfileUserId,
-  isUuidString,
-} from "@/lib/constants/public-profile";
+import { isUuidString } from "@/lib/constants/public-profile";
+import { resolveActivePublicProfileUserId } from "@/lib/services/user/public-profile-access";
 
 export type ResolveAuthorizedDataUserIdResult =
   | { ok: true; userId: string }
@@ -20,7 +18,7 @@ export type ResolveAuthorizedDataUserIdResult =
 export async function resolveAuthorizedDataUserId(
   request: NextRequest
 ): Promise<ResolveAuthorizedDataUserIdResult> {
-  const publicId = getPublicProfileUserId();
+  const publicId = await resolveActivePublicProfileUserId();
   const requestedRaw = extractOptionalUserId(request);
   const requested =
     requestedRaw && isUuidString(requestedRaw) ? requestedRaw.trim() : undefined;

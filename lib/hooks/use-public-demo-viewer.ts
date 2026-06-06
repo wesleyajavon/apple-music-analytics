@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { getPublicProfileUserId } from "@/lib/constants/public-profile";
+import { usePublicDemo } from "@/lib/providers/public-demo-provider";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { shouldHideNotificationCenterForPublicDemo } from "@/lib/utils/public-demo-notifications";
 
@@ -37,7 +37,7 @@ function useSupabaseAuthUserId(): string | null | undefined {
 }
 
 export function usePublicDemoViewer(userId?: string | null): boolean {
-  const publicProfileUserId = useMemo(() => getPublicProfileUserId(), []);
+  const { publicProfileUserId } = usePublicDemo();
   const authUserId = useSupabaseAuthUserId();
 
   return authUserId === null && !!publicProfileUserId && userId === publicProfileUserId;
@@ -47,7 +47,7 @@ export function usePublicDemoViewer(userId?: string | null): boolean {
  * Masque le centre de notifications (démo publique anonyme sur `?userId=public`).
  */
 export function useHideNotificationCenterForPublicDemo(userIdFromUrl: string | null): boolean {
-  const publicProfileUserId = useMemo(() => getPublicProfileUserId(), []);
+  const { publicProfileUserId } = usePublicDemo();
   const authUserId = useSupabaseAuthUserId();
 
   return useMemo(

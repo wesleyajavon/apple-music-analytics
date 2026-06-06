@@ -7,11 +7,12 @@ import { Footer } from "@/lib/components/footer";
 import { LanguageSwitcher } from "@/lib/components/language-switcher";
 import { SoundprintLogo } from "@/lib/components/soundprint-logo";
 import { ThemeSwitcher } from "@/lib/components/theme-switcher";
-import { DEFAULT_PUBLIC_PROFILE_USER_ID } from "@/lib/constants/public-profile";
+import { usePublicDemo } from "@/lib/providers/public-demo-provider";
 import { LayoutDashboard } from "lucide-react";
 
 export function AuthShell({ children }: { children: React.ReactNode }) {
   const t = useTranslations("auth");
+  const { publicDemoOverviewPath: publicDemoPath } = usePublicDemo();
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -62,14 +63,16 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
             className="flex shrink-0 flex-wrap items-center justify-end gap-1 sm:gap-3"
             aria-label={t("authNavAriaLabel")}
           >
-            <Link
-              href={`/dashboard/overview?userId=${DEFAULT_PUBLIC_PROFILE_USER_ID}`}
-              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-card-border text-muted transition-colors hover:bg-primary/10 hover:text-primary sm:min-w-0 sm:gap-2 sm:border-transparent sm:px-3 sm:py-2"
-              aria-label={t("dashboardLink")}
-            >
-              <LayoutDashboard className="h-5 w-5 shrink-0 sm:hidden" aria-hidden />
-              <span className="hidden text-sm font-medium sm:inline">{t("dashboardLink")}</span>
-            </Link>
+            {publicDemoPath ? (
+              <Link
+                href={publicDemoPath}
+                className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-card-border text-muted transition-colors hover:bg-primary/10 hover:text-primary sm:min-w-0 sm:gap-2 sm:border-transparent sm:px-3 sm:py-2"
+                aria-label={t("dashboardLink")}
+              >
+                <LayoutDashboard className="h-5 w-5 shrink-0 sm:hidden" aria-hidden />
+                <span className="hidden text-sm font-medium sm:inline">{t("dashboardLink")}</span>
+              </Link>
+            ) : null}
             <ThemeSwitcher placement="bottom" compactOnMobile />
             <Suspense
               fallback={

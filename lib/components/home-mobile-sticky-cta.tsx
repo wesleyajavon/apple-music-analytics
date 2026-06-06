@@ -2,7 +2,7 @@
 
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
-import { DEFAULT_PUBLIC_PROFILE_USER_ID } from "@/lib/constants/public-profile";
+import { usePublicDemo } from "@/lib/providers/public-demo-provider";
 
 type HomeMobileStickyCtaProps = {
   isAuthenticated: boolean;
@@ -11,6 +11,7 @@ type HomeMobileStickyCtaProps = {
 export function HomeMobileStickyCta({ isAuthenticated }: HomeMobileStickyCtaProps) {
   const t = useTranslations("home");
   const tAuth = useTranslations("auth");
+  const { publicDemoOverviewPath: publicDemoPath } = usePublicDemo();
 
   return (
     <div
@@ -41,12 +42,14 @@ export function HomeMobileStickyCta({ isAuthenticated }: HomeMobileStickyCtaProp
                 {tAuth("signIn")}
               </Link>
             </div>
-            <Link
-              href={`/dashboard/overview?userId=${DEFAULT_PUBLIC_PROFILE_USER_ID}`}
-              className="flex min-h-10 items-center justify-center rounded-xl border border-card-border bg-card-surface px-4 text-center text-xs font-semibold text-foreground shadow-sm active:scale-[0.98]"
-            >
-              {t("accessDashboard")}
-            </Link>
+            {publicDemoPath ? (
+              <Link
+                href={publicDemoPath}
+                className="flex min-h-10 items-center justify-center rounded-xl border border-card-border bg-card-surface px-4 text-center text-xs font-semibold text-foreground shadow-sm active:scale-[0.98]"
+              >
+                {t("accessDashboard")}
+              </Link>
+            ) : null}
           </div>
         )}
       </div>

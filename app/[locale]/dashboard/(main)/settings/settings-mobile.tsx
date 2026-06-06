@@ -34,6 +34,14 @@ export type SettingsMobileProps = {
   onSaveProfile: () => void;
   hideGenreBanner: boolean;
   onHideGenreBannerChange: (next: boolean) => void;
+  groqConsentGranted: boolean;
+  publicProfileEligible: boolean;
+  publicProfileGranted: boolean;
+  privacyPrefsLoaded: boolean;
+  privacySaving: boolean;
+  privacyError: string | null;
+  onGroqConsentChange: (next: boolean) => void;
+  onPublicProfileChange: (next: boolean) => void;
   expectedPhrase: string | null;
   phraseLoadError: string | null;
   phraseInput: string;
@@ -421,6 +429,46 @@ export function SettingsMobileExperience(props: SettingsMobileProps) {
               onChange={props.onHideGenreBannerChange}
             />
           </div>
+
+          <div>
+            <h3 className="text-sm font-semibold text-slate-900 dark:text-white">{t("groqConsentTitle")}</h3>
+            <p className={`mt-1.5 text-sm leading-relaxed ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("groqConsentDescription")}</p>
+          </div>
+          <div className="flex min-h-[52px] items-center justify-between gap-4 rounded-2xl border border-slate-200/80 bg-slate-50/80 px-4 py-3 dark:border-white/10 dark:bg-black/20">
+            <p className="text-sm font-medium text-slate-900 dark:text-white">{t("groqConsentLabel")}</p>
+            <SettingsSwitch
+              aria-label={t("groqConsentLabel")}
+              checked={props.groqConsentGranted}
+              disabled={!props.privacyPrefsLoaded || props.privacySaving}
+              onChange={props.onGroqConsentChange}
+            />
+          </div>
+
+          {props.publicProfileEligible ? (
+            <>
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900 dark:text-white">{t("publicProfileTitle")}</h3>
+                <p className={`mt-1.5 text-sm leading-relaxed ${DASHBOARD_SPOTLIGHT_MUTED}`}>
+                  {t("publicProfileDescription")}
+                </p>
+              </div>
+              <div className="flex min-h-[52px] items-center justify-between gap-4 rounded-2xl border border-slate-200/80 bg-slate-50/80 px-4 py-3 dark:border-white/10 dark:bg-black/20">
+                <p className="text-sm font-medium text-slate-900 dark:text-white">{t("publicProfileLabel")}</p>
+                <SettingsSwitch
+                  aria-label={t("publicProfileLabel")}
+                  checked={props.publicProfileGranted}
+                  disabled={!props.privacyPrefsLoaded || props.privacySaving}
+                  onChange={props.onPublicProfileChange}
+                />
+              </div>
+            </>
+          ) : null}
+
+          {props.privacyError ? (
+            <p className="text-sm font-medium text-red-700 dark:text-red-300" role="alert">
+              {props.privacyError}
+            </p>
+          ) : null}
         </div>
       </MobileDisclosure>
 

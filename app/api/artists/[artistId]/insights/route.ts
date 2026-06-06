@@ -8,7 +8,7 @@ import {
 import { handleApiError } from "@/lib/utils/error-handler";
 import { getArtistUserInsights, type ArtistUserInsights } from "@/lib/services/artist/artist-service";
 import type { ArtistUserInsightsDto } from "@/lib/dto/artist";
-import { getPublicProfileUserId } from "@/lib/constants/public-profile";
+import { isActivePublicProfileUserId } from "@/lib/services/user/public-profile-access";
 import { publicDemoJsonResponse } from "@/lib/http/public-demo-response";
 import { getPublicProfileArtistUserInsightsCached } from "@/lib/services/artist/public-artist-insights-cached";
 
@@ -55,9 +55,7 @@ export async function GET(
     }
     const { userId } = resolved;
 
-    const publicProfileId = getPublicProfileUserId();
-    const isPublicDemoDataset =
-      publicProfileId !== null && userId === publicProfileId;
+    const isPublicDemoDataset = await isActivePublicProfileUserId(userId);
 
     const insights: ArtistUserInsights | null = isPublicDemoDataset
       ? await getPublicProfileArtistUserInsightsCached(

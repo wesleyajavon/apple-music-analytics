@@ -1,25 +1,16 @@
 import { createHash } from "crypto";
 import type { NextRequest } from "next/server";
-import { getRedisClient, runRedisCommand } from "@/lib/redis";
-import { isRateLimitFailClosed } from "@/lib/security/rate-limit-policy";
+import * as rateLimitPolicy from "@/lib/security/rate-limit-policy";
+import {
+  evalRateLimitWindow,
+  getRateLimitBlockedCount,
+  getRateLimitTopBlockedSubjectsFromRedis,
+  incrementRateLimitBlockedCounters,
+} from "@/lib/security/rate-limit-redis";
 import { logSecurityAuthEvent } from "@/lib/security/security-logger";
 import { AppError, ErrorCodes } from "@/lib/utils/error-handler";
 import { logger } from "@/lib/utils/logger";
 import { captureRateLimitSpike } from "@/lib/utils/sentry";
-
-const REDIS_FIXED_WINDOW_LUA = `
-local key = KEYS[1]
-local window_ms = tonumber(ARGV[1])
-local current = redis.call('INCR', key)
-if current == 1 then
-  redis.call('PEXPIRE', key, window_ms)
-end
-local ttl = redis.call('PTTL', key)
-if ttl < 0 then
-  ttl = window_ms
-end
-return { current, ttl }
-`;
 
 type MemoryCounter = {
   count: number;
@@ -141,20 +132,12 @@ function shouldWarnSoftLimit(
 
 async function recordBlockedRateLimit(route: string, subject: string): Promise<{ minuteCount: number }> {
   const minuteKey = new Date().toISOString().slice(0, 16);
-  const redis = getRedisClient();
-  if (redis) {
-    const routeMinuteKey = `rate-limit:429:route:${route}:${minuteKey}`;
-    const routeSubjectKey = `rate-limit:429:subject:${route}:${subject}`;
+  if (rateLimitPolicy.isRateLimitRedisBackendConfigured()) {
     try {
-      const raw = await redis
-        .multi()
-        .incr(routeMinuteKey)
-        .expire(routeMinuteKey, 120)
-        .zincrby(routeSubjectKey, 1, subject)
-        .expire(routeSubjectKey, 7 * 24 * 3600)
-        .exec();
-      const minuteCount = Number(raw?.[0]?.[1] ?? 1);
-      return { minuteCount: Number.isFinite(minuteCount) ? minuteCount : 1 };
+      const minuteCount = await incrementRateLimitBlockedCounters(route, subject, minuteKey);
+      if (minuteCount !== null) {
+        return { minuteCount };
+      }
     } catch {
       // Fall through to memory counters.
     }
@@ -171,12 +154,10 @@ async function recordBlockedRateLimit(route: string, subject: string): Promise<{
 
 export async function getRateLimitBlockedInCurrentMinute(route: string): Promise<number> {
   const minuteKey = new Date().toISOString().slice(0, 16);
-  const redis = getRedisClient();
-  if (redis) {
+  if (rateLimitPolicy.isRateLimitRedisBackendConfigured()) {
     try {
-      const raw = await redis.get(`rate-limit:429:route:${route}:${minuteKey}`);
-      const n = Number(raw ?? 0);
-      return Number.isFinite(n) ? n : 0;
+      const n = await getRateLimitBlockedCount(route, minuteKey);
+      if (n !== null) return n;
     } catch {
       // fall through to memory fallback
     }
@@ -189,21 +170,10 @@ export async function getRateLimitTopBlockedSubjects(
   limit = 10
 ): Promise<RateLimitBlockedSubjectStat[]> {
   const safeLimit = Math.min(Math.max(limit, 1), 100);
-  const redis = getRedisClient();
-  if (redis) {
+  if (rateLimitPolicy.isRateLimitRedisBackendConfigured()) {
     try {
-      const zkey = `rate-limit:429:subject:${route}`;
-      const raw = await redis.zrevrange(zkey, 0, safeLimit - 1, "WITHSCORES");
-      const out: RateLimitBlockedSubjectStat[] = [];
-      for (let i = 0; i < raw.length; i += 2) {
-        const subject = raw[i];
-        const score = Number(raw[i + 1] ?? 0);
-        out.push({
-          subject,
-          blockedCount: Number.isFinite(score) ? Math.floor(score) : 0,
-        });
-      }
-      return out;
+      const out = await getRateLimitTopBlockedSubjectsFromRedis(route, safeLimit);
+      if (out) return out;
     } catch {
       // fall through to memory fallback
     }
@@ -246,24 +216,21 @@ async function checkRateLimitRedis(
   maxRequests: number,
   nowMs: number
 ): Promise<RateLimitResult | null> {
-  const redis = getRedisClient();
-  if (!redis) return null;
+  if (!rateLimitPolicy.isRateLimitRedisBackendConfigured()) return null;
 
   try {
-    const raw = (await runRedisCommand((client) =>
-      client.eval(REDIS_FIXED_WINDOW_LUA, 1, key, String(windowMs))
-    )) as [number, number];
+    const raw = await evalRateLimitWindow(key, windowMs);
+    if (!raw) return null;
 
-    const currentCount = Number(raw?.[0] ?? 0);
-    const ttlMs = Math.max(1, Number(raw?.[1] ?? windowMs));
-    const resetAtMs = nowMs + ttlMs;
+    const [currentCount, ttlMs] = raw;
+    const resetAtMs = nowMs + Math.max(1, ttlMs || windowMs);
     return createResult(currentCount <= maxRequests, maxRequests - currentCount, resetAtMs);
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
       console.warn("[rate-limit] Redis failed, using in-memory fallback:", error);
       return checkRateLimitMemory(key, windowMs, maxRequests, nowMs);
     }
-    if (isRateLimitFailClosed()) {
+    if (rateLimitPolicy.isRateLimitFailClosed()) {
       logger.error("Rate limit Redis unavailable (fail-closed)", {
         key,
         error: error instanceof Error ? error.message : String(error),
@@ -294,7 +261,7 @@ export async function checkRateLimit(
     return checkRateLimitMemory(key, config.windowMs, config.maxRequests, nowMs);
   }
 
-  if (isRateLimitFailClosed()) {
+  if (rateLimitPolicy.isRateLimitFailClosed()) {
     logger.error("Rate limit Redis not configured (fail-closed)", {
       route: config.route,
       subject,

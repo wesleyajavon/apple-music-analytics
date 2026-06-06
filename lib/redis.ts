@@ -41,6 +41,15 @@ function createRedisClient(): Redis {
 
   const client = new Redis(redisUrl, options);
 
+  const dropClientOnDisconnect = () => {
+    if (globalForRedis.redis === client) {
+      globalForRedis.redis = undefined;
+    }
+  };
+
+  client.on("close", dropClientOnDisconnect);
+  client.on("end", dropClientOnDisconnect);
+
   // Handle connection errors silently (we catch errors in try/catch blocks)
   client.on("error", (err) => {
     // Only log in development for debugging
@@ -102,30 +111,39 @@ export function getRedisClient(): Redis | null {
   return globalForRedis.redis;
 }
 
+const REDIS_COMMAND_MAX_ATTEMPTS = 3;
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 /**
- * Run a Redis command with one automatic reconnect on stale TCP connections.
- * Keeps retry bounded (single retry) so AI routes cannot hang indefinitely.
+ * Run a Redis command with bounded reconnects on stale TCP connections.
  */
 export async function runRedisCommand<T>(
   operation: (client: Redis) => Promise<T>
 ): Promise<T> {
-  const attempt = async (allowRetry: boolean): Promise<T> => {
+  let lastError: unknown;
+
+  for (let attempt = 1; attempt <= REDIS_COMMAND_MAX_ATTEMPTS; attempt += 1) {
     const client = getRedisClient();
     if (!client) {
       throw new Error("Redis is not configured");
     }
+
     try {
       return await operation(client);
     } catch (error) {
-      if (allowRetry && isStaleRedisConnectionError(error)) {
-        invalidateRedisClient();
-        return attempt(false);
+      lastError = error;
+      if (!isStaleRedisConnectionError(error) || attempt === REDIS_COMMAND_MAX_ATTEMPTS) {
+        throw error;
       }
-      throw error;
+      invalidateRedisClient();
+      await sleep(25 * attempt);
     }
-  };
+  }
 
-  return attempt(true);
+  throw lastError instanceof Error ? lastError : new Error("Redis command failed");
 }
 
 /**

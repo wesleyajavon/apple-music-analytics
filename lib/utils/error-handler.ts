@@ -42,6 +42,9 @@ export const ErrorCodes = {
   /** Classification genres import en cours : réservation capacité Groq interactive (423) */
   GROQ_GENRE_CLASSIFICATION_ACTIVE: 'GROQ_GENRE_CLASSIFICATION_ACTIVE',
   RATE_LIMIT_EXCEEDED: 'RATE_LIMIT_EXCEEDED',
+
+  // Indisponibilité temporaire (503)
+  SERVICE_UNAVAILABLE: 'SERVICE_UNAVAILABLE',
   
   // Erreurs de ressource non trouvée (404)
   NOT_FOUND: 'NOT_FOUND',

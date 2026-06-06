@@ -1,6 +1,7 @@
 import { createHash } from "crypto";
 import type { NextRequest } from "next/server";
 import { getRedisClient } from "@/lib/redis";
+import { isRateLimitFailClosed } from "@/lib/security/rate-limit-policy";
 import { logSecurityAuthEvent } from "@/lib/security/security-logger";
 import { AppError, ErrorCodes } from "@/lib/utils/error-handler";
 import { logger } from "@/lib/utils/logger";
@@ -43,6 +44,8 @@ export type RateLimitResult = {
   allowed: boolean;
   remaining: number;
   resetAt: string;
+  /** True when production fail-closed rejected the request because Redis was unavailable. */
+  backendUnavailable?: boolean;
 };
 
 export type RateLimitHeadersConfig = {
@@ -86,12 +89,22 @@ function buildKey(route: string, subject: string): string {
   return `rate-limit:${route}:${subject}`;
 }
 
-function createResult(allowed: boolean, remaining: number, resetAtMs: number): RateLimitResult {
+function createResult(
+  allowed: boolean,
+  remaining: number,
+  resetAtMs: number,
+  backendUnavailable = false
+): RateLimitResult {
   return {
     allowed,
     remaining: Math.max(0, remaining),
     resetAt: new Date(resetAtMs).toISOString(),
+    backendUnavailable,
   };
+}
+
+function createFailClosedResult(nowMs: number, windowMs: number): RateLimitResult {
+  return createResult(false, 0, nowMs + windowMs, true);
 }
 
 function clampSoftRatio(ratio?: number): number {
@@ -253,6 +266,13 @@ async function checkRateLimitRedis(
       console.warn("[rate-limit] Redis failed, using in-memory fallback:", error);
       return checkRateLimitMemory(key, windowMs, maxRequests, nowMs);
     }
+    if (isRateLimitFailClosed()) {
+      logger.error("Rate limit Redis unavailable (fail-closed)", {
+        key,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      return createFailClosedResult(nowMs, windowMs);
+    }
     return null;
   }
 }
@@ -277,7 +297,15 @@ export async function checkRateLimit(
     return checkRateLimitMemory(key, config.windowMs, config.maxRequests, nowMs);
   }
 
-  // In production without Redis (or on Redis errors), fail-open to avoid accidental outages.
+  if (isRateLimitFailClosed()) {
+    logger.error("Rate limit Redis not configured (fail-closed)", {
+      route: config.route,
+      subject,
+    });
+    return createFailClosedResult(nowMs, config.windowMs);
+  }
+
+  // Staging / legacy: fail-open when Redis is missing to avoid accidental outages.
   return createResult(true, config.maxRequests, nowMs + config.windowMs);
 }
 
@@ -288,6 +316,23 @@ export async function assertRateLimit(
   const subject = resolveSubject(request, config.userId);
   const key = buildKey(config.route, subject);
   const result = await checkRateLimit(request, config);
+  if (result.backendUnavailable) {
+    logger.error("Rate limit backend unavailable", {
+      route: config.route,
+      subject,
+      resetAt: result.resetAt,
+    });
+    throw new AppError(
+      503,
+      "Service temporarily unavailable. Please try again shortly.",
+      ErrorCodes.SERVICE_UNAVAILABLE,
+      {
+        route: config.route,
+        resetAt: result.resetAt,
+        reason: "rate_limit_backend_unavailable",
+      }
+    );
+  }
   if (result.allowed) {
     if (shouldWarnSoftLimit(key, result, config)) {
       logger.warn("Rate limit soft threshold reached", {

@@ -1,4 +1,5 @@
 const createNextIntlPlugin = require('next-intl/plugin');
+const { buildSecurityHeaders } = require('./lib/security/security-headers.js');
 
 const withNextIntl = createNextIntlPlugin();
 
@@ -14,24 +15,7 @@ const nextConfig = {
     return [
       {
         source: '/:path*',
-        headers: [
-          {
-            key: 'X-DNS-Prefetch-Control',
-            value: 'on'
-          },
-          {
-            key: 'X-Frame-Options',
-            value: 'SAMEORIGIN'
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff'
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin'
-          },
-        ],
+        headers: buildSecurityHeaders(),
       },
     ];
   },

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { scrubSentryEvent } from '@/lib/utils/sentry-scrub';
 import * as Sentry from '@sentry/react';
 
 type SentryInitProps = {
@@ -68,11 +69,7 @@ export function SentryInit({ enableReplay = false }: SentryInitProps) {
           'Non-Error promise rejection captured',
         ],
         beforeSend(event) {
-          if (event.user) {
-            delete event.user.email;
-            delete event.user.username;
-          }
-          return event;
+          return scrubSentryEvent(event);
         },
       });
     } catch (error) {

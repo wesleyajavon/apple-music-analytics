@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getRateLimitBlockedInCurrentMinute } from "@/lib/security/rate-limit";
+import { getRateLimitBackendStatus } from "@/lib/security/rate-limit-policy";
 import { handleApiError } from "@/lib/utils/error-handler";
 
 export const dynamic = "force-dynamic";
@@ -118,9 +119,15 @@ export async function GET(request: NextRequest) {
       warnThreshold,
       criticalThreshold,
     });
+    const rateLimitBackend = getRateLimitBackendStatus();
+    const backendStatus =
+      rateLimitBackend.redisRequired && !rateLimitBackend.redisConfigured
+        ? "critical"
+        : status;
 
     return NextResponse.json({
-      status,
+      status: backendStatus,
+      rateLimitBackend,
       warnThreshold,
       criticalThreshold,
       maxBlockedInCurrentMinute,

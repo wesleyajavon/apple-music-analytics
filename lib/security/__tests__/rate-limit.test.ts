@@ -85,4 +85,21 @@ describe("rate-limit", () => {
     expect(third.allowed).toBe(true);
     expect(third.remaining).toBe(0);
   });
+
+  it("fail-closes in production when Redis is not configured", async () => {
+    (process.env as Record<string, string | undefined>).NODE_ENV = "production";
+    delete process.env.RATE_LIMIT_FAIL_CLOSED;
+
+    const request = new NextRequest("http://localhost/api/overview");
+    const result = await checkRateLimit(request, {
+      route: "/api/overview",
+      userId: "user-prod",
+      windowMs: 60_000,
+      maxRequests: 20,
+    });
+
+    expect(result.allowed).toBe(false);
+    expect(result.backendUnavailable).toBe(true);
+    expect(result.remaining).toBe(0);
+  });
 });

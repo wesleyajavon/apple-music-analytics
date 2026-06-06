@@ -8,6 +8,7 @@
  */
 
 import * as Sentry from '@sentry/nextjs';
+import { scrubSentryEvent } from '@/lib/utils/sentry-scrub';
 
 const dsn = process.env.SENTRY_DSN || process.env.NEXT_PUBLIC_SENTRY_DSN;
 
@@ -36,14 +37,16 @@ if (dsn) {
     
     // Configuration pour les routes API
     beforeSend(event, hint) {
+      const scrubbed = scrubSentryEvent(event);
+      if (!scrubbed) return null;
       // En développement, on log aussi dans la console
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Sentry Server Event:', event);
+      if (process.env.NODE_ENV === "development") {
+        console.error('Sentry Server Event:', scrubbed);
         if (hint.originalException) {
           console.error('Original Exception:', hint.originalException);
         }
       }
-      return event;
+      return scrubbed;
     },
   });
 } else {

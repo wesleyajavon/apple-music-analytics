@@ -14,6 +14,7 @@ describe("security-headers", () => {
     expect(csp).toContain("worker-src 'self' blob:");
     expect(csp).toContain("https://*.supabase.co");
     expect(csp).toContain("https://*.ingest.sentry.io");
+    expect(csp).toContain("https://vercel.live");
   });
 
   it("adds HSTS only in production", () => {

@@ -15,6 +15,7 @@ describe("security-headers", () => {
     expect(csp).toContain("https://*.supabase.co");
     expect(csp).toContain("https://*.ingest.sentry.io");
     expect(csp).toContain("https://vercel.live");
+    expect(csp).toMatch(/font-src[^;]*https:\/\/vercel\.live/);
   });
 
   it("adds HSTS only in production", () => {

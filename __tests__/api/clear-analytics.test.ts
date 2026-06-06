@@ -90,6 +90,11 @@ describe("POST /api/user/clear-analytics", () => {
     vi.mocked(clearUserAnalyticsData).mockResolvedValue({
       listensDeleted: 12,
       replayYearsDeleted: 1,
+      paletteArtistDecisionsDeleted: 0,
+      paletteTrackDecisionsDeleted: 0,
+      paletteSuggestionsDeleted: 0,
+      paletteSuggestionDecisionsDeleted: 0,
+      importJobsCancelled: 0,
     });
   });
 

@@ -2315,11 +2315,6 @@
     "appleMusicLogoAlt": "Apple Music",
     "subtitle": "See your music taste evolution, hidden patterns, and stats Apple/Spotify don't show you.",
     "heroPrimaryCta": "Reveal your Soundprint",
-    "heroInsightChips": {
-      "lateNight": "Late-night phase detected",
-      "tasteShift": "Taste shift: Indie → Electronic",
-      "artistStreak": "Top artist streak: 42 days"
-    },
     "heroProof": {
       "private": "Private by design",
       "demoFirst": "Try the public demo first",
@@ -2346,13 +2341,18 @@
       "chartBar": "Preview chart bar {index}",
       "liveBadge": "Live",
       "waveformLabel": "Taste pulse",
-      "insightEyebrow": "Live insight",
-      "insightTitle": "Your late-night phase is becoming a real pattern.",
-      "insightCopy": "Soundprint connects artists, genres, dates, and playback habits so your dashboard feels less like a spreadsheet and more like a map of your taste.",
+      "insightEyebrow": "Something we noticed",
+      "insightTitle": "Your music sounds different after midnight.",
+      "insightCopy": "Import your history once and see the artists, moods, and moments that show how you really listen—not just your top ten.",
       "signalRows": {
-        "obsession": "Longest obsession",
-        "shift": "Genre lift",
-        "ritual": "Peak ritual"
+        "topTrack": "Most played track",
+        "shift": "Genre on the rise",
+        "artist": "Favorite artist"
+      },
+      "signalValues": {
+        "topTrack": "WAIT FOR U",
+        "shift": "Electronic",
+        "artist": "Future"
       },
       "genrePills": {
         "indie": "Indie",
@@ -2398,27 +2398,6 @@
         "description": "Get quick analyses based on your listening stats.",
         "demoQuestion": "Why did my taste shift?",
         "demoAnswer": "Your synth-pop plays doubled after June."
-      }
-    },
-    "discoveriesEyebrow": "What Soundprint finds",
-    "discoveriesTitle": "Patterns your streaming apps leave buried.",
-    "discoveriesSubtitle": "Soundprint turns raw plays into memorable moments: the phases, rituals, and shifts that make your listening history feel personal.",
-    "discoveries": {
-      "lateNight": {
-        "label": "Ritual",
-        "title": "The hour your music taste changes character."
-      },
-      "artistStreak": {
-        "label": "Streak",
-        "title": "The artist who quietly became your season."
-      },
-      "tasteShift": {
-        "label": "Shift",
-        "title": "The genre lift that marks a new chapter."
-      },
-      "hiddenEra": {
-        "label": "Era",
-        "title": "The year your archive still keeps pulling you back to."
       }
     },
     "demoHighlightsSection": {

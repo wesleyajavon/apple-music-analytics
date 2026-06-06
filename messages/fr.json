@@ -2315,11 +2315,6 @@
     "appleMusicLogoAlt": "Apple Music",
     "subtitle": "Découvrez l'évolution de vos goûts musicaux, les patterns cachés et les stats qu'Apple/Spotify ne vous montrent pas.",
     "heroPrimaryCta": "Révéler votre Soundprint",
-    "heroInsightChips": {
-      "lateNight": "Phase late-night détectée",
-      "tasteShift": "Changement de goût : Indie → Électro",
-      "artistStreak": "Série artiste top : 42 jours"
-    },
     "heroProof": {
       "private": "Pensé pour rester privé",
       "demoFirst": "Essayez d'abord la démo publique",
@@ -2346,13 +2341,18 @@
       "chartBar": "Barre de graphique d'aperçu {index}",
       "liveBadge": "Live",
       "waveformLabel": "Pulse de goût",
-      "insightEyebrow": "Insight live",
-      "insightTitle": "Votre phase late-night devient un vrai pattern.",
-      "insightCopy": "Soundprint relie artistes, genres, dates et habitudes de lecture pour que votre dashboard ressemble moins à une feuille de calcul et plus à une carte de vos goûts.",
+      "insightEyebrow": "Ce qu'on a remarqué",
+      "insightTitle": "Votre musique change quand la nuit tombe.",
+      "insightCopy": "Importez votre historique une fois et découvrez les artistes, les ambiances et les moments qui racontent vraiment comment vous écoutez—pas seulement votre top 10.",
       "signalRows": {
-        "obsession": "Plus longue obsession",
-        "shift": "Hausse de genre",
-        "ritual": "Rituel de pointe"
+        "topTrack": "Morceau le plus joué",
+        "shift": "Genre en hausse",
+        "artist": "Artiste favori"
+      },
+      "signalValues": {
+        "topTrack": "WAIT FOR U",
+        "shift": "Électro",
+        "artist": "Future"
       },
       "genrePills": {
         "indie": "Indie",
@@ -2398,27 +2398,6 @@
         "description": "Obtenez des analyses rapides basées sur vos statistiques.",
         "demoQuestion": "Pourquoi mes goûts ont changé ?",
         "demoAnswer": "Vos écoutes synth-pop ont doublé après juin."
-      }
-    },
-    "discoveriesEyebrow": "Ce que Soundprint révèle",
-    "discoveriesTitle": "Les patterns que vos apps de streaming laissent cachés.",
-    "discoveriesSubtitle": "Soundprint transforme les écoutes brutes en moments mémorables : phases, rituels et changements qui rendent votre historique vraiment personnel.",
-    "discoveries": {
-      "lateNight": {
-        "label": "Rituel",
-        "title": "L'heure où vos goûts changent de caractère."
-      },
-      "artistStreak": {
-        "label": "Série",
-        "title": "L'artiste qui est discrètement devenu votre saison."
-      },
-      "tasteShift": {
-        "label": "Shift",
-        "title": "La hausse de genre qui marque un nouveau chapitre."
-      },
-      "hiddenEra": {
-        "label": "Ère",
-        "title": "L'année vers laquelle votre archive vous ramène encore."
       }
     },
     "demoHighlightsSection": {

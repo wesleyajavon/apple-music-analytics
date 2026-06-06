@@ -171,33 +171,6 @@ export default function Home() {
     },
   ] as const;
 
-  const discoveryCards = [
-    {
-      label: t("discoveries.lateNight.label"),
-      title: t("discoveries.lateNight.title"),
-      metric: "1:14 AM",
-      accentClassName: "from-accent-cyan/30 to-accent-violet/10",
-    },
-    {
-      label: t("discoveries.artistStreak.label"),
-      title: t("discoveries.artistStreak.title"),
-      metric: "42 days",
-      accentClassName: "from-accent-rose/30 to-accent-violet/10",
-    },
-    {
-      label: t("discoveries.tasteShift.label"),
-      title: t("discoveries.tasteShift.title"),
-      metric: "+18%",
-      accentClassName: "from-accent-violet/30 to-accent-cyan/10",
-    },
-    {
-      label: t("discoveries.hiddenEra.label"),
-      title: t("discoveries.hiddenEra.title"),
-      metric: "2022",
-      accentClassName: "from-accent-emerald/25 to-accent-cyan/10",
-    },
-  ];
-
   const closingHighlights = [
     {
       label: t("closingCta.highlights.import.label"),
@@ -219,35 +192,20 @@ export default function Home() {
     t("workflow.share"),
   ];
 
-  const heroInsightChips = [
-    {
-      label: t("heroInsightChips.lateNight"),
-      dotClassName: "bg-accent-cyan",
-    },
-    {
-      label: t("heroInsightChips.tasteShift"),
-      dotClassName: "bg-accent-rose",
-    },
-    {
-      label: t("heroInsightChips.artistStreak"),
-      dotClassName: "bg-accent-emerald",
-    },
-  ];
-
   const productSignalRows = [
     {
-      label: t("productPreview.signalRows.obsession"),
-      value: "42d",
+      label: t("productPreview.signalRows.topTrack"),
+      value: t("productPreview.signalValues.topTrack"),
       accentClassName: "bg-accent-rose",
     },
     {
       label: t("productPreview.signalRows.shift"),
-      value: "+18%",
+      value: t("productPreview.signalValues.shift"),
       accentClassName: "bg-accent-violet",
     },
     {
-      label: t("productPreview.signalRows.ritual"),
-      value: "1:14a",
+      label: t("productPreview.signalRows.artist"),
+      value: t("productPreview.signalValues.artist"),
       accentClassName: "bg-accent-cyan",
     },
   ];
@@ -495,20 +453,6 @@ export default function Home() {
               aria-hidden
             />
             <div className="relative space-y-3 rounded-[2rem] border border-card-border bg-surface-glass p-3 shadow-card backdrop-blur-xl">
-              <div className="hidden gap-2 sm:grid sm:grid-cols-3">
-                {heroInsightChips.map((chip) => (
-                  <div
-                    key={chip.label}
-                    className="flex min-h-11 items-center gap-2 rounded-2xl border border-white/10 bg-slate-950/80 px-3 py-2 text-xs font-semibold text-white shadow-lg shadow-black/10 backdrop-blur-xl"
-                  >
-                    <span
-                      className={`h-2 w-2 shrink-0 rounded-full ${chip.dotClassName} shadow-[0_0_16px_currentColor]`}
-                      aria-hidden
-                    />
-                    <span className="min-w-0 text-balance leading-4">{chip.label}</span>
-                  </div>
-                ))}
-              </div>
               <div className="relative overflow-hidden rounded-[1.5rem] border border-white/10 bg-slate-950 p-3 shadow-2xl shadow-black/30">
                 <div
                   className="pointer-events-none absolute -right-20 -top-16 h-64 w-64 rounded-full bg-accent-violet/25 blur-3xl"
@@ -592,10 +536,10 @@ export default function Home() {
                   </div>
 
                   <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.06] p-4">
-                    <p className="font-mono text-[0.65rem] font-semibold uppercase tracking-[0.24em] text-cyan-200">
+                    <p className="text-xs font-semibold text-cyan-200">
                       {t("productPreview.insightEyebrow")}
                     </p>
-                    <p className="mt-3 text-2xl font-semibold tracking-tight text-white">
+                    <p className="mt-3 text-xl font-semibold leading-snug tracking-tight text-white sm:text-2xl">
                       {t("productPreview.insightTitle")}
                     </p>
                     <p className="mt-3 text-sm leading-6 text-slate-300">
@@ -616,7 +560,7 @@ export default function Home() {
                               {row.label}
                             </span>
                           </div>
-                          <span className="font-mono text-sm font-semibold text-white">
+                          <span className="text-sm font-semibold text-white">
                             {row.value}
                           </span>
                         </div>
@@ -768,56 +712,6 @@ export default function Home() {
                 </div>
               </div>
             ))}
-          </div>
-        </section>
-
-        <section className="mx-auto w-full max-w-7xl px-4 pb-16 sm:px-6 sm:pb-20 lg:px-8">
-          <div className="overflow-hidden rounded-[2rem] border border-card-border bg-surface-glass p-4 shadow-card backdrop-blur-xl sm:p-6 lg:p-8">
-            <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
-              <div>
-                <p className="font-mono text-xs font-semibold uppercase tracking-[0.28em] text-primary">
-                  {t("discoveriesEyebrow")}
-                </p>
-                <h2 className="mt-3 max-w-3xl text-2xl font-semibold tracking-[-0.04em] text-foreground sm:text-5xl">
-                  {t("discoveriesTitle")}
-                </h2>
-              </div>
-              <p className="max-w-md text-base leading-7 text-muted">
-                {t("discoveriesSubtitle")}
-              </p>
-            </div>
-
-            <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {discoveryCards.map((card) => (
-                <div
-                  key={card.label}
-                  className="group relative overflow-hidden rounded-3xl border border-card-border bg-card-surface p-5 shadow-card transition-all hover:-translate-y-1 hover:shadow-card-hover"
-                >
-                  <div
-                    className={`absolute inset-x-0 top-0 h-24 bg-gradient-to-br ${card.accentClassName}`}
-                    aria-hidden
-                  />
-                  <div className="relative">
-                    <div className="mb-8 flex items-center justify-between">
-                      <span className="rounded-full border border-primary/15 bg-primary/10 px-2.5 py-1 font-mono text-[0.62rem] font-bold uppercase tracking-[0.18em] text-primary">
-                        {card.label}
-                      </span>
-                      <SoundprintLogo
-                        src="/brand/favicon.png"
-                        showText={false}
-                        imageClassName="h-8 w-8 rounded-xl opacity-80 transition-transform group-hover:rotate-[-2deg] group-hover:scale-105"
-                      />
-                    </div>
-                    <p className="font-mono text-3xl font-semibold tracking-[-0.04em] text-foreground">
-                      {card.metric}
-                    </p>
-                    <h3 className="mt-3 text-base font-semibold leading-6 tracking-tight text-foreground">
-                      {card.title}
-                    </h3>
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
         </section>
 

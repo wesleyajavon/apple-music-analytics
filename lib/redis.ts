@@ -52,27 +52,80 @@ function createRedisClient(): Redis {
   return client;
 }
 
+function isRedisClientUsable(client: Redis): boolean {
+  const status = client.status;
+  return status !== "end" && status !== "close";
+}
+
+export function isStaleRedisConnectionError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  return (
+    message.includes("Connection is closed") ||
+    message.includes("ECONNRESET") ||
+    message.includes("ECONNREFUSED") ||
+    message.includes("Socket closed")
+  );
+}
+
+/** Drop a dead client so the next getRedisClient() creates a fresh connection. */
+export function invalidateRedisClient(): void {
+  const existing = globalForRedis.redis;
+  if (!existing) return;
+  globalForRedis.redis = undefined;
+  try {
+    existing.disconnect();
+  } catch {
+    // ignore teardown errors
+  }
+}
+
 /**
- * Get or create Redis client instance
- * Uses singleton pattern to reuse connection in development
- * Falls back gracefully if REDIS_URL is not configured
+ * Get or create Redis client instance.
+ * Reuses one connection per warm serverless instance (Vercel) to avoid
+ * connection storms and stale TCP sockets against Upstash.
  */
 export function getRedisClient(): Redis | null {
-  // If Redis URL is not configured, return null (cache disabled)
   if (!process.env.REDIS_URL) {
     return null;
   }
 
-  // In development, reuse the same Redis instance to avoid connection limits
-  if (process.env.NODE_ENV !== "production") {
-    if (!globalForRedis.redis) {
-      globalForRedis.redis = createRedisClient();
-    }
-    return globalForRedis.redis;
+  const existing = globalForRedis.redis;
+  if (existing && isRedisClientUsable(existing)) {
+    return existing;
   }
 
-  // In production, create new instance (serverless functions)
-  return createRedisClient();
+  if (existing) {
+    invalidateRedisClient();
+  }
+
+  globalForRedis.redis = createRedisClient();
+  return globalForRedis.redis;
+}
+
+/**
+ * Run a Redis command with one automatic reconnect on stale TCP connections.
+ * Keeps retry bounded (single retry) so AI routes cannot hang indefinitely.
+ */
+export async function runRedisCommand<T>(
+  operation: (client: Redis) => Promise<T>
+): Promise<T> {
+  const attempt = async (allowRetry: boolean): Promise<T> => {
+    const client = getRedisClient();
+    if (!client) {
+      throw new Error("Redis is not configured");
+    }
+    try {
+      return await operation(client);
+    } catch (error) {
+      if (allowRetry && isStaleRedisConnectionError(error)) {
+        invalidateRedisClient();
+        return attempt(false);
+      }
+      throw error;
+    }
+  };
+
+  return attempt(true);
 }
 
 /**

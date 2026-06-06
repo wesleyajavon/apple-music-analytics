@@ -1,6 +1,6 @@
 import { createHash } from "crypto";
 import type { NextRequest } from "next/server";
-import { getRedisClient } from "@/lib/redis";
+import { getRedisClient, runRedisCommand } from "@/lib/redis";
 import { isRateLimitFailClosed } from "@/lib/security/rate-limit-policy";
 import { logSecurityAuthEvent } from "@/lib/security/security-logger";
 import { AppError, ErrorCodes } from "@/lib/utils/error-handler";
@@ -250,11 +250,8 @@ async function checkRateLimitRedis(
   if (!redis) return null;
 
   try {
-    const raw = (await redis.eval(
-      REDIS_FIXED_WINDOW_LUA,
-      1,
-      key,
-      String(windowMs)
+    const raw = (await runRedisCommand((client) =>
+      client.eval(REDIS_FIXED_WINDOW_LUA, 1, key, String(windowMs))
     )) as [number, number];
 
     const currentCount = Number(raw?.[0] ?? 0);

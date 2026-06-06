@@ -15,6 +15,11 @@ import {
   DASHBOARD_SPOTLIGHT_TITLE,
   DASHBOARD_SPOTLIGHT_BTN_SECONDARY,
 } from "@/lib/constants/dashboard-spotlight";
+import {
+  SpotifyPlaygroundMobileConnected,
+  SpotifyPlaygroundMobileDisconnected,
+  type SpotifyPlaygroundPayload,
+} from "@/lib/components/spotify-playground-mobile";
 
 type TabId = "me" | "topTracks" | "topArtists" | "recentlyPlayed";
 
@@ -22,13 +27,7 @@ type EndpointResult =
   | { ok: true; path: string; status: number; data: unknown }
   | { ok: false; path: string; status: number; error: string };
 
-type PlaygroundApiBody = {
-  ok: true;
-  fetchedAt: string;
-  endpoints: Record<TabId, EndpointResult>;
-  spotifyConnectionScope?: string | null;
-  expectedSpotifyApiScopes?: string;
-};
+type PlaygroundApiBody = SpotifyPlaygroundPayload;
 
 type SpotifyPlaygroundClientProps = {
   hasSpotifyConnection: boolean;
@@ -280,24 +279,36 @@ export function SpotifyPlaygroundClient({
 
   if (!hasSpotifyConnection) {
     return (
-      <div className={outerClass}>
-        <PlaygroundHeroDisconnected />
-        <section className={`relative ${DASHBOARD_SPOTLIGHT_SHELL}`} aria-labelledby="playground-disconnected-panel-title">
-          <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} aria-hidden />
-          <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} aria-hidden />
-          <div className="relative p-6 sm:p-8">
-            <h2 id="playground-disconnected-panel-title" className={DASHBOARD_SPOTLIGHT_TITLE}>
-              {t("notConnected.title")}
-            </h2>
-            <p className={`mt-2 max-w-2xl ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("notConnected.panelHint")}</p>
-          </div>
-        </section>
-      </div>
+      <>
+        <SpotifyPlaygroundMobileDisconnected />
+        <div className={`${outerClass} hidden lg:block`}>
+          <PlaygroundHeroDisconnected />
+          <section className={`relative ${DASHBOARD_SPOTLIGHT_SHELL}`} aria-labelledby="playground-disconnected-panel-title">
+            <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} aria-hidden />
+            <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} aria-hidden />
+            <div className="relative p-6 sm:p-8">
+              <h2 id="playground-disconnected-panel-title" className={DASHBOARD_SPOTLIGHT_TITLE}>
+                {t("notConnected.title")}
+              </h2>
+              <p className={`mt-2 max-w-2xl ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("notConnected.panelHint")}</p>
+            </div>
+          </section>
+        </div>
+      </>
     );
   }
 
   return (
-    <div className={outerClass}>
+    <>
+      <SpotifyPlaygroundMobileConnected
+        spotifyDisplayName={spotifyDisplayName}
+        payload={payload}
+        loadError={loadError}
+        isLoading={isLoading}
+        showApiTroubleshootHint={showApiTroubleshootHint}
+        onReload={fetchPlayground}
+      />
+      <div className={`${outerClass} hidden lg:block`}>
       <PlaygroundHeroConnected spotifyDisplayName={spotifyDisplayName} />
 
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -407,6 +418,7 @@ export function SpotifyPlaygroundClient({
           </div>
         </div>
       </section>
-    </div>
+      </div>
+    </>
   );
 }

@@ -30,6 +30,12 @@ import {
   DASHBOARD_SPOTLIGHT_BTN_SECONDARY,
   DASHBOARD_SPOTLIGHT_PILL_MUTED,
 } from "@/lib/constants/dashboard-spotlight";
+import {
+  SettingsMobileExperience,
+  SettingsMobileSignedOut,
+  SettingsMobileSkeleton,
+} from "./settings-mobile";
+import { SettingsSwitch } from "./settings-shared";
 
 const SUBNAV_STICKY_TOP =
   "top-[calc(var(--dashboard-filter-height,4.5rem)+0.5rem)]";
@@ -47,41 +53,6 @@ const SUPPORTED_AVATAR_TYPES = new Set([
   "image/webp",
   "image/gif",
 ]);
-
-function SettingsSwitch({
-  id,
-  checked,
-  onChange,
-  disabled,
-  "aria-label": ariaLabel,
-}: {
-  id?: string;
-  checked: boolean;
-  onChange: (next: boolean) => void;
-  disabled?: boolean;
-  "aria-label": string;
-}) {
-  return (
-    <button
-      type="button"
-      id={id}
-      role="switch"
-      aria-checked={checked}
-      aria-label={ariaLabel}
-      disabled={disabled}
-      onClick={() => !disabled && onChange(!checked)}
-      className={`relative inline-flex h-7 w-12 shrink-0 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950 ${
-        checked ? "bg-accent-emerald" : "bg-white/20"
-      } ${disabled ? "cursor-not-allowed opacity-50" : ""}`}
-    >
-      <span
-        className={`pointer-events-none block h-6 w-6 translate-y-0.5 rounded-full bg-white shadow transition-transform ${
-          checked ? "translate-x-5" : "translate-x-0.5"
-        }`}
-      />
-    </button>
-  );
-}
 
 function SettingsHeroTrustPanel() {
   const t = useTranslations("settings");
@@ -614,35 +585,98 @@ export function AccountSettingsClient() {
   const primarySaveClass =
     "inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-2xl bg-slate-950 px-5 text-sm font-semibold text-white shadow-xl shadow-slate-950/20 transition hover:-translate-y-0.5 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 dark:bg-white dark:text-slate-950 dark:shadow-black/25 dark:hover:bg-slate-100 sm:w-auto";
 
+  const mobileProps = {
+    nameInput,
+    onNameChange: (value: string) => {
+      setNameInput(value);
+      setProfileSaved(false);
+      setProfileSaveError(null);
+      if (value.length > 200) setNameFieldError(t("profileNameTooLong"));
+      else setNameFieldError(null);
+    },
+    nameFieldError,
+    accountEmail,
+    avatarUrl,
+    avatarUploading,
+    avatarDeleting,
+    avatarError,
+    onAvatarSelect: (file: File | null | undefined) => {
+      void uploadAvatar(file);
+    },
+    onAvatarDelete: () => {
+      void deleteAvatar();
+    },
+    profileLoadError,
+    profileSaveError,
+    profileSaved,
+    profileSaving,
+    profileSaveDisabled,
+    onSaveProfile: () => {
+      void saveProfile();
+    },
+    hideGenreBanner,
+    onHideGenreBannerChange: (next: boolean) => {
+      if (next) setGenreBackfillBannerOptOut(true);
+      else clearGenreBackfillBannerBlockingPrefs();
+      setHideGenreBanner(next);
+    },
+    expectedPhrase,
+    phraseLoadError,
+    phraseInput,
+    onPhraseInputChange: (value: string) => {
+      setPhraseInput(value);
+      setError(null);
+    },
+    phraseOk,
+    understood,
+    onUnderstoodChange: (next: boolean) => {
+      setUnderstood(next);
+      setError(null);
+    },
+    clearing,
+    clearError: error,
+    onRunClear: () => {
+      void runClear();
+    },
+  };
+
   if (!authReady) {
     return (
-      <div className={outerClass}>
-        <div className="h-52 animate-pulse rounded-[2rem] border border-white/10 bg-gray-950 sm:h-60" aria-busy="true" />
-        <div className="flex flex-wrap gap-2">
+      <>
+        <SettingsMobileSkeleton />
+        <div className={`${outerClass} hidden lg:block`}>
+          <div className="h-52 animate-pulse rounded-[2rem] border border-white/10 bg-gray-950 sm:h-60" aria-busy="true" />
+          <div className="flex flex-wrap gap-2">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-9 w-28 animate-pulse rounded-full bg-slate-200 dark:bg-white/10" />
+            ))}
+          </div>
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-9 w-28 animate-pulse rounded-full bg-slate-200 dark:bg-white/10" />
+            <div key={i} className={`relative min-h-[200px] animate-pulse ${DASHBOARD_SPOTLIGHT_SHELL}`} aria-busy="true">
+              <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} aria-hidden />
+              <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} aria-hidden />
+            </div>
           ))}
         </div>
-        {[1, 2, 3].map((i) => (
-          <div key={i} className={`relative min-h-[200px] animate-pulse ${DASHBOARD_SPOTLIGHT_SHELL}`} aria-busy="true">
-            <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} aria-hidden />
-            <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} aria-hidden />
-          </div>
-        ))}
-      </div>
+      </>
     );
   }
 
   if (!userId) {
     return (
-      <div className={outerClass}>
-        <SettingsHeroSignedOut />
-      </div>
+      <>
+        <SettingsMobileSignedOut />
+        <div className={`${outerClass} hidden lg:block`}>
+          <SettingsHeroSignedOut />
+        </div>
+      </>
     );
   }
 
   return (
-    <div className={outerClass}>
+    <>
+      <SettingsMobileExperience {...mobileProps} />
+      <div className={`${outerClass} hidden lg:block`}>
       <SettingsHeroConnected />
 
       <nav
@@ -961,5 +995,6 @@ export function AccountSettingsClient() {
         </section>
       </div>
     </div>
+    </>
   );
 }

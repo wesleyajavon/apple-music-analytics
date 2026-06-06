@@ -12,7 +12,7 @@ import {
   CartesianGrid,
   Tooltip,
 } from "recharts";
-import { Activity, CalendarDays } from "lucide-react";
+import { Activity, CalendarDays, ChevronDown } from "lucide-react";
 import { useTimeline, type TimelineDataPoint } from "@/lib/hooks/use-listening";
 import { ChartResponsiveContainer } from "@/lib/components/chart-responsive-container";
 import { ErrorState } from "@/lib/components/error-state";
@@ -31,6 +31,15 @@ import {
 import { useTheme } from "@/lib/providers/theme-provider";
 
 type ChartPalette = (typeof DASHBOARD_CHART_THEME)[keyof typeof DASHBOARD_CHART_THEME];
+type TimelineMobileSummary = {
+  total: number;
+  peak: TimelineDataPoint;
+  average: number;
+  count: number;
+  trendDelta: number;
+  trendDirection: "up" | "down" | "flat";
+  topBuckets: TimelineDataPoint[];
+};
 
 /** Barre de période — neutre, alignée dashboard spotlight */
 const TIMELINE_TOOLBAR_CLASS =
@@ -79,6 +88,56 @@ function formatDate(date: string, period: PeriodType, locale: string): string {
       });
     }
   }
+}
+
+function getTimelineMobileSummary(data: TimelineDataPoint[]): TimelineMobileSummary | null {
+  if (data.length === 0) return null;
+
+  const total = data.reduce((sum, point) => sum + point.listens, 0);
+  const peak = data.reduce((currentPeak, point) =>
+    point.listens > currentPeak.listens ? point : currentPeak,
+  );
+  const first = data[0]?.listens ?? 0;
+  const last = data[data.length - 1]?.listens ?? 0;
+  const trendDelta = last - first;
+  const trendDirection =
+    Math.abs(trendDelta) < 1 ? "flat" : trendDelta > 0 ? "up" : "down";
+  const topBuckets = [...data]
+    .sort((a, b) => b.listens - a.listens)
+    .slice(0, 5);
+
+  return {
+    total,
+    peak,
+    average: total / data.length,
+    count: data.length,
+    trendDelta,
+    trendDirection,
+    topBuckets,
+  };
+}
+
+function createSparklinePoints(data: TimelineDataPoint[]): string {
+  if (data.length === 0) return "";
+
+  const width = 260;
+  const height = 92;
+  const padding = 8;
+  const values = data.map((point) => point.listens);
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const range = Math.max(max - min, 1);
+
+  return data
+    .map((point, index) => {
+      const x =
+        data.length === 1
+          ? width / 2
+          : padding + (index / (data.length - 1)) * (width - padding * 2);
+      const y = height - padding - ((point.listens - min) / range) * (height - padding * 2);
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    })
+    .join(" ");
 }
 
 function createTimelineTooltip(
@@ -342,6 +401,235 @@ const TimelineListeningChart = memo(function TimelineListeningChart({
 });
 TimelineListeningChart.displayName = "TimelineListeningChart";
 
+function TimelineMobileSkeleton() {
+  return (
+    <section className="space-y-4 lg:hidden" aria-busy="true">
+      <div className="overflow-hidden rounded-[1.75rem] bg-slate-950 p-5 text-white shadow-2xl shadow-violet-500/15">
+        <div className="mb-5 h-6 w-28 animate-pulse rounded-full bg-white/15" />
+        <div className="mb-3 h-8 w-4/5 animate-pulse rounded-xl bg-white/15" />
+        <div className="h-4 w-full animate-pulse rounded bg-white/10" />
+        <div className="mt-6 grid grid-cols-2 gap-2">
+          {[0, 1, 2, 3].map((index) => (
+            <div key={index} className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
+              <div className="mb-3 h-6 w-16 animate-pulse rounded bg-white/15" />
+              <div className="h-3 w-20 animate-pulse rounded bg-white/10" />
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="rounded-[1.5rem] border border-slate-200/80 bg-white p-4 shadow-lg shadow-slate-900/[0.04] dark:border-white/10 dark:bg-slate-950">
+        <div className="h-32 animate-pulse rounded-2xl bg-slate-100 dark:bg-white/10" />
+      </div>
+    </section>
+  );
+}
+
+function TimelineMobileExperience({
+  data,
+  chartData,
+  isLoading,
+  error,
+  refetch,
+  period,
+  periodBadgeLabel,
+  locale,
+}: {
+  data?: TimelineDataPoint[];
+  chartData: TimelineChartRow[];
+  isLoading: boolean;
+  error: Error | null;
+  refetch: () => void;
+  period: PeriodType;
+  periodBadgeLabel: string;
+  locale: string;
+}) {
+  const t = useTranslations("timeline");
+  const summary = useMemo(() => getTimelineMobileSummary(data ?? []), [data]);
+  const sparklinePoints = useMemo(() => createSparklinePoints(data ?? []), [data]);
+
+  if (isLoading) return <TimelineMobileSkeleton />;
+
+  if (error) {
+    return (
+      <section className="lg:hidden">
+        <div className="rounded-[1.5rem] border border-slate-200/80 bg-white p-4 shadow-lg shadow-slate-900/[0.04] dark:border-white/10 dark:bg-slate-950">
+          <ErrorState
+            variant="startup"
+            error={error}
+            message={t("errorLoading")}
+            onRetry={() => refetch()}
+          />
+        </div>
+      </section>
+    );
+  }
+
+  if (!summary || chartData.length === 0) {
+    return (
+      <section className="lg:hidden">
+        <div className="rounded-[1.75rem] border border-slate-200/80 bg-white p-5 shadow-lg shadow-slate-900/[0.04] dark:border-white/10 dark:bg-slate-950">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-600 dark:text-violet-300">
+            {t("heroEyebrow")}
+          </p>
+          <h1 className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-slate-950 dark:text-white">
+            {t("mobile.emptyTitle")}
+          </h1>
+          <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-400">
+            {t("mobile.emptyBody")}
+          </p>
+        </div>
+      </section>
+    );
+  }
+
+  const peakDate = formatDate(summary.peak.date, period, locale);
+  const trendLabel =
+    summary.trendDirection === "up"
+      ? t("mobile.trendUp")
+      : summary.trendDirection === "down"
+        ? t("mobile.trendDown")
+        : t("mobile.trendFlat");
+  const metricCards = [
+    {
+      label: t("heroStatTotal"),
+      value: summary.total.toLocaleString(locale),
+    },
+    {
+      label: t("heroStatPeak"),
+      value: summary.peak.listens.toLocaleString(locale),
+      detail: peakDate,
+    },
+    {
+      label: t("mobile.average"),
+      value: Math.round(summary.average).toLocaleString(locale),
+    },
+    {
+      label: t("mobile.trend"),
+      value: trendLabel,
+      detail: t("mobile.trendDelta", {
+        count: Math.abs(summary.trendDelta).toLocaleString(locale),
+      }),
+    },
+  ];
+
+  return (
+    <section className="space-y-4 lg:hidden" aria-labelledby="timeline-mobile-title">
+      <div className="relative overflow-hidden rounded-[1.75rem] bg-slate-950 p-5 text-white shadow-2xl shadow-violet-500/15">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.28),transparent_34%),radial-gradient(circle_at_85%_12%,rgba(34,211,238,0.2),transparent_32%)]" />
+        <div className="absolute -bottom-20 right-4 h-48 w-48 rounded-full bg-cyan-400/15 blur-3xl" />
+        <div className="relative">
+          <div className="flex items-center justify-between gap-3">
+            <span className="inline-flex items-center rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-[0.66rem] font-semibold uppercase tracking-[0.2em] text-violet-100">
+              {t("mobile.eyebrow")}
+            </span>
+            <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white/85">
+              {periodBadgeLabel}
+            </span>
+          </div>
+          <h1 id="timeline-mobile-title" className="mt-5 text-3xl font-semibold tracking-[-0.06em] text-balance">
+            {t("mobile.storyTitle", { date: peakDate })}
+          </h1>
+          <p className="mt-3 text-sm leading-6 text-white/70">
+            {t("mobile.storyBody", {
+              count: summary.peak.listens.toLocaleString(locale),
+              listens: t("listens"),
+            })}
+          </p>
+          <div className="mt-6 grid grid-cols-2 gap-2">
+            {metricCards.map((metric) => (
+              <div key={metric.label} className="rounded-2xl border border-white/10 bg-white/[0.07] p-3 backdrop-blur">
+                <p className="text-xl font-semibold tracking-tight text-white tabular-nums">{metric.value}</p>
+                <p className="mt-1 text-[0.66rem] font-semibold uppercase tracking-[0.16em] text-white/45">
+                  {metric.label}
+                </p>
+                {metric.detail ? (
+                  <p className="mt-1 truncate text-xs text-white/60" title={metric.detail}>
+                    {metric.detail}
+                  </p>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-[1.5rem] border border-slate-200/80 bg-white p-4 shadow-lg shadow-slate-900/[0.04] dark:border-white/10 dark:bg-slate-950">
+        <div className="mb-4 flex items-start justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-700 dark:text-cyan-300">
+              {t("mobile.sparkEyebrow")}
+            </p>
+            <h2 className="mt-1 text-lg font-semibold tracking-tight text-slate-950 dark:text-white">
+              {t("mobile.sparkTitle")}
+            </h2>
+          </div>
+          <span className="inline-flex min-h-11 items-center rounded-full bg-slate-100 px-3 text-xs font-semibold text-slate-600 dark:bg-white/10 dark:text-slate-300">
+            {summary.count.toLocaleString(locale)} {t("mobile.bucketsShort")}
+          </span>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200/80 bg-slate-50/80 p-3 dark:border-white/10 dark:bg-black/25">
+          <svg className="h-28 w-full" viewBox="0 0 260 92" preserveAspectRatio="none" role="img" aria-label={t("mobile.sparkAria")}>
+            <defs>
+              <linearGradient id="timelineMobileSparkline" x1="0" x2="1" y1="0" y2="0">
+                <stop offset="0%" stopColor="#a78bfa" />
+                <stop offset="60%" stopColor="#6366f1" />
+                <stop offset="100%" stopColor="#22d3ee" />
+              </linearGradient>
+            </defs>
+            <polyline
+              points={sparklinePoints}
+              fill="none"
+              stroke="url(#timelineMobileSparkline)"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="4"
+              vectorEffect="non-scaling-stroke"
+            />
+          </svg>
+        </div>
+        <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-400">
+          {t("mobile.sparkHint")}
+        </p>
+      </div>
+
+      <details className="group rounded-[1.5rem] border border-slate-200/80 bg-white shadow-lg shadow-slate-900/[0.04] dark:border-white/10 dark:bg-slate-950">
+        <summary className="flex min-h-[52px] cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-left">
+          <div>
+            <p className="text-sm font-semibold text-slate-950 dark:text-white">{t("mobile.detailsTitle")}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">{t("mobile.detailsHint")}</p>
+          </div>
+          <ChevronDown className="h-5 w-5 shrink-0 text-slate-500 transition-transform group-open:rotate-180" aria-hidden />
+        </summary>
+        <div className="space-y-2 border-t border-slate-200/80 p-3 dark:border-white/10">
+          {summary.topBuckets.map((bucket, index) => {
+            const bucketDate = formatDate(bucket.date, period, locale);
+            return (
+              <div key={`${bucket.date}-${index}`} className="flex min-h-11 items-center justify-between gap-3 rounded-2xl bg-slate-50 px-3 py-2 dark:bg-white/[0.05]">
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">{bucketDate}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">#{index + 1}</p>
+                </div>
+                <p className="text-sm font-semibold tabular-nums text-slate-900 dark:text-white">
+                  {bucket.listens.toLocaleString(locale)} {t("listens")}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      </details>
+
+      <Link
+        href="/dashboard/heatmap"
+        className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-slate-950 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-slate-900/15 transition-colors hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100"
+      >
+        <CalendarDays className="h-4 w-4" aria-hidden />
+        {t("mobile.heatmapCta")}
+      </Link>
+    </section>
+  );
+}
+
 function TimelineContent() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -398,62 +686,77 @@ function TimelineContent() {
         <PeriodSelector defaultPeriod="month" />
       </div>
 
-      <div className="mt-6 space-y-8">
-        <TimelineHeroFrame periodBadgeLabel={periodBadgeLabel} stats={heroStats} />
+      <div className="mt-4 space-y-5 lg:mt-6 lg:space-y-8">
+        <div className="hidden lg:block">
+          <TimelineHeroFrame periodBadgeLabel={periodBadgeLabel} stats={heroStats} />
+        </div>
 
-        {!isLoading && error ? (
-          <div className={TIMELINE_CHART_SECTION_CLASS}>
-            <div className={DASHBOARD_SPOTLIGHT_GRADIENT_CYAN} aria-hidden />
-            <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_CYAN} aria-hidden />
-            <div className="relative p-6 sm:p-8">
-              <ErrorState
-                variant="startup"
-                error={error}
-                message={t("errorLoading")}
-                onRetry={() => refetch()}
-              />
-            </div>
-          </div>
-        ) : !isLoading && (!data || data.length === 0) ? (
-          <EmptyState variant="startup" {...emptyStatePresets.changeDates(pathname)} />
-        ) : (
-          <section className={TIMELINE_CHART_SECTION_CLASS} aria-labelledby="timeline-spotlight-title">
-            <div className={DASHBOARD_SPOTLIGHT_GRADIENT_CYAN} aria-hidden />
-            <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_CYAN} aria-hidden />
-            <div className="relative">
-              <div className={`${DASHBOARD_SPOTLIGHT_HEADER_BOTTOM} px-6 py-5 sm:px-8`}>
-                <div className="flex items-start gap-4">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-slate-200/90 bg-slate-50/90 text-violet-600 shadow-sm dark:border-white/15 dark:bg-white/10 dark:text-violet-300">
-                    <Activity className="h-5 w-5" strokeWidth={1.75} aria-hidden />
-                  </div>
-                  <div>
-                    <h2 id="timeline-spotlight-title" className={DASHBOARD_SPOTLIGHT_TITLE}>
-                      {t("chartTitle")}
-                    </h2>
-                    <p className={`mt-1 max-w-2xl ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("chartHint")}</p>
-                  </div>
-                </div>
+        <TimelineMobileExperience
+          data={data}
+          chartData={chartData}
+          isLoading={isLoading}
+          error={error}
+          refetch={refetch}
+          period={period}
+          periodBadgeLabel={periodBadgeLabel}
+          locale={locale}
+        />
+
+        <div className="hidden lg:block">
+          {!isLoading && error ? (
+            <div className={TIMELINE_CHART_SECTION_CLASS}>
+              <div className={DASHBOARD_SPOTLIGHT_GRADIENT_CYAN} aria-hidden />
+              <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_CYAN} aria-hidden />
+              <div className="relative p-6 sm:p-8">
+                <ErrorState
+                  variant="startup"
+                  error={error}
+                  message={t("errorLoading")}
+                  onRetry={() => refetch()}
+                />
               </div>
-              <div className="p-4 sm:p-6 md:p-8">
-                {isLoading ? (
-                  <TimelineChartSkeleton />
-                ) : (
-                  <div className={`relative min-h-[500px] ${DASHBOARD_SPOTLIGHT_INNER_WELL}`}>
-                    <div className="pointer-events-none absolute left-1/2 top-14 h-56 w-56 -translate-x-1/2 rounded-full bg-violet-400/10 blur-3xl dark:bg-cyan-400/12" aria-hidden />
-                    <div className="relative">
-                      <TimelineListeningChart
-                        chartData={chartData}
-                        chartPalette={chartPalette}
-                        TimelineTooltip={TimelineTooltip}
-                        listensLabel={t("Listens")}
-                      />
+            </div>
+          ) : !isLoading && (!data || data.length === 0) ? (
+            <EmptyState variant="startup" {...emptyStatePresets.changeDates(pathname)} />
+          ) : (
+            <section className={TIMELINE_CHART_SECTION_CLASS} aria-labelledby="timeline-spotlight-title">
+              <div className={DASHBOARD_SPOTLIGHT_GRADIENT_CYAN} aria-hidden />
+              <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_CYAN} aria-hidden />
+              <div className="relative">
+                <div className={`${DASHBOARD_SPOTLIGHT_HEADER_BOTTOM} px-6 py-5 sm:px-8`}>
+                  <div className="flex items-start gap-4">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-slate-200/90 bg-slate-50/90 text-violet-600 shadow-sm dark:border-white/15 dark:bg-white/10 dark:text-violet-300">
+                      <Activity className="h-5 w-5" strokeWidth={1.75} aria-hidden />
+                    </div>
+                    <div>
+                      <h2 id="timeline-spotlight-title" className={DASHBOARD_SPOTLIGHT_TITLE}>
+                        {t("chartTitle")}
+                      </h2>
+                      <p className={`mt-1 max-w-2xl ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("chartHint")}</p>
                     </div>
                   </div>
-                )}
+                </div>
+                <div className="p-4 sm:p-6 md:p-8">
+                  {isLoading ? (
+                    <TimelineChartSkeleton />
+                  ) : (
+                    <div className={`relative min-h-[500px] ${DASHBOARD_SPOTLIGHT_INNER_WELL}`}>
+                      <div className="pointer-events-none absolute left-1/2 top-14 h-56 w-56 -translate-x-1/2 rounded-full bg-violet-400/10 blur-3xl dark:bg-cyan-400/12" aria-hidden />
+                      <div className="relative">
+                        <TimelineListeningChart
+                          chartData={chartData}
+                          chartPalette={chartPalette}
+                          TimelineTooltip={TimelineTooltip}
+                          listensLabel={t("Listens")}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          </section>
-        )}
+            </section>
+          )}
+        </div>
       </div>
     </>
   );
@@ -474,9 +777,12 @@ function TimelineFallback() {
       <div className={TIMELINE_TOOLBAR_CLASS}>
         <div className="h-10 w-64 animate-shimmer rounded-xl bg-slate-100 dark:bg-white/10" />
       </div>
-      <div className="mt-6 space-y-8">
-        <TimelineHeroFrame periodBadgeLabel={periodBadgeLabel} stats={<TimelineHeroStatsSkeleton />} />
-        <div className={TIMELINE_CHART_SECTION_CLASS}>
+      <div className="mt-4 space-y-5 lg:mt-6 lg:space-y-8">
+        <TimelineMobileSkeleton />
+        <div className="hidden lg:block">
+          <TimelineHeroFrame periodBadgeLabel={periodBadgeLabel} stats={<TimelineHeroStatsSkeleton />} />
+        </div>
+        <div className={`hidden lg:block ${TIMELINE_CHART_SECTION_CLASS}`}>
           <div className={DASHBOARD_SPOTLIGHT_GRADIENT_CYAN} aria-hidden />
           <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_CYAN} aria-hidden />
           <div className="relative p-6 sm:p-8">

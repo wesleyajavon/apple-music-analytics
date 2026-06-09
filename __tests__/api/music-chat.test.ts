@@ -26,6 +26,10 @@ vi.mock("@/lib/services/ai/ai-master", () => ({
   isAiMasterEnvEnabled: vi.fn(() => true),
 }));
 
+vi.mock("@/lib/services/ai/groq-ai-request-guard", () => ({
+  getGroqAiUnavailableReason: vi.fn().mockResolvedValue(null),
+}));
+
 vi.mock("@/lib/services/ai/music-chat-service", () => ({
   generateMusicChatAnswer: vi.fn(),
 }));

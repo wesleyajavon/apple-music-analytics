@@ -34,6 +34,10 @@ vi.mock("@/lib/services/listening/groq-import-genre-backfill-ai-guard", () => ({
   ),
 }));
 
+vi.mock("@/lib/services/ai/groq-ai-request-guard", () => ({
+  isGroqAiEnabledForRequest: vi.fn().mockResolvedValue(true),
+}));
+
 import { getListeningHabitPrediction } from "@/lib/services/predictions/listening-habit-service";
 import {
   getCachedPrediction,

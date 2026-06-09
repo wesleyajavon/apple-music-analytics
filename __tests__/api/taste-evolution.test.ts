@@ -31,6 +31,18 @@ vi.mock("@/lib/auth/resolve-authorized-data-user-id", () => ({
   }),
 }));
 
+vi.mock("@/lib/services/user/public-profile-access", () => ({
+  isActivePublicProfileUserId: vi.fn().mockResolvedValue(false),
+}));
+
+vi.mock("@/lib/services/ai/groq-ai-request-guard", () => ({
+  isGroqAiEnabledForRequest: vi.fn().mockResolvedValue(true),
+}));
+
+vi.mock("@/lib/services/listening/groq-import-genre-backfill-ai-guard", () => ({
+  hasPendingOrRunningGroqImportGenreBackfillForUser: vi.fn().mockResolvedValue(false),
+}));
+
 import { getListenDateRange } from "@/lib/services/listening/listening-service";
 import { getTasteEvolutionTrends } from "@/lib/services/taste-evolution/taste-evolution-service";
 import {

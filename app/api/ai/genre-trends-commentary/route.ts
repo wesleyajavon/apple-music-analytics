@@ -4,7 +4,7 @@ import { getListenDateRange } from "@/lib/services/listening/listening-service";
 import type { GenreTrendsCommentaryApiResponse } from "@/lib/dto/genre-trends-ai";
 import { AppError, handleApiError } from "@/lib/utils/error-handler";
 import { assertGroqUserQuotaForRequest } from "@/lib/services/ai/groq-user-quota";
-import { isAiMasterEnabledForRequest } from "@/lib/services/ai/ai-master";
+import { isGroqAiEnabledForRequest } from "@/lib/services/ai/groq-ai-request-guard";
 import {
   extractDateRangeWithDefaults,
   extractPeriod,
@@ -133,7 +133,7 @@ export async function GET(request: NextRequest) {
       return applyRateLimitHeaders(response, rateLimit, AI_GENRE_TRENDS_RATE_LIMIT);
     }
 
-    if (!isAiMasterEnabledForRequest(request)) {
+    if (!(await isGroqAiEnabledForRequest(request, userId))) {
       const res: GenreTrendsCommentaryApiResponse = {
         commentary: null,
         commentaryLight: null,

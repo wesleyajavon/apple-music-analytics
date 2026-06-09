@@ -9,11 +9,13 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { getOrCreateAnonymousId } from "@/lib/constants/anonymous-id";
 import {
   ALL_COOKIE_CONSENT,
   buildStoredConsent,
   COOKIE_CONSENT_STORAGE_KEY,
   DEFAULT_COOKIE_CONSENT,
+  isStoredCookieConsentCurrent,
   parseStoredConsent,
   type CookieConsentCategories,
   type StoredCookieConsent,
@@ -45,6 +47,7 @@ async function syncConsentToServer(categories: CookieConsentCategories) {
         consentType: "cookie",
         consentVersion: buildStoredConsent(categories).version,
         granted: categories.analytics || categories.errorMonitoring || categories.sessionReplay,
+        anonymousId: getOrCreateAnonymousId(),
         categories: {
           analytics: categories.analytics,
           errorMonitoring: categories.errorMonitoring,
@@ -63,7 +66,13 @@ export function CookieConsentProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const raw = window.localStorage.getItem(COOKIE_CONSENT_STORAGE_KEY);
-    setStored(parseStoredConsent(raw));
+    const parsed = parseStoredConsent(raw);
+    if (parsed && !isStoredCookieConsentCurrent(parsed)) {
+      window.localStorage.removeItem(COOKIE_CONSENT_STORAGE_KEY);
+      setStored(null);
+    } else {
+      setStored(parsed);
+    }
     setHydrated(true);
 
     const onChange = (event: Event) => {
@@ -124,5 +133,6 @@ export function readCookieConsentFromStorage(): CookieConsentCategories {
   const stored = parseStoredConsent(
     window.localStorage.getItem(COOKIE_CONSENT_STORAGE_KEY)
   );
+  if (!isStoredCookieConsentCurrent(stored)) return DEFAULT_COOKIE_CONSENT;
   return stored?.categories ?? DEFAULT_COOKIE_CONSENT;
 }

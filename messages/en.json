@@ -23,7 +23,24 @@
     "ariaLabel": "Enable or disable AI features for this browser",
     "lockedHint": "AI is off server-side (AI_MASTER_ENABLED=false). This toggle cannot enable it.",
     "widgetHint": "AI is turned off for this browser. Use the AI switch in the Plus menu (mobile) or bottom-right (desktop) to load this content.",
-    "widgetHintEnvLocked": "AI is disabled on the server. This content cannot be generated here."
+    "widgetHintEnvLocked": "AI is disabled on the server. This content cannot be generated here.",
+    "widgetHintConsentRequired": "Enable Groq AI below to use this feature.",
+    "consentRequiredHint": "Enable Groq AI in Settings → Preferences first.",
+    "enableGroqCta": "Enable Groq AI"
+  },
+  "groqAiConsentPrompt": {
+    "title": "Enable Groq AI",
+    "body": "Soundprint-AI can send aggregated listening data and artist or track titles to Groq (United States) for AI features in this app.",
+    "bulletInsights": "Insights, chat, genre classification, and taste summaries",
+    "bulletTransfer": "Data may be processed outside the EU (Groq, Inc.)",
+    "bulletRevoke": "You can revoke consent anytime in Settings or pause AI per browser",
+    "privacyLink": "Read our Privacy Policy",
+    "accept": "Allow Groq to process my listening data",
+    "decline": "Not now",
+    "manageInSettings": "Manage in Settings",
+    "accepting": "Saving…",
+    "grantedToast": "Groq AI enabled. Pause it anytime with the AI button.",
+    "error": "Could not save your preference. Try again or use Settings."
   },
   "sidebar": {
     "openMenu": "Open menu",
@@ -133,6 +150,7 @@
     "genericError": "Could not generate an answer. Please try again.",
     "requestTimeoutError": "This answer took longer than the browser allows (about three minutes), so the request was stopped. Try a narrower date range on the dashboard, or ask again in a moment — the models or database may have been slow.",
     "aiDisabledClient": "AI is disabled for this browser. Turn the AI switch back on to use Ask your Soundprint.",
+    "aiDisabledConsent": "Enable Groq AI in Settings → Data & privacy to use Ask your Soundprint.",
     "aiDisabledEnv": "AI is disabled server-side. Ask your Soundprint is not available here.",
     "mobile": {
       "eyebrow": "Soundprint chat",
@@ -243,6 +261,7 @@
     "sectionPreferencesLead": "Optional prompts, banners, and in-app messages.",
     "sectionDataPrivacy": "Data & privacy",
     "sectionDataPrivacyLead": "Remove listening history and imports stored in this app. Your sign-in is not deleted.",
+    "gdprContactLead": "For access, export, correction, or deletion requests, contact:",
     "importExportsTitle": "Listening data imports",
     "importExportsBody": "Add or update Spotify or Apple exports any time — duplicate plays from an earlier sync or import are skipped automatically.",
     "importExportsCta": "Open import assistant",
@@ -290,11 +309,12 @@
     "genreBannerTitle": "Groq genre banner",
     "genreBannerDescription": "After import you can hide the dashboard strip about Groq genre classification. Turn it back on here anytime.",
     "genreBannerHideLabel": "Hide Groq genre classification prompts and summaries on the dashboard",
-    "groqConsentTitle": "Groq genre classification (IA)",
-    "groqConsentDescription": "When enabled, artist and track titles from your library can be sent to Groq to fill missing genres. Disabling stops new runs and cancels any job in progress.",
-    "groqConsentLabel": "Allow Groq to classify missing genres",
+    "groqConsentTitle": "Groq AI features",
+    "groqConsentDescription": "When enabled, aggregated listening data and artist or track titles can be sent to Groq for insights, chat, genre classification, and other AI features. Disabling stops new AI runs and cancels any genre job in progress.",
+    "groqConsentLabel": "Allow Groq to process my listening data for AI features",
     "groqConsentError": "Could not update Groq privacy preference. Please try again.",
     "groqConsentSaving": "Saving…",
+    "groqConsentBrowserToggleHint": "Once enabled, you can pause AI for this browser with the AI button (bottom-right on desktop, Plus menu on mobile) without revoking this consent.",
     "publicProfileTitle": "Public dashboard demo",
     "publicProfileDescription": "When enabled, visitors without an account can view your listening analytics via the public demo link. You can turn this off anytime.",
     "publicProfileLabel": "Allow my profile to be shown in the public demo",
@@ -348,10 +368,17 @@
     "noAccount": "Don't have an account?",
     "alreadyAccount": "Already have an account?",
     "signUpSuccess": "Account created. Check your email to confirm your sign up.",
-    "termsConsentLabel": "I accept the {terms} and {privacy}.",
+    "termsConsentLabel": "I accept the <terms></terms> and <privacy></privacy>.",
     "termsLink": "Terms of Service",
     "privacyLink": "Privacy Policy",
     "termsConsentRequired": "You must accept the Terms and Privacy Policy to create an account.",
+    "oauthTermsHint": "New with Google or Spotify? Check the box below. Returning users can leave it unchecked.",
+    "acceptTermsEyebrow": "One more step",
+    "acceptTermsTitle": "Accept our terms",
+    "acceptTermsSubtitle": "Before using Soundprint-AI, please confirm that you accept our Terms and Privacy Policy.",
+    "acceptTermsButton": "Continue",
+    "acceptTermsSaving": "Saving…",
+    "acceptTermsError": "Could not save your acceptance. Please try again.",
     "skipToContent": "Skip to sign-in form",
     "homeLinkAriaLabel": "Soundprint-AI — home",
     "authNavAriaLabel": "Account pages",
@@ -389,43 +416,43 @@
     "updatePasswordExpiredSubtitle": "Request a new reset link and open it from your inbox."
   },
   "onboarding": {
-    "metaTitle": "First sign-in — export your listening data",
-    "welcomeEyebrow": "Getting started",
-    "welcomeTitle": "Bring your listening history onboard",
+    "metaTitle": "Set up Soundprint",
+    "welcomeEyebrow": "Welcome",
+    "welcomeTitle": "Import your listening history",
     "welcomePlanTitle": "What we'll do together",
     "welcomeBullet1": "Pick Spotify or Apple Music—every screen stays on your choice.",
-    "welcomeBullet2": "Follow screenshots to request the official listening export.",
+    "welcomeBullet2": "Follow the steps to request the official export from their privacy portal.",
     "welcomeBullet3": "Upload when the email arrives—most exports land within a few days.",
     "whyNotApiSummary": "Why upload a file instead of a sync button?",
     "whyNotApiTitle": "Why can’t this app connect to Apple Music or Spotify for me?",
     "whyNotApiBody": "Those companies don’t give independent apps direct access to your personal listening history — that data stays between you and them, which protects your privacy. We’re a third-party app, so there’s no supported “log in and sync” path for your full history. The official option is for you to request your own copy from their privacy tools; you then import that file here.",
-    "welcomeBody": "Charts run on rows parsed from exports you approve—not a fuzzy “music login”. Start the wizard now; you can pause anywhere and reopen this page when your download is ready.",
+    "welcomeBody": "We’ll walk you through it. The official export can take a few days — come back when your file is ready.",
     "welcomeNoteStrong": "You'll import when the ZIP or CSV arrives in your inbox",
     "welcomeNoteRest": " — exports take time to generate, and that's OK.",
     "flowRail": {
-      "ariaLabel": "Setup steps",
+      "ariaLabel": "Steps",
       "intro": "Start",
       "choose": "Service",
-      "export": "Request",
+      "export": "Export",
       "upload": "Import",
-      "done": "Finish"
+      "done": "Done"
     },
-    "guidePhaseLabel": "Export walkthrough",
-    "guideStepCounterLabel": "Screen {current} of {total}",
+    "guidePhaseLabel": "Export",
+    "guideStepCounterLabel": "{current} / {total}",
     "pickBadgeSpotify": "ZIP archive",
     "pickBadgeApple": "CSV file",
-    "continue": "Continue",
-    "pickTitle": "Where do your plays live?",
-    "pickSubtitle": "One path keeps the guide coherent—everything below matches Apple or Spotify, not both.",
+    "continue": "Get started",
+    "pickTitle": "Where do you listen?",
+    "pickSubtitle": "Pick one — the rest of the flow follows that choice.",
     "pickSpotify": "Spotify",
-    "pickSpotifyHint": "Extended streaming history with curated screenshots.",
+    "pickSpotifyHint": ".zip file",
     "pickApple": "Apple Music",
-    "pickAppleHint": "Apple Media Services archive with curated screenshots.",
+    "pickAppleHint": ".csv file",
     "back": "Back",
     "stepProgress": "Step {current} of {total}",
-    "flowProgressAriaLabel": "Onboarding progress: {percent} percent complete",
-    "openSpotifyPrivacy": "Open Spotify privacy settings",
-    "openApplePrivacy": "Open Apple’s privacy portal",
+    "flowProgressAriaLabel": "Progress: {percent} percent",
+    "openSpotifyPrivacy": "Open Spotify",
+    "openApplePrivacy": "Open Apple",
     "spotifyUrls": {
       "privacy": "https://www.spotify.com/us/account/privacy/"
     },
@@ -434,40 +461,40 @@
       "archive": "https://privacy.apple.com/account/archive"
     },
     "spotify": {
-      "step1Title": "Request Extended streaming history",
-      "step1Body": "On the “Download your data” page, select Extended streaming history, then tap “Request data.” Account data may arrive sooner, but extended history is usually richer; Spotify may take up to 30 days to prepare it.",
-      "step2Title": "Confirmation",
-      "step2Body": "On “Account privacy,” a green banner confirms Spotify is preparing your file. You will get an email when the download is ready."
+      "step1Title": "Request extended history",
+      "step1Body": "On “Download your data”, select Extended streaming history, then tap Request data. It can take up to 30 days.",
+      "step2Title": "Request sent",
+      "step2Body": "A green banner confirms Spotify is preparing your file. You’ll get an email when it’s ready."
     },
     "apple": {
-      "step1Title": "Request a copy of your data",
-      "step1Body": "Sign in to Apple’s Data & Privacy portal, then under “Manage your data,” open “Request a copy of your data.”",
+      "step1Title": "Request your data",
+      "step1Body": "Sign in at privacy.apple.com, then open “Request a copy of your data”.",
       "step2Title": "Select Apple Media Services",
-      "step2Body": "In the list, check “Apple Media Services Information” (App Store, Apple Music, Podcasts, etc.). You can leave other categories unchecked for a focused export.",
-      "step3Title": "Choose a file size",
-      "step3Body": "Pick a maximum file size that is easy for you to download — 1 GB is usually fine. Review the summary, then complete the request.",
-      "step4Title": "Confirmation",
-      "step4Body": "Apple thanks you and explains that preparation can take up to several days; you will be notified at your Apple ID email.",
-      "step5Title": "Email: your download is ready",
-      "step5Body": "When the archive is ready, Apple emails the address on your Apple ID. Open the message and use the link (for example “Get your data”) to go to your downloads page and fetch the Apple Media Services package.",
-      "step6Title": "Download the files",
-      "step6Body": "On Apple’s “Download your data” page, download each part of the archive (Apple may split it into multiple files, e.g. part 1 of 2). Links expire after a limited time — save the files somewhere safe before you unzip.",
-      "step7Title": "Unzip the archive",
-      "step7Body": "Open each downloaded .zip (double-click on Mac, or extract on Windows). You should get a top-level folder named Apple_Media_Services — that is the package to open in the next step.",
-      "step8Title": "Open Apple Music Activity",
-      "step8Body": "Inside Apple_Media_Services, open the folder Apple Music Activity (see first screenshot). Then select Apple Music - Play History Daily Tracks.csv (second screenshot) — this is the file you will upload here; we do not import other CSVs from the export."
+      "step2Body": "Check Apple Media Services Information. Other categories can stay unchecked.",
+      "step3Title": "Pick a file size",
+      "step3Body": "1 GB is usually enough. Confirm the request.",
+      "step4Title": "Request sent",
+      "step4Body": "Apple is preparing your archive. You’ll get an email in a few days.",
+      "step5Title": "Email received",
+      "step5Body": "Open Apple’s email and follow the link to your download page.",
+      "step6Title": "Download",
+      "step6Body": "Download each part of the archive. Links expire — save the files somewhere safe.",
+      "step7Title": "Unzip",
+      "step7Body": "Open each .zip. You should get an Apple_Media_Services folder.",
+      "step8Title": "Find the right file",
+      "step8Body": "In Apple Music Activity, select Apple Music - Play History Daily Tracks.csv — that’s the one to upload here."
     },
     "next": "Next",
     "import": {
-      "eyebrow": "Step {step} — Import",
-      "spotifyTitle": "Upload your Spotify archive",
-      "spotifyBody": "Download the file you were sent and upload it in the app as a .zip archive.",
-      "appleTitle": "Upload your Apple Music export",
-      "appleBody": "Upload Apple Music - Play History Daily Tracks.csv — the file from the last step of the guide above. We only read this CSV from your export.",
-      "openAppleDownloads": "Open Apple’s downloads page",
-      "dropTitle": "Drop the file here or click to browse",
-      "dropSubSpotify": ".zip archive from Spotify (e.g. my_spotify_data.zip)",
-      "dropSubApple": "CSV file — “Apple Music - Play History Daily Tracks.csv”",
+      "eyebrow": "Import",
+      "spotifyTitle": "Upload your Spotify .zip",
+      "spotifyBody": "The file from Spotify’s email. Drop it here or browse your files.",
+      "appleTitle": "Upload your Apple Music .csv",
+      "appleBody": "The Play History Daily Tracks.csv file from the last step.",
+      "openAppleDownloads": "Apple downloads page",
+      "dropTitle": "Drop your file here",
+      "dropSubSpotify": "Spotify .zip archive",
+      "dropSubApple": "Apple Music - Play History Daily Tracks.csv",
       "selectedFile": "Selected file: {name}",
       "noFile": "Choose a file to import.",
       "importSubmit": "Import into my account",
@@ -487,7 +514,7 @@
         "uploading": "Saving listens to your account…",
         "finalizing": "Finalizing your profile…"
       },
-      "skipImport": "I don’t have the file yet",
+      "skipImport": "No file yet",
       "toastSuccess": "{count, plural, one {# listen imported.} other {# listens imported.}}",
       "importError": "Import failed. Check the file and try again.",
       "recentAuthRequired": "Please sign in again before importing data.",
@@ -506,10 +533,10 @@
       "importingOverlayTitleWebApi": "Checking Spotify…",
       "importingOverlayHintWebApi": "Contacting Spotify — no listens are saved to your dashboard from this step."
     },
-    "finishTitle": "You’re set",
-    "finishSuccessEyebrow": "Import complete",
-    "finishSuccessTitle": "Your listening history is ready",
-    "finishSuccessBody": "We imported {imported} listens into your account and skipped {skipped} duplicates. You are now ready to discover your musical profile.",
+    "finishTitle": "All set",
+    "finishSuccessEyebrow": "Done",
+    "finishSuccessTitle": "Your listens are in",
+    "finishSuccessBody": "{imported} listens added · {skipped} duplicates skipped. Your musical profile is ready.",
     "finishSuccessSteps": {
       "requested": {
         "title": "Data requested",
@@ -524,18 +551,18 @@
         "body": "Open your first personalized view."
       }
     },
-    "finishSkippedEyebrow": "You’re almost there",
-    "finishBody": "You can skip this step if your export is not ready yet — the dashboard stays available, and charts will fill in after you import later.",
+    "finishSkippedEyebrow": "Almost there",
+    "finishBody": "No file yet? No problem — the dashboard is still available. Import whenever you’re ready.",
     "finishAfterImport": "{imported} listens were added to your profile. Skipped duplicates: {skipped}.",
     "finishImportedLabel": "Listens added",
     "finishSkippedLabel": "Duplicates skipped",
     "finishNextHint": "Next up: your overview, listening trends, and Replay-style stats. You can add another export anytime from the dashboard.",
     "finishPaletteCta": "Open Palette ({count, plural, one {# artist to map} other {# artists to map}})",
     "goToDashboard": "Go to dashboard",
-    "goToMusicalProfile": "View my musical profile",
-    "finishing": "Saving…",
-    "skipForNow": "Skip for now",
-    "skipHint": "You can request your export later; we won’t keep blocking you.",
+    "goToMusicalProfile": "View my profile",
+    "finishing": "One moment…",
+    "skipForNow": "Skip",
+    "skipHint": "You can import later.",
     "completeError": "Could not save. Please try again.",
     "imageAltSpotifyStep1": "Screenshot: Spotify Download your data with extended history and Request data",
     "imageAltSpotifyStep2": "Screenshot: Spotify Account privacy with green confirmation banner",
@@ -2507,7 +2534,7 @@
     "privacy": {
       "eyebrow": "Legal",
       "title": "Privacy Policy",
-      "lastUpdated": "Last updated: June 5, 2026",
+      "lastUpdated": "Last updated: June 6, 2026",
       "intro": "A plain-language summary of how Soundprint-AI handles your data. We built this app for your listening stats — not to sell your information.",
       "sections": [
         {
@@ -2534,7 +2561,26 @@
         {
           "title": "How long we keep it",
           "paragraphs": [
-            "Your account and listening data stay while your account is active. If you delete your account, we erase your data within 30 days."
+            "Your account and listening data stay while your account is active. If you delete your account, we erase your data promptly from our systems."
+          ]
+        },
+        {
+          "title": "Who we work with",
+          "paragraphs": [
+            "We rely on trusted providers to run the app. They process data only on our instructions and for the purposes below."
+          ],
+          "bullets": [
+            "Supabase (hosting, auth, database, profile photo storage) — runs your account and stores your listening data.",
+            "Groq (US) — optional AI features when you opt in; may receive artist/track titles and aggregated listening stats.",
+            "Vercel (global) — hosts the app; optional analytics only if you consent to cookies.",
+            "Sentry (US/EU) — optional error monitoring and session replay only if you consent to cookies."
+          ]
+        },
+        {
+          "title": "International transfers",
+          "paragraphs": [
+            "Some providers may process data outside your country (including the United States). When required, we rely on appropriate safeguards such as the providers' data processing agreements and standard contractual clauses.",
+            "Groq and Sentry are only used for the optional features described above and only when you opt in (AI) or accept the relevant cookies."
           ]
         },
         {
@@ -2545,6 +2591,12 @@
           ]
         }
       ],
+      "contact": {
+        "title": "Privacy requests",
+        "body": "For questions about your data or to exercise your rights, email us at:",
+        "fallback": "For privacy requests, use Settings → Data & privacy (export or delete) or configure a contact address for your deployment.",
+        "emailAriaLabel": "Send a privacy request email to {email}"
+      },
       "related": {
         "title": "Related policies",
         "description": "See also:",
@@ -2555,7 +2607,7 @@
     "terms": {
       "eyebrow": "Terms of use",
       "title": "Terms of Service",
-      "lastUpdated": "Last updated: June 5, 2026",
+      "lastUpdated": "Last updated: June 6, 2026",
       "intro": "A quick overview of your rights and ours when you use Soundprint-AI. By using the app, you agree to these terms.",
       "sections": [
         {
@@ -2599,7 +2651,7 @@
     "cookies": {
       "eyebrow": "Cookie policy",
       "title": "Cookie Policy",
-      "lastUpdated": "Last updated: June 5, 2026",
+      "lastUpdated": "Last updated: June 6, 2026",
       "intro": "We use a few cookies to keep you signed in and remember your choices. Optional ones help us improve the app — only if you say yes.",
       "sections": [
         {
@@ -2617,6 +2669,21 @@
           "paragraphs": [
             "Use the panel below to accept, reject, or customize optional cookies anytime.",
             "Saying no to optional cookies won't stop you from using Soundprint-AI. You can also clear cookies in your browser settings."
+          ]
+        },
+        {
+          "title": "Cookies and local storage we set",
+          "paragraphs": [
+            "Technical names below help you recognize what the app stores in your browser."
+          ],
+          "bullets": [
+            "Supabase auth cookies (sb-*-auth-token) — essential; keep you signed in.",
+            "ai_master_disabled — httpOnly; remembers if you turned off AI for this browser.",
+            "ama_oauth_terms — short-lived; records that you accepted terms before an OAuth redirect.",
+            "ama_anonymous_id — links anonymous cookie choices to your account after sign-in.",
+            "localStorage ama-cookie-consent-v1 — your cookie banner choices on this device.",
+            "localStorage ama_anonymous_id — anonymous id used before you create an account.",
+            "Theme preference — stored locally for light/dark mode (not sent to our servers)."
           ]
         }
       ],

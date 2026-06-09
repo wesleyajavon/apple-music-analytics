@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
+import { useQueryClient } from "@tanstack/react-query";
 import { LayoutDashboard, Settings2, Upload } from "lucide-react";
 import { Link, useRouter } from "@/i18n/navigation";
 import {
@@ -36,6 +37,9 @@ import {
   SettingsMobileSkeleton,
 } from "./settings-mobile";
 import { SettingsSwitch } from "./settings-shared";
+import { GroqAiSettingsFocus } from "@/lib/components/groq-ai-settings-focus";
+import { GROQ_AI_CONSENT_SETTINGS_HASH } from "@/lib/constants/groq-ai-settings";
+import { AI_MASTER_QUERY_KEY } from "@/lib/hooks/use-ai-master-toggle";
 
 const SUBNAV_STICKY_TOP =
   "top-[calc(var(--dashboard-filter-height,4.5rem)+0.5rem)]";
@@ -267,10 +271,15 @@ function IconUser() {
   );
 }
 
-export function AccountSettingsClient() {
+type AccountSettingsClientProps = {
+  gdprContactEmail?: string | null;
+};
+
+export function AccountSettingsClient({ gdprContactEmail = null }: AccountSettingsClientProps) {
   const t = useTranslations("settings");
   const tCommon = useTranslations("common");
   const router = useRouter();
+  const queryClient = useQueryClient();
   const avatarInputRef = useRef<HTMLInputElement | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [authReady, setAuthReady] = useState(false);
@@ -402,6 +411,9 @@ export function AccountSettingsClient() {
         setGroqConsentGranted(data.groqGenreConsent?.granted ?? false);
         setPublicProfileEligible(data.publicProfile?.eligible ?? false);
         setPublicProfileGranted(data.publicProfile?.granted ?? false);
+        if (payload.groqGenreConsent !== undefined) {
+          void queryClient.invalidateQueries({ queryKey: AI_MASTER_QUERY_KEY });
+        }
         return true;
       } catch {
         if (payload.publicProfile !== undefined) {
@@ -414,7 +426,7 @@ export function AccountSettingsClient() {
         setPrivacySaving(false);
       }
     },
-    [t]
+    [t, queryClient]
   );
 
   useEffect(() => {
@@ -856,6 +868,7 @@ export function AccountSettingsClient() {
 
   return (
     <>
+      <GroqAiSettingsFocus />
       <SettingsMobileExperience {...mobileProps} />
       <div className={`${outerClass} hidden lg:block`}>
       <SettingsHeroConnected />
@@ -1044,7 +1057,10 @@ export function AccountSettingsClient() {
                 </div>
               </div>
 
-              <div className="border-t border-slate-200/80 pt-5 dark:border-white/10">
+              <div
+                id={GROQ_AI_CONSENT_SETTINGS_HASH}
+                className="scroll-mt-28 border-t border-slate-200/80 pt-5 dark:border-white/10"
+              >
                 <h3 className="text-sm font-semibold text-slate-900 dark:text-white">{t("groqConsentTitle")}</h3>
                 <p className={`mt-1.5 text-sm leading-relaxed ${DASHBOARD_SPOTLIGHT_MUTED}`}>
                   {t("groqConsentDescription")}
@@ -1065,6 +1081,9 @@ export function AccountSettingsClient() {
                     />
                   </div>
                 </div>
+                <p className={`mt-3 text-xs leading-relaxed ${DASHBOARD_SPOTLIGHT_MUTED}`}>
+                  {t("groqConsentBrowserToggleHint")}
+                </p>
               </div>
 
               {publicProfileEligible ? (
@@ -1110,6 +1129,17 @@ export function AccountSettingsClient() {
               {t("sectionDataPrivacy")}
             </h2>
             <p className={`mt-1.5 text-sm ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("sectionDataPrivacyLead")}</p>
+            {gdprContactEmail ? (
+              <p className={`mt-3 text-sm ${DASHBOARD_SPOTLIGHT_MUTED}`}>
+                {t("gdprContactLead")}{" "}
+                <a
+                  href={`mailto:${gdprContactEmail}`}
+                  className="font-medium text-primary underline-offset-2 hover:underline"
+                >
+                  {gdprContactEmail}
+                </a>
+              </p>
+            ) : null}
           </div>
 
           <SettingsSpotlightSection

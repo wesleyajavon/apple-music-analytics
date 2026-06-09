@@ -6,6 +6,7 @@ import {
   PUBLIC_PROFILE_CONSENT_VERSION,
 } from "@/lib/constants/legal-consent";
 import { getConfiguredPublicProfileUserId } from "@/lib/constants/public-profile";
+import { isGrantedConsentCurrent } from "@/lib/services/user/consent-version";
 import { recordUserConsent } from "@/lib/services/user/consent-service";
 
 export const PRIVACY_CONSENT_TYPES = {
@@ -23,12 +24,12 @@ function isMissingConsentTable(error: unknown): boolean {
 export async function getLatestUserConsent(
   userId: string,
   consentType: string
-): Promise<{ granted: boolean; createdAt: Date } | null> {
+): Promise<{ granted: boolean; consentVersion: string; createdAt: Date } | null> {
   try {
     return await prisma.userConsent.findFirst({
       where: { userId, consentType },
       orderBy: { createdAt: "desc" },
-      select: { granted: true, createdAt: true },
+      select: { granted: true, consentVersion: true, createdAt: true },
     });
   } catch (error) {
     if (isMissingConsentTable(error)) return null;
@@ -36,21 +37,10 @@ export async function getLatestUserConsent(
   }
 }
 
-/** Grandfather users who started Groq backfill before consent tracking existed. */
+/** Explicit opt-in only — must match the current legal version. */
 export async function hasGroqGenreConsent(userId: string): Promise<boolean> {
   const latest = await getLatestUserConsent(userId, PRIVACY_CONSENT_TYPES.groqGenre);
-  if (latest) return latest.granted;
-
-  try {
-    const priorJob = await prisma.importGenreBackfillJob.findFirst({
-      where: { userId, provider: "groq" },
-      select: { id: true },
-    });
-    return priorJob != null;
-  } catch (error) {
-    if (isMissingConsentTable(error)) return false;
-    throw error;
-  }
+  return isGrantedConsentCurrent(latest, GROQ_GENRE_CONSENT_VERSION);
 }
 
 export async function hasPublicProfileOptIn(userId: string): Promise<boolean> {
@@ -58,7 +48,7 @@ export async function hasPublicProfileOptIn(userId: string): Promise<boolean> {
     userId,
     PRIVACY_CONSENT_TYPES.publicProfile
   );
-  return latest?.granted === true;
+  return isGrantedConsentCurrent(latest, PUBLIC_PROFILE_CONSENT_VERSION);
 }
 
 export function isPublicProfileEligible(userId: string): boolean {

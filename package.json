@@ -29,6 +29,8 @@
     "db:migrate:dev:local": "npx --yes dotenv-cli -e .env.local --override -- prisma migrate dev",
     "db:studio": "prisma studio",
     "lastfm:update": "node scripts/update-lastfm.js",
+    "listens:sync": "npx tsx scripts/sync-listens-from-apple-music.ts",
+    "listens:sync:lastfm": "npx tsx scripts/sync-listens-from-lastfm.ts",
     "apple-music:filter": "node scripts/filter-apple-music-play-history.js",
     "apple-music:import": "node scripts/import-apple-music-csv.js",
     "auth:migrate-user-id": "node scripts/migrate-user-id-to-supabase.js",

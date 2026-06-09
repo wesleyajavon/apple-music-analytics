@@ -9,10 +9,7 @@ import { getCurrentUserId } from "@/lib/auth/get-current-user-id";
 import { handleApiError } from "@/lib/utils/error-handler";
 import { assertAnalyticsRateLimit } from "@/lib/security/analytics-rate-limit";
 import { assertGroqUserQuotaForRequest } from "@/lib/services/ai/groq-user-quota";
-import {
-  AI_MASTER_DISABLED_COOKIE,
-  isAiMasterEnvEnabled,
-} from "@/lib/services/ai/ai-master";
+import { getGroqAiUnavailableReason } from "@/lib/services/ai/groq-ai-request-guard";
 import { parseAiLocale } from "@/lib/services/ai/locale-utils";
 import { generateMusicChatAnswer } from "@/lib/services/ai/music-chat-service";
 import {
@@ -151,26 +148,15 @@ export async function POST(request: NextRequest) {
 
     const locale = parseAiLocale(localeParam);
 
-    if (!isAiMasterEnvEnabled()) {
+    const aiUnavailableReason = await getGroqAiUnavailableReason(request, userId);
+    if (aiUnavailableReason) {
       const degraded: MusicChatResponse = {
         answer: "",
         sources: [],
         locale,
         presetQuestionId,
         aiUnavailable: true,
-        aiUnavailableReason: "env",
-      };
-      return NextResponse.json(degraded);
-    }
-
-    if (request.cookies.get(AI_MASTER_DISABLED_COOKIE)?.value === "1") {
-      const degraded: MusicChatResponse = {
-        answer: "",
-        sources: [],
-        locale,
-        presetQuestionId,
-        aiUnavailable: true,
-        aiUnavailableReason: "client",
+        aiUnavailableReason,
       };
       return NextResponse.json(degraded);
     }

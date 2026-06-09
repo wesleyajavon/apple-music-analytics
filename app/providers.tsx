@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/lib/providers/theme-provider";
+import { LinkAnonymousConsent } from "@/lib/components/link-anonymous-consent";
 import { CookieConsentProvider } from "@/lib/providers/cookie-consent-provider";
 
 // Provider TanStack Query avec configuration optimisée pour un dashboard analytique
@@ -32,6 +33,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <CookieConsentProvider>
     <ThemeProvider>
       <QueryClientProvider client={queryClient}>
+        <LinkAnonymousConsent />
         {children}
         <Toaster
           position="top-right"

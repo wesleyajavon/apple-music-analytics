@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getCurrentUserId } from "@/lib/auth/get-current-user-id";
 import { recordUserConsent } from "@/lib/services/user/consent-service";
+import { recordTermsConsentIfNeeded } from "@/lib/services/user/terms-consent";
 import { handleApiError } from "@/lib/utils/error-handler";
 
 export const dynamic = "force-dynamic";
@@ -35,6 +36,17 @@ export async function POST(request: NextRequest) {
         { error: "Invalid consent payload", code: "VALIDATION_ERROR" },
         { status: 400 }
       );
+    }
+
+    if (parsed.data.consentType === "terms") {
+      if (!userId) {
+        return NextResponse.json(
+          { error: "Authentication required", code: "UNAUTHORIZED" },
+          { status: 401 }
+        );
+      }
+      await recordTermsConsentIfNeeded(userId, request);
+      return NextResponse.json({ ok: true });
     }
 
     await recordUserConsent({

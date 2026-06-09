@@ -15,7 +15,7 @@ import {
   setCachedPrediction,
 } from "@/lib/services/predictions/prediction-cache";
 import { explainListeningHabitPrediction } from "@/lib/services/ai/listening-habit-explainer";
-import { isAiMasterEnabledForRequest } from "@/lib/services/ai/ai-master";
+import { isGroqAiEnabledForRequest } from "@/lib/services/ai/groq-ai-request-guard";
 import type { ListeningHabitPrediction, ListeningHabitResponse } from "@/lib/dto/predictions";
 import { hasPendingOrRunningGroqImportGenreBackfillForUser } from "@/lib/services/listening/groq-import-genre-backfill-ai-guard";
 
@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
 
       let aiExplanation: string | undefined;
 
-      if (explain && isAiMasterEnabledForRequest(request)) {
+      if (explain && (await isGroqAiEnabledForRequest(request, userId))) {
         const expLogicalKey = getExplanationCacheKey(userId, locale);
         let cachedExpl = await getCachedExplanation(expLogicalKey);
 
@@ -107,7 +107,7 @@ export async function GET(request: NextRequest) {
 
     let aiExplanation: string | undefined;
 
-    if (explain && isAiMasterEnabledForRequest(request)) {
+    if (explain && (await isGroqAiEnabledForRequest(request, userId))) {
       const expLogicalKey = getExplanationCacheKey(userId, locale);
       let cachedExpl = await getCachedExplanation(expLogicalKey);
 

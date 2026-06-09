@@ -12,6 +12,7 @@ import { AiMasterToggle } from "@/lib/components/ai-master-toggle";
 import { ConditionalAnalytics } from "@/lib/components/conditional-analytics";
 import { ConditionalSentry } from "@/lib/components/conditional-sentry";
 import { CookieConsentBanner } from "@/lib/components/cookie-consent-banner";
+import { GroqAiConsentPromptProvider } from "@/lib/context/groq-ai-consent-prompt-context";
 
 
 const inter = Inter({
@@ -72,9 +73,11 @@ export default async function RootLayout({
           <PublicDemoProvider publicProfileUserId={publicProfileUserId}>
             <ConditionalSentry />
             <NextIntlClientProvider messages={messages}>
-              {children}
-              <AiMasterToggle />
-              <CookieConsentBanner />
+              <GroqAiConsentPromptProvider>
+                {children}
+                <AiMasterToggle />
+                <CookieConsentBanner />
+              </GroqAiConsentPromptProvider>
             </NextIntlClientProvider>
             <ConditionalAnalytics />
           </PublicDemoProvider>

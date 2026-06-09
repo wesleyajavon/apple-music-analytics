@@ -82,7 +82,7 @@ export interface AiInsightItem {
  * Response from POST /api/ai/insights
  */
 /** Why AI output was not generated when `aiUnavailable` is true. */
-export type AiUnavailableReason = "env" | "client";
+export type AiUnavailableReason = "env" | "client" | "consent";
 
 export interface AiInsightsResponse {
   insights: string[]; // 3-5 bullet points

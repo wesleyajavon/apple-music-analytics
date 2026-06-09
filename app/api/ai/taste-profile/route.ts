@@ -23,10 +23,7 @@ import {
   assertInteractiveGroqNotBlockedByImportGenreBackfill,
   resolveUserIdForGroqGenreBackfillGuard,
 } from "@/lib/services/listening/groq-import-genre-backfill-ai-guard";
-import {
-  AI_MASTER_DISABLED_COOKIE,
-  isAiMasterEnvEnabled,
-} from "@/lib/services/ai/ai-master";
+import { getGroqAiUnavailableReason } from "@/lib/services/ai/groq-ai-request-guard";
 import { parseAiLocale } from "@/lib/services/ai/locale-utils";
 import type {
   TasteProfileInput,
@@ -131,7 +128,8 @@ export async function POST(request: NextRequest) {
     const input: TasteProfileInput = analyticsInput;
     const locale = parseAiLocale(localeParam);
 
-    if (!isAiMasterEnvEnabled()) {
+    const aiUnavailableReason = await getGroqAiUnavailableReason(request, userId);
+    if (aiUnavailableReason) {
       const degraded: TasteProfileResponse = {
         description: "",
         influences: "",
@@ -139,19 +137,7 @@ export async function POST(request: NextRequest) {
         uniqueAspect: "",
         cached: false,
         aiUnavailable: true,
-        aiUnavailableReason: "env",
-      };
-      return NextResponse.json(degraded);
-    }
-    if (request.cookies.get(AI_MASTER_DISABLED_COOKIE)?.value === "1") {
-      const degraded: TasteProfileResponse = {
-        description: "",
-        influences: "",
-        coreGenres: "",
-        uniqueAspect: "",
-        cached: false,
-        aiUnavailable: true,
-        aiUnavailableReason: "client",
+        aiUnavailableReason,
       };
       return NextResponse.json(degraded);
     }

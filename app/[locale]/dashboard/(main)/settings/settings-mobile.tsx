@@ -7,6 +7,7 @@ import { Link } from "@/i18n/navigation";
 import { DASHBOARD_ONBOARDING_REIMPORT_PATH } from "@/lib/utils/onboarding-route";
 import { UserAvatar } from "@/lib/components/user-avatar";
 import { DASHBOARD_SPOTLIGHT_BTN_SECONDARY, DASHBOARD_SPOTLIGHT_INNER_WELL, DASHBOARD_SPOTLIGHT_MUTED } from "@/lib/constants/dashboard-spotlight";
+import { GROQ_AI_CONSENT_SETTINGS_HASH } from "@/lib/constants/groq-ai-settings";
 import { SettingsSwitch } from "./settings-shared";
 
 const INPUT_CLASS =
@@ -430,18 +431,21 @@ export function SettingsMobileExperience(props: SettingsMobileProps) {
             />
           </div>
 
-          <div>
-            <h3 className="text-sm font-semibold text-slate-900 dark:text-white">{t("groqConsentTitle")}</h3>
-            <p className={`mt-1.5 text-sm leading-relaxed ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("groqConsentDescription")}</p>
-          </div>
-          <div className="flex min-h-[52px] items-center justify-between gap-4 rounded-2xl border border-slate-200/80 bg-slate-50/80 px-4 py-3 dark:border-white/10 dark:bg-black/20">
-            <p className="text-sm font-medium text-slate-900 dark:text-white">{t("groqConsentLabel")}</p>
-            <SettingsSwitch
-              aria-label={t("groqConsentLabel")}
-              checked={props.groqConsentGranted}
-              disabled={!props.privacyPrefsLoaded || props.privacySaving}
-              onChange={props.onGroqConsentChange}
-            />
+          <div id={GROQ_AI_CONSENT_SETTINGS_HASH} className="scroll-mt-28 space-y-4">
+            <div>
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">{t("groqConsentTitle")}</h3>
+              <p className={`mt-1.5 text-sm leading-relaxed ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("groqConsentDescription")}</p>
+            </div>
+            <div className="flex min-h-[52px] items-center justify-between gap-4 rounded-2xl border border-slate-200/80 bg-slate-50/80 px-4 py-3 dark:border-white/10 dark:bg-black/20">
+              <p className="text-sm font-medium text-slate-900 dark:text-white">{t("groqConsentLabel")}</p>
+              <SettingsSwitch
+                aria-label={t("groqConsentLabel")}
+                checked={props.groqConsentGranted}
+                disabled={!props.privacyPrefsLoaded || props.privacySaving}
+                onChange={props.onGroqConsentChange}
+              />
+            </div>
+            <p className={`text-xs leading-relaxed ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("groqConsentBrowserToggleHint")}</p>
           </div>
 
           {props.publicProfileEligible ? (

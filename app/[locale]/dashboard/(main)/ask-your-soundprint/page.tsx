@@ -1017,9 +1017,11 @@ function MusicChatContent() {
           {
             role: "assistant",
             content:
-              response.aiUnavailableReason === "client"
-                ? t("aiDisabledClient")
-                : t("aiDisabledEnv"),
+              response.aiUnavailableReason === "consent"
+                ? t("aiDisabledConsent")
+                : response.aiUnavailableReason === "client"
+                  ? t("aiDisabledClient")
+                  : t("aiDisabledEnv"),
           },
         ]);
         return;

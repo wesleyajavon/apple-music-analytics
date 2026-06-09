@@ -25,7 +25,7 @@ import {
   setCachedCommentary,
 } from "@/lib/services/taste-evolution/taste-evolution-cache";
 import { handleApiError } from "@/lib/utils/error-handler";
-import { isAiMasterEnabledForRequest } from "@/lib/services/ai/ai-master";
+import { isGroqAiEnabledForRequest } from "@/lib/services/ai/groq-ai-request-guard";
 import type { TasteEvolutionResponse } from "@/lib/dto/taste-evolution";
 import { resolveAuthorizedDataUserId } from "@/lib/auth/resolve-authorized-data-user-id";
 import {
@@ -117,7 +117,7 @@ export async function GET(request: NextRequest) {
     let aiUnavailable = false;
     let interactiveAiPausedForGenreClassification = false;
 
-    const aiOn = isAiMasterEnabledForRequest(request);
+    const aiOn = await isGroqAiEnabledForRequest(request, userId);
     const genreBackfillBusy =
       trends.length > 0 && aiOn
         ? await hasPendingOrRunningGroqImportGenreBackfillForUser(userId)

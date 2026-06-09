@@ -3,6 +3,8 @@
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import type { AiUnavailableReason } from "@/lib/dto/ai-insights";
+import { GroqAiConsentPromptButton } from "@/lib/components/groq-ai-consent-prompt-button";
+import { GroqAiConsentSettingsLink } from "@/lib/components/groq-ai-consent-settings-link";
 import {
   OVERVIEW_STARTUP_EYEBROW_PILL_CLASS,
   OVERVIEW_STARTUP_HEADER_LINK_CLASS,
@@ -37,7 +39,11 @@ export function AiFeatureDisabledPlaceholder({
 }) {
   const t = useTranslations("aiMasterToggle");
   const hint =
-    reason === "env" ? t("widgetHintEnvLocked") : t("widgetHint");
+    reason === "env"
+      ? t("widgetHintEnvLocked")
+      : reason === "consent"
+        ? t("widgetHintConsentRequired")
+        : t("widgetHint");
 
   const isStartup = surface === "startup";
 
@@ -125,7 +131,15 @@ export function AiFeatureDisabledPlaceholder({
                   />
                 </svg>
               </span>
-              <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-200">{hint}</p>
+              <div className="min-w-0 space-y-3">
+                <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-200">{hint}</p>
+                {reason === "consent" ? (
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                    <GroqAiConsentPromptButton variant="button" />
+                    <GroqAiConsentSettingsLink variant="default" className="text-xs font-medium" />
+                  </div>
+                ) : null}
+              </div>
             </div>
           </div>
         ) : (
@@ -142,7 +156,15 @@ export function AiFeatureDisabledPlaceholder({
                 />
               </svg>
             </span>
-            <p className="text-sm leading-relaxed text-muted-foreground">{hint}</p>
+            <div className="min-w-0 space-y-3">
+              <p className="text-sm leading-relaxed text-muted-foreground">{hint}</p>
+              {reason === "consent" ? (
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                  <GroqAiConsentPromptButton variant="button" />
+                  <GroqAiConsentSettingsLink variant="default" className="text-xs font-medium" />
+                </div>
+              ) : null}
+            </div>
           </div>
         )}
       </div>

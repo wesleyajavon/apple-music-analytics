@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
+import { NextResponse } from "next/server";
 
 const exchangeCodeForSession = vi.fn();
 const verifyOtp = vi.fn();
@@ -15,6 +16,14 @@ vi.mock("@/lib/services/spotify/persist-connection-from-session", () => ({
   persistSpotifyConnectionFromSupabaseSession: vi.fn(),
 }));
 
+vi.mock("@/lib/services/user/terms-consent", () => ({
+  recordTermsConsentIfNeeded: vi.fn(),
+}));
+
+vi.mock("@/lib/services/user/has-terms-consent", () => ({
+  hasTermsConsent: vi.fn(),
+}));
+
 vi.mock("@/lib/utils/logger", () => ({
   logger: {
     error: vi.fn(),
@@ -27,6 +36,8 @@ vi.mock("@/lib/utils/logger", () => ({
 import { GET } from "@/app/auth/callback/route";
 import { ensureAppUserFromSession } from "@/lib/auth/ensure-app-user-from-session";
 import { persistSpotifyConnectionFromSupabaseSession } from "@/lib/services/spotify/persist-connection-from-session";
+import { recordTermsConsentIfNeeded } from "@/lib/services/user/terms-consent";
+import { hasTermsConsent } from "@/lib/services/user/has-terms-consent";
 import { createSupabaseRouteHandlerClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/utils/logger";
 
@@ -54,6 +65,7 @@ describe("GET /auth/callback", () => {
     vi.mocked(persistSpotifyConnectionFromSupabaseSession).mockResolvedValue(
       undefined
     );
+    vi.mocked(hasTermsConsent).mockResolvedValue(true);
   });
 
   it("uses error code as detail when error_description is absent", async () => {
@@ -115,6 +127,10 @@ describe("GET /auth/callback", () => {
     expect(persistSpotifyConnectionFromSupabaseSession).toHaveBeenCalledWith(
       session
     );
+    expect(recordTermsConsentIfNeeded).toHaveBeenCalledWith(
+      "user-1",
+      expect.anything()
+    );
     expect(exchangeCodeForSession).not.toHaveBeenCalled();
     expect(locationOf(response)).toBe(
       new URL("/fr/dashboard/overview", "http://localhost").href
@@ -156,9 +172,42 @@ describe("GET /auth/callback", () => {
     expect(persistSpotifyConnectionFromSupabaseSession).toHaveBeenCalledWith(
       session
     );
+    expect(recordTermsConsentIfNeeded).not.toHaveBeenCalled();
     expect(locationOf(response)).toBe(
       new URL("/fr/dashboard/overview", "http://localhost").href
     );
+  });
+
+  it("redirects OAuth users without terms to accept-terms", async () => {
+    vi.mocked(hasTermsConsent).mockResolvedValue(false);
+    const session = {
+      user: { id: "user-1" },
+      access_token: "at",
+    };
+    exchangeCodeForSession.mockResolvedValue({
+      data: { session },
+      error: null,
+    });
+
+    let capturedResponse: NextResponse | undefined;
+    vi.mocked(createSupabaseRouteHandlerClient).mockImplementation(async (response) => {
+      capturedResponse = response;
+      response.cookies.set("sb-test", "session-token", { path: "/" });
+      return {
+        auth: { exchangeCodeForSession, verifyOtp },
+      } as unknown as Awaited<ReturnType<typeof createSupabaseRouteHandlerClient>>;
+    });
+
+    const url =
+      "http://localhost/auth/callback?code=abc&next=/fr/dashboard/overview";
+    const response = await GET(new Request(url));
+
+    const loc = new URL(locationOf(response));
+    expect(loc.pathname).toContain("/accept-terms");
+    expect(loc.searchParams.get("next")).toBe("/fr/dashboard/overview");
+    expect(recordTermsConsentIfNeeded).not.toHaveBeenCalled();
+    expect(response).toBe(capturedResponse);
+    expect(response.cookies.get("sb-test")?.value).toBe("session-token");
   });
 
   it("redirects to sign-in when code exchange fails", async () => {

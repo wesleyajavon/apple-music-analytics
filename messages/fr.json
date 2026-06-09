@@ -23,7 +23,24 @@
     "ariaLabel": "Activer ou désactiver les fonctionnalités IA pour ce navigateur",
     "lockedHint": "L’IA est coupée côté serveur (AI_MASTER_ENABLED=false). Ce bouton ne peut pas la réactiver.",
     "widgetHint": "L’IA est désactivée pour ce navigateur. Activez-la via le menu Plus (mobile) ou le bouton « IA » en bas à droite (bureau).",
-    "widgetHintEnvLocked": "L’IA est désactivée côté serveur. Ce contenu ne peut pas être généré ici."
+    "widgetHintEnvLocked": "L’IA est désactivée côté serveur. Ce contenu ne peut pas être généré ici.",
+    "widgetHintConsentRequired": "Activez l’IA Groq ci-dessous pour utiliser cette fonctionnalité.",
+    "consentRequiredHint": "Activez d’abord l’IA Groq dans Paramètres → Préférences.",
+    "enableGroqCta": "Activer l’IA Groq"
+  },
+  "groqAiConsentPrompt": {
+    "title": "Activer l’IA Groq",
+    "body": "Soundprint-AI peut envoyer des données d’écoute agrégées et des titres d’artistes ou de morceaux à Groq (États-Unis) pour les fonctionnalités IA de l’application.",
+    "bulletInsights": "Insights, chat, classification des genres et résumés de goûts",
+    "bulletTransfer": "Des données peuvent être traitées hors UE (Groq, Inc.)",
+    "bulletRevoke": "Vous pouvez retirer ce consentement dans Paramètres ou mettre l’IA en pause par navigateur",
+    "privacyLink": "Lire notre politique de confidentialité",
+    "accept": "Autoriser Groq à traiter mes données d’écoute",
+    "decline": "Pas maintenant",
+    "manageInSettings": "Gérer dans les paramètres",
+    "accepting": "Enregistrement…",
+    "grantedToast": "IA Groq activée. Mettez-la en pause à tout moment via le bouton IA.",
+    "error": "Impossible d’enregistrer votre choix. Réessayez ou passez par les paramètres."
   },
   "sidebar": {
     "openMenu": "Ouvrir le menu",
@@ -133,6 +150,7 @@
     "genericError": "Impossible de générer une réponse. Réessayez.",
     "requestTimeoutError": "La réponse a dépassé la durée maximale côté navigateur (environ trois minutes), la requête a donc été interrompue. Réessaie avec une plage de dates plus courte dans le tableau de bord, ou réessaie plus tard — le modèle ou la base peut avoir été lent.",
     "aiDisabledClient": "L’IA est désactivée pour ce navigateur. Réactivez le bouton IA pour utiliser Ask your Soundprint.",
+    "aiDisabledConsent": "Activez l’IA Groq dans Paramètres → Données et confidentialité pour utiliser Ask your Soundprint.",
     "aiDisabledEnv": "L’IA est désactivée côté serveur. Ask your Soundprint n’est pas disponible ici.",
     "mobile": {
       "eyebrow": "Chat Soundprint",
@@ -243,6 +261,7 @@
     "sectionPreferencesLead": "Invites, bandeaux et messages optionnels dans l’app.",
     "sectionDataPrivacy": "Données et confidentialité",
     "sectionDataPrivacyLead": "Supprimez l’historique d’écoute et les importations stockés dans cette app. Votre connexion n’est pas supprimée.",
+    "gdprContactLead": "Pour l’accès, l’export, la rectification ou la suppression de vos données, contactez :",
     "importExportsTitle": "Import des données d’écoute",
     "importExportsBody": "Ajoutez ou mettez à jour un export Spotify ou Apple à tout moment — les lectures déjà enregistrées (sync ou import) sont ignorées en doublon.",
     "importExportsCta": "Ouvrir l’assistant d’import",
@@ -290,11 +309,12 @@
     "genreBannerTitle": "Bandeau Groq (genres)",
     "genreBannerDescription": "Après l’import, vous pouvez masquer le bandeau du tableau de bord sur la classification Groq. Réactivez-le ici à tout moment.",
     "genreBannerHideLabel": "Masquer sur le tableau de bord les invites et résumés de classification Groq",
-    "groqConsentTitle": "Classification des genres Groq (IA)",
-    "groqConsentDescription": "Si activé, les titres d’artistes et de morceaux de votre bibliothèque peuvent être envoyés à Groq pour compléter les genres manquants. La désactivation arrête les nouvelles passes et annule tout job en cours.",
-    "groqConsentLabel": "Autoriser Groq à classifier les genres manquants",
+    "groqConsentTitle": "Fonctionnalités IA Groq",
+    "groqConsentDescription": "Si activé, des données d’écoute agrégées et des titres d’artistes ou de morceaux peuvent être envoyés à Groq pour les insights, le chat, la classification des genres et les autres fonctionnalités IA. La désactivation arrête les nouvelles passes IA et annule tout job de genres en cours.",
+    "groqConsentLabel": "Autoriser Groq à traiter mes données d’écoute pour les fonctionnalités IA",
     "groqConsentError": "Impossible de mettre à jour la préférence Groq. Réessayez.",
     "groqConsentSaving": "Enregistrement…",
+    "groqConsentBrowserToggleHint": "Une fois activé, vous pouvez mettre l’IA en pause sur ce navigateur via le bouton IA (en bas à droite sur bureau, menu Plus sur mobile) sans retirer ce consentement.",
     "publicProfileTitle": "Démo publique du tableau de bord",
     "publicProfileDescription": "Si activé, les visiteurs sans compte peuvent consulter vos analytics via le lien de démo publique. Vous pouvez désactiver à tout moment.",
     "publicProfileLabel": "Autoriser l’affichage de mon profil dans la démo publique",
@@ -348,10 +368,17 @@
     "noAccount": "Vous n'avez pas de compte ?",
     "alreadyAccount": "Vous avez déjà un compte ?",
     "signUpSuccess": "Compte créé. Vérifiez votre email pour confirmer votre inscription.",
-    "termsConsentLabel": "J'accepte les {terms} et la {privacy}.",
+    "termsConsentLabel": "J'accepte les <terms></terms> et la <privacy></privacy>.",
     "termsLink": "conditions générales",
     "privacyLink": "politique de confidentialité",
     "termsConsentRequired": "Vous devez accepter les conditions et la politique de confidentialité pour créer un compte.",
+    "oauthTermsHint": "Nouveau avec Google ou Spotify ? Cochez la case ci-dessous. Les utilisateurs existants peuvent la laisser décochée.",
+    "acceptTermsEyebrow": "Dernière étape",
+    "acceptTermsTitle": "Acceptez nos conditions",
+    "acceptTermsSubtitle": "Avant d'utiliser Soundprint-AI, confirmez que vous acceptez nos CGU et notre politique de confidentialité.",
+    "acceptTermsButton": "Continuer",
+    "acceptTermsSaving": "Enregistrement…",
+    "acceptTermsError": "Impossible d'enregistrer votre acceptation. Réessayez.",
     "skipToContent": "Aller au formulaire de connexion",
     "homeLinkAriaLabel": "Soundprint-AI — accueil",
     "authNavAriaLabel": "Navigation compte",
@@ -389,43 +416,43 @@
     "updatePasswordExpiredSubtitle": "Demandez un nouveau lien de réinitialisation, puis ouvrez-le depuis votre boîte mail."
   },
   "onboarding": {
-    "metaTitle": "Première connexion — exporter vos données",
-    "welcomeEyebrow": "Démarrage",
-    "welcomeTitle": "Donnez vos écoutes à Soundprint",
+    "metaTitle": "Configurer Soundprint",
+    "welcomeEyebrow": "Bienvenue",
+    "welcomeTitle": "Importez vos écoutes",
     "welcomePlanTitle": "Ce qu’on va faire ensemble",
     "welcomeBullet1": "Choisissez Spotify ou Apple Music — chaque écran reste sur votre choix.",
-    "welcomeBullet2": "Suivez les captures pour demander l’export officiel sur leur portail vie privée.",
+    "welcomeBullet2": "Suivez les étapes pour demander l’export officiel sur leur portail vie privée.",
     "welcomeBullet3": "Importez dès que l’e-mail arrive — préparez plusieurs jours côté service.",
     "whyNotApiSummary": "Pourquoi un fichier plutôt qu’un bouton synchro ?",
     "whyNotApiTitle": "Pourquoi l’app ne se connecte pas à Apple Music ou Spotify à ma place ?",
     "whyNotApiBody": "Apple et Spotify ne permettent pas à une application indépendante d’accéder directement à votre historique d’écoute personnel : ces données restent entre vous et eux, pour protéger votre vie privée. Nous sommes un service tiers : il n’existe pas de moyen officiel pour nous de « synchroniser » tout votre historique à votre place. La voie prévue, c’est que vous demandiez vous‑même une copie via leurs outils de confidentialité, puis que vous importiez le fichier ici.",
-    "welcomeBody": "Les graphes reposent sur des lignes issues d’exports que vous fournissez — pas sur un vague « lien musical ». Lancez l’assistant maintenant ; revenez ici au moment du téléchargement.",
+    "welcomeBody": "On vous guide pas à pas. L’export officiel peut mettre quelques jours — revenez quand le fichier est prêt.",
     "welcomeNoteStrong": "Vous importez quand le ZIP ou CSV est dans votre boîte mail",
     "welcomeNoteRest": " — leur génération prend du temps, c’est normal.",
     "flowRail": {
-      "ariaLabel": "Étapes d’installation",
-      "intro": "Intro",
+      "ariaLabel": "Étapes",
+      "intro": "Accueil",
       "choose": "Service",
-      "export": "Demande",
+      "export": "Export",
       "upload": "Import",
-      "done": "Fin"
+      "done": "Terminé"
     },
-    "guidePhaseLabel": "Guide d’export",
-    "guideStepCounterLabel": "Écran {current} sur {total}",
+    "guidePhaseLabel": "Export",
+    "guideStepCounterLabel": "{current} / {total}",
     "pickBadgeSpotify": "Archive ZIP",
     "pickBadgeApple": "Fichier CSV",
-    "continue": "Continuer",
-    "pickTitle": "Où sont stockées vos écoutes ?",
-    "pickSubtitle": "Une seule filière évite tout mélange — tout ce qui suit correspond à Spotify ou à Apple uniquement.",
+    "continue": "Commencer",
+    "pickTitle": "Où écoutez-vous ?",
+    "pickSubtitle": "Un seul choix pour la suite.",
     "pickSpotify": "Spotify",
-    "pickSpotifyHint": "Historique étendu avec captures guidées.",
+    "pickSpotifyHint": "Fichier .zip",
     "pickApple": "Apple Music",
-    "pickAppleHint": "Archive Apple Media Services avec captures guidées.",
+    "pickAppleHint": "Fichier .csv",
     "back": "Retour",
     "stepProgress": "Étape {current} sur {total}",
-    "flowProgressAriaLabel": "Progression de l’intégration : {percent} %",
-    "openSpotifyPrivacy": "Ouvrir les paramètres Spotify",
-    "openApplePrivacy": "Ouvrir le portail Apple",
+    "flowProgressAriaLabel": "Progression : {percent} %",
+    "openSpotifyPrivacy": "Ouvrir Spotify",
+    "openApplePrivacy": "Ouvrir Apple",
     "spotifyUrls": {
       "privacy": "https://www.spotify.com/us/account/privacy/"
     },
@@ -434,40 +461,40 @@
       "archive": "https://privacy.apple.com/account/archive"
     },
     "spotify": {
-      "step1Title": "Demander l’historique de streaming étendu",
-      "step1Body": "Sur la page « Download your data », activez la sélection pour l’historique de streaming étendu (Extended streaming history) — c’est ce qui couvre le plus d’écoute dans le temps. Ensuite, touchez « Request data ». Le compte « Account data » peut arriver plus vite, mais l’historique étendu est souvent plus complet ; Spotify indique jusqu’à 30 jours pour le préparer.",
-      "step2Title": "Confirmation",
-      "step2Body": "Revenez sur « Account privacy » : une bannière verte confirme que Spotify prépare votre fichier. Vous recevrez un e-mail lorsque le téléchargement sera prêt."
+      "step1Title": "Demander l’historique étendu",
+      "step1Body": "Sur « Download your data », cochez Extended streaming history, puis touchez Request data. Comptez jusqu’à 30 jours.",
+      "step2Title": "C’est demandé",
+      "step2Body": "Une bannière verte confirme que Spotify prépare votre fichier. Vous recevrez un e-mail quand il sera prêt."
     },
     "apple": {
-      "step1Title": "Demander une copie de vos données",
-      "step1Body": "Connectez-vous au portail Données et confidentialité Apple, puis sous « Gérer vos données », ouvrez le lien « Demander une copie de vos données » (Request a copy of your data).",
+      "step1Title": "Demander vos données",
+      "step1Body": "Connectez-vous sur privacy.apple.com, puis ouvrez « Demander une copie de vos données ».",
       "step2Title": "Cocher Apple Media Services",
-      "step2Body": "Dans la liste, sélectionnez « Apple Media Services Information » (App Store, Apple Music, Podcasts, etc.). Vous pouvez laisser les autres cases décochées si vous voulez un export ciblé.",
-      "step3Title": "Taille de fichier",
-      "step3Body": "Choisissez une taille maximale pratique pour le téléchargement — 1 Go convient en général. Vérifiez le récapitulatif, puis validez la demande.",
-      "step4Title": "Confirmation",
-      "step4Body": "Apple affiche un message de remerciement et précise que la préparation peut prendre jusqu’à quelques jours ; vous serez notifié à l’adresse e-mail de votre compte.",
-      "step5Title": "E-mail : votre téléchargement est prêt",
-      "step5Body": "Lorsque l’archive est prête, Apple envoie un message à l’adresse de votre compte. Ouvrez l’e-mail et suivez le lien (par ex. « Obtenez vos données ») pour accéder à la page des téléchargements et récupérer l’archive Apple Media Services.",
-      "step6Title": "Télécharger les fichiers",
-      "step6Body": "Sur la page « Téléchargez vos données », téléchargez chaque partie de l’archive (Apple peut la découper en plusieurs fichiers, ex. « Lot 1 sur 2 »). Les liens expirent après un délai — enregistrez les fichiers en lieu sûr avant de décompresser.",
-      "step7Title": "Décompresser l’archive",
-      "step7Body": "Ouvrez chaque fichier .zip téléchargé (double-clic sur Mac, extraction sous Windows). Vous devriez obtenir un dossier principal nommé Apple_Media_Services — c’est ce paquet que nous ouvrirons à l’étape suivante.",
-      "step8Title": "Ouvrir Apple Music Activity",
-      "step8Body": "Dans Apple_Media_Services, ouvrez le dossier Apple Music Activity (première capture). Sélectionnez ensuite « Apple Music - Play History Daily Tracks.csv » (deuxième capture) — c’est le fichier à téléverser ici ; nous n’importons pas les autres CSV de l’export."
+      "step2Body": "Sélectionnez Apple Media Services Information. Les autres cases peuvent rester décochées.",
+      "step3Title": "Choisir la taille",
+      "step3Body": "1 Go suffit en général. Validez la demande.",
+      "step4Title": "C’est demandé",
+      "step4Body": "Apple prépare l’archive. Vous serez notifié par e-mail dans quelques jours.",
+      "step5Title": "E-mail reçu",
+      "step5Body": "Ouvrez l’e-mail d’Apple et suivez le lien pour accéder au téléchargement.",
+      "step6Title": "Télécharger",
+      "step6Body": "Téléchargez chaque partie de l’archive. Les liens expirent — gardez les fichiers en lieu sûr.",
+      "step7Title": "Décompresser",
+      "step7Body": "Ouvrez chaque .zip. Vous obtenez un dossier Apple_Media_Services.",
+      "step8Title": "Trouver le bon fichier",
+      "step8Body": "Dans Apple Music Activity, sélectionnez Apple Music - Play History Daily Tracks.csv — c’est celui à importer ici."
     },
     "next": "Suivant",
     "import": {
-      "eyebrow": "Étape {step} — Import",
-      "spotifyTitle": "Envoyez votre archive Spotify",
-      "spotifyBody": "Téléchargez le fichier reçu par e-mail et importez-le dans l’app sous forme d’archive .zip.",
-      "appleTitle": "Envoyez votre export Apple Music",
-      "appleBody": "Envoyez « Apple Music - Play History Daily Tracks.csv », le fichier indiqué à la dernière étape du guide ci-dessus. Nous ne lisons que ce CSV issu de votre export.",
-      "openAppleDownloads": "Ouvrir la page Téléchargements Apple",
-      "dropTitle": "Déposez le fichier ici ou cliquez pour parcourir",
-      "dropSubSpotify": "Archive .zip envoyée par Spotify (ex. my_spotify_data.zip)",
-      "dropSubApple": "Fichier CSV « Apple Music - Play History Daily Tracks.csv »",
+      "eyebrow": "Import",
+      "spotifyTitle": "Envoyez votre .zip Spotify",
+      "spotifyBody": "Le fichier reçu par e-mail. Glissez-le ici ou parcourez vos fichiers.",
+      "appleTitle": "Envoyez votre .csv Apple Music",
+      "appleBody": "Le fichier Play History Daily Tracks.csv de la dernière étape.",
+      "openAppleDownloads": "Page téléchargements Apple",
+      "dropTitle": "Glissez votre fichier ici",
+      "dropSubSpotify": "Archive .zip Spotify",
+      "dropSubApple": "Apple Music - Play History Daily Tracks.csv",
       "selectedFile": "Fichier sélectionné : {name}",
       "noFile": "Choisissez un fichier à importer.",
       "importSubmit": "Importer dans mon compte",
@@ -487,7 +514,7 @@
         "uploading": "Enregistrement des écoutes dans votre compte…",
         "finalizing": "Finalisation de votre profil…"
       },
-      "skipImport": "Je n’ai pas encore le fichier",
+      "skipImport": "Pas encore le fichier",
       "toastSuccess": "{count, plural, one {# écoute importée.} other {# écoutes importées.}}",
       "importError": "L’import a échoué. Vérifiez le fichier et réessayez.",
       "recentAuthRequired": "Reconnectez-vous avant d’importer des données.",
@@ -506,10 +533,10 @@
       "importingOverlayTitleWebApi": "Connexion à Spotify…",
       "importingOverlayHintWebApi": "Échange avec Spotify — aucune écoute n’est sauvegardée dans le tableau de bord à cette étape."
     },
-    "finishTitle": "C’est noté",
-    "finishSuccessEyebrow": "Import terminé",
-    "finishSuccessTitle": "Votre historique d’écoute est prêt",
-    "finishSuccessBody": "Nous avons importé {imported} écoutes dans votre compte et ignoré {skipped} doublons. Vous pouvez maintenant découvrir votre profil musical.",
+    "finishTitle": "C’est bon",
+    "finishSuccessEyebrow": "Terminé",
+    "finishSuccessTitle": "Vos écoutes sont importées",
+    "finishSuccessBody": "{imported} écoutes ajoutées · {skipped} doublons ignorés. Votre profil musical vous attend.",
     "finishSuccessSteps": {
       "requested": {
         "title": "Données demandées",
@@ -524,18 +551,18 @@
         "body": "Ouvrez votre première vue personnalisée."
       }
     },
-    "finishSkippedEyebrow": "Presque prêt",
-    "finishBody": "Vous pouvez passer cette étape si votre export n’est pas encore prêt : le tableau de bord reste accessible, et les vues se rempliront après un import ultérieur.",
+    "finishSkippedEyebrow": "Presque fini",
+    "finishBody": "Pas de fichier pour l’instant ? Aucun souci — le tableau de bord reste accessible. Importez quand vous voulez.",
     "finishAfterImport": "{imported} écoutes ont été ajoutées à votre profil. Doublons ignorés : {skipped}.",
     "finishImportedLabel": "Écoutes ajoutées",
     "finishSkippedLabel": "Doublons ignorés",
     "finishNextHint": "Ensuite : vue d’ensemble, tendances d’écoute et stats façon Replay. Vous pourrez importer un autre export depuis le tableau de bord.",
     "finishPaletteCta": "Ouvrir Palette ({count, plural, one {# artiste à mapper} other {# artistes à mapper}})",
-    "goToDashboard": "Accéder au tableau de bord",
-    "goToMusicalProfile": "Voir mon profil musical",
-    "finishing": "Enregistrement…",
-    "skipForNow": "Passer pour l’instant",
-    "skipHint": "Vous pourrez refaire la demande d’export plus tard ; nous ne vous bloquons pas.",
+    "goToDashboard": "Aller au tableau de bord",
+    "goToMusicalProfile": "Voir mon profil",
+    "finishing": "Un instant…",
+    "skipForNow": "Passer",
+    "skipHint": "Vous pourrez importer plus tard.",
     "completeError": "Impossible d’enregistrer. Réessayez.",
     "imageAltSpotifyStep1": "Capture : page Spotify Download your data avec historique étendu et bouton Request data",
     "imageAltSpotifyStep2": "Capture : page Account privacy Spotify avec bannière de confirmation verte",
@@ -2507,7 +2534,7 @@
     "privacy": {
       "eyebrow": "Mentions légales",
       "title": "Politique de confidentialité",
-      "lastUpdated": "Dernière mise à jour : 5 juin 2026",
+      "lastUpdated": "Dernière mise à jour : 6 juin 2026",
       "intro": "Un résumé clair de la façon dont Soundprint-AI gère vos données. Cette app sert à vos stats d'écoute — pas à vendre vos informations.",
       "sections": [
         {
@@ -2538,7 +2565,26 @@
         {
           "title": "Combien de temps nous les gardons",
           "paragraphs": [
-            "Vos données de compte et d'écoute restent tant que votre compte est actif. Si vous supprimez votre compte, nous effaçons vos données sous 30 jours."
+            "Vos données de compte et d'écoute restent tant que votre compte est actif. Si vous supprimez votre compte, nous effaçons vos données rapidement de nos systèmes."
+          ]
+        },
+        {
+          "title": "Nos prestataires",
+          "paragraphs": [
+            "Nous faisons appel à des prestataires de confiance pour faire tourner l'app. Ils ne traitent vos données que selon nos instructions et pour les finalités ci-dessous."
+          ],
+          "bullets": [
+            "Supabase (hébergement, auth, base de données, photos de profil) — fait tourner votre compte et stocke vos données d'écoute.",
+            "Groq (États-Unis) — fonctionnalités IA optionnelles si vous y consentez ; peut recevoir des titres d'artistes/morceaux et des stats agrégées.",
+            "Vercel (mondial) — héberge l'app ; analytique optionnelle uniquement si vous acceptez les cookies.",
+            "Sentry (US/UE) — surveillance d'erreurs et replay de session optionnels uniquement si vous acceptez les cookies."
+          ]
+        },
+        {
+          "title": "Transferts internationaux",
+          "paragraphs": [
+            "Certains prestataires peuvent traiter des données en dehors de votre pays (y compris aux États-Unis). Le cas échéant, nous nous appuyons sur des garanties appropriées, telles que les accords de traitement des données des prestataires et les clauses contractuelles types.",
+            "Groq et Sentry ne sont utilisés que pour les fonctionnalités optionnelles décrites ci-dessus et uniquement si vous y consentez (IA) ou si vous acceptez les cookies concernés."
           ]
         },
         {
@@ -2549,6 +2595,12 @@
           ]
         }
       ],
+      "contact": {
+        "title": "Demandes relatives à la vie privée",
+        "body": "Pour toute question sur vos données ou pour exercer vos droits, écrivez-nous à :",
+        "fallback": "Pour les demandes RGPD, utilisez Paramètres → Données et confidentialité (export ou suppression) ou configurez une adresse de contact pour votre déploiement.",
+        "emailAriaLabel": "Envoyer un e-mail de demande RGPD à {email}"
+      },
       "related": {
         "title": "Documents connexes",
         "description": "Voir aussi :",
@@ -2559,7 +2611,7 @@
     "terms": {
       "eyebrow": "Conditions d'utilisation",
       "title": "Conditions générales d'utilisation",
-      "lastUpdated": "Dernière mise à jour : 5 juin 2026",
+      "lastUpdated": "Dernière mise à jour : 6 juin 2026",
       "intro": "Un aperçu simple de vos droits et des nôtres lorsque vous utilisez Soundprint-AI. En utilisant l'application, vous acceptez ces conditions.",
       "sections": [
         {
@@ -2611,7 +2663,7 @@
     "cookies": {
       "eyebrow": "Politique cookies",
       "title": "Politique relative aux cookies",
-      "lastUpdated": "Dernière mise à jour : 5 juin 2026",
+      "lastUpdated": "Dernière mise à jour : 6 juin 2026",
       "intro": "Nous utilisons quelques cookies pour vous garder connecté et mémoriser vos choix. Les optionnels nous aident à améliorer l'app — seulement si vous acceptez.",
       "sections": [
         {
@@ -2631,6 +2683,21 @@
           "paragraphs": [
             "Utilisez le panneau ci-dessous pour accepter, refuser ou personnaliser les cookies optionnels à tout moment.",
             "Refuser les cookies optionnels ne vous empêche pas d'utiliser Soundprint-AI. Vous pouvez aussi les supprimer dans les paramètres de votre navigateur."
+          ]
+        },
+        {
+          "title": "Cookies et stockage local",
+          "paragraphs": [
+            "Les noms techniques ci-dessous vous aident à identifier ce que l'app enregistre dans votre navigateur."
+          ],
+          "bullets": [
+            "Cookies d'auth Supabase (sb-*-auth-token) — essentiels ; maintiennent votre session.",
+            "ai_master_disabled — httpOnly ; mémorise si vous avez désactivé l'IA sur ce navigateur.",
+            "ama_oauth_terms — courte durée ; confirme l'acceptation des CGU avant une redirection OAuth.",
+            "ama_anonymous_id — relie les choix cookies anonymes à votre compte après connexion.",
+            "localStorage ama-cookie-consent-v1 — vos choix de la bannière cookies sur cet appareil.",
+            "localStorage ama_anonymous_id — identifiant anonyme avant création de compte.",
+            "Préférence de thème — stockée localement pour le mode clair/sombre (non envoyée à nos serveurs)."
           ]
         }
       ],

@@ -84,6 +84,30 @@ Session récente. Retourne `{ "phrase": string }` — phrase attendue pour confi
 
 Session récente. Body : `{ "confirm": true, "phrase": string }`. Supprime les données analytics de l’utilisateur. Réponse : `{ ok, listensDeleted, replayYearsDeleted }`.
 
+### GET `/api/user/export`
+
+Session récente. Télécharge un JSON (portabilité RGPD) : profil, écoutes, Replay, palette, métadonnées Spotify, historique de consentements. Rate limit : 5 requêtes / h.
+
+### DELETE `/api/user/delete-account`
+
+Session récente. Body : `{ "confirm": true, "phrase": string }`. Supprime le compte Prisma (cascade), l’avatar Storage et l’utilisateur Supabase Auth, puis déconnecte la session.
+
+### GET `/api/user/privacy-preferences`
+
+Session requise. Retourne `{ groqGenreConsent, publicProfile, groqJobActive }`.
+
+### PATCH `/api/user/privacy-preferences`
+
+Session requise. Body partiel : `{ groqGenreConsent?: boolean, publicProfile?: boolean }`. Le consentement Groq (opt-in explicite) conditionne **toutes** les fonctionnalités IA Groq.
+
+### POST `/api/user/consent`
+
+Enregistre un consentement (`cookie`, `terms`, `groq_genre`, `ai_master`, `public_profile`). Accepte `anonymousId` pour les visiteurs non connectés (cookies). Les CGU sont enregistrées de façon idempotente lorsqu’une session existe.
+
+### POST `/api/user/consent/link-anonymous`
+
+Session requise. Body : `{ "anonymousId": string }`. Rattache les lignes `UserConsent` anonymes (`userId` null) au compte connecté. Appelé automatiquement côté client après login ; aussi exécuté dans `/auth/callback` si le cookie `ama_anonymous_id` est présent.
+
 ---
 
 ## Onboarding et imports utilisateur
@@ -256,7 +280,7 @@ Au moins un **`genres`** répété ; mêmes idées de dates / `period` / `locale
 
 Chat contextualisé sur l’historique d’écoute (Groq). **Auth** : même résolution utilisateur que les autres lectures analytics (`resolveAuthorizedDataUserId`) ; **`userId`** en query optionnel pour **démo publique** — dans ce cas **sans session**, seules les **`presetQuestionId`** sont autorisées (sinon **403** `PUBLIC_DEMO_PRESET_REQUIRED`). Avec session, soit historique **`messages`** (alternance user/assistant), soit **`presetQuestionId`** en complément.
 
-**Body JSON** : `messages` (max 12 entrées, `role`: `user` \| `assistant`, `content` 1–2000 car.), `locale` optionnel ; `presetQuestionId` / `presetArgs` (`artistName`, `earlierYear`, `laterYear`, `genreYear`) pour questions préréglées ; `dateRange` optionnel (`startDate`, `endDate`, `isAll`). **Rate limiting** : max 8 requêtes / 60 s par utilisateur résolu (`maxDuration` 180 s côté route). Respect du **cookie maître IA** (`aiUnavailableReason` `env` \| `client` si désactivé), du **quota utilisateur Groq**, et blocage tant qu’un job de **backfill genres LLM** post-import tourne encore.
+**Body JSON** : `messages` (max 12 entrées, `role`: `user` \| `assistant`, `content` 1–2000 car.), `locale` optionnel ; `presetQuestionId` / `presetArgs` (`artistName`, `earlierYear`, `laterYear`, `genreYear`) pour questions préréglées ; `dateRange` optionnel (`startDate`, `endDate`, `isAll`). **Rate limiting** : max 8 requêtes / 60 s par utilisateur résolu (`maxDuration` 180 s côté route). Respect du **cookie maître IA**, du **consentement Groq** (`aiUnavailableReason` `env` \| `client` \| `consent`), du **quota utilisateur Groq**, et blocage tant qu’un job de **backfill genres LLM** post-import tourne encore.
 
 ---
 

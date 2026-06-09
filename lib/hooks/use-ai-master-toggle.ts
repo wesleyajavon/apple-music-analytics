@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 export type AiMasterStatus = {
   enabled: boolean;
   envLocked: boolean;
+  consentRequired?: boolean;
 };
 
 export const AI_MASTER_QUERY_KEY = ["ai-master-status"] as const;
@@ -38,12 +39,16 @@ export function useAiMasterToggle() {
       });
       const data = (await res.json()) as AiMasterStatus & { error?: string };
       if (res.status === 403) {
-        return { enabled: false, envLocked: true };
+        return {
+          enabled: false,
+          envLocked: data.envLocked === true,
+          consentRequired: data.consentRequired === true,
+        };
       }
       if (!res.ok || typeof data.enabled !== "boolean") {
         throw new Error(data.error ?? "Failed to update AI setting");
       }
-      return { enabled: data.enabled, envLocked: false };
+      return { enabled: data.enabled, envLocked: false, consentRequired: data.consentRequired === true };
     },
     onSuccess: (next) => {
       queryClient.setQueryData(AI_MASTER_QUERY_KEY, next);
@@ -51,12 +56,13 @@ export function useAiMasterToggle() {
     },
   });
 
-  const resolved = status ?? { enabled: true, envLocked: false };
+  const resolved = status ?? { enabled: false, envLocked: false, consentRequired: false };
 
   return {
     t,
     enabled: resolved.enabled,
-    locked: resolved.envLocked,
+    locked: resolved.envLocked || resolved.consentRequired === true,
+    consentRequired: resolved.consentRequired === true,
     pending: mutation.isPending,
     onToggle: (nextEnabled: boolean) => mutation.mutate(nextEnabled),
   };

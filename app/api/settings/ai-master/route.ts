@@ -5,10 +5,12 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { getCurrentUserId } from "@/lib/auth/get-current-user-id";
 import {
   AI_MASTER_DISABLED_COOKIE,
   isAiMasterEnvEnabled,
 } from "@/lib/services/ai/ai-master";
+import { hasGroqGenreConsent } from "@/lib/services/user/privacy-preferences";
 import { logSecurityAuthEvent } from "@/lib/security/security-logger";
 
 export const dynamic = "force-dynamic";
@@ -26,13 +28,18 @@ function json(data: unknown, init?: ResponseInit) {
 export async function GET(request: NextRequest) {
   const envLocked = !isAiMasterEnvEnabled();
   if (envLocked) {
-    return json({ enabled: false, envLocked: true });
+    return json({ enabled: false, envLocked: true, consentRequired: false });
   }
+
+  const userId = await getCurrentUserId(request);
+  const consentGranted = userId ? await hasGroqGenreConsent(userId) : true;
   const disabledByCookie =
     request.cookies.get(AI_MASTER_DISABLED_COOKIE)?.value === "1";
+
   return json({
-    enabled: !disabledByCookie,
+    enabled: consentGranted && !disabledByCookie,
     envLocked: false,
+    consentRequired: userId ? !consentGranted : false,
   });
 }
 
@@ -72,7 +79,27 @@ export async function POST(request: NextRequest) {
   }
 
   const { enabled } = parsed.data;
-  const res = json({ success: true, enabled, envLocked: false });
+  const userId = await getCurrentUserId(request);
+  if (enabled && userId && !(await hasGroqGenreConsent(userId))) {
+    return json(
+      {
+        success: false,
+        enabled: false,
+        envLocked: false,
+        consentRequired: true,
+        error: "Enable Groq AI in Settings → Preferences before turning AI on.",
+      },
+      { status: 403 }
+    );
+  }
+
+  const consentGranted = userId ? await hasGroqGenreConsent(userId) : true;
+  const res = json({
+    success: true,
+    enabled: enabled && consentGranted,
+    envLocked: false,
+    consentRequired: userId ? !consentGranted : false,
+  });
 
   if (enabled) {
     res.cookies.set(AI_MASTER_DISABLED_COOKIE, "", {

@@ -64,5 +64,5 @@ export type MusicChatResponse = {
   locale: AiLocale;
   presetQuestionId?: MusicChatPresetQuestionId;
   aiUnavailable?: boolean;
-  aiUnavailableReason?: "env" | "client";
+  aiUnavailableReason?: "env" | "client" | "consent";
 };

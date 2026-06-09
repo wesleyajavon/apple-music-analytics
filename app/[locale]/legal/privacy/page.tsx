@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { PrivacyDocument } from "@/lib/components/privacy-document";
+import { getGdprContactEmail } from "@/lib/constants/gdpr-contact";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("legal.privacy");
@@ -8,5 +9,6 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function PrivacyPolicyPage() {
-  return <PrivacyDocument />;
+  const contactEmail = getGdprContactEmail();
+  return <PrivacyDocument contactEmail={contactEmail} />;
 }

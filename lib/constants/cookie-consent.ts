@@ -57,3 +57,7 @@ export function buildStoredConsent(
     categories,
   };
 }
+
+export function isStoredCookieConsentCurrent(stored: StoredCookieConsent | null): boolean {
+  return stored !== null && stored.version === COOKIE_CONSENT_VERSION;
+}

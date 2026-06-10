@@ -17,7 +17,22 @@ import {
 import {
   getArtistTrendsChartRowsForArtistIds,
 } from "@/lib/services/artist/artist-service";
+import { getTrackTrendsChartRowsForTrackIds } from "@/lib/services/track/track-service";
 import { getListenDateRange } from "@/lib/services/listening/listening-service";
+
+export type CompareEntityType = "artist" | "track";
+
+type CompareEntityResultBase = {
+  entityId: string;
+  period: "day" | "week" | "month";
+  startDate: string;
+  endDate: string;
+  rangeClamped: boolean;
+  selfCount: number;
+  friendCount: number;
+  winner: "self" | "friend" | "tie";
+  merged: CompareMergedPoint[];
+};
 
 export type CompareTimelinePoint = {
   date: string;
@@ -42,19 +57,18 @@ export type CompareTimelineResult = {
   merged: CompareMergedPoint[];
 };
 
-export type CompareEntityResult = {
+export type CompareArtistEntityResult = CompareEntityResultBase & {
   type: "artist";
-  entityId: string;
   artistName: string | null;
-  period: "day" | "week" | "month";
-  startDate: string;
-  endDate: string;
-  rangeClamped: boolean;
-  selfCount: number;
-  friendCount: number;
-  winner: "self" | "friend" | "tie";
-  merged: CompareMergedPoint[];
 };
+
+export type CompareTrackEntityResult = CompareEntityResultBase & {
+  type: "track";
+  trackTitle: string | null;
+  artistName: string | null;
+};
+
+export type CompareEntityResult = CompareArtistEntityResult | CompareTrackEntityResult;
 
 export type CompareUserMetadata = {
   minDate: string | null;
@@ -284,10 +298,57 @@ async function countArtistListens(
   return Number(result[0]?.count ?? 0);
 }
 
+async function fetchTrackTimelineSeries(
+  userId: string,
+  trackId: string,
+  startDate: Date,
+  endDate: Date,
+  period: "day" | "week" | "month"
+): Promise<CompareTimelinePoint[]> {
+  const rows = await getTrackTrendsChartRowsForTrackIds(
+    startDate,
+    endDate,
+    period,
+    userId,
+    [trackId]
+  );
+  return rows.map((row) => ({
+    date: row.date,
+    listens: row.count,
+    uniqueTracks: 0,
+    uniqueArtists: 0,
+  }));
+}
+
+async function countTrackListens(
+  userId: string,
+  trackId: string,
+  startDate: Date,
+  endDate: Date
+): Promise<number> {
+  return prisma.listen.count({
+    where: {
+      userId,
+      trackId,
+      playedAt: { gte: startDate, lte: endDate },
+    },
+  });
+}
+
+function resolveWinner(
+  selfCount: number,
+  friendCount: number
+): CompareEntityResultBase["winner"] {
+  if (selfCount > friendCount) return "self";
+  if (friendCount > selfCount) return "friend";
+  return "tie";
+}
+
 export async function getCompareEntity(
   request: NextRequest,
   viewerId: string,
   friendUserId: string,
+  type: CompareEntityType,
   entityId: string
 ): Promise<CompareEntityResult> {
   const period = extractPeriod(request, "month");
@@ -297,6 +358,38 @@ export async function getCompareEntity(
     friendUserId,
     { period }
   );
+
+  const base = {
+    entityId,
+    period,
+    startDate: startDate.toISOString(),
+    endDate: endDate.toISOString(),
+    rangeClamped,
+  };
+
+  if (type === "track") {
+    const [selfCount, friendCount, self, friend, track] = await Promise.all([
+      countTrackListens(viewerId, entityId, startDate, endDate),
+      countTrackListens(friendUserId, entityId, startDate, endDate),
+      fetchTrackTimelineSeries(viewerId, entityId, startDate, endDate, period),
+      fetchTrackTimelineSeries(friendUserId, entityId, startDate, endDate, period),
+      prisma.track.findUnique({
+        where: { id: entityId },
+        select: { title: true, artist: { select: { name: true } } },
+      }),
+    ]);
+
+    return {
+      ...base,
+      type: "track",
+      trackTitle: track?.title ?? null,
+      artistName: track?.artist.name ?? null,
+      selfCount,
+      friendCount,
+      winner: resolveWinner(selfCount, friendCount),
+      merged: mergeTimelineSeries(self, friend),
+    };
+  }
 
   const [selfCount, friendCount, self, friend, artist] = await Promise.all([
     countArtistListens(viewerId, entityId, startDate, endDate),
@@ -309,21 +402,13 @@ export async function getCompareEntity(
     }),
   ]);
 
-  let winner: CompareEntityResult["winner"] = "tie";
-  if (selfCount > friendCount) winner = "self";
-  else if (friendCount > selfCount) winner = "friend";
-
   return {
+    ...base,
     type: "artist",
-    entityId,
     artistName: artist?.name ?? null,
-    period,
-    startDate: startDate.toISOString(),
-    endDate: endDate.toISOString(),
-    rangeClamped,
     selfCount,
     friendCount,
-    winner,
+    winner: resolveWinner(selfCount, friendCount),
     merged: mergeTimelineSeries(self, friend),
   };
 }

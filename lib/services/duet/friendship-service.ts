@@ -245,6 +245,38 @@ export async function declineFriendship(
   return toFriendshipDto(updated, addresseeId);
 }
 
+export async function updateFriendshipShareScope(
+  friendshipId: string,
+  userId: string,
+  shareScope: DuetShareScope
+): Promise<FriendshipDto> {
+  assertAcceptableShareScope(shareScope);
+
+  const row = await prisma.friendship.findUnique({
+    where: { id: friendshipId },
+    include: friendshipInclude,
+  });
+  if (!row) {
+    throw new DuetServiceError(DUET_ERROR_CODES.FRIENDSHIP_NOT_FOUND);
+  }
+  if (row.requesterId !== userId && row.addresseeId !== userId) {
+    throw new DuetServiceError(DUET_ERROR_CODES.FORBIDDEN);
+  }
+  if (row.status !== "accepted") {
+    throw new DuetServiceError(DUET_ERROR_CODES.FORBIDDEN);
+  }
+  if (row.shareScope === shareScope) {
+    return toFriendshipDto(row, userId);
+  }
+
+  const updated = await prisma.friendship.update({
+    where: { id: friendshipId },
+    data: { shareScope },
+    include: friendshipInclude,
+  });
+  return toFriendshipDto(updated, userId);
+}
+
 export async function revokeFriendship(
   friendshipId: string,
   userId: string

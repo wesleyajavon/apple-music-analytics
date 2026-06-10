@@ -30,6 +30,7 @@ import {
   acceptFriendship,
   declineFriendship,
   revokeFriendship,
+  updateFriendshipShareScope,
   blockUser,
   listFriendships,
   findFriendshipBetween,
@@ -179,6 +180,45 @@ describe("friendship-service", () => {
       const result = await declineFriendship(friendshipId, userB);
 
       expect(result.status).toBe("declined");
+    });
+  });
+
+  describe("updateFriendshipShareScope", () => {
+    it("updates share scope for either party on accepted friendship", async () => {
+      const accepted = mockFriendship({ status: "accepted", shareScope: "aggregates" });
+      vi.mocked(prisma.friendship.findUnique).mockResolvedValue(accepted);
+      const updated = mockFriendship({ status: "accepted", shareScope: "full" });
+      vi.mocked(prisma.friendship.update).mockResolvedValue(updated);
+
+      const result = await updateFriendshipShareScope(friendshipId, userA, "full");
+
+      expect(result.shareScope).toBe("full");
+      expect(prisma.friendship.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: friendshipId },
+          data: { shareScope: "full" },
+        })
+      );
+    });
+
+    it("skips update when scope unchanged", async () => {
+      const accepted = mockFriendship({ status: "accepted", shareScope: "aggregates" });
+      vi.mocked(prisma.friendship.findUnique).mockResolvedValue(accepted);
+
+      const result = await updateFriendshipShareScope(friendshipId, userB, "aggregates");
+
+      expect(result.shareScope).toBe("aggregates");
+      expect(prisma.friendship.update).not.toHaveBeenCalled();
+    });
+
+    it("forbids update when friendship is not accepted", async () => {
+      vi.mocked(prisma.friendship.findUnique).mockResolvedValue(
+        mockFriendship({ status: "pending" })
+      );
+
+      await expect(updateFriendshipShareScope(friendshipId, userB, "full")).rejects.toMatchObject({
+        code: DUET_ERROR_CODES.FORBIDDEN,
+      });
     });
   });
 

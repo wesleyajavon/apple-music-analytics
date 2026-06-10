@@ -85,6 +85,7 @@ export const duetKeys = {
     [...duetKeys.all, "compare", "metadata", friendUserId] as const,
   compareEntity: (params?: {
     friendUserId?: string;
+    type?: "artist" | "track";
     entityId?: string;
     startDate?: string;
     endDate?: string;

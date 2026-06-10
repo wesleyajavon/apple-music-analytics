@@ -37,7 +37,6 @@ import {
   DASHBOARD_SPOTLIGHT_BADGE_DOT_LIME,
   DASHBOARD_SPOTLIGHT_BADGE_CYAN_COMPACT,
   DASHBOARD_SPOTLIGHT_BADGE_DOT_CYAN,
-  DASHBOARD_SPOTLIGHT_SELECT,
 } from "@/lib/constants/dashboard-spotlight";
 import { useDuetFriends, useDuetMutations, type DuetShareScopeOption } from "@/lib/hooks/use-duet";
 import type { FriendshipDto } from "@/lib/dto/duet";
@@ -110,12 +109,107 @@ function StatusPill({
   );
 }
 
+function DuetShareScopeFieldset({
+  groupName,
+  legend,
+  value,
+  onChange,
+  disabled = false,
+}: {
+  groupName: string;
+  legend: string;
+  value: DuetShareScopeOption;
+  onChange: (scope: DuetShareScopeOption) => void;
+  disabled?: boolean;
+}) {
+  const tAccept = useTranslations("duet.inviteAccept");
+
+  const options = [
+    {
+      value: "aggregates" as const,
+      label: tAccept("scopeAggregates.label"),
+      description: tAccept("scopeAggregates.description"),
+    },
+    {
+      value: "full" as const,
+      label: tAccept("scopeFull.label"),
+      description: tAccept("scopeFull.description"),
+    },
+  ] satisfies { value: DuetShareScopeOption; label: string; description: string }[];
+
+  return (
+    <fieldset className="w-full sm:min-w-[18rem] sm:max-w-sm" disabled={disabled}>
+      <legend className="mb-2.5 flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200">
+        <Shield className="h-3.5 w-3.5 text-violet-500 dark:text-violet-400" aria-hidden />
+        {legend}
+      </legend>
+      <div className="flex flex-col gap-2">
+        {options.map((option) => {
+          const selected = value === option.value;
+          return (
+            <label
+              key={option.value}
+              className={`flex cursor-pointer items-start gap-3 rounded-xl border px-3 py-3 transition-colors ${
+                disabled ? "cursor-not-allowed opacity-60" : ""
+              } ${
+                selected
+                  ? "border-violet-400/80 bg-violet-50 shadow-sm dark:border-violet-400/45 dark:bg-violet-950/55"
+                  : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50 dark:border-white/10 dark:bg-slate-900 dark:hover:border-white/20 dark:hover:bg-slate-900/80"
+              }`}
+            >
+              <input
+                type="radio"
+                name={groupName}
+                value={option.value}
+                checked={selected}
+                onChange={() => onChange(option.value)}
+                className="sr-only"
+              />
+              <span
+                aria-hidden
+                className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
+                  selected
+                    ? "border-violet-600 bg-violet-600 dark:border-violet-400 dark:bg-violet-500"
+                    : "border-slate-300 bg-white dark:border-slate-500 dark:bg-slate-800"
+                }`}
+              >
+                {selected ? <span className="h-1.5 w-1.5 rounded-full bg-white" /> : null}
+              </span>
+              <span className="min-w-0">
+                <span
+                  className={`block text-sm font-semibold ${
+                    selected
+                      ? "text-violet-950 dark:text-violet-50"
+                      : "text-slate-900 dark:text-slate-100"
+                  }`}
+                >
+                  {option.label}
+                </span>
+                <span
+                  className={`mt-0.5 block text-xs leading-relaxed ${
+                    selected
+                      ? "text-violet-800/80 dark:text-violet-200/90"
+                      : "text-slate-600 dark:text-slate-300"
+                  }`}
+                >
+                  {option.description}
+                </span>
+              </span>
+            </label>
+          );
+        })}
+      </div>
+    </fieldset>
+  );
+}
+
 function FriendRow({
   friendship,
   viewerId,
   onAccept,
   onDecline,
   onRevoke,
+  onUpdateShareScope,
   onBlock,
   busy,
   index,
@@ -125,6 +219,7 @@ function FriendRow({
   onAccept: (id: string, scope: DuetShareScopeOption) => void;
   onDecline: (id: string) => void;
   onRevoke: (id: string) => void;
+  onUpdateShareScope: (id: string, scope: DuetShareScopeOption) => void;
   onBlock: (id: string) => void;
   busy: boolean;
   index: number;
@@ -134,7 +229,11 @@ function FriendRow({
   const peer =
     friendship.requester.id === viewerId ? friendship.addressee : friendship.requester;
   const displayName = getDuetDisplayName(peer);
-  const [shareScope, setShareScope] = useState<DuetShareScopeOption>("aggregates");
+  const [pendingShareScope, setPendingShareScope] = useState<DuetShareScopeOption>("aggregates");
+  const activeShareScope =
+    friendship.status === "accepted" && friendship.shareScope !== "none"
+      ? (friendship.shareScope as DuetShareScopeOption)
+      : pendingShareScope;
 
   const isIncoming = friendship.direction === "incoming" && friendship.status === "pending";
   const isOutgoing = friendship.direction === "outgoing" && friendship.status === "pending";
@@ -151,7 +250,7 @@ function FriendRow({
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: index * 0.04 }}
-      className={`flex flex-col gap-4 rounded-[1.35rem] border bg-white p-4 shadow-sm transition-all duration-300 hover:shadow-md dark:bg-slate-950/60 sm:flex-row sm:items-center sm:justify-between ${cardAccent}`}
+      className={`flex flex-col gap-4 rounded-[1.35rem] border bg-white p-4 shadow-sm transition-all duration-300 hover:shadow-md dark:bg-slate-950/60 sm:flex-row sm:items-start sm:justify-between ${cardAccent}`}
     >
       <div className="flex min-w-0 items-center gap-3">
         <UserAvatar name={displayName} src={peer.avatarUrl} size="lg" />
@@ -190,25 +289,17 @@ function FriendRow({
 
         {isIncoming ? (
           <>
-            <div className="w-full rounded-xl border border-slate-200/80 bg-slate-50/70 p-3 dark:border-white/10 dark:bg-black/25 sm:w-auto sm:min-w-[14rem]">
-              <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300">
-                <Shield className="h-3.5 w-3.5 text-violet-500" aria-hidden />
-                {tAccept("sharePrompt")}
-              </p>
-              <select
-                value={shareScope}
-                onChange={(e) => setShareScope(e.target.value as DuetShareScopeOption)}
-                className={`w-full ${DASHBOARD_SPOTLIGHT_SELECT}`}
-                aria-label={tAccept("sharePrompt")}
-              >
-                <option value="aggregates">{tAccept("scopeAggregates.label")}</option>
-                <option value="full">{tAccept("scopeFull.label")}</option>
-              </select>
-            </div>
+            <DuetShareScopeFieldset
+              groupName={`duet-share-scope-accept-${friendship.id}`}
+              legend={tAccept("sharePrompt")}
+              value={pendingShareScope}
+              onChange={setPendingShareScope}
+              disabled={busy}
+            />
             <button
               type="button"
               disabled={busy}
-              onClick={() => onAccept(friendship.id, shareScope)}
+              onClick={() => onAccept(friendship.id, pendingShareScope)}
               className="inline-flex min-h-10 items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white transition-opacity disabled:opacity-50"
             >
               <Check className="h-4 w-4" aria-hidden />
@@ -227,24 +318,37 @@ function FriendRow({
         ) : null}
 
         {isAccepted ? (
-          <>
-            <Link
-              href={`/dashboard/duet/compare?friendUserId=${encodeURIComponent(peer.id)}`}
-              className="inline-flex min-h-10 items-center gap-1.5 rounded-xl bg-gradient-to-r from-violet-600 to-violet-500 px-4 py-2 text-sm font-bold text-white shadow-md shadow-violet-500/25 no-underline transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-violet-500/30"
-            >
-              <Swords className="h-4 w-4" aria-hidden />
-              {t("compare")}
-            </Link>
-            <button
-              type="button"
+          <div className="flex w-full flex-col gap-3 sm:w-auto">
+            <DuetShareScopeFieldset
+              groupName={`duet-share-scope-friend-${friendship.id}`}
+              legend={t("shareScopeLabel")}
+              value={activeShareScope}
+              onChange={(scope) => {
+                if (scope !== friendship.shareScope) {
+                  onUpdateShareScope(friendship.id, scope);
+                }
+              }}
               disabled={busy}
-              onClick={() => onRevoke(friendship.id)}
-              className={`inline-flex min-h-10 items-center gap-1.5 ${DASHBOARD_SPOTLIGHT_BTN_SECONDARY}`}
-            >
-              <UserMinus className="h-4 w-4" aria-hidden />
-              {t("revoke")}
-            </button>
-          </>
+            />
+            <div className="flex flex-wrap items-center gap-2">
+              <Link
+                href={`/dashboard/duet/compare?friendUserId=${encodeURIComponent(peer.id)}`}
+                className="inline-flex min-h-10 items-center gap-1.5 rounded-xl bg-gradient-to-r from-violet-600 to-violet-500 px-4 py-2 text-sm font-bold text-white shadow-md shadow-violet-500/25 no-underline transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-violet-500/30"
+              >
+                <Swords className="h-4 w-4" aria-hidden />
+                {t("compare")}
+              </Link>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => onRevoke(friendship.id)}
+                className={`inline-flex min-h-10 items-center gap-1.5 ${DASHBOARD_SPOTLIGHT_BTN_SECONDARY}`}
+              >
+                <UserMinus className="h-4 w-4" aria-hidden />
+                {t("revoke")}
+              </button>
+            </div>
+          </div>
         ) : null}
 
         <button
@@ -274,6 +378,7 @@ function FriendsListSection({
   onAccept,
   onDecline,
   onRevoke,
+  onUpdateShareScope,
   onBlock,
 }: {
   eyebrow: string;
@@ -288,6 +393,7 @@ function FriendsListSection({
   onAccept: (id: string, scope: DuetShareScopeOption) => void;
   onDecline: (id: string) => void;
   onRevoke: (id: string) => void;
+  onUpdateShareScope: (id: string, scope: DuetShareScopeOption) => void;
   onBlock: (id: string) => void;
 }) {
   if (!friendships.length) return null;
@@ -308,6 +414,7 @@ function FriendsListSection({
             onAccept={onAccept}
             onDecline={onDecline}
             onRevoke={onRevoke}
+            onUpdateShareScope={onUpdateShareScope}
             onBlock={onBlock}
           />
         ))}
@@ -388,6 +495,8 @@ export function DuetFriendsClient() {
       patchFriendship.mutate({ id, action: "accept", shareScope: scope }),
     onDecline: (id: string) => patchFriendship.mutate({ id, action: "decline" }),
     onRevoke: (id: string) => patchFriendship.mutate({ id, action: "revoke" }),
+    onUpdateShareScope: (id: string, scope: DuetShareScopeOption) =>
+      patchFriendship.mutate({ id, action: "updateShareScope", shareScope: scope }),
     onBlock: (id: string) => blockFriendship.mutate(id),
   };
 

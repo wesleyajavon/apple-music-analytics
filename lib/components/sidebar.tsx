@@ -11,6 +11,7 @@ import { UserAvatar } from "@/lib/components/user-avatar";
 import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { usePublicDemo } from "@/lib/providers/public-demo-provider";
+import { useDuetFriends } from "@/lib/hooks/use-duet";
 
 const STORAGE_KEY = "sidebar-collapsed";
 
@@ -287,6 +288,44 @@ function getActiveParentKeys(groups: NavGroup[], pathname: string): string[] {
   );
 }
 
+function formatNavBadgeCount(count: number): string {
+  return count > 99 ? "99+" : String(count);
+}
+
+function PendingFriendRequestsNavBadge({
+  count,
+  collapsed,
+  ariaLabel,
+}: {
+  count: number;
+  collapsed: boolean;
+  ariaLabel: string;
+}) {
+  if (count <= 0) return null;
+
+  const label = formatNavBadgeCount(count);
+
+  if (collapsed) {
+    return (
+      <span
+        aria-label={ariaLabel}
+        className="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full border border-background bg-foreground px-1 font-mono text-[10px] font-medium tabular-nums text-background"
+      >
+        {label}
+      </span>
+    );
+  }
+
+  return (
+    <span
+      aria-label={ariaLabel}
+      className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-bold tabular-nums text-primary-foreground"
+    >
+      {label}
+    </span>
+  );
+}
+
 function SidebarFallback() {
   return (
     <aside
@@ -321,6 +360,8 @@ function SidebarContent() {
   const [isSigningOut, setIsSigningOut] = useState(false);
   const t = useTranslations("sidebar");
   const { publicProfileUserId } = usePublicDemo();
+  const { data: duetFriendsData } = useDuetFriends({ enabled: !!authUserId });
+  const pendingFriendRequestsCount = duetFriendsData?.pendingIncoming.length ?? 0;
 
   const withFilters = useMemo(
     () => (href: string) => mergeDashboardSearchParams(href, searchParams),
@@ -480,6 +521,11 @@ function SidebarContent() {
     const isFeatured = !!item.featured;
     const Icon = item.icon;
     const label = t(`items.${item.labelKey}`);
+    const showPendingFriendRequestsBadge =
+      item.href === "/dashboard/duet/friends" && pendingFriendRequestsCount > 0;
+    const pendingFriendRequestsBadgeLabel = showPendingFriendRequestsBadge
+      ? t("pendingFriendRequestsBadge", { count: pendingFriendRequestsCount })
+      : undefined;
     const itemClassName = `
       group flex items-center rounded-xl text-sm font-medium transition-all duration-200
       ${displayCollapsed ? "justify-center px-2 py-2.5" : "gap-3 px-3 py-2.5"}
@@ -561,10 +607,26 @@ function SidebarContent() {
           ${depth > 0 && !displayCollapsed ? "py-2 text-[13px]" : ""}
         `}
       >
-        <Icon className={iconClassName} />
+        <span className="relative shrink-0">
+          <Icon className={iconClassName} />
+          {displayCollapsed && showPendingFriendRequestsBadge && pendingFriendRequestsBadgeLabel ? (
+            <PendingFriendRequestsNavBadge
+              count={pendingFriendRequestsCount}
+              collapsed
+              ariaLabel={pendingFriendRequestsBadgeLabel}
+            />
+          ) : null}
+        </span>
         {!displayCollapsed && (
           <>
             <span className="flex-1 truncate">{label}</span>
+            {showPendingFriendRequestsBadge && pendingFriendRequestsBadgeLabel ? (
+              <PendingFriendRequestsNavBadge
+                count={pendingFriendRequestsCount}
+                collapsed={false}
+                ariaLabel={pendingFriendRequestsBadgeLabel}
+              />
+            ) : null}
             {isFeatured && !isDirectActive && (
               <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">
                 {t(item.badgeKey ?? "featuredBadge")}

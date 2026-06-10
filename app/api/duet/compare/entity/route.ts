@@ -10,7 +10,7 @@ export const runtime = "nodejs";
 const ROUTE = "/api/duet/compare/entity";
 
 const EntityQuerySchema = z.object({
-  type: z.literal("artist"),
+  type: z.enum(["artist", "track"]),
   entityId: z.string().min(1),
 });
 
@@ -35,6 +35,7 @@ export async function GET(request: NextRequest) {
       request,
       access.viewerId,
       access.friendUserId,
+      parsed.data.type,
       parsed.data.entityId
     );
     return NextResponse.json(result);

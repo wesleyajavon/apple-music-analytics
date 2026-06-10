@@ -145,14 +145,56 @@ describe("Duet compare API", () => {
       "/api/duet/compare/entity",
       "aggregates"
     );
+    expect(getCompareEntity).toHaveBeenCalledWith(
+      expect.any(NextRequest),
+      VIEWER_ID,
+      FRIEND_ID,
+      "artist",
+      "artist-1"
+    );
     const data = await response.json();
     expect(data.winner).toBe("self");
+  });
+
+  it("GET entity returns track head-to-head on happy path", async () => {
+    vi.mocked(getCompareEntity).mockResolvedValue({
+      type: "track",
+      entityId: "track-1",
+      trackTitle: "Paranoid Android",
+      artistName: "Radiohead",
+      period: "day",
+      startDate: timelinePayload.startDate,
+      endDate: timelinePayload.endDate,
+      rangeClamped: false,
+      selfCount: 6,
+      friendCount: 9,
+      winner: "friend",
+      merged: [{ date: "2026-05-01", self: 6, friend: 9 }],
+    });
+
+    const response = await GETEntity(
+      new NextRequest(
+        `http://localhost/api/duet/compare/entity?friendUserId=${FRIEND_ID}&type=track&entityId=track-1`
+      )
+    );
+
+    expect(response.status).toBe(200);
+    expect(getCompareEntity).toHaveBeenCalledWith(
+      expect.any(NextRequest),
+      VIEWER_ID,
+      FRIEND_ID,
+      "track",
+      "track-1"
+    );
+    const data = await response.json();
+    expect(data.winner).toBe("friend");
+    expect(data.trackTitle).toBe("Paranoid Android");
   });
 
   it("GET entity returns 400 for invalid type", async () => {
     const response = await GETEntity(
       new NextRequest(
-        `http://localhost/api/duet/compare/entity?friendUserId=${FRIEND_ID}&type=track&entityId=track-1`
+        `http://localhost/api/duet/compare/entity?friendUserId=${FRIEND_ID}&type=genre&entityId=genre-1`
       )
     );
     expect(response.status).toBe(400);

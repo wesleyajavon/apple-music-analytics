@@ -53,10 +53,8 @@ export type CompareTimelineResponse = {
   merged: CompareMergedPoint[];
 };
 
-export type CompareEntityResponse = {
-  type: "artist";
+type CompareEntityResponseBase = {
   entityId: string;
-  artistName: string | null;
   period: "day" | "week" | "month";
   startDate: string;
   endDate: string;
@@ -66,6 +64,19 @@ export type CompareEntityResponse = {
   winner: "self" | "friend" | "tie";
   merged: CompareMergedPoint[];
 };
+
+export type CompareArtistEntityResponse = CompareEntityResponseBase & {
+  type: "artist";
+  artistName: string | null;
+};
+
+export type CompareTrackEntityResponse = CompareEntityResponseBase & {
+  type: "track";
+  trackTitle: string | null;
+  artistName: string | null;
+};
+
+export type CompareEntityResponse = CompareArtistEntityResponse | CompareTrackEntityResponse;
 
 export type CompareUserMetadata = {
   minDate: string | null;

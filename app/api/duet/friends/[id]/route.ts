@@ -10,6 +10,7 @@ import {
   acceptFriendship,
   declineFriendship,
   revokeFriendship,
+  updateFriendshipShareScope,
 } from "@/lib/services/duet/friendship-service";
 import { grantDuetSharingConsent } from "@/lib/services/duet/duet-consent";
 import {
@@ -35,6 +36,10 @@ const PatchSchema = z.discriminatedUnion("action", [
   }),
   z.object({
     action: z.literal("revoke"),
+  }),
+  z.object({
+    action: z.literal("updateShareScope"),
+    shareScope: z.enum(["aggregates", "full"]),
   }),
 ]);
 
@@ -103,6 +108,30 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
           targetUserId: friendship.requester.id,
           request,
         });
+        return NextResponse.json({ friendship: serializeFriendship(friendship) });
+      }
+
+      if (parsed.data.action === "updateShareScope") {
+        const friendship = await updateFriendshipShareScope(
+          friendshipId,
+          userId,
+          parsed.data.shareScope
+        );
+        try {
+          await grantDuetSharingConsent(userId, request);
+        } catch (error) {
+          if (error instanceof Error && error.message === "USER_CONSENT_TABLE_MISSING") {
+            return NextResponse.json(
+              {
+                error:
+                  "Consent storage is not ready. Run `npm run db:migrate` and restart the dev server.",
+                code: "CONSENT_TABLE_MISSING",
+              },
+              { status: 503 }
+            );
+          }
+          throw error;
+        }
         return NextResponse.json({ friendship: serializeFriendship(friendship) });
       }
 

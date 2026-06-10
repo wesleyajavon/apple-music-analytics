@@ -25,10 +25,11 @@ function buildCompareQuery(
   return q.toString();
 }
 
-export function useDuetFriends() {
+export function useDuetFriends(options?: { enabled?: boolean }) {
   return useQuery<FriendshipsListResponse, Error>({
     queryKey: duetKeys.friends(),
     queryFn: () => apiClient.get<FriendshipsListResponse>("/duet/friends"),
+    enabled: options?.enabled ?? true,
   });
 }
 
@@ -69,19 +70,21 @@ export function useDuetCompareMetadata(friendUserId?: string) {
 
 export function useDuetCompareEntity(params: {
   friendUserId?: string;
+  type?: "artist" | "track";
   entityId?: string;
   startDate?: string;
   endDate?: string;
   period?: PeriodType;
 }) {
+  const entityType = params.type ?? "artist";
   const enabled = !!params.friendUserId && !!params.entityId;
   return useQuery<CompareEntityResponse, Error>({
-    queryKey: duetKeys.compareEntity(params),
+    queryKey: duetKeys.compareEntity({ ...params, type: entityType }),
     enabled,
     queryFn: () => {
       const q = new URLSearchParams({
         friendUserId: params.friendUserId!,
-        type: "artist",
+        type: entityType,
         entityId: params.entityId!,
       });
       if (params.startDate) q.set("startDate", params.startDate);
@@ -110,13 +113,13 @@ export function useDuetMutations() {
   const patchFriendship = useMutation({
     mutationFn: (input: {
       id: string;
-      action: "accept" | "decline" | "revoke";
+      action: "accept" | "decline" | "revoke" | "updateShareScope";
       shareScope?: "aggregates" | "full";
     }) =>
       apiClient.patch<{ friendship?: FriendshipDto; ok?: boolean }>(
         `/duet/friends/${input.id}`,
-        input.action === "accept"
-          ? { action: "accept", shareScope: input.shareScope }
+        input.action === "accept" || input.action === "updateShareScope"
+          ? { action: input.action, shareScope: input.shareScope }
           : { action: input.action }
       ),
     onSuccess: () => {

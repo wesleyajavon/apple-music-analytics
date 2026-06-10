@@ -1,0 +1,189 @@
+{
+  "nav": {
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "cookies": "Cookies"
+  },
+  "privacy": {
+    "eyebrow": "Legal",
+    "title": "Privacy Policy",
+    "lastUpdated": "Last updated: June 6, 2026",
+    "intro": "A plain-language summary of how Soundprint-AI handles your data. We built this app for your listening stats — not to sell your information.",
+    "sections": [
+      {
+        "title": "Who's responsible",
+        "paragraphs": [
+          "Wesley Ajavon (Soundprint-AI) is responsible for your data. Questions? Reach us through account settings or the support channel on the site."
+        ]
+      },
+      {
+        "title": "What we collect",
+        "paragraphs": [
+          "Only what's needed to run your dashboard:"
+        ],
+        "bullets": [
+          "Account info — email, name, profile photo, and how you sign in.",
+          "Listening history — artists, tracks, and when you played them.",
+          "Connections — if you link Spotify or similar services.",
+          "Your choices — cookie preferences, AI settings, and other consents."
+        ]
+      },
+      {
+        "title": "Why we use it",
+        "paragraphs": [
+          "To show your stats, keep you signed in, and improve the app. Optional analytics and error reporting only run if you agree in our cookie settings.",
+          "AI features that send artist or track names to a provider only run when you opt in."
+        ]
+      },
+      {
+        "title": "How long we keep it",
+        "paragraphs": [
+          "Your account and listening data stay while your account is active. If you delete your account, we erase your data promptly from our systems."
+        ]
+      },
+      {
+        "title": "Who we work with",
+        "paragraphs": [
+          "We rely on trusted providers to run the app. They process data only on our instructions and for the purposes below."
+        ],
+        "bullets": [
+          "Supabase (hosting, auth, database, profile photo storage) — runs your account and stores your listening data.",
+          "Groq (US) — optional AI features when you opt in; may receive artist/track titles and aggregated listening stats.",
+          "Vercel (global) — hosts the app; optional analytics only if you consent to cookies.",
+          "Sentry (US/EU) — optional error monitoring and session replay only if you consent to cookies."
+        ]
+      },
+      {
+        "title": "International transfers",
+        "paragraphs": [
+          "Some providers may process data outside your country (including the United States). When required, we rely on appropriate safeguards such as the providers' data processing agreements and standard contractual clauses.",
+          "Groq and Sentry are only used for the optional features described above and only when you opt in (AI) or accept the relevant cookies."
+        ]
+      },
+      {
+        "title": "Your rights",
+        "paragraphs": [
+          "You can access, export, correct, or delete your data. Go to Settings → Data & privacy to export or delete your account.",
+          "You can also change cookie and AI choices anytime. If you're in the EU, you may contact your local data protection authority."
+        ]
+      }
+    ],
+    "contact": {
+      "title": "Privacy requests",
+      "body": "For questions about your data or to exercise your rights, email us at:",
+      "fallback": "For privacy requests, use Settings → Data & privacy (export or delete) or configure a contact address for your deployment.",
+      "emailAriaLabel": "Send a privacy request email to {email}"
+    },
+    "related": {
+      "title": "Related policies",
+      "description": "See also:",
+      "termsLink": "Terms of Service",
+      "cookiesLink": "Cookie Policy"
+    }
+  },
+  "terms": {
+    "eyebrow": "Terms of use",
+    "title": "Terms of Service",
+    "lastUpdated": "Last updated: June 6, 2026",
+    "intro": "A quick overview of your rights and ours when you use Soundprint-AI. By using the app, you agree to these terms.",
+    "sections": [
+      {
+        "title": "What this is",
+        "paragraphs": [
+          "Soundprint-AI is your personal listening dashboard. Import your history or connect services like Spotify to explore your stats."
+        ]
+      },
+      {
+        "title": "Your account",
+        "paragraphs": [
+          "Keep your login safe. Use accurate info and don't impersonate anyone else."
+        ]
+      },
+      {
+        "title": "Your music data",
+        "paragraphs": [
+          "Your listening data stays yours. You let us process it only to run the dashboard. Only upload data you own or are allowed to use."
+        ]
+      },
+      {
+        "title": "Connected services",
+        "paragraphs": [
+          "If you link Spotify, Apple Music, Last.fm, or AI features, their rules apply too. Soundprint-AI isn't affiliated with Apple, Spotify, or Last.fm."
+        ]
+      },
+      {
+        "title": "A few expectations",
+        "paragraphs": [
+          "We provide the service as-is. Stats depend on what you import, so they may not be perfect.",
+          "We're not responsible for outages caused by third-party services."
+        ]
+      },
+      {
+        "title": "Leaving the service",
+        "paragraphs": [
+          "You can delete your account anytime in Settings.",
+          "We may suspend accounts that abuse the service or break the law."
+        ]
+      }
+    ],
+    "related": {
+      "title": "Related policies",
+      "description": "See also:",
+      "privacyLink": "Privacy Policy",
+      "cookiesLink": "Cookie Policy"
+    }
+  },
+  "cookies": {
+    "eyebrow": "Cookie policy",
+    "title": "Cookie Policy",
+    "lastUpdated": "Last updated: June 6, 2026",
+    "intro": "We use a few cookies to keep you signed in and remember your choices. Optional ones help us improve the app — only if you say yes.",
+    "sections": [
+      {
+        "title": "What we use",
+        "paragraphs": [
+          "In plain terms:"
+        ],
+        "bullets": [
+          "Essential — needed to sign in and use the app.",
+          "Preferences — things like your theme or display settings.",
+          "Optional analytics — help us see which pages are used.",
+          "Optional error reporting — help us fix bugs faster."
+        ]
+      },
+      {
+        "title": "Your choices",
+        "paragraphs": [
+          "Use the panel below to accept, reject, or customize optional cookies anytime.",
+          "Saying no to optional cookies won't stop you from using Soundprint-AI. You can also clear cookies in your browser settings."
+        ]
+      },
+      {
+        "title": "Cookies and local storage we set",
+        "paragraphs": [
+          "Technical names below help you recognize what the app stores in your browser."
+        ],
+        "bullets": [
+          "Supabase auth cookies (sb-*-auth-token) — essential; keep you signed in.",
+          "ai_master_disabled — httpOnly; remembers if you turned off AI for this browser.",
+          "ama_oauth_terms — short-lived; records that you accepted terms before an OAuth redirect.",
+          "ama_anonymous_id — links anonymous cookie choices to your account after sign-in.",
+          "localStorage ama-cookie-consent-v1 — your cookie banner choices on this device.",
+          "localStorage ama_anonymous_id — anonymous id used before you create an account.",
+          "Theme preference — stored locally for light/dark mode (not sent to our servers)."
+        ]
+      }
+    ],
+    "preferences": {
+      "title": "Manage your preferences",
+      "description": "Pick what you're comfortable with. Changes apply right away on this browser.",
+      "saved": "Your preferences have been saved."
+    },
+    "related": {
+      "title": "Related policies",
+      "description": "See also:",
+      "privacyLink": "Privacy Policy",
+      "termsLink": "Terms of Service"
+    }
+  }
+}

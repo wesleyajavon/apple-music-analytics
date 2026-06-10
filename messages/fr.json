@@ -72,7 +72,8 @@
       "patterns": "Rythmes d’écoute",
       "aiPredictions": "IA et prédictions",
       "helpProduct": "Aide et produit",
-      "account": "Compte"
+      "account": "Compte",
+      "social": "Social"
     },
     "items": {
       "overview": "Your Music",
@@ -97,7 +98,114 @@
       "sentryTest": "Test Sentry",
       "spotifySnapshot": "Aperçu Spotify",
       "spotifyPlayground": "Playground API",
-      "settings": "Espace compte"
+      "settings": "Espace compte",
+      "duetFriends": "Amis",
+      "duetCompare": "Comparer"
+    }
+  },
+  "duet": {
+    "friends": {
+      "pageTitle": "Duet — Amis",
+      "pageDescription": "Invitez des amis et gérez le partage pour comparer vos écoutes.",
+      "loading": "Chargement des amis…",
+      "error": "Impossible de charger les amis.",
+      "inviteTitle": "Inviter un ami",
+      "inviteDescription": "Saisissez l’email de son compte Soundprint.",
+      "invitePlaceholder": "ami@exemple.com",
+      "inviteSubmit": "Envoyer l’invitation",
+      "inviteSent": "Invitation traitée.",
+      "inviteError": "Impossible d’envoyer l’invitation.",
+      "emptyTitle": "Pas encore d’amis",
+      "emptyDescription": "Invitez quelqu’un pour comparer vos stats sur un même graphe.",
+      "pendingIncoming": "Demandes reçues",
+      "pendingOutgoing": "Demandes envoyées",
+      "pendingOutgoingStatus": "En attente de réponse",
+      "friendsList": "Amis",
+      "accept": "Accepter",
+      "decline": "Refuser",
+      "revoke": "Retirer l’ami",
+      "block": "Bloquer",
+      "compare": "Comparer"
+    },
+    "inviteAccept": {
+      "sharePrompt": "Que souhaitez-vous partager avec cet ami ?",
+      "scopeAggregates": { "label": "Statistiques agrégées", "description": "Courbes, tops artistes et genres — sans détail des morceaux." },
+      "scopeFull": { "label": "Comparaisons détaillées", "description": "Tout ce qui précède, plus les défis artiste head-to-head." }
+    },
+    "compare": {
+      "pageTitle": "Comparer avec un ami",
+      "pageDescription": "Timeline à deux séries et duel artiste sur la période choisie.",
+      "heroEyebrow": "Écoute sociale",
+      "heroTitle": "Qui écoute le plus ?",
+      "heroTitleBattle": "Le face-à-face",
+      "heroSubtitle": "Choisissez un ami, comparez vos écoutes et tranchez — artiste par artiste.",
+      "heroSubtitleBattle": "Vous et {friendName} sur la même timeline. Même période. Pas d'excuses.",
+      "heroStatBadge": "Comment ça marche",
+      "heroStatTag": "Head-to-head",
+      "heroTrust1": "Les timelines à deux montrent qui a le plus streamé sur la période.",
+      "heroTrust2": "L'arène artiste tranche les débats — cherchez un artiste et couronnez un gagnant.",
+      "heroTrust3": "Seuls les amis qui ont accepté voient vos stats. Révocable à tout moment.",
+      "changeFriend": "Changer d'adversaire",
+      "pickerEyebrow": "Choisissez votre rival",
+      "pickerBadge": "Prêt à dueller",
+      "pickerReadyCount": "{count, plural, one {# ami prêt à comparer} other {# amis prêts à comparer}}",
+      "challengeCta": "Lancer le duel",
+      "scoreboardLeads": "{name} mène",
+      "scoreboardTie": "Égalité parfaite",
+      "scoreboardMargin": "+{margin} écoutes d'avance",
+      "timelineEyebrow": "La course",
+      "timelineBadge": "Timeline dual",
+      "artistEyebrow": "Arène artiste",
+      "artistBadge": "Head-to-head",
+      "artistWinnerSelf": "Vous gagnez ce round !",
+      "artistWinnerFriend": "{friendName} l'emporte !",
+      "artistClear": "Effacer la recherche",
+      "loading": "Chargement de la comparaison…",
+      "error": "Impossible de charger la comparaison.",
+      "selectFriendTitle": "Choisissez un ami",
+      "selectFriendDescription": "Sélectionnez un ami dans votre liste pour comparer vos écoutes.",
+      "goToFriends": "Voir mes amis",
+      "scopeInsufficientTitle": "Partage insuffisant",
+      "scopeInsufficientDescription": "Cet ami n’a pas partagé assez de données pour cette vue.",
+      "notFoundTitle": "Comparaison indisponible",
+      "notFoundDescription": "Aucune amitié active trouvée pour cette comparaison.",
+      "rangeClamped": "En vue journalière, la plage est limitée aux 2 dernières années (volume d’écoutes élevé). Passez en vue mensuelle pour voir tout l’historique.",
+      "chartTitle": "Vous vs {friendName}",
+      "chartDescription": "Écoutes par jour sur la même période.",
+      "seriesSelf": "Vous",
+      "seriesFriend": "{friendName}",
+      "friendFallback": "Ami",
+      "noDataTitle": "Aucune écoute sur cette période",
+      "noDataDescription": "Essayez une autre plage de dates ou vérifiez vos imports.",
+      "artistTitle": "Duel artiste",
+      "artistDescription": "Qui a le plus streamé cet artiste sur la période ?",
+      "artistSearchPlaceholder": "Rechercher un artiste…",
+      "artistLoading": "Comparaison des écoutes pour cet artiste…",
+      "artistError": "Impossible de charger le duel artiste",
+      "artistChartTitle": "{artistName} — vous vs {friendName}",
+      "artistChartDescription": "Écoutes de cet artiste sur la période sélectionnée (même granularité que le graphique ci-dessus).",
+      "artistNoDataTitle": "Aucune écoute pour cet artiste",
+      "artistNoDataDescription": "Aucun de vous deux n’a streamé cet artiste sur la période sélectionnée.",
+      "artistResult": "Vous : {self} · {friendName} : {friend} — {winner} mène",
+      "artistTie": "Égalité"
+    },
+    "metadataBanner": {
+      "title": "Données incomplètes pour une comparaison équitable",
+      "body": "{friendName} n’a pas la même couverture que vous : {reasons}. Les chiffres peuvent être trompeurs sur la période sélectionnée.",
+      "reasonShorterHistory": "historique plus court ({friendFrom} → {friendTo} vs {selfFrom} → {selfTo})",
+      "reasonFewerListens": "moins d’écoutes ({friendTotal} vs {selfTotal})",
+      "reasonSeparator": "·",
+      "dismiss": "Compris"
+    },
+    "settings": {
+      "title": "Partage Duet",
+      "description": "Contrôlez les demandes d’ami et le niveau de partage par défaut.",
+      "allowRequests": "Autoriser les demandes d’ami",
+      "defaultScope": "Partage par défaut pour les nouveaux amis",
+      "scopeAggregates": "Statistiques agrégées",
+      "scopeFull": "Comparaisons détaillées",
+      "consentHint": "En activant le partage Duet, vous acceptez que vos statistiques agrégées puissent être visibles par les amis que vous autorisez. Révocable à tout moment.",
+      "error": "Impossible de charger les paramètres Duet."
     }
   },
   "askSoundprint": {
@@ -2534,7 +2642,7 @@
     "privacy": {
       "eyebrow": "Mentions légales",
       "title": "Politique de confidentialité",
-      "lastUpdated": "Dernière mise à jour : 6 juin 2026",
+      "lastUpdated": "Dernière mise à jour : 9 juin 2026",
       "intro": "Un résumé clair de la façon dont Soundprint-AI gère vos données. Cette app sert à vos stats d'écoute — pas à vendre vos informations.",
       "sections": [
         {
@@ -2552,14 +2660,16 @@
             "Compte — e-mail, nom, photo de profil et mode de connexion.",
             "Historique d'écoute — artistes, titres et dates d'écoute.",
             "Connexions — si vous liez Spotify ou des services similaires.",
-            "Vos choix — préférences cookies, réglages IA et autres consentements."
+            "Vos choix — préférences cookies, réglages IA et autres consentements.",
+            "Duet (optionnel) — si vous utilisez le partage avec amis : statut de la relation, niveau de partage choisi, et statistiques d'écoute que vous autorisez à voir vos amis acceptés."
           ]
         },
         {
           "title": "Pourquoi nous les utilisons",
           "paragraphs": [
             "Pour afficher vos stats, vous garder connecté et améliorer l'app. L'analytique et le signalement d'erreurs optionnels ne s'activent que si vous acceptez dans les paramètres cookies.",
-            "Les fonctions IA qui envoient des noms d'artistes ou de titres à un prestataire ne s'activent que si vous y consentez."
+            "Les fonctions IA qui envoient des noms d'artistes ou de titres à un prestataire ne s'activent que si vous y consentez.",
+            "Duet (partage avec amis) ne s'active que si vous acceptez une invitation ou en envoyez une, et uniquement selon le niveau de partage que vous choisissez pour chaque ami."
           ]
         },
         {
@@ -2588,10 +2698,19 @@
           ]
         },
         {
+          "title": "Partage avec amis (Duet)",
+          "paragraphs": [
+            "Duet vous permet de comparer vos statistiques d'écoute avec des amis qui ont un compte Soundprint-AI. Cette fonctionnalité est entièrement optionnelle.",
+            "Pour voir les stats d'un autre utilisateur, vous devez d'abord lui envoyer une demande d'ami (par e-mail). Il choisit s'il accepte et ce qu'il partage avec vous : statistiques agrégées (courbes, tops artistes et genres) ou, s'il le souhaite, des comparaisons plus détaillées sur un artiste, un titre ou un genre.",
+            "Ce que vous partagez est décidé par vous, ami par ami, au moment de l'acceptation. Vous pouvez modifier le niveau de partage ou révoquer un ami à tout moment dans Paramètres → Partage Duet. Nous enregistrons votre consentement (type et version) comme preuve.",
+            "Nous n'offrons pas de découverte publique d'utilisateurs ni de classements ouverts. Vos e-mails ne sont pas affichés à vos amis dans Duet. Les invitations utilisent un message uniforme pour limiter l'énumération de comptes."
+          ]
+        },
+        {
           "title": "Vos droits",
           "paragraphs": [
             "Vous pouvez accéder à vos données, les exporter, les corriger ou les supprimer. Allez dans Paramètres → Données et confidentialité pour exporter ou supprimer votre compte.",
-            "Vous pouvez aussi modifier vos choix cookies et IA à tout moment. Si vous êtes dans l'UE, vous pouvez contacter votre autorité de protection des données."
+            "Vous pouvez aussi modifier vos choix cookies, IA et partage Duet à tout moment. Si vous êtes dans l'UE, vous pouvez contacter votre autorité de protection des données."
           ]
         }
       ],

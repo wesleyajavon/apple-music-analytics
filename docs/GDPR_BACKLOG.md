@@ -110,13 +110,13 @@ Créer un dossier interne (hors git public si sensible) pour tracer les incident
 
 ## 6. Revue RGPD avant fonctionnalités sociales
 
-**Statut** : ☐ Non applicable tant que social désactivé — **priorité basse**
+**Statut** : ☑ Auto-évaluation Duet MVP (2026-06-09) — [GDPR_DPIA_DUET.md](./GDPR_DPIA_DUET.md), ROPA et privacy mis à jour. Revue externe **différée** sauf plainte, incident ou scale UE.
 
 Avant tout partage public, contacts, découverte d’amis, etc. :
 
-- Mettre à jour le ROPA
-- Revoir bases légales et paramètres de confidentialité
-- Possible nouvelle revue juridique ciblée
+- Mettre à jour le ROPA *(fait pour Duet MVP)*
+- Revoir bases légales et paramètres de confidentialité *(fait pour Duet MVP)*
+- Possible nouvelle revue juridique ciblée *(si changement de périmètre ou scale)*
 
 ---
 

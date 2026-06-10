@@ -1,6 +1,6 @@
 # Registre des activités de traitement (ROPA)
 
-Document interne — Soundprint-AI. Dernière révision : 2026-06-09.
+Document interne — Soundprint-AI. Dernière révision : 2026-06-09 (Duet).
 
 > Ce registre complète la [politique de confidentialité](/legal/privacy) publique. Il n’est pas destiné aux utilisateurs finaux.
 
@@ -22,6 +22,7 @@ Document interne — Soundprint-AI. Dernière révision : 2026-06-09.
 | Cookies analytics | Mesure d’usage | Consentement (bannière) | Pages vues, agrégats | Selon Vercel | Vercel |
 | Error monitoring / replay | Stabilité produit | Consentement (bannière) | Erreurs scrubées, replay masqué | Selon Sentry | Sentry (US/EU) |
 | Rate limiting | Sécurité, anti-abus | Intérêt légitime | IP hash / identifiants requête | Fenêtre glissante courte | Redis (si configuré) |
+| **Partage Duet (amis)** | Comparaison de stats d’écoute entre utilisateurs connectés ayant accepté une relation | **Consentement explicite** (acceptation invitation + choix `shareScope` par ami) | Statut relation, scope partage ; nom/avatar ami ; agrégats d’écoute (timeline, tops, genres) ; comparaisons artiste/titre/genre si scope `full` | Durée du compte ; relation et accès supprimés à la révocation, au blocage ou à la suppression de compte | Supabase ; **autres utilisateurs amis autorisés** (accès lecture selon scope) |
 
 ## Droits des personnes (mise en œuvre produit)
 
@@ -32,6 +33,7 @@ Document interne — Soundprint-AI. Dernière révision : 2026-06-09.
 | Effacement partiel | `POST /api/user/clear-analytics` |
 | Effacement complet | `DELETE /api/user/delete-account` |
 | Opposition / retrait consentement | Paramètres (IA Groq), bannière cookies, toggle IA navigateur |
+| Retrait partage Duet | Révoquer un ami, modifier le scope, ou désactiver le partage — Paramètres → Partage Duet ; preuve consentement `UserConsent` type `duet_sharing` |
 | Retrait consentement CGU | Suppression de compte (pas de service sans CGU à jour) |
 
 ## Transferts hors UE
@@ -46,10 +48,13 @@ Document interne — Soundprint-AI. Dernière révision : 2026-06-09.
 - Ré-auth récente pour export / suppression
 - Scrubbing Sentry ; pas d’envoi massif d’écoutes au LLM
 - Versions de consentement (`legal-consent.ts`, `cookie-consent.ts`) → re-consentement si bump
+- Duet : autorisation dédiée cross-user (`assertDuetFriendAccess`) — pas de paramètre `userId` analytics pour cibler un ami
+- Duet : rate limit invitations (10/jour) et plafond amis (50) ; pas d’accès en démo publique anonyme
 
 ## Documents associés
 
 - [GDPR_DPIA_AI.md](./GDPR_DPIA_AI.md) — analyse d’impact IA (Groq)
+- [GDPR_DPIA_DUET.md](./GDPR_DPIA_DUET.md) — analyse d’impact Duet (partage social)
 - [GDPR_LEGAL_REVIEW_CHECKLIST.md](./GDPR_LEGAL_REVIEW_CHECKLIST.md) — checklist revue juridique externe
 - [GDPR_DATA_BREACH_PROCEDURE.md](./GDPR_DATA_BREACH_PROCEDURE.md) — procédure violation de données
 - [GDPR_BACKLOG.md](./GDPR_BACKLOG.md) — actions différées (priorité basse)

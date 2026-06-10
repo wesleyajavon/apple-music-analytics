@@ -11,6 +11,9 @@ export type DeleteUserAccountResult = {
 /**
  * Suppression complète du compte : Prisma (cascade), avatar Storage, Supabase Auth.
  * Requiert SUPABASE_SERVICE_ROLE_KEY.
+ *
+ * Les relations Duet (`Friendship`, `DuetShareSettings`) sont supprimées en cascade
+ * via `onDelete: Cascade` sur le modèle `User`.
  */
 export async function deleteUserAccount(userId: string): Promise<DeleteUserAccountResult> {
   const admin = getSupabaseAdminClient();

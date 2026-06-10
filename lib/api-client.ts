@@ -434,6 +434,22 @@ export class ApiClient {
       body: JSON.stringify(data),
     });
   }
+
+  async patch<T>(
+    endpoint: string,
+    data: unknown,
+    options?: ApiRequestOptions
+  ): Promise<T> {
+    return this.request<T>(endpoint, {
+      ...options,
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+      },
+      body: JSON.stringify(data),
+    });
+  }
 }
 
 export const apiClient = new ApiClient();

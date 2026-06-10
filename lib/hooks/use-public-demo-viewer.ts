@@ -5,7 +5,7 @@ import { usePublicDemo } from "@/lib/providers/public-demo-provider";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { shouldHideNotificationCenterForPublicDemo } from "@/lib/utils/public-demo-notifications";
 
-function useSupabaseAuthUserId(): string | null | undefined {
+export function useSupabaseAuthUserId(): string | null | undefined {
   const [authUserId, setAuthUserId] = useState<string | null | undefined>(undefined);
 
   useEffect(() => {

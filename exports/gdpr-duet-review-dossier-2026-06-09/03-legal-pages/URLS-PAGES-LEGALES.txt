@@ -1,0 +1,8 @@
+Pages légales publiques (remplacer par ton URL staging ou prod) :
+
+- Politique de confidentialité : https://www.soundprint-ai.com//fr/legal/privacy
+- Cookies : https://www.soundprint-ai.com//fr/legal/cookies
+- CGU : https://www.soundprint-ai.com//fr/legal/terms
+- Acceptation CGU : https://www.soundprint-ai.com//fr/accept-terms
+
+Local : npm run dev puis URLs localhost.

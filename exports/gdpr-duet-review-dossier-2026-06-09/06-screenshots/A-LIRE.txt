@@ -1,0 +1,8 @@
+Ajouter manuellement avant envoi au conseil (checklist §2 point 9) :
+
+- [ ] Bannière cookies (première visite)
+- [ ] Paramètres → Données et confidentialité
+- [ ] Opt-in IA Groq (Paramètres)
+- [ ] Page /accept-terms
+
+Format : PNG ou PDF, sans données personnelles réelles si possible.

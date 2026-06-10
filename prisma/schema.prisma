@@ -29,6 +29,9 @@ model User {
   paletteSuggestionDecisions PaletteSuggestionDecision[]
   spotifyConnection SpotifyConnection?
   consents UserConsent[]
+  friendshipsAsRequester Friendship[] @relation("FriendshipRequester")
+  friendshipsAsAddressee Friendship[] @relation("FriendshipAddressee")
+  duetShareSettings DuetShareSettings?
 }
 
 /// GDPR consent audit trail (cookies, terms, IA, etc.)
@@ -113,6 +116,43 @@ enum PaletteSuggestionDecisionType {
   accepted
   edited
   rejected
+}
+
+enum FriendshipStatus {
+  pending
+  accepted
+  declined
+  blocked
+}
+
+enum DuetShareScope {
+  none
+  aggregates
+  full
+}
+
+model Friendship {
+  id          String           @id @default(cuid())
+  requesterId String
+  addresseeId String
+  status      FriendshipStatus @default(pending)
+  shareScope  DuetShareScope   @default(none)
+  createdAt   DateTime         @default(now())
+  respondedAt DateTime?
+
+  requester User @relation("FriendshipRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+  addressee User @relation("FriendshipAddressee", fields: [addresseeId], references: [id], onDelete: Cascade)
+
+  @@unique([requesterId, addresseeId])
+  @@index([addresseeId, status])
+  @@index([requesterId, status])
+}
+
+model DuetShareSettings {
+  userId              String         @id
+  allowFriendRequests Boolean        @default(true)
+  defaultShareScope   DuetShareScope @default(aggregates)
+  user                User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model PaletteArtistDecision {

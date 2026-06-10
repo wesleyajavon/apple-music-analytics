@@ -38,6 +38,7 @@ import {
 } from "./settings-mobile";
 import { SettingsSwitch } from "./settings-shared";
 import { GroqAiSettingsFocus } from "@/lib/components/groq-ai-settings-focus";
+import { DuetShareSettingsSection } from "@/lib/components/duet/duet-share-settings-section";
 import { GROQ_AI_CONSENT_SETTINGS_HASH } from "@/lib/constants/groq-ai-settings";
 import { AI_MASTER_QUERY_KEY } from "@/lib/hooks/use-ai-master-toggle";
 
@@ -1110,6 +1111,10 @@ export function AccountSettingsClient({ gdprContactEmail = null }: AccountSettin
                   </div>
                 </div>
               ) : null}
+
+              <div className="border-t border-slate-200/80 pt-5 dark:border-white/10">
+                <DuetShareSettingsSection />
+              </div>
 
               {privacyError ? (
                 <p className="text-sm font-medium text-red-700 dark:text-red-300" role="alert">

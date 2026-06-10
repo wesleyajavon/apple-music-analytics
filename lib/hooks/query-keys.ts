@@ -71,6 +71,27 @@ export const listeningKeys = {
   }) => [...listeningKeys.palette(), "suggestions", params] as const,
 } as const;
 
+export const duetKeys = {
+  all: ["duet"] as const,
+  friends: () => [...duetKeys.all, "friends"] as const,
+  settings: () => [...duetKeys.all, "settings"] as const,
+  compareTimeline: (params?: {
+    friendUserId?: string;
+    startDate?: string;
+    endDate?: string;
+    period?: "day" | "week" | "month";
+  }) => [...duetKeys.all, "compare", "timeline", params] as const,
+  compareMetadata: (friendUserId?: string) =>
+    [...duetKeys.all, "compare", "metadata", friendUserId] as const,
+  compareEntity: (params?: {
+    friendUserId?: string;
+    entityId?: string;
+    startDate?: string;
+    endDate?: string;
+    period?: "day" | "week" | "month";
+  }) => [...duetKeys.all, "compare", "entity", params] as const,
+} as const;
+
 export const tasteProfileKeys = {
   all: ["ai", "taste-profile"] as const,
   list: (params?: {

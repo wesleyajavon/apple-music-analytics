@@ -1,3 +1,6 @@
 export const TERMS_CONSENT_VERSION = "2026-06-01";
 export const GROQ_GENRE_CONSENT_VERSION = "2026-06-01";
 export const PUBLIC_PROFILE_CONSENT_VERSION = "2026-06-01";
+export const DUET_SHARING_CONSENT_VERSION = "2026-06-09";
+
+export const DUET_SHARING_CONSENT_TYPE = "duet_sharing";

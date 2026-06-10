@@ -7,6 +7,10 @@ import { useTranslations } from "next-intl";
 import { AiMasterToggleSwitch } from "@/lib/components/ai-master-toggle-switch";
 import { MobileBottomSheet } from "@/lib/components/mobile-bottom-sheet";
 import { useMobileSidebar } from "@/lib/components/sidebar";
+import {
+  usePublicDemoViewer,
+  useSupabaseAuthUserId,
+} from "@/lib/hooks/use-public-demo-viewer";
 import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
 
 type PlusNavItem = {
@@ -17,7 +21,7 @@ type PlusNavItem = {
 };
 
 type PlusNavSection = {
-  groupKey: "patterns" | "library" | "aiPredictions" | "helpProduct" | "account";
+  groupKey: "patterns" | "library" | "aiPredictions" | "helpProduct" | "account" | "social";
   items: PlusNavItem[];
 };
 
@@ -98,6 +102,16 @@ const icons = {
       <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
     </svg>
   ),
+  duetUsers: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
+    </svg>
+  ),
+  duetCompare: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
+    </svg>
+  ),
   about: (props: React.SVGProps<SVGSVGElement>) => (
     <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
       <path
@@ -123,6 +137,13 @@ const PLUS_SECTIONS: PlusNavSection[] = [
       { href: "/dashboard/tracks", labelKey: "tracks", icon: icons.tracks },
       { href: "/dashboard/musical-profile", labelKey: "musicalProfile", icon: icons.musicalProfile },
       { href: "/dashboard/genres/palette", labelKey: "palette", icon: icons.palette },
+    ],
+  },
+  {
+    groupKey: "social",
+    items: [
+      { href: "/dashboard/duet/friends", labelKey: "duetFriends", icon: icons.duetUsers },
+      { href: "/dashboard/duet/compare", labelKey: "duetCompare", icon: icons.duetCompare },
     ],
   },
   {
@@ -169,6 +190,17 @@ export function DashboardMobilePlusMenu({ open, onClose }: DashboardMobilePlusMe
     () => (href: string) => mergeDashboardSearchParams(href, searchParams),
     [searchParams],
   );
+  const userIdFromUrl = searchParams.get("userId");
+  const isPublicDemoViewer = usePublicDemoViewer(userIdFromUrl);
+  const authUserId = useSupabaseAuthUserId();
+
+  const visibleSections = useMemo(() => {
+    const hideDuet = isPublicDemoViewer || authUserId === null || authUserId === undefined;
+    return PLUS_SECTIONS.map((section) => {
+      if (section.groupKey !== "social" || !hideDuet) return section;
+      return { ...section, items: [] };
+    }).filter((section) => section.items.length > 0);
+  }, [authUserId, isPublicDemoViewer]);
 
   useEffect(() => {
     onClose();
@@ -218,7 +250,7 @@ export function DashboardMobilePlusMenu({ open, onClose }: DashboardMobilePlusMe
         </div>
 
         <div className="space-y-5">
-          {PLUS_SECTIONS.map((section) => (
+          {visibleSections.map((section) => (
             <div key={section.groupKey}>
               <p className="mb-1.5 px-1 text-[10px] font-semibold uppercase tracking-wider text-muted">
                 {t(`groups.${section.groupKey}`)}

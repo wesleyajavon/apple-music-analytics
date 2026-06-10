@@ -284,6 +284,31 @@ Chat contextualisé sur l’historique d’écoute (Groq). **Auth** : même rés
 
 ---
 
+## Duet (amis & comparaison)
+
+Toutes les routes Duet exigent une **session** authentifiée (pas de `userId` démo).
+
+| Méthode | Chemin | Description |
+|---------|--------|-------------|
+| GET | `/api/duet/friends` | `{ friends, pendingIncoming, pendingOutgoing }` — profils légers (id, email, name, avatarUrl). |
+| POST | `/api/duet/friends/invite` | Body `{ email }`. Lookup insensible à la casse. Réponse uniforme `{ ok, message: "Invitation processed" }` si email inconnu ou cible fermée aux demandes (anti-énumération). Succès : inclut `friendship`. Quota 10/jour. **409** doublon ; **429** quota. |
+| PATCH | `/api/duet/friends/[id]` | `accept` + `shareScope` (`aggregates` \| `full`) enregistre `duet_sharing` ; `decline` ; `revoke`. |
+| POST | `/api/duet/friends/[id]/block` | Bloque l’autre partie ; log sécurité serveur. |
+| GET | `/api/duet/settings` | `{ allowFriendRequests, defaultShareScope }`. |
+| PATCH | `/api/duet/settings` | Body partiel : `allowFriendRequests`, `defaultShareScope` (`none` \| `aggregates` \| `full`). |
+
+### Comparaison (auth + relation `accepted`)
+
+Query **`friendUserId`** (UUID) requis sur toutes les routes ci-dessous. **404** si pas ami (anti-énumération) ; **403** si `shareScope` insuffisant. Rate limit aligné sur `/api/timeline` (20 req / 60 s).
+
+| Méthode | Chemin | Scope | Description |
+|---------|--------|-------|-------------|
+| GET | `/api/duet/compare/timeline` | `aggregates` | `startDate`, `endDate`, `period` (`day` \| `week` \| `month`). Réponse `{ period, startDate, endDate, rangeClamped, self, friend, merged }`. Si la plage dépasse **2 ans** et qu’un des deux utilisateurs a **> 50k** écoutes dans la plage, `rangeClamped: true` et fenêtre réduite aux 2 dernières années. |
+| GET | `/api/duet/compare/entity` | `full` | `type=artist`, `entityId` + plage dates. `{ selfCount, friendCount, winner }`. |
+| GET | `/api/duet/compare/metadata` | `aggregates` | Couverture `{ self, friend }` : `minDate`, `maxDate`, `totalListens`, `sources[]`. |
+
+---
+
 ## Palette (normalisation des genres hors import)
 
 Sessions et suggestions nécessitent une **session** valide.

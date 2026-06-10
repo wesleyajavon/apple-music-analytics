@@ -12,7 +12,7 @@
 |------------|-------------------|---------------|
 | **Breakwater** | Durcir la démo publique quand coûts, trafic ou risque dépassent le confort actuel | [docs/BREAKWATER.md](docs/BREAKWATER.md) |
 | **CurtainCall** | Sessions expirantes avec timeout d’inactivité : demander une reconnexion après absence prolongée | [docs/CURTAINCALL.md](docs/CURTAINCALL.md) |
-| **Duet** | Réseau social léger : **amis**, **comparaison** des stats sur **un même graphe** (engagement, « qui écoute le plus cet artiste ») | [docs/DUET.md](docs/DUET.md) |
+| **Duet** | Réseau social léger : **amis**, **comparaison** des stats sur **un même graphe** (engagement, « qui écoute le plus cet artiste ») | [docs/DUET.md](docs/DUET.md) · [playbook](docs/DUET_PLAYBOOK.md) |
 | **Encore** | UI **Replay par année** (style Apple Music Replay), API déjà prête | [docs/ENCORE.md](docs/ENCORE.md) |
 | **Headliner** | Unifier **artiste principal vs featuring** pour des tops et agrégats plus justes (parsing, alias, mbid, ou crédits multiples) | [docs/HEADLINER.md](docs/HEADLINER.md) |
 | **Maestro** | Agent conversationnel IA pour poser des questions en langage naturel sur les données musicales de l’utilisateur | [docs/MAESTRO.md](docs/MAESTRO.md) |
@@ -42,9 +42,10 @@
 ## Duet
 
 - **Idée** : donner une **dynamique sociale** à l’app — les utilisateurs ajoutent des **amis** (demandes / acceptation), puis **comparent leurs données** : graphes avec **les deux comptes** sur une même série (artistes, genres, fenêtre temporelle), mini-défis du type « qui a le plus écouté **cet artiste** sur la période », etc.
+- **Note (2026-06-09)** : comparer des stats **artistes / titres / genres** avec **d’autres utilisateurs** — ex. « qui est le plus grand fan de cet artiste ? », classements ou ratios entre amis sur une entité précise (artiste, morceau, genre) plutôt que seulement des graphes globaux.
 - **Pourquoi** : fort potentiel **d’engagement** et de **fun** sans forcément transformer le produit en réseau généraliste ; la valeur reste ancrée dans les données d’écoute déjà au cœur du dashboard.
 - **À trancher tôt** : modèle **privacy** (opt-in par ami ? niveaux de visibilité ?), anti-abus (spam d’invitations), alignement **Breakwater** sur tout ce qui touche aux données d’un autre user ; conformité RGPD si contacts ou découverte.
-- **Doc** : [docs/DUET.md](docs/DUET.md) (visions MVP → v2, prompts agent).
+- **Doc** : [docs/DUET.md](docs/DUET.md) (vision) · [docs/DUET_PLAYBOOK.md](docs/DUET_PLAYBOOK.md) (roadmap, audit, prompts agent, actions hors code).
 - **Quand prioriser** : après stabilité auth / onboarding ; quand tu veux pousser la rétention et le bouche-à-oreille ; idéalement avec une première version **minimaliste** (liste d’amis + 1 à 2 vues comparatives) avant d’élargir.
 
 ---

@@ -1,0 +1,189 @@
+{
+  "nav": {
+    "privacy": "Privacidad",
+    "terms": "Términos",
+    "cookies": "Cookies"
+  },
+  "privacy": {
+    "eyebrow": "Legal",
+    "title": "Política de privacidad",
+    "lastUpdated": "Última actualización: 6 de junio de 2026",
+    "intro": "Un resumen claro de cómo Soundprint-AI maneja tus datos. Creamos esta app para tus estadísticas de escucha — no para vender tu información.",
+    "sections": [
+      {
+        "title": "Quién es responsable",
+        "paragraphs": [
+          "Wesley Ajavon (Soundprint-AI) es responsable de tus datos. ¿Preguntas? Contáctanos desde la configuración de la cuenta o el canal de soporte del sitio."
+        ]
+      },
+      {
+        "title": "Qué recopilamos",
+        "paragraphs": [
+          "Solo lo necesario para hacer funcionar tu panel:"
+        ],
+        "bullets": [
+          "Cuenta — email, nombre, foto de perfil y cómo inicias sesión.",
+          "Historial de escucha — artistas, canciones y cuándo las escuchaste.",
+          "Conexiones — si vinculas Spotify u otros servicios similares.",
+          "Tus elecciones — preferencias de cookies, ajustes de IA y otros consentimientos."
+        ]
+      },
+      {
+        "title": "Por qué lo usamos",
+        "paragraphs": [
+          "Para mostrar tus estadísticas, mantener tu sesión y mejorar la app. La analítica y los informes de errores opcionales solo funcionan si aceptas en la configuración de cookies.",
+          "Las funciones de IA que envían nombres de artistas o canciones a un proveedor solo se activan si das tu consentimiento."
+        ]
+      },
+      {
+        "title": "Cuánto tiempo lo guardamos",
+        "paragraphs": [
+          "Tus datos de cuenta y escucha permanecen mientras tu cuenta esté activa. Si eliminas tu cuenta, borramos tus datos con prontitud de nuestros sistemas."
+        ]
+      },
+      {
+        "title": "Con quién trabajamos",
+        "paragraphs": [
+          "Confiamos en proveedores de confianza para operar la app. Solo procesan datos según nuestras instrucciones y para los fines indicados abajo."
+        ],
+        "bullets": [
+          "Supabase (alojamiento, auth, base de datos, fotos de perfil) — gestiona tu cuenta y almacena tus datos de escucha.",
+          "Groq (EE. UU.) — funciones de IA opcionales si das tu consentimiento; puede recibir títulos de artistas/canciones y estadísticas agregadas.",
+          "Vercel (global) — aloja la app; analítica opcional solo si aceptas las cookies.",
+          "Sentry (EE. UU./UE) — monitorización de errores y replay de sesión opcionales solo si aceptas las cookies."
+        ]
+      },
+      {
+        "title": "Transferencias internacionales",
+        "paragraphs": [
+          "Algunos proveedores pueden tratar datos fuera de tu país (incluidos los Estados Unidos). Cuando es necesario, nos basamos en garantías adecuadas, como los acuerdos de tratamiento de datos de los proveedores y las cláusulas contractuales tipo.",
+          "Groq y Sentry solo se usan para las funciones opcionales descritas arriba y únicamente si das tu consentimiento (IA) o aceptas las cookies correspondientes."
+        ]
+      },
+      {
+        "title": "Tus derechos",
+        "paragraphs": [
+          "Puedes acceder, exportar, corregir o eliminar tus datos. Ve a Ajustes → Datos y privacidad para exportar o eliminar tu cuenta.",
+          "También puedes cambiar tus elecciones de cookies e IA en cualquier momento. Si estás en la UE, puedes contactar a tu autoridad de protección de datos."
+        ]
+      }
+    ],
+    "contact": {
+      "title": "Solicitudes de privacidad",
+      "body": "Para preguntas sobre tus datos o para ejercer tus derechos, escríbenos a:",
+      "fallback": "Para solicitudes RGPD, usa Ajustes → Datos y privacidad (exportar o eliminar) o configura un correo de contacto en tu despliegue.",
+      "emailAriaLabel": "Enviar un correo de solicitud de privacidad a {email}"
+    },
+    "related": {
+      "title": "Políticas relacionadas",
+      "description": "Ver también:",
+      "termsLink": "Términos de servicio",
+      "cookiesLink": "Política de cookies"
+    }
+  },
+  "terms": {
+    "eyebrow": "Condiciones",
+    "title": "Términos de servicio",
+    "lastUpdated": "Última actualización: 6 de junio de 2026",
+    "intro": "Un resumen claro de tus derechos y los nuestros al usar Soundprint-AI. Al usar la app, aceptas estos términos.",
+    "sections": [
+      {
+        "title": "Qué es esto",
+        "paragraphs": [
+          "Soundprint-AI es tu panel personal de escucha. Importa tu historial o conecta servicios como Spotify para explorar tus estadísticas."
+        ]
+      },
+      {
+        "title": "Tu cuenta",
+        "paragraphs": [
+          "Protege tu acceso. Usa información veraz y no suplantar a otras personas."
+        ]
+      },
+      {
+        "title": "Tus datos musicales",
+        "paragraphs": [
+          "Tus datos de escucha siguen siendo tuyos. Nos autorizas a procesarlos solo para hacer funcionar el panel. Sube solo datos que te pertenezcan o estés autorizado a usar."
+        ]
+      },
+      {
+        "title": "Servicios conectados",
+        "paragraphs": [
+          "Si vinculas Spotify, Apple Music, Last.fm o funciones de IA, sus reglas también aplican. Soundprint-AI no está afiliado a Apple, Spotify ni Last.fm."
+        ]
+      },
+      {
+        "title": "Algunas expectativas",
+        "paragraphs": [
+          "Ofrecemos el servicio tal cual. Las estadísticas dependen de lo que importes — pueden no ser perfectas.",
+          "No somos responsables de interrupciones causadas por servicios de terceros."
+        ]
+      },
+      {
+        "title": "Dejar el servicio",
+        "paragraphs": [
+          "Puedes eliminar tu cuenta en cualquier momento desde Ajustes.",
+          "Podemos suspender cuentas que abusen del servicio o infrinjan la ley."
+        ]
+      }
+    ],
+    "related": {
+      "title": "Políticas relacionadas",
+      "description": "Ver también:",
+      "privacyLink": "Política de privacidad",
+      "cookiesLink": "Política de cookies"
+    }
+  },
+  "cookies": {
+    "eyebrow": "Cookies",
+    "title": "Política de cookies",
+    "lastUpdated": "Última actualización: 6 de junio de 2026",
+    "intro": "Usamos unas pocas cookies para mantener tu sesión y recordar tus elecciones. Las opcionales nos ayudan a mejorar la app — solo si aceptas.",
+    "sections": [
+      {
+        "title": "Qué usamos",
+        "paragraphs": [
+          "En pocas palabras:"
+        ],
+        "bullets": [
+          "Esenciales — necesarias para iniciar sesión y usar la app.",
+          "Preferencias — tema, visualización, etc.",
+          "Analítica opcional — nos ayuda a ver qué páginas se usan.",
+          "Informes de errores opcionales — nos ayudan a corregir fallos más rápido."
+        ]
+      },
+      {
+        "title": "Tus elecciones",
+        "paragraphs": [
+          "Usa el panel de abajo para aceptar, rechazar o personalizar las cookies opcionales en cualquier momento.",
+          "Rechazar las cookies opcionales no te impide usar Soundprint-AI. También puedes borrarlas en la configuración del navegador."
+        ]
+      },
+      {
+        "title": "Cookies y almacenamiento local",
+        "paragraphs": [
+          "Los nombres técnicos a continuación te ayudan a reconocer lo que la app guarda en tu navegador."
+        ],
+        "bullets": [
+          "Cookies de auth de Supabase (sb-*-auth-token) — esenciales; mantienen tu sesión.",
+          "ai_master_disabled — httpOnly; recuerda si desactivaste la IA en este navegador.",
+          "ama_oauth_terms — corta duración; registra que aceptaste los términos antes de un redirect OAuth.",
+          "ama_anonymous_id — vincula elecciones de cookies anónimas a tu cuenta tras iniciar sesión.",
+          "localStorage ama-cookie-consent-v1 — tus elecciones del banner de cookies en este dispositivo.",
+          "localStorage ama_anonymous_id — id anónimo antes de crear una cuenta.",
+          "Preferencia de tema — almacenada localmente para modo claro/oscuro (no se envía a nuestros servidores)."
+        ]
+      }
+    ],
+    "preferences": {
+      "title": "Gestionar tus preferencias",
+      "description": "Elige con qué te sientes cómodo. Los cambios se aplican de inmediato en este navegador.",
+      "saved": "Tus preferencias se han guardado."
+    },
+    "related": {
+      "title": "Políticas relacionadas",
+      "description": "Ver también:",
+      "privacyLink": "Política de privacidad",
+      "termsLink": "Términos de servicio"
+    }
+  }
+}

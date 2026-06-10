@@ -5,9 +5,10 @@ function row(
   artistId: string,
   artistName: string,
   listenCount: number,
-  rank: number
+  rank: number,
+  imageUrl: string | null = null
 ): TopArtistListenRow {
-  return { artistId, artistName, listenCount, rank };
+  return { artistId, artistName, imageUrl, listenCount, rank };
 }
 
 describe("intersectTopArtists", () => {

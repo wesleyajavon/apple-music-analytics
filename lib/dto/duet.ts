@@ -101,6 +101,7 @@ export type CompareMetadataResponse = {
 export type CompareSharedArtistItem = {
   artistId: string;
   artistName: string;
+  imageUrl: string | null;
   selfCount: number;
   friendCount: number;
   selfRank: number;

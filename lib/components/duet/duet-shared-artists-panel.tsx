@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { ChevronDown, Crown, Swords, X } from "lucide-react";
+import { ArtistAvatarHydrated } from "@/lib/components/artist-avatar-hydrated";
 import { EmptyState } from "@/lib/components/empty-state";
 import { ErrorState } from "@/lib/components/error-state";
 import {
@@ -27,6 +28,65 @@ import type { CompareSharedArtistsResponse } from "@/lib/dto/duet";
 import { ApiError } from "@/lib/api-client";
 
 const VISIBLE_ARTISTS_COUNT = 5;
+
+type SharedArtistStatChipProps = {
+  label: string;
+  listenCount: number;
+  rankLabel: string;
+  listensLabel: string;
+  variant: "self" | "friend";
+  isWinner: boolean;
+  locale: string;
+};
+
+function SharedArtistStatChip({
+  label,
+  listenCount,
+  rankLabel,
+  listensLabel,
+  variant,
+  isWinner,
+  locale,
+}: SharedArtistStatChipProps) {
+  const isSelf = variant === "self";
+
+  return (
+    <div
+      className={`relative rounded-lg border px-2.5 py-2 transition-colors ${
+        isSelf
+          ? "border-violet-200/80 bg-violet-50/70 dark:border-violet-400/25 dark:bg-violet-400/10"
+          : "border-cyan-200/80 bg-cyan-50/70 dark:border-cyan-400/25 dark:bg-cyan-400/10"
+      } ${isWinner ? "ring-1 ring-amber-400/60 dark:ring-amber-400/40" : ""}`}
+    >
+      {isWinner ? (
+        <Crown
+          className="absolute right-2 top-2 h-3 w-3 text-amber-500 dark:text-amber-300"
+          aria-hidden
+        />
+      ) : null}
+      <p
+        className={`truncate pr-4 text-[0.65rem] font-semibold uppercase tracking-wider ${
+          isSelf ? "text-violet-700 dark:text-violet-200" : "text-cyan-700 dark:text-cyan-200"
+        }`}
+      >
+        {label}
+      </p>
+      <p className="mt-0.5 text-lg font-bold tabular-nums leading-none text-slate-900 dark:text-white">
+        {listenCount.toLocaleString(locale)}
+        <span className={`ml-1 text-[0.65rem] font-medium normal-case tracking-normal ${DASHBOARD_SPOTLIGHT_MUTED}`}>
+          {listensLabel}
+        </span>
+      </p>
+      <p
+        className={`mt-1 text-[0.65rem] font-medium leading-snug ${
+          isSelf ? "text-violet-600/90 dark:text-violet-300/90" : "text-cyan-600/90 dark:text-cyan-300/90"
+        }`}
+      >
+        {rankLabel}
+      </p>
+    </div>
+  );
+}
 
 type DuetSharedArtistsPanelProps = {
   friendUserId: string;
@@ -182,7 +242,7 @@ export function DuetSharedArtistsPanel({
         ) : (
           <>
             <ul className={`space-y-2 ${DASHBOARD_SPOTLIGHT_INNER_WELL} p-3 sm:p-4`}>
-              {visibleArtists.map((artist) => {
+              {visibleArtists.map((artist, index) => {
                 const isSelected = selectedArtistId === artist.artistId;
                 return (
                   <li key={artist.artistId}>
@@ -190,43 +250,75 @@ export function DuetSharedArtistsPanel({
                       type="button"
                       onClick={() => handleArtistClick(artist.artistId, artist.artistName)}
                       aria-expanded={isSelected}
-                      className={`group flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left transition-all ${
+                      className={`group flex w-full gap-3 rounded-xl border px-3 py-3 text-left transition-all sm:items-start ${
                         isSelected
                           ? "border-lime-400/80 bg-lime-50/80 shadow-sm ring-2 ring-lime-300/40 dark:border-lime-400/40 dark:bg-lime-400/10 dark:ring-lime-400/20"
                           : "border-slate-200/80 bg-white/80 hover:border-lime-300/70 hover:bg-lime-50/50 hover:shadow-sm dark:border-white/10 dark:bg-slate-950/40 dark:hover:border-lime-400/30 dark:hover:bg-lime-400/5"
                       }`}
                     >
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate font-semibold text-slate-900 dark:text-white">{artist.artistName}</p>
-                        <p className={`mt-1 text-xs ${DASHBOARD_SPOTLIGHT_MUTED}`}>
-                          {t("sharedArtistsCounts", {
-                            self: artist.selfCount,
-                            friend: artist.friendCount,
-                            friendName,
-                          })}
-                        </p>
-                        <p className={`mt-0.5 text-[0.65rem] font-bold uppercase tracking-[0.12em] ${DASHBOARD_SPOTLIGHT_MUTED}`}>
-                          {t("sharedArtistsRanks", {
-                            selfRank: artist.selfRank,
-                            friendRank: artist.friendRank,
-                            friendName,
-                          })}
-                        </p>
+                      <div className="relative shrink-0 self-start overflow-hidden rounded-xl ring-1 ring-slate-200/90 shadow-sm dark:ring-white/10">
+                        <ArtistAvatarHydrated
+                          artistId={artist.artistId}
+                          artistName={artist.artistName}
+                          imageUrl={artist.imageUrl}
+                          avatarApiSize={112}
+                          colorIndex={index}
+                          alt=""
+                          width={56}
+                          height={56}
+                          className="h-14 w-14 object-cover transition-transform duration-300 group-hover:scale-105"
+                          loading="lazy"
+                        />
                       </div>
-                      <div className="flex shrink-0 flex-col items-end gap-1">
-                        {artist.winner === "self" ? (
-                          <Crown className="h-4 w-4 text-lime-600 dark:text-lime-300" aria-hidden />
-                        ) : artist.winner === "friend" ? (
-                          <Crown className="h-4 w-4 text-cyan-500 dark:text-cyan-300" aria-hidden />
-                        ) : null}
-                        <span
-                          className={`inline-flex items-center gap-1 rounded-full border border-lime-200/80 bg-lime-50 px-2 py-0.5 text-[0.65rem] font-black uppercase tracking-widest text-lime-700 transition-opacity dark:border-lime-400/25 dark:bg-lime-400/10 dark:text-lime-200 ${
-                            isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-                          }`}
-                        >
-                          <Swords className="h-3 w-3" aria-hidden />
-                          {t("sharedArtistsDuelCta")}
-                        </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start justify-between gap-2">
+                          <p className="truncate font-semibold text-slate-900 dark:text-white">{artist.artistName}</p>
+                          <span
+                            className={`hidden shrink-0 items-center gap-1 rounded-full border border-lime-200/80 bg-lime-50 px-2.5 py-1 text-[0.65rem] font-black uppercase tracking-widest text-lime-700 transition-opacity dark:border-lime-400/25 dark:bg-lime-400/10 dark:text-lime-200 sm:inline-flex ${
+                              isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                            }`}
+                          >
+                            <Swords className="h-3 w-3" aria-hidden />
+                            {t("sharedArtistsDuelCta")}
+                          </span>
+                        </div>
+                        <div className="mt-2.5 grid grid-cols-2 gap-2">
+                          <SharedArtistStatChip
+                            label={t("seriesSelf")}
+                            listenCount={artist.selfCount}
+                            listensLabel={t("sharedArtistsListens")}
+                            rankLabel={t("sharedArtistsTop50RankSelf", {
+                              rank: artist.selfRank,
+                              topPool: data.topPool,
+                            })}
+                            variant="self"
+                            isWinner={artist.winner === "self"}
+                            locale={locale}
+                          />
+                          <SharedArtistStatChip
+                            label={friendName}
+                            listenCount={artist.friendCount}
+                            listensLabel={t("sharedArtistsListens")}
+                            rankLabel={t("sharedArtistsTop50RankFriend", {
+                              rank: artist.friendRank,
+                              friendName,
+                              topPool: data.topPool,
+                            })}
+                            variant="friend"
+                            isWinner={artist.winner === "friend"}
+                            locale={locale}
+                          />
+                        </div>
+                        <div className="mt-2.5 flex justify-end sm:hidden">
+                          <span
+                            className={`inline-flex items-center gap-1 rounded-full border border-lime-200/80 bg-lime-50 px-2.5 py-1 text-[0.65rem] font-black uppercase tracking-widest text-lime-700 dark:border-lime-400/25 dark:bg-lime-400/10 dark:text-lime-200 ${
+                              isSelected ? "opacity-100" : "opacity-100"
+                            }`}
+                          >
+                            <Swords className="h-3 w-3" aria-hidden />
+                            {t("sharedArtistsDuelCta")}
+                          </span>
+                        </div>
                       </div>
                     </button>
                   </li>

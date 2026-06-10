@@ -1,6 +1,7 @@
 export type TopArtistListenRow = {
   artistId: string;
   artistName: string;
+  imageUrl: string | null;
   listenCount: number;
   rank: number;
 };
@@ -8,6 +9,7 @@ export type TopArtistListenRow = {
 export type SharedArtistRow = {
   artistId: string;
   artistName: string;
+  imageUrl: string | null;
   selfCount: number;
   friendCount: number;
   selfRank: number;
@@ -41,6 +43,7 @@ export function intersectTopArtists(
     shared.push({
       artistId: selfRow.artistId,
       artistName: selfRow.artistName,
+      imageUrl: selfRow.imageUrl ?? friendRow.imageUrl,
       selfCount,
       friendCount,
       selfRank: selfRow.rank,

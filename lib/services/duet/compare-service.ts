@@ -103,6 +103,7 @@ export type CompareMetadataResult = {
 export type CompareSharedArtistItem = {
   artistId: string;
   artistName: string;
+  imageUrl: string | null;
   selfCount: number;
   friendCount: number;
   selfRank: number;
@@ -537,10 +538,11 @@ async function getTopArtistsWithCounts(
     Array<{
       artist_id: string;
       artist_name: string;
+      image_url: string | null;
       listen_count: number;
     }>
   >(Prisma.sql`
-    SELECT a.id as artist_id, a.name as artist_name, COUNT(*)::int as listen_count
+    SELECT a.id as artist_id, a.name as artist_name, MAX(a."imageUrl") as image_url, COUNT(*)::int as listen_count
     FROM "Listen" l
     JOIN "Track" t ON l."trackId" = t.id
     JOIN "Artist" a ON t."artistId" = a.id
@@ -555,6 +557,7 @@ async function getTopArtistsWithCounts(
   return rows.map((row, index) => ({
     artistId: row.artist_id,
     artistName: row.artist_name,
+    imageUrl: row.image_url,
     listenCount: row.listen_count,
     rank: index + 1,
   }));

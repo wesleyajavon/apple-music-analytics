@@ -281,6 +281,7 @@ describe("Duet compare API", () => {
         {
           artistId: "artist-1",
           artistName: "Radiohead",
+          imageUrl: "https://example.com/radiohead.jpg",
           selfCount: 12,
           friendCount: 8,
           selfRank: 3,

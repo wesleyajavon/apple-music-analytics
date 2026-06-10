@@ -4,6 +4,10 @@ const AVATAR_BG_COLORS = [
   "6d28d9", "059669", "d97706", "be123c", "7c2d12", "4d7c0f", "9333ea", "64748b",
 ];
 
+export function getAvatarBackgroundColor(colorIndex: number = 0): string {
+  return `#${AVATAR_BG_COLORS[colorIndex % AVATAR_BG_COLORS.length]}`;
+}
+
 /** URL avatar initiales (ui-avatars) — `size` sert aussi pour la définition retina (ex. 72 → passer 144). */
 export function getAvatarUrl(
   artistName: string,

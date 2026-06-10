@@ -140,6 +140,8 @@ function EntityHeadToHeadPanel({
   arenaMode,
   viewerName,
   friendName,
+  viewerAvatarUrl,
+  friendAvatarUrl,
   locale,
   t,
   chartTheme,
@@ -171,6 +173,8 @@ function EntityHeadToHeadPanel({
   arenaMode: DuetArenaMode;
   viewerName: string;
   friendName: string;
+  viewerAvatarUrl?: string | null;
+  friendAvatarUrl?: string | null;
   locale: string;
   t: ReturnType<typeof useTranslations<"duet.compare">>;
   chartTheme: (typeof DASHBOARD_CHART_THEME)[keyof typeof DASHBOARD_CHART_THEME];
@@ -259,6 +263,8 @@ function EntityHeadToHeadPanel({
             friendCount={entityCompare.friendCount}
             viewerName={viewerName}
             friendName={friendName}
+            viewerAvatarUrl={viewerAvatarUrl}
+            friendAvatarUrl={friendAvatarUrl}
             winner={entityCompare.winner}
             entityName={entityDisplayName}
             entitySubtitle={entitySubtitle}
@@ -580,6 +586,8 @@ function CompareContent() {
             subtitle,
             viewerName,
             friendName,
+            viewerAvatarUrl: viewer?.avatarUrl,
+            friendAvatarUrl: friendUser?.avatarUrl,
             selfTotal: periodTotals.selfTotal,
             friendTotal: periodTotals.friendTotal,
             winner,
@@ -618,6 +626,8 @@ function CompareContent() {
     locale,
     friendName,
     viewer?.name,
+    viewer?.avatarUrl,
+    friendUser?.avatarUrl,
     t,
     tPeriod,
   ]);
@@ -894,6 +904,8 @@ function CompareContent() {
                   arenaMode="artist"
                   viewerName={viewer?.name ?? t("seriesSelf")}
                   friendName={friendName}
+                  viewerAvatarUrl={viewer?.avatarUrl}
+                  friendAvatarUrl={friendUser?.avatarUrl}
                   locale={locale}
                   t={t}
                   chartTheme={chartTheme}
@@ -940,6 +952,8 @@ function CompareContent() {
                   arenaMode="track"
                   viewerName={viewer?.name ?? t("seriesSelf")}
                   friendName={friendName}
+                  viewerAvatarUrl={viewer?.avatarUrl}
+                  friendAvatarUrl={friendUser?.avatarUrl}
                   locale={locale}
                   t={t}
                   chartTheme={chartTheme}
@@ -984,6 +998,8 @@ function CompareContent() {
                   arenaMode="genre"
                   viewerName={viewer?.name ?? t("seriesSelf")}
                   friendName={friendName}
+                  viewerAvatarUrl={viewer?.avatarUrl}
+                  friendAvatarUrl={friendUser?.avatarUrl}
                   locale={locale}
                   t={t}
                   chartTheme={chartTheme}

@@ -59,6 +59,8 @@ export function EntityBattleScorecard({
   friendCount,
   viewerName,
   friendName,
+  viewerAvatarUrl,
+  friendAvatarUrl,
   winner,
   entityName,
   entitySubtitle,
@@ -70,6 +72,8 @@ export function EntityBattleScorecard({
   friendCount: number;
   viewerName: string;
   friendName: string;
+  viewerAvatarUrl?: string | null;
+  friendAvatarUrl?: string | null;
   winner: "self" | "friend" | "tie";
   entityName: string;
   entitySubtitle?: string;
@@ -104,6 +108,8 @@ export function EntityBattleScorecard({
       entitySubtitle,
       viewerName,
       friendName,
+      viewerAvatarUrl,
+      friendAvatarUrl,
       selfCount,
       friendCount,
       winner,

@@ -9,6 +9,8 @@ export type DuetBattleShareImageInput = {
   entitySubtitle?: string;
   viewerName: string;
   friendName: string;
+  viewerAvatarUrl?: string | null;
+  friendAvatarUrl?: string | null;
   selfCount: number;
   friendCount: number;
   winner: "self" | "friend" | "tie";
@@ -26,6 +28,8 @@ function toHeadToHeadInput(input: DuetBattleShareImageInput) {
     subtitle: input.entitySubtitle,
     viewerName: input.viewerName,
     friendName: input.friendName,
+    viewerAvatarUrl: input.viewerAvatarUrl,
+    friendAvatarUrl: input.friendAvatarUrl,
     selfCount: input.selfCount,
     friendCount: input.friendCount,
     winner: input.winner,
@@ -37,7 +41,9 @@ function toHeadToHeadInput(input: DuetBattleShareImageInput) {
   };
 }
 
-export function renderDuetBattleShareImage(input: DuetBattleShareImageInput): HTMLCanvasElement {
+export async function renderDuetBattleShareImage(
+  input: DuetBattleShareImageInput
+): Promise<HTMLCanvasElement> {
   return renderHeadToHeadShareCard(toHeadToHeadInput(input));
 }
 

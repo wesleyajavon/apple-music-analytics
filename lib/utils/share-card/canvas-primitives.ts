@@ -147,11 +147,59 @@ export function drawShareCardBrandFooter(
   ctx.fillText(brandTagline, size / 2, 968);
 }
 
+export function drawCircularAvatar(
+  ctx: CanvasRenderingContext2D,
+  image: HTMLImageElement,
+  centerX: number,
+  centerY: number,
+  radius: number,
+  options?: { borderColor?: string; borderWidth?: number }
+) {
+  const diameter = radius * 2;
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+  ctx.closePath();
+  ctx.clip();
+
+  const aspect = image.width / image.height;
+  let drawW: number;
+  let drawH: number;
+  let drawX: number;
+  let drawY: number;
+
+  if (aspect >= 1) {
+    drawH = diameter;
+    drawW = diameter * aspect;
+    drawX = centerX - drawW / 2;
+    drawY = centerY - radius;
+  } else {
+    drawW = diameter;
+    drawH = diameter / aspect;
+    drawX = centerX - radius;
+    drawY = centerY - drawH / 2;
+  }
+
+  ctx.drawImage(image, drawX, drawY, drawW, drawH);
+  ctx.restore();
+
+  if (options?.borderColor) {
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+    ctx.strokeStyle = options.borderColor;
+    ctx.lineWidth = options.borderWidth ?? 3;
+    ctx.stroke();
+  }
+}
+
 export type HeadToHeadCardInput = {
   size: number;
   cardY?: number;
   viewerName: string;
   friendName: string;
+  viewerAvatar?: HTMLImageElement | null;
+  friendAvatar?: HTMLImageElement | null;
   selfCount: number;
   friendCount: number;
   selfLabel: string;
@@ -168,57 +216,67 @@ export function drawHeadToHeadCard(
   const cardY = input.cardY ?? 430;
   const cardX = 96;
   const cardW = size - 192;
-  const cardH = 360;
+  const cardH = 380;
+  const avatarRadius = 36;
 
   ctx.fillStyle = "rgba(15,23,42,0.72)";
   drawRoundedRect(ctx, cardX, cardY, cardW, cardH, 36);
   ctx.fill();
 
   const colWidth = cardW / 2;
+  const selfCenterX = cardX + colWidth / 2;
+  const friendCenterX = cardX + colWidth + colWidth / 2;
+  const avatarCenterY = cardY + 52;
+
+  if (input.viewerAvatar) {
+    drawCircularAvatar(ctx, input.viewerAvatar, selfCenterX, avatarCenterY, avatarRadius, {
+      borderColor: "rgba(167,139,250,0.85)",
+      borderWidth: 3,
+    });
+  }
+  if (input.friendAvatar) {
+    drawCircularAvatar(ctx, input.friendAvatar, friendCenterX, avatarCenterY, avatarRadius, {
+      borderColor: "rgba(34,211,238,0.85)",
+      borderWidth: 3,
+    });
+  }
+
   ctx.textAlign = "center";
   ctx.fillStyle = "rgba(167,139,250,0.95)";
   ctx.font = `700 24px ${SHARE_CARD_FONT}`;
   ctx.fillText(
     truncateText(ctx, input.viewerName, colWidth - 40),
-    cardX + colWidth / 2,
-    cardY + 58
+    selfCenterX,
+    cardY + 112
   );
   ctx.fillStyle = "rgba(34,211,238,0.95)";
   ctx.fillText(
     truncateText(ctx, input.friendName, colWidth - 40),
-    cardX + colWidth + colWidth / 2,
-    cardY + 58
+    friendCenterX,
+    cardY + 112
   );
 
   ctx.fillStyle = "#ffffff";
   ctx.font = `800 88px ${SHARE_CARD_FONT}`;
-  ctx.fillText(
-    input.selfCount.toLocaleString(),
-    cardX + colWidth / 2,
-    cardY + 170
-  );
-  ctx.fillText(
-    input.friendCount.toLocaleString(),
-    cardX + colWidth + colWidth / 2,
-    cardY + 170
-  );
+  ctx.fillText(input.selfCount.toLocaleString(), selfCenterX, cardY + 204);
+  ctx.fillText(input.friendCount.toLocaleString(), friendCenterX, cardY + 204);
 
   ctx.font = `600 22px ${SHARE_CARD_FONT}`;
   ctx.fillStyle = "rgba(148,163,184,0.95)";
-  ctx.fillText(input.selfLabel, cardX + colWidth / 2, cardY + 210);
-  ctx.fillText(input.friendLabel, cardX + colWidth + colWidth / 2, cardY + 210);
+  ctx.fillText(input.selfLabel, selfCenterX, cardY + 242);
+  ctx.fillText(input.friendLabel, friendCenterX, cardY + 242);
 
   ctx.fillStyle = "rgba(255,255,255,0.12)";
-  ctx.fillRect(cardX + colWidth - 1, cardY + 36, 2, 288);
+  ctx.fillRect(cardX + colWidth - 1, cardY + 36, 2, 308);
 
   ctx.font = `900 34px ${SHARE_CARD_FONT}`;
   ctx.fillStyle = "#f9a8d4";
-  ctx.fillText("VS", size / 2, cardY + 165);
+  ctx.fillText("VS", size / 2, avatarCenterY + 12);
 
   const total = input.selfCount + input.friendCount;
   const selfPct = total > 0 ? input.selfCount / total : 0.5;
   const barX = 132;
-  const barY = cardY + 250;
+  const barY = cardY + 274;
   const barW = size - 264;
   const barH = 28;
   ctx.fillStyle = "rgba(255,255,255,0.12)";
@@ -251,6 +309,6 @@ export function drawHeadToHeadCard(
   ctx.fillText(
     truncateText(ctx, input.winnerHeadline, size - 180),
     size / 2,
-    cardY + 330
+    cardY + 350
   );
 }

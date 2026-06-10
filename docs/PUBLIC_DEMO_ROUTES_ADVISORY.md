@@ -39,6 +39,8 @@ Voir aussi : [PUBLIC_DEMO_HARDENING.md](./PUBLIC_DEMO_HARDENING.md) (levier 1, p
 | `/dashboard/demo` | **Garder** | Vidéo / démo produit. |
 | `/dashboard/insights` | **Garder** | Méthodologie / documentation. |
 | `/dashboard/sentry-test` | **Admin uniquement** | Ne doit pas être concerné par le mode public ; déjà filtré admin en prod dans la sidebar. |
+| `/dashboard/duet/friends` | **Fermer** | Social auth-only : invitations, relations, consentement `duet_sharing`. Pas de parcours démo publique ; redirect sign-in sans session (`duet/layout.tsx`). Même politique pour `/dashboard/duet/compare` et `/api/duet/*`. |
+| `/dashboard/duet/compare` | **Fermer** | Comparaison cross-user via `friendUserId` + `assertFriendDataAccess` — jamais via `?userId=` des routes analytics solo. Auth obligatoire ; absent de la sidebar en démo publique anonyme. |
 
 ---
 
@@ -47,7 +49,8 @@ Voir aussi : [PUBLIC_DEMO_HARDENING.md](./PUBLIC_DEMO_HARDENING.md) (levier 1, p
 1. Bloquer ou limiter tout le **bloc IA** : `musical-profile`, `ai-insights`, `taste-evolution`, `taste-profile`; `ask-your-soundprint` reste limité aux questions prédéfinies en public/demo.
 2. Bloquer **`heatmap`** (ou désactiver uniquement le détail jour + appels `listens` en mode public — plus fin à implémenter).
 3. Bloquer **`genres/palette`** côté page et API : cacher le lien ne suffit pas, car `GET /api/palette/session`, `GET /api/palette/suggestions`, `POST /api/palette/map` et `POST /api/palette/skip` explorent la file Palette ou écrivent des décisions utilisateur.
-4. Laisser ouvert : **overview**, **temporal-analysis**, **genres**, **artists**, **genres/trends**, **artists/trends**, **timeline**, **about**, **demo**, **insights**.
+4. Bloquer **`/dashboard/duet/*`** et **`/api/duet/*`** : auth session obligatoire ; pas de lecture ami via `userId` des routes analytics existantes.
+5. Laisser ouvert : **overview**, **temporal-analysis**, **genres**, **artists**, **genres/trends**, **artists/trends**, **timeline**, **about**, **demo**, **insights**.
 
 ---
 

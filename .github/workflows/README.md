@@ -31,7 +31,7 @@ Il **ne** s’exécute **pas** sur les PR ni sur les pushes vers des branches au
 
 1. Démarre un **PostgreSQL 15** (service Docker sur le runner).
 2. Définit `DATABASE_URL=postgresql://postgres:postgres@localhost:5432/e2e` (base éphémère, pas vos secrets de prod).
-3. `prisma migrate deploy` puis `npx playwright install --with-deps chromium` et `npm run test:e2e -- --project=chromium` (un seul navigateur en CI).
+3. `prisma migrate deploy` puis `npx playwright install --with-deps chromium` et `npm run test:e2e -- __tests__/e2e/auth-hardening.spec.ts __tests__/e2e/duet-compare.spec.ts --project=chromium`.
 4. Playwright lance `npm run dev` (voir `playwright.config.ts` → `webServer`) avec les mêmes variables d’environnement que le job : `DATABASE_URL`, `NODE_ENV=development`, `CI=true`, `NEXT_TELEMETRY_DISABLED=1`.
 
 **Variables / secrets** :

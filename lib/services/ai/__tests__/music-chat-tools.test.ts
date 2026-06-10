@@ -13,6 +13,7 @@ import {
   getTasteShiftSummary,
   getTrackObsessionWindows,
   isMusicChatPresetQuestionId,
+  MUSIC_CHAT_PRESET_QUESTIONS,
   resolveDateRange,
 } from "@/lib/services/ai/music-chat-tools";
 import { prisma } from "@/lib/prisma";
@@ -483,5 +484,13 @@ describe("music-chat-tools", () => {
       },
     });
     expect(prisma.$queryRaw).toHaveBeenCalledTimes(8);
+  });
+
+  it("does not expose friendUserId in preset question surface", () => {
+    const presetKeys = Object.keys(MUSIC_CHAT_PRESET_QUESTIONS);
+    for (const key of presetKeys) {
+      expect(key).not.toMatch(/friend/i);
+    }
+    expect(JSON.stringify(MUSIC_CHAT_PRESET_QUESTIONS)).not.toContain("friendUserId");
   });
 });

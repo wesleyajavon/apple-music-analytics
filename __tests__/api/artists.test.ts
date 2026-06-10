@@ -195,4 +195,18 @@ describe("GET /api/artists", () => {
     const data = await response.json();
     expect(data).toHaveProperty("error");
   });
+
+  it("should ignore query userId and use authenticated user", async () => {
+    vi.mocked(getArtistOverview).mockResolvedValue(mockOverview);
+    vi.mocked(getArtistStats).mockResolvedValue(mockTopArtists);
+    vi.mocked(countArtistsForRange).mockResolvedValue(50);
+
+    const request = new NextRequest(
+      "http://localhost/api/artists?limit=5&userId=22222222-2222-4222-8222-222222222222"
+    );
+    const response = await GET(request);
+
+    expect(response.status).toBe(200);
+    expect(getArtistStats).toHaveBeenCalledWith(undefined, undefined, "user-1", 5, 0);
+  });
 });

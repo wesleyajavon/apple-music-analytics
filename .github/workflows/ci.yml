@@ -237,11 +237,11 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://localhost:5432/test' }}
           NODE_ENV: production
 
-  # Job 4: E2E auth hardening (Playwright)
+  # Job 4: E2E auth + Duet hardening (Playwright)
   # Uses a Docker Postgres (not Neon pooler): prisma migrate deploy needs advisory locks,
   # which time out or misbehave through Neon's pooled hostname (-pooler).
   e2e-auth-hardening:
-    name: E2E Auth Hardening
+    name: E2E Auth & Duet Hardening
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -284,8 +284,8 @@ jobs:
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
 
-      - name: Run auth hardening e2e
-        run: npm run test:e2e -- __tests__/e2e/auth-hardening.spec.ts --project=chromium
+      - name: Run auth and Duet hardening e2e
+        run: npm run test:e2e -- __tests__/e2e/auth-hardening.spec.ts __tests__/e2e/duet-compare.spec.ts --project=chromium
 
 # ============================================
 # NOTES IMPORTANTES

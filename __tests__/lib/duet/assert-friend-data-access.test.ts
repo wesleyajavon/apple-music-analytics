@@ -74,4 +74,44 @@ describe("assertFriendDataAccess", () => {
 
     expect(result).toEqual({ ok: true, shareScope: "full" });
   });
+
+  it("returns 404 when friendship is pending", async () => {
+    vi.mocked(findFriendshipBetween).mockResolvedValue({
+      id: "f1",
+      requesterId: "user-a",
+      addresseeId: "user-b",
+      status: "pending",
+      shareScope: "none" as DuetShareScope,
+      createdAt: new Date(),
+      respondedAt: null,
+    });
+
+    const result = await assertFriendDataAccess({
+      viewerId: "user-a",
+      targetUserId: "user-b",
+      requiredScope: "aggregates",
+    });
+
+    expect(result).toEqual({ ok: false, status: 404 });
+  });
+
+  it("returns 404 when user is blocked", async () => {
+    vi.mocked(findFriendshipBetween).mockResolvedValue({
+      id: "f1",
+      requesterId: "user-a",
+      addresseeId: "user-b",
+      status: "blocked",
+      shareScope: "none" as DuetShareScope,
+      createdAt: new Date(),
+      respondedAt: new Date(),
+    });
+
+    const result = await assertFriendDataAccess({
+      viewerId: "user-a",
+      targetUserId: "user-b",
+      requiredScope: "aggregates",
+    });
+
+    expect(result).toEqual({ ok: false, status: 404 });
+  });
 });

@@ -16,6 +16,7 @@
     "test:run": "vitest run",
     "test:integration": "vitest run __tests__/api",
     "test:e2e": "playwright test",
+    "test:e2e:duet": "playwright test __tests__/e2e/duet-compare.spec.ts --project=chromium",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
     "test:performance": "vitest run __tests__/performance",

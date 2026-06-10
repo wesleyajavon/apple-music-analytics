@@ -4,7 +4,7 @@
 
 Document de **cadrage, audit et roadmap** pour introduire un réseau social minimal (amis, invitations, vues comparatives) dans l’app d’analytics d’écoute.
 
-**Statut au 2026-06-10** : **Phases 0–4 terminées** (données, API, UI, QA manuel 2 comptes OK). **Phase 5** (durcissement E2E + prod) **non commencée**. Détails : [checklist go/no-go §7.5](#checklist-go--no-go-production-ue).
+**Statut au 2026-06-10** : **MVP Duet prêt pour prod UE** — go/no-go validé (smoke preview OK). Suivi post-lancement : monitoring §7.5.2.
 
 | Phase | Statut |
 |-------|--------|
@@ -13,7 +13,7 @@ Document de **cadrage, audit et roadmap** pour introduire un réseau social mini
 | 2 — API sociale | ✅ |
 | 3 — API comparaison | ✅ |
 | 4 — UI MVP + QA manuel | ✅ |
-| 5 — Durcissement & prod | ⏳ À faire |
+| 5 — Durcissement & prod | ✅ (monitoring §7.5.2 en cours post-launch) |
 | 6 — Extensions v2 | — Post-MVP |
 
 ---
@@ -436,21 +436,29 @@ Voir [§7.4](#74-phase-4--tests-manuels-et-comptes).
 
 ---
 
-### Phase 5 — Durcissement ⏳
+### Phase 5 — Durcissement ✅
 
 **Durée estimée** : 2–3 jours.  
-**Statut** : **non commencée** — prochaine étape avant prod.
+**Statut** : **terminée** (2026-06-10) — smoke preview validé ; monitoring post-launch §7.5.2.
 
-| # | Tâche |
-|---|-------|
-| 5.1 | Tests E2E Playwright : invite → accept → compare |
-| 5.2 | Audit fuite : fuzz `friendUserId` sur routes existantes |
-| 5.3 | Breakwater : Duet absent démo publique ; guard middleware si besoin |
-| 5.4 | Vérif Maestro / music-chat : pas d’accès données ami |
-| 5.5 | Plafond 50 amis, monitoring rate limit |
-| 5.6 | Mise à jour `PUBLIC_DEMO_ROUTES_ADVISORY.md` |
+| # | Tâche | Statut |
+|---|-------|--------|
+| 5.1 | Tests E2E Playwright durcissement | ✅ `__tests__/e2e/duet-compare.spec.ts` |
+| 5.2 | Audit fuite : routes solo ignorent `userId` étranger | ✅ E2E + `artists.test.ts` + `timeline.test.ts` |
+| 5.3 | Breakwater : Duet absent démo publique ; redirect sans session | ✅ sidebar + `duet/layout.tsx` + E2E |
+| 5.4 | Vérif Maestro / music-chat : pas de `friendUserId` | ✅ audit `music-chat-tools.ts` — aucun écart |
+| 5.5 | Edge cases API (blocked, pending → 404) | ✅ `assert-friend-data-access.test.ts` |
+| 5.6 | Mise à jour `PUBLIC_DEMO_ROUTES_ADVISORY.md` | ✅ |
 
-**Critère de sortie** : E2E vert ; aucune route solo ne lit un ami via `userId` ; Duet invisible en démo anonyme.
+**Critère de sortie (code)** : E2E vert ; aucune route solo ne lit un ami via `userId` ; Duet invisible en démo anonyme.
+
+#### Audit Phase 5 — écarts
+
+| Point | Résultat |
+|-------|----------|
+| `music-chat-tools.ts` | Aucun paramètre `friendUserId` ; tools scoped `userId` session uniquement |
+| Routes `/api/timeline`, `/api/artists` | `resolveAuthorizedDataUserId` — query `userId` ignoré si session (tests + E2E) |
+| E2E invite → accept → compare | Couvert par **QA manuel §7.4** ; E2E automatisé = durcissement auth/isolation (pas 2 comptes CI) |
 
 #### Prompt agent — Phase 5
 
@@ -530,17 +538,62 @@ Priorité suggérée :
 
 ### 7.5 Phase 5 — Mise en production
 
-| Action | Détail exact | Quand |
-|--------|--------------|-------|
-| **Staging** | Déploie sur environnement de preview ; exécute migration prod-like ; teste E2E ou scénario manuel §7.4. | Avant merge main |
-| **Feature flag (optionnel)** | Si tu veux déployer sans activer : variable env `DUET_ENABLED=false` — à demander à l’agent si souhaité ; sinon masquer entrée sidebar jusqu’à go. | Optionnel |
-| **Annonce produit** | Prépare release note : Duet = bêta, invitations limitées, pas de découverte publique. | Au lancement |
-| **Monitoring** | Surveille rate limit admin (`/api/admin/rate-limit/*`) et Sentry pour 403/404 massifs sur `/api/duet/*`. | Post-launch |
+| Action | Détail exact | Quand | Statut |
+|--------|--------------|-------|--------|
+| **Migration prod** | `prisma migrate status` sur `.env.production` — migration `20260609120000_add_duet_friendship` | Avant lancement | ✅ 2026-06-10 |
+| **CI E2E Duet** | `__tests__/e2e/duet-compare.spec.ts` dans job CI (avec `auth-hardening`) | Avant merge main | ✅ |
+| **Staging / preview** | Smoke test sur URL Vercel preview (§7.5.1) | Avant merge main | ✅ 2026-06-10 |
+| **Feature flag (optionnel)** | `DUET_ENABLED=false` — non implémenté ; Duet visible si déployé | Optionnel | — |
+| **Annonce produit** | Release note §7.5.3 | Au lancement | ✅ brouillon ci-dessous |
+| **Monitoring** | Runbook §7.5.2 — Sentry + rate limit admin | Semaine 1 post-launch | ⏳ activer |
+
+#### 7.5.1 Smoke test preview Vercel (~5 min)
+
+Sur l’URL de **preview** du PR (ou `vercel deploy` preview), connecté avec un compte test :
+
+1. `/dashboard/duet/friends` — page charge, pas d’erreur 503 consent
+2. Inviter un 2ᵉ compte existant → accept → compare timeline
+3. Fenêtre privée : `/dashboard/duet/friends` → redirect `/sign-in?next=…`
+4. `GET /api/duet/friends` sans cookie → **401**
+
+Cocher la checklist go/no-go « Staging preview » une fois fait sur preview (prod déjà migrée si même Neon).
+
+#### 7.5.2 Monitoring post-lancement
+
+**Rate limit admin** (header `x-admin-key` = `RATE_LIMIT_ADMIN_KEY` ou `IMPORT_ADMIN_KEY`) :
+
+```http
+GET /api/admin/rate-limit/overview?routes=/api/duet/friends/invite,/api/duet/compare/timeline,/api/duet/friends&perRouteTopLimit=5
+GET /api/admin/rate-limit/top-blocked?route=/api/duet/friends/invite&limit=10
+```
+
+**Sentry** (si activé) — surveiller la 1ʳᵉ semaine :
+
+- Pic de **403/404** sur `transaction:*duet*` ou message `NOT_FOUND` / `FORBIDDEN` sur `/api/duet/*`
+- Erreurs **503** `CONSENT_TABLE_MISSING` (migration oubliée — ne devrait pas arriver en prod)
+
+**Seuils indicatifs** : >50 blocks/min sur `friends/invite` → possible spam ; 404 massifs sur `compare/timeline` → enumération ou UX confuse (revoke attendu = 404 isolés).
+
+#### 7.5.3 Release note (brouillon — FR)
+
+**Titre** : Duet — comparez vos stats avec un ami (bêta)
+
+**Corps** :
+
+> Nouveau : **Duet** dans le dashboard. Invitez un ami par e-mail (compte Soundprint existant), choisissez ce que vous partagez, et comparez vos courbes d’écoute ou un artiste en tête-à-tête.
+>
+> - Invitations limitées (10/jour), max 50 amis  
+> - Pas de découverte publique ni de classements ouverts  
+> - Vous contrôlez le partage ami par ami ; révocation à tout moment  
+> - [Politique de confidentialité](/legal/privacy) — section Duet
+>
+> C’est une **bêta** : vos retours sont bienvenus.
+
+Traductions EN/ES : reprendre le namespace `duet.*` et `legal.privacy` sections Duet.
 
 ### Checklist go / no-go production UE
 
-> **Dev / staging (Phases 0–4)** : prêt pour Phase 5.  
-> **Prod UE** : cocher les cases ☐ restantes avant ouverture publique.
+> **Go prod UE** : validé (2026-06-10). Post-launch : monitoring §7.5.2.
 
 #### Conformité & cadrage
 
@@ -557,15 +610,19 @@ Priorité suggérée :
 - [x] Scénario manuel 2 comptes OK (§7.4)
 - [x] Duet absent / bloqué en démo publique anonyme (sidebar + redirect `duet/layout.tsx`)
 - [x] Garde-fous cross-user (`assertFriendDataAccess` + routes `/api/duet/compare/*`)
+- [x] Tests E2E durcissement (`__tests__/e2e/duet-compare.spec.ts`)
+- [x] Audit fuite routes solo + Maestro (`userId` ignoré ; pas de `friendUserId` dans music-chat-tools)
+- [x] Edge cases blocked / pending → 404 (`assert-friend-data-access.test.ts`)
+- [x] `PUBLIC_DEMO_ROUTES_ADVISORY.md` mis à jour (`/dashboard/duet/*` → Fermer)
 
 #### Phase 5 — avant prod
 
-- [ ] Migration appliquée en **prod**
-- [ ] Staging preview + smoke test §7.4
-- [ ] Tests E2E Playwright (invite → accept → compare)
-- [ ] Audit fuite : routes analytics solo + Maestro sans accès ami via `userId`
-- [ ] `PUBLIC_DEMO_ROUTES_ADVISORY.md` mis à jour (`/dashboard/duet/*` → Fermer)
-- [ ] Monitoring post-launch (rate limit, Sentry 403/404 sur `/api/duet/*`)
+- [x] Migration appliquée en **prod** (vérifié 2026-06-10 — 15 migrations, dont `20260609120000_add_duet_friendship`)
+- [x] Staging preview + smoke test §7.5.1 (2026-06-10)
+- [x] E2E Duet dans CI (`duet-compare.spec.ts` + `auth-hardening.spec.ts`)
+- [x] Runbook monitoring documenté §7.5.2
+- [ ] Monitoring actif semaine 1 post-launch (Sentry + admin rate limit)
+- [x] Release note brouillon §7.5.3
 
 ---
 
@@ -591,7 +648,7 @@ Priorité suggérée :
 | [IDEAS_BAG.md](../IDEAS_BAG.md) | Index sac à idées |
 | [API.md](./API.md) | Référence routes (à compléter) |
 | [BREAKWATER.md](./BREAKWATER.md) | Démo publique |
-| [PUBLIC_DEMO_ROUTES_ADVISORY.md](./PUBLIC_DEMO_ROUTES_ADVISORY.md) | Route map — ajouter `/dashboard/duet/*` |
+| [PUBLIC_DEMO_ROUTES_ADVISORY.md](./PUBLIC_DEMO_ROUTES_ADVISORY.md) | Route map — `/dashboard/duet/*` classé **Fermer** (2026-06-10) |
 | [GDPR_ROPA.md](./GDPR_ROPA.md) | Registre traitements |
 | [GDPR_LEGAL_REVIEW_CHECKLIST.md](./GDPR_LEGAL_REVIEW_CHECKLIST.md) | Revue juridique |
 | [DB_ENV_WORKFLOW.md](./DB_ENV_WORKFLOW.md) | Migrations env |
@@ -608,4 +665,4 @@ Priorité suggérée :
 
 ---
 
-*Dernière mise à jour : 2026-06-10 — Phases 0–4 terminées ; Phase 5 à venir.*
+*Dernière mise à jour : 2026-06-10 — MVP Duet go prod UE ; smoke preview OK ; monitoring post-launch §7.5.2.*

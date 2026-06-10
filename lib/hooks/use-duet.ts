@@ -7,6 +7,7 @@ import { duetKeys } from "@/lib/hooks/query-keys";
 import type {
   CompareEntityResponse,
   CompareMetadataResponse,
+  CompareSharedArtistsResponse,
   CompareTimelineResponse,
   DuetShareSettingsDto,
   FriendshipsListResponse,
@@ -25,11 +26,21 @@ function buildCompareQuery(
   return q.toString();
 }
 
-export function useDuetFriends(options?: { enabled?: boolean }) {
+export function useDuetFriends(
+  options?: {
+    enabled?: boolean;
+    refetchInterval?: number | false;
+    refetchOnWindowFocus?: boolean;
+    staleTime?: number;
+  }
+) {
   return useQuery<FriendshipsListResponse, Error>({
     queryKey: duetKeys.friends(),
     queryFn: () => apiClient.get<FriendshipsListResponse>("/duet/friends"),
     enabled: options?.enabled ?? true,
+    refetchInterval: options?.refetchInterval,
+    refetchOnWindowFocus: options?.refetchOnWindowFocus,
+    staleTime: options?.staleTime,
   });
 }
 
@@ -70,7 +81,7 @@ export function useDuetCompareMetadata(friendUserId?: string) {
 
 export function useDuetCompareEntity(params: {
   friendUserId?: string;
-  type?: "artist" | "track";
+  type?: "artist" | "track" | "genre";
   entityId?: string;
   startDate?: string;
   endDate?: string;
@@ -92,6 +103,22 @@ export function useDuetCompareEntity(params: {
       if (params.period) q.set("period", params.period);
       return apiClient.get<CompareEntityResponse>(`/duet/compare/entity?${q.toString()}`);
     },
+  });
+}
+
+export function useDuetCompareSharedArtists(params: {
+  friendUserId?: string;
+  startDate?: string;
+  endDate?: string;
+}) {
+  const enabled = !!params.friendUserId;
+  return useQuery<CompareSharedArtistsResponse, Error>({
+    queryKey: duetKeys.compareSharedArtists(params),
+    enabled,
+    queryFn: () =>
+      apiClient.get<CompareSharedArtistsResponse>(
+        `/duet/compare/shared-artists?${buildCompareQuery(params.friendUserId!, params)}`
+      ),
   });
 }
 
@@ -142,7 +169,26 @@ export function useDuetMutations() {
     },
   });
 
-  return { invite, patchFriendship, blockFriendship, updateSettings };
+  const createInviteLink = useMutation({
+    mutationFn: () =>
+      apiClient.post<{
+        ok: boolean;
+        url: string;
+        acceptPath: string;
+        expiresAt: string;
+      }>("/duet/friends/invite-link", {}),
+    onSuccess: invalidateFriends,
+  });
+
+  const redeemInviteLink = useMutation({
+    mutationFn: (input: { token: string; shareScope: DuetShareScopeOption }) =>
+      apiClient.post<{ ok: boolean }>("/duet/friends/invite-link/redeem", input),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: duetKeys.all });
+    },
+  });
+
+  return { invite, patchFriendship, blockFriendship, updateSettings, createInviteLink, redeemInviteLink };
 }
 
 export type DuetShareScopeOption = Extract<DuetShareScope, "aggregates" | "full">;

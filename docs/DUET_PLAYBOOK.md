@@ -14,7 +14,7 @@ Document de **cadrage, audit et roadmap** pour introduire un réseau social mini
 | 3 — API comparaison | ✅ |
 | 4 — UI MVP + QA manuel | ✅ |
 | 5 — Durcissement & prod | ✅ (monitoring §7.5.2 en cours post-launch) |
-| 6 — Extensions v2 | — Post-MVP |
+| 6 — Extensions v2 | 🚧 6a ✅ · 6b ✅ · 6c ✅ |
 
 ---
 
@@ -473,13 +473,19 @@ Voir [§7.5](#75-phase-5--mise-en-production).
 
 ### Phase 6 — Extensions v2 (post-MVP)
 
+**Statut Phase 6a** : **terminée** (2026-06-10) — `type=track`, `type=genre`, deep links trends.  
+**Statut Phase 6b** : **terminée** (2026-06-10) — liens HMAC 7j, `/duet/accept`, quota D9 unifié.  
+**Statut Phase 6c** : **terminée** (2026-06-10) — badge centre de notifications + polling `/api/duet/friends`.  
+**Statut Phase 6d** : **terminée** (2026-06-10) — top artistes partagés (`GET /api/duet/compare/shared-artists`, panneau compare).  
+**Statut Phase 6e** : **terminée** (2026-06-10) — cartes partage timeline + factorisation `lib/utils/share-card/` (prête pour Encore).
+
 Priorité suggérée :
 
-1. Comparaisons **titre** et **genre** (`compare/entity` étendu).
-2. Top artistes **partagés** (intersection tops).
-3. Notifications persistantes (demandes d’ami).
-4. Lien d’invitation signé (token 7j) si email trop frictionnel.
-5. Cartes partageables (alignement Encore / Setlist).
+1. Comparaisons **titre** et **genre** (`compare/entity` étendu). ✅ titre ; ✅ genre (6a)
+2. Top artistes **partagés** (intersection tops). ✅ (6d)
+3. Notifications persistantes (demandes d’ami). ✅ (6c — badge + polling, source serveur `Friendship`)
+4. Lien d’invitation signé (token 7j) si email trop frictionnel. ✅ (6b)
+5. Cartes partageables (alignement Encore / Setlist). ✅ (6e — arène + timeline ; lib partagée ; Encore UI à venir)
 6. Groupes (>2 utilisateurs).
 
 #### Prompt agent — Phase 6a (comparaisons titre/genre)

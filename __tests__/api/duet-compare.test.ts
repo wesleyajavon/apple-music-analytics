@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { GET as GETTimeline } from "@/app/api/duet/compare/timeline/route";
 import { GET as GETEntity } from "@/app/api/duet/compare/entity/route";
 import { GET as GETMetadata } from "@/app/api/duet/compare/metadata/route";
+import { GET as GETSharedArtists } from "@/app/api/duet/compare/shared-artists/route";
 
 vi.mock("@/lib/services/duet/duet-compare-guard", () => ({
   requireDuetCompareAccess: vi.fn(),
@@ -22,6 +23,7 @@ vi.mock("@/lib/services/duet/compare-service", () => ({
   getCompareTimeline: vi.fn(),
   getCompareEntity: vi.fn(),
   getCompareMetadata: vi.fn(),
+  getCompareSharedArtists: vi.fn(),
 }));
 
 import { requireDuetCompareAccess } from "@/lib/services/duet/duet-compare-guard";
@@ -29,6 +31,7 @@ import {
   getCompareTimeline,
   getCompareEntity,
   getCompareMetadata,
+  getCompareSharedArtists,
 } from "@/lib/services/duet/compare-service";
 
 const VIEWER_ID = "11111111-1111-4111-8111-111111111111";
@@ -191,10 +194,44 @@ describe("Duet compare API", () => {
     expect(data.trackTitle).toBe("Paranoid Android");
   });
 
+  it("GET entity returns genre head-to-head on happy path", async () => {
+    vi.mocked(getCompareEntity).mockResolvedValue({
+      type: "genre",
+      entityId: "Rock",
+      genreName: "Rock",
+      period: "day",
+      startDate: timelinePayload.startDate,
+      endDate: timelinePayload.endDate,
+      rangeClamped: false,
+      selfCount: 42,
+      friendCount: 38,
+      winner: "self",
+      merged: [{ date: "2026-05-01", self: 42, friend: 38 }],
+    });
+
+    const response = await GETEntity(
+      new NextRequest(
+        `http://localhost/api/duet/compare/entity?friendUserId=${FRIEND_ID}&type=genre&entityId=${encodeURIComponent("Rock")}`
+      )
+    );
+
+    expect(response.status).toBe(200);
+    expect(getCompareEntity).toHaveBeenCalledWith(
+      expect.any(NextRequest),
+      VIEWER_ID,
+      FRIEND_ID,
+      "genre",
+      "Rock"
+    );
+    const data = await response.json();
+    expect(data.genreName).toBe("Rock");
+    expect(data.winner).toBe("self");
+  });
+
   it("GET entity returns 400 for invalid type", async () => {
     const response = await GETEntity(
       new NextRequest(
-        `http://localhost/api/duet/compare/entity?friendUserId=${FRIEND_ID}&type=genre&entityId=genre-1`
+        `http://localhost/api/duet/compare/entity?friendUserId=${FRIEND_ID}&type=album&entityId=album-1`
       )
     );
     expect(response.status).toBe(400);
@@ -229,6 +266,44 @@ describe("Duet compare API", () => {
     expect(requireDuetCompareAccess).toHaveBeenCalledWith(
       expect.any(NextRequest),
       "/api/duet/compare/metadata",
+      "aggregates"
+    );
+  });
+
+  it("GET shared-artists requires aggregates scope", async () => {
+    vi.mocked(getCompareSharedArtists).mockResolvedValue({
+      startDate: timelinePayload.startDate,
+      endDate: timelinePayload.endDate,
+      rangeClamped: false,
+      topPool: 50,
+      totalShared: 1,
+      artists: [
+        {
+          artistId: "artist-1",
+          artistName: "Radiohead",
+          selfCount: 12,
+          friendCount: 8,
+          selfRank: 3,
+          friendRank: 5,
+          combinedCount: 20,
+          winner: "self",
+        },
+      ],
+    });
+
+    const response = await GETSharedArtists(
+      new NextRequest(
+        `http://localhost/api/duet/compare/shared-artists?friendUserId=${FRIEND_ID}`
+      )
+    );
+
+    expect(response.status).toBe(200);
+    const data = await response.json();
+    expect(data.artists).toHaveLength(1);
+    expect(data.artists[0].artistName).toBe("Radiohead");
+    expect(requireDuetCompareAccess).toHaveBeenCalledWith(
+      expect.any(NextRequest),
+      "/api/duet/compare/shared-artists",
       "aggregates"
     );
   });

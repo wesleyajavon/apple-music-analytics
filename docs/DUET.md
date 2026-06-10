@@ -1,6 +1,6 @@
 # Duet — social léger & comparaison d’écoute
 
-**Statut** : Phase 4 ✅ (UI MVP) — prêt pour Phase 5 (durcissement E2E + audit démo).
+**Statut** : Phase 6a en cours — comparaisons artiste / morceau / genre ; MVP prod UE (Phase 5 ✅).
 
 **Documents Duet**
 
@@ -38,6 +38,16 @@
 - **Autorisation** : chaque endpoint qui renvoie des agrégats « ami » doit **vérifier la relation** et le **scope de partage** ; pas de fuite via `userId` dans l’URL (renforcer avec Breakwater si routes exposées).
 - **Perf** : agrégations pour **deux** utilisateurs peuvent doubler le coût — caches ou requêtes batch, limites de plage temporelle.
 - **Équité données** : si un ami n’a pas importé la même source ou la même profondeur d’historique, l’UI doit l’indiquer pour éviter les comparaisons trompeuses.
+
+---
+
+## Limites connues (comparaisons entité)
+
+| Entité | Limite | Mitigation |
+|--------|--------|------------|
+| **Artiste** | Sans **Headliner**, un même artiste peut exister sous plusieurs IDs (imports fragmentés). Les compteurs head-to-head peuvent sous-estimer ou scinder un artiste. | Headliner améliore la justesse ; documenter en UI si couverture inégale. |
+| **Morceau** | Un titre identique chez deux utilisateurs doit pointer vers le **même `Track.id`** (catalogue partagé). Les imports distincts créent des IDs différents — la comparaison ne fusionne pas automatiquement. | Rechercher le titre exact dans l’arène Duet ; Setlist pourrait enrichir le matching en v2. |
+| **Genre** | Résolution identique à `/api/genres` : `track.genre` → mapping artiste → `Unknown`. Les genres Palette/Groq non backfillés restent `Unknown` ou absents. | Bandeau metadata Duet ; backfill genres via Palette. |
 
 ---
 

@@ -76,7 +76,15 @@ export type CompareTrackEntityResponse = CompareEntityResponseBase & {
   artistName: string | null;
 };
 
-export type CompareEntityResponse = CompareArtistEntityResponse | CompareTrackEntityResponse;
+export type CompareGenreEntityResponse = CompareEntityResponseBase & {
+  type: "genre";
+  genreName: string;
+};
+
+export type CompareEntityResponse =
+  | CompareArtistEntityResponse
+  | CompareTrackEntityResponse
+  | CompareGenreEntityResponse;
 
 export type CompareUserMetadata = {
   minDate: string | null;
@@ -88,4 +96,24 @@ export type CompareUserMetadata = {
 export type CompareMetadataResponse = {
   self: CompareUserMetadata;
   friend: CompareUserMetadata;
+};
+
+export type CompareSharedArtistItem = {
+  artistId: string;
+  artistName: string;
+  selfCount: number;
+  friendCount: number;
+  selfRank: number;
+  friendRank: number;
+  combinedCount: number;
+  winner: "self" | "friend" | "tie";
+};
+
+export type CompareSharedArtistsResponse = {
+  startDate: string;
+  endDate: string;
+  rangeClamped: boolean;
+  topPool: number;
+  totalShared: number;
+  artists: CompareSharedArtistItem[];
 };

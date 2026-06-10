@@ -1,62 +1,30 @@
 "use client";
 
 import { motion } from "motion/react";
-import { Mic2, Music2, Swords } from "lucide-react";
+import { Disc3, Mic2, Music2, Swords } from "lucide-react";
 import { useTranslations } from "next-intl";
+import {
+  downloadShareCardImage,
+  shareCardWithCaption,
+  type ShareCardOutcome,
+} from "@/lib/utils/share-card/browser-share";
 
-export type DuetArenaMode = "artist" | "track";
+export type DuetArenaMode = "artist" | "track" | "genre";
 
-export type DuetBattleShareOutcome = "shared-image" | "shared-text" | "copied";
+/** @deprecated Use ShareCardOutcome from lib/utils/share-card/browser-share */
+export type DuetBattleShareOutcome = ShareCardOutcome;
 
 const SHARE_IMAGE_FILENAME = "soundprint-duel.png";
 
 export function downloadDuetBattleImage(imageBlob: Blob): void {
-  const url = URL.createObjectURL(imageBlob);
-  const anchor = document.createElement("a");
-  anchor.href = url;
-  anchor.download = SHARE_IMAGE_FILENAME;
-  anchor.click();
-  URL.revokeObjectURL(url);
+  downloadShareCardImage(imageBlob, SHARE_IMAGE_FILENAME);
 }
 
 export async function shareDuetBattleResult(
   text: string,
   imageBlob?: Blob
 ): Promise<DuetBattleShareOutcome> {
-  if (typeof navigator === "undefined") {
-    throw new Error("Share is only available in the browser");
-  }
-
-  if (imageBlob) {
-    const file = new File([imageBlob], SHARE_IMAGE_FILENAME, { type: "image/png" });
-    const canShareFiles =
-      typeof navigator.canShare === "function" && navigator.canShare({ files: [file] });
-
-    if (canShareFiles && typeof navigator.share === "function") {
-      try {
-        await navigator.share({ text, files: [file] });
-        return "shared-image";
-      } catch (error) {
-        if (error instanceof Error && error.name === "AbortError") {
-          throw error;
-        }
-      }
-    }
-  }
-
-  if (typeof navigator.share === "function") {
-    try {
-      await navigator.share({ text });
-      return "shared-text";
-    } catch (error) {
-      if (error instanceof Error && error.name === "AbortError") {
-        throw error;
-      }
-    }
-  }
-
-  await navigator.clipboard.writeText(text);
-  return "copied";
+  return shareCardWithCaption(text, imageBlob, SHARE_IMAGE_FILENAME);
 }
 
 export function DuetArenaModePicker({ onSelect }: { onSelect: (mode: DuetArenaMode) => void }) {
@@ -81,6 +49,15 @@ export function DuetArenaModePicker({ onSelect }: { onSelect: (mode: DuetArenaMo
         "border-cyan-200/90 bg-gradient-to-br from-cyan-50/95 via-white to-violet-50/70 hover:border-cyan-300 dark:border-cyan-400/30 dark:from-cyan-950/40 dark:via-slate-950/70 dark:to-violet-950/30",
       iconClass: "text-cyan-600 dark:text-cyan-300",
     },
+    {
+      mode: "genre" as const,
+      icon: Disc3,
+      title: t("arenaModeGenre"),
+      hint: t("arenaModeGenreHint"),
+      accent:
+        "border-fuchsia-200/90 bg-gradient-to-br from-fuchsia-50/95 via-white to-violet-50/70 hover:border-fuchsia-300 dark:border-fuchsia-400/30 dark:from-fuchsia-950/40 dark:via-slate-950/70 dark:to-violet-950/30",
+      iconClass: "text-fuchsia-600 dark:text-fuchsia-300",
+    },
   ];
 
   return (
@@ -95,7 +72,7 @@ export function DuetArenaModePicker({ onSelect }: { onSelect: (mode: DuetArenaMo
         </p>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {options.map((option, index) => {
           const Icon = option.icon;
           return (
@@ -144,6 +121,7 @@ export function DuetArenaModeToggle({
   const segments: { value: DuetArenaMode; label: string; icon: typeof Mic2 }[] = [
     { value: "artist", label: t("arenaSwitchArtist"), icon: Mic2 },
     { value: "track", label: t("arenaSwitchTrack"), icon: Music2 },
+    { value: "genre", label: t("arenaSwitchGenre"), icon: Disc3 },
   ];
 
   return (

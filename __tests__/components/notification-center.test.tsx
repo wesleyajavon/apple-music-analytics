@@ -33,6 +33,15 @@ vi.mock("@/i18n/navigation", () => ({
   ),
 }));
 
+vi.mock("@/lib/hooks/use-duet-pending-incoming", () => ({
+  useDuetPendingIncoming: () => ({
+    pendingIncoming: [],
+    pendingCount: 0,
+    isLoading: false,
+    isFetching: false,
+  }),
+}));
+
 describe("NotificationCenter (RTL)", () => {
   beforeEach(() => {
     vi.stubGlobal("fetch", () =>

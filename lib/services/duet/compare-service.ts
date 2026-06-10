@@ -4,7 +4,13 @@ import { prisma } from "@/lib/prisma";
 import {
   DUET_CLAMP_LISTEN_THRESHOLD,
   DUET_MAX_COMPARE_RANGE_MS,
+  DUET_SHARED_TOP_LIMIT,
+  DUET_SHARED_TOP_POOL,
 } from "@/lib/constants/duet-compare";
+import {
+  intersectTopArtists,
+  type TopArtistListenRow,
+} from "@/lib/services/duet/shared-artists";
 import {
   extractDateRangeWithDefaults,
   extractPeriod,
@@ -19,8 +25,12 @@ import {
 } from "@/lib/services/artist/artist-service";
 import { getTrackTrendsChartRowsForTrackIds } from "@/lib/services/track/track-service";
 import { getListenDateRange } from "@/lib/services/listening/listening-service";
+import {
+  countGenreListens,
+  getGenreTrendRowsForGenre,
+} from "@/lib/services/listening/listening-stats";
 
-export type CompareEntityType = "artist" | "track";
+export type CompareEntityType = "artist" | "track" | "genre";
 
 type CompareEntityResultBase = {
   entityId: string;
@@ -68,7 +78,15 @@ export type CompareTrackEntityResult = CompareEntityResultBase & {
   artistName: string | null;
 };
 
-export type CompareEntityResult = CompareArtistEntityResult | CompareTrackEntityResult;
+export type CompareGenreEntityResult = CompareEntityResultBase & {
+  type: "genre";
+  genreName: string;
+};
+
+export type CompareEntityResult =
+  | CompareArtistEntityResult
+  | CompareTrackEntityResult
+  | CompareGenreEntityResult;
 
 export type CompareUserMetadata = {
   minDate: string | null;
@@ -80,6 +98,26 @@ export type CompareUserMetadata = {
 export type CompareMetadataResult = {
   self: CompareUserMetadata;
   friend: CompareUserMetadata;
+};
+
+export type CompareSharedArtistItem = {
+  artistId: string;
+  artistName: string;
+  selfCount: number;
+  friendCount: number;
+  selfRank: number;
+  friendRank: number;
+  combinedCount: number;
+  winner: "self" | "friend" | "tie";
+};
+
+export type CompareSharedArtistsResult = {
+  startDate: string;
+  endDate: string;
+  rangeClamped: boolean;
+  topPool: number;
+  totalShared: number;
+  artists: CompareSharedArtistItem[];
 };
 
 async function countListensInRange(
@@ -335,6 +373,28 @@ async function countTrackListens(
   });
 }
 
+async function fetchGenreTimelineSeries(
+  userId: string,
+  genre: string,
+  startDate: Date,
+  endDate: Date,
+  period: "day" | "week" | "month"
+): Promise<CompareTimelinePoint[]> {
+  const rows = await getGenreTrendRowsForGenre(
+    startDate,
+    endDate,
+    period,
+    userId,
+    genre
+  );
+  return rows.map((row) => ({
+    date: row.date,
+    listens: row.count,
+    uniqueTracks: 0,
+    uniqueArtists: 0,
+  }));
+}
+
 function resolveWinner(
   selfCount: number,
   friendCount: number
@@ -366,6 +426,25 @@ export async function getCompareEntity(
     endDate: endDate.toISOString(),
     rangeClamped,
   };
+
+  if (type === "genre") {
+    const [selfCount, friendCount, self, friend] = await Promise.all([
+      countGenreListens(viewerId, entityId, startDate, endDate),
+      countGenreListens(friendUserId, entityId, startDate, endDate),
+      fetchGenreTimelineSeries(viewerId, entityId, startDate, endDate, period),
+      fetchGenreTimelineSeries(friendUserId, entityId, startDate, endDate, period),
+    ]);
+
+    return {
+      ...base,
+      type: "genre",
+      genreName: entityId,
+      selfCount,
+      friendCount,
+      winner: resolveWinner(selfCount, friendCount),
+      merged: mergeTimelineSeries(self, friend),
+    };
+  }
 
   if (type === "track") {
     const [selfCount, friendCount, self, friend, track] = await Promise.all([
@@ -444,4 +523,67 @@ export async function getCompareMetadata(
     getUserMetadata(friendUserId),
   ]);
   return { self, friend };
+}
+
+async function getTopArtistsWithCounts(
+  userId: string,
+  startDate: Date,
+  endDate: Date,
+  topN: number
+): Promise<TopArtistListenRow[]> {
+  const n = Math.min(Math.max(topN, 1), DUET_SHARED_TOP_POOL);
+
+  const rows = await prisma.$queryRaw<
+    Array<{
+      artist_id: string;
+      artist_name: string;
+      listen_count: number;
+    }>
+  >(Prisma.sql`
+    SELECT a.id as artist_id, a.name as artist_name, COUNT(*)::int as listen_count
+    FROM "Listen" l
+    JOIN "Track" t ON l."trackId" = t.id
+    JOIN "Artist" a ON t."artistId" = a.id
+    WHERE l."playedAt" >= ${startDate}
+      AND l."playedAt" <= ${endDate}
+      AND l."userId" = ${userId}
+    GROUP BY a.id, a.name
+    ORDER BY listen_count DESC, a.name ASC
+    LIMIT ${n}
+  `);
+
+  return rows.map((row, index) => ({
+    artistId: row.artist_id,
+    artistName: row.artist_name,
+    listenCount: row.listen_count,
+    rank: index + 1,
+  }));
+}
+
+export async function getCompareSharedArtists(
+  request: NextRequest,
+  viewerId: string,
+  friendUserId: string
+): Promise<CompareSharedArtistsResult> {
+  const { startDate, endDate, rangeClamped } = await resolveCompareDateRange(
+    request,
+    viewerId,
+    friendUserId
+  );
+
+  const [selfTop, friendTop] = await Promise.all([
+    getTopArtistsWithCounts(viewerId, startDate, endDate, DUET_SHARED_TOP_POOL),
+    getTopArtistsWithCounts(friendUserId, startDate, endDate, DUET_SHARED_TOP_POOL),
+  ]);
+
+  const allShared = intersectTopArtists(selfTop, friendTop, DUET_SHARED_TOP_POOL);
+
+  return {
+    startDate: startDate.toISOString(),
+    endDate: endDate.toISOString(),
+    rangeClamped,
+    topPool: DUET_SHARED_TOP_POOL,
+    totalShared: allShared.length,
+    artists: allShared.slice(0, DUET_SHARED_TOP_LIMIT),
+  };
 }

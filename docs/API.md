@@ -292,6 +292,9 @@ Toutes les routes Duet exigent une **session** authentifiée (pas de `userId` d�
 |---------|--------|-------------|
 | GET | `/api/duet/friends` | `{ friends, pendingIncoming, pendingOutgoing }` — profils légers (id, email, name, avatarUrl). |
 | POST | `/api/duet/friends/invite` | Body `{ email }`. Lookup insensible à la casse. Réponse uniforme `{ ok, message: "Invitation processed" }` si email inconnu ou cible fermée aux demandes (anti-énumération). Succès : inclut `friendship`. Quota 10/jour. **409** doublon ; **429** quota. |
+| POST | `/api/duet/friends/invite-link` | Génère un lien signé HMAC (validité **7 jours**). Réponse `{ ok, token, url, acceptPath, expiresAt }`. Compte dans le quota D9 (10/jour). Rate limit strict (8/min). |
+| GET | `/api/duet/friends/invite-link/validate` | Query `token`. Auth requise. Retourne `{ requester: { id, name, avatarUrl }, expiresAt }` — **aucune** donnée analytics. **404** token invalide / expiré / consommé. |
+| POST | `/api/duet/friends/invite-link/redeem` | Body `{ token, shareScope }`. Crée + accepte l’amitié, enregistre `duet_sharing`, consomme le token (usage unique). |
 | PATCH | `/api/duet/friends/[id]` | `accept` + `shareScope` (`aggregates` \| `full`) enregistre `duet_sharing` ; `updateShareScope` + `shareScope` (relation `accepted`, les deux parties) ; `decline` ; `revoke`. |
 | POST | `/api/duet/friends/[id]/block` | Bloque l’autre partie ; log sécurité serveur. |
 | GET | `/api/duet/settings` | `{ allowFriendRequests, defaultShareScope }`. |
@@ -304,7 +307,8 @@ Query **`friendUserId`** (UUID) requis sur toutes les routes ci-dessous. **404**
 | Méthode | Chemin | Scope | Description |
 |---------|--------|-------|-------------|
 | GET | `/api/duet/compare/timeline` | `aggregates` | `startDate`, `endDate`, `period` (`day` \| `week` \| `month`). Réponse `{ period, startDate, endDate, rangeClamped, self, friend, merged }`. Si la plage dépasse **2 ans** et qu’un des deux utilisateurs a **> 50k** écoutes dans la plage, `rangeClamped: true` et fenêtre réduite aux 2 dernières années. |
-| GET | `/api/duet/compare/entity` | `aggregates` | `type=artist` ou `type=track`, `entityId` + plage dates. Réponse `{ type, entityId, selfCount, friendCount, winner, merged, … }` avec `artistName` ou `trackTitle` + `artistName`. |
+| GET | `/api/duet/compare/entity` | `aggregates` | `type=artist`, `type=track` ou `type=genre`, `entityId` + plage dates. Réponse `{ type, entityId, selfCount, friendCount, winner, merged, … }` avec `artistName`, `trackTitle` + `artistName`, ou `genreName`. |
+| GET | `/api/duet/compare/shared-artists` | `aggregates` | Plage dates optionnelle (sinon intersection all-time). Top **50** par user → intersection par `artistId` → max **20** résultats triés par écoutes combinées. Réponse `{ startDate, endDate, rangeClamped, topPool, totalShared, artists[] }` avec rangs et gagnant par artiste. |
 | GET | `/api/duet/compare/metadata` | `aggregates` | Couverture `{ self, friend }` : `minDate`, `maxDate`, `totalListens`, `sources[]`. |
 
 ---

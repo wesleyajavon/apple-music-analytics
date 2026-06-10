@@ -19,6 +19,7 @@ type BattleHeroProps = {
   friendTotal?: number;
   locale: string;
   stats?: ReactNode;
+  shareActions?: ReactNode;
 };
 
 export function DuetCompareHero({
@@ -31,6 +32,7 @@ export function DuetCompareHero({
   friendTotal = 0,
   locale,
   stats,
+  shareActions,
 }: BattleHeroProps) {
   const t = useTranslations("duet.compare");
 
@@ -150,6 +152,8 @@ export function DuetCompareHero({
                         </p>
                       ) : null}
                     </div>
+
+                    {shareActions ? <div className="pt-1">{shareActions}</div> : null}
                   </div>
                 ) : (
                   <>

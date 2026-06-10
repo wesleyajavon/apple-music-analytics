@@ -85,12 +85,17 @@ export const duetKeys = {
     [...duetKeys.all, "compare", "metadata", friendUserId] as const,
   compareEntity: (params?: {
     friendUserId?: string;
-    type?: "artist" | "track";
+    type?: "artist" | "track" | "genre";
     entityId?: string;
     startDate?: string;
     endDate?: string;
     period?: "day" | "week" | "month";
   }) => [...duetKeys.all, "compare", "entity", params] as const,
+  compareSharedArtists: (params?: {
+    friendUserId?: string;
+    startDate?: string;
+    endDate?: string;
+  }) => [...duetKeys.all, "compare", "shared-artists", params] as const,
 } as const;
 
 export const tasteProfileKeys = {

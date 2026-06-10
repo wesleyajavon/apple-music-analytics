@@ -8,6 +8,8 @@ import {
   Ban,
   Check,
   Clock,
+  Copy,
+  Link2,
   Mail,
   Send,
   Shield,
@@ -427,11 +429,14 @@ export function DuetFriendsClient() {
   const t = useTranslations("duet.friends");
   const locale = useLocale();
   const { data, isLoading, error, refetch } = useDuetFriends();
-  const { invite, patchFriendship, blockFriendship } = useDuetMutations();
+  const { invite, patchFriendship, blockFriendship, createInviteLink } = useDuetMutations();
   const [email, setEmail] = useState("");
   const [viewerId, setViewerId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [feedbackError, setFeedbackError] = useState(false);
+  const [inviteLinkUrl, setInviteLinkUrl] = useState<string | null>(null);
+  const [inviteLinkExpiresAt, setInviteLinkExpiresAt] = useState<string | null>(null);
+  const [linkFeedback, setLinkFeedback] = useState<string | null>(null);
 
   useEffect(() => {
     void createSupabaseBrowserClient()
@@ -440,7 +445,10 @@ export function DuetFriendsClient() {
   }, []);
 
   const busy =
-    invite.isPending || patchFriendship.isPending || blockFriendship.isPending;
+    invite.isPending ||
+    patchFriendship.isPending ||
+    blockFriendship.isPending ||
+    createInviteLink.isPending;
 
   async function handleInvite(e: FormEvent) {
     e.preventDefault();
@@ -453,6 +461,28 @@ export function DuetFriendsClient() {
     } catch {
       setFeedback(t("inviteError"));
       setFeedbackError(true);
+    }
+  }
+
+  async function handleCreateInviteLink() {
+    setLinkFeedback(null);
+    try {
+      const result = await createInviteLink.mutateAsync();
+      setInviteLinkUrl(result.url);
+      setInviteLinkExpiresAt(result.expiresAt);
+      setLinkFeedback(t("inviteLinkGenerated"));
+    } catch {
+      setLinkFeedback(t("inviteLinkError"));
+    }
+  }
+
+  async function handleCopyInviteLink() {
+    if (!inviteLinkUrl) return;
+    try {
+      await navigator.clipboard.writeText(inviteLinkUrl);
+      setLinkFeedback(t("inviteLinkCopied"));
+    } catch {
+      setLinkFeedback(t("inviteLinkCopyError"));
     }
   }
 
@@ -551,6 +581,55 @@ export function DuetFriendsClient() {
               {feedback}
             </p>
           ) : null}
+
+          <div className="mt-6 border-t border-slate-200/80 pt-6 dark:border-white/10">
+            <div className="mb-3 flex items-center gap-2">
+              <Link2 className="h-4 w-4 text-cyan-600 dark:text-cyan-300" aria-hidden />
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">{t("inviteLinkTitle")}</h3>
+            </div>
+            <p className={`mb-4 text-sm leading-6 ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("inviteLinkDescription")}</p>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => void handleCreateInviteLink()}
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-cyan-200/90 bg-white px-5 py-2.5 text-sm font-bold text-cyan-800 shadow-sm transition-colors hover:bg-cyan-50 disabled:opacity-50 dark:border-cyan-400/25 dark:bg-cyan-500/10 dark:text-cyan-100 dark:hover:bg-cyan-500/20"
+              >
+                <Link2 className="h-4 w-4" aria-hidden />
+                {t("inviteLinkGenerate")}
+              </button>
+              {inviteLinkUrl ? (
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => void handleCopyInviteLink()}
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-bold text-white disabled:opacity-50 dark:bg-white dark:text-slate-900"
+                >
+                  <Copy className="h-4 w-4" aria-hidden />
+                  {t("inviteLinkCopy")}
+                </button>
+              ) : null}
+            </div>
+            {inviteLinkUrl ? (
+              <p className="mt-3 break-all rounded-xl border border-slate-200/80 bg-slate-50/80 px-3 py-2 font-mono text-xs text-slate-700 dark:border-white/10 dark:bg-black/30 dark:text-slate-200">
+                {inviteLinkUrl}
+              </p>
+            ) : null}
+            {inviteLinkExpiresAt ? (
+              <p className={`mt-2 flex items-center gap-1.5 text-xs ${DASHBOARD_SPOTLIGHT_MUTED}`}>
+                <Clock className="h-3.5 w-3.5" aria-hidden />
+                {t("inviteLinkExpires", {
+                  date: new Date(inviteLinkExpiresAt).toLocaleString(locale, {
+                    dateStyle: "medium",
+                    timeStyle: "short",
+                  }),
+                })}
+              </p>
+            ) : null}
+            {linkFeedback ? (
+              <p className="mt-3 text-sm text-cyan-700 dark:text-cyan-200">{linkFeedback}</p>
+            ) : null}
+          </div>
         </div>
       </section>
 

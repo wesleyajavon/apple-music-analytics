@@ -14,22 +14,26 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
-import { Crown, Download, Search, Share2, Swords, Trophy, X } from "lucide-react";
+import { Crown, Search, Swords, Trophy, X } from "lucide-react";
 import { ChartResponsiveContainer } from "@/lib/components/chart-responsive-container";
 import { PeriodSelector, getPeriodFromSearchParams } from "@/lib/components/period-selector";
 import { EmptyState } from "@/lib/components/empty-state";
 import { ErrorState } from "@/lib/components/error-state";
 import { UserAvatar } from "@/lib/components/user-avatar";
 import { DuetMetadataBanner } from "@/lib/components/duet/duet-metadata-banner";
+import { DuetSharedArtistsPanel } from "@/lib/components/duet/duet-shared-artists-panel";
 import { DuetCompareHero } from "@/lib/components/duet/duet-compare-hero";
 import {
   DuetArenaModePicker,
   DuetArenaModeToggle,
-  downloadDuetBattleImage,
-  shareDuetBattleResult,
   type DuetArenaMode,
 } from "@/lib/components/duet/duet-battle-arena-ui";
+import { DuetShareCardActions } from "@/lib/components/duet/duet-share-card-actions";
 import { generateDuetBattleSharePng } from "@/lib/utils/duet-battle-share-image";
+import {
+  generateDuetTimelineSharePng,
+  resolveDuetTimelineWinner,
+} from "@/lib/utils/duet-timeline-share-image";
 import { getDuetDisplayName } from "@/lib/components/duet/duet-utils";
 import {
   DASHBOARD_SPOTLIGHT_SHELL,
@@ -52,12 +56,14 @@ import { useTheme } from "@/lib/providers/theme-provider";
 import {
   useDuetCompareEntity,
   useDuetCompareMetadata,
+  useDuetCompareSharedArtists,
   useDuetCompareTimeline,
   useDuetFriends,
 } from "@/lib/hooks/use-duet";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
 import { useArtistSearch } from "@/lib/hooks/use-artists";
 import { useTrackSearch } from "@/lib/hooks/use-tracks";
+import { useGenres } from "@/lib/hooks/use-listening";
 import type { CompareEntityResponse } from "@/lib/dto/duet";
 import { ApiError } from "@/lib/api-client";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -165,9 +171,6 @@ function EntityBattleScorecard({
   locale: string;
   t: ReturnType<typeof useTranslations<"duet.compare">>;
 }) {
-  const [shareFeedback, setShareFeedback] = useState<string | null>(null);
-  const [downloadFeedback, setDownloadFeedback] = useState<string | null>(null);
-  const [busyAction, setBusyAction] = useState<"share" | "download" | null>(null);
   const total = selfCount + friendCount;
   const selfPct = total > 0 ? (selfCount / total) * 100 : 50;
   const friendPct = total > 0 ? 100 - selfPct : 50;
@@ -180,10 +183,17 @@ function EntityBattleScorecard({
         ? t("battleWinnerSelf")
         : t("battleWinnerFriend", { friendName });
 
+  function buildArenaLabel() {
+    return arenaMode === "artist"
+      ? t("shareArenaArtist")
+      : arenaMode === "track"
+        ? t("shareArenaTrack")
+        : t("shareArenaGenre");
+  }
+
   async function buildShareImageBlob() {
-    const arenaLabel = arenaMode === "artist" ? t("shareArenaArtist") : t("shareArenaTrack");
     return generateDuetBattleSharePng({
-      arenaLabel,
+      arenaLabel: buildArenaLabel(),
       entityName,
       entitySubtitle,
       viewerName,
@@ -206,54 +216,14 @@ function EntityBattleScorecard({
         : winner === "self"
           ? t("shareOutcomeSelf")
           : t("shareOutcomeFriend", { friendName });
-    const arenaLabel = arenaMode === "artist" ? t("shareArenaArtist") : t("shareArenaTrack");
     return t("shareBattleText", {
-      arenaLabel,
+      arenaLabel: buildArenaLabel(),
       entityName,
       selfCount: selfCount.toLocaleString(locale),
       friendName,
       friendCount: friendCount.toLocaleString(locale),
       outcome,
     });
-  }
-
-  async function handleShare() {
-    setBusyAction("share");
-    setShareFeedback(t("shareImagePreparing"));
-
-    try {
-      const imageBlob = await buildShareImageBlob();
-      const text = buildShareCaption();
-      const result = await shareDuetBattleResult(text, imageBlob);
-      const feedback =
-        result === "shared-image"
-          ? t("shareImageShared")
-          : result === "shared-text"
-            ? t("shareShared")
-            : t("shareCopied");
-      setShareFeedback(feedback);
-      window.setTimeout(() => setShareFeedback(null), 3200);
-    } catch {
-      setShareFeedback(null);
-    } finally {
-      setBusyAction(null);
-    }
-  }
-
-  async function handleDownload() {
-    setBusyAction("download");
-    setDownloadFeedback(t("shareImagePreparing"));
-
-    try {
-      const imageBlob = await buildShareImageBlob();
-      downloadDuetBattleImage(imageBlob);
-      setDownloadFeedback(t("shareImageSaved"));
-      window.setTimeout(() => setDownloadFeedback(null), 3200);
-    } catch {
-      setDownloadFeedback(null);
-    } finally {
-      setBusyAction(null);
-    }
   }
 
   return (
@@ -295,26 +265,19 @@ function EntityBattleScorecard({
             </span>
           ) : null}
           {canShare ? (
-            <>
-              <button
-                type="button"
-                disabled={busyAction !== null}
-                onClick={() => void handleShare()}
-                className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-violet-200/90 bg-white/90 px-3 py-1.5 text-xs font-semibold text-violet-800 shadow-sm transition-colors hover:bg-violet-50 disabled:opacity-60 dark:border-violet-400/25 dark:bg-violet-500/10 dark:text-violet-100 dark:hover:bg-violet-500/20"
-              >
-                <Share2 className="h-3.5 w-3.5" aria-hidden />
-                {shareFeedback ?? t("shareBattleImage")}
-              </button>
-              <button
-                type="button"
-                disabled={busyAction !== null}
-                onClick={() => void handleDownload()}
-                className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-slate-200/90 bg-white/90 px-3 py-1.5 text-xs font-semibold text-slate-800 shadow-sm transition-colors hover:bg-slate-50 disabled:opacity-60 dark:border-white/15 dark:bg-white/10 dark:text-slate-100 dark:hover:bg-white/15"
-              >
-                <Download className="h-3.5 w-3.5" aria-hidden />
-                {downloadFeedback ?? t("downloadBattleImage")}
-              </button>
-            </>
+            <DuetShareCardActions
+              canShare={canShare}
+              buildImageBlob={buildShareImageBlob}
+              buildCaption={buildShareCaption}
+              shareLabel={t("shareBattleImage")}
+              downloadLabel={t("downloadBattleImage")}
+              preparingLabel={t("shareImagePreparing")}
+              sharedImageLabel={t("shareImageShared")}
+              sharedTextLabel={t("shareShared")}
+              copiedLabel={t("shareCopied")}
+              savedLabel={t("shareImageSaved")}
+              downloadFilename="soundprint-duel.png"
+            />
           ) : null}
         </div>
       </div>
@@ -536,8 +499,24 @@ function EntityHeadToHeadPanel({
   );
 }
 
+function parseInitialArenaMode(value: string | null): DuetArenaMode | null {
+  if (value === "artist" || value === "track" || value === "genre") return value;
+  return null;
+}
+
+function formatShareDateRange(
+  startIso: string | undefined,
+  endIso: string | undefined,
+  locale: string
+): string {
+  if (!startIso || !endIso) return "";
+  const fmt = new Intl.DateTimeFormat(locale, { dateStyle: "medium" });
+  return `${fmt.format(new Date(startIso))} – ${fmt.format(new Date(endIso))}`;
+}
+
 function CompareContent() {
   const t = useTranslations("duet.compare");
+  const tPeriod = useTranslations("components.periodSelector");
   const locale = useLocale();
   const searchParams = useSearchParams();
   const { resolvedTheme } = useTheme();
@@ -587,10 +566,28 @@ function CompareContent() {
     period,
   });
   const { data: metadata } = useDuetCompareMetadata(friendUserId);
+  const {
+    data: sharedArtists,
+    isLoading: isSharedArtistsLoading,
+    error: sharedArtistsError,
+    refetch: refetchSharedArtists,
+  } = useDuetCompareSharedArtists({
+    friendUserId,
+    startDate,
+    endDate,
+  });
 
-  const [arenaMode, setArenaMode] = useState<DuetArenaMode | null>(null);
-  const [artistQuery, setArtistQuery] = useState("");
-  const [selectedArtistId, setSelectedArtistId] = useState<string | undefined>();
+  const initialArenaMode = parseInitialArenaMode(searchParams.get("arenaMode"));
+  const initialEntityType = searchParams.get("entityType") ?? searchParams.get("type");
+  const initialEntityId = searchParams.get("entityId") ?? undefined;
+
+  const [arenaMode, setArenaMode] = useState<DuetArenaMode | null>(initialArenaMode);
+  const [artistQuery, setArtistQuery] = useState(
+    initialEntityType === "artist" && initialEntityId ? initialEntityId : ""
+  );
+  const [selectedArtistId, setSelectedArtistId] = useState<string | undefined>(
+    initialEntityType === "artist" ? initialEntityId : undefined
+  );
   const { data: artistResults } = useArtistSearch(artistQuery);
   const {
     data: artistCompare,
@@ -607,8 +604,12 @@ function CompareContent() {
     period,
   });
 
-  const [trackQuery, setTrackQuery] = useState("");
-  const [selectedTrackId, setSelectedTrackId] = useState<string | undefined>();
+  const [trackQuery, setTrackQuery] = useState(
+    initialEntityType === "track" && initialEntityId ? "" : ""
+  );
+  const [selectedTrackId, setSelectedTrackId] = useState<string | undefined>(
+    initialEntityType === "track" ? initialEntityId : undefined
+  );
   const { data: trackResults } = useTrackSearch(trackQuery);
   const {
     data: trackCompare,
@@ -625,10 +626,50 @@ function CompareContent() {
     period,
   });
 
+  const [genreQuery, setGenreQuery] = useState(
+    initialEntityType === "genre" && initialEntityId ? initialEntityId : ""
+  );
+  const [selectedGenre, setSelectedGenre] = useState<string | undefined>(
+    initialEntityType === "genre" ? initialEntityId : undefined
+  );
+  const { data: genreCatalog } = useGenres(startDate, endDate);
+  const {
+    data: genreCompare,
+    isLoading: isGenreCompareLoading,
+    isFetching: isGenreCompareFetching,
+    error: genreCompareError,
+    refetch: refetchGenreCompare,
+  } = useDuetCompareEntity({
+    friendUserId,
+    type: "genre",
+    entityId: selectedGenre,
+    startDate,
+    endDate,
+    period,
+  });
+
+  useEffect(() => {
+    if (trackCompare?.type === "track" && selectedTrackId && !trackQuery) {
+      setTrackQuery(trackCompare.trackTitle ?? "");
+    }
+  }, [trackCompare, selectedTrackId, trackQuery]);
+
   const showArtistSuggestions =
     !!artistResults?.artists?.length && artistQuery.trim().length >= 2 && !selectedArtistId;
   const showTrackSuggestions =
     !!trackResults?.tracks?.length && trackQuery.trim().length >= 2 && !selectedTrackId;
+
+  const genreSuggestions = useMemo(() => {
+    const q = genreQuery.trim().toLowerCase();
+    const genres = genreCatalog?.data ?? [];
+    if (q.length < 1) return genres.slice(0, 8);
+    return genres
+      .filter((row) => row.genre.toLowerCase().includes(q))
+      .slice(0, 8);
+  }, [genreCatalog, genreQuery]);
+
+  const showGenreSuggestions =
+    genreSuggestions.length > 0 && genreQuery.trim().length >= 1 && !selectedGenre;
 
   const friend = useMemo(() => {
     if (!friendUserId || !friendsData) return null;
@@ -661,11 +702,95 @@ function CompareContent() {
     [trackCompare]
   );
 
+  const genreChartData = useMemo(
+    () =>
+      genreCompare?.merged.map((row) => ({ date: row.date, self: row.self, friend: row.friend })) ?? [],
+    [genreCompare]
+  );
+
   const periodTotals = useMemo(() => {
     const selfTotal = chartData.reduce((sum, row) => sum + row.self, 0);
     const friendTotal = chartData.reduce((sum, row) => sum + row.friend, 0);
     return { selfTotal, friendTotal };
   }, [chartData]);
+
+  const timelineShareActions = useMemo(() => {
+    const total = periodTotals.selfTotal + periodTotals.friendTotal;
+    if (total <= 0) return null;
+
+    const winner = resolveDuetTimelineWinner(periodTotals.selfTotal, periodTotals.friendTotal);
+    const periodLabel =
+      period === "day" ? tPeriod("daily") : period === "week" ? tPeriod("weekly") : tPeriod("monthly");
+    const dateRange = formatShareDateRange(timeline?.startDate, timeline?.endDate, locale);
+    const subtitle = dateRange
+      ? t("shareTimelineSubtitle", { periodLabel, dateRange })
+      : periodLabel;
+    const viewerName = viewer?.name ?? t("seriesSelf");
+    const winnerHeadline =
+      winner === "tie"
+        ? t("scoreboardTie")
+        : winner === "self"
+          ? t("battleWinnerSelf")
+          : t("battleWinnerFriend", { friendName });
+    const outcome =
+      winner === "tie"
+        ? t("shareOutcomeTie", { friendName })
+        : winner === "self"
+          ? t("shareOutcomeSelf")
+          : t("shareOutcomeFriend", { friendName });
+
+    return (
+      <DuetShareCardActions
+        canShare
+        variant="hero"
+        buildImageBlob={() =>
+          generateDuetTimelineSharePng({
+            arenaLabel: t("shareArenaTimeline"),
+            title: t("shareTimelineTitle"),
+            subtitle,
+            viewerName,
+            friendName,
+            selfTotal: periodTotals.selfTotal,
+            friendTotal: periodTotals.friendTotal,
+            winner,
+            winnerHeadline,
+            selfLabel: t("seriesSelf"),
+            friendLabel: t("seriesFriend", { friendName }),
+            brandName: t("shareBrandName"),
+            brandTagline: t("shareBrandTagline"),
+          })
+        }
+        buildCaption={() =>
+          t("shareTimelineText", {
+            arenaLabel: t("shareArenaTimeline"),
+            selfTotal: periodTotals.selfTotal.toLocaleString(locale),
+            friendName,
+            friendTotal: periodTotals.friendTotal.toLocaleString(locale),
+            dateRange: dateRange || subtitle,
+            outcome,
+          })
+        }
+        shareLabel={t("shareBattleImage")}
+        downloadLabel={t("downloadBattleImage")}
+        preparingLabel={t("shareImagePreparing")}
+        sharedImageLabel={t("shareImageShared")}
+        sharedTextLabel={t("shareShared")}
+        copiedLabel={t("shareCopied")}
+        savedLabel={t("shareImageSaved")}
+        downloadFilename="soundprint-timeline.png"
+      />
+    );
+  }, [
+    periodTotals,
+    timeline?.startDate,
+    timeline?.endDate,
+    period,
+    locale,
+    friendName,
+    viewer?.name,
+    t,
+    tPeriod,
+  ]);
 
   const selectedArtistName =
     artistCompare?.type === "artist" ? (artistCompare.artistName ?? artistQuery) : artistQuery;
@@ -673,6 +798,8 @@ function CompareContent() {
     trackCompare?.type === "track" ? (trackCompare.trackTitle ?? trackQuery) : trackQuery;
   const selectedTrackArtistName =
     trackCompare?.type === "track" ? trackCompare.artistName : undefined;
+  const selectedGenreName =
+    genreCompare?.type === "genre" ? genreCompare.genreName : genreQuery;
 
   if (!friendUserId) {
     if (friendsLoading || viewer === null) {
@@ -811,6 +938,7 @@ function CompareContent() {
         selfTotal={periodTotals.selfTotal}
         friendTotal={periodTotals.friendTotal}
         locale={locale}
+        shareActions={timelineShareActions}
       />
 
       <DuetMetadataBanner friendName={friendName} metadata={metadata} />
@@ -848,23 +976,40 @@ function CompareContent() {
         </div>
       </section>
 
+      <DuetSharedArtistsPanel
+        friendName={friendName}
+        data={sharedArtists}
+        isLoading={isSharedArtistsLoading}
+        error={sharedArtistsError}
+        onRetry={() => void refetchSharedArtists()}
+        onSelectArtist={(artistId, artistName) => {
+          setArenaMode("artist");
+          setSelectedArtistId(artistId);
+          setArtistQuery(artistName);
+        }}
+      />
+
       <section className={DASHBOARD_SPOTLIGHT_SHELL}>
         <div
           className={
-            arenaMode === "track"
-              ? DASHBOARD_SPOTLIGHT_GRADIENT_CYAN
-              : arenaMode === "artist"
-                ? DASHBOARD_SPOTLIGHT_GRADIENT_LIME
-                : DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY
+            arenaMode === "genre"
+              ? DASHBOARD_SPOTLIGHT_GRADIENT_LIME
+              : arenaMode === "track"
+                ? DASHBOARD_SPOTLIGHT_GRADIENT_CYAN
+                : arenaMode === "artist"
+                  ? DASHBOARD_SPOTLIGHT_GRADIENT_LIME
+                  : DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY
           }
         />
         <div
           className={
-            arenaMode === "track"
-              ? DASHBOARD_SPOTLIGHT_HAIRLINE_CYAN
-              : arenaMode === "artist"
-                ? DASHBOARD_SPOTLIGHT_HAIRLINE_LIME
-                : DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET
+            arenaMode === "genre"
+              ? DASHBOARD_SPOTLIGHT_HAIRLINE_LIME
+              : arenaMode === "track"
+                ? DASHBOARD_SPOTLIGHT_HAIRLINE_CYAN
+                : arenaMode === "artist"
+                  ? DASHBOARD_SPOTLIGHT_HAIRLINE_LIME
+                  : DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET
           }
         />
         <SpotlightSectionHeader
@@ -924,7 +1069,7 @@ function CompareContent() {
                   chartTheme={chartTheme}
                   resolvedTheme={resolvedTheme}
                 />
-              ) : (
+              ) : arenaMode === "track" ? (
                 <EntityHeadToHeadPanel
                   searchPlaceholder={t("trackSearchPlaceholder")}
                   clearLabel={t("trackClear")}
@@ -963,6 +1108,50 @@ function CompareContent() {
                   entityDisplayName={selectedTrackName}
                   entitySubtitle={selectedTrackArtistName ?? undefined}
                   arenaMode="track"
+                  viewerName={viewer?.name ?? t("seriesSelf")}
+                  friendName={friendName}
+                  locale={locale}
+                  t={t}
+                  chartTheme={chartTheme}
+                  resolvedTheme={resolvedTheme}
+                />
+              ) : (
+                <EntityHeadToHeadPanel
+                  searchPlaceholder={t("genreSearchPlaceholder")}
+                  clearLabel={t("genreClear")}
+                  loadingLabel={t("genreLoading")}
+                  errorLabel={t("genreError")}
+                  chartTitle={t("genreChartTitle", { genreName: selectedGenreName, friendName })}
+                  chartDescription={t("genreChartDescription")}
+                  noDataTitle={t("genreNoDataTitle")}
+                  noDataDescription={t("genreNoDataDescription")}
+                  query={genreQuery}
+                  onQueryChange={(value) => {
+                    setGenreQuery(value);
+                    setSelectedGenre(undefined);
+                  }}
+                  selectedEntityId={selectedGenre}
+                  onSelectEntity={(id, label) => {
+                    setSelectedGenre(id);
+                    setGenreQuery(label);
+                  }}
+                  onClear={() => {
+                    setGenreQuery("");
+                    setSelectedGenre(undefined);
+                  }}
+                  suggestions={genreSuggestions.map((row) => ({
+                    id: row.genre,
+                    label: row.genre,
+                  }))}
+                  showSuggestions={showGenreSuggestions}
+                  entityCompare={genreCompare}
+                  isEntityLoading={isGenreCompareLoading}
+                  isEntityFetching={isGenreCompareFetching}
+                  entityError={genreCompareError}
+                  refetchEntity={() => void refetchGenreCompare()}
+                  chartData={genreChartData}
+                  entityDisplayName={selectedGenreName}
+                  arenaMode="genre"
                   viewerName={viewer?.name ?? t("seriesSelf")}
                   friendName={friendName}
                   locale={locale}

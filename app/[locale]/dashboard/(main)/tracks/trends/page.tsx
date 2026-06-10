@@ -41,6 +41,7 @@ import {
   DASHBOARD_CHART_THEME,
 } from "@/lib/constants/dashboard-spotlight";
 import { useTheme } from "@/lib/providers/theme-provider";
+import { DuetCompareDeepLink } from "@/lib/components/duet/duet-compare-deep-link";
 
 const COLORS = [
   "#22d3ee",
@@ -892,9 +893,14 @@ function TrendsContent() {
                   <h3 className={`${DASHBOARD_SPOTLIGHT_TITLE} tracking-tight sm:text-xl`}>{t("evolution")}</h3>
                   <p className={`mt-1 ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("chartHint")}</p>
                 </div>
-                <span className={DASHBOARD_SPOTLIGHT_PILL_MUTED}>
-                  {t("selectionCount", { selected: selectedIds.length, max: MAX_SERIES_TRACKS })}
-                </span>
+                <div className="flex flex-col items-start gap-2 sm:items-end">
+                  <span className={DASHBOARD_SPOTLIGHT_PILL_MUTED}>
+                    {t("selectionCount", { selected: selectedIds.length, max: MAX_SERIES_TRACKS })}
+                  </span>
+                  {selectedIds.length === 1 ? (
+                    <DuetCompareDeepLink entityType="track" entityId={selectedIds[0]!} />
+                  ) : null}
+                </div>
               </div>
             </div>
             <div className="relative p-4 sm:p-6 lg:p-8">

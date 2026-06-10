@@ -10,6 +10,8 @@
 
 La **couche données et API** existe : import validé, persistance Prisma, lecture agrégée. Aucune page dashboard ne consomme encore `GET /api/replay` ; le hook client est prêt mais **non branché**.
 
+**Cartes partage** : la librairie commune `lib/utils/share-card/` (canvas 1080×1080, head-to-head, Web Share API) est utilisée par Duet ; Encore pourra s’y brancher via `head-to-head-share-card.ts` ou un renderer dédié Replay.
+
 Rien d’urgent : ce fichier sert de **cadrage** jusqu’à ce que tu priorises l’UI ou l’intégration import côté utilisateur.
 
 ---

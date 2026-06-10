@@ -10,7 +10,7 @@ export const runtime = "nodejs";
 const ROUTE = "/api/duet/compare/entity";
 
 const EntityQuerySchema = z.object({
-  type: z.enum(["artist", "track"]),
+  type: z.enum(["artist", "track", "genre"]),
   entityId: z.string().min(1),
 });
 

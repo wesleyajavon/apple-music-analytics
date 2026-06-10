@@ -410,6 +410,137 @@ export async function getGenreTrends(
   }));
 }
 
+/**
+ * Compte les écoutes d'un genre résolu sur une plage (même logique que getGenreDistribution).
+ */
+export async function countGenreListens(
+  userId: string,
+  genre: string,
+  startDate: Date,
+  endDate: Date
+): Promise<number> {
+  const genreMapEntries = Object.entries(ARTIST_TO_GENRE_MAP);
+
+  if (
+    genreMapEntries.length === 0 ||
+    genreMapEntries.length > ARTIST_TO_GENRE_MAP_SQL_SAFE_ROW_LIMIT
+  ) {
+    const result = await prisma.$queryRaw<Array<{ count: bigint }>>(Prisma.sql`
+      SELECT COUNT(*)::bigint AS count
+      FROM "Listen" l
+      JOIN "Track" t ON l."trackId" = t.id
+      WHERE l."userId" = ${userId}
+        AND l."playedAt" >= ${startDate}
+        AND l."playedAt" <= ${endDate}
+        AND COALESCE(t.genre, 'Unknown') = ${genre}
+    `);
+    return Number(result[0]?.count ?? 0);
+  }
+
+  const valuesParts = genreMapEntries.map(([artist, mappedGenre]) =>
+    Prisma.sql`(${artist}, ${mappedGenre})`
+  );
+
+  const result = await prisma.$queryRaw<Array<{ count: bigint }>>(Prisma.sql`
+    SELECT COUNT(*)::bigint AS count
+    FROM "Listen" l
+    JOIN "Track" t ON l."trackId" = t.id
+    JOIN "Artist" a ON t."artistId" = a.id
+    LEFT JOIN (VALUES ${Prisma.join(valuesParts)}) AS genre_map(artist_name, genre)
+      ON a.name = genre_map.artist_name
+    WHERE l."userId" = ${userId}
+      AND l."playedAt" >= ${startDate}
+      AND l."playedAt" <= ${endDate}
+      AND COALESCE(t.genre, genre_map.genre, 'Unknown') = ${genre}
+  `);
+
+  return Number(result[0]?.count ?? 0);
+}
+
+/**
+ * Série temporelle pour un genre donné (même résolution que getGenreTrends).
+ */
+export async function getGenreTrendRowsForGenre(
+  startDate: Date,
+  endDate: Date,
+  period: GenreTrendPeriod,
+  userId: string,
+  genre: string
+): Promise<Array<{ date: string; count: number }>> {
+  const genreMapEntries = Object.entries(ARTIST_TO_GENRE_MAP);
+
+  const dateExpr =
+    period === "day"
+      ? Prisma.raw('DATE(l."playedAt")')
+      : period === "week"
+        ? Prisma.raw('DATE_TRUNC(\'week\', l."playedAt")::date')
+        : Prisma.raw('TO_CHAR(l."playedAt", \'YYYY-MM\')');
+
+  if (
+    genreMapEntries.length === 0 ||
+    genreMapEntries.length > ARTIST_TO_GENRE_MAP_SQL_SAFE_ROW_LIMIT
+  ) {
+    const query = Prisma.sql`
+      SELECT
+        ${dateExpr}::text as date,
+        COUNT(*)::int as count
+      FROM "Listen" l
+      JOIN "Track" t ON l."trackId" = t.id
+      WHERE l."playedAt" >= ${startDate}
+        AND l."playedAt" <= ${endDate}
+        AND l."userId" = ${userId}
+        AND COALESCE(t.genre, 'Unknown') = ${genre}
+      GROUP BY ${dateExpr}
+      ORDER BY ${dateExpr} ASC
+    `;
+
+    const result = await prisma.$queryRaw<
+      Array<{ date: string | Date; count: bigint }>
+    >(query);
+
+    return result.map((row) => ({
+      date: normalizeTrendDate(row.date, period),
+      count: transformBigIntToNumber({ count: row.count }).count,
+    }));
+  }
+
+  const valuesParts = genreMapEntries.map(([artist, mappedGenre]) =>
+    Prisma.sql`(${artist}, ${mappedGenre})`
+  );
+
+  const query = Prisma.sql`
+    WITH genre_resolved AS (
+      SELECT
+        ${dateExpr} as bucket,
+        COALESCE(t.genre, genre_map.genre, 'Unknown') as genre
+      FROM "Listen" l
+      JOIN "Track" t ON l."trackId" = t.id
+      JOIN "Artist" a ON t."artistId" = a.id
+      LEFT JOIN (VALUES ${Prisma.join(valuesParts)}) AS genre_map(artist_name, genre)
+        ON a.name = genre_map.artist_name
+      WHERE l."playedAt" >= ${startDate}
+        AND l."playedAt" <= ${endDate}
+        AND l."userId" = ${userId}
+    )
+    SELECT
+      bucket::text as date,
+      COUNT(*)::int as count
+    FROM genre_resolved
+    WHERE genre = ${genre}
+    GROUP BY bucket
+    ORDER BY bucket ASC
+  `;
+
+  const result = await prisma.$queryRaw<
+    Array<{ date: string | Date; count: bigint }>
+  >(query);
+
+  return result.map((row) => ({
+    date: normalizeTrendDate(row.date, period),
+    count: transformBigIntToNumber({ count: row.count }).count,
+  }));
+}
+
 function normalizeTrendDate(
   value: string | Date,
   period: GenreTrendPeriod

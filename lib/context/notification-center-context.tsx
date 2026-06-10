@@ -32,6 +32,11 @@ export type NotificationItem = {
     pct: number;
     count: number;
   };
+  /** Injecté depuis GET /api/duet/friends — non persisté en localStorage. */
+  duetFriendRequest?: {
+    friendshipId: string;
+    requesterName: string;
+  };
 };
 
 export type AddNotificationInput = {
@@ -62,6 +67,12 @@ function isNotificationItem(x: unknown): x is NotificationItem {
     if (g === null || typeof g !== "object") return false;
     const gx = g as Record<string, unknown>;
     if (typeof gx.pct !== "number" || typeof gx.count !== "number") return false;
+  }
+  if (o.duetFriendRequest !== undefined) {
+    const d = o.duetFriendRequest;
+    if (d === null || typeof d !== "object") return false;
+    const dx = d as Record<string, unknown>;
+    if (typeof dx.friendshipId !== "string" || typeof dx.requesterName !== "string") return false;
   }
   return true;
 }
@@ -143,7 +154,11 @@ export function NotificationCenterProvider({ children }: { children: ReactNode }
               NOTIFICATION_SOURCE_DEDUPE_MS
             )
           : prev;
-      return sortByNewest([item, ...withoutRecentDup]).slice(0, NOTIFICATION_CENTER_MAX_ITEMS);
+      const withoutServerDuet =
+        input.source != null && input.source.startsWith("duet-friend-request:")
+          ? withoutRecentDup.filter((n) => !n.source?.startsWith("duet-friend-request:"))
+          : withoutRecentDup;
+      return sortByNewest([item, ...withoutServerDuet]).slice(0, NOTIFICATION_CENTER_MAX_ITEMS);
     });
   }, []);
 

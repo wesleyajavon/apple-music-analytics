@@ -2,6 +2,7 @@ import type { DuetShareScope, Friendship, FriendshipStatus, User } from "@prisma
 import { prisma } from "@/lib/prisma";
 import { DUET_MAX_FRIENDS, DUET_MAX_INVITES_PER_DAY } from "@/lib/constants/duet-limits";
 import { DUET_ERROR_CODES, DuetServiceError } from "@/lib/services/duet/duet-errors";
+import { countDuetInvitesSentToday } from "@/lib/services/duet/duet-invite-quota";
 import { getOrCreateDuetShareSettings } from "@/lib/services/duet/duet-share-settings-service";
 
 const userSummarySelect = {
@@ -37,10 +38,6 @@ const friendshipInclude = {
 
 function normalizeEmail(raw: string): string {
   return raw.trim().toLowerCase();
-}
-
-function startOfUtcDay(date: Date): Date {
-  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
 }
 
 function toFriendshipDto(
@@ -86,17 +83,6 @@ async function countAcceptedFriendships(userId: string): Promise<number> {
   });
 }
 
-async function countInvitesSentToday(requesterId: string): Promise<number> {
-  const since = startOfUtcDay(new Date());
-  return prisma.friendship.count({
-    where: {
-      requesterId,
-      createdAt: { gte: since },
-      status: { in: ["pending", "accepted"] },
-    },
-  });
-}
-
 function assertAcceptableShareScope(shareScope: DuetShareScope): void {
   if (shareScope !== "aggregates" && shareScope !== "full") {
     throw new DuetServiceError(DUET_ERROR_CODES.INVALID_SHARE_SCOPE);
@@ -135,7 +121,7 @@ export async function inviteFriendByEmail(
     throw new DuetServiceError(DUET_ERROR_CODES.FRIEND_LIMIT_REACHED);
   }
 
-  const invitesToday = await countInvitesSentToday(requesterId);
+  const invitesToday = await countDuetInvitesSentToday(requesterId);
   if (invitesToday >= DUET_MAX_INVITES_PER_DAY) {
     throw new DuetServiceError(DUET_ERROR_CODES.INVITE_QUOTA_EXCEEDED);
   }

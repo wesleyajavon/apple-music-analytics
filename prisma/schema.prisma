@@ -32,6 +32,7 @@ model User {
   friendshipsAsRequester Friendship[] @relation("FriendshipRequester")
   friendshipsAsAddressee Friendship[] @relation("FriendshipAddressee")
   duetShareSettings DuetShareSettings?
+  duetInviteTokens DuetInviteToken[]
 }
 
 /// GDPR consent audit trail (cookies, terms, IA, etc.)
@@ -153,6 +154,19 @@ model DuetShareSettings {
   allowFriendRequests Boolean        @default(true)
   defaultShareScope   DuetShareScope @default(aggregates)
   user                User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model DuetInviteToken {
+  id          String    @id @default(cuid())
+  requesterId String
+  expiresAt   DateTime
+  consumedAt  DateTime?
+  createdAt   DateTime  @default(now())
+
+  requester User @relation(fields: [requesterId], references: [id], onDelete: Cascade)
+
+  @@index([requesterId, createdAt])
+  @@index([expiresAt])
 }
 
 model PaletteArtistDecision {

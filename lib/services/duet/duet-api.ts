@@ -22,6 +22,18 @@ export const DUET_RATE_LIMITS = {
     maxRequests: 15,
     softLimitRatio: 0.8,
   },
+  friendsInviteLink: {
+    route: "/api/duet/friends/invite-link",
+    windowMs: 60_000,
+    maxRequests: 8,
+    softLimitRatio: 0.8,
+  },
+  friendsInviteLinkRedeem: {
+    route: "/api/duet/friends/invite-link/redeem",
+    windowMs: 60_000,
+    maxRequests: 15,
+    softLimitRatio: 0.8,
+  },
   friendsMutate: {
     route: "/api/duet/friends/mutate",
     windowMs: 60_000,
@@ -90,6 +102,13 @@ export function mapDuetServiceError(error: DuetServiceError): NextResponse {
       return NextResponse.json(
         { error: error.message, code: error.code },
         { status: 409 }
+      );
+    case DUET_ERROR_CODES.INVITE_TOKEN_INVALID:
+    case DUET_ERROR_CODES.INVITE_TOKEN_EXPIRED:
+    case DUET_ERROR_CODES.INVITE_TOKEN_CONSUMED:
+      return NextResponse.json(
+        { error: "Invite link unavailable", code: error.code },
+        { status: 404 }
       );
     default:
       return NextResponse.json(

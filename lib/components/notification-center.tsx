@@ -1,18 +1,30 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Link } from "@/i18n/navigation";
 import { GENRE_AI_NUDGE_NOTIFICATION_SOURCE } from "@/lib/constants/genre-ai-nudge-notification";
+import { isDuetFriendRequestSource } from "@/lib/constants/duet-friend-request-notification";
 import { useNotifications, type NotificationItem } from "@/lib/context/notification-center-context";
 import { useGenreBackfillJob } from "@/lib/context/genre-backfill-job-context";
+import { useDuetPendingIncoming } from "@/lib/hooks/use-duet-pending-incoming";
+import {
+  buildDuetFriendRequestNotification,
+  mergeNotificationItems,
+} from "@/lib/utils/duet-friend-request-notifications";
 import { clearGenreBackfillBannerBlockingPrefs } from "@/lib/utils/genre-backfill-banner-prefs";
 
 function formatNotificationDisplay(
   n: NotificationItem,
   t: (key: string, values?: Record<string, string | number | Date>) => string
 ): { title: string; body?: string } {
+  if (n.duetFriendRequest) {
+    return {
+      title: t("duetFriendRequest.title", { name: n.duetFriendRequest.requesterName }),
+      body: t("duetFriendRequest.body"),
+    };
+  }
   if (n.genreGroqNudge) {
     return {
       title: t("genreGroqNudge.title"),
@@ -29,6 +41,10 @@ function formatNotificationDisplay(
     };
   }
   return { title: n.title, body: n.body };
+}
+
+function isDuetFriendRequestNotification(n: NotificationItem): boolean {
+  return isDuetFriendRequestSource(n.source) || n.duetFriendRequest != null;
 }
 
 function isGenreGroqNudgeNotification(n: NotificationItem): boolean {
@@ -64,11 +80,27 @@ function formatListTime(iso: string, locale: string): string {
 export function NotificationCenter() {
   const t = useTranslations("components.notificationCenter");
   const locale = useLocale();
-  const { items, unreadCount, markRead, markAllRead, clearAll } = useNotifications();
+  const { items, markRead, markAllRead, clearAll } = useNotifications();
+  const { pendingIncoming } = useDuetPendingIncoming();
   const { refreshStatus, hasActiveGroqJob } = useGenreBackfillJob();
   const [open, setOpen] = useState(false);
   const [groqStartingId, setGroqStartingId] = useState<string | null>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
+
+  const serverDuetItems = useMemo(
+    () => pendingIncoming.map((friendship) => buildDuetFriendRequestNotification(friendship)),
+    [pendingIncoming]
+  );
+
+  const displayItems = useMemo(
+    () => mergeNotificationItems(items, serverDuetItems),
+    [items, serverDuetItems]
+  );
+
+  const unreadCount = useMemo(
+    () => displayItems.filter((item) => !item.read).length,
+    [displayItems]
+  );
 
   const startGroqClassification = useCallback(
     async (notificationId: string) => {
@@ -176,7 +208,7 @@ export function NotificationCenter() {
                   {t("markAllRead")}
                 </button>
               ) : null}
-              {items.length > 0 ? (
+              {displayItems.length > 0 ? (
                 <button
                   type="button"
                   onClick={() => clearAll()}
@@ -189,17 +221,18 @@ export function NotificationCenter() {
           </div>
 
           <div className="max-h-[min(26rem,52vh)] overflow-y-auto overscroll-contain">
-            {items.length === 0 ? (
+            {displayItems.length === 0 ? (
               <div className="px-4 py-10 text-center">
                 <p className="font-mono text-[11px] uppercase tracking-wider text-muted/70">{t("emptyKicker")}</p>
                 <p className="mt-2 text-sm leading-relaxed text-muted">{t("empty")}</p>
               </div>
             ) : (
               <ul className="divide-y divide-border/60">
-                {items.map((n) => {
+                {displayItems.map((n) => {
                   const timeLabel = formatListTime(n.createdAt, locale);
                   const display = formatNotificationDisplay(n, t);
                   const isGroqNudge = isGenreGroqNudgeNotification(n);
+                  const isDuetFriendRequest = isDuetFriendRequestNotification(n);
                   const isStartingGroq = groqStartingId === n.id;
                   const stripe = severityStripeClass(n.severity);
 
@@ -257,6 +290,20 @@ export function NotificationCenter() {
 
                   const rowHover =
                     "transition-colors hover:bg-foreground/[0.03] dark:hover:bg-white/[0.04]";
+
+                  if (isDuetFriendRequest && n.href) {
+                    return (
+                      <li key={n.id}>
+                        <Link
+                          href={n.href}
+                          onClick={() => setOpen(false)}
+                          className={`block px-4 py-3.5 ${rowHover}`}
+                        >
+                          {textBlock}
+                        </Link>
+                      </li>
+                    );
+                  }
 
                   return (
                     <li key={n.id}>

@@ -28,7 +28,11 @@ import {
   generateDuetTimelineSharePng,
   resolveDuetTimelineWinner,
 } from "@/lib/utils/duet-timeline-share-image";
-import { getDuetDisplayName } from "@/lib/components/duet/duet-utils";
+import {
+  getDuetDisplayName,
+  getViewerDisplayName,
+  resolveAuthAvatarUrl,
+} from "@/lib/components/duet/duet-utils";
 import {
   DASHBOARD_SPOTLIGHT_SHELL,
   DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY,
@@ -65,6 +69,7 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 type ViewerProfile = {
   id: string;
   name: string;
+  email: string | null;
   avatarUrl: string | null;
 };
 
@@ -327,28 +332,62 @@ function CompareContent() {
     void createSupabaseBrowserClient()
       .auth.getUser()
       .then(async ({ data: auth }) => {
-        const userId = auth.user?.id ?? null;
-        if (!userId) {
+        const authUser = auth.user;
+        const userId = authUser?.id ?? null;
+        if (!userId || !authUser) {
           setViewer(null);
           return;
         }
+
+        const authEmail = authUser.email ?? null;
+        const authAvatarUrl = resolveAuthAvatarUrl(authUser);
+        const authFallbackName = getViewerDisplayName({
+          name:
+            (authUser.user_metadata?.name as string | undefined) ??
+            (authUser.user_metadata?.full_name as string | undefined),
+          email: authEmail,
+          id: userId,
+        });
+
         try {
           const res = await fetch("/api/user/me", { credentials: "same-origin" });
           if (res.ok) {
-            const data = (await res.json()) as { name?: string | null; avatarUrl?: string | null };
+            const data = (await res.json()) as {
+              user?: {
+                name?: string | null;
+                email?: string | null;
+                avatarUrl?: string | null;
+              } | null;
+            };
+            const email = data.user?.email ?? authEmail;
             setViewer({
               id: userId,
-              name: data.name?.trim() || t("seriesSelf"),
-              avatarUrl: data.avatarUrl ?? null,
+              email,
+              name: getViewerDisplayName({
+                name: data.user?.name,
+                email,
+                id: userId,
+              }),
+              avatarUrl: data.user?.avatarUrl ?? authAvatarUrl,
             });
           } else {
-            setViewer({ id: userId, name: t("seriesSelf"), avatarUrl: null });
+            setViewer({
+              id: userId,
+              email: authEmail,
+              name: authFallbackName,
+              avatarUrl: authAvatarUrl,
+            });
           }
         } catch {
-          setViewer({ id: userId, name: t("seriesSelf"), avatarUrl: null });
+          setViewer({
+            id: userId,
+            email: authEmail,
+            name: authFallbackName,
+            avatarUrl: authAvatarUrl,
+          });
         }
       });
-  }, [t]);
+  }, []);
 
   const { data: timeline, isLoading, error, refetch } = useDuetCompareTimeline({
     friendUserId,

@@ -120,7 +120,7 @@ export function DuetCompareHero({
                         ) : (
                           <span className="text-center text-[0.65rem] font-semibold uppercase tracking-wider text-emerald-300">
                             {leader === "self"
-                              ? t("scoreboardLeads", { name: t("seriesSelf") })
+                              ? t("scoreboardLeads", { name: viewerName })
                               : t("scoreboardLeads", { name: friendName })}
                           </span>
                         )}

@@ -16,6 +16,9 @@ vi.mock("@/lib/prisma", () => ({
     duetShareSettings: {
       upsert: vi.fn(),
     },
+    duetInviteToken: {
+      count: vi.fn(),
+    },
   },
 }));
 
@@ -84,6 +87,7 @@ describe("friendship-service", () => {
       allowFriendRequests: true,
       defaultShareScope: "aggregates",
     });
+    vi.mocked(prisma.duetInviteToken.count).mockResolvedValue(0);
   });
 
   describe("inviteFriendByEmail", () => {

@@ -47,6 +47,16 @@ function redirectToPublicHome(request: NextRequest, locale: string | null) {
   );
 }
 
+function redirectToSignIn(
+  request: NextRequest,
+  locale: string | null,
+  nextPath: string
+) {
+  const signInUrl = new URL(getLocalizedPath("/sign-in", locale), request.url);
+  signInUrl.searchParams.set("next", nextPath);
+  return NextResponse.redirect(signInUrl);
+}
+
 export default async function middleware(request: NextRequest) {
   const response = handleI18nRouting(request);
   const { response: sessionResponse, user } = await updateSession(request, response);
@@ -59,6 +69,11 @@ export default async function middleware(request: NextRequest) {
     const configuredPublicId = getConfiguredPublicProfileUserId();
     const userIdParam = request.nextUrl.searchParams.get("userId");
     const locale = getLocaleFromPathname(request.nextUrl.pathname);
+
+    if (normalizedPath.startsWith("/dashboard/duet")) {
+      const nextPath = `${normalizedPath}${request.nextUrl.search}`;
+      return redirectToSignIn(request, locale, nextPath);
+    }
 
     let activePublicId: string | null = null;
     if (configuredPublicId && userIdParam === configuredPublicId) {

@@ -2,7 +2,19 @@
 
 > **Project Duet** · Résumé codename : [DUET.md](./DUET.md) · Index : [IDEAS_BAG.md](../IDEAS_BAG.md)
 
-Document de **cadrage, audit et roadmap** pour introduire un réseau social minimal (amis, invitations, vues comparatives) dans l’app d’analytics d’écoute. **Statut au 2026-06-09** : idée documentée — **aucune implémentation** (pas de tables, API ni pages Duet).
+Document de **cadrage, audit et roadmap** pour introduire un réseau social minimal (amis, invitations, vues comparatives) dans l’app d’analytics d’écoute.
+
+**Statut au 2026-06-10** : **Phases 0–4 terminées** (données, API, UI, QA manuel 2 comptes OK). **Phase 5** (durcissement E2E + prod) **non commencée**. Détails : [checklist go/no-go §7.5](#checklist-go--no-go-production-ue).
+
+| Phase | Statut |
+|-------|--------|
+| 0 — Cadrage & juridique | ✅ Validée ([DUET_PHASE0_DECISIONS.md](./DUET_PHASE0_DECISIONS.md)) |
+| 1 — Fondation données | ✅ |
+| 2 — API sociale | ✅ |
+| 3 — API comparaison | ✅ |
+| 4 — UI MVP + QA manuel | ✅ |
+| 5 — Durcissement & prod | ⏳ À faire |
+| 6 — Extensions v2 | — Post-MVP |
 
 ---
 
@@ -281,7 +293,7 @@ Avant le premier commit code, valider ces choix (défauts recommandés entre **g
 | D7 | Accès démo publique | **Fermé** (session obligatoire) |
 | D8 | Plafond amis | **50** |
 | D9 | Quota invitations / jour | **10** par utilisateur |
-| D10 | Texte légal consentement partage | **À rédiger / valider juridiquement** (voir §7) |
+| D10 | Texte légal consentement partage | **Auto-évaluation interne** — ROPA, privacy, `DUET_SHARING_CONSENT_VERSION` `2026-06-09` (voir [DUET_PHASE0_DECISIONS.md](./DUET_PHASE0_DECISIONS.md), [GDPR_DPIA_DUET.md](./GDPR_DPIA_DUET.md)) |
 
 Cocher dans la section [Actions hors code](#7-actions-hors-code-ta-responsabilité) quand tranché.
 
@@ -289,10 +301,11 @@ Cocher dans la section [Actions hors code](#7-actions-hors-code-ta-responsabilit
 
 ## 6. Roadmap par phase
 
-### Phase 0 — Cadrage produit & juridique
+### Phase 0 — Cadrage produit & juridique ✅
 
 **Durée estimée** : 2–3 jours (dont actions humaines en parallèle).  
-**Bloquant** : oui, avant migration Prisma.
+**Bloquant** : oui, avant migration Prisma.  
+**Statut** : **terminée** (2026-06-09).
 
 | # | Livrable |
 |---|----------|
@@ -312,9 +325,10 @@ Voir [§7.1](#71-phase-0--cadrage-et-juridique).
 
 ---
 
-### Phase 1 — Fondation données
+### Phase 1 — Fondation données ✅
 
-**Durée estimée** : 3–4 jours.
+**Durée estimée** : 3–4 jours.  
+**Statut** : **terminée**.
 
 | # | Tâche | Fichiers |
 |---|-------|----------|
@@ -340,9 +354,10 @@ Voir [§7.2](#72-phase-1--base-de-données).
 
 ---
 
-### Phase 2 — API sociale
+### Phase 2 — API sociale ✅
 
-**Durée estimée** : 3–4 jours.
+**Durée estimée** : 3–4 jours.  
+**Statut** : **terminée**.
 
 | # | Tâche |
 |---|-------|
@@ -367,9 +382,10 @@ Voir [§7.3](#73-phase-2--légal-et-consentement).
 
 ---
 
-### Phase 3 — API comparaison
+### Phase 3 — API comparaison ✅
 
-**Durée estimée** : 4–5 jours.
+**Durée estimée** : 4–5 jours.  
+**Statut** : **terminée**.
 
 | # | Tâche | Réutilisation |
 |---|-------|---------------|
@@ -392,9 +408,10 @@ Aucune action bloquante hors code. Optionnel : tester manuellement avec 2 compte
 
 ---
 
-### Phase 4 — UI MVP
+### Phase 4 — UI MVP ✅
 
-**Durée estimée** : 5–7 jours.
+**Durée estimée** : 5–7 jours.  
+**Statut** : **terminée** — QA manuel 2 comptes validé (invite → accept → compare → revoke → blocage).
 
 | # | Écran |
 |---|-------|
@@ -419,9 +436,10 @@ Voir [§7.4](#74-phase-4--tests-manuels-et-comptes).
 
 ---
 
-### Phase 5 — Durcissement
+### Phase 5 — Durcissement ⏳
 
-**Durée estimée** : 2–3 jours.
+**Durée estimée** : 2–3 jours.  
+**Statut** : **non commencée** — prochaine étape avant prod.
 
 | # | Tâche |
 |---|-------|
@@ -477,13 +495,14 @@ Priorité suggérée :
 
 ### 7.1 Phase 0 — Cadrage et juridique
 
-| Action | Détail exact | Quand |
-|--------|--------------|-------|
-| **Valider D1–D10** | Ouvre `docs/DUET_PHASE0_DECISIONS.md` (créé par l’agent Phase 0) ou note tes choix dans un commentaire / issue. Coche chaque décision. | Avant Phase 1 |
-| **Revue RGPD** | Ouvre [GDPR_LEGAL_REVIEW_CHECKLIST.md](./GDPR_LEGAL_REVIEW_CHECKLIST.md) §6 — déclencheur « Fonctionnalités sociales ». Contacte conseil / DPO externe (_À désigner_ dans le checklist). Budget indicatif : 2–5 h dossier préparé. | Parallèle Phase 0–1 |
-| **Mettre à jour ROPA** | Après validation juridique, édite [GDPR_ROPA.md](./GDPR_ROPA.md) : nouvelle finalité « partage comparatif avec amis acceptés », base légale, durée conservation relations, droit de retrait (révocation ami). | Avant prod UE |
-| **Texte consentement** | Rédige ou fais valider le texte affiché à l’**acceptation** d’invitation (partage de statistiques d’écoute agrégées avec un ami identifié). L’agent codera la constante `DUET_SHARING_CONSENT_VERSION` — tu fournis le contenu légal. | Avant Phase 2 |
-| **Politique de confidentialité** | Ajoute un paragraphe « Partage avec amis (Duet) » dans les pages légales `/legal/privacy` (via `messages/*.json` namespace `legal.privacy`) une fois le texte validé. | Avant prod |
+| Action | Détail exact | Quand | Statut |
+|--------|--------------|-------|--------|
+| **Valider D1–D10** | `docs/DUET_PHASE0_DECISIONS.md` | Avant Phase 1 | ✅ 2026-06-09 |
+| **Revue RGPD externe** | [GDPR_LEGAL_REVIEW_CHECKLIST.md](./GDPR_LEGAL_REVIEW_CHECKLIST.md) §6 | Parallèle Phase 0–1 | ⏭️ Différée (auto-évaluation retenue) |
+| **Mettre à jour ROPA** | [GDPR_ROPA.md](./GDPR_ROPA.md) — ligne « Partage Duet » | Avant prod UE | ✅ 2026-06-09 |
+| **Texte consentement** | `DUET_SHARING_CONSENT_VERSION` = `2026-06-09` ; copy §2.3 Phase 0 | Avant Phase 2 | ✅ |
+| **Politique de confidentialité** | Section Duet dans `messages/*/legal.privacy` | Avant prod UE | ✅ 2026-06-09 |
+| **DPIA Duet** | [GDPR_DPIA_DUET.md](./GDPR_DPIA_DUET.md) | Avant prod UE | ✅ 2026-06-09 (interne) |
 
 ### 7.2 Phase 1 — Base de données
 
@@ -495,18 +514,19 @@ Priorité suggérée :
 
 ### 7.3 Phase 2 — Légal et consentement
 
-| Action | Détail exact | Quand |
-|--------|--------------|-------|
-| **Version consentement** | Donne le numéro de version à utiliser (ex. `2026-06-01`) pour `DUET_SHARING_CONSENT_VERSION` — doit correspondre au texte légal publié. | Avant merge Phase 2 |
-| **Email transactionnel (optionnel)** | Si tu veux notifier les invitations par email réel : configure SMTP / Supabase Auth templates / Resend — **hors scope MVP** (l’invite MVP cible un `User` existant in-app). | v2 |
+| Action | Détail exact | Quand | Statut |
+|--------|--------------|-------|--------|
+| **Version consentement** | `DUET_SHARING_CONSENT_VERSION` = `2026-06-09` | Avant merge Phase 2 | ✅ |
+| **Email transactionnel (optionnel)** | SMTP / Supabase / Resend — hors scope MVP | v2 | — |
 
 ### 7.4 Phase 4 — Tests manuels et comptes
 
-| Action | Détail exact | Quand |
-|--------|--------------|-------|
-| **2 comptes de test** | Crée 2 utilisateurs Supabase (ex. `duet-test-a@…`, `duet-test-b@…`) avec imports Last.fm ou CSV **sur la même période** pour valider le graphe. | Avant QA Phase 4 |
-| **Scénario manuel** | 1) A invite B par email. 2) B accepte avec scope `aggregates`. 3) A ouvre Comparer → timeline. 4) B révoque → A doit voir 404. 5) Tester blocage. | Avant prod |
-| **Copy UX** | Relis les chaînes i18n `duet.*` dans les 3 langues ; ajuste le ton « fun » vs juridique sur l’écran d’acceptation. | Avant prod |
+| Action | Détail exact | Quand | Statut |
+|--------|--------------|-------|--------|
+| **2 comptes de test** | 2 utilisateurs Supabase avec imports sur la même période | Avant QA Phase 4 | ✅ |
+| **Scénario manuel** | Invite → accept `aggregates` → compare timeline → revoke → 404 → blocage | Avant prod | ✅ 2026-06-10 |
+| **Copy UX** | Relire `duet.*` en/fr/es | Avant prod | ☐ Optionnel |
+| **Redirect anonyme** | `/dashboard/duet/*` → sign-in (`duet/layout.tsx`) | Avant prod | ✅ |
 
 ### 7.5 Phase 5 — Mise en production
 
@@ -519,14 +539,33 @@ Priorité suggérée :
 
 ### Checklist go / no-go production UE
 
-- [ ] D1–D10 validées et documentées
-- [ ] ROPA mis à jour
-- [ ] Politique de confidentialité mise à jour
-- [ ] Consentement `duet_sharing` versionné et tracé (`UserConsent`)
-- [ ] Migration appliquée en prod
-- [ ] Scénario manuel 2 comptes OK
-- [ ] Duet absent / bloqué en démo publique anonyme
-- [ ] Pas de fuite cross-user sur audit Phase 5
+> **Dev / staging (Phases 0–4)** : prêt pour Phase 5.  
+> **Prod UE** : cocher les cases ☐ restantes avant ouverture publique.
+
+#### Conformité & cadrage
+
+- [x] D1–D10 validées et documentées ([DUET_PHASE0_DECISIONS.md](./DUET_PHASE0_DECISIONS.md))
+- [x] ROPA mis à jour ([GDPR_ROPA.md](./GDPR_ROPA.md) — Partage Duet)
+- [x] Politique de confidentialité mise à jour (section Duet, 2026-06-09)
+- [x] Consentement `duet_sharing` versionné et tracé (`UserConsent`, version `2026-06-09`)
+- [x] DPIA Duet documentée ([GDPR_DPIA_DUET.md](./GDPR_DPIA_DUET.md) — auto-évaluation)
+- [ ] Revue juridique externe *(différée — optionnelle pour MVP)*
+
+#### Qualité & sécurité (dev / QA)
+
+- [x] Migration appliquée en **dev** (local)
+- [x] Scénario manuel 2 comptes OK (§7.4)
+- [x] Duet absent / bloqué en démo publique anonyme (sidebar + redirect `duet/layout.tsx`)
+- [x] Garde-fous cross-user (`assertFriendDataAccess` + routes `/api/duet/compare/*`)
+
+#### Phase 5 — avant prod
+
+- [ ] Migration appliquée en **prod**
+- [ ] Staging preview + smoke test §7.4
+- [ ] Tests E2E Playwright (invite → accept → compare)
+- [ ] Audit fuite : routes analytics solo + Maestro sans accès ami via `userId`
+- [ ] `PUBLIC_DEMO_ROUTES_ADVISORY.md` mis à jour (`/dashboard/duet/*` → Fermer)
+- [ ] Monitoring post-launch (rate limit, Sentry 403/404 sur `/api/duet/*`)
 
 ---
 
@@ -569,4 +608,4 @@ Priorité suggérée :
 
 ---
 
-*Dernière mise à jour : 2026-06-09 — généré à partir de l’audit architecture pré-implémentation.*
+*Dernière mise à jour : 2026-06-10 — Phases 0–4 terminées ; Phase 5 à venir.*

@@ -12,7 +12,7 @@ export default async function DuetLayout({ children, params }: Props) {
   const { locale } = await params;
   const userId = await getCurrentUserId();
   if (!userId) {
-    redirect({ href: "/sign-in", locale });
+    redirect({ href: "/sign-in?next=/dashboard/duet/friends", locale });
   }
   return children;
 }

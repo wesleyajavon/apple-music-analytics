@@ -1,20 +1,114 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useEffect, useState, type FormEvent, type ReactNode } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { motion } from "motion/react";
+import {
+  Ban,
+  Check,
+  Clock,
+  Mail,
+  Send,
+  Shield,
+  Swords,
+  UserMinus,
+  X,
+} from "lucide-react";
 import { UserAvatar } from "@/lib/components/user-avatar";
 import { EmptyState } from "@/lib/components/empty-state";
 import { ErrorState } from "@/lib/components/error-state";
+import { DuetFriendsHero } from "@/lib/components/duet/duet-friends-hero";
 import {
   DASHBOARD_SPOTLIGHT_SHELL,
+  DASHBOARD_SPOTLIGHT_GRADIENT_CYAN,
+  DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY,
+  DASHBOARD_SPOTLIGHT_GRADIENT_LIME,
+  DASHBOARD_SPOTLIGHT_HAIRLINE_CYAN,
+  DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET,
+  DASHBOARD_SPOTLIGHT_HAIRLINE_LIME,
+  DASHBOARD_SPOTLIGHT_HEADER_BOTTOM,
+  DASHBOARD_SPOTLIGHT_INNER_WELL,
   DASHBOARD_SPOTLIGHT_MUTED,
   DASHBOARD_SPOTLIGHT_BTN_SECONDARY,
+  DASHBOARD_SPOTLIGHT_BADGE_VIOLET,
+  DASHBOARD_SPOTLIGHT_BADGE_DOT_VIOLET,
+  DASHBOARD_SPOTLIGHT_BADGE_LIME,
+  DASHBOARD_SPOTLIGHT_BADGE_DOT_LIME,
+  DASHBOARD_SPOTLIGHT_BADGE_CYAN_COMPACT,
+  DASHBOARD_SPOTLIGHT_BADGE_DOT_CYAN,
+  DASHBOARD_SPOTLIGHT_SELECT,
 } from "@/lib/constants/dashboard-spotlight";
 import { useDuetFriends, useDuetMutations, type DuetShareScopeOption } from "@/lib/hooks/use-duet";
 import type { FriendshipDto } from "@/lib/dto/duet";
 import { getDuetDisplayName } from "@/lib/components/duet/duet-utils";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+
+function SpotlightSectionHeader({
+  eyebrow,
+  title,
+  description,
+  badge,
+  badgeVariant = "violet",
+}: {
+  eyebrow: string;
+  title: string;
+  description?: string;
+  badge: string;
+  badgeVariant?: "violet" | "lime" | "cyan";
+}) {
+  const badgeClass =
+    badgeVariant === "lime"
+      ? DASHBOARD_SPOTLIGHT_BADGE_LIME
+      : badgeVariant === "cyan"
+        ? DASHBOARD_SPOTLIGHT_BADGE_CYAN_COMPACT
+        : DASHBOARD_SPOTLIGHT_BADGE_VIOLET;
+  const dotClass =
+    badgeVariant === "lime"
+      ? DASHBOARD_SPOTLIGHT_BADGE_DOT_LIME
+      : badgeVariant === "cyan"
+        ? DASHBOARD_SPOTLIGHT_BADGE_DOT_CYAN
+        : DASHBOARD_SPOTLIGHT_BADGE_DOT_VIOLET;
+
+  return (
+    <div className={`relative px-5 pb-5 pt-6 sm:px-8 ${DASHBOARD_SPOTLIGHT_HEADER_BOTTOM}`}>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="font-mono text-xs font-semibold uppercase tracking-[0.24em] text-primary">{eyebrow}</p>
+          <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-foreground sm:text-3xl">{title}</h2>
+          {description ? (
+            <p className={`mt-2 max-w-2xl text-sm leading-6 ${DASHBOARD_SPOTLIGHT_MUTED}`}>{description}</p>
+          ) : null}
+        </div>
+        <span className={badgeClass}>
+          <span className={dotClass} aria-hidden />
+          {badge}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function StatusPill({
+  variant,
+  children,
+}: {
+  variant: "incoming" | "outgoing" | "accepted";
+  children: ReactNode;
+}) {
+  const classes =
+    variant === "incoming"
+      ? "border-amber-200/90 bg-amber-50/90 text-amber-800 dark:border-amber-400/25 dark:bg-amber-400/10 dark:text-amber-100"
+      : variant === "outgoing"
+        ? "border-slate-200/90 bg-slate-50/90 text-slate-600 dark:border-white/15 dark:bg-white/10 dark:text-slate-300"
+        : "border-emerald-200/90 bg-emerald-50/90 text-emerald-800 dark:border-emerald-400/25 dark:bg-emerald-400/10 dark:text-emerald-100";
+
+  return (
+    <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.65rem] font-bold uppercase tracking-wider ${classes}`}>
+      {children}
+    </span>
+  );
+}
 
 function FriendRow({
   friendship,
@@ -24,6 +118,7 @@ function FriendRow({
   onRevoke,
   onBlock,
   busy,
+  index,
 }: {
   friendship: FriendshipDto;
   viewerId: string;
@@ -32,97 +127,204 @@ function FriendRow({
   onRevoke: (id: string) => void;
   onBlock: (id: string) => void;
   busy: boolean;
+  index: number;
 }) {
   const t = useTranslations("duet.friends");
   const tAccept = useTranslations("duet.inviteAccept");
   const peer =
     friendship.requester.id === viewerId ? friendship.addressee : friendship.requester;
+  const displayName = getDuetDisplayName(peer);
   const [shareScope, setShareScope] = useState<DuetShareScopeOption>("aggregates");
 
+  const isIncoming = friendship.direction === "incoming" && friendship.status === "pending";
+  const isOutgoing = friendship.direction === "outgoing" && friendship.status === "pending";
+  const isAccepted = friendship.status === "accepted";
+
+  const cardAccent = isIncoming
+    ? "border-amber-200/80 dark:border-amber-400/25"
+    : isAccepted
+      ? "border-emerald-200/60 hover:border-violet-300/60 dark:border-emerald-400/20 dark:hover:border-violet-400/30"
+      : "border-slate-200/80 dark:border-white/10";
+
   return (
-    <li className="flex flex-col gap-3 rounded-2xl border border-slate-200/80 bg-white p-4 dark:border-white/10 dark:bg-slate-950/60 sm:flex-row sm:items-center sm:justify-between">
+    <motion.li
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: index * 0.04 }}
+      className={`flex flex-col gap-4 rounded-[1.35rem] border bg-white p-4 shadow-sm transition-all duration-300 hover:shadow-md dark:bg-slate-950/60 sm:flex-row sm:items-center sm:justify-between ${cardAccent}`}
+    >
       <div className="flex min-w-0 items-center gap-3">
-        <UserAvatar name={getDuetDisplayName(peer)} src={peer.avatarUrl} size="md" />
+        <UserAvatar name={displayName} src={peer.avatarUrl} size="lg" />
         <div className="min-w-0">
-          <p className="truncate font-semibold text-slate-900 dark:text-white">
-            {getDuetDisplayName(peer)}
-          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="truncate font-semibold text-slate-900 dark:text-white">{displayName}</p>
+            {isIncoming ? (
+              <StatusPill variant="incoming">
+                <Clock className="h-3 w-3" aria-hidden />
+                {t("statusIncoming")}
+              </StatusPill>
+            ) : null}
+            {isOutgoing ? (
+              <StatusPill variant="outgoing">
+                <Clock className="h-3 w-3" aria-hidden />
+                {t("statusPending")}
+              </StatusPill>
+            ) : null}
+            {isAccepted ? (
+              <StatusPill variant="accepted">
+                <Check className="h-3 w-3" aria-hidden />
+                {t("statusAccepted")}
+              </StatusPill>
+            ) : null}
+          </div>
           {peer.email ? (
-            <p className={`truncate text-sm ${DASHBOARD_SPOTLIGHT_MUTED}`}>{peer.email}</p>
+            <p className={`mt-0.5 truncate text-sm ${DASHBOARD_SPOTLIGHT_MUTED}`}>{peer.email}</p>
           ) : null}
         </div>
       </div>
+
       <div className="flex flex-wrap items-center gap-2">
-        {friendship.direction === "outgoing" && friendship.status === "pending" ? (
+        {isOutgoing ? (
           <span className={`text-sm ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("pendingOutgoingStatus")}</span>
         ) : null}
-        {friendship.direction === "incoming" && friendship.status === "pending" ? (
+
+        {isIncoming ? (
           <>
-            <select
-              value={shareScope}
-              onChange={(e) => setShareScope(e.target.value as DuetShareScopeOption)}
-              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-black/30"
-              aria-label={tAccept("sharePrompt")}
-            >
-              <option value="aggregates">{tAccept("scopeAggregates.label")}</option>
-              <option value="full">{tAccept("scopeFull.label")}</option>
-            </select>
+            <div className="w-full rounded-xl border border-slate-200/80 bg-slate-50/70 p-3 dark:border-white/10 dark:bg-black/25 sm:w-auto sm:min-w-[14rem]">
+              <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                <Shield className="h-3.5 w-3.5 text-violet-500" aria-hidden />
+                {tAccept("sharePrompt")}
+              </p>
+              <select
+                value={shareScope}
+                onChange={(e) => setShareScope(e.target.value as DuetShareScopeOption)}
+                className={`w-full ${DASHBOARD_SPOTLIGHT_SELECT}`}
+                aria-label={tAccept("sharePrompt")}
+              >
+                <option value="aggregates">{tAccept("scopeAggregates.label")}</option>
+                <option value="full">{tAccept("scopeFull.label")}</option>
+              </select>
+            </div>
             <button
               type="button"
               disabled={busy}
               onClick={() => onAccept(friendship.id, shareScope)}
-              className="rounded-xl bg-primary px-3 py-2 text-sm font-semibold text-white"
+              className="inline-flex min-h-10 items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white transition-opacity disabled:opacity-50"
             >
+              <Check className="h-4 w-4" aria-hidden />
               {t("accept")}
             </button>
             <button
               type="button"
               disabled={busy}
               onClick={() => onDecline(friendship.id)}
-              className={DASHBOARD_SPOTLIGHT_BTN_SECONDARY}
+              className={`inline-flex min-h-10 items-center gap-1.5 ${DASHBOARD_SPOTLIGHT_BTN_SECONDARY}`}
             >
+              <X className="h-4 w-4" aria-hidden />
               {t("decline")}
             </button>
           </>
         ) : null}
-        {friendship.status === "accepted" ? (
+
+        {isAccepted ? (
           <>
             <Link
               href={`/dashboard/duet/compare?friendUserId=${encodeURIComponent(peer.id)}`}
-              className="rounded-xl bg-primary px-3 py-2 text-sm font-semibold text-white no-underline"
+              className="inline-flex min-h-10 items-center gap-1.5 rounded-xl bg-gradient-to-r from-violet-600 to-violet-500 px-4 py-2 text-sm font-bold text-white shadow-md shadow-violet-500/25 no-underline transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-violet-500/30"
             >
+              <Swords className="h-4 w-4" aria-hidden />
               {t("compare")}
             </Link>
             <button
               type="button"
               disabled={busy}
               onClick={() => onRevoke(friendship.id)}
-              className={DASHBOARD_SPOTLIGHT_BTN_SECONDARY}
+              className={`inline-flex min-h-10 items-center gap-1.5 ${DASHBOARD_SPOTLIGHT_BTN_SECONDARY}`}
             >
+              <UserMinus className="h-4 w-4" aria-hidden />
               {t("revoke")}
             </button>
           </>
         ) : null}
+
         <button
           type="button"
           disabled={busy}
           onClick={() => onBlock(friendship.id)}
-          className="rounded-xl border border-red-200 px-3 py-2 text-sm font-medium text-red-700 dark:border-red-400/30 dark:text-red-300"
+          className="inline-flex min-h-10 items-center gap-1.5 rounded-xl border border-red-200/90 px-3 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-50 dark:border-red-400/30 dark:text-red-300 dark:hover:bg-red-950/30"
         >
+          <Ban className="h-4 w-4" aria-hidden />
           {t("block")}
         </button>
       </div>
-    </li>
+    </motion.li>
+  );
+}
+
+function FriendsListSection({
+  eyebrow,
+  title,
+  badge,
+  badgeVariant,
+  gradient,
+  hairline,
+  friendships,
+  viewerId,
+  busy,
+  onAccept,
+  onDecline,
+  onRevoke,
+  onBlock,
+}: {
+  eyebrow: string;
+  title: string;
+  badge: string;
+  badgeVariant: "violet" | "lime" | "cyan";
+  gradient: string;
+  hairline: string;
+  friendships: FriendshipDto[];
+  viewerId: string;
+  busy: boolean;
+  onAccept: (id: string, scope: DuetShareScopeOption) => void;
+  onDecline: (id: string) => void;
+  onRevoke: (id: string) => void;
+  onBlock: (id: string) => void;
+}) {
+  if (!friendships.length) return null;
+
+  return (
+    <section className={DASHBOARD_SPOTLIGHT_SHELL}>
+      <div className={gradient} />
+      <div className={hairline} />
+      <SpotlightSectionHeader eyebrow={eyebrow} title={title} badge={badge} badgeVariant={badgeVariant} />
+      <ul className="space-y-3 px-5 pb-6 sm:px-8">
+        {friendships.map((f, index) => (
+          <FriendRow
+            key={f.id}
+            friendship={f}
+            viewerId={viewerId}
+            busy={busy}
+            index={index}
+            onAccept={onAccept}
+            onDecline={onDecline}
+            onRevoke={onRevoke}
+            onBlock={onBlock}
+          />
+        ))}
+      </ul>
+    </section>
   );
 }
 
 export function DuetFriendsClient() {
   const t = useTranslations("duet.friends");
+  const locale = useLocale();
   const { data, isLoading, error, refetch } = useDuetFriends();
   const { invite, patchFriendship, blockFriendship } = useDuetMutations();
   const [email, setEmail] = useState("");
   const [viewerId, setViewerId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [feedbackError, setFeedbackError] = useState(false);
 
   useEffect(() => {
     void createSupabaseBrowserClient()
@@ -133,57 +335,114 @@ export function DuetFriendsClient() {
   const busy =
     invite.isPending || patchFriendship.isPending || blockFriendship.isPending;
 
-  async function handleInvite(e: React.FormEvent) {
+  async function handleInvite(e: FormEvent) {
     e.preventDefault();
     setFeedback(null);
+    setFeedbackError(false);
     try {
       await invite.mutateAsync(email.trim());
       setEmail("");
       setFeedback(t("inviteSent"));
     } catch {
       setFeedback(t("inviteError"));
+      setFeedbackError(true);
     }
   }
 
+  const friendsCount = data?.friends.length ?? 0;
+  const pendingIncomingCount = data?.pendingIncoming.length ?? 0;
+  const pendingOutgoingCount = data?.pendingOutgoing.length ?? 0;
+
   if (isLoading) {
-    return <p className={`text-sm ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("loading")}</p>;
+    return (
+      <div className="space-y-8">
+        <DuetFriendsHero
+          friendsCount={0}
+          pendingIncomingCount={0}
+          pendingOutgoingCount={0}
+          locale={locale}
+        />
+        <p className={`text-sm ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("loading")}</p>
+      </div>
+    );
   }
 
   if (error) {
     return (
-      <ErrorState variant="startup" error={error} message={t("error")} onRetry={() => refetch()} />
+      <div className="space-y-8">
+        <DuetFriendsHero
+          friendsCount={0}
+          pendingIncomingCount={0}
+          pendingOutgoingCount={0}
+          locale={locale}
+        />
+        <ErrorState variant="startup" error={error} message={t("error")} onRetry={() => refetch()} />
+      </div>
     );
   }
 
-  const hasAny =
-    (data?.friends.length ?? 0) +
-      (data?.pendingIncoming.length ?? 0) +
-      (data?.pendingOutgoing.length ?? 0) >
-    0;
+  const hasAny = friendsCount + pendingIncomingCount + pendingOutgoingCount > 0;
+
+  const mutationHandlers = {
+    onAccept: (id: string, scope: DuetShareScopeOption) =>
+      patchFriendship.mutate({ id, action: "accept", shareScope: scope }),
+    onDecline: (id: string) => patchFriendship.mutate({ id, action: "decline" }),
+    onRevoke: (id: string) => patchFriendship.mutate({ id, action: "revoke" }),
+    onBlock: (id: string) => blockFriendship.mutate(id),
+  };
 
   return (
     <div className="space-y-8">
+      <DuetFriendsHero
+        friendsCount={friendsCount}
+        pendingIncomingCount={pendingIncomingCount}
+        pendingOutgoingCount={pendingOutgoingCount}
+        locale={locale}
+      />
+
       <section className={DASHBOARD_SPOTLIGHT_SHELL}>
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{t("inviteTitle")}</h2>
-        <p className={`mt-2 text-sm ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("inviteDescription")}</p>
-        <form onSubmit={handleInvite} className="mt-4 flex flex-col gap-3 sm:flex-row">
-          <input
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder={t("invitePlaceholder")}
-            className="min-h-11 flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-black/30 dark:text-white"
-          />
-          <button
-            type="submit"
-            disabled={busy || !email.trim()}
-            className="min-h-11 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
-          >
-            {t("inviteSubmit")}
-          </button>
-        </form>
-        {feedback ? <p className="mt-3 text-sm text-emerald-600 dark:text-emerald-400">{feedback}</p> : null}
+        <div className={DASHBOARD_SPOTLIGHT_GRADIENT_CYAN} />
+        <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_CYAN} />
+        <SpotlightSectionHeader
+          eyebrow={t("inviteEyebrow")}
+          title={t("inviteTitle")}
+          description={t("inviteDescription")}
+          badge={t("inviteBadge")}
+          badgeVariant="cyan"
+        />
+        <div className="px-5 pb-6 sm:px-8">
+          <form onSubmit={handleInvite} className={`${DASHBOARD_SPOTLIGHT_INNER_WELL} flex flex-col gap-3 sm:flex-row sm:items-center`}>
+            <div className="relative min-w-0 flex-1">
+              <Mail
+                className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+                aria-hidden
+              />
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder={t("invitePlaceholder")}
+                className="min-h-11 w-full rounded-xl border border-slate-200/80 bg-white py-3 pl-10 pr-3 text-sm text-slate-900 shadow-sm focus:border-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-200/60 dark:border-white/10 dark:bg-black/30 dark:text-white dark:focus:border-cyan-400/40 dark:focus:ring-cyan-400/20"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={busy || !email.trim()}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-600 to-cyan-500 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-cyan-500/20 transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0"
+            >
+              <Send className="h-4 w-4" aria-hidden />
+              {t("inviteSubmit")}
+            </button>
+          </form>
+          {feedback ? (
+            <p
+              className={`mt-3 text-sm ${feedbackError ? "text-red-600 dark:text-red-400" : "text-emerald-600 dark:text-emerald-400"}`}
+            >
+              {feedback}
+            </p>
+          ) : null}
+        </div>
       </section>
 
       {!hasAny ? (
@@ -191,69 +450,48 @@ export function DuetFriendsClient() {
       ) : null}
 
       {viewerId && data?.pendingIncoming.length ? (
-        <section>
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
-            {t("pendingIncoming")}
-          </h2>
-          <ul className="space-y-3">
-            {data.pendingIncoming.map((f) => (
-              <FriendRow
-                key={f.id}
-                friendship={f}
-                viewerId={viewerId}
-                busy={busy}
-                onAccept={(id, scope) => patchFriendship.mutate({ id, action: "accept", shareScope: scope })}
-                onDecline={(id) => patchFriendship.mutate({ id, action: "decline" })}
-                onRevoke={(id) => patchFriendship.mutate({ id, action: "revoke" })}
-                onBlock={(id) => blockFriendship.mutate(id)}
-              />
-            ))}
-          </ul>
-        </section>
+        <FriendsListSection
+          eyebrow={t("incomingEyebrow")}
+          title={t("pendingIncoming")}
+          badge={t("incomingBadge")}
+          badgeVariant="violet"
+          gradient={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY}
+          hairline={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET}
+          friendships={data.pendingIncoming}
+          viewerId={viewerId}
+          busy={busy}
+          {...mutationHandlers}
+        />
       ) : null}
 
       {viewerId && data?.pendingOutgoing.length ? (
-        <section>
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
-            {t("pendingOutgoing")}
-          </h2>
-          <ul className="space-y-3">
-            {data.pendingOutgoing.map((f) => (
-              <FriendRow
-                key={f.id}
-                friendship={f}
-                viewerId={viewerId}
-                busy={busy}
-                onAccept={() => {}}
-                onDecline={() => {}}
-                onRevoke={(id) => patchFriendship.mutate({ id, action: "revoke" })}
-                onBlock={(id) => blockFriendship.mutate(id)}
-              />
-            ))}
-          </ul>
-        </section>
+        <FriendsListSection
+          eyebrow={t("outgoingEyebrow")}
+          title={t("pendingOutgoing")}
+          badge={t("outgoingBadge")}
+          badgeVariant="cyan"
+          gradient={DASHBOARD_SPOTLIGHT_GRADIENT_CYAN}
+          hairline={DASHBOARD_SPOTLIGHT_HAIRLINE_CYAN}
+          friendships={data.pendingOutgoing}
+          viewerId={viewerId}
+          busy={busy}
+          {...mutationHandlers}
+        />
       ) : null}
 
       {viewerId && data?.friends.length ? (
-        <section>
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
-            {t("friendsList")}
-          </h2>
-          <ul className="space-y-3">
-            {data.friends.map((f) => (
-              <FriendRow
-                key={f.id}
-                friendship={f}
-                viewerId={viewerId}
-                busy={busy}
-                onAccept={() => {}}
-                onDecline={() => {}}
-                onRevoke={(id) => patchFriendship.mutate({ id, action: "revoke" })}
-                onBlock={(id) => blockFriendship.mutate(id)}
-              />
-            ))}
-          </ul>
-        </section>
+        <FriendsListSection
+          eyebrow={t("rosterEyebrow")}
+          title={t("friendsList")}
+          badge={t("rosterBadge")}
+          badgeVariant="lime"
+          gradient={DASHBOARD_SPOTLIGHT_GRADIENT_LIME}
+          hairline={DASHBOARD_SPOTLIGHT_HAIRLINE_LIME}
+          friendships={data.friends}
+          viewerId={viewerId}
+          busy={busy}
+          {...mutationHandlers}
+        />
       ) : null}
     </div>
   );

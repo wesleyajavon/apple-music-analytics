@@ -126,10 +126,6 @@ function OverviewHeroFrame({
       <div className="absolute -bottom-28 right-10 h-72 w-72 rounded-full bg-accent-cyan/20 blur-3xl" />
       <div className="relative grid gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-center">
         <div>
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-100 backdrop-blur">
-            <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_18px_rgb(22_199_132_/0.75)]" />
-            {t("heroEyebrow")}
-          </div>
           <h1 className="max-w-4xl text-balance text-4xl font-semibold tracking-[-0.06em] sm:text-5xl lg:text-6xl">
             {title}
           </h1>
@@ -1444,11 +1440,6 @@ function OverviewContent() {
         />
         <div className="space-y-12">
         <section className="relative">
-          <OverviewSectionHeader
-            eyebrow={t("sections.snapshot.eyebrow")}
-            title={t("sections.snapshot.title")}
-            description={t("sections.snapshot.description")}
-          />
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
             <div className="flex min-h-[280px] w-full min-w-0 sm:col-span-2 lg:col-span-4">
               <TasteProfileSummaryWidget />

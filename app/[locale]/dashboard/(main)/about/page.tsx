@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Map } from "lucide-react";
 import { DashboardHeroTitle } from "@/lib/components/dashboard-hero-title";
-import { SoundprintLogo } from "@/lib/components/soundprint-logo";
+import { SoundprintBrandMark } from "@/lib/components/soundprint-brand-mark";
 
 /**
  * Page About - Guide utilisateur non-technique
@@ -122,11 +122,7 @@ export default function AboutPage() {
         className="mb-10 flex flex-col items-start gap-4 rounded-2xl border border-accent-violet/20 bg-gradient-to-br from-accent-violet/10 via-surface-glass to-accent-indigo/10 p-6 shadow-card sm:flex-row sm:items-center sm:gap-8"
         aria-labelledby="about-brand-heading"
       >
-        <SoundprintLogo
-          className="shrink-0"
-          showText={false}
-          imageClassName="h-24 w-24 rounded-2xl shadow-brand-glow ring-1 ring-white/10 sm:h-28 sm:w-28"
-        />
+        <SoundprintBrandMark size="xl" showWordmark={false} className="shrink-0" />
         <div className="min-w-0">
           <h2
             id="about-brand-heading"

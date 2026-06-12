@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useScroll, useTransform } from "motion/react";
+import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
 
 interface ParallaxHeroProps {
   children: React.ReactNode;
@@ -14,19 +14,25 @@ interface ParallaxHeroProps {
  */
 export function ParallaxHero({ children, className = "" }: ParallaxHeroProps) {
   const ref = useRef<HTMLElement>(null);
+  const prefersReducedMotion = useReducedMotion();
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"],
   });
 
-  // Couche arrière : bouge lentement (effet de profondeur)
-  const backgroundY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
-  // Couche milieu : bouge à vitesse moyenne
-  const midY = useTransform(scrollYProgress, [0, 1], ["0%", "15%"]);
-  // Opacité du glow : diminue au scroll
-  const glowOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0.3]);
-  // Scale léger pour effet de zoom out
-  const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.98]);
+  const backgroundY = useTransform(scrollYProgress, [0, 1], ["0%", "38%"]);
+  const midY = useTransform(scrollYProgress, [0, 1], ["0%", "18%"]);
+  const contentY = useTransform(scrollYProgress, [0, 1], ["0%", "-6%"]);
+  const glowOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0.25]);
+  const scale = useTransform(scrollYProgress, [0, 0.6], [1, 0.96]);
+
+  if (prefersReducedMotion) {
+    return (
+      <section ref={ref} className={`relative overflow-hidden rounded-2xl ${className}`}>
+        <div className="relative z-10">{children}</div>
+      </section>
+    );
+  }
 
   return (
     <motion.section
@@ -34,7 +40,6 @@ export function ParallaxHero({ children, className = "" }: ParallaxHeroProps) {
       className={`relative overflow-hidden rounded-2xl ${className}`}
       style={{ scale }}
     >
-      {/* Couche parallax arrière - orbes flottants */}
       <motion.div
         className="pointer-events-none absolute -inset-4 rounded-2xl"
         style={{ y: backgroundY }}
@@ -53,7 +58,6 @@ export function ParallaxHero({ children, className = "" }: ParallaxHeroProps) {
         />
       </motion.div>
 
-      {/* Couche milieu - gradient radial */}
       <motion.div
         className="pointer-events-none absolute inset-0 rounded-2xl"
         style={{ y: midY, opacity: glowOpacity }}
@@ -67,8 +71,9 @@ export function ParallaxHero({ children, className = "" }: ParallaxHeroProps) {
         />
       </motion.div>
 
-      {/* Contenu */}
-      <div className="relative z-10">{children}</div>
+      <motion.div className="relative z-10" style={{ y: contentY }}>
+        {children}
+      </motion.div>
     </motion.section>
   );
 }

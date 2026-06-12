@@ -1,0 +1,52 @@
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
+import { AuthPreviewPanel } from "@/lib/components/auth-preview-panel";
+
+type AuthSplitLayoutProps = {
+  children: React.ReactNode;
+};
+
+export function AuthSplitLayout({ children }: AuthSplitLayoutProps) {
+  const t = useTranslations("auth");
+
+  return (
+    <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-background lg:bg-[#06070d] lg:text-white">
+      <div className="pointer-events-none absolute inset-0 hidden lg:block" aria-hidden>
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_120%_90%_at_0%_30%,rgb(152_80_208_/_0.22),transparent_52%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_70%_at_8%_88%,rgb(79_144_224_/_0.14),transparent_55%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_18%_12%,rgb(240_64_104_/_0.1),transparent_48%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(105deg,#06070d_0%,#06070d_18%,rgb(6_7_13_/_0.92)_30%,rgb(6_7_13_/_0.55)_44%,rgb(6_7_13_/_0.15)_58%,transparent_78%)]" />
+      </div>
+
+      <AuthPreviewPanel />
+
+      <div className="relative z-10 flex min-h-0 flex-1 flex-col lg:max-w-[44%] xl:max-w-[48%]">
+        <div className="flex flex-1 flex-col justify-center px-6 pb-8 pt-24 sm:px-10 sm:pb-10 lg:items-center lg:px-8 lg:pb-12 lg:pt-32 xl:px-10">
+          <div className="w-full max-w-[24rem] lg:max-w-[27rem]">
+            <div className="auth-form-surface lg:rounded-[2rem] lg:border lg:border-white/10 lg:bg-white/[0.045] lg:p-8 lg:shadow-[inset_0_1px_0_0_rgb(255_255_255_/_0.08),0_32px_80px_-40px_rgb(0_0_0_/_0.65)] lg:backdrop-blur-2xl xl:p-10 [&_.text-muted]:lg:text-white/55">
+              {children}
+            </div>
+
+            <footer className="mt-6 px-1 text-center text-xs text-muted lg:mt-8 lg:text-left lg:text-white/40">
+              <Link
+                href="/legal/terms"
+                className="font-medium underline-offset-2 transition-colors hover:text-primary lg:text-white/65 lg:hover:text-white"
+              >
+                {t("termsLink")}
+              </Link>
+              <span className="mx-2 opacity-50" aria-hidden>
+                ·
+              </span>
+              <Link
+                href="/legal/privacy"
+                className="font-medium underline-offset-2 transition-colors hover:text-primary lg:text-white/65 lg:hover:text-white"
+              >
+                {t("privacyLink")}
+              </Link>
+            </footer>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

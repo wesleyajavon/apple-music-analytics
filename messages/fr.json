@@ -20,6 +20,7 @@
   },
   "aiMasterToggle": {
     "label": "IA",
+    "dragHandleAriaLabel": "Déplacer le bouton IA",
     "ariaLabel": "Activer ou désactiver les fonctionnalités IA pour ce navigateur",
     "lockedHint": "L’IA est coupée côté serveur (AI_MASTER_ENABLED=false). Ce bouton ne peut pas la réactiver.",
     "widgetHint": "L’IA est désactivée pour ce navigateur. Activez-la via le menu Plus (mobile) ou le bouton « IA » en bas à droite (bureau).",
@@ -617,6 +618,8 @@
     "acceptTermsButton": "Continuer",
     "acceptTermsSaving": "Enregistrement…",
     "acceptTermsError": "Impossible d'enregistrer votre acceptation. Réessayez.",
+    "authPreviewAlt": "Aperçu du tableau de bord Soundprint AI",
+    "authPreviewSpotlightDescription": "Visualisez vos artistes les plus écoutés et l'évolution de votre rotation dès votre première connexion.",
     "skipToContent": "Aller au formulaire de connexion",
     "homeLinkAriaLabel": "Soundprint-AI — accueil",
     "authNavAriaLabel": "Navigation compte",
@@ -989,7 +992,6 @@
   "overview": {
     "title": "Votre musique",
     "titlePersonal": "La musique de {name}",
-    "heroEyebrow": "Votre écoute en un coup d'œil",
     "musicAgentPromoBadge": "Nouveau",
     "musicAgentPromoTitle": "Music AI Agent",
     "musicAgentPromoAria": "Ouvrir le nouveau Music AI Agent",
@@ -1964,7 +1966,6 @@
   },
   "taste-profile": {
     "title": "Votre Soundprint-AI décrypté",
-    "featureBadge": "Lecture musicale IA",
     "subtitleShort": "Les motifs derrière ce que vous écoutez le plus",
     "seeMore": "Voir plus",
     "subtitle": "Votre profil musical expliqué à partir de vos analytics.",
@@ -1987,6 +1988,7 @@
     },
     "yourProfile": "Votre profil musical",
     "pullQuoteLabel": "Votre univers en une phrase",
+    "exploreProfileCta": "Explorer mon profil",
     "inBrief": "En bref",
     "influences": "Influences",
     "coreGenres": "Genres principaux",
@@ -1996,17 +1998,33 @@
   "musical-profile": {
     "title": "Profil musical",
     "subtitle": "Un replay premium de votre identité musicale, enrichi par l'IA.",
-    "heroBadge": "Cockpit du profil",
     "heroTitle": "Retrouvez-vous dans la musique que vous aimez déjà.",
-    "heroSubtitle": "Un court instant d'accueil sur votre son—puis ouvrez Your Music pour le tableau de bord complet : stats live, graphiques d'évolution, artistes, titres et outils genres.",
     "heroSignature": "Signature sonore",
     "heroSignatureHint": "Ancrée dans {genre}",
     "heroSignatureHintFallback": "En attente de plus de signal genre",
     "profileCockpit": {
       "label": "Profil musical",
       "live": "Période live",
-      "genreMix": "Mix genres",
-      "anchorShare": "{percent}% d'ancrage"
+      "listeningRhythm": "Rythme d'écoute",
+      "peakDay": "Jour fort",
+      "peakHour": "Heure forte",
+      "tracksExploredHint": "morceaux distincts",
+      "rhythmFallback": "Élargissez la période pour révéler vos pics d'écoute."
+    },
+    "periodBadge": {
+      "label": "Période",
+      "fallback": "Période",
+      "periodLast7Days": "7 derniers jours",
+      "periodLast30Days": "30 derniers jours",
+      "periodYearToDate": "Depuis le début de l'année",
+      "periodAllTime": "Tout l'historique",
+      "periodCustom": "Plage personnalisée",
+      "days": "{count, plural, one {# jour} other {# jours}}",
+      "months": "{count, plural, one {# mois} other {# mois}}",
+      "years": "{count, plural, one {# an} other {# ans}}",
+      "yearsMonths": "{years, plural, one {# an} other {# ans}} et {months, plural, one {# mois} other {# mois}}",
+      "ariaLabel": "Période analysée du {start} au {end}",
+      "ariaLabelSingleDay": "Période analysée le {date}"
     },
     "noData": "Pas encore de données d'écoute",
     "emptyFeature": {
@@ -2044,17 +2062,16 @@
     "overviewCallout": {
       "badge": "Commencez par le cœur de Soundprint-AI",
       "title": "Your Music est la vue d'ensemble qui relie tout",
-      "body": "Utilisez Your Music comme point de départ : cette page résume vos écoutes, artistes, titres, temps d'écoute, évolutions récentes et genres avant d'ouvrir des vues plus poussées.",
       "cta": "Ouvrir Your Music",
       "philosophyLogoAlt": "Soundprint-AI",
       "philosophyEyebrow": "L’esprit Soundprint",
-      "philosophyBullet1": "Votre identité musicale repose sur les écoutes réellement enregistrées — pas sur une étiquette de goût toute faite ni sur une humeur du moment.",
+      "philosophyBullet1": "Votre identité musicale se construit à partir de vos écoutes réellement enregistrées — là où votre goût se révèle au fil du temps.",
       "philosophyBullet2": "Chaque écran s’appuie sur le même historique et les mêmes filtres de dates : le récit d’introduction et les vues détaillées restent alignés."
     },
     "landing": {
       "badge": "Un accueil tout en douceur",
-      "title": "Your Music, c'est là que se trouvent les vrais outils",
-      "lead": "Cette page pose l'ambiance. Your Music est le hub pour les comparaisons, graphiques et détails—mêmes filtres de dates, contexte plus riche.",
+      "title": "Your Music, votre espace d'analyse complet",
+      "lead": "Cette page vous accueille. Your Music regroupe comparaisons, graphiques et analyses détaillées — mêmes filtres de dates, vue plus approfondie.",
       "primaryCta": "Aller sur Your Music",
       "secondaryHint": "Ou ouvrir une vue ciblée",
       "cards": {

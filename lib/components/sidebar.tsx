@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { Link, usePathname } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { LanguageSwitcher } from "@/lib/components/language-switcher";
-import { SoundprintLogo } from "@/lib/components/soundprint-logo";
+import { SoundprintBrandMark } from "@/lib/components/soundprint-brand-mark";
 import { ThemeSwitcher } from "@/lib/components/theme-switcher";
 import { UserAvatar } from "@/lib/components/user-avatar";
 import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
@@ -679,27 +679,14 @@ function SidebarContent() {
               onClick={closeMobileMenu}
               title={displayCollapsed ? t("logo") : undefined}
             >
-              <span className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-brand-gradient shadow-brand-glow ring-1 ring-white/20 transition-transform group-hover:rotate-[-2deg] group-hover:scale-105">
-                <SoundprintLogo
-                  src="/brand/favicon.png"
-                  showText={false}
-                  imageClassName="h-8 w-8 rounded-xl"
-                  priority
-                />
-              </span>
-              {!displayCollapsed && (
-                <div className="flex min-w-0 flex-col justify-center gap-1">
-                  <div className="flex min-w-0 items-center gap-2">
-                    <span className="truncate text-base font-semibold tracking-[-0.03em] text-foreground">
-                      Soundprint
-                    </span>
-                    <span className="shrink-0 rounded-full border border-primary/15 bg-primary/10 px-1.5 py-0.5 text-[0.62rem] font-bold uppercase tracking-[0.18em] text-primary">
-                      AI
-                    </span>
-                  </div>
-                  <span className="text-[11px] font-medium leading-snug text-muted">{t("tagline")}</span>
-                </div>
-              )}
+              <SoundprintBrandMark
+                size="lg"
+                layout="stacked"
+                showWordmark={!displayCollapsed}
+                showAiBadgeOnMobile
+                tagline={displayCollapsed ? undefined : t("tagline")}
+                priority
+              />
             </Link>
             {isMobileMenuOpen && (
               <button

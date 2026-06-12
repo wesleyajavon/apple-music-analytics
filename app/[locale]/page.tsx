@@ -6,9 +6,11 @@ import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { LanguageSwitcher } from "@/lib/components/language-switcher";
 import { Footer } from "@/lib/components/footer";
+import { SoundprintBrandMark } from "@/lib/components/soundprint-brand-mark";
 import { SoundprintLogo } from "@/lib/components/soundprint-logo";
 import { ThemeSwitcher } from "@/lib/components/theme-switcher";
 import { DemoTerminalHero } from "@/lib/components/demo-terminal-hero";
+import { Home3DHero } from "@/lib/components/home-3d/home-3d-hero";
 import { HomeMobileNav } from "@/lib/components/home-mobile-nav";
 import { HomeMobileStickyCta } from "@/lib/components/home-mobile-sticky-cta";
 import { StreamingProviderLogos } from "@/lib/components/streaming-provider-logos";
@@ -251,22 +253,7 @@ export default function Home() {
               className="group inline-flex min-w-0 shrink items-center gap-2 rounded-full py-1.5 pr-1 outline-none transition-all hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:gap-3 sm:pr-3"
               aria-label="Soundprint-AI"
             >
-              <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-brand-gradient shadow-brand-glow ring-1 ring-white/20 transition-transform group-hover:rotate-[-2deg] group-hover:scale-105 sm:h-11 sm:w-11">
-                <SoundprintLogo
-                  src="/brand/favicon.png"
-                  showText={false}
-                  imageClassName="h-7 w-7 rounded-xl sm:h-8 sm:w-8"
-                  priority
-                />
-              </span>
-              <span className="hidden min-w-0 items-center gap-2 sm:flex">
-                <span className="text-base font-semibold tracking-[-0.03em] text-foreground">
-                  Soundprint
-                </span>
-                <span className="rounded-full border border-primary/15 bg-primary/10 px-1.5 py-0.5 text-[0.62rem] font-bold uppercase tracking-[0.18em] text-primary">
-                  AI
-                </span>
-              </span>
+              <SoundprintBrandMark priority showWordmarkOnMobile={false} />
             </Link>
 
             <div className="hidden items-center gap-6 text-sm font-medium text-muted md:flex">
@@ -320,25 +307,21 @@ export default function Home() {
         </header>
 
         <div className="relative flex-1 overflow-x-hidden">
+        <Home3DHero
+          variant="hero"
+          className="absolute inset-x-0 top-0 -z-10 hidden h-[min(52rem,90vh)] w-full md:block [&_canvas]:h-full [&_canvas]:w-full"
+        />
         <div
-          className="absolute left-1/2 top-0 -z-10 hidden h-[34rem] w-[34rem] -translate-x-1/2 rounded-full bg-accent-violet/20 blur-3xl md:block"
+          className="pointer-events-none absolute inset-x-0 top-[min(38rem,72vh)] -z-10 hidden h-40 bg-gradient-to-b from-transparent via-background/40 to-background md:block"
           aria-hidden
         />
         <div
-          className="absolute -left-32 top-36 -z-10 hidden h-72 w-72 rounded-full bg-accent-rose/20 blur-3xl md:block"
-          aria-hidden
-        />
-        <div
-          className="absolute -right-40 top-[28rem] -z-10 hidden h-96 w-96 rounded-full bg-accent-cyan/20 blur-3xl md:block"
-          aria-hidden
-        />
-        <div
-          className="pointer-events-none absolute inset-x-0 top-0 -z-10 hidden h-[42rem] bg-[linear-gradient(to_right,rgb(152_80_208_/_0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgb(79_144_224_/_0.08)_1px,transparent_1px)] bg-[size:72px_72px] opacity-50 [mask-image:radial-gradient(ellipse_at_center,black,transparent_72%)] lg:block"
+          className="pointer-events-none absolute inset-x-0 top-0 -z-10 hidden h-[42rem] bg-[linear-gradient(to_right,rgb(152_80_208_/_0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgb(79_144_224_/_0.06)_1px,transparent_1px)] bg-[size:72px_72px] opacity-40 [mask-image:radial-gradient(ellipse_at_center,black,transparent_72%)] lg:block"
           aria-hidden
         />
 
-        <section className="mx-auto grid w-full max-w-7xl scroll-mt-24 items-center gap-10 px-4 pb-16 pt-10 sm:gap-12 sm:px-6 sm:pb-20 sm:pt-14 lg:grid-cols-[0.92fr_1.08fr] lg:gap-14 lg:px-8 lg:pb-28 lg:pt-20">
-          <div className="text-left">
+        <section className="relative mx-auto grid w-full max-w-7xl scroll-mt-24 items-center gap-10 px-4 pb-16 pt-10 sm:gap-12 sm:px-6 sm:pb-20 sm:pt-14 lg:grid-cols-[0.92fr_1.08fr] lg:gap-14 lg:px-8 lg:pb-28 lg:pt-20">
+          <div className="relative z-10 text-left">
             {isAuthenticated ? (
               <Link
                 href="/dashboard"
@@ -452,7 +435,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div id="product" className="relative scroll-mt-24">
+          <div id="product" className="relative z-10 scroll-mt-24">
             <div
               className="absolute -inset-6 rounded-[2rem] bg-brand-gradient-soft blur-2xl"
               aria-hidden
@@ -591,9 +574,16 @@ export default function Home() {
           </div>
         </section>
 
+        <section className="relative mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+          <Home3DHero
+            variant="ambient"
+            className="relative -z-10 mx-auto hidden h-48 w-full max-w-4xl overflow-visible md:block [&_canvas]:h-full [&_canvas]:w-full"
+          />
+        </section>
+
         <section
           id="insights"
-          className="mx-auto w-full max-w-7xl scroll-mt-24 px-4 pb-10 sm:px-6 sm:pb-20 lg:px-8"
+          className="relative mx-auto w-full max-w-7xl scroll-mt-24 px-4 pb-10 sm:px-6 sm:pb-20 lg:px-8"
         >
           <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div>

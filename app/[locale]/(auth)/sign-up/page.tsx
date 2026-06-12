@@ -8,10 +8,15 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { usePublicDemo } from "@/lib/providers/public-demo-provider";
 import { SPOTIFY_WEB_API_OAUTH_SCOPES } from "@/lib/services/spotify/spotify-web-api-scopes";
 import {
-  AUTH_CARD_CLASS,
+  AUTH_DIVIDER_LINE_CLASS,
+  AUTH_DIVIDER_TEXT_CLASS,
+  AUTH_FOOTER_LINK_CLASS,
+  AUTH_FORM_PANEL_CLASS,
+  AUTH_HEADING_CLASS,
   AUTH_INPUT_CLASS,
-  AUTH_MAIN_CLASS,
+  AUTH_LABEL_CLASS,
   AUTH_OAUTH_BUTTON_CLASS,
+  AUTH_PLAIN_FORM_CLASS,
   AUTH_PRIMARY_BUTTON_CLASS,
 } from "@/lib/constants/auth-form-styles";
 
@@ -111,14 +116,11 @@ export default function SignUpPage() {
   const statusId = error ? errorId : success ? successId : undefined;
 
   return (
-    <main id="auth-main" tabIndex={-1} className={AUTH_MAIN_CLASS}>
-      <section className={AUTH_CARD_CLASS} aria-labelledby="sign-up-heading">
-        <p className="text-xs font-semibold uppercase tracking-widest text-primary">
-          {t("signUpEyebrow")}
-        </p>
+    <main id="auth-main" tabIndex={-1} className={AUTH_FORM_PANEL_CLASS}>
+      <section className={AUTH_PLAIN_FORM_CLASS} aria-labelledby="sign-up-heading">
         <h1
           id="sign-up-heading"
-          className="mt-2 text-xl font-bold tracking-tight text-foreground lg:text-3xl"
+          className={AUTH_HEADING_CLASS}
         >
           {t("signUpTitle")}
         </h1>
@@ -126,11 +128,11 @@ export default function SignUpPage() {
           {t("signUpSubtitle")}
         </p>
 
-        <form method="post" onSubmit={onSubmit} className="mt-8 space-y-5">
+        <form method="post" onSubmit={onSubmit} className="mt-8 space-y-4">
           <div>
             <label
               htmlFor={emailId}
-              className="mb-1.5 block text-sm font-medium text-foreground/85"
+              className={AUTH_LABEL_CLASS}
             >
               {t("email")}
             </label>
@@ -151,7 +153,7 @@ export default function SignUpPage() {
           <div>
             <label
               htmlFor={passwordId}
-              className="mb-1.5 block text-sm font-medium text-foreground/85"
+              className={AUTH_LABEL_CLASS}
             >
               {t("password")}
             </label>
@@ -170,10 +172,10 @@ export default function SignUpPage() {
             />
           </div>
 
-          <label className="flex items-start gap-3 text-sm text-muted">
+          <label className="flex items-start gap-3 text-sm text-muted lg:text-white/55">
             <input
               type="checkbox"
-              className="mt-1 h-4 w-4 shrink-0 rounded border-border text-primary focus:ring-primary/30"
+              className="mt-1 h-4 w-4 shrink-0 rounded border-border text-primary focus:ring-primary/30 lg:border-white/25 lg:bg-white/5"
               checked={termsAccepted}
               onChange={(e) => {
                 setTermsAccepted(e.target.checked);
@@ -184,12 +186,12 @@ export default function SignUpPage() {
             <span>
               {t.rich("termsConsentLabel", {
                 terms: (chunks) => (
-                  <Link href="/legal/terms" className="font-medium text-primary underline-offset-2 hover:underline">
+                  <Link href="/legal/terms" className="font-medium text-primary underline-offset-2 hover:underline lg:text-white/85 lg:hover:text-white">
                     {t("termsLink")}
                   </Link>
                 ),
                 privacy: (chunks) => (
-                  <Link href="/legal/privacy" className="font-medium text-primary underline-offset-2 hover:underline">
+                  <Link href="/legal/privacy" className="font-medium text-primary underline-offset-2 hover:underline lg:text-white/85 lg:hover:text-white">
                     {t("privacyLink")}
                   </Link>
                 ),
@@ -228,10 +230,10 @@ export default function SignUpPage() {
 
         <div className="relative mt-6 py-1">
           <div className="absolute inset-0 flex items-center" aria-hidden>
-            <span className="w-full border-t border-card-border" />
+            <span className={AUTH_DIVIDER_LINE_CLASS} />
           </div>
-          <div className="relative flex justify-center text-xs uppercase tracking-wider">
-            <span className="bg-card px-3 text-muted">{t("orDivider")}</span>
+          <div className="relative flex justify-center">
+            <span className={AUTH_DIVIDER_TEXT_CLASS}>{t("orDivider")}</span>
           </div>
         </div>
 
@@ -267,7 +269,7 @@ export default function SignUpPage() {
             type="button"
             onClick={() => void onSpotifySignUp()}
             disabled={isLoading}
-            className={`${AUTH_OAUTH_BUTTON_CLASS} border-[#1ed760]/35 bg-[#191414] text-white hover:bg-[#282828] hover:text-white`}
+            className={`${AUTH_OAUTH_BUTTON_CLASS} border-[#1ed760]/35 bg-[#191414] text-white hover:bg-[#282828] hover:text-white lg:border-[#1ed760]/40 lg:bg-[#121212]/90 lg:hover:bg-[#1a1a1a]`}
           >
             <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" aria-hidden>
               <path
@@ -279,9 +281,9 @@ export default function SignUpPage() {
           </button>
         </div>
 
-        <p className="mt-6 text-center text-sm text-muted">
+        <p className="mt-8 text-sm text-muted">
           {t("alreadyAccount")}{" "}
-          <Link href="/sign-in" className="font-semibold text-primary hover:underline">
+          <Link href="/sign-in" className={AUTH_FOOTER_LINK_CLASS}>
             {t("signIn")}
           </Link>
         </p>

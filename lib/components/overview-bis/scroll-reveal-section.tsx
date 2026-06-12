@@ -40,7 +40,7 @@ export function ScrollRevealSection({
       className={className}
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: true, amount }}
+      viewport={{ once: true, amount: Math.min(amount, 0.12), margin: "0px 0px -80px 0px" }}
       variants={defaultVariants}
     >
       {children}

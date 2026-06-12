@@ -20,6 +20,7 @@
   },
   "aiMasterToggle": {
     "label": "AI",
+    "dragHandleAriaLabel": "Move AI toggle",
     "ariaLabel": "Enable or disable AI features for this browser",
     "lockedHint": "AI is off server-side (AI_MASTER_ENABLED=false). This toggle cannot enable it.",
     "widgetHint": "AI is turned off for this browser. Use the AI switch in the Plus menu (mobile) or bottom-right (desktop) to load this content.",
@@ -617,6 +618,8 @@
     "acceptTermsButton": "Continue",
     "acceptTermsSaving": "Saving…",
     "acceptTermsError": "Could not save your acceptance. Please try again.",
+    "authPreviewAlt": "Soundprint AI dashboard preview",
+    "authPreviewSpotlightDescription": "See your most-played artists and how your rotation evolves — from your very first sign-in.",
     "skipToContent": "Skip to sign-in form",
     "homeLinkAriaLabel": "Soundprint-AI — home",
     "authNavAriaLabel": "Account pages",
@@ -989,7 +992,6 @@
   "overview": {
     "title": "Your music",
     "titlePersonal": "{name}'s music",
-    "heroEyebrow": "Your listening at a glance",
     "musicAgentPromoBadge": "New",
     "musicAgentPromoTitle": "Music AI Agent",
     "musicAgentPromoAria": "Open the new Music AI Agent",
@@ -1964,7 +1966,6 @@
   },
   "taste-profile": {
     "title": "Your Soundprint-AI, decoded",
-    "featureBadge": "AI music read",
     "subtitleShort": "The patterns behind what you play most",
     "seeMore": "See more",
     "subtitle": "Your musical profile explained from your analytics.",
@@ -1987,6 +1988,7 @@
     },
     "yourProfile": "Your musical profile",
     "pullQuoteLabel": "Your sound in one line",
+    "exploreProfileCta": "Explore my profile",
     "inBrief": "In brief",
     "influences": "Influences",
     "coreGenres": "Core genres",
@@ -1996,17 +1998,33 @@
   "musical-profile": {
     "title": "Musical Profile",
     "subtitle": "A premium, AI-assisted replay of your listening identity.",
-    "heroBadge": "Profile cockpit",
     "heroTitle": "See yourself through the music you already love.",
-    "heroSubtitle": "A short welcome snapshot of your sound—then open Your Music for the full dashboard: live stats, movement charts, artists, tracks, and genre tools.",
     "heroSignature": "Signature sound",
     "heroSignatureHint": "Anchored in {genre}",
     "heroSignatureHintFallback": "Waiting for more genre signal",
     "profileCockpit": {
       "label": "Musical profile",
       "live": "Live range",
-      "genreMix": "Genre mix",
-      "anchorShare": "{percent}% anchor share"
+      "listeningRhythm": "Listening rhythm",
+      "peakDay": "Peak day",
+      "peakHour": "Peak hour",
+      "tracksExploredHint": "distinct tracks",
+      "rhythmFallback": "Widen the date range to surface your listening peaks."
+    },
+    "periodBadge": {
+      "label": "Period",
+      "fallback": "Period",
+      "periodLast7Days": "Last 7 days",
+      "periodLast30Days": "Last 30 days",
+      "periodYearToDate": "Year to date",
+      "periodAllTime": "All time",
+      "periodCustom": "Custom range",
+      "days": "{count, plural, one {# day} other {# days}}",
+      "months": "{count, plural, one {# month} other {# months}}",
+      "years": "{count, plural, one {# year} other {# years}}",
+      "yearsMonths": "{years, plural, one {# year} other {# years}} and {months, plural, one {# month} other {# months}}",
+      "ariaLabel": "Analysis period from {start} to {end}",
+      "ariaLabelSingleDay": "Analysis period on {date}"
     },
     "noData": "No listening data yet",
     "emptyFeature": {
@@ -2044,7 +2062,6 @@
     "overviewCallout": {
       "badge": "Start with the heart of Soundprint-AI",
       "title": "Your Music is the overview that ties everything together",
-      "body": "Use Your Music as your home base: it summarizes your plays, artists, tracks, time spent listening, recent movement, and genre mix before you dive into deeper pages.",
       "cta": "Open Your Music",
       "philosophyLogoAlt": "Soundprint-AI",
       "philosophyEyebrow": "What Soundprint stands for",

@@ -20,6 +20,7 @@
   },
   "aiMasterToggle": {
     "label": "IA",
+    "dragHandleAriaLabel": "Mover el interruptor de IA",
     "ariaLabel": "Activar o desactivar las funciones de IA en este navegador",
     "lockedHint": "La IA está desactivada en el servidor (AI_MASTER_ENABLED=false). Este control no puede activarla.",
     "widgetHint": "La IA está desactivada en este navegador. Actívala desde el menú Más (móvil) o el interruptor «IA» abajo a la derecha (escritorio).",
@@ -617,6 +618,8 @@
     "acceptTermsButton": "Continuar",
     "acceptTermsSaving": "Guardando…",
     "acceptTermsError": "No se pudo guardar tu aceptación. Inténtalo de nuevo.",
+    "authPreviewAlt": "Vista previa del panel de Soundprint AI",
+    "authPreviewSpotlightDescription": "Visualiza tus artistas más escuchados y la evolución de tu rotación desde tu primer inicio de sesión.",
     "skipToContent": "Ir al formulario de inicio de sesión",
     "homeLinkAriaLabel": "Soundprint-AI — inicio",
     "authNavAriaLabel": "Navegación de cuenta",
@@ -989,7 +992,6 @@
   "overview": {
     "title": "Tu música",
     "titlePersonal": "La música de {name}",
-    "heroEyebrow": "Tu escucha de un vistazo",
     "musicAgentPromoBadge": "Nuevo",
     "musicAgentPromoTitle": "Music AI Agent",
     "musicAgentPromoAria": "Abrir el nuevo Music AI Agent",
@@ -1946,7 +1948,6 @@
   },
   "taste-profile": {
     "title": "Tu Soundprint-AI, descifrado",
-    "featureBadge": "Lectura musical IA",
     "subtitleShort": "Los patrones detrás de lo que más escuchas",
     "seeMore": "Ver más",
     "subtitle": "Tu perfil musical explicado a partir de tus analytics.",
@@ -1969,6 +1970,7 @@
     },
     "yourProfile": "Tu perfil musical",
     "pullQuoteLabel": "Tu sonido en una frase",
+    "exploreProfileCta": "Explorar mi perfil",
     "inBrief": "En breve",
     "influences": "Influencias",
     "coreGenres": "Géneros principales",
@@ -1978,17 +1980,33 @@
   "musical-profile": {
     "title": "Perfil musical",
     "subtitle": "Un replay premium de tu identidad musical, enriquecido con IA.",
-    "heroBadge": "Cockpit del perfil",
     "heroTitle": "Descúbrete a través de la música que ya amas.",
-    "heroSubtitle": "Una bienvenida breve a tu sonido—luego abre Your Music para el panel completo: estadísticas en vivo, gráficos de tendencia, artistas, canciones y herramientas de géneros.",
     "heroSignature": "Firma sonora",
     "heroSignatureHint": "Anclada en {genre}",
     "heroSignatureHintFallback": "Esperando más señal de género",
     "profileCockpit": {
       "label": "Perfil musical",
       "live": "Rango en vivo",
-      "genreMix": "Mezcla de géneros",
-      "anchorShare": "{percent}% de anclaje"
+      "listeningRhythm": "Ritmo de escucha",
+      "peakDay": "Día fuerte",
+      "peakHour": "Hora fuerte",
+      "tracksExploredHint": "canciones distintas",
+      "rhythmFallback": "Amplía el rango de fechas para revelar tus picos de escucha."
+    },
+    "periodBadge": {
+      "label": "Periodo",
+      "fallback": "Periodo",
+      "periodLast7Days": "Últimos 7 días",
+      "periodLast30Days": "Últimos 30 días",
+      "periodYearToDate": "Desde inicio de año",
+      "periodAllTime": "Todo el historial",
+      "periodCustom": "Rango personalizado",
+      "days": "{count, plural, one {# día} other {# días}}",
+      "months": "{count, plural, one {# mes} other {# meses}}",
+      "years": "{count, plural, one {# año} other {# años}}",
+      "yearsMonths": "{years, plural, one {# año} other {# años}} y {months, plural, one {# mes} other {# meses}}",
+      "ariaLabel": "Periodo analizado del {start} al {end}",
+      "ariaLabelSingleDay": "Periodo analizado el {date}"
     },
     "noData": "Aún no hay datos de escucha",
     "emptyFeature": {
@@ -2026,7 +2044,6 @@
     "overviewCallout": {
       "badge": "Empieza por el corazón de Soundprint-AI",
       "title": "Your Music es la vista general que conecta todo",
-      "body": "Usa Your Music como punto de partida: resume tus escuchas, artistas, canciones, tiempo de escucha, evolución reciente y mezcla de géneros antes de abrir vistas más profundas.",
       "cta": "Abrir Your Music",
       "philosophyLogoAlt": "Soundprint-AI",
       "philosophyEyebrow": "El espíritu de Soundprint",

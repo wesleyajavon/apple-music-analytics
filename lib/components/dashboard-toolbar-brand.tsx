@@ -4,7 +4,7 @@ import { useMemo, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
-import { SoundprintLogo } from "@/lib/components/soundprint-logo";
+import { SoundprintBrandMark } from "@/lib/components/soundprint-brand-mark";
 import { useMobileSidebar } from "@/lib/components/sidebar";
 import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -70,18 +70,16 @@ export function DashboardToolbarBrand() {
         <div className="min-w-0 flex-1">
           <Link
             href={href}
-            className="inline-flex max-w-full items-center rounded-lg outline-none ring-offset-background transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring"
+            className="group inline-flex max-w-full items-center rounded-lg outline-none ring-offset-background transition-all hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-ring"
             aria-label={t("logo")}
           >
-            <SoundprintLogo
-              showText
-              imageClassName="h-9 w-9 shrink-0 rounded-xl shadow-brand-glow ring-1 ring-card-border/50"
-              textClassName="truncate text-base font-bold tracking-tight text-foreground"
+            <SoundprintBrandMark
+              size="lg"
+              layout="stacked"
+              showAiBadgeOnMobile
+              tagline={t("tagline")}
             />
           </Link>
-          <p className="mt-1.5 hidden text-[11px] leading-snug text-muted sm:block">
-            {t("tagline")}
-          </p>
         </div>
       </div>
     </div>

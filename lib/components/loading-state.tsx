@@ -5,7 +5,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { SoundprintLogo } from "@/lib/components/soundprint-logo";
+import { SoundprintBrandMark } from "@/lib/components/soundprint-brand-mark";
 
 interface LoadingStateProps {
   message?: string;
@@ -24,9 +24,10 @@ export function LoadingState({
     <div className={`flex items-center justify-center py-16 ${className}`}>
       <div className="text-center">
         <div className="mb-8 flex justify-center opacity-90">
-          <SoundprintLogo
-            showText={false}
-            imageClassName="h-14 w-14 animate-pulse rounded-2xl shadow-brand-glow opacity-90"
+          <SoundprintBrandMark
+            showWordmark={false}
+            interactive={false}
+            className="animate-pulse opacity-90"
           />
         </div>
         <div className="inline-block relative mb-6">

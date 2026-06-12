@@ -1,6 +1,11 @@
 "use client";
 
+import { useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { motion } from "motion/react";
+import { Sparkles } from "lucide-react";
+import { Link } from "@/i18n/navigation";
 import { useTasteProfile } from "@/lib/hooks/use-taste-profile";
 import { AiWidgetQuotaOrError } from "@/lib/components/error-state";
 import { AiFeatureDisabledPlaceholder } from "@/lib/components/ai-feature-disabled-placeholder";
@@ -9,35 +14,157 @@ import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
 import { useDashboardViewerUserId } from "@/lib/context/dashboard-viewer-context";
 import { useInteractiveAiBlockedByGenreBackfill } from "@/lib/hooks/use-interactive-ai-blocked-by-genre-backfill";
 import { isGroqGenreClassificationBlockingError } from "@/lib/utils/groq-quota-message";
+import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
+import { parseCoreGenres } from "@/lib/utils/parse-core-genres";
+import {
+  CinematicFilmGrain,
+  CinematicFloatingOrbs,
+  CinematicLightSweep,
+  CinematicQuote,
+} from "@/lib/components/musical-profile-cinematic";
 
 const WIDGET_SHELL_CLASS =
-  "relative min-h-[280px] w-full overflow-hidden rounded-[2rem] border border-accent-violet/20 bg-gradient-to-br from-white via-[#fbf8ff] to-[#eef7ff] shadow-card ring-1 ring-white/70 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent-violet/30 hover:shadow-card-hover dark:border-white/[0.08] dark:from-[#06070d] dark:via-[#070812] dark:to-[#0b0d16] dark:ring-white/[0.06]";
+  "relative min-h-[280px] w-full overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950 text-white shadow-2xl shadow-black/20 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-black/30";
 
-const WIDGET_BACKGROUND = (
-  <>
-    <div
-      className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(240,64,104,0.13),transparent_30%),radial-gradient(circle_at_88%_12%,rgba(79,144,224,0.16),transparent_32%),linear-gradient(135deg,rgba(255,255,255,0.72),transparent_45%)] dark:bg-[radial-gradient(circle_at_top_left,rgba(240,64,104,0.12),transparent_32%),radial-gradient(circle_at_88%_12%,rgba(79,144,224,0.12),transparent_32%),linear-gradient(135deg,rgba(255,255,255,0.03),transparent_48%)]"
-      aria-hidden
-    />
-    <div
-      className="pointer-events-none absolute -right-20 -top-24 h-56 w-56 rounded-full bg-accent-cyan/20 blur-3xl dark:bg-accent-cyan/12"
-      aria-hidden
-    />
-    <div
-      className="pointer-events-none absolute -bottom-24 left-12 h-56 w-56 rounded-full bg-accent-violet/16 blur-3xl dark:bg-accent-violet/14"
-      aria-hidden
-    />
-  </>
-);
+const GENRE_PILL_STYLES = [
+  "border-violet-400/35 bg-violet-500/15 text-violet-100 shadow-[0_0_24px_rgba(167,139,250,0.15)]",
+  "border-cyan-400/35 bg-cyan-500/15 text-cyan-100 shadow-[0_0_24px_rgba(34,211,238,0.12)]",
+  "border-rose-400/35 bg-rose-500/15 text-rose-100 shadow-[0_0_24px_rgba(244,114,182,0.12)]",
+  "border-emerald-400/35 bg-emerald-500/15 text-emerald-100 shadow-[0_0_24px_rgba(52,211,153,0.12)]",
+  "border-amber-400/35 bg-amber-500/15 text-amber-100 shadow-[0_0_24px_rgba(251,191,36,0.12)]",
+  "border-indigo-400/35 bg-indigo-500/15 text-indigo-100 shadow-[0_0_24px_rgba(129,140,248,0.12)]",
+] as const;
+
+const ORB_COLORS = ["#a78bfa", "#67e8f9", "#f472b6", "#34d399", "#fbbf24", "#818cf8"] as const;
+
+function TasteProfileShell({ children }: { children: React.ReactNode }) {
+  return (
+    <section className={WIDGET_SHELL_CLASS}>
+      <div
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(240,64,104,0.22),transparent_32%),radial-gradient(circle_at_86%_18%,rgba(79,144,224,0.2),transparent_34%),linear-gradient(135deg,rgba(3,7,18,0.98),rgba(30,27,75,0.88)_48%,rgba(8,47,73,0.72))]"
+        aria-hidden
+      />
+      <CinematicFloatingOrbs />
+      <CinematicFilmGrain />
+      <CinematicLightSweep />
+      <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-cyan-200/50 to-transparent" />
+      <div className="relative">{children}</div>
+    </section>
+  );
+}
+
+function SoundprintOrb({ genreCount }: { genreCount: number }) {
+  const segments = Math.max(genreCount, 3);
+  const gradient = ORB_COLORS
+    .slice(0, segments)
+    .map((color, index) => `${color} ${(index / segments) * 360}deg ${((index + 1) / segments) * 360}deg`)
+    .join(", ");
+
+  return (
+    <div className="relative mx-auto flex h-44 w-44 items-center justify-center sm:h-52 sm:w-52">
+      <motion.div
+        className="absolute inset-0 rounded-full opacity-90"
+        style={{ background: `conic-gradient(from 0deg, ${gradient})` }}
+        animate={{ rotate: 360 }}
+        transition={{ duration: 24, repeat: Infinity, ease: "linear" }}
+        aria-hidden
+      />
+      <div className="absolute inset-[10%] rounded-full bg-slate-950/85 shadow-inner shadow-black/40 backdrop-blur-md" />
+      <div
+        className="pointer-events-none absolute inset-[18%] rounded-full bg-[radial-gradient(circle_at_30%_25%,rgba(255,255,255,0.18),transparent_55%)]"
+        aria-hidden
+      />
+      <div className="relative flex flex-col items-center gap-1 text-center">
+        <Sparkles className="h-8 w-8 text-cyan-100/90 sm:h-9 sm:w-9" aria-hidden />
+        <span className="font-mono text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-slate-400">
+          AI
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function GenrePills({ genres }: { genres: string[] }) {
+  if (genres.length === 0) return null;
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      {genres.map((genre, index) => (
+        <motion.span
+          key={genre}
+          initial={{ opacity: 0, y: 10, scale: 0.94 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.45, delay: 0.15 + index * 0.07, ease: [0.22, 1, 0.36, 1] }}
+          className={`inline-flex items-center rounded-full border px-3.5 py-1.5 text-sm font-semibold backdrop-blur ${GENRE_PILL_STYLES[index % GENRE_PILL_STYLES.length]}`}
+        >
+          {genre}
+        </motion.span>
+      ))}
+    </div>
+  );
+}
+
+function TasteProfileLoadingState() {
+  const t = useTranslations("taste-profile");
+
+  return (
+    <TasteProfileShell>
+      <div className="grid gap-8 p-6 sm:p-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-center lg:p-10">
+        <div className="space-y-5">
+          <div className="h-7 w-28 animate-shimmer rounded-full bg-white/10" />
+          <div className="space-y-3">
+            <div className="h-8 w-full animate-shimmer rounded-lg bg-white/10" />
+            <div className="h-8 w-[92%] animate-shimmer rounded-lg bg-white/10" />
+            <div className="h-8 w-[78%] animate-shimmer rounded-lg bg-white/10" />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {[0, 1, 2, 3].map((i) => (
+              <div key={i} className="h-9 w-24 animate-shimmer rounded-full bg-white/10" />
+            ))}
+          </div>
+          <p className="text-xs text-slate-400">{t("loading")}</p>
+        </div>
+        <div className="flex justify-center">
+          <div className="h-44 w-44 animate-pulse rounded-full bg-white/10 sm:h-52 sm:w-52" />
+        </div>
+      </div>
+    </TasteProfileShell>
+  );
+}
+
+function TasteProfileBlockedShell({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const tOverview = useTranslations("overview");
+
+  return (
+    <TasteProfileShell>
+      <div className="border-b border-white/10 px-6 py-5 sm:px-8">
+        <p className="font-mono text-xs font-semibold uppercase tracking-[0.24em] text-cyan-100">
+          {tOverview("sections.snapshot.eyebrow")}
+        </p>
+      </div>
+      <div className="p-6 sm:p-8">{children}</div>
+    </TasteProfileShell>
+  );
+}
 
 /**
- * Overview feature widget showing the AI-generated taste profile.
- * Uses full listen range when "all" (tout) filter is selected.
+ * Overview teaser for the AI taste profile — visual-first, minimal text.
  */
 export function TasteProfileSummaryWidget() {
   const t = useTranslations("taste-profile");
+  const tOverview = useTranslations("overview");
+  const searchParams = useSearchParams();
   const viewerUserId = useDashboardViewerUserId();
   const { startDate, endDate, isLoading: isRangeLoading } = useListenDateRange();
+
+  const profileHref = useMemo(
+    () => mergeDashboardSearchParams("/dashboard/musical-profile", searchParams),
+    [searchParams]
+  );
 
   const { data, isLoading, error } = useTasteProfile(startDate, endDate, "casual", {
     userId: viewerUserId,
@@ -47,50 +174,16 @@ export function TasteProfileSummaryWidget() {
 
   if (interactiveAiBlockedByGenreBackfill && !isRangeLoading) {
     return (
-      <section className={WIDGET_SHELL_CLASS}>
-        {WIDGET_BACKGROUND}
-        <div className="relative border-b border-white/70 px-6 py-5 dark:border-white/[0.06]">
-          <h2 className="text-lg font-semibold text-gray-950 dark:text-white">{t("title")}</h2>
-          <p className="mt-0.5 text-sm text-muted dark:text-slate-400">{t("subtitleShort")}</p>
-        </div>
-        <div className="relative p-6">
-          <InteractiveAiGenreBackfillNotice />
-        </div>
-      </section>
+      <TasteProfileBlockedShell>
+        <InteractiveAiGenreBackfillNotice />
+      </TasteProfileBlockedShell>
     );
   }
 
   if (isLoadingOrFetching) {
     return (
-      <div
-        className={WIDGET_SHELL_CLASS}
-        role="status"
-        aria-label={t("loading")}
-      >
-        {WIDGET_BACKGROUND}
-        {/* Header skeleton — matches real layout */}
-        <div className="relative border-b border-white/70 px-6 py-5 dark:border-white/[0.06]">
-          <div className="space-y-1.5">
-            <div className="h-5 w-44 animate-shimmer rounded bg-gray-200 dark:bg-gray-700" />
-            <div className="h-4 w-64 max-w-full animate-shimmer rounded bg-gray-200 dark:bg-gray-700" />
-          </div>
-        </div>
-        {/* Content skeleton — paragraph block with staggered lines */}
-        <div className="relative p-6">
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">{t("loading")}</p>
-          <div className="space-y-2">
-            {[0, 1, 2, 3, 4, 5].map((i) => (
-              <div
-                key={i}
-                className="h-3.5 animate-shimmer rounded bg-gray-200 dark:bg-gray-700"
-                style={{
-                  width: i === 5 ? "66%" : "100%",
-                  animationDelay: `${i * 0.1}s`,
-                }}
-              />
-            ))}
-          </div>
-        </div>
+      <div role="status" aria-label={t("loading")}>
+        <TasteProfileLoadingState />
       </div>
     );
   }
@@ -98,22 +191,15 @@ export function TasteProfileSummaryWidget() {
   if (error) {
     if (isGroqGenreClassificationBlockingError(error)) {
       return (
-        <section className={WIDGET_SHELL_CLASS}>
-          {WIDGET_BACKGROUND}
-          <div className="relative border-b border-white/70 px-6 py-5 dark:border-white/[0.06]">
-            <h2 className="text-lg font-semibold text-gray-950 dark:text-white">{t("title")}</h2>
-            <p className="mt-0.5 text-sm text-muted dark:text-slate-400">{t("subtitleShort")}</p>
-          </div>
-          <div className="relative p-6">
-            <InteractiveAiGenreBackfillNotice force />
-          </div>
-        </section>
+        <TasteProfileBlockedShell>
+          <InteractiveAiGenreBackfillNotice force />
+        </TasteProfileBlockedShell>
       );
     }
     return (
       <AiWidgetQuotaOrError
-        title={t("title")}
-        subtitle={t("subtitleShort")}
+        title={tOverview("sections.snapshot.eyebrow")}
+        subtitle={t("pullQuoteLabel")}
         error={error}
       />
     );
@@ -122,8 +208,8 @@ export function TasteProfileSummaryWidget() {
   if (data?.aiUnavailable) {
     return (
       <AiFeatureDisabledPlaceholder
-        title={t("title")}
-        subtitle={t("subtitleShort")}
+        title={tOverview("sections.snapshot.eyebrow")}
+        subtitle={t("pullQuoteLabel")}
         reason={data.aiUnavailableReason ?? "client"}
       />
     );
@@ -133,95 +219,59 @@ export function TasteProfileSummaryWidget() {
     return null;
   }
 
+  const genres = parseCoreGenres(data.coreGenres);
+
   return (
-    <section className={WIDGET_SHELL_CLASS}>
-      {WIDGET_BACKGROUND}
-      <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-accent-cyan/50 to-transparent dark:via-cyan-200/30" />
-      <div className="relative border-b border-white/70 px-6 py-5 dark:border-white/[0.06]">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div>
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-accent-violet/20 bg-white/70 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-accent-violet shadow-sm backdrop-blur dark:border-violet-400/18 dark:bg-[#141622] dark:text-violet-100">
-              <span
-                className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_16px_rgb(22_199_132_/0.65)]"
-                aria-hidden
-              />
-              {t("featureBadge")}
+    <TasteProfileShell>
+      <div className="grid gap-8 p-6 sm:p-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:items-center lg:gap-10 lg:p-10">
+        <div>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-100">
+              <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_16px_rgb(22_199_132_/0.75)]" />
+              {tOverview("sections.snapshot.eyebrow")}
             </div>
-            <h2 className="text-2xl font-semibold tracking-[-0.04em] text-gray-950 dark:text-white sm:text-3xl">
-              {t("title")}
-            </h2>
-            <p className="mt-1 text-sm text-muted dark:text-slate-400">
-              {t("subtitleShort")}
-            </p>
+            {data.cached ? (
+              <span className="text-[0.68rem] font-medium uppercase tracking-[0.16em] text-slate-500">
+                {t("cached")}
+              </span>
+            ) : null}
           </div>
-          {data.cached ? (
-            <p className="w-fit rounded-full border border-accent-cyan/20 bg-white/60 px-3 py-1.5 text-xs font-medium text-muted shadow-sm backdrop-blur dark:border-white/[0.08] dark:bg-[#12141f] dark:text-slate-400">
-              {t("cached")}
-            </p>
+
+          <CinematicQuote
+            quoteKey={data.description}
+            className="mt-6 max-w-2xl text-balance text-2xl font-semibold leading-tight tracking-[-0.04em] text-white sm:text-3xl lg:text-[2rem] lg:leading-[1.2]"
+          >
+            {data.description}
+          </CinematicQuote>
+
+          {genres.length > 0 ? (
+            <div className="mt-6">
+              <GenrePills genres={genres} />
+            </div>
           ) : null}
-        </div>
-      </div>
-      <div className="relative space-y-6 p-6">
-        <p className="max-w-4xl text-lg font-medium leading-8 text-gray-800 dark:text-slate-200">
-          {data.description}
-        </p>
-        <div className="grid gap-4 md:grid-cols-3">
-          {[
-            {
-              title: t("influences"),
-              body: data.influences,
-              number: "01",
-              badge: "border-accent-violet/20 bg-accent-violet/10 text-accent-violet dark:text-violet-100",
-              dot: "bg-accent-violet",
-            },
-            {
-              title: t("coreGenres"),
-              body: data.coreGenres,
-              number: "02",
-              badge: "border-accent-cyan/20 bg-accent-cyan/10 text-accent-cyan dark:text-cyan-100",
-              dot: "bg-accent-cyan",
-            },
-            {
-              title: t("whatMakesYouUnique"),
-              body: data.uniqueAspect,
-              number: "03",
-              badge: "border-accent-emerald/20 bg-accent-emerald/10 text-accent-emerald dark:text-emerald-100",
-              dot: "bg-accent-emerald",
-            },
-          ].map((section) => (
-            <article
-              key={section.title}
-              className="group relative flex min-h-[220px] flex-col overflow-hidden rounded-3xl border border-card-border bg-white/88 p-5 shadow-card backdrop-blur transition-all hover:-translate-y-1 hover:bg-white hover:shadow-card-hover dark:border-white/[0.06] dark:bg-[#0c0e18] dark:hover:bg-[#101521]"
+
+          <div className="mt-8 flex flex-wrap items-center gap-4">
+            <Link
+              href={profileHref}
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25 transition-all hover:-translate-y-0.5 hover:bg-gray-100"
             >
-              <div
-                className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent opacity-90 dark:via-white/25"
-                aria-hidden
-              />
-              <div
-                className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.72),transparent_42%)] opacity-80 dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.05),transparent_42%)]"
-                aria-hidden
-              />
-              <div className="relative mb-5 flex items-center justify-between gap-3">
-                <span
-                  className={`inline-flex rounded-full border px-3 py-1 font-mono text-[0.68rem] font-semibold uppercase tracking-[0.22em] ${section.badge}`}
-                >
-                  {section.number}
-                </span>
-                <span
-                  className={`h-2.5 w-2.5 rounded-full ${section.dot} shadow-[0_0_18px_currentColor]`}
-                  aria-hidden
-                />
-              </div>
-              <h3 className="relative text-xl font-semibold tracking-[-0.03em] text-gray-950 dark:text-white">
-                {section.title}
-              </h3>
-              <p className="relative mt-3 text-sm leading-7 text-gray-600 dark:text-slate-300">
-                {section.body}
-              </p>
-            </article>
-          ))}
+              <Sparkles className="h-4 w-4" aria-hidden />
+              {t("exploreProfileCta")}
+            </Link>
+            <Link
+              href={profileHref}
+              className="text-sm font-semibold text-slate-400 transition-colors hover:text-white"
+            >
+              {t("seeMore")}
+              <span aria-hidden="true"> →</span>
+            </Link>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-center lg:justify-end">
+          <SoundprintOrb genreCount={genres.length} />
         </div>
       </div>
-    </section>
+    </TasteProfileShell>
   );
 }

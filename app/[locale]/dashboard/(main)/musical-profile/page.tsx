@@ -6,11 +6,22 @@ import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { motion } from "motion/react";
-import { Link } from "@/i18n/navigation";
+import { Link, usePathname } from "@/i18n/navigation";
 import { apiClient } from "@/lib/api-client";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
 import { ErrorState, GroqQuotaNotice } from "@/lib/components/error-state";
 import { ParallaxHero, ScrollRevealSection, StaggerContainer } from "@/lib/components/overview-bis";
+import {
+  CinematicFilmGrain,
+  CinematicFloat,
+  CinematicFloatingOrbs,
+  CinematicLightSweep,
+  CinematicProgressBar,
+  CinematicQuote,
+  CinematicReveal,
+  CinematicStagger,
+  CinematicWordReveal,
+} from "@/lib/components/musical-profile-cinematic";
 import { getAiInsightsLabels } from "@/lib/constants/ai-insights-labels";
 import type { ArtistStatsDto } from "@/lib/dto/artist";
 import type { GenreDistributionDto } from "@/lib/dto/genres";
@@ -31,10 +42,10 @@ import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params"
 import { firstKnownGenreName } from "@/lib/utils/genre-unknown-label";
 import { ArtistAvatarHydrated } from "@/lib/components/artist-avatar-hydrated";
 import { getAvatarUrl } from "@/lib/components/artist-avatar-utils";
+import { MusicalProfilePeriodBadge } from "@/lib/components/musical-profile-period-badge";
 
 const TOP_LIMIT = 6;
 const PROFILE_AI_STALE_TIME = 5 * 60 * 1000;
-const MOBILE_DATE_OPTS = { month: "2-digit", day: "2-digit", year: "2-digit" } as const;
 
 function SparkIcon({ className }: { className?: string }) {
   return (
@@ -60,21 +71,6 @@ function BarsIcon({ className }: { className?: string }) {
   );
 }
 
-function formatDateRange(startDate: string | undefined, endDate: string | undefined, locale: string): string {
-  if (!startDate || !endDate) return "";
-  const formatter = new Intl.DateTimeFormat(locale, {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-  return `${formatter.format(new Date(startDate))} - ${formatter.format(new Date(endDate))}`;
-}
-
-function formatMobileDateRange(startDate: string | undefined, endDate: string | undefined, locale: string): string {
-  if (!startDate || !endDate) return "";
-  return `${new Date(startDate).toLocaleDateString(locale, MOBILE_DATE_OPTS)}–${new Date(endDate).toLocaleDateString(locale, MOBILE_DATE_OPTS)}`;
-}
-
 function formatCompactNumber(value: number | undefined, locale: string): string {
   return new Intl.NumberFormat(locale, {
     notation: "compact",
@@ -90,6 +86,72 @@ function formatListeningTime(seconds: number | undefined, t: ReturnType<typeof u
   }
   const hours = Math.round(totalMinutes / 60);
   return `${hours}${t("units.hours")}`;
+}
+
+function formatPeakHour(hour: number, locale: string): string {
+  const date = new Date(Date.UTC(2000, 0, 1, hour));
+  return new Intl.DateTimeFormat(locale, { hour: "numeric" }).format(date);
+}
+
+function ProfileCockpitRhythm({
+  locale,
+  peakDay,
+  peakHour,
+  uniqueTracks,
+}: {
+  locale: string;
+  peakDay: TemporalAnalysisDto["peakDay"];
+  peakHour: TemporalAnalysisDto["peakHour"];
+  uniqueTracks: number | undefined;
+}) {
+  const t = useTranslations("musical-profile");
+  const dayNames = getAiInsightsLabels(locale).dayNames;
+  const hasRhythm = Boolean(peakDay || peakHour);
+
+  return (
+    <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4">
+      <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+        {t("profileCockpit.listeningRhythm")}
+      </p>
+      {hasRhythm ? (
+        <CinematicStagger className="grid gap-2 sm:grid-cols-3" delay={0.45} inView>
+          {peakDay ? (
+            <div className="rounded-xl border border-white/10 bg-white/[0.06] p-3">
+              <p className="text-lg font-semibold tracking-tight text-white">{dayNames[peakDay.dayOfWeek]}</p>
+              <p className="mt-1 text-xs text-cyan-100">
+                {formatCompactNumber(peakDay.listens, locale)} {t("labels.listens")}
+              </p>
+              <p className="mt-2 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                {t("profileCockpit.peakDay")}
+              </p>
+            </div>
+          ) : null}
+          {peakHour ? (
+            <div className="rounded-xl border border-white/10 bg-white/[0.06] p-3">
+              <p className="text-lg font-semibold tracking-tight text-white">{formatPeakHour(peakHour.hour, locale)}</p>
+              <p className="mt-1 text-xs text-cyan-100">
+                {formatCompactNumber(peakHour.listens, locale)} {t("labels.listens")}
+              </p>
+              <p className="mt-2 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                {t("profileCockpit.peakHour")}
+              </p>
+            </div>
+          ) : null}
+          <div className="rounded-xl border border-white/10 bg-white/[0.06] p-3">
+            <p className="text-lg font-semibold tracking-tight text-white">
+              {formatCompactNumber(uniqueTracks, locale)}
+            </p>
+            <p className="mt-1 text-xs text-cyan-100">{t("profileCockpit.tracksExploredHint")}</p>
+            <p className="mt-2 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+              {t("metrics.uniqueTracks")}
+            </p>
+          </div>
+        </CinematicStagger>
+      ) : (
+        <p className="text-sm leading-6 text-white/55">{t("profileCockpit.rhythmFallback")}</p>
+      )}
+    </div>
+  );
 }
 
 function getTopArtistFallback(artists: ArtistStatsDto[], overview?: OverviewStatsWithTopArtists) {
@@ -190,17 +252,25 @@ function LandingValueCard({
   accentClass: string;
 }) {
   return (
-    <div className="group relative overflow-hidden rounded-3xl border border-card-border bg-card-surface p-6 shadow-card backdrop-blur-sm transition-all hover:-translate-y-1 hover:shadow-card-hover">
+    <motion.div
+      className="group relative overflow-hidden rounded-3xl border border-card-border bg-card-surface p-6 shadow-card backdrop-blur-sm"
+      whileHover={{ y: -6, scale: 1.02 }}
+      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+    >
       <div
         className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-br from-accent-violet/10 via-transparent to-accent-cyan/10 opacity-80 transition-opacity group-hover:opacity-100"
         aria-hidden
       />
-      <div className={`relative mb-4 flex h-11 w-11 items-center justify-center rounded-2xl ${accentClass}`}>
+      <motion.div
+        className={`relative mb-4 flex h-11 w-11 items-center justify-center rounded-2xl ${accentClass}`}
+        whileHover={{ rotate: [0, -6, 6, 0] }}
+        transition={{ duration: 0.45 }}
+      >
         {icon}
-      </div>
+      </motion.div>
       <h3 className="relative text-base font-semibold text-gray-950 dark:text-white">{title}</h3>
       <p className="relative mt-3 text-sm leading-6 text-gray-600 dark:text-gray-300">{body}</p>
-    </div>
+    </motion.div>
   );
 }
 
@@ -208,17 +278,25 @@ function MobileMetricPill({
   label,
   value,
   hint,
+  index = 0,
 }: {
   label: string;
   value: string;
   hint: string;
+  index?: number;
 }) {
   return (
-    <div className="min-w-[9.25rem] rounded-3xl border border-white/10 bg-gray-950 p-4 shadow-lg shadow-black/10">
+    <motion.div
+      className="min-w-[9.25rem] rounded-3xl border border-white/10 bg-gray-950 p-4 shadow-lg shadow-black/10"
+      initial={{ opacity: 0, x: 24, scale: 0.94 }}
+      whileInView={{ opacity: 1, x: 0, scale: 1 }}
+      viewport={{ once: true, amount: 0.4 }}
+      transition={{ duration: 0.55, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
+    >
       <p className="text-2xl font-semibold tracking-tight text-white">{value}</p>
       <p className="mt-1 text-xs font-semibold uppercase tracking-[0.16em] text-white/45">{label}</p>
       <p className="mt-2 text-xs leading-5 text-white/55">{hint}</p>
-    </div>
+    </motion.div>
   );
 }
 
@@ -246,7 +324,11 @@ function MobileAiStory({
   }
 
   if (!aiError) {
-    return <p className="text-lg font-semibold leading-8 text-white">&ldquo;{profileDescription}&rdquo;</p>;
+    return (
+      <CinematicQuote className="text-lg font-semibold leading-8 text-white" quoteKey={profileDescription}>
+        &ldquo;{profileDescription}&rdquo;
+      </CinematicQuote>
+    );
   }
 
   if (isGroqDailyQuotaError(aiError)) {
@@ -273,13 +355,14 @@ function MobileAiStory({
 function MobileMusicalProfileView({
   aiError,
   aiLoading,
-  dateRangeLabel,
+  endDate,
   genrePreview,
   interactiveAiBlockedByGenreBackfill,
   locale,
   profileDescription,
   profileMetrics,
   showAiUnavailable,
+  startDate,
   topArtistName,
   topArtistShare,
   topArtists,
@@ -288,13 +371,14 @@ function MobileMusicalProfileView({
 }: {
   aiError: Error | null;
   aiLoading: boolean;
-  dateRangeLabel: string;
+  endDate?: string;
   genrePreview: GenreDistributionDto[];
   interactiveAiBlockedByGenreBackfill: boolean;
   locale: string;
   profileDescription: string;
   profileMetrics: Array<{ label: string; value: string; hint: string }>;
   showAiUnavailable?: boolean;
+  startDate?: string;
   topArtistName: string;
   topArtistShare: number;
   topArtists: ArtistStatsDto[];
@@ -306,9 +390,17 @@ function MobileMusicalProfileView({
 
   return (
     <div className="space-y-5 pb-8 lg:hidden">
-      <section className="relative overflow-hidden rounded-[2rem] bg-gray-950 p-4 text-white shadow-2xl shadow-accent-violet/20">
+      <motion.section
+        className="relative overflow-hidden rounded-[2rem] bg-gray-950 p-4 text-white shadow-2xl shadow-accent-violet/20"
+        initial={{ opacity: 0, y: 32, scale: 0.94 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+      >
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_10%_0%,rgba(240,64,104,0.35),transparent_34%),radial-gradient(circle_at_90%_20%,rgba(6,182,212,0.26),transparent_32%),linear-gradient(160deg,rgba(3,7,18,0.98),rgba(30,27,75,0.9)_52%,rgba(8,47,73,0.76))]" />
-        <div className="relative space-y-5">
+        <CinematicFloatingOrbs />
+        <CinematicFilmGrain />
+        <CinematicLightSweep />
+        <CinematicStagger className="relative space-y-5" delay={0.15}>
           <div className="flex items-center justify-between gap-3">
             <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-2xl border border-white/15 bg-white/10 p-1.5 shadow-lg shadow-black/20 ring-1 ring-white/10">
               <Image
@@ -320,13 +412,17 @@ function MobileMusicalProfileView({
                 priority
               />
             </div>
-            <p className="shrink-0 whitespace-nowrap rounded-full bg-white/10 px-2.5 py-1.5 text-[11px] font-medium text-white/60">
-              {dateRangeLabel || t("mobile.dateRangeFallback")}
-            </p>
+            <MusicalProfilePeriodBadge
+              startDate={startDate}
+              endDate={endDate}
+              locale={locale}
+              variant="mobile"
+            />
           </div>
 
           <div className="grid grid-cols-[5rem_minmax(0,1fr)] items-center gap-4">
-            <div className="relative h-20 w-20 overflow-hidden rounded-[1.35rem] shadow-2xl shadow-black/35 ring-1 ring-white/15">
+            <CinematicFloat className="relative h-20 w-20" intensity="subtle">
+              <div className="relative h-full w-full overflow-hidden rounded-[1.35rem] shadow-2xl shadow-black/35 ring-1 ring-white/15">
               {primaryArtist ? (
                 <ArtistAvatarHydrated
                   artistId={primaryArtist.artistId}
@@ -355,13 +451,14 @@ function MobileMusicalProfileView({
                 className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-violet-600/20 via-transparent to-cyan-500/20"
                 aria-hidden
               />
-            </div>
+              </div>
+            </CinematicFloat>
             <div className="min-w-0">
               <p className="whitespace-nowrap text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-cyan">
                 {t("mobile.signatureLabel")}
               </p>
               <h1 className="mt-2 truncate text-3xl font-semibold tracking-[-0.06em]">
-                {topArtistName || t("unknownArtist")}
+                <CinematicWordReveal text={topArtistName || t("unknownArtist")} delay={0.2} />
               </h1>
               <p className="mt-2 line-clamp-2 text-sm leading-6 text-white/62">
                 {topGenreName ? t("heroSignatureHint", { genre: topGenreName }) : t("mobile.genreFallback")}
@@ -387,18 +484,18 @@ function MobileMusicalProfileView({
               </p>
             ) : null}
           </div>
-        </div>
-      </section>
+        </CinematicStagger>
+      </motion.section>
 
       <section className="-mx-4 overflow-x-auto px-4 pb-1">
         <div className="flex gap-3">
-          {profileMetrics.map((metric) => (
-            <MobileMetricPill key={metric.label} {...metric} />
+          {profileMetrics.map((metric, index) => (
+            <MobileMetricPill key={metric.label} {...metric} index={index} />
           ))}
         </div>
       </section>
 
-      <section className="rounded-[1.75rem] border border-card-border bg-card-surface p-4 shadow-card">
+      <CinematicReveal className="rounded-[1.75rem] border border-card-border bg-card-surface p-4 shadow-card">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
@@ -413,24 +510,24 @@ function MobileMusicalProfileView({
           ) : null}
         </div>
         <div className="mt-4 space-y-3">
-          {genrePreview.map((genre) => (
+          {genrePreview.map((genre, index) => (
             <div key={genre.genre}>
               <div className="mb-1.5 flex items-center justify-between gap-3 text-sm">
                 <span className="truncate font-medium text-gray-800 dark:text-gray-100">{genre.genre}</span>
                 <span className="text-gray-500 dark:text-gray-400">{Math.round(genre.percentage)}%</span>
               </div>
-              <div className="h-2.5 overflow-hidden rounded-full bg-gray-100 dark:bg-white/10">
-                <div
-                  className="h-full rounded-full bg-gradient-to-r from-accent-violet to-accent-cyan"
-                  style={{ width: `${Math.min(100, Math.max(4, genre.percentage))}%` }}
-                />
-              </div>
+              <CinematicProgressBar
+                percentage={genre.percentage}
+                delay={index * 0.12}
+                trackClassName="h-2.5 overflow-hidden rounded-full bg-gray-100 dark:bg-white/10"
+              />
             </div>
           ))}
         </div>
-      </section>
+      </CinematicReveal>
 
-      <details className="group rounded-[1.75rem] border border-card-border bg-card-surface p-4 shadow-card">
+      <CinematicReveal delay={0.1}>
+        <details className="group rounded-[1.75rem] border border-card-border bg-card-surface p-4 shadow-card">
         <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 text-left">
           <span>
             <span className="block text-xs font-semibold uppercase tracking-[0.18em] text-primary">
@@ -468,9 +565,10 @@ function MobileMusicalProfileView({
             </div>
           ))}
         </div>
-      </details>
+        </details>
+      </CinematicReveal>
 
-      <section className="rounded-[1.75rem] border border-accent-violet/20 bg-gradient-to-br from-card-surface to-accent-violet/[0.08] p-4 shadow-card">
+      <CinematicReveal delay={0.15} className="rounded-[1.75rem] border border-accent-violet/20 bg-gradient-to-br from-card-surface to-accent-violet/[0.08] p-4 shadow-card">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent-violet">
           {t("mobile.nextTitle")}
         </p>
@@ -499,7 +597,7 @@ function MobileMusicalProfileView({
             ))}
           </div>
         </div>
-      </section>
+      </CinematicReveal>
     </div>
   );
 }
@@ -514,7 +612,6 @@ function MusicalProfileNoDataView({
   const t = useTranslations("musical-profile");
   const emptyStatePresets = useEmptyStatePresets();
   const { startDate, endDate } = useListenDateRange();
-  const dateRangeLabel = formatDateRange(startDate, endDate, locale);
   const previewBullets = [t("emptyFeature.item1"), t("emptyFeature.item2"), t("emptyFeature.item3")];
 
   return (
@@ -527,18 +624,21 @@ function MusicalProfileNoDataView({
           className="relative overflow-hidden rounded-[2rem] border border-accent-violet/20 bg-gray-950 px-6 py-8 text-white shadow-2xl shadow-accent-violet/20 sm:px-10 sm:py-12"
         >
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.45),transparent_35%),radial-gradient(circle_at_80%_20%,rgba(6,182,212,0.28),transparent_30%),linear-gradient(135deg,rgba(17,24,39,0.98),rgba(76,29,149,0.78))]" />
+          <CinematicFloatingOrbs />
+          <CinematicFilmGrain />
+          <CinematicLightSweep />
           <div className="absolute -bottom-24 left-1/2 h-56 w-[80%] -translate-x-1/2 rounded-full bg-accent-violet/25 blur-3xl" />
-          <div className="relative grid gap-10 lg:grid-cols-[1.25fr_0.75fr] lg:items-end">
+          <CinematicStagger className="relative grid gap-10 lg:grid-cols-[1.25fr_0.75fr] lg:items-end" delay={0.1}>
             <div>
               <h1 className="max-w-3xl text-3xl font-black tracking-tight sm:text-5xl lg:text-6xl">
-                {t("heroTitle")}
+                <CinematicWordReveal text={t("heroTitle")} />
               </h1>
-              <p className="mt-5 max-w-2xl text-base leading-7 text-white/72 sm:text-lg">
-                {t("heroSubtitle")}
-              </p>
-              {dateRangeLabel ? (
-                <p className="mt-5 text-sm font-medium text-white/55">{dateRangeLabel}</p>
-              ) : null}
+              <MusicalProfilePeriodBadge
+                startDate={startDate}
+                endDate={endDate}
+                locale={locale}
+                className="mt-5"
+              />
             </div>
             <div className="rounded-3xl border border-white/15 bg-white/10 p-5 backdrop-blur">
               <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-center">
@@ -564,11 +664,11 @@ function MusicalProfileNoDataView({
                 </div>
               </div>
             </div>
-          </div>
+          </CinematicStagger>
         </motion.section>
       </ParallaxHero>
 
-      <section className="relative min-h-[240px] w-full overflow-hidden rounded-2xl border border-accent-violet/25 bg-card-surface shadow-2xl ring-1 ring-accent-violet/10 transition-all duration-300 dark:border-accent-violet/30 dark:ring-accent-violet/20">
+      <CinematicReveal className="relative min-h-[240px] w-full overflow-hidden rounded-2xl border border-accent-violet/25 bg-card-surface shadow-2xl ring-1 ring-accent-violet/10 transition-all duration-300 dark:border-accent-violet/30 dark:ring-accent-violet/20">
         <div
           className="pointer-events-none absolute inset-0 opacity-80 dark:opacity-50"
           style={{
@@ -605,7 +705,7 @@ function MusicalProfileNoDataView({
             <span aria-hidden="true">&rarr;</span>
           </Link>
         </div>
-      </section>
+      </CinematicReveal>
 
       <EmptyState
         variant="startup"
@@ -710,8 +810,6 @@ function MusicalProfileContent() {
     return <MusicalProfileNoDataView locale={locale} withFilters={withFilters} />;
   }
 
-  const dateRangeLabel = formatDateRange(startDate, endDate, locale);
-  const mobileDateRangeLabel = formatMobileDateRange(startDate, endDate, locale);
   const topArtistName = getTopArtistFallback(topArtists, overview);
   const topGenreName = firstKnownGenreName(genresData?.data);
   const profileDescription =
@@ -749,7 +847,8 @@ function MusicalProfileContent() {
       <MobileMusicalProfileView
         aiError={aiError ?? null}
         aiLoading={aiLoading}
-        dateRangeLabel={mobileDateRangeLabel}
+        startDate={startDate}
+        endDate={endDate}
         genrePreview={genrePreview}
         interactiveAiBlockedByGenreBackfill={interactiveAiBlockedByGenreBackfill}
         locale={locale}
@@ -766,26 +865,29 @@ function MusicalProfileContent() {
       <div className="hidden space-y-12 pb-6 lg:block lg:pb-10">
         <ParallaxHero>
           <motion.section
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            key="musical-profile-hero"
+            initial={{ opacity: 0, y: 40, scale: 0.95, filter: "blur(10px)" }}
+            animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+            transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
             className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-gray-950 px-5 py-6 text-white shadow-2xl shadow-accent-violet/20 sm:px-8 sm:py-9 lg:px-10 lg:py-10"
           >
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(240,64,104,0.28),transparent_30%),radial-gradient(circle_at_80%_10%,rgba(79,144,224,0.24),transparent_32%),linear-gradient(135deg,rgba(3,7,18,0.98),rgba(30,27,75,0.88)_48%,rgba(8,47,73,0.72))]" />
+          <CinematicFloatingOrbs />
+          <CinematicFilmGrain />
+          <CinematicLightSweep />
           <div className="absolute -left-24 top-1/2 h-64 w-64 rounded-full bg-accent-violet/25 blur-3xl" />
           <div className="absolute -bottom-28 right-10 h-72 w-72 rounded-full bg-accent-cyan/20 blur-3xl" />
-          <div className="relative grid gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-center">
+          <CinematicStagger className="relative grid gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-center" delay={0.12}>
             <div>
-              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-100 backdrop-blur">
-                <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_18px_rgb(22_199_132_/0.75)]" />
-                {t("heroBadge")}
-              </div>
               <h1 className="max-w-4xl text-balance text-3xl font-semibold tracking-[-0.06em] sm:text-5xl lg:text-6xl">
-                {t("heroTitle")}
+                <CinematicWordReveal text={t("heroTitle")} />
               </h1>
-              <p className="mt-5 max-w-2xl text-base leading-7 text-white/70 sm:text-lg">
-                {t("heroSubtitle")}
-              </p>
+              <MusicalProfilePeriodBadge
+                startDate={startDate}
+                endDate={endDate}
+                locale={locale}
+                className="mt-5"
+              />
               <div className="mt-7 flex flex-col gap-3 sm:flex-row">
                 <Link
                   href={withFilters("/dashboard/overview")}
@@ -795,15 +897,15 @@ function MusicalProfileContent() {
                   <span aria-hidden="true">&rarr;</span>
                 </Link>
               </div>
-              {dateRangeLabel ? (
-                <p className="mt-5 inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-white/55">
-                  {dateRangeLabel}
-                </p>
-              ) : null}
             </div>
 
-            <div className="relative">
-              <div className="absolute -inset-4 rounded-[2rem] bg-brand-gradient-soft blur-2xl" aria-hidden />
+            <CinematicReveal delay={0.25} className="relative">
+              <motion.div
+                className="absolute -inset-4 rounded-[2rem] bg-brand-gradient-soft blur-2xl"
+                animate={{ opacity: [0.55, 0.85, 0.6] }}
+                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                aria-hidden
+              />
               <div className="relative overflow-hidden rounded-[1.75rem] border border-white/15 bg-white/10 p-3 shadow-2xl shadow-black/35 backdrop-blur-xl">
                 <div className="rounded-[1.35rem] border border-white/10 bg-slate-950/70 p-4">
                   <div className="flex items-center justify-between border-b border-white/10 pb-4">
@@ -816,7 +918,8 @@ function MusicalProfileContent() {
                   </div>
 
                   <div className="mt-4 grid gap-4 sm:grid-cols-[auto_1fr] sm:items-center">
-                    <div className="relative mx-auto h-32 w-32 overflow-hidden rounded-3xl shadow-2xl shadow-black/35 ring-1 ring-white/15 sm:mx-0">
+                    <CinematicFloat className="relative mx-auto h-32 w-32 sm:mx-0" intensity="subtle">
+                      <div className="relative h-full w-full overflow-hidden rounded-3xl shadow-2xl shadow-black/35 ring-1 ring-white/15">
                       {topArtists[0] ? (
                         <ArtistAvatarHydrated
                           artistId={topArtists[0].artistId}
@@ -852,13 +955,14 @@ function MusicalProfileContent() {
                         className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-violet-600/20 via-transparent to-cyan-500/20"
                         aria-hidden
                       />
-                    </div>
+                      </div>
+                    </CinematicFloat>
                     <div className="min-w-0 text-center sm:text-left">
                       <p className="text-xs font-semibold uppercase tracking-[0.22em] text-accent-cyan">
                         {t("heroSignature")}
                       </p>
                       <p className="mt-2 truncate text-2xl font-semibold tracking-tight">
-                        {topArtistName || t("unknownArtist")}
+                        <CinematicWordReveal text={topArtistName || t("unknownArtist")} delay={0.35} />
                       </p>
                       <p className="mt-2 text-sm text-white/60">
                         {topGenreName
@@ -868,7 +972,7 @@ function MusicalProfileContent() {
                     </div>
                   </div>
 
-                  <div className="mt-5 grid gap-2 sm:grid-cols-3">
+                  <CinematicStagger className="mt-5 grid gap-2 sm:grid-cols-3" delay={0.4} inView>
                     {profileMetrics.map((metric) => (
                       <div key={metric.label} className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
                         <p className="text-xl font-semibold tracking-tight">{metric.value}</p>
@@ -877,40 +981,18 @@ function MusicalProfileContent() {
                         </p>
                       </div>
                     ))}
-                  </div>
+                  </CinematicStagger>
 
-                  <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4">
-                    <div className="mb-3 flex items-center justify-between gap-3 text-xs">
-                      <span className="font-semibold uppercase tracking-[0.18em] text-slate-400">
-                        {t("profileCockpit.genreMix")}
-                      </span>
-                      {topArtistShare > 0 ? (
-                        <span className="text-cyan-100">
-                          {t("profileCockpit.anchorShare", { percent: topArtistShare })}
-                        </span>
-                      ) : null}
-                    </div>
-                    <div className="space-y-2">
-                      {genrePreview.map((genre) => (
-                        <div key={genre.genre}>
-                          <div className="mb-1 flex items-center justify-between text-xs text-slate-300">
-                            <span className="truncate">{genre.genre}</span>
-                            <span>{Math.round(genre.percentage)}%</span>
-                          </div>
-                          <div className="h-2 overflow-hidden rounded-full bg-white/10">
-                            <div
-                              className="h-full rounded-full bg-gradient-to-r from-accent-violet to-accent-cyan"
-                              style={{ width: `${Math.min(100, Math.max(4, genre.percentage))}%` }}
-                            />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  <ProfileCockpitRhythm
+                    locale={locale}
+                    peakDay={temporalData?.peakDay ?? null}
+                    peakHour={temporalData?.peakHour ?? null}
+                    uniqueTracks={overview?.uniqueTracks}
+                  />
                 </div>
               </div>
-            </div>
-          </div>
+            </CinematicReveal>
+          </CinematicStagger>
         </motion.section>
       </ParallaxHero>
 
@@ -926,9 +1008,6 @@ function MusicalProfileContent() {
               <h2 className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-gray-950 dark:text-white sm:text-3xl lg:text-4xl">
                 {t("overviewCallout.title")}
               </h2>
-              <p className="mt-3 text-sm leading-6 text-gray-600 dark:text-gray-300">
-                {t("overviewCallout.body")}
-              </p>
               <Link
                 href={withFilters("/dashboard/overview")}
                 className="mt-6 inline-flex items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-5 py-3 text-sm font-bold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:shadow-card-hover focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
@@ -1049,9 +1128,12 @@ function MusicalProfileContent() {
                     {!interactiveAiBlockedByGenreBackfill ? (
                       <InteractiveAiGenreBackfillNotice force />
                     ) : null}
-                    <blockquote className="text-2xl font-semibold leading-9 tracking-tight text-white">
+                    <CinematicQuote
+                      className="text-2xl font-semibold leading-9 tracking-tight text-white"
+                      quoteKey={profileDescription}
+                    >
                       &ldquo;{profileDescription}&rdquo;
-                    </blockquote>
+                    </CinematicQuote>
                   </div>
                 ) : (
                   <div role="alert" className="space-y-3">
@@ -1064,9 +1146,12 @@ function MusicalProfileContent() {
                   </div>
                 )
               ) : (
-                <blockquote className="text-2xl font-semibold leading-9 tracking-tight text-white">
+                <CinematicQuote
+                  className="text-2xl font-semibold leading-9 tracking-tight text-white"
+                  quoteKey={profileDescription}
+                >
                   &ldquo;{profileDescription}&rdquo;
-                </blockquote>
+                </CinematicQuote>
               )}
               </div>
             </div>
@@ -1087,7 +1172,7 @@ function MusicalProfileContent() {
               </h2>
               <p className="mt-3 text-sm leading-6 text-gray-600 dark:text-gray-300">{t("landing.lead")}</p>
             </div>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <StaggerContainer className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <LandingValueCard
                 title={t("landing.cards.statsTitle")}
                 body={t("landing.cards.statsBody")}
@@ -1106,7 +1191,7 @@ function MusicalProfileContent() {
                 icon={<ProfileIcon className="h-5 w-5" />}
                 accentClass="bg-accent-indigo/10 text-accent-indigo"
               />
-            </div>
+            </StaggerContainer>
             <div className="flex flex-col items-stretch gap-4 sm:items-center">
               <Link
                 href={withFilters("/dashboard/overview")}
@@ -1158,17 +1243,31 @@ function MusicalProfileContent() {
 function MusicalProfileFallback() {
   return (
     <div className="space-y-8">
-      <div className="h-72 rounded-[2rem] bg-gray-100 animate-shimmer dark:bg-gray-800" />
-      <div className="h-80 rounded-[2rem] bg-gray-100 animate-shimmer dark:bg-gray-800" />
+      <motion.div
+        className="h-72 rounded-[2rem] bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800"
+        initial={{ opacity: 0.4 }}
+        animate={{ opacity: [0.4, 0.7, 0.4] }}
+        transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <motion.div
+        className="h-80 rounded-[2rem] bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800"
+        initial={{ opacity: 0.4 }}
+        animate={{ opacity: [0.4, 0.7, 0.4] }}
+        transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}
+      />
     </div>
   );
 }
 
 export default function MusicalProfilePage() {
+  const pathname = usePathname();
+
   return (
     <div className="relative px-4 py-6 sm:px-0">
       <Suspense fallback={<MusicalProfileFallback />}>
-        <MusicalProfileContent />
+        <div key={pathname}>
+          <MusicalProfileContent />
+        </div>
       </Suspense>
     </div>
   );

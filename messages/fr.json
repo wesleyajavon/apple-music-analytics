@@ -1383,7 +1383,7 @@
     "paginationNext": "Suivant",
     "paginationPage": "Page {page} / {totalPages}",
     "selectAtLeastOne": "Sélectionnez au moins un genre pour afficher le graphique.",
-    "evolution": "Le pouls de vos genres, décodé",
+    "evolution": "Quels genres montent — et lesquels s'effacent",
     "chartHint": "Voyez quels sons prennent le dessus dans vos goûts, et lesquels s’effacent.",
     "listensDelta": "écoutes",
     "noGenreData": "Aucune donnée de genre pour cette période",
@@ -2660,8 +2660,8 @@
       "periodMeta": "90 derniers jours · mêmes filtres",
       "selfName": "Vous",
       "selfInitials": "VO",
-      "friendName": "Maya",
-      "friendInitials": "MY",
+      "friendName": "Josh",
+      "friendInitials": "JO",
       "winnerHeadline": "Vous streamez plus Tyler.",
       "insightEyebrow": "Face à face",
       "insightCopy": "Ajoutez un ami, choisissez un artiste et voyez qui domine vraiment — compteur basé sur vos bibliothèques réelles.",
@@ -2706,8 +2706,8 @@
         "quote": "Votre file du soir glisse vers des textures épurées et mélodiques, avec un retour régulier vers l'art pop."
       },
       "albumSpotlight": {
-        "title": "Les albums en rotation dans votre bibliothèque.",
-        "description": "Vos disques les plus écoutés — classés par nombre de lectures réelles, avec les pochettes de votre historique."
+        "title": "Ce qui reste en rotation.",
+        "description": "Classé par vos retours — la musique devenue réflexe."
       }
     },
     "featuresEyebrow": "Pourquoi c'est différent",
@@ -2761,7 +2761,7 @@
       "features": {
         "compareEras": {
           "label": "Avant / après",
-          "supporting": "Deux années, côte à côte."
+          "supporting": "Comparez 2 années d'écoutes"
         },
         "plainLanguage": {
           "label": "En clair",

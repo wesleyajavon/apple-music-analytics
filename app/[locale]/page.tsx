@@ -21,6 +21,13 @@ import { UserAvatar } from "@/lib/components/user-avatar";
 import { withPublicDemoUserId } from "@/lib/constants/public-profile";
 import { usePublicDemo } from "@/lib/providers/public-demo-provider";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import {
+  HomeBlurFadeReveal,
+  HomeClipReveal,
+  HomePerspectiveReveal,
+  HomeTextReveal,
+  HomeTextRevealLines,
+} from "@/lib/components/home-animations";
 
 function ArrowRightIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
@@ -266,6 +273,7 @@ export default function Home() {
 
         <section className="relative mx-auto grid w-full max-w-7xl scroll-mt-24 items-center gap-10 px-4 pb-16 pt-10 sm:gap-12 sm:px-6 sm:pb-20 sm:pt-14 lg:grid-cols-[0.92fr_1.08fr] lg:gap-14 lg:px-8 lg:pb-28 lg:pt-20">
           <div className="relative z-10 text-left">
+            <HomeBlurFadeReveal delay={0} immediate>
             {isAuthenticated ? (
               <Link
                 href="/dashboard"
@@ -309,27 +317,42 @@ export default function Home() {
                 <ArrowRightIcon className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
               </Link>
             ) : null}
+            </HomeBlurFadeReveal>
 
-            <h1 className="max-w-4xl overflow-visible text-balance text-[2.35rem] font-semibold leading-[1.15] tracking-[-0.05em] text-foreground sm:text-6xl sm:leading-snug sm:tracking-[-0.06em] lg:text-7xl lg:leading-[1.12]">
-              {welcomeMessage}
-              {!firstName ? (
-                <span className="mt-1 block bg-brand-gradient bg-clip-text pb-1.5 leading-normal text-transparent sm:pb-2">
-                  {t("heroGradient")}
-                </span>
-              ) : null}
-            </h1>
-            <p className="mt-5 max-w-2xl text-base leading-7 text-muted sm:mt-6 sm:text-xl sm:leading-8">
-              {t("subtitle")}
-            </p>
-
-            <StreamingProviderLogos
-              caption={t("supportedStreamingCaption")}
-              spotifyLogoAlt={t("spotifyLogoAlt")}
-              appleMusicLogoAlt={t("appleMusicLogoAlt")}
-              className="mt-5"
+            <HomeTextRevealLines
+              as="h1"
+              className="max-w-4xl overflow-visible text-balance text-[2.35rem] font-semibold leading-[1.15] tracking-[-0.05em] text-foreground sm:text-6xl sm:leading-snug sm:tracking-[-0.06em] lg:text-7xl lg:leading-[1.12]"
+              lines={[
+                <span key="welcome">{welcomeMessage}</span>,
+                ...(!firstName
+                  ? [
+                      <span
+                        key="gradient"
+                        className="mt-1 block bg-brand-gradient bg-clip-text pb-1.5 leading-normal text-transparent sm:pb-2"
+                      >
+                        {t("heroGradient")}
+                      </span>,
+                    ]
+                  : []),
+              ]}
             />
 
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <HomeBlurFadeReveal delay={0.2} className="mt-5 max-w-2xl">
+              <p className="text-base leading-7 text-muted sm:text-xl sm:leading-8">
+                {t("subtitle")}
+              </p>
+            </HomeBlurFadeReveal>
+
+            <HomeBlurFadeReveal delay={0.32}>
+              <StreamingProviderLogos
+                caption={t("supportedStreamingCaption")}
+                spotifyLogoAlt={t("spotifyLogoAlt")}
+                appleMusicLogoAlt={t("appleMusicLogoAlt")}
+                className="mt-5"
+              />
+            </HomeBlurFadeReveal>
+
+            <HomeBlurFadeReveal delay={0.44} className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               {isAuthenticated ? (
                 <Link
                   href="/dashboard"
@@ -347,10 +370,12 @@ export default function Home() {
                   <ArrowRightIcon />
                 </Link>
               )}
-            </div>
+            </HomeBlurFadeReveal>
           </div>
 
-          <HomeDuetPreview />
+          <HomeClipReveal className="relative z-10" delay={0.15} immediate>
+            <HomeDuetPreview />
+          </HomeClipReveal>
         </section>
 
         <SoundprintBrandDividerSection
@@ -379,12 +404,18 @@ export default function Home() {
           className="mx-auto w-full max-w-7xl scroll-mt-24 px-4 pb-12 sm:px-6 sm:pb-20 lg:px-8"
         >
           <div className="mb-10 text-center lg:mb-12">
-            <p className="font-mono text-xs font-semibold uppercase tracking-[0.28em] text-primary">
-              {t("soundprintAiChatDemo.sectionEyebrow")}
-            </p>
-            <h2 className="mx-auto mt-3 max-w-4xl text-2xl font-semibold tracking-[-0.04em] text-foreground sm:text-5xl">
-              {t("soundprintAiChatDemo.sectionTitle")}
-            </h2>
+            <HomeBlurFadeReveal>
+              <p className="font-mono text-xs font-semibold uppercase tracking-[0.28em] text-primary">
+                {t("soundprintAiChatDemo.sectionEyebrow")}
+              </p>
+            </HomeBlurFadeReveal>
+            <HomeTextReveal
+              as="h2"
+              onScroll
+              className="mx-auto mt-3 block max-w-4xl text-2xl font-semibold tracking-[-0.04em] text-foreground sm:text-5xl"
+              text={t("soundprintAiChatDemo.sectionTitle")}
+              stagger={0.05}
+            />
           </div>
 
           <DemoTerminalHero
@@ -398,7 +429,7 @@ export default function Home() {
             className="max-w-6xl"
           />
 
-          <div className="mt-10 flex justify-center">
+          <HomeBlurFadeReveal delay={0.15} className="mt-10 flex justify-center">
             <Link
               href={
                 isAuthenticated
@@ -416,7 +447,7 @@ export default function Home() {
               )}
               <ArrowRightIcon />
             </Link>
-          </div>
+          </HomeBlurFadeReveal>
         </section>
 
         <SoundprintBrandDividerSection
@@ -432,56 +463,68 @@ export default function Home() {
           className="mx-auto w-full max-w-7xl scroll-mt-24 px-4 pb-10 sm:px-6 sm:pb-20 lg:px-8"
         >
           <div className="mb-8 hidden text-center md:block">
-            <p className="font-mono text-xs font-semibold uppercase tracking-[0.28em] text-primary">
-              {t("demoHighlightsSection.eyebrow")}
-            </p>
-            <h2 className="mx-auto mt-3 max-w-3xl text-2xl font-semibold tracking-[-0.04em] text-foreground sm:text-5xl">
-              {t("demoHighlightsSection.title")}
-            </h2>
+            <HomeBlurFadeReveal>
+              <p className="font-mono text-xs font-semibold uppercase tracking-[0.28em] text-primary">
+                {t("demoHighlightsSection.eyebrow")}
+              </p>
+            </HomeBlurFadeReveal>
+            <HomeTextReveal
+              as="h2"
+              onScroll
+              className="mx-auto mt-3 block max-w-3xl text-2xl font-semibold tracking-[-0.04em] text-foreground sm:text-5xl"
+              text={t("demoHighlightsSection.title")}
+              stagger={0.05}
+            />
           </div>
 
           <div className="hidden w-full gap-6 md:grid">
             {demoHighlights.map((highlight) => (
-              <section
+              <HomePerspectiveReveal
                 key={highlight.id}
-                className="grid items-center gap-5 rounded-3xl border border-card-border bg-surface-glass p-4 text-left shadow-card backdrop-blur-xl sm:gap-6 sm:rounded-[2rem] md:p-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-8"
+                direction={highlight.reverse ? "right" : "left"}
               >
-                <div
-                  className={
-                    highlight.reverse
-                      ? "relative overflow-hidden rounded-3xl border border-white/10 bg-slate-950/90 p-2 shadow-2xl shadow-cyan-950/20 lg:order-2"
-                      : "relative overflow-hidden rounded-3xl border border-white/10 bg-slate-950/90 p-2 shadow-2xl shadow-cyan-950/20"
-                  }
-                >
-                  <video
-                    aria-label={highlight.videoLabel}
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    preload="metadata"
-                    className="aspect-video w-full rounded-2xl object-cover ring-1 ring-white/10"
+                <section className="grid items-center gap-5 rounded-3xl border border-card-border bg-surface-glass p-4 text-left shadow-card backdrop-blur-xl sm:gap-6 sm:rounded-[2rem] md:p-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-8">
+                  <div
+                    className={
+                      highlight.reverse
+                        ? "relative overflow-hidden rounded-3xl border border-white/10 bg-slate-950/90 p-2 shadow-2xl shadow-cyan-950/20 lg:order-2"
+                        : "relative overflow-hidden rounded-3xl border border-white/10 bg-slate-950/90 p-2 shadow-2xl shadow-cyan-950/20"
+                    }
                   >
-                    <source src={highlight.videoSrc} type="video/mp4" />
-                    Your browser does not support the video tag.
-                  </video>
-                </div>
+                    <video
+                      aria-label={highlight.videoLabel}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      preload="metadata"
+                      className="aspect-video w-full rounded-2xl object-cover ring-1 ring-white/10"
+                    >
+                      <source src={highlight.videoSrc} type="video/mp4" />
+                      Your browser does not support the video tag.
+                    </video>
+                  </div>
 
-                <div className={highlight.reverse ? "lg:order-1" : undefined}>
-                  <p className="font-mono text-xs font-semibold uppercase tracking-[0.24em] text-primary">
-                    {highlight.eyebrow}
-                  </p>
-                  <h2 className="mt-3 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                    {highlight.title}
-                  </h2>
-                  <p className="mt-4 text-base leading-7 text-muted sm:text-lg">
-                    {highlight.description}
-                  </p>
-                  <p className="mt-5 inline-flex rounded-full border border-primary/20 bg-primary/10 px-4 py-2 text-sm font-semibold text-primary">
-                    {highlight.metric}
-                  </p>
-                </div>
-              </section>
+                  <HomeBlurFadeReveal
+                    delay={0.12}
+                    direction={highlight.reverse ? "right" : "left"}
+                    className={highlight.reverse ? "lg:order-1" : undefined}
+                  >
+                    <p className="font-mono text-xs font-semibold uppercase tracking-[0.24em] text-primary">
+                      {highlight.eyebrow}
+                    </p>
+                    <h2 className="mt-3 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+                      {highlight.title}
+                    </h2>
+                    <p className="mt-4 text-base leading-7 text-muted sm:text-lg">
+                      {highlight.description}
+                    </p>
+                    <p className="mt-5 inline-flex rounded-full border border-primary/20 bg-primary/10 px-4 py-2 text-sm font-semibold text-primary">
+                      {highlight.metric}
+                    </p>
+                  </HomeBlurFadeReveal>
+                </section>
+              </HomePerspectiveReveal>
             ))}
           </div>
         </section>
@@ -494,6 +537,7 @@ export default function Home() {
         />
 
         <section className="mx-auto w-full max-w-7xl px-4 pb-28 sm:px-6 sm:pb-24 md:pb-24 lg:px-8">
+          <HomeBlurFadeReveal>
           <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950 px-5 py-8 shadow-2xl shadow-black/20 sm:px-8 sm:py-12 lg:px-10 lg:py-14">
             <div
               className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_20%,rgba(240,64,104,0.24),transparent_34%),radial-gradient(circle_at_86%_22%,rgba(79,144,224,0.24),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.08),transparent_42%)]"
@@ -510,22 +554,32 @@ export default function Home() {
 
             <div className="relative grid gap-8 lg:grid-cols-[1.08fr_0.92fr] lg:items-center">
               <div className="text-center lg:text-left">
-                <SoundprintLogo
-                  src="/brand/favicon.png"
-                  showText={false}
-                  className="mx-auto mb-5 lg:mx-0"
-                  imageClassName="h-16 w-16 object-contain"
+                <HomeBlurFadeReveal>
+                  <SoundprintLogo
+                    src="/brand/favicon.png"
+                    showText={false}
+                    className="mx-auto mb-5 lg:mx-0"
+                    imageClassName="h-16 w-16 object-contain"
+                  />
+                </HomeBlurFadeReveal>
+                <HomeBlurFadeReveal delay={0.06}>
+                  <p className="font-mono text-xs font-semibold uppercase tracking-[0.28em] text-cyan-200">
+                    {t("closingCta.eyebrow")}
+                  </p>
+                </HomeBlurFadeReveal>
+                <HomeTextReveal
+                  as="h2"
+                  onScroll
+                  className="mt-4 block max-w-3xl text-2xl font-semibold tracking-[-0.04em] text-white sm:text-5xl"
+                  text={t("closingCta.title")}
+                  stagger={0.045}
                 />
-                <p className="font-mono text-xs font-semibold uppercase tracking-[0.28em] text-cyan-200">
-                  {t("closingCta.eyebrow")}
-                </p>
-                <h2 className="mt-4 max-w-3xl text-2xl font-semibold tracking-[-0.04em] text-white sm:text-5xl">
-                  {t("closingCta.title")}
-                </h2>
-                <p className="mt-4 max-w-2xl text-base leading-7 text-slate-300">
-                  {t("closingCta.subtitle")}
-                </p>
-                <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row lg:justify-start">
+                <HomeBlurFadeReveal delay={0.12} className="mt-4 max-w-2xl">
+                  <p className="text-base leading-7 text-slate-300">
+                    {t("closingCta.subtitle")}
+                  </p>
+                </HomeBlurFadeReveal>
+                <HomeBlurFadeReveal delay={0.2} className="mt-8 flex flex-col justify-center gap-3 sm:flex-row lg:justify-start">
                   <Link
                     href={isAuthenticated ? "/dashboard" : "/sign-up"}
                     className="hidden min-h-12 items-center justify-center gap-2 rounded-2xl bg-white px-7 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-white/10 transition-all hover:-translate-y-0.5 hover:bg-slate-100 md:inline-flex"
@@ -542,26 +596,26 @@ export default function Home() {
                       <ArrowRightIcon className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                     </Link>
                   ) : null}
-                </div>
+                </HomeBlurFadeReveal>
               </div>
 
               <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-                {closingHighlights.map((highlight) => (
-                  <div
-                    key={highlight.label}
-                    className="rounded-3xl border border-white/10 bg-white/[0.07] p-5 text-left shadow-2xl shadow-black/10 backdrop-blur"
-                  >
-                    <p className="font-mono text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-cyan-200">
-                      {highlight.label}
-                    </p>
-                    <p className="mt-3 text-xl font-semibold tracking-[-0.03em] text-white">
-                      {highlight.value}
-                    </p>
-                  </div>
+                {closingHighlights.map((highlight, index) => (
+                  <HomeBlurFadeReveal key={highlight.label} delay={0.08 * index}>
+                    <div className="rounded-3xl border border-white/10 bg-white/[0.07] p-5 text-left shadow-2xl shadow-black/10 backdrop-blur">
+                      <p className="font-mono text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-cyan-200">
+                        {highlight.label}
+                      </p>
+                      <p className="mt-3 text-xl font-semibold tracking-[-0.03em] text-white">
+                        {highlight.value}
+                      </p>
+                    </div>
+                  </HomeBlurFadeReveal>
                 ))}
               </div>
             </div>
           </div>
+          </HomeBlurFadeReveal>
         </section>
         </div>
       </main>

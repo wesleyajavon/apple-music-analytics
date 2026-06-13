@@ -40,7 +40,7 @@ export function DashboardPreviewShell({
 }: DashboardPreviewShellProps) {
   return (
     <div
-      className={`relative w-full ${tilt ? "[transform:perspective(1400px)_rotateY(-3deg)]" : ""} ${className}`}
+      className={`relative w-full max-w-full origin-center ${tilt ? "[transform:perspective(1400px)_rotateY(-3deg)]" : ""} ${className}`}
     >
       <div
         className="absolute -inset-6 rounded-[2rem] bg-[radial-gradient(ellipse_at_center,rgb(152_80_208_/_0.22),transparent_68%)] blur-3xl"

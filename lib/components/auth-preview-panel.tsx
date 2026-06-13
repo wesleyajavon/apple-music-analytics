@@ -9,7 +9,7 @@ export function AuthPreviewPanel() {
 
   return (
     <div
-      className="pointer-events-none absolute inset-y-0 right-0 z-[1] hidden lg:flex lg:w-[58%] xl:w-[54%] lg:items-center lg:justify-end lg:pr-6 xl:pr-10"
+      className="pointer-events-none relative z-[1] hidden min-h-0 min-w-0 self-center lg:flex lg:items-center lg:justify-end lg:overflow-x-clip lg:py-8 lg:pr-6 xl:pr-10"
       aria-hidden
     >
       <div
@@ -27,7 +27,7 @@ export function AuthPreviewPanel() {
         title={tOverview("artistSpotlight.title")}
         description={tAuth("authPreviewSpotlightDescription")}
         tilt
-        className="max-w-[min(100%,920px)]"
+        className="w-full max-w-[min(100%,920px)]"
       >
         <div className="grid grid-cols-3 gap-3 xl:gap-4">
           {AUTH_PREVIEW_ARTISTS.map((artist, index) => (

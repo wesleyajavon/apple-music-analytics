@@ -1383,7 +1383,7 @@
     "paginationNext": "Next",
     "paginationPage": "Page {page} / {totalPages}",
     "selectAtLeastOne": "Select at least one genre to display the chart.",
-    "evolution": "Your genre pulse, decoded",
+    "evolution": "Which genres are surging — and fading",
     "chartHint": "See which sounds are taking over your taste, and which ones are fading out.",
     "listensDelta": "listens",
     "noGenreData": "No genre data for this period",
@@ -2660,8 +2660,8 @@
       "periodMeta": "Last 90 days · same filters",
       "selfName": "You",
       "selfInitials": "YO",
-      "friendName": "Maya",
-      "friendInitials": "MY",
+      "friendName": "Josh",
+      "friendInitials": "JO",
       "winnerHeadline": "You stream more Tyler.",
       "insightEyebrow": "Head-to-head",
       "insightCopy": "Add a friend, pick any artist, and see who really dominates—plays counted from your actual libraries.",
@@ -2706,8 +2706,8 @@
         "quote": "Your late-night queue drifts toward sparse, melodic textures with a steady pull back to art pop."
       },
       "albumSpotlight": {
-        "title": "The albums on repeat in your library.",
-        "description": "Your most-played records — ranked by real listen counts, with covers pulled straight from your history."
+        "title": "What stays in your rotation.",
+        "description": "Ranked by how often you come back — the music you've made a habit."
       }
     },
     "featuresEyebrow": "Why it feels different",
@@ -2761,7 +2761,7 @@
       "features": {
         "compareEras": {
           "label": "Then vs now",
-          "supporting": "Stack any two years."
+          "supporting": "Compare 2 years of listening"
         },
         "plainLanguage": {
           "label": "Plain talk",

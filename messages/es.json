@@ -1365,7 +1365,7 @@
     "paginationNext": "Siguiente",
     "paginationPage": "Página {page} / {totalPages}",
     "selectAtLeastOne": "Selecciona al menos un género para mostrar el gráfico.",
-    "evolution": "El pulso de tus géneros, decodificado",
+    "evolution": "Qué géneros suben — y cuáles se desvanecen",
     "chartHint": "Mira qué sonidos se están apoderando de tu gusto y cuáles se van apagando.",
     "listensDelta": "escuchas",
     "noGenreData": "Sin datos de género para este período",
@@ -2642,8 +2642,8 @@
       "periodMeta": "Últimos 90 días · mismos filtros",
       "selfName": "Tú",
       "selfInitials": "TU",
-      "friendName": "Maya",
-      "friendInitials": "MY",
+      "friendName": "Josh",
+      "friendInitials": "JO",
       "winnerHeadline": "Tú reproduces más a Tyler.",
       "insightEyebrow": "Cara a cara",
       "insightCopy": "Añade un amigo, elige un artista y mira quién domina de verdad — reproducciones contadas desde vuestras bibliotecas reales.",
@@ -2688,8 +2688,8 @@
         "quote": "Tu cola nocturna se inclina hacia texturas esparsas y melódicas, con un regreso constante al art pop."
       },
       "albumSpotlight": {
-        "title": "Los álbumes en rotación en tu biblioteca.",
-        "description": "Tus discos más reproducidos — clasificados por escuchas reales, con portadas de tu historial."
+        "title": "Lo que sigue en rotación.",
+        "description": "Clasificado por tus retornos — la música que ya es reflejo."
       }
     },
     "featuresEyebrow": "Por qué se siente distinto",
@@ -2743,7 +2743,7 @@
       "features": {
         "compareEras": {
           "label": "Antes y ahora",
-          "supporting": "Dos años, de un vistazo."
+          "supporting": "Compara 2 años de escuchas"
         },
         "plainLanguage": {
           "label": "En simple",

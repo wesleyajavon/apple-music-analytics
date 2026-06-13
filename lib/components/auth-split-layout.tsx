@@ -11,7 +11,7 @@ export function AuthSplitLayout({ children }: AuthSplitLayoutProps) {
   const t = useTranslations("auth");
 
   return (
-    <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-background lg:bg-[#06070d] lg:text-white">
+    <div className="relative flex min-h-0 flex-1 flex-col bg-background lg:grid lg:min-h-full lg:grid-cols-[minmax(0,42fr)_minmax(0,58fr)] lg:bg-[#06070d] lg:text-white">
       <div className="pointer-events-none absolute inset-0 hidden lg:block" aria-hidden>
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_120%_90%_at_0%_30%,rgb(152_80_208_/_0.22),transparent_52%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_70%_at_8%_88%,rgb(79_144_224_/_0.14),transparent_55%)]" />
@@ -19,17 +19,15 @@ export function AuthSplitLayout({ children }: AuthSplitLayoutProps) {
         <div className="absolute inset-0 bg-[linear-gradient(105deg,#06070d_0%,#06070d_18%,rgb(6_7_13_/_0.92)_30%,rgb(6_7_13_/_0.55)_44%,rgb(6_7_13_/_0.15)_58%,transparent_78%)]" />
       </div>
 
-      <AuthPreviewPanel />
-
-      <div className="relative z-10 flex min-h-0 flex-1 flex-col lg:max-w-[44%] xl:max-w-[48%]">
+      <div className="relative z-10 flex min-h-0 min-w-0 flex-1 flex-col lg:min-h-full">
         <SoundprintBrandDivider
           orientation="vertical"
           tone="onDark"
           className="pointer-events-none absolute inset-y-0 right-0 z-20 hidden -translate-x-1/2 lg:flex"
         />
 
-        <div className="flex flex-1 flex-col justify-center px-6 pb-8 pt-24 sm:px-10 sm:pb-10 lg:items-center lg:px-8 lg:pb-12 lg:pt-32 xl:px-10">
-          <div className="w-full max-w-[24rem] lg:max-w-[27rem]">
+        <div className="flex flex-1 flex-col px-6 pb-8 pt-24 sm:px-10 sm:pb-10 lg:items-center lg:px-8 lg:pb-12 lg:pt-32 xl:px-10">
+          <div className="my-auto w-full max-w-[24rem] lg:max-w-[27rem]">
             <div className="auth-form-surface lg:rounded-[2rem] lg:border lg:border-white/10 lg:bg-white/[0.045] lg:p-8 lg:shadow-[inset_0_1px_0_0_rgb(255_255_255_/_0.08),0_32px_80px_-40px_rgb(0_0_0_/_0.65)] lg:backdrop-blur-2xl xl:p-10 [&_.text-muted]:lg:text-white/55">
               {children}
             </div>
@@ -54,6 +52,8 @@ export function AuthSplitLayout({ children }: AuthSplitLayoutProps) {
           </div>
         </div>
       </div>
+
+      <AuthPreviewPanel />
     </div>
   );
 }

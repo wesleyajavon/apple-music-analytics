@@ -8,6 +8,10 @@ import {
   HomeDashboardPreviewsParallax,
   HomeDashboardPreviewsParallaxGrid,
 } from "@/lib/components/home-dashboard-previews-parallax";
+import {
+  HomeBlurFadeReveal,
+  HomeTextReveal,
+} from "@/lib/components/home-animations";
 
 const PREVIEW_GENRES = [
   { name: "Indie Rock", color: "#818cf8", active: true },
@@ -482,15 +486,23 @@ export function HomeDashboardPreviewsSection() {
       <HomeDashboardPreviewsParallax>
         <div className="relative mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-8 text-center md:mb-12">
-            <p className="font-mono text-xs font-semibold uppercase tracking-[0.28em] text-primary">
-              {t("eyebrow")}
-            </p>
-            <h2 className="mx-auto mt-3 max-w-3xl text-2xl font-semibold tracking-[-0.04em] text-foreground sm:text-5xl">
-              {t("title")}
-            </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-muted sm:text-lg">
-              {t("subtitle")}
-            </p>
+            <HomeBlurFadeReveal>
+              <p className="font-mono text-xs font-semibold uppercase tracking-[0.28em] text-primary">
+                {t("eyebrow")}
+              </p>
+            </HomeBlurFadeReveal>
+            <HomeTextReveal
+              as="h2"
+              onScroll
+              className="mx-auto mt-3 block max-w-3xl text-2xl font-semibold tracking-[-0.04em] text-foreground sm:text-5xl"
+              text={t("title")}
+              stagger={0.05}
+            />
+            <HomeBlurFadeReveal delay={0.1} className="mx-auto mt-4 max-w-2xl">
+              <p className="text-base leading-7 text-muted sm:text-lg">
+                {t("subtitle")}
+              </p>
+            </HomeBlurFadeReveal>
           </div>
 
           <HomeDashboardPreviewsParallaxGrid

@@ -2,6 +2,7 @@
 
 import { motion, type Variants } from "motion/react";
 import type { ComponentProps } from "react";
+import { HomeAutoplayVideo } from "@/lib/components/home-autoplay-video";
 
 type DemoTerminalFeature = {
   label: string;
@@ -17,10 +18,7 @@ type DemoTerminalHeroProps = {
   badge?: string;
   features?: readonly DemoTerminalFeature[];
   showFeaturesOnMobile?: boolean;
-} & Omit<
-  ComponentProps<typeof motion.section>,
-  "children" | "variants" | "initial" | "whileInView" | "viewport"
->;
+} & Omit<ComponentProps<"section">, "children">;
 
 const defaultFeatures: readonly DemoTerminalFeature[] = [
   {
@@ -37,22 +35,7 @@ const defaultFeatures: readonly DemoTerminalFeature[] = [
   },
 ];
 
-const containerVariants: Variants = {
-  hidden: { opacity: 0, y: 28, scale: 0.98 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: {
-      duration: 0.7,
-      ease: [0.22, 1, 0.36, 1],
-      staggerChildren: 0.08,
-      delayChildren: 0.1,
-    },
-  },
-};
-
-const itemVariants: Variants = {
+const headerVariants: Variants = {
   hidden: { opacity: 0, y: 18 },
   visible: {
     opacity: 1,
@@ -60,6 +43,20 @@ const itemVariants: Variants = {
     transition: {
       duration: 0.55,
       ease: [0.22, 1, 0.36, 1],
+    },
+  },
+};
+
+const footerVariants: Variants = {
+  hidden: { opacity: 0, y: 14 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5,
+      ease: [0.22, 1, 0.36, 1],
+      staggerChildren: 0.06,
+      delayChildren: 0.05,
     },
   },
 };
@@ -81,11 +78,7 @@ export function DemoTerminalHero({
   ...props
 }: DemoTerminalHeroProps) {
   return (
-    <motion.section
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.2 }}
-      variants={containerVariants}
+    <section
       className={cx("relative mx-auto w-full max-w-6xl", className)}
       {...props}
     >
@@ -114,7 +107,10 @@ export function DemoTerminalHero({
         />
 
         <motion.header
-          variants={itemVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.2, margin: "0px 0px 80px 0px" }}
+          variants={headerVariants}
           className="relative flex flex-col gap-4 border-b border-white/10 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6"
         >
           <div className="flex min-w-0 items-center gap-4">
@@ -139,37 +135,28 @@ export function DemoTerminalHero({
           </span>
         </motion.header>
 
-        <motion.div variants={itemVariants} className="relative p-3 sm:p-5 lg:p-6">
-          <motion.div
-            whileHover={{ y: -4, scale: 1.01 }}
-            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-            className="group relative overflow-hidden rounded-2xl border border-white/10 bg-black/55 p-2 shadow-2xl shadow-cyan-950/20"
-          >
+        <div className="relative p-3 sm:p-5 lg:p-6">
+          <div className="group relative overflow-hidden rounded-2xl border border-white/10 bg-black/55 p-2 shadow-2xl shadow-cyan-950/20 transition-transform duration-300 hover:-translate-y-1 hover:scale-[1.01]">
             <div
               aria-hidden
               className="pointer-events-none absolute inset-0 rounded-2xl bg-[radial-gradient(circle_at_30%_0%,rgba(255,255,255,0.16),transparent_42%)] opacity-80 transition-opacity duration-500 group-hover:opacity-100"
             />
 
             <div className="relative overflow-hidden rounded-2xl bg-slate-950">
-              <video
-                aria-label={videoLabel}
-                autoPlay
-                loop
-                muted
-                playsInline
-                preload="metadata"
+              <HomeAutoplayVideo
+                src={videoSrc}
                 poster={videoPoster}
-                className="aspect-video w-full rounded-2xl object-cover ring-1 ring-white/10"
-              >
-                <source src={videoSrc} type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
+                label={videoLabel}
+              />
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
 
         <motion.div
-          variants={itemVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.2, margin: "0px 0px 80px 0px" }}
+          variants={footerVariants}
           className={cx(
             "relative grid-cols-1 border-t border-white/10 sm:grid-cols-3",
             showFeaturesOnMobile ? "grid" : "hidden md:grid",
@@ -190,6 +177,6 @@ export function DemoTerminalHero({
           ))}
         </motion.div>
       </div>
-    </motion.section>
+    </section>
   );
 }

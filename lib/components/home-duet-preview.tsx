@@ -150,20 +150,14 @@ export function HomeDuetPreview() {
                   className="absolute -right-10 -top-10 h-24 w-24 rounded-full bg-accent-violet/20 blur-2xl"
                   aria-hidden
                 />
-                <div className="relative flex items-start justify-between gap-3">
-                  <div>
-                    <p className="font-mono text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-violet-200">
-                      {t("arenaEyebrow")}
-                    </p>
-                    <p className="mt-2 text-lg font-semibold leading-snug tracking-tight text-white sm:text-xl">
-                      {t("artistName")}
-                    </p>
-                  </div>
-                  <span className="rounded-full border border-emerald-300/20 bg-emerald-300/10 px-2 py-1 font-mono text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-emerald-100">
-                    {t("liveBadge")}
-                  </span>
+                <div className="relative">
+                  <p className="font-mono text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-violet-200">
+                    {t("arenaEyebrow")}
+                  </p>
+                  <p className="mt-2 text-lg font-semibold leading-snug tracking-tight text-white sm:text-xl">
+                    {t("artistName")}
+                  </p>
                 </div>
-                <p className="relative mt-1 text-xs text-cyan-200">{t("periodMeta")}</p>
 
                 <div className="relative mt-4 grid grid-cols-2 gap-2">
                   <div className="rounded-xl border border-violet-300/20 bg-black/25 p-3">

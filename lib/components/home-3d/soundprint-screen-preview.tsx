@@ -41,6 +41,7 @@ function MiniAreaChart() {
       <path
         d="M0 58 L20 52 L40 56 L60 38 L80 44 L100 28 L120 34 L140 22 L160 30 L180 18 L200 26 L220 14 L240 20 L240 80 L0 80 Z"
         fill="url(#sp-chart-fill)"
+        className="sp-preview-chart-fill"
       />
       <path
         d="M0 58 L20 52 L40 56 L60 38 L80 44 L100 28 L120 34 L140 22 L160 30 L180 18 L200 26 L220 14 L240 20"
@@ -48,13 +49,35 @@ function MiniAreaChart() {
         stroke="url(#sp-chart-line)"
         strokeWidth="2.5"
         strokeLinecap="round"
+        className="sp-preview-chart-line"
       />
+      <style>{`
+        .sp-preview-chart-line {
+          stroke-dasharray: 320;
+          stroke-dashoffset: 320;
+          animation: sp-preview-draw 2.4s ease-out forwards, sp-preview-pulse 3s ease-in-out 2.4s infinite;
+        }
+        .sp-preview-chart-fill {
+          opacity: 0;
+          animation: sp-preview-fade-in 1.2s ease-out 1.4s forwards;
+        }
+        @keyframes sp-preview-draw {
+          to { stroke-dashoffset: 0; }
+        }
+        @keyframes sp-preview-fade-in {
+          to { opacity: 1; }
+        }
+        @keyframes sp-preview-pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.72; }
+        }
+      `}</style>
     </svg>
   );
 }
 
 /**
- * Miniature statique du dashboard Soundprint-AI — utilisée sur l'écran 3D (sign-in).
+ * Miniature animée du dashboard Soundprint-AI — utilisée sur l'écran 3D du hero.
  */
 export function SoundprintScreenPreview() {
   return (
@@ -62,6 +85,16 @@ export function SoundprintScreenPreview() {
       className="flex h-full w-full overflow-hidden rounded-[10px] bg-[#06070d] text-[#f7f3ff] shadow-inner"
       style={{ fontFamily: "var(--font-inter), system-ui, sans-serif" }}
     >
+      <style>{`
+        @keyframes sp-preview-bar {
+          0%, 100% { transform: scaleY(0.72); }
+          50% { transform: scaleY(1.18); }
+        }
+        .sp-preview-bar {
+          transform-origin: bottom;
+          animation: sp-preview-bar 1.6s ease-in-out infinite;
+        }
+      `}</style>
       {/* Sidebar */}
       <aside className="flex w-[72px] shrink-0 flex-col border-r border-[#28213c]/80 bg-[#090a12] px-2 py-3">
         <div className="mb-4 flex flex-col items-center gap-1">
@@ -78,7 +111,7 @@ export function SoundprintScreenPreview() {
           {NAV_ITEMS.map((item) => (
             <div
               key={item.label}
-              className={`rounded-lg px-1.5 py-1.5 text-center text-[0.42rem] font-semibold leading-tight ${
+              className={`rounded-lg px-1.5 py-1.5 text-center text-[0.42rem] font-semibold leading-snug ${
                 item.active
                   ? "bg-[#151827] text-[#f7f3ff] ring-1 ring-[#9850d0]/30"
                   : "text-[#a59ab8]"
@@ -149,8 +182,11 @@ export function SoundprintScreenPreview() {
                 {WAVE_BARS.slice(0, 8).map((height, index) => (
                   <div
                     key={index}
-                    className="flex-1 rounded-full bg-gradient-to-t from-[#9850d0] via-[#4f90e0] to-white/80"
-                    style={{ height: `${height * 0.28}px` }}
+                    className="sp-preview-bar flex-1 rounded-full bg-gradient-to-t from-[#9850d0] via-[#4f90e0] to-white/80"
+                    style={{
+                      height: `${height * 0.28}px`,
+                      animationDelay: `${index * 0.14}s`,
+                    }}
                     aria-hidden
                   />
                 ))}

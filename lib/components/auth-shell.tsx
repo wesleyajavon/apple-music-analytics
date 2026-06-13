@@ -24,7 +24,7 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
         {t("skipToContent")}
       </a>
 
-      <div className="relative flex min-h-0 flex-1 flex-col">
+      <div className="relative flex min-h-0 flex-1 flex-col overflow-x-clip overflow-y-auto scroll-pt-24 lg:scroll-pt-28">
         <header className="absolute inset-x-0 top-0 z-20 flex items-center justify-between gap-2 px-6 py-5 sm:px-10 lg:px-14 lg:py-6 xl:px-20">
           <Link
             href="/"

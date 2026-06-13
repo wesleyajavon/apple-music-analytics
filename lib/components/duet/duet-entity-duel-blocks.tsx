@@ -64,6 +64,7 @@ export function EntityBattleScorecard({
   winner,
   entityName,
   entitySubtitle,
+  entityImageUrl,
   arenaMode,
   locale,
   t,
@@ -77,6 +78,7 @@ export function EntityBattleScorecard({
   winner: "self" | "friend" | "tie";
   entityName: string;
   entitySubtitle?: string;
+  entityImageUrl?: string | null;
   arenaMode: DuetArenaMode;
   locale: string;
   t: ReturnType<typeof useTranslations<"duet.compare">>;
@@ -106,6 +108,7 @@ export function EntityBattleScorecard({
       arenaLabel: buildArenaLabel(),
       entityName,
       entitySubtitle,
+      entityImageUrl: arenaMode === "artist" ? entityImageUrl : undefined,
       viewerName,
       friendName,
       viewerAvatarUrl,

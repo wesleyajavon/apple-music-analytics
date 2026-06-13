@@ -70,6 +70,7 @@ export type CompareTimelineResult = {
 export type CompareArtistEntityResult = CompareEntityResultBase & {
   type: "artist";
   artistName: string | null;
+  imageUrl: string | null;
 };
 
 export type CompareTrackEntityResult = CompareEntityResultBase & {
@@ -478,7 +479,7 @@ export async function getCompareEntity(
     fetchArtistTimelineSeries(friendUserId, entityId, startDate, endDate, period),
     prisma.artist.findUnique({
       where: { id: entityId },
-      select: { name: true },
+      select: { name: true, imageUrl: true },
     }),
   ]);
 
@@ -486,6 +487,7 @@ export async function getCompareEntity(
     ...base,
     type: "artist",
     artistName: artist?.name ?? null,
+    imageUrl: artist?.imageUrl?.trim() ?? null,
     selfCount,
     friendCount,
     winner: resolveWinner(selfCount, friendCount),

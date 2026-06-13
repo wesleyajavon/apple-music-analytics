@@ -13,7 +13,7 @@ export function buildDuetFriendRequestNotification(
     createdAt: friendship.createdAt,
     read: false,
     severity: "info",
-    href: "/dashboard/duet/friends",
+    href: "/dashboard/duet/friends?section=incoming",
     source: duetFriendRequestSource(friendship.id),
     duetFriendRequest: {
       friendshipId: friendship.id,

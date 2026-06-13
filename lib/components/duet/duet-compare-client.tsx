@@ -19,6 +19,11 @@ import { DuetMetadataBanner } from "@/lib/components/duet/duet-metadata-banner";
 import { DuetSharedArtistsPanel } from "@/lib/components/duet/duet-shared-artists-panel";
 import { DuetCompareHero } from "@/lib/components/duet/duet-compare-hero";
 import {
+  DuetCompareBattleSkeleton,
+  DuetComparePageFallback,
+  DuetComparePickerSkeleton,
+} from "@/lib/components/duet/duet-compare-skeleton";
+import {
   DuetArenaModePicker,
   DuetArenaModeToggle,
   type DuetArenaMode,
@@ -137,6 +142,7 @@ function EntityHeadToHeadPanel({
   chartData,
   entityDisplayName,
   entitySubtitle,
+  entityImageUrl,
   arenaMode,
   viewerName,
   friendName,
@@ -170,6 +176,7 @@ function EntityHeadToHeadPanel({
   chartData: DualLineChartPoint[];
   entityDisplayName: string;
   entitySubtitle?: string;
+  entityImageUrl?: string | null;
   arenaMode: DuetArenaMode;
   viewerName: string;
   friendName: string;
@@ -268,6 +275,7 @@ function EntityHeadToHeadPanel({
             winner={entityCompare.winner}
             entityName={entityDisplayName}
             entitySubtitle={entitySubtitle}
+            entityImageUrl={entityImageUrl}
             arenaMode={arenaMode}
             locale={locale}
             t={t}
@@ -644,9 +652,9 @@ function CompareContent() {
   if (!friendUserId) {
     if (friendsLoading || viewer === null) {
       return (
-        <div className="space-y-6">
+        <div className="space-y-8">
           <DuetCompareHero mode="picker" viewerName={t("seriesSelf")} locale={locale} />
-          <p className={`text-sm ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("loading")}</p>
+          <DuetComparePickerSkeleton />
         </div>
       );
     }
@@ -728,7 +736,7 @@ function CompareContent() {
 
   if (isLoading || (!isAll && isRangeLoading)) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-8">
         <DuetCompareHero
           mode="battle"
           viewerName={viewer?.name ?? t("seriesSelf")}
@@ -737,7 +745,7 @@ function CompareContent() {
           friendAvatar={friendUser?.avatarUrl}
           locale={locale}
         />
-        <p className={`text-sm ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("loading")}</p>
+        <DuetCompareBattleSkeleton />
       </div>
     );
   }
@@ -901,6 +909,9 @@ function CompareContent() {
                   refetchEntity={() => void refetchArtistCompare()}
                   chartData={artistChartData}
                   entityDisplayName={selectedArtistName}
+                  entityImageUrl={
+                    artistCompare?.type === "artist" ? artistCompare.imageUrl : undefined
+                  }
                   arenaMode="artist"
                   viewerName={viewer?.name ?? t("seriesSelf")}
                   friendName={friendName}
@@ -1015,9 +1026,8 @@ function CompareContent() {
 }
 
 export function DuetCompareClient() {
-  const t = useTranslations("duet.compare");
   return (
-    <Suspense fallback={<p className="text-sm text-muted">{t("loading")}</p>}>
+    <Suspense fallback={<DuetComparePageFallback />}>
       <CompareContent />
     </Suspense>
   );

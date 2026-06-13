@@ -212,6 +212,9 @@ export function DuetSharedArtistsPanel({
 
   const duelArtistName =
     artistCompare?.type === "artist" ? (artistCompare.artistName ?? selectedArtistName) : selectedArtistName;
+  const duelArtistImageUrl =
+    data?.artists.find((artist) => artist.artistId === selectedArtistId)?.imageUrl ??
+    (artistCompare?.type === "artist" ? artistCompare.imageUrl : null);
 
   return (
     <section className={DASHBOARD_SPOTLIGHT_SHELL}>
@@ -400,6 +403,7 @@ export function DuetSharedArtistsPanel({
                       friendName={friendName}
                       winner={artistCompare.winner}
                       entityName={duelArtistName}
+                      entityImageUrl={duelArtistImageUrl}
                       arenaMode="artist"
                       locale={locale}
                       t={t}

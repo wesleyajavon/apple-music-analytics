@@ -19,6 +19,7 @@ export type DuetBattleShareImageInput = {
   friendLabel: string;
   brandName: string;
   brandTagline: string;
+  entityImageUrl?: string | null;
 };
 
 function toHeadToHeadInput(input: DuetBattleShareImageInput) {
@@ -38,6 +39,7 @@ function toHeadToHeadInput(input: DuetBattleShareImageInput) {
     friendLabel: input.friendLabel,
     brandName: input.brandName,
     brandTagline: input.brandTagline,
+    entityImageUrl: input.entityImageUrl,
   };
 }
 

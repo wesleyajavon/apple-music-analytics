@@ -4,6 +4,7 @@ import { type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { ArrowLeft, Swords, Sparkles } from "lucide-react";
+import { LiveStatusDot } from "@/lib/components/live-status-dot";
 import { UserAvatar } from "@/lib/components/user-avatar";
 
 const DUET_COMPARE_HERO_SHELL =
@@ -64,7 +65,7 @@ export function DuetCompareHero({
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] lg:items-center">
           <div>
             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-violet-100 backdrop-blur">
-              <span className="h-2 w-2 rounded-full bg-pink-400 shadow-[0_0_18px_rgb(244_114_182_/0.75)]" />
+              <LiveStatusDot tone="pink" />
               {t("heroEyebrow")}
             </div>
 

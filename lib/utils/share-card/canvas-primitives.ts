@@ -1,4 +1,4 @@
-import { SHARE_CARD_FONT } from "@/lib/utils/share-card/constants";
+import { SHARE_CARD_FONT, SHARE_CARD_LAYOUT } from "@/lib/utils/share-card/constants";
 
 export function truncateText(
   ctx: CanvasRenderingContext2D,
@@ -106,17 +106,31 @@ export function drawShareCardEyebrow(
   ctx.fillText(eyebrowLabel.toUpperCase(), size / 2, 152);
 }
 
+export function drawShareCardEntityImage(
+  ctx: CanvasRenderingContext2D,
+  size: number,
+  image: HTMLImageElement,
+  centerY: number,
+  radius: number
+) {
+  drawCircularAvatar(ctx, image, size / 2, centerY, radius, {
+    borderColor: "rgba(255,255,255,0.35)",
+    borderWidth: 4,
+  });
+}
+
 export function drawShareCardTitleBlock(
   ctx: CanvasRenderingContext2D,
   size: number,
   title: string,
-  subtitle?: string
+  subtitle?: string,
+  options?: { titleStartY?: number }
 ): number {
   ctx.fillStyle = "#ffffff";
   ctx.font = `800 64px ${SHARE_CARD_FONT}`;
   ctx.textAlign = "center";
   const titleLines = wrapLines(ctx, title, size - 200, 2);
-  let titleY = 250;
+  let titleY = options?.titleStartY ?? 250;
   for (const line of titleLines) {
     ctx.fillText(line, size / 2, titleY);
     titleY += 72;
@@ -132,16 +146,64 @@ export function drawShareCardTitleBlock(
   return titleY;
 }
 
+export function drawRoundedShareCardLogo(
+  ctx: CanvasRenderingContext2D,
+  image: HTMLImageElement,
+  centerX: number,
+  centerY: number,
+  size: number,
+  radius = 10
+) {
+  const x = centerX - size / 2;
+  const y = centerY - size / 2;
+
+  ctx.save();
+  drawRoundedRect(ctx, x, y, size, size, radius);
+  ctx.clip();
+  ctx.drawImage(image, x, y, size, size);
+  ctx.restore();
+}
+
 export function drawShareCardBrandFooter(
   ctx: CanvasRenderingContext2D,
   size: number,
   brandName: string,
-  brandTagline: string
+  brandTagline: string,
+  logo?: HTMLImageElement | null
 ) {
-  ctx.textAlign = "center";
-  ctx.font = `800 42px ${SHARE_CARD_FONT}`;
+  const { brandLogoSize, brandLogoGap, brandLogoRadius } = SHARE_CARD_LAYOUT;
+  const nameBaselineY = 920;
+  const nameFontSize = 44;
+
+  ctx.font = `800 ${nameFontSize}px ${SHARE_CARD_FONT}`;
   ctx.fillStyle = "#ffffff";
-  ctx.fillText(brandName, size / 2, 920);
+
+  if (logo) {
+    const textWidth = ctx.measureText(brandName).width;
+    const totalWidth = brandLogoSize + brandLogoGap + textWidth;
+    const startX = (size - totalWidth) / 2;
+    const iconCenterX = startX + brandLogoSize / 2;
+    const iconCenterY = nameBaselineY - nameFontSize * 0.35;
+
+    drawRoundedShareCardLogo(
+      ctx,
+      logo,
+      iconCenterX,
+      iconCenterY,
+      brandLogoSize,
+      brandLogoRadius
+    );
+
+    ctx.textAlign = "left";
+    ctx.textBaseline = "alphabetic";
+    ctx.fillText(brandName, startX + brandLogoSize + brandLogoGap, nameBaselineY);
+  } else {
+    ctx.textAlign = "center";
+    ctx.textBaseline = "alphabetic";
+    ctx.fillText(brandName, size / 2, nameBaselineY);
+  }
+
+  ctx.textAlign = "center";
   ctx.font = `500 26px ${SHARE_CARD_FONT}`;
   ctx.fillStyle = "rgba(148,163,184,0.9)";
   ctx.fillText(brandTagline, size / 2, 968);

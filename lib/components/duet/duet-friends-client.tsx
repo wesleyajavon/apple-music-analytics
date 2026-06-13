@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState, type FormEvent, type ReactNode } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
+import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { motion } from "motion/react";
 import {
   Ban,
@@ -22,6 +23,11 @@ import { EmptyState } from "@/lib/components/empty-state";
 import { ErrorState } from "@/lib/components/error-state";
 import { DuetFriendsHero } from "@/lib/components/duet/duet-friends-hero";
 import {
+  DuetFriendsContentSkeleton,
+  DuetFriendsHeroSkeleton,
+  DuetFriendsPageFallback,
+} from "@/lib/components/duet/duet-friends-skeleton";
+import {
   DASHBOARD_SPOTLIGHT_SHELL,
   DASHBOARD_SPOTLIGHT_GRADIENT_CYAN,
   DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY,
@@ -39,7 +45,20 @@ import {
   DASHBOARD_SPOTLIGHT_BADGE_DOT_LIME,
   DASHBOARD_SPOTLIGHT_BADGE_CYAN_COMPACT,
   DASHBOARD_SPOTLIGHT_BADGE_DOT_CYAN,
+  DASHBOARD_SPOTLIGHT_FOOTER,
+  DASHBOARD_SPOTLIGHT_FOOTER_TEXT,
+  DASHBOARD_SPOTLIGHT_SELECT,
+  DASHBOARD_SPOTLIGHT_LABEL,
 } from "@/lib/constants/dashboard-spotlight";
+import {
+  DUET_FRIENDS_PAGE_SIZE_OPTIONS,
+  isDuetFriendsSection,
+  paginateList,
+  parseDuetFriendsPageSize,
+  resolveDefaultDuetFriendsSection,
+  type DuetFriendsSection,
+} from "@/lib/constants/duet-friends";
+import { DuetSubNav } from "@/lib/components/duet/duet-sub-nav";
 import { useDuetFriends, useDuetMutations, type DuetShareScopeOption } from "@/lib/hooks/use-duet";
 import type { FriendshipDto } from "@/lib/dto/duet";
 import { getDuetDisplayName } from "@/lib/components/duet/duet-utils";
@@ -85,6 +104,145 @@ function SpotlightSectionHeader({
           <span className={dotClass} aria-hidden />
           {badge}
         </span>
+      </div>
+    </div>
+  );
+}
+
+function DuetFriendsSectionNav({
+  activeSection,
+  counts,
+  onSelect,
+}: {
+  activeSection: DuetFriendsSection;
+  counts: { friends: number; pendingIncoming: number; pendingOutgoing: number };
+  onSelect: (section: DuetFriendsSection) => void;
+}) {
+  const t = useTranslations("duet.friends");
+
+  const segments: {
+    value: DuetFriendsSection;
+    label: string;
+    count?: number;
+    accent?: "amber" | "lime";
+  }[] = [
+    { value: "invite", label: t("navInvite") },
+    {
+      value: "incoming",
+      label: t("navIncoming"),
+      count: counts.pendingIncoming,
+      accent: "amber",
+    },
+    { value: "outgoing", label: t("navOutgoing"), count: counts.pendingOutgoing },
+    { value: "friends", label: t("navFriends"), count: counts.friends, accent: "lime" },
+  ];
+
+  return (
+    <div
+      role="tablist"
+      aria-label={t("navLabel")}
+      className="flex w-full gap-1 overflow-x-auto rounded-2xl border border-slate-200/80 bg-slate-100/80 p-1 [scrollbar-width:none] dark:border-white/10 dark:bg-black/30 [&::-webkit-scrollbar]:hidden"
+    >
+      {segments.map((segment) => {
+        const selected = activeSection === segment.value;
+        return (
+          <button
+            key={segment.value}
+            type="button"
+            role="tab"
+            aria-selected={selected}
+            onClick={() => onSelect(segment.value)}
+            className={`inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all ${
+              selected
+                ? "bg-white text-violet-800 shadow-sm dark:bg-violet-500/20 dark:text-violet-100"
+                : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+            }`}
+          >
+            {segment.label}
+            {segment.count !== undefined && segment.count > 0 ? (
+              <span
+                className={`inline-flex min-h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[0.65rem] font-bold tabular-nums ${
+                  segment.accent === "amber"
+                    ? "bg-amber-100 text-amber-800 dark:bg-amber-400/15 dark:text-amber-100"
+                    : segment.accent === "lime"
+                      ? "bg-lime-100 text-lime-800 dark:bg-lime-400/15 dark:text-lime-100"
+                      : "bg-slate-200/90 text-slate-700 dark:bg-white/10 dark:text-slate-200"
+                }`}
+              >
+                {segment.count > 99 ? "99+" : segment.count}
+              </span>
+            ) : null}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function FriendsListPagination({
+  page,
+  pageSize,
+  totalPages,
+  pageStart,
+  pageEnd,
+  total,
+  hasMore,
+  onPageChange,
+  onPageSizeChange,
+}: {
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  pageStart: number;
+  pageEnd: number;
+  total: number;
+  hasMore: boolean;
+  onPageChange: (nextPage: number) => void;
+  onPageSizeChange: (nextPageSize: number) => void;
+}) {
+  const t = useTranslations("duet.friends");
+
+  if (total <= DUET_FRIENDS_PAGE_SIZE_OPTIONS[0]) return null;
+
+  return (
+    <div className={DASHBOARD_SPOTLIGHT_FOOTER}>
+      <p className={DASHBOARD_SPOTLIGHT_FOOTER_TEXT}>
+        {t("paginationSummary", { start: pageStart, end: pageEnd, total })}
+      </p>
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          onClick={() => onPageChange(page - 1)}
+          disabled={page === 1}
+          className={DASHBOARD_SPOTLIGHT_BTN_SECONDARY}
+        >
+          {t("paginationPrevious")}
+        </button>
+        <label className={DASHBOARD_SPOTLIGHT_LABEL}>
+          <span>{t("pageSizeLabel")}</span>
+          <select
+            value={pageSize}
+            onChange={(e) => onPageSizeChange(Number(e.target.value))}
+            className={DASHBOARD_SPOTLIGHT_SELECT}
+          >
+            {DUET_FRIENDS_PAGE_SIZE_OPTIONS.map((size) => (
+              <option key={size} value={size}>
+                {size}
+              </option>
+            ))}
+          </select>
+        </label>
+        <span className={`px-2 ${DASHBOARD_SPOTLIGHT_FOOTER_TEXT}`}>
+          {t("paginationPage", { page, totalPages })}
+        </span>
+        <button
+          type="button"
+          onClick={() => onPageChange(page + 1)}
+          disabled={!hasMore}
+          className={DASHBOARD_SPOTLIGHT_BTN_SECONDARY}
+        >
+          {t("paginationNext")}
+        </button>
       </div>
     </div>
   );
@@ -382,6 +540,9 @@ function FriendsListSection({
   onRevoke,
   onUpdateShareScope,
   onBlock,
+  pagination,
+  onPageChange,
+  onPageSizeChange,
 }: {
   eyebrow: string;
   title: string;
@@ -397,6 +558,17 @@ function FriendsListSection({
   onRevoke: (id: string) => void;
   onUpdateShareScope: (id: string, scope: DuetShareScopeOption) => void;
   onBlock: (id: string) => void;
+  pagination?: {
+    page: number;
+    pageSize: number;
+    totalPages: number;
+    pageStart: number;
+    pageEnd: number;
+    total: number;
+    hasMore: boolean;
+  };
+  onPageChange?: (nextPage: number) => void;
+  onPageSizeChange?: (nextPageSize: number) => void;
 }) {
   if (!friendships.length) return null;
 
@@ -405,7 +577,7 @@ function FriendsListSection({
       <div className={gradient} />
       <div className={hairline} />
       <SpotlightSectionHeader eyebrow={eyebrow} title={title} badge={badge} badgeVariant={badgeVariant} />
-      <ul className="space-y-3 px-5 pb-6 sm:px-8">
+      <ul className="space-y-3 px-5 pb-0 sm:px-8">
         {friendships.map((f, index) => (
           <FriendRow
             key={f.id}
@@ -421,13 +593,31 @@ function FriendsListSection({
           />
         ))}
       </ul>
+      {pagination && onPageChange && onPageSizeChange ? (
+        <FriendsListPagination
+          page={pagination.page}
+          pageSize={pagination.pageSize}
+          totalPages={pagination.totalPages}
+          pageStart={pagination.pageStart}
+          pageEnd={pagination.pageEnd}
+          total={pagination.total}
+          hasMore={pagination.hasMore}
+          onPageChange={onPageChange}
+          onPageSizeChange={onPageSizeChange}
+        />
+      ) : (
+        <div className="pb-6" />
+      )}
     </section>
   );
 }
 
-export function DuetFriendsClient() {
+function DuetFriendsContent() {
   const t = useTranslations("duet.friends");
   const locale = useLocale();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
   const { data, isLoading, error, refetch } = useDuetFriends();
   const { invite, patchFriendship, blockFriendship, createInviteLink } = useDuetMutations();
   const [email, setEmail] = useState("");
@@ -490,16 +680,119 @@ export function DuetFriendsClient() {
   const pendingIncomingCount = data?.pendingIncoming.length ?? 0;
   const pendingOutgoingCount = data?.pendingOutgoing.length ?? 0;
 
+  const sectionCounts = useMemo(
+    () => ({
+      friends: friendsCount,
+      pendingIncoming: pendingIncomingCount,
+      pendingOutgoing: pendingOutgoingCount,
+    }),
+    [friendsCount, pendingIncomingCount, pendingOutgoingCount]
+  );
+
+  const sectionParam = searchParams.get("section");
+  const activeSection = isDuetFriendsSection(sectionParam)
+    ? sectionParam
+    : resolveDefaultDuetFriendsSection(sectionCounts);
+
+  const page = Math.max(1, Number.parseInt(searchParams.get("page") ?? "1", 10) || 1);
+  const pageSize = parseDuetFriendsPageSize(searchParams.get("pageSize"));
+
+  const updateFriendsParams = useCallback(
+    (next: { section?: DuetFriendsSection; page?: number; pageSize?: number }) => {
+      const params = new URLSearchParams(searchParams.toString());
+      const nextSection = next.section ?? activeSection;
+      params.set("section", nextSection);
+
+      const nextPageSize = next.pageSize ?? pageSize;
+      params.set("pageSize", String(nextPageSize));
+
+      const nextPage = next.page ?? (next.section !== undefined || next.pageSize !== undefined ? 1 : page);
+      params.set("page", String(Math.max(1, nextPage)));
+
+      const qs = params.toString();
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    },
+    [activeSection, page, pageSize, pathname, router, searchParams]
+  );
+
+  const handleSectionChange = useCallback(
+    (nextSection: DuetFriendsSection) => {
+      updateFriendsParams({ section: nextSection, page: 1 });
+    },
+    [updateFriendsParams]
+  );
+
+  const handlePageChange = useCallback(
+    (nextPage: number) => {
+      updateFriendsParams({ page: nextPage });
+    },
+    [updateFriendsParams]
+  );
+
+  const handlePageSizeChange = useCallback(
+    (nextPageSize: number) => {
+      updateFriendsParams({ pageSize: nextPageSize, page: 1 });
+    },
+    [updateFriendsParams]
+  );
+
+  const incomingPagination = useMemo(
+    () => paginateList(data?.pendingIncoming ?? [], page, pageSize),
+    [data?.pendingIncoming, page, pageSize]
+  );
+  const outgoingPagination = useMemo(
+    () => paginateList(data?.pendingOutgoing ?? [], page, pageSize),
+    [data?.pendingOutgoing, page, pageSize]
+  );
+  const friendsPagination = useMemo(
+    () => paginateList(data?.friends ?? [], page, pageSize),
+    [data?.friends, page, pageSize]
+  );
+
+  useEffect(() => {
+    const currentListTotal =
+      activeSection === "incoming"
+        ? pendingIncomingCount
+        : activeSection === "outgoing"
+          ? pendingOutgoingCount
+          : activeSection === "friends"
+            ? friendsCount
+            : 0;
+
+    if (currentListTotal === 0) return;
+
+    const totalPages = Math.max(1, Math.ceil(currentListTotal / pageSize));
+    if (page > totalPages) {
+      updateFriendsParams({ page: totalPages });
+    }
+  }, [
+    activeSection,
+    friendsCount,
+    page,
+    pageSize,
+    pendingIncomingCount,
+    pendingOutgoingCount,
+    updateFriendsParams,
+  ]);
+
+  useEffect(() => {
+    if (isLoading || !data) return;
+
+    const resolved = isDuetFriendsSection(sectionParam)
+      ? sectionParam
+      : resolveDefaultDuetFriendsSection(sectionCounts);
+
+    if (sectionParam !== resolved) {
+      updateFriendsParams({ section: resolved, page: 1 });
+    }
+  }, [data, isLoading, sectionCounts, sectionParam, updateFriendsParams]);
+
   if (isLoading) {
     return (
       <div className="space-y-8">
-        <DuetFriendsHero
-          friendsCount={0}
-          pendingIncomingCount={0}
-          pendingOutgoingCount={0}
-          locale={locale}
-        />
-        <p className={`text-sm ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("loading")}</p>
+        <DuetSubNav />
+        <DuetFriendsHeroSkeleton />
+        <DuetFriendsContentSkeleton />
       </div>
     );
   }
@@ -507,6 +800,7 @@ export function DuetFriendsClient() {
   if (error) {
     return (
       <div className="space-y-8">
+        <DuetSubNav />
         <DuetFriendsHero
           friendsCount={0}
           pendingIncomingCount={0}
@@ -530,8 +824,113 @@ export function DuetFriendsClient() {
     onBlock: (id: string) => blockFriendship.mutate(id),
   };
 
+  const listPaginationProps = {
+    page,
+    pageSize,
+    onPageChange: handlePageChange,
+    onPageSizeChange: handlePageSizeChange,
+  };
+
+  const inviteSection = (
+    <section className={DASHBOARD_SPOTLIGHT_SHELL}>
+      <div className={DASHBOARD_SPOTLIGHT_GRADIENT_CYAN} />
+      <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_CYAN} />
+      <SpotlightSectionHeader
+        eyebrow={t("inviteEyebrow")}
+        title={t("inviteTitle")}
+        description={t("inviteDescription")}
+        badge={t("inviteBadge")}
+        badgeVariant="cyan"
+      />
+      <div className="px-5 pb-6 sm:px-8">
+        <form onSubmit={handleInvite} className={`${DASHBOARD_SPOTLIGHT_INNER_WELL} flex flex-col gap-3 sm:flex-row sm:items-center`}>
+          <div className="relative min-w-0 flex-1">
+            <Mail
+              className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+              aria-hidden
+            />
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder={t("invitePlaceholder")}
+              className="min-h-11 w-full rounded-xl border border-slate-200/80 bg-white py-3 pl-10 pr-3 text-sm text-slate-900 shadow-sm focus:border-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-200/60 dark:border-white/10 dark:bg-black/30 dark:text-white dark:focus:border-cyan-400/40 dark:focus:ring-cyan-400/20"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={busy || !email.trim()}
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-600 to-cyan-500 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-cyan-500/20 transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0"
+          >
+            <Send className="h-4 w-4" aria-hidden />
+            {t("inviteSubmit")}
+          </button>
+        </form>
+        {feedback ? (
+          <p
+            className={`mt-3 text-sm ${feedbackError ? "text-red-600 dark:text-red-400" : "text-emerald-600 dark:text-emerald-400"}`}
+          >
+            {feedback}
+          </p>
+        ) : null}
+
+        <div className="mt-6 border-t border-slate-200/80 pt-6 dark:border-white/10">
+          <div className="mb-3 flex items-center gap-2">
+            <Link2 className="h-4 w-4 text-cyan-600 dark:text-cyan-300" aria-hidden />
+            <h3 className="text-sm font-semibold text-slate-900 dark:text-white">{t("inviteLinkTitle")}</h3>
+          </div>
+          <p className={`mb-4 text-sm leading-6 ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("inviteLinkDescription")}</p>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => void handleCreateInviteLink()}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-cyan-200/90 bg-white px-5 py-2.5 text-sm font-bold text-cyan-800 shadow-sm transition-colors hover:bg-cyan-50 disabled:opacity-50 dark:border-cyan-400/25 dark:bg-cyan-500/10 dark:text-cyan-100 dark:hover:bg-cyan-500/20"
+            >
+              <Link2 className="h-4 w-4" aria-hidden />
+              {t("inviteLinkGenerate")}
+            </button>
+            {inviteLinkUrl ? (
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => void handleCopyInviteLink()}
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-bold text-white disabled:opacity-50 dark:bg-white dark:text-slate-900"
+              >
+                <Copy className="h-4 w-4" aria-hidden />
+                {t("inviteLinkCopy")}
+              </button>
+            ) : null}
+          </div>
+          {inviteLinkUrl ? (
+            <p className="mt-3 break-all rounded-xl border border-slate-200/80 bg-slate-50/80 px-3 py-2 font-mono text-xs text-slate-700 dark:border-white/10 dark:bg-black/30 dark:text-slate-200">
+              {inviteLinkUrl}
+            </p>
+          ) : null}
+          {inviteLinkExpiresAt ? (
+            <p className={`mt-2 flex items-center gap-1.5 text-xs ${DASHBOARD_SPOTLIGHT_MUTED}`}>
+              <Clock className="h-3.5 w-3.5" aria-hidden />
+              {t("inviteLinkExpires", {
+                date: new Date(inviteLinkExpiresAt).toLocaleString(locale, {
+                  dateStyle: "medium",
+                  timeStyle: "short",
+                }),
+              })}
+            </p>
+          ) : null}
+          {linkFeedback ? (
+            <p className="mt-3 text-sm text-cyan-700 dark:text-cyan-200">{linkFeedback}</p>
+          ) : null}
+        </div>
+      </div>
+    </section>
+  );
+
   return (
     <div className="space-y-8">
+      <DuetSubNav />
+
       <DuetFriendsHero
         friendsCount={friendsCount}
         pendingIncomingCount={pendingIncomingCount}
@@ -539,148 +938,89 @@ export function DuetFriendsClient() {
         locale={locale}
       />
 
-      <section className={DASHBOARD_SPOTLIGHT_SHELL}>
-        <div className={DASHBOARD_SPOTLIGHT_GRADIENT_CYAN} />
-        <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_CYAN} />
-        <SpotlightSectionHeader
-          eyebrow={t("inviteEyebrow")}
-          title={t("inviteTitle")}
-          description={t("inviteDescription")}
-          badge={t("inviteBadge")}
-          badgeVariant="cyan"
-        />
-        <div className="px-5 pb-6 sm:px-8">
-          <form onSubmit={handleInvite} className={`${DASHBOARD_SPOTLIGHT_INNER_WELL} flex flex-col gap-3 sm:flex-row sm:items-center`}>
-            <div className="relative min-w-0 flex-1">
-              <Mail
-                className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
-                aria-hidden
-              />
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder={t("invitePlaceholder")}
-                className="min-h-11 w-full rounded-xl border border-slate-200/80 bg-white py-3 pl-10 pr-3 text-sm text-slate-900 shadow-sm focus:border-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-200/60 dark:border-white/10 dark:bg-black/30 dark:text-white dark:focus:border-cyan-400/40 dark:focus:ring-cyan-400/20"
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={busy || !email.trim()}
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-600 to-cyan-500 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-cyan-500/20 transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0"
-            >
-              <Send className="h-4 w-4" aria-hidden />
-              {t("inviteSubmit")}
-            </button>
-          </form>
-          {feedback ? (
-            <p
-              className={`mt-3 text-sm ${feedbackError ? "text-red-600 dark:text-red-400" : "text-emerald-600 dark:text-emerald-400"}`}
-            >
-              {feedback}
-            </p>
-          ) : null}
+      <DuetFriendsSectionNav
+        activeSection={activeSection}
+        counts={sectionCounts}
+        onSelect={handleSectionChange}
+      />
 
-          <div className="mt-6 border-t border-slate-200/80 pt-6 dark:border-white/10">
-            <div className="mb-3 flex items-center gap-2">
-              <Link2 className="h-4 w-4 text-cyan-600 dark:text-cyan-300" aria-hidden />
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">{t("inviteLinkTitle")}</h3>
-            </div>
-            <p className={`mb-4 text-sm leading-6 ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("inviteLinkDescription")}</p>
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => void handleCreateInviteLink()}
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-cyan-200/90 bg-white px-5 py-2.5 text-sm font-bold text-cyan-800 shadow-sm transition-colors hover:bg-cyan-50 disabled:opacity-50 dark:border-cyan-400/25 dark:bg-cyan-500/10 dark:text-cyan-100 dark:hover:bg-cyan-500/20"
-              >
-                <Link2 className="h-4 w-4" aria-hidden />
-                {t("inviteLinkGenerate")}
-              </button>
-              {inviteLinkUrl ? (
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={() => void handleCopyInviteLink()}
-                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-bold text-white disabled:opacity-50 dark:bg-white dark:text-slate-900"
-                >
-                  <Copy className="h-4 w-4" aria-hidden />
-                  {t("inviteLinkCopy")}
-                </button>
-              ) : null}
-            </div>
-            {inviteLinkUrl ? (
-              <p className="mt-3 break-all rounded-xl border border-slate-200/80 bg-slate-50/80 px-3 py-2 font-mono text-xs text-slate-700 dark:border-white/10 dark:bg-black/30 dark:text-slate-200">
-                {inviteLinkUrl}
-              </p>
-            ) : null}
-            {inviteLinkExpiresAt ? (
-              <p className={`mt-2 flex items-center gap-1.5 text-xs ${DASHBOARD_SPOTLIGHT_MUTED}`}>
-                <Clock className="h-3.5 w-3.5" aria-hidden />
-                {t("inviteLinkExpires", {
-                  date: new Date(inviteLinkExpiresAt).toLocaleString(locale, {
-                    dateStyle: "medium",
-                    timeStyle: "short",
-                  }),
-                })}
-              </p>
-            ) : null}
-            {linkFeedback ? (
-              <p className="mt-3 text-sm text-cyan-700 dark:text-cyan-200">{linkFeedback}</p>
-            ) : null}
-          </div>
-        </div>
-      </section>
+      {activeSection === "invite" ? inviteSection : null}
 
-      {!hasAny ? (
-        <EmptyState variant="startup" message={t("emptyTitle")} description={t("emptyDescription")} />
+      {activeSection === "incoming" && viewerId ? (
+        incomingPagination.total > 0 ? (
+          <FriendsListSection
+            eyebrow={t("incomingEyebrow")}
+            title={t("pendingIncoming")}
+            badge={t("incomingBadge")}
+            badgeVariant="violet"
+            gradient={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY}
+            hairline={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET}
+            friendships={incomingPagination.items}
+            viewerId={viewerId}
+            busy={busy}
+            pagination={incomingPagination}
+            {...listPaginationProps}
+            {...mutationHandlers}
+          />
+        ) : (
+          <EmptyState variant="startup" message={t("emptyIncoming")} description={t("emptyIncomingDescription")} />
+        )
       ) : null}
 
-      {viewerId && data?.pendingIncoming.length ? (
-        <FriendsListSection
-          eyebrow={t("incomingEyebrow")}
-          title={t("pendingIncoming")}
-          badge={t("incomingBadge")}
-          badgeVariant="violet"
-          gradient={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY}
-          hairline={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET}
-          friendships={data.pendingIncoming}
-          viewerId={viewerId}
-          busy={busy}
-          {...mutationHandlers}
-        />
+      {activeSection === "outgoing" && viewerId ? (
+        outgoingPagination.total > 0 ? (
+          <FriendsListSection
+            eyebrow={t("outgoingEyebrow")}
+            title={t("pendingOutgoing")}
+            badge={t("outgoingBadge")}
+            badgeVariant="cyan"
+            gradient={DASHBOARD_SPOTLIGHT_GRADIENT_CYAN}
+            hairline={DASHBOARD_SPOTLIGHT_HAIRLINE_CYAN}
+            friendships={outgoingPagination.items}
+            viewerId={viewerId}
+            busy={busy}
+            pagination={outgoingPagination}
+            {...listPaginationProps}
+            {...mutationHandlers}
+          />
+        ) : (
+          <EmptyState variant="startup" message={t("emptyOutgoing")} description={t("emptyOutgoingDescription")} />
+        )
       ) : null}
 
-      {viewerId && data?.pendingOutgoing.length ? (
-        <FriendsListSection
-          eyebrow={t("outgoingEyebrow")}
-          title={t("pendingOutgoing")}
-          badge={t("outgoingBadge")}
-          badgeVariant="cyan"
-          gradient={DASHBOARD_SPOTLIGHT_GRADIENT_CYAN}
-          hairline={DASHBOARD_SPOTLIGHT_HAIRLINE_CYAN}
-          friendships={data.pendingOutgoing}
-          viewerId={viewerId}
-          busy={busy}
-          {...mutationHandlers}
-        />
-      ) : null}
-
-      {viewerId && data?.friends.length ? (
-        <FriendsListSection
-          eyebrow={t("rosterEyebrow")}
-          title={t("friendsList")}
-          badge={t("rosterBadge")}
-          badgeVariant="lime"
-          gradient={DASHBOARD_SPOTLIGHT_GRADIENT_LIME}
-          hairline={DASHBOARD_SPOTLIGHT_HAIRLINE_LIME}
-          friendships={data.friends}
-          viewerId={viewerId}
-          busy={busy}
-          {...mutationHandlers}
-        />
+      {activeSection === "friends" && viewerId ? (
+        friendsPagination.total > 0 ? (
+          <FriendsListSection
+            eyebrow={t("rosterEyebrow")}
+            title={t("friendsList")}
+            badge={t("rosterBadge")}
+            badgeVariant="lime"
+            gradient={DASHBOARD_SPOTLIGHT_GRADIENT_LIME}
+            hairline={DASHBOARD_SPOTLIGHT_HAIRLINE_LIME}
+            friendships={friendsPagination.items}
+            viewerId={viewerId}
+            busy={busy}
+            pagination={friendsPagination}
+            {...listPaginationProps}
+            {...mutationHandlers}
+          />
+        ) : (
+          <EmptyState
+            variant="startup"
+            message={t("emptyFriendsSection")}
+            description={t("emptyFriendsSectionDescription")}
+            actions={hasAny ? undefined : [{ label: t("navInvite"), href: "/dashboard/duet/friends?section=invite" }]}
+          />
+        )
       ) : null}
     </div>
+  );
+}
+
+export function DuetFriendsClient() {
+  return (
+    <Suspense fallback={<DuetFriendsPageFallback />}>
+      <DuetFriendsContent />
+    </Suspense>
   );
 }

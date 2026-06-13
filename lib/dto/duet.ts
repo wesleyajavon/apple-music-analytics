@@ -68,6 +68,7 @@ type CompareEntityResponseBase = {
 export type CompareArtistEntityResponse = CompareEntityResponseBase & {
   type: "artist";
   artistName: string | null;
+  imageUrl: string | null;
 };
 
 export type CompareTrackEntityResponse = CompareEntityResponseBase & {

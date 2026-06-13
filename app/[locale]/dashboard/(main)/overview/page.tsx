@@ -46,6 +46,7 @@ import {
   OverviewFeaturePromosSkeleton,
 } from "@/lib/components/overview-feature-promos";
 import { UserAvatarPhoto } from "@/lib/components/user-avatar";
+import { SoundprintBrandDividerSection } from "@/lib/components/soundprint-brand-divider";
 
 const MOBILE_DATE_OPTS = { month: "2-digit", day: "2-digit", year: "2-digit" } as const;
 
@@ -1417,6 +1418,9 @@ function OverviewContent() {
             )
           }
         />
+
+        <SoundprintBrandDividerSection logoSize="lg" lineStyle="fade" maxWidth="medium" className="py-4 sm:py-6" />
+
         <div className="space-y-12">
         <section className="relative">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
@@ -1577,6 +1581,8 @@ function OverviewContent() {
             )}
           </div>
         </section>
+
+        <SoundprintBrandDividerSection logoSize="md" lineStyle="gradient" maxWidth="narrow" className="py-4 sm:py-6" />
 
         <section className="relative">
           <OverviewSectionHeader

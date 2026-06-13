@@ -31,7 +31,7 @@ describe("duet friend request notifications", () => {
   it("builds a server notification with link to friends page", () => {
     const item = buildDuetFriendRequestNotification(friendship);
     expect(item.read).toBe(false);
-    expect(item.href).toBe("/dashboard/duet/friends");
+    expect(item.href).toBe("/dashboard/duet/friends?section=incoming");
     expect(item.source).toBe("duet-friend-request:friendship-1");
     expect(item.duetFriendRequest?.requesterName).toBe("Bob");
   });

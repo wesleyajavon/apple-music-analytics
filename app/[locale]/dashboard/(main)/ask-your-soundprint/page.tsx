@@ -1237,7 +1237,7 @@ function MusicChatContent() {
               <p className="rounded-xl border border-amber-200/70 bg-amber-50/90 px-3 py-2 text-xs leading-relaxed text-amber-950 dark:border-amber-300/25 dark:bg-amber-950/35 dark:text-amber-50">
                 {t("heavyPresetHistoryNotice")}
               </p>
-              <details open className="group mt-1">
+              <details className="group mt-1">
                 <summary className="flex cursor-pointer list-none items-center justify-between rounded-xl border border-slate-200/90 bg-slate-50/90 px-4 py-3 text-left text-sm font-semibold text-slate-900 transition hover:bg-slate-100 dark:border-white/10 dark:bg-white/[0.06] dark:text-white dark:hover:bg-white/[0.09]">
                   <span>{t("supportedGuideTitle")}</span>
                   <ChevronDown

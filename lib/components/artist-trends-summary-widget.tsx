@@ -102,6 +102,7 @@ const OVERVIEW_ARTIST_TRENDS_TOP_N = 15;
 export type ArtistTrendsSummaryWidgetProps = {
   startDate?: string;
   endDate?: string;
+  embedded?: boolean;
 };
 
 /**
@@ -111,6 +112,7 @@ export type ArtistTrendsSummaryWidgetProps = {
 export function ArtistTrendsSummaryWidget({
   startDate,
   endDate,
+  embedded = false,
 }: ArtistTrendsSummaryWidgetProps) {
   const t = useTranslations("artistTrends");
   const tOverview = useTranslations("overview");
@@ -173,9 +175,13 @@ export function ArtistTrendsSummaryWidget({
     return qs ? `?${qs}` : "?period=month";
   }, [startDate, endDate, viewerUserId]);
 
+  const shellClass = embedded
+    ? "min-h-[320px] w-full min-w-0"
+    : "sm:col-span-2 lg:col-span-4 min-h-[320px] w-full min-w-0";
+
   if (isLoading) {
     return (
-      <div className="sm:col-span-2 lg:col-span-4 min-h-[320px] w-full min-w-0">
+      <div className={shellClass}>
         <div className={`${TREND_CARD_CLASS} animate-fade-in-up`} role="status" aria-label={t("evolution")}>
           {TREND_BACKGROUND}
           <div className="relative border-b border-white/70 px-6 py-5 dark:border-white/[0.06]">
@@ -202,7 +208,7 @@ export function ArtistTrendsSummaryWidget({
 
   if (error) {
     return (
-      <div className="sm:col-span-2 lg:col-span-4 w-full min-w-0">
+      <div className={embedded ? "w-full min-w-0" : "sm:col-span-2 lg:col-span-4 w-full min-w-0"}>
         <div className={`${TREND_CARD_CLASS} p-6`}>
           {TREND_BACKGROUND}
           <ErrorState
@@ -220,7 +226,7 @@ export function ArtistTrendsSummaryWidget({
   }
 
   return (
-    <div className="sm:col-span-2 lg:col-span-4 min-h-[320px] w-full min-w-0">
+    <div className={shellClass}>
       <div className={`${TREND_CARD_CLASS} animate-fade-in-up`}>
         {TREND_BACKGROUND}
         <div className="relative">

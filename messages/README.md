@@ -23,7 +23,7 @@ Ce dossier contient les fichiers de traduction pour chaque langue supportée.
 | `artists` | Page artistes |
 | `ai-insights` | Page AI Insights |
 | `taste-evolution` | Page évolution des goûts |
-| `taste-profile` | Page Explain My Taste |
+| `taste-profile` | Taste profile page |
 | `insights` | Page méthodologie |
 | `api-docs` | Page doc API |
 | `errors` | error.tsx, global-error.tsx |

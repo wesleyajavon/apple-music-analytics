@@ -119,22 +119,17 @@ function SnapshotHeaderScrollDivider({ label }: { label: string }) {
 }
 
 function SnapshotHeader({
-  eyebrow,
   title,
   description,
   scrollCue,
 }: {
-  eyebrow: string;
   title: string;
   description: string;
   scrollCue: string;
 }) {
   return (
     <div className="border-b border-white/20 bg-gradient-to-b from-transparent to-black/20 px-5 pb-5 pt-6 sm:px-8 sm:pb-6 sm:pt-7">
-      <p className="font-mono text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
-        {eyebrow}
-      </p>
-      <h2 className="mt-3 text-3xl font-semibold tracking-[-0.05em] text-white sm:text-4xl">{title}</h2>
+      <h2 className="text-3xl font-semibold tracking-[-0.05em] text-white sm:text-4xl">{title}</h2>
       <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-400 sm:text-base">{description}</p>
       <SnapshotHeaderScrollDivider label={scrollCue} />
     </div>
@@ -147,7 +142,6 @@ function TasteProfileLoadingState() {
   return (
     <TasteProfileShell>
       <SnapshotHeader
-        eyebrow={t("overviewWidget.eyebrow")}
         title={t("overviewWidget.title")}
         description={t("overviewWidget.description")}
         scrollCue={t("overviewWidget.scrollCue")}
@@ -182,7 +176,6 @@ function TasteProfileBlockedShell({ children }: { children: React.ReactNode }) {
   return (
     <TasteProfileShell>
       <SnapshotHeader
-        eyebrow={t("overviewWidget.eyebrow")}
         title={t("overviewWidget.title")}
         description={t("overviewWidget.description")}
         scrollCue={t("overviewWidget.scrollCue")}
@@ -233,7 +226,7 @@ export function TasteProfileSummaryWidget() {
     }
     return (
       <AiWidgetQuotaOrError
-        title={t("overviewWidget.eyebrow")}
+        title={t("overviewWidget.title")}
         subtitle={t("pullQuoteLabel")}
         error={error}
       />
@@ -243,7 +236,7 @@ export function TasteProfileSummaryWidget() {
   if (data?.aiUnavailable) {
     return (
       <AiFeatureDisabledPlaceholder
-        title={t("overviewWidget.eyebrow")}
+        title={t("overviewWidget.title")}
         subtitle={t("pullQuoteLabel")}
         reason={data.aiUnavailableReason ?? "client"}
       />
@@ -260,7 +253,6 @@ export function TasteProfileSummaryWidget() {
   return (
     <TasteProfileShell>
       <SnapshotHeader
-        eyebrow={t("overviewWidget.eyebrow")}
         title={t("overviewWidget.title")}
         description={t("overviewWidget.description")}
         scrollCue={t("overviewWidget.scrollCue")}

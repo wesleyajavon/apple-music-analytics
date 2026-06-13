@@ -1053,6 +1053,17 @@
       "badge": "Tendances artistes",
       "seeMoreHint": "Pour découvrir d'autres artistes, cliquez sur Voir plus."
     },
+    "momentumCarousel": {
+      "previous": "Graphique précédent",
+      "next": "Graphique suivant",
+      "slideCounter": "{current} / {total}",
+      "slides": {
+        "timeline": "Momentum d'écoute",
+        "artists": "Tendances artistes",
+        "genres": "Tendances genres",
+        "tracks": "Tendances titres"
+      }
+    },
     "libraryLeaders": {
       "badge": "Leaders bibliothèque",
       "title": "Ce qui mène votre bibliothèque.",
@@ -1577,7 +1588,7 @@
     "all": "Tout",
     "none": "Aucun",
     "selectAtLeastOne": "Sélectionnez au moins un artiste pour afficher le graphique.",
-    "evolution": "Votre radar des artistes qui montent",
+    "evolution": "Votre radar des artistes qui montent (ou qui descendent)",
     "chartHint": "Repérez qui explose, qui ralentit et qui domine vraiment votre rotation.",
     "listensDelta": "écoutes",
     "noArtistData": "Aucune donnée d'artiste pour cette période",
@@ -1748,9 +1759,9 @@
     "insightsTimelineFootnote": "Les dates tiennent compte de vos filtres actifs (période et sources).",
     "insightsLoadError": "Impossible de charger les statistiques pour cet artiste.",
     "insightsPeaksTitle": "Quand vous écoutez le plus cet artiste",
-    "insightsPeakHour": "Heure",
-    "insightsPeakWeekday": "Jour",
-    "insightsBusiestCalendarDay": "Record",
+    "insightsPeakHour": "Heure la plus active",
+    "insightsPeakWeekday": "Jour de la semaine le plus actif",
+    "insightsBusiestCalendarDay": "Jour le plus actif",
     "insightsBusiestMeta": "{date} · {listens} écoutes",
     "insightsNoSignal": "Pas assez de données pour dégager une tendance",
     "insightsActiveDays": "Actifs",
@@ -2025,8 +2036,7 @@
     },
     "yourProfile": "Votre profil musical",
     "overviewWidget": {
-      "eyebrow": "Explain My Taste",
-      "title": "Ce que votre son raconte aujourd'hui.",
+      "title": "Votre empreinte sonore, décryptée.",
       "description": "L'IA tire influences, singularités et une synthèse en une ligne depuis vos filtres actifs.",
       "scrollCue": "Votre lecture juste en dessous"
     },
@@ -2041,7 +2051,7 @@
   "musical-profile": {
     "title": "Profil musical",
     "subtitle": "Un replay premium de votre identité musicale, enrichi par l'IA.",
-    "heroTitle": "Retrouvez-vous dans la musique que vous aimez déjà.",
+    "heroTitle": "Retrouvez-vous dans la musique que vous aimez.",
     "heroSignature": "Signature sonore",
     "heroSignatureHint": "Ancrée dans {genre}",
     "heroSignatureHintFallback": "En attente de plus de signal genre",
@@ -2683,7 +2693,7 @@
         "timeAnalysis": "Analyse temporelle — Habitudes par heure et jour de la semaine",
         "musicalProfile": "Profil musical — Votre persona d'écoute basé sur vos patterns",
         "insights": "Insights — Résumés générés par le produit et signaux d'écoute clés",
-        "tasteProfile": "Explain My Taste — Explication IA de vos préférences musicales",
+        "tasteProfile": "Profil de goût — Explication IA de vos préférences musicales",
         "tasteEvolution": "Évolution des goûts — Changements semaine par semaine de vos goûts musicaux",
         "aiInsights": "AI Insights — Insights en langage naturel (optionnel)"
       }
@@ -2812,8 +2822,8 @@
       }
     },
     "demoHighlightsSection": {
-      "eyebrow": "Tours produit enregistrés",
-      "title": "Voyez le dashboard en mouvement, pas seulement en maquette."
+      "eyebrow": "Voir en action",
+      "title": "Analyses d'artistes et tendances d'écoute, directement depuis le dashboard."
     },
     "soundprintAiChatDemo": {
       "sectionEyebrow": "Soundprint Chat",

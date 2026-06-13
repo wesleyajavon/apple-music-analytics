@@ -7,7 +7,7 @@ type SoundprintBrandDividerProps = {
   maxWidth?: "full" | "medium" | "narrow";
   showLogo?: boolean;
   className?: string;
-  logoSize?: "sm" | "md" | "lg" | "xl";
+  logoSize?: "sm" | "md" | "lg" | "xl" | "2xl";
 };
 
 const LINE_STYLE: Record<
@@ -33,6 +33,7 @@ const LOGO_SIZE = {
   md: "h-8 w-8 object-contain",
   lg: "h-12 w-12 object-contain sm:h-14 sm:w-14",
   xl: "h-16 w-16 object-contain sm:h-20 sm:w-20",
+  "2xl": "h-24 w-24 object-contain sm:h-28 sm:w-28",
 } as const;
 
 const MAX_WIDTH = {
@@ -46,6 +47,7 @@ const GAP = {
   md: "gap-3 sm:gap-4",
   lg: "gap-4 sm:gap-5",
   xl: "gap-4 sm:gap-6",
+  "2xl": "gap-5 sm:gap-8",
 } as const;
 
 /**
@@ -63,7 +65,7 @@ export function SoundprintBrandDivider({
 }: SoundprintBrandDividerProps) {
   const lineClass = LINE_STYLE[lineStyle][tone];
   const widthClass = MAX_WIDTH[maxWidth];
-  const gapClass = GAP[logoSize === "sm" ? "sm" : logoSize === "xl" ? "xl" : "md"];
+  const gapClass = GAP[logoSize];
 
   const logo = showLogo ? (
     <SoundprintLogo

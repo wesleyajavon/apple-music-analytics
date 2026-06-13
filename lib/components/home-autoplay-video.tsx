@@ -45,13 +45,45 @@ export function HomeAutoplayVideo({
     video.load();
     attemptPlay();
 
+    let retryTimer: ReturnType<typeof setInterval> | null = null;
+
+    const stopRetry = () => {
+      if (retryTimer) {
+        clearInterval(retryTimer);
+        retryTimer = null;
+      }
+    };
+
+    const startRetryWhileVisible = () => {
+      stopRetry();
+      retryTimer = setInterval(() => {
+        const currentVideo = videoRef.current;
+        if (!currentVideo) return;
+        if (!currentVideo.paused) {
+          stopRetry();
+          return;
+        }
+        attemptPlay();
+      }, 400);
+    };
+
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry?.isIntersecting) attemptPlay();
+        if (entry?.isIntersecting) {
+          attemptPlay();
+          startRetryWhileVisible();
+        } else {
+          stopRetry();
+        }
       },
       { threshold: 0.1, rootMargin: "0px 0px 120px 0px" },
     );
     observer.observe(container);
+
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") attemptPlay();
+    };
+    document.addEventListener("visibilitychange", onVisibilityChange);
 
     const mediaEvents = ["loadedmetadata", "loadeddata", "canplay"] as const;
     for (const event of mediaEvents) {
@@ -60,6 +92,8 @@ export function HomeAutoplayVideo({
 
     return () => {
       observer.disconnect();
+      stopRetry();
+      document.removeEventListener("visibilitychange", onVisibilityChange);
       for (const event of mediaEvents) {
         video.removeEventListener(event, attemptPlay);
       }

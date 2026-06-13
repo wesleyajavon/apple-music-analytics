@@ -9,7 +9,7 @@ export function AuthPreviewPanel() {
 
   return (
     <div
-      className="pointer-events-none relative z-[1] hidden min-h-0 min-w-0 self-center lg:flex lg:items-center lg:justify-end lg:overflow-x-clip lg:py-8 lg:pr-6 xl:pr-10"
+      className="pointer-events-none relative z-[1] hidden min-h-0 min-w-0 self-center lg:flex lg:items-center lg:justify-start lg:overflow-x-clip lg:py-8 lg:pl-[4.75rem] lg:pr-8 xl:pr-10"
       aria-hidden
     >
       <div

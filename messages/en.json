@@ -1053,6 +1053,17 @@
       "badge": "Artist trends",
       "seeMoreHint": "To explore more artists, click See more."
     },
+    "momentumCarousel": {
+      "previous": "Previous chart",
+      "next": "Next chart",
+      "slideCounter": "{current} / {total}",
+      "slides": {
+        "timeline": "Listening momentum",
+        "artists": "Artist trends",
+        "genres": "Genre trends",
+        "tracks": "Track trends"
+      }
+    },
     "libraryLeaders": {
       "badge": "Library leaders",
       "title": "What leads your library.",
@@ -1577,7 +1588,7 @@
     "all": "All",
     "none": "None",
     "selectAtLeastOne": "Select at least one artist to display the chart.",
-    "evolution": "Your artist momentum map",
+    "evolution": "Your rising artist radar (or who's falling)",
     "chartHint": "Spot who's rising, fading, and owning your rotation.",
     "listensDelta": "listens",
     "noArtistData": "No artist data for this period",
@@ -1748,9 +1759,9 @@
     "insightsTimelineFootnote": "Dates respect your active filters (period and sources).",
     "insightsLoadError": "Could not load artist insights.",
     "insightsPeaksTitle": "When you listen the most",
-    "insightsPeakHour": "Hour",
-    "insightsPeakWeekday": "Weekday",
-    "insightsBusiestCalendarDay": "Busiest",
+    "insightsPeakHour": "Busiest hour",
+    "insightsPeakWeekday": "Busiest weekday",
+    "insightsBusiestCalendarDay": "Busiest day ever",
     "insightsBusiestMeta": "{date} · {listens} listens",
     "insightsNoSignal": "Not enough patterned data yet",
     "insightsActiveDays": "Active",
@@ -2025,8 +2036,7 @@
     },
     "yourProfile": "Your musical profile",
     "overviewWidget": {
-      "eyebrow": "Explain My Taste",
-      "title": "How your sound reads right now.",
+      "title": "Your musical fingerprint, decoded.",
       "description": "AI pulls influences, standout quirks, and a one-line take from your active filters.",
       "scrollCue": "Your read is below"
     },
@@ -2041,7 +2051,7 @@
   "musical-profile": {
     "title": "Musical Profile",
     "subtitle": "A premium, AI-assisted replay of your listening identity.",
-    "heroTitle": "See yourself through the music you already love.",
+    "heroTitle": "See yourself through the music you love.",
     "heroSignature": "Signature sound",
     "heroSignatureHint": "Anchored in {genre}",
     "heroSignatureHintFallback": "Waiting for more genre signal",
@@ -2683,7 +2693,7 @@
         "timeAnalysis": "Time analysis — Habits by hour and day of week",
         "musicalProfile": "Musical profile — Your listener persona from behavior patterns",
         "insights": "Insights — Product-generated summaries and key listening signals",
-        "tasteProfile": "Explain My Taste — AI-powered explanation of your musical preferences",
+        "tasteProfile": "Taste Profile — AI-powered explanation of your musical preferences",
         "tasteEvolution": "Taste Evolution — Week-to-week changes in your musical tastes",
         "aiInsights": "AI Insights — Natural language insights (optional)"
       }
@@ -2812,8 +2822,8 @@
       }
     },
     "demoHighlightsSection": {
-      "eyebrow": "Recorded product tours",
-      "title": "See the dashboard moving, not just mocked up."
+      "eyebrow": "See it in action",
+      "title": "Artist stories and listening trends, straight from the dashboard."
     },
     "soundprintAiChatDemo": {
       "sectionEyebrow": "Soundprint Chat",

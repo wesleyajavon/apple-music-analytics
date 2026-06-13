@@ -1,5 +1,5 @@
 /**
- * DTOs for Explain My Taste (taste profile) feature
+ * DTOs for the taste profile feature
  * Input: aggregated analytics only (no raw listening events)
  * Output: structured text fields for UI rendering
  */

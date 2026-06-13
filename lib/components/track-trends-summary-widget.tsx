@@ -102,11 +102,13 @@ const OVERVIEW_TRACK_TRENDS_TOP_N = 20;
 export type TrackTrendsSummaryWidgetProps = {
   startDate?: string;
   endDate?: string;
+  embedded?: boolean;
 };
 
 export function TrackTrendsSummaryWidget({
   startDate,
   endDate,
+  embedded = false,
 }: TrackTrendsSummaryWidgetProps) {
   const t = useTranslations("trackTrends");
   const tOverview = useTranslations("overview");
@@ -169,9 +171,13 @@ export function TrackTrendsSummaryWidget({
     return qs ? `?${qs}` : "?period=month";
   }, [startDate, endDate, viewerUserId]);
 
+  const shellClass = embedded
+    ? "min-h-[320px] w-full min-w-0"
+    : "sm:col-span-2 lg:col-span-4 min-h-[320px] w-full min-w-0";
+
   if (isLoading) {
     return (
-      <div className="sm:col-span-2 lg:col-span-4 min-h-[320px] w-full min-w-0">
+      <div className={shellClass}>
         <div className={`${TRACK_TREND_CARD_CLASS} animate-fade-in-up`} role="status" aria-label={t("evolution")}>
           {TRACK_TREND_BACKGROUND}
           <div className="relative border-b border-white/70 px-6 py-5 dark:border-white/[0.06]">
@@ -198,7 +204,7 @@ export function TrackTrendsSummaryWidget({
 
   if (error) {
     return (
-      <div className="sm:col-span-2 lg:col-span-4 w-full min-w-0">
+      <div className={embedded ? "w-full min-w-0" : "sm:col-span-2 lg:col-span-4 w-full min-w-0"}>
         <div className={`${TRACK_TREND_CARD_CLASS} p-6`}>
           {TRACK_TREND_BACKGROUND}
           <ErrorState
@@ -216,7 +222,7 @@ export function TrackTrendsSummaryWidget({
   }
 
   return (
-    <div className="sm:col-span-2 lg:col-span-4 min-h-[320px] w-full min-w-0">
+    <div className={shellClass}>
       <div className={`${TRACK_TREND_CARD_CLASS} animate-fade-in-up`}>
         {TRACK_TREND_BACKGROUND}
         <div className="relative">

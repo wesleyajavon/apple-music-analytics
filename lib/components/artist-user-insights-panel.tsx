@@ -191,15 +191,6 @@ export const ArtistUserInsightsPanel = memo(
         ? weekdayShortMonFirst(query.data.peakWeekday.weekdayIndexMondayFirst, locale)
         : null;
 
-    const busiestDayLabel =
-      query.data?.busiestDay != null
-        ? new Date(query.data.busiestDay.date + "T12:00:00.000Z").toLocaleDateString(locale, {
-            weekday: "short",
-            month: "short",
-            day: "numeric",
-          })
-        : null;
-
     const formatListenDate = (isoDate: string) =>
       new Date(isoDate).toLocaleDateString(locale, {
         weekday: "short",
@@ -207,6 +198,9 @@ export const ArtistUserInsightsPanel = memo(
         day: "numeric",
         year: "numeric",
       });
+
+    const busiestDayLabel =
+      query.data?.busiestDay != null ? formatListenDate(query.data.busiestDay.date + "T12:00:00.000Z") : null;
 
     if (!open || !previewArtist || !artistId) return null;
 

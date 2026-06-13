@@ -28,6 +28,7 @@ import {
   HomeTextReveal,
   HomeTextRevealLines,
 } from "@/lib/components/home-animations";
+import { HomeAutoplayVideo } from "@/lib/components/home-autoplay-video";
 
 function ArrowRightIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
@@ -479,36 +480,30 @@ export default function Home() {
 
           <div className="hidden w-full gap-6 md:grid">
             {demoHighlights.map((highlight) => (
-              <HomePerspectiveReveal
+              <section
                 key={highlight.id}
-                direction={highlight.reverse ? "right" : "left"}
+                className="grid items-center gap-5 rounded-3xl border border-card-border bg-surface-glass p-4 text-left shadow-card backdrop-blur-xl sm:gap-6 sm:rounded-[2rem] md:p-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-8"
               >
-                <section className="grid items-center gap-5 rounded-3xl border border-card-border bg-surface-glass p-4 text-left shadow-card backdrop-blur-xl sm:gap-6 sm:rounded-[2rem] md:p-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-8">
-                  <div
-                    className={
-                      highlight.reverse
-                        ? "relative overflow-hidden rounded-3xl border border-white/10 bg-slate-950/90 p-2 shadow-2xl shadow-cyan-950/20 lg:order-2"
-                        : "relative overflow-hidden rounded-3xl border border-white/10 bg-slate-950/90 p-2 shadow-2xl shadow-cyan-950/20"
-                    }
-                  >
-                    <video
-                      aria-label={highlight.videoLabel}
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      preload="metadata"
-                      className="aspect-video w-full rounded-2xl object-cover ring-1 ring-white/10"
-                    >
-                      <source src={highlight.videoSrc} type="video/mp4" />
-                      Your browser does not support the video tag.
-                    </video>
-                  </div>
+                <div
+                  className={
+                    highlight.reverse
+                      ? "relative overflow-hidden rounded-3xl border border-white/10 bg-slate-950/90 p-2 shadow-2xl shadow-cyan-950/20 lg:order-2"
+                      : "relative overflow-hidden rounded-3xl border border-white/10 bg-slate-950/90 p-2 shadow-2xl shadow-cyan-950/20"
+                  }
+                >
+                  <HomeAutoplayVideo
+                    src={highlight.videoSrc}
+                    label={highlight.videoLabel}
+                  />
+                </div>
 
+                <HomePerspectiveReveal
+                  direction={highlight.reverse ? "right" : "left"}
+                  className={highlight.reverse ? "lg:order-1" : undefined}
+                >
                   <HomeBlurFadeReveal
                     delay={0.12}
                     direction={highlight.reverse ? "right" : "left"}
-                    className={highlight.reverse ? "lg:order-1" : undefined}
                   >
                     <p className="font-mono text-xs font-semibold uppercase tracking-[0.24em] text-primary">
                       {highlight.eyebrow}
@@ -523,8 +518,8 @@ export default function Home() {
                       {highlight.metric}
                     </p>
                   </HomeBlurFadeReveal>
-                </section>
-              </HomePerspectiveReveal>
+                </HomePerspectiveReveal>
+              </section>
             ))}
           </div>
         </section>

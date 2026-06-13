@@ -34,11 +34,14 @@ export async function GET(request: NextRequest) {
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { name: true },
+      select: { name: true, avatarUrl: true },
     });
 
     return NextResponse.json({
-      user: { name: user?.name ?? null },
+      user: {
+        name: user?.name ?? null,
+        avatarUrl: user?.avatarUrl ?? null,
+      },
     });
   } catch (error) {
     return handleApiError(error, { route: ROUTE });

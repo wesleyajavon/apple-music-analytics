@@ -8,6 +8,7 @@ import { useArtistStats } from "@/lib/hooks/use-artists";
 import { useDashboardViewerUserId } from "@/lib/context/dashboard-viewer-context";
 import { TopThreeArtists } from "@/lib/components/top-three-artists-cards";
 import { ErrorState } from "@/lib/components/error-state";
+import { LiveStatusDot } from "@/lib/components/live-status-dot";
 
 export type TopThreeArtistsOverviewWidgetProps = {
   startDate?: string;
@@ -109,7 +110,7 @@ export function TopThreeArtistsOverviewWidget({
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-accent-violet/20 bg-white/70 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-accent-violet shadow-sm backdrop-blur dark:border-violet-400/18 dark:bg-[#141622] dark:text-violet-100">
-                  <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_16px_rgb(22_199_132_/0.65)]" />
+                  <LiveStatusDot />
                   {tOverview("artistSpotlight.badge")}
                 </div>
                 <h2 className="text-3xl font-semibold tracking-[-0.05em] text-gray-950 dark:text-white sm:text-4xl">

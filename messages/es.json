@@ -992,9 +992,24 @@
   "overview": {
     "title": "Tu música",
     "titlePersonal": "La música de {name}",
-    "musicAgentPromoBadge": "Nuevo",
-    "musicAgentPromoTitle": "Music AI Agent",
-    "musicAgentPromoAria": "Abrir el nuevo Music AI Agent",
+    "featurePromos": {
+      "panelBadge": "Ir más allá",
+      "panelTag": "Destacado",
+      "soundprint": {
+        "badge": "Chat IA",
+        "title": "Chatea con tu Soundprint",
+        "description": "Pregunta por tops, rachas y cambios de gusto — las respuestas usan tus escuchas reales.",
+        "cta": "Abrir chat",
+        "aria": "Abrir chat Soundprint"
+      },
+      "duet": {
+        "badge": "Social",
+        "title": "Duet con un amigo",
+        "description": "Invita amigos y compara líneas de tiempo, artistas y temas cara a cara.",
+        "cta": "Iniciar duelo",
+        "aria": "Abrir Duet — amigos"
+      }
+    },
     "subtitle": "Tus estadísticas personales de escucha. Analiza tus tendencias y descubre tus géneros favoritos.",
     "periodBadge": "Período",
     "allData": "Todos los datos",
@@ -1007,6 +1022,15 @@
     "statsSectionBadge": "Resumen",
     "statsSectionTitle": "Tus cifras en el período",
     "statsSectionDescription": "Volumen de escucha, diversidad y tiempo acumulado: los indicadores que resumen tu actividad.",
+    "statsSectionListensHint": "Cada repetición, shuffle y descubrimiento alimenta el pulso de escucha de este período.",
+    "statsSectionBreadthLabel": "Alcance del catálogo",
+    "statsSectionBreadthHint": "Cuántos artistas y pistas distintos marcaron tu rotación.",
+    "statsSectionBreadthSummary": "{artists} artistas y {tracks} pistas compusieron lo que escuchaste en este período.",
+    "statsSectionTimeLabel": "Tiempo acumulado",
+    "statsSectionTimeHours": "Horas",
+    "statsSectionTimeMinutes": "Minutos",
+    "statsSectionTimeHint": "El tiempo total que mantuviste la música sonando en este período.",
+    "statsSectionTimeSummary": "{duration} con la música sonando en este período.",
     "statsSectionComparisonNote": "Los porcentajes comparan este período con la ventana anterior de la misma duración (cuando hay datos).",
     "vsPreviousPeriod": "vs período anterior",
     "notAvailable": "No disponible",
@@ -1024,6 +1048,10 @@
       "badge": "Spotlight de artistas",
       "title": "Los artistas que sostienen tu rotación.",
       "description": "Pasa el cursor por cada portada para revelar escuchas, variedad de canciones y el peso de tus tres artistas principales."
+    },
+    "artistTrends": {
+      "badge": "Tendencias de artistas",
+      "seeMoreHint": "Para explorar más artistas, haz clic en Ver más."
     },
     "libraryLeaders": {
       "badge": "Líderes de biblioteca",
@@ -1049,8 +1077,8 @@
     "sections": {
       "snapshot": {
         "eyebrow": "Snapshot",
-        "title": "Empieza por la forma de tu escucha.",
-        "description": "Una lectura rápida de tu gusto, volumen y variedad antes de entrar en los detalles."
+        "title": "Tu escucha de un vistazo.",
+        "description": "Volumen, variedad y gusto primero — antes de las tendencias y los rankings detallados."
       },
       "momentum": {
         "eyebrow": "Momentum",
@@ -1365,8 +1393,8 @@
     "paginationNext": "Siguiente",
     "paginationPage": "Página {page} / {totalPages}",
     "selectAtLeastOne": "Selecciona al menos un género para mostrar el gráfico.",
-    "evolution": "Qué géneros suben — y cuáles se desvanecen",
-    "chartHint": "Mira qué sonidos se están apoderando de tu gusto y cuáles se van apagando.",
+    "evolution": "Lo que sube — y lo que se apaga",
+    "chartHint": "Mira qué géneros conquistan tus escuchas — y cuáles van cediendo terreno.",
     "listensDelta": "escuchas",
     "noGenreData": "Sin datos de género para este período",
     "changeDatesDescription": "Modifica las fechas o el período de agregación en la barra de filtros.",
@@ -1387,6 +1415,14 @@
     "apiMappingNoticeBody": "Usa Palette para ajustar géneros manualmente, o ejecuta el mapeo con Groq para clasificar más rápido las canciones desconocidas.",
     "apiMappingNoticeShort": "Palette y el mapeo con Groq pueden ayudar a refinar los géneros usados en estas tendencias.",
     "apiMappingNoticeLink": "Abrir Palette",
+    "genreAccuracyChooserTitle": "Algunas pistas aún no tienen género",
+    "genreAccuracyChooserIntro": "Elige una opción abajo — tus líneas de tendencia se verán más claras a medida que mejoren las etiquetas.",
+    "genreAccuracyGroqRecommended": "Recomendado",
+    "genreAccuracyGroqTitle": "Autocompletar con IA",
+    "genreAccuracyGroqDescription": "Un toque. Etiquetamos tus géneros faltantes en segundo plano.",
+    "genreAccuracyPaletteTitle": "Palette",
+    "genreAccuracyPaletteDescription": "Elige los géneros tú mismo, artista por artista.",
+    "genreAccuracyPaletteCta": "Abrir Palette",
     "chartGenreAccuracyTitle": "Capa de confianza de géneros",
     "chartGenreAccuracyIntro": "El gráfico se vuelve más claro cuanto mejor están etiquetados tus géneros. Ajusta esta capa una vez y cada tendencia será más fiable.",
     "chartGenreAccuracyPalette": "<manualLabel>Control Palette</manualLabel>: elige géneros a mano para artistas o canciones donde la precisión importa más. <palette>Abrir Palette</palette>.",
@@ -1969,6 +2005,12 @@
       "poetic": "Poético"
     },
     "yourProfile": "Tu perfil musical",
+    "overviewWidget": {
+      "eyebrow": "Explain My Taste",
+      "title": "Cómo suena tu perfil ahora.",
+      "description": "La IA extrae influencias, singularidades y una lectura breve de tus filtros activos.",
+      "scrollCue": "Tu lectura está abajo"
+    },
     "pullQuoteLabel": "Tu sonido en una frase",
     "exploreProfileCta": "Explorar mi perfil",
     "inBrief": "En breve",

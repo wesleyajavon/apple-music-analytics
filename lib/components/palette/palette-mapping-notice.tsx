@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Link } from "@/i18n/navigation";
-import { GroqGenreBackfillCta } from "@/lib/components/palette/groq-genre-backfill-cta";
+import { GenreAccuracyChooser } from "@/lib/components/palette/genre-accuracy-chooser";
 
 type PaletteMappingNoticeProps = {
   title: string;
@@ -29,6 +29,10 @@ export function PaletteMappingNotice({
     return null;
   }
 
+  if (showGroqCta) {
+    return <GenreAccuracyChooser viewerUserId={viewerUserId} className="max-w-3xl" />;
+  }
+
   return (
     <div className={className}>
       <div
@@ -45,12 +49,6 @@ export function PaletteMappingNotice({
             {linkLabel}
           </Link>
         </p>
-        {showGroqCta ? (
-          <GroqGenreBackfillCta
-            viewerUserId={viewerUserId}
-            className="mt-3 space-y-2 border-t border-slate-200/75 pt-2.5 dark:border-white/10"
-          />
-        ) : null}
       </div>
     </div>
   );

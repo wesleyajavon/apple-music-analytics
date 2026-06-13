@@ -61,27 +61,21 @@ export function StatCardsSkeleton({ count = 4 }: { count?: number }) {
 export function OverviewStatsSectionSkeleton() {
   return (
     <div className="sm:col-span-2 lg:col-span-4">
-      <div className="overflow-hidden rounded-2xl border-2 border-emerald-500/15 bg-card-surface shadow-xl">
-        <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-6 sm:px-8 sm:py-8">
-          <div className="mb-2 h-6 w-28 rounded-full bg-gray-200 dark:bg-gray-700 animate-shimmer" />
-          <div className="h-8 w-72 max-w-full rounded bg-gray-200 dark:bg-gray-700 animate-shimmer" />
-          <div className="mt-2 h-4 w-full max-w-2xl rounded bg-gray-200 dark:bg-gray-700 animate-shimmer" />
+      <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-[#08060a] via-[#100c12] to-[#0a080e] shadow-2xl shadow-black/50 ring-1 ring-white/[0.06]">
+        <div className="border-b border-white/10 px-5 py-6 sm:px-8 sm:py-7">
+          <div className="h-3 w-24 rounded bg-white/10 animate-shimmer" />
+          <div className="mt-3 h-9 w-72 max-w-full rounded bg-white/10 animate-shimmer" />
+          <div className="mt-3 h-4 w-full max-w-2xl rounded bg-white/10 animate-shimmer" />
         </div>
-        <div className="px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4 xl:gap-5">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div
-                key={i}
-                className="flex min-h-[180px] flex-col rounded-2xl border border-card-border bg-card-surface/80 p-6"
-              >
-                <div className="mb-4 h-14 w-14 rounded-2xl bg-gray-200 dark:bg-gray-700 animate-shimmer" />
-                <div className="h-3 w-32 rounded bg-gray-200 dark:bg-gray-700 animate-shimmer" />
-                <div className="mt-2 h-10 w-40 rounded bg-gray-200 dark:bg-gray-700 animate-shimmer" />
-                <div className="mt-auto pt-4">
-                  <div className="h-9 w-44 rounded-full bg-gray-200 dark:bg-gray-700 animate-shimmer" />
-                </div>
-              </div>
-            ))}
+        <div className="grid gap-4 p-5 sm:p-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-5 lg:p-8">
+          <div className="min-h-[260px] rounded-[1.5rem] border border-white/10 bg-black/35 p-5 sm:p-7">
+            <div className="h-4 w-28 rounded bg-white/10 animate-shimmer" />
+            <div className="mt-4 h-14 w-40 rounded bg-white/10 animate-shimmer" />
+            <div className="mt-4 h-16 w-full rounded bg-white/10 animate-shimmer" />
+          </div>
+          <div className="grid gap-4">
+            <div className="min-h-[240px] rounded-[1.5rem] border border-white/10 bg-black/35 animate-shimmer" />
+            <div className="min-h-[240px] rounded-[1.5rem] border border-white/10 bg-black/35 animate-shimmer" />
           </div>
         </div>
       </div>

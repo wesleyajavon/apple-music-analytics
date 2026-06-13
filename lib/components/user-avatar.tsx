@@ -29,6 +29,45 @@ export function getUserAvatarInitials(name?: string | null, email?: string | nul
   return initials || "U";
 }
 
+/** Renders only when `src` loads successfully — no initials / gradient fallback. */
+export function UserAvatarPhoto({
+  src,
+  size = "xl",
+  alt = "",
+  className = "",
+}: {
+  src?: string | null;
+  size?: UserAvatarSize;
+  alt?: string;
+  className?: string;
+}) {
+  const [imageFailed, setImageFailed] = useState(false);
+  const showImage = !!src && !imageFailed;
+
+  useEffect(() => {
+    setImageFailed(false);
+  }, [src]);
+
+  if (!showImage) return null;
+
+  return (
+    <span
+      className={`relative flex shrink-0 items-center justify-center overflow-hidden border border-white/70 bg-white/10 shadow-lg shadow-violet-500/15 dark:border-white/10 ${SIZE_CLASSES[size]} ${className}`}
+      aria-hidden={alt ? undefined : true}
+    >
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        sizes={IMAGE_SIZES[size]}
+        unoptimized
+        className="object-cover"
+        onError={() => setImageFailed(true)}
+      />
+    </span>
+  );
+}
+
 export function UserAvatar({
   src,
   name,

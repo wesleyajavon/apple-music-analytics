@@ -1,24 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { toast } from "sonner";
-import { clearGenreBackfillBannerBlockingPrefs } from "@/lib/utils/genre-backfill-banner-prefs";
-
-type GroqEligibility = {
-  unknownTrackCount: number;
-  unknownRatio: number;
-  totalTrackCount: number;
-  groqConfigured: boolean;
-};
-
-type GroqJobStatus =
-  | "pending"
-  | "running"
-  | "paused"
-  | "completed"
-  | "failed"
-  | "cancelled";
+import { useGroqGenreBackfillMeta } from "@/lib/hooks/use-groq-genre-backfill-meta";
 
 type GroqGenreBackfillCtaProps = {
   viewerUserId?: string | null;
@@ -40,89 +23,7 @@ export function GroqGenreBackfillCta({
 }: GroqGenreBackfillCtaProps) {
   const t = useTranslations("genreTrends");
   const tConsent = useTranslations("onboarding.genreLlmConsent");
-  const [meta, setMeta] = useState<{
-    loaded: boolean;
-    eligibility: GroqEligibility | null;
-    jobStatus: GroqJobStatus | null;
-    errorStatus: number | null;
-  }>({ loaded: false, eligibility: null, jobStatus: null, errorStatus: null });
-  const [isStarting, setIsStarting] = useState(false);
-
-  const refreshMeta = useCallback(async () => {
-    if (viewerUserId) {
-      setMeta({ loaded: true, eligibility: null, jobStatus: null, errorStatus: null });
-      return;
-    }
-
-    try {
-      const res = await fetch("/api/user/onboarding/import/genre-backfill/status?includeEligibility=1", {
-        credentials: "include",
-      });
-      const data = (await res.json().catch(() => ({}))) as {
-        eligibility?: GroqEligibility;
-        job?: { status: GroqJobStatus } | null;
-      };
-
-      if (!res.ok) {
-        setMeta({
-          loaded: true,
-          eligibility: null,
-          jobStatus: null,
-          errorStatus: res.status,
-        });
-        return;
-      }
-
-      setMeta({
-        loaded: true,
-        eligibility: data.eligibility ?? null,
-        jobStatus: data.job?.status ?? null,
-        errorStatus: null,
-      });
-    } catch {
-      setMeta({ loaded: true, eligibility: null, jobStatus: null, errorStatus: null });
-    }
-  }, [viewerUserId]);
-
-  useEffect(() => {
-    let cancelled = false;
-    void (async () => {
-      await refreshMeta();
-      if (cancelled) return;
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [refreshMeta]);
-
-  const startBackfill = useCallback(async () => {
-    setIsStarting(true);
-    try {
-      const res = await fetch("/api/user/onboarding/import/genre-backfill/start", {
-        method: "POST",
-        credentials: "include",
-      });
-      const data = (await res.json().catch(() => ({}))) as { error?: string };
-      if (!res.ok) {
-        toast.error(data?.error ?? tConsent("startError"));
-        return;
-      }
-
-      clearGenreBackfillBannerBlockingPrefs();
-      toast.success(tConsent("startedToast"));
-      await refreshMeta();
-      window.setTimeout(() => {
-        document.getElementById("genre-backfill-global-badge-panel")?.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-      }, 200);
-    } catch {
-      toast.error(tConsent("startError"));
-    } finally {
-      setIsStarting(false);
-    }
-  }, [refreshMeta, tConsent]);
+  const { meta, isStarting, isJobActive, startBackfill } = useGroqGenreBackfillMeta(viewerUserId);
 
   if (viewerUserId != null) {
     return (
@@ -190,11 +91,7 @@ export function GroqGenreBackfillCta({
     );
   }
 
-  if (
-    meta.jobStatus === "pending" ||
-    meta.jobStatus === "running" ||
-    meta.jobStatus === "paused"
-  ) {
+  if (isJobActive) {
     return (
       <div className={className}>
         <p className={textClassName}>
@@ -216,7 +113,7 @@ export function GroqGenreBackfillCta({
       <button
         type="button"
         disabled={isStarting}
-        onClick={() => void startBackfill()}
+        onClick={() => void startBackfill(tConsent("startError"), tConsent("startedToast"))}
         className={buttonClassName}
       >
         <span className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.34),_transparent_34%),linear-gradient(120deg,_transparent,_rgba(255,255,255,0.18),_transparent)] opacity-70 transition-opacity group-hover:opacity-100" />

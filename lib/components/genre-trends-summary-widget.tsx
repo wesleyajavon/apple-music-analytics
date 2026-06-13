@@ -17,11 +17,11 @@ import { useGenreTrends } from "@/lib/hooks/use-listening";
 import { useDashboardViewerUserId } from "@/lib/context/dashboard-viewer-context";
 import { ErrorState } from "@/lib/components/error-state";
 import { usePublicDemoViewer } from "@/lib/hooks/use-public-demo-viewer";
-import { Sparkles } from "lucide-react";
-import { GroqGenreBackfillCta } from "@/lib/components/palette/groq-genre-backfill-cta";
+import { GenreAccuracyChooser } from "@/lib/components/palette/genre-accuracy-chooser";
 import { useTheme } from "@/lib/providers/theme-provider";
 import { useIsLgChartViewport } from "@/lib/hooks/use-chart-viewport";
 import { DASHBOARD_CHART_THEME } from "@/lib/constants/dashboard-spotlight";
+import { LiveStatusDot } from "@/lib/components/live-status-dot";
 
 const COLORS = [
   "#818cf8",
@@ -225,10 +225,7 @@ export function GenreTrendsSummaryWidget({
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
               <div className="max-w-2xl">
                 <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-rose-300/25 bg-white/70 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-rose-600 shadow-sm backdrop-blur dark:border-rose-400/18 dark:bg-[#141622] dark:text-rose-100">
-                  <span
-                    className="h-2 w-2 rounded-full bg-amber-400 shadow-[0_0_16px_rgb(251_191_36_/0.7)]"
-                    aria-hidden
-                  />
+                  <LiveStatusDot tone="amber" />
                   {t("title")}
                 </div>
                 <h2 className="text-2xl font-semibold tracking-[-0.04em] text-gray-950 dark:text-white sm:text-3xl">
@@ -238,60 +235,7 @@ export function GenreTrendsSummaryWidget({
                   {t("chartHint")}
                 </p>
                 {!isPublicDemoViewer ? (
-                  <div className="relative mt-4 overflow-hidden rounded-[1.5rem] border border-slate-200/85 bg-gradient-to-br from-white via-slate-50/90 to-white shadow-lg shadow-slate-900/[0.05] ring-1 ring-slate-900/[0.04] backdrop-blur dark:border-white/[0.06] dark:from-[#0a0b10] dark:via-[#090a0f] dark:to-[#080913]">
-                    <div
-                      className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.08),transparent_40%),radial-gradient(circle_at_92%_8%,rgba(6,182,212,0.07),transparent_34%)] dark:bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.14),transparent_38%),radial-gradient(circle_at_92%_8%,rgba(6,182,212,0.09),transparent_34%)]"
-                      aria-hidden
-                    />
-                    <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-violet-300/45 to-transparent dark:via-violet-400/28" aria-hidden />
-                    <div className="relative p-4">
-                      <div className="relative flex items-start gap-3">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-violet-200/85 bg-violet-50/95 text-violet-700 shadow-sm ring-1 ring-violet-500/[0.06] dark:border-violet-400/30 dark:bg-violet-950/45 dark:text-violet-200">
-                          <Sparkles className="h-5 w-5" strokeWidth={1.7} aria-hidden />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-700 dark:text-violet-300">
-                            {t("chartGenreAccuracyTitle")}
-                          </p>
-                          <p className="mt-1 text-sm leading-6 text-slate-700 dark:text-slate-200">
-                            {t("chartGenreAccuracyIntro")}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="relative mt-4 grid gap-3 sm:grid-cols-2">
-                        <div className="rounded-2xl border border-slate-200/75 bg-white/88 p-3 text-xs leading-5 text-slate-700 shadow-sm ring-1 ring-slate-900/[0.03] dark:border-white/[0.06] dark:bg-[#0f111a] dark:text-slate-200">
-                          {t.rich("chartGenreAccuracyPalette", {
-                            manualLabel: (chunks) => (
-                              <span className="font-semibold text-slate-950 dark:text-white">{chunks}</span>
-                            ),
-                            palette: (chunks) => (
-                              <Link
-                                href="/dashboard/genres/palette"
-                                className="font-semibold text-violet-600 underline decoration-violet-300/50 underline-offset-2 hover:text-violet-800 dark:text-violet-300 dark:decoration-violet-400/45 dark:hover:text-white"
-                              >
-                                {chunks}
-                              </Link>
-                            ),
-                          })}
-                        </div>
-                        <div className="rounded-2xl border border-slate-200/75 bg-white/88 p-3 text-xs leading-5 text-slate-700 shadow-sm ring-1 ring-slate-900/[0.03] dark:border-white/[0.06] dark:bg-[#0f111a] dark:text-slate-200">
-                          {t.rich("chartGenreAccuracyGroq", {
-                            aiLabel: (chunks) => (
-                              <span className="font-semibold text-slate-950 dark:text-white">{chunks}</span>
-                            ),
-                          })}
-                        </div>
-                      </div>
-
-                      <GroqGenreBackfillCta
-                        viewerUserId={viewerUserId}
-                        className="relative mt-4 space-y-2 border-t border-slate-200/70 pt-3 dark:border-white/[0.06]"
-                        textClassName="text-[11px] leading-snug text-slate-600 dark:text-slate-300"
-                        buttonClassName="group relative inline-flex min-h-[36px] items-center justify-center overflow-hidden rounded-xl border border-white/20 bg-brand-gradient px-3.5 py-2 text-[11px] font-semibold text-white shadow-brand-glow transition-all duration-300 hover:-translate-y-0.5 hover:opacity-[0.98] hover:shadow-card-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/50 disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-60"
-                      />
-                    </div>
-                  </div>
+                  <GenreAccuracyChooser viewerUserId={viewerUserId} variant="compact" className="mt-4" />
                 ) : null}
               </div>
               <Link

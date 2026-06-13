@@ -19,6 +19,7 @@ import { ErrorState } from "@/lib/components/error-state";
 import { useTheme } from "@/lib/providers/theme-provider";
 import { useIsLgChartViewport } from "@/lib/hooks/use-chart-viewport";
 import { DASHBOARD_CHART_THEME } from "@/lib/constants/dashboard-spotlight";
+import { LiveStatusDot } from "@/lib/components/live-status-dot";
 
 const COLORS = [
   "#8b5cf6",
@@ -227,17 +228,14 @@ export function ArtistTrendsSummaryWidget({
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
               <div className="max-w-2xl">
                 <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-accent-violet/20 bg-white/70 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-accent-violet shadow-sm backdrop-blur dark:border-violet-400/18 dark:bg-[#141622] dark:text-violet-100">
-                  <span
-                    className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_16px_rgb(22_199_132_/0.65)]"
-                    aria-hidden
-                  />
-                  {tOverview("artistSpotlight.badge")}
+                  <LiveStatusDot />
+                  {tOverview("artistTrends.badge")}
                 </div>
                 <h2 className="text-2xl font-semibold tracking-[-0.04em] text-gray-950 dark:text-white sm:text-3xl">
                   {t("evolution")}
                 </h2>
                 <p className="mt-2 max-w-xl text-sm leading-6 text-muted dark:text-slate-400 sm:text-base">
-                  {t("chartHint")}
+                  {t("chartHint")} {tOverview("artistTrends.seeMoreHint")}
                 </p>
               </div>
               <Link

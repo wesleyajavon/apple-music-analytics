@@ -18,6 +18,7 @@ import {
   OVERVIEW_STARTUP_WIDGET_TITLE_CLASS,
   OverviewStartupSurfaceBg,
 } from "@/lib/components/overview-startup-surface";
+import { LiveStatusDot } from "@/lib/components/live-status-dot";
 
 function toDateOnly(date: string): string {
   return date.split("T")[0];
@@ -138,7 +139,7 @@ export function HeatmapCalendarOverviewWidget({
         <OverviewStartupSurfaceBg />
         <div className={`relative ${OVERVIEW_STARTUP_WIDGET_HEADER_BORDER_CLASS} px-6 py-5 sm:px-8`}>
           <div className={OVERVIEW_STARTUP_EYEBROW_PILL_CLASS}>
-            <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_16px_rgb(22_199_132_/0.75)]" />
+            <LiveStatusDot />
             {tHeatmap("heroEyebrow")}
           </div>
           <h2 id="overview-heatmap-calendar-title" className={OVERVIEW_STARTUP_WIDGET_TITLE_CLASS}>
@@ -172,7 +173,7 @@ export function HeatmapCalendarOverviewWidget({
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
               <div className={OVERVIEW_STARTUP_EYEBROW_PILL_CLASS}>
-                <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_16px_rgb(22_199_132_/0.75)]" />
+                <LiveStatusDot />
                 {tHeatmap("heroEyebrow")}
               </div>
               <h2 id="overview-heatmap-calendar-title" className={OVERVIEW_STARTUP_WIDGET_TITLE_CLASS}>

@@ -15,6 +15,7 @@ import {
   OVERVIEW_STARTUP_WIDGET_TITLE_CLASS,
   OverviewStartupSurfaceBg,
 } from "@/lib/components/overview-startup-surface";
+import { LiveStatusDot } from "@/lib/components/live-status-dot";
 
 /**
  * Carte overview quand l’IA est coupée (réponse `aiUnavailable` de l’API).
@@ -69,7 +70,7 @@ export function AiFeatureDisabledPlaceholder({
           <div className="min-w-0">
             {isStartup && eyebrow ? (
               <div className={OVERVIEW_STARTUP_EYEBROW_PILL_CLASS}>
-                <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_16px_rgb(22_199_132_/0.75)]" />
+                <LiveStatusDot />
                 {eyebrow}
               </div>
             ) : null}

@@ -1599,10 +1599,6 @@ function OverviewContent() {
                   <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-cyan-200/50 to-transparent" />
                   <div className="relative grid gap-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.35fr)] lg:items-end">
                     <div>
-                      <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-100">
-                        <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_16px_rgb(22_199_132_/0.75)]" />
-                        {t("libraryLeaders.badge")}
-                      </div>
                       <h2 className="text-3xl font-semibold tracking-[-0.05em] text-white sm:text-4xl">
                         {t("libraryLeaders.title")}
                       </h2>

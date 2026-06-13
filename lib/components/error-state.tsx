@@ -22,6 +22,7 @@ import {
   OVERVIEW_STARTUP_WIDGET_TITLE_CLASS,
   OverviewStartupSurfaceBg,
 } from "@/lib/components/overview-startup-surface";
+import { LiveStatusDot } from "@/lib/components/live-status-dot";
 
 interface ErrorStateProps {
   error: Error | null;
@@ -79,11 +80,7 @@ export function ErrorState({
             <div className="min-w-0">
               {statusEyebrow ? (
                 <div className={OVERVIEW_STARTUP_EYEBROW_PILL_CLASS}>
-                  <span
-                    className={`h-2 w-2 rounded-full shadow-[0_0_16px_currentColor] ${
-                      isQuota ? "bg-amber-400 text-amber-400" : "bg-accent-emerald text-emerald-400"
-                    }`}
-                  />
+                  <LiveStatusDot tone={isQuota ? "amber" : "emerald"} />
                   {statusEyebrow}
                 </div>
               ) : null}
@@ -264,7 +261,7 @@ export function AiWidgetQuotaOrError({
           <div className="min-w-0">
             {isStartup && eyebrow ? (
               <div className={OVERVIEW_STARTUP_EYEBROW_PILL_CLASS}>
-                <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_16px_rgb(22_199_132_/0.75)]" />
+                <LiveStatusDot />
                 {eyebrow}
               </div>
             ) : null}

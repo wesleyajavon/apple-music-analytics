@@ -19,6 +19,7 @@ import { ErrorState } from "@/lib/components/error-state";
 import { useTheme } from "@/lib/providers/theme-provider";
 import { useIsLgChartViewport } from "@/lib/hooks/use-chart-viewport";
 import { DASHBOARD_CHART_THEME } from "@/lib/constants/dashboard-spotlight";
+import { LiveStatusDot } from "@/lib/components/live-status-dot";
 import { getTrackLabel } from "@/lib/utils/track-trends-pivot";
 
 const COLORS = [
@@ -223,10 +224,7 @@ export function TrackTrendsSummaryWidget({
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
               <div className="max-w-2xl">
                 <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-cyan-300/25 bg-white/70 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-700 shadow-sm backdrop-blur dark:border-cyan-400/18 dark:bg-[#141622] dark:text-cyan-100">
-                  <span
-                    className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_16px_rgb(22_199_132_/0.65)]"
-                    aria-hidden
-                  />
+                  <LiveStatusDot />
                   {t("title")}
                 </div>
                 <h2 className="text-2xl font-semibold tracking-[-0.04em] text-gray-950 dark:text-white sm:text-3xl">

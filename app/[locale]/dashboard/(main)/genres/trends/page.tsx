@@ -28,7 +28,7 @@ import { LoadingState } from "@/lib/components/loading-state";
 import { ErrorState, GroqQuotaNotice } from "@/lib/components/error-state";
 import { isGroqDailyQuotaError } from "@/lib/utils/groq-quota-message";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
-import { GroqGenreBackfillCta } from "@/lib/components/palette/groq-genre-backfill-cta";
+import { GenreAccuracyChooser } from "@/lib/components/palette/genre-accuracy-chooser";
 import { PeriodSelector, getPeriodFromSearchParams, type PeriodType } from "@/lib/components/period-selector";
 import { GenreTrendsSkeleton } from "@/lib/components/skeleton-loaders";
 import { usePublicDemoViewer } from "@/lib/hooks/use-public-demo-viewer";
@@ -1141,44 +1141,7 @@ function TrendsContent() {
           badgeLabel={badgeLabel}
           panel={heroPanel}
         />
-        {!isPublicDemoViewer ? (
-          <div className="relative max-w-3xl overflow-hidden rounded-[1.25rem] border border-slate-200/85 bg-gradient-to-br from-white via-slate-50/95 to-white px-4 py-3.5 text-sm text-slate-800 shadow-lg shadow-slate-900/[0.05] ring-1 ring-slate-900/[0.04] dark:border-white/10 dark:from-slate-950/50 dark:via-slate-950/35 dark:to-slate-950/25 dark:text-slate-100">
-            <div
-              className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.06),transparent_42%),radial-gradient(circle_at_100%_0%,rgba(6,182,212,0.05),transparent_38%)]"
-              aria-hidden
-            />
-            <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-violet-300/40 to-transparent dark:via-violet-400/25" aria-hidden />
-            <div className="relative">
-              <p className="font-semibold text-slate-900 dark:text-white">{t("apiMappingNoticeTitle")}</p>
-              <p className="mt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
-                {t("chartGenreAccuracyIntro")}
-              </p>
-              <div className="mt-3 space-y-2 border-t border-slate-200/75 pt-2.5 dark:border-white/10">
-                <p className="text-xs text-slate-700 dark:text-slate-200">
-                  {t.rich("chartGenreAccuracyPalette", {
-                    manualLabel: (chunks) => <span className="font-semibold text-slate-900 dark:text-white">{chunks}</span>,
-                    palette: (chunks) => (
-                      <Link
-                        href="/dashboard/genres/palette"
-                        className="font-semibold text-violet-600 underline decoration-violet-300/55 underline-offset-2 hover:text-violet-800 dark:text-violet-300 dark:decoration-violet-400/45 dark:hover:text-white"
-                      >
-                        {chunks}
-                      </Link>
-                    ),
-                  })}
-                </p>
-                <div className="space-y-2 rounded-xl border border-slate-200/75 bg-white/75 p-3 text-xs shadow-sm ring-1 ring-slate-900/[0.03] dark:border-white/10 dark:bg-white/5 dark:text-slate-200">
-                  <p>
-                    {t.rich("chartGenreAccuracyGroq", {
-                      aiLabel: (chunks) => <span className="font-semibold text-slate-900 dark:text-white">{chunks}</span>,
-                    })}
-                  </p>
-                  <GroqGenreBackfillCta viewerUserId={userId} />
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : null}
+        {!isPublicDemoViewer ? <GenreAccuracyChooser viewerUserId={userId} className="max-w-3xl" /> : null}
 
         <div className="space-y-12">
           <section className="relative animate-fade-in-up">

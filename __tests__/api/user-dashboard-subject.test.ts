@@ -31,6 +31,7 @@ describe("GET /api/user/dashboard-subject", () => {
     });
     vi.mocked(prisma.user.findUnique).mockResolvedValue({
       name: "Demo Public",
+      avatarUrl: "https://example.com/avatar.jpg",
     } as Awaited<ReturnType<typeof prisma.user.findUnique>>);
   });
 
@@ -40,10 +41,12 @@ describe("GET /api/user/dashboard-subject", () => {
 
     expect(response.status).toBe(200);
     const data = await response.json();
-    expect(data).toEqual({ user: { name: "Demo Public" } });
+    expect(data).toEqual({
+      user: { name: "Demo Public", avatarUrl: "https://example.com/avatar.jpg" },
+    });
     expect(prisma.user.findUnique).toHaveBeenCalledWith({
       where: { id: "resolved-user" },
-      select: { name: true },
+      select: { name: true, avatarUrl: true },
     });
     expect(assertAnalyticsRateLimit).toHaveBeenCalled();
   });

@@ -992,9 +992,24 @@
   "overview": {
     "title": "Your music",
     "titlePersonal": "{name}'s music",
-    "musicAgentPromoBadge": "New",
-    "musicAgentPromoTitle": "Music AI Agent",
-    "musicAgentPromoAria": "Open the new Music AI Agent",
+    "featurePromos": {
+      "panelBadge": "Go deeper",
+      "panelTag": "Featured",
+      "soundprint": {
+        "badge": "AI chat",
+        "title": "Chat with your Soundprint",
+        "description": "Ask about tops, streaks, and taste shifts—answers pull from your real listening data.",
+        "cta": "Open chat",
+        "aria": "Open Soundprint chat"
+      },
+      "duet": {
+        "badge": "Social",
+        "title": "Duet with a friend",
+        "description": "Invite friends and compare timelines, artists, and tracks head-to-head.",
+        "cta": "Start a duel",
+        "aria": "Open Duet friends"
+      }
+    },
     "subtitle": "Your personal listening stats. Analyze your trends and discover your favorite genres.",
     "periodBadge": "Period",
     "allData": "All data",
@@ -1007,6 +1022,15 @@
     "statsSectionBadge": "Summary",
     "statsSectionTitle": "Your numbers for this period",
     "statsSectionDescription": "How much you played, how wide your rotation was, and how long you spent listening.",
+    "statsSectionListensHint": "Every replay, shuffle, and deep cut adds up to your listening pulse for this window.",
+    "statsSectionBreadthLabel": "Catalog reach",
+    "statsSectionBreadthHint": "How many different artists and tracks shaped your rotation.",
+    "statsSectionBreadthSummary": "{artists} artists and {tracks} tracks made up what you played this period.",
+    "statsSectionTimeLabel": "Time invested",
+    "statsSectionTimeHours": "Hours",
+    "statsSectionTimeMinutes": "Minutes",
+    "statsSectionTimeHint": "The total time you kept the music going across this period.",
+    "statsSectionTimeSummary": "{duration} with the music running across this period.",
     "statsSectionComparisonNote": "Percent changes compare this period to the previous one of the same length (when earlier data exists).",
     "vsPreviousPeriod": "vs previous period",
     "notAvailable": "Not available",
@@ -1024,6 +1048,10 @@
       "badge": "Artist spotlight",
       "title": "The artists carrying your rotation.",
       "description": "Hover each cover to reveal the plays, track variety, and listening weight behind your top three."
+    },
+    "artistTrends": {
+      "badge": "Artist trends",
+      "seeMoreHint": "To explore more artists, click See more."
     },
     "libraryLeaders": {
       "badge": "Library leaders",
@@ -1049,8 +1077,8 @@
     "sections": {
       "snapshot": {
         "eyebrow": "Snapshot",
-        "title": "Start with the shape of your listening.",
-        "description": "A high-level read of your taste, volume, and variety before you dive into the details."
+        "title": "Your listening at a glance.",
+        "description": "Lead with volume, variety, and taste before you scroll into trends and detailed rankings."
       },
       "momentum": {
         "eyebrow": "Momentum",
@@ -1383,8 +1411,8 @@
     "paginationNext": "Next",
     "paginationPage": "Page {page} / {totalPages}",
     "selectAtLeastOne": "Select at least one genre to display the chart.",
-    "evolution": "Which genres are surging — and fading",
-    "chartHint": "See which sounds are taking over your taste, and which ones are fading out.",
+    "evolution": "What's heating up — and cooling off",
+    "chartHint": "Watch the genres crowding your playlist — and the ones quietly making room.",
     "listensDelta": "listens",
     "noGenreData": "No genre data for this period",
     "changeDatesDescription": "Modify the dates or aggregation period in the filter bar.",
@@ -1405,6 +1433,14 @@
     "apiMappingNoticeBody": "Use Palette to refine genres manually, or run Groq genre mapping to classify unknown tracks faster.",
     "apiMappingNoticeShort": "Palette and Groq genre mapping can help refine the genres used in these trends.",
     "apiMappingNoticeLink": "Open Palette",
+    "genreAccuracyChooserTitle": "Some tracks still need a genre",
+    "genreAccuracyChooserIntro": "Pick one option below — your trend lines get clearer as labels improve.",
+    "genreAccuracyGroqRecommended": "Recommended",
+    "genreAccuracyGroqTitle": "AI auto-fill",
+    "genreAccuracyGroqDescription": "One tap. We label your missing genres in the background.",
+    "genreAccuracyPaletteTitle": "Palette",
+    "genreAccuracyPaletteDescription": "Pick genres yourself, one artist at a time.",
+    "genreAccuracyPaletteCta": "Open Palette",
     "chartGenreAccuracyTitle": "Genre confidence layer",
     "chartGenreAccuracyIntro": "Your chart gets sharper as your library labels get cleaner. Tune the genre layer once, and every trend becomes easier to trust.",
     "chartGenreAccuracyPalette": "<manualLabel>Palette control</manualLabel>: hand-pick genres for artists or tracks when precision matters most. <palette>Open Palette</palette>.",
@@ -1987,6 +2023,12 @@
       "poetic": "Poetic"
     },
     "yourProfile": "Your musical profile",
+    "overviewWidget": {
+      "eyebrow": "Explain My Taste",
+      "title": "How your sound reads right now.",
+      "description": "AI pulls influences, standout quirks, and a one-line take from your active filters.",
+      "scrollCue": "Your read is below"
+    },
     "pullQuoteLabel": "Your sound in one line",
     "exploreProfileCta": "Explore my profile",
     "inBrief": "In brief",

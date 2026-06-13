@@ -19,13 +19,13 @@ import {
   DASHBOARD_SPOTLIGHT_INNER_WELL,
   DASHBOARD_SPOTLIGHT_MUTED,
   DASHBOARD_SPOTLIGHT_BADGE_CYAN_COMPACT,
-  DASHBOARD_SPOTLIGHT_BADGE_DOT_CYAN,
   DASHBOARD_SPOTLIGHT_BTN_SECONDARY,
   DASHBOARD_CHART_THEME,
 } from "@/lib/constants/dashboard-spotlight";
 import type { ArtistStatsDto } from "@/lib/dto/artist";
 import { useArtistUserInsights } from "@/lib/hooks/use-artists";
 import { ArtistAvatarHydrated } from "@/lib/components/artist-avatar-hydrated";
+import { LiveStatusDot } from "@/lib/components/live-status-dot";
 import { ErrorState } from "@/lib/components/error-state";
 import { useTheme } from "@/lib/providers/theme-provider";
 import { ChartResponsiveContainer } from "@/lib/components/chart-responsive-container";
@@ -183,46 +183,30 @@ export const ArtistUserInsightsPanel = memo(
 
     const peakHourLabel =
       query.data?.peakListenHour != null
-        ? `${String(query.data.peakListenHour.hour).padStart(2, "0")}:00 · ${query.data.peakListenHour.listens.toLocaleString(locale)} ${t("listensCount")}`
+        ? `${String(query.data.peakListenHour.hour).padStart(2, "0")}:00`
         : null;
 
     const peakWeekdayLabel =
       query.data?.peakWeekday != null
-        ? `${weekdayShortMonFirst(query.data.peakWeekday.weekdayIndexMondayFirst, locale)} · ${query.data.peakWeekday.listens.toLocaleString(locale)} ${t("listensCount")}`
+        ? weekdayShortMonFirst(query.data.peakWeekday.weekdayIndexMondayFirst, locale)
         : null;
 
-    const busiestLine =
+    const busiestDayLabel =
       query.data?.busiestDay != null
-        ? t("insightsBusiestMeta", {
-            date: new Date(query.data.busiestDay.date + "T12:00:00.000Z").toLocaleDateString(locale, {
-              weekday: "long",
-              month: "short",
-              day: "numeric",
-            }),
-            listens: query.data.busiestDay.listens.toLocaleString(locale),
+        ? new Date(query.data.busiestDay.date + "T12:00:00.000Z").toLocaleDateString(locale, {
+            weekday: "short",
+            month: "short",
+            day: "numeric",
           })
         : null;
 
-    const firstListenMoment = firstLast
-      ? {
-          weekday: new Date(firstLast.firstListenDate).toLocaleDateString(locale, { weekday: "long" }),
-          dateLine: new Date(firstLast.firstListenDate).toLocaleDateString(locale, {
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-          }),
-        }
-      : null;
-    const lastListenMoment = firstLast
-      ? {
-          weekday: new Date(firstLast.lastListenDate).toLocaleDateString(locale, { weekday: "long" }),
-          dateLine: new Date(firstLast.lastListenDate).toLocaleDateString(locale, {
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-          }),
-        }
-      : null;
+    const formatListenDate = (isoDate: string) =>
+      new Date(isoDate).toLocaleDateString(locale, {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
 
     if (!open || !previewArtist || !artistId) return null;
 
@@ -270,7 +254,7 @@ export const ArtistUserInsightsPanel = memo(
               </div>
               <div className="min-w-0">
                 <div className={`mb-2 w-fit ${DASHBOARD_SPOTLIGHT_BADGE_CYAN_COMPACT}`}>
-                  <span className={DASHBOARD_SPOTLIGHT_BADGE_DOT_CYAN} aria-hidden />
+                  <LiveStatusDot tone="cyan" />
                   {t("insightsEyebrow")}
                 </div>
                 <h2
@@ -309,41 +293,27 @@ export const ArtistUserInsightsPanel = memo(
           </div>
 
           <div className="relative z-10 min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-6 sm:py-6 [scrollbar-gutter:stable]">
-            {firstLast && firstListenMoment && lastListenMoment ? (
-              <section className={`mb-6 ${INSIGHT_CARD} p-4 sm:p-5`} aria-label={t("insightsTimelineTitle")}>
-                <h3 className="text-base font-semibold tracking-[-0.02em] text-slate-900 dark:text-white">
-                  {t("insightsTimelineTitle")}
-                </h3>
-                <p className={`mt-1.5 text-xs leading-relaxed ${DASHBOARD_SPOTLIGHT_MUTED}`}>
-                  {t("insightsTimelineLead")}
-                </p>
-                <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <div className="rounded-2xl border border-violet-200/80 bg-white px-4 py-4 shadow-sm shadow-slate-900/[0.04] dark:border-violet-400/20 dark:bg-white/[0.04] dark:shadow-none">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-violet-800 dark:text-violet-200/90">
-                      {t("insightsFirstListenLabel")}
-                    </p>
-                    <p className="mt-3 text-xl font-bold tabular-nums leading-none tracking-tight text-slate-900 dark:text-white">
-                      {firstListenMoment.dateLine}
-                    </p>
-                    <p className="mt-2 text-sm font-medium capitalize text-violet-950/75 dark:text-violet-100/80">
-                      {firstListenMoment.weekday}
-                    </p>
-                  </div>
-                  <div className="rounded-2xl border border-cyan-200/80 bg-white px-4 py-4 shadow-sm shadow-slate-900/[0.04] dark:border-cyan-400/22 dark:bg-white/[0.04] dark:shadow-none">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-cyan-800 dark:text-cyan-100/90">
-                      {t("insightsMostRecentListenLabel")}
-                    </p>
-                    <p className="mt-3 text-xl font-bold tabular-nums leading-none tracking-tight text-slate-900 dark:text-white">
-                      {lastListenMoment.dateLine}
-                    </p>
-                    <p className="mt-2 text-sm font-medium capitalize text-cyan-950/75 dark:text-cyan-100/85">
-                      {lastListenMoment.weekday}
-                    </p>
-                  </div>
+            {firstLast ? (
+              <section
+                className={`mb-6 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-slate-200/80 bg-slate-200/80 dark:border-white/10 dark:bg-white/10`}
+                aria-label={t("insightsTimelineTitle")}
+              >
+                <div className="bg-white px-4 py-3 dark:bg-slate-950/90">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-violet-700 dark:text-violet-300/85">
+                    {t("insightsFirstListenLabel")}
+                  </p>
+                  <p className="mt-1 text-sm font-semibold capitalize leading-snug text-slate-900 dark:text-white">
+                    {formatListenDate(firstLast.firstListenDate)}
+                  </p>
                 </div>
-                <p className={`mt-3 text-[11px] leading-relaxed ${DASHBOARD_SPOTLIGHT_MUTED}`}>
-                  {t("insightsTimelineFootnote")}
-                </p>
+                <div className="bg-white px-4 py-3 dark:bg-slate-950/90">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-cyan-700 dark:text-cyan-300/85">
+                    {t("insightsMostRecentListenLabel")}
+                  </p>
+                  <p className="mt-1 text-sm font-semibold capitalize leading-snug text-slate-900 dark:text-white">
+                    {formatListenDate(firstLast.lastListenDate)}
+                  </p>
+                </div>
               </section>
             ) : null}
 
@@ -361,49 +331,50 @@ export const ArtistUserInsightsPanel = memo(
 
             {query.data ? (
               <div className="space-y-8">
-                <section>
-                  <h3 className={INSIGHT_SECTION_TITLE}>{t("insightsPeaksTitle")}</h3>
-                  <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                    <div className="rounded-2xl border border-violet-200/85 bg-white px-3 py-2.5 shadow-sm shadow-slate-900/[0.04] dark:border-violet-400/18 dark:bg-white/[0.04] dark:shadow-none">
-                      <p className="text-[11px] font-semibold uppercase tracking-wider text-violet-800 dark:text-violet-100/80">
+                <section aria-label={t("insightsPeaksTitle")}>
+                  <div className="grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-slate-200/80 bg-slate-200/80 sm:grid-cols-6 dark:border-white/10 dark:bg-white/10">
+                    <div className="bg-white px-4 py-3 sm:col-span-2 dark:bg-slate-950/90">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-lime-700 dark:text-lime-300/85">
+                        {t("insightsBusiestCalendarDay")}
+                      </p>
+                      <p className="mt-1 text-sm font-semibold capitalize text-slate-900 dark:text-white">
+                        {busiestDayLabel ?? t("insightsNoSignal")}
+                      </p>
+                    </div>
+                    <div className="bg-white px-4 py-3 sm:col-span-2 dark:bg-slate-950/90">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-violet-700 dark:text-violet-300/85">
                         {t("insightsPeakHour")}
                       </p>
-                      <p className="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-50">
+                      <p className="mt-1 text-sm font-semibold tabular-nums text-slate-900 dark:text-white">
                         {peakHourLabel ?? t("insightsNoSignal")}
                       </p>
                     </div>
-                    <div className="rounded-2xl border border-cyan-200/85 bg-white px-3 py-2.5 shadow-sm shadow-slate-900/[0.04] dark:border-cyan-400/18 dark:bg-white/[0.04] dark:shadow-none">
-                      <p className="text-[11px] font-semibold uppercase tracking-wider text-cyan-800 dark:text-cyan-100/80">
+                    <div className="bg-white px-4 py-3 sm:col-span-2 dark:bg-slate-950/90">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-cyan-700 dark:text-cyan-300/85">
                         {t("insightsPeakWeekday")}
                       </p>
-                      <p className="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-50">
+                      <p className="mt-1 text-sm font-semibold capitalize text-slate-900 dark:text-white">
                         {peakWeekdayLabel ?? t("insightsNoSignal")}
                       </p>
                     </div>
-                    <div className="rounded-2xl border border-lime-200/90 bg-white px-3 py-2.5 shadow-sm shadow-slate-900/[0.04] dark:border-lime-400/18 dark:bg-white/[0.04] dark:shadow-none sm:col-span-2">
-                      <p className="text-[11px] font-semibold uppercase tracking-wider text-lime-900 dark:text-lime-100/80">
-                        {t("insightsBusiestCalendarDay")}
-                      </p>
-                      <p className="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-50">
-                        {busiestLine ?? t("insightsNoSignal")}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="mt-3 grid grid-cols-2 gap-2">
-                    <div className={`${INSIGHT_CARD_SOLID} px-3 py-2 text-center`}>
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    <div className="bg-white px-4 py-3 sm:col-span-3 dark:bg-slate-950/90">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-300/85">
                         {t("insightsActiveDays")}
                       </p>
-                      <p className="mt-0.5 text-lg font-bold tabular-nums text-slate-900 dark:text-white">
-                        {query.data.activeListeningDays.toLocaleString(locale)}
+                      <p className="mt-1 text-sm font-semibold tabular-nums text-slate-900 dark:text-white">
+                        {t("insightsDaysValue", {
+                          count: query.data.activeListeningDays,
+                        })}
                       </p>
                     </div>
-                    <div className={`${INSIGHT_CARD_SOLID} px-3 py-2 text-center`}>
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    <div className="bg-white px-4 py-3 sm:col-span-3 dark:bg-slate-950/90">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300/85">
                         {t("insightsSpanDays")}
                       </p>
-                      <p className="mt-0.5 text-lg font-bold tabular-nums text-slate-900 dark:text-white">
-                        {query.data.listeningSpanDays.toLocaleString(locale)}
+                      <p className="mt-1 text-sm font-semibold tabular-nums text-slate-900 dark:text-white">
+                        {t("insightsDaysValue", {
+                          count: query.data.listeningSpanDays,
+                        })}
                       </p>
                     </div>
                   </div>

@@ -1,4 +1,4 @@
-type LiveStatusDotTone = "emerald" | "amber";
+type LiveStatusDotTone = "emerald" | "amber" | "cyan";
 
 type LiveStatusDotSize = "sm" | "md";
 
@@ -15,6 +15,11 @@ const TONE_CLASS: Record<
     ring: "bg-amber-500/15 ring-amber-400/35",
     ping: "bg-amber-400/80",
     dot: "bg-amber-400 shadow-[0_0_10px_rgb(251_191_36_/0.95)]",
+  },
+  cyan: {
+    ring: "bg-cyan-500/15 ring-cyan-400/35",
+    ping: "bg-cyan-400/80",
+    dot: "bg-cyan-400 shadow-[0_0_10px_rgb(34_211_238_/0.95)]",
   },
 };
 

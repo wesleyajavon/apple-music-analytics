@@ -36,7 +36,11 @@ import {
 import { OverviewStatsSection, type OverviewStatsChanges } from "@/lib/components/overview-stats-section";
 import { formatOverviewDateRangeLabel } from "@/lib/utils/overview-date-range-label";
 import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
-import { Sparkles } from "lucide-react";
+import {
+  OverviewFeaturePromos,
+  OverviewFeaturePromosSkeleton,
+} from "@/lib/components/overview-feature-promos";
+import { UserAvatarPhoto } from "@/lib/components/user-avatar";
 
 const MOBILE_DATE_OPTS = { month: "2-digit", day: "2-digit", year: "2-digit" } as const;
 
@@ -108,15 +112,19 @@ function OverviewHeroFrame({
   description,
   badgeLabel,
   hasComparison,
-  featureHref = "/dashboard/ask-your-soundprint",
-  stats,
+  soundprintChatHref,
+  duetHref,
+  featurePromos,
+  avatarUrl,
 }: {
   title: string;
   description: string;
   badgeLabel: string;
   hasComparison: boolean;
-  featureHref?: string;
-  stats: ReactNode;
+  soundprintChatHref: string;
+  duetHref: string;
+  featurePromos?: ReactNode;
+  avatarUrl?: string | null;
 }) {
   const t = useTranslations("overview");
   return (
@@ -125,140 +133,39 @@ function OverviewHeroFrame({
       <div className="absolute -left-24 top-1/2 h-64 w-64 rounded-full bg-accent-violet/25 blur-3xl" />
       <div className="absolute -bottom-28 right-10 h-72 w-72 rounded-full bg-accent-cyan/20 blur-3xl" />
       <div className="relative grid gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-center">
-        <div>
-          <h1 className="max-w-4xl text-balance text-4xl font-semibold tracking-[-0.06em] sm:text-5xl lg:text-6xl">
-            {title}
-          </h1>
-          <p className="mt-5 max-w-2xl text-base leading-7 text-white/70 sm:text-lg">
-            {description}
-          </p>
-          <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-            <Link
-              href={featureHref}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25 transition-all hover:-translate-y-0.5 hover:bg-gray-100"
-              aria-label={t("musicAgentPromoAria")}
-            >
-              <Sparkles className="h-4 w-4" aria-hidden />
-              {t("musicAgentPromoTitle")}
-            </Link>
-            <span className="inline-flex items-center justify-center rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-sm font-bold text-white backdrop-blur">
-              {badgeLabel}
-            </span>
-          </div>
-          {hasComparison ? (
-            <p className="mt-5 inline-flex rounded-full border border-emerald-300/30 bg-emerald-400/15 px-3 py-1 text-xs font-medium text-emerald-100">
-              {t("vsPreviousPeriod")}
+        <div className="flex items-start gap-5 sm:gap-6 lg:gap-8">
+          <UserAvatarPhoto
+            src={avatarUrl}
+            size="xl"
+            className="ring-2 ring-white/20 shadow-2xl shadow-black/30"
+          />
+          <div className="min-w-0 flex-1">
+            <h1 className="max-w-4xl text-balance text-4xl font-semibold tracking-[-0.06em] sm:text-5xl lg:text-6xl">
+              {title}
+            </h1>
+            <p className="mt-5 max-w-2xl text-base leading-7 text-white/70 sm:text-lg">
+              {description}
             </p>
-          ) : null}
-        </div>
-
-        <div className="relative">
-          <div className="absolute -inset-4 rounded-[2rem] bg-brand-gradient-soft blur-2xl" aria-hidden />
-          <div className="relative overflow-hidden rounded-[1.75rem] border border-white/15 bg-white/10 p-3 shadow-2xl shadow-black/35 backdrop-blur-xl">
-            <div className="rounded-[1.35rem] border border-white/10 bg-slate-950/70 p-4">
-              <div className="flex items-center justify-between border-b border-white/10 pb-4">
-                <p className="font-mono text-[0.66rem] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                  {t("statsSectionBadge")}
-                </p>
-                <span className="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-2.5 py-1 text-[0.66rem] font-semibold text-cyan-100">
-                  {t("musicAgentPromoBadge")}
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+              <span className="inline-flex items-center justify-center rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-sm font-bold text-white backdrop-blur">
+                {badgeLabel}
+              </span>
+              {hasComparison ? (
+                <span className="inline-flex items-center justify-center rounded-2xl border border-emerald-300/30 bg-emerald-400/15 px-5 py-3 text-sm font-medium text-emerald-100">
+                  {t("vsPreviousPeriod")}
                 </span>
-              </div>
-              {stats}
+              ) : null}
             </div>
           </div>
         </div>
-      </div>
-    </div>
-  );
-}
 
-function OverviewHeroStats({
-  totalListens,
-  uniqueArtists,
-  uniqueTracks,
-  locale: statsLocale,
-}: {
-  totalListens: number;
-  uniqueArtists: number;
-  uniqueTracks: number;
-  locale: string;
-}) {
-  const t = useTranslations("overview");
-  return (
-    <div className="grid gap-2 pt-4 sm:grid-cols-3">
-      <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
-        <p className="text-xl font-semibold tracking-tight text-white">{totalListens.toLocaleString(statsLocale)}</p>
-        <p className="mt-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">{t("stats.totalListens")}</p>
+        {featurePromos ?? (
+          <OverviewFeaturePromos
+            soundprintChatHref={soundprintChatHref}
+            duetHref={duetHref}
+          />
+        )}
       </div>
-      <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
-        <p className="text-xl font-semibold tracking-tight text-white">{uniqueArtists.toLocaleString(statsLocale)}</p>
-        <p className="mt-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">{t("stats.uniqueArtists")}</p>
-      </div>
-      <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
-        <p className="text-xl font-semibold tracking-tight text-white">{uniqueTracks.toLocaleString(statsLocale)}</p>
-        <p className="mt-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">{t("stats.uniqueTracks")}</p>
-      </div>
-    </div>
-  );
-}
-
-function OverviewHeroStatsSkeleton() {
-  return (
-    <div className="grid gap-2 pt-4 sm:grid-cols-3">
-      {[0, 1, 2].map((i) => (
-        <div
-          key={i}
-          className="animate-pulse rounded-2xl border border-white/10 bg-white/[0.06] p-3"
-        >
-          <div className="mb-2 h-7 w-20 rounded bg-white/20" />
-          <div className="h-3 w-24 rounded bg-white/15" />
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function OverviewHeroStatsErrorPlaceholder() {
-  const t = useTranslations("overview");
-  return (
-    <div className="grid gap-2 pt-4 sm:grid-cols-3">
-      {(["totalListens", "uniqueArtists", "uniqueTracks"] as const).map((key) => (
-        <div
-          key={key}
-          className="rounded-2xl border border-dashed border-white/30 bg-white/[0.05] p-3"
-        >
-          <p className="text-xl font-semibold tracking-tight text-white/40">—</p>
-          <p className="mt-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-500">
-            {t(`stats.${key}`)}
-          </p>
-          <p className="mt-2 font-mono text-[0.62rem] font-medium uppercase tracking-[0.16em] text-cyan-200/45">
-            {t("errorStateMetricStatus")}
-          </p>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function OverviewHeroStatsEmptyPlaceholder() {
-  const t = useTranslations("overview");
-  return (
-    <div className="grid gap-2 pt-4 sm:grid-cols-3">
-      {(["totalListens", "uniqueArtists", "uniqueTracks"] as const).map((key) => (
-        <div
-          key={key}
-          className="rounded-2xl border border-dashed border-white/25 bg-white/[0.04] p-3"
-        >
-          <p className="text-xl font-semibold tracking-tight text-white/55">0</p>
-          <p className="mt-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-500">
-            {t(`stats.${key}`)}
-          </p>
-          <p className="mt-2 font-mono text-[0.62rem] font-medium uppercase tracking-[0.16em] text-cyan-200/50">
-            {t("emptyStateMetricHint")}
-          </p>
-        </div>
-      ))}
     </div>
   );
 }
@@ -784,8 +691,10 @@ function MobileOverviewFlow({
   artistsHref,
   genresHref,
   musicAgentHref,
+  duetHref,
   startDate,
   endDate,
+  avatarUrl,
 }: {
   title: string;
   badgeLabel: string;
@@ -817,8 +726,10 @@ function MobileOverviewFlow({
   artistsHref: string;
   genresHref: string;
   musicAgentHref: string;
+  duetHref: string;
   startDate?: string;
   endDate?: string;
+  avatarUrl?: string | null;
 }) {
   const t = useTranslations("overview");
   const topTrack = topTracks[0];
@@ -910,7 +821,13 @@ function MobileOverviewFlow({
     <div className="space-y-5">
       <section className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-slate-950 p-5 text-white shadow-2xl shadow-accent-violet/20">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(240,64,104,0.24),transparent_34%),radial-gradient(circle_at_86%_18%,rgba(79,144,224,0.20),transparent_34%),linear-gradient(135deg,rgba(3,7,18,0.98),rgba(30,27,75,0.86)_48%,rgba(8,47,73,0.72))]" />
-        <div className="relative">
+        <div className="relative flex items-start gap-4">
+          <UserAvatarPhoto
+            src={avatarUrl}
+            size="lg"
+            className="ring-2 ring-white/20 shadow-xl shadow-black/25"
+          />
+          <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-3">
             <p className="inline-flex min-h-8 shrink-0 items-center whitespace-nowrap rounded-full border border-white/15 bg-white/10 px-2.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-100">
               {t("mobile.heroEyebrow")}
@@ -953,20 +870,18 @@ function MobileOverviewFlow({
             ) : null}
           </div>
 
-          <div className="mt-4 flex flex-col gap-3">
-            <Link
-              href={musicAgentHref}
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-white px-4 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25"
-              aria-label={t("musicAgentPromoAria")}
-            >
-              <Sparkles className="h-4 w-4" aria-hidden />
-              {t("mobile.askAgentCta")}
-            </Link>
-            {hasComparison ? (
-              <p className="text-center text-xs font-medium text-emerald-100">
-                {t("mobile.comparisonHint")}
-              </p>
-            ) : null}
+          <div className="mt-4">
+            <OverviewFeaturePromos
+              soundprintChatHref={musicAgentHref}
+              duetHref={duetHref}
+              variant="stack"
+            />
+          </div>
+          {hasComparison ? (
+            <p className="mt-3 text-center text-xs font-medium text-emerald-100">
+              {t("mobile.comparisonHint")}
+            </p>
+          ) : null}
           </div>
         </div>
       </section>
@@ -1083,12 +998,14 @@ function MobileOverviewUnavailable({
   description,
   badgeLabel,
   statusLabel,
+  avatarUrl,
   children,
 }: {
   title: string;
   description: string;
   badgeLabel: string;
   statusLabel: string;
+  avatarUrl?: string | null;
   children: ReactNode;
 }) {
   const t = useTranslations("overview");
@@ -1096,7 +1013,13 @@ function MobileOverviewUnavailable({
     <div className="space-y-5 lg:hidden">
       <section className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-slate-950 p-5 text-white shadow-2xl shadow-accent-violet/20">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(240,64,104,0.20),transparent_34%),radial-gradient(circle_at_86%_18%,rgba(79,144,224,0.18),transparent_34%)]" />
-        <div className="relative">
+        <div className="relative flex items-start gap-4">
+          <UserAvatarPhoto
+            src={avatarUrl}
+            size="lg"
+            className="ring-2 ring-white/20 shadow-xl shadow-black/25"
+          />
+          <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-3">
             <p className="inline-flex min-h-8 shrink-0 items-center whitespace-nowrap rounded-full border border-white/15 bg-white/10 px-2.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-100">
               {t("mobile.heroEyebrow")}
@@ -1112,6 +1035,7 @@ function MobileOverviewUnavailable({
               {statusLabel}
             </p>
             <p className="mt-2 text-3xl font-semibold tabular-nums">—</p>
+          </div>
           </div>
         </div>
       </section>
@@ -1136,9 +1060,11 @@ function OverviewContent() {
   const userId = searchParams.get("userId") ?? undefined;
 
   const [firstName, setFirstName] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   useEffect(() => {
     let mounted = true;
     setFirstName(null);
+    setAvatarUrl(null);
 
     function extractFirstName(rawName?: string | null) {
       if (!rawName) return null;
@@ -1154,9 +1080,12 @@ function OverviewContent() {
       const url = qs ? `/api/user/dashboard-subject?${qs}` : "/api/user/dashboard-subject";
       const response = await fetch(url, { method: "GET" });
       if (!response.ok) return;
-      const payload = (await response.json()) as { user?: { name?: string | null } | null };
+      const payload = (await response.json()) as {
+        user?: { name?: string | null; avatarUrl?: string | null } | null;
+      };
       if (!mounted) return;
       setFirstName(extractFirstName(payload.user?.name ?? null));
+      setAvatarUrl(payload.user?.avatarUrl ?? null);
     }
 
     hydrateDashboardSubjectDisplayName();
@@ -1311,6 +1240,10 @@ function OverviewContent() {
     () => mergeDashboardSearchParams("/dashboard/ask-your-soundprint", searchParams),
     [searchParams]
   );
+  const duetHref = useMemo(
+    () => mergeDashboardSearchParams("/dashboard/duet/friends", searchParams),
+    [searchParams]
+  );
 
   if (!isLoading && error) {
     return (
@@ -1320,6 +1253,7 @@ function OverviewContent() {
           description={t("errorStateHint")}
           badgeLabel={mobileBadgeLabel}
           statusLabel={t("errorStateMetricStatus")}
+          avatarUrl={avatarUrl}
         >
           <ErrorState
             variant="startup"
@@ -1335,8 +1269,9 @@ function OverviewContent() {
             description={t("errorStateHint")}
             badgeLabel={badgeLabel}
             hasComparison={hasComparison}
-            featureHref={musicAgentHref}
-            stats={<OverviewHeroStatsErrorPlaceholder />}
+            soundprintChatHref={musicAgentHref}
+            duetHref={duetHref}
+            avatarUrl={avatarUrl}
           />
           <ErrorState
             variant="startup"
@@ -1359,6 +1294,7 @@ function OverviewContent() {
           description={t("emptyStateHeroDescription")}
           badgeLabel={mobileBadgeLabel}
           statusLabel={t("emptyStateMetricHint")}
+          avatarUrl={avatarUrl}
         >
           <EmptyState
             variant="startup"
@@ -1375,8 +1311,9 @@ function OverviewContent() {
             description={t("emptyStateHeroDescription")}
             badgeLabel={badgeLabel}
             hasComparison={hasComparison}
-            featureHref={musicAgentHref}
-            stats={<OverviewHeroStatsEmptyPlaceholder />}
+            soundprintChatHref={musicAgentHref}
+            duetHref={duetHref}
+            avatarUrl={avatarUrl}
           />
           <EmptyState
             variant="startup"
@@ -1411,8 +1348,10 @@ function OverviewContent() {
             artistsHref={`/dashboard/artists${artistsPageQuery}`}
             genresHref={genresHref}
             musicAgentHref={musicAgentHref}
+            duetHref={duetHref}
             startDate={startDate}
             endDate={endDate}
+            avatarUrl={avatarUrl}
           />
         </div>
       ) : (
@@ -1424,17 +1363,12 @@ function OverviewContent() {
           description={t("subtitle")}
           badgeLabel={badgeLabel}
           hasComparison={hasComparison}
-          featureHref={musicAgentHref}
-          stats={
-            data ? (
-              <OverviewHeroStats
-                totalListens={data.totalListens}
-                uniqueArtists={data.uniqueArtists}
-                uniqueTracks={data.uniqueTracks}
-                locale={locale}
-              />
-            ) : (
-              <OverviewHeroStatsSkeleton />
+          soundprintChatHref={musicAgentHref}
+          duetHref={duetHref}
+          avatarUrl={avatarUrl}
+          featurePromos={
+            data ? undefined : (
+              <OverviewFeaturePromosSkeleton />
             )
           }
         />
@@ -1445,18 +1379,11 @@ function OverviewContent() {
               <TasteProfileSummaryWidget />
             </div>
 
-            {data ? (
-              <OverviewStatsSection
-                totalListens={data.totalListens}
-                uniqueArtists={data.uniqueArtists}
-                uniqueTracks={data.uniqueTracks}
-                totalPlayTime={data.totalPlayTime}
-                changes={changes}
-                showComparison={!!previousPeriod}
-              />
-            ) : (
-              <OverviewStatsSectionSkeleton />
-            )}
+            <TopThreeArtistsOverviewWidget
+              startDate={startDate}
+              endDate={endDate}
+              onOpenArtistInsights={handleOpenArtistInsights}
+            />
           </div>
         </section>
 
@@ -1566,12 +1493,6 @@ function OverviewContent() {
             </div>
           </div>
         )}
-
-        <TopThreeArtistsOverviewWidget
-          startDate={startDate}
-          endDate={endDate}
-          onOpenArtistInsights={handleOpenArtistInsights}
-        />
 
         <ArtistTrendsSummaryWidget startDate={startDate} endDate={endDate} />
 
@@ -1734,6 +1655,23 @@ function OverviewContent() {
             </div>
           </div>
         </section>
+
+        <section className="relative">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
+            {data ? (
+              <OverviewStatsSection
+                totalListens={data.totalListens}
+                uniqueArtists={data.uniqueArtists}
+                uniqueTracks={data.uniqueTracks}
+                totalPlayTime={data.totalPlayTime}
+                changes={changes}
+                showComparison={!!previousPeriod}
+              />
+            ) : (
+              <OverviewStatsSectionSkeleton />
+            )}
+          </div>
+        </section>
         </div>
       </div>
 
@@ -1770,7 +1708,9 @@ function OverviewPageFallback() {
           description={t("subtitle")}
           badgeLabel={badgeLabel}
           hasComparison={hasComparison}
-          stats={<OverviewHeroStatsSkeleton />}
+          soundprintChatHref={mergeDashboardSearchParams("/dashboard/ask-your-soundprint", new URLSearchParams())}
+          duetHref={mergeDashboardSearchParams("/dashboard/duet/friends", new URLSearchParams())}
+          featurePromos={<OverviewFeaturePromosSkeleton />}
         />
         <OverviewSkeleton />
       </div>

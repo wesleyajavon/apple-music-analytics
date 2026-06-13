@@ -47,6 +47,14 @@ import {
 } from "@/lib/components/overview-feature-promos";
 import { UserAvatarPhoto } from "@/lib/components/user-avatar";
 import { SoundprintBrandDividerSection } from "@/lib/components/soundprint-brand-divider";
+import { SoundprintBrandMark } from "@/lib/components/soundprint-brand-mark";
+import {
+  DASHBOARD_BTN_LINK,
+  DASHBOARD_CINEMATIC_HERO_SHELL,
+  DASHBOARD_WIDGET_CARD_SHELL,
+  DashboardCinematicHeroBg,
+  DashboardWidgetCardBg,
+} from "@/lib/components/dashboard-ui";
 
 const MOBILE_DATE_OPTS = { month: "2-digit", day: "2-digit", year: "2-digit" } as const;
 
@@ -110,8 +118,8 @@ function calculateChange(current: number, previous: number): {
   };
 }
 
-const OVERVIEW_HERO_SHELL_CLASS =
-  "relative overflow-hidden rounded-[2rem] border border-white/10 bg-gray-950 px-5 py-6 text-white shadow-2xl shadow-accent-violet/20 sm:px-8 sm:py-9 lg:px-10 lg:py-10";
+const OVERVIEW_MOBILE_HERO_SHELL = `${DASHBOARD_CINEMATIC_HERO_SHELL} p-5 sm:p-6`;
+const OVERVIEW_DESKTOP_HERO_SHELL = `${DASHBOARD_CINEMATIC_HERO_SHELL} px-5 py-6 sm:px-8 sm:py-9 lg:px-10 lg:py-10`;
 
 function OverviewHeroFrame({
   title,
@@ -134,10 +142,8 @@ function OverviewHeroFrame({
 }) {
   const t = useTranslations("overview");
   return (
-    <div className={OVERVIEW_HERO_SHELL_CLASS}>
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(240,64,104,0.28),transparent_30%),radial-gradient(circle_at_80%_10%,rgba(79,144,224,0.24),transparent_32%),linear-gradient(135deg,rgba(3,7,18,0.98),rgba(30,27,75,0.88)_48%,rgba(8,47,73,0.72))]" />
-      <div className="absolute -left-24 top-1/2 h-64 w-64 rounded-full bg-accent-violet/25 blur-3xl" />
-      <div className="absolute -bottom-28 right-10 h-72 w-72 rounded-full bg-accent-cyan/20 blur-3xl" />
+    <div className={OVERVIEW_DESKTOP_HERO_SHELL}>
+      <DashboardCinematicHeroBg />
       <div className="relative grid gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-center">
         <div className="flex items-start gap-5 sm:gap-6 lg:gap-8">
           <UserAvatarPhoto
@@ -146,6 +152,18 @@ function OverviewHeroFrame({
             className="ring-2 ring-white/20 shadow-2xl shadow-black/30"
           />
           <div className="min-w-0 flex-1">
+            <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+              <SoundprintBrandMark
+                size="sm"
+                tone="onDark"
+                showAiBadge={false}
+                showWordmarkOnMobile={false}
+                interactive={false}
+              />
+              <span className="inline-flex items-center justify-center rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-white/80">
+                {badgeLabel}
+              </span>
+            </div>
             <h1 className="max-w-4xl text-balance text-4xl font-semibold tracking-[-0.06em] sm:text-5xl lg:text-6xl">
               {title}
             </h1>
@@ -153,9 +171,6 @@ function OverviewHeroFrame({
               {description}
             </p>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-              <span className="inline-flex items-center justify-center rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-sm font-bold text-white backdrop-blur">
-                {badgeLabel}
-              </span>
               {hasComparison ? (
                 <span className="inline-flex items-center justify-center rounded-2xl border border-emerald-300/30 bg-emerald-400/15 px-5 py-3 text-sm font-medium text-emerald-100">
                   {t("vsPreviousPeriod")}
@@ -186,7 +201,7 @@ function OverviewSectionHeader({
   description: string;
 }) {
   return (
-    <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+    <div className="mb-6 flex flex-col justify-between gap-4 rounded-[1.5rem] border border-card-border bg-surface-glass/60 p-5 backdrop-blur-sm sm:flex-row sm:items-end sm:p-6">
       <div>
         <p className="font-mono text-xs font-semibold uppercase tracking-[0.24em] text-primary">
           {eyebrow}
@@ -363,9 +378,8 @@ function TopLibraryCard({
 }) {
   const maxCount = items[0]?.count ?? 1;
   return (
-    <article className="relative overflow-hidden rounded-[2rem] border border-card-border bg-gradient-to-br from-white via-white/90 to-slate-50/80 p-4 shadow-card ring-1 ring-white/70 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-card-hover dark:border-white/[0.08] dark:from-[#06070d] dark:via-[#070812] dark:to-[#0c0e18] dark:ring-white/[0.06]">
-      <div className={`pointer-events-none absolute -right-20 -top-20 h-48 w-48 rounded-full ${accent.glow} blur-3xl`} />
-      <div className={`pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent ${accent.rail} to-transparent opacity-80`} />
+    <article className={`${DASHBOARD_WIDGET_CARD_SHELL} p-4 sm:p-5`}>
+      <DashboardWidgetCardBg glowClass={accent.glow} />
       <div className="relative">
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -377,7 +391,7 @@ function TopLibraryCard({
           </div>
           <Link
             href={href}
-            className={`inline-flex shrink-0 items-center gap-1.5 rounded-2xl border border-card-border bg-white/70 px-3 py-2 text-sm font-semibold shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow-card dark:border-white/[0.10] dark:bg-[#161822] dark:hover:bg-[#1c2030] ${accent.text}`}
+            className={`${DASHBOARD_BTN_LINK} ${accent.text}`}
           >
             {ctaLabel}
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -608,7 +622,7 @@ function MobileTimelineCard({
           </div>
           <Link
             href={timelineHref}
-            className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-2xl border border-white/15 bg-white/10 px-3 text-xs font-semibold text-white"
+            className={`${DASHBOARD_BTN_LINK} min-h-11 border-white/15 bg-white/10 px-3 text-xs text-white hover:bg-white/15 dark:hover:bg-white/15`}
           >
             {t("seeMore")}
           </Link>
@@ -825,8 +839,8 @@ function MobileOverviewFlow({
 
   return (
     <div className="space-y-5">
-      <section className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-slate-950 p-5 text-white shadow-2xl shadow-accent-violet/20">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(240,64,104,0.24),transparent_34%),radial-gradient(circle_at_86%_18%,rgba(79,144,224,0.20),transparent_34%),linear-gradient(135deg,rgba(3,7,18,0.98),rgba(30,27,75,0.86)_48%,rgba(8,47,73,0.72))]" />
+      <section className={OVERVIEW_MOBILE_HERO_SHELL}>
+        <DashboardCinematicHeroBg />
         <div className="relative flex items-start gap-4">
           <UserAvatarPhoto
             src={avatarUrl}
@@ -835,9 +849,13 @@ function MobileOverviewFlow({
           />
           <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-3">
-            <p className="inline-flex min-h-8 shrink-0 items-center whitespace-nowrap rounded-full border border-white/15 bg-white/10 px-2.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-100">
-              {t("mobile.heroEyebrow")}
-            </p>
+            <SoundprintBrandMark
+              size="sm"
+              tone="onDark"
+              showAiBadge={false}
+              showWordmarkOnMobile={false}
+              interactive={false}
+            />
             <span className="inline-flex min-h-8 shrink-0 items-center whitespace-nowrap rounded-full border border-white/15 bg-white/10 px-2.5 text-[11px] font-semibold text-white/85">
               {badgeLabel}
             </span>
@@ -962,16 +980,19 @@ function MobileOverviewLoadingFallback({
   title: string;
   badgeLabel: string;
 }) {
-  const t = useTranslations("overview");
   return (
     <div className="space-y-5 lg:hidden">
-      <section className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-slate-950 p-5 text-white shadow-2xl shadow-accent-violet/20">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(240,64,104,0.20),transparent_34%),radial-gradient(circle_at_86%_18%,rgba(79,144,224,0.18),transparent_34%)]" />
+      <section className={OVERVIEW_MOBILE_HERO_SHELL}>
+        <DashboardCinematicHeroBg />
         <div className="relative">
           <div className="flex items-center justify-between gap-3">
-            <p className="inline-flex min-h-8 shrink-0 items-center whitespace-nowrap rounded-full border border-white/15 bg-white/10 px-2.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-100">
-              {t("mobile.heroEyebrow")}
-            </p>
+            <SoundprintBrandMark
+              size="sm"
+              tone="onDark"
+              showAiBadge={false}
+              showWordmarkOnMobile={false}
+              interactive={false}
+            />
             <span className="inline-flex min-h-8 shrink-0 items-center whitespace-nowrap rounded-full border border-white/15 bg-white/10 px-2.5 text-[11px] font-semibold">
               {badgeLabel}
             </span>
@@ -1017,8 +1038,8 @@ function MobileOverviewUnavailable({
   const t = useTranslations("overview");
   return (
     <div className="space-y-5 lg:hidden">
-      <section className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-slate-950 p-5 text-white shadow-2xl shadow-accent-violet/20">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(240,64,104,0.20),transparent_34%),radial-gradient(circle_at_86%_18%,rgba(79,144,224,0.18),transparent_34%)]" />
+      <section className={OVERVIEW_MOBILE_HERO_SHELL}>
+        <DashboardCinematicHeroBg />
         <div className="relative flex items-start gap-4">
           <UserAvatarPhoto
             src={avatarUrl}
@@ -1027,9 +1048,13 @@ function MobileOverviewUnavailable({
           />
           <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-3">
-            <p className="inline-flex min-h-8 shrink-0 items-center whitespace-nowrap rounded-full border border-white/15 bg-white/10 px-2.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-100">
-              {t("mobile.heroEyebrow")}
-            </p>
+            <SoundprintBrandMark
+              size="sm"
+              tone="onDark"
+              showAiBadge={false}
+              showWordmarkOnMobile={false}
+              interactive={false}
+            />
             <span className="inline-flex min-h-8 shrink-0 items-center whitespace-nowrap rounded-full border border-white/15 bg-white/10 px-2.5 text-[11px] font-semibold">
               {badgeLabel}
             </span>
@@ -1454,12 +1479,8 @@ function OverviewContent() {
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-5">
             {(topTracksForChart[0] || topArtistsForChart[0] || topGenres[0]) && (
               <div className="lg:col-span-3">
-                <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950 p-5 text-white shadow-2xl shadow-black/20 sm:p-6 lg:p-8">
-                  <div
-                    className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(6,182,212,0.22),transparent_30%),radial-gradient(circle_at_86%_14%,rgba(139,92,246,0.2),transparent_32%),radial-gradient(circle_at_50%_100%,rgba(132,204,22,0.13),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.08),transparent_42%)]"
-                    aria-hidden
-                  />
-                  <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-cyan-200/50 to-transparent" />
+                <div className="relative overflow-hidden rounded-[2rem] border border-accent-violet/30 bg-gray-950 p-5 text-white shadow-2xl shadow-accent-violet/25 ring-1 ring-accent-violet/15 sm:p-6 lg:p-8">
+                  <DashboardCinematicHeroBg />
                   <div className="relative grid gap-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.35fr)] lg:items-end">
                     <div>
                       <h2 className="text-3xl font-semibold tracking-[-0.05em] text-white sm:text-4xl">

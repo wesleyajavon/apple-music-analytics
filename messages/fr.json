@@ -1106,7 +1106,7 @@
     "errorStateEyebrow": "Synthèse indisponible",
     "errorStateHint": "Impossible de charger les métriques de la vue d'ensemble. Il s'agit en général d'un court incident réseau ou serveur — réessayez dans un instant. Vos données d'écoute restent sur votre compte.",
     "errorStateMetricStatus": "En attente de réponse",
-    "emptyStateHeroDescription": "Votre vue d'ensemble reste à zéro tant qu'aucune importation n'a abouti. Connectez Spotify, Apple Music, Last.fm ou terminez l'onboarding avec des écoutes d'exemple.",
+    "emptyStateHeroDescription": "Votre vue d'ensemble reste à zéro tant qu'aucune importation n'a abouti. Importez un export Spotify ou Apple Music pour commencer.",
     "emptyStateEyebrow": "Bibliothèque au repos",
     "emptyStateAside": "Métriques · zéro ligne",
     "emptyStateMetricHint": "En attente d'import",
@@ -2582,7 +2582,7 @@
       "publicDemoLabel": "Voir la démo publique",
       "importData": {
         "message": "Aucune donnée d'écoute disponible",
-        "description": "Importez un export Spotify ou Apple Music (recommandé), synchronisez via Last.fm, ou chargez des exemples depuis l'intégration pour afficher vos statistiques.",
+        "description": "Importez un export Spotify ou Apple Music pour afficher vos statistiques.",
         "actionLabel": "Importer vos données"
       },
       "importReplay": {

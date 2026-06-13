@@ -288,6 +288,16 @@ function getActiveParentKeys(groups: NavGroup[], pathname: string): string[] {
   );
 }
 
+function getActiveGroupKeys(groups: NavGroup[], pathname: string): string[] {
+  return groups
+    .filter((group) => group.items.some((item) => isNavItemActive(item, pathname)))
+    .map((group) => group.labelKey);
+}
+
+function isNavGroupOpen(openGroupKeys: Record<string, boolean>, key: string): boolean {
+  return openGroupKeys[key] ?? false;
+}
+
 function formatNavBadgeCount(count: number): string {
   return count > 99 ? "99+" : String(count);
 }
@@ -351,6 +361,7 @@ function SidebarContent() {
   const { isOpen: isMobileMenuOpen, close: closeMobileMenu } = useMobileSidebar();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [openNavKeys, setOpenNavKeys] = useState<Record<string, boolean>>({});
+  const [openGroupKeys, setOpenGroupKeys] = useState<Record<string, boolean>>({});
   const [authEmail, setAuthEmail] = useState<string | null>(null);
   const [profileName, setProfileName] = useState<string | null>(null);
   const [profileAvatarUrl, setProfileAvatarUrl] = useState<string | null>(null);
@@ -376,6 +387,10 @@ function SidebarContent() {
   );
   const activeParentKeys = useMemo(
     () => getActiveParentKeys(navGroups, pathname),
+    [pathname]
+  );
+  const activeGroupKeys = useMemo(
+    () => getActiveGroupKeys(navGroups, pathname),
     [pathname]
   );
   const displayCollapsed = isCollapsed && !isMobileMenuOpen;
@@ -415,6 +430,20 @@ function SidebarContent() {
       return next;
     });
   }, [activeParentKeys]);
+
+  useEffect(() => {
+    if (activeGroupKeys.length === 0) return;
+
+    setOpenGroupKeys((prev) => {
+      let next = prev;
+      for (const key of activeGroupKeys) {
+        if (!isNavGroupOpen(prev, key)) {
+          next = { ...next, [key]: true };
+        }
+      }
+      return next;
+    });
+  }, [activeGroupKeys]);
 
   useEffect(() => {
     let mounted = true;
@@ -497,6 +526,13 @@ function SidebarContent() {
 
   const toggleNavItem = (key: string) => {
     setOpenNavKeys((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const toggleNavGroup = (key: string) => {
+    setOpenGroupKeys((prev) => ({
+      ...prev,
+      [key]: !isNavGroupOpen(prev, key),
+    }));
   };
 
   const renderNavItem = (item: NavItem, depth = 0) => {
@@ -727,20 +763,49 @@ function SidebarContent() {
 
           {/* Navigation */}
           <nav className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-5">
-            {navGroups.map((group) => (
-              <div key={group.labelKey} className="mb-6 last:mb-0">
-                {!displayCollapsed && (
-                  <div className="px-3 mb-2">
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">
-                      {t(`groups.${group.labelKey}`)}
-                    </span>
-                  </div>
-                )}
-                <div className="space-y-0.5">
-                  {group.items.map((item) => renderNavItem(item))}
+            {navGroups.map((group) => {
+              const groupLabel = t(`groups.${group.labelKey}`);
+              const isGroupOpen = isNavGroupOpen(openGroupKeys, group.labelKey);
+
+              return (
+                <div key={group.labelKey} className="mb-6 last:mb-0">
+                  {!displayCollapsed && (
+                    <button
+                      type="button"
+                      onClick={() => toggleNavGroup(group.labelKey)}
+                      className="mb-2 flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-left transition-colors hover:bg-primary/5 focus:outline-none focus:ring-2 focus:ring-ring"
+                      aria-expanded={isGroupOpen}
+                      aria-label={t(isGroupOpen ? "collapseSection" : "expandSection", {
+                        label: groupLabel,
+                      })}
+                    >
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">
+                        {groupLabel}
+                      </span>
+                      <svg
+                        className={`h-3.5 w-3.5 shrink-0 text-muted transition-transform duration-200 ${isGroupOpen ? "rotate-180" : ""}`}
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        aria-hidden
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="m19 9-7 7-7-7"
+                        />
+                      </svg>
+                    </button>
+                  )}
+                  {(displayCollapsed || isGroupOpen) && (
+                    <div className="space-y-0.5">
+                      {group.items.map((item) => renderNavItem(item))}
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </nav>
 
           {/* Theme & Language switchers */}

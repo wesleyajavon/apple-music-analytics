@@ -5,6 +5,7 @@ import { Link } from "@/i18n/navigation";
 import { ChevronRight, Sparkles, Swords } from "lucide-react";
 import { useDashboardViewerUserId } from "@/lib/context/dashboard-viewer-context";
 import { usePublicDemoViewer } from "@/lib/hooks/use-public-demo-viewer";
+import { SoundprintLogo } from "@/lib/components/soundprint-logo";
 
 type OverviewFeaturePromosProps = {
   soundprintChatHref: string;
@@ -36,20 +37,20 @@ function FeaturePromoCard({
   const accentStyles =
     accent === "violet"
       ? {
-          glow: "bg-violet-400/20",
-          badge: "border-violet-300/25 bg-violet-300/10 text-violet-100",
-          icon: "text-violet-200",
-          ring: "hover:border-violet-300/30 hover:bg-violet-400/[0.08]",
+          glow: "bg-accent-violet/20",
+          badge: "border-accent-violet/25 bg-accent-violet/10 text-violet-100",
+          icon: "bg-accent-violet/15 text-accent-violet",
+          ring: "hover:border-accent-violet/30 hover:bg-accent-violet/[0.08]",
         }
       : {
-          glow: "bg-cyan-400/20",
-          badge: "border-cyan-300/25 bg-cyan-300/10 text-cyan-100",
-          icon: "text-cyan-200",
-          ring: "hover:border-cyan-300/30 hover:bg-cyan-400/[0.08]",
+          glow: "bg-accent-cyan/20",
+          badge: "border-accent-cyan/25 bg-accent-cyan/10 text-cyan-100",
+          icon: "bg-accent-cyan/15 text-accent-cyan",
+          ring: "hover:border-accent-cyan/30 hover:bg-accent-cyan/[0.08]",
         };
 
-  const className = `group relative block overflow-hidden rounded-[1.35rem] border border-white/10 bg-white/[0.05] p-4 ${
-    disabled ? "cursor-default" : `transition-all hover:-translate-y-0.5 ${accentStyles.ring}`
+  const className = `group relative block overflow-hidden rounded-[1.35rem] border border-white/12 bg-white/[0.06] p-4 backdrop-blur-sm ${
+    disabled ? "cursor-default opacity-80" : `transition-all hover:-translate-y-0.5 ${accentStyles.ring}`
   }`;
 
   const content = (
@@ -60,7 +61,7 @@ function FeaturePromoCard({
       />
       <div className="relative flex items-start gap-3">
         <span
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/10 ${accentStyles.icon}`}
+          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/10 ${accentStyles.icon}`}
         >
           <Icon className="h-5 w-5" aria-hidden />
         </span>
@@ -71,10 +72,10 @@ function FeaturePromoCard({
             {badge}
           </span>
           <p className="mt-2 text-base font-semibold tracking-[-0.03em] text-white">{title}</p>
-          <p className="mt-1 text-sm leading-6 text-slate-300">{description}</p>
+          <p className="mt-1 text-sm leading-6 text-white/65">{description}</p>
           <span
-            className={`mt-3 inline-flex items-center gap-1 text-sm font-semibold text-white/90 ${
-              disabled ? "" : "transition group-hover:gap-2"
+            className={`mt-3 inline-flex items-center gap-1 rounded-xl bg-white/10 px-3 py-1.5 text-sm font-semibold text-white/90 ${
+              disabled ? "" : "transition group-hover:gap-2 group-hover:bg-white/15"
             }`}
           >
             {cta}
@@ -143,12 +144,19 @@ export function OverviewFeaturePromos({
     <div className="relative">
       <div className="absolute -inset-4 rounded-[2rem] bg-brand-gradient-soft blur-2xl" aria-hidden />
       <div className="relative overflow-hidden rounded-[1.75rem] border border-white/15 bg-white/10 p-3 shadow-2xl shadow-black/35 backdrop-blur-xl">
-        <div className="rounded-[1.35rem] border border-white/10 bg-slate-950/70 p-4">
+        <div className="rounded-[1.35rem] border border-white/10 bg-gray-950/75 p-4">
           <div className="flex items-center justify-between border-b border-white/10 pb-4">
-            <p className="font-mono text-[0.66rem] font-semibold uppercase tracking-[0.24em] text-slate-400">
-              {t("panelBadge")}
-            </p>
-            <span className="rounded-full border border-emerald-300/25 bg-emerald-300/10 px-2.5 py-1 text-[0.66rem] font-semibold text-emerald-100">
+            <div className="flex items-center gap-2.5">
+              <SoundprintLogo
+                src="/brand/favicon.png"
+                showText={false}
+                imageClassName="h-6 w-6 object-contain opacity-90"
+              />
+              <p className="font-mono text-[0.66rem] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                {t("panelBadge")}
+              </p>
+            </div>
+            <span className="rounded-full border border-accent-emerald/25 bg-accent-emerald/10 px-2.5 py-1 text-[0.66rem] font-semibold text-emerald-100">
               {t("panelTag")}
             </span>
           </div>
@@ -163,12 +171,12 @@ export function OverviewFeaturePromosSkeleton({ variant = "panel" }: { variant?:
   const cardSkeleton = (
     <div className="animate-pulse rounded-[1.35rem] border border-white/10 bg-white/[0.05] p-4">
       <div className="flex items-start gap-3">
-        <div className="h-10 w-10 shrink-0 rounded-2xl bg-white/15" />
+        <div className="h-11 w-11 shrink-0 rounded-2xl bg-white/15" />
         <div className="flex-1 space-y-2">
           <div className="h-4 w-16 rounded-full bg-white/15" />
           <div className="h-5 w-3/4 rounded bg-white/20" />
           <div className="h-4 w-full rounded bg-white/10" />
-          <div className="h-4 w-24 rounded bg-white/15" />
+          <div className="h-8 w-28 rounded-xl bg-white/15" />
         </div>
       </div>
     </div>
@@ -186,9 +194,9 @@ export function OverviewFeaturePromosSkeleton({ variant = "panel" }: { variant?:
   return (
     <div className="relative">
       <div className="relative overflow-hidden rounded-[1.75rem] border border-white/15 bg-white/10 p-3">
-        <div className="rounded-[1.35rem] border border-white/10 bg-slate-950/70 p-4">
+        <div className="rounded-[1.35rem] border border-white/10 bg-gray-950/70 p-4">
           <div className="mb-4 flex items-center justify-between border-b border-white/10 pb-4">
-            <div className="h-3 w-20 animate-pulse rounded bg-white/15" />
+            <div className="h-3 w-24 animate-pulse rounded bg-white/15" />
             <div className="h-5 w-14 animate-pulse rounded-full bg-white/15" />
           </div>
           <div className="space-y-3">

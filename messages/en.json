@@ -1106,7 +1106,7 @@
     "errorStateEyebrow": "Snapshot unavailable",
     "errorStateHint": "We couldn't load your overview metrics. It is usually a brief network or server hiccup—try again in a moment. Your listening data stays on your account.",
     "errorStateMetricStatus": "Awaiting response",
-    "emptyStateHeroDescription": "Your overview stays at zero until the first import lands. Connect Spotify, Apple Music, Last.fm, or finish onboarding with sample listens.",
+    "emptyStateHeroDescription": "Your overview stays at zero until the first import lands. Import a Spotify or Apple Music export to get started.",
     "emptyStateEyebrow": "Library idle",
     "emptyStateAside": "Metrics · zero rows",
     "emptyStateMetricHint": "Awaiting import",
@@ -2582,7 +2582,7 @@
       "publicDemoLabel": "View public demo",
       "importData": {
         "message": "No listening data available",
-        "description": "Import a Spotify or Apple Music listening export (recommended), sync from Last.fm, or load sample listens from onboarding to unlock your statistics.",
+        "description": "Import a Spotify or Apple Music export to unlock your statistics.",
         "actionLabel": "Import your data"
       },
       "importReplay": {

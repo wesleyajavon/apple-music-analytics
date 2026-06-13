@@ -16,6 +16,18 @@ import {
 } from "lucide-react";
 import { DashboardHeroTitle } from "@/lib/components/dashboard-hero-title";
 import { OnboardingMobileStickyActions } from "@/lib/components/onboarding-mobile-sticky-actions";
+import { SoundprintBrandMark } from "@/lib/components/soundprint-brand-mark";
+import {
+  DASHBOARD_BTN_GHOST,
+  DASHBOARD_BTN_GRADIENT,
+  DASHBOARD_BTN_OUTLINE,
+  DASHBOARD_CINEMATIC_HERO_SHELL,
+  DASHBOARD_GLASS_CARD_SHELL,
+  DashboardCinematicHeroBg,
+  DashboardGradientButton,
+  DashboardOnboardingProviderCard,
+  DashboardOutlineButton,
+} from "@/lib/components/dashboard-ui";
 import { useGenreBackfillJobSafe } from "@/lib/context/genre-backfill-job-context";
 import {
   isRecentAuthRequiredError,
@@ -173,13 +185,16 @@ const VERCEL_SAFE_MULTIPART_MAX_BYTES = 4 * 1024 * 1024;
 
 /** Trait / remplissage brand (s’aligne sur --brand-* en clair et sombre). */
 const ONBOARDING_RAIL_CLASS = "bg-brand-gradient";
-const ONBOARDING_SHELL_CLASS =
-  "rounded-3xl border border-card-border/70 bg-card px-6 py-8 sm:px-8 sm:py-10";
-const ONBOARDING_SURFACE_CLASS =
-  "rounded-3xl border border-card-border/70 bg-card px-6 py-8 sm:px-8";
+const ONBOARDING_SHELL_CLASS = DASHBOARD_CINEMATIC_HERO_SHELL;
+const ONBOARDING_SURFACE_CLASS = DASHBOARD_GLASS_CARD_SHELL;
 
 function OnboardingShell({ children }: { children: ReactNode }) {
-  return <div className={ONBOARDING_SHELL_CLASS}>{children}</div>;
+  return (
+    <div className={`${ONBOARDING_SHELL_CLASS} px-6 py-8 text-white sm:px-8 sm:py-10`}>
+      <DashboardCinematicHeroBg />
+      <div className="relative">{children}</div>
+    </div>
+  );
 }
 
 /** Carte « genres IA » — surfaces thème + accents brand (pas de violet/cyan Tailwind hors tokens). */
@@ -296,10 +311,13 @@ function OnboardingTopProgress({
   ariaLabel: string;
 }) {
   return (
-    <div className="space-y-2.5">
+    <div className="space-y-3">
+      <div className="flex items-center justify-between gap-3">
+        <SoundprintBrandMark size="sm" showWordmarkOnMobile={false} interactive={false} />
+        <span className="text-xs tabular-nums text-muted">{percent}%</span>
+      </div>
       <div className="flex items-center justify-between gap-3 text-xs text-muted">
         <span className="font-medium">{stepLabel}</span>
-        <span className="tabular-nums">{percent}%</span>
       </div>
       <OnboardingFlowProgressBar percent={percent} variant="hero" ariaLabel={ariaLabel} />
     </div>
@@ -922,19 +940,15 @@ export function DataExportOnboarding({
 
   const surfaceShellClass = ONBOARDING_SURFACE_CLASS;
 
-  const primaryBtn =
-    "inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 lg:w-auto";
+  const primaryBtn = `${DASHBOARD_BTN_GRADIENT} min-h-11 px-5 py-2.5 lg:w-auto`;
 
-  const secondaryBtn =
-    "inline-flex min-h-11 w-full items-center justify-center rounded-2xl border border-card-border bg-transparent px-5 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted/20 disabled:opacity-60 lg:w-auto";
+  const secondaryBtn = `${DASHBOARD_BTN_OUTLINE} min-h-11 lg:w-auto`;
 
-  const welcomeContinueBtn =
-    "group inline-flex min-h-12 w-full shrink-0 items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-6 py-3 text-sm font-semibold text-white shadow-brand-glow transition-all hover:opacity-[0.96] disabled:opacity-60 sm:w-auto";
+  const continueBtn = DASHBOARD_BTN_GRADIENT;
 
-  const welcomeSkipBtn =
-    "inline-flex min-h-12 w-full shrink-0 items-center justify-center rounded-2xl px-5 py-3 text-sm font-medium text-muted transition-colors hover:text-foreground disabled:opacity-55 sm:w-auto";
+  const skipBtn = DASHBOARD_BTN_GHOST;
 
-  const pickSkipBtn = welcomeSkipBtn;
+  const pickSkipBtn = DASHBOARD_BTN_GHOST;
 
   const effectiveBackfill = useMemo(
     () =>
@@ -994,31 +1008,45 @@ export function DataExportOnboarding({
       {phase === "welcome" && (
         <OnboardingShell>
           <div className="space-y-8">
-            <div className="space-y-4">
-              <p className="text-sm font-medium text-muted">{t("welcomeEyebrow")}</p>
-              <DashboardHeroTitle icon={Music2} variant="onboarding" className="!mt-0">
+            <div className="flex flex-col gap-4 sm:gap-5">
+              <DashboardHeroTitle icon={Music2} variant="hero" className="!mt-0">
                 {t("welcomeTitle")}
               </DashboardHeroTitle>
-              <p className="max-w-lg text-base leading-relaxed text-muted">{t("welcomeBody")}</p>
+              <p className="max-w-lg text-base leading-relaxed text-white/70">{t("welcomeBody")}</p>
             </div>
+
+            <div className="rounded-[1.35rem] border border-white/12 bg-white/[0.06] p-5 backdrop-blur-sm">
+              <p className="font-mono text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-accent-cyan">
+                {t("welcomePlanTitle")}
+              </p>
+              <ul className="mt-4 space-y-3">
+                {[t("welcomeBullet1"), t("welcomeBullet2"), t("welcomeBullet3")].map((bullet) => (
+                  <li key={bullet} className="flex gap-3 text-sm leading-6 text-white/75">
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-gradient shadow-brand-glow" />
+                    {bullet}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <button type="button" className={welcomeContinueBtn} onClick={() => setPhase("pick")}>
+              <DashboardGradientButton onClick={() => setPhase("pick")}>
                 <span>{t("continue")}</span>
                 <ArrowRight
                   className="h-4 w-4 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5"
                   aria-hidden
                 />
-              </button>
+              </DashboardGradientButton>
               <button
                 type="button"
-                className={welcomeSkipBtn}
+                className={`${skipBtn} text-white/60 hover:text-white`}
                 onClick={() => void completeOnboarding()}
                 disabled={isSubmitting}
               >
                 {t("skipForNow")}
               </button>
             </div>
-            <p className="text-xs text-muted">{t("skipHint")}</p>
+            <p className="text-xs text-white/45">{t("skipHint")}</p>
           </div>
         </OnboardingShell>
       )}
@@ -1026,65 +1054,62 @@ export function DataExportOnboarding({
       {phase === "pick" && (
         <div className="space-y-6">
           <OnboardingShell>
-            <div className="space-y-3">
-              <DashboardHeroTitle icon={Music2} variant="onboarding" className="!mt-0">
-                {t("pickTitle")}
-              </DashboardHeroTitle>
-              <p className="text-base text-muted">{t("pickSubtitle")}</p>
+            <div className="flex flex-col gap-5 sm:gap-6">
+              <p className="font-mono text-xs font-semibold uppercase tracking-[0.24em] text-accent-cyan">
+                {t("flowRail.choose")}
+              </p>
+              <div className="flex flex-col gap-3 sm:gap-4">
+                <DashboardHeroTitle icon={Music2} variant="hero" className="!mt-0">
+                  {t("pickTitle")}
+                </DashboardHeroTitle>
+                <p className="max-w-lg text-base leading-relaxed text-white/70">
+                  {t("pickSubtitle")}
+                </p>
+              </div>
             </div>
           </OnboardingShell>
 
           <div className={`${surfaceShellClass} space-y-3`}>
-            <button
-              type="button"
+            <DashboardOnboardingProviderCard
               onClick={() => selectProvider("spotify")}
-              className="group flex w-full items-center gap-4 rounded-2xl border border-card-border px-4 py-4 text-left transition-colors hover:border-[#1DB954]/50 hover:bg-[#1DB954]/[0.04]"
-            >
-              <Image
-                src={SPOTIFY_LOGO_SRC}
-                alt=""
-                width={40}
-                height={40}
-                className="h-10 w-10 shrink-0 rounded-xl object-contain"
-                unoptimized
-              />
-              <div className="min-w-0 flex-1">
-                <span className="block text-base font-semibold text-foreground">{t("pickSpotify")}</span>
-                <span className="mt-0.5 block text-sm text-muted">{t("pickSpotifyHint")}</span>
-              </div>
-              <ArrowRight
-                className="h-4 w-4 shrink-0 text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-foreground"
-                aria-hidden
-              />
-            </button>
+              badge={t("pickBadgeSpotify")}
+              title={t("pickSpotify")}
+              hint={t("pickSpotifyHint")}
+              hoverAccentClass="hover:border-[#1DB954]/40"
+              logo={
+                <Image
+                  src={SPOTIFY_LOGO_SRC}
+                  alt=""
+                  width={40}
+                  height={40}
+                  className="h-8 w-8 object-contain"
+                  unoptimized
+                />
+              }
+            />
 
-            <button
-              type="button"
+            <DashboardOnboardingProviderCard
               onClick={() => selectProvider("apple")}
-              className="group flex w-full items-center gap-4 rounded-2xl border border-card-border px-4 py-4 text-left transition-colors hover:border-primary/40 hover:bg-primary/[0.04]"
-            >
-              <Image
-                src={APPLE_MUSIC_LOGO_SRC}
-                alt=""
-                width={40}
-                height={40}
-                className="h-10 w-10 shrink-0 rounded-xl object-contain"
-                unoptimized
-              />
-              <div className="min-w-0 flex-1">
-                <span className="block text-base font-semibold text-foreground">{t("pickApple")}</span>
-                <span className="mt-0.5 block text-sm text-muted">{t("pickAppleHint")}</span>
-              </div>
-              <ArrowRight
-                className="h-4 w-4 shrink-0 text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-foreground"
-                aria-hidden
-              />
-            </button>
+              badge={t("pickBadgeApple")}
+              title={t("pickApple")}
+              hint={t("pickAppleHint")}
+              hoverAccentClass="hover:border-primary/35"
+              logo={
+                <Image
+                  src={APPLE_MUSIC_LOGO_SRC}
+                  alt=""
+                  width={40}
+                  height={40}
+                  className="h-8 w-8 object-contain"
+                  unoptimized
+                />
+              }
+            />
 
             <div className="flex flex-col gap-3 border-t border-card-border pt-6 sm:flex-row sm:items-center sm:justify-between">
-              <button type="button" className={secondaryBtn} onClick={() => setPhase("welcome")}>
+              <DashboardOutlineButton onClick={() => setPhase("welcome")}>
                 {t("back")}
-              </button>
+              </DashboardOutlineButton>
               <button
                 type="button"
                 className={pickSkipBtn}
@@ -1144,7 +1169,7 @@ export function DataExportOnboarding({
                 priority={stepIndex === 0}
               />
             </figure>
-            {"imageSrc2" in steps[stepIndex] && steps[stepIndex].imageSrc2 && steps[stepIndex].altKey2 ? (
+            {steps[stepIndex].imageSrc2 && steps[stepIndex].altKey2 ? (
               <figure className="overflow-hidden rounded-2xl border border-card-border bg-muted/10">
                 <Image
                   src={steps[stepIndex].imageSrc2}
@@ -1153,6 +1178,7 @@ export function DataExportOnboarding({
                   height={720}
                   className="h-auto w-full object-contain"
                   sizes="(max-width: 768px) 100vw, 42rem"
+                  unoptimized
                 />
               </figure>
             ) : null}
@@ -1450,17 +1476,17 @@ export function DataExportOnboarding({
             <OnboardingShell>
               <div className="space-y-8 text-center">
                 <div
-                  className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-accent-emerald/10"
+                  className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-accent-emerald/25 bg-accent-emerald/15"
                   aria-hidden
                 >
                   <CheckCircle2 className="h-7 w-7 text-accent-emerald" strokeWidth={1.8} />
                 </div>
                 <div className="space-y-3">
                   <p className="text-sm font-medium text-accent-emerald">{t("finishSuccessEyebrow")}</p>
-                  <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+                  <h1 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">
                     {t("finishSuccessTitle")}
                   </h1>
-                  <p className="mx-auto max-w-md text-base leading-relaxed text-muted">
+                  <p className="mx-auto max-w-md text-base leading-relaxed text-white/70">
                     {t("finishSuccessBody", {
                       imported: importSummary.imported.toLocaleString(),
                       skipped: importSummary.skippedDuplicates.toLocaleString(),
@@ -1475,7 +1501,7 @@ export function DataExportOnboarding({
                 </p>
                 <button
                   type="button"
-                  className={`${welcomeContinueBtn} mx-auto disabled:pointer-events-none disabled:opacity-60`}
+                  className={`${continueBtn} mx-auto disabled:pointer-events-none disabled:opacity-60`}
                   onClick={() => void completeOnboarding("/dashboard/musical-profile")}
                   disabled={isSubmitting}
                 >
@@ -1498,11 +1524,13 @@ export function DataExportOnboarding({
         <div className="space-y-6">
             <OnboardingShell>
               <div className="space-y-4">
-                <p className="text-sm font-medium text-muted">{t("finishSkippedEyebrow")}</p>
-                <DashboardHeroTitle icon={Music2} variant="onboarding" className="!mt-0">
+                <p className="font-mono text-xs font-semibold uppercase tracking-[0.24em] text-accent-cyan">
+                  {t("finishSkippedEyebrow")}
+                </p>
+                <DashboardHeroTitle icon={Music2} variant="hero" className="!mt-0">
                   {t("finishTitle")}
                 </DashboardHeroTitle>
-                <p className="text-base leading-relaxed text-muted">{t("finishBody")}</p>
+                <p className="text-base leading-relaxed text-white/70">{t("finishBody")}</p>
               </div>
             </OnboardingShell>
 
@@ -1705,7 +1733,7 @@ export function DataExportOnboarding({
           >
             <button
               type="button"
-              className={`${welcomeContinueBtn} disabled:pointer-events-none disabled:opacity-60`}
+              className={`${continueBtn} disabled:pointer-events-none disabled:opacity-60`}
               onClick={() => void completeOnboarding()}
               disabled={isSubmitting}
             >

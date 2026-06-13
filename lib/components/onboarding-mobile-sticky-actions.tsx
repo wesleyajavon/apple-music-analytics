@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { DASHBOARD_BTN_GRADIENT, DASHBOARD_BTN_GHOST, DASHBOARD_BTN_OUTLINE } from "@/lib/components/dashboard-ui";
 
 type OnboardingMobileStickyActionsProps = {
   mode: "guide" | "import";
@@ -20,9 +21,9 @@ export function OnboardingMobileStickyActions({
   onPrimary,
   primaryLabel,
   primaryDisabled = false,
+  secondaryDisabled = false,
   secondaryLabel,
   onSecondary,
-  secondaryDisabled = false,
   isLoading = false,
 }: OnboardingMobileStickyActionsProps) {
   const t = useTranslations("onboarding");
@@ -34,13 +35,13 @@ export function OnboardingMobileStickyActions({
       role="region"
       aria-label={mode === "guide" ? t("guidePhaseLabel") : t("import.spotifyTitle")}
     >
-      <div className="pointer-events-auto border-t border-card-border bg-surface-glass/95 px-4 py-3 shadow-[0_-8px_32px_rgb(0_0_0_/0.1)] backdrop-blur-xl">
+      <div className="pointer-events-auto border-t border-card-border bg-surface-glass/95 px-4 py-3 shadow-[0_-12px_40px_rgb(0_0_0_/0.12)] backdrop-blur-xl">
         <div className="mx-auto flex max-w-4xl flex-col gap-2">
           <button
             type="button"
             onClick={onPrimary}
             disabled={primaryDisabled || isLoading}
-            className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-brand-glow transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+            className={`${DASHBOARD_BTN_GRADIENT} w-full min-h-11 rounded-xl`}
           >
             {isLoading ? (
               <span
@@ -55,7 +56,7 @@ export function OnboardingMobileStickyActions({
               type="button"
               onClick={onBack}
               disabled={isLoading}
-              className="flex min-h-11 min-w-0 flex-1 items-center justify-center rounded-xl border border-card-border bg-surface-raised px-4 text-sm font-semibold text-foreground transition-colors hover:bg-primary/5 disabled:opacity-60"
+              className={`${DASHBOARD_BTN_OUTLINE} min-h-11 min-w-0 flex-1 rounded-xl`}
             >
               {t("back")}
             </button>
@@ -64,7 +65,7 @@ export function OnboardingMobileStickyActions({
                 type="button"
                 onClick={onSecondary}
                 disabled={secondaryDisabled || isLoading}
-                className="flex min-h-11 min-w-0 flex-1 items-center justify-center rounded-xl border border-dashed border-border px-4 text-sm font-medium text-muted transition-colors hover:border-primary/35 hover:text-foreground disabled:opacity-60"
+                className={`${DASHBOARD_BTN_GHOST} min-h-11 min-w-0 flex-1 rounded-xl border border-dashed border-border`}
               >
                 {secondaryLabel}
               </button>

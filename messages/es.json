@@ -1106,7 +1106,7 @@
     "errorStateEyebrow": "Resumen no disponible",
     "errorStateHint": "No pudimos cargar las métricas del resumen. Suele ser un fallo breve de red o del servidor: vuelve a intentarlo en un momento. Tus datos de escucha siguen en tu cuenta.",
     "errorStateMetricStatus": "Esperando respuesta",
-    "emptyStateHeroDescription": "Tu resumen se queda en cero hasta que llegue la primera importación. Conecta Spotify, Apple Music, Last.fm o termina el onboarding con escuchas de ejemplo.",
+    "emptyStateHeroDescription": "Tu resumen se queda en cero hasta que llegue la primera importación. Importa una exportación de Spotify o Apple Music para empezar.",
     "emptyStateEyebrow": "Biblioteca en reposo",
     "emptyStateAside": "Métricas · cero filas",
     "emptyStateMetricHint": "Esperando importación",
@@ -2564,7 +2564,7 @@
       "publicDemoLabel": "Ver la demo pública",
       "importData": {
         "message": "No hay datos de escucha disponibles",
-        "description": "Importa una exportación de Spotify o Apple Music (recomendado), sincroniza con Last.fm o carga escuchas de ejemplo desde la integración para ver tus estadísticas.",
+        "description": "Importa una exportación de Spotify o Apple Music para ver tus estadísticas.",
         "actionLabel": "Importar tus datos"
       },
       "importReplay": {

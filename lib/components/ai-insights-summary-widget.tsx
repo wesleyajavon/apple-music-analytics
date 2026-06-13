@@ -9,6 +9,10 @@ import { AiFeatureDisabledPlaceholder } from "@/lib/components/ai-feature-disabl
 import { InteractiveAiGenreBackfillNotice } from "@/lib/components/interactive-ai-genre-backfill-notice";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
 import { useDashboardViewerUserId } from "@/lib/context/dashboard-viewer-context";
+import { usePublicDemoViewer } from "@/lib/hooks/use-public-demo-viewer";
+import { usePublicDemoSoundprintSnapshot } from "@/lib/hooks/use-public-demo-soundprint-snapshot";
+import { useAiInsightsDemoCopy } from "@/lib/hooks/use-public-demo-ai-copy";
+import { PublicDemoAiSignupCta } from "@/lib/components/public-demo-ai-signup-cta";
 import { useInteractiveAiBlockedByGenreBackfill } from "@/lib/hooks/use-interactive-ai-blocked-by-genre-backfill";
 import { isGroqGenreClassificationBlockingError } from "@/lib/utils/groq-quota-message";
 import {
@@ -26,6 +30,90 @@ import { LiveStatusDot } from "@/lib/components/live-status-dot";
 /** Number of insights to show in the overview widget */
 const PREVIEW_INSIGHTS_COUNT = 3;
 
+const INSIGHT_ACCENTS = [
+  "border-l-cyan-600/85 dark:border-l-cyan-300/80",
+  "border-l-violet-600/85 dark:border-l-violet-300/80",
+  "border-l-emerald-600/85 dark:border-l-emerald-300/80",
+] as const;
+
+function AiInsightsPublicDemoTeaser() {
+  const t = useTranslations("ai-insights");
+  const viewerUserId = useDashboardViewerUserId();
+  const { startDate, endDate, isLoading: isRangeLoading } = useListenDateRange();
+  const { snapshot, isLoading: isSnapshotLoading } = usePublicDemoSoundprintSnapshot(
+    startDate,
+    endDate,
+    viewerUserId,
+    true
+  );
+  const demoInsights = useAiInsightsDemoCopy(snapshot);
+
+  if (isRangeLoading || isSnapshotLoading) {
+    return (
+      <div
+        className={`${OVERVIEW_STARTUP_SURFACE_BASE} flex min-h-[280px] flex-col animate-fade-in-up`}
+        role="status"
+        aria-label={t("loading")}
+      >
+        <OverviewStartupSurfaceBg />
+        <div className={`relative ${OVERVIEW_STARTUP_WIDGET_HEADER_BORDER_CLASS} px-6 py-5 sm:px-8`}>
+          <div className="h-8 w-3/4 max-w-sm rounded-lg bg-slate-200/80 animate-shimmer dark:bg-[#1a1d2a]" />
+        </div>
+        <div className="relative flex-1 space-y-3 p-6 sm:p-8">
+          <div className={OVERVIEW_STARTUP_INNER_PANEL_CLASS}>
+            <div className="space-y-3">
+              {[0, 1, 2].map((i) => (
+                <div
+                  key={i}
+                  className="h-16 animate-shimmer rounded-xl bg-slate-200/80 dark:bg-[#252836]"
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (demoInsights.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className={`${OVERVIEW_STARTUP_SURFACE_BASE} flex min-h-[280px] flex-col animate-fade-in-up`}>
+      <OverviewStartupSurfaceBg />
+      <div className={`relative ${OVERVIEW_STARTUP_WIDGET_HEADER_BORDER_CLASS} px-6 py-5 sm:px-8`}>
+        <div className={OVERVIEW_STARTUP_EYEBROW_PILL_CLASS}>
+          <LiveStatusDot />
+          {t("heroEyebrow")}
+        </div>
+        <h2 className={OVERVIEW_STARTUP_WIDGET_TITLE_CLASS}>{t("title")}</h2>
+        <p className={OVERVIEW_STARTUP_WIDGET_SUBTITLE_CLASS}>{t("subtitleShort")}</p>
+      </div>
+      <div className="relative flex-1 space-y-3 p-6 sm:p-8">
+        <div className={OVERVIEW_STARTUP_INNER_PANEL_CLASS}>
+          <div className="space-y-3">
+            {demoInsights.map((insight, index) => (
+              <div
+                key={index}
+                className={`flex gap-3 rounded-xl border border-slate-200/90 bg-white p-3 shadow-sm backdrop-blur dark:border-white/[0.06] dark:bg-[#0f111a] dark:shadow-none ${INSIGHT_ACCENTS[index % INSIGHT_ACCENTS.length]}`}
+              >
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-slate-100 text-xs font-semibold text-slate-800 dark:border-white/[0.08] dark:bg-[#1a1d2a] dark:text-cyan-100">
+                  {index + 1}
+                </span>
+                <span className="min-w-0 flex-1 text-sm leading-relaxed text-slate-700 dark:text-slate-200">
+                  {insight}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <PublicDemoAiSignupCta variant="light" />
+      </div>
+    </div>
+  );
+}
+
 /**
  * Small overview widget showing AI insights preview.
  * Displays first few insights with link to full page.
@@ -34,11 +122,13 @@ const PREVIEW_INSIGHTS_COUNT = 3;
 export function AiInsightsSummaryWidget() {
   const t = useTranslations("ai-insights");
   const viewerUserId = useDashboardViewerUserId();
+  const isPublicDemoViewer = usePublicDemoViewer(viewerUserId);
   const { startDate, endDate, isLoading: isRangeLoading } = useListenDateRange();
 
   const { data, isLoading, error } = useAiInsights(startDate, endDate, {
     insightStyle: "human",
     userId: viewerUserId,
+    enabled: !isPublicDemoViewer,
   });
   const isLoadingOrFetching = isRangeLoading || isLoading;
   const interactiveAiBlockedByGenreBackfill = useInteractiveAiBlockedByGenreBackfill();
@@ -49,6 +139,10 @@ export function AiInsightsSummaryWidget() {
     const qs = p.toString();
     return qs ? `/dashboard/ai-insights?${qs}` : "/dashboard/ai-insights";
   }, [viewerUserId]);
+
+  if (isPublicDemoViewer) {
+    return <AiInsightsPublicDemoTeaser />;
+  }
 
   if (interactiveAiBlockedByGenreBackfill && !isRangeLoading) {
     return (
@@ -176,11 +270,6 @@ export function AiInsightsSummaryWidget() {
   }
 
   const previewInsights = data.insights.slice(0, PREVIEW_INSIGHTS_COUNT);
-  const INSIGHT_ACCENTS = [
-    "border-l-cyan-600/85 dark:border-l-cyan-300/80",
-    "border-l-violet-600/85 dark:border-l-violet-300/80",
-    "border-l-emerald-600/85 dark:border-l-emerald-300/80",
-  ] as const;
 
   return (
     <div className={`${OVERVIEW_STARTUP_SURFACE_BASE} flex min-h-[280px] flex-col animate-fade-in-up`}>

@@ -3,6 +3,8 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { ChevronRight, Sparkles, Swords } from "lucide-react";
+import { useDashboardViewerUserId } from "@/lib/context/dashboard-viewer-context";
+import { usePublicDemoViewer } from "@/lib/hooks/use-public-demo-viewer";
 
 type OverviewFeaturePromosProps = {
   soundprintChatHref: string;
@@ -19,6 +21,7 @@ function FeaturePromoCard({
   cta,
   icon: Icon,
   accent,
+  disabled = false,
 }: {
   href: string;
   ariaLabel: string;
@@ -28,6 +31,7 @@ function FeaturePromoCard({
   cta: string;
   icon: typeof Sparkles;
   accent: "violet" | "cyan";
+  disabled?: boolean;
 }) {
   const accentStyles =
     accent === "violet"
@@ -44,12 +48,12 @@ function FeaturePromoCard({
           ring: "hover:border-cyan-300/30 hover:bg-cyan-400/[0.08]",
         };
 
-  return (
-    <Link
-      href={href}
-      aria-label={ariaLabel}
-      className={`group relative block overflow-hidden rounded-[1.35rem] border border-white/10 bg-white/[0.05] p-4 transition-all hover:-translate-y-0.5 ${accentStyles.ring}`}
-    >
+  const className = `group relative block overflow-hidden rounded-[1.35rem] border border-white/10 bg-white/[0.05] p-4 ${
+    disabled ? "cursor-default" : `transition-all hover:-translate-y-0.5 ${accentStyles.ring}`
+  }`;
+
+  const content = (
+    <>
       <div
         className={`pointer-events-none absolute -right-6 -top-8 h-24 w-24 rounded-full ${accentStyles.glow} blur-2xl`}
         aria-hidden
@@ -68,12 +72,30 @@ function FeaturePromoCard({
           </span>
           <p className="mt-2 text-base font-semibold tracking-[-0.03em] text-white">{title}</p>
           <p className="mt-1 text-sm leading-6 text-slate-300">{description}</p>
-          <span className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-white/90 transition group-hover:gap-2">
+          <span
+            className={`mt-3 inline-flex items-center gap-1 text-sm font-semibold text-white/90 ${
+              disabled ? "" : "transition group-hover:gap-2"
+            }`}
+          >
             {cta}
             <ChevronRight className="h-4 w-4" aria-hidden />
           </span>
         </div>
       </div>
+    </>
+  );
+
+  if (disabled) {
+    return (
+      <div className={className} aria-disabled="true">
+        {content}
+      </div>
+    );
+  }
+
+  return (
+    <Link href={href} aria-label={ariaLabel} className={className}>
+      {content}
     </Link>
   );
 }
@@ -84,6 +106,8 @@ export function OverviewFeaturePromos({
   variant = "panel",
 }: OverviewFeaturePromosProps) {
   const t = useTranslations("overview.featurePromos");
+  const viewerUserId = useDashboardViewerUserId();
+  const isPublicDemoViewer = usePublicDemoViewer(viewerUserId);
 
   const cards = (
     <>
@@ -106,6 +130,7 @@ export function OverviewFeaturePromos({
         cta={t("duet.cta")}
         icon={Swords}
         accent="cyan"
+        disabled={isPublicDemoViewer}
       />
     </>
   );

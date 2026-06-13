@@ -359,7 +359,7 @@
     }
   },
   "askSoundprint": {
-    "eyebrow": "Copilote analytics natif",
+    "eyebrow": "En direct · chat Soundprint",
     "title": "Dialoguez avec votre Soundprint",
     "subtitle": "Tops, régularité, habitudes tardives ou bascules de goût entre deux époques — chaque réponse s’appuie sur vos écoutes stockées et nos agrégats serveur.",
     "heroStatBadge": "Cadre de confiance",
@@ -479,6 +479,12 @@
         "question": "Quels morceaux m’ont obsédé sur une année marquante de mon historique ?"
       }
     }
+  },
+  "publicDemoAi": {
+    "demoPill": "Aperçu démo",
+    "signUpHint": "Les lectures IA nécessitent un compte. Inscrivez-vous pour débloquer votre empreinte sonore complète et vos cartes d’insights.",
+    "signUp": "S'inscrire",
+    "signIn": "Se connecter"
   },
   "settings": {
     "metaTitle": "Paramètres du compte",
@@ -1980,7 +1986,13 @@
       "human": "Humain",
       "technical": "Technique"
     },
-    "loadingShort": "Chargement..."
+    "loadingShort": "Chargement...",
+    "publicDemoTeaser": {
+      "insightTopGenre": "{genre} représente {pct} des écoutes classifiées sur cette période.",
+      "insightTopArtist": "{artist} est votre artiste le plus écouté avec {count} lectures.",
+      "insightRhythm": "Votre rythme d’écoute le plus marqué apparaît le {peakDay} vers {peakHour}.",
+      "insightDiversity": "Vous avez exploré {artistCount} artistes et {trackCount} titres distincts sur cette période."
+    }
   },
   "taste-evolution": {
     "title": "Évolution des goûts",
@@ -2065,7 +2077,18 @@
     "influences": "Influences",
     "coreGenres": "Genres principaux",
     "whatMakesYouUnique": "Ce qui vous distingue",
-    "footer": "Généré à partir de vos données d'écoute • Soundprint-AI"
+    "footer": "Généré à partir de vos données d'écoute • Soundprint-AI",
+    "publicDemoTeaser": {
+      "headline": "{genre} mène à {genrePct}, avec {artist} comme pilier de votre rotation.",
+      "headlineNoArtist": "{genre} mène à {genrePct} sur cette période.",
+      "headlineFallback": "Vos habitudes d’écoute se dessinent sur {listenCount} lectures.",
+      "influences": "{genre1} et {genre2} structurent la majorité de vos écoutes.",
+      "influencesSingle": "{genre} domine votre mix de genres.",
+      "uniqueAspect": "Le pic d’écoute tombe le {peakDay} vers {peakHour}.",
+      "uniqueAspectDayOnly": "Le pic d’écoute tombe le {peakDay}.",
+      "uniqueAspectHourOnly": "Les soirées culminent vers {peakHour}.",
+      "uniqueAspectFallback": "{artistCount} artistes et {trackCount} titres sur cette période."
+    }
   },
   "musical-profile": {
     "title": "Profil musical",

@@ -359,7 +359,7 @@
     }
   },
   "askSoundprint": {
-    "eyebrow": "Analytics-native copilot",
+    "eyebrow": "Live · Soundprint chat",
     "title": "Chat with your Soundprint",
     "subtitle": "Ask about tops, streaks, late-night habits, or era-vs-era taste shifts—answers pull strictly from your stored plays and server-side aggregates.",
     "heroStatBadge": "Ground rules",
@@ -479,6 +479,12 @@
         "question": "Which songs obsessed me in a standout year from my history?"
       }
     }
+  },
+  "publicDemoAi": {
+    "demoPill": "Demo preview",
+    "signUpHint": "AI-powered reads need an account. Sign up to unlock your full musical fingerprint and insight cards.",
+    "signUp": "Sign up",
+    "signIn": "Sign in"
   },
   "settings": {
     "metaTitle": "Account settings",
@@ -1980,7 +1986,13 @@
       "human": "Human",
       "technical": "Technical"
     },
-    "loadingShort": "Loading..."
+    "loadingShort": "Loading...",
+    "publicDemoTeaser": {
+      "insightTopGenre": "{genre} accounts for {pct} of classified plays in this range.",
+      "insightTopArtist": "{artist} is your most played artist with {count} listens.",
+      "insightRhythm": "Your strongest listening rhythm shows up on {peakDay} around {peakHour}.",
+      "insightDiversity": "You explored {artistCount} artists and {trackCount} distinct tracks in this window."
+    }
   },
   "taste-evolution": {
     "title": "Taste evolution",
@@ -2065,7 +2077,18 @@
     "influences": "Influences",
     "coreGenres": "Core genres",
     "whatMakesYouUnique": "What makes you unique",
-    "footer": "Generated from your listening data • Soundprint-AI"
+    "footer": "Generated from your listening data • Soundprint-AI",
+    "publicDemoTeaser": {
+      "headline": "{genre} leads at {genrePct}, with {artist} anchoring your rotation.",
+      "headlineNoArtist": "{genre} leads at {genrePct} in this listening window.",
+      "headlineFallback": "Your listening patterns are taking shape across {listenCount} plays.",
+      "influences": "{genre1} and {genre2} shape most of your plays.",
+      "influencesSingle": "{genre} dominates your genre mix.",
+      "uniqueAspect": "Peak listening lands on {peakDay} around {peakHour}.",
+      "uniqueAspectDayOnly": "Peak listening lands on {peakDay}.",
+      "uniqueAspectHourOnly": "Evenings peak around {peakHour}.",
+      "uniqueAspectFallback": "{artistCount} artists across {trackCount} tracks in this window."
+    }
   },
   "musical-profile": {
     "title": "Musical Profile",

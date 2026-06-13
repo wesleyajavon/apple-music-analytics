@@ -9,6 +9,10 @@ import { InteractiveAiGenreBackfillNotice } from "@/lib/components/interactive-a
 import { SoundprintLogo } from "@/lib/components/soundprint-logo";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
 import { useDashboardViewerUserId } from "@/lib/context/dashboard-viewer-context";
+import { usePublicDemoViewer } from "@/lib/hooks/use-public-demo-viewer";
+import { usePublicDemoSoundprintSnapshot } from "@/lib/hooks/use-public-demo-soundprint-snapshot";
+import { useTasteProfileDemoCopy } from "@/lib/hooks/use-public-demo-ai-copy";
+import { PublicDemoAiSignupCta } from "@/lib/components/public-demo-ai-signup-cta";
 import { useInteractiveAiBlockedByGenreBackfill } from "@/lib/hooks/use-interactive-ai-blocked-by-genre-backfill";
 import { isGroqGenreClassificationBlockingError } from "@/lib/utils/groq-quota-message";
 import { CinematicQuote } from "@/lib/components/musical-profile-cinematic";
@@ -188,17 +192,90 @@ function TasteProfileBlockedShell({ children }: { children: React.ReactNode }) {
 /**
  * Overview teaser for the AI taste profile — dark editorial surface with animated favicon.
  */
+function TasteProfilePublicDemoTeaser() {
+  const t = useTranslations("taste-profile");
+  const viewerUserId = useDashboardViewerUserId();
+  const { startDate, endDate, isLoading: isRangeLoading } = useListenDateRange();
+  const { snapshot, isLoading: isSnapshotLoading } = usePublicDemoSoundprintSnapshot(
+    startDate,
+    endDate,
+    viewerUserId,
+    true
+  );
+  const demoCopy = useTasteProfileDemoCopy(snapshot);
+
+  if (isRangeLoading || isSnapshotLoading) {
+    return (
+      <div role="status" aria-label={t("loading")}>
+        <TasteProfileLoadingState />
+      </div>
+    );
+  }
+
+  if (!demoCopy) {
+    return null;
+  }
+
+  const { headline, influences, uniqueAspect } = demoCopy;
+
+  return (
+    <TasteProfileShell>
+      <SnapshotHeader
+        title={t("overviewWidget.title")}
+        description={t("overviewWidget.description")}
+        scrollCue={t("overviewWidget.scrollCue")}
+      />
+
+      <div className="grid gap-6 p-5 sm:p-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:items-start lg:gap-10">
+        <div className="min-w-0 space-y-5">
+          <div className="relative overflow-hidden rounded-[1.5rem] border border-white/10 bg-black/35 p-5 sm:p-7">
+            <div
+              className="pointer-events-none absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-accent-rose/80 via-accent-violet/70 to-accent-cyan/60"
+              aria-hidden
+            />
+            <CinematicQuote
+              quoteKey={headline}
+              className="text-balance text-xl font-semibold leading-8 tracking-[-0.03em] text-white sm:text-2xl sm:leading-9"
+            >
+              &ldquo;{headline}&rdquo;
+            </CinematicQuote>
+          </div>
+
+          <div className="grid gap-3">
+            {influences ? (
+              <SnapshotSignalStrip label={t("influences")} value={influences} />
+            ) : null}
+            <SnapshotSignalStrip label={t("whatMakesYouUnique")} value={uniqueAspect} />
+          </div>
+
+          <PublicDemoAiSignupCta variant="dark" />
+        </div>
+
+        <div className="flex items-center justify-center lg:sticky lg:top-8 lg:self-start">
+          <SnapshotFaviconMark />
+        </div>
+      </div>
+    </TasteProfileShell>
+  );
+}
+
 export function TasteProfileSummaryWidget() {
   const t = useTranslations("taste-profile");
   const viewerUserId = useDashboardViewerUserId();
+  const isPublicDemoViewer = usePublicDemoViewer(viewerUserId);
   const { startDate, endDate, isLoading: isRangeLoading } = useListenDateRange();
 
   const { data, isLoading, error } = useTasteProfile(startDate, endDate, "casual", {
     userId: viewerUserId,
+    enabled: !isPublicDemoViewer,
   });
 
   const isLoadingOrFetching = isRangeLoading || isLoading;
   const interactiveAiBlockedByGenreBackfill = useInteractiveAiBlockedByGenreBackfill();
+
+  if (isPublicDemoViewer) {
+    return <TasteProfilePublicDemoTeaser />;
+  }
 
   if (interactiveAiBlockedByGenreBackfill && !isRangeLoading) {
     return (

@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { MobileBottomSheet } from "@/lib/components/mobile-bottom-sheet";
+import { LiveStatusDot } from "@/lib/components/live-status-dot";
 import {
   DASHBOARD_SPOTLIGHT_SHELL,
   DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY,
@@ -86,7 +87,7 @@ function AskSoundprintHero({ isPublicDemoViewer }: { isPublicDemoViewer: boolean
       <div className="relative grid gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-center">
         <div>
           <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-violet-100 backdrop-blur">
-            <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_18px_rgb(22_199_132_/0.75)]" />
+            <LiveStatusDot />
             {t("eyebrow")}
           </div>
           <h1 className="flex flex-wrap items-center gap-3 text-3xl font-semibold tracking-[-0.06em] text-white sm:text-5xl lg:text-6xl">
@@ -617,7 +618,8 @@ function AskSoundprintMobileExperience({
           <div className="absolute -bottom-20 right-4 h-48 w-48 rounded-full bg-cyan-400/15 blur-3xl" />
           <div className="relative">
             <div className="flex items-center justify-between gap-3">
-              <span className="inline-flex min-h-8 items-center rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-[0.66rem] font-semibold uppercase tracking-[0.2em] text-violet-100">
+              <span className="inline-flex min-h-8 items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-[0.66rem] font-semibold uppercase tracking-[0.2em] text-violet-100">
+                <LiveStatusDot />
                 {t("mobile.eyebrow")}
               </span>
               {isPublicDemoViewer ? (

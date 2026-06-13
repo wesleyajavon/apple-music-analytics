@@ -123,6 +123,7 @@ describe("Duet compare API", () => {
       type: "artist",
       entityId: "artist-1",
       artistName: "Radiohead",
+      imageUrl: null,
       period: "day",
       startDate: timelinePayload.startDate,
       endDate: timelinePayload.endDate,

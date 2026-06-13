@@ -38,8 +38,11 @@ export default defineConfig({
       '@': path.resolve(__dirname, './'),
     },
   },
-  esbuild: {
-    jsx: "automatic",
+  // Vitest 4 uses oxc (not esbuild); override tsconfig jsx: "preserve" for Next.js.
+  oxc: {
+    jsx: {
+      runtime: 'automatic',
+    },
   },
 });
 

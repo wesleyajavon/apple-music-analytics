@@ -19,7 +19,7 @@ export default async function Home() {
       <div className="z-10 max-w-2xl w-full flex flex-col items-center text-center">
         <SoundprintLogo
           className="mb-6 flex-col gap-3"
-          imageClassName="h-36 w-36 rounded-3xl shadow-brand-glow ring-1 ring-white/10 sm:h-44 sm:w-44"
+          imageClassName="h-36 w-36 object-contain sm:h-44 sm:w-44"
           showText={false}
           priority
         />

@@ -24,16 +24,16 @@ type DemoTerminalHeroProps = {
 
 const defaultFeatures: readonly DemoTerminalFeature[] = [
   {
-    label: "Live analytics",
-    supportingText: "Behavior, trends, and context in one place",
+    label: "Then vs now",
+    supportingText: "Stack any two years.",
   },
   {
-    label: "Guided insights",
-    supportingText: "AI summaries tuned for product clarity",
+    label: "Plain talk",
+    supportingText: "Ask like you would a friend.",
   },
   {
-    label: "Fast exports",
-    supportingText: "Share polished views without extra tooling",
+    label: "Your plays only",
+    supportingText: "Real stats. No guesswork.",
   },
 ];
 
@@ -71,10 +71,10 @@ function cx(...classes: Array<string | undefined | false>) {
 export function DemoTerminalHero({
   videoSrc = "/media/demo.mp4",
   videoPoster,
-  videoLabel = "Recorded product walkthrough",
-  eyebrow = "Recorded walkthrough",
-  subtitle = "Single-app overview",
-  badge = "Desktop demo",
+  videoLabel = "Product demo",
+  eyebrow = "See it live · AI chat",
+  subtitle = "Tap a preset. Get an answer.",
+  badge = "Preview",
   features = defaultFeatures,
   showFeaturesOnMobile = true,
   className,
@@ -183,7 +183,7 @@ export function DemoTerminalHero({
               <p className="text-sm font-semibold tracking-[-0.01em] text-white">
                 {feature.label}
               </p>
-              <p className="mt-2 font-mono text-[0.66rem] font-medium uppercase leading-5 tracking-[0.22em] text-slate-500">
+              <p className="mt-1.5 text-xs leading-5 text-slate-400">
                 {feature.supportingText}
               </p>
             </div>

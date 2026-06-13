@@ -2683,9 +2683,33 @@
       "analyze": "Repérez changements, obsessions et rituels d'écoute",
       "share": "Ouvrez des dashboards polis et des résumés AI"
     },
+    "dashboardPreviews": {
+      "eyebrow": "Dans le dashboard",
+      "title": "Votre musique, pas une maquette.",
+      "subtitle": "Tendances, artistes favoris, calendrier et analyses IA — le tout tiré de votre historique d'écoute.",
+      "genreTrends": {
+        "description": "Suivez les genres qui montent et ceux qui s'effacent — mois après mois, ligne par ligne."
+      },
+      "heatmap": {
+        "description": "Un calendrier façon GitHub de votre intensité d'écoute. Les cases plus foncées signifient une rotation plus lourde."
+      },
+      "topArtists": {
+        "description": "Votre podium d'artistes avec lectures réelles et barres de part — les mêmes cartes que dans le dashboard."
+      },
+      "timeline": {
+        "description": "Votre pouls d'écoute dans le temps — repérez pics, creux et changements de momentum d'un coup d'œil."
+      },
+      "tasteProfile": {
+        "description": "Une lecture assistée par IA de votre identité musicale — genres clés, signature sonore et résumé en langage clair.",
+        "quote": "Votre file du soir glisse vers des textures épurées et mélodiques, avec un retour régulier vers l'art pop."
+      },
+      "albumSpotlight": {
+        "title": "Les albums en rotation dans votre bibliothèque.",
+        "description": "Vos disques les plus écoutés — classés par nombre de lectures réelles, avec les pochettes de votre historique."
+      }
+    },
     "featuresEyebrow": "Pourquoi c'est différent",
     "featuresTitle": "Une couche d'analytics personnelle pour les passionnés de musique.",
-    "featuresSubtitle": "Chaque surface est conçue pour rendre votre archive d'écoute rapide, visuelle et vivante.",
     "demoHighlights": {
       "artistAnalysis": {
         "eyebrow": "Analyse artiste",
@@ -2724,26 +2748,26 @@
     },
     "soundprintAiChatDemo": {
       "sectionEyebrow": "Soundprint Chat",
-      "sectionTitle": "Posez des questions à votre archive — réponses sourcées, tout de suite.",
-      "sectionSubtitle": "Creuser tops et séries, confronter deux époques ou raconter vos nuits tardives : l’agent s’appuie uniquement sur vos analytics issue des imports — jamais d’écoute inventée.",
-      "heroEyebrow": "Parcours enregistré · chat IA",
-      "heroSubtitle": "Même mise en avant que la grande démo : presets, transcripts et citations autour de vos données.",
-      "heroBadge": "Démo IA",
-      "videoLabel": "Enregistrement de démo Soundprint Chat",
-      "cta": "Ouvrir Soundprint Chat (démo publique)",
-      "ctaSignedIn": "Ouvrir votre Soundprint Chat",
+      "sectionTitle": "Posez n'importe quelle question à votre musique.",
+      "sectionSubtitle": "Comparez des époques, creusez vos obsessions ou demandez en langage simple — le tout à partir de vos vraies écoutes.",
+      "heroEyebrow": "En direct · chat IA",
+      "heroSubtitle": "Un preset. Une réponse.",
+      "heroBadge": "Aperçu",
+      "videoLabel": "Démo Soundprint Chat",
+      "cta": "Essayer le chat démo",
+      "ctaSignedIn": "Ouvrir Soundprint Chat",
       "features": {
         "compareEras": {
-          "label": "Comparer des chapitres",
-          "supporting": "ANNÉE VS ANNÉE · VOLUMES · RÉCITS DE CHANGEMENTS DE GOÛT"
+          "label": "Avant / après",
+          "supporting": "Deux années, côte à côte."
         },
         "plainLanguage": {
-          "label": "Comme avec un ami",
-          "supporting": "DEEP DIVES ARTISTE · GENRES · TEXTE LIBRE CONNECTÉ"
+          "label": "En clair",
+          "supporting": "Comme à un ami qui vous connaît."
         },
         "groundedAnswers": {
-          "label": "Des réponses traçables",
-          "supporting": "LECTURE SEULE · FILTRES DASHBOARD · PAS DE HACK PLAYLIST"
+          "label": "Vos écoutes",
+          "supporting": "Des chiffres réels. Zéro invention."
         }
       }
     },

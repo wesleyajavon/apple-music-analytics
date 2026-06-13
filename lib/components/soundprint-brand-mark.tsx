@@ -21,18 +21,11 @@ type SoundprintBrandMarkProps = {
   wordmarkClassName?: string;
 };
 
-const ICON_SHELL: Record<BrandMarkSize, string> = {
-  sm: "h-8 w-8",
-  md: "h-10 w-10 sm:h-11 sm:w-11",
-  lg: "h-11 w-11",
-  xl: "h-28 w-28 sm:h-32 sm:w-32",
-};
-
 const ICON_IMAGE: Record<BrandMarkSize, string> = {
-  sm: "h-6 w-6 rounded-lg",
-  md: "h-7 w-7 rounded-xl sm:h-8 sm:w-8",
-  lg: "h-8 w-8 rounded-xl",
-  xl: "h-24 w-24 rounded-2xl sm:h-28 sm:w-28",
+  sm: "h-8 w-8 object-contain",
+  md: "h-10 w-10 object-contain sm:h-11 sm:w-11",
+  lg: "h-11 w-11 object-contain",
+  xl: "h-28 w-28 object-contain sm:h-32 sm:w-32",
 };
 
 const NAME_TEXT: Record<BrandMarkSize, string> = {
@@ -50,7 +43,7 @@ const GAP: Record<BrandMarkSize, string> = {
 };
 
 /**
- * Marque Soundprint cohérente : favicon dans un carré dégradé + wordmark + badge AI.
+ * Marque Soundprint cohérente : favicon transparent + wordmark + badge AI.
  * Utilisée sur la page de connexion, la sidebar, les en-têtes et les pages légales.
  */
 export function SoundprintBrandMark({
@@ -113,9 +106,7 @@ export function SoundprintBrandMark({
 
   return (
     <span className={`inline-flex min-w-0 items-center ${GAP[size]} ${className}`}>
-      <span
-        className={`relative flex shrink-0 items-center justify-center rounded-2xl bg-brand-gradient shadow-brand-glow ring-1 ring-white/20 ${ICON_SHELL[size]} ${iconShellInteractive}`}
-      >
+      <span className={`relative flex shrink-0 items-center justify-center ${iconShellInteractive}`}>
         <SoundprintLogo
           src="/brand/favicon.png"
           showText={false}

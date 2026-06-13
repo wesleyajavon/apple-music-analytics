@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 
 const NAV_ITEMS = [
   { href: "#product", labelKey: "product" },
-  { href: "#insights", labelKey: "insights" },
+  { href: "#dashboard-widgets", labelKey: "insights" },
   { href: "#demo", labelKey: "demo" },
   { href: "#soundprint-ai-chat", labelKey: "aiChat" },
 ] as const;

@@ -2683,9 +2683,33 @@
       "analyze": "Find shifts, obsessions, and listening rituals",
       "share": "Open polished dashboards and AI summaries"
     },
+    "dashboardPreviews": {
+      "eyebrow": "Inside the dashboard",
+      "title": "Your music, not a mockup.",
+      "subtitle": "Trends, top artists, calendars, and AI insights — built from your actual listening history.",
+      "genreTrends": {
+        "description": "Track which genres are surging and which are fading — month by month, line by line."
+      },
+      "heatmap": {
+        "description": "A GitHub-style calendar of your listening intensity. Darker tiles mean heavier rotation."
+      },
+      "topArtists": {
+        "description": "Your podium artists with real listen counts and share bars — the same ranking cards from the dashboard."
+      },
+      "timeline": {
+        "description": "Your listening pulse over time — spot spikes, dips, and momentum shifts at a glance."
+      },
+      "tasteProfile": {
+        "description": "An AI-assisted read of your musical identity — core genres, signature sound, and a plain-language snapshot.",
+        "quote": "Your late-night queue drifts toward sparse, melodic textures with a steady pull back to art pop."
+      },
+      "albumSpotlight": {
+        "title": "The albums on repeat in your library.",
+        "description": "Your most-played records — ranked by real listen counts, with covers pulled straight from your history."
+      }
+    },
     "featuresEyebrow": "Why it feels different",
     "featuresTitle": "A personal analytics layer for music people.",
-    "featuresSubtitle": "Every surface is designed to make your listening archive feel fast, visual, and alive.",
     "demoHighlights": {
       "artistAnalysis": {
         "eyebrow": "Artist intelligence",
@@ -2724,26 +2748,26 @@
     },
     "soundprintAiChatDemo": {
       "sectionEyebrow": "Soundprint Chat",
-      "sectionTitle": "Ask your archive out loud—instant, tool-backed replies.",
-      "sectionSubtitle": "Dig into tops and streaks, stack one era against another, or narrate late-night moods. The assistant only answers from analytics built on your imports—never made-up listens.",
-      "heroEyebrow": "Recorded walkthrough · AI chat",
-      "heroSubtitle": "Same spotlight layout as our hero demo—you see presets, transcripts, and how answers cite your data.",
-      "heroBadge": "AI demo",
-      "videoLabel": "Soundprint Chat AI assistant demo recording",
-      "cta": "Open Soundprint Chat (public demo)",
-      "ctaSignedIn": "Open your Soundprint Chat",
+      "sectionTitle": "Ask your music anything.",
+      "sectionSubtitle": "Compare eras, chase obsessions, or just ask in plain language—all from your real listening data.",
+      "heroEyebrow": "See it live · AI chat",
+      "heroSubtitle": "Tap a preset. Get an answer.",
+      "heroBadge": "Preview",
+      "videoLabel": "Soundprint Chat demo",
+      "cta": "Try the demo chat",
+      "ctaSignedIn": "Open Soundprint Chat",
       "features": {
         "compareEras": {
-          "label": "Compare chapters",
-          "supporting": "YEAR VS YEAR · VOLUME CURVES · TASTE SHIFT STORIES"
+          "label": "Then vs now",
+          "supporting": "Stack any two years."
         },
         "plainLanguage": {
-          "label": "Talk like a fan",
-          "supporting": "ARTIST DEEP DIVES · GENRE SHARES · FREE TEXT WHEN SIGNED IN"
+          "label": "Plain talk",
+          "supporting": "Ask like you would a friend."
         },
         "groundedAnswers": {
-          "label": "Answers you can trace",
-          "supporting": "READ-ONLY TOOLS · DASH FILTERS RESPECTED · NO PLAYLIST HACKS"
+          "label": "Your plays only",
+          "supporting": "Real stats. No guesswork."
         }
       }
     },

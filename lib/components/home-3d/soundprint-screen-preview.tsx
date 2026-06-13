@@ -65,15 +65,13 @@ export function SoundprintScreenPreview() {
       {/* Sidebar */}
       <aside className="flex w-[72px] shrink-0 flex-col border-r border-[#28213c]/80 bg-[#090a12] px-2 py-3">
         <div className="mb-4 flex flex-col items-center gap-1">
-          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-[#f04068] via-[#9850d0] to-[#4f90e0] p-1 shadow-[0_0_20px_rgb(152_80_208_/_0.35)]">
-            <Image
-              src="/brand/favicon.png"
-              alt=""
-              width={32}
-              height={32}
-              className="h-6 w-6 rounded-lg object-cover"
-            />
-          </div>
+          <Image
+            src="/brand/favicon.png"
+            alt=""
+            width={32}
+            height={32}
+            className="h-8 w-8 object-contain"
+          />
           <span className="text-[0.45rem] font-bold uppercase tracking-[0.12em] text-[#b06cff]">AI</span>
         </div>
         <nav className="flex flex-1 flex-col gap-1">

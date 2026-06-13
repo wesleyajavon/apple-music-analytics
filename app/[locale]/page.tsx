@@ -7,11 +7,13 @@ import { useTranslations } from "next-intl";
 import { LanguageSwitcher } from "@/lib/components/language-switcher";
 import { Footer } from "@/lib/components/footer";
 import { SoundprintBrandMark } from "@/lib/components/soundprint-brand-mark";
+import { SoundprintBrandDividerSection } from "@/lib/components/soundprint-brand-divider";
 import { SoundprintLogo } from "@/lib/components/soundprint-logo";
 import { ThemeSwitcher } from "@/lib/components/theme-switcher";
 import { DemoTerminalHero } from "@/lib/components/demo-terminal-hero";
 import { Home3DHero } from "@/lib/components/home-3d/home-3d-hero";
 import { HomeMobileNav } from "@/lib/components/home-mobile-nav";
+import { HomeDashboardPreviewsSection } from "@/lib/components/home-dashboard-previews";
 import { HomeMobileStickyCta } from "@/lib/components/home-mobile-sticky-cta";
 import { StreamingProviderLogos } from "@/lib/components/streaming-provider-logos";
 import { UserAvatar } from "@/lib/components/user-avatar";
@@ -155,27 +157,6 @@ export default function Home() {
     },
   ] as const;
 
-  const featureCards = [
-    {
-      id: "timeline",
-      title: t("features.timeline.title"),
-      description: t("features.timeline.description"),
-      accent: "from-accent-rose/20 to-accent-violet/10",
-    },
-    {
-      id: "genres",
-      title: t("features.genresArtists.title"),
-      description: t("features.genresArtists.description"),
-      accent: "from-accent-cyan/20 to-accent-indigo/10",
-    },
-    {
-      id: "ai",
-      title: t("features.aiInsights.title"),
-      description: t("features.aiInsights.description"),
-      accent: "from-accent-emerald/20 to-accent-cyan/10",
-    },
-  ] as const;
-
   const closingHighlights = [
     {
       label: t("closingCta.highlights.import.label"),
@@ -260,7 +241,7 @@ export default function Home() {
               <a href="#product" className="transition-colors hover:text-foreground">
                 {t("nav.product")}
               </a>
-              <a href="#insights" className="transition-colors hover:text-foreground">
+              <a href="#dashboard-widgets" className="transition-colors hover:text-foreground">
                 {t("nav.insights")}
               </a>
               <a href="#demo" className="transition-colors hover:text-foreground">
@@ -460,7 +441,7 @@ export default function Home() {
                     <SoundprintLogo
                       src="/brand/favicon.png"
                       showText={false}
-                      imageClassName="h-6 w-6 rounded-lg ring-1 ring-white/15"
+                      imageClassName="h-6 w-6 object-contain"
                     />
                     <p className="font-mono text-[0.65rem] uppercase tracking-[0.22em] text-slate-400">
                       {t("productPreview.label")}
@@ -574,6 +555,13 @@ export default function Home() {
           </div>
         </section>
 
+        <SoundprintBrandDividerSection
+          logoSize="lg"
+          lineStyle="fade"
+          maxWidth="medium"
+          className="py-8 sm:py-12"
+        />
+
         <section className="relative mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
           <Home3DHero
             variant="ambient"
@@ -581,141 +569,70 @@ export default function Home() {
           />
         </section>
 
+        <HomeDashboardPreviewsSection />
+
+        <SoundprintBrandDividerSection
+          logoSize="xl"
+          className="py-6 sm:py-10"
+        />
+
         <section
-          id="insights"
-          className="relative mx-auto w-full max-w-7xl scroll-mt-24 px-4 pb-10 sm:px-6 sm:pb-20 lg:px-8"
+          id="soundprint-ai-chat"
+          className="mx-auto w-full max-w-7xl scroll-mt-24 px-4 pb-12 sm:px-6 sm:pb-20 lg:px-8"
         >
-          <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-            <div>
-              <p className="font-mono text-xs font-semibold uppercase tracking-[0.28em] text-primary">
-                {t("featuresEyebrow")}
-              </p>
-              <h2 className="mt-3 max-w-2xl text-2xl font-semibold tracking-[-0.04em] text-foreground sm:text-5xl">
-                {t("featuresTitle")}
-              </h2>
-            </div>
-            <p className="max-w-md text-base leading-7 text-muted">
-              {t("featuresSubtitle")}
+          <div className="mb-10 text-center lg:mb-12">
+            <p className="font-mono text-xs font-semibold uppercase tracking-[0.28em] text-primary">
+              {t("soundprintAiChatDemo.sectionEyebrow")}
             </p>
+            <h2 className="mx-auto mt-3 max-w-4xl text-2xl font-semibold tracking-[-0.04em] text-foreground sm:text-5xl">
+              {t("soundprintAiChatDemo.sectionTitle")}
+            </h2>
           </div>
 
-          <div className="grid gap-3 md:hidden">
-            {featureCards.map((feature) => (
-              <div
-                key={feature.title}
-                className="flex items-start gap-3 rounded-2xl border border-card-border bg-card-surface p-4 shadow-card"
-              >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-brand-gradient p-1.5 shadow-brand-glow ring-1 ring-white/20">
-                  <SoundprintLogo
-                    src="/brand/favicon.png"
-                    showText={false}
-                    imageClassName="h-full w-full rounded-xl"
-                  />
-                </div>
-                <div>
-                  <h3 className="text-base font-semibold tracking-tight text-foreground">
-                    {feature.title}
-                  </h3>
-                  <p className="mt-1 text-sm leading-6 text-muted">
-                    {feature.description}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
+          <DemoTerminalHero
+            videoSrc="/media/aichat.mp4"
+            videoLabel={t("soundprintAiChatDemo.videoLabel")}
+            eyebrow={t("soundprintAiChatDemo.heroEyebrow")}
+            subtitle={t("soundprintAiChatDemo.heroSubtitle")}
+            badge={t("soundprintAiChatDemo.heroBadge")}
+            features={soundprintAiChatFeatures}
+            showFeaturesOnMobile={false}
+            className="max-w-6xl"
+          />
 
-          <div className="hidden gap-4 md:grid lg:grid-cols-3">
-            {featureCards.map((feature) => (
-              <div
-                key={feature.title}
-                className="group relative overflow-hidden rounded-3xl border border-card-border bg-card-surface p-6 shadow-card transition-all hover:-translate-y-1 hover:shadow-card-hover"
-              >
-                <div
-                  className={`absolute inset-x-0 top-0 h-28 bg-gradient-to-br ${feature.accent} opacity-80 transition-opacity group-hover:opacity-100`}
-                  aria-hidden
-                />
-                <div
-                  className="pointer-events-none absolute -right-10 -top-10 opacity-[0.06] transition-opacity group-hover:opacity-[0.1]"
-                  aria-hidden
-                >
-                  <SoundprintLogo
-                    src="/brand/favicon.png"
-                    showText={false}
-                    imageClassName="h-32 w-32 rounded-[2rem]"
-                  />
-                </div>
-                <div className="relative">
-                  <div className="mb-8 flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-gradient p-1.5 shadow-brand-glow ring-1 ring-white/20 transition-transform group-hover:rotate-[-2deg] group-hover:scale-105">
-                    <SoundprintLogo
-                      src="/brand/favicon.png"
-                      showText={false}
-                      imageClassName="h-full w-full rounded-xl"
-                    />
-                  </div>
-                  <div className="mb-6 rounded-2xl border border-card-border/80 bg-surface-glass/70 p-3 backdrop-blur">
-                    {feature.id === "timeline" ? (
-                      <div className="flex h-20 items-end gap-1.5">
-                        {[28, 52, 38, 74, 46, 88, 58, 66, 44, 80].map(
-                          (height, index) => (
-                            <div
-                              key={`${height}-${index}`}
-                              className="flex-1 rounded-full bg-gradient-to-t from-accent-rose via-accent-violet to-accent-cyan opacity-85 transition-opacity group-hover:opacity-100"
-                              style={{ height: `${height}%` }}
-                              aria-hidden
-                            />
-                          ),
-                        )}
-                      </div>
-                    ) : null}
-                    {feature.id === "genres" ? (
-                      <div className="grid h-20 grid-cols-4 gap-2">
-                        {[
-                          "bg-accent-rose",
-                          "bg-accent-violet",
-                          "bg-accent-cyan",
-                          "bg-accent-emerald",
-                          "bg-accent-indigo",
-                          "bg-accent-pink",
-                          "bg-accent-cyan/70",
-                          "bg-accent-violet/70",
-                        ].map((className, index) => (
-                          <span
-                            key={`${className}-${index}`}
-                            className={`rounded-2xl ${className} shadow-sm transition-transform group-hover:scale-105`}
-                            aria-hidden
-                          />
-                        ))}
-                      </div>
-                    ) : null}
-                    {feature.id === "ai" ? (
-                      <div className="flex h-20 flex-col justify-center gap-2">
-                        <div className="max-w-[88%] rounded-2xl rounded-bl-md bg-slate-950 px-3 py-2 text-xs font-semibold text-white shadow-sm">
-                          {t("features.aiInsights.demoQuestion")}
-                        </div>
-                        <div className="ml-auto max-w-[86%] rounded-2xl rounded-br-md border border-primary/15 bg-primary/10 px-3 py-2 text-xs font-semibold text-primary">
-                          {t("features.aiInsights.demoAnswer")}
-                        </div>
-                      </div>
-                    ) : null}
-                  </div>
-                  <h3 className="text-xl font-semibold tracking-tight text-foreground">
-                    {feature.title}
-                  </h3>
-                  <p className="mt-3 text-sm leading-6 text-muted">
-                    {feature.description}
-                  </p>
-                </div>
-              </div>
-            ))}
+          <div className="mt-10 flex justify-center">
+            <Link
+              href={
+                isAuthenticated
+                  ? "/dashboard/ask-your-soundprint"
+                  : publicProfileId
+                    ? withPublicDemoUserId("/dashboard/ask-your-soundprint", publicProfileId)
+                    : "/sign-in"
+              }
+              className="inline-flex min-h-11 w-full max-w-md items-center justify-center gap-2 rounded-xl bg-brand-gradient px-6 py-3 text-sm font-semibold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:opacity-95 sm:w-auto"
+            >
+              {t(
+                isAuthenticated
+                  ? "soundprintAiChatDemo.ctaSignedIn"
+                  : "soundprintAiChatDemo.cta",
+              )}
+              <ArrowRightIcon />
+            </Link>
           </div>
         </section>
+
+        <SoundprintBrandDividerSection
+          logoSize="md"
+          lineStyle="gradient"
+          maxWidth="narrow"
+          sectionClassName="hidden md:block"
+          className="py-6 sm:py-8"
+        />
 
         <section
           id="demo"
           className="mx-auto w-full max-w-7xl scroll-mt-24 px-4 pb-10 sm:px-6 sm:pb-20 lg:px-8"
         >
-          <DemoTerminalHero className="mb-8" />
-
           <div className="mb-8 hidden text-center md:block">
             <p className="font-mono text-xs font-semibold uppercase tracking-[0.28em] text-primary">
               {t("demoHighlightsSection.eyebrow")}
@@ -771,53 +688,12 @@ export default function Home() {
           </div>
         </section>
 
-        <section
-          id="soundprint-ai-chat"
-          className="mx-auto w-full max-w-7xl scroll-mt-24 px-4 pb-12 sm:px-6 sm:pb-20 lg:px-8"
-        >
-          <div className="mb-10 text-center lg:mb-12">
-            <p className="font-mono text-xs font-semibold uppercase tracking-[0.28em] text-primary">
-              {t("soundprintAiChatDemo.sectionEyebrow")}
-            </p>
-            <h2 className="mx-auto mt-3 max-w-4xl text-2xl font-semibold tracking-[-0.04em] text-foreground sm:text-5xl">
-              {t("soundprintAiChatDemo.sectionTitle")}
-            </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-muted sm:text-lg">
-              {t("soundprintAiChatDemo.sectionSubtitle")}
-            </p>
-          </div>
-
-          <DemoTerminalHero
-            videoSrc="/media/aichat.mp4"
-            videoLabel={t("soundprintAiChatDemo.videoLabel")}
-            eyebrow={t("soundprintAiChatDemo.heroEyebrow")}
-            subtitle={t("soundprintAiChatDemo.heroSubtitle")}
-            badge={t("soundprintAiChatDemo.heroBadge")}
-            features={soundprintAiChatFeatures}
-            showFeaturesOnMobile={false}
-            className="max-w-6xl"
-          />
-
-          <div className="mt-10 flex justify-center">
-            <Link
-              href={
-                isAuthenticated
-                  ? "/dashboard/ask-your-soundprint"
-                  : publicProfileId
-                    ? withPublicDemoUserId("/dashboard/ask-your-soundprint", publicProfileId)
-                    : "/sign-in"
-              }
-              className="inline-flex min-h-11 w-full max-w-md items-center justify-center gap-2 rounded-xl bg-brand-gradient px-6 py-3 text-sm font-semibold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:opacity-95 sm:w-auto"
-            >
-              {t(
-                isAuthenticated
-                  ? "soundprintAiChatDemo.ctaSignedIn"
-                  : "soundprintAiChatDemo.cta",
-              )}
-              <ArrowRightIcon />
-            </Link>
-          </div>
-        </section>
+        <SoundprintBrandDividerSection
+          logoSize="lg"
+          lineStyle="fade"
+          maxWidth="medium"
+          className="py-8 sm:py-12"
+        />
 
         <section className="mx-auto w-full max-w-7xl px-4 pb-28 sm:px-6 sm:pb-24 md:pb-24 lg:px-8">
           <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950 px-5 py-8 shadow-2xl shadow-black/20 sm:px-8 sm:py-12 lg:px-10 lg:py-14">
@@ -836,13 +712,12 @@ export default function Home() {
 
             <div className="relative grid gap-8 lg:grid-cols-[1.08fr_0.92fr] lg:items-center">
               <div className="text-center lg:text-left">
-                <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-3xl bg-brand-gradient p-2 shadow-brand-glow ring-1 ring-white/20 lg:mx-0">
-                  <SoundprintLogo
-                    src="/brand/favicon.png"
-                    showText={false}
-                    imageClassName="h-full w-full rounded-2xl"
-                  />
-                </div>
+                <SoundprintLogo
+                  src="/brand/favicon.png"
+                  showText={false}
+                  className="mx-auto mb-5 lg:mx-0"
+                  imageClassName="h-16 w-16 object-contain"
+                />
                 <p className="font-mono text-xs font-semibold uppercase tracking-[0.28em] text-cyan-200">
                   {t("closingCta.eyebrow")}
                 </p>

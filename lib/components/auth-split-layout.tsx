@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { AuthPreviewPanel } from "@/lib/components/auth-preview-panel";
+import { SoundprintBrandDivider } from "@/lib/components/soundprint-brand-divider";
 
 type AuthSplitLayoutProps = {
   children: React.ReactNode;
@@ -21,6 +22,12 @@ export function AuthSplitLayout({ children }: AuthSplitLayoutProps) {
       <AuthPreviewPanel />
 
       <div className="relative z-10 flex min-h-0 flex-1 flex-col lg:max-w-[44%] xl:max-w-[48%]">
+        <SoundprintBrandDivider
+          orientation="vertical"
+          tone="onDark"
+          className="pointer-events-none absolute inset-y-0 right-0 z-20 hidden -translate-x-1/2 lg:flex"
+        />
+
         <div className="flex flex-1 flex-col justify-center px-6 pb-8 pt-24 sm:px-10 sm:pb-10 lg:items-center lg:px-8 lg:pb-12 lg:pt-32 xl:px-10">
           <div className="w-full max-w-[24rem] lg:max-w-[27rem]">
             <div className="auth-form-surface lg:rounded-[2rem] lg:border lg:border-white/10 lg:bg-white/[0.045] lg:p-8 lg:shadow-[inset_0_1px_0_0_rgb(255_255_255_/_0.08),0_32px_80px_-40px_rgb(0_0_0_/_0.65)] lg:backdrop-blur-2xl xl:p-10 [&_.text-muted]:lg:text-white/55">

@@ -402,16 +402,14 @@ function MobileMusicalProfileView({
         <CinematicLightSweep />
         <CinematicStagger className="relative space-y-5" delay={0.15}>
           <div className="flex items-center justify-between gap-3">
-            <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-2xl border border-white/15 bg-white/10 p-1.5 shadow-lg shadow-black/20 ring-1 ring-white/10">
-              <Image
-                src="/brand/favicon.png"
-                alt={t("overviewCallout.philosophyLogoAlt")}
-                width={80}
-                height={80}
-                className="h-full w-full rounded-xl object-cover"
-                priority
-              />
-            </div>
+            <Image
+              src="/brand/favicon.png"
+              alt={t("overviewCallout.philosophyLogoAlt")}
+              width={80}
+              height={80}
+              className="h-10 w-10 object-contain"
+              priority
+            />
             <MusicalProfilePeriodBadge
               startDate={startDate}
               endDate={endDate}
@@ -1036,15 +1034,13 @@ function MusicalProfileContent() {
               />
               <div className="relative flex flex-col gap-6 sm:flex-row sm:items-start">
                 <div className="shrink-0">
-                  <div className="relative h-14 w-14 overflow-hidden rounded-2xl border border-accent-violet/25 bg-card-surface shadow-lg shadow-accent-violet/20 ring-1 ring-accent-violet/15">
-                    <Image
-                      src="/brand/favicon.png"
-                      alt={t("overviewCallout.philosophyLogoAlt")}
-                      width={112}
-                      height={112}
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
+                  <Image
+                    src="/brand/favicon.png"
+                    alt={t("overviewCallout.philosophyLogoAlt")}
+                    width={112}
+                    height={112}
+                    className="h-14 w-14 object-contain"
+                  />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
@@ -1079,15 +1075,13 @@ function MusicalProfileContent() {
           <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-accent-cyan/60 to-transparent" />
           <div className="relative grid gap-8 p-6 sm:p-8 lg:grid-cols-[0.8fr_1.2fr] lg:p-10">
             <div>
-              <div className="mb-5 h-14 w-14 shrink-0 overflow-hidden rounded-2xl border border-accent-violet/25 bg-card-surface shadow-lg shadow-accent-violet/20 ring-1 ring-accent-violet/15">
-                <Image
-                  src="/brand/favicon.png"
-                  alt=""
-                  width={112}
-                  height={112}
-                  className="h-full w-full object-cover"
-                />
-              </div>
+              <Image
+                src="/brand/favicon.png"
+                alt=""
+                width={112}
+                height={112}
+                className="mb-5 h-14 w-14 object-contain"
+              />
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-accent-violet">
                 {t("sections.sonicIdentity")}
               </p>

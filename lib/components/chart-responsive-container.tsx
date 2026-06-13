@@ -22,7 +22,8 @@ export function ChartResponsiveContainer({
   minWidth,
   heightOverride,
 }: ChartResponsiveContainerProps) {
-  const height = heightOverride ?? useChartHeight(token);
+  const tokenHeight = useChartHeight(token);
+  const height = heightOverride ?? tokenHeight;
   const isLg = useIsLgChartViewport();
   const enableScroll = !isLg && minWidth != null && minWidth > 0;
 

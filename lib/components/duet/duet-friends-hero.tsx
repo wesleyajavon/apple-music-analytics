@@ -30,11 +30,6 @@ export function DuetFriendsHero({
 
       <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] lg:items-center">
         <div>
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-100 backdrop-blur">
-            <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_18px_rgb(22_199_132_/0.75)]" />
-            {t("heroEyebrow")}
-          </div>
-
           <h1 className="flex flex-wrap items-center gap-3 text-3xl font-semibold tracking-[-0.06em] text-white sm:text-5xl lg:text-6xl">
             <Users className="h-9 w-9 shrink-0 text-cyan-200/90 sm:h-11 sm:w-11" aria-hidden />
             <span className="max-w-4xl text-balance">{t("heroTitle")}</span>

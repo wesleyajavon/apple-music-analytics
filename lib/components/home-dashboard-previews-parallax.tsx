@@ -83,7 +83,7 @@ type HomeDashboardPreviewsParallaxProps = {
 export function HomeDashboardPreviewsParallax({
   children,
 }: HomeDashboardPreviewsParallaxProps) {
-  const sectionRef = useRef<HTMLElement>(null);
+  const sectionRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
   const { scrollYProgress } = useScroll({
     target: sectionRef,

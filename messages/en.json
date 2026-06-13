@@ -2625,13 +2625,13 @@
   "home": {
     "title": "Soundprint-AI",
     "heroEyebrow": "Public demo available",
-    "heroGradient": "real insights.",
-    "welcome": "Turn your streaming history into",
+    "heroGradient": "your music decoded.",
+    "welcome": "Welcome to Soundprint-AI",
     "welcomePersonal": "Welcome back, {name}",
     "supportedStreamingCaption": "Works with",
     "spotifyLogoAlt": "Spotify",
     "appleMusicLogoAlt": "Apple Music",
-    "subtitle": "See your music taste evolution, hidden patterns, and stats Apple/Spotify don't show you.",
+    "subtitle": "Import once from Apple Music or Spotify—then explore trends, chat with your listening data, and compare plays with friends on any artist.",
     "heroPrimaryCta": "Reveal your Soundprint",
     "heroProof": {
       "private": "Private by design",
@@ -2652,36 +2652,38 @@
       "closeMenu": "Close menu",
       "menuLabel": "Page sections"
     },
-    "productPreview": {
-      "label": "Soundprint cockpit",
-      "cardTitle": "Listening minutes",
-      "cardMeta": "+24% vs previous period",
-      "chartBar": "Preview chart bar {index}",
-      "liveBadge": "Live",
-      "waveformLabel": "Taste pulse",
-      "insightEyebrow": "Something we noticed",
-      "insightTitle": "Your music sounds different after midnight.",
-      "insightCopy": "Import your history once and see the artists, moods, and moments that show how you really listen—not just your top ten.",
+    "duetPreview": {
+      "label": "Duet preview",
+      "liveBadge": "Demo",
+      "arenaEyebrow": "Artist duel",
+      "artistName": "Tyler, The Creator",
+      "periodMeta": "Last 90 days · same filters",
+      "selfName": "You",
+      "selfInitials": "YO",
+      "friendName": "Maya",
+      "friendInitials": "MY",
+      "winnerHeadline": "You stream more Tyler.",
+      "insightEyebrow": "Head-to-head",
+      "insightCopy": "Add a friend, pick any artist, and see who really dominates—plays counted from your actual libraries.",
+      "trendLabel": "Plays over time",
       "signalRows": {
-        "topTrack": "Most played track",
-        "shift": "Genre on the rise",
-        "artist": "Favorite artist"
+        "yourPlays": "Your plays",
+        "friendPlays": "{friendName}'s plays",
+        "margin": "Your lead"
       },
       "signalValues": {
-        "topTrack": "WAIT FOR U",
-        "shift": "Electronic",
-        "artist": "Future"
+        "margin": "+235 plays"
       },
-      "genrePills": {
-        "indie": "Indie",
-        "electronic": "Electronic",
-        "altPop": "Alt pop"
+      "arenaModes": {
+        "artist": "Artist",
+        "track": "Track",
+        "genre": "Genre"
+      },
+      "workflow": {
+        "step1": "Add a friend from your invite link",
+        "step2": "Pick an artist, track, or genre",
+        "step3": "See who wins—and share the scorecard"
       }
-    },
-    "workflow": {
-      "import": "Import Apple Music or Spotify history",
-      "analyze": "Find shifts, obsessions, and listening rituals",
-      "share": "Open polished dashboards and AI summaries"
     },
     "dashboardPreviews": {
       "eyebrow": "Inside the dashboard",

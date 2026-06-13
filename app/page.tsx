@@ -24,10 +24,10 @@ export default async function Home() {
           priority
         />
         <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-4 tracking-tight">
-          Turn your streaming history into real insights.
+          Welcome to Soundprint-AI your music decoded.
         </h1>
         <p className="text-muted text-lg mb-6 max-w-md">
-          See your music taste evolution, hidden patterns, and stats Apple/Spotify don&apos;t show you.
+          Import once from Apple Music or Spotify—then explore trends, chat with your listening data, and compare plays with friends on any artist.
         </p>
         <StreamingProviderLogos
           caption="Works with"

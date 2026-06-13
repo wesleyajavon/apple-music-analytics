@@ -14,6 +14,7 @@ import { DemoTerminalHero } from "@/lib/components/demo-terminal-hero";
 import { Home3DHero } from "@/lib/components/home-3d/home-3d-hero";
 import { HomeMobileNav } from "@/lib/components/home-mobile-nav";
 import { HomeDashboardPreviewsSection } from "@/lib/components/home-dashboard-previews";
+import { HomeDuetPreview } from "@/lib/components/home-duet-preview";
 import { HomeMobileStickyCta } from "@/lib/components/home-mobile-sticky-cta";
 import { StreamingProviderLogos } from "@/lib/components/streaming-provider-logos";
 import { UserAvatar } from "@/lib/components/user-avatar";
@@ -172,44 +173,6 @@ export default function Home() {
     },
   ];
 
-  const workflowSteps = [
-    t("workflow.import"),
-    t("workflow.analyze"),
-    t("workflow.share"),
-  ];
-
-  const productSignalRows = [
-    {
-      label: t("productPreview.signalRows.topTrack"),
-      value: t("productPreview.signalValues.topTrack"),
-      accentClassName: "bg-accent-rose",
-    },
-    {
-      label: t("productPreview.signalRows.shift"),
-      value: t("productPreview.signalValues.shift"),
-      accentClassName: "bg-accent-violet",
-    },
-    {
-      label: t("productPreview.signalRows.artist"),
-      value: t("productPreview.signalValues.artist"),
-      accentClassName: "bg-accent-cyan",
-    },
-  ];
-
-  const productWaveBars = [34, 62, 48, 78, 56, 92, 66, 44, 72, 58];
-
-  const productGenrePills = [
-    t("productPreview.genrePills.indie"),
-    t("productPreview.genrePills.electronic"),
-    t("productPreview.genrePills.altPop"),
-  ];
-
-  const heroProofPills = [
-    t("heroProof.private"),
-    t("heroProof.demoFirst"),
-    t("heroProof.appleSpotify"),
-  ];
-
   const soundprintAiChatFeatures = useMemo(
     () =>
       (
@@ -333,9 +296,15 @@ export default function Home() {
             ) : publicDemoPath ? (
               <Link
                 href={publicDemoPath}
-                className="group mb-6 inline-flex items-center gap-2 rounded-full border border-card-border bg-card-surface px-3 py-1.5 text-sm font-semibold text-primary shadow-card backdrop-blur transition-all hover:-translate-y-0.5 hover:shadow-card-hover"
+                className="group mb-6 inline-flex items-center gap-2.5 rounded-full border border-card-border bg-card-surface px-3 py-1.5 text-sm font-semibold text-primary shadow-card backdrop-blur transition-all hover:-translate-y-0.5 hover:shadow-card-hover"
               >
-                <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_16px_rgb(22_199_132_/0.7)]" />
+                <span
+                  className="relative inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 ring-1 ring-emerald-400/35"
+                  aria-hidden
+                >
+                  <span className="absolute inline-flex h-2.5 w-2.5 animate-ping rounded-full bg-emerald-400/80" />
+                  <span className="relative h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgb(52_211_153_/0.95)]" />
+                </span>
                 {t("heroEyebrow")}
                 <ArrowRightIcon className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
               </Link>
@@ -370,189 +339,18 @@ export default function Home() {
                   <ArrowRightIcon />
                 </Link>
               ) : (
-                <>
-                  <Link
-                    href="/sign-up"
-                    className="hidden min-h-12 items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-7 py-3 text-sm font-semibold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:opacity-95 md:inline-flex"
-                  >
-                    {t("heroPrimaryCta")}
-                    <ArrowRightIcon />
-                  </Link>
-                  <Link
-                    href="/sign-in"
-                    className="hidden min-h-12 items-center justify-center rounded-2xl border border-card-border bg-surface-glass px-6 py-3 text-sm font-semibold text-foreground backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-card-surface md:inline-flex"
-                  >
-                    {tAuth("signIn")}
-                  </Link>
-                </>
-              )}
-              {publicDemoPath ? (
                 <Link
-                  href={publicDemoPath}
-                  className={`group inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-transparent bg-brand-gradient px-6 py-3 text-center text-sm font-semibold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:opacity-95 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background md:w-auto md:bg-none md:shadow-none md:hover:opacity-100 md:active:scale-100 ${
-                    isAuthenticated
-                      ? "md:border-card-border md:bg-surface-glass md:text-muted md:backdrop-blur md:hover:bg-card-surface md:hover:text-foreground"
-                      : "md:border-primary/15 md:bg-primary/10 md:text-primary md:shadow-card md:backdrop-blur md:hover:bg-primary/15"
-                  }`}
+                  href="/sign-up"
+                  className="hidden min-h-12 items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-7 py-3 text-sm font-semibold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:opacity-95 md:inline-flex"
                 >
-                  {t("accessDashboard")}
-                  <ArrowRightIcon className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                  {t("heroPrimaryCta")}
+                  <ArrowRightIcon />
                 </Link>
-              ) : null}
-            </div>
-            <div className="mt-5 flex flex-wrap gap-2">
-              {heroProofPills.map((pill) => (
-                <span
-                  key={pill}
-                  className="inline-flex items-center gap-2 rounded-full border border-card-border bg-card-surface/70 px-3 py-1.5 text-xs font-semibold text-muted shadow-sm backdrop-blur"
-                >
-                  <span
-                    className="h-1.5 w-1.5 rounded-full bg-accent-emerald shadow-[0_0_12px_rgb(22_199_132_/0.7)]"
-                    aria-hidden
-                  />
-                  {pill}
-                </span>
-              ))}
+              )}
             </div>
           </div>
 
-          <div id="product" className="relative z-10 scroll-mt-24">
-            <div
-              className="absolute -inset-6 rounded-[2rem] bg-brand-gradient-soft blur-2xl"
-              aria-hidden
-            />
-            <div className="relative space-y-3 rounded-[2rem] border border-card-border bg-surface-glass p-3 shadow-card backdrop-blur-xl">
-              <div className="relative overflow-hidden rounded-[1.5rem] border border-white/10 bg-slate-950 p-3 shadow-2xl shadow-black/30">
-                <div
-                  className="pointer-events-none absolute -right-20 -top-16 h-64 w-64 rounded-full bg-accent-violet/25 blur-3xl"
-                  aria-hidden
-                />
-                <div
-                  className="pointer-events-none absolute -bottom-20 left-10 h-56 w-56 rounded-full bg-accent-cyan/20 blur-3xl"
-                  aria-hidden
-                />
-                <div className="relative flex items-center justify-between border-b border-white/10 px-3 pb-3">
-                  <div className="flex items-center gap-2">
-                    <span className="h-2.5 w-2.5 rounded-full bg-rose-400" />
-                    <span className="h-2.5 w-2.5 rounded-full bg-amber-300" />
-                    <span className="h-2.5 w-2.5 rounded-full bg-emerald-300" />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <SoundprintLogo
-                      src="/brand/favicon.png"
-                      showText={false}
-                      imageClassName="h-6 w-6 object-contain"
-                    />
-                    <p className="font-mono text-[0.65rem] uppercase tracking-[0.22em] text-slate-400">
-                      {t("productPreview.label")}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="relative grid gap-3 p-2 pt-4 sm:grid-cols-[0.88fr_1.12fr]">
-                  <div className="space-y-3">
-                    <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.06] p-4">
-                      <div
-                        className="absolute -right-10 -top-10 h-24 w-24 rounded-full bg-accent-rose/20 blur-2xl"
-                        aria-hidden
-                      />
-                      <div className="relative flex items-start justify-between gap-3">
-                        <div>
-                          <p className="text-sm font-semibold text-white">
-                            {t("productPreview.cardTitle")}
-                          </p>
-                          <p className="mt-2 text-3xl font-semibold tracking-tight text-white">
-                            18,420
-                          </p>
-                        </div>
-                        <span className="rounded-full border border-emerald-300/20 bg-emerald-300/10 px-2 py-1 font-mono text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-emerald-100">
-                          {t("productPreview.liveBadge")}
-                        </span>
-                      </div>
-                      <p className="relative mt-1 text-xs text-cyan-200">
-                        {t("productPreview.cardMeta")}
-                      </p>
-                    </div>
-                    <div className="rounded-2xl border border-white/10 bg-black/20 p-3">
-                      <div className="mb-3 flex items-center justify-between">
-                        <p className="font-mono text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-slate-400">
-                          {t("productPreview.waveformLabel")}
-                        </p>
-                        <p className="text-xs font-semibold text-cyan-200">+31%</p>
-                      </div>
-                      <div className="flex h-16 items-end gap-1.5 sm:h-24">
-                        {productWaveBars.map((height, index) => (
-                          <div
-                            key={`${height}-${index}`}
-                            className="flex-1 rounded-full bg-gradient-to-t from-accent-violet via-accent-cyan to-white/80"
-                            style={{ height: `${height}%` }}
-                            aria-hidden
-                          />
-                        ))}
-                      </div>
-                      <span className="sr-only">{t("productPreview.waveformLabel")}</span>
-                    </div>
-                    <div className="grid grid-cols-3 gap-2">
-                      {productGenrePills.map((genre) => (
-                        <div
-                          key={genre}
-                          className="rounded-2xl border border-white/10 bg-white/[0.05] p-2 text-center text-[0.65rem] font-semibold text-slate-200"
-                        >
-                          {genre}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.06] p-4">
-                    <p className="text-xs font-semibold text-cyan-200">
-                      {t("productPreview.insightEyebrow")}
-                    </p>
-                    <p className="mt-3 text-xl font-semibold leading-snug tracking-tight text-white sm:text-2xl">
-                      {t("productPreview.insightTitle")}
-                    </p>
-                    <p className="mt-3 text-sm leading-6 text-slate-300">
-                      {t("productPreview.insightCopy")}
-                    </p>
-                    <div className="mt-5 grid gap-2">
-                      {productSignalRows.map((row) => (
-                        <div
-                          key={row.label}
-                          className="flex items-center justify-between rounded-2xl bg-black/20 p-3 ring-1 ring-white/10"
-                        >
-                          <div className="flex min-w-0 items-center gap-3">
-                            <span
-                              className={`h-2.5 w-2.5 shrink-0 rounded-full ${row.accentClassName}`}
-                              aria-hidden
-                            />
-                            <span className="truncate text-sm font-medium text-slate-200">
-                              {row.label}
-                            </span>
-                          </div>
-                          <span className="text-sm font-semibold text-white">
-                            {row.value}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="mt-5 hidden space-y-3 sm:block">
-                      {workflowSteps.map((step, index) => (
-                        <div
-                          key={step}
-                          className="flex items-center gap-3 rounded-2xl bg-black/20 p-3 text-sm text-slate-200 ring-1 ring-white/10"
-                        >
-                          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/10 font-mono text-xs text-cyan-100">
-                            0{index + 1}
-                          </span>
-                          {step}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <HomeDuetPreview />
         </section>
 
         <SoundprintBrandDividerSection

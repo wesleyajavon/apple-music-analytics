@@ -2625,13 +2625,13 @@
   "home": {
     "title": "Soundprint-AI",
     "heroEyebrow": "Démo publique disponible",
-    "heroGradient": "de vraies analyses.",
-    "welcome": "Transformez votre historique de streaming en",
+    "heroGradient": "votre musique décodée.",
+    "welcome": "Bienvenue sur Soundprint-AI",
     "welcomePersonal": "Bon retour, {name}",
     "supportedStreamingCaption": "Compatible avec",
     "spotifyLogoAlt": "Spotify",
     "appleMusicLogoAlt": "Apple Music",
-    "subtitle": "Découvrez l'évolution de vos goûts musicaux, les patterns cachés et les stats qu'Apple/Spotify ne vous montrent pas.",
+    "subtitle": "Importez une fois depuis Apple Music ou Spotify — explorez les tendances, dialoguez avec vos données d'écoute et comparez vos lectures avec vos amis sur n'importe quel artiste.",
     "heroPrimaryCta": "Révéler votre Soundprint",
     "heroProof": {
       "private": "Pensé pour rester privé",
@@ -2652,36 +2652,38 @@
       "closeMenu": "Fermer le menu",
       "menuLabel": "Sections de la page"
     },
-    "productPreview": {
-      "label": "Cockpit Soundprint",
-      "cardTitle": "Minutes d'écoute",
-      "cardMeta": "+24% vs période précédente",
-      "chartBar": "Barre de graphique d'aperçu {index}",
-      "liveBadge": "Live",
-      "waveformLabel": "Pulse de goût",
-      "insightEyebrow": "Ce qu'on a remarqué",
-      "insightTitle": "Votre musique change quand la nuit tombe.",
-      "insightCopy": "Importez votre historique une fois et découvrez les artistes, les ambiances et les moments qui racontent vraiment comment vous écoutez—pas seulement votre top 10.",
+    "duetPreview": {
+      "label": "Aperçu Duet",
+      "liveBadge": "Démo",
+      "arenaEyebrow": "Duel artiste",
+      "artistName": "Tyler, The Creator",
+      "periodMeta": "90 derniers jours · mêmes filtres",
+      "selfName": "Vous",
+      "selfInitials": "VO",
+      "friendName": "Maya",
+      "friendInitials": "MY",
+      "winnerHeadline": "Vous streamez plus Tyler.",
+      "insightEyebrow": "Face à face",
+      "insightCopy": "Ajoutez un ami, choisissez un artiste et voyez qui domine vraiment — compteur basé sur vos bibliothèques réelles.",
+      "trendLabel": "Lectures dans le temps",
       "signalRows": {
-        "topTrack": "Morceau le plus joué",
-        "shift": "Genre en hausse",
-        "artist": "Artiste favori"
+        "yourPlays": "Vos lectures",
+        "friendPlays": "Lectures de {friendName}",
+        "margin": "Votre avance"
       },
       "signalValues": {
-        "topTrack": "WAIT FOR U",
-        "shift": "Électro",
-        "artist": "Future"
+        "margin": "+235 lectures"
       },
-      "genrePills": {
-        "indie": "Indie",
-        "electronic": "Électro",
-        "altPop": "Alt pop"
+      "arenaModes": {
+        "artist": "Artiste",
+        "track": "Morceau",
+        "genre": "Genre"
+      },
+      "workflow": {
+        "step1": "Ajoutez un ami via votre lien d'invitation",
+        "step2": "Choisissez un artiste, un morceau ou un genre",
+        "step3": "Voyez qui gagne — et partagez le scorecard"
       }
-    },
-    "workflow": {
-      "import": "Importez votre historique Apple Music ou Spotify",
-      "analyze": "Repérez changements, obsessions et rituels d'écoute",
-      "share": "Ouvrez des dashboards polis et des résumés AI"
     },
     "dashboardPreviews": {
       "eyebrow": "Dans le dashboard",

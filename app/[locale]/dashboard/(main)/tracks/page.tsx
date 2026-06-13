@@ -18,9 +18,11 @@ import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
 import { formatOverviewDateRangeLabel } from "@/lib/utils/overview-date-range-label";
 import { OverviewSkeleton } from "@/lib/components/skeleton-loaders";
 import { ErrorState } from "@/lib/components/error-state";
+import { LiveStatusDot } from "@/lib/components/live-status-dot";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
 import { CHART_TOOLTIP_STYLES } from "@/lib/constants/config";
 import { ChartResponsiveContainer } from "@/lib/components/chart-responsive-container";
+import { useChartHeight } from "@/lib/hooks/use-chart-viewport";
 import {
   DASHBOARD_SPOTLIGHT_SHELL,
   DASHBOARD_SPOTLIGHT_GRADIENT_CYAN,
@@ -29,9 +31,7 @@ import {
   DASHBOARD_SPOTLIGHT_HAIRLINE_CYAN,
   DASHBOARD_SPOTLIGHT_HEADER_BOTTOM,
   DASHBOARD_SPOTLIGHT_BADGE_CYAN,
-  DASHBOARD_SPOTLIGHT_BADGE_DOT_CYAN,
   DASHBOARD_SPOTLIGHT_BADGE_VIOLET,
-  DASHBOARD_SPOTLIGHT_BADGE_DOT_VIOLET,
   DASHBOARD_SPOTLIGHT_INNER_WELL,
   DASHBOARD_SPOTLIGHT_TABLE_HEAD,
   DASHBOARD_SPOTLIGHT_TABLE_HEAD_CELL,
@@ -68,10 +68,6 @@ function TracksHeroFrame({
       <div className="absolute -bottom-28 right-8 h-72 w-72 rounded-full bg-accent-emerald/18 blur-3xl" />
       <div className="relative grid gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-center">
         <div>
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-100 backdrop-blur">
-            <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_18px_rgb(22_199_132_/0.75)]" />
-            {t("heroEyebrow")}
-          </div>
           <h1 className="max-w-4xl text-balance text-4xl font-semibold tracking-[-0.06em] text-white sm:text-5xl lg:text-6xl">
             {t("title")}
           </h1>
@@ -836,6 +832,8 @@ function TracksContent() {
       })),
     [topTracks]
   );
+  const baseChartHeight = useChartHeight("tracksMain");
+  const tracksBarChartHeight = Math.max(baseChartHeight, chartData.length * 32 + 16);
 
   const heroStats = topData ? (
     <TracksHeroStats overview={topData.overview} locale={locale} />
@@ -908,7 +906,7 @@ function TracksContent() {
               <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                   <div className={DASHBOARD_SPOTLIGHT_BADGE_CYAN}>
-                    <span className={DASHBOARD_SPOTLIGHT_BADGE_DOT_CYAN} />
+                    <LiveStatusDot tone="cyan" />
                     {t("sections.chart.badge")}
                   </div>
                   <p className="font-mono text-xs text-slate-600 dark:text-slate-400">
@@ -922,8 +920,8 @@ function TracksContent() {
                 {isTopLoading || !topData ? (
                   <TracksChartSkeleton />
                 ) : (
-                  <ChartResponsiveContainer token="tracksMain">
-                    <BarChart data={chartData} layout="vertical" margin={{ top: 8, right: 24, left: 148, bottom: 8 }}>
+                  <ChartResponsiveContainer token="tracksMain" heightOverride={tracksBarChartHeight}>
+                    <BarChart data={chartData} layout="vertical" margin={{ top: 8, right: 24, left: 148, bottom: 8 }} barCategoryGap="18%">
                       <defs>
                         <linearGradient id="trackBarGradient" x1="0" y1="0" x2="1" y2="0">
                           <stop offset="0%" stopColor="#22d3ee" />
@@ -940,9 +938,11 @@ function TracksContent() {
                       <YAxis
                         type="category"
                         dataKey="name"
+                        interval={0}
                         tick={{ fill: chartTheme.tickStrong, fontSize: 12, fontWeight: 600 }}
                         axisLine={false}
                         tickLine={false}
+                        tickMargin={8}
                         width={136}
                       />
                       <Tooltip
@@ -975,7 +975,7 @@ function TracksContent() {
             <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} aria-hidden />
             <div className={`relative ${DASHBOARD_SPOTLIGHT_HEADER_BOTTOM} px-5 py-5 sm:px-8`}>
               <div className={DASHBOARD_SPOTLIGHT_BADGE_VIOLET}>
-                <span className={DASHBOARD_SPOTLIGHT_BADGE_DOT_VIOLET} />
+                <LiveStatusDot tone="violet" />
                 {t("sections.table.badge")}
               </div>
             </div>

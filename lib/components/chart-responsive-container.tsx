@@ -11,6 +11,8 @@ type ChartResponsiveContainerProps = {
   className?: string;
   /** Enables horizontal scroll on viewports below lg when set */
   minWidth?: number;
+  /** Overrides token-based height when a chart needs more vertical space (e.g. dense bar charts). */
+  heightOverride?: number;
 };
 
 export function ChartResponsiveContainer({
@@ -18,8 +20,9 @@ export function ChartResponsiveContainer({
   children,
   className = "",
   minWidth,
+  heightOverride,
 }: ChartResponsiveContainerProps) {
-  const height = useChartHeight(token);
+  const height = heightOverride ?? useChartHeight(token);
   const isLg = useIsLgChartViewport();
   const enableScroll = !isLg && minWidth != null && minWidth > 0;
 

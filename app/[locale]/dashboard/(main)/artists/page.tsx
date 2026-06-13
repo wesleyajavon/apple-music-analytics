@@ -35,11 +35,8 @@ import {
   DASHBOARD_SPOTLIGHT_TITLE,
   DASHBOARD_SPOTLIGHT_MUTED,
   DASHBOARD_SPOTLIGHT_BADGE_VIOLET,
-  DASHBOARD_SPOTLIGHT_BADGE_DOT_VIOLET,
   DASHBOARD_SPOTLIGHT_BADGE_LIME,
-  DASHBOARD_SPOTLIGHT_BADGE_DOT_LIME,
   DASHBOARD_SPOTLIGHT_BADGE_CYAN_COMPACT,
-  DASHBOARD_SPOTLIGHT_BADGE_DOT_CYAN,
   DASHBOARD_SPOTLIGHT_INNER_WELL,
   DASHBOARD_SPOTLIGHT_TABLE_HEAD,
   DASHBOARD_SPOTLIGHT_TABLE_HEAD_CELL,
@@ -60,6 +57,7 @@ import type { ArtistOverviewDto, ArtistStatsDto } from "@/lib/dto/artist";
 import { TopThreeArtists } from "@/lib/components/top-three-artists-cards";
 import { ArtistAvatarHydrated } from "@/lib/components/artist-avatar-hydrated";
 import { ArtistUserInsightsPanel } from "@/lib/components/artist-user-insights-panel";
+import { LiveStatusDot } from "@/lib/components/live-status-dot";
 import { LineChart } from "lucide-react";
 
 /**
@@ -89,10 +87,6 @@ function ArtistsHeroFrame({ trendsHref, stats, badgeLabel }: { trendsHref: strin
       <div className="absolute -bottom-28 right-10 h-72 w-72 rounded-full bg-accent-cyan/18 blur-3xl" />
       <div className="relative grid gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-center">
         <div>
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-violet-100 backdrop-blur">
-            <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_18px_rgb(22_199_132_/0.75)]" />
-            {t("heroEyebrow")}
-          </div>
           <h1 className="max-w-4xl text-balance text-4xl font-semibold tracking-[-0.06em] text-white sm:text-5xl lg:text-6xl">{t("title")}</h1>
           <p className="mt-5 max-w-2xl text-base leading-7 text-white/70 sm:text-lg">{t("subtitle")}</p>
           <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
@@ -922,7 +916,7 @@ const DetailedViewSection = memo(({
       >
         <div>
           <div className={`mb-2 ${DASHBOARD_SPOTLIGHT_BADGE_CYAN_COMPACT}`}>
-            <span className={DASHBOARD_SPOTLIGHT_BADGE_DOT_CYAN} aria-hidden />
+            <LiveStatusDot tone="cyan" />
             {t("sections.table.badge")}
           </div>
           <h3 className={DASHBOARD_SPOTLIGHT_TITLE}>{t("sections.table.title")}</h3>
@@ -1403,7 +1397,7 @@ function ArtistsContent() {
             <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} aria-hidden />
             <div className={`relative ${DASHBOARD_SPOTLIGHT_HEADER_BOTTOM} px-5 py-5 sm:px-8`}>
               <div className={DASHBOARD_SPOTLIGHT_BADGE_VIOLET}>
-                <span className={DASHBOARD_SPOTLIGHT_BADGE_DOT_VIOLET} aria-hidden />
+                <LiveStatusDot tone="violet" />
                 {t("sections.charts.barBadge")}
               </div>
               <h3 className={`mt-3 ${DASHBOARD_SPOTLIGHT_TITLE}`}>{t("top10Listens")}</h3>
@@ -1463,7 +1457,7 @@ function ArtistsContent() {
             <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_LIME} aria-hidden />
             <div className={`relative ${DASHBOARD_SPOTLIGHT_HEADER_BOTTOM} px-5 py-5 sm:px-8`}>
               <div className={DASHBOARD_SPOTLIGHT_BADGE_LIME}>
-                <span className={DASHBOARD_SPOTLIGHT_BADGE_DOT_LIME} aria-hidden />
+                <LiveStatusDot tone="emerald" />
                 {t("sections.charts.pieBadge")}
               </div>
               <h3 className={`mt-3 ${DASHBOARD_SPOTLIGHT_TITLE}`}>{t("distributionTop6")}</h3>

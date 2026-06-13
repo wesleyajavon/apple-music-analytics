@@ -1819,7 +1819,7 @@
       "table": {
         "eyebrow": "Full index",
         "title": "Every ranked track",
-        "description": "Paginate the complete list. Same ordering counts as the chart; respects the same date window.",
+        "description": "Page through the full ranking—the same order and play counts as the chart, scoped to your current date range and filters.",
         "badge": "Dataset"
       }
     },

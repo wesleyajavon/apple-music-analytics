@@ -2042,6 +2042,30 @@
     "deterministicProfile": "Votre profil actuel penche vers {genre}, avec {artist} comme l'un des ancrages les plus forts sur cette période. Importez plus d'écoutes ou élargissez la plage de dates pour affiner le profil IA.",
     "identityTitle": "Votre identité soundprint",
     "identitySubtitle": "Votre histoire s’appuie sur les mêmes artistes, genres et titres que le reste de vos analyses — le récit colle toujours à votre portrait d’écoute.",
+    "identityWelcome": "Import terminé — voici votre première lecture.",
+    "features": {
+      "badge": "Et maintenant",
+      "title": "Trois façons d'explorer votre bibliothèque",
+      "lead": "Vos écoutes sont prêtes. Commencez par la vue d'ensemble, posez des questions en langage clair, ou comparez avec des amis.",
+      "yourMusic": {
+        "eyebrow": "Hub analytique",
+        "title": "Your Music",
+        "body": "KPI, tendances, heatmaps et classements — le tout aligné sur les mêmes filtres de dates qu'ici.",
+        "cta": "Ouvrir Your Music"
+      },
+      "aiChat": {
+        "eyebrow": "Conversationnel",
+        "title": "Soundprint chat",
+        "body": "Posez n'importe quelle question sur votre historique. Les réponses restent ancrées dans vos écoutes — pas le web.",
+        "cta": "Lancer le chat"
+      },
+      "duet": {
+        "eyebrow": "Social",
+        "title": "Duet",
+        "body": "Invitez des amis, choisissez un artiste, et voyez qui stream vraiment le plus.",
+        "cta": "Essayer Duet"
+      }
+    },
     "aiCached": "Profil IA servi depuis le cache",
     "aiUnavailable": "L'IA est désactivée pour cet environnement ou ce navigateur ; cette page affiche donc un profil déterministe basé sur vos statistiques.",
     "aiErrorTitle": "Analyse IA indisponible. Affichage d'un résumé basé sur les données.",
@@ -2088,7 +2112,7 @@
     "trackObsessionTitle": "Titres en rotation",
     "aiAttributesTitle": "Attributs du profil IA",
     "sections": {
-      "sonicIdentity": "Narration IA",
+      "sonicIdentity": "Identité Soundprint",
       "topArtists": "Artistes les plus écoutés",
       "topTracks": "Titres les plus écoutés",
       "topGenres": "Genres dominants",

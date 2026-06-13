@@ -2042,6 +2042,30 @@
     "deterministicProfile": "Your current profile leans toward {genre}, with {artist} acting as one of the strongest anchors in the period. Import more listens or widen the date range to make the AI profile sharper.",
     "identityTitle": "Your soundprint identity",
     "identitySubtitle": "Your story is woven from the same artists, genres, and tracks as the rest of your analytics — so what you read always lines up with your listening picture.",
+    "identityWelcome": "Import complete — here's your first read.",
+    "features": {
+      "badge": "What's next",
+      "title": "Three ways to explore your library",
+      "lead": "Your listens are in. Start with the overview, ask questions in plain language, or compare with friends.",
+      "yourMusic": {
+        "eyebrow": "Analytics hub",
+        "title": "Your Music",
+        "body": "KPIs, trends, heatmaps, and leaderboards — all tied to the same date filters you see here.",
+        "cta": "Open Your Music"
+      },
+      "aiChat": {
+        "eyebrow": "Conversational",
+        "title": "Soundprint chat",
+        "body": "Ask anything about your history. Answers stay grounded in your plays — not the open web.",
+        "cta": "Start chatting"
+      },
+      "duet": {
+        "eyebrow": "Social",
+        "title": "Duet",
+        "body": "Invite friends, pick any artist, and see who really streams more from your libraries.",
+        "cta": "Try Duet"
+      }
+    },
     "aiCached": "AI profile served from cache",
     "aiUnavailable": "AI is currently disabled for this environment or browser, so this page is showing a deterministic profile from your stats.",
     "aiErrorTitle": "AI analysis unavailable. Showing a data-based summary instead.",
@@ -2088,7 +2112,7 @@
     "trackObsessionTitle": "Repeat-worthy tracks",
     "aiAttributesTitle": "AI profile attributes",
     "sections": {
-      "sonicIdentity": "AI narrative",
+      "sonicIdentity": "Soundprint identity",
       "topArtists": "Top artists",
       "topTracks": "Top tracks",
       "topGenres": "Dominant genres",

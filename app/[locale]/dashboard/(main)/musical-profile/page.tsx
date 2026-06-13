@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { Suspense, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
@@ -11,12 +10,13 @@ import { apiClient } from "@/lib/api-client";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
 import { ErrorState, GroqQuotaNotice } from "@/lib/components/error-state";
 import { ParallaxHero, ScrollRevealSection, StaggerContainer } from "@/lib/components/overview-bis";
+import { SoundprintBrandDividerSection } from "@/lib/components/soundprint-brand-divider";
+import { SoundprintBrandMark } from "@/lib/components/soundprint-brand-mark";
 import {
   CinematicFilmGrain,
   CinematicFloat,
   CinematicFloatingOrbs,
   CinematicLightSweep,
-  CinematicProgressBar,
   CinematicQuote,
   CinematicReveal,
   CinematicStagger,
@@ -47,14 +47,6 @@ import { MusicalProfilePeriodBadge } from "@/lib/components/musical-profile-peri
 const TOP_LIMIT = 6;
 const PROFILE_AI_STALE_TIME = 5 * 60 * 1000;
 
-function SparkIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="m3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z" />
-    </svg>
-  );
-}
-
 function ProfileIcon({ className }: { className?: string }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -67,6 +59,38 @@ function BarsIcon({ className }: { className?: string }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z" />
+    </svg>
+  );
+}
+
+function ChatIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M8.625 9.75a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375m-13.5 3.75c0 5.385 4.365 9.75 9.75 9.75s9.75-4.365 9.75-9.75S17.385 2.25 12 2.25 2.25 6.615 2.25 12m13.5 0a1.125 1.125 0 0 1-1.125 1.125H9.75a1.125 1.125 0 0 1-1.125-1.125v-6.75m9 0V9.375"
+      />
+    </svg>
+  );
+}
+
+function DuetIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"
+      />
+    </svg>
+  );
+}
+
+function ArrowRightIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
     </svg>
   );
 }
@@ -240,92 +264,34 @@ function usePreparedTasteProfile(params: {
   });
 }
 
-function LandingValueCard({
-  title,
-  body,
-  icon,
-  accentClass,
-}: {
-  title: string;
-  body: string;
-  icon: React.ReactNode;
-  accentClass: string;
-}) {
-  return (
-    <motion.div
-      className="group relative overflow-hidden rounded-3xl border border-card-border bg-card-surface p-6 shadow-card backdrop-blur-sm"
-      whileHover={{ y: -6, scale: 1.02 }}
-      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-    >
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-br from-accent-violet/10 via-transparent to-accent-cyan/10 opacity-80 transition-opacity group-hover:opacity-100"
-        aria-hidden
-      />
-      <motion.div
-        className={`relative mb-4 flex h-11 w-11 items-center justify-center rounded-2xl ${accentClass}`}
-        whileHover={{ rotate: [0, -6, 6, 0] }}
-        transition={{ duration: 0.45 }}
-      >
-        {icon}
-      </motion.div>
-      <h3 className="relative text-base font-semibold text-gray-950 dark:text-white">{title}</h3>
-      <p className="relative mt-3 text-sm leading-6 text-gray-600 dark:text-gray-300">{body}</p>
-    </motion.div>
-  );
-}
-
-function MobileMetricPill({
-  label,
-  value,
-  hint,
-  index = 0,
-}: {
-  label: string;
-  value: string;
-  hint: string;
-  index?: number;
-}) {
-  return (
-    <motion.div
-      className="min-w-[9.25rem] rounded-3xl border border-white/10 bg-gray-950 p-4 shadow-lg shadow-black/10"
-      initial={{ opacity: 0, x: 24, scale: 0.94 }}
-      whileInView={{ opacity: 1, x: 0, scale: 1 }}
-      viewport={{ once: true, amount: 0.4 }}
-      transition={{ duration: 0.55, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
-    >
-      <p className="text-2xl font-semibold tracking-tight text-white">{value}</p>
-      <p className="mt-1 text-xs font-semibold uppercase tracking-[0.16em] text-white/45">{label}</p>
-      <p className="mt-2 text-xs leading-5 text-white/55">{hint}</p>
-    </motion.div>
-  );
-}
-
-function MobileAiStory({
+function AiIdentityQuote({
   aiError,
   aiLoading,
   interactiveAiBlockedByGenreBackfill,
   profileDescription,
+  quoteClassName = "text-2xl font-semibold leading-9 tracking-tight text-white",
 }: {
   aiError: Error | null;
   aiLoading: boolean;
   interactiveAiBlockedByGenreBackfill: boolean;
   profileDescription: string;
+  quoteClassName?: string;
 }) {
   const t = useTranslations("musical-profile");
 
   if (aiLoading) {
     return (
       <div className="space-y-3 animate-pulse" aria-busy="true">
-        <div className="h-4 w-full rounded-full bg-white/15" />
-        <div className="h-4 w-11/12 rounded-full bg-white/15" />
-        <div className="h-4 w-3/4 rounded-full bg-white/15" />
+        <div className="h-5 w-full rounded-full bg-white/15" />
+        <div className="h-5 w-11/12 rounded-full bg-white/15" />
+        <div className="h-5 w-4/5 rounded-full bg-white/15" />
       </div>
     );
   }
 
   if (!aiError) {
     return (
-      <CinematicQuote className="text-lg font-semibold leading-8 text-white" quoteKey={profileDescription}>
+      <CinematicQuote className={quoteClassName} quoteKey={profileDescription}>
         &ldquo;{profileDescription}&rdquo;
       </CinematicQuote>
     );
@@ -339,7 +305,9 @@ function MobileAiStory({
     return (
       <div className="space-y-4">
         {!interactiveAiBlockedByGenreBackfill ? <InteractiveAiGenreBackfillNotice force /> : null}
-        <p className="text-lg font-semibold leading-8 text-white">&ldquo;{profileDescription}&rdquo;</p>
+        <CinematicQuote className={quoteClassName} quoteKey={profileDescription}>
+          &ldquo;{profileDescription}&rdquo;
+        </CinematicQuote>
       </div>
     );
   }
@@ -347,40 +315,257 @@ function MobileAiStory({
   return (
     <div role="alert" className="space-y-2">
       <p className="text-sm font-semibold text-red-200">{t("aiErrorTitle")}</p>
-      <p className="text-base font-semibold leading-7 text-white">{profileDescription}</p>
+      <p className={quoteClassName}>{profileDescription}</p>
     </div>
   );
 }
 
+function FeaturePillarCard({
+  href,
+  eyebrow,
+  title,
+  body,
+  cta,
+  icon,
+  accentClass,
+  glowClass,
+}: {
+  href: string;
+  eyebrow: string;
+  title: string;
+  body: string;
+  cta: string;
+  icon: React.ReactNode;
+  accentClass: string;
+  glowClass: string;
+}) {
+  return (
+    <motion.div whileHover={{ y: -6 }} transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}>
+      <Link
+        href={href}
+        className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-card-border bg-surface-glass p-6 shadow-card backdrop-blur-xl transition-all hover:border-accent-violet/25 hover:shadow-card-hover"
+      >
+        <div
+          className={`pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full blur-3xl ${glowClass}`}
+          aria-hidden
+        />
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent-violet/40 to-transparent opacity-0 transition-opacity group-hover:opacity-100"
+          aria-hidden
+        />
+        <div
+          className={`relative mb-5 flex h-12 w-12 items-center justify-center rounded-2xl ${accentClass}`}
+        >
+          {icon}
+        </div>
+        <p className="relative font-mono text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-primary">
+          {eyebrow}
+        </p>
+        <h3 className="relative mt-2 text-xl font-semibold tracking-[-0.03em] text-gray-950 dark:text-white">
+          {title}
+        </h3>
+        <p className="relative mt-3 flex-1 text-sm leading-6 text-gray-600 dark:text-gray-300">{body}</p>
+        <span className="relative mt-6 inline-flex items-center gap-2 text-sm font-semibold text-primary transition-transform group-hover:translate-x-0.5">
+          {cta}
+          <ArrowRightIcon className="h-4 w-4" />
+        </span>
+      </Link>
+    </motion.div>
+  );
+}
+
+function SoundprintIdentitySection({
+  aiCached,
+  aiError,
+  aiLoading,
+  interactiveAiBlockedByGenreBackfill,
+  profileDescription,
+  showAiUnavailable,
+  topArtistName,
+  topGenreName,
+}: {
+  aiCached?: boolean;
+  aiError: Error | null;
+  aiLoading: boolean;
+  interactiveAiBlockedByGenreBackfill: boolean;
+  profileDescription: string;
+  showAiUnavailable?: boolean;
+  topArtistName: string;
+  topGenreName: string | undefined;
+}) {
+  const t = useTranslations("musical-profile");
+
+  return (
+    <section className="relative overflow-hidden rounded-[2rem] border border-accent-violet/30 bg-gray-950 text-white shadow-2xl shadow-accent-violet/25 ring-1 ring-accent-violet/15">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_12%_0%,rgba(240,64,104,0.38),transparent_36%),radial-gradient(circle_at_88%_18%,rgba(6,182,212,0.28),transparent_34%),linear-gradient(155deg,rgba(3,7,18,0.98),rgba(30,27,75,0.92)_50%,rgba(8,47,73,0.82))]" />
+      <CinematicFloatingOrbs />
+      <CinematicFilmGrain />
+      <CinematicLightSweep />
+      <div className="pointer-events-none absolute -bottom-28 left-1/2 h-64 w-[85%] -translate-x-1/2 rounded-full bg-accent-violet/20 blur-3xl" />
+      <div className="relative p-5 sm:p-8 lg:p-10">
+        <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:gap-12">
+          <div className="flex shrink-0 flex-col items-center text-center lg:items-start lg:text-left">
+            <SoundprintBrandMark
+              size="xl"
+              layout="stacked"
+              tone="onDark"
+              showAiBadgeOnMobile
+              priority
+              interactive={false}
+              tagline={t("identityWelcome")}
+              className="flex-col items-center lg:items-start"
+            />
+            <div className="mt-6 flex flex-wrap justify-center gap-2 lg:justify-start">
+              {topArtistName ? (
+                <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white/90">
+                  {topArtistName}
+                </span>
+              ) : null}
+              {topGenreName ? (
+                <span className="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1.5 text-xs font-semibold text-cyan-100">
+                  {topGenreName}
+                </span>
+              ) : null}
+            </div>
+          </div>
+
+          <div className="min-w-0 flex-1">
+            <p className="font-mono text-xs font-semibold uppercase tracking-[0.28em] text-accent-cyan">
+              {t("sections.sonicIdentity")}
+            </p>
+            <h2 className="mt-3 text-2xl font-semibold tracking-[-0.04em] sm:text-4xl lg:text-[2.75rem] lg:leading-tight">
+              {t("identityTitle")}
+            </h2>
+            <p className="mt-3 max-w-2xl text-sm leading-7 text-white/60 sm:text-base">
+              {t("identitySubtitle")}
+            </p>
+
+            <div className="relative mt-8 overflow-hidden rounded-3xl border border-white/12 bg-white/[0.06] p-5 shadow-2xl shadow-black/25 backdrop-blur-sm sm:p-7">
+              <div
+                className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(79,144,224,0.16),transparent_40%)]"
+                aria-hidden
+              />
+              <AiIdentityQuote
+                aiError={aiError}
+                aiLoading={aiLoading}
+                interactiveAiBlockedByGenreBackfill={interactiveAiBlockedByGenreBackfill}
+                profileDescription={profileDescription}
+                quoteClassName="text-lg font-semibold leading-8 text-white sm:text-2xl sm:leading-9 sm:tracking-tight"
+              />
+            </div>
+
+            {aiCached ? (
+              <p className="mt-4 inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-white/70">
+                {t("aiCached")}
+              </p>
+            ) : null}
+            {showAiUnavailable ? (
+              <p className="mt-4 rounded-2xl border border-amber-200/20 bg-amber-300/10 px-4 py-3 text-sm leading-6 text-amber-50">
+                {t("aiUnavailable")}
+              </p>
+            ) : null}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ExploreFeaturesSection({
+  withFilters,
+}: {
+  withFilters: (href: string) => string;
+}) {
+  const t = useTranslations("musical-profile");
+
+  const pillars = [
+    {
+      href: withFilters("/dashboard/overview"),
+      eyebrow: t("features.yourMusic.eyebrow"),
+      title: t("features.yourMusic.title"),
+      body: t("features.yourMusic.body"),
+      cta: t("features.yourMusic.cta"),
+      icon: <BarsIcon className="h-6 w-6" />,
+      accentClass: "bg-accent-violet/15 text-accent-violet",
+      glowClass: "bg-accent-violet/20",
+    },
+    {
+      href: withFilters("/dashboard/ask-your-soundprint"),
+      eyebrow: t("features.aiChat.eyebrow"),
+      title: t("features.aiChat.title"),
+      body: t("features.aiChat.body"),
+      cta: t("features.aiChat.cta"),
+      icon: <ChatIcon className="h-6 w-6" />,
+      accentClass: "bg-accent-cyan/15 text-accent-cyan",
+      glowClass: "bg-accent-cyan/20",
+    },
+    {
+      href: withFilters("/dashboard/duet/friends"),
+      eyebrow: t("features.duet.eyebrow"),
+      title: t("features.duet.title"),
+      body: t("features.duet.body"),
+      cta: t("features.duet.cta"),
+      icon: <DuetIcon className="h-6 w-6" />,
+      accentClass: "bg-accent-rose/15 text-accent-rose",
+      glowClass: "bg-accent-rose/20",
+    },
+  ] as const;
+
+  return (
+    <section className="relative overflow-hidden rounded-[2rem] border border-card-border bg-card-surface p-5 shadow-card sm:p-8 lg:p-10">
+      <div
+        className="pointer-events-none absolute inset-0 opacity-60 dark:opacity-40"
+        style={{
+          background:
+            "radial-gradient(circle at 10% 0%, rgba(139, 92, 246, 0.1), transparent 34%), radial-gradient(circle at 95% 80%, rgba(6, 182, 212, 0.08), transparent 30%)",
+        }}
+        aria-hidden
+      />
+      <div className="relative mx-auto max-w-3xl text-center">
+        <p className="font-mono text-xs font-semibold uppercase tracking-[0.28em] text-primary">
+          {t("features.badge")}
+        </p>
+        <h2 className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-gray-950 dark:text-white sm:text-4xl">
+          {t("features.title")}
+        </h2>
+        <p className="mt-3 text-sm leading-7 text-gray-600 dark:text-gray-300 sm:text-base">
+          {t("features.lead")}
+        </p>
+      </div>
+      <StaggerContainer className="relative mt-8 grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-5">
+        {pillars.map((pillar) => (
+          <FeaturePillarCard key={pillar.href} {...pillar} />
+        ))}
+      </StaggerContainer>
+    </section>
+  );
+}
+
 function MobileMusicalProfileView({
+  aiCached,
   aiError,
   aiLoading,
   endDate,
-  genrePreview,
   interactiveAiBlockedByGenreBackfill,
   locale,
   profileDescription,
-  profileMetrics,
   showAiUnavailable,
   startDate,
   topArtistName,
-  topArtistShare,
   topArtists,
   topGenreName,
   withFilters,
 }: {
+  aiCached?: boolean;
   aiError: Error | null;
   aiLoading: boolean;
   endDate?: string;
-  genrePreview: GenreDistributionDto[];
   interactiveAiBlockedByGenreBackfill: boolean;
   locale: string;
   profileDescription: string;
-  profileMetrics: Array<{ label: string; value: string; hint: string }>;
   showAiUnavailable?: boolean;
   startDate?: string;
   topArtistName: string;
-  topArtistShare: number;
   topArtists: ArtistStatsDto[];
   topGenreName: string | undefined;
   withFilters: (href: string) => string;
@@ -402,14 +587,7 @@ function MobileMusicalProfileView({
         <CinematicLightSweep />
         <CinematicStagger className="relative space-y-5" delay={0.15}>
           <div className="flex items-center justify-between gap-3">
-            <Image
-              src="/brand/favicon.png"
-              alt={t("overviewCallout.philosophyLogoAlt")}
-              width={80}
-              height={80}
-              className="h-10 w-10 object-contain"
-              priority
-            />
+            <SoundprintBrandMark size="sm" tone="onDark" showAiBadgeOnMobile priority interactive={false} />
             <MusicalProfilePeriodBadge
               startDate={startDate}
               endDate={endDate}
@@ -463,139 +641,21 @@ function MobileMusicalProfileView({
               </p>
             </div>
           </div>
-
-          <div className="rounded-3xl border border-white/10 bg-white/[0.07] p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/45">
-              {t("mobile.storyTitle")}
-            </p>
-            <div className="mt-3">
-              <MobileAiStory
-                aiError={aiError}
-                aiLoading={aiLoading}
-                interactiveAiBlockedByGenreBackfill={interactiveAiBlockedByGenreBackfill}
-                profileDescription={profileDescription}
-              />
-            </div>
-            {showAiUnavailable ? (
-              <p className="mt-4 rounded-2xl border border-amber-200/20 bg-amber-300/10 px-4 py-3 text-sm leading-6 text-amber-50">
-                {t("aiUnavailable")}
-              </p>
-            ) : null}
-          </div>
         </CinematicStagger>
       </motion.section>
 
-      <section className="-mx-4 overflow-x-auto px-4 pb-1">
-        <div className="flex gap-3">
-          {profileMetrics.map((metric, index) => (
-            <MobileMetricPill key={metric.label} {...metric} index={index} />
-          ))}
-        </div>
-      </section>
+      <SoundprintIdentitySection
+        aiCached={aiCached}
+        aiError={aiError}
+        aiLoading={aiLoading}
+        interactiveAiBlockedByGenreBackfill={interactiveAiBlockedByGenreBackfill}
+        profileDescription={profileDescription}
+        showAiUnavailable={showAiUnavailable}
+        topArtistName={topArtistName}
+        topGenreName={topGenreName}
+      />
 
-      <CinematicReveal className="rounded-[1.75rem] border border-card-border bg-card-surface p-4 shadow-card">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-              {t("mobile.genresTitle")}
-            </p>
-            <p className="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">{t("mobile.genresHint")}</p>
-          </div>
-          {topArtistShare > 0 ? (
-            <span className="shrink-0 rounded-full bg-accent-cyan/10 px-3 py-1 text-xs font-semibold text-accent-cyan">
-              {t("mobile.anchorShare", { percent: topArtistShare })}
-            </span>
-          ) : null}
-        </div>
-        <div className="mt-4 space-y-3">
-          {genrePreview.map((genre, index) => (
-            <div key={genre.genre}>
-              <div className="mb-1.5 flex items-center justify-between gap-3 text-sm">
-                <span className="truncate font-medium text-gray-800 dark:text-gray-100">{genre.genre}</span>
-                <span className="text-gray-500 dark:text-gray-400">{Math.round(genre.percentage)}%</span>
-              </div>
-              <CinematicProgressBar
-                percentage={genre.percentage}
-                delay={index * 0.12}
-                trackClassName="h-2.5 overflow-hidden rounded-full bg-gray-100 dark:bg-white/10"
-              />
-            </div>
-          ))}
-        </div>
-      </CinematicReveal>
-
-      <CinematicReveal delay={0.1}>
-        <details className="group rounded-[1.75rem] border border-card-border bg-card-surface p-4 shadow-card">
-        <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 text-left">
-          <span>
-            <span className="block text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-              {t("mobile.artistsTitle")}
-            </span>
-            <span className="mt-1 block text-sm text-gray-500 dark:text-gray-400">{t("mobile.artistsHint")}</span>
-          </span>
-          <span className="rounded-full border border-card-border px-3 py-1 text-xs font-semibold text-gray-500 transition group-open:rotate-45 dark:text-gray-300">
-            +
-          </span>
-        </summary>
-        <div className="mt-4 space-y-3">
-          {topArtists.slice(0, 4).map((artist, index) => (
-            <div key={artist.artistId ?? artist.artistName} className="flex items-center gap-3">
-              <div className="h-11 w-11 overflow-hidden rounded-2xl bg-gray-100 dark:bg-white/10">
-                <ArtistAvatarHydrated
-                  artistId={artist.artistId}
-                  artistName={artist.artistName}
-                  imageUrl={artist.imageUrl}
-                  avatarApiSize={128}
-                  colorIndex={index}
-                  alt=""
-                  className="h-full w-full object-cover"
-                  loading="lazy"
-                  decoding="async"
-                  referrerPolicy="no-referrer"
-                />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold text-gray-900 dark:text-white">{artist.artistName}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {formatCompactNumber(artist.listenCount, locale)} {t("labels.listens")}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-        </details>
-      </CinematicReveal>
-
-      <CinematicReveal delay={0.15} className="rounded-[1.75rem] border border-accent-violet/20 bg-gradient-to-br from-card-surface to-accent-violet/[0.08] p-4 shadow-card">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent-violet">
-          {t("mobile.nextTitle")}
-        </p>
-        <p className="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-300">{t("mobile.nextLead")}</p>
-        <div className="mt-4 grid gap-3">
-          <Link
-            href={withFilters("/dashboard/overview")}
-            className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-5 py-3 text-sm font-bold text-white shadow-brand-glow"
-          >
-            {t("mobile.overviewCta")}
-            <span aria-hidden="true">&rarr;</span>
-          </Link>
-          <div className="grid grid-cols-3 gap-2">
-            {[
-              { href: withFilters("/dashboard/artists"), label: t("ctas.artists") },
-              { href: withFilters("/dashboard/tracks"), label: t("ctas.tracks") },
-              { href: withFilters("/dashboard/genres"), label: t("ctas.genres") },
-            ].map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="flex min-h-11 items-center justify-center rounded-2xl border border-card-border bg-card-surface px-2 py-2 text-center text-xs font-semibold text-gray-700 dark:text-gray-300"
-              >
-                {item.label}
-              </Link>
-            ))}
-          </div>
-        </div>
-      </CinematicReveal>
+      <ExploreFeaturesSection withFilters={withFilters} />
     </div>
   );
 }
@@ -610,7 +670,6 @@ function MusicalProfileNoDataView({
   const t = useTranslations("musical-profile");
   const emptyStatePresets = useEmptyStatePresets();
   const { startDate, endDate } = useListenDateRange();
-  const previewBullets = [t("emptyFeature.item1"), t("emptyFeature.item2"), t("emptyFeature.item3")];
 
   return (
     <div className="space-y-8 pb-10">
@@ -666,44 +725,7 @@ function MusicalProfileNoDataView({
         </motion.section>
       </ParallaxHero>
 
-      <CinematicReveal className="relative min-h-[240px] w-full overflow-hidden rounded-2xl border border-accent-violet/25 bg-card-surface shadow-2xl ring-1 ring-accent-violet/10 transition-all duration-300 dark:border-accent-violet/30 dark:ring-accent-violet/20">
-        <div
-          className="pointer-events-none absolute inset-0 opacity-80 dark:opacity-50"
-          style={{
-            background:
-              "radial-gradient(circle at top left, rgba(139, 92, 246, 0.18), transparent 34%), radial-gradient(circle at 85% 20%, rgba(34, 211, 238, 0.12), transparent 28%)",
-          }}
-        />
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-accent-violet via-accent-indigo to-accent-cyan opacity-80" />
-        <div className="relative border-b border-gray-100/80 px-6 py-5 dark:border-gray-700/50">
-          <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-accent-violet/20 bg-accent-violet/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-accent-violet dark:bg-accent-violet/15">
-            <span className="h-1.5 w-1.5 rounded-full bg-accent-violet" aria-hidden />
-            {t("emptyFeature.badge")}
-          </div>
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{t("emptyFeature.title")}</h2>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{t("emptyFeature.lead")}</p>
-        </div>
-        <div className="relative space-y-6 p-6">
-          <ul className="list-none space-y-3">
-            {previewBullets.map((text) => (
-              <li key={text} className="flex gap-3 text-sm leading-6 text-gray-700 dark:text-gray-300">
-                <span
-                  className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-violet"
-                  aria-hidden
-                />
-                <span>{text}</span>
-              </li>
-            ))}
-          </ul>
-          <Link
-            href={withFilters("/dashboard/overview")}
-            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-5 py-3 text-sm font-bold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:shadow-card-hover focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
-          >
-            {t("overviewCallout.cta")}
-            <span aria-hidden="true">&rarr;</span>
-          </Link>
-        </div>
-      </CinematicReveal>
+      <ExploreFeaturesSection withFilters={withFilters} />
 
       <EmptyState
         variant="startup"
@@ -834,27 +856,20 @@ function MusicalProfileContent() {
       hint: t("metrics.uniqueArtistsHint"),
     },
   ];
-  const genrePreview = (genresData?.data ?? []).slice(0, 3);
-  const topArtistShare =
-    overview?.totalListens && topArtists[0]?.listenCount
-      ? Math.round((topArtists[0].listenCount / overview.totalListens) * 100)
-      : 0;
 
   return (
     <>
       <MobileMusicalProfileView
+        aiCached={aiProfile?.cached}
         aiError={aiError ?? null}
         aiLoading={aiLoading}
         startDate={startDate}
         endDate={endDate}
-        genrePreview={genrePreview}
         interactiveAiBlockedByGenreBackfill={interactiveAiBlockedByGenreBackfill}
         locale={locale}
         profileDescription={profileDescription}
-        profileMetrics={profileMetrics}
         showAiUnavailable={showAiUnavailable}
         topArtistName={topArtistName}
-        topArtistShare={topArtistShare}
         topArtists={topArtists}
         topGenreName={topGenreName}
         withFilters={withFilters}
@@ -994,241 +1009,26 @@ function MusicalProfileContent() {
         </motion.section>
       </ParallaxHero>
 
-      <ScrollRevealSection>
-        <section className="relative overflow-hidden rounded-[2rem] border border-card-border bg-surface-glass p-4 shadow-card backdrop-blur-xl sm:p-6">
-          <div className="pointer-events-none absolute -right-20 -top-24 h-56 w-56 rounded-full bg-accent-cyan/20 blur-3xl" />
-          <div className="pointer-events-none absolute -left-16 bottom-0 h-48 w-48 rounded-full bg-accent-violet/15 blur-3xl" />
-          <div className="relative grid gap-4 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-stretch">
-            <div className="max-w-2xl">
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">
-                {t("overviewCallout.badge")}
-              </p>
-              <h2 className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-gray-950 dark:text-white sm:text-3xl lg:text-4xl">
-                {t("overviewCallout.title")}
-              </h2>
-              <Link
-                href={withFilters("/dashboard/overview")}
-                className="mt-6 inline-flex items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-5 py-3 text-sm font-bold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:shadow-card-hover focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
-              >
-                {t("overviewCallout.cta")}
-                <span aria-hidden="true">&rarr;</span>
-              </Link>
-            </div>
-            <div className="relative flex min-h-[220px] flex-col justify-center overflow-hidden rounded-3xl border border-card-border bg-card-surface p-6 shadow-card">
-              <div
-                className="pointer-events-none absolute inset-0 opacity-[0.28] dark:opacity-[0.18]"
-                style={{
-                  backgroundImage:
-                    "radial-gradient(circle at 1px 1px, rgb(139 92 246 / 0.22) 1px, transparent 0)",
-                  backgroundSize: "22px 22px",
-                }}
-                aria-hidden
-              />
-              <div
-                className="pointer-events-none absolute -right-20 top-1/2 h-44 w-44 -translate-y-1/2 rounded-full bg-accent-cyan/15 blur-3xl dark:bg-accent-cyan/10"
-                aria-hidden
-              />
-              <div
-                className="pointer-events-none absolute -left-16 bottom-0 h-36 w-36 rounded-full bg-accent-violet/10 blur-2xl"
-                aria-hidden
-              />
-              <div className="relative flex flex-col gap-6 sm:flex-row sm:items-start">
-                <div className="shrink-0">
-                  <Image
-                    src="/brand/favicon.png"
-                    alt={t("overviewCallout.philosophyLogoAlt")}
-                    width={112}
-                    height={112}
-                    className="h-14 w-14 object-contain"
-                  />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-                    {t("overviewCallout.philosophyEyebrow")}
-                  </p>
-                  <ul className="mt-4 list-none space-y-4">
-                    <li className="flex gap-3 text-sm leading-6 text-gray-700 dark:text-gray-300">
-                      <span
-                        className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-violet"
-                        aria-hidden
-                      />
-                      <span>{t("overviewCallout.philosophyBullet1")}</span>
-                    </li>
-                    <li className="flex gap-3 text-sm leading-6 text-gray-700 dark:text-gray-300">
-                      <span
-                        className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-cyan"
-                        aria-hidden
-                      />
-                      <span>{t("overviewCallout.philosophyBullet2")}</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      </ScrollRevealSection>
+      <SoundprintBrandDividerSection logoSize="lg" lineStyle="fade" maxWidth="medium" className="py-4 sm:py-6" />
 
       <ScrollRevealSection>
-        <section className="relative overflow-hidden rounded-[2rem] border border-card-border bg-card-surface shadow-2xl ring-1 ring-accent-violet/10">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(152,80,208,0.16),transparent_32%),radial-gradient(circle_at_90%_40%,rgba(79,144,224,0.14),transparent_28%)]" />
-          <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-accent-cyan/60 to-transparent" />
-          <div className="relative grid gap-8 p-6 sm:p-8 lg:grid-cols-[0.8fr_1.2fr] lg:p-10">
-            <div>
-              <Image
-                src="/brand/favicon.png"
-                alt=""
-                width={112}
-                height={112}
-                className="mb-5 h-14 w-14 object-contain"
-              />
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-accent-violet">
-                {t("sections.sonicIdentity")}
-              </p>
-              <h2 className="mt-3 text-2xl font-bold tracking-tight text-gray-950 dark:text-white sm:text-3xl">
-                {t("identityTitle")}
-              </h2>
-              <p className="mt-3 text-sm leading-6 text-gray-500 dark:text-gray-400">
-                {t("identitySubtitle")}
-              </p>
-              {aiProfile?.cached && (
-                <p className="mt-4 inline-flex rounded-full bg-accent-violet/10 px-3 py-1 text-xs font-medium text-accent-violet">
-                  {t("aiCached")}
-                </p>
-              )}
-              {showAiUnavailable && (
-                <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-100">
-                  {t("aiUnavailable")}
-                </p>
-              )}
-            </div>
-            <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-slate-950 p-6 text-white shadow-2xl shadow-black/20 sm:p-8">
-              <div
-                className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(79,144,224,0.18),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.08),transparent_38%)]"
-                aria-hidden
-              />
-              <div className="relative">
-              {aiLoading ? (
-                <div className="space-y-3 animate-pulse" aria-busy="true">
-                  <div className="h-5 w-full rounded bg-white/15" />
-                  <div className="h-5 w-11/12 rounded bg-white/15" />
-                  <div className="h-5 w-4/5 rounded bg-white/15" />
-                </div>
-              ) : aiError ? (
-                isGroqDailyQuotaError(aiError) ? (
-                  <GroqQuotaNotice error={aiError} />
-                ) : isGroqGenreClassificationBlockingError(aiError) ? (
-                  <div className="space-y-4">
-                    {!interactiveAiBlockedByGenreBackfill ? (
-                      <InteractiveAiGenreBackfillNotice force />
-                    ) : null}
-                    <CinematicQuote
-                      className="text-2xl font-semibold leading-9 tracking-tight text-white"
-                      quoteKey={profileDescription}
-                    >
-                      &ldquo;{profileDescription}&rdquo;
-                    </CinematicQuote>
-                  </div>
-                ) : (
-                  <div role="alert" className="space-y-3">
-                    <p className="text-sm font-semibold text-red-600 dark:text-red-400">
-                      {t("aiErrorTitle")}
-                    </p>
-                    <p className="text-xl font-semibold leading-8 text-white">
-                      {profileDescription}
-                    </p>
-                  </div>
-                )
-              ) : (
-                <CinematicQuote
-                  className="text-2xl font-semibold leading-9 tracking-tight text-white"
-                  quoteKey={profileDescription}
-                >
-                  &ldquo;{profileDescription}&rdquo;
-                </CinematicQuote>
-              )}
-              </div>
-            </div>
-          </div>
-        </section>
+        <SoundprintIdentitySection
+          aiCached={aiProfile?.cached}
+          aiError={aiError ?? null}
+          aiLoading={aiLoading}
+          interactiveAiBlockedByGenreBackfill={interactiveAiBlockedByGenreBackfill}
+          profileDescription={profileDescription}
+          showAiUnavailable={showAiUnavailable}
+          topArtistName={topArtistName}
+          topGenreName={topGenreName}
+        />
       </ScrollRevealSection>
 
+      <SoundprintBrandDividerSection logoSize="md" lineStyle="gradient" maxWidth="narrow" className="py-4 sm:py-6" />
+
       <ScrollRevealSection>
-        <section className="relative overflow-hidden rounded-[2rem] border border-accent-violet/20 bg-gradient-to-br from-card-surface via-card-surface to-accent-violet/[0.06] p-6 shadow-2xl ring-1 ring-accent-violet/10 sm:p-8 lg:p-10 dark:to-accent-violet/[0.09]">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_0%,rgba(139,92,246,0.12),transparent_32%),radial-gradient(circle_at_95%_80%,rgba(6,182,212,0.1),transparent_30%)]" />
-          <div className="relative space-y-8">
-            <div className="max-w-2xl">
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-accent-violet">
-                {t("landing.badge")}
-              </p>
-              <h2 className="mt-3 text-2xl font-bold tracking-tight text-gray-950 dark:text-white sm:text-3xl">
-                {t("landing.title")}
-              </h2>
-              <p className="mt-3 text-sm leading-6 text-gray-600 dark:text-gray-300">{t("landing.lead")}</p>
-            </div>
-            <StaggerContainer className="grid grid-cols-1 gap-4 md:grid-cols-3">
-              <LandingValueCard
-                title={t("landing.cards.statsTitle")}
-                body={t("landing.cards.statsBody")}
-                icon={<BarsIcon className="h-5 w-5" />}
-                accentClass="bg-accent-violet/10 text-accent-violet"
-              />
-              <LandingValueCard
-                title={t("landing.cards.movementTitle")}
-                body={t("landing.cards.movementBody")}
-                icon={<SparkIcon className="h-5 w-5" />}
-                accentClass="bg-accent-cyan/10 text-accent-cyan"
-              />
-              <LandingValueCard
-                title={t("landing.cards.mixTitle")}
-                body={t("landing.cards.mixBody")}
-                icon={<ProfileIcon className="h-5 w-5" />}
-                accentClass="bg-accent-indigo/10 text-accent-indigo"
-              />
-            </StaggerContainer>
-            <div className="flex flex-col items-stretch gap-4 sm:items-center">
-              <Link
-                href={withFilters("/dashboard/overview")}
-                className="inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-6 py-3.5 text-sm font-bold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:shadow-card-hover focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background sm:w-auto sm:min-w-[280px]"
-              >
-                {t("landing.primaryCta")}
-                <span aria-hidden="true">&rarr;</span>
-              </Link>
-              <p className="text-center text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                {t("landing.secondaryHint")}
-              </p>
-              <StaggerContainer className="grid w-full max-w-3xl grid-cols-1 gap-3 sm:grid-cols-3">
-                {[
-                  {
-                    href: withFilters("/dashboard/artists"),
-                    label: t("ctas.artists"),
-                    icon: <ProfileIcon className="h-5 w-5" />,
-                  },
-                  {
-                    href: withFilters("/dashboard/tracks"),
-                    label: t("ctas.tracks"),
-                    icon: <BarsIcon className="h-5 w-5" />,
-                  },
-                  {
-                    href: withFilters("/dashboard/genres"),
-                    label: t("ctas.genres"),
-                    icon: <BarsIcon className="h-5 w-5" />,
-                  },
-                ].map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className="flex min-h-[48px] items-center justify-center gap-2 rounded-2xl border border-card-border bg-card-surface px-4 py-3 text-sm font-medium text-gray-700 shadow-card transition-all hover:-translate-y-0.5 hover:border-accent-violet/30 hover:text-accent-violet hover:shadow-card-hover dark:text-gray-300"
-                  >
-                    <span className="text-accent-violet">{item.icon}</span>
-                    {item.label}
-                  </Link>
-                ))}
-              </StaggerContainer>
-            </div>
-          </div>
-        </section>
-        </ScrollRevealSection>
+        <ExploreFeaturesSection withFilters={withFilters} />
+      </ScrollRevealSection>
       </div>
     </>
   );

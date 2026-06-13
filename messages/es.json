@@ -2024,6 +2024,30 @@
     "deterministicProfile": "Tu perfil actual se inclina hacia {genre}, con {artist} como uno de los anclajes más fuertes del período. Importa más escuchas o amplía el rango de fechas para afinar el perfil IA.",
     "identityTitle": "Tu identidad soundprint",
     "identitySubtitle": "Tu historia se teje con los mismos artistas, géneros y canciones que el resto de tus análisis — así lo que lees siempre encaja con tu panorama de escucha.",
+    "identityWelcome": "Importación lista — aquí va tu primera lectura.",
+    "features": {
+      "badge": "Qué sigue",
+      "title": "Tres formas de explorar tu biblioteca",
+      "lead": "Tus escuchas ya están. Empieza por la vista general, haz preguntas en lenguaje claro o compara con amigos.",
+      "yourMusic": {
+        "eyebrow": "Centro analítico",
+        "title": "Your Music",
+        "body": "KPIs, tendencias, heatmaps y rankings — todo con los mismos filtros de fechas que ves aquí.",
+        "cta": "Abrir Your Music"
+      },
+      "aiChat": {
+        "eyebrow": "Conversacional",
+        "title": "Soundprint chat",
+        "body": "Pregunta lo que quieras sobre tu historial. Las respuestas se basan en tus reproducciones — no en la web abierta.",
+        "cta": "Empezar a chatear"
+      },
+      "duet": {
+        "eyebrow": "Social",
+        "title": "Duet",
+        "body": "Invita amigos, elige un artista y mira quién realmente escucha más.",
+        "cta": "Probar Duet"
+      }
+    },
     "aiCached": "Perfil IA servido desde caché",
     "aiUnavailable": "La IA está desactivada para este entorno o navegador, por lo que esta página muestra un perfil determinista basado en tus estadísticas.",
     "aiErrorTitle": "Análisis IA no disponible. Mostrando un resumen basado en datos.",
@@ -2070,7 +2094,7 @@
     "trackObsessionTitle": "Canciones en repetición",
     "aiAttributesTitle": "Atributos del perfil IA",
     "sections": {
-      "sonicIdentity": "Narrativa IA",
+      "sonicIdentity": "Identidad Soundprint",
       "topArtists": "Artistas más escuchados",
       "topTracks": "Canciones más escuchadas",
       "topGenres": "Géneros dominantes",

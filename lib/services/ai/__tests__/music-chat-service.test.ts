@@ -67,7 +67,7 @@ describe("music-chat-service", () => {
       }
     );
     expect(mockCreateGroqChatCompletion).not.toHaveBeenCalled();
-    expect(response.answer).toContain("Hit — Band (40 listens)");
+    expect(response.answer).toContain("Hit — Band (40 streams)");
     expect(response.sources).toHaveLength(1);
   });
 
@@ -110,7 +110,7 @@ describe("music-chat-service", () => {
     );
     expect(mockCreateGroqChatCompletion).not.toHaveBeenCalled();
     expect(response.answer).toContain("- Daft Punk");
-    expect(response.answer).toContain("100 listens");
+    expect(response.answer).toContain("100 streams");
     expect(response.answer).toContain("12 unique tracks");
     expect(response.sources).toHaveLength(1);
   });

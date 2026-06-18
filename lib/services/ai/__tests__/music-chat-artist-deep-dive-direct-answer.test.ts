@@ -80,6 +80,6 @@ describe("music-chat-artist-deep-dive-direct-answer", () => {
     expect(text).toContain("Radiohead");
     expect(text).toContain("Weird Fishes");
     expect(text).toContain("2023");
-    expect(text).toContain("40 total listens");
+    expect(text).toContain("40 total streams");
   });
 });

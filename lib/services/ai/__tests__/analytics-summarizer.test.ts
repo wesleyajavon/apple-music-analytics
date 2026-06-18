@@ -46,7 +46,7 @@ describe("analytics-summarizer", () => {
   it("sorts hours by listens descending", () => {
     const result = summarizeAnalytics(minimalInput);
     expect(result.text).toContain("18h-19h");
-    expect(result.text).toContain("50 écoutes");
+    expect(result.text).toContain("50 streams");
   });
 
   it("limits to top 10 genres", () => {

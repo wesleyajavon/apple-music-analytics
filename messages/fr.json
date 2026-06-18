@@ -183,8 +183,14 @@
     },
     "inviteAccept": {
       "sharePrompt": "Que souhaitez-vous partager avec cet ami ?",
-      "scopeAggregates": { "label": "Statistiques agrégées", "description": "Courbes, tops artistes et genres — sans détail des morceaux." },
-      "scopeFull": { "label": "Comparaisons détaillées", "description": "Tout ce qui précède, plus les défis artiste head-to-head." }
+      "scopeAggregates": {
+        "label": "Statistiques agrégées",
+        "description": "Courbes, tops artistes et genres — sans détail des morceaux."
+      },
+      "scopeFull": {
+        "label": "Comparaisons détaillées",
+        "description": "Tout ce qui précède, plus les défis artiste head-to-head."
+      }
     },
     "accept": {
       "title": "Invitation d’ami",
@@ -363,14 +369,18 @@
     }
   },
   "askSoundprint": {
-    "eyebrow": "En direct · chat Soundprint",
+    "eyebrow": "Interrogez votre bibliothèque",
     "title": "Dialoguez avec votre Soundprint",
-    "subtitle": "Tops, régularité, habitudes tardives ou bascules de goût entre deux époques — chaque réponse s’appuie sur vos écoutes stockées et nos agrégats serveur.",
-    "heroStatBadge": "Cadre de confiance",
-    "heroStatTag": "Outils contrôlés",
-    "heroTrust1": "Pas de navigation web ni de classements inventés.",
-    "heroTrust2": "Lecture seule : pas de playlists, imports ou SQL imprévu.",
-    "heroTrust3": "Honore le filtre de dates du tableau de bord sauf mention contraire sur une carte.",
+    "subtitle": "Qui passe en boucle ? Quand écoutez-vous le plus ? Posez vos questions — deepdives artiste inclus — à partir de votre vrai historique d'écoute.",
+    "heroStatBadge": "Des réponses fiables",
+    "heroStatTag": "Votre historique",
+    "heroTrustPanelHint": "Trois promesses avant de poser vos questions.",
+    "heroTrust1Title": "Vos vraies écoutes",
+    "heroTrust1": "Tirées de votre historique — pas de classements inventés ni de recherches web.",
+    "heroTrust2Title": "Regarder, pas toucher",
+    "heroTrust2": "Explorez librement — rien ici ne modifie vos playlists ni vos imports.",
+    "heroTrust3Title": "Votre période",
+    "heroTrust3": "Respecte la plage de dates choisie sur le tableau de bord.",
     "heroDemoPill": "Démo — presets uniquement",
     "ctaOverview": "Vue Musique",
     "ctaAiInsights": "Cartes AI Insights",
@@ -397,7 +407,7 @@
     "thinkingPatience": "Les réponses détaillées peuvent prendre un peu de temps — merci de patienter.",
     "presetTitle": "Playbook des presets",
     "presetDescription": "Un clic envoie une question structurée pour découvrir vite ce que cet agent sait traiter.",
-    "customizeHint": "Ces questions sont des modèles : les utilisateurs connectés peuvent changer l’artiste, l’année, la période, les périodes à comparer, la taille de fenêtre ou la limite de résultats en texte libre.",
+    "customizeHint": "Ces questions sont des modèles : les utilisateurs connectés peuvent changer l'artiste, l'année, la période, les périodes à comparer, la taille de fenêtre ou la limite de résultats en texte libre.",
     "heavyPresetHistoryNotice": "Certaines questions rapides n’analysent qu’une fenêtre récente (voir chaque carte) ou la plage du tableau de bord pour garder des réponses rapides — ce n’est pas toujours tout votre historique.",
     "dismissHintAria": "Masquer l’avertissement",
     "supportedGuideTitle": "Parcourir le playbook",
@@ -416,16 +426,16 @@
     "aiDisabledConsent": "Activez l’IA Groq dans Paramètres → Données et confidentialité pour utiliser Ask your Soundprint.",
     "aiDisabledEnv": "L’IA est désactivée côté serveur. Ask your Soundprint n’est pas disponible ici.",
     "mobile": {
-      "eyebrow": "Chat Soundprint",
+      "eyebrow": "Questions musicales",
       "storyTitle": "Interrogez votre bibliothèque",
-      "storyBody": "Chaque réponse s’appuie sur vos écoutes stockées et nos agrégats serveur — pas d’approximation.",
+      "storyBody": "Chaque réponse vient de votre vrai historique d'écoute — pas d'approximation.",
       "demoBadge": "Démo presets",
       "featuredPresets": "Démarrages rapides",
       "featuredPresetsHint": "Un tap envoie une question structurée.",
       "browseAllPresets": "Tous les presets",
       "presetSheetTitle": "Playbook des presets",
       "presetSheetHint": "Parcourez tous les modèles de questions supportés.",
-      "trustSummary": "Outils analytics en lecture seule. Pas de navigation web ni d’édition de playlists.",
+      "trustSummary": "Vos vraies écoutes. Lecture seule. Votre période.",
       "guardrailsTitle": "Limites et garde-fous"
     },
     "presets": {
@@ -482,7 +492,7 @@
         "recentWindowHint": "Environ les {days} derniers jours (UTC), pas tout l’historique — indépendamment du filtre du tableau de bord."
       },
       "artist-deep-dive": {
-        "label": "Deep dive artiste",
+        "label": "Deepdive artiste",
         "labelRich": "<em>artiste</em> deepdive",
         "question": "Raconte-moi mon historique d’écoute avec Radiohead."
       },
@@ -2769,7 +2779,7 @@
     "appleMusicLogoAlt": "Apple Music",
     "journey": {
       "tagline": "Votre musique, décodée en 3 temps.",
-      "pitch": "Importez une fois depuis Apple Music ou Spotify. Explorez vos tendances. Dialoguez avec vos données — et défier vos amis.",
+      "pitch": "Importez une fois depuis Apple Music ou Spotify. Explorez vos tendances, lancez des deepdives artiste, dialoguez avec vos données — et défiez vos amis.",
       "stepsListAriaLabel": "Les 3 étapes du parcours Soundprint",
       "stepLinkAria": "Aller à {step}",
       "nav": {
@@ -2813,7 +2823,7 @@
         }
       }
     },
-    "subtitle": "Importez une fois depuis Apple Music ou Spotify. Explorez vos tendances. Dialoguez avec vos données — et défier vos amis.",
+    "subtitle": "Importez une fois depuis Apple Music ou Spotify. Explorez vos tendances. Dialoguez avec vos données — et défiez vos amis.",
     "heroPrimaryCta": "Révéler votre Soundprint",
     "heroDashboardPreview": {
       "label": "Aperçu du dashboard Soundprint",
@@ -2926,11 +2936,11 @@
     "featuresTitle": "Une couche d'analytics personnelle pour les passionnés de musique.",
     "demoHighlights": {
       "artistAnalysis": {
-        "eyebrow": "Analyse artiste",
-        "title": "Transformez chaque artiste préféré en histoire claire.",
-        "description": "Soundprint montre pourquoi un artiste revient dans votre vie musicale : quand vous l'écoutez le plus, comment vos goûts évoluent autour de lui et ce que ses patterns révèlent sur vous.",
+        "eyebrow": "Deepdives artiste",
+        "title": "Un artiste, toute votre histoire d'écoute.",
+        "description": "Soundprint tire votre historique avec un seul artiste — écoutes, top titres et évolution — dans le dashboard et le chat.",
         "metric": "Des top artistes au vrai contexte d'écoute",
-        "videoLabel": "Démo d'analyse des artistes"
+        "videoLabel": "Démo deepdive artiste"
       },
       "listeningTrends": {
         "eyebrow": "Données d'écoute avancées",
@@ -2975,13 +2985,13 @@
           "label": "Avant / après",
           "supporting": "Comparez 2 années d'écoutes"
         },
-        "plainLanguage": {
-          "label": "En clair",
-          "supporting": "Comme à un ami qui vous connaît."
-        },
         "groundedAnswers": {
           "label": "Vos écoutes",
           "supporting": "Des chiffres réels. Zéro invention."
+        },
+        "artistDeepdive": {
+          "label": "Deepdive artiste",
+          "supporting": "Un nom → stats, titres, arc annuel"
         }
       }
     },
@@ -3004,6 +3014,10 @@
         "pricing": {
           "question": "Soundprint est-il gratuit ?",
           "answer": "Oui, Soundprint est gratuit. Créez un compte, importez votre historique et explorez votre dashboard sans frais."
+        },
+        "deepdive": {
+          "question": "Qu'est-ce qu'un deepdive artiste ?",
+          "answer": "Choisissez n'importe quel artiste de votre historique — ou tapez son nom suivi de deepdive dans le chat Soundprint. Soundprint récupère vos écoutes avec cet artiste et affiche totaux, top titres, détail année par année et un résumé clair."
         }
       },
       "cta": {

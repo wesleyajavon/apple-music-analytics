@@ -31,7 +31,7 @@ export function HomeJourneyInteractSection({
 
   const soundprintAiChatFeatures = useMemo(
     () =>
-      (["compareEras", "plainLanguage", "groundedAnswers"] as const).map((key) => ({
+      (["artistDeepdive", "compareEras", "groundedAnswers"] as const).map((key) => ({
         label: tHome(`soundprintAiChatDemo.features.${key}.label`),
         supportingText: tHome(`soundprintAiChatDemo.features.${key}.supporting`),
       })),

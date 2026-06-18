@@ -14,10 +14,13 @@ import { useLocale, useTranslations } from "next-intl";
 import {
   Bot,
   Brain,
+  CalendarRange,
   ChevronDown,
   LayoutDashboard,
   ListTree,
+  Music2,
   Send,
+  ShieldCheck,
   Sparkles,
   UserRound,
   X,
@@ -140,6 +143,82 @@ function DismissibleAskHint({
 const ASK_HERO_SHELL_CLASS =
   "relative overflow-hidden rounded-[2rem] border border-white/10 bg-gray-950 px-5 py-6 text-white shadow-2xl shadow-violet-500/15 sm:px-8 sm:py-9 lg:px-10 lg:py-10";
 
+const ASK_TRUST_PILLARS = [
+  {
+    titleKey: "heroTrust1Title",
+    bodyKey: "heroTrust1",
+    icon: Music2,
+    iconClass:
+      "border-violet-300/30 bg-gradient-to-br from-violet-500/30 to-violet-400/10 text-violet-100 shadow-[0_0_22px_rgba(139,92,246,0.28)]",
+  },
+  {
+    titleKey: "heroTrust2Title",
+    bodyKey: "heroTrust2",
+    icon: ShieldCheck,
+    iconClass:
+      "border-cyan-300/30 bg-gradient-to-br from-cyan-500/25 to-cyan-400/10 text-cyan-100 shadow-[0_0_22px_rgba(34,211,238,0.22)]",
+  },
+  {
+    titleKey: "heroTrust3Title",
+    bodyKey: "heroTrust3",
+    icon: CalendarRange,
+    iconClass:
+      "border-emerald-300/30 bg-gradient-to-br from-emerald-500/25 to-emerald-400/10 text-emerald-100 shadow-[0_0_22px_rgba(52,211,153,0.22)]",
+  },
+] as const;
+
+function AskSoundprintTrustPanel() {
+  const t = useTranslations("askSoundprint");
+
+  return (
+    <div className="relative">
+      <div className="absolute -inset-4 rounded-[2rem] bg-brand-gradient-soft blur-2xl" aria-hidden />
+      <div className="relative overflow-hidden rounded-[1.75rem] border border-white/20 bg-gradient-to-br from-white/15 via-white/5 to-transparent p-px shadow-2xl shadow-violet-500/25 backdrop-blur-xl">
+        <div className="relative overflow-hidden rounded-[1.72rem] bg-slate-950/90 p-5 sm:p-6">
+          <div
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(139,92,246,0.22),transparent_42%),radial-gradient(circle_at_bottom_left,rgba(6,182,212,0.14),transparent_38%)]"
+            aria-hidden
+          />
+          <div className="relative flex items-start gap-3.5">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/15 bg-gradient-to-br from-violet-500/35 via-violet-400/15 to-cyan-400/10 shadow-lg shadow-violet-500/25">
+              <Sparkles className="h-5 w-5 text-violet-50" strokeWidth={2} aria-hidden />
+            </div>
+            <div className="min-w-0 flex-1 pt-0.5">
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-lg font-semibold tracking-[-0.03em] text-white">{t("heroStatBadge")}</p>
+                <span className="rounded-full border border-emerald-300/35 bg-emerald-400/12 px-2.5 py-1 text-[0.62rem] font-bold uppercase tracking-[0.14em] text-emerald-100">
+                  {t("heroStatTag")}
+                </span>
+              </div>
+              <p className="mt-1.5 text-sm leading-6 text-white/60">{t("heroTrustPanelHint")}</p>
+            </div>
+          </div>
+
+          <ul className="relative mt-5 space-y-2.5">
+            {ASK_TRUST_PILLARS.map(({ titleKey, bodyKey, icon: Icon, iconClass }) => (
+              <li
+                key={titleKey}
+                className="flex gap-3 rounded-2xl border border-white/10 bg-white/[0.045] p-3.5 transition-colors hover:border-white/16 hover:bg-white/[0.07]"
+              >
+                <div
+                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${iconClass}`}
+                  aria-hidden
+                >
+                  <Icon className="h-4 w-4" strokeWidth={2.1} />
+                </div>
+                <div className="min-w-0 pt-0.5">
+                  <p className="text-sm font-semibold text-white">{t(titleKey)}</p>
+                  <p className="mt-0.5 text-sm leading-5 text-white/65">{t(bodyKey)}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function AskSoundprintHero({ isPublicDemoViewer }: { isPublicDemoViewer: boolean }) {
   const t = useTranslations("askSoundprint");
   return (
@@ -183,31 +262,7 @@ function AskSoundprintHero({ isPublicDemoViewer }: { isPublicDemoViewer: boolean
           </div>
         </div>
 
-        <div className="relative">
-          <div className="absolute -inset-4 rounded-[2rem] bg-brand-gradient-soft blur-2xl" aria-hidden />
-          <div className="relative overflow-hidden rounded-[1.75rem] border border-white/15 bg-white/10 p-3 shadow-2xl shadow-black/35 backdrop-blur-xl">
-            <div className="rounded-[1.35rem] border border-white/10 bg-slate-950/70 p-4">
-              <div className="flex items-center justify-between border-b border-white/10 pb-4">
-                <p className="font-mono text-[0.66rem] font-semibold uppercase tracking-[0.24em] text-slate-400">{t("heroStatBadge")}</p>
-                <span className="rounded-full border border-violet-300/25 bg-violet-300/10 px-2.5 py-1 text-[0.66rem] font-semibold text-violet-100">{t("heroStatTag")}</span>
-              </div>
-              <ul className="mt-4 space-y-3 text-sm leading-6 text-white/75">
-                <li className="flex gap-2">
-                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.55)]" aria-hidden />
-                  <span>{t("heroTrust1")}</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.55)]" aria-hidden />
-                  <span>{t("heroTrust2")}</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.55)]" aria-hidden />
-                  <span>{t("heroTrust3")}</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
+        <AskSoundprintTrustPanel />
       </div>
     </div>
   );

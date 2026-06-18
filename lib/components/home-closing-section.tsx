@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { HomeBlurFadeReveal, HomeTextReveal } from "@/lib/components/home-animations";
 
-const FAQ_KEYS = ["export", "privacy", "providers", "pricing"] as const;
+const FAQ_KEYS = ["export", "deepdive", "privacy", "providers", "pricing"] as const;
 
 type HomeClosingSectionProps = {
   isAuthenticated: boolean;

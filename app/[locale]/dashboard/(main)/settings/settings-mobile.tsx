@@ -386,7 +386,7 @@ export function SettingsMobileExperience(props: SettingsMobileProps) {
             title={t("genreBannerHideLabel")}
             hint={t("genreBannerHint")}
             checked={props.hideGenreBanner}
-            aria-label={t("switchHideGenreAria")}
+            ariaLabel={t("switchHideGenreAria")}
             onChange={props.onHideGenreBannerChange}
           />
 
@@ -398,7 +398,7 @@ export function SettingsMobileExperience(props: SettingsMobileProps) {
               disabled={!props.privacyPrefsLoaded || props.privacySaving}
               saving={props.privacySaving}
               savingLabel={t("groqConsentSaving")}
-              aria-label={t("groqConsentLabel")}
+              ariaLabel={t("groqConsentLabel")}
               onChange={props.onGroqConsentChange}
             />
           </div>
@@ -411,7 +411,7 @@ export function SettingsMobileExperience(props: SettingsMobileProps) {
               disabled={!props.privacyPrefsLoaded || props.privacySaving}
               saving={props.privacySaving}
               savingLabel={t("publicProfileSaving")}
-              aria-label={t("publicProfileLabel")}
+              ariaLabel={t("publicProfileLabel")}
               onChange={props.onPublicProfileChange}
             />
           ) : null}

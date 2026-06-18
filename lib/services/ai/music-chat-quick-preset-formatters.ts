@@ -679,9 +679,23 @@ const WEEKLY_CLASSIFICATION_LABELS: Record<
   },
 };
 
-export function isWeeklyTasteEvolutionToolResult(value: unknown): boolean {
+export type WeeklyTasteEvolutionToolResult = {
+  period: { startDate: string; endDate: string };
+  trends: unknown[];
+  skippedWeeks?: unknown;
+};
+
+export function isWeeklyTasteEvolutionToolResult(
+  value: unknown
+): value is WeeklyTasteEvolutionToolResult {
   if (!isRecord(value)) return false;
-  return isRecord(value.period) && Array.isArray(value.trends);
+  const period = value.period;
+  if (!isRecord(period)) return false;
+  return (
+    typeof period.startDate === "string" &&
+    typeof period.endDate === "string" &&
+    Array.isArray(value.trends)
+  );
 }
 
 function formatWeeklyVolumeLine(
@@ -722,9 +736,8 @@ export function formatWeeklyTasteEvolutionPresetAnswer(
   if (!isWeeklyTasteEvolutionToolResult(result)) return "";
 
   const period = result.period;
-  const startDate =
-    typeof period.startDate === "string" ? period.startDate : "";
-  const endDate = typeof period.endDate === "string" ? period.endDate : "";
+  const startDate = period.startDate;
+  const endDate = period.endDate;
   const periodPhrase = formatListeningPeriodPhrase(locale, startDate, endDate);
 
   const intro =

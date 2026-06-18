@@ -1075,7 +1075,7 @@ export function AccountSettingsClient({ gdprContactEmail = null }: AccountSettin
                 title={t("genreBannerHideLabel")}
                 hint={t("genreBannerHint")}
                 checked={hideGenreBanner}
-                aria-label={t("switchHideGenreAria")}
+                ariaLabel={t("switchHideGenreAria")}
                 onChange={(next) => {
                   if (next) setGenreBackfillBannerOptOut(true);
                   else clearGenreBackfillBannerBlockingPrefs();
@@ -1091,7 +1091,7 @@ export function AccountSettingsClient({ gdprContactEmail = null }: AccountSettin
                   disabled={!privacyPrefsLoaded || privacySaving}
                   saving={privacySaving}
                   savingLabel={t("groqConsentSaving")}
-                  aria-label={t("groqConsentLabel")}
+                  ariaLabel={t("groqConsentLabel")}
                   onChange={(next) => {
                     void patchPrivacyPreference({ groqGenreConsent: next });
                   }}
@@ -1106,7 +1106,7 @@ export function AccountSettingsClient({ gdprContactEmail = null }: AccountSettin
                   disabled={!privacyPrefsLoaded || privacySaving}
                   saving={privacySaving}
                   savingLabel={t("publicProfileSaving")}
-                  aria-label={t("publicProfileLabel")}
+                  ariaLabel={t("publicProfileLabel")}
                   onChange={(next) => {
                     void patchPrivacyPreference({ publicProfile: next });
                   }}

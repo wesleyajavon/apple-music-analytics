@@ -2,17 +2,13 @@
 
 import { useSearchParams } from "next/navigation";
 import { useRouter, usePathname } from "@/i18n/navigation";
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useCallback, useRef, useEffect, useState } from "react";
 import { toast } from "sonner";
-import {
-  isRecentAuthRequiredError,
-  redirectToRecentSignIn,
-} from "@/lib/auth/recent-auth-client";
 import { useOptimisticFilters } from "@/lib/hooks/use-optimistic-filters";
+import { DashboardUserMenu } from "@/lib/components/dashboard-user-menu";
 import { NotificationCenter } from "@/lib/components/notification-center";
 import { useMobileSidebar } from "@/lib/components/sidebar";
-import { useNotifications } from "@/lib/context/notification-center-context";
 import { useHideNotificationCenterForPublicDemo } from "@/lib/hooks/use-public-demo-viewer";
 
 export type DateRangePreset = "7d" | "30d" | "ytd" | "all" | "custom";
@@ -96,111 +92,6 @@ export function getDateRangePresetFromSearchParams(searchParams: {
   return "all";
 }
 
-function DashboardExportMenu({
-  open,
-  onToggle,
-  onClose,
-  onCsv,
-  onStats,
-  onPdf,
-}: {
-  open: boolean;
-  onToggle: () => void;
-  onClose: () => void;
-  onCsv: () => void;
-  onStats: () => void;
-  onPdf: () => void;
-}) {
-  const t = useTranslations("components.dateRangeFilter");
-  const wrapRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const handlePointerDown = (e: MouseEvent) => {
-      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) {
-        onClose();
-      }
-    };
-    document.addEventListener("mousedown", handlePointerDown);
-    return () => document.removeEventListener("mousedown", handlePointerDown);
-  }, [open, onClose]);
-
-  useEffect(() => {
-    if (!open) return;
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
-  }, [open, onClose]);
-
-  return (
-    <div ref={wrapRef} className="relative shrink-0 lg:hidden">
-      <button
-        type="button"
-        onClick={onToggle}
-        aria-expanded={open}
-        aria-haspopup="menu"
-        aria-label={t("exportMenuLabel")}
-        title={t("exportLabel")}
-        className="flex h-9 w-9 items-center justify-center rounded-lg text-muted transition-colors hover:bg-primary/10 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-      >
-        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-          />
-        </svg>
-      </button>
-      {open ? (
-        <div
-          role="menu"
-          className="absolute right-0 top-[calc(100%+0.25rem)] z-50 w-[min(14rem,calc(100vw-5rem))] overflow-hidden rounded-xl border border-card-border bg-surface-raised py-1 shadow-card"
-        >
-          <button
-            type="button"
-            role="menuitem"
-            onClick={() => {
-              onCsv();
-              onClose();
-            }}
-            className="flex min-h-10 w-full items-center gap-2 px-3 text-left text-sm font-medium text-foreground transition-colors hover:bg-accent-emerald/10 hover:text-accent-emerald"
-          >
-            <span className="font-mono text-xs text-muted">CSV</span>
-            <span className="min-w-0 truncate">{t("exportMenuCsv")}</span>
-          </button>
-          <button
-            type="button"
-            role="menuitem"
-            onClick={() => {
-              onStats();
-              onClose();
-            }}
-            className="flex min-h-10 w-full items-center gap-2 px-3 text-left text-sm font-medium text-foreground transition-colors hover:bg-accent-indigo/10 hover:text-accent-indigo"
-          >
-            <span className="font-mono text-xs text-muted">JSON</span>
-            <span className="min-w-0 truncate">{t("exportMenuJson")}</span>
-          </button>
-          <button
-            type="button"
-            role="menuitem"
-            onClick={() => {
-              onPdf();
-              onClose();
-            }}
-            className="flex min-h-10 w-full items-center gap-2 px-3 text-left text-sm font-medium text-foreground transition-colors hover:bg-accent-rose/10 hover:text-accent-rose"
-          >
-            <span className="font-mono text-xs text-muted">PDF</span>
-            <span className="min-w-0 truncate">{t("exportMenuPdf")}</span>
-          </button>
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
 export function DateRangeFilter() {
   const router = useRouter();
   const pathname = usePathname();
@@ -208,18 +99,14 @@ export function DateRangeFilter() {
   const { prefetchWithOptimisticUpdate } = useOptimisticFilters();
   const t = useTranslations("components.dateRangeFilter");
   const tSidebar = useTranslations("sidebar");
-  const tNotifications = useTranslations("components.notificationCenter");
   const { toggle: toggleMobileSidebar } = useMobileSidebar();
-  const { addNotification } = useNotifications();
   const hideNotificationCenter = useHideNotificationCenterForPublicDemo(
     searchParams.get("userId")
   );
-  const locale = useLocale();
 
   const currentPreset: DateRangePreset = getDateRangePresetFromSearchParams(searchParams);
 
   const [customOpen, setCustomOpen] = useState(false);
-  const [exportMenuOpen, setExportMenuOpen] = useState(false);
   const [customStart, setCustomStart] = useState("");
   const [customEnd, setCustomEnd] = useState("");
   const customWrapRef = useRef<HTMLDivElement>(null);
@@ -397,137 +284,6 @@ export function DateRangeFilter() {
 
   const presetEntries = Object.entries(presets) as [FixedDateRangePreset, DateRange][];
 
-  const downloadFile = useCallback(
-    async (url: string, defaultFilename: string, exportType: string) => {
-      const toastId = toast.loading(t("toastExportInProgress", { type: exportType }));
-      try {
-        const response = await fetch(url);
-        if (!response.ok) {
-          const errorPayload = (await response.json().catch(() => null)) as {
-            error?: string;
-            code?: string;
-          } | null;
-          if (isRecentAuthRequiredError(errorPayload)) {
-            toast.error(t("recentAuthRequired"), { id: toastId });
-            redirectToRecentSignIn(window.location.pathname + window.location.search);
-            return;
-          }
-          throw new Error(errorPayload?.error || t("toastExportErrorFallback"));
-        }
-
-        const blob = await response.blob();
-        const downloadUrl = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = downloadUrl;
-
-        const contentDisposition = response.headers.get("content-disposition");
-        const filename = contentDisposition
-          ? contentDisposition.split("filename=")[1]?.replace(/"/g, "") || defaultFilename
-          : defaultFilename;
-
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(downloadUrl);
-
-        toast.success(t("toastExportSuccess", { type: exportType }), {
-          id: toastId,
-          description: t("toastFileDownloaded", { filename }),
-        });
-        if (!hideNotificationCenter) {
-          addNotification({
-            title: tNotifications("exportSuccessTitle", { type: exportType }),
-            body: tNotifications("exportSuccessBody", { filename }),
-            severity: "success",
-            source: `export-${exportType.toLowerCase()}`,
-          });
-        }
-      } catch (error) {
-        console.error("Erreur lors de l'export:", error);
-        const errorMessage =
-          error instanceof Error ? error.message : t("toastExportErrorFallback");
-        toast.error(t("toastExportError", { type: exportType }), {
-          id: toastId,
-          description: errorMessage,
-        });
-        if (!hideNotificationCenter) {
-          addNotification({
-            title: tNotifications("exportErrorTitle", { type: exportType }),
-            body: errorMessage,
-            severity: "error",
-            source: `export-${exportType.toLowerCase()}`,
-          });
-        }
-      }
-    },
-    [t, tNotifications, addNotification, hideNotificationCenter]
-  );
-
-  const handleExportCsv = useCallback(async () => {
-    const params = new URLSearchParams();
-    params.set("format", "csv");
-
-    const startDate = searchParams.get("startDate");
-    const endDate = searchParams.get("endDate");
-
-    if (startDate) params.set("startDate", startDate);
-    if (endDate) params.set("endDate", endDate);
-
-    const exportUrl = `/api/export/listens?${params.toString()}`;
-    await downloadFile(exportUrl, "listens.csv", "CSV");
-  }, [searchParams, downloadFile]);
-
-  const handleExportStats = useCallback(async () => {
-    const params = new URLSearchParams();
-    params.set("format", "json");
-
-    const startDate = searchParams.get("startDate");
-    const endDate = searchParams.get("endDate");
-
-    if (startDate) params.set("startDate", startDate);
-    if (endDate) params.set("endDate", endDate);
-
-    const exportUrl = `/api/export/stats?${params.toString()}`;
-    await downloadFile(exportUrl, "stats.json", "JSON");
-  }, [searchParams, downloadFile]);
-
-  const handleExportPdf = useCallback(async () => {
-    const params = new URLSearchParams();
-    params.set("format", "pdf");
-    params.set("locale", locale);
-
-    const startDate = searchParams.get("startDate");
-    const endDate = searchParams.get("endDate");
-
-    if (startDate && endDate) {
-      const start = new Date(startDate);
-      const end = new Date(endDate);
-      const startYear = start.getFullYear();
-      const endYear = end.getFullYear();
-
-      const isFullYear =
-        start.getMonth() === 0 &&
-        start.getDate() === 1 &&
-        end.getMonth() === 11 &&
-        end.getDate() === 31 &&
-        startYear === endYear;
-
-      if (isFullYear) {
-        params.set("year", startYear.toString());
-      } else {
-        params.set("startDate", startDate);
-        params.set("endDate", endDate);
-      }
-    } else {
-      const currentYear = new Date().getFullYear();
-      params.set("year", currentYear.toString());
-    }
-
-    const exportUrl = `/api/export/report?${params.toString()}`;
-    await downloadFile(exportUrl, "rapport.pdf", "PDF");
-  }, [searchParams, downloadFile, locale]);
-
   const presetButtonClass = (active: boolean) =>
     [
       "relative z-10 shrink-0 whitespace-nowrap rounded-md px-2.5 py-1.5 text-[11px] font-semibold transition-all duration-200",
@@ -630,64 +386,7 @@ export function DateRangeFilter() {
   const headerActions = (
     <>
       {!hideNotificationCenter ? <NotificationCenter /> : null}
-      <DashboardExportMenu
-        open={exportMenuOpen}
-        onToggle={() => setExportMenuOpen((v) => !v)}
-        onClose={() => setExportMenuOpen(false)}
-        onCsv={handleExportCsv}
-        onStats={handleExportStats}
-        onPdf={handleExportPdf}
-      />
-      <div className="hidden items-center gap-1 border-l border-card-border pl-4 lg:flex">
-        <span className="mr-2 text-[10px] font-semibold uppercase tracking-wider text-muted">
-          {t("exportLabel")}
-        </span>
-        <button
-          type="button"
-          onClick={handleExportCsv}
-          className="flex items-center justify-center rounded-lg p-2.5 text-muted transition-colors hover:bg-accent-emerald/10 hover:text-accent-emerald"
-          title={t("exportCsvTitle")}
-        >
-          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-            />
-          </svg>
-        </button>
-        <button
-          type="button"
-          onClick={handleExportStats}
-          className="flex items-center justify-center rounded-lg p-2.5 text-muted transition-colors hover:bg-accent-indigo/10 hover:text-accent-indigo"
-          title={t("exportStatsTitle")}
-        >
-          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
-            />
-          </svg>
-        </button>
-        <button
-          type="button"
-          onClick={handleExportPdf}
-          className="flex items-center justify-center rounded-lg p-2.5 text-muted transition-colors hover:bg-accent-rose/10 hover:text-accent-rose"
-          title={t("exportPdfTitle")}
-        >
-          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
-            />
-          </svg>
-        </button>
-      </div>
+      <DashboardUserMenu />
     </>
   );
 

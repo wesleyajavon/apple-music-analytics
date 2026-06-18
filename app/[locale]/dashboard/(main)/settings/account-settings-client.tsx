@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { useQueryClient } from "@tanstack/react-query";
-import { LayoutDashboard, Settings2, Upload } from "lucide-react";
+import { Download, FileJson, LayoutDashboard, Settings2, ShieldCheck, SlidersHorizontal, Upload, UserRound } from "lucide-react";
+import { LiveStatusDot } from "@/lib/components/live-status-dot";
 import { Link, useRouter } from "@/i18n/navigation";
 import {
   isRecentAuthRequiredError,
@@ -22,28 +23,29 @@ import {
   DASHBOARD_SPOTLIGHT_SHELL,
   DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY,
   DASHBOARD_SPOTLIGHT_GRADIENT_CYAN,
-  DASHBOARD_SPOTLIGHT_GRADIENT_TABLE,
   DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET,
   DASHBOARD_SPOTLIGHT_HAIRLINE_CYAN,
   DASHBOARD_SPOTLIGHT_HEADER_BOTTOM,
   DASHBOARD_SPOTLIGHT_INNER_WELL,
   DASHBOARD_SPOTLIGHT_MUTED,
   DASHBOARD_SPOTLIGHT_BTN_SECONDARY,
-  DASHBOARD_SPOTLIGHT_PILL_MUTED,
 } from "@/lib/constants/dashboard-spotlight";
 import {
   SettingsMobileExperience,
   SettingsMobileSignedOut,
   SettingsMobileSkeleton,
 } from "./settings-mobile";
-import { SettingsSwitch } from "./settings-shared";
+import {
+  SettingsDataCard,
+  SettingsPageNav,
+  SettingsSectionHeader,
+  SettingsToggleRow,
+} from "./settings-shared";
 import { GroqAiSettingsFocus } from "@/lib/components/groq-ai-settings-focus";
 import { DuetShareSettingsSection } from "@/lib/components/duet/duet-share-settings-section";
+import { DashboardDataExportsSection } from "@/lib/components/dashboard-data-exports-section";
 import { GROQ_AI_CONSENT_SETTINGS_HASH } from "@/lib/constants/groq-ai-settings";
 import { AI_MASTER_QUERY_KEY } from "@/lib/hooks/use-ai-master-toggle";
-
-const SUBNAV_STICKY_TOP =
-  "top-[calc(var(--dashboard-filter-height,4.5rem)+0.5rem)]";
 
 const SETTINGS_HERO_SHELL_CLASS =
   "relative overflow-hidden rounded-[2rem] border border-white/10 bg-gray-950 px-5 py-6 text-white shadow-2xl shadow-violet-500/15 sm:px-8 sm:py-9 lg:px-10 lg:py-10";
@@ -59,23 +61,79 @@ const SUPPORTED_AVATAR_TYPES = new Set([
   "image/gif",
 ]);
 
-function SettingsHeroTrustPanel() {
+const SETTINGS_CONTROLS_PILLARS = [
+  {
+    titleKey: "heroTrust1Title",
+    bodyKey: "heroTrust1",
+    icon: UserRound,
+    iconClass:
+      "border-violet-300/30 bg-gradient-to-br from-violet-500/30 to-violet-400/10 text-violet-100 shadow-[0_0_22px_rgba(139,92,246,0.28)]",
+  },
+  {
+    titleKey: "heroTrust2Title",
+    bodyKey: "heroTrust2",
+    icon: SlidersHorizontal,
+    iconClass:
+      "border-cyan-300/30 bg-gradient-to-br from-cyan-500/25 to-cyan-400/10 text-cyan-100 shadow-[0_0_22px_rgba(34,211,238,0.22)]",
+  },
+  {
+    titleKey: "heroTrust3Title",
+    bodyKey: "heroTrust3",
+    icon: ShieldCheck,
+    iconClass:
+      "border-emerald-300/30 bg-gradient-to-br from-emerald-500/25 to-emerald-400/10 text-emerald-100 shadow-[0_0_22px_rgba(52,211,153,0.22)]",
+  },
+] as const;
+
+function SettingsControlsPanel() {
   const t = useTranslations("settings");
+
   return (
-    <ul className="mt-4 space-y-3 text-sm leading-6 text-white/75">
-      <li className="flex gap-2">
-        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.55)]" aria-hidden />
-        <span>{t("heroTrust1")}</span>
-      </li>
-      <li className="flex gap-2">
-        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.55)]" aria-hidden />
-        <span>{t("heroTrust2")}</span>
-      </li>
-      <li className="flex gap-2">
-        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.55)]" aria-hidden />
-        <span>{t("heroTrust3")}</span>
-      </li>
-    </ul>
+    <div className="relative">
+      <div className="absolute -inset-4 rounded-[2rem] bg-brand-gradient-soft blur-2xl" aria-hidden />
+      <div className="relative overflow-hidden rounded-[1.75rem] border border-white/20 bg-gradient-to-br from-white/15 via-white/5 to-transparent p-px shadow-2xl shadow-violet-500/25 backdrop-blur-xl">
+        <div className="relative overflow-hidden rounded-[1.72rem] bg-slate-950/90 p-5 sm:p-6">
+          <div
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(139,92,246,0.22),transparent_42%),radial-gradient(circle_at_bottom_left,rgba(6,182,212,0.14),transparent_38%)]"
+            aria-hidden
+          />
+          <div className="relative flex items-start gap-3.5">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/15 bg-gradient-to-br from-violet-500/35 via-violet-400/15 to-cyan-400/10 shadow-lg shadow-violet-500/25">
+              <Settings2 className="h-5 w-5 text-violet-50" strokeWidth={2} aria-hidden />
+            </div>
+            <div className="min-w-0 flex-1 pt-0.5">
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-lg font-semibold tracking-[-0.03em] text-white">{t("heroStatBadge")}</p>
+                <span className="rounded-full border border-emerald-300/35 bg-emerald-400/12 px-2.5 py-1 text-[0.62rem] font-bold uppercase tracking-[0.14em] text-emerald-100">
+                  {t("heroStatTag")}
+                </span>
+              </div>
+              <p className="mt-1.5 text-sm leading-6 text-white/60">{t("heroTrustPanelHint")}</p>
+            </div>
+          </div>
+
+          <ul className="relative mt-5 space-y-2.5">
+            {SETTINGS_CONTROLS_PILLARS.map(({ titleKey, bodyKey, icon: Icon, iconClass }) => (
+              <li
+                key={titleKey}
+                className="flex gap-3 rounded-2xl border border-white/10 bg-white/[0.045] p-3.5 transition-colors hover:border-white/16 hover:bg-white/[0.07]"
+              >
+                <div
+                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${iconClass}`}
+                  aria-hidden
+                >
+                  <Icon className="h-4 w-4" strokeWidth={2.1} />
+                </div>
+                <div className="min-w-0 pt-0.5">
+                  <p className="text-sm font-semibold text-white">{t(titleKey)}</p>
+                  <p className="mt-0.5 text-sm leading-5 text-white/65">{t(bodyKey)}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -109,7 +167,7 @@ function SettingsHeroConnected() {
       <div className="relative grid gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-center">
         <div>
           <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-violet-100 backdrop-blur">
-            <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_18px_rgb(22_199_132_/0.75)]" />
+            <LiveStatusDot />
             {t("heroEyebrow")}
           </div>
           <h1 className="flex flex-wrap items-center gap-3 text-3xl font-semibold tracking-[-0.06em] text-white sm:text-5xl lg:text-6xl">
@@ -134,18 +192,7 @@ function SettingsHeroConnected() {
           </div>
         </div>
 
-        <div className="relative">
-          <div className="absolute -inset-4 rounded-[2rem] bg-brand-gradient-soft blur-2xl" aria-hidden />
-          <div className="relative overflow-hidden rounded-[1.75rem] border border-white/15 bg-white/10 p-3 shadow-2xl shadow-black/35 backdrop-blur-xl">
-            <div className="rounded-[1.35rem] border border-white/10 bg-slate-950/70 p-4">
-              <div className="flex items-center justify-between border-b border-white/10 pb-4">
-                <p className="font-mono text-[0.66rem] font-semibold uppercase tracking-[0.24em] text-slate-400">{t("heroStatBadge")}</p>
-                <span className="rounded-full border border-violet-300/25 bg-violet-300/10 px-2.5 py-1 text-[0.66rem] font-semibold text-violet-100">{t("heroStatTag")}</span>
-              </div>
-              <SettingsHeroTrustPanel />
-            </div>
-          </div>
-        </div>
+        <SettingsControlsPanel />
       </div>
     </div>
   );
@@ -249,16 +296,6 @@ function IconSliders() {
       <line x1="1" y1="14" x2="7" y2="14" />
       <line x1="9" y1="8" x2="15" y2="8" />
       <line x1="17" y1="16" x2="23" y2="16" />
-    </svg>
-  );
-}
-
-function IconDataPrivacy() {
-  return (
-    <svg className="h-5 w-5 text-red-600 dark:text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-      <path d="M12 9v4" />
-      <path d="M12 17h.01" />
     </svg>
   );
 }
@@ -874,22 +911,17 @@ export function AccountSettingsClient({ gdprContactEmail = null }: AccountSettin
       <div className={`${outerClass} hidden lg:block`}>
       <SettingsHeroConnected />
 
-      <nav
-        className={`sticky ${SUBNAV_STICKY_TOP} z-20 -mx-1 mb-2 flex gap-2 overflow-x-auto overscroll-x-contain border-b border-slate-200/80 bg-white/85 px-1 pb-3 backdrop-blur-md [-ms-overflow-style:none] [scrollbar-width:none] dark:border-white/10 dark:bg-slate-950/85 lg:flex-wrap lg:overflow-visible [&::-webkit-scrollbar]:hidden`}
-        aria-label={t("navOnThisPage")}
-      >
-        <a href="#settings-profile" className={`${DASHBOARD_SPOTLIGHT_PILL_MUTED} shrink-0 whitespace-nowrap px-4 py-2.5 text-sm font-semibold no-underline transition hover:border-violet-300/50 hover:bg-white dark:hover:bg-white/15`}>
-          {t("sectionProfile")}
-        </a>
-        <a href="#settings-preferences" className={`${DASHBOARD_SPOTLIGHT_PILL_MUTED} shrink-0 whitespace-nowrap px-4 py-2.5 text-sm font-semibold no-underline transition hover:border-violet-300/50 hover:bg-white dark:hover:bg-white/15`}>
-          {t("sectionPreferences")}
-        </a>
-        <a href="#settings-data-privacy" className={`${DASHBOARD_SPOTLIGHT_PILL_MUTED} shrink-0 whitespace-nowrap px-4 py-2.5 text-sm font-semibold no-underline transition hover:border-violet-300/50 hover:bg-white dark:hover:bg-white/15`}>
-          {t("sectionDataPrivacy")}
-        </a>
-      </nav>
+      <SettingsPageNav
+        ariaLabel={t("navOnThisPage")}
+        items={[
+          { href: "#settings-profile", label: t("sectionProfile") },
+          { href: "#settings-preferences", label: t("sectionPreferences") },
+          { href: "#settings-your-data", label: t("sectionYourData") },
+          { href: "#settings-danger", label: t("sectionDanger") },
+        ]}
+      />
 
-      <div className="space-y-8">
+      <div className="space-y-12">
         <section id="settings-profile" className="scroll-mt-28" aria-labelledby="settings-profile-heading">
           <SettingsSpotlightSection
             gradientClass={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY}
@@ -1038,81 +1070,50 @@ export function AccountSettingsClient({ gdprContactEmail = null }: AccountSettin
             heading={t("sectionPreferences")}
             lead={t("sectionPreferencesLead")}
           >
-            <div className="flex flex-col gap-5">
-              <div className="min-w-0">
-                <h3 className="text-sm font-semibold text-slate-900 dark:text-white">{t("genreBannerTitle")}</h3>
-                <p className={`mt-1.5 text-sm leading-relaxed ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("genreBannerDescription")}</p>
-              </div>
-              <div className={`flex flex-col gap-3 border-t border-slate-200/80 pt-4 dark:border-white/10 sm:flex-row sm:items-center sm:justify-between sm:gap-6`}>
-                <p className="text-sm font-medium text-slate-900 dark:text-white">{t("genreBannerHideLabel")}</p>
-                <div className="flex shrink-0 justify-end sm:justify-start">
-                  <SettingsSwitch
-                    aria-label={t("switchHideGenreAria")}
-                    checked={hideGenreBanner}
-                    onChange={(next) => {
-                      if (next) setGenreBackfillBannerOptOut(true);
-                      else clearGenreBackfillBannerBlockingPrefs();
-                      setHideGenreBanner(next);
-                    }}
-                  />
-                </div>
-              </div>
+            <div className="space-y-3">
+              <SettingsToggleRow
+                title={t("genreBannerHideLabel")}
+                hint={t("genreBannerHint")}
+                checked={hideGenreBanner}
+                aria-label={t("switchHideGenreAria")}
+                onChange={(next) => {
+                  if (next) setGenreBackfillBannerOptOut(true);
+                  else clearGenreBackfillBannerBlockingPrefs();
+                  setHideGenreBanner(next);
+                }}
+              />
 
-              <div
-                id={GROQ_AI_CONSENT_SETTINGS_HASH}
-                className="scroll-mt-28 border-t border-slate-200/80 pt-5 dark:border-white/10"
-              >
-                <h3 className="text-sm font-semibold text-slate-900 dark:text-white">{t("groqConsentTitle")}</h3>
-                <p className={`mt-1.5 text-sm leading-relaxed ${DASHBOARD_SPOTLIGHT_MUTED}`}>
-                  {t("groqConsentDescription")}
-                </p>
-                <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
-                  <p className="text-sm font-medium text-slate-900 dark:text-white">{t("groqConsentLabel")}</p>
-                  <div className="flex shrink-0 items-center justify-end gap-2 sm:justify-start">
-                    {privacySaving ? (
-                      <span className={`text-xs ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("groqConsentSaving")}</span>
-                    ) : null}
-                    <SettingsSwitch
-                      aria-label={t("groqConsentLabel")}
-                      checked={groqConsentGranted}
-                      disabled={!privacyPrefsLoaded || privacySaving}
-                      onChange={(next) => {
-                        void patchPrivacyPreference({ groqGenreConsent: next });
-                      }}
-                    />
-                  </div>
-                </div>
-                <p className={`mt-3 text-xs leading-relaxed ${DASHBOARD_SPOTLIGHT_MUTED}`}>
-                  {t("groqConsentBrowserToggleHint")}
-                </p>
+              <div id={GROQ_AI_CONSENT_SETTINGS_HASH} className="scroll-mt-28 space-y-2">
+                <SettingsToggleRow
+                  title={t("groqConsentLabel")}
+                  hint={t("groqConsentHint")}
+                  checked={groqConsentGranted}
+                  disabled={!privacyPrefsLoaded || privacySaving}
+                  saving={privacySaving}
+                  savingLabel={t("groqConsentSaving")}
+                  aria-label={t("groqConsentLabel")}
+                  onChange={(next) => {
+                    void patchPrivacyPreference({ groqGenreConsent: next });
+                  }}
+                />
               </div>
 
               {publicProfileEligible ? (
-                <div className="border-t border-slate-200/80 pt-5 dark:border-white/10">
-                  <h3 className="text-sm font-semibold text-slate-900 dark:text-white">{t("publicProfileTitle")}</h3>
-                  <p className={`mt-1.5 text-sm leading-relaxed ${DASHBOARD_SPOTLIGHT_MUTED}`}>
-                    {t("publicProfileDescription")}
-                  </p>
-                  <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
-                    <p className="text-sm font-medium text-slate-900 dark:text-white">{t("publicProfileLabel")}</p>
-                    <div className="flex shrink-0 items-center justify-end gap-2 sm:justify-start">
-                      {privacySaving ? (
-                        <span className={`text-xs ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("publicProfileSaving")}</span>
-                      ) : null}
-                      <SettingsSwitch
-                        aria-label={t("publicProfileLabel")}
-                        checked={publicProfileGranted}
-                        disabled={!privacyPrefsLoaded || privacySaving}
-                        onChange={(next) => {
-                          void patchPrivacyPreference({ publicProfile: next });
-                        }}
-                      />
-                    </div>
-                  </div>
-                </div>
+                <SettingsToggleRow
+                  title={t("publicProfileLabel")}
+                  hint={t("publicProfileHint")}
+                  checked={publicProfileGranted}
+                  disabled={!privacyPrefsLoaded || privacySaving}
+                  saving={privacySaving}
+                  savingLabel={t("publicProfileSaving")}
+                  aria-label={t("publicProfileLabel")}
+                  onChange={(next) => {
+                    void patchPrivacyPreference({ publicProfile: next });
+                  }}
+                />
               ) : null}
 
-              <div className="border-t border-slate-200/80 pt-5 dark:border-white/10">
+              <div className="rounded-2xl border border-slate-200/80 bg-slate-50/50 p-4 dark:border-white/10 dark:bg-black/15">
                 <DuetShareSettingsSection />
               </div>
 
@@ -1125,15 +1126,12 @@ export function AccountSettingsClient({ gdprContactEmail = null }: AccountSettin
           </SettingsSpotlightSection>
         </section>
 
-        <section id="settings-data-privacy" className="scroll-mt-28" aria-labelledby="settings-data-heading">
-          <div className="mb-2">
-            <h2 id="settings-data-heading" className="flex items-center gap-2.5 text-lg font-semibold text-slate-900 dark:text-white">
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-red-200/80 bg-red-50 dark:border-red-400/25 dark:bg-red-400/10">
-                <IconDataPrivacy />
-              </span>
-              {t("sectionDataPrivacy")}
-            </h2>
-            <p className={`mt-1.5 text-sm ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("sectionDataPrivacyLead")}</p>
+        <section id="settings-your-data" className="scroll-mt-28" aria-labelledby="settings-your-data-heading">
+          <SettingsSectionHeader
+            id="settings-your-data-heading"
+            title={t("sectionYourData")}
+            lead={t("sectionYourDataLead")}
+          >
             {gdprContactEmail ? (
               <p className={`mt-3 text-sm ${DASHBOARD_SPOTLIGHT_MUTED}`}>
                 {t("gdprContactLead")}{" "}
@@ -1145,34 +1143,37 @@ export function AccountSettingsClient({ gdprContactEmail = null }: AccountSettin
                 </a>
               </p>
             ) : null}
-          </div>
+          </SettingsSectionHeader>
 
-          <SettingsSpotlightSection
-            gradientClass={DASHBOARD_SPOTLIGHT_GRADIENT_TABLE}
-            hairlineClass={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET}
-            iconBgClass="border border-slate-200/80 bg-slate-50 dark:border-white/10 dark:bg-white/10"
-            icon={<Upload className="h-5 w-5 text-slate-700 dark:text-slate-200" aria-hidden />}
-            titleId="settings-import-heading"
-            heading={t("importExportsTitle")}
-            lead={t("importExportsBody")}
-          >
-            <Link href={DASHBOARD_ONBOARDING_REIMPORT_PATH} className={`${DASHBOARD_SPOTLIGHT_BTN_SECONDARY} no-underline inline-flex min-h-11 items-center`}>
-              {t("importExportsCta")}
-            </Link>
-          </SettingsSpotlightSection>
-
-          <div className="mt-8">
-            <SettingsSpotlightSection
-              gradientClass={DASHBOARD_SPOTLIGHT_GRADIENT_CYAN}
-              hairlineClass={DASHBOARD_SPOTLIGHT_HAIRLINE_CYAN}
-              iconBgClass="border border-slate-200/80 bg-slate-50 dark:border-white/10 dark:bg-white/10"
+          <div className="grid gap-4">
+            <SettingsDataCard
               icon={<Upload className="h-5 w-5 text-slate-700 dark:text-slate-200" aria-hidden />}
-              titleId="settings-export-heading"
-              heading={t("exportAllDataTitle")}
-              lead={t("exportAllDataBody")}
+              title={t("importExportsTitle")}
+              body={t("importExportsBodyShort")}
+            >
+              <Link
+                href={DASHBOARD_ONBOARDING_REIMPORT_PATH}
+                className={`${DASHBOARD_SPOTLIGHT_BTN_SECONDARY} no-underline inline-flex min-h-11 items-center`}
+              >
+                {t("importExportsCta")}
+              </Link>
+            </SettingsDataCard>
+
+            <SettingsDataCard
+              icon={<Download className="h-5 w-5 text-slate-700 dark:text-slate-200" aria-hidden />}
+              title={t("dashboardExportsTitle")}
+              body={t("dashboardExportsBodyShort")}
+            >
+              <DashboardDataExportsSection variant="embedded" />
+            </SettingsDataCard>
+
+            <SettingsDataCard
+              icon={<FileJson className="h-5 w-5 text-slate-700 dark:text-slate-200" aria-hidden />}
+              title={t("exportAllDataTitle")}
+              body={t("exportAllDataBodyShort")}
             >
               {exportError ? (
-                <p className="text-sm font-medium text-red-700 dark:text-red-300" role="alert">
+                <p className="mb-3 text-sm font-medium text-red-700 dark:text-red-300" role="alert">
                   {exportError}
                 </p>
               ) : null}
@@ -1184,10 +1185,20 @@ export function AccountSettingsClient({ gdprContactEmail = null }: AccountSettin
               >
                 {exporting ? t("exporting") : t("exportAllDataButton")}
               </button>
-            </SettingsSpotlightSection>
+            </SettingsDataCard>
           </div>
+        </section>
 
-          <div className="mt-8 overflow-hidden rounded-[2rem] border border-red-200/90 bg-gradient-to-b from-red-50/95 to-red-50/50 shadow-xl shadow-red-900/10 dark:border-red-900/50 dark:from-red-950/40 dark:to-red-950/15 dark:shadow-black/25">
+        <section id="settings-danger" className="scroll-mt-28" aria-labelledby="settings-danger-heading">
+          <SettingsSectionHeader
+            id="settings-danger-heading"
+            title={t("sectionDanger")}
+            lead={t("sectionDangerLead")}
+            tone="danger"
+          />
+
+          <div className="space-y-6">
+          <div className="overflow-hidden rounded-[2rem] border border-red-200/90 bg-gradient-to-b from-red-50/95 to-red-50/50 shadow-xl shadow-red-900/10 dark:border-red-900/50 dark:from-red-950/40 dark:to-red-950/15 dark:shadow-black/25">
             <div className={`${DASHBOARD_SPOTLIGHT_HEADER_BOTTOM} border-red-200/70 p-5 dark:border-red-900/40 sm:p-6`}>
               <h3 className="text-base font-semibold text-red-950 dark:text-red-200" id="danger-heading">
                 {t("dangerTitle")}
@@ -1289,7 +1300,7 @@ export function AccountSettingsClient({ gdprContactEmail = null }: AccountSettin
             </div>
           </div>
 
-          <div className="mt-8 overflow-hidden rounded-[2rem] border border-red-300 bg-gradient-to-b from-red-100/90 to-red-50/60 shadow-xl shadow-red-900/15 dark:border-red-800 dark:from-red-950/50 dark:to-red-950/20">
+          <div className="overflow-hidden rounded-[2rem] border border-red-300 bg-gradient-to-b from-red-100/90 to-red-50/60 shadow-xl shadow-red-900/15 dark:border-red-800 dark:from-red-950/50 dark:to-red-950/20">
             <div className={`${DASHBOARD_SPOTLIGHT_HEADER_BOTTOM} border-red-300/70 p-5 dark:border-red-900/50 sm:p-6`}>
               <h3 className="text-base font-semibold text-red-950 dark:text-red-200">
                 {t("deleteAccountTitle")}
@@ -1377,6 +1388,7 @@ export function AccountSettingsClient({ gdprContactEmail = null }: AccountSettin
                 </button>
               </div>
             </div>
+          </div>
           </div>
         </section>
       </div>

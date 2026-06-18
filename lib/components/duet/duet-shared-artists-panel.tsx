@@ -9,7 +9,10 @@ import { ErrorState } from "@/lib/components/error-state";
 import {
   DuetDualLineChart,
   EntityBattleScorecard,
+  applyDuetChartView,
+  type DuetChartViewMode,
 } from "@/lib/components/duet/duet-entity-duel-blocks";
+import { DuetChartViewToggle } from "@/lib/components/duet/duet-chart-view-toggle";
 import {
   DASHBOARD_SPOTLIGHT_SHELL,
   DASHBOARD_SPOTLIGHT_GRADIENT_LIME,
@@ -95,6 +98,8 @@ type DuetSharedArtistsPanelProps = {
   startDate?: string;
   endDate?: string;
   period: PeriodType;
+  chartView: DuetChartViewMode;
+  onChartViewChange: (mode: DuetChartViewMode) => void;
   data?: CompareSharedArtistsResponse;
   isLoading: boolean;
   error: Error | null;
@@ -143,6 +148,8 @@ export function DuetSharedArtistsPanel({
   startDate,
   endDate,
   period,
+  chartView,
+  onChartViewChange,
   data,
   isLoading,
   error,
@@ -176,6 +183,11 @@ export function DuetSharedArtistsPanel({
     () =>
       artistCompare?.merged.map((row) => ({ date: row.date, self: row.self, friend: row.friend })) ?? [],
     [artistCompare]
+  );
+
+  const artistDisplayChartData = useMemo(
+    () => applyDuetChartView(artistChartData, chartView),
+    [artistChartData, chartView]
   );
 
   const visibleArtists = useMemo(() => {
@@ -349,23 +361,30 @@ export function DuetSharedArtistsPanel({
             {selectedArtistId ? (
               <div className={`space-y-4 ${DASHBOARD_SPOTLIGHT_INNER_WELL} p-4 sm:p-5`}>
                 <div className="flex items-start justify-between gap-3">
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <p className="font-mono text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-lime-700 dark:text-lime-300">
                       {t("sharedArtistsDuelEyebrow")}
                     </p>
                     <h3 className="mt-1 text-base font-semibold text-slate-900 dark:text-white">
                       {t("artistChartTitle", { artistName: duelArtistName, friendName })}
                     </h3>
-                    <p className={`mt-1 text-sm ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("artistChartDescription")}</p>
+                    <p className={`mt-1 text-sm ${DASHBOARD_SPOTLIGHT_MUTED}`}>
+                      {chartView === "cumulative"
+                        ? t("chartDescriptionCumulative")
+                        : t("artistChartDescription")}
+                    </p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={handleCloseDuel}
-                    className="shrink-0 rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-white/10 dark:hover:text-slate-200"
-                    aria-label={t("sharedArtistsCloseDuel")}
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
+                  <div className="flex shrink-0 flex-col items-end gap-2">
+                    <DuetChartViewToggle value={chartView} onChange={onChartViewChange} />
+                    <button
+                      type="button"
+                      onClick={handleCloseDuel}
+                      className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-white/10 dark:hover:text-slate-200"
+                      aria-label={t("sharedArtistsCloseDuel")}
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
 
                 {isArtistCompareLoading || isArtistCompareFetching ? (
@@ -421,7 +440,7 @@ export function DuetSharedArtistsPanel({
                       />
                     ) : (
                       <DuetDualLineChart
-                        data={artistChartData}
+                        data={artistDisplayChartData}
                         chartTheme={chartTheme}
                         resolvedTheme={resolvedTheme}
                         selfLabel={t("seriesSelf")}

@@ -9,8 +9,11 @@ import { Crown, Search, Swords, X } from "lucide-react";
 import {
   DuetDualLineChart,
   EntityBattleScorecard,
+  applyDuetChartView,
   type DualLineChartPoint,
+  type DuetChartViewMode,
 } from "@/lib/components/duet/duet-entity-duel-blocks";
+import { DuetChartViewToggle } from "@/lib/components/duet/duet-chart-view-toggle";
 import { PeriodSelector, getPeriodFromSearchParams } from "@/lib/components/period-selector";
 import { EmptyState } from "@/lib/components/empty-state";
 import { ErrorState } from "@/lib/components/error-state";
@@ -125,6 +128,7 @@ function EntityHeadToHeadPanel({
   errorLabel,
   chartTitle,
   chartDescription,
+  chartDescriptionCumulative,
   noDataTitle,
   noDataDescription,
   query,
@@ -152,6 +156,8 @@ function EntityHeadToHeadPanel({
   t,
   chartTheme,
   resolvedTheme,
+  chartView,
+  onChartViewChange,
 }: {
   searchPlaceholder: string;
   clearLabel: string;
@@ -159,6 +165,7 @@ function EntityHeadToHeadPanel({
   errorLabel: string;
   chartTitle: string;
   chartDescription: string;
+  chartDescriptionCumulative: string;
   noDataTitle: string;
   noDataDescription: string;
   query: string;
@@ -186,7 +193,14 @@ function EntityHeadToHeadPanel({
   t: ReturnType<typeof useTranslations<"duet.compare">>;
   chartTheme: (typeof DASHBOARD_CHART_THEME)[keyof typeof DASHBOARD_CHART_THEME];
   resolvedTheme: string;
+  chartView: DuetChartViewMode;
+  onChartViewChange: (mode: DuetChartViewMode) => void;
 }) {
+  const displayChartData = useMemo(
+    () => applyDuetChartView(chartData, chartView),
+    [chartData, chartView]
+  );
+
   return (
     <div className="space-y-4">
       <div className={`relative ${DASHBOARD_SPOTLIGHT_INNER_WELL}`}>
@@ -285,9 +299,14 @@ function EntityHeadToHeadPanel({
             <p className={`text-sm ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("rangeClamped")}</p>
           ) : null}
 
-          <div>
-            <h3 className="text-base font-semibold text-slate-900 dark:text-white">{chartTitle}</h3>
-            <p className={`mt-1 text-sm ${DASHBOARD_SPOTLIGHT_MUTED}`}>{chartDescription}</p>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h3 className="text-base font-semibold text-slate-900 dark:text-white">{chartTitle}</h3>
+              <p className={`mt-1 text-sm ${DASHBOARD_SPOTLIGHT_MUTED}`}>
+                {chartView === "cumulative" ? chartDescriptionCumulative : chartDescription}
+              </p>
+            </div>
+            <DuetChartViewToggle value={chartView} onChange={onChartViewChange} />
           </div>
 
           {chartData.length === 0 ? (
@@ -295,7 +314,7 @@ function EntityHeadToHeadPanel({
           ) : (
             <div className={DASHBOARD_SPOTLIGHT_INNER_WELL}>
               <DuetDualLineChart
-                data={chartData}
+                data={displayChartData}
                 chartTheme={chartTheme}
                 resolvedTheme={resolvedTheme}
                 selfLabel={t("seriesSelf")}
@@ -426,6 +445,7 @@ function CompareContent() {
   const initialEntityId = searchParams.get("entityId") ?? undefined;
 
   const [arenaMode, setArenaMode] = useState<DuetArenaMode | null>(initialArenaMode);
+  const [chartView, setChartView] = useState<DuetChartViewMode>("period");
   const [artistQuery, setArtistQuery] = useState(
     initialEntityType === "artist" && initialEntityId ? initialEntityId : ""
   );
@@ -532,6 +552,11 @@ function CompareContent() {
   const chartData = useMemo(
     () => timeline?.merged.map((row) => ({ date: row.date, self: row.self, friend: row.friend })) ?? [],
     [timeline]
+  );
+
+  const timelineDisplayChartData = useMemo(
+    () => applyDuetChartView(chartData, chartView),
+    [chartData, chartView]
   );
 
   const artistChartData = useMemo(
@@ -803,9 +828,16 @@ function CompareContent() {
         <SpotlightSectionHeader
           eyebrow={t("timelineEyebrow")}
           title={t("chartTitle", { friendName })}
-          description={t("chartDescription")}
+          description={
+            chartView === "cumulative" ? t("chartDescriptionCumulative") : t("chartDescription")
+          }
           badge={t("timelineBadge")}
-          action={<PeriodSelector value={period} defaultPeriod="month" />}
+          action={
+            <div className="flex flex-col items-start gap-3 sm:items-end">
+              <PeriodSelector value={period} defaultPeriod="month" />
+              <DuetChartViewToggle value={chartView} onChange={setChartView} />
+            </div>
+          }
         />
         <div className="px-5 pb-6 sm:px-8">
           {chartData.length === 0 ? (
@@ -813,7 +845,7 @@ function CompareContent() {
           ) : (
             <div className={DASHBOARD_SPOTLIGHT_INNER_WELL}>
               <DuetDualLineChart
-                data={chartData}
+                data={timelineDisplayChartData}
                 chartTheme={chartTheme}
                 resolvedTheme={resolvedTheme}
                 selfLabel={t("seriesSelf")}
@@ -831,6 +863,8 @@ function CompareContent() {
         startDate={startDate}
         endDate={endDate}
         period={period}
+        chartView={chartView}
+        onChartViewChange={setChartView}
         data={sharedArtists}
         isLoading={isSharedArtistsLoading}
         error={sharedArtistsError}
@@ -881,6 +915,7 @@ function CompareContent() {
                   errorLabel={t("artistError")}
                   chartTitle={t("artistChartTitle", { artistName: selectedArtistName, friendName })}
                   chartDescription={t("artistChartDescription")}
+                  chartDescriptionCumulative={t("chartDescriptionCumulative")}
                   noDataTitle={t("artistNoDataTitle")}
                   noDataDescription={t("artistNoDataDescription")}
                   query={artistQuery}
@@ -921,6 +956,8 @@ function CompareContent() {
                   t={t}
                   chartTheme={chartTheme}
                   resolvedTheme={resolvedTheme}
+                  chartView={chartView}
+                  onChartViewChange={setChartView}
                 />
               ) : arenaMode === "track" ? (
                 <EntityHeadToHeadPanel
@@ -930,6 +967,7 @@ function CompareContent() {
                   errorLabel={t("trackError")}
                   chartTitle={t("trackChartTitle", { trackName: selectedTrackName, friendName })}
                   chartDescription={t("trackChartDescription")}
+                  chartDescriptionCumulative={t("chartDescriptionCumulative")}
                   noDataTitle={t("trackNoDataTitle")}
                   noDataDescription={t("trackNoDataDescription")}
                   query={trackQuery}
@@ -969,6 +1007,8 @@ function CompareContent() {
                   t={t}
                   chartTheme={chartTheme}
                   resolvedTheme={resolvedTheme}
+                  chartView={chartView}
+                  onChartViewChange={setChartView}
                 />
               ) : (
                 <EntityHeadToHeadPanel
@@ -978,6 +1018,7 @@ function CompareContent() {
                   errorLabel={t("genreError")}
                   chartTitle={t("genreChartTitle", { genreName: selectedGenreName, friendName })}
                   chartDescription={t("genreChartDescription")}
+                  chartDescriptionCumulative={t("chartDescriptionCumulative")}
                   noDataTitle={t("genreNoDataTitle")}
                   noDataDescription={t("genreNoDataDescription")}
                   query={genreQuery}
@@ -1015,6 +1056,8 @@ function CompareContent() {
                   t={t}
                   chartTheme={chartTheme}
                   resolvedTheme={resolvedTheme}
+                  chartView={chartView}
+                  onChartViewChange={setChartView}
                 />
               )}
             </>

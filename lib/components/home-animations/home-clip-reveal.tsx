@@ -1,7 +1,7 @@
 "use client";
 
-import { motion, useReducedMotion, type Variants } from "motion/react";
-import type { ReactNode } from "react";
+import { motion, useInView, useReducedMotion, type Variants } from "motion/react";
+import { useRef, type ReactNode } from "react";
 
 const EASE_OUT_EXPO = [0.16, 1, 0.3, 1] as const;
 
@@ -44,10 +44,20 @@ export function HomeClipReveal({
   amount = 0.15,
   immediate = false,
 }: HomeClipRevealProps) {
+  const ref = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
+  const isInView = useInView(ref, {
+    once: true,
+    amount,
+    margin: "0px 0px 100px 0px",
+  });
 
   if (reducedMotion) {
-    return <div className={className}>{children}</div>;
+    return (
+      <div ref={ref} className={className}>
+        {children}
+      </div>
+    );
   }
 
   const visibleVariant = {
@@ -59,22 +69,18 @@ export function HomeClipReveal({
   };
 
   return (
-    <motion.div
-      className={className}
-      initial="hidden"
-      {...(immediate
-        ? { animate: "visible" }
-        : {
-            whileInView: "visible",
-            viewport: { once: true, amount: 0.05, margin: "0px 0px 100px 0px" },
-          })}
-      variants={{
-        hidden: clipVariants.hidden,
-        visible: visibleVariant,
-      }}
-    >
-      {children}
-    </motion.div>
+    <div ref={ref} className={className}>
+      <motion.div
+        initial="hidden"
+        animate={immediate || isInView ? "visible" : "hidden"}
+        variants={{
+          hidden: clipVariants.hidden,
+          visible: visibleVariant,
+        }}
+      >
+        {children}
+      </motion.div>
+    </div>
   );
 }
 

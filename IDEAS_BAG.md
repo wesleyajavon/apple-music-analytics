@@ -18,6 +18,7 @@
 | **Maestro** | Agent conversationnel IA pour poser des questions en langage naturel sur les données musicales de l’utilisateur | [docs/MAESTRO.md](docs/MAESTRO.md) |
 | **Palette** | Atelier **genres** ré-entrant : l’utilisateur mappe les tops artistes « Unknown » (liste existante + saisie), expérience ludique, sans bloquer l’import | [docs/PALETTE.md](docs/PALETTE.md) |
 | **Setlist** | Page **`/dashboard/tracks`** au même niveau qu’**Artists** et **Genres** : tops morceaux + tendances temporelles, UX et API alignés sur l’existant | [docs/SETLIST.md](docs/SETLIST.md) |
+| **Overture** | Restructuration **progressive** de la **landing** autour du parcours **Importer → Explorer → Interagir** (nav, sections, i18n, CTAs) | [docs/OVERTURE.md](docs/OVERTURE.md) |
 
 ---
 
@@ -84,6 +85,14 @@
 
 ---
 
+## Overture
+
+- **Idée** : faire du **parcours en 3 mouvements** (Importer → Explorer → Interagir) le fil rouge de la promo — home d’abord, puis déclinaisons hors site.
+- **Doc** : [docs/OVERTURE.md](docs/OVERTURE.md) (cadrage, cartographie sections, roadmap par phases, clés i18n, prompt agent).
+- **Quand prioriser** : avant une poussée marketing / démo publique élargie ; quand le message actuel (catalogue de features) dilue Chat + Duet.
+
+---
+
 ## Setlist
 
 - **Idée** : offrir une section **Tracks** dans le dashboard, **parallèle** à **Artists** et **Genres** — tops par écoutes, tendances dans le temps, cohérence visuelle et navigation.
@@ -126,4 +135,5 @@ Quand une idée mérite son propre dossier, crée `docs/NOM_CODENAME.md` (comme 
 - **Maestro** : `Maestro`, `maestro`, `music-chat`, `agent conversationnel`, `Ask your music data`, [docs/MAESTRO.md](docs/MAESTRO.md)
 - **Palette** : `Palette`, `palette`, `Unknown`, `genre`, `mapping genres`, `genres:map-top-unknown`, `démo publique`, `public demo`, [docs/PALETTE.md](docs/PALETTE.md)
 - **Setlist** : `Setlist`, `setlist`, `tracks`, `titres`, `dashboard/tracks`, [docs/SETLIST.md](docs/SETLIST.md)
+- **Overture** : `Overture`, `overture`, `journey`, `3 mouvements`, `parcours Soundprint`, `home.journey`, [docs/OVERTURE.md](docs/OVERTURE.md)
 - **Ce fichier** : `IDEAS_BAG`, `ideas bag`, `sac à idées`

@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { DashboardPreviewShell } from "@/lib/components/dashboard-preview-shell";
 import { HOME_PREVIEW_ALBUMS } from "@/lib/constants/home-album-preview";
+import { HOME_JOURNEY_SECTION_SCROLL_MT } from "@/lib/constants/home-journey-nav";
 import {
   HomeDashboardPreviewsParallax,
   HomeDashboardPreviewsParallaxGrid,
@@ -478,11 +479,33 @@ export function HomeTimelinePreview() {
   );
 }
 
-export function HomeDashboardPreviewsSection() {
+export function HomeDashboardPreviewsSection({ embedded = false }: { embedded?: boolean }) {
   const t = useTranslations("home.dashboardPreviews");
 
+  const grid = (
+    <HomeDashboardPreviewsParallaxGrid
+      items={[
+        <HomeGenreTrendsPreview key="genre-trends" />,
+        <HomeHeatmapPreview key="heatmap" />,
+        <HomeTopArtistsPreview key="top-artists" />,
+        <HomeTimelinePreview key="timeline" />,
+        <HomeAlbumSpotlightPreview key="album-spotlight" />,
+      ]}
+    />
+  );
+
+  if (embedded) {
+    return (
+      <HomeDashboardPreviewsParallax>
+        <div className="relative mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+          {grid}
+        </div>
+      </HomeDashboardPreviewsParallax>
+    );
+  }
+
   return (
-    <section id="dashboard-widgets" className="relative scroll-mt-24 pb-10 sm:pb-20">
+    <section id="explore" className={`relative ${HOME_JOURNEY_SECTION_SCROLL_MT} pb-10 sm:pb-20`}>
       <HomeDashboardPreviewsParallax>
         <div className="relative mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-8 text-center md:mb-12">
@@ -505,15 +528,7 @@ export function HomeDashboardPreviewsSection() {
             </HomeBlurFadeReveal>
           </div>
 
-          <HomeDashboardPreviewsParallaxGrid
-            items={[
-              <HomeGenreTrendsPreview key="genre-trends" />,
-              <HomeHeatmapPreview key="heatmap" />,
-              <HomeTopArtistsPreview key="top-artists" />,
-              <HomeTimelinePreview key="timeline" />,
-              <HomeAlbumSpotlightPreview key="album-spotlight" />,
-            ]}
-          />
+          {grid}
         </div>
       </HomeDashboardPreviewsParallax>
     </section>

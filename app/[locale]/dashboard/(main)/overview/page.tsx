@@ -29,6 +29,11 @@ import {
   type OverviewMomentumSlide,
 } from "@/lib/components/overview-momentum-carousel";
 import { OverviewListeningMomentumCard } from "@/lib/components/overview-listening-momentum-card";
+import { ListenTrendChartViewToggle } from "@/lib/components/charts/listen-trend-chart-view-toggle";
+import {
+  applyListenTrendChartViewSingle,
+  type ListenTrendChartViewMode,
+} from "@/lib/utils/listen-trend-chart-view";
 import type { ArtistStatsDto } from "@/lib/dto/artist";
 import { ArtistUserInsightsPanel } from "@/lib/components/artist-user-insights-panel";
 import { CHART_TOOLTIP_STYLES } from "@/lib/constants/config";
@@ -51,10 +56,13 @@ import { SoundprintBrandMark } from "@/lib/components/soundprint-brand-mark";
 import {
   DASHBOARD_BTN_LINK,
   DASHBOARD_CINEMATIC_HERO_SHELL,
-  DASHBOARD_WIDGET_CARD_SHELL,
   DashboardCinematicHeroBg,
-  DashboardWidgetCardBg,
 } from "@/lib/components/dashboard-ui";
+import {
+  TopLibraryCard,
+  LIBRARY_LEADER_ACCENTS,
+  type LibraryLeaderItem,
+} from "@/lib/components/overview-library-rankings";
 
 const MOBILE_DATE_OPTS = { month: "2-digit", day: "2-digit", year: "2-digit" } as const;
 
@@ -215,54 +223,6 @@ function OverviewSectionHeader({
   );
 }
 
-type LibraryLeaderAccent = {
-  badge: string;
-  rail: string;
-  glow: string;
-  progress: string;
-  text: string;
-  soft: string;
-  border: string;
-};
-
-type LibraryLeaderItem = {
-  id: string;
-  title: string;
-  subtitle?: string;
-  count: number;
-  percentage: number;
-};
-
-const LIBRARY_LEADER_ACCENTS = {
-  tracks: {
-    badge: "border-cyan-300/25 bg-cyan-300/10 text-cyan-700 dark:text-cyan-100",
-    rail: "via-cyan-300/70",
-    glow: "bg-cyan-300/18 dark:bg-cyan-300/12",
-    progress: "from-cyan-300 via-emerald-400 to-lime-300",
-    text: "text-cyan-700 dark:text-cyan-100",
-    soft: "bg-cyan-300/10",
-    border: "border-cyan-300/25",
-  },
-  artists: {
-    badge: "border-violet-300/25 bg-violet-300/10 text-violet-700 dark:text-violet-100",
-    rail: "via-violet-300/70",
-    glow: "bg-violet-300/18 dark:bg-violet-300/12",
-    progress: "from-violet-400 via-cyan-300 to-lime-300",
-    text: "text-violet-700 dark:text-violet-100",
-    soft: "bg-violet-300/10",
-    border: "border-violet-300/25",
-  },
-  genres: {
-    badge: "border-rose-300/25 bg-rose-300/10 text-rose-700 dark:text-rose-100",
-    rail: "via-rose-300/70",
-    glow: "bg-rose-300/18 dark:bg-rose-300/12",
-    progress: "from-indigo-400 via-rose-400 to-amber-300",
-    text: "text-rose-700 dark:text-rose-100",
-    soft: "bg-rose-300/10",
-    border: "border-rose-300/25",
-  },
-} satisfies Record<string, LibraryLeaderAccent>;
-
 function TopLibraryHeroPill({
   label,
   item,
@@ -272,7 +232,7 @@ function TopLibraryHeroPill({
 }: {
   label: string;
   item?: LibraryLeaderItem;
-  accent: LibraryLeaderAccent;
+  accent: (typeof LIBRARY_LEADER_ACCENTS)[keyof typeof LIBRARY_LEADER_ACCENTS];
   locale: string;
   listensLabel: string;
 }) {
@@ -301,119 +261,6 @@ function TopLibraryHeroPill({
         <p className="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{listensLabel}</p>
       </div>
     </div>
-  );
-}
-
-function TopLibraryRow({
-  item,
-  index,
-  maxCount,
-  accent,
-  locale,
-  listensLabel,
-}: {
-  item: LibraryLeaderItem;
-  index: number;
-  maxCount: number;
-  accent: LibraryLeaderAccent;
-  locale: string;
-  listensLabel: string;
-}) {
-  const widthPercent = maxCount > 0 ? Math.max(4, (item.count / maxCount) * 100) : 0;
-  return (
-    <div className="group rounded-2xl border border-white/70 bg-white/62 p-3 shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white/85 hover:shadow-card dark:border-white/[0.07] dark:bg-[#12141f] dark:hover:bg-[#181b28]">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex min-w-0 items-start gap-3">
-          <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border text-xs font-black ${accent.badge}`}>
-            {index + 1}
-          </span>
-          <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-gray-950 dark:text-white" title={item.title}>
-              {item.title}
-            </p>
-            {item.subtitle ? (
-              <p className="mt-0.5 truncate text-xs text-muted dark:text-slate-400" title={item.subtitle}>
-                {item.subtitle}
-              </p>
-            ) : null}
-          </div>
-        </div>
-        <div className="shrink-0 text-right">
-          <p className="text-sm font-semibold tabular-nums text-gray-950 dark:text-white">
-            {item.count.toLocaleString(locale)}
-          </p>
-          <p className="text-[11px] font-medium text-muted dark:text-slate-400">
-            {item.percentage.toFixed(1)}% · {listensLabel}
-          </p>
-        </div>
-      </div>
-      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-200/70 dark:bg-[#2a2d3d]">
-        <div
-          className={`h-full rounded-full bg-gradient-to-r ${accent.progress} transition-all duration-500 ease-out`}
-          style={{ width: `${widthPercent}%` }}
-        />
-      </div>
-    </div>
-  );
-}
-
-function TopLibraryCard({
-  title,
-  description,
-  href,
-  accent,
-  items,
-  locale,
-  listensLabel,
-  ctaLabel,
-}: {
-  title: string;
-  description: string;
-  href: string;
-  accent: LibraryLeaderAccent;
-  items: LibraryLeaderItem[];
-  locale: string;
-  listensLabel: string;
-  ctaLabel: string;
-}) {
-  const maxCount = items[0]?.count ?? 1;
-  return (
-    <article className={`${DASHBOARD_WIDGET_CARD_SHELL} p-4 sm:p-5`}>
-      <DashboardWidgetCardBg glowClass={accent.glow} />
-      <div className="relative">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <div className={`mb-3 inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] shadow-sm backdrop-blur ${accent.badge}`}>
-              <span className={`h-2 w-2 rounded-full ${accent.soft} shadow-[0_0_16px_currentColor]`} />
-              {title}
-            </div>
-            <p className="text-sm leading-6 text-muted dark:text-slate-400">{description}</p>
-          </div>
-          <Link
-            href={href}
-            className={`${DASHBOARD_BTN_LINK} ${accent.text}`}
-          >
-            {ctaLabel}
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </Link>
-        </div>
-        <div className="mt-5 space-y-3">
-          {items.map((item, index) => (
-            <TopLibraryRow
-              key={item.id}
-              item={item}
-              index={index}
-              maxCount={maxCount}
-              accent={accent}
-              locale={locale}
-              listensLabel={listensLabel}
-            />
-          ))}
-        </div>
-      </div>
-    </article>
   );
 }
 
@@ -596,10 +443,15 @@ function MobileTimelineCard({
   locale: string;
 }) {
   const t = useTranslations("overview");
+  const [chartView, setChartView] = useState<ListenTrendChartViewMode>("period");
   const totalListens = chartData.reduce((sum, point) => sum + point.listens, 0);
   const peakPoint = chartData.reduce<MobileChartPoint | null>(
     (peak, point) => (!peak || point.listens > peak.listens ? point : peak),
     null
+  );
+  const displayChartData = useMemo(
+    () => applyListenTrendChartViewSingle(chartData, chartView, "listens"),
+    [chartData, chartView]
   );
 
   if (chartData.length === 0) return null;
@@ -647,12 +499,16 @@ function MobileTimelineCard({
           </div>
         </div>
 
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+          <ListenTrendChartViewToggle value={chartView} onChange={setChartView} />
+        </div>
+
         <div className="mt-4 rounded-[1.25rem] border border-white/10 bg-black/20 p-2">
           <ChartResponsiveContainer
             token="overviewArea"
             minWidth={chartData.length > 8 ? Math.max(320, chartData.length * 34) : undefined}
           >
-            <AreaChart data={chartData} margin={{ top: 8, right: 10, left: -18, bottom: 0 }}>
+            <AreaChart data={displayChartData} margin={{ top: 8, right: 10, left: -18, bottom: 0 }}>
               <defs>
                 <linearGradient id="mobileOverviewAreaGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#67e8f9" stopOpacity={0.38} />
@@ -1476,76 +1332,78 @@ function OverviewContent() {
             title={t("sections.library.title")}
             description={t("sections.library.description")}
           />
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-5">
+          <div className="space-y-5">
             {(topTracksForChart[0] || topArtistsForChart[0] || topGenres[0]) && (
-              <div className="lg:col-span-3">
-                <div className="relative overflow-hidden rounded-[2rem] border border-accent-violet/30 bg-gray-950 p-5 text-white shadow-2xl shadow-accent-violet/25 ring-1 ring-accent-violet/15 sm:p-6 lg:p-8">
-                  <DashboardCinematicHeroBg />
-                  <div className="relative grid gap-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.35fr)] lg:items-end">
-                    <div>
-                      <h2 className="text-3xl font-semibold tracking-[-0.05em] text-white sm:text-4xl">
-                        {t("libraryLeaders.title")}
-                      </h2>
-                      <p className="mt-3 max-w-xl text-sm leading-6 text-slate-300 sm:text-base">
-                        {t("libraryLeaders.description")}
-                      </p>
-                    </div>
-                    <div className="grid gap-3 sm:grid-cols-3">
-                      <TopLibraryHeroPill
-                        label={t("libraryLeaders.topTrack")}
-                        item={
-                          topTracksForChart[0]
-                            ? {
-                                id: topTracksForChart[0].trackId,
-                                title: topTracksForChart[0].name,
-                                subtitle: topTracksForChart[0].artistName,
-                                count: topTracksForChart[0].count,
-                                percentage: topTracksForChart[0].percentage,
-                              }
-                            : undefined
-                        }
-                        accent={LIBRARY_LEADER_ACCENTS.tracks}
-                        locale={locale}
-                        listensLabel={t("listens")}
-                      />
-                      <TopLibraryHeroPill
-                        label={t("libraryLeaders.topArtist")}
-                        item={
-                          topArtistsForChart[0]
-                            ? {
-                                id: topArtistsForChart[0].artistId,
-                                title: topArtistsForChart[0].name,
-                                count: topArtistsForChart[0].count,
-                                percentage: topArtistsForChart[0].percentage,
-                              }
-                            : undefined
-                        }
-                        accent={LIBRARY_LEADER_ACCENTS.artists}
-                        locale={locale}
-                        listensLabel={t("listens")}
-                      />
-                      <TopLibraryHeroPill
-                        label={t("libraryLeaders.topGenre")}
-                        item={
-                          topGenres[0]
-                            ? {
-                                id: topGenres[0].genre,
-                                title: topGenres[0].genre,
-                                count: topGenres[0].count,
-                                percentage: topGenres[0].percentage,
-                              }
-                            : undefined
-                        }
-                        accent={LIBRARY_LEADER_ACCENTS.genres}
-                        locale={locale}
-                        listensLabel={t("listens")}
-                      />
-                    </div>
+              <div className="relative overflow-hidden rounded-[2rem] border border-accent-violet/30 bg-gray-950 p-5 text-white shadow-2xl shadow-accent-violet/25 ring-1 ring-accent-violet/15 sm:p-6 lg:p-8">
+                <DashboardCinematicHeroBg />
+                <div className="relative grid gap-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.35fr)] lg:items-end">
+                  <div>
+                    <p className="font-mono text-xs font-semibold uppercase tracking-[0.24em] text-violet-200/80">
+                      {t("libraryLeaders.badge")}
+                    </p>
+                    <h2 className="mt-2 text-3xl font-semibold tracking-[-0.05em] text-white sm:text-4xl">
+                      {t("libraryLeaders.title")}
+                    </h2>
+                    <p className="mt-3 max-w-xl text-sm leading-6 text-slate-300 sm:text-base">
+                      {t("libraryLeaders.description")}
+                    </p>
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    <TopLibraryHeroPill
+                      label={t("libraryLeaders.topTrack")}
+                      item={
+                        topTracksForChart[0]
+                          ? {
+                              id: topTracksForChart[0].trackId,
+                              title: topTracksForChart[0].name,
+                              subtitle: topTracksForChart[0].artistName,
+                              count: topTracksForChart[0].count,
+                              percentage: topTracksForChart[0].percentage,
+                            }
+                          : undefined
+                      }
+                      accent={LIBRARY_LEADER_ACCENTS.tracks}
+                      locale={locale}
+                      listensLabel={t("listens")}
+                    />
+                    <TopLibraryHeroPill
+                      label={t("libraryLeaders.topArtist")}
+                      item={
+                        topArtistsForChart[0]
+                          ? {
+                              id: topArtistsForChart[0].artistId,
+                              title: topArtistsForChart[0].name,
+                              count: topArtistsForChart[0].count,
+                              percentage: topArtistsForChart[0].percentage,
+                            }
+                          : undefined
+                      }
+                      accent={LIBRARY_LEADER_ACCENTS.artists}
+                      locale={locale}
+                      listensLabel={t("listens")}
+                    />
+                    <TopLibraryHeroPill
+                      label={t("libraryLeaders.topGenre")}
+                      item={
+                        topGenres[0]
+                          ? {
+                              id: topGenres[0].genre,
+                              title: topGenres[0].genre,
+                              count: topGenres[0].count,
+                              percentage: topGenres[0].percentage,
+                            }
+                          : undefined
+                      }
+                      accent={LIBRARY_LEADER_ACCENTS.genres}
+                      locale={locale}
+                      listensLabel={t("listens")}
+                    />
                   </div>
                 </div>
               </div>
             )}
 
+            <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
             {topTracksForChart.length > 0 && (
               <TopLibraryCard
                 title={t("topTracks")}
@@ -1600,6 +1458,7 @@ function OverviewContent() {
                 ctaLabel={t("seeAll")}
               />
             )}
+            </div>
           </div>
         </section>
 

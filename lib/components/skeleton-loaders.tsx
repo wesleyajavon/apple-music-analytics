@@ -61,22 +61,17 @@ export function StatCardsSkeleton({ count = 4 }: { count?: number }) {
 export function OverviewStatsSectionSkeleton() {
   return (
     <div className="sm:col-span-2 lg:col-span-4">
-      <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-[#08060a] via-[#100c12] to-[#0a080e] shadow-2xl shadow-black/50 ring-1 ring-white/[0.06]">
+      <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950 shadow-2xl shadow-black/40 ring-1 ring-white/[0.06]">
         <div className="border-b border-white/10 px-5 py-6 sm:px-8 sm:py-7">
-          <div className="h-3 w-24 rounded bg-white/10 animate-shimmer" />
-          <div className="mt-3 h-9 w-72 max-w-full rounded bg-white/10 animate-shimmer" />
-          <div className="mt-3 h-4 w-full max-w-2xl rounded bg-white/10 animate-shimmer" />
+          <div className="h-8 w-32 rounded-full bg-white/10 animate-shimmer" />
+          <div className="mt-4 h-9 w-72 max-w-full rounded bg-white/10 animate-shimmer" />
+          <div className="mt-3 h-4 w-full max-w-xl rounded bg-white/10 animate-shimmer" />
         </div>
-        <div className="grid gap-4 p-5 sm:p-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-5 lg:p-8">
-          <div className="min-h-[260px] rounded-[1.5rem] border border-white/10 bg-black/35 p-5 sm:p-7">
-            <div className="h-4 w-28 rounded bg-white/10 animate-shimmer" />
-            <div className="mt-4 h-14 w-40 rounded bg-white/10 animate-shimmer" />
-            <div className="mt-4 h-16 w-full rounded bg-white/10 animate-shimmer" />
-          </div>
-          <div className="grid gap-4">
-            <div className="min-h-[240px] rounded-[1.5rem] border border-white/10 bg-black/35 animate-shimmer" />
-            <div className="min-h-[240px] rounded-[1.5rem] border border-white/10 bg-black/35 animate-shimmer" />
-          </div>
+        <div className="grid gap-4 p-5 sm:p-6 lg:grid-cols-12 lg:gap-5 lg:p-8">
+          <div className="min-h-[320px] rounded-[1.5rem] border border-white/10 bg-white/[0.03] lg:col-span-7 animate-shimmer" />
+          <div className="min-h-[320px] rounded-[1.5rem] border border-white/10 bg-white/[0.03] lg:col-span-5 animate-shimmer" />
+          <div className="min-h-[220px] rounded-[1.5rem] border border-white/10 bg-white/[0.03] lg:col-span-6 animate-shimmer" />
+          <div className="min-h-[220px] rounded-[1.5rem] border border-white/10 bg-white/[0.03] lg:col-span-6 animate-shimmer" />
         </div>
       </div>
     </div>

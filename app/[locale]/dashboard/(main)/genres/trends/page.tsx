@@ -30,6 +30,11 @@ import { isGroqDailyQuotaError } from "@/lib/utils/groq-quota-message";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
 import { GenreAccuracyChooser } from "@/lib/components/palette/genre-accuracy-chooser";
 import { PeriodSelector, getPeriodFromSearchParams, type PeriodType } from "@/lib/components/period-selector";
+import { ListenTrendChartViewToggle } from "@/lib/components/charts/listen-trend-chart-view-toggle";
+import {
+  applyListenTrendChartViewMulti,
+  type ListenTrendChartViewMode,
+} from "@/lib/utils/listen-trend-chart-view";
 import { GenreTrendsSkeleton } from "@/lib/components/skeleton-loaders";
 import { usePublicDemoViewer } from "@/lib/hooks/use-public-demo-viewer";
 import { useDebouncedValue } from "@/lib/hooks/use-debounced-value";
@@ -326,6 +331,7 @@ function GenreTrendsMobileExperience({
   genreFilterPage,
   genreFilterPageCount,
   chartData,
+  chartDisplayData,
   isLoading,
   isFetching,
   selectionPending,
@@ -355,6 +361,7 @@ function GenreTrendsMobileExperience({
   genreFilterPage: number;
   genreFilterPageCount: number;
   chartData: GenreTrendsDataPoint[];
+  chartDisplayData: GenreTrendsDataPoint[];
   isLoading: boolean;
   isFetching: boolean;
   selectionPending: boolean;
@@ -524,7 +531,7 @@ function GenreTrendsMobileExperience({
             )}
             <div className={`transition-opacity duration-200 ${isUpdating ? "pointer-events-none opacity-40" : ""}`}>
               <ChartResponsiveContainer token="tracksMain">
-                <RechartsLineChart data={chartData} margin={{ top: 12, right: 10, left: -18, bottom: 18 }}>
+                <RechartsLineChart data={chartDisplayData} margin={{ top: 12, right: 10, left: -18, bottom: 18 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} />
                   <XAxis dataKey="formattedDate" tick={{ fill: chartTheme.tick, fontSize: 10 }} stroke={chartTheme.axisStroke} minTickGap={18} />
                   <YAxis tick={{ fill: chartTheme.tick, fontSize: 10 }} stroke={chartTheme.axisStroke} width={34} />
@@ -882,6 +889,11 @@ function TrendsContent() {
     [data?.availableGenres]
   );
   const chartData = useMemo(() => data?.data ?? [], [data?.data]);
+  const [chartView, setChartView] = useState<ListenTrendChartViewMode>("period");
+  const displayChartData = useMemo(
+    () => applyListenTrendChartViewMulti(chartData, chartView, selectedGenres),
+    [chartData, chartView, selectedGenres]
+  );
 
   useEffect(() => {
     if (availableGenres.length === 0) return;
@@ -1029,7 +1041,10 @@ function TrendsContent() {
     return (
       <>
         <div className={GROUP_BY_BAR_CLASS}>
-          <PeriodSelector defaultPeriod="month" value={period} />
+          <div className="flex flex-wrap items-center gap-3">
+            <PeriodSelector defaultPeriod="month" value={period} />
+            <ListenTrendChartViewToggle value={chartView} onChange={setChartView} />
+          </div>
         </div>
         <div className="mt-5 space-y-6 lg:hidden">
           <GenreTrendsMobileEmptyHero genresHref={genresHref} badgeLabel={badgeLabel} />
@@ -1062,7 +1077,10 @@ function TrendsContent() {
     return (
       <>
         <div className={GROUP_BY_BAR_CLASS}>
-          <PeriodSelector defaultPeriod="month" value={period} />
+          <div className="flex flex-wrap items-center gap-3">
+            <PeriodSelector defaultPeriod="month" value={period} />
+            <ListenTrendChartViewToggle value={chartView} onChange={setChartView} />
+          </div>
         </div>
         <div className="mt-5 space-y-6 lg:hidden">
           <GenreTrendsMobileEmptyHero genresHref={genresHref} badgeLabel={badgeLabel} />
@@ -1094,7 +1112,10 @@ function TrendsContent() {
   return (
     <>
       <div className={GROUP_BY_BAR_CLASS}>
-        <PeriodSelector defaultPeriod="month" value={period} />
+        <div className="flex flex-wrap items-center gap-3">
+          <PeriodSelector defaultPeriod="month" value={period} />
+          <ListenTrendChartViewToggle value={chartView} onChange={setChartView} />
+        </div>
       </div>
 
       <div className="mt-5 lg:hidden">
@@ -1110,6 +1131,7 @@ function TrendsContent() {
           genreFilterPage={genreFilterPage}
           genreFilterPageCount={genreFilterPageCount}
           chartData={chartData}
+          chartDisplayData={displayChartData}
           isLoading={isLoading}
           isFetching={chartFetching}
           selectionPending={selectionPending}
@@ -1335,7 +1357,7 @@ function TrendsContent() {
                         token="tracksMain"
                         minWidth={chartData.length > 10 ? Math.max(320, chartData.length * 32) : undefined}
                       >
-                        <RechartsLineChart data={chartData} margin={{ top: 8, right: 20, left: 4, bottom: 60 }}>
+                        <RechartsLineChart data={displayChartData} margin={{ top: 8, right: 20, left: 4, bottom: 60 }}>
                           <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} />
                           <XAxis
                             dataKey="formattedDate"

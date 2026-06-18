@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import {
@@ -11,7 +12,13 @@ import {
   Tooltip,
 } from "recharts";
 import { ChartResponsiveContainer } from "@/lib/components/chart-responsive-container";
+import { ListenTrendChartViewToggle } from "@/lib/components/charts/listen-trend-chart-view-toggle";
+import { LiveStatusDot } from "@/lib/components/live-status-dot";
 import { CHART_TOOLTIP_STYLES } from "@/lib/constants/config";
+import {
+  applyListenTrendChartViewSingle,
+  type ListenTrendChartViewMode,
+} from "@/lib/utils/listen-trend-chart-view";
 
 export type OverviewListeningMomentumPoint = {
   formattedDate: string;
@@ -29,6 +36,12 @@ export function OverviewListeningMomentumCard({
 }: OverviewListeningMomentumCardProps) {
   const t = useTranslations("overview");
   const locale = useLocale();
+  const [chartView, setChartView] = useState<ListenTrendChartViewMode>("period");
+
+  const displayChartData = useMemo(
+    () => applyListenTrendChartViewSingle(chartData, chartView, "listens"),
+    [chartData, chartView]
+  );
 
   if (chartData.length === 0) return null;
 
@@ -52,7 +65,7 @@ export function OverviewListeningMomentumCard({
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-100">
-                  <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_16px_rgb(22_199_132_/0.75)]" />
+                  <LiveStatusDot />
                   {t("momentumBadge")}
                 </div>
                 <h2 className="text-3xl font-semibold tracking-[-0.05em] text-white sm:text-4xl">
@@ -62,15 +75,18 @@ export function OverviewListeningMomentumCard({
                   {t("listensPerMonth")}
                 </p>
               </div>
-              <Link
-                href={timelineHref}
-                className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white/15"
-              >
-                {t("seeMore")}
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
+              <div className="flex flex-col items-start gap-3 sm:items-end">
+                <ListenTrendChartViewToggle value={chartView} onChange={setChartView} />
+                <Link
+                  href={timelineHref}
+                  className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white/15"
+                >
+                  {t("seeMore")}
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </Link>
+              </div>
             </div>
           </div>
           <div className="px-3 py-5 sm:px-6">
@@ -79,7 +95,7 @@ export function OverviewListeningMomentumCard({
                 token="overviewArea"
                 minWidth={chartData.length > 8 ? Math.max(300, chartData.length * 28) : undefined}
               >
-                <AreaChart data={chartData} margin={{ top: 10, right: 14, left: 0, bottom: 0 }}>
+                <AreaChart data={displayChartData} margin={{ top: 10, right: 14, left: 0, bottom: 0 }}>
                   <defs>
                     <linearGradient id="overviewMomentumAreaGradient" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stopColor="#67e8f9" stopOpacity={0.34} />

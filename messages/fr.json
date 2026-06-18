@@ -293,6 +293,10 @@
       "rangeClamped": "En vue journalière, la plage est limitée aux 2 dernières années (volume d’écoutes élevé). Passez en vue mensuelle pour voir tout l’historique.",
       "chartTitle": "Vous vs {friendName}",
       "chartDescription": "Écoutes par jour sur la même période.",
+      "chartDescriptionCumulative": "Total cumulé des écoutes sur la période — voyez qui prend l'avantage.",
+      "chartViewLabel": "Vue du graphique",
+      "chartViewPeriod": "Par période",
+      "chartViewCumulative": "Cumulatif",
       "seriesSelf": "Vous",
       "seriesFriend": "{friendName}",
       "friendFallback": "Ami",
@@ -2676,6 +2680,11 @@
       "weekly": "Hebdomadaire",
       "monthly": "Mensuel"
     },
+    "listenTrendChartView": {
+      "label": "Vue du graphique",
+      "period": "Par période",
+      "cumulative": "Cumulatif"
+    },
     "loadingState": {
       "defaultMessage": "Chargement des données...",
       "pleaseWait": "Veuillez patienter..."
@@ -2750,9 +2759,62 @@
     "supportedStreamingCaption": "Compatible avec",
     "spotifyLogoAlt": "Spotify",
     "appleMusicLogoAlt": "Apple Music",
-    "subtitle": "Importez une fois depuis Apple Music ou Spotify — explorez les tendances, dialoguez avec vos données d'écoute et comparez vos lectures avec vos amis sur n'importe quel artiste.",
+    "journey": {
+      "tagline": "Votre musique, décodée en 3 temps.",
+      "pitch": "Importez une fois depuis Apple Music ou Spotify. Explorez vos tendances. Dialoguez avec vos données — et défier vos amis.",
+      "stepsListAriaLabel": "Les 3 étapes du parcours Soundprint",
+      "stepLinkAria": "Aller à {step}",
+      "nav": {
+        "import": "Importer",
+        "explore": "Explorer",
+        "interact": "Interagir",
+        "navAriaLabel": "Parcours Soundprint en 3 temps"
+      },
+      "steps": {
+        "import": {
+          "eyebrow": "Mouvement 1",
+          "title": "Importer",
+          "verb": "Connecter",
+          "description": "Connectez Apple Music ou Spotify. Votre historique d'écoute devient votre Soundprint — en quelques minutes, sans API payante côté utilisateur.",
+          "cta": "Créer mon compte",
+          "ctaOnboarding": "Importer mon historique",
+          "ctaDemo": "Essayer la démo d'abord",
+          "previewBadge": "Onboarding guidé",
+          "previewTitle": "Votre export en 3 étapes",
+          "previewProviders": "Apple Music ou Spotify",
+          "previewSteps": {
+            "pick": "Choisissez votre service de streaming",
+            "upload": "Importez votre fichier d'historique",
+            "unlock": "Découvrez votre Soundprint"
+          }
+        },
+        "explore": {
+          "eyebrow": "Mouvement 2",
+          "title": "Explorer",
+          "verb": "Décoder",
+          "description": "Tendances, heatmap, profil musical : voyez les phases, rituels et obsessions cachés dans vos écoutes. Bien au-delà d'un Spotify Wrapped ou d'un Apple Music Replay annuel.",
+          "cta": "Voir la démo publique"
+        },
+        "interact": {
+          "eyebrow": "Mouvement 3",
+          "title": "Interagir",
+          "verb": "Dialoguer",
+          "description": "Posez n'importe quelle question à vos données. Ajoutez vos amis et tranchez : qui est le plus grand fan de cet artiste ?",
+          "ctaChat": "Essayer le chat",
+          "ctaDuet": "Lancer un duel"
+        }
+      }
+    },
+    "subtitle": "Importez une fois depuis Apple Music ou Spotify. Explorez vos tendances. Dialoguez avec vos données — et défier vos amis.",
     "heroPrimaryCta": "Révéler votre Soundprint",
+    "heroDashboardPreview": {
+      "label": "Aperçu du dashboard Soundprint",
+      "eyebrow": "Vos données d'écoute",
+      "subtitle": "Tendances, stats et patterns en un coup d'œil",
+      "liveBadge": "Aperçu live"
+    },
     "heroProof": {
+      "ariaLabel": "Points forts du produit",
       "private": "Pensé pour rester privé",
       "demoFirst": "Essayez d'abord la démo publique",
       "appleSpotify": "Prêt pour Apple Music + Spotify"
@@ -2772,7 +2834,10 @@
       "menuLabel": "Sections de la page"
     },
     "duetPreview": {
+      "sectionEyebrow": "Duet",
       "label": "Aperçu Duet",
+      "heroEyebrow": "En direct · duel entre amis",
+      "heroSubtitle": "Choisissez un artiste. Voyez qui stream le plus.",
       "liveBadge": "Démo",
       "arenaEyebrow": "Duel artiste",
       "artistName": "Tyler, The Creator",
@@ -2892,23 +2957,35 @@
         }
       }
     },
-    "closingCta": {
-      "eyebrow": "Commencez avec votre soundprint",
-      "title": "Transformez votre historique musical en data product moderne.",
-      "subtitle": "Explorez le profil public maintenant, ou connectez-vous pour convertir votre propre archive d'écoute en graphes propres, contexte et analyses AI.",
-      "highlights": {
-        "import": {
-          "label": "Importer",
-          "value": "Ajoutez votre archive d'écoute en quelques minutes."
+    "closingSection": {
+      "eyebrow": "Des questions ?",
+      "title": "Tout ce qu'il faut savoir avant de commencer",
+      "faq": {
+        "export": {
+          "question": "Comment importer mon historique Apple Music ou Spotify ?",
+          "answer": "Après création de compte, l'onboarding guidé vous accompagne pour exporter votre historique d'écoute depuis Apple Music ou Spotify et le télécharger. La plupart des imports se terminent en quelques minutes."
         },
-        "patterns": {
-          "label": "Révéler",
-          "value": "Voyez les phases et rituels cachés dans vos écoutes."
+        "privacy": {
+          "question": "Mes données d'écoute sont-elles privées ?",
+          "answer": "Oui. Vos données vous appartiennent. Nous ne vendons pas votre historique d'écoute, et vous pouvez tout exporter ou supprimer à tout moment depuis les paramètres de votre compte."
         },
-        "ai": {
-          "label": "Demander",
-          "value": "Discutez avec des réponses ancrées dans vos vraies données."
+        "providers": {
+          "question": "Ai-je besoin d'Apple Music ou Spotify ?",
+          "answer": "Les deux fonctionnent. Importez depuis les exports Apple Music Replay, l'historique étendu Spotify, ou connectez Spotify via OAuth. Vous pouvez utiliser l'un ou les deux."
+        },
+        "pricing": {
+          "question": "Soundprint est-il gratuit ?",
+          "answer": "Oui, Soundprint est gratuit. Créez un compte, importez votre historique et explorez votre dashboard sans frais."
         }
+      },
+      "cta": {
+        "title": "Prêt à voir votre propre Soundprint ?",
+        "signUp": "Révéler votre Soundprint",
+        "dashboard": "Aller à votre dashboard",
+        "demo": "Explorer la démo publique",
+        "microcopy": "Pas de carte bancaire · Vos données restent les vôtres",
+        "privacyLink": "Politique de confidentialité",
+        "termsLink": "Conditions d'utilisation"
       }
     }
   },

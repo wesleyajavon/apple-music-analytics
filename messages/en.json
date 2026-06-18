@@ -293,6 +293,10 @@
       "rangeClamped": "In daily view, the range is limited to the last 2 years because of high listen volume. Switch to monthly view to see your full history.",
       "chartTitle": "You vs {friendName}",
       "chartDescription": "Daily listens on the same period.",
+      "chartDescriptionCumulative": "Running total of listens over the period — see who pulls ahead.",
+      "chartViewLabel": "Chart view",
+      "chartViewPeriod": "By period",
+      "chartViewCumulative": "Cumulative",
       "seriesSelf": "You",
       "seriesFriend": "{friendName}",
       "friendFallback": "Friend",
@@ -2676,6 +2680,11 @@
       "weekly": "Weekly",
       "monthly": "Monthly"
     },
+    "listenTrendChartView": {
+      "label": "Chart view",
+      "period": "By period",
+      "cumulative": "Cumulative"
+    },
     "loadingState": {
       "defaultMessage": "Loading data...",
       "pleaseWait": "Please wait..."
@@ -2750,9 +2759,62 @@
     "supportedStreamingCaption": "Works with",
     "spotifyLogoAlt": "Spotify",
     "appleMusicLogoAlt": "Apple Music",
-    "subtitle": "Import once from Apple Music or Spotify—then explore trends, chat with your listening data, and compare plays with friends on any artist.",
+    "journey": {
+      "tagline": "Your music, decoded in 3 steps.",
+      "pitch": "Import once from Apple Music or Spotify. Explore your trends. Talk to your data—and challenge your friends.",
+      "stepsListAriaLabel": "The 3 steps of the Soundprint journey",
+      "stepLinkAria": "Go to {step}",
+      "nav": {
+        "import": "Import",
+        "explore": "Explore",
+        "interact": "Interact",
+        "navAriaLabel": "Soundprint journey in 3 steps"
+      },
+      "steps": {
+        "import": {
+          "eyebrow": "Step 1",
+          "title": "Import",
+          "verb": "Connect",
+          "description": "Connect Apple Music or Spotify. Your listening history becomes your Soundprint—in minutes, with no paid API on your side.",
+          "cta": "Create my account",
+          "ctaOnboarding": "Import my listening history",
+          "ctaDemo": "Try the demo first",
+          "previewBadge": "Guided onboarding",
+          "previewTitle": "Your export in 3 steps",
+          "previewProviders": "Apple Music or Spotify",
+          "previewSteps": {
+            "pick": "Choose your streaming service",
+            "upload": "Upload your history file",
+            "unlock": "Discover your Soundprint"
+          }
+        },
+        "explore": {
+          "eyebrow": "Step 2",
+          "title": "Explore",
+          "verb": "Decode",
+          "description": "Trends, heatmap, musical profile: see the phases, rituals, and obsessions hidden in your plays. Well beyond an annual Spotify Wrapped or Apple Music Replay.",
+          "cta": "View the public demo"
+        },
+        "interact": {
+          "eyebrow": "Step 3",
+          "title": "Interact",
+          "verb": "Dialogue",
+          "description": "Ask your data anything. Add your friends and settle it: who is the bigger fan of that artist?",
+          "ctaChat": "Try the chat",
+          "ctaDuet": "Start a duel"
+        }
+      }
+    },
+    "subtitle": "Import once from Apple Music or Spotify. Explore your trends. Talk to your data—and challenge your friends.",
     "heroPrimaryCta": "Reveal your Soundprint",
+    "heroDashboardPreview": {
+      "label": "Soundprint dashboard preview",
+      "eyebrow": "Your listening data",
+      "subtitle": "Trends, stats, and patterns at a glance",
+      "liveBadge": "Live preview"
+    },
     "heroProof": {
+      "ariaLabel": "Product highlights",
       "private": "Private by design",
       "demoFirst": "Try the public demo first",
       "appleSpotify": "Apple Music + Spotify ready"
@@ -2772,7 +2834,10 @@
       "menuLabel": "Page sections"
     },
     "duetPreview": {
+      "sectionEyebrow": "Duet",
       "label": "Duet preview",
+      "heroEyebrow": "See it live · friend duel",
+      "heroSubtitle": "Pick an artist. See who streams more.",
       "liveBadge": "Demo",
       "arenaEyebrow": "Artist duel",
       "artistName": "Tyler, The Creator",
@@ -2892,23 +2957,35 @@
         }
       }
     },
-    "closingCta": {
-      "eyebrow": "Start with your soundprint",
-      "title": "Make your music history feel like a modern data product.",
-      "subtitle": "Explore the public profile now, or sign in to turn your own listening archive into clean charts, context, and AI-powered takeaways.",
-      "highlights": {
-        "import": {
-          "label": "Import",
-          "value": "Bring your listening archive in minutes."
+    "closingSection": {
+      "eyebrow": "Questions?",
+      "title": "Everything you need to know before you start",
+      "faq": {
+        "export": {
+          "question": "How do I import my Apple Music or Spotify history?",
+          "answer": "After creating an account, guided onboarding walks you through exporting your listening history from Apple Music or Spotify and uploading it. Most imports complete in minutes."
         },
-        "patterns": {
-          "label": "Reveal",
-          "value": "See the phases and rituals hidden in your plays."
+        "privacy": {
+          "question": "Is my listening data private?",
+          "answer": "Yes. Your data is yours. We don't sell your listening history, and you can export or delete everything at any time from your account settings."
         },
-        "ai": {
-          "label": "Ask",
-          "value": "Chat with answers grounded in your real data."
+        "providers": {
+          "question": "Do I need Apple Music or Spotify?",
+          "answer": "Either works. Import from Apple Music Replay exports, Spotify Extended Streaming History, or connect Spotify via OAuth. You can use one or both."
+        },
+        "pricing": {
+          "question": "Is Soundprint free?",
+          "answer": "Yes, Soundprint is free to use. Create an account, import your history, and explore your dashboard at no cost."
         }
+      },
+      "cta": {
+        "title": "Ready to see your own Soundprint?",
+        "signUp": "Reveal your Soundprint",
+        "dashboard": "Go to your dashboard",
+        "demo": "Explore the public demo",
+        "microcopy": "No credit card required · Your data stays yours",
+        "privacyLink": "Privacy Policy",
+        "termsLink": "Terms of Service"
       }
     }
   },

@@ -22,6 +22,11 @@ import { useTheme } from "@/lib/providers/theme-provider";
 import { useIsLgChartViewport } from "@/lib/hooks/use-chart-viewport";
 import { DASHBOARD_CHART_THEME } from "@/lib/constants/dashboard-spotlight";
 import { LiveStatusDot } from "@/lib/components/live-status-dot";
+import { ListenTrendChartViewToggle } from "@/lib/components/charts/listen-trend-chart-view-toggle";
+import {
+  applyListenTrendChartViewMulti,
+  type ListenTrendChartViewMode,
+} from "@/lib/utils/listen-trend-chart-view";
 
 const COLORS = [
   "#818cf8",
@@ -148,6 +153,12 @@ export function GenreTrendsSummaryWidget({
   );
 
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
+  const [chartView, setChartView] = useState<ListenTrendChartViewMode>("period");
+
+  const displayChartData = useMemo(
+    () => applyListenTrendChartViewMulti(chartData, chartView, selectedGenres),
+    [chartData, chartView, selectedGenres]
+  );
 
   useEffect(() => {
     if (availableGenres.length === 0) return;
@@ -306,10 +317,13 @@ export function GenreTrendsSummaryWidget({
               </p>
             ) : (
               <div className="relative rounded-3xl border border-white/70 bg-white/60 p-3 shadow-inner backdrop-blur dark:border-white/[0.06] dark:bg-[#080913]">
+                <div className="mb-3 flex flex-wrap items-center justify-end gap-3">
+                  <ListenTrendChartViewToggle value={chartView} onChange={setChartView} />
+                </div>
                 <div className="pointer-events-none absolute left-1/2 top-8 h-56 w-56 -translate-x-1/2 rounded-full bg-rose-300/10 blur-3xl dark:bg-rose-300/14" />
                 <ChartResponsiveContainer token="trendsLine" minWidth={trendsMinWidth}>
                     <LineChart
-                      data={chartData}
+                      data={displayChartData}
                       margin={{ top: 12, right: 16, left: 0, bottom: isLgChart ? 50 : 44 }}
                     >
                       <CartesianGrid

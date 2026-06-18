@@ -14,6 +14,11 @@ import {
   YAxis,
 } from "recharts";
 import { getPeriodFromSearchParams, PeriodSelector, type PeriodType } from "@/lib/components/period-selector";
+import { ListenTrendChartViewToggle } from "@/lib/components/charts/listen-trend-chart-view-toggle";
+import {
+  applyListenTrendChartViewMulti,
+  type ListenTrendChartViewMode,
+} from "@/lib/utils/listen-trend-chart-view";
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
 import { GenreTrendsSkeleton } from "@/lib/components/skeleton-loaders";
@@ -363,6 +368,7 @@ function TrackTrendsMobileExperience({
   selectedIds,
   pickerTracks,
   chartData,
+  chartDisplayData,
   isLoading,
   isFetching,
   selectionPending,
@@ -380,6 +386,7 @@ function TrackTrendsMobileExperience({
   selectedIds: string[];
   pickerTracks: TrackTrendsChartTrack[];
   chartData: TrackTrendsChartDataPoint[];
+  chartDisplayData: TrackTrendsChartDataPoint[];
   isLoading: boolean;
   isFetching: boolean;
   selectionPending: boolean;
@@ -541,7 +548,7 @@ function TrackTrendsMobileExperience({
             )}
             <div className={`transition-opacity duration-200 ${isUpdating ? "pointer-events-none opacity-40" : ""}`}>
               <ChartResponsiveContainer token="tracksMain">
-                <RechartsLineChart data={chartData} margin={{ top: 12, right: 10, left: -18, bottom: 18 }}>
+                <RechartsLineChart data={chartDisplayData} margin={{ top: 12, right: 10, left: -18, bottom: 18 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} />
                   <XAxis dataKey="formattedDate" tick={{ fill: chartTheme.tick, fontSize: 10 }} stroke={chartTheme.axisStroke} minTickGap={18} />
                   <YAxis tick={{ fill: chartTheme.tick, fontSize: 10 }} stroke={chartTheme.axisStroke} width={34} />
@@ -721,6 +728,11 @@ function TrendsContent() {
   const getTrackIndex = useCallback((trackId: string) => pickerTracks.findIndex((x) => x.id === trackId), [pickerTracks]);
   const idToTrack = useMemo(() => new Map(pickerTracks.map((item) => [item.id, item])), [pickerTracks]);
   const chartData = data?.data ?? [];
+  const [chartView, setChartView] = useState<ListenTrendChartViewMode>("period");
+  const displayChartData = useMemo(
+    () => applyListenTrendChartViewMulti(chartData, chartView, selectedIds),
+    [chartData, chartView, selectedIds]
+  );
 
   const heroPanel =
     isLoading && !data ? (
@@ -733,7 +745,10 @@ function TrendsContent() {
     return (
       <>
         <div className={GROUP_BY_BAR_CLASS}>
-          <PeriodSelector defaultPeriod="month" value={period} />
+          <div className="flex flex-wrap items-center gap-3">
+            <PeriodSelector defaultPeriod="month" value={period} />
+            <ListenTrendChartViewToggle value={chartView} onChange={setChartView} />
+          </div>
         </div>
         <div className="mt-5 space-y-6 lg:hidden">
           <TrackTrendsMobileEmptyHero tracksHref={tracksHref} badgeLabel={badgeLabel} />
@@ -755,7 +770,10 @@ function TrendsContent() {
     return (
       <>
         <div className={GROUP_BY_BAR_CLASS}>
-          <PeriodSelector defaultPeriod="month" value={period} />
+          <div className="flex flex-wrap items-center gap-3">
+            <PeriodSelector defaultPeriod="month" value={period} />
+            <ListenTrendChartViewToggle value={chartView} onChange={setChartView} />
+          </div>
         </div>
         <div className="mt-5 space-y-6 lg:hidden">
           <TrackTrendsMobileEmptyHero tracksHref={tracksHref} badgeLabel={badgeLabel} />
@@ -781,7 +799,10 @@ function TrendsContent() {
   return (
     <>
       <div className={GROUP_BY_BAR_CLASS}>
-        <PeriodSelector defaultPeriod="month" value={period} />
+        <div className="flex flex-wrap items-center gap-3">
+          <PeriodSelector defaultPeriod="month" value={period} />
+          <ListenTrendChartViewToggle value={chartView} onChange={setChartView} />
+        </div>
       </div>
 
       <div className="mt-5 lg:hidden">
@@ -792,6 +813,7 @@ function TrendsContent() {
           selectedIds={selectedIds}
           pickerTracks={pickerTracks}
           chartData={chartData}
+          chartDisplayData={displayChartData}
           isLoading={isLoading}
           isFetching={isFetching}
           selectionPending={selectionPending}
@@ -924,7 +946,7 @@ function TrendsContent() {
                       token="tracksMain"
                       minWidth={chartData.length > 10 ? Math.max(320, chartData.length * 32) : undefined}
                     >
-                      <RechartsLineChart data={chartData} margin={{ top: 8, right: 20, left: 4, bottom: 60 }}>
+                      <RechartsLineChart data={displayChartData} margin={{ top: 8, right: 20, left: 4, bottom: 60 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} />
                         <XAxis
                           dataKey="formattedDate"

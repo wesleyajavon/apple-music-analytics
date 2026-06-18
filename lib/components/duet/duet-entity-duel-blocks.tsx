@@ -17,8 +17,14 @@ import { DuetShareCardActions } from "@/lib/components/duet/duet-share-card-acti
 import type { DuetArenaMode } from "@/lib/components/duet/duet-battle-arena-ui";
 import { generateDuetBattleSharePng } from "@/lib/utils/duet-battle-share-image";
 import { DASHBOARD_CHART_THEME } from "@/lib/constants/dashboard-spotlight";
+import type { DualLineChartPoint } from "@/lib/utils/listen-trend-chart-view";
 
-export type DualLineChartPoint = { date: string; self: number; friend: number };
+export type { DualLineChartPoint, ListenTrendChartViewMode as DuetChartViewMode } from "@/lib/utils/listen-trend-chart-view";
+
+export {
+  applyListenTrendChartViewDual as applyDuetChartView,
+  toCumulativeDualLineChartData,
+} from "@/lib/utils/listen-trend-chart-view";
 
 export function DuetDualLineChart({
   data,

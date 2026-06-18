@@ -2,17 +2,11 @@
 
 import { useCallback, useEffect, useId, useState } from "react";
 import { useTranslations } from "next-intl";
-
-const NAV_ITEMS = [
-  { href: "#product", labelKey: "product" },
-  { href: "#dashboard-widgets", labelKey: "insights" },
-  { href: "#demo", labelKey: "demo" },
-  { href: "#soundprint-ai-chat", labelKey: "aiChat" },
-] as const;
+import { HOME_JOURNEY_NAV_ITEMS } from "@/lib/constants/home-journey-nav";
 
 export function HomeMobileNav() {
   const t = useTranslations("home");
-  const tNav = useTranslations("home.nav");
+  const tNav = useTranslations("home.journey.nav");
   const [isOpen, setIsOpen] = useState(false);
   const panelId = useId();
 
@@ -75,7 +69,7 @@ export function HomeMobileNav() {
             aria-label={t("mobileNav.menuLabel")}
           >
             <ul className="flex flex-col gap-0.5">
-              {NAV_ITEMS.map((item) => (
+              {HOME_JOURNEY_NAV_ITEMS.map((item) => (
                 <li key={item.href}>
                   <a
                     href={item.href}

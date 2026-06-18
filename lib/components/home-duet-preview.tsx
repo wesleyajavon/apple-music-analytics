@@ -64,7 +64,7 @@ function PreviewAvatar({
   );
 }
 
-export function HomeDuetPreview() {
+export function HomeDuetPreview({ className }: { className?: string }) {
   const t = useTranslations("home.duetPreview");
 
   const total = SELF_LISTENS + FRIEND_LISTENS;
@@ -109,13 +109,16 @@ export function HomeDuetPreview() {
   );
 
   return (
-    <div id="product" className="relative z-10 scroll-mt-24">
+    <div className={["relative z-10", className].filter(Boolean).join(" ")}>
       <div
         className="absolute -inset-6 rounded-[2rem] bg-brand-gradient-soft blur-2xl"
         aria-hidden
       />
       <div className="relative space-y-3 rounded-[2rem] border border-card-border bg-surface-glass p-3 shadow-card backdrop-blur-xl">
-        <div className="relative overflow-hidden rounded-[1.5rem] border border-white/10 bg-slate-950 p-3 shadow-2xl shadow-black/30">
+        <div
+          className="relative overflow-hidden rounded-[1.5rem] border border-white/10 bg-slate-950 p-3 shadow-2xl shadow-black/30"
+          aria-label={t("label")}
+        >
           <div
             className="pointer-events-none absolute -right-20 -top-16 h-64 w-64 rounded-full bg-accent-violet/25 blur-3xl"
             aria-hidden
@@ -125,22 +128,30 @@ export function HomeDuetPreview() {
             aria-hidden
           />
 
-          <div className="relative flex items-center justify-between border-b border-white/10 px-3 pb-3">
-            <div className="flex items-center gap-2">
-              <span className="h-2.5 w-2.5 rounded-full bg-rose-400" />
-              <span className="h-2.5 w-2.5 rounded-full bg-amber-300" />
-              <span className="h-2.5 w-2.5 rounded-full bg-emerald-300" />
+          <div className="relative flex flex-col gap-3 border-b border-white/10 px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex shrink-0 items-center gap-2" aria-hidden>
+                <span className="h-2.5 w-2.5 rounded-full bg-rose-400" />
+                <span className="h-2.5 w-2.5 rounded-full bg-amber-300" />
+                <span className="h-2.5 w-2.5 rounded-full bg-emerald-300" />
+              </div>
+              <div className="min-w-0">
+                <p className="truncate font-mono text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-slate-300">
+                  {t("heroEyebrow")}
+                </p>
+                <p className="mt-1 text-xs font-medium text-slate-400 sm:text-sm">
+                  {t("heroSubtitle")}
+                </p>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
+            <span className="inline-flex w-fit items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1 font-mono text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-cyan-100">
               <SoundprintLogo
                 src="/brand/favicon.png"
                 showText={false}
-                imageClassName="h-6 w-6 object-contain"
+                imageClassName="h-4 w-4 object-contain"
               />
-              <p className="font-mono text-[0.65rem] uppercase tracking-[0.22em] text-slate-400">
-                {t("label")}
-              </p>
-            </div>
+              {t("liveBadge")}
+            </span>
           </div>
 
           <div className="relative grid gap-3 p-2 pt-4 sm:grid-cols-[0.88fr_1.12fr]">

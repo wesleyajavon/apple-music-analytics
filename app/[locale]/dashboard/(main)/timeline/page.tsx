@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, memo, useMemo, type ComponentType, type ReactNode } from "react";
+import { Suspense, memo, useMemo, useState, type ComponentType, type ReactNode } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
@@ -18,6 +18,11 @@ import { ChartResponsiveContainer } from "@/lib/components/chart-responsive-cont
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
 import { PeriodSelector, PeriodType } from "@/lib/components/period-selector";
+import { ListenTrendChartViewToggle } from "@/lib/components/charts/listen-trend-chart-view-toggle";
+import {
+  applyListenTrendChartViewSingle,
+  type ListenTrendChartViewMode,
+} from "@/lib/utils/listen-trend-chart-view";
 import {
   DASHBOARD_SPOTLIGHT_SHELL,
   DASHBOARD_SPOTLIGHT_GRADIENT_CYAN,
@@ -427,6 +432,7 @@ function TimelineMobileSkeleton() {
 function TimelineMobileExperience({
   data,
   chartData,
+  chartView,
   isLoading,
   error,
   refetch,
@@ -436,6 +442,7 @@ function TimelineMobileExperience({
 }: {
   data?: TimelineDataPoint[];
   chartData: TimelineChartRow[];
+  chartView: ListenTrendChartViewMode;
   isLoading: boolean;
   error: Error | null;
   refetch: () => void;
@@ -445,7 +452,11 @@ function TimelineMobileExperience({
 }) {
   const t = useTranslations("timeline");
   const summary = useMemo(() => getTimelineMobileSummary(data ?? []), [data]);
-  const sparklinePoints = useMemo(() => createSparklinePoints(data ?? []), [data]);
+  const sparklineData = useMemo(
+    () => applyListenTrendChartViewSingle(data ?? [], chartView, "listens"),
+    [data, chartView]
+  );
+  const sparklinePoints = useMemo(() => createSparklinePoints(sparklineData), [sparklineData]);
 
   if (isLoading) return <TimelineMobileSkeleton />;
 
@@ -664,6 +675,12 @@ function TimelineContent() {
     [data, period, locale],
   );
 
+  const [chartView, setChartView] = useState<ListenTrendChartViewMode>("period");
+  const displayChartData = useMemo(
+    () => applyListenTrendChartViewSingle(chartData, chartView, "listens"),
+    [chartData, chartView]
+  );
+
   const emptyStatePresets = useEmptyStatePresets();
 
   const periodBadgeLabel =
@@ -683,7 +700,10 @@ function TimelineContent() {
   return (
     <>
       <div className={TIMELINE_TOOLBAR_CLASS}>
-        <PeriodSelector defaultPeriod="month" />
+        <div className="flex flex-wrap items-center gap-3">
+          <PeriodSelector defaultPeriod="month" />
+          <ListenTrendChartViewToggle value={chartView} onChange={setChartView} />
+        </div>
       </div>
 
       <div className="mt-4 space-y-5 lg:mt-6 lg:space-y-8">
@@ -694,6 +714,7 @@ function TimelineContent() {
         <TimelineMobileExperience
           data={data}
           chartData={chartData}
+          chartView={chartView}
           isLoading={isLoading}
           error={error}
           refetch={refetch}
@@ -744,7 +765,7 @@ function TimelineContent() {
                       <div className="pointer-events-none absolute left-1/2 top-14 h-56 w-56 -translate-x-1/2 rounded-full bg-violet-400/10 blur-3xl dark:bg-cyan-400/12" aria-hidden />
                       <div className="relative">
                         <TimelineListeningChart
-                          chartData={chartData}
+                          chartData={displayChartData}
                           chartPalette={chartPalette}
                           TimelineTooltip={TimelineTooltip}
                           listensLabel={t("Listens")}

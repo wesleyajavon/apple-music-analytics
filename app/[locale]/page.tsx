@@ -8,27 +8,27 @@ import { LanguageSwitcher } from "@/lib/components/language-switcher";
 import { Footer } from "@/lib/components/footer";
 import { SoundprintBrandMark } from "@/lib/components/soundprint-brand-mark";
 import { SoundprintBrandDividerSection } from "@/lib/components/soundprint-brand-divider";
-import { SoundprintLogo } from "@/lib/components/soundprint-logo";
 import { ThemeSwitcher } from "@/lib/components/theme-switcher";
-import { DemoTerminalHero } from "@/lib/components/demo-terminal-hero";
 import { Home3DHero } from "@/lib/components/home-3d/home-3d-hero";
+import { HomeJourneyExploreSection } from "@/lib/components/home-journey-explore-section";
+import { HomeJourneyImportSection } from "@/lib/components/home-journey-import-section";
+import { HomeJourneyInteractSection } from "@/lib/components/home-journey-interact-section";
+import { HomeClosingSection } from "@/lib/components/home-closing-section";
+import { HomeJourneySteps } from "@/lib/components/home-journey-steps";
 import { HomeMobileNav } from "@/lib/components/home-mobile-nav";
-import { HomeDashboardPreviewsSection } from "@/lib/components/home-dashboard-previews";
-import { HomeDuetPreview } from "@/lib/components/home-duet-preview";
 import { HomeMobileStickyCta } from "@/lib/components/home-mobile-sticky-cta";
-import { StreamingProviderLogos } from "@/lib/components/streaming-provider-logos";
 import { UserAvatar } from "@/lib/components/user-avatar";
-import { withPublicDemoUserId } from "@/lib/constants/public-profile";
+import {
+  HOME_JOURNEY_NAV_ITEMS,
+} from "@/lib/constants/home-journey-nav";
 import { usePublicDemo } from "@/lib/providers/public-demo-provider";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import {
   HomeBlurFadeReveal,
   HomeClipReveal,
-  HomePerspectiveReveal,
-  HomeTextReveal,
   HomeTextRevealLines,
 } from "@/lib/components/home-animations";
-import { HomeAutoplayVideo } from "@/lib/components/home-autoplay-video";
+import { HomeHeroDashboardPreview } from "@/lib/components/home-hero-dashboard-preview";
 
 function ArrowRightIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
@@ -143,55 +143,6 @@ export default function Home() {
     return t("welcomePersonal", { name: firstName });
   }, [firstName, t]);
 
-  const demoHighlights = [
-    {
-      id: "artist-analysis",
-      videoSrc: "/media/artist1.mp4",
-      videoLabel: t("demoHighlights.artistAnalysis.videoLabel"),
-      eyebrow: t("demoHighlights.artistAnalysis.eyebrow"),
-      title: t("demoHighlights.artistAnalysis.title"),
-      description: t("demoHighlights.artistAnalysis.description"),
-      metric: t("demoHighlights.artistAnalysis.metric"),
-      reverse: false,
-    },
-    {
-      id: "listening-trends",
-      videoSrc: "/media/artist2.mp4",
-      videoLabel: t("demoHighlights.listeningTrends.videoLabel"),
-      eyebrow: t("demoHighlights.listeningTrends.eyebrow"),
-      title: t("demoHighlights.listeningTrends.title"),
-      description: t("demoHighlights.listeningTrends.description"),
-      metric: t("demoHighlights.listeningTrends.metric"),
-      reverse: true,
-    },
-  ] as const;
-
-  const closingHighlights = [
-    {
-      label: t("closingCta.highlights.import.label"),
-      value: t("closingCta.highlights.import.value"),
-    },
-    {
-      label: t("closingCta.highlights.patterns.label"),
-      value: t("closingCta.highlights.patterns.value"),
-    },
-    {
-      label: t("closingCta.highlights.ai.label"),
-      value: t("closingCta.highlights.ai.value"),
-    },
-  ];
-
-  const soundprintAiChatFeatures = useMemo(
-    () =>
-      (
-        ["compareEras", "plainLanguage", "groundedAnswers"] as const
-      ).map((key) => ({
-        label: t(`soundprintAiChatDemo.features.${key}.label`),
-        supportingText: t(`soundprintAiChatDemo.features.${key}.supporting`),
-      })),
-    [t],
-  );
-
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       <main className="relative flex flex-1 flex-col bg-app-shell">
@@ -208,23 +159,20 @@ export default function Home() {
               <SoundprintBrandMark priority showWordmarkOnMobile={false} />
             </Link>
 
-            <div className="hidden items-center gap-6 text-sm font-medium text-muted md:flex">
-              <a href="#product" className="transition-colors hover:text-foreground">
-                {t("nav.product")}
-              </a>
-              <a href="#dashboard-widgets" className="transition-colors hover:text-foreground">
-                {t("nav.insights")}
-              </a>
-              <a href="#demo" className="transition-colors hover:text-foreground">
-                {t("nav.demo")}
-              </a>
-              <a
-                href="#soundprint-ai-chat"
-                className="transition-colors hover:text-foreground"
-              >
-                {t("nav.aiChat")}
-              </a>
-            </div>
+            <nav
+              className="hidden items-center gap-6 text-sm font-medium text-muted md:flex"
+              aria-label={t("journey.navAriaLabel")}
+            >
+              {HOME_JOURNEY_NAV_ITEMS.map((item) => (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  className="transition-colors hover:text-foreground"
+                >
+                  {t(`journey.nav.${item.labelKey}`)}
+                </a>
+              ))}
+            </nav>
 
             <div className="flex shrink-0 items-center gap-1 sm:gap-3">
               <HomeMobileNav />
@@ -272,7 +220,7 @@ export default function Home() {
           aria-hidden
         />
 
-        <section className="relative mx-auto grid w-full max-w-7xl scroll-mt-24 items-center gap-10 px-4 pb-16 pt-10 sm:gap-12 sm:px-6 sm:pb-20 sm:pt-14 lg:grid-cols-[0.92fr_1.08fr] lg:gap-14 lg:px-8 lg:pb-28 lg:pt-20">
+        <section className="relative mx-auto grid w-full max-w-7xl items-center gap-10 px-4 pb-16 pt-10 sm:gap-12 sm:px-6 sm:pb-20 sm:pt-14 lg:grid-cols-[0.95fr_1.05fr] lg:gap-14 lg:px-8 lg:pb-28 lg:pt-20">
           <div className="relative z-10 text-left">
             <HomeBlurFadeReveal delay={0} immediate>
             {isAuthenticated ? (
@@ -320,6 +268,14 @@ export default function Home() {
             ) : null}
             </HomeBlurFadeReveal>
 
+            {!isAuthenticated ? (
+              <HomeBlurFadeReveal delay={0.04} immediate>
+                <p className="mb-4 font-mono text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-primary sm:text-xs">
+                  {t("journey.tagline")}
+                </p>
+              </HomeBlurFadeReveal>
+            ) : null}
+
             <HomeTextRevealLines
               as="h1"
               className="max-w-4xl overflow-visible text-balance text-[2.35rem] font-semibold leading-[1.15] tracking-[-0.05em] text-foreground sm:text-6xl sm:leading-snug sm:tracking-[-0.06em] lg:text-7xl lg:leading-[1.12]"
@@ -340,24 +296,23 @@ export default function Home() {
 
             <HomeBlurFadeReveal delay={0.2} className="mt-5 max-w-2xl">
               <p className="text-base leading-7 text-muted sm:text-xl sm:leading-8">
-                {t("subtitle")}
+                {t("journey.pitch")}
               </p>
             </HomeBlurFadeReveal>
 
-            <HomeBlurFadeReveal delay={0.32}>
-              <StreamingProviderLogos
-                caption={t("supportedStreamingCaption")}
-                spotifyLogoAlt={t("spotifyLogoAlt")}
-                appleMusicLogoAlt={t("appleMusicLogoAlt")}
-                className="mt-5"
-              />
+            <HomeBlurFadeReveal delay={0.28} className="mt-6">
+              <HomeJourneySteps />
             </HomeBlurFadeReveal>
 
-            <HomeBlurFadeReveal delay={0.44} className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <HomeClipReveal className="mt-8 lg:hidden" delay={0.32} immediate>
+              <HomeHeroDashboardPreview compact />
+            </HomeClipReveal>
+
+            <HomeBlurFadeReveal delay={0.4} className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               {isAuthenticated ? (
                 <Link
                   href="/dashboard"
-                  className="hidden min-h-12 items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-7 py-3 text-sm font-semibold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:opacity-95 md:inline-flex"
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-7 py-3 text-sm font-semibold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:opacity-95"
                 >
                   {t("goToDashboard")}
                   <ArrowRightIcon />
@@ -365,17 +320,43 @@ export default function Home() {
               ) : (
                 <Link
                   href="/sign-up"
-                  className="hidden min-h-12 items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-7 py-3 text-sm font-semibold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:opacity-95 md:inline-flex"
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-7 py-3 text-sm font-semibold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:opacity-95"
                 >
                   {t("heroPrimaryCta")}
                   <ArrowRightIcon />
                 </Link>
               )}
+              {!isAuthenticated && publicDemoPath ? (
+                <Link
+                  href={publicDemoPath}
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-card-border bg-card-surface px-7 py-3 text-sm font-semibold text-foreground shadow-card transition-all hover:-translate-y-0.5 hover:shadow-card-hover"
+                >
+                  {t("accessDashboard")}
+                  <ArrowRightIcon />
+                </Link>
+              ) : null}
+            </HomeBlurFadeReveal>
+
+            <HomeBlurFadeReveal delay={0.48} className="mt-6">
+              <ul className="flex flex-wrap gap-2" aria-label={t("heroProof.ariaLabel")}>
+                {(["private", "demoFirst", "appleSpotify"] as const).map((key) => (
+                  <li
+                    key={key}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-card-border bg-card-surface/70 px-3 py-1.5 text-xs font-medium text-muted backdrop-blur-sm"
+                  >
+                    <span
+                      className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent-emerald shadow-[0_0_8px_rgb(22_199_132_/0.6)]"
+                      aria-hidden
+                    />
+                    {t(`heroProof.${key}`)}
+                  </li>
+                ))}
+              </ul>
             </HomeBlurFadeReveal>
           </div>
 
-          <HomeClipReveal className="relative z-10" delay={0.15} immediate>
-            <HomeDuetPreview />
+          <HomeClipReveal className="relative z-10 hidden lg:block" delay={0.15} immediate>
+            <HomeHeroDashboardPreview />
           </HomeClipReveal>
         </section>
 
@@ -386,6 +367,11 @@ export default function Home() {
           className="py-8 sm:py-12"
         />
 
+        <HomeJourneyImportSection
+          isAuthenticated={isAuthenticated}
+          publicDemoPath={publicDemoPath}
+        />
+
         <section className="relative mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
           <Home3DHero
             variant="ambient"
@@ -393,136 +379,17 @@ export default function Home() {
           />
         </section>
 
-        <HomeDashboardPreviewsSection />
+        <HomeJourneyExploreSection publicDemoPath={publicDemoPath} />
 
         <SoundprintBrandDividerSection
           logoSize="xl"
           className="py-6 sm:py-10"
         />
 
-        <section
-          id="soundprint-ai-chat"
-          className="mx-auto w-full max-w-7xl scroll-mt-24 px-4 pb-12 sm:px-6 sm:pb-20 lg:px-8"
-        >
-          <div className="mb-10 text-center lg:mb-12">
-            <HomeBlurFadeReveal>
-              <p className="font-mono text-xs font-semibold uppercase tracking-[0.28em] text-primary">
-                {t("soundprintAiChatDemo.sectionEyebrow")}
-              </p>
-            </HomeBlurFadeReveal>
-            <HomeTextReveal
-              as="h2"
-              onScroll
-              className="mx-auto mt-3 block max-w-4xl text-2xl font-semibold tracking-[-0.04em] text-foreground sm:text-5xl"
-              text={t("soundprintAiChatDemo.sectionTitle")}
-              stagger={0.05}
-            />
-          </div>
-
-          <DemoTerminalHero
-            videoSrc="/media/aichat.mp4"
-            videoLabel={t("soundprintAiChatDemo.videoLabel")}
-            eyebrow={t("soundprintAiChatDemo.heroEyebrow")}
-            subtitle={t("soundprintAiChatDemo.heroSubtitle")}
-            badge={t("soundprintAiChatDemo.heroBadge")}
-            features={soundprintAiChatFeatures}
-            showFeaturesOnMobile={false}
-            className="max-w-6xl"
-          />
-
-          <HomeBlurFadeReveal delay={0.15} className="mt-10 flex justify-center">
-            <Link
-              href={
-                isAuthenticated
-                  ? "/dashboard/ask-your-soundprint"
-                  : publicProfileId
-                    ? withPublicDemoUserId("/dashboard/ask-your-soundprint", publicProfileId)
-                    : "/sign-in"
-              }
-              className="inline-flex min-h-11 w-full max-w-md items-center justify-center gap-2 rounded-xl bg-brand-gradient px-6 py-3 text-sm font-semibold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:opacity-95 sm:w-auto"
-            >
-              {t(
-                isAuthenticated
-                  ? "soundprintAiChatDemo.ctaSignedIn"
-                  : "soundprintAiChatDemo.cta",
-              )}
-              <ArrowRightIcon />
-            </Link>
-          </HomeBlurFadeReveal>
-        </section>
-
-        <SoundprintBrandDividerSection
-          logoSize="md"
-          lineStyle="gradient"
-          maxWidth="narrow"
-          sectionClassName="hidden md:block"
-          className="py-6 sm:py-8"
+        <HomeJourneyInteractSection
+          isAuthenticated={isAuthenticated}
+          publicProfileUserId={publicProfileId}
         />
-
-        <section
-          id="demo"
-          className="mx-auto w-full max-w-7xl scroll-mt-24 px-4 pb-10 sm:px-6 sm:pb-20 lg:px-8"
-        >
-          <div className="mb-8 hidden text-center md:block">
-            <HomeBlurFadeReveal>
-              <p className="font-mono text-xs font-semibold uppercase tracking-[0.28em] text-primary">
-                {t("demoHighlightsSection.eyebrow")}
-              </p>
-            </HomeBlurFadeReveal>
-            <HomeTextReveal
-              as="h2"
-              onScroll
-              className="mx-auto mt-3 block max-w-3xl text-2xl font-semibold tracking-[-0.04em] text-foreground sm:text-5xl"
-              text={t("demoHighlightsSection.title")}
-              stagger={0.05}
-            />
-          </div>
-
-          <div className="hidden w-full gap-6 md:grid">
-            {demoHighlights.map((highlight) => (
-              <section
-                key={highlight.id}
-                className="grid items-center gap-5 rounded-3xl border border-card-border bg-surface-glass p-4 text-left shadow-card backdrop-blur-xl sm:gap-6 sm:rounded-[2rem] md:p-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-8"
-              >
-                <div
-                  className={
-                    highlight.reverse
-                      ? "relative overflow-hidden rounded-3xl border border-white/10 bg-slate-950/90 p-2 shadow-2xl shadow-cyan-950/20 lg:order-2"
-                      : "relative overflow-hidden rounded-3xl border border-white/10 bg-slate-950/90 p-2 shadow-2xl shadow-cyan-950/20"
-                  }
-                >
-                  <HomeAutoplayVideo
-                    src={highlight.videoSrc}
-                    label={highlight.videoLabel}
-                  />
-                </div>
-
-                <HomePerspectiveReveal
-                  direction={highlight.reverse ? "right" : "left"}
-                  className={highlight.reverse ? "lg:order-1" : undefined}
-                >
-                  <HomeBlurFadeReveal
-                    delay={0.12}
-                    direction={highlight.reverse ? "right" : "left"}
-                  >
-                    <p className="font-mono text-xs font-semibold uppercase tracking-[0.24em] text-primary">
-                      {highlight.eyebrow}
-                    </p>
-                    <h2 className="mt-3 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                      {highlight.title}
-                    </h2>
-                    <p className="mt-4 text-base leading-7 text-muted sm:text-lg">
-                      {highlight.description}
-                    </p>
-                    <p className="mt-5 inline-flex rounded-full border border-primary/20 bg-primary/10 px-4 py-2 text-sm font-semibold text-primary">
-                      {highlight.metric}
-                    </p>
-                  </HomeBlurFadeReveal>
-                </HomePerspectiveReveal>
-              </section>
-            ))}
-          </div>
-        </section>
 
         <SoundprintBrandDividerSection
           logoSize="lg"
@@ -531,87 +398,10 @@ export default function Home() {
           className="py-8 sm:py-12"
         />
 
-        <section className="mx-auto w-full max-w-7xl px-4 pb-28 sm:px-6 sm:pb-24 md:pb-24 lg:px-8">
-          <HomeBlurFadeReveal>
-          <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950 px-5 py-8 shadow-2xl shadow-black/20 sm:px-8 sm:py-12 lg:px-10 lg:py-14">
-            <div
-              className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_20%,rgba(240,64,104,0.24),transparent_34%),radial-gradient(circle_at_86%_22%,rgba(79,144,224,0.24),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.08),transparent_42%)]"
-              aria-hidden
-            />
-            <div
-              className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent"
-              aria-hidden
-            />
-            <div
-              className="pointer-events-none absolute -bottom-24 -right-16 h-64 w-64 rounded-full bg-accent-violet/25 blur-3xl"
-              aria-hidden
-            />
-
-            <div className="relative grid gap-8 lg:grid-cols-[1.08fr_0.92fr] lg:items-center">
-              <div className="text-center lg:text-left">
-                <HomeBlurFadeReveal>
-                  <SoundprintLogo
-                    src="/brand/favicon.png"
-                    showText={false}
-                    className="mx-auto mb-5 lg:mx-0"
-                    imageClassName="h-16 w-16 object-contain"
-                  />
-                </HomeBlurFadeReveal>
-                <HomeBlurFadeReveal delay={0.06}>
-                  <p className="font-mono text-xs font-semibold uppercase tracking-[0.28em] text-cyan-200">
-                    {t("closingCta.eyebrow")}
-                  </p>
-                </HomeBlurFadeReveal>
-                <HomeTextReveal
-                  as="h2"
-                  onScroll
-                  className="mt-4 block max-w-3xl text-2xl font-semibold tracking-[-0.04em] text-white sm:text-5xl"
-                  text={t("closingCta.title")}
-                  stagger={0.045}
-                />
-                <HomeBlurFadeReveal delay={0.12} className="mt-4 max-w-2xl">
-                  <p className="text-base leading-7 text-slate-300">
-                    {t("closingCta.subtitle")}
-                  </p>
-                </HomeBlurFadeReveal>
-                <HomeBlurFadeReveal delay={0.2} className="mt-8 flex flex-col justify-center gap-3 sm:flex-row lg:justify-start">
-                  <Link
-                    href={isAuthenticated ? "/dashboard" : "/sign-up"}
-                    className="hidden min-h-12 items-center justify-center gap-2 rounded-2xl bg-white px-7 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-white/10 transition-all hover:-translate-y-0.5 hover:bg-slate-100 md:inline-flex"
-                  >
-                    {isAuthenticated ? t("goToDashboard") : t("heroPrimaryCta")}
-                    <ArrowRightIcon />
-                  </Link>
-                  {publicDemoPath ? (
-                    <Link
-                      href={publicDemoPath}
-                      className="group inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-white/25 bg-white px-6 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-white/10 transition-all hover:-translate-y-0.5 hover:bg-slate-100 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-white/70 focus:ring-offset-2 focus:ring-offset-slate-950 md:w-auto md:bg-white/10 md:text-white md:shadow-none md:hover:bg-white/15 md:hover:text-white md:active:scale-100"
-                    >
-                      {t("accessDashboard")}
-                      <ArrowRightIcon className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                    </Link>
-                  ) : null}
-                </HomeBlurFadeReveal>
-              </div>
-
-              <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-                {closingHighlights.map((highlight, index) => (
-                  <HomeBlurFadeReveal key={highlight.label} delay={0.08 * index}>
-                    <div className="rounded-3xl border border-white/10 bg-white/[0.07] p-5 text-left shadow-2xl shadow-black/10 backdrop-blur">
-                      <p className="font-mono text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-cyan-200">
-                        {highlight.label}
-                      </p>
-                      <p className="mt-3 text-xl font-semibold tracking-[-0.03em] text-white">
-                        {highlight.value}
-                      </p>
-                    </div>
-                  </HomeBlurFadeReveal>
-                ))}
-              </div>
-            </div>
-          </div>
-          </HomeBlurFadeReveal>
-        </section>
+        <HomeClosingSection
+          isAuthenticated={isAuthenticated}
+          publicDemoPath={publicDemoPath}
+        />
         </div>
       </main>
       <HomeMobileStickyCta isAuthenticated={isAuthenticated} />

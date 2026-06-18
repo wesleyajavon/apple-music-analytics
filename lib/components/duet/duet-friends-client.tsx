@@ -19,6 +19,7 @@ import {
   UserMinus,
   X,
 } from "lucide-react";
+import { LiveStatusDot } from "@/lib/components/live-status-dot";
 import { UserAvatar } from "@/lib/components/user-avatar";
 import { EmptyState } from "@/lib/components/empty-state";
 import { ErrorState } from "@/lib/components/error-state";
@@ -41,11 +42,8 @@ import {
   DASHBOARD_SPOTLIGHT_MUTED,
   DASHBOARD_SPOTLIGHT_BTN_SECONDARY,
   DASHBOARD_SPOTLIGHT_BADGE_VIOLET,
-  DASHBOARD_SPOTLIGHT_BADGE_DOT_VIOLET,
   DASHBOARD_SPOTLIGHT_BADGE_LIME,
-  DASHBOARD_SPOTLIGHT_BADGE_DOT_LIME,
   DASHBOARD_SPOTLIGHT_BADGE_CYAN_COMPACT,
-  DASHBOARD_SPOTLIGHT_BADGE_DOT_CYAN,
   DASHBOARD_SPOTLIGHT_FOOTER,
   DASHBOARD_SPOTLIGHT_FOOTER_TEXT,
   DASHBOARD_SPOTLIGHT_SELECT,
@@ -84,12 +82,8 @@ function SpotlightSectionHeader({
       : badgeVariant === "cyan"
         ? DASHBOARD_SPOTLIGHT_BADGE_CYAN_COMPACT
         : DASHBOARD_SPOTLIGHT_BADGE_VIOLET;
-  const dotClass =
-    badgeVariant === "lime"
-      ? DASHBOARD_SPOTLIGHT_BADGE_DOT_LIME
-      : badgeVariant === "cyan"
-        ? DASHBOARD_SPOTLIGHT_BADGE_DOT_CYAN
-        : DASHBOARD_SPOTLIGHT_BADGE_DOT_VIOLET;
+  const dotTone =
+    badgeVariant === "lime" ? "emerald" : badgeVariant === "cyan" ? "cyan" : "violet";
 
   return (
     <div className={`relative px-5 pb-5 pt-6 sm:px-8 ${DASHBOARD_SPOTLIGHT_HEADER_BOTTOM}`}>
@@ -102,7 +96,7 @@ function SpotlightSectionHeader({
           ) : null}
         </div>
         <span className={badgeClass}>
-          <span className={dotClass} aria-hidden />
+          <LiveStatusDot tone={dotTone} />
           {badge}
         </span>
       </div>

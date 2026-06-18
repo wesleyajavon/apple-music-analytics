@@ -5,6 +5,8 @@ type SoundprintBrandDividerProps = {
   tone?: "default" | "onDark";
   lineStyle?: "solid" | "gradient" | "fade";
   maxWidth?: "full" | "medium" | "narrow";
+  /** Horizontal alignment of the logo and line segments. */
+  align?: "center" | "start";
   showLogo?: boolean;
   className?: string;
   logoSize?: "sm" | "md" | "lg" | "xl" | "2xl";
@@ -37,9 +39,9 @@ const LOGO_SIZE = {
 } as const;
 
 const MAX_WIDTH = {
-  full: "",
-  medium: "mx-auto max-w-4xl",
-  narrow: "mx-auto max-w-2xl",
+  full: { center: "", start: "" },
+  medium: { center: "mx-auto max-w-4xl", start: "max-w-4xl" },
+  narrow: { center: "mx-auto max-w-2xl", start: "max-w-2xl" },
 } as const;
 
 const GAP = {
@@ -59,12 +61,13 @@ export function SoundprintBrandDivider({
   tone = "default",
   lineStyle = "solid",
   maxWidth = "full",
+  align = "center",
   showLogo = true,
   className = "",
   logoSize = "md",
 }: SoundprintBrandDividerProps) {
   const lineClass = LINE_STYLE[lineStyle][tone];
-  const widthClass = MAX_WIDTH[maxWidth];
+  const widthClass = MAX_WIDTH[maxWidth][align];
   const gapClass = GAP[logoSize];
 
   const logo = showLogo ? (
@@ -91,9 +94,18 @@ export function SoundprintBrandDivider({
       className={`flex items-center ${gapClass} ${widthClass} ${className}`}
       aria-hidden
     >
-      <div className={`h-px flex-1 ${lineClass}`} />
-      {logo}
-      <div className={`h-px flex-1 ${lineClass}`} />
+      {align === "start" ? (
+        <>
+          {logo}
+          <div className={`h-px flex-1 ${lineClass}`} />
+        </>
+      ) : (
+        <>
+          <div className={`h-px flex-1 ${lineClass}`} />
+          {logo}
+          <div className={`h-px flex-1 ${lineClass}`} />
+        </>
+      )}
     </div>
   );
 }

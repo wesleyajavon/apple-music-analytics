@@ -25,12 +25,12 @@ describe("music-chat-top-tracks-direct-answer", () => {
         },
       ],
     });
-    expect(answer).toContain("- Alpha — Artist A (10 listens)");
-    expect(answer).toContain("- Beta — Artist B (2 listens)");
-    expect(answer).toContain("Your most-played tracks");
+    expect(answer).toContain("- Alpha — Artist A (10 streams)");
+    expect(answer).toContain("- Beta — Artist B (2 streams)");
+    expect(answer).toContain("Your most-streamed tracks");
     expect(answer).toContain("Jan 1, 2026");
     expect(answer).toContain("Dec 31, 2026");
-    expect(answer).toContain("first play in this ranking was on");
+    expect(answer).toContain("first stream in this ranking was on");
     expect(answer).toContain("Jan 2, 2026");
     expect(answer).toContain("Jun 15, 2026");
     expect(answer).toContain("imported");
@@ -49,7 +49,7 @@ describe("music-chat-top-tracks-direct-answer", () => {
         },
       ],
     });
-    expect(answer).toContain("(1 écoute)");
+    expect(answer).toContain("(1 stream)");
   });
 
   it("handles empty FR tracks", () => {
@@ -57,7 +57,7 @@ describe("music-chat-top-tracks-direct-answer", () => {
       period: { startDate: "2020-01-01", endDate: "2020-12-31" },
       tracks: [],
     });
-    expect(answer).toContain("Aucune écoute");
+    expect(answer).toContain("Aucun stream");
     expect(answer).toContain("importé");
   });
 

@@ -41,7 +41,7 @@ export function HomeDemoHighlights() {
 
   return (
     <div id="demo" className="mx-auto w-full max-w-7xl scroll-mt-28 px-4 sm:px-6 lg:px-8">
-      <div className="mb-8 hidden text-center md:block">
+      <div className="mb-8 hidden md:block">
         <HomeBlurFadeReveal>
           <p className="font-mono text-xs font-semibold uppercase tracking-[0.28em] text-primary">
             {t("demoHighlightsSection.eyebrow")}
@@ -50,7 +50,7 @@ export function HomeDemoHighlights() {
         <HomeTextReveal
           as="h3"
           onScroll
-          className="mx-auto mt-3 block max-w-3xl text-2xl font-semibold tracking-[-0.04em] text-foreground sm:text-4xl"
+          className="mt-3 block max-w-3xl text-2xl font-semibold tracking-[-0.04em] text-foreground sm:text-4xl"
           text={t("demoHighlightsSection.title")}
           stagger={0.05}
         />

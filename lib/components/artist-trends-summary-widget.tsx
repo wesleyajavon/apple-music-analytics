@@ -255,15 +255,18 @@ export function ArtistTrendsSummaryWidget({
                   {t("chartHint")} {tOverview("artistTrends.seeMoreHint")}
                 </p>
               </div>
-              <Link
-                href={`/dashboard/artists/trends${trendsQuery}`}
-                className="inline-flex shrink-0 items-center justify-center gap-1.5 self-start rounded-2xl border border-card-border bg-white/70 px-4 py-2.5 text-sm font-semibold text-accent-violet shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow-card dark:border-white/[0.10] dark:bg-[#161822] dark:text-violet-100 dark:hover:bg-[#1c2030]"
-              >
-                {tOverview("seeMore")}
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
+              <div className="flex flex-col items-start gap-3 lg:items-end">
+                <ListenTrendChartViewToggle value={chartView} onChange={setChartView} />
+                <Link
+                  href={`/dashboard/artists/trends${trendsQuery}`}
+                  className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-2xl border border-card-border bg-white/70 px-4 py-2.5 text-sm font-semibold text-accent-violet shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow-card dark:border-white/[0.10] dark:bg-[#161822] dark:text-violet-100 dark:hover:bg-[#1c2030]"
+                >
+                  {tOverview("seeMore")}
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </Link>
+              </div>
             </div>
           </div>
 
@@ -317,9 +320,6 @@ export function ArtistTrendsSummaryWidget({
               </p>
             ) : (
               <div className="relative rounded-3xl border border-white/70 bg-white/60 p-3 shadow-inner backdrop-blur dark:border-white/[0.06] dark:bg-[#080913]">
-                <div className="mb-3 flex flex-wrap items-center justify-end gap-3">
-                  <ListenTrendChartViewToggle value={chartView} onChange={setChartView} />
-                </div>
                 <div className="pointer-events-none absolute left-1/2 top-8 h-56 w-56 -translate-x-1/2 rounded-full bg-accent-cyan/10 blur-3xl dark:bg-accent-cyan/15" />
                 <ChartResponsiveContainer token="trendsLine" minWidth={trendsMinWidth}>
                     <LineChart

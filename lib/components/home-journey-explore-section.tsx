@@ -28,7 +28,7 @@ export function HomeJourneyExploreSection({ publicDemoPath }: HomeJourneyExplore
       className={`relative ${HOME_JOURNEY_SECTION_SCROLL_MT} pb-12 sm:pb-20`}
     >
       <div className="relative mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-8 text-center md:mb-12">
+        <div className="mb-8 md:mb-12">
           <HomeBlurFadeReveal>
             <p className="font-mono text-xs font-semibold uppercase tracking-[0.28em] text-primary">
               {t("eyebrow")}
@@ -37,11 +37,11 @@ export function HomeJourneyExploreSection({ publicDemoPath }: HomeJourneyExplore
           <HomeTextReveal
             as="h2"
             onScroll
-            className="mx-auto mt-3 block max-w-3xl text-2xl font-semibold tracking-[-0.04em] text-foreground sm:text-5xl"
+            className="mt-3 block max-w-3xl text-2xl font-semibold tracking-[-0.04em] text-foreground sm:text-5xl"
             text={t("title")}
             stagger={0.05}
           />
-          <HomeBlurFadeReveal delay={0.1} className="mx-auto mt-4 max-w-2xl">
+          <HomeBlurFadeReveal delay={0.1} className="mt-4 max-w-2xl">
             <p className="text-base leading-7 text-muted sm:text-lg">{t("description")}</p>
           </HomeBlurFadeReveal>
         </div>
@@ -53,15 +53,17 @@ export function HomeJourneyExploreSection({ publicDemoPath }: HomeJourneyExplore
         <HomeDemoHighlights />
 
         {publicDemoPath ? (
-          <HomeBlurFadeReveal className="flex justify-center px-4 sm:px-6">
-            <Link
-              href={publicDemoPath}
-              className="inline-flex min-h-12 w-full max-w-md items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-7 py-3 text-sm font-semibold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:opacity-95 sm:w-auto"
-            >
-              {t("cta")}
-              <ArrowRightIcon />
-            </Link>
-          </HomeBlurFadeReveal>
+          <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+            <HomeBlurFadeReveal>
+              <Link
+                href={publicDemoPath}
+                className="inline-flex min-h-12 w-full max-w-md items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-7 py-3 text-sm font-semibold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:opacity-95 sm:w-auto"
+              >
+                {t("cta")}
+                <ArrowRightIcon />
+              </Link>
+            </HomeBlurFadeReveal>
+          </div>
         ) : null}
       </div>
     </section>

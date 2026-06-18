@@ -508,7 +508,7 @@ export function HomeDashboardPreviewsSection({ embedded = false }: { embedded?: 
     <section id="explore" className={`relative ${HOME_JOURNEY_SECTION_SCROLL_MT} pb-10 sm:pb-20`}>
       <HomeDashboardPreviewsParallax>
         <div className="relative mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-8 text-center md:mb-12">
+          <div className="mb-8 md:mb-12">
             <HomeBlurFadeReveal>
               <p className="font-mono text-xs font-semibold uppercase tracking-[0.28em] text-primary">
                 {t("eyebrow")}
@@ -517,11 +517,11 @@ export function HomeDashboardPreviewsSection({ embedded = false }: { embedded?: 
             <HomeTextReveal
               as="h2"
               onScroll
-              className="mx-auto mt-3 block max-w-3xl text-2xl font-semibold tracking-[-0.04em] text-foreground sm:text-5xl"
+              className="mt-3 block max-w-3xl text-2xl font-semibold tracking-[-0.04em] text-foreground sm:text-5xl"
               text={t("title")}
               stagger={0.05}
             />
-            <HomeBlurFadeReveal delay={0.1} className="mx-auto mt-4 max-w-2xl">
+            <HomeBlurFadeReveal delay={0.1} className="mt-4 max-w-2xl">
               <p className="text-base leading-7 text-muted sm:text-lg">
                 {t("subtitle")}
               </p>

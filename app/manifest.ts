@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "Soundprint-AI",
     short_name: "Soundprint",
     description:
-      "Personal dashboard to analyze your Apple Music and Spotify listening habits.",
+      "Personal dashboard to analyze your Apple Music and Spotify streaming habits.",
     start_url: "/en/dashboard/overview",
     scope: "/",
     display: "standalone",

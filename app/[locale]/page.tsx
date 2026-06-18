@@ -144,7 +144,7 @@ export default function Home() {
   }, [firstName, t]);
 
   return (
-    <div className="flex min-h-screen flex-col bg-background text-foreground">
+    <div className="flex min-h-screen flex-col overflow-x-hidden bg-background text-foreground">
       <main className="relative flex flex-1 flex-col bg-app-shell">
         <header
           className="sticky top-0 z-30 border-b border-card-border bg-surface-glass backdrop-blur-xl"
@@ -220,8 +220,8 @@ export default function Home() {
           aria-hidden
         />
 
-        <section className="relative mx-auto grid w-full max-w-7xl items-center gap-10 px-4 pb-16 pt-10 sm:gap-12 sm:px-6 sm:pb-20 sm:pt-14 lg:grid-cols-[0.95fr_1.05fr] lg:gap-14 lg:px-8 lg:pb-28 lg:pt-20">
-          <div className="relative z-10 text-left">
+        <section className="relative mx-auto grid w-full min-w-0 max-w-7xl items-center gap-10 px-4 pb-16 pt-10 sm:gap-12 sm:px-6 sm:pb-20 sm:pt-14 lg:grid-cols-[0.95fr_1.05fr] lg:gap-14 lg:px-8 lg:pb-28 lg:pt-20">
+          <div className="relative z-10 min-w-0 w-full text-left">
             <HomeBlurFadeReveal delay={0} immediate>
             {isAuthenticated ? (
               <Link
@@ -253,7 +253,7 @@ export default function Home() {
             ) : publicDemoPath ? (
               <Link
                 href={publicDemoPath}
-                className="group mb-6 inline-flex items-center gap-2.5 rounded-full border border-card-border bg-card-surface px-3 py-1.5 text-sm font-semibold text-primary shadow-card backdrop-blur transition-all hover:-translate-y-0.5 hover:shadow-card-hover"
+                className="group mb-6 inline-flex max-w-full flex-wrap items-center gap-2.5 rounded-full border border-card-border bg-card-surface px-3 py-1.5 text-sm font-semibold text-primary shadow-card backdrop-blur transition-all hover:-translate-y-0.5 hover:shadow-card-hover"
               >
                 <span
                   className="relative inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 ring-1 ring-emerald-400/35"
@@ -278,7 +278,7 @@ export default function Home() {
 
             <HomeTextRevealLines
               as="h1"
-              className="max-w-4xl overflow-visible text-balance text-[2.35rem] font-semibold leading-[1.15] tracking-[-0.05em] text-foreground sm:text-6xl sm:leading-snug sm:tracking-[-0.06em] lg:text-7xl lg:leading-[1.12]"
+              className="w-full min-w-0 max-w-4xl text-balance text-[2.15rem] font-semibold leading-[1.15] tracking-[-0.05em] text-foreground min-[400px]:text-[2.35rem] sm:text-6xl sm:leading-snug sm:tracking-[-0.06em] lg:text-7xl lg:leading-[1.12]"
               lines={[
                 <span key="welcome">{welcomeMessage}</span>,
                 ...(!firstName
@@ -294,21 +294,21 @@ export default function Home() {
               ]}
             />
 
-            <HomeBlurFadeReveal delay={0.2} className="mt-5 max-w-2xl">
+            <HomeBlurFadeReveal delay={0.2} className="mt-5 w-full min-w-0 max-w-2xl">
               <p className="text-base leading-7 text-muted sm:text-xl sm:leading-8">
                 {t("journey.pitch")}
               </p>
             </HomeBlurFadeReveal>
 
-            <HomeBlurFadeReveal delay={0.28} className="mt-6">
+            <HomeBlurFadeReveal delay={0.28} className="mt-6 w-full min-w-0">
               <HomeJourneySteps />
             </HomeBlurFadeReveal>
 
-            <HomeClipReveal className="mt-8 lg:hidden" delay={0.32} immediate>
+            <HomeClipReveal className="mt-8 min-w-0 w-full lg:hidden" delay={0.32} immediate>
               <HomeHeroDashboardPreview compact />
             </HomeClipReveal>
 
-            <HomeBlurFadeReveal delay={0.4} className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <HomeBlurFadeReveal delay={0.4} className="mt-8 flex w-full min-w-0 flex-col gap-3 sm:flex-row sm:flex-wrap">
               {isAuthenticated ? (
                 <Link
                   href="/dashboard"
@@ -337,12 +337,12 @@ export default function Home() {
               ) : null}
             </HomeBlurFadeReveal>
 
-            <HomeBlurFadeReveal delay={0.48} className="mt-6">
+            <HomeBlurFadeReveal delay={0.48} className="mt-6 w-full min-w-0">
               <ul className="flex flex-wrap gap-2" aria-label={t("heroProof.ariaLabel")}>
                 {(["private", "demoFirst", "appleSpotify"] as const).map((key) => (
                   <li
                     key={key}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-card-border bg-card-surface/70 px-3 py-1.5 text-xs font-medium text-muted backdrop-blur-sm"
+                    className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-card-border bg-card-surface/70 px-3 py-1.5 text-xs font-medium text-muted backdrop-blur-sm"
                   >
                     <span
                       className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent-emerald shadow-[0_0_8px_rgb(22_199_132_/0.6)]"
@@ -361,6 +361,7 @@ export default function Home() {
         </section>
 
         <SoundprintBrandDividerSection
+          align="start"
           logoSize="lg"
           lineStyle="fade"
           maxWidth="medium"
@@ -382,6 +383,7 @@ export default function Home() {
         <HomeJourneyExploreSection publicDemoPath={publicDemoPath} />
 
         <SoundprintBrandDividerSection
+          align="start"
           logoSize="xl"
           className="py-6 sm:py-10"
         />
@@ -392,6 +394,7 @@ export default function Home() {
         />
 
         <SoundprintBrandDividerSection
+          align="start"
           logoSize="lg"
           lineStyle="fade"
           maxWidth="medium"

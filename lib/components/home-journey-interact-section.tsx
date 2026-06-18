@@ -51,7 +51,7 @@ export function HomeJourneyInteractSection({
       id="interact"
       className={`mx-auto w-full max-w-7xl ${HOME_JOURNEY_SECTION_SCROLL_MT} px-4 pb-12 sm:px-6 sm:pb-20 lg:px-8`}
     >
-      <div className="mb-10 text-center lg:mb-12">
+      <div className="mb-10 lg:mb-12">
         <HomeBlurFadeReveal>
           <p className="font-mono text-xs font-semibold uppercase tracking-[0.28em] text-primary">
             {t("eyebrow")}
@@ -60,11 +60,11 @@ export function HomeJourneyInteractSection({
         <HomeTextReveal
           as="h2"
           onScroll
-          className="mx-auto mt-3 block max-w-4xl text-2xl font-semibold tracking-[-0.04em] text-foreground sm:text-5xl"
+          className="mt-3 block max-w-4xl text-2xl font-semibold tracking-[-0.04em] text-foreground sm:text-5xl"
           text={t("title")}
           stagger={0.05}
         />
-        <HomeBlurFadeReveal delay={0.1} className="mx-auto mt-4 max-w-2xl">
+        <HomeBlurFadeReveal delay={0.1} className="mt-4 max-w-2xl">
           <p className="text-base leading-7 text-muted sm:text-lg">{t("description")}</p>
         </HomeBlurFadeReveal>
       </div>
@@ -72,7 +72,7 @@ export function HomeJourneyInteractSection({
       <div className="space-y-14 sm:space-y-16">
         <div id="soundprint-ai-chat" className="scroll-mt-28">
           <HomeBlurFadeReveal>
-            <p className="mb-6 text-center font-mono text-xs font-semibold uppercase tracking-[0.24em] text-primary">
+            <p className="mb-6 font-mono text-xs font-semibold uppercase tracking-[0.24em] text-primary">
               {tHome("soundprintAiChatDemo.sectionEyebrow")}
             </p>
           </HomeBlurFadeReveal>
@@ -85,13 +85,13 @@ export function HomeJourneyInteractSection({
             badge={tHome("soundprintAiChatDemo.heroBadge")}
             features={soundprintAiChatFeatures}
             showFeaturesOnMobile={false}
-            className="mx-auto max-w-6xl"
+            className="w-full max-w-6xl"
           />
         </div>
 
         <div id="duet" className="scroll-mt-28">
           <HomeBlurFadeReveal>
-            <p className="mb-6 text-center font-mono text-xs font-semibold uppercase tracking-[0.24em] text-primary">
+            <p className="mb-6 font-mono text-xs font-semibold uppercase tracking-[0.24em] text-primary">
               {tHome("duetPreview.sectionEyebrow")}
             </p>
           </HomeBlurFadeReveal>
@@ -101,7 +101,7 @@ export function HomeJourneyInteractSection({
           </HomeClipReveal>
         </div>
 
-        <HomeBlurFadeReveal delay={0.12} className="flex flex-col justify-center gap-3 sm:flex-row sm:flex-wrap">
+        <HomeBlurFadeReveal delay={0.12} className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <Link
             href={chatHref}
             className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-7 py-3 text-sm font-semibold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:opacity-95 sm:w-auto sm:min-w-[12rem]"

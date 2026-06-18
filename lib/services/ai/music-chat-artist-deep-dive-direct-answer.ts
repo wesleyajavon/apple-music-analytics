@@ -149,14 +149,14 @@ function copy(locale: AiLocale): DeepDiveCopy {
     case "fr":
       return {
         notFound: (name) =>
-          `Je n’ai trouvé aucune écoute pour « ${name} » dans ton historique importé pour cette requête (et le filtre de dates du tableau de bord s’applique s’il est actif). Essaie un autre nom ou vérifie tes imports.`,
+          `Je n’ai trouvé aucun stream pour « ${name} » dans ton historique importé pour cette requête (et le filtre de dates du tableau de bord s’applique s’il est actif). Essaie un autre nom ou vérifie tes imports.`,
         intro: (name) =>
-          `Voici ton historique d’écoute pour ${name}, d’après les données importées.`,
+          `Voici ton historique de streams pour ${name}, d’après les données importées.`,
         totals: (listens, tracks) =>
-          `- ${listens} ${listens === 1 ? "écoute au total" : "écoutes au total"}, ${tracks} ${tracks === 1 ? "titre différent" : "titres différents"}`,
-        topTracksHeader: `Titres les plus écoutés :`,
+          `- ${listens} ${listens === 1 ? "stream au total" : "streams au total"}, ${tracks} ${tracks === 1 ? "titre différent" : "titres différents"}`,
+        topTracksHeader: `Titres les plus streamés :`,
         listens: (n) =>
-          `${n} ${n === 1 ? "écoute" : "écoutes"}`,
+          `${n} ${n === 1 ? "stream" : "streams"}`,
         trackLine: (title, listensPhrase, genre) =>
           genre
             ? `- ${title} (${genre}) (${listensPhrase})`
@@ -165,23 +165,23 @@ function copy(locale: AiLocale): DeepDiveCopy {
         yearLine: (y, listens, uniq) =>
           `- ${y} : ${listens}, ${uniq}`,
         span: (a, b) =>
-          `Toute période confondue pour cet artiste : première écoute le ${a}, plus récente le ${b}.`,
+          `Toute période confondue pour cet artiste : premier stream le ${a}, plus récent le ${b}.`,
         caveat:
-          "Les totaux reposent uniquement sur l’historique d’écoute que tu as importé.",
+          "Les totaux reposent uniquement sur l’historique de streams que tu as importé.",
         uniqTracksWord: (n) =>
           `${n} ${n === 1 ? "titre différent" : "titres différents"}`,
       };
     case "es":
       return {
         notFound: (name) =>
-          `No encontré reproducciones de « ${name} » en tu historial importado para esta consulta (y se aplica el filtro de fechas del panel si está activo). Prueba otro nombre o revisa tus importaciones.`,
+          `No encontré streams de « ${name} » en tu historial importado para esta consulta (y se aplica el filtro de fechas del panel si está activo). Prueba otro nombre o revisa tus importaciones.`,
         intro: (name) =>
-          `Aquí va tu historial con ${name}, según los datos importados.`,
+          `Aquí va tu historial de streams con ${name}, según los datos importados.`,
         totals: (listens, tracks) =>
-          `- ${listens} ${listens === 1 ? "reproducción en total" : "reproducciones en total"}, ${tracks} ${tracks === 1 ? "pista distinta" : "pistas distintas"}`,
-        topTracksHeader: `Canciones más reproducidas:`,
+          `- ${listens} ${listens === 1 ? "stream en total" : "streams en total"}, ${tracks} ${tracks === 1 ? "pista distinta" : "pistas distintas"}`,
+        topTracksHeader: `Canciones más streameadas:`,
         listens: (n) =>
-          `${n} ${n === 1 ? "reproducción" : "reproducciones"}`,
+          `${n} ${n === 1 ? "stream" : "streams"}`,
         trackLine: (title, listensPhrase, genre) =>
           genre
             ? `- ${title} (${genre}) (${listensPhrase})`
@@ -190,9 +190,9 @@ function copy(locale: AiLocale): DeepDiveCopy {
         yearLine: (y, listens, uniq) =>
           `- ${y}: ${listens}, ${uniq}`,
         span: (a, b) =>
-          `En conjunto para este artista: primera reproducción el ${a}, la más reciente el ${b}.`,
+          `En conjunto para este artista: primer stream el ${a}, el más reciente el ${b}.`,
         caveat:
-          "Los totales se basan solo en el historial de escucha que has importado.",
+          "Los totales se basan solo en el historial de streams que has importado.",
         uniqTracksWord: (n) =>
           `${n} ${n === 1 ? "pista distinta" : "pistas distintas"}`,
       };
@@ -200,23 +200,23 @@ function copy(locale: AiLocale): DeepDiveCopy {
     default:
       return {
         notFound: (name) =>
-          `I couldn’t find any plays for “${name}” in your imported history for this request (and your dashboard date filter applies when it’s active). Try another spelling or check your imports.`,
+          `I couldn’t find any streams for “${name}” in your imported history for this request (and your dashboard date filter applies when it’s active). Try another spelling or check your imports.`,
         intro: (name) =>
-          `Here’s your listening history for ${name}, based on the data you imported.`,
+          `Here’s your streaming history for ${name}, based on the data you imported.`,
         totals: (listens, tracks) =>
-          `- ${listens} total ${listens === 1 ? "listen" : "listens"}, ${tracks} unique ${tracks === 1 ? "track" : "tracks"}`,
-        topTracksHeader: `Most-played tracks:`,
-        listens: (n) => `${n} ${n === 1 ? "listen" : "listens"}`,
+          `- ${listens} total ${listens === 1 ? "stream" : "streams"}, ${tracks} unique ${tracks === 1 ? "track" : "tracks"}`,
+        topTracksHeader: `Most-streamed tracks:`,
+        listens: (n) => `${n} ${n === 1 ? "stream" : "streams"}`,
         trackLine: (title, listensPhrase, genre) =>
           genre
             ? `- ${title} (${genre}) (${listensPhrase})`
             : `- ${title} (${listensPhrase})`,
-        yearsHeader: `Listens by year:`,
+        yearsHeader: `Streams by year:`,
         yearLine: (y, listens, uniq) =>
           `- ${y}: ${listens}, ${uniq}`,
         span: (a, b) =>
-          `Overall for this artist, your first play was on ${a} and your most recent on ${b}.`,
-        caveat: "Counts are based only on listening history you have imported.",
+          `Overall for this artist, your first stream was on ${a} and your most recent on ${b}.`,
+        caveat: "Counts are based only on streaming history you have imported.",
         uniqTracksWord: (n) =>
           `${n} unique ${n === 1 ? "track" : "tracks"}`,
       };

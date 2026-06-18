@@ -35,7 +35,7 @@ export function HomeJourneySteps({ className }: HomeJourneyStepsProps) {
   return (
     <nav
       aria-label={t("stepsListAriaLabel")}
-      className={["w-full max-w-2xl", className].filter(Boolean).join(" ")}
+      className={["w-full min-w-0 max-w-2xl", className].filter(Boolean).join(" ")}
     >
       <ol className="grid gap-2.5 sm:grid-cols-3 sm:gap-3">
         {HOME_JOURNEY_NAV_ITEMS.map((item, index) => {

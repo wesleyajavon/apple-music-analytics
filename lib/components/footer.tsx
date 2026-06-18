@@ -50,7 +50,8 @@ export function Footer({ variant = "dashboard" }: { variant?: FooterVariant }) {
       `}
       role="contentinfo"
     >
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div className="mx-auto w-full max-w-7xl">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <nav
           className="flex flex-wrap items-center gap-x-5 gap-y-1"
           aria-label={t("navAriaLabel")}
@@ -72,6 +73,7 @@ export function Footer({ variant = "dashboard" }: { variant?: FooterVariant }) {
           <p className="text-xs text-muted">
             {t("creatorCredit")}
           </p>
+        </div>
         </div>
       </div>
     </footer>

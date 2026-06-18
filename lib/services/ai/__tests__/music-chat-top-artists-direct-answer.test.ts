@@ -25,10 +25,10 @@ describe("music-chat-top-artists-direct-answer", () => {
         },
       ],
     });
-    expect(answer).toContain("- A (5 listens, 2 unique tracks)");
-    expect(answer).toContain("- B (3 listens, 1 unique track)");
+    expect(answer).toContain("- A (5 streams, 2 unique tracks)");
+    expect(answer).toContain("- B (3 streams, 1 unique track)");
     expect(answer).toContain("Your top artists");
-    expect(answer).toContain("first listen");
+    expect(answer).toContain("first stream");
     expect(answer).toContain("Jan 5, 2026");
     expect(answer).toContain("Jun 1, 2026");
   });
@@ -38,7 +38,7 @@ describe("music-chat-top-artists-direct-answer", () => {
       period: { startDate: "2020-01-01", endDate: "2020-12-31" },
       artists: [],
     });
-    expect(answer).toContain("No hay reproducciones");
+    expect(answer).toContain("No hay streams");
   });
 
   it("isTopArtistsPeriodToolResult narrows payloads", () => {

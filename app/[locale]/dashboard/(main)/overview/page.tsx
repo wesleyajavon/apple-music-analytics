@@ -5,15 +5,6 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
-import {
-  Area,
-  AreaChart,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-} from "recharts";
-import { ChartResponsiveContainer } from "@/lib/components/chart-responsive-container";
 import { useOverviewStats, useTimeline, useGenres } from "@/lib/hooks/use-listening";
 import type { OverviewStatsWithTopArtists } from "@/lib/hooks/use-listening";
 import { useTrackStats } from "@/lib/hooks/use-tracks";
@@ -29,14 +20,8 @@ import {
   type OverviewMomentumSlide,
 } from "@/lib/components/overview-momentum-carousel";
 import { OverviewListeningMomentumCard } from "@/lib/components/overview-listening-momentum-card";
-import { ListenTrendChartViewToggle } from "@/lib/components/charts/listen-trend-chart-view-toggle";
-import {
-  applyListenTrendChartViewSingle,
-  type ListenTrendChartViewMode,
-} from "@/lib/utils/listen-trend-chart-view";
 import type { ArtistStatsDto } from "@/lib/dto/artist";
 import { ArtistUserInsightsPanel } from "@/lib/components/artist-user-insights-panel";
-import { CHART_TOOLTIP_STYLES } from "@/lib/constants/config";
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
 import {
@@ -54,7 +39,6 @@ import { UserAvatarPhoto } from "@/lib/components/user-avatar";
 import { SoundprintBrandDividerSection } from "@/lib/components/soundprint-brand-divider";
 import { SoundprintBrandMark } from "@/lib/components/soundprint-brand-mark";
 import {
-  DASHBOARD_BTN_LINK,
   DASHBOARD_CINEMATIC_HERO_SHELL,
   DashboardCinematicHeroBg,
 } from "@/lib/components/dashboard-ui";
@@ -277,11 +261,6 @@ type MobileLeaderItem = LibraryLeaderItem & {
   href?: string;
 };
 
-type MobileChartPoint = {
-  formattedDate: string;
-  listens: number;
-};
-
 function formatListeningTime(totalSeconds: number, notAvailable: string) {
   if (totalSeconds <= 0) return notAvailable;
   const hours = Math.floor(totalSeconds / 3600);
@@ -433,136 +412,17 @@ function MobileDisclosure({
   );
 }
 
-function MobileTimelineCard({
-  chartData,
-  timelineHref,
-  locale,
-}: {
-  chartData: MobileChartPoint[];
-  timelineHref: string;
-  locale: string;
-}) {
-  const t = useTranslations("overview");
-  const [chartView, setChartView] = useState<ListenTrendChartViewMode>("period");
-  const totalListens = chartData.reduce((sum, point) => sum + point.listens, 0);
-  const peakPoint = chartData.reduce<MobileChartPoint | null>(
-    (peak, point) => (!peak || point.listens > peak.listens ? point : peak),
-    null
-  );
-  const displayChartData = useMemo(
-    () => applyListenTrendChartViewSingle(chartData, chartView, "listens"),
-    [chartData, chartView]
-  );
-
-  if (chartData.length === 0) return null;
-
-  return (
-    <article className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-slate-950 p-4 text-white shadow-2xl shadow-black/20">
-      <div
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(103,232,249,0.18),transparent_32%),radial-gradient(circle_at_85%_20%,rgba(167,139,250,0.20),transparent_30%)]"
-        aria-hidden
-      />
-      <div className="relative">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-100">
-              {t("mobile.momentum.eyebrow")}
-            </p>
-            <h2 className="mt-2 text-xl font-semibold tracking-[-0.04em]">
-              {t("mobile.momentum.title")}
-            </h2>
-          </div>
-          <Link
-            href={timelineHref}
-            className={`${DASHBOARD_BTN_LINK} min-h-11 border-white/15 bg-white/10 px-3 text-xs text-white hover:bg-white/15 dark:hover:bg-white/15`}
-          >
-            {t("seeMore")}
-          </Link>
-        </div>
-
-        <div className="mt-4 grid grid-cols-2 gap-2">
-          <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-              {t("mobile.momentum.total")}
-            </p>
-            <p className="mt-1 text-xl font-semibold tabular-nums">
-              {totalListens.toLocaleString(locale)}
-            </p>
-          </div>
-          <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-              {t("mobile.momentum.peak")}
-            </p>
-            <p className="mt-1 truncate text-xl font-semibold">
-              {peakPoint?.formattedDate ?? t("notAvailable")}
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-          <ListenTrendChartViewToggle value={chartView} onChange={setChartView} />
-        </div>
-
-        <div className="mt-4 rounded-[1.25rem] border border-white/10 bg-black/20 p-2">
-          <ChartResponsiveContainer
-            token="overviewArea"
-            minWidth={chartData.length > 8 ? Math.max(320, chartData.length * 34) : undefined}
-          >
-            <AreaChart data={displayChartData} margin={{ top: 8, right: 10, left: -18, bottom: 0 }}>
-              <defs>
-                <linearGradient id="mobileOverviewAreaGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#67e8f9" stopOpacity={0.38} />
-                  <stop offset="60%" stopColor="#a78bfa" stopOpacity={0.12} />
-                  <stop offset="100%" stopColor="#67e8f9" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <XAxis
-                dataKey="formattedDate"
-                tick={{ fill: "#94a3b8", fontSize: 10 }}
-                axisLine={false}
-                tickLine={false}
-                interval="preserveStartEnd"
-                minTickGap={18}
-              />
-              <YAxis hide />
-              <Tooltip
-                contentStyle={CHART_TOOLTIP_STYLES.contentStyle}
-                labelStyle={CHART_TOOLTIP_STYLES.labelStyle}
-                itemStyle={CHART_TOOLTIP_STYLES.itemStyle}
-                formatter={(value: number) => [
-                  `${value.toLocaleString(locale)} ${t("listens")}`,
-                  t("Listens"),
-                ]}
-              />
-              <Area
-                type="monotone"
-                dataKey="listens"
-                stroke="#67e8f9"
-                strokeWidth={3}
-                fill="url(#mobileOverviewAreaGradient)"
-                animationDuration={600}
-                animationEasing="ease-out"
-              />
-            </AreaChart>
-          </ChartResponsiveContainer>
-        </div>
-      </div>
-    </article>
-  );
-}
-
 function MobileOverviewFlow({
   title,
   badgeLabel,
   hasComparison,
   data,
   changes,
-  chartData,
+  momentumSlides,
   topTracks,
   topArtists,
   topGenres,
   locale,
-  timelineHref,
   tracksHref,
   artistsHref,
   genresHref,
@@ -577,7 +437,7 @@ function MobileOverviewFlow({
   hasComparison: boolean;
   data: OverviewStatsWithTopArtists;
   changes: OverviewStatsChanges;
-  chartData: MobileChartPoint[];
+  momentumSlides: OverviewMomentumSlide[];
   topTracks: Array<{
     trackId: string;
     name: string;
@@ -597,7 +457,6 @@ function MobileOverviewFlow({
     percentage: number;
   }>;
   locale: string;
-  timelineHref: string;
   tracksHref: string;
   artistsHref: string;
   genresHref: string;
@@ -767,7 +626,20 @@ function MobileOverviewFlow({
       </section>
 
       <MobileMetricRail stats={stats} comparisonLabel={t("mobile.vsShort")} />
-      <MobileTimelineCard chartData={chartData} timelineHref={timelineHref} locale={locale} />
+
+      {momentumSlides.length > 0 ? (
+        <section className="space-y-3">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+              {t("sections.momentum.eyebrow")}
+            </p>
+            <h2 className="mt-1 text-lg font-semibold tracking-[-0.04em] text-foreground dark:text-white">
+              {t("sections.momentum.title")}
+            </h2>
+          </div>
+          <OverviewMomentumCarousel slides={momentumSlides} />
+        </section>
+      ) : null}
 
       <div className="space-y-3">
         <MobileDisclosure
@@ -1265,12 +1137,11 @@ function OverviewContent() {
             hasComparison={hasComparison}
             data={data}
             changes={changes}
-            chartData={chartData}
+            momentumSlides={momentumSlides}
             topTracks={topTracksForChart}
             topArtists={topArtistsForChart}
             topGenres={topGenres}
             locale={locale}
-            timelineHref={timelineHref}
             tracksHref={tracksHref}
             artistsHref={`/dashboard/artists${artistsPageQuery}`}
             genresHref={genresHref}

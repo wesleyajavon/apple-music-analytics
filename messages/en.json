@@ -31,12 +31,12 @@
   },
   "groqAiConsentPrompt": {
     "title": "Enable Groq AI",
-    "body": "Soundprint-AI can send aggregated listening data and artist or track titles to Groq (United States) for AI features in this app.",
+    "body": "Soundprint-AI can send aggregated streaming data and artist or track titles to Groq (United States) for AI features in this app.",
     "bulletInsights": "Insights, chat, genre classification, and taste summaries",
     "bulletTransfer": "Data may be processed outside the EU (Groq, Inc.)",
     "bulletRevoke": "You can revoke consent anytime in Settings or pause AI per browser",
     "privacyLink": "Read our Privacy Policy",
-    "accept": "Allow Groq to process my listening data",
+    "accept": "Allow Groq to process my streaming data",
     "decline": "Not now",
     "manageInSettings": "Manage in Settings",
     "accepting": "Saving…",
@@ -58,7 +58,7 @@
     "collapseSection": "Collapse {label}",
     "expandSection": "Expand {label}",
     "logo": "Soundprint-AI",
-    "tagline": "Your listening, visualized",
+    "tagline": "Your streaming, visualized",
     "appearance": "Appearance",
     "language": "Language",
     "signIn": "Sign in",
@@ -71,7 +71,7 @@
     "groups": {
       "home": "Home",
       "library": "Library",
-      "patterns": "Listening patterns",
+      "patterns": "Streaming patterns",
       "aiPredictions": "AI & Predictions",
       "helpProduct": "Help & Product",
       "account": "Account",
@@ -108,9 +108,9 @@
   "duet": {
     "friends": {
       "pageTitle": "Duet — Friends",
-      "pageDescription": "Invite friends and manage sharing for listening comparisons.",
+      "pageDescription": "Invite friends and manage sharing for streaming comparisons.",
       "heroEyebrow": "Your crew",
-      "heroTitle": "Build your listening squad",
+      "heroTitle": "Build your streaming squad",
       "heroSubtitle": "Invite friends, choose what you share, then settle the score on the compare page.",
       "heroStatBadge": "Your network",
       "heroStatTag": "Invite & duel",
@@ -150,7 +150,7 @@
       "inviteLinkError": "Could not generate invite link.",
       "inviteLinkExpires": "Expires {date}",
       "emptyTitle": "No friends yet",
-      "emptyDescription": "Invite someone to compare listening stats on the same chart.",
+      "emptyDescription": "Invite someone to compare streaming stats on the same chart.",
       "pendingIncoming": "Requests for you",
       "pendingOutgoing": "Sent requests",
       "pendingOutgoingStatus": "Waiting for response",
@@ -194,7 +194,7 @@
     },
     "accept": {
       "title": "Friend invite",
-      "subtitle": "Accept to compare listening stats. No analytics are shown until you confirm.",
+      "subtitle": "Accept to compare streaming stats. No analytics are shown until you confirm.",
       "fromLabel": "Invitation from",
       "expiresLabel": "Link expires {date}",
       "acceptCta": "Accept and connect",
@@ -205,16 +205,16 @@
       "invalidTitle": "Invite unavailable",
       "invalidDescription": "This link may have expired, already been used, or is invalid.",
       "goToFriends": "Go to friends",
-      "privacyNote": "By accepting, you agree to share listening data as selected. See our",
+      "privacyNote": "By accepting, you agree to share streaming data as selected. See our",
       "privacyLink": "privacy policy"
     },
     "compare": {
       "pageTitle": "Compare with a friend",
       "pageDescription": "Dual timeline plus artist and track head-to-head on the selected period.",
       "heroEyebrow": "Duet",
-      "heroTitle": "Who listens harder?",
+      "heroTitle": "Who streams harder?",
       "heroTitleBattle": "The showdown",
-      "heroSubtitle": "Pick a friend, stack your listens, and settle the score — artist by artist.",
+      "heroSubtitle": "Pick a friend, stack your streams, and settle the score — artist by artist.",
       "heroSubtitleBattle": "You and {friendName} on the same timeline. Same period. No excuses.",
       "heroStatBadge": "How it works",
       "heroStatTag": "Head-to-head",
@@ -228,19 +228,19 @@
       "challengeCta": "Start the duel",
       "scoreboardLeads": "{name} leads",
       "scoreboardTie": "Dead heat",
-      "scoreboardMargin": "+{margin} listens ahead",
+      "scoreboardMargin": "+{margin} streams ahead",
       "timelineEyebrow": "The race",
       "timelineBadge": "Dual timeline",
       "sharedArtistsEyebrow": "Common ground",
       "sharedArtistsTitle": "Shared artists with {friendName}",
-      "sharedArtistsDescription": "Intersection of your top 50 artists for the period — sorted by combined listens.",
+      "sharedArtistsDescription": "Intersection of your top 50 artists for the period — sorted by combined streams.",
       "sharedArtistsBadge": "Shared tops",
       "sharedArtistsLoading": "Finding shared artists…",
       "sharedArtistsError": "Could not load shared artists.",
       "sharedArtistsEmptyTitle": "No shared artists",
       "sharedArtistsEmptyDescription": "Your tops don’t overlap on this period. Try “All time” or a wider date range.",
       "sharedArtistsDuelCta": "Duel",
-      "sharedArtistsListens": "listens",
+      "sharedArtistsListens": "streams",
       "sharedArtistsTop50RankSelf": "#{rank} of your top {topPool}",
       "sharedArtistsTop50RankFriend": "#{rank} of {friendName}'s top {topPool}",
       "sharedArtistsShowMore": "Show {count} more",
@@ -257,7 +257,7 @@
       "arenaModeArtist": "Artist duel",
       "arenaModeArtistHint": "Who streamed this artist more?",
       "arenaModeTrack": "Track duel",
-      "arenaModeTrackHint": "Same song — who listened harder?",
+      "arenaModeTrackHint": "Same song — who streamed harder?",
       "arenaPickCta": "Enter the arena",
       "arenaToggleLabel": "Battle mode",
       "arenaSwitchArtist": "Artist",
@@ -273,7 +273,7 @@
       "shareImageSaved": "Card downloaded!",
       "downloadBattleImage": "Download",
       "shareBrandName": "Soundprint-AI",
-      "shareBrandTagline": "Your listening, decoded.",
+      "shareBrandTagline": "Your streaming, decoded.",
       "shareCopied": "Copied!",
       "shareShared": "Shared!",
       "shareArenaArtist": "Artist duel",
@@ -290,32 +290,32 @@
       "loading": "Loading comparison…",
       "error": "Could not load comparison.",
       "selectFriendTitle": "Pick a friend",
-      "selectFriendDescription": "Choose a friend from your list to compare listening stats.",
+      "selectFriendDescription": "Choose a friend from your list to compare streaming stats.",
       "goToFriends": "Go to friends",
       "scopeInsufficientTitle": "Sharing not enabled",
       "scopeInsufficientDescription": "This friend has not shared enough data for this view.",
       "notFoundTitle": "Comparison unavailable",
       "notFoundDescription": "No active friendship found for this comparison.",
-      "rangeClamped": "In daily view, the range is limited to the last 2 years because of high listen volume. Switch to monthly view to see your full history.",
+      "rangeClamped": "In daily view, the range is limited to the last 2 years because of high stream volume. Switch to monthly view to see your full history.",
       "chartTitle": "You vs {friendName}",
-      "chartDescription": "Daily listens on the same period.",
-      "chartDescriptionCumulative": "Running total of listens over the period — see who pulls ahead.",
+      "chartDescription": "Daily streams on the same period.",
+      "chartDescriptionCumulative": "Running total of streams over the period — see who pulls ahead.",
       "chartViewLabel": "Chart view",
       "chartViewPeriod": "By period",
       "chartViewCumulative": "Cumulative",
       "seriesSelf": "You",
       "seriesFriend": "{friendName}",
       "friendFallback": "Friend",
-      "noDataTitle": "No listens in this period",
+      "noDataTitle": "no streams in this period",
       "noDataDescription": "Try another date range or check imports.",
       "artistTitle": "Artist head-to-head",
       "artistDescription": "Who streamed an artist more on this period?",
       "artistSearchPlaceholder": "Search an artist…",
-      "artistLoading": "Comparing listens for this artist…",
+      "artistLoading": "Comparing streams for this artist…",
       "artistError": "Could not load the artist comparison",
       "artistChartTitle": "{artistName} — you vs {friendName}",
-      "artistChartDescription": "Listens for this artist over the selected period (same granularity as the chart above).",
-      "artistNoDataTitle": "No listens for this artist",
+      "artistChartDescription": "Streams for this artist over the selected period (same granularity as the chart above).",
+      "artistNoDataTitle": "no streams for this artist",
       "artistNoDataDescription": "Neither of you streamed this artist on the selected period.",
       "artistResult": "You: {self} · {friendName}: {friend} — {winner} leads",
       "artistTie": "Tie",
@@ -325,11 +325,11 @@
       "trackDescription": "Who streamed a track more on this period?",
       "trackSearchPlaceholder": "Search a track…",
       "trackClear": "Clear search",
-      "trackLoading": "Comparing listens for this track…",
+      "trackLoading": "Comparing streams for this track…",
       "trackError": "Could not load the track comparison",
       "trackChartTitle": "{trackName} — you vs {friendName}",
-      "trackChartDescription": "Listens for this track over the selected period (same granularity as the chart above).",
-      "trackNoDataTitle": "No listens for this track",
+      "trackChartDescription": "Streams for this track over the selected period (same granularity as the chart above).",
+      "trackNoDataTitle": "no streams for this track",
       "trackNoDataDescription": "Neither of you streamed this track on the selected period.",
       "arenaModeGenre": "Genre duel",
       "arenaModeGenreHint": "Who dominates this genre?",
@@ -340,8 +340,8 @@
       "genreLoading": "Loading genre duel…",
       "genreError": "Could not load genre duel.",
       "genreChartTitle": "{genreName} — you vs {friendName}",
-      "genreChartDescription": "Listens for this genre on the selected period (same granularity as the chart above).",
-      "genreNoDataTitle": "No listens for this genre",
+      "genreChartDescription": "Streams for this genre on the selected period (same granularity as the chart above).",
+      "genreNoDataTitle": "no streams for this genre",
       "genreNoDataDescription": "Neither of you streamed this genre on the selected period.",
       "shareArenaTimeline": "Timeline duel",
       "shareTimelineTitle": "Total for the period",
@@ -353,7 +353,7 @@
       "title": "Incomplete data for a fair comparison",
       "body": "{friendName} doesn't have the same coverage as you: {reasons}. Numbers may be misleading for the selected period.",
       "reasonShorterHistory": "shorter history ({friendFrom} → {friendTo} vs {selfFrom} → {selfTo})",
-      "reasonFewerListens": "fewer listens ({friendTotal} vs {selfTotal})",
+      "reasonFewerListens": "fewer streams ({friendTotal} vs {selfTotal})",
       "reasonSeparator": "·",
       "dismiss": "Got it"
     },
@@ -364,19 +364,19 @@
       "defaultScope": "Default sharing for new friends",
       "scopeAggregates": "Aggregated stats",
       "scopeFull": "Detailed comparisons",
-      "consentHint": "By enabling Duet sharing, you agree that aggregated listening statistics may be visible to friends you authorize. You can revoke access anytime.",
+      "consentHint": "By enabling Duet sharing, you agree that aggregated streaming statistics may be visible to friends you authorize. You can revoke access anytime.",
       "error": "Could not load Duet settings."
     }
   },
   "askSoundprint": {
     "eyebrow": "Ask your library",
     "title": "Chat with your Soundprint",
-    "subtitle": "Who's on repeat? When do you listen most? Ask anything—including artist deepdives—from your real listening history.",
+    "subtitle": "Who's on repeat? When do you stream most? Ask anything—including artist deepdives—from your real streaming history.",
     "heroStatBadge": "Answers you can trust",
     "heroStatTag": "Your history only",
     "heroTrustPanelHint": "Three promises before you ask.",
-    "heroTrust1Title": "Your real plays",
-    "heroTrust1": "Pulled from your listening history—not invented charts or web guesses.",
+    "heroTrust1Title": "Your real streams",
+    "heroTrust1": "Pulled from your streaming history—not invented charts or web guesses.",
     "heroTrust2Title": "Look, don't touch",
     "heroTrust2": "Explore freely—nothing here edits playlists or imports data.",
     "heroTrust3Title": "Your date range",
@@ -390,17 +390,17 @@
     "inputLabel": "Question for Ask your Soundprint",
     "inputPlaceholder": "Example: What were my top tracks in 2022?",
     "inputPlaceholderWithArtist": "Example: {artist} deepdive",
-    "artistDeepDiveQuestion": "Tell me my listening history with {artist}.",
+    "artistDeepDiveQuestion": "Tell me my streaming history with {artist}.",
     "topTracksYearQuestion": "What were my top tracks in {year}?",
     "topArtistsYearQuestion": "Who were my top artists in {year}?",
     "comparePeriodsQuestion": "Compare my top tracks and artists in {earlierYear} vs {laterYear}.",
     "trackObsessionsYearQuestion": "Which songs obsessed me in {year}?",
     "publicDemoPlaceholder": "Free text is disabled in demo mode.",
-    "noListeningDataPlaceholder": "Import your listening history to ask questions.",
+    "noListeningDataPlaceholder": "Import your streaming history to ask questions.",
     "send": "Send",
     "thinking": "Reading your Soundprint…",
     "thinkingStep0": "Reading your Soundprint…",
-    "thinkingStep1": "Pulling fresh numbers from your listening history…",
+    "thinkingStep1": "Pulling fresh numbers from your streaming history…",
     "thinkingStep2": "Connecting artists, genres, and time ranges…",
     "thinkingStep3": "Almost there — shaping a clear answer…",
     "thinkingStep4": "Crunching per-track and yearly stats (this can take a bit on large histories)…",
@@ -408,7 +408,7 @@
     "presetTitle": "Preset playbook",
     "presetDescription": "One tap fires a structured question so you learn what this agent covers fast.",
     "customizeHint": "These are templates: signed-in users can change the artist, year, date range, comparison periods, window size, or result limit in free text.",
-    "heavyPresetHistoryNotice": "Some presets analyze only a recent window (see each card) or follow your dashboard date filter so answers stay responsive—they are not always your full listening history.",
+    "heavyPresetHistoryNotice": "Some presets analyze only a recent window (see each card) or follow your dashboard date filter so answers stay responsive—they are not always your full streaming history.",
     "dismissHintAria": "Dismiss notice",
     "supportedGuideTitle": "Browse the playbook",
     "demoPresetOnlyHint": "Available for signed-in free text.",
@@ -418,7 +418,7 @@
     },
     "guardrailHint": "Soundprint chat uses allowlisted analytics tools: no free-form generated SQL, no writes, and bounded results.",
     "unsupportedTitle": "What is not supported?",
-    "unsupportedExamples": "Playlist creation, account changes, data deletion/imports, external artist facts, free-form SQL, and general non-music tasks.",
+    "unsupportedExamples": "playlist creation, account changes, data deletion/imports, external artist facts, free-form SQL, and general non-music tasks.",
     "publicDemoFreeTextBlocked": "Public demo mode only accepts preset questions.",
     "genericError": "Could not generate an answer. Please try again.",
     "requestTimeoutError": "This answer took longer than the browser allows (about three minutes), so the request was stopped. Try a narrower date range on the dashboard, or ask again in a moment — the models or database may have been slow.",
@@ -426,30 +426,30 @@
     "aiDisabledConsent": "Enable Groq AI in Settings → Data & privacy to use Ask your Soundprint.",
     "aiDisabledEnv": "AI is disabled server-side. Ask your Soundprint is not available here.",
     "mobile": {
-      "eyebrow": "Listening Q&A",
+      "eyebrow": "Streaming Q&A",
       "storyTitle": "Ask your library anything",
-      "storyBody": "Every answer comes from your real listening history—no guesswork.",
+      "storyBody": "Every answer comes from your real streaming history—no guesswork.",
       "demoBadge": "Preset demo",
       "featuredPresets": "Quick starts",
       "featuredPresetsHint": "One tap sends a structured question.",
       "browseAllPresets": "All presets",
       "presetSheetTitle": "Preset playbook",
       "presetSheetHint": "Browse every supported question template.",
-      "trustSummary": "Your real plays. Read-only. Your date range.",
+      "trustSummary": "Your real streams. Read-only. Your date range.",
       "guardrailsTitle": "Limits & guardrails"
     },
     "presets": {
       "summer-2022-top-tracks": "What were my top tracks in 2022?",
       "summer-2022-top-artists": "Who were my top artists in 2022?",
-      "consistent-artists": "Who's the artist I've been listening to the most consistently over the years?",
-      "late-night-habits": "What have I been listening to late at night recently?",
-      "artist-deep-dive": "Tell me my listening history with Radiohead.",
+      "consistent-artists": "Who's the artist I've been streaming to the most consistently over the years?",
+      "late-night-habits": "What have I been streaming to late at night recently?",
+      "artist-deep-dive": "Tell me my streaming history with Radiohead.",
       "taste-shift-2020-2024": "How did my taste change between 2020 and 2024?",
       "weekly-taste-evolution": "How has my taste evolved week by week over the past few weeks?",
       "track-obsessions-2022": "Which songs obsessed me in 2022?",
-      "genre-breakdown-last-year": "What genres did I listen to most last year?",
+      "genre-breakdown-last-year": "What genres did I stream to most last year?",
       "compare-listening-periods": "Compare my top tracks and artists in 2021 vs 2024.",
-      "yearly-listening-trends": "How did my listening volume change by year?"
+      "yearly-listening-trends": "How did my streaming volume change by year?"
     },
     "examples": {
       "top-tracks": {
@@ -462,7 +462,7 @@
       },
       "genre-breakdown": {
         "label": "Genre breakdown",
-        "question": "What genres did I listen to most last year?"
+        "question": "What genres did I stream to most last year?"
       },
       "compare-periods": {
         "label": "Compare periods",
@@ -480,21 +480,21 @@
       },
       "yearly-trends": {
         "label": "Yearly trends",
-        "question": "How did my listening volume change by year?"
+        "question": "How did my streaming volume change by year?"
       },
       "consistent-artists": {
         "label": "Consistent artists",
-        "question": "Who's the artist I've been listening to the most consistently over the years?"
+        "question": "Who's the artist I've been streaming to the most consistently over the years?"
       },
       "time-of-day": {
         "label": "Time habits",
-        "question": "What have I been listening to late at night recently?",
+        "question": "What have I been streaming to late at night recently?",
         "recentWindowHint": "Uses about the last {days} days (UTC), not your full history—regardless of the dashboard date filter."
       },
       "artist-deep-dive": {
         "label": "Artist deepdive",
         "labelRich": "<em>artist</em> deepdive",
-        "question": "Tell me my listening history with Radiohead."
+        "question": "Tell me my streaming history with Radiohead."
       },
       "track-obsessions": {
         "label": "Track obsessions",
@@ -521,7 +521,7 @@
     "heroTrust2Title": "What you see",
     "heroTrust2": "Turn optional prompts and banners on or off when they get in the way.",
     "heroTrust3Title": "What stays or goes",
-    "heroTrust3": "Import fresh data, download a copy, or wipe listening history while keeping your sign-in.",
+    "heroTrust3": "Import fresh data, download a copy, or wipe streaming history while keeping your sign-in.",
     "ctaOverview": "Music overview",
     "pageEyebrow": "Account",
     "navOnThisPage": "On this page",
@@ -529,15 +529,15 @@
     "sectionProfileLead": "Photo, display name, and the email tied to your sign-in.",
     "sectionPreferencesLead": "Optional prompts, AI features, and Duet sharing — flip what you need.",
     "sectionYourData": "Your data",
-    "sectionYourDataLead": "Bring listening history in, download reports, or export everything we store.",
+    "sectionYourDataLead": "Bring streaming history in, download reports, or export everything we store.",
     "sectionDanger": "Danger zone",
     "sectionDangerLead": "Permanent actions. Clearing data keeps your sign-in; deleting the account removes everything.",
     "genreBannerHint": "Hide the optional genre-classification banner on the dashboard.",
-    "groqConsentHint": "Send aggregated listening data to Groq for AI features like Ask your Soundprint.",
+    "groqConsentHint": "Send aggregated streaming data to Groq for AI features like Ask your Soundprint.",
     "publicProfileHint": "Let invited viewers see a read-only demo of your dashboard.",
     "importExportsBodyShort": "Add or refresh Spotify or Apple exports anytime.",
-    "dashboardExportsBodyShort": "CSV listens, JSON stats, or an annual PDF — uses your dashboard date filter when set.",
-    "exportAllDataBodyShort": "One JSON file with profile, listens, imports, and consent history.",
+    "dashboardExportsBodyShort": "CSV streams, JSON stats, or an annual PDF — uses your dashboard date filter when set.",
+    "exportAllDataBodyShort": "One JSON file with profile, streams, imports, and consent history.",
     "profileImageLabel": "Profile image",
     "profileImageHint": "Upload a JPG, PNG, WebP, or GIF up to 2 MB. This image can appear anywhere your profile is shown.",
     "profileImageAlt": "Your profile image",
@@ -560,11 +560,11 @@
     "profileNameTooLong": "Use at most 200 characters.",
     "sectionPreferences": "Preferences",
     "gdprContactLead": "For access, export, correction, or deletion requests, contact:",
-    "importExportsTitle": "Listening data imports",
-    "importExportsBody": "Add or update Spotify or Apple exports any time — duplicate plays from an earlier sync or import are skipped automatically.",
+    "importExportsTitle": "streaming data imports",
+    "importExportsBody": "Add or update Spotify or Apple exports any time — duplicate streams from an earlier sync or import are skipped automatically.",
     "importExportsCta": "Open import assistant",
-    "dashboardExportsTitle": "Listening exports",
-    "dashboardExportsBody": "Download listens (CSV), aggregated statistics (JSON), or an annual PDF report. When a period is selected in the dashboard filter, exports use that range; otherwise your full library or the current year applies.",
+    "dashboardExportsTitle": "Streaming exports",
+    "dashboardExportsBody": "Download streams (CSV), aggregated statistics (JSON), or an annual PDF report. When a period is selected in the dashboard filter, exports use that range; otherwise your full library or the current year applies.",
     "signedOutHeroEyebrow": "Sign in required",
     "signedOutStatBadge": "Private by default",
     "signedOutStatTag": "Nothing loads until you're signed in",
@@ -576,8 +576,8 @@
     "switchHideGenreAria": "Hide Groq genre classification banner on the dashboard",
     "switchUnderstandAria": "I understand this data deletion cannot be undone",
     "dangerTitle": "Clear my analytics data",
-    "dangerBody": "This permanently deletes all imported listening history and Replay data we store. Your account (email) is not deleted.",
-    "dangerBulletListens": "All stored listens (imports, etc.)",
+    "dangerBody": "This permanently deletes all imported streaming history and Replay data we store. Your account (email) is not deleted.",
+    "dangerBulletListens": "All stored streams (imports, etc.)",
     "dangerBulletReplay": "All Apple Music Replay / yearly imports",
     "dangerBulletOnboarding": "Onboarding is reset: you will need to import an export again to refill the dashboard",
     "confirmCheckbox": "I understand this action cannot be undone.",
@@ -589,7 +589,7 @@
     "phraseLoadError": "Could not load the confirmation phrase. Please try again.",
     "noPhraseError": "We cannot build a phrase from your profile (name or email). Update your display name in your account settings or contact support.",
     "exportAllDataTitle": "Export all my data",
-    "exportAllDataBody": "Download a JSON file with your profile, listens, Replay imports, palette decisions, Spotify metadata, and consent history.",
+    "exportAllDataBody": "Download a JSON file with your profile, streams, Replay imports, palette decisions, Spotify metadata, and consent history.",
     "exportAllDataButton": "Download my data (JSON)",
     "exporting": "Preparing export…",
     "exportError": "Could not export your data. Please try again later.",
@@ -597,7 +597,7 @@
     "deleteAccountBody": "Permanently deletes your account, profile, avatar, Spotify connection, and all associated data. This cannot be undone.",
     "deleteAccountBulletProfile": "Profile, email, and avatar",
     "deleteAccountBulletSpotify": "Spotify connection and tokens",
-    "deleteAccountBulletAllData": "Listening history, Replay, palette, and AI jobs",
+    "deleteAccountBulletAllData": "streaming history, Replay, palette, and AI jobs",
     "deleteAccountCheckbox": "I understand that deleting my account is permanent.",
     "deleteAccountButton": "Permanently delete my account",
     "deletingAccount": "Deleting account…",
@@ -610,13 +610,13 @@
     "genreBannerDescription": "After import you can hide the dashboard strip about Groq genre classification. Turn it back on here anytime.",
     "genreBannerHideLabel": "Hide Groq genre classification prompts and summaries on the dashboard",
     "groqConsentTitle": "Groq AI features",
-    "groqConsentDescription": "When enabled, aggregated listening data and artist or track titles can be sent to Groq for insights, chat, genre classification, and other AI features. Disabling stops new AI runs and cancels any genre job in progress.",
-    "groqConsentLabel": "Allow Groq to process my listening data for AI features",
+    "groqConsentDescription": "When enabled, aggregated streaming data and artist or track titles can be sent to Groq for insights, chat, genre classification, and other AI features. Disabling stops new AI runs and cancels any genre job in progress.",
+    "groqConsentLabel": "Allow Groq to process my streaming data for AI features",
     "groqConsentError": "Could not update Groq privacy preference. Please try again.",
     "groqConsentSaving": "Saving…",
     "groqConsentBrowserToggleHint": "Once enabled, you can pause AI for this browser with the AI button (bottom-right on desktop, Plus menu on mobile) without revoking this consent.",
     "publicProfileTitle": "Public dashboard demo",
-    "publicProfileDescription": "When enabled, visitors without an account can view your listening analytics via the public demo link. You can turn this off anytime.",
+    "publicProfileDescription": "When enabled, visitors without an account can view your streaming analytics via the public demo link. You can turn this off anytime.",
     "publicProfileLabel": "Allow my profile to be shown in the public demo",
     "publicProfileError": "Could not update public demo preference. Please try again.",
     "consentTableMissing": "Consent storage is not ready. Run npm run db:migrate, then restart the dev server.",
@@ -636,7 +636,7 @@
         "genreBanner": "Groq prompts",
         "genreHidden": "Hidden",
         "genreVisible": "Visible",
-        "data": "Listening data"
+        "data": "streaming data"
       },
       "profileDisclosureTitle": "Edit profile",
       "profileDisclosureSummary": "Photo, name, and email",
@@ -645,7 +645,7 @@
       "yourDataDisclosureTitle": "Your data",
       "yourDataDisclosureSummary": "Imports, reports, and full export",
       "dangerDisclosureTitle": "Danger zone",
-      "dangerDisclosureSummary": "Clear listening data or delete account",
+      "dangerDisclosureSummary": "Clear streaming data or delete account",
       "trustDisclosureTitle": "What you control here",
       "trustDisclosureSummary": "Identity, comfort, and your data",
       "signedOutStoryTitle": "Sign in to manage your account",
@@ -680,7 +680,7 @@
     "acceptTermsSaving": "Saving…",
     "acceptTermsError": "Could not save your acceptance. Please try again.",
     "authPreviewAlt": "Soundprint AI dashboard preview",
-    "authPreviewSpotlightDescription": "See your most-played artists and how your rotation evolves — from your very first sign-in.",
+    "authPreviewSpotlightDescription": "See your most-streamed artists and how your rotation evolves — from your very first sign-in.",
     "skipToContent": "Skip to sign-in form",
     "homeLinkAriaLabel": "Soundprint-AI — home",
     "authNavAriaLabel": "Account pages",
@@ -720,14 +720,14 @@
   "onboarding": {
     "metaTitle": "Set up Soundprint",
     "welcomeEyebrow": "Welcome",
-    "welcomeTitle": "Import your listening history",
+    "welcomeTitle": "Import your streaming history",
     "welcomePlanTitle": "What we'll do together",
     "welcomeBullet1": "Pick Spotify or Apple Music—every screen stays on your choice.",
     "welcomeBullet2": "Follow the steps to request the official export from their privacy portal.",
     "welcomeBullet3": "Upload when the email arrives—most exports land within a few days.",
     "whyNotApiSummary": "Why upload a file instead of a sync button?",
     "whyNotApiTitle": "Why can’t this app connect to Apple Music or Spotify for me?",
-    "whyNotApiBody": "Those companies don’t give independent apps direct access to your personal listening history — that data stays between you and them, which protects your privacy. We’re a third-party app, so there’s no supported “log in and sync” path for your full history. The official option is for you to request your own copy from their privacy tools; you then import that file here.",
+    "whyNotApiBody": "Those companies don’t give independent apps direct access to your personal streaming history — that data stays between you and them, which protects your privacy. We’re a third-party app, so there’s no supported “log in and sync” path for your full history. The official option is for you to request your own copy from their privacy tools; you then import that file here.",
     "welcomeBody": "We’ll walk you through it. The official export can take a few days — come back when your file is ready.",
     "welcomeNoteStrong": "You'll import when the ZIP or CSV arrives in your inbox",
     "welcomeNoteRest": " — exports take time to generate, and that's OK.",
@@ -744,7 +744,7 @@
     "pickBadgeSpotify": "ZIP archive",
     "pickBadgeApple": "CSV file",
     "continue": "Get started",
-    "pickTitle": "Where do you listen?",
+    "pickTitle": "Where do you stream?",
     "pickSubtitle": "Pick one — the rest of the flow follows that choice.",
     "pickSpotify": "Spotify",
     "pickSpotifyHint": ".zip file",
@@ -805,27 +805,27 @@
       "importingOverlayHint": "Large archives can take up to a minute. Please keep this tab open.",
       "progressAriaLabel": "Import progress",
       "progressPercent": "{percent}% complete",
-      "progressWithRows": "{percent}% complete · {processed}/{total} listens",
+      "progressWithRows": "{percent}% complete · {processed}/{total} streams",
       "progressWorking": "Working…",
       "progressBatch": "Batch {current}/{total}",
       "progressPhase": {
         "checking": "Checking the connection…",
         "reading": "Reading the file locally…",
-        "parsing": "Preparing your listening history…",
-        "validating": "Checking the parsed listens…",
-        "uploading": "Saving listens to your account…",
+        "parsing": "Preparing your streaming history…",
+        "validating": "Checking the parsed streams…",
+        "uploading": "Saving streams to your account…",
         "finalizing": "Finalizing your profile…"
       },
       "skipImport": "No file yet",
-      "toastSuccess": "{count, plural, one {# listen imported.} other {# listens imported.}}",
+      "toastSuccess": "{count, plural, one {# stream imported.} other {# streams imported.}}",
       "importError": "Import failed. Check the file and try again.",
       "recentAuthRequired": "Please sign in again before importing data.",
       "zipMissingAudioJson": "No extended streaming history JSON found in this ZIP (Streaming_History_Audio_*.json or StreamingHistory_music_*.json). Use the archive from Spotify’s “Extended streaming history” email.",
-      "noParsedListens": "No listens could be parsed from this file. Make sure you selected the correct export.",
-      "tooManyPlays": "This export exceeds {max} plays. Contact support or split the data.",
+      "noParsedListens": "no streams could be parsed from this file. Make sure you selected the correct export.",
+      "tooManyPlays": "This export exceeds {max} streams. Contact support or split the data.",
       "spotifyWebEyebrow": "Partial setup",
       "spotifyWebTitle": "Try your Spotify link",
-      "spotifyWebBody": "We call Spotify live to confirm the link works. Nothing from this step is saved in your account yet — the next screen shows top tracks, artists, and recent plays straight from Spotify. Charts and analytics only appear after you import your official Spotify ZIP or Apple CSV below.",
+      "spotifyWebBody": "We call Spotify live to confirm the link works. Nothing from this step is saved in your account yet — the next screen shows top tracks, artists, and recent streams straight from Spotify. Charts and analytics only appear after you import your official Spotify ZIP or Apple CSV below.",
       "spotifyWebCta": "Open live Spotify preview",
       "spotifyWebDivider": "Full history (.zip export)",
       "spotifyWebNoConnection": "No Spotify connection is saved for this account. Sign in with Spotify or upload the .zip archive below.",
@@ -833,12 +833,12 @@
       "spotifyWebVerifySuccess": "Spotify responded — opening your live preview.",
       "spotifyWebVerifying": "Checking…",
       "importingOverlayTitleWebApi": "Checking Spotify…",
-      "importingOverlayHintWebApi": "Contacting Spotify — no listens are saved to your dashboard from this step."
+      "importingOverlayHintWebApi": "Contacting Spotify — no streams are saved to your dashboard from this step."
     },
     "finishTitle": "All set",
     "finishSuccessEyebrow": "Done",
-    "finishSuccessTitle": "Your listens are in",
-    "finishSuccessBody": "{imported} listens added · {skipped} duplicates skipped. Your musical profile is ready.",
+    "finishSuccessTitle": "Your streams are in",
+    "finishSuccessBody": "{imported} streams added · {skipped} duplicates skipped. Your musical profile is ready.",
     "finishSuccessSteps": {
       "requested": {
         "title": "Data requested",
@@ -846,7 +846,7 @@
       },
       "imported": {
         "title": "Import done",
-        "body": "Your listening history is saved."
+        "body": "Your streaming history is saved."
       },
       "current": {
         "title": "You are here",
@@ -855,10 +855,10 @@
     },
     "finishSkippedEyebrow": "Almost there",
     "finishBody": "No file yet? No problem — the dashboard is still available. Import whenever you’re ready.",
-    "finishAfterImport": "{imported} listens were added to your profile. Skipped duplicates: {skipped}.",
-    "finishImportedLabel": "Listens added",
+    "finishAfterImport": "{imported} streams were added to your profile. Skipped duplicates: {skipped}.",
+    "finishImportedLabel": "Streams added",
     "finishSkippedLabel": "Duplicates skipped",
-    "finishNextHint": "Next up: your overview, listening trends, and Replay-style stats. You can add another export anytime from the dashboard.",
+    "finishNextHint": "Next up: your overview, streaming trends, and Replay-style stats. You can add another export anytime from the dashboard.",
     "finishPaletteCta": "Open Palette ({count, plural, one {# artist to map} other {# artists to map}})",
     "goToDashboard": "Go to dashboard",
     "goToMusicalProfile": "View my profile",
@@ -882,7 +882,7 @@
     "externalLinkAria": "Opens in a new tab",
     "genreLlmConsent": {
       "title": "Improve genres with AI (optional)",
-      "body": "About {unknown} tracks ({pct}% of your library) have no genre yet. You can run a quick Groq (LLM) pass on the most-played unknown tracks. Nothing starts until you confirm.",
+      "body": "About {unknown} tracks ({pct}% of your library) have no genre yet. You can run a quick Groq (LLM) pass on the most-streamed unknown tracks. Nothing starts until you confirm.",
       "privacy": "This sends artist and track titles to Groq for classification. You can skip and map genres later in Palette.",
       "missingKey": "Groq is not configured on this server (GROQ_API_KEY). Ask your admin or use Palette to map genres manually.",
       "accept": "Yes, classify with Groq",
@@ -916,18 +916,18 @@
     "heroStatTag": "Read-only pull",
     "heroTrust1": "Uses your linked Spotify token to call Web API endpoints—no writes and no mutation of Soundprint rows.",
     "heroTrust2": "Different from ZIP imports: heatmaps and long-tail charts still need Extended streaming history inside Soundprint.",
-    "heroTrust3": "Refresh re-runs the bundled snapshot calls so tops and recent plays stay current.",
+    "heroTrust3": "Refresh re-runs the bundled snapshot calls so tops and recent streams stay current.",
     "ctaOverview": "Music overview",
     "ctaPlayground": "API playground",
     "title": "Spotify snapshot",
-    "subtitle": "A live window into what Spotify returns today—sanity-check your link with tops and recently played before your export lands.",
+    "subtitle": "A live window into what Spotify returns today—sanity-check your link with tops and recent streams before your export lands.",
     "connectedAs": "Spotify account: {name}.",
     "liveSnapshotTitle": "Endpoint panels",
     "reload": "Refresh",
     "loading": "Loading…",
     "topTracks": "Top tracks",
     "topArtists": "Top artists",
-    "recentlyPlayed": "Recently played",
+    "recentlyPlayed": "recent streams",
     "emptySection": "Nothing here yet for this section.",
     "recentUnknownTrack": "Unknown track",
     "fetchedAt": "Fetched {time}",
@@ -949,22 +949,22 @@
         "topTrackEyebrow": "Strongest signal",
         "topTrackBody": "Spotify ranks this track highest in your tops right now — a good sign your link is healthy.",
         "emptyEyebrow": "Connection live",
-        "emptyBody": "Your Spotify token is linked. Refresh to pull tops and recent plays.",
+        "emptyBody": "Your Spotify token is linked. Refresh to pull tops and recent streams.",
         "recentEyebrow": "Last heard",
-        "recentBody": "Your most recent play from Spotify — useful to confirm real-time sync."
+        "recentBody": "Your most recent stream from Spotify — useful to confirm real-time sync."
       },
       "signalsLabel": "Quick signals",
       "signals": {
         "topArtist": "Top artist",
-        "recentCount": "Recent plays",
+        "recentCount": "Recent streams",
         "endpointsOk": "Endpoints",
         "fetched": "Updated"
       },
       "tracksRailTitle": "Top tracks now",
       "tracksRailHint": "Swipe through what Spotify returns today.",
       "artistsRailTitle": "Top artists",
-      "recentTitle": "Recently played",
-      "recentDescription": "Latest listens pulled from Spotify's API.",
+      "recentTitle": "recent streams",
+      "recentDescription": "Latest streams pulled from Spotify's API.",
       "topTracksDisclosureTitle": "Full top tracks list",
       "topTracksDisclosureDescription": "Every track in Spotify's tops response.",
       "topArtistsDisclosureTitle": "All top artists",
@@ -1036,7 +1036,7 @@
   },
   "footer": {
     "brand": "Soundprint-AI",
-    "tagline": "Your personal listening analytics",
+    "tagline": "Your personal streaming analytics",
     "overview": "Your Music",
     "about": "How it works",
     "demo": "Demo",
@@ -1059,7 +1059,7 @@
       "soundprint": {
         "badge": "AI chat",
         "title": "Chat with your Soundprint",
-        "description": "Ask about tops, streaks, and taste shifts—answers pull from your real listening data.",
+        "description": "Ask about tops, streaks, and taste shifts—answers pull from your real streaming data.",
         "cta": "Open chat",
         "aria": "Open Soundprint chat"
       },
@@ -1071,22 +1071,22 @@
         "aria": "Open Duet friends"
       }
     },
-    "subtitle": "Your personal listening stats. Analyze your trends and discover your favorite genres.",
+    "subtitle": "Your personal streaming stats. Analyze your trends and discover your favorite genres.",
     "periodBadge": "Period",
     "allData": "All data",
     "stats": {
-      "totalListens": "Total plays",
+      "totalListens": "Total streams",
       "uniqueArtists": "Different artists",
       "uniqueTracks": "Different tracks",
-      "totalTime": "Listening time"
+      "totalTime": "streaming time"
     },
     "statsSectionBadge": "Summary",
     "statsSectionTitle": "Your numbers for this period",
-    "statsSectionDescription": "How much you played, how wide your rotation was, and how long you spent listening.",
-    "statsSectionListensHint": "Every replay, shuffle, and deep cut adds up to your listening pulse for this window.",
+    "statsSectionDescription": "How much you streamed, how wide your rotation was, and how long you spent streaming.",
+    "statsSectionListensHint": "Every replay, shuffle, and deep cut adds up to your streaming pulse for this window.",
     "statsSectionBreadthLabel": "Catalog reach",
     "statsSectionBreadthHint": "How many different artists and tracks shaped your rotation.",
-    "statsSectionBreadthSummary": "{artists} artists and {tracks} tracks made up what you played this period.",
+    "statsSectionBreadthSummary": "{artists} artists and {tracks} tracks made up what you streamed this period.",
     "statsSectionTimeLabel": "Time invested",
     "statsSectionTimeHours": "Hours",
     "statsSectionTimeMinutes": "Minutes",
@@ -1096,9 +1096,9 @@
     "vsPreviousPeriod": "vs previous period",
     "notAvailable": "Not available",
     "momentumBadge": "Live trend",
-    "recentEvolution": "Listening momentum",
-    "listensPerDay": "Plays per day",
-    "listensPerMonth": "Track the surges, dips, and listening arcs that shape your music story month by month.",
+    "recentEvolution": "Streaming momentum",
+    "listensPerDay": "Streams per day",
+    "listensPerMonth": "Track the surges, dips, and streaming arcs that shape your music story month by month.",
     "seeMore": "See more",
     "topGenres": "Genres shaping your sound",
     "yourTopGenres": "The styles setting the tone of your library.",
@@ -1108,7 +1108,7 @@
     "artistSpotlight": {
       "badge": "Artist spotlight",
       "title": "The artists carrying your rotation.",
-      "description": "Hover each cover to reveal the plays, track variety, and listening weight behind your top three."
+      "description": "Hover each cover to reveal the streams, track variety, and streaming weight behind your top three."
     },
     "artistTrends": {
       "badge": "Artist trends",
@@ -1119,7 +1119,7 @@
       "next": "Next chart",
       "slideCounter": "{current} / {total}",
       "slides": {
-        "timeline": "Listening momentum",
+        "timeline": "Streaming momentum",
         "artists": "Artist trends",
         "genres": "Genre trends",
         "tracks": "Track trends"
@@ -1135,12 +1135,12 @@
     },
     "topArtists": "Artists owning your rotation",
     "topTracks": "Tracks on repeat",
-    "yourFavoriteArtists": "Your standout artists by play count",
-    "listens": "listens",
-    "Listens": "Listens",
+    "yourFavoriteArtists": "Your standout artists by stream count",
+    "listens": "streams",
+    "Listens": "Streams",
     "errorLoading": "Unable to load statistics",
     "errorStateEyebrow": "Snapshot unavailable",
-    "errorStateHint": "We couldn't load your overview metrics. It is usually a brief network or server hiccup—try again in a moment. Your listening data stays on your account.",
+    "errorStateHint": "We couldn't load your overview metrics. It is usually a brief network or server hiccup—try again in a moment. Your streaming data stays on your account.",
     "errorStateMetricStatus": "Awaiting response",
     "emptyStateHeroDescription": "Your overview stays at zero until the first import lands. Import a Spotify or Apple Music export to get started.",
     "emptyStateEyebrow": "Library idle",
@@ -1149,23 +1149,23 @@
     "sections": {
       "snapshot": {
         "eyebrow": "Snapshot",
-        "title": "Your listening at a glance.",
+        "title": "Your streaming at a glance.",
         "description": "Lead with volume, variety, and taste before you scroll into trends and detailed rankings."
       },
       "momentum": {
         "eyebrow": "Momentum",
         "title": "See what is moving right now.",
-        "description": "Trend widgets turn raw play counts into shifts, surges, and recent listening direction."
+        "description": "Trend widgets turn raw stream counts into shifts, surges, and recent streaming direction."
       },
       "library": {
         "eyebrow": "Library signals",
         "title": "The artists, tracks, and genres behind the story.",
-        "description": "Rankings keep the product grounded in concrete listening behavior."
+        "description": "Rankings keep the product grounded in concrete streaming behavior."
       },
       "intelligence": {
         "eyebrow": "AI & calendar",
         "title": "Add context to the patterns.",
-        "description": "AI summaries and calendar intensity help explain when and why your listening changes."
+        "description": "AI summaries and calendar intensity help explain when and why your streaming changes."
       }
     },
     "mobile": {
@@ -1177,14 +1177,14 @@
         "topTrackEyebrow": "Your strongest signal",
         "topTrackBody": "This is the track pulling you back most in this window, led by {artist}.",
         "topArtistEyebrow": "Your rotation anchor",
-        "topArtistBody": "This artist carries the most weight in your listening right now.",
-        "libraryEyebrow": "Your listening shape",
+        "topArtistBody": "This artist carries the most weight in your streaming right now.",
+        "libraryEyebrow": "Your streaming shape",
         "libraryBody": "Your overview starts with volume, variety, and the patterns behind them."
       },
       "momentum": {
         "eyebrow": "Momentum",
-        "title": "How your listening moved",
-        "total": "Plays plotted",
+        "title": "How your streaming moved",
+        "total": "Streams plotted",
         "peak": "Peak month"
       },
       "disclosures": {
@@ -1204,28 +1204,28 @@
     }
   },
   "timeline": {
-    "title": "Your listening pulse",
+    "title": "Your streaming pulse",
     "subtitle": "Zoom from long arcs to sharp spikes—spot where momentum builds, fades, or comes roaring back.",
     "heroEyebrow": "Momentum radar",
     "heroStatBadge": "Signals",
     "heroStatTag": "This range",
     "heroStatsPlaceholder": "Totals and peaks appear as soon as your timeline loads.",
     "ctaHeatmap": "Open intensity map",
-    "heroStatTotal": "Total plays",
+    "heroStatTotal": "Total streams",
     "heroStatPeak": "Loudest bucket",
     "heroStatBuckets": "Buckets plotted",
     "chartTitle": "Volume curve",
     "chartHint": "Buckets follow your selector above—flip day, week, or month without losing the story.",
     "errorLoading": "We couldn't load your pulse chart—try again.",
-    "listens": "listens",
-    "Listens": "Listens",
+    "listens": "streams",
+    "Listens": "Streams",
     "periodBadgeDay": "Daily",
     "periodBadgeWeek": "Weekly",
     "periodBadgeMonth": "Monthly",
     "mobile": {
       "eyebrow": "Pulse now",
       "storyTitle": "Your loudest moment lands on {date}",
-      "storyBody": "{count} {listens} in one bucket. Start with that peak, then scan how the pulse moves around it.",
+      "storyBody": "{count} {streams} in one bucket. Start with that peak, then scan how the pulse moves around it.",
       "average": "Avg. bucket",
       "trend": "Last move",
       "trendUp": "Rising",
@@ -1235,24 +1235,24 @@
       "sparkEyebrow": "Shape",
       "sparkTitle": "The period at a glance",
       "sparkHint": "A compact read of the curve. Open the full desktop chart when you need exact axis detail.",
-      "sparkAria": "Compact listening trend for the selected period",
+      "sparkAria": "Compact streaming trend for the selected period",
       "bucketsShort": "buckets",
       "detailsTitle": "Open the high points",
       "detailsHint": "Top buckets, kept one tap deeper.",
       "heatmapCta": "See the daily texture",
-      "emptyTitle": "Your pulse is waiting for plays",
-      "emptyBody": "Import listening history or adjust the date filters, then this mobile view will lead with your strongest moment."
+      "emptyTitle": "Your pulse is waiting for streams",
+      "emptyBody": "Import streaming history or adjust the date filters, then this mobile view will lead with your strongest moment."
     }
   },
   "heatmap": {
-    "title": "Your listening canopy",
-    "subtitle": "GitHub-style tiles for every day you hit play. Tap a square to unpack that day's soundtrack.",
+    "title": "Your streaming canopy",
+    "subtitle": "GitHub-style tiles for every day you streamed. Tap a square to unpack that day's soundtrack.",
     "heroEyebrow": "Intensity map",
     "mobile": {
       "heroEyebrow": "Intensity",
       "primaryInsightEyebrow": "Start here",
-      "primaryInsightBody": "{date} carried the strongest signal with {count} plays.",
-      "peakMetric": "Peak plays",
+      "primaryInsightBody": "{date} carried the strongest signal with {count} streams.",
+      "peakMetric": "Peak streams",
       "openPeakDay": "Open that day",
       "signalsLabel": "Key heatmap signals",
       "signals": {
@@ -1269,16 +1269,16 @@
     },
     "heroStatBadge": "Live snapshot",
     "heroStatTag": "This window",
-    "heroStatsPlaceholder": "Fill this grid with listens and your KPIs snap into place.",
+    "heroStatsPlaceholder": "Fill this grid with streams and your KPIs snap into place.",
     "ctaTimeline": "Open pulse chart",
     "dateRangeBadge": "Period: {range}",
     "errorLoading": "We couldn't load your calendar—try again.",
     "activeDays": "Active days",
     "ofDays": "of days",
     "avgDaily": "Daily average",
-    "listensPerDay": "listens per day",
+    "listensPerDay": "streams per day",
     "mostActiveDay": "Most active day",
-    "listensCount": "listens",
+    "listensCount": "streams",
     "noData": "No data",
     "favoriteDay": "Favorite day",
     "favoriteDayHint": "most active day (selected period)",
@@ -1287,7 +1287,7 @@
     "overviewCalendarHint": "Click on a day to open its details in the full heatmap.",
     "noDataPeriod": "No data available for this period",
     "weekdayDistribution": "Distribution by day of week",
-    "weekdayDistributionHint": "Distribution of your listens by day",
+    "weekdayDistributionHint": "Distribution of your streams by day",
     "weekdays": {
       "monday": "Monday",
       "tuesday": "Tuesday",
@@ -1304,28 +1304,28 @@
     "vsAvgBelow": "{pct}% below your daily average for this range",
     "vsAvgMatch": "In line with your daily average for this range",
     "relativeToPeak": "Compared to your busiest day here",
-    "listensByHour": "Listens by hour",
+    "listensByHour": "Streams by hour",
     "topTracks": "Top tracks",
     "sourceLastfm": "Last.fm",
     "sourceAppleMusic": "Apple Music",
     "sourceSpotify": "Spotify",
     "sourceOther": "Other",
-    "totalListens": "Total plays",
+    "totalListens": "Total streams",
     "uniqueArtists": "Different artists",
     "uniqueTracks": "Different tracks",
     "inTotal": "in total",
     "closeDetails": "Close details",
     "topArtists": "Top artists",
-    "listen": "listen",
-    "listens": "listens",
-    "detailedListens": "Detailed listens",
+    "listen": "stream",
+    "listens": "streams",
+    "detailedListens": "Detailed streams",
     "noDateToDisplay": "No dates to display",
     "noDataToDisplay": "No data to display",
-    "legendLess": "Fewer listens",
-    "legendMore": "More listens",
+    "legendLess": "Fewer streams",
+    "legendMore": "More streams",
     "ariaListenCount": "Click to see details",
-    "ariaNoListen": "No listens",
-    "noListen": "No listens"
+    "ariaNoListen": "no streams",
+    "noListen": "no streams"
   },
   "temporal-analysis": {
     "title": "Rhythm studio",
@@ -1337,7 +1337,7 @@
     "heroStatsPlaceholder": "Peak weekday and hour appear once your rhythm profile compiles.",
     "ctaTimeline": "Open pulse chart",
     "ctaHeatmap": "Open intensity map",
-    "heroStatTotal": "Total plays",
+    "heroStatTotal": "Total streams",
     "note": "Why full history?",
     "noteText": "Short windows lie. We analyze your entire archive so weekday and hour habits mirror real life—not one noisy week.",
     "errorLoading": "We couldn't load rhythm analytics—try again.",
@@ -1352,8 +1352,8 @@
       "saturday": "Saturday",
       "sunday": "Sunday"
     },
-    "listens": "listens",
-    "Listens": "Listens",
+    "listens": "streams",
+    "Listens": "Streams",
     "chart": "Chart",
     "bar": "Bar",
     "distribution": "Distribution",
@@ -1361,18 +1361,18 @@
     "listensByWeekday": "Weekday lanes",
     "listensByWeekdayHint": "See which weekday owns your rotation—not just Monday blues.",
     "weeklyPattern": "Weekly pattern (Radar)",
-    "weeklyPatternHint": "Radar visualization of listens by day of week",
+    "weeklyPatternHint": "Radar visualization of streams by day of week",
     "listensByHour": "Clock faces",
     "listensByHourHint": "Hunt the hour blocks where you lose track of time—in the best way.",
     "detailsByWeekday": "Details by day of week",
-    "detailsByWeekdayHint": "Listens, unique tracks and artists per day",
+    "detailsByWeekdayHint": "Streams, unique tracks and artists per day",
     "spotlightTitle": "Your signature slot",
     "spotlightHint": "The instant your streak peaks across both calendar day and clock time.",
     "peakMomentLabel": "Peak combo",
     "rhythmNightOwl": "Night owl",
     "rhythmMorningPerson": "Morning person",
-    "rhythmAfternoon": "Afternoon listener",
-    "rhythmEvening": "Evening listener",
+    "rhythmAfternoon": "Afternoon streamer",
+    "rhythmEvening": "Evening streamer",
     "at": "at",
     "on": "on",
     "atThisHour": "at this hour",
@@ -1381,7 +1381,7 @@
   },
   "genres": {
     "title": "Genres",
-    "subtitle": "Distribution of your listens by music genre. Visualize your preferences in a pie or bar chart.",
+    "subtitle": "Distribution of your streams by music genre. Visualize your preferences in a pie or bar chart.",
     "errorLoading": "Unable to load genre distribution",
     "heroEyebrow": "Rankings & overview",
     "chart": "Chart",
@@ -1390,14 +1390,14 @@
     "distributionTitle": "Genre distribution",
     "totalListens": "Total",
     "detailByGenre": "Detail by genre",
-    "listens": "listens",
-    "Listens": "Listens",
+    "listens": "streams",
+    "Listens": "Streams",
     "heroTitle": "Your genres",
-    "heroSubtitle": "Distribution of your listening by genre",
+    "heroSubtitle": "Distribution of your streaming by genre",
     "statGenres": "Genres",
     "statTopGenre": "Top genre",
     "top3Title": "Your top 3 genres",
-    "top3Subtitle": "The genres you played most often, front and center",
+    "top3Subtitle": "The genres you streamed most often, front and center",
     "allData": "All data",
     "other": "Other",
     "apiMappingNoticeTitle": "Improve your genre mapping",
@@ -1417,11 +1417,11 @@
       "spotlight": {
         "eyebrow": "Spotlight",
         "title": "Your top genres",
-        "description": "The lanes you play most often—ranked and framed by the artists behind them."
+        "description": "The lanes you stream most often—ranked and framed by the artists behind them."
       },
       "distribution": {
         "eyebrow": "Breakdown",
-        "title": "How your listens split",
+        "title": "How your streams split",
         "description": "Switch chart geometry, then page through the full ladder with the same filters as the rest of the dashboard."
       }
     },
@@ -1433,7 +1433,7 @@
     "mobile": {
       "eyebrow": "Genre story",
       "title": "Your sound starts here",
-      "heroInsight": "{genre} leads this window with {percentage}% of your plays, so the page opens with that signal before the full breakdown.",
+      "heroInsight": "{genre} leads this window with {percentage}% of your streams, so the page opens with that signal before the full breakdown.",
       "topGenreLabel": "Top genre",
       "topThreeLabel": "Top 3",
       "shareLabel": "Share",
@@ -1443,7 +1443,7 @@
       "noArtistContext": "Artist context is not available for this genre yet.",
       "supportingMetrics": "Supporting metrics",
       "distributionTitle": "The compact breakdown",
-      "distributionDescription": "{total} listens are grouped by genre. The first five stay upfront; the rest stays tucked away.",
+      "distributionDescription": "{total} streams are grouped by genre. The first five stay upfront; the rest stays tucked away.",
       "showMoreGenres": "Show genres 6-10",
       "accuracySummary": "About genre accuracy",
       "loading": "Loading"
@@ -1451,7 +1451,7 @@
   },
   "genreTrends": {
     "title": "Genre trends",
-    "heroEyebrow": "Listening over time",
+    "heroEyebrow": "Streaming over time",
     "heroStatBadge": "Context",
     "heroStatTag": "This range",
     "heroPanelGroupBy": "Group by",
@@ -1465,7 +1465,7 @@
       },
       "chart": {
         "eyebrow": "Trajectory",
-        "title": "Listen volume over time",
+        "title": "Stream volume over time",
         "description": "Each line tracks one genre; bucket size comes from the sticky control bar.",
         "badge": "Multi-series"
       }
@@ -1485,7 +1485,7 @@
     "selectAtLeastOne": "Select at least one genre to display the chart.",
     "evolution": "What's heating up — and cooling off",
     "chartHint": "Watch the genres crowding your playlist — and the ones quietly making room.",
-    "listensDelta": "listens",
+    "listensDelta": "streams",
     "noGenreData": "No genre data for this period",
     "changeDatesDescription": "Modify the dates or aggregation period in the filter bar.",
     "aiSpotlightEyebrow": "AI-powered read",
@@ -1525,14 +1525,14 @@
     "groqUnavailableInViewedProfile": "Groq classification is available only on your own dashboard, not while viewing another profile or demo data.",
     "groqSessionRunningHint": "A Groq classification session is already in progress.",
     "groqProgressAnchor": "View the progress banner",
-    "groqStartNoUnknown": "Every track you have listened to already has a genre in your data; there is nothing left for Groq to classify here.",
+    "groqStartNoUnknown": "Every track you have streamed already has a genre in your data; there is nothing left for Groq to classify here.",
     "mobile": {
       "eyebrow": "Genre story",
       "heroTitle": "What sound is leading this window?",
-      "heroSubtitle": "Start with the genre carrying your listening, then scan the shifts worth investigating.",
+      "heroSubtitle": "Start with the genre carrying your streaming, then scan the shifts worth investigating.",
       "topGenreLabel": "Leading genre",
       "topGenreFallback": "Select at least one genre to reveal the strongest signal in this window.",
-      "listenCount": "{count} listens",
+      "listenCount": "{count} streams",
       "peakLine": "Peak {count} on {date}",
       "noPeak": "No peak yet",
       "signalsLabel": "Genre trend signals",
@@ -1566,20 +1566,20 @@
     "heroStatTag": "Live session",
     "backToGenres": "Genre overview",
     "heroMetricProgress": "Progress",
-    "heroMetricUnknown": "Unknown listens",
-    "heroMetricMapped": "Mapped listens",
+    "heroMetricUnknown": "Unknown streams",
+    "heroMetricMapped": "Mapped streams",
     "modeArtists": "Top artists",
     "modeTracks": "Top tracks",
     "modeAriaLabel": "Mapping queue: prioritize by artist or by track",
-    "subtitleArtists": "Map unknown artists one card at a time, ordered by how much you listen to them.",
-    "subtitleTracks": "Map unknown tracks one card at a time, ordered by listen count (most played first).",
+    "subtitleArtists": "Map unknown artists one card at a time, ordered by how much you stream to them.",
+    "subtitleTracks": "Map unknown tracks one card at a time, ordered by stream count (most streamed first).",
     "whyImplementedTitle": "Why Palette was implemented",
     "whyImplementedBody": "Apple Music and Spotify do not provide reliable API access to fetch and normalize genres for every artist/track at scale. As a result, part of the library remains labeled as \"Unknown\".",
-    "whyImplementedOutcome": "Palette lets you fix those cases manually, prioritized by listens impact, to improve accuracy in Genres and Genre Trends pages.",
+    "whyImplementedOutcome": "Palette lets you fix those cases manually, prioritized by streams impact, to improve accuracy in Genres and Genre Trends pages.",
     "loadError": "Unable to load Palette session.",
     "nextArtistCard": "Next artist",
     "nextTrackCard": "Next track",
-    "listensImpacted": "{count} unknown listens impacted",
+    "listensImpacted": "{count} unknown streams impacted",
     "tracksImpacted": "{count} tracks to update",
     "existingGenres": "Existing genres (autocomplete)",
     "existingGenresPlaceholder": "Ex: Hip-Hop, Afrobeats, Pop…",
@@ -1602,8 +1602,8 @@
     "mobile": {
       "eyebrow": "Palette queue",
       "heroTitle": "Fix the genre with the biggest payoff first.",
-      "heroSubtitleArtists": "Start with the artist affecting the most Unknown listens, then move through the queue one decision at a time.",
-      "heroSubtitleTracks": "Start with the track affecting the most Unknown listens, then keep the queue moving in short mobile sessions.",
+      "heroSubtitleArtists": "Start with the artist affecting the most Unknown streams, then move through the queue one decision at a time.",
+      "heroSubtitleTracks": "Start with the track affecting the most Unknown streams, then keep the queue moving in short mobile sessions.",
       "nowFixing": "Now fixing",
       "nextBestMatch": "Highest-impact item in this queue",
       "impactSignal": "Impact",
@@ -1622,7 +1622,7 @@
   },
   "artistTrends": {
     "title": "Artist trends",
-    "heroEyebrow": "Listening over time",
+    "heroEyebrow": "Streaming over time",
     "heroStatBadge": "Context",
     "heroStatTag": "This range",
     "heroPanelGroupBy": "Group by",
@@ -1636,7 +1636,7 @@
       },
       "chart": {
         "eyebrow": "Trajectory",
-        "title": "Listen volume over time",
+        "title": "Stream volume over time",
         "description": "Each line follows one artist; bucket size comes from the control bar above.",
         "badge": "Multi-series"
       }
@@ -1651,7 +1651,7 @@
     "selectAtLeastOne": "Select at least one artist to display the chart.",
     "evolution": "Your rising artist radar (or who's falling)",
     "chartHint": "Spot who's rising, fading, and owning your rotation.",
-    "listensDelta": "listens",
+    "listensDelta": "streams",
     "noArtistData": "No artist data for this period",
     "changeDatesDescription": "Modify the dates or aggregation period in the filter bar.",
     "searchPlaceholder": "Search an artist…",
@@ -1682,11 +1682,11 @@
     "aiUpdating": "Updating summary…",
     "mobile": {
       "eyebrow": "Artist story",
-      "heroTitle": "Who is carrying this listening window?",
+      "heroTitle": "Who is carrying this streaming window?",
       "heroSubtitle": "Start with the artist shaping the period, then scan the supporting signals before opening the full comparison.",
       "topArtistLabel": "Most present",
       "topArtistFallback": "Select artists to reveal the leader for this period.",
-      "listenCount": "{count} listens",
+      "listenCount": "{count} streams",
       "peakLine": "Peak {count} · {date}",
       "noPeak": "No peak yet",
       "signalsLabel": "Artist trend signals",
@@ -1715,7 +1715,7 @@
   },
   "artists": {
     "title": "Artists",
-    "subtitle": "Discover your favorite artists, their stats and the evolution of your listening.",
+    "subtitle": "Discover your favorite artists, their stats and the evolution of your streaming.",
     "errorLoading": "Unable to load artist statistics",
     "heroStatBadge": "Context",
     "heroStatTag": "This range",
@@ -1723,14 +1723,14 @@
       "charts": {
         "eyebrow": "Signals",
         "title": "Rank depth & concentration",
-        "description": "Bar chart for who dominates your hours; donut for how the top six split your listens.",
+        "description": "Bar chart for who dominates your hours; donut for how the top six split your streams.",
         "barBadge": "Top 10",
         "pieBadge": "Top 6 split"
       },
       "roster": {
         "eyebrow": "Spotlight",
         "title": "Your artist cards",
-        "description": "Tap a card to open listening insights—same filters as the rest of the dashboard.",
+        "description": "Tap a card to open streaming insights—same filters as the rest of the dashboard.",
         "top3Badge": "Podium",
         "gridBadge": "Gallery"
       },
@@ -1746,16 +1746,16 @@
       "heroTitle": "Who owns your rotation?",
       "heroSubtitle": "Start with the artist carrying this window, then open the deeper ranking only when you want the full index.",
       "primaryInsightEyebrow": "Rotation anchor",
-      "primaryInsightBody": "{name} is the artist with the most weight in your listening right now.",
-      "primaryInsightFallback": "Import listening data to reveal the artist leading this period.",
-      "listenCount": "{count} listens",
-      "shareLabel": "{share} of listens",
+      "primaryInsightBody": "{name} is the artist with the most weight in your streaming right now.",
+      "primaryInsightFallback": "Import streaming data to reveal the artist leading this period.",
+      "listenCount": "{count} streams",
+      "shareLabel": "{share} of streams",
       "signalsLabel": "Artist overview signals",
       "avgSignal": "Avg / artist",
       "concentrationSignal": "Top share",
       "topFiveEyebrow": "First five",
       "topFiveTitle": "The artists setting the tone",
-      "topFiveDescription": "A compact read of the names carrying the most listening weight right now.",
+      "topFiveDescription": "A compact read of the names carrying the most streaming weight right now.",
       "open": "Open",
       "disclosures": {
         "supporting": {
@@ -1770,31 +1770,31 @@
     },
     "heroEyebrow": "Rankings & overview",
     "yourArtists": "Your artists",
-    "overviewSubtitle": "Your listening snapshot",
+    "overviewSubtitle": "Your streaming snapshot",
     "periodLast7Days": "Last 7 days",
     "periodLast30Days": "Last 30 days",
     "periodYearToDate": "Year to date",
     "periodAllTime": "All time",
     "periodCustom": "Custom range",
     "artists": "Artists",
-    "listens": "Listens",
-    "topArtist": "Top artist listens",
+    "listens": "Streams",
+    "topArtist": "Top artist streams",
     "top3Title": "Your top 3 artists",
     "allArtists": "All your artists",
     "evolutionTitle": "Top artists evolution",
-    "evolutionSubtitle": "Listens per day · 5 artists",
-    "top10Listens": "Top 10 · Listens",
+    "evolutionSubtitle": "Streams per day · 5 artists",
+    "top10Listens": "Top 10 · Streams",
     "distributionTop6": "Distribution · Top 6",
     "detailedView": "Detailed view",
     "datesAndTracks": "Dates and unique tracks",
     "rank": "Rank",
     "artist": "Artist",
-    "listensLabel": "Listens",
+    "listensLabel": "Streams",
     "tracks": "Tracks",
     "first": "First",
     "last": "Last",
     "uniqueTracks": "unique track(s)",
-    "listensCount": "listens",
+    "listensCount": "streams",
     "rank1st": "1st",
     "rankNth": "{n}th",
     "artistTooltip": "Artist",
@@ -1807,32 +1807,32 @@
     "paginationPage": "Page {page} / {totalPages}",
     "pageSizeLabel": "Rows",
     "paginationLoading": "Loading next page...",
-    "artistInsightsAriaOpen": "Open listening insights for {name}",
+    "artistInsightsAriaOpen": "Open streaming insights for {name}",
     "insightsCloseAria": "Close insights panel",
-    "insightsEyebrow": "Your listening",
+    "insightsEyebrow": "Your streaming",
     "insightsUniqueTracksShort": "unique tracks",
     "insightsEstPlayTimeUnavailable": "—",
-    "insightsEstPlayTimeHint": "est. play time (track durations)",
-    "insightsTimelineTitle": "First listen & most recent",
-    "insightsTimelineLead": "These two moments show when this artist entered your history for the selected range and when you last pressed play.",
+    "insightsEstPlayTimeHint": "est. stream time (track durations)",
+    "insightsTimelineTitle": "first stream & most recent",
+    "insightsTimelineLead": "These two moments show when this artist entered your history for the selected range and when you last streamed.",
     "insightsFirstListenLabel": "First",
     "insightsMostRecentListenLabel": "Latest",
     "insightsTimelineFootnote": "Dates respect your active filters (period and sources).",
     "insightsLoadError": "Could not load artist insights.",
-    "insightsPeaksTitle": "When you listen the most",
+    "insightsPeaksTitle": "When you stream the most",
     "insightsPeakHour": "Busiest hour",
     "insightsPeakWeekday": "Busiest weekday",
     "insightsBusiestCalendarDay": "Busiest day ever",
-    "insightsBusiestMeta": "{date} · {listens} listens",
+    "insightsBusiestMeta": "{date} · {streams} streams",
     "insightsNoSignal": "Not enough patterned data yet",
     "insightsActiveDays": "Active",
     "insightsSpanDays": "Span",
     "insightsDaysValue": "{count, plural, one {# day} other {# days}}",
-    "insightsByHour": "Listening by hour of day",
-    "insightsByWeekday": "Listening by weekday",
-    "insightsTopTracks": "Your most played tracks with this artist",
-    "insightsSources": "Where listens come from",
-    "insightsFootnoteTz": "Hours and weekdays follow the timestamps stored with your listens (typically UTC depending on export). Totals reflect your active date filters.",
+    "insightsByHour": "Streaming by hour of day",
+    "insightsByWeekday": "Streaming by weekday",
+    "insightsTopTracks": "Your most streamed tracks with this artist",
+    "insightsSources": "Where streams come from",
+    "insightsFootnoteTz": "Hours and weekdays follow the timestamps stored with your streams (typically UTC depending on export). Totals reflect your active date filters.",
     "sourceLastfm": "Last.fm",
     "sourceAppleReplay": "Apple Music Replay",
     "sourceSpotifyExport": "Spotify extended export",
@@ -1841,21 +1841,21 @@
   },
   "tracks": {
     "title": "Tracks",
-    "subtitle": "Your most played tracks at a glance, starting with your top 20.",
+    "subtitle": "Your most streamed tracks at a glance, starting with your top 20.",
     "errorLoading": "Unable to load track statistics",
     "heroStatBadge": "Rollup",
     "heroStatTag": "This range",
     "sections": {
       "chart": {
         "eyebrow": "Leaderboard",
-        "title": "Top 20 by listens",
-        "description": "The songs you repeat most—ranked by total plays under your current filters.",
+        "title": "Top 20 by streams",
+        "description": "The songs you repeat most—ranked by total streams under your current filters.",
         "badge": "Replay surface"
       },
       "table": {
         "eyebrow": "Full index",
         "title": "Every ranked track",
-        "description": "Page through the full ranking—the same order and play counts as the chart, scoped to your current date range and filters.",
+        "description": "Page through the full ranking—the same order and stream counts as the chart, scoped to your current date range and filters.",
         "badge": "Dataset"
       }
     },
@@ -1863,14 +1863,14 @@
       "heroEyebrow": "Replay signal",
       "primaryInsightEyebrow": "Most replayed",
       "primaryInsightBody": "This is the track you returned to most in this window, led by {artist}.",
-      "shareLabel": "Share of listens",
+      "shareLabel": "Share of streams",
       "trendsCta": "See how it moved",
       "topFiveEyebrow": "First five",
       "topFiveTitle": "The songs setting the tone",
-      "topFiveDescription": "A compact read of the tracks carrying the most listening weight right now.",
+      "topFiveDescription": "A compact read of the tracks carrying the most streaming weight right now.",
       "stats": {
         "uniqueTracks": "Unique songs represented in this range.",
-        "totalListens": "Every saved play behind this ranking.",
+        "totalListens": "Every saved stream behind this ranking.",
         "averageLabel": "Avg / track",
         "average": "How concentrated your repeats are."
       },
@@ -1891,13 +1891,13 @@
     "tracks": "Tracks",
     "track": "Track",
     "artist": "Artist",
-    "listens": "Listens",
-    "topTrack": "Top track listens",
-    "top12Listens": "Top 12 · Listens",
-    "top20Listens": "Top 20 · Listens",
+    "listens": "Streams",
+    "topTrack": "Top track streams",
+    "top12Listens": "Top 12 · Streams",
+    "top20Listens": "Top 20 · Streams",
     "allTracks": "Tracks ranking",
     "rank": "Rank",
-    "listensCount": "listens",
+    "listensCount": "streams",
     "viewTrends": "View track trends",
     "paginationSummary": "Showing {start}-{end} of {total}",
     "paginationPrevious": "Previous",
@@ -1908,7 +1908,7 @@
   },
   "trackTrends": {
     "title": "Track trends",
-    "heroEyebrow": "Listening over time",
+    "heroEyebrow": "Streaming over time",
     "heroStatBadge": "Context",
     "heroStatTag": "This range",
     "heroPanelGroupBy": "Group by",
@@ -1917,18 +1917,18 @@
       "picker": {
         "eyebrow": "Curate",
         "title": "Choose your lines",
-        "description": "Toggle from your top plays, search the full catalog, stack up to 50 tracks on one canvas.",
+        "description": "Toggle from your top streams, search the full catalog, stack up to 50 tracks on one canvas.",
         "badge": "Selection"
       },
       "chart": {
         "eyebrow": "Trajectory",
-        "title": "Listen volume over time",
+        "title": "Stream volume over time",
         "description": "Each line follows one track; bucket size comes from the control bar above.",
         "badge": "Multi-series"
       }
     },
     "backToTracks": "Back to track rankings",
-    "subtitle": "Evolution of your most played tracks",
+    "subtitle": "Evolution of your most streamed tracks",
     "subtitleExtended": "Compare track evolution over time. Start with top 20, then add other tracks via catalog search.",
     "errorLoading": "Unable to load track trends",
     "tracksToDisplay": "Tracks to display:",
@@ -1937,7 +1937,7 @@
     "selectAtLeastOne": "Select at least one track to display the chart.",
     "evolution": "Your hit replay engine",
     "chartHint": "See which songs keep pulling you back, and which ones had their moment.",
-    "listensDelta": "listens",
+    "listensDelta": "streams",
     "noTrackData": "No track data for this period",
     "changeDatesDescription": "Adjust date range or aggregation period in the filters bar.",
     "searchPlaceholder": "Search track or artist…",
@@ -1960,7 +1960,7 @@
       "heroSubtitle": "Start with the songs doing the most in this window, then open the deeper controls only when you want to tune the comparison.",
       "topTrackLabel": "Most present",
       "topTrackFallback": "Select tracks to reveal the lead song for this period.",
-      "listenCount": "{count} listens",
+      "listenCount": "{count} streams",
       "peakLine": "Peak {count} · {date}",
       "noPeak": "No peak yet",
       "signalsLabel": "Track trend signals",
@@ -1988,7 +1988,7 @@
     "title": "AI Insights",
     "heroEyebrow": "Digest from your analytics",
     "heroStatBadge": "Signal quality",
-    "heroStatTag": "Grounded in plays",
+    "heroStatTag": "Grounded in streams",
     "heroTrust1": "Cards summarize aggregates already in Soundprint—nothing is fabricated from the web.",
     "heroTrust2": "Human vs technical only changes tone; the underlying stats stay identical.",
     "heroTrust3": "Uses the date range active on your dashboard.",
@@ -1998,10 +1998,10 @@
     "heroStatTone": "Tone",
     "heroStatStatus": "Quota / cache",
     "heroFresh": "Live response",
-    "subtitle": "Five crisp takeaways per refresh—generated only from your filtered listening window.",
-    "subtitleShort": "Analysis of your listening data",
+    "subtitle": "Five crisp takeaways per refresh—generated only from your filtered streaming window.",
+    "subtitleShort": "Analysis of your streaming data",
     "seeMore": "See more",
-    "loading": "Analyzing your listening data...",
+    "loading": "Analyzing your streaming data...",
     "generating": "Synthesizing insight cards from your latest aggregates…",
     "errorLoading": "Unable to load insights.",
     "errorMessage": "Error generating insights",
@@ -2009,11 +2009,11 @@
     "noInsights": "No data available to generate insights.",
     "changeDates": "Modify the dates to get insights.",
     "notEnoughData": "Not enough data",
-    "importDescription": "Import your listening data (Spotify/Apple exports recommended) and select a period to get insights.",
+    "importDescription": "Import your streaming data (Spotify/Apple exports recommended) and select a period to get insights.",
     "yourInsights": "Short, opinionated blurbs grounded in the same charts you already trust—toggle tone without changing the math.",
-    "insightsFromData": "Insights generated from your aggregated listening data.",
+    "insightsFromData": "Insights generated from your aggregated streaming data.",
     "spotlightTitle": "Insight cards",
-    "spotlightHint": "Grounded in your dashboard filters and stored plays",
+    "spotlightHint": "Grounded in your dashboard filters and stored streams",
     "cached": "(cached result)",
     "quotaRemaining": "Quota: {count} remaining",
     "styleToggle": {
@@ -2024,9 +2024,9 @@
     },
     "loadingShort": "Loading...",
     "publicDemoTeaser": {
-      "insightTopGenre": "{genre} accounts for {pct} of classified plays in this range.",
-      "insightTopArtist": "{artist} is your most played artist with {count} listens.",
-      "insightRhythm": "Your strongest listening rhythm shows up on {peakDay} around {peakHour}.",
+      "insightTopGenre": "{genre} accounts for {pct} of classified streams in this range.",
+      "insightTopArtist": "{artist} is your most streamed artist with {count} streams.",
+      "insightRhythm": "Your strongest streaming rhythm shows up on {peakDay} around {peakHour}.",
       "insightDiversity": "You explored {artistCount} artists and {trackCount} distinct tracks in this window."
     }
   },
@@ -2036,7 +2036,7 @@
     "heroEyebrow": "Week-over-week signal",
     "heroStatBadge": "Deterministic core",
     "heroStatTag": "AI narration",
-    "heroTrust1": "Week-to-week deltas come from your stored plays—classification rules are fixed on the server.",
+    "heroTrust1": "Week-to-week deltas come from your stored streams—classification rules are fixed on the server.",
     "heroTrust2": "Natural vs technical only changes how the AI phrases the same underlying shifts.",
     "heroTrust3": "Sparse weeks are skipped automatically so charts stay honest.",
     "ctaOverview": "Music overview",
@@ -2046,15 +2046,15 @@
     "heroStatSkipped": "Skipped weeks",
     "summaryStyleLabel": "Summary style",
     "subtitle": "Watch volume, diversity, and genre mix move between ISO weeks—deterministic stats first, optional AI color commentary on top.",
-    "loading": "Diffing your listening weeks…",
+    "loading": "Diffing your streaming weeks…",
     "loadingShort": "Loading...",
     "errorLoading": "Unable to load trends.",
     "errorMessage": "Error loading taste evolution",
-    "emptySubtitle": "We compare consecutive ISO weeks inside your selected range. Import enough listens so each week clears the minimum threshold.",
+    "emptySubtitle": "We compare consecutive ISO weeks inside your selected range. Import enough streams so each week clears the minimum threshold.",
     "insufficientData": "Insufficient data",
-    "importDescription": "Import your listening data and select a range of at least 2 weeks. Each week must contain at least 10 listens for reliable analysis.",
+    "importDescription": "Import your streaming data and select a range of at least 2 weeks. Each week must contain at least 10 streams for reliable analysis.",
     "vs": "vs",
-    "listens": "listens",
+    "listens": "streams",
     "classifications": {
       "expansion": "Expansion",
       "consolidation": "Consolidation",
@@ -2081,7 +2081,7 @@
   },
   "taste-profile": {
     "title": "Your Soundprint-AI, decoded",
-    "subtitleShort": "The patterns behind what you play most",
+    "subtitleShort": "The patterns behind what you stream most",
     "seeMore": "See more",
     "subtitle": "Your musical profile explained from your analytics.",
     "loading": "Generating your musical profile...",
@@ -2092,7 +2092,7 @@
     "checkApiKey": "Make sure GROQ_API_KEY is configured on the server.",
     "noData": "No data available.",
     "notEnoughData": "Not enough data",
-    "importDescription": "Import your listening data (Spotify/Apple exports recommended) and select a period to get your profile.",
+    "importDescription": "Import your streaming data (Spotify/Apple exports recommended) and select a period to get your profile.",
     "cached": "(cached result)",
     "quotaRemaining": "Quota: {count} remaining",
     "tone": "Tone:",
@@ -2113,22 +2113,22 @@
     "influences": "Influences",
     "coreGenres": "Core genres",
     "whatMakesYouUnique": "What makes you unique",
-    "footer": "Generated from your listening data • Soundprint-AI",
+    "footer": "Generated from your streaming data • Soundprint-AI",
     "publicDemoTeaser": {
       "headline": "{genre} leads at {genrePct}, with {artist} anchoring your rotation.",
-      "headlineNoArtist": "{genre} leads at {genrePct} in this listening window.",
-      "headlineFallback": "Your listening patterns are taking shape across {listenCount} plays.",
-      "influences": "{genre1} and {genre2} shape most of your plays.",
+      "headlineNoArtist": "{genre} leads at {genrePct} in this streaming window.",
+      "headlineFallback": "Your streaming patterns are taking shape across {listenCount} streams.",
+      "influences": "{genre1} and {genre2} shape most of your streams.",
       "influencesSingle": "{genre} dominates your genre mix.",
-      "uniqueAspect": "Peak listening lands on {peakDay} around {peakHour}.",
-      "uniqueAspectDayOnly": "Peak listening lands on {peakDay}.",
+      "uniqueAspect": "Peak streaming lands on {peakDay} around {peakHour}.",
+      "uniqueAspectDayOnly": "Peak streaming lands on {peakDay}.",
       "uniqueAspectHourOnly": "Evenings peak around {peakHour}.",
       "uniqueAspectFallback": "{artistCount} artists across {trackCount} tracks in this window."
     }
   },
   "musical-profile": {
     "title": "Musical Profile",
-    "subtitle": "A premium, AI-assisted replay of your listening identity.",
+    "subtitle": "A premium, AI-assisted replay of your streaming identity.",
     "heroTitle": "See yourself through the music you love.",
     "heroSignature": "Signature sound",
     "heroSignatureHint": "Anchored in {genre}",
@@ -2136,11 +2136,11 @@
     "profileCockpit": {
       "label": "Musical profile",
       "live": "Live range",
-      "listeningRhythm": "Listening rhythm",
+      "listeningRhythm": "streaming rhythm",
       "peakDay": "Peak day",
       "peakHour": "Peak hour",
       "tracksExploredHint": "distinct tracks",
-      "rhythmFallback": "Widen the date range to surface your listening peaks."
+      "rhythmFallback": "Widen the date range to surface your streaming peaks."
     },
     "periodBadge": {
       "label": "Period",
@@ -2157,7 +2157,7 @@
       "ariaLabel": "Analysis period from {start} to {end}",
       "ariaLabelSingleDay": "Analysis period on {date}"
     },
-    "noData": "No listening data yet",
+    "noData": "No streaming data yet",
     "emptyFeature": {
       "badge": "What this page is for",
       "title": "A landing-style welcome before you drop into analytics",
@@ -2166,18 +2166,18 @@
       "item2": "A single cue toward Your Music, where leaderboards and detailed breakdowns actually live",
       "item3": "A poetic sonic identity line (cached) so the page still feels personal—without replacing the main dashboard"
     },
-    "importDescription": "Import your Spotify or Apple Music export to generate a musical profile from real listening history.",
+    "importDescription": "Import your Spotify or Apple Music export to generate a musical profile from real streaming history.",
     "errorLoading": "Unable to load your musical profile. Please try again.",
     "unknownArtist": "Unknown artist",
     "unknownGenre": "your current palette",
-    "deterministicProfile": "Your current profile leans toward {genre}, with {artist} acting as one of the strongest anchors in the period. Import more listens or widen the date range to make the AI profile sharper.",
+    "deterministicProfile": "Your current profile leans toward {genre}, with {artist} acting as one of the strongest anchors in the period. Import more streams or widen the date range to make the AI profile sharper.",
     "identityTitle": "Your soundprint identity",
-    "identitySubtitle": "Your real top artists, genres, and tracks — not random poetry. What you read here is what you actually play.",
+    "identitySubtitle": "Your real top artists, genres, and tracks — not random poetry. What you read here is what you actually stream.",
     "identityWelcome": "Import complete — here's your first read.",
     "features": {
       "badge": "What's next",
       "title": "Three ways to explore your library",
-      "lead": "Your listens are in. Start with the overview, ask questions in plain language, or compare with friends.",
+      "lead": "Your streams are in. Start with the overview, ask questions in plain language, or compare with friends.",
       "yourMusic": {
         "eyebrow": "Analytics hub",
         "title": "Your Music",
@@ -2187,7 +2187,7 @@
       "aiChat": {
         "eyebrow": "Conversational",
         "title": "Soundprint chat",
-        "body": "Ask anything about your history. Answers stay grounded in your plays—not the open web.",
+        "body": "Ask anything about your history. Answers stay grounded in your streams—not the open web.",
         "cta": "Start chatting"
       },
       "duet": {
@@ -2220,7 +2220,7 @@
       "cta": "Open Your Music",
       "philosophyLogoAlt": "Soundprint-AI",
       "philosophyEyebrow": "What Soundprint stands for",
-      "philosophyBullet1": "Your musical identity is grounded in the listens you actually logged—not a generic taste label or a one-off mood.",
+      "philosophyBullet1": "Your musical identity is grounded in the streams you actually logged—not a generic taste label or a one-off mood.",
       "philosophyBullet2": "Every screen draws from the same history and date filters, so the story up top and the details below never fight each other."
     },
     "landing": {
@@ -2231,7 +2231,7 @@
       "secondaryHint": "Or jump to a focused view",
       "cards": {
         "statsTitle": "Period snapshot",
-        "statsBody": "Plays, listening time, artist and track variety—with comparison to the previous range when you need it.",
+        "statsBody": "Streams, streaming time, artist and track variety—with comparison to the previous range when you need it.",
         "movementTitle": "Recent movement",
         "movementBody": "Area charts and trend context so you see momentum, not only totals.",
         "mixTitle": "Genre & taste context",
@@ -2250,18 +2250,18 @@
       "aiAttributes": "Deeper signals"
     },
     "metrics": {
-      "totalListens": "Listens",
-      "totalListensHint": "Plays in this profile",
-      "listeningTime": "Listening time",
+      "totalListens": "Streams",
+      "totalListensHint": "streams in this profile",
+      "listeningTime": "streaming time",
       "listeningTimeHint": "Estimated from track durations",
       "uniqueArtists": "Artists",
       "uniqueArtistsHint": "Distinct artists explored",
       "uniqueTracks": "Tracks",
-      "uniqueTracksHint": "Distinct songs played"
+      "uniqueTracksHint": "Distinct songs streamed"
     },
     "labels": {
-      "listens": "listens",
-      "ofListens": "of listening",
+      "listens": "streams",
+      "ofListens": "of streaming",
       "by": "by"
     },
     "units": {
@@ -2283,17 +2283,17 @@
   },
   "annualReport": {
     "title": "Annual Report {year}",
-    "subtitle": "Analysis of your music listening habits",
+    "subtitle": "Analysis of your music streaming habits",
     "overview": "Your Music",
-    "totalListens": "Total plays",
+    "totalListens": "Total streams",
     "uniqueArtists": "Different artists",
     "uniqueTracks": "Different tracks",
-    "totalPlayTime": "Listening time",
+    "totalPlayTime": "streaming time",
     "genres": "Music genres",
-    "listens": "listens",
+    "listens": "streams",
     "monthlyEvolution": "Monthly evolution",
     "tableMonth": "Month",
-    "tableListens": "Listens",
+    "tableListens": "Streams",
     "tableArtists": "Artists",
     "tableTracks": "Tracks",
     "footer": "Generated on {date} - Soundprint-AI Dashboard"
@@ -2307,7 +2307,7 @@
     "summary": {
       "patterns": "Patterns: Overview surfaces KPIs plus embedded summaries; Library covers tracks/artists, trend pages, and genre palette; Timeline/heatmap/temporal analysis explore rhythm; AI adds Ask your Soundprint, AI Insights, musical profile, and taste evolution. Account tools (live Spotify, API playground, settings) and the demo videos sit beside that core—they inform or operate the product but do not replace export-backed history.",
       "calculations": "Calculations: PostgreSQL aggregations (daily/weekly/monthly), global stats, genre cascade (Track → ARTIST_TO_GENRE_MAP → Unknown), and CSV/JSON/PDF exports.",
-      "limitations": "Limitations: Genre mapping coverage, source-data completeness, live Spotify API vs export-backed history, estimated listen time, query performance at scale, and artist/track normalization.",
+      "limitations": "Limitations: Genre mapping coverage, source-data completeness, live Spotify API vs export-backed history, estimated stream time, query performance at scale, and artist/track normalization.",
       "architecture": "Architecture: Next.js App Router, PostgreSQL + Prisma, Redis (optional, ioredis) plus TanStack Query, Groq-backed AI with server-side insight caching, Recharts, Spotify/Apple-first ingestion (Last.fm optional)."
     },
     "expandSection": "Expand section",
@@ -2316,22 +2316,22 @@
       "sectionTitle": "Patterns Revealed by the Data",
       "overview": {
         "title": "Your Music",
-        "paragraph": "The <code>/dashboard/overview</code> page is the main snapshot: headline KPIs versus the prior window of the same length, a recent-listens area chart, and links into deeper views. It also embeds summary widgets—heatmap preview, genre/artist/track momentum cards, taste profile teaser, an AI insights excerpt, top artists, and expandable per-artist breakdowns aligned with the artists area. Related routes include <code>/dashboard/tracks</code>, <code>/dashboard/artists</code>, <code>/dashboard/musical-profile</code>, and this methodology page at <code>/dashboard/insights</code>."
+        "paragraph": "The <code>/dashboard/overview</code> page is the main snapshot: headline KPIs versus the prior window of the same length, a recent-streams area chart, and links into deeper views. It also embeds summary widgets—heatmap preview, genre/artist/track momentum cards, taste profile teaser, an AI insights excerpt, top artists, and expandable per-artist breakdowns aligned with the artists area. Related routes include <code>/dashboard/tracks</code>, <code>/dashboard/artists</code>, <code>/dashboard/musical-profile</code>, and this methodology page at <code>/dashboard/insights</code>."
       },
       "timeline": {
         "title": "Timeline and Temporal Trends",
-        "paragraph": "The <code>/dashboard/timeline</code> and <code>/dashboard/genres/trends</code> pages reveal listening cycles with aggregation by day, week or month:",
-        "li1": "Weekly cycles: Days of the week when you listen the most",
+        "paragraph": "The <code>/dashboard/timeline</code> and <code>/dashboard/genres/trends</code> pages reveal streaming cycles with aggregation by day, week or month:",
+        "li1": "Weekly cycles: Days of the week when you stream the most",
         "li2": "Seasonal variations: Monthly evolution of habits",
         "li3": "Genre trends: Genres on the rise or decline over the period (first vs second half comparison)"
       },
       "heatmap": {
-        "title": "Listening Heatmap",
-        "paragraph": "The <code>/dashboard/heatmap</code> page displays a GitHub-style calendar with listening intensity per day. It identifies your most active days and distribution by day of the week."
+        "title": "Streaming Heatmap",
+        "paragraph": "The <code>/dashboard/heatmap</code> page displays a GitHub-style calendar with streaming intensity per day. It identifies your most active days and distribution by day of the week."
       },
       "temporal": {
         "title": "Advanced Temporal Analysis",
-        "paragraph": "The <code>/dashboard/temporal-analysis</code> page details your listening patterns: listens by day of the week (Monday-Sunday), by hour of the day, and identifies peak moments (day and hour when you listen the most)."
+        "paragraph": "The <code>/dashboard/temporal-analysis</code> page details your streaming patterns: streams by day of the week (Monday-Sunday), by hour of the day, and identifies peak moments (day and hour when you stream the most)."
       },
       "genres": {
         "title": "Genre Diversity and Preferences",
@@ -2339,11 +2339,11 @@
       },
       "libraryTrends": {
         "title": "Track and artist trend views",
-        "paragraph": "Beyond the high-level genre summaries, <code>/dashboard/tracks/trends</code> and <code>/dashboard/artists/trends</code> chart listen volume across the filtered range using day, week, or month buckets—so you can follow specific tracks or your top artists over time. They honor the same global date filter as the rest of the dashboard."
+        "paragraph": "Beyond the high-level genre summaries, <code>/dashboard/tracks/trends</code> and <code>/dashboard/artists/trends</code> chart stream volume across the filtered range using day, week, or month buckets—so you can follow specific tracks or your top artists over time. They honor the same global date filter as the rest of the dashboard."
       },
       "ai": {
         "title": "AI-Powered Insights",
-        "paragraph": "Several experiences use Groq-hosted models on top of your analytics summary and listening data:",
+        "paragraph": "Several experiences use Groq-hosted models on top of your analytics summary and streaming data:",
         "li1": "<code>/dashboard/ask-your-soundprint</code>: Conversational assistant with tool-backed answers over your library (honors the dashboard date filter)",
         "li2": "<code>/dashboard/ai-insights</code>: Short natural-language insight cards (optional; requires Groq credentials server-side)",
         "li3": "<code>/dashboard/musical-profile</code>: Enriches your stats with an AI-generated musical identity",
@@ -2352,15 +2352,15 @@
       },
       "dateRange": {
         "title": "Date Range Filter",
-        "paragraph": "The top filter scopes analytics to presets (7 days, 30 days, year-to-date, custom range) or all time. For the all-time preset, the client resolves the true min/max listen dates from <code>/api/date-range</code> so features such as AI insights and taste profile use your full history instead of silently falling back to a short default window. Exports (CSV, JSON, PDF) honor the selected range."
+        "paragraph": "The top filter scopes analytics to presets (7 days, 30 days, year-to-date, custom range) or all time. For the all-time preset, the client resolves the true min/max stream dates from <code>/api/date-range</code> so features such as AI insights and taste profile use your full history instead of silently falling back to a short default window. Exports (CSV, JSON, PDF) honor the selected range."
       },
       "accountTooling": {
         "title": "Account: live Spotify, API playground, and settings",
-        "paragraph": "The Account section of the sidebar is deliberately separate from the export-backed analytics storyline. <code>/dashboard/spotify-snapshot</code> shows what the Spotify Web API returns today—profile, top tracks and artists, recently played—so you can compare that live snapshot with the long-term rows in your <code>Listen</code> table built from imports. That route can be used once Spotify is OAuth-linked even when full export onboarding is incomplete; it reflects API state, not your warehouse. <code>/dashboard/spotify-playground</code> is the same family of endpoints in raw JSON form for debugging scopes and payloads; it is operational tooling, not a listening-history dashboard. <code>/dashboard/settings</code> collects preferences, confirmations, and safety actions (such as deletion): they change your experience and account state, not how historical aggregates are defined from stored plays."
+        "paragraph": "The Account section of the sidebar is deliberately separate from the export-backed analytics storyline. <code>/dashboard/spotify-snapshot</code> shows what the Spotify Web API returns today—profile, top tracks and artists, recent streams—so you can compare that live snapshot with the long-term rows in your <code>Stream</code> table built from imports. That route can be used once Spotify is OAuth-linked even when full export onboarding is incomplete; it reflects API state, not your warehouse. <code>/dashboard/spotify-playground</code> is the same family of endpoints in raw JSON form for debugging scopes and payloads; it is operational tooling, not a streaming-history dashboard. <code>/dashboard/settings</code> collects preferences, confirmations, and safety actions (such as deletion): they change your experience and account state, not how historical aggregates are defined from stored streams."
       },
       "productDemo": {
         "title": "Walkthrough videos (demo)",
-        "paragraph": "<code>/dashboard/demo</code> embeds product walkthrough videos for orientation and storytelling. Treat them as illustrative—they are not ingested as data, and every personalized chart still derives from listens stored in your account."
+        "paragraph": "<code>/dashboard/demo</code> embeds product walkthrough videos for orientation and storytelling. Treat them as illustrative—they are not ingested as data, and every personalized chart still derives from streams stored in your account."
       }
     },
     "calculations": {
@@ -2368,18 +2368,18 @@
       "aggregations": {
         "title": "Temporal Aggregations",
         "paragraph": "Aggregations use native PostgreSQL SQL (via Prisma) for performance:",
-        "li1": "Daily: date bucket from the Listen.playedAt timestamp",
+        "li1": "Daily: date bucket from the Stream.playedAt timestamp",
         "li2": "Weekly: DATE_TRUNC('week', playedAt) buckets ISO weeks (Monday start)",
         "li3": "Monthly: calendar month bucket from playedAt (typically YYYY-MM)",
-        "li4": "Counts: COUNT(*) and COUNT(DISTINCT ...) on listens, tracks, and artists as needed"
+        "li4": "Counts: COUNT(*) and COUNT(DISTINCT ...) on streams, tracks, and artists as needed"
       },
       "stats": {
         "title": "Global Statistics",
         "paragraph": "Your Music statistics are calculated as follows:",
-        "li1": "Total listens: Total count of records in the Listen table",
-        "li2": "Unique artists: Distinct count of artist_id via listened tracks",
+        "li1": "Total streams: Total count of records in the Stream table",
+        "li2": "Unique artists: Distinct count of artist_id via streamed tracks",
         "li3": "Unique tracks: Distinct count of track_id",
-        "li4": "Total time: Sum of track durations (in seconds) for all listens"
+        "li4": "Total time: Sum of track durations (in seconds) for all streams"
       },
       "genres": {
         "title": "Genre Distribution",
@@ -2387,12 +2387,12 @@
         "li1": "1. Track.genre: Genre stored on the track (from Last.fm when available on import)",
         "li2": "2. ARTIST_TO_GENRE_MAP: Static manual mapping by artist name (fallback if Track.genre is null)",
         "li3": "3. \"Unknown\": If neither is available",
-        "li4": "Listens are aggregated by resolved genre; percentages are calculated on total listens"
+        "li4": "Streams are aggregated by resolved genre; percentages are calculated on total streams"
       },
       "export": {
         "title": "Data Export",
         "paragraph": "Exports are available in the filter bar (CSV, JSON, PDF icons):",
-        "li1": "CSV: All listens with Date, Artist, Title, Genre, Source (period filters applied)",
+        "li1": "CSV: All streams with Date, Artist, Title, Genre, Source (period filters applied)",
         "li2": "JSON: Aggregated statistics (overview, timeline, genres) in structured format",
         "li3": "PDF: Custom annual report with charts and top artists/tracks per year"
       }
@@ -2413,20 +2413,20 @@
       },
       "liveSpotifyApi": {
         "title": "Live Spotify Web API",
-        "limitation": "Snapshot and playground calls reflect Spotify's current API rules—time windows, limits, and how \"top\" or \"recent\" lists are defined—not the same completeness or replay semantics as a user-requested account export ingested into Listen.",
-        "impact": "Side-by-side comparison with your warehouse can diverge (e.g. recency filters, listening not exposed through these endpoints, curated tops vs. full history in exports).",
-        "solution": "Use live API views for debugging or quick checks; rely on imported listens for longitudinal dashboards, exports, and like-for-like historical analysis."
+        "limitation": "Snapshot and playground calls reflect Spotify's current API rules—time windows, limits, and how \"top\" or \"recent\" lists are defined—not the same completeness or replay semantics as a user-requested account export ingested into Stream.",
+        "impact": "Side-by-side comparison with your warehouse can diverge (e.g. recency filters, streaming not exposed through these endpoints, curated tops vs. full history in exports).",
+        "solution": "Use live API views for debugging or quick checks; rely on imported streams for longitudinal dashboards, exports, and like-for-like historical analysis."
       },
       "listenTime": {
-        "title": "Listen Time Calculation",
-        "limitation": "Total listening time is estimated by summing track durations, without accounting for interruptions or partial listens.",
-        "impact": "Calculated time may overestimate actual listening time if tracks are often interrupted or partially listened.",
+        "title": "Stream Time Calculation",
+        "limitation": "Total streaming time is estimated by summing track durations, without accounting for interruptions or partial streams.",
+        "impact": "Calculated time may overestimate actual streaming time if tracks are often interrupted or partially streamed.",
         "solution": "Possible improvement: Use playback progress data if available in sources."
       },
       "queryPerformance": {
         "title": "Query Performance",
-        "limitation": "Trade-off: Complex aggregations require loading listens into memory for calculations.",
-        "impact": "Performance may degrade with very large datasets (millions of listens).",
+        "limitation": "Trade-off: Complex aggregations require loading streams into memory for calculations.",
+        "impact": "Performance may degrade with very large datasets (millions of streams).",
         "solution": "Possible optimizations: Materialized views, additional indexes, or asynchronous calculations for large data."
       },
       "dataNormalization": {
@@ -2453,7 +2453,7 @@
         "paragraph": "Normalized schema (Prisma) to avoid redundancy:",
         "li1": "Artist: name, nameLower (case-insensitive search), MBID, imageUrl",
         "li2": "Track: title, artist, duration, genre (Last.fm when available), MBID",
-        "li3": "Listen: timestamp (playedAt), source (spotify_export | apple_music_export | apple_music_replay | lastfm), link to Track"
+        "li3": "Stream: timestamp (playedAt), source (spotify_export | apple_music_export | apple_music_replay | lastfm), link to Track"
       },
       "import": {
         "title": "Data Import",
@@ -2481,7 +2481,7 @@
     "noConnectionTrust3": "Operational tooling only—dashboard charts still depend on exported history inside Soundprint.",
     "panelToolbarTitle": "Endpoint inspector",
     "title": "API playground",
-    "subtitle": "Tab through proxied GET responses—raw JSON for /me, tops, and recently played while you validate scopes and payloads.",
+    "subtitle": "Tab through proxied GET responses—raw JSON for /me, tops, and recent streams while you validate scopes and payloads.",
     "connectedAs": "Signed in to Spotify as {name}.",
     "reload": "Reload",
     "loading": "Loading…",
@@ -2492,8 +2492,8 @@
     "statusError": "HTTP {status}",
     "emptyPanel": "No response loaded yet.",
     "fetchedAt": "Fetched at {time}",
-    "apiTroubleshootTitle": "Seeing errors on Top tracks / Top artists / Recently played?",
-    "apiTroubleshootBody": "• OAuth scopes: Top and recently-played need user-top-read and user-read-recently-played. In Supabase, open Authentication → Providers → Spotify and set the provider scopes to include those (same string as SPOTIFY_WEB_API_OAUTH_SCOPES in your app). Then sign out and sign in with Spotify again.\n• HTTP 502 / 500 / “Server error”: Spotify sometimes has short outages — wait and tap Reload. If /v1/me works but other tabs fail, check scopes first.",
+    "apiTroubleshootTitle": "Seeing errors on Top tracks / Top artists / recent streams?",
+    "apiTroubleshootBody": "• OAuth scopes: Top and recently-streamed need user-top-read and user-read-recently-streamed. In Supabase, open Authentication → Providers → Spotify and set the provider scopes to include those (same string as SPOTIFY_WEB_API_OAUTH_SCOPES in your app). Then sign out and sign in with Spotify again.\n• HTTP 502 / 500 / “Server error”: Spotify sometimes has short outages — wait and tap Reload. If /v1/me works but other tabs fail, check scopes first.",
     "scopeStoredLabel": "Scope string stored for this connection (may update after token refresh)",
     "scopeExpectedLabel": "Scopes this app expects",
     "notConnected": {
@@ -2506,7 +2506,7 @@
       "me": "Current user",
       "topTracks": "Top tracks",
       "topArtists": "Top artists",
-      "recentlyPlayed": "Recently played"
+      "recentlyPlayed": "recent streams"
     },
     "mobile": {
       "eyebrow": "API playground",
@@ -2533,7 +2533,7 @@
       "trustSummary": "Read-only proxy using your saved Spotify token.",
       "disconnectedEyebrow": "Link required",
       "disconnectedStoryTitle": "Connect Spotify to inspect live API payloads",
-      "disconnectedStoryBody": "OAuth from the import assistant unlocks proxied JSON for /me, tops, and recently played.",
+      "disconnectedStoryBody": "OAuth from the import assistant unlocks proxied JSON for /me, tops, and recent streams.",
       "whyLinkTitle": "Why link Spotify?",
       "whyLinkSummary": "Three things to know before you connect."
     }
@@ -2597,7 +2597,7 @@
   },
   "api-docs": {
     "title": "API documentation",
-    "description": "API endpoints reference. Use the dashboard to explore your listening data.",
+    "description": "API endpoints reference. Use the dashboard to explore your streaming data.",
     "viewReference": "View API reference",
     "goToDashboard": "Go to Dashboard"
   },
@@ -2617,13 +2617,13 @@
       "defaultMessage": "No data available",
       "publicDemoLabel": "View public demo",
       "importData": {
-        "message": "No listening data available",
+        "message": "No streaming data available",
         "description": "Import a Spotify or Apple Music export to unlock your statistics.",
         "actionLabel": "Import your data"
       },
       "importReplay": {
         "message": "No yearly data available",
-        "description": "Import your listening data to compare years.",
+        "description": "Import your streaming data to compare years.",
         "actionLabel": "See how to import"
       },
       "changeDates": {
@@ -2632,7 +2632,7 @@
         "actionLabel": "Change dates"
       },
       "noDayDetail": {
-        "message": "No listening found for this date",
+        "message": "No streaming found for this date",
         "description": "Choose another date in the calendar to see the details."
       },
       "startupEmptyEyebrow": "Cold start",
@@ -2650,7 +2650,7 @@
       "period": "Period",
       "exportLabel": "Export",
       "exportMenuLabel": "Export options",
-      "exportMenuCsv": "Listens",
+      "exportMenuCsv": "Streams",
       "exportMenuJson": "Statistics",
       "exportMenuPdf": "Annual report",
       "presets": {
@@ -2675,7 +2675,7 @@
       "toastExportErrorGeneric": "Export error",
       "toastExportErrorFallback": "An error occurred during export",
       "recentAuthRequired": "Please sign in again before exporting your data.",
-      "exportCsvTitle": "Export listens to CSV",
+      "exportCsvTitle": "Export streams to CSV",
       "exportStatsTitle": "Export statistics to JSON",
       "exportPdfTitle": "Generate annual PDF report"
     },
@@ -2739,7 +2739,7 @@
   },
   "about": {
     "title": "How it works",
-    "subtitle": "A quick guide to understand where your listening data comes from and what you can explore in the dashboard today.",
+    "subtitle": "A quick guide to understand where your streaming data comes from and what you can explore in the dashboard today.",
     "heroBadge": "User guide",
     "brandCard": {
       "title": "Soundprint-AI",
@@ -2747,7 +2747,7 @@
     },
     "whatIs": {
       "title": "What is this?",
-      "paragraph": "Soundprint-AI is a personal dashboard that visualizes your listening habits over time. You can ingest data from Last.fm scrobbles or Apple Music CSV exports, then explore stats, trends, and insights in one place."
+      "paragraph": "Soundprint-AI is a personal dashboard that visualizes your streaming habits over time. You can ingest data from Last.fm scrobbles or Apple Music CSV exports, then explore stats, trends, and insights in one place."
     },
     "whyLastfm": {
       "title": "Why Last.fm instead of Apple Music?",
@@ -2755,15 +2755,15 @@
     },
     "whatIsLastfm": {
       "title": "What is Last.fm?",
-      "paragraph": "Last.fm is a music service that tracks your listens across platforms (Apple Music, Spotify, and more). Each scrobble includes metadata like artist, track, and timestamp. This project fetches that history and stores it locally for analytics."
+      "paragraph": "Last.fm is a music service that tracks your streams across platforms (Apple Music, Spotify, and more). Each scrobble includes metadata like artist, track, and timestamp. This project fetches that history and stores it locally for analytics."
     },
     "workflow": {
       "title": "How does the data get here?",
       "steps": {
-        "step1": "Listen to music — Use Apple Music (or any supported app) on your phone as usual.",
-        "step2": "Last.fm scrobbling — Last.fm is linked to your Apple Music account and automatically records each listen.",
-        "step3": "Capture and sync — New listens are sent to Last.fm via scrobbling, or imported later from Apple Music CSV exports.",
-        "step4": "Update the database — Run the update/import scripts to fetch fresh listens and store them in your local database.",
+        "step1": "Stream to music — Use Apple Music (or any supported app) on your phone as usual.",
+        "step2": "Last.fm scrobbling — Last.fm is linked to your Apple Music account and automatically records each stream.",
+        "step3": "Capture and sync — New streams are sent to Last.fm via scrobbling, or imported later from Apple Music CSV exports.",
+        "step4": "Update the database — Run the update/import scripts to fetch fresh streams and store them in your local database.",
         "step5": "Dashboard refreshes — Once the data pipeline completes, charts and metrics reflect the newest records.",
         "step6": "Data looks stale? — Most of the time, it means no recent sync/import has run yet."
       }
@@ -2771,15 +2771,15 @@
     "features": {
       "title": "What can you explore?",
       "items": {
-        "overview": "Your Music — Global stats (listens, artists, tracks, total time)",
-        "timeline": "Timeline — Evolution of your listens over time (day/week/month)",
-        "heatmap": "Heatmap — GitHub-style calendar of your listening intensity",
-        "tracks": "Tracks — Most played tracks and replay patterns",
+        "overview": "Your Music — Global stats (streams, artists, tracks, total time)",
+        "timeline": "Timeline — Evolution of your streams over time (day/week/month)",
+        "heatmap": "Heatmap — GitHub-style calendar of your streaming intensity",
+        "tracks": "Tracks — most streamed tracks and replay patterns",
         "genres": "Genres — Breakdown by genre and temporal trends",
         "artists": "Artists — Top artists and detailed stats",
         "timeAnalysis": "Time analysis — Habits by hour and day of week",
-        "musicalProfile": "Musical profile — Your listener persona from behavior patterns",
-        "insights": "Insights — Product-generated summaries and key listening signals",
+        "musicalProfile": "Musical profile — Your streamer persona from behavior patterns",
+        "insights": "Insights — Product-generated summaries and key streaming signals",
         "tasteProfile": "Taste Profile — AI-powered explanation of your musical preferences",
         "tasteEvolution": "Taste Evolution — Week-to-week changes in your musical tastes",
         "aiInsights": "AI Insights — Natural language insights (optional)"
@@ -2811,9 +2811,9 @@
           "eyebrow": "Step 1",
           "title": "Import",
           "verb": "Connect",
-          "description": "Connect Apple Music or Spotify. Your listening history becomes your Soundprint—in minutes, with no paid API on your side.",
+          "description": "Connect Apple Music or Spotify. Your streaming history becomes your Soundprint—in minutes, with no paid API on your side.",
           "cta": "Create my account",
-          "ctaOnboarding": "Import my listening history",
+          "ctaOnboarding": "Import my streaming history",
           "ctaDemo": "Try the demo first",
           "previewBadge": "Guided onboarding",
           "previewTitle": "Your export in 3 steps",
@@ -2828,7 +2828,7 @@
           "eyebrow": "Step 2",
           "title": "Explore",
           "verb": "Decode",
-          "description": "Trends, heatmap, musical profile: see the phases, rituals, and obsessions hidden in your plays. Well beyond an annual Spotify Wrapped or Apple Music Replay.",
+          "description": "Trends, heatmap, musical profile: see the phases, rituals, and obsessions hidden in your streams. Well beyond an annual Spotify Wrapped or Apple Music Replay.",
           "cta": "View the public demo"
         },
         "interact": {
@@ -2845,7 +2845,7 @@
     "heroPrimaryCta": "Reveal your Soundprint",
     "heroDashboardPreview": {
       "label": "Soundprint dashboard preview",
-      "eyebrow": "Your listening data",
+      "eyebrow": "Your streaming data",
       "subtitle": "Trends, stats, and patterns at a glance",
       "liveBadge": "Live preview",
       "screen": {
@@ -2859,7 +2859,7 @@
         "yourMusic": "Your Music",
         "periodDays": "30 days",
         "stats": {
-          "listens": "Plays",
+          "listens": "Streams",
           "artists": "Artists",
           "tracks": "Tracks",
           "time": "Time"
@@ -2904,15 +2904,15 @@
       "friendInitials": "JO",
       "winnerHeadline": "You stream more Tyler.",
       "insightEyebrow": "Head-to-head",
-      "insightCopy": "Add a friend, pick any artist, and see who really dominates—plays counted from your actual libraries.",
-      "trendLabel": "Plays over time",
+      "insightCopy": "Add a friend, pick any artist, and see who really dominates—streams counted from your actual libraries.",
+      "trendLabel": "Streams over time",
       "signalRows": {
-        "yourPlays": "Your plays",
-        "friendPlays": "{friendName}'s plays",
+        "yourPlays": "Your streams",
+        "friendPlays": "{friendName}'s streams",
         "margin": "Your lead"
       },
       "signalValues": {
-        "margin": "+235 plays"
+        "margin": "+235 streams"
       },
       "arenaModes": {
         "artist": "Artist",
@@ -2928,18 +2928,18 @@
     "dashboardPreviews": {
       "eyebrow": "Inside the dashboard",
       "title": "Your music, not a mockup.",
-      "subtitle": "Trends, top artists, calendars, and AI insights — built from your actual listening history.",
+      "subtitle": "Trends, top artists, calendars, and AI insights — built from your actual streaming history.",
       "genreTrends": {
         "description": "Track which genres are surging and which are fading — month by month, line by line."
       },
       "heatmap": {
-        "description": "A GitHub-style calendar of your listening intensity. Darker tiles mean heavier rotation."
+        "description": "A GitHub-style calendar of your streaming intensity. Darker tiles mean heavier rotation."
       },
       "topArtists": {
-        "description": "Your podium artists with real listen counts and share bars — the same ranking cards from the dashboard."
+        "description": "Your podium artists with real stream counts and share bars — the same ranking cards from the dashboard."
       },
       "timeline": {
-        "description": "Your listening pulse over time — spot spikes, dips, and momentum shifts at a glance."
+        "description": "Your streaming pulse over time — spot spikes, dips, and momentum shifts at a glance."
       },
       "tasteProfile": {
         "description": "An AI-assisted read of your musical identity — core genres, signature sound, and a plain-language snapshot.",
@@ -2955,23 +2955,23 @@
     "demoHighlights": {
       "artistAnalysis": {
         "eyebrow": "Artist deepdives",
-        "title": "One artist, your full listening story.",
-        "description": "Soundprint pulls your history with a single artist—plays, top tracks, and how it changed over time—across the dashboard and chat.",
-        "metric": "From top artists to real listening context",
+        "title": "One artist, your full streaming story.",
+        "description": "Soundprint pulls your history with a single artist—streams, top tracks, and how it changed over time—across the dashboard and chat.",
+        "metric": "From top artists to real streaming context",
         "videoLabel": "Artist deepdive demo"
       },
       "listeningTrends": {
-        "eyebrow": "Deep listening data",
+        "eyebrow": "Deep streaming data",
         "title": "Go beyond totals with trends, graphs, and comparisons.",
-        "description": "Explore your music history with visual trend graphs, date ranges, and comparison tools that make it easy to spot growth, phases, obsessions, and shifts across your listening data.",
+        "description": "Explore your music history with visual trend graphs, date ranges, and comparison tools that make it easy to spot growth, phases, obsessions, and shifts across your streaming data.",
         "metric": "Compare periods, artists, tracks, and habits",
-        "videoLabel": "Listening trends and comparison demo"
+        "videoLabel": "streaming trends and comparison demo"
       }
     },
     "features": {
       "timeline": {
         "title": "Timeline",
-        "description": "Visualize your listening habits over time."
+        "description": "Visualize your streaming habits over time."
       },
       "genresArtists": {
         "title": "Genres & Artists",
@@ -2979,19 +2979,19 @@
       },
       "aiInsights": {
         "title": "AI Insights",
-        "description": "Get quick analyses based on your listening stats.",
+        "description": "Get quick analyses based on your streaming stats.",
         "demoQuestion": "Why did my taste shift?",
-        "demoAnswer": "Your synth-pop plays doubled after June."
+        "demoAnswer": "Your synth-pop streams doubled after June."
       }
     },
     "demoHighlightsSection": {
       "eyebrow": "See it in action",
-      "title": "Artist stories and listening trends, straight from the dashboard."
+      "title": "Artist stories and streaming trends, straight from the dashboard."
     },
     "soundprintAiChatDemo": {
       "sectionEyebrow": "Soundprint Chat",
       "sectionTitle": "Ask your music anything.",
-      "sectionSubtitle": "Compare eras, chase obsessions, or just ask in plain language—all from your real listening data.",
+      "sectionSubtitle": "Compare eras, chase obsessions, or just ask in plain language—all from your real streaming data.",
       "heroEyebrow": "See it live · AI chat",
       "heroSubtitle": "Tap a preset. Get an answer.",
       "heroBadge": "Preview",
@@ -3001,14 +3001,14 @@
       "features": {
         "compareEras": {
           "label": "Then vs now",
-          "supporting": "Compare 2 years of listening"
+          "supporting": "Compare 2 years of streaming"
         },
         "artistDeepdive": {
           "label": "Artist deepdive",
           "supporting": "One name → stats, tracks, yearly arc"
         },
         "groundedAnswers": {
-          "label": "Your plays only",
+          "label": "Your streams only",
           "supporting": "Real stats. No guesswork."
         }
       }
@@ -3019,11 +3019,11 @@
       "faq": {
         "export": {
           "question": "How do I import my Apple Music or Spotify history?",
-          "answer": "After creating an account, guided onboarding walks you through exporting your listening history from Apple Music or Spotify and uploading it. Most imports complete in minutes."
+          "answer": "After creating an account, guided onboarding walks you through exporting your streaming history from Apple Music or Spotify and uploading it. Most imports complete in minutes."
         },
         "privacy": {
-          "question": "Is my listening data private?",
-          "answer": "Yes. Your data is yours. We don't sell your listening history, and you can export or delete everything at any time from your account settings."
+          "question": "Is my streaming data private?",
+          "answer": "Yes. Your data is yours. We don't sell your streaming history, and you can export or delete everything at any time from your account settings."
         },
         "providers": {
           "question": "Do I need Apple Music or Spotify?",
@@ -3035,7 +3035,7 @@
         },
         "deepdive": {
           "question": "What's an artist deepdive?",
-          "answer": "Pick any artist from your history—or type their name plus deepdive in Soundprint chat. Soundprint fetches your plays with that artist and shows totals, top tracks, a year-by-year breakdown, and a clear written summary."
+          "answer": "Pick any artist from your history—or type their name plus deepdive in Soundprint chat. Soundprint fetches your streams with that artist and shows totals, top tracks, a year-by-year breakdown, and a clear written summary."
         }
       },
       "cta": {
@@ -3076,7 +3076,7 @@
       "eyebrow": "Legal",
       "title": "Privacy Policy",
       "lastUpdated": "Last updated: June 9, 2026",
-      "intro": "A plain-language summary of how Soundprint-AI handles your data. We built this app for your listening stats — not to sell your information.",
+      "intro": "A plain-language summary of how Soundprint-AI handles your data. We built this app for your streaming stats — not to sell your information.",
       "sections": [
         {
           "title": "Who's responsible",
@@ -3091,10 +3091,10 @@
           ],
           "bullets": [
             "Account info — email, name, profile photo, and how you sign in.",
-            "Listening history — artists, tracks, and when you played them.",
+            "streaming history — artists, tracks, and when you streamed them.",
             "Connections — if you link Spotify or similar services.",
             "Your choices — cookie preferences, AI settings, and other consents.",
-            "Duet (optional) — if you use friend sharing: relationship status, sharing level you choose, and listening statistics you allow accepted friends to see."
+            "Duet (optional) — if you use friend sharing: relationship status, sharing level you choose, and streaming statistics you allow accepted friends to see."
           ]
         },
         {
@@ -3108,7 +3108,7 @@
         {
           "title": "How long we keep it",
           "paragraphs": [
-            "Your account and listening data stay while your account is active. If you delete your account, we erase your data promptly from our systems."
+            "Your account and streaming data stay while your account is active. If you delete your account, we erase your data promptly from our systems."
           ]
         },
         {
@@ -3117,8 +3117,8 @@
             "We rely on trusted providers to run the app. They process data only on our instructions and for the purposes below."
           ],
           "bullets": [
-            "Supabase (hosting, auth, database, profile photo storage) — runs your account and stores your listening data.",
-            "Groq (US) — optional AI features when you opt in; may receive artist/track titles and aggregated listening stats.",
+            "Supabase (hosting, auth, database, profile photo storage) — runs your account and stores your streaming data.",
+            "Groq (US) — optional AI features when you opt in; may receive artist/track titles and aggregated streaming stats.",
             "Vercel (global) — hosts the app; optional analytics only if you consent to cookies.",
             "Sentry (US/EU) — optional error monitoring and session replay only if you consent to cookies."
           ]
@@ -3133,7 +3133,7 @@
         {
           "title": "Sharing with friends (Duet)",
           "paragraphs": [
-            "Duet lets you compare listening statistics with friends who have a Soundprint-AI account. This feature is entirely optional.",
+            "Duet lets you compare streaming statistics with friends who have a Soundprint-AI account. This feature is entirely optional.",
             "To see another user's stats, you must send them a friend request (by email). They choose whether to accept and what to share with you: aggregated statistics (trends, top artists and genres) or, if they choose, more detailed head-to-head comparisons for an artist, track, or genre.",
             "What you share is decided by you, friend by friend, when you accept a request. You can change the sharing level or revoke a friend anytime in Settings → Duet sharing. We record your consent (type and version) as proof.",
             "We do not offer public user discovery or open leaderboards. Your email is not shown to friends in Duet. Invitations use a uniform response to limit account enumeration."
@@ -3169,7 +3169,7 @@
         {
           "title": "What this is",
           "paragraphs": [
-            "Soundprint-AI is your personal listening dashboard. Import your history or connect services like Spotify to explore your stats."
+            "Soundprint-AI is your personal streaming dashboard. Import your history or connect services like Spotify to explore your stats."
           ]
         },
         {
@@ -3181,7 +3181,7 @@
         {
           "title": "Your music data",
           "paragraphs": [
-            "Your listening data stays yours. You let us process it only to run the dashboard. Only upload data you own or are allowed to use."
+            "Your streaming data stays yours. You let us process it only to run the dashboard. Only upload data you own or are allowed to use."
           ]
         },
         {
@@ -3268,6 +3268,6 @@
   },
   "metadata": {
     "title": "Soundprint-AI Dashboard",
-    "description": "Personal dashboard to analyze your Apple Music listening habits"
+    "description": "Personal dashboard to analyze your Apple Music streaming habits"
   }
 }

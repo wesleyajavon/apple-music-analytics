@@ -25,9 +25,13 @@ export function HomeHeroDashboardPreview({
   );
 
   return (
-    <div className={["relative z-10", className].filter(Boolean).join(" ")}>
+    <div
+      className={["relative z-10 w-full min-w-0 overflow-hidden", className]
+        .filter(Boolean)
+        .join(" ")}
+    >
       <div
-        className="absolute -inset-6 rounded-[2rem] bg-brand-gradient-soft blur-2xl"
+        className="absolute -inset-3 rounded-[2rem] bg-brand-gradient-soft blur-2xl sm:-inset-6"
         aria-hidden
       />
       <div className="relative space-y-3 rounded-[2rem] border border-card-border bg-surface-glass p-3 shadow-card backdrop-blur-xl">

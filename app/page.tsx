@@ -27,7 +27,7 @@ export default async function Home() {
           Welcome to Soundprint-AI your music decoded.
         </h1>
         <p className="text-muted text-lg mb-6 max-w-md">
-          Import once from Apple Music or Spotify—then explore trends, chat with your listening data, and compare plays with friends on any artist.
+          Import once from Apple Music or Spotify—then explore trends, chat with your streaming data, and compare streams with friends on any artist.
         </p>
         <StreamingProviderLogos
           caption="Works with"

@@ -79,7 +79,7 @@ export function DemoTerminalHero({
 }: DemoTerminalHeroProps) {
   return (
     <section
-      className={cx("relative mx-auto w-full max-w-6xl", className)}
+      className={cx("relative w-full max-w-6xl", className)}
       {...props}
     >
       <motion.div

@@ -62,10 +62,11 @@ export function HomeTextReveal({
   }
 
   const MotionTag = motion[Tag] as typeof motion.span;
+  const displayClass = Tag === "span" ? "inline" : "block";
 
   return (
     <MotionTag
-      className={`inline ${className}`}
+      className={[displayClass, className].filter(Boolean).join(" ")}
       initial="hidden"
       {...(onScroll
         ? { whileInView: "visible", viewport: { once: true, amount: 0.6 } }
@@ -129,9 +130,11 @@ export function HomeTextRevealLines({
 
   if (reducedMotion) {
     return (
-      <Tag className={className}>
+      <Tag className={`w-full min-w-0 ${className}`}>
         {lines.map((line, i) => (
-          <div key={i}>{line}</div>
+          <div key={i} className="min-w-0">
+            {line}
+          </div>
         ))}
       </Tag>
     );
@@ -141,7 +144,7 @@ export function HomeTextRevealLines({
 
   return (
     <MotionTag
-      className={className}
+      className={`w-full min-w-0 ${className}`}
       initial="hidden"
       {...(onScroll
         ? { whileInView: "visible", viewport: { once: true, amount: 0.35 } }
@@ -157,7 +160,7 @@ export function HomeTextRevealLines({
         <motion.div
           key={index}
           variants={lineVariants}
-          className="overflow-hidden pb-[0.08em]"
+          className="w-full min-w-0 overflow-hidden pb-[0.08em]"
         >
           {line}
         </motion.div>

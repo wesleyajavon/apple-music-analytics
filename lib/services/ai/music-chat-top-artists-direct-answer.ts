@@ -76,15 +76,15 @@ function copy(locale: AiLocale): ArtistsCopyPack {
     case "fr":
       return {
         empty: (d1, d2) =>
-          `Aucune écoute dans ton historique entre le ${d1} et le ${d2}. Essaie une autre année ou vérifie le filtre de dates du tableau de bord.`,
+          `Aucun stream dans ton historique entre le ${d1} et le ${d2}. Essaie une autre année ou vérifie le filtre de dates du tableau de bord.`,
         intro: (d1, d2) =>
-          `Tes artistes les plus écoutés entre le ${d1} et le ${d2} :`,
+          `Tes artistes les plus streamés entre le ${d1} et le ${d2} :`,
         caveat:
-          "Les totaux reposent uniquement sur l'historique d'écoute que tu as importé.",
+          "Les totaux reposent uniquement sur l'historique de streams que tu as importé.",
         line: (name, listens, uniq) =>
           `- ${name} (${listens}, ${uniq})`,
         listens: (n) =>
-          `${n} ${n === 1 ? "écoute" : "écoutes"}`,
+          `${n} ${n === 1 ? "stream" : "streams"}`,
         uniqueTracks: (n) =>
           `${n} ${n === 1 ? "titre différent" : "titres différents"}`,
         span: (min, max) =>
@@ -93,37 +93,37 @@ function copy(locale: AiLocale): ArtistsCopyPack {
     case "es":
       return {
         empty: (d1, d2) =>
-          `No hay reproducciones en tu historial entre el ${d1} y el ${d2}. Prueba con otro año o revisa el filtro de fechas del panel.`,
+          `No hay streams en tu historial entre el ${d1} y el ${d2}. Prueba con otro año o revisa el filtro de fechas del panel.`,
         intro: (d1, d2) =>
-          `Tus artistas más reproducidos entre el ${d1} y el ${d2}:`,
+          `Tus artistas más streameados entre el ${d1} y el ${d2}:`,
         caveat:
-          "Los totales se basan solo en el historial de escucha que has importado.",
+          "Los totales se basan solo en el historial de streams que has importado.",
         line: (name, listens, uniq) =>
           `- ${name} (${listens}, ${uniq})`,
         listens: (n) =>
-          `${n} ${n === 1 ? "reproducción" : "reproducciones"}`,
+          `${n} ${n === 1 ? "stream" : "streams"}`,
         uniqueTracks: (n) =>
           `${n} ${n === 1 ? "pista distinta" : "pistas distintas"}`,
         span: (min, max) =>
-          `En este ranking, la reproducción más antigua es del ${min} y la más reciente del ${max}.`,
+          `En este ranking, el stream más antiguo es del ${min} y el más reciente del ${max}.`,
       };
     case "en":
     default:
       return {
         empty: (d1, d2) =>
-          `There are no plays in your history between ${d1} and ${d2}. Try another year or check your dashboard date filter.`,
+          `There are no streams in your history between ${d1} and ${d2}. Try another year or check your dashboard date filter.`,
         intro: (d1, d2) =>
           `Your top artists between ${d1} and ${d2}:`,
         caveat:
-          "Counts are based only on listening history you have imported.",
+          "Counts are based only on streaming history you have imported.",
         line: (name, listens, uniq) =>
           `- ${name} (${listens}, ${uniq})`,
         listens: (n) =>
-          `${n} ${n === 1 ? "listen" : "listens"}`,
+          `${n} ${n === 1 ? "stream" : "streams"}`,
         uniqueTracks: (n) =>
           `${n} ${n === 1 ? "unique track" : "unique tracks"}`,
         span: (min, max) =>
-          `Across these artists, your first listen in this ranking was on ${min} and your most recent on ${max}.`,
+          `Across these artists, your first stream in this ranking was on ${min} and your most recent on ${max}.`,
       };
   }
 }

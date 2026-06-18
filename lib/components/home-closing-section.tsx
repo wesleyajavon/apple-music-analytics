@@ -38,7 +38,7 @@ export function HomeClosingSection({
       id="faq"
       className="mx-auto w-full max-w-7xl scroll-mt-28 px-4 pb-28 sm:px-6 sm:pb-24 md:pb-24 lg:px-8"
     >
-      <div className="mx-auto max-w-3xl text-center">
+      <div className="max-w-3xl">
         <HomeBlurFadeReveal>
           <p className="font-mono text-xs font-semibold uppercase tracking-[0.28em] text-primary">
             {t("eyebrow")}
@@ -47,13 +47,13 @@ export function HomeClosingSection({
         <HomeTextReveal
           as="h2"
           onScroll
-          className="mx-auto mt-3 block max-w-2xl text-2xl font-semibold tracking-[-0.04em] text-foreground sm:text-4xl"
+          className="mt-3 block max-w-2xl text-2xl font-semibold tracking-[-0.04em] text-foreground sm:text-4xl"
           text={t("title")}
           stagger={0.04}
         />
       </div>
 
-      <div className="mx-auto mt-10 max-w-2xl space-y-3">
+      <div className="mt-10 max-w-2xl space-y-3">
         {FAQ_KEYS.map((key, index) => (
           <HomeBlurFadeReveal key={key} delay={0.06 * index}>
             <details className="group rounded-2xl border border-card-border bg-card-surface/80 backdrop-blur-sm open:shadow-card">
@@ -68,12 +68,12 @@ export function HomeClosingSection({
       </div>
 
       <HomeBlurFadeReveal delay={0.28}>
-        <div className="mx-auto mt-12 max-w-xl border-t border-card-border pt-10 text-center">
+        <div className="mt-12 max-w-xl border-t border-card-border pt-10">
           <p className="text-xl font-semibold tracking-[-0.03em] text-foreground sm:text-2xl">
             {t("cta.title")}
           </p>
 
-          <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <Link
               href={isAuthenticated ? "/dashboard" : "/sign-up"}
               className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-7 py-3 text-sm font-semibold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:opacity-95"

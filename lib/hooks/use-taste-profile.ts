@@ -51,10 +51,11 @@ function buildTasteProfileInput(
   temporal: TemporalAnalysisDto,
   locale: string
 ): TasteProfileInput {
+  const labels = getAiInsightsLabels(locale);
   const yearOverYearDeltas: YearOverYearDelta[] = previousOverview
     ? [
         {
-          metric: "Total d'écoutes",
+          metric: labels.metrics.totalListens,
           currentValue: overview.totalListens,
           previousValue: previousOverview.totalListens,
           percentChange:
@@ -67,7 +68,7 @@ function buildTasteProfileInput(
                 100,
         },
         {
-          metric: "Artistes uniques",
+          metric: labels.metrics.uniqueArtists,
           currentValue: overview.uniqueArtists,
           previousValue: previousOverview.uniqueArtists,
           percentChange:
@@ -80,7 +81,7 @@ function buildTasteProfileInput(
                 100,
         },
         {
-          metric: "Titres uniques",
+          metric: labels.metrics.uniqueTracks,
           currentValue: overview.uniqueTracks,
           previousValue: previousOverview.uniqueTracks,
           percentChange:
@@ -93,7 +94,7 @@ function buildTasteProfileInput(
                 100,
         },
         {
-          metric: "Temps d'écoute (secondes)",
+          metric: `${labels.metrics.totalPlayTime} (secondes)`,
           currentValue: overview.totalPlayTime,
           previousValue: previousOverview.totalPlayTime,
           percentChange:

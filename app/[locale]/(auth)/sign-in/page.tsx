@@ -4,7 +4,6 @@ import { FormEvent, useId, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
-import { setOAuthTermsCookie } from "@/lib/auth/oauth-terms-cookie";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { TERMS_CONSENT_VERSION } from "@/lib/constants/legal-consent";
 import { usePublicDemo } from "@/lib/providers/public-demo-provider";
@@ -34,7 +33,6 @@ export default function SignInPage() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [oauthTermsAccepted, setOauthTermsAccepted] = useState(false);
   const reason = searchParams.get("reason");
   const nextParam = searchParams.get("next");
   const oauthCallbackFailed = searchParams.get("oauth_error") === "1";
@@ -77,12 +75,7 @@ export default function SignInPage() {
     }
   }
 
-  function prepareOAuthTermsCookie() {
-    if (oauthTermsAccepted) setOAuthTermsCookie();
-  }
-
   async function onGoogleSignIn() {
-    prepareOAuthTermsCookie();
     setIsLoading(true);
     setError(null);
 
@@ -106,7 +99,6 @@ export default function SignInPage() {
   }
 
   async function onSpotifySignIn() {
-    prepareOAuthTermsCookie();
     setIsLoading(true);
     setError(null);
 
@@ -254,31 +246,6 @@ export default function SignInPage() {
               </span>
             </div>
           </div>
-
-          <p className="text-xs leading-relaxed text-muted">{t("oauthTermsHint")}</p>
-
-          <label className="flex items-start gap-3 text-sm text-muted lg:text-white/55">
-            <input
-              type="checkbox"
-              className="mt-1 h-4 w-4 shrink-0 rounded border-border text-primary focus:ring-primary/30 lg:border-white/25 lg:bg-white/5"
-              checked={oauthTermsAccepted}
-              onChange={(e) => setOauthTermsAccepted(e.target.checked)}
-            />
-            <span>
-              {t.rich("termsConsentLabel", {
-                terms: () => (
-                  <Link href="/legal/terms" className="font-medium text-primary underline-offset-2 hover:underline lg:text-white/85 lg:hover:text-white">
-                    {t("termsLink")}
-                  </Link>
-                ),
-                privacy: () => (
-                  <Link href="/legal/privacy" className="font-medium text-primary underline-offset-2 hover:underline lg:text-white/85 lg:hover:text-white">
-                    {t("privacyLink")}
-                  </Link>
-                ),
-              })}
-            </span>
-          </label>
 
           <button
             type="button"

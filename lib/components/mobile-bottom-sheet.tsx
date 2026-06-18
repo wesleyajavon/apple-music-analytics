@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, type ReactNode } from "react";
+import { useIsLgChartViewport } from "@/lib/hooks/use-chart-viewport";
 
 type MobileBottomSheetProps = {
   open: boolean;
@@ -21,19 +22,28 @@ export function MobileBottomSheet({
   insetAboveBottomNav = false,
   children,
 }: MobileBottomSheetProps) {
+  const isLg = useIsLgChartViewport();
+
   useEffect(() => {
     if (!open) return;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
     window.addEventListener("keydown", onKey);
     return () => {
-      document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", onKey);
     };
   }, [open, onClose]);
+
+  // Lock body scroll only on mobile — desktop renders the panel inline (lg:static).
+  useEffect(() => {
+    if (!open || isLg) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [open, isLg]);
 
   if (!open) return null;
 

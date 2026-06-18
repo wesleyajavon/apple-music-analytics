@@ -2782,11 +2782,11 @@
       "pitch": "Importa una vez desde Apple Music o Spotify. Explora tus tendencias, lanza deepdives de artista, habla con tus datos — y desafía a tus amigos.",
       "stepsListAriaLabel": "Los 3 pasos del recorrido Soundprint",
       "stepLinkAria": "Ir a {step}",
+      "navAriaLabel": "Recorrido Soundprint en 3 pasos",
       "nav": {
         "import": "Importar",
         "explore": "Explorar",
-        "interact": "Interactuar",
-        "navAriaLabel": "Recorrido Soundprint en 3 pasos"
+        "interact": "Interactuar"
       },
       "steps": {
         "import": {

@@ -25,6 +25,7 @@ import { CHART_TOOLTIP_STYLES } from "@/lib/constants/config";
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
 import { TemporalAnalysisSkeleton } from "@/lib/components/skeleton-loaders";
+import { LiveStatusDot } from "@/lib/components/live-status-dot";
 import { Clock, Activity, CalendarDays } from "lucide-react";
 import {
   DASHBOARD_SPOTLIGHT_SHELL,
@@ -145,7 +146,7 @@ function TemporalHeroFrame({ badgeLabel, stats }: { badgeLabel: string; stats: R
       <div className="relative grid gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-start">
         <div>
           <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-violet-100 backdrop-blur">
-            <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_18px_rgb(22_199_132_/0.75)]" />
+            <LiveStatusDot />
             {t("heroEyebrow")}
           </div>
           <h1 className="flex flex-wrap items-center gap-3 text-4xl font-semibold tracking-[-0.06em] text-white sm:text-5xl lg:text-6xl">

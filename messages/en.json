@@ -2800,11 +2800,11 @@
       "pitch": "Import once from Apple Music or Spotify. Explore your trends, run artist deepdives, and talk to your data—and challenge your friends.",
       "stepsListAriaLabel": "The 3 steps of the Soundprint journey",
       "stepLinkAria": "Go to {step}",
+      "navAriaLabel": "Soundprint journey in 3 steps",
       "nav": {
         "import": "Import",
         "explore": "Explore",
-        "interact": "Interact",
-        "navAriaLabel": "Soundprint journey in 3 steps"
+        "interact": "Interact"
       },
       "steps": {
         "import": {

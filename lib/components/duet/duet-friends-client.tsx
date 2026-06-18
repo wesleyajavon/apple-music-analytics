@@ -8,6 +8,7 @@ import { motion } from "motion/react";
 import {
   Ban,
   Check,
+  ChevronDown,
   Clock,
   Copy,
   Link2,
@@ -275,12 +276,14 @@ function DuetShareScopeFieldset({
   value,
   onChange,
   disabled = false,
+  showLegend = true,
 }: {
   groupName: string;
   legend: string;
   value: DuetShareScopeOption;
   onChange: (scope: DuetShareScopeOption) => void;
   disabled?: boolean;
+  showLegend?: boolean;
 }) {
   const tAccept = useTranslations("duet.inviteAccept");
 
@@ -298,11 +301,17 @@ function DuetShareScopeFieldset({
   ] satisfies { value: DuetShareScopeOption; label: string; description: string }[];
 
   return (
-    <fieldset className="w-full sm:min-w-[18rem] sm:max-w-sm" disabled={disabled}>
-      <legend className="mb-2.5 flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200">
-        <Shield className="h-3.5 w-3.5 text-violet-500 dark:text-violet-400" aria-hidden />
-        {legend}
-      </legend>
+    <fieldset
+      className="w-full sm:min-w-[18rem] sm:max-w-sm"
+      disabled={disabled}
+      aria-label={showLegend ? undefined : legend}
+    >
+      {showLegend ? (
+        <legend className="mb-2.5 flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200">
+          <Shield className="h-3.5 w-3.5 text-violet-500 dark:text-violet-400" aria-hidden />
+          {legend}
+        </legend>
+      ) : null}
       <div className="flex flex-col gap-2">
         {options.map((option) => {
           const selected = value === option.value;
@@ -478,37 +487,57 @@ function FriendRow({
         ) : null}
 
         {isAccepted ? (
-          <div className="flex w-full flex-col gap-3 sm:w-auto">
-            <DuetShareScopeFieldset
-              groupName={`duet-share-scope-friend-${friendship.id}`}
-              legend={t("shareScopeLabel")}
-              value={activeShareScope}
-              onChange={(scope) => {
-                if (scope !== friendship.shareScope) {
-                  onUpdateShareScope(friendship.id, scope);
-                }
-              }}
-              disabled={busy}
-            />
-            <div className="flex flex-wrap items-center gap-2">
-              <Link
-                href={`/dashboard/duet/compare?friendUserId=${encodeURIComponent(peer.id)}`}
-                className="inline-flex min-h-10 items-center gap-1.5 rounded-xl bg-gradient-to-r from-violet-600 to-violet-500 px-4 py-2 text-sm font-bold text-white shadow-md shadow-violet-500/25 no-underline transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-violet-500/30"
-              >
-                <Swords className="h-4 w-4" aria-hidden />
-                {t("compare")}
-              </Link>
-              <button
-                type="button"
+          <details className="group w-full rounded-xl border border-slate-200/80 bg-slate-50/60 dark:border-white/10 dark:bg-black/25 sm:min-w-[18rem] sm:max-w-sm">
+            <summary className="flex min-h-10 cursor-pointer list-none items-center justify-between gap-3 px-3 py-2.5 text-left">
+              <div className="min-w-0">
+                <p className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  <Shield className="h-3.5 w-3.5 shrink-0 text-violet-500 dark:text-violet-400" aria-hidden />
+                  {t("shareScopeLabel")}
+                </p>
+                <p className={`mt-0.5 truncate text-xs ${DASHBOARD_SPOTLIGHT_MUTED}`}>
+                  {activeShareScope === "full"
+                    ? tAccept("scopeFull.label")
+                    : tAccept("scopeAggregates.label")}
+                </p>
+              </div>
+              <ChevronDown
+                className="h-4 w-4 shrink-0 text-slate-500 transition-transform duration-200 group-open:rotate-180 dark:text-slate-400"
+                aria-hidden
+              />
+            </summary>
+            <div className="space-y-3 border-t border-slate-200/80 px-3 py-3 dark:border-white/10">
+              <DuetShareScopeFieldset
+                groupName={`duet-share-scope-friend-${friendship.id}`}
+                legend={t("shareScopeLabel")}
+                value={activeShareScope}
+                onChange={(scope) => {
+                  if (scope !== friendship.shareScope) {
+                    onUpdateShareScope(friendship.id, scope);
+                  }
+                }}
                 disabled={busy}
-                onClick={() => onRevoke(friendship.id)}
-                className={`inline-flex min-h-10 items-center gap-1.5 ${DASHBOARD_SPOTLIGHT_BTN_SECONDARY}`}
-              >
-                <UserMinus className="h-4 w-4" aria-hidden />
-                {t("revoke")}
-              </button>
+                showLegend={false}
+              />
+              <div className="flex flex-wrap items-center gap-2">
+                <Link
+                  href={`/dashboard/duet/compare?friendUserId=${encodeURIComponent(peer.id)}`}
+                  className="inline-flex min-h-10 items-center gap-1.5 rounded-xl bg-gradient-to-r from-violet-600 to-violet-500 px-4 py-2 text-sm font-bold text-white shadow-md shadow-violet-500/25 no-underline transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-violet-500/30"
+                >
+                  <Swords className="h-4 w-4" aria-hidden />
+                  {t("compare")}
+                </Link>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => onRevoke(friendship.id)}
+                  className={`inline-flex min-h-10 items-center gap-1.5 ${DASHBOARD_SPOTLIGHT_BTN_SECONDARY}`}
+                >
+                  <UserMinus className="h-4 w-4" aria-hidden />
+                  {t("revoke")}
+                </button>
+              </div>
             </div>
-          </div>
+          </details>
         ) : null}
 
         <button

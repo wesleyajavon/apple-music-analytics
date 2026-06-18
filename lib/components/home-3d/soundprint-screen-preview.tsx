@@ -4,18 +4,18 @@ import Image from "next/image";
 
 const WAVE_BARS = [34, 62, 48, 78, 56, 92, 66, 44, 72, 58, 84, 52];
 
-const NAV_ITEMS = [
-  { label: "Your Music", active: true },
-  { label: "Profil musical", active: false },
-  { label: "Genres", active: false },
-  { label: "AI Insights", active: false },
+const NAV_ITEM_KEYS = [
+  { key: "yourMusic", active: true },
+  { key: "musicProfile", active: false },
+  { key: "genres", active: false },
+  { key: "aiInsights", active: false },
 ] as const;
 
-const STATS = [
-  { label: "Écoutes", value: "18 420", accent: "from-[#f04068] to-[#9850d0]", delta: "+12%" },
-  { label: "Artistes", value: "842", accent: "from-[#9850d0] to-[#706fe0]", delta: "+8%" },
-  { label: "Titres", value: "3 241", accent: "from-[#706fe0] to-[#4f90e0]", delta: "+5%" },
-  { label: "Temps", value: "124 h", accent: "from-[#4f90e0] to-[#16c784]", delta: "+31%" },
+const STAT_KEYS = [
+  { key: "listens", value: "18 420", accent: "from-[#f04068] to-[#9850d0]", delta: "+12%" },
+  { key: "artists", value: "842", accent: "from-[#9850d0] to-[#706fe0]", delta: "+8%" },
+  { key: "tracks", value: "3 241", accent: "from-[#706fe0] to-[#4f90e0]", delta: "+5%" },
+  { key: "time", value: "124 h", accent: "from-[#4f90e0] to-[#16c784]", delta: "+31%" },
 ] as const;
 
 const TOP_ARTISTS = [
@@ -23,6 +23,42 @@ const TOP_ARTISTS = [
   { name: "Radiohead", color: "from-[#706fe0] to-[#4f90e0]" },
   { name: "Frank Ocean", color: "from-[#4f90e0] to-[#16c784]" },
 ] as const;
+
+export type SoundprintScreenPreviewLabels = {
+  nav: Record<(typeof NAV_ITEM_KEYS)[number]["key"], string>;
+  dashboard: string;
+  yourMusic: string;
+  periodDays: string;
+  stats: Record<(typeof STAT_KEYS)[number]["key"], string>;
+  timeline: string;
+  topArtists: string;
+  genres: string;
+};
+
+export function buildSoundprintScreenPreviewLabels(
+  t: (key: string) => string,
+): SoundprintScreenPreviewLabels {
+  return {
+    nav: {
+      yourMusic: t("nav.yourMusic"),
+      musicProfile: t("nav.musicProfile"),
+      genres: t("nav.genres"),
+      aiInsights: t("nav.aiInsights"),
+    },
+    dashboard: t("dashboard"),
+    yourMusic: t("yourMusic"),
+    periodDays: t("periodDays"),
+    stats: {
+      listens: t("stats.listens"),
+      artists: t("stats.artists"),
+      tracks: t("stats.tracks"),
+      time: t("stats.time"),
+    },
+    timeline: t("timeline"),
+    topArtists: t("topArtists"),
+    genres: t("genres"),
+  };
+}
 
 function MiniAreaChart() {
   return (
@@ -78,8 +114,13 @@ function MiniAreaChart() {
 
 /**
  * Miniature animée du dashboard Soundprint-AI — utilisée sur l'écran 3D du hero.
+ * Les libellés sont passés en props car le portail Html de drei casse le contexte next-intl.
  */
-export function SoundprintScreenPreview() {
+export function SoundprintScreenPreview({
+  labels,
+}: {
+  labels: SoundprintScreenPreviewLabels;
+}) {
   return (
     <div
       className="flex h-full w-full overflow-hidden rounded-[10px] bg-[#06070d] text-[#f7f3ff] shadow-inner"
@@ -108,16 +149,16 @@ export function SoundprintScreenPreview() {
           <span className="text-[0.45rem] font-bold uppercase tracking-[0.12em] text-[#b06cff]">AI</span>
         </div>
         <nav className="flex flex-1 flex-col gap-1">
-          {NAV_ITEMS.map((item) => (
+          {NAV_ITEM_KEYS.map((item) => (
             <div
-              key={item.label}
+              key={item.key}
               className={`rounded-lg px-1.5 py-1.5 text-center text-[0.42rem] font-semibold leading-snug ${
                 item.active
                   ? "bg-[#151827] text-[#f7f3ff] ring-1 ring-[#9850d0]/30"
                   : "text-[#a59ab8]"
               }`}
             >
-              {item.label}
+              {labels.nav[item.key]}
             </div>
           ))}
         </nav>
@@ -135,29 +176,31 @@ export function SoundprintScreenPreview() {
           <div className="flex items-center justify-between gap-2">
             <div>
               <p className="text-[0.42rem] font-semibold uppercase tracking-[0.18em] text-[#b06cff]">
-                Dashboard
+                {labels.dashboard}
               </p>
               <h2 className="text-[0.72rem] font-semibold tracking-[-0.03em] text-white">
-                Your Music
+                {labels.yourMusic}
               </h2>
             </div>
             <span className="rounded-full border border-[#4a376e]/50 bg-[#151827] px-2 py-0.5 text-[0.4rem] font-semibold text-[#a59ab8]">
-              30 jours
+              {labels.periodDays}
             </span>
           </div>
 
           {/* Stats */}
           <div className="grid grid-cols-4 gap-1">
-            {STATS.map((stat) => (
+            {STAT_KEYS.map((stat) => (
               <div
-                key={stat.label}
+                key={stat.key}
                 className="relative overflow-hidden rounded-lg border border-white/[0.06] bg-[#151827]/90 p-1.5"
               >
                 <div
                   className={`pointer-events-none absolute inset-x-0 top-0 h-6 bg-gradient-to-br ${stat.accent} opacity-25`}
                   aria-hidden
                 />
-                <p className="relative text-[0.38rem] font-medium text-[#a59ab8]">{stat.label}</p>
+                <p className="relative text-[0.38rem] font-medium text-[#a59ab8]">
+                  {labels.stats[stat.key]}
+                </p>
                 <p className="relative mt-0.5 text-[0.62rem] font-semibold tracking-tight text-white">
                   {stat.value}
                 </p>
@@ -171,7 +214,7 @@ export function SoundprintScreenPreview() {
             <div className="flex min-h-0 flex-col overflow-hidden rounded-lg border border-white/[0.06] bg-[#0c0e18]/90 p-1.5">
               <div className="mb-1 flex items-center justify-between">
                 <p className="text-[0.4rem] font-semibold uppercase tracking-[0.14em] text-[#a59ab8]">
-                  Timeline
+                  {labels.timeline}
                 </p>
                 <span className="text-[0.38rem] font-semibold text-[#4f90e0]">+31%</span>
               </div>
@@ -196,7 +239,7 @@ export function SoundprintScreenPreview() {
             <div className="flex min-h-0 flex-col gap-1.5">
               <div className="flex-1 rounded-lg border border-white/[0.06] bg-[#0c0e18]/90 p-1.5">
                 <p className="text-[0.4rem] font-semibold uppercase tracking-[0.14em] text-[#a59ab8]">
-                  Top artistes
+                  {labels.topArtists}
                 </p>
                 <div className="mt-1.5 space-y-1">
                   {TOP_ARTISTS.map((artist, i) => (
@@ -215,7 +258,7 @@ export function SoundprintScreenPreview() {
               </div>
               <div className="rounded-lg border border-white/[0.06] bg-[#0c0e18]/90 p-1.5">
                 <p className="text-[0.4rem] font-semibold uppercase tracking-[0.14em] text-[#a59ab8]">
-                  Genres
+                  {labels.genres}
                 </p>
                 <div className="mt-1 flex flex-wrap gap-0.5">
                   {["Indie", "Alt", "R&B"].map((genre) => (

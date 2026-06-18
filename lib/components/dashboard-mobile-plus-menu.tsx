@@ -156,7 +156,6 @@ const PLUS_SECTIONS: PlusNavSection[] = [
         badgeKey: "newAiBadge",
       },
       { href: "/dashboard/ai-insights", labelKey: "aiInsights", icon: icons.aiInsights },
-      { href: "/dashboard/taste-evolution", labelKey: "tasteEvolution", icon: icons.trends },
     ],
   },
   {

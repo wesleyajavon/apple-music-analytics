@@ -216,7 +216,61 @@ describe("music-chat-service", () => {
     );
     expect(mockCreateGroqChatCompletion).not.toHaveBeenCalled();
     expect(response.sources).toHaveLength(1);
-    expect(response.answer).toContain("2020-01-01");
+    expect(response.answer).toContain("Taste shift between 2020 and 2024");
+    expect(response.answer).not.toContain("2020-01-01");
+  });
+
+  it("short-circuits the weekly taste evolution preset to getWeeklyTasteEvolution", async () => {
+    mockExecuteMusicChatTool.mockResolvedValue({
+      period: { startDate: "2026-04-24", endDate: "2026-06-18" },
+      trends: [
+        {
+          weekLabel: "Week of Jun 9",
+          previousWeekLabel: "Week of Jun 2",
+          classification: "exploration",
+          volumeDeltaPct: 12,
+          diversityDelta: 0.1,
+          currentWeekListens: 50,
+          previousWeekListens: 44,
+          emergingGenres: [{ genre: "Electronic", deltaPct: 5 }],
+          decliningGenres: [],
+          artistMovements: [
+            { artistName: "Daft Punk", previousRank: 4, currentRank: 2, rankChange: 2 },
+          ],
+        },
+      ],
+      skippedWeeks: [],
+      dataQuality: { insufficientData: false },
+    });
+
+    const response = await generateMusicChatAnswer({
+      userId: "user-123",
+      locale: "fr",
+      messages: [
+        {
+          role: "user",
+          content:
+            "Comment mes goûts ont-ils évolué semaine après semaine ces dernières semaines ?",
+        },
+      ],
+      presetQuestionId: "weekly-taste-evolution",
+    });
+
+    expect(mockExecuteMusicChatTool).toHaveBeenCalledTimes(1);
+    expect(mockExecuteMusicChatTool).toHaveBeenCalledWith(
+      "user-123",
+      "getWeeklyTasteEvolution",
+      expect.objectContaining({
+        maxTrends: 4,
+        locale: "fr",
+        startDate: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
+        endDate: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
+      })
+    );
+    expect(mockCreateGroqChatCompletion).not.toHaveBeenCalled();
+    expect(response.answer).toContain("semaine après semaine");
+    expect(response.answer).toContain("Exploration");
+    expect(response.answer).toContain("Daft Punk: #4 → #2");
   });
 
   it("short-circuits track obsessions preset to getTrackObsessionWindows for the calendar year in the user message", async () => {

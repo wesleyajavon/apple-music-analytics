@@ -9,8 +9,11 @@ import { ARTIST_TO_GENRE_MAP, ARTIST_TO_GENRE_MAP_SQL_SAFE_ROW_LIMIT } from "@/l
 import { transformBigIntToNumber } from "@/lib/dto/transformers";
 import {
   LATE_NIGHT_PRESET_RECENT_WINDOW_DAYS,
+  WEEKLY_TASTE_EVOLUTION_PRESET_WINDOW_DAYS,
+  getWeeklyTasteEvolutionPresetDateRange,
   type MusicChatPresetQuestionId,
 } from "@/lib/dto/music-chat";
+import { getTasteEvolutionTrends } from "@/lib/services/taste-evolution/taste-evolution-service";
 
 const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const DEFAULT_LIMIT = 10;
@@ -27,11 +30,14 @@ const TASTE_SHIFT_MAX_LIMIT = 10;
 const TASTE_SHIFT_CANDIDATE_MULTIPLIER = 4;
 const TASTE_SHIFT_MAX_CANDIDATES = 40;
 const TASTE_SHIFT_MIN_LISTENS_PER_PERIOD = 5;
+const WEEKLY_TASTE_EVOLUTION_DEFAULT_MAX_TRENDS = 4;
+const WEEKLY_TASTE_EVOLUTION_MAX_TRENDS = 8;
+const WEEKLY_TASTE_EVOLUTION_MIN_LISTENS_PER_WEEK = 10;
 
 /** Clock hours 22–03 inclusive (late evening through early morning), same EXTRACT semantics as `getListeningHabitsByTimeOfDay`. */
 const LATE_NIGHT_HOURS = [22, 23, 0, 1, 2, 3] as const;
 
-export { LATE_NIGHT_PRESET_RECENT_WINDOW_DAYS };
+export { LATE_NIGHT_PRESET_RECENT_WINDOW_DAYS, getWeeklyTasteEvolutionPresetDateRange };
 
 export function getLateNightPresetDateRange(asOf: Date = new Date()): {
   startDate: string;
@@ -91,6 +97,8 @@ export const MUSIC_CHAT_PRESET_QUESTIONS: Record<
     "What have I been listening to late at night recently?",
   "artist-deep-dive": "Tell me my listening history with Radiohead.",
   "taste-shift-2020-2024": "How did my taste change between 2020 and 2024?",
+  "weekly-taste-evolution":
+    "How has my taste evolved week by week over the past few weeks?",
   "track-obsessions-2022": "Which songs obsessed me in 2022?",
   "genre-breakdown-last-year":
     "What genres did I listen to most last year?",
@@ -124,6 +132,20 @@ function clampTasteShiftLimit(limit: unknown): number {
     return TASTE_SHIFT_DEFAULT_LIMIT;
   }
   return Math.min(Math.max(Math.trunc(limit), 1), TASTE_SHIFT_MAX_LIMIT);
+}
+
+function clampWeeklyTasteEvolutionMaxTrends(maxTrends: unknown): number {
+  if (typeof maxTrends !== "number" || !Number.isFinite(maxTrends)) {
+    return WEEKLY_TASTE_EVOLUTION_DEFAULT_MAX_TRENDS;
+  }
+  return Math.min(
+    Math.max(Math.trunc(maxTrends), 1),
+    WEEKLY_TASTE_EVOLUTION_MAX_TRENDS
+  );
+}
+
+function parseOptionalIsoDate(value: unknown): string | undefined {
+  return typeof value === "string" && ISO_DATE_RE.test(value) ? value : undefined;
 }
 
 function clampTrackObsessionLimit(limit: unknown): number {
@@ -1265,6 +1287,84 @@ export async function getTasteShiftSummary(
   };
 }
 
+export async function getWeeklyTasteEvolution(
+  userId: string,
+  args: {
+    startDate?: string;
+    endDate?: string;
+    locale?: string;
+    maxTrends?: number;
+  }
+) {
+  const presetRange = getWeeklyTasteEvolutionPresetDateRange();
+  const startDateStr = parseOptionalIsoDate(args.startDate) ?? presetRange.startDate;
+  const endDateStr = parseOptionalIsoDate(args.endDate) ?? presetRange.endDate;
+  const locale =
+    typeof args.locale === "string" && args.locale.length > 0
+      ? args.locale
+      : "en";
+  const maxTrends = clampWeeklyTasteEvolutionMaxTrends(args.maxTrends);
+
+  const { trends, skippedWeeks } = await getTasteEvolutionTrends(
+    new Date(`${startDateStr}T00:00:00Z`),
+    new Date(`${endDateStr}T23:59:59Z`),
+    userId,
+    locale
+  );
+
+  const trimmedTrends = trends.slice(-maxTrends).map((trend) => ({
+    weekLabel: trend.timeRange.label,
+    previousWeekLabel: trend.previousWeekRange.label,
+    weekStart: trend.timeRange.weekStart,
+    weekEnd: trend.timeRange.weekEnd,
+    classification: trend.classification,
+    volumeDelta: trend.volumeDelta,
+    volumeDeltaPct: trend.volumeDeltaPct,
+    diversityDelta: trend.diversityDelta,
+    genreCountPrevious: trend.genreCountPrevious,
+    genreCountCurrent: trend.genreCountCurrent,
+    emergingGenres: trend.emergingGenres.slice(0, 5).map((genre) => ({
+      genre: genre.genre,
+      previousPct: genre.previousPct,
+      currentPct: genre.currentPct,
+      deltaPct: genre.deltaPct,
+    })),
+    decliningGenres: trend.decliningGenres.slice(0, 5).map((genre) => ({
+      genre: genre.genre,
+      previousPct: genre.previousPct,
+      currentPct: genre.currentPct,
+      deltaPct: genre.deltaPct,
+    })),
+    artistMovements: trend.artistRankMovements.slice(0, 5).map((artist) => ({
+      artistName: artist.artistName,
+      previousRank: artist.previousRank,
+      currentRank: artist.currentRank,
+      rankChange: artist.rankChange,
+      currentCount: artist.currentCount,
+    })),
+    dominantShifts: trend.dominantShifts.slice(0, 5),
+    currentWeekListens: trend.currentWeekListens,
+    previousWeekListens: trend.previousWeekListens,
+  }));
+
+  return {
+    period: { startDate: startDateStr, endDate: endDateStr },
+    trends: trimmedTrends,
+    skippedWeeks,
+    limits: {
+      maxTrends,
+      maxAllowedTrends: WEEKLY_TASTE_EVOLUTION_MAX_TRENDS,
+      minimumListensPerWeek: WEEKLY_TASTE_EVOLUTION_MIN_LISTENS_PER_WEEK,
+      weekDefinition: "ISO (Monday start)",
+    },
+    dataQuality: {
+      insufficientData: trimmedTrends.length === 0,
+      minimumListensPerWeek: WEEKLY_TASTE_EVOLUTION_MIN_LISTENS_PER_WEEK,
+      skippedWeekCount: skippedWeeks.length,
+    },
+  };
+}
+
 export async function compareListeningPeriods(
   userId: string,
   args: {
@@ -1682,6 +1782,16 @@ export async function executeMusicChatTool(
           secondEndDate: string;
           topLimit?: number;
           deltaLimit?: number;
+        }
+      );
+    case "getWeeklyTasteEvolution":
+      return getWeeklyTasteEvolution(
+        userId,
+        args as {
+          startDate?: string;
+          endDate?: string;
+          locale?: string;
+          maxTrends?: number;
         }
       );
     case "getListeningTrendsByYear":

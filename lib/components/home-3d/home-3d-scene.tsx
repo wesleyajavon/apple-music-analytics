@@ -1,9 +1,11 @@
 "use client";
 
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { PerspectiveCamera } from "@react-three/drei";
+import { useTranslations } from "next-intl";
 import * as THREE from "three";
+import { buildSoundprintScreenPreviewLabels } from "./soundprint-screen-preview";
 import {
   AnalyticsBars,
   FingerprintWhorl,
@@ -12,8 +14,15 @@ import {
   MockDashboardCard,
   SoundWaveSurface,
 } from "./objects";
+import type { SoundprintScreenPreviewLabels } from "./soundprint-screen-preview";
 
-function SceneContent({ variant }: { variant: "hero" | "ambient" | "dashboard" }) {
+function SceneContent({
+  variant,
+  screenLabels,
+}: {
+  variant: "hero" | "ambient" | "dashboard";
+  screenLabels: SoundprintScreenPreviewLabels;
+}) {
   const groupRef = useRef<THREE.Group>(null);
   const { pointer } = useThree();
 
@@ -36,7 +45,7 @@ function SceneContent({ variant }: { variant: "hero" | "ambient" | "dashboard" }
   if (variant === "dashboard") {
     return (
       <group ref={groupRef}>
-        <MockDashboardCard position={[0, 0, 0]} scale={1.35} />
+        <MockDashboardCard position={[0, 0, 0]} scale={1.35} screenLabels={screenLabels} />
       </group>
     );
   }
@@ -55,7 +64,7 @@ function SceneContent({ variant }: { variant: "hero" | "ambient" | "dashboard" }
   return (
     <group ref={groupRef}>
       <FingerprintWhorl />
-      <MockDashboardCard />
+      <MockDashboardCard screenLabels={screenLabels} />
       <AnalyticsBars position={[0.3, -0.35, 0.35]} />
       <SoundWaveSurface />
       <GenerativeKnot />
@@ -85,6 +94,11 @@ export type Home3DSceneProps = {
 };
 
 export function Home3DScene({ variant = "hero", className = "" }: Home3DSceneProps) {
+  const tScreen = useTranslations("home.heroDashboardPreview.screen");
+  const screenLabels = useMemo(
+    () => buildSoundprintScreenPreviewLabels(tScreen),
+    [tScreen],
+  );
   const cameraZ = variant === "dashboard" ? 3.4 : 4.2;
 
   return (
@@ -96,7 +110,7 @@ export function Home3DScene({ variant = "hero", className = "" }: Home3DScenePro
       >
         <PerspectiveCamera makeDefault position={[0, 0, cameraZ]} fov={42} />
         <SceneLights />
-        <SceneContent variant={variant} />
+        <SceneContent variant={variant} screenLabels={screenLabels} />
       </Canvas>
     </div>
   );

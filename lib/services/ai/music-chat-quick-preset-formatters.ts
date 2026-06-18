@@ -25,6 +25,94 @@ function formatMediumDate(isoUtc: string, locale: AiLocale): string {
   }).format(d);
 }
 
+const ISO_DATE_RE = /^(\d{4})-(\d{2})-(\d{2})$/;
+
+function parseIsoDateParts(
+  isoDate: string
+): { y: number; m: number; d: number } | null {
+  const match = ISO_DATE_RE.exec(isoDate);
+  if (!match) return null;
+  const y = Number(match[1]);
+  const m = Number(match[2]);
+  const d = Number(match[3]);
+  if (!Number.isFinite(y) || !Number.isFinite(m) || !Number.isFinite(d)) return null;
+  return { y, m, d };
+}
+
+function isFullCalendarYear(startDate: string, endDate: string): boolean {
+  const start = parseIsoDateParts(startDate);
+  const end = parseIsoDateParts(endDate);
+  if (!start || !end) return false;
+  return (
+    start.y === end.y &&
+    start.m === 1 &&
+    start.d === 1 &&
+    end.m === 12 &&
+    end.d === 31
+  );
+}
+
+function lastDayOfMonthUtc(year: number, month: number): number {
+  return new Date(Date.UTC(year, month, 0)).getUTCDate();
+}
+
+function isFullCalendarMonth(startDate: string, endDate: string): boolean {
+  const start = parseIsoDateParts(startDate);
+  const end = parseIsoDateParts(endDate);
+  if (!start || !end) return false;
+  if (start.y !== end.y || start.m !== end.m) return false;
+  return start.d === 1 && end.d === lastDayOfMonthUtc(start.y, start.m);
+}
+
+function formatMonthYear(isoDate: string, locale: AiLocale): string {
+  const d = new Date(`${isoDate}T00:00:00.000Z`);
+  if (Number.isNaN(d.getTime())) return isoDate.slice(0, 7);
+  return new Intl.DateTimeFormat(intlLocale(locale), {
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(d);
+}
+
+/** Human-friendly label for a listening period (year → "2020", month → "June 2024", else medium dates). */
+export function formatPeriodRangeLabel(
+  startDate: string,
+  endDate: string,
+  locale: AiLocale
+): string {
+  if (!startDate && !endDate) return "";
+  if (startDate && startDate === endDate) {
+    return formatMediumDate(`${startDate}T00:00:00.000Z`, locale);
+  }
+  if (isFullCalendarYear(startDate, endDate)) {
+    return startDate.slice(0, 4);
+  }
+  if (isFullCalendarMonth(startDate, endDate)) {
+    return formatMonthYear(startDate, locale);
+  }
+  const d1 = formatMediumDate(`${startDate}T00:00:00.000Z`, locale);
+  const d2 = formatMediumDate(`${endDate}T00:00:00.000Z`, locale);
+  return `${d1} – ${d2}`;
+}
+
+function formatListeningPeriodPhrase(
+  locale: AiLocale,
+  startDate: string,
+  endDate: string
+): string {
+  if (isFullCalendarYear(startDate, endDate) || isFullCalendarMonth(startDate, endDate)) {
+    const label = formatPeriodRangeLabel(startDate, endDate, locale);
+    if (locale === "fr") return `en ${label}`;
+    if (locale === "es") return `en ${label}`;
+    return `in ${label}`;
+  }
+  const d1 = formatMediumDate(`${startDate}T00:00:00.000Z`, locale);
+  const d2 = formatMediumDate(`${endDate}T00:00:00.000Z`, locale);
+  if (locale === "fr") return `entre le ${d1} et le ${d2}`;
+  if (locale === "es") return `entre el ${d1} y el ${d2}`;
+  return `between ${d1} and ${d2}`;
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === "object" && !Array.isArray(value);
 }
@@ -55,18 +143,21 @@ export function formatGenreBreakdownPresetAnswer(
   locale: AiLocale,
   result: GenreBreakdownToolResult
 ): string {
-  const d1 = formatMediumDate(`${result.period.startDate}T00:00:00.000Z`, locale);
-  const d2 = formatMediumDate(`${result.period.endDate}T00:00:00.000Z`, locale);
+  const periodPhrase = formatListeningPeriodPhrase(
+    locale,
+    result.period.startDate,
+    result.period.endDate
+  );
   const bullets = result.genres.map(
     (g) =>
       `- ${g.genre} (${g.count} ${locale === "fr" ? "écoutes" : locale === "es" ? "reproducciones" : "listens"}, ${g.percentage.toFixed(1)}%)`
   );
   const intro =
     locale === "fr"
-      ? `Tes genres les plus écoutés entre le ${d1} et le ${d2} :`
+      ? `Tes genres les plus écoutés ${periodPhrase} :`
       : locale === "es"
-        ? `Tus géneros más escuchados entre el ${d1} y el ${d2}:`
-        : `Your top genres between ${d1} and ${d2}:`;
+        ? `Tus géneros más escuchados ${periodPhrase}:`
+        : `Your top genres ${periodPhrase}:`;
   const caveat =
     locale === "fr"
       ? "Les totaux reposent uniquement sur l’historique d’écoute importé (résolution genre : piste, puis mapping artiste si besoin)."
@@ -121,8 +212,7 @@ export function formatComparePeriodsPresetAnswer(
   locale: AiLocale,
   result: ComparePeriodsToolResult
 ): string {
-  const fmt = (sd: string, ed: string) =>
-    `${formatMediumDate(`${sd}T00:00:00.000Z`, locale)} – ${formatMediumDate(`${ed}T00:00:00.000Z`, locale)}`;
+  const fmt = (sd: string, ed: string) => formatPeriodRangeLabel(sd, ed, locale);
   const hFirst =
     locale === "fr"
       ? `Période 1 (${fmt(result.firstPeriod.startDate, result.firstPeriod.endDate)})`
@@ -411,12 +501,15 @@ export function formatTasteShiftPresetAnswer(locale: AiLocale, result: unknown):
     typeof second.startDate === "string" ? second.startDate : "";
   const d2e = typeof second.endDate === "string" ? second.endDate : "";
 
+  const period1 = formatPeriodRangeLabel(d1s, d1e, locale);
+  const period2 = formatPeriodRangeLabel(d2s, d2e, locale);
+
   const intro =
     locale === "fr"
-      ? `Changement de goût entre ${d1s}–${d1e} et ${d2s}–${d2e} :`
+      ? `Changement de goût entre ${period1} et ${period2} :`
       : locale === "es"
-        ? `Cambio de gusto entre ${d1s}–${d1e} y ${d2s}–${d2e}:`
-        : `Taste shift between ${d1s}–${d1e} and ${d2s}–${d2e}:`;
+        ? `Cambio de gusto entre ${period1} y ${period2}:`
+        : `Taste shift between ${period1} and ${period2}:`;
 
   const lines: string[] = [intro, ""];
 
@@ -430,7 +523,13 @@ export function formatTasteShiftPresetAnswer(locale: AiLocale, result: unknown):
   const fa = first.topArtists;
   const sa = second.topArtists;
   if (Array.isArray(fa)) {
-    lines.push(locale === "fr" ? "Première période :" : locale === "es" ? "Primer periodo:" : "First period:");
+    lines.push(
+      locale === "fr"
+        ? `Première période (${period1}) :`
+        : locale === "es"
+          ? `Primer periodo (${period1}):`
+          : `First period (${period1}):`
+    );
     for (const x of fa.slice(0, 5)) {
       if (isRecord(x)) {
         const n = pickName(x, ["artistName", "name"]);
@@ -440,7 +539,14 @@ export function formatTasteShiftPresetAnswer(locale: AiLocale, result: unknown):
     }
   }
   if (Array.isArray(sa)) {
-    lines.push("", locale === "fr" ? "Seconde période :" : locale === "es" ? "Segundo periodo:" : "Second period:");
+    lines.push(
+      "",
+      locale === "fr"
+        ? `Seconde période (${period2}) :`
+        : locale === "es"
+          ? `Segundo periodo (${period2}):`
+          : `Second period (${period2}):`
+    );
     for (const x of sa.slice(0, 5)) {
       if (isRecord(x)) {
         const n = pickName(x, ["artistName", "name"]);
@@ -544,6 +650,228 @@ export function isTasteShiftSummaryToolResult(value: unknown): boolean {
   return isRecord(value.periods);
 }
 
+// --- Weekly taste evolution ---
+
+const WEEKLY_CLASSIFICATION_LABELS: Record<
+  AiLocale,
+  Record<string, string>
+> = {
+  fr: {
+    expansion: "Expansion",
+    consolidation: "Consolidation",
+    exploration: "Exploration",
+    regression: "Régression",
+    stable: "Stable",
+  },
+  en: {
+    expansion: "Expansion",
+    consolidation: "Consolidation",
+    exploration: "Exploration",
+    regression: "Regression",
+    stable: "Stable",
+  },
+  es: {
+    expansion: "Expansión",
+    consolidation: "Consolidación",
+    exploration: "Exploración",
+    regression: "Regresión",
+    stable: "Estable",
+  },
+};
+
+export function isWeeklyTasteEvolutionToolResult(value: unknown): boolean {
+  if (!isRecord(value)) return false;
+  return isRecord(value.period) && Array.isArray(value.trends);
+}
+
+function formatWeeklyVolumeLine(
+  locale: AiLocale,
+  previousWeekListens: number,
+  currentWeekListens: number
+): string {
+  if (locale === "fr") {
+    return `- Écoutes : ${currentWeekListens} cette semaine (${previousWeekListens} la semaine précédente)`;
+  }
+  if (locale === "es") {
+    return `- Reproducciones: ${currentWeekListens} esta semana (${previousWeekListens} la semana anterior)`;
+  }
+  return `- Listens: ${currentWeekListens} this week (${previousWeekListens} the week before)`;
+}
+
+function formatWeeklyGenreListLine(
+  locale: AiLocale,
+  kind: "rising" | "declining",
+  genres: string[]
+): string | null {
+  if (genres.length === 0) return null;
+  const joined = genres.join(", ");
+  if (kind === "rising") {
+    if (locale === "fr") return `- Genres qui montent : ${joined}`;
+    if (locale === "es") return `- Géneros al alza: ${joined}`;
+    return `- Rising genres: ${joined}`;
+  }
+  if (locale === "fr") return `- Genres qui reculent : ${joined}`;
+  if (locale === "es") return `- Géneros a la baja: ${joined}`;
+  return `- Declining genres: ${joined}`;
+}
+
+export function formatWeeklyTasteEvolutionPresetAnswer(
+  locale: AiLocale,
+  result: unknown
+): string {
+  if (!isWeeklyTasteEvolutionToolResult(result)) return "";
+
+  const period = result.period;
+  const startDate =
+    typeof period.startDate === "string" ? period.startDate : "";
+  const endDate = typeof period.endDate === "string" ? period.endDate : "";
+  const periodPhrase = formatListeningPeriodPhrase(locale, startDate, endDate);
+
+  const intro =
+    locale === "fr"
+      ? `Voici comment tes goûts ont bougé, semaine après semaine ${periodPhrase} :`
+      : locale === "es"
+        ? `Así han cambiado tus gustos, semana a semana ${periodPhrase}:`
+        : `Here’s how your taste shifted, week by week ${periodPhrase}:`;
+
+  const lines: string[] = [intro, ""];
+
+  if (result.trends.length === 0) {
+    lines.push(
+      locale === "fr"
+        ? "Pas assez d’écoutes sur les dernières semaines pour comparer — il faut au moins une dizaine d’écoutes par semaine."
+        : locale === "es"
+          ? "No hay suficientes reproducciones en las últimas semanas para comparar: hacen falta al menos unas diez por semana."
+          : "Not enough listens in recent weeks to compare—you need at least about ten per week."
+    );
+  } else {
+    for (const trend of result.trends) {
+      if (!isRecord(trend)) continue;
+      const weekLabel =
+        typeof trend.weekLabel === "string" ? trend.weekLabel : "";
+      const previousWeekLabel =
+        typeof trend.previousWeekLabel === "string"
+          ? trend.previousWeekLabel
+          : "";
+      const classification =
+        typeof trend.classification === "string"
+          ? trend.classification
+          : "stable";
+      const classLabel =
+        WEEKLY_CLASSIFICATION_LABELS[locale][classification] ?? classification;
+      const currentWeekListens =
+        typeof trend.currentWeekListens === "number"
+          ? trend.currentWeekListens
+          : 0;
+      const previousWeekListens =
+        typeof trend.previousWeekListens === "number"
+          ? trend.previousWeekListens
+          : 0;
+
+      lines.push(
+        locale === "fr"
+          ? `${previousWeekLabel} → ${weekLabel} — ${classLabel}`
+          : locale === "es"
+            ? `${previousWeekLabel} → ${weekLabel} — ${classLabel}`
+            : `${previousWeekLabel} → ${weekLabel} — ${classLabel}`
+      );
+      lines.push(
+        formatWeeklyVolumeLine(
+          locale,
+          previousWeekListens,
+          currentWeekListens
+        )
+      );
+
+      const emerging = trend.emergingGenres;
+      const risingGenreNames: string[] = [];
+      if (Array.isArray(emerging)) {
+        for (const item of emerging.slice(0, 3)) {
+          if (!isRecord(item)) continue;
+          risingGenreNames.push(pickName(item, ["genre", "name"]));
+        }
+      }
+      const risingLine = formatWeeklyGenreListLine(
+        locale,
+        "rising",
+        risingGenreNames
+      );
+      if (risingLine) lines.push(risingLine);
+
+      const declining = trend.decliningGenres;
+      const decliningGenreNames: string[] = [];
+      if (Array.isArray(declining)) {
+        for (const item of declining.slice(0, 3)) {
+          if (!isRecord(item)) continue;
+          decliningGenreNames.push(pickName(item, ["genre", "name"]));
+        }
+      }
+      const decliningLine = formatWeeklyGenreListLine(
+        locale,
+        "declining",
+        decliningGenreNames
+      );
+      if (decliningLine) lines.push(decliningLine);
+
+      const artists = trend.artistMovements;
+      if (Array.isArray(artists) && artists.length > 0) {
+        lines.push(
+          locale === "fr"
+            ? "- Artistes qui bougent dans ton top :"
+            : locale === "es"
+              ? "- Artistas que se mueven en tu top:"
+              : "- Artists moving in your top:"
+        );
+        for (const item of artists.slice(0, 3)) {
+          if (!isRecord(item)) continue;
+          const name = pickName(item, ["artistName", "name"]);
+          const previousRank = item.previousRank;
+          const currentRank = item.currentRank;
+          if (previousRank === null && typeof currentRank === "number") {
+            lines.push(
+              locale === "fr"
+                ? `  - ${name} (nouveau dans le top, #${currentRank})`
+                : locale === "es"
+                  ? `  - ${name} (nuevo en el top, #${currentRank})`
+                  : `  - ${name} (new in your top, #${currentRank})`
+            );
+          } else if (
+            typeof previousRank === "number" &&
+            typeof currentRank === "number"
+          ) {
+            lines.push(`  - ${name}: #${previousRank} → #${currentRank}`);
+          } else {
+            lines.push(`  - ${name}`);
+          }
+        }
+      }
+
+      lines.push("");
+    }
+  }
+
+  const skipped = result.skippedWeeks;
+  if (Array.isArray(skipped) && skipped.length > 0) {
+    lines.push(
+      locale === "fr"
+        ? `${skipped.length} semaine(s) sans assez d’écoutes pour être comparées.`
+        : locale === "es"
+          ? `${skipped.length} semana(s) sin datos suficientes para comparar.`
+          : `${skipped.length} week(s) had too little data to compare.`
+    );
+    lines.push("");
+  }
+
+  lines.push(
+    locale === "fr"
+      ? "Basé uniquement sur ton historique d’écoute importé."
+      : locale === "es"
+        ? "Basado solo en tu historial de escucha importado."
+        : "Based only on your imported listening history."
+  );
+  return lines.join("\n").trimEnd();
+}
+
 // --- Track obsessions ---
 
 export type TrackObsessionsToolResult = {
@@ -573,12 +901,17 @@ export function formatTrackObsessionsPresetAnswer(
   locale: AiLocale,
   result: TrackObsessionsToolResult
 ): string {
+  const periodPhrase = formatListeningPeriodPhrase(
+    locale,
+    result.period.startDate,
+    result.period.endDate
+  );
   const intro =
     locale === "fr"
-      ? `Fenêtre courte : ${result.windowDays} jours. Période : ${result.period.startDate} → ${result.period.endDate}.`
+      ? `Fenêtre courte : ${result.windowDays} jours. Période ${periodPhrase}.`
       : locale === "es"
-        ? `Ventana corta: ${result.windowDays} días. Periodo: ${result.period.startDate} → ${result.period.endDate}.`
-        : `Short window: ${result.windowDays} days. Period: ${result.period.startDate} → ${result.period.endDate}.`;
+        ? `Ventana corta: ${result.windowDays} días. Periodo ${periodPhrase}.`
+        : `Short window: ${result.windowDays} days. Period ${periodPhrase}.`;
 
   if (result.obsessionWindows.length === 0) {
     return [
@@ -597,13 +930,18 @@ export function formatTrackObsessionsPresetAnswer(
           : "Counts use only imported history.",
     ].join("\n");
   }
-  const lines = result.obsessionWindows.map((w) =>
-    locale === "fr"
-      ? `- ${w.title} — ${w.artistName}, ${w.listensInWindow} écoutes sur ${result.windowDays} jours (${w.window.startDate}–${w.window.endDate}), ${w.totalListensInPeriod} sur toute la période`
+  const lines = result.obsessionWindows.map((w) => {
+    const windowLabel = formatPeriodRangeLabel(
+      w.window.startDate,
+      w.window.endDate,
+      locale
+    );
+    return locale === "fr"
+      ? `- ${w.title} — ${w.artistName}, ${w.listensInWindow} écoutes sur ${result.windowDays} jours (${windowLabel}), ${w.totalListensInPeriod} sur toute la période`
       : locale === "es"
-        ? `- ${w.title} — ${w.artistName}, ${w.listensInWindow} reproducciones en ${result.windowDays} días (${w.window.startDate}–${w.window.endDate}), ${w.totalListensInPeriod} en el periodo completo`
-        : `- ${w.title} — ${w.artistName}, ${w.listensInWindow} listens in ${result.windowDays} days (${w.window.startDate}–${w.window.endDate}), ${w.totalListensInPeriod} in the full span`
-  );
+        ? `- ${w.title} — ${w.artistName}, ${w.listensInWindow} reproducciones en ${result.windowDays} días (${windowLabel}), ${w.totalListensInPeriod} en el periodo completo`
+        : `- ${w.title} — ${w.artistName}, ${w.listensInWindow} listens in ${result.windowDays} days (${windowLabel}), ${w.totalListensInPeriod} in the full span`;
+  });
   return [
     intro,
     "",

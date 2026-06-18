@@ -14,7 +14,10 @@ import type {
 import { getRedisClient } from "@/lib/redis";
 import { buildArtistDeepDiveCacheSuffix } from "@/lib/services/ai/music-chat-artist-deep-dive-direct-answer";
 import { resolveGenreQuickPresetYear } from "@/lib/services/ai/music-chat-preset-helpers";
-import { getLateNightPresetDateRange } from "@/lib/services/ai/music-chat-tools";
+import {
+  getLateNightPresetDateRange,
+  getWeeklyTasteEvolutionPresetDateRange,
+} from "@/lib/services/ai/music-chat-tools";
 
 const CACHE_KEY_PREFIX = "music-chat:preset:v1";
 
@@ -65,6 +68,10 @@ export function buildMusicChatPresetCacheSuffix(
     case "taste-shift-2020-2024":
     case "consistent-artists":
       return "fixed";
+    case "weekly-taste-evolution": {
+      const r = getWeeklyTasteEvolutionPresetDateRange();
+      return `${r.startDate}_${r.endDate}`;
+    }
     case "late-night-habits": {
       const r = getLateNightPresetDateRange();
       return `${r.startDate}_${r.endDate}`;

@@ -20,6 +20,7 @@ import {
   Send,
   Sparkles,
   UserRound,
+  X,
 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { MobileBottomSheet } from "@/lib/components/mobile-bottom-sheet";
@@ -44,6 +45,8 @@ import { useOverviewStats } from "@/lib/hooks/use-listening";
 import { usePublicDemoViewer } from "@/lib/hooks/use-public-demo-viewer";
 import {
   LATE_NIGHT_PRESET_RECENT_WINDOW_DAYS,
+  WEEKLY_TASTE_EVOLUTION_PRESET_WINDOW_DAYS,
+  getWeeklyTasteEvolutionPresetDateRange,
   type MusicChatMessage,
   type MusicChatPresetArgs,
   type MusicChatPresetQuestionId,
@@ -57,6 +60,7 @@ type QuickQuestionId =
   | "genre-breakdown"
   | "compare-periods"
   | "taste-shift"
+  | "weekly-taste-evolution"
   | "yearly-trends"
   | "consistent-artists"
   | "time-of-day"
@@ -72,6 +76,65 @@ const COMPARE_PERIODS_FALLBACK_LATER = 2024;
 
 /** Fallback single year when listening bounds are missing (should be rare once the date range has loaded). */
 const LISTEN_HISTORY_YEAR_FALLBACK = 2022;
+
+const ASK_SOUNDPRINT_DISMISS_CUSTOMIZE_HINT_KEY = "ama-ask-soundprint-dismiss-customize-hint";
+const ASK_SOUNDPRINT_DISMISS_HEAVY_PRESET_NOTICE_KEY =
+  "ama-ask-soundprint-dismiss-heavy-preset-notice";
+
+function DismissibleAskHint({
+  storageKey,
+  variant,
+  children,
+}: {
+  storageKey: string;
+  variant: "cyan" | "amber";
+  children: ReactNode;
+}) {
+  const t = useTranslations("askSoundprint");
+  const [dismissed, setDismissed] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    try {
+      setDismissed(window.localStorage.getItem(storageKey) === "1");
+    } catch {
+      // ignore private mode / quota
+    }
+    setHydrated(true);
+  }, [storageKey]);
+
+  function dismiss() {
+    setDismissed(true);
+    try {
+      window.localStorage.setItem(storageKey, "1");
+    } catch {
+      // ignore private mode / quota
+    }
+  }
+
+  if (!hydrated || dismissed) return null;
+
+  const variantClassName =
+    variant === "cyan"
+      ? "border-cyan-200/70 bg-cyan-50/90 text-cyan-950 dark:border-cyan-300/20 dark:bg-cyan-950/35 dark:text-cyan-50"
+      : "border-amber-200/70 bg-amber-50/90 text-amber-950 dark:border-amber-300/25 dark:bg-amber-950/35 dark:text-amber-50";
+
+  return (
+    <div
+      className={`relative rounded-xl border px-3 py-2 pr-9 text-xs leading-relaxed ${variantClassName}`}
+    >
+      {children}
+      <button
+        type="button"
+        onClick={dismiss}
+        className="absolute right-1.5 top-1.5 rounded-md p-1 text-current/55 transition hover:bg-black/5 hover:text-current focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/40 dark:hover:bg-white/10"
+        aria-label={t("dismissHintAria")}
+      >
+        <X className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />
+      </button>
+    </div>
+  );
+}
 
 /** Même shell hero que `/dashboard/timeline` — vibe startup / Vercel */
 const ASK_HERO_SHELL_CLASS =
@@ -219,6 +282,7 @@ const QUICK_QUESTION_SECTIONS: Array<{
   {
     titleKey: "maestroUpgrade",
     examples: [
+      { id: "weekly-taste-evolution", presetQuestionId: "weekly-taste-evolution" },
       { id: "taste-shift", presetQuestionId: "taste-shift-2020-2024" },
       { id: "track-obsessions", presetQuestionId: "track-obsessions-2022" },
     ],
@@ -228,6 +292,7 @@ const QUICK_QUESTION_SECTIONS: Array<{
 /** Presets surfaced first on mobile — personalized + high-signal analytics pulls. */
 const MOBILE_FEATURED_PRESET_IDS: QuickQuestionId[] = [
   "artist-deep-dive",
+  "weekly-taste-evolution",
   "top-tracks",
   "genre-breakdown",
   "compare-periods",
@@ -287,9 +352,35 @@ function usePresetExampleContent(
       ? t("examples.time-of-day.recentWindowHint", {
           days: LATE_NIGHT_PRESET_RECENT_WINDOW_DAYS,
         })
-      : undefined;
+      : example.id === "weekly-taste-evolution"
+        ? t("examples.weekly-taste-evolution.recentWindowHint", {
+            days: WEEKLY_TASTE_EVOLUTION_PRESET_WINDOW_DAYS,
+          })
+        : undefined;
 
   return { label, question, hint };
+}
+
+function WeeklyTasteEvolutionDetailLink({ className }: { className?: string }) {
+  const t = useTranslations("askSoundprint");
+  const href = useMemo(() => {
+    const { startDate, endDate } = getWeeklyTasteEvolutionPresetDateRange();
+    const params = new URLSearchParams({ startDate, endDate });
+    return `/dashboard/taste-evolution?${params.toString()}`;
+  }, []);
+
+  return (
+    <Link
+      href={href}
+      className={
+        className ??
+        "mt-2 inline-flex items-center gap-1 text-xs font-medium text-cyan-700 hover:text-cyan-800 dark:text-cyan-300 dark:hover:text-cyan-200"
+      }
+    >
+      {t("examples.weekly-taste-evolution.detailLink")}
+      <span aria-hidden>→</span>
+    </Link>
+  );
 }
 
 function PresetExampleButton({
@@ -310,47 +401,55 @@ function PresetExampleButton({
 
   if (variant === "chip") {
     return (
-      <button
-        type="button"
-        disabled={disabled}
-        onClick={() => onSelect(example.presetQuestionId)}
-        className="inline-flex min-h-11 shrink-0 snap-start flex-col items-start justify-center rounded-2xl border border-slate-200/90 bg-white px-4 py-3 text-left shadow-sm transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-slate-950/80"
-      >
-        <span className="text-[0.66rem] font-semibold uppercase tracking-[0.14em] text-violet-700 dark:text-violet-200">
-          {example.id === "artist-deep-dive" ? label : t(`examples.${example.id}.label`)}
-        </span>
-        <span className="mt-1 line-clamp-2 max-w-[12.5rem] text-sm font-medium leading-snug text-slate-900 dark:text-white">
-          {question}
-        </span>
-      </button>
+      <div className="inline-flex shrink-0 snap-start flex-col">
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => onSelect(example.presetQuestionId)}
+          className="inline-flex min-h-11 flex-col items-start justify-center rounded-2xl border border-slate-200/90 bg-white px-4 py-3 text-left shadow-sm transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-slate-950/80"
+        >
+          <span className="text-[0.66rem] font-semibold uppercase tracking-[0.14em] text-violet-700 dark:text-violet-200">
+            {example.id === "artist-deep-dive" ? label : t(`examples.${example.id}.label`)}
+          </span>
+          <span className="mt-1 line-clamp-2 max-w-[12.5rem] text-sm font-medium leading-snug text-slate-900 dark:text-white">
+            {question}
+          </span>
+        </button>
+        {example.id === "weekly-taste-evolution" ? (
+          <WeeklyTasteEvolutionDetailLink className="mt-1.5 px-1 text-[0.7rem] font-medium text-cyan-700 dark:text-cyan-300" />
+        ) : null}
+      </div>
     );
   }
 
   return (
-    <button
-      type="button"
-      disabled={disabled}
-      onClick={() => onSelect(example.presetQuestionId)}
-      className="w-full rounded-xl border border-slate-200/90 bg-white px-4 py-3 text-left shadow-sm transition hover:border-cyan-300/50 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-black/20 dark:hover:border-cyan-400/35 dark:hover:bg-white/[0.04]"
-    >
-      <span
-        className={
-          example.id === "artist-deep-dive"
-            ? "block text-[0.68rem] font-semibold tracking-[0.14em] text-violet-700 dark:text-violet-200"
-            : "block text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-violet-700 dark:text-violet-200"
-        }
+    <div>
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => onSelect(example.presetQuestionId)}
+        className="w-full rounded-xl border border-slate-200/90 bg-white px-4 py-3 text-left shadow-sm transition hover:border-cyan-300/50 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-black/20 dark:hover:border-cyan-400/35 dark:hover:bg-white/[0.04]"
       >
-        {label}
-      </span>
-      <span className="mt-1 block text-sm font-medium leading-snug text-slate-900 dark:text-white">
-        {question}
-      </span>
-      {hint ? (
-        <span className="mt-2 block text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-          {hint}
+        <span
+          className={
+            example.id === "artist-deep-dive"
+              ? "block text-[0.68rem] font-semibold tracking-[0.14em] text-violet-700 dark:text-violet-200"
+              : "block text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-violet-700 dark:text-violet-200"
+          }
+        >
+          {label}
         </span>
-      ) : null}
-    </button>
+        <span className="mt-1 block text-sm font-medium leading-snug text-slate-900 dark:text-white">
+          {question}
+        </span>
+        {hint ? (
+          <span className="mt-2 block text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+            {hint}
+          </span>
+        ) : null}
+      </button>
+      {example.id === "weekly-taste-evolution" ? <WeeklyTasteEvolutionDetailLink /> : null}
+    </div>
   );
 }
 
@@ -715,9 +814,9 @@ function AskSoundprintMobileExperience({
               </summary>
               <p className="mt-2">{t("unsupportedExamples")}</p>
             </details>
-            <p className="rounded-xl border border-cyan-200/70 bg-cyan-50/90 px-3 py-2 text-xs leading-relaxed text-cyan-950 dark:border-cyan-300/20 dark:bg-cyan-950/35 dark:text-cyan-50">
+            <DismissibleAskHint storageKey={ASK_SOUNDPRINT_DISMISS_CUSTOMIZE_HINT_KEY} variant="cyan">
               {t("customizeHint")}
-            </p>
+            </DismissibleAskHint>
           </div>
         </details>
       </section>
@@ -768,9 +867,14 @@ function AskSoundprintMobileExperience({
             {t("mobile.presetSheetTitle")}
           </h2>
           <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">{t("mobile.presetSheetHint")}</p>
-          <p className="mt-3 rounded-xl border border-amber-200/70 bg-amber-50/90 px-3 py-2 text-xs leading-relaxed text-amber-950 dark:border-amber-300/25 dark:bg-amber-950/35 dark:text-amber-50">
-            {t("heavyPresetHistoryNotice")}
-          </p>
+          <div className="mt-3">
+            <DismissibleAskHint
+              storageKey={ASK_SOUNDPRINT_DISMISS_HEAVY_PRESET_NOTICE_KEY}
+              variant="amber"
+            >
+              {t("heavyPresetHistoryNotice")}
+            </DismissibleAskHint>
+          </div>
           <div className="mt-4 space-y-5">
             <PresetPlaybookSections
               ctx={presetCtx}
@@ -1185,7 +1289,7 @@ function MusicChatContent() {
         ) : null}
       </section>
 
-      <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
+      <section className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
         {showGenreBackfillNotice ? (
           <div className="lg:col-span-2">
             <InteractiveAiGenreBackfillNotice
@@ -1196,8 +1300,8 @@ function MusicChatContent() {
         <div className={`relative flex flex-col ${DASHBOARD_SPOTLIGHT_SHELL}`}>
           <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} aria-hidden />
           <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} aria-hidden />
-          <div className="relative flex min-h-0 flex-1 flex-col">
-            <div className={`${DASHBOARD_SPOTLIGHT_INNER_WELL} mx-4 mt-4 max-h-[min(50dvh,360px)] min-h-[280px] flex-1 space-y-4 overflow-y-auto sm:mx-5 sm:mt-5 lg:max-h-[560px] lg:min-h-[420px]`}>
+          <div className="relative flex flex-col">
+            <div className={`${DASHBOARD_SPOTLIGHT_INNER_WELL} mx-4 mt-4 max-h-[min(50dvh,360px)] min-h-[280px] space-y-4 overflow-y-auto sm:mx-5 sm:mt-5 lg:max-h-[560px] lg:min-h-[420px]`}>
               <MusicChatMessages
                 messages={visibleMessages}
                 thinkingStepIndex={thinkingStepIndex}
@@ -1233,12 +1337,15 @@ function MusicChatContent() {
                 {t("presetTitle")}
               </h2>
               <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">{t("presetDescription")}</p>
-              <p className="rounded-xl border border-cyan-200/70 bg-cyan-50/90 px-3 py-2 text-xs leading-relaxed text-cyan-950 dark:border-cyan-300/20 dark:bg-cyan-950/35 dark:text-cyan-50">
+              <DismissibleAskHint storageKey={ASK_SOUNDPRINT_DISMISS_CUSTOMIZE_HINT_KEY} variant="cyan">
                 {t("customizeHint")}
-              </p>
-              <p className="rounded-xl border border-amber-200/70 bg-amber-50/90 px-3 py-2 text-xs leading-relaxed text-amber-950 dark:border-amber-300/25 dark:bg-amber-950/35 dark:text-amber-50">
+              </DismissibleAskHint>
+              <DismissibleAskHint
+                storageKey={ASK_SOUNDPRINT_DISMISS_HEAVY_PRESET_NOTICE_KEY}
+                variant="amber"
+              >
                 {t("heavyPresetHistoryNotice")}
-              </p>
+              </DismissibleAskHint>
               <details className="group mt-1">
                 <summary className="flex cursor-pointer list-none items-center justify-between rounded-xl border border-slate-200/90 bg-slate-50/90 px-4 py-3 text-left text-sm font-semibold text-slate-900 transition hover:bg-slate-100 dark:border-white/10 dark:bg-white/[0.06] dark:text-white dark:hover:bg-white/[0.09]">
                   <span>{t("supportedGuideTitle")}</span>
@@ -1247,7 +1354,7 @@ function MusicChatContent() {
                     aria-hidden
                   />
                 </summary>
-                <div className="mt-4 space-y-5">
+                <div className="mt-4 max-h-[min(48dvh,22rem)] space-y-5 overflow-y-auto overscroll-y-contain pr-0.5">
                   <PresetPlaybookSections
                     ctx={presetCtx}
                     disabled={presetsDisabled}

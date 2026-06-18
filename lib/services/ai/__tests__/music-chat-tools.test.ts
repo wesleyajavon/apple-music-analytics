@@ -6,17 +6,24 @@ vi.mock("@/lib/prisma", () => ({
   },
 }));
 
+vi.mock("@/lib/services/taste-evolution/taste-evolution-service", () => ({
+  getTasteEvolutionTrends: vi.fn(),
+}));
+
 import {
   getArtistDeepDive,
   getLateNightListeningProfile,
   getLateNightPresetDateRange,
   getTasteShiftSummary,
   getTrackObsessionWindows,
+  getWeeklyTasteEvolution,
+  getWeeklyTasteEvolutionPresetDateRange,
   isMusicChatPresetQuestionId,
   MUSIC_CHAT_PRESET_QUESTIONS,
   resolveDateRange,
 } from "@/lib/services/ai/music-chat-tools";
 import { prisma } from "@/lib/prisma";
+import { getTasteEvolutionTrends } from "@/lib/services/taste-evolution/taste-evolution-service";
 
 describe("music-chat-tools", () => {
   beforeEach(() => {
@@ -46,6 +53,7 @@ describe("music-chat-tools", () => {
     expect(isMusicChatPresetQuestionId("summer-2022-top-artists")).toBe(true);
     expect(isMusicChatPresetQuestionId("artist-deep-dive")).toBe(true);
     expect(isMusicChatPresetQuestionId("taste-shift-2020-2024")).toBe(true);
+    expect(isMusicChatPresetQuestionId("weekly-taste-evolution")).toBe(true);
     expect(isMusicChatPresetQuestionId("track-obsessions-2022")).toBe(true);
     expect(isMusicChatPresetQuestionId("late-night-habits")).toBe(true);
     expect(isMusicChatPresetQuestionId("free-text")).toBe(false);
@@ -484,6 +492,83 @@ describe("music-chat-tools", () => {
       },
     });
     expect(prisma.$queryRaw).toHaveBeenCalledTimes(8);
+  });
+
+  it("returns compact week-to-week taste evolution from taste-evolution service", async () => {
+    vi.mocked(getTasteEvolutionTrends).mockResolvedValue({
+      trends: [
+        {
+          timeRange: {
+            weekStart: "2026-06-09",
+            weekEnd: "2026-06-15",
+            label: "Week of Jun 9",
+          },
+          previousWeekRange: {
+            weekStart: "2026-06-02",
+            weekEnd: "2026-06-08",
+            label: "Week of Jun 2",
+          },
+          volumeDelta: 12,
+          volumeDeltaPct: 20,
+          diversityDelta: 0.15,
+          genreCountPrevious: 4,
+          genreCountCurrent: 5,
+          emergingGenres: [
+            {
+              genre: "Electronic",
+              previousPct: 10,
+              currentPct: 18,
+              deltaPct: 8,
+              previousCount: 5,
+              currentCount: 9,
+            },
+          ],
+          decliningGenres: [],
+          artistRankMovements: [
+            {
+              artistName: "Daft Punk",
+              previousRank: 3,
+              currentRank: 1,
+              rankChange: -2,
+              previousCount: 8,
+              currentCount: 14,
+            },
+          ],
+          dominantShifts: [],
+          classification: "exploration",
+          previousWeekListens: 60,
+          currentWeekListens: 72,
+        },
+      ],
+      skippedWeeks: [{ weekStart: "2026-05-26", reason: "too few listens" }],
+    });
+
+    const range = getWeeklyTasteEvolutionPresetDateRange(
+      new Date("2026-06-18T12:00:00Z")
+    );
+    const result = await getWeeklyTasteEvolution("user-123", {
+      startDate: range.startDate,
+      endDate: range.endDate,
+      locale: "en",
+      maxTrends: 4,
+    });
+
+    expect(getTasteEvolutionTrends).toHaveBeenCalledWith(
+      new Date(`${range.startDate}T00:00:00Z`),
+      new Date(`${range.endDate}T23:59:59Z`),
+      "user-123",
+      "en"
+    );
+    expect(result.period).toEqual(range);
+    expect(result.trends).toHaveLength(1);
+    expect(result.trends[0]).toMatchObject({
+      classification: "exploration",
+      volumeDeltaPct: 20,
+      emergingGenres: [{ genre: "Electronic", deltaPct: 8 }],
+      artistMovements: [{ artistName: "Daft Punk", rankChange: -2 }],
+    });
+    expect(result.dataQuality.insufficientData).toBe(false);
+    expect(result.skippedWeeks).toHaveLength(1);
   });
 
   it("does not expose friendUserId in preset question surface", () => {

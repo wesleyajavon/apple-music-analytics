@@ -399,13 +399,14 @@
     "presetDescription": "Un toque lanza una pregunta estructurada para ver rápido qué cubre este agente.",
     "customizeHint": "Estas preguntas son plantillas: los usuarios conectados pueden cambiar el artista, el año, el rango de fechas, los períodos a comparar, el tamaño de ventana o el límite de resultados en texto libre.",
     "heavyPresetHistoryNotice": "Algunas preguntas rápidas solo analizan una ventana reciente (mira cada tarjeta) o el rango del panel para que las respuestas sigan siendo ágiles: no siempre es todo tu historial.",
+    "dismissHintAria": "Cerrar aviso",
     "supportedGuideTitle": "Explorar el playbook",
     "demoPresetOnlyHint": "Disponible como texto libre para cuentas conectadas.",
     "presetSections": {
       "core": "Consultas del día a día",
       "maestroUpgrade": "Arcos más profundos"
     },
-    "guardrailHint": "Ask your Soundprint usa tools analytics autorizados: sin SQL generado libremente, sin escrituras y con resultados limitados.",
+    "guardrailHint": "El chat Soundprint usa herramientas analytics autorizadas: sin SQL generado libremente, sin escrituras y con resultados limitados.",
     "unsupportedTitle": "Qué no está soportado",
     "unsupportedExamples": "Crear playlists, cambiar cuentas, borrar/importar datos, hechos externos sobre artistas, SQL libre y tareas generales fuera de analytics musicales.",
     "publicDemoFreeTextBlocked": "El modo demo pública solo acepta preguntas predefinidas.",
@@ -434,6 +435,7 @@
       "late-night-habits": "¿Qué he estado escuchando tarde por la noche últimamente?",
       "artist-deep-dive": "Cuéntame mi historial de escucha con Radiohead.",
       "taste-shift-2020-2024": "¿Cómo cambiaron mis gustos entre 2020 y 2024?",
+      "weekly-taste-evolution": "¿Cómo han evolucionado mis gustos semana a semana en las últimas semanas?",
       "track-obsessions-2022": "¿Qué canciones me obsesionaron en 2022?",
       "genre-breakdown-last-year": "¿Qué géneros escuché más el año pasado?",
       "compare-listening-periods": "Compara mis tops de canciones y artistas entre 2021 y 2024.",
@@ -459,6 +461,12 @@
       "taste-shift": {
         "label": "Cambio de gusto",
         "question": "¿Cómo cambiaron mis gustos entre 2020 y 2024?"
+      },
+      "weekly-taste-evolution": {
+        "label": "Evolución semanal",
+        "question": "¿Cómo han evolucionado mis gustos semana a semana en las últimas semanas?",
+        "recentWindowHint": "Usa aproximadamente los últimos {days} días (UTC), comparaciones por semanas ISO — no el filtro de fechas del panel.",
+        "detailLink": "Ver desglose semanal"
       },
       "yearly-trends": {
         "label": "Tendencias anuales",
@@ -2793,7 +2801,27 @@
       "label": "Vista previa del dashboard Soundprint",
       "eyebrow": "Tus datos de escucha",
       "subtitle": "Tendencias, estadísticas y patrones de un vistazo",
-      "liveBadge": "Vista previa en vivo"
+      "liveBadge": "Vista previa en vivo",
+      "screen": {
+        "nav": {
+          "yourMusic": "Tu música",
+          "musicProfile": "Perfil musical",
+          "genres": "Géneros",
+          "aiInsights": "Insights IA"
+        },
+        "dashboard": "Dashboard",
+        "yourMusic": "Tu música",
+        "periodDays": "30 días",
+        "stats": {
+          "listens": "Escuchas",
+          "artists": "Artistas",
+          "tracks": "Títulos",
+          "time": "Tiempo"
+        },
+        "timeline": "Timeline",
+        "topArtists": "Top artistas",
+        "genres": "Géneros"
+      }
     },
     "heroProof": {
       "ariaLabel": "Aspectos destacados del producto",

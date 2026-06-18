@@ -3,6 +3,27 @@ import type { AiLocale } from "@/lib/services/ai/locale-utils";
 /** Rolling UTC calendar-day window for the late-night preset (bounded workload vs full history). */
 export const LATE_NIGHT_PRESET_RECENT_WINDOW_DAYS = 90;
 
+/** Rolling UTC window for the weekly taste-evolution preset (matches `/dashboard/taste-evolution`). */
+export const WEEKLY_TASTE_EVOLUTION_PRESET_WINDOW_DAYS = 56;
+
+export function getWeeklyTasteEvolutionPresetDateRange(asOf: Date = new Date()): {
+  startDate: string;
+  endDate: string;
+} {
+  const MS_PER_DAY = 86_400_000;
+  const endUtc = Date.UTC(
+    asOf.getUTCFullYear(),
+    asOf.getUTCMonth(),
+    asOf.getUTCDate()
+  );
+  const startUtc =
+    endUtc - (WEEKLY_TASTE_EVOLUTION_PRESET_WINDOW_DAYS - 1) * MS_PER_DAY;
+  return {
+    startDate: new Date(startUtc).toISOString().slice(0, 10),
+    endDate: new Date(endUtc).toISOString().slice(0, 10),
+  };
+}
+
 export type MusicChatRole = "user" | "assistant";
 
 export type MusicChatMessage = {
@@ -33,6 +54,7 @@ export type MusicChatPresetQuestionId =
   | "late-night-habits"
   | "artist-deep-dive"
   | "taste-shift-2020-2024"
+  | "weekly-taste-evolution"
   | "track-obsessions-2022"
   | "genre-breakdown-last-year"
   | "compare-listening-periods"
@@ -45,6 +67,7 @@ export type MusicChatSource =
   | "getGenreBreakdownForPeriod"
   | "compareListeningPeriods"
   | "getTasteShiftSummary"
+  | "getWeeklyTasteEvolution"
   | "getListeningTrendsByYear"
   | "getMostConsistentArtistsOverTime"
   | "getListeningHabitsByTimeOfDay"

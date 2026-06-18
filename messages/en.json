@@ -399,13 +399,14 @@
     "presetDescription": "One tap fires a structured question so you learn what this agent covers fast.",
     "customizeHint": "These are templates: signed-in users can change the artist, year, date range, comparison periods, window size, or result limit in free text.",
     "heavyPresetHistoryNotice": "Some presets analyze only a recent window (see each card) or follow your dashboard date filter so answers stay responsive—they are not always your full listening history.",
+    "dismissHintAria": "Dismiss notice",
     "supportedGuideTitle": "Browse the playbook",
     "demoPresetOnlyHint": "Available for signed-in free text.",
     "presetSections": {
       "core": "Everyday pulls",
       "maestroUpgrade": "Deeper arcs"
     },
-    "guardrailHint": "Ask your Soundprint uses allowlisted analytics tools: no free-form generated SQL, no writes, and bounded results.",
+    "guardrailHint": "Soundprint chat uses allowlisted analytics tools: no free-form generated SQL, no writes, and bounded results.",
     "unsupportedTitle": "What is not supported?",
     "unsupportedExamples": "Playlist creation, account changes, data deletion/imports, external artist facts, free-form SQL, and general non-music tasks.",
     "publicDemoFreeTextBlocked": "Public demo mode only accepts preset questions.",
@@ -434,6 +435,7 @@
       "late-night-habits": "What have I been listening to late at night recently?",
       "artist-deep-dive": "Tell me my listening history with Radiohead.",
       "taste-shift-2020-2024": "How did my taste change between 2020 and 2024?",
+      "weekly-taste-evolution": "How has my taste evolved week by week over the past few weeks?",
       "track-obsessions-2022": "Which songs obsessed me in 2022?",
       "genre-breakdown-last-year": "What genres did I listen to most last year?",
       "compare-listening-periods": "Compare my top tracks and artists in 2021 vs 2024.",
@@ -459,6 +461,12 @@
       "taste-shift": {
         "label": "Taste shift",
         "question": "How did my taste change between 2020 and 2024?"
+      },
+      "weekly-taste-evolution": {
+        "label": "Weekly taste shifts",
+        "question": "How has my taste evolved week by week over the past few weeks?",
+        "recentWindowHint": "Uses about the last {days} days (UTC) with ISO week comparisons—not your full dashboard date filter.",
+        "detailLink": "View weekly breakdown"
       },
       "yearly-trends": {
         "label": "Yearly trends",
@@ -2811,7 +2819,27 @@
       "label": "Soundprint dashboard preview",
       "eyebrow": "Your listening data",
       "subtitle": "Trends, stats, and patterns at a glance",
-      "liveBadge": "Live preview"
+      "liveBadge": "Live preview",
+      "screen": {
+        "nav": {
+          "yourMusic": "Your Music",
+          "musicProfile": "Soundprint",
+          "genres": "Genres",
+          "aiInsights": "AI Insights"
+        },
+        "dashboard": "Dashboard",
+        "yourMusic": "Your Music",
+        "periodDays": "30 days",
+        "stats": {
+          "listens": "Plays",
+          "artists": "Artists",
+          "tracks": "Tracks",
+          "time": "Time"
+        },
+        "timeline": "Timeline",
+        "topArtists": "Top artists",
+        "genres": "Genres"
+      }
     },
     "heroProof": {
       "ariaLabel": "Product highlights",

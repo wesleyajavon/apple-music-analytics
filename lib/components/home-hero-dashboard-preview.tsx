@@ -1,7 +1,11 @@
 "use client";
 
+import { useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { SoundprintScreenPreview } from "@/lib/components/home-3d/soundprint-screen-preview";
+import {
+  buildSoundprintScreenPreviewLabels,
+  SoundprintScreenPreview,
+} from "@/lib/components/home-3d/soundprint-screen-preview";
 import { SoundprintLogo } from "@/lib/components/soundprint-logo";
 
 type HomeHeroDashboardPreviewProps = {
@@ -14,6 +18,11 @@ export function HomeHeroDashboardPreview({
   compact = false,
 }: HomeHeroDashboardPreviewProps) {
   const t = useTranslations("home.heroDashboardPreview");
+  const tScreen = useTranslations("home.heroDashboardPreview.screen");
+  const screenLabels = useMemo(
+    () => buildSoundprintScreenPreviewLabels(tScreen),
+    [tScreen],
+  );
 
   return (
     <div className={["relative z-10", className].filter(Boolean).join(" ")}>
@@ -69,7 +78,7 @@ export function HomeHeroDashboardPreview({
                 : "h-[min(22rem,72vw)] sm:h-[min(24rem,52vw)] lg:h-[min(26rem,36vw)]",
             ].join(" ")}
           >
-            <SoundprintScreenPreview />
+            <SoundprintScreenPreview labels={screenLabels} />
           </div>
         </div>
       </div>

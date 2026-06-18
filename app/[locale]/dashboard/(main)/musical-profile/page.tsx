@@ -430,10 +430,7 @@ function SoundprintIdentitySection({
           </div>
 
           <div className="min-w-0 flex-1">
-            <p className="font-mono text-xs font-semibold uppercase tracking-[0.28em] text-accent-cyan">
-              {t("sections.sonicIdentity")}
-            </p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-[-0.04em] sm:text-4xl lg:text-[2.75rem] lg:leading-tight">
+            <h2 className="text-2xl font-semibold tracking-[-0.04em] sm:text-4xl lg:text-[2.75rem] lg:leading-tight">
               {t("identityTitle")}
             </h2>
             <p className="mt-3 max-w-2xl text-sm leading-7 text-white/60 sm:text-base">

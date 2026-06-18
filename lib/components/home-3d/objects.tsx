@@ -4,7 +4,7 @@ import { useFrame } from "@react-three/fiber";
 import { Float, Html, RoundedBox } from "@react-three/drei";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
-import { SoundprintScreenPreview } from "./soundprint-screen-preview";
+import { SoundprintScreenPreview, type SoundprintScreenPreviewLabels } from "./soundprint-screen-preview";
 
 const BRAND = {
   rose: "#f04068",
@@ -196,9 +196,11 @@ export function GlassOrb({
 export function MockDashboardCard({
   position = [1.85, 0.45, -0.15] as [number, number, number],
   scale = 1,
+  screenLabels,
 }: {
   position?: [number, number, number];
   scale?: number;
+  screenLabels: SoundprintScreenPreviewLabels;
 }) {
   const groupRef = useRef<THREE.Group>(null);
   const isCentered = position[0] === 0 && position[1] === 0 && position[2] === 0;
@@ -250,7 +252,7 @@ export function MockDashboardCard({
           }}
         >
           <div className="h-full w-full overflow-hidden rounded-[12px] ring-1 ring-white/10 shadow-[inset_0_1px_0_rgb(255_255_255_/_0.08)]">
-            <SoundprintScreenPreview />
+            <SoundprintScreenPreview labels={screenLabels} />
           </div>
         </Html>
 

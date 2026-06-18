@@ -8,6 +8,7 @@ import {
   executeMusicChatTool,
   getLateNightPresetDateRange,
   getPresetQuestion,
+  getWeeklyTasteEvolutionPresetDateRange,
 } from "@/lib/services/ai/music-chat-tools";
 import type {
   MusicChatDateRangeContext,
@@ -45,6 +46,7 @@ import {
   formatLateNightPresetAnswer,
   formatTasteShiftPresetAnswer,
   formatTrackObsessionsPresetAnswer,
+  formatWeeklyTasteEvolutionPresetAnswer,
   formatYearlyTrendsPresetAnswer,
   isComparePeriodsToolResult,
   isConsistentArtistsToolResult,
@@ -52,6 +54,7 @@ import {
   isLateNightProfileToolResult,
   isTasteShiftSummaryToolResult,
   isTrackObsessionsToolResult,
+  isWeeklyTasteEvolutionToolResult,
   isYearlyTrendsToolResult,
 } from "@/lib/services/ai/music-chat-quick-preset-formatters";
 
@@ -227,6 +230,39 @@ const MUSIC_CHAT_TOOLS = [
   {
     type: "function",
     function: {
+      name: "getWeeklyTasteEvolution",
+      description:
+        "Analyze week-to-week taste evolution using ISO weeks (Monday start). Returns deterministic classifications (expansion, consolidation, exploration, regression, stable), genre share deltas, and top artist rank movements. Use for recent weekly shifts, not multi-year period comparisons.",
+      parameters: {
+        type: "object",
+        properties: {
+          startDate: {
+            type: "string",
+            description:
+              "Optional YYYY-MM-DD. Defaults to a recent rolling window (~8 weeks).",
+          },
+          endDate: {
+            type: "string",
+            description: "Optional YYYY-MM-DD. Defaults to today (UTC).",
+          },
+          locale: {
+            type: "string",
+            description: "Optional locale for week labels (fr, en, es).",
+          },
+          maxTrends: {
+            type: "number",
+            minimum: 1,
+            maximum: 8,
+            description:
+              "Maximum week-to-week comparisons to return (most recent). Defaults to 4.",
+          },
+        },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
       name: "getListeningTrendsByYear",
       description: "Get annual listening counts and yearly coverage.",
       parameters: {
@@ -348,6 +384,7 @@ function buildSystemPrompt(
     "Always mention the date range or interpretation you used when relevant.",
     "If a period has no data, say so clearly and suggest a nearby useful follow-up.",
     "For taste-shift comparisons, always name both periods. If the tool result includes a caution about sparse data, explain in plain language that the comparison may be weak because one period has very little data. If there is no caution, do not mention data quality.",
+    "For week-to-week taste evolution, summarize each ISO week pair with its classification, volume change, notable genre shifts, and artist rank moves. Prefer getWeeklyTasteEvolution for recent weekly changes; use getTasteShiftSummary for explicit multi-month or multi-year period comparisons.",
     "Never expose raw tool field names or metadata labels in the final answer.",
     "For track obsession windows, always mention the exact short window and the wider period total.",
     "Exact listening hours are allowed, but avoid dumping unnecessary raw rows.",
@@ -473,7 +510,8 @@ function getDirectPresetToolCall(
   presetQuestionId: MusicChatPresetQuestionId | undefined,
   messages: MusicChatMessage[],
   presetArgs: MusicChatPresetArgs | undefined,
-  dateRange: MusicChatDateRangeContext | undefined
+  dateRange: MusicChatDateRangeContext | undefined,
+  locale: AiLocale
 ): DirectPresetToolCall | null {
   if (presetQuestionId === "taste-shift-2020-2024") {
     return {
@@ -486,6 +524,20 @@ function getDirectPresetToolCall(
         secondEndDate: "2024-12-31",
         topLimit: 5,
         deltaLimit: 5,
+      },
+    };
+  }
+
+  if (presetQuestionId === "weekly-taste-evolution") {
+    const range = getWeeklyTasteEvolutionPresetDateRange();
+    return {
+      id: "preset_weekly_taste_evolution",
+      toolName: "getWeeklyTasteEvolution",
+      args: {
+        startDate: range.startDate,
+        endDate: range.endDate,
+        locale,
+        maxTrends: 4,
       },
     };
   }
@@ -680,7 +732,8 @@ export async function generateMusicChatAnswer({
     presetQuestionId,
     messages,
     presetArgs,
-    dateRange
+    dateRange,
+    locale
   );
 
   if (directPresetToolCall) {
@@ -771,6 +824,12 @@ export async function generateMusicChatAnswer({
       isTasteShiftSummaryToolResult(result)
     ) {
       answer = formatTasteShiftPresetAnswer(locale, result);
+    } else if (
+      presetQuestionId === "weekly-taste-evolution" &&
+      directPresetToolCall.toolName === "getWeeklyTasteEvolution" &&
+      isWeeklyTasteEvolutionToolResult(result)
+    ) {
+      answer = formatWeeklyTasteEvolutionPresetAnswer(locale, result);
     } else if (
       presetQuestionId === "track-obsessions-2022" &&
       directPresetToolCall.toolName === "getTrackObsessionWindows" &&

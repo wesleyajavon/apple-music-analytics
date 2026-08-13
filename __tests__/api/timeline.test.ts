@@ -56,6 +56,7 @@ describe('GET /api/timeline', () => {
         listens: 100,
         uniqueTracks: 50,
         uniqueArtists: 30,
+        dailyBreakdown: [],
       },
     ];
 

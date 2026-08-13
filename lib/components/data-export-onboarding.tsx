@@ -34,11 +34,14 @@ import {
   redirectToRecentSignIn,
 } from "@/lib/auth/recent-auth-client";
 import { extractSpotifyStreamingHistoryJsonTextsFromZip } from "@/lib/services/listening/extract-spotify-export-zip";
+import { filterNormalizedListensAfterCursor } from "@/lib/services/listening/filter-normalized-listens-after-cursor";
 import {
   ONBOARDING_IMPORT_MAX_JSON_BATCH_ROWS,
   ONBOARDING_IMPORT_MAX_PARSED_ROWS,
 } from "@/lib/services/listening/onboarding-import-constants";
+import type { OnboardingImportMode } from "@/lib/services/listening/onboarding-import-mode";
 import type { NormalizedListenInput } from "@/lib/services/listening/onboarding-import-types";
+import { playedAtToDateKey } from "@/lib/services/listening/onboarding-import-cursor-utils";
 import { parseApplePlayHistoryDailyTracksCsv } from "@/lib/services/listening/parse-apple-play-history-daily-csv";
 import { parseSpotifyStreamingHistoryAudioJson } from "@/lib/services/listening/parse-spotify-streaming-history-json";
 import { isGroqGenreNudgeEligible } from "@/lib/utils/genre-ai-nudge-eligibility";
@@ -50,6 +53,19 @@ import {
 
 type Phase = "welcome" | "pick" | "guide" | "import" | "finish";
 type MusicProvider = "spotify" | "apple";
+
+type ImportStatusProvider = {
+  listenCount: number;
+  lastPlayedAt: string | null;
+  lastTrackLabel: string | null;
+  hasData: boolean;
+};
+
+type ImportStatusResponse = {
+  ok: boolean;
+  spotify: ImportStatusProvider;
+  apple: ImportStatusProvider;
+};
 
 const SPOTIFY_LOGO_SRC = "/brand/providers/spotify-icon.svg";
 const APPLE_MUSIC_LOGO_SRC = "/brand/providers/apple-music-icon.svg";
@@ -361,6 +377,42 @@ function yieldToBrowser() {
   });
 }
 
+function filterRowsForIncrementalImport(
+  provider: MusicProvider,
+  rows: NormalizedListenInput[],
+  lastPlayedAtIso: string
+): NormalizedListenInput[] {
+  const cursor = new Date(lastPlayedAtIso);
+  if (Number.isNaN(cursor.getTime())) return rows;
+
+  if (provider === "spotify") {
+    return filterNormalizedListensAfterCursor(rows, cursor).rows;
+  }
+
+  const minDateKey = playedAtToDateKey(cursor);
+  const minDayStart = Date.UTC(
+    Number(minDateKey.slice(0, 4)),
+    Number(minDateKey.slice(4, 6)) - 1,
+    Number(minDateKey.slice(6, 8)),
+    0,
+    0,
+    0,
+    0
+  );
+  return rows.filter((row) => row.playedAt.getTime() >= minDayStart);
+}
+
+function formatImportCursorDate(iso: string, locale: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString(locale, {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    timeZone: "UTC",
+  });
+}
+
 export function DataExportOnboarding({
   hasSpotifyWebConnection = false,
   initialGenreAiLanding = false,
@@ -387,7 +439,11 @@ export function DataExportOnboarding({
   const [importSummary, setImportSummary] = useState<{
     imported: number;
     skippedDuplicates: number;
+    skippedByCursor?: number;
+    mode: OnboardingImportMode;
   } | null>(null);
+  const [importMode, setImportMode] = useState<OnboardingImportMode>("full");
+  const [importStatus, setImportStatus] = useState<ImportStatusResponse | null>(null);
   const [paletteInvitation, setPaletteInvitation] = useState<{
     shouldInvite: boolean;
     unknownRatio: number;
@@ -416,6 +472,47 @@ export function DataExportOnboarding({
     if (provider === "apple") return APPLE_STEPS;
     return [];
   }, [provider]);
+
+  const providerImportStatus = useMemo(() => {
+    if (!importStatus || !provider) return null;
+    return provider === "spotify" ? importStatus.spotify : importStatus.apple;
+  }, [importStatus, provider]);
+
+  const providerHasExistingData = Boolean(providerImportStatus?.hasData);
+
+  const providerLabel = useMemo(() => {
+    if (provider === "spotify") return t("pickSpotify");
+    if (provider === "apple") return t("pickApple");
+    return "";
+  }, [provider, t]);
+
+  const importCursorDateLabel = useMemo(() => {
+    if (!providerImportStatus?.lastPlayedAt) return null;
+    return formatImportCursorDate(providerImportStatus.lastPlayedAt, locale);
+  }, [providerImportStatus?.lastPlayedAt, locale]);
+
+  useEffect(() => {
+    if (phase !== "import") return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await fetch("/api/user/onboarding/import/status");
+        if (!res.ok || cancelled) return;
+        const data = (await res.json()) as ImportStatusResponse;
+        if (!cancelled && data.ok) setImportStatus(data);
+      } catch {
+        /* status optionnel — l’import reste utilisable en mode complet */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [phase]);
+
+  useEffect(() => {
+    if (!providerImportStatus || !provider) return;
+    setImportMode(providerImportStatus.hasData ? "incremental" : "full");
+  }, [provider, providerImportStatus?.hasData, providerImportStatus?.listenCount]);
 
   const flowProgressPercent = useMemo(
     () =>
@@ -645,27 +742,76 @@ export function DataExportOnboarding({
       isDeterminate: true,
     });
     setIsImporting(true);
+
+    type ImportOkJson = {
+      error?: string;
+      code?: string;
+      imported?: number;
+      skippedDuplicates?: number;
+      skippedInvalid?: number;
+      skippedByCursor?: number;
+      genreLlmBackfill?: {
+        unknownTrackCount?: number;
+        unknownRatio?: number;
+        totalTrackCount?: number;
+        groqConfigured?: boolean;
+      } | null;
+      paletteInvitation?: {
+        shouldInvite?: boolean;
+        unknownRatio?: number;
+        unknownArtists?: number;
+      };
+    };
+
+    const finishImportSession = (
+      imported: number,
+      skippedDuplicates: number,
+      skippedByCursor = 0,
+      payload?: ImportOkJson | null
+    ) => {
+      setImportProgress({
+        phase: "finalizing",
+        percent: 95,
+        isDeterminate: true,
+      });
+      setImportSummary({
+        imported,
+        skippedDuplicates,
+        skippedByCursor,
+        mode: importMode,
+      });
+      if (payload?.paletteInvitation) {
+        setPaletteInvitation({
+          shouldInvite: Boolean(payload.paletteInvitation.shouldInvite),
+          unknownRatio: Number(payload.paletteInvitation.unknownRatio ?? 0),
+          unknownArtists: Number(payload.paletteInvitation.unknownArtists ?? 0),
+        });
+      } else {
+        setPaletteInvitation(null);
+      }
+      setGenreBackfillJob(null);
+      setGenreBackfillStatus(null);
+      setGenreLlmDeclined(false);
+      if (payload?.genreLlmBackfill && (payload.genreLlmBackfill.unknownTrackCount ?? 0) > 0) {
+        setGenreLlmAfterImport({
+          unknownTrackCount: Number(payload.genreLlmBackfill.unknownTrackCount ?? 0),
+          unknownRatio: Number(payload.genreLlmBackfill.unknownRatio ?? 0),
+          totalTrackCount: Number(payload.genreLlmBackfill.totalTrackCount ?? 0),
+          groqConfigured: Boolean(payload.genreLlmBackfill.groqConfigured),
+        });
+      } else {
+        setGenreLlmAfterImport(null);
+      }
+      if (imported > 0) {
+        toast.success(t("import.toastSuccess", { count: imported }));
+      } else if (importMode === "incremental" && providerHasExistingData) {
+        toast.message(t("import.nothingNewAfterCursor"));
+      }
+      setPhase("finish");
+    };
+
     try {
       const useLargeFilePath = importFile.size >= VERCEL_SAFE_MULTIPART_MAX_BYTES;
-
-      type ImportOkJson = {
-        error?: string;
-        code?: string;
-        imported?: number;
-        skippedDuplicates?: number;
-        skippedInvalid?: number;
-        genreLlmBackfill?: {
-          unknownTrackCount?: number;
-          unknownRatio?: number;
-          totalTrackCount?: number;
-          groqConfigured?: boolean;
-        } | null;
-        paletteInvitation?: {
-          shouldInvite?: boolean;
-          unknownRatio?: number;
-          unknownArtists?: number;
-        };
-      };
 
       if (!useLargeFilePath) {
         setImportProgress({
@@ -676,6 +822,7 @@ export function DataExportOnboarding({
         const fd = new FormData();
         fd.append("provider", provider);
         fd.append("file", importFile);
+        fd.append("mode", importMode);
         const res = await fetch("/api/user/onboarding/import", { method: "POST", body: fd });
         const data = (await res.json().catch(() => ({}))) as ImportOkJson;
         if (!res.ok) {
@@ -687,38 +834,12 @@ export function DataExportOnboarding({
           toast.error(data?.error ?? t("import.importError"));
           return;
         }
-        setImportProgress({
-          phase: "finalizing",
-          percent: 95,
-          isDeterminate: true,
-        });
-        const imported = data.imported ?? 0;
-        const skippedDuplicates = data.skippedDuplicates ?? 0;
-        setImportSummary({ imported, skippedDuplicates });
-        if (data.paletteInvitation) {
-          setPaletteInvitation({
-            shouldInvite: Boolean(data.paletteInvitation.shouldInvite),
-            unknownRatio: Number(data.paletteInvitation.unknownRatio ?? 0),
-            unknownArtists: Number(data.paletteInvitation.unknownArtists ?? 0),
-          });
-        } else {
-          setPaletteInvitation(null);
-        }
-        setGenreBackfillJob(null);
-        setGenreBackfillStatus(null);
-        setGenreLlmDeclined(false);
-        if (data.genreLlmBackfill && (data.genreLlmBackfill.unknownTrackCount ?? 0) > 0) {
-          setGenreLlmAfterImport({
-            unknownTrackCount: Number(data.genreLlmBackfill.unknownTrackCount ?? 0),
-            unknownRatio: Number(data.genreLlmBackfill.unknownRatio ?? 0),
-            totalTrackCount: Number(data.genreLlmBackfill.totalTrackCount ?? 0),
-            groqConfigured: Boolean(data.genreLlmBackfill.groqConfigured),
-          });
-        } else {
-          setGenreLlmAfterImport(null);
-        }
-        toast.success(t("import.toastSuccess", { count: imported }));
-        setPhase("finish");
+        finishImportSession(
+          data.imported ?? 0,
+          data.skippedDuplicates ?? 0,
+          data.skippedByCursor ?? 0,
+          data
+        );
         return;
       }
 
@@ -769,6 +890,23 @@ export function DataExportOnboarding({
         allRows = parseApplePlayHistoryDailyTracksCsv(csvText);
       }
 
+      if (
+        importMode === "incremental" &&
+        providerImportStatus?.lastPlayedAt &&
+        providerImportStatus.hasData
+      ) {
+        const parsedCount = allRows.length;
+        allRows = filterRowsForIncrementalImport(
+          provider,
+          allRows,
+          providerImportStatus.lastPlayedAt
+        );
+        if (allRows.length === 0 && parsedCount > 0) {
+          finishImportSession(0, 0, parsedCount);
+          return;
+        }
+      }
+
       setImportProgress({
         phase: "validating",
         percent: 25,
@@ -803,6 +941,7 @@ export function DataExportOnboarding({
         });
         const body: Record<string, unknown> = {
           provider,
+          mode: importMode,
           rows: listensToJsonRows(chunks[i]!),
         };
         if (chunks.length > 1) {
@@ -846,49 +985,21 @@ export function DataExportOnboarding({
         return;
       }
 
-      setImportProgress({
-        phase: "finalizing",
-        percent: 95,
-        processedRows: allRows.length,
-        totalRows: allRows.length,
-        batchCount: chunks.length,
-        isDeterminate: true,
-      });
-      setImportSummary({
-        imported: sumImported,
-        skippedDuplicates: sumSkippedDup,
-      });
-      if (lastPayload.paletteInvitation) {
-        setPaletteInvitation({
-          shouldInvite: Boolean(lastPayload.paletteInvitation.shouldInvite),
-          unknownRatio: Number(lastPayload.paletteInvitation.unknownRatio ?? 0),
-          unknownArtists: Number(lastPayload.paletteInvitation.unknownArtists ?? 0),
-        });
-      } else {
-        setPaletteInvitation(null);
-      }
-      setGenreBackfillJob(null);
-      setGenreBackfillStatus(null);
-      setGenreLlmDeclined(false);
-      if (lastPayload.genreLlmBackfill && (lastPayload.genreLlmBackfill.unknownTrackCount ?? 0) > 0) {
-        setGenreLlmAfterImport({
-          unknownTrackCount: Number(lastPayload.genreLlmBackfill.unknownTrackCount ?? 0),
-          unknownRatio: Number(lastPayload.genreLlmBackfill.unknownRatio ?? 0),
-          totalTrackCount: Number(lastPayload.genreLlmBackfill.totalTrackCount ?? 0),
-          groqConfigured: Boolean(lastPayload.genreLlmBackfill.groqConfigured),
-        });
-      } else {
-        setGenreLlmAfterImport(null);
-      }
-      toast.success(t("import.toastSuccess", { count: sumImported }));
-      setPhase("finish");
+      finishImportSession(sumImported, sumSkippedDup, 0, lastPayload);
     } catch {
       toast.error(t("import.importError"));
     } finally {
       setIsImporting(false);
       setImportProgress(null);
     }
-  }, [importFile, provider, t]);
+  }, [
+    importFile,
+    importMode,
+    provider,
+    providerHasExistingData,
+    providerImportStatus,
+    t,
+  ]);
 
   function skipImportToFinish() {
     setImportSummary(null);
@@ -1303,6 +1414,131 @@ export function DataExportOnboarding({
             </p>
           </div>
 
+          {providerHasExistingData ? (
+            <div className="space-y-4">
+              <div
+                className="rounded-2xl border-2 border-primary/25 bg-primary/[0.06] p-4 sm:p-5"
+                role="status"
+                aria-live="polite"
+              >
+                <p className="text-sm font-semibold text-foreground">
+                  {t("import.outcomeTitle")}
+                </p>
+                <dl className="mt-4 grid gap-4 sm:grid-cols-3">
+                  <div className="space-y-1 rounded-xl bg-surface/80 p-3 ring-1 ring-card-border">
+                    <dt className="text-[11px] font-semibold uppercase tracking-wide text-muted">
+                      {t("import.outcomeExistingLabel")}
+                    </dt>
+                    <dd className="text-sm font-medium leading-snug text-foreground">
+                      {t("import.outcomeExistingKept", {
+                        count: (providerImportStatus?.listenCount ?? 0).toLocaleString(),
+                      })}
+                    </dd>
+                  </div>
+                  <div className="space-y-1 rounded-xl bg-surface/80 p-3 ring-1 ring-card-border">
+                    <dt className="text-[11px] font-semibold uppercase tracking-wide text-muted">
+                      {t("import.outcomeFileLabel")}
+                    </dt>
+                    <dd className="text-sm font-medium leading-snug text-foreground">
+                      {importMode === "incremental" && importCursorDateLabel
+                        ? t("import.outcomeFileIncremental", { date: importCursorDateLabel })
+                        : t("import.outcomeFileFull")}
+                    </dd>
+                  </div>
+                  <div className="space-y-1 rounded-xl bg-surface/80 p-3 ring-1 ring-card-border">
+                    <dt className="text-[11px] font-semibold uppercase tracking-wide text-muted">
+                      {t("import.outcomeResultLabel")}
+                    </dt>
+                    <dd className="text-sm font-medium leading-snug text-foreground">
+                      {importMode === "incremental"
+                        ? t("import.outcomeResultAppend")
+                        : t("import.outcomeResultMerge")}
+                    </dd>
+                  </div>
+                </dl>
+              </div>
+
+              <fieldset
+                className="space-y-3 rounded-2xl border border-card-border bg-muted/5 p-4 sm:p-5"
+                disabled={isImporting}
+              >
+                <legend className="px-1 text-sm font-semibold text-foreground">
+                  {t("import.modeTitle")}
+                </legend>
+                <p className="text-xs leading-relaxed text-muted">{t("import.modeIntro")}</p>
+                <label className="flex cursor-pointer gap-3 rounded-xl border border-card-border bg-surface p-3 has-[:checked]:border-primary/40 has-[:checked]:ring-1 has-[:checked]:ring-primary/25">
+                  <input
+                    type="radio"
+                    name="importMode"
+                    className="mt-0.5"
+                    checked={importMode === "incremental"}
+                    onChange={() => setImportMode("incremental")}
+                  />
+                  <span className="space-y-1 text-sm">
+                    <span className="flex flex-wrap items-center gap-2">
+                      <span className="font-medium text-foreground">
+                        {t("import.modeIncremental")}
+                      </span>
+                      <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">
+                        {t("import.modeIncrementalBadge")}
+                      </span>
+                    </span>
+                    <span className="block text-xs leading-relaxed text-muted">
+                      {importCursorDateLabel
+                        ? t("import.modeIncrementalHint", {
+                            date: importCursorDateLabel,
+                            count: (providerImportStatus?.listenCount ?? 0).toLocaleString(),
+                          })
+                        : t("import.modeIncrementalHintGeneric")}
+                    </span>
+                  </span>
+                </label>
+                <label className="flex cursor-pointer gap-3 rounded-xl border border-card-border bg-surface p-3 has-[:checked]:border-primary/40 has-[:checked]:ring-1 has-[:checked]:ring-primary/25">
+                  <input
+                    type="radio"
+                    name="importMode"
+                    className="mt-0.5"
+                    checked={importMode === "full"}
+                    onChange={() => setImportMode("full")}
+                  />
+                  <span className="space-y-1 text-sm">
+                    <span className="block font-medium text-foreground">
+                      {t("import.modeFull")}
+                    </span>
+                    <span className="block text-xs leading-relaxed text-muted">
+                      {t("import.modeFullHint")}
+                    </span>
+                  </span>
+                </label>
+              </fieldset>
+            </div>
+          ) : (
+            <div
+              className="space-y-2 rounded-2xl border-2 border-primary/25 bg-primary/[0.06] px-4 py-4 sm:px-5"
+              role="status"
+            >
+              <p className="text-sm font-semibold text-foreground">
+                {t("import.outcomeFirstImportTitle", { provider: providerLabel })}
+              </p>
+              <p className="text-xs leading-relaxed text-muted sm:text-sm">
+                {t("import.outcomeFirstImportBody")}
+              </p>
+            </div>
+          )}
+
+          {importFile ? (
+            <p
+              className="rounded-xl border border-card-border bg-surface px-4 py-3 text-sm leading-relaxed text-foreground"
+              aria-live="polite"
+            >
+              {providerHasExistingData
+                ? importMode === "incremental"
+                  ? t("import.confirmAppend", { name: importFile.name })
+                  : t("import.confirmReprocess", { name: importFile.name })
+                : t("import.confirmFirstImport", { name: importFile.name })}
+            </p>
+          ) : null}
+
           {provider === "spotify" && hasSpotifyWebConnection ? (
             <div className="space-y-4 rounded-2xl border border-card-border bg-surface p-5 shadow-inner ring-1 ring-[#169c46]/35 dark:bg-[#1DB954]/[0.08] dark:ring-[#1ed760]/30">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#047857] dark:text-[#86efac]">
@@ -1439,8 +1675,12 @@ export function DataExportOnboarding({
                     />
                     <span>{t("import.importing")}</span>
                   </>
+                ) : providerHasExistingData ? (
+                  importMode === "incremental"
+                    ? t("import.importSubmitIncremental")
+                    : t("import.importSubmitFull")
                 ) : (
-                  t("import.importSubmit")
+                  t("import.importSubmitFirst")
                 )}
               </button>
             </div>
@@ -1462,7 +1702,15 @@ export function DataExportOnboarding({
           mode="import"
           onBack={goBackImport}
           onPrimary={() => void submitImport()}
-          primaryLabel={isImporting ? t("import.importing") : t("import.importSubmit")}
+          primaryLabel={
+            isImporting
+              ? t("import.importing")
+              : providerHasExistingData
+                ? importMode === "incremental"
+                  ? t("import.importSubmitIncremental")
+                  : t("import.importSubmitFull")
+                : t("import.importSubmitFirst")
+          }
           primaryDisabled={isImporting || !importFile}
           secondaryLabel={t("import.skipImport")}
           onSecondary={skipImportToFinish}
@@ -1487,10 +1735,20 @@ export function DataExportOnboarding({
                     {t("finishSuccessTitle")}
                   </h1>
                   <p className="mx-auto max-w-md text-base leading-relaxed text-white/70">
-                    {t("finishSuccessBody", {
-                      imported: importSummary.imported.toLocaleString(),
-                      skipped: importSummary.skippedDuplicates.toLocaleString(),
-                    })}
+                    {importSummary.mode === "incremental"
+                      ? t("finishSuccessBodyAppend", {
+                          imported: importSummary.imported.toLocaleString(),
+                          skipped: importSummary.skippedDuplicates.toLocaleString(),
+                        })
+                      : importSummary.mode === "full" && providerImportStatus?.hasData
+                        ? t("finishSuccessBodyReprocess", {
+                            imported: importSummary.imported.toLocaleString(),
+                            skipped: importSummary.skippedDuplicates.toLocaleString(),
+                          })
+                        : t("finishSuccessBody", {
+                            imported: importSummary.imported.toLocaleString(),
+                            skipped: importSummary.skippedDuplicates.toLocaleString(),
+                          })}
                   </p>
                 </div>
                 <p className="sr-only">

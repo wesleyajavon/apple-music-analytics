@@ -1,5 +1,9 @@
 import { createValidationError } from "@/lib/utils/error-handler";
 import { ONBOARDING_IMPORT_MAX_JSON_BATCH_ROWS } from "./onboarding-import-constants";
+import {
+  parseOnboardingImportMode,
+  type OnboardingImportMode,
+} from "./onboarding-import-mode";
 import type { NormalizedListenInput } from "./onboarding-import-types";
 
 export { ONBOARDING_IMPORT_MAX_JSON_BATCH_ROWS } from "./onboarding-import-constants";
@@ -19,6 +23,8 @@ export type OnboardingImportJsonBody = {
   batch?: OnboardingImportBatchMeta;
   /** Sur le dernier lot d’une série : somme des `imported` des lots précédents (sans ce lot). */
   sessionTotalImported?: unknown;
+  /** `incremental` : n’importe que les streams postérieurs au dernier enregistrement. */
+  mode?: unknown;
 };
 
 function isProvider(s: string): s is "spotify" | "apple" {
@@ -32,6 +38,7 @@ export function parseOnboardingImportJsonBody(
   rows: NormalizedListenInput[];
   batch: OnboardingImportBatchMeta | null;
   sessionTotalImported: number | null;
+  mode: OnboardingImportMode;
 } {
   if (!body || typeof body !== "object") {
     throw createValidationError("Invalid JSON body");
@@ -100,5 +107,7 @@ export function parseOnboardingImportJsonBody(
     rows.push({ artistName, trackName, playedAt });
   }
 
-  return { provider: b.provider, rows, batch, sessionTotalImported };
+  const mode = parseOnboardingImportMode(b.mode);
+
+  return { provider: b.provider, rows, batch, sessionTotalImported, mode };
 }

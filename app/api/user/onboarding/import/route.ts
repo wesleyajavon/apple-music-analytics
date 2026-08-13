@@ -7,11 +7,13 @@ import {
   createValidationError,
   handleApiError,
 } from "@/lib/utils/error-handler";
-import { extractSpotifyStreamingHistoryJsonTextsFromZip } from "@/lib/services/listening/extract-spotify-export-zip";
-import { parseSpotifyStreamingHistoryAudioJson } from "@/lib/services/listening/parse-spotify-streaming-history-json";
-import { parseApplePlayHistoryDailyTracksCsv } from "@/lib/services/listening/parse-apple-play-history-daily-csv";
+import { listenSourceForOnboardingProvider } from "@/lib/services/listening/get-user-import-cursor";
 import { importOnboardingListens } from "@/lib/services/listening/import-onboarding-listens";
-import type { NormalizedListenInput } from "@/lib/services/listening/onboarding-import-types";
+import {
+  isOnboardingImportMode,
+  parseOnboardingImportMode,
+} from "@/lib/services/listening/onboarding-import-mode";
+import { prepareOnboardingImportRows } from "@/lib/services/listening/prepare-onboarding-import-rows";
 import { getPaletteInvitationStatus } from "@/lib/services/palette/palette-service";
 import { getGroqImportGenreBackfillEligibility } from "@/lib/services/listening/import-genre-backfill-queue";
 import { parseOnboardingImportJsonBody } from "@/lib/services/listening/onboarding-import-json-body";
@@ -98,19 +100,34 @@ export async function POST(request: NextRequest) {
 
     if (contentType.includes("application/json")) {
       const raw = await request.json();
-      const { provider: providerRaw, rows, batch, sessionTotalImported } =
-        parseOnboardingImportJsonBody(raw);
+      const {
+        provider: providerRaw,
+        rows: parsedRows,
+        batch,
+        sessionTotalImported,
+        mode,
+      } = parseOnboardingImportJsonBody(raw);
 
-      if (rows.length > ONBOARDING_IMPORT_MAX_PARSED_ROWS) {
+      const prepared = await prepareOnboardingImportRows({
+        userId,
+        provider: providerRaw,
+        mode,
+        preParsedRows: parsedRows,
+      });
+      const rows = prepared.rows;
+
+      if (prepared.parsedRows > ONBOARDING_IMPORT_MAX_PARSED_ROWS) {
         throw createValidationError(
           `This export contains more than ${ONBOARDING_IMPORT_MAX_PARSED_ROWS.toLocaleString()} plays. Contact support or split the data.`
         );
       }
 
-      const source =
-        providerRaw === "spotify" ? ("spotify_export" as const) : ("apple_music_export" as const);
+      const source = listenSourceForOnboardingProvider(providerRaw);
 
-      const result = await importOnboardingListens(userId, source, rows);
+      const result =
+        rows.length === 0
+          ? { imported: 0, skippedDuplicates: 0, skippedInvalid: 0 }
+          : await importOnboardingListens(userId, source, rows);
       const isLastBatch = !batch || batch.index === batch.count - 1;
 
       let paletteInvite: Awaited<ReturnType<typeof getPaletteInvitationStatus>> | null = null;
@@ -141,7 +158,11 @@ export async function POST(request: NextRequest) {
         ok: true,
         partial: !isLastBatch,
         provider: providerRaw,
-        parsedRows: rows.length,
+        mode: prepared.mode,
+        parsedRows: prepared.parsedRows,
+        rowsAfterCursor: rows.length,
+        skippedByCursor: prepared.skippedByCursor,
+        cursor: prepared.cursor,
         imported: result.imported,
         skippedDuplicates: result.skippedDuplicates,
         skippedInvalid: result.skippedInvalid,
@@ -169,7 +190,14 @@ export async function POST(request: NextRequest) {
       throw createValidationError('Missing "file"');
     }
 
-    let rows: NormalizedListenInput[];
+    const modeRaw = form.get("mode");
+    const mode =
+      typeof modeRaw === "string" && isOnboardingImportMode(modeRaw)
+        ? modeRaw
+        : parseOnboardingImportMode(modeRaw);
+
+    let spotifyZipBuffer: Buffer | undefined;
+    let appleCsvText: string | undefined;
 
     if (providerRaw === "spotify") {
       if (!file.name.toLowerCase().endsWith(".zip")) {
@@ -180,14 +208,7 @@ export async function POST(request: NextRequest) {
           `File too large (max ${Math.round(MAX_ZIP_BYTES / (1024 * 1024))} MB)`
         );
       }
-      const buffer = Buffer.from(await file.arrayBuffer());
-      const jsonTexts = await extractSpotifyStreamingHistoryJsonTextsFromZip(buffer);
-      if (jsonTexts.length === 0) {
-        throw createValidationError(
-          "No Spotify extended streaming history JSON files found in this ZIP (expected Streaming_History_Audio_*.json or StreamingHistory_music_*.json). Use the archive from Spotify’s email (Extended streaming history)."
-        );
-      }
-      rows = jsonTexts.flatMap((text) => parseSpotifyStreamingHistoryAudioJson(text));
+      spotifyZipBuffer = Buffer.from(await file.arrayBuffer());
     } else {
       const lower = file.name.toLowerCase();
       if (!lower.endsWith(".csv")) {
@@ -198,26 +219,42 @@ export async function POST(request: NextRequest) {
           `File too large (max ${Math.round(MAX_CSV_BYTES / (1024 * 1024))} MB)`
         );
       }
-      const csvText = await file.text();
-      rows = parseApplePlayHistoryDailyTracksCsv(csvText);
+      appleCsvText = await file.text();
     }
 
-    if (rows.length === 0) {
+    const prepared = await prepareOnboardingImportRows({
+      userId,
+      provider: providerRaw,
+      mode,
+      spotifyZipBuffer,
+      appleCsvText,
+    });
+
+    if (prepared.emptySpotifyZip) {
+      throw createValidationError(
+        "No Spotify extended streaming history JSON files found in this ZIP (expected Streaming_History_Audio_*.json or StreamingHistory_music_*.json). Use the archive from Spotify’s email (Extended streaming history)."
+      );
+    }
+
+    if (prepared.parsedRows === 0 && prepared.skippedByCursor === 0) {
       throw createValidationError(
         "No listening rows could be parsed. Check that you selected the correct file."
       );
     }
 
-    if (rows.length > ONBOARDING_IMPORT_MAX_PARSED_ROWS) {
+    if (prepared.parsedRows > ONBOARDING_IMPORT_MAX_PARSED_ROWS) {
       throw createValidationError(
         `This export contains more than ${ONBOARDING_IMPORT_MAX_PARSED_ROWS.toLocaleString()} plays. Contact support or split the data.`
       );
     }
 
-    const source =
-      providerRaw === "spotify" ? ("spotify_export" as const) : ("apple_music_export" as const);
+    const rows = prepared.rows;
+    const source = listenSourceForOnboardingProvider(providerRaw);
 
-    const result = await importOnboardingListens(userId, source, rows);
+    const result =
+      rows.length === 0
+        ? { imported: 0, skippedDuplicates: 0, skippedInvalid: 0 }
+        : await importOnboardingListens(userId, source, rows);
     const paletteInvite = await getPaletteInvitationStatus(userId);
     const genreLlmBackfill =
       result.imported > 0
@@ -232,7 +269,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       ok: true,
       provider: providerRaw,
-      parsedRows: rows.length,
+      mode: prepared.mode,
+      parsedRows: prepared.parsedRows,
+      rowsAfterCursor: rows.length,
+      skippedByCursor: prepared.skippedByCursor,
+      cursor: prepared.cursor,
       imported: result.imported,
       skippedDuplicates: result.skippedDuplicates,
       skippedInvalid: result.skippedInvalid,

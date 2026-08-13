@@ -210,17 +210,22 @@
     },
     "compare": {
       "pageTitle": "Comparar con un amigo",
-      "pageDescription": "Timeline dual y duelo por artista en el periodo seleccionado.",
+      "pageDescription": "Timeline dual, artistas en común y duelos de artista, pista o género en el periodo seleccionado.",
       "heroEyebrow": "Duet",
       "heroTitle": "¿Quién stream más?",
       "heroTitleBattle": "El enfrentamiento",
-      "heroSubtitle": "Elige un amigo, compara streams y decide — artista por artista.",
+      "heroSubtitle": "Elige un amigo, compara streams en el periodo, descubre artistas en común y decide en duelo — artista, pista o género.",
       "heroSubtitleBattle": "Tú y {friendName} en la misma timeline. Mismo periodo. Sin excusas.",
       "heroStatBadge": "Cómo funciona",
-      "heroStatTag": "Head-to-head",
-      "heroTrust1": "Las timelines duales muestran quién escuchó más en el periodo.",
-      "heroTrust2": "La arena de artistas resuelve debates — busca un artista y corona un ganador.",
-      "heroTrust3": "Solo los amigos que aceptaron pueden ver tus stats. Revocable en cualquier momento.",
+      "heroStatTag": "3 pasos",
+      "heroTrustPanelHint": "Mismo periodo, mismas reglas — tú y tu amigo lado a lado.",
+      "heroStep1Title": "Elige un amigo",
+      "heroStep1": "Alguien que aceptó tu invitación Duet. Toca su tarjeta abajo para abrir el duelo.",
+      "heroStep2Title": "Compara el periodo",
+      "heroStep2": "La timeline muestra quién escuchó más en tu rango de fechas activo — día, semana o mes.",
+      "heroStep3Title": "Profundiza",
+      "heroStep3": "Artistas en común, luego duelos de artista, pista o género — busca un objetivo y decide.",
+      "heroPrivacyNote": "Solo tus amigos Duet ven estas stats. Revoca el acceso cuando quieras desde Amigos.",
       "changeFriend": "Cambiar rival",
       "pickerEyebrow": "Elige tu rival",
       "pickerBadge": "Listo para duelar",
@@ -296,9 +301,11 @@
       "scopeInsufficientDescription": "Este amigo no ha compartido suficientes datos para esta vista.",
       "notFoundTitle": "Comparación no disponible",
       "notFoundDescription": "No se encontró amistad activa para esta comparación.",
-      "rangeClamped": "En vista diaria, el rango se limita a los últimos 2 años por alto volumen de streamss. Cambia a vista mensual para ver todo el historial.",
+      "rangeClamped": "En vista diaria, el rango se limita a los últimos 2 años por alto volumen de streams. Cambia a vista mensual para ver todo el historial.",
       "chartTitle": "Tú vs {friendName}",
-      "chartDescription": "Streams diarias en el mismo periodo.",
+      "chartDescriptionDaily": "Streams diarias en el mismo periodo.",
+      "chartDescriptionWeekly": "Streams semanales en el mismo periodo.",
+      "chartDescriptionMonthly": "Streams mensuales en el mismo periodo.",
       "chartDescriptionCumulative": "Total acumulado de streams en el periodo — mira quién se adelanta.",
       "chartViewLabel": "Vista del gráfico",
       "chartViewPeriod": "Por periodo",
@@ -1476,7 +1483,7 @@
       },
       "chart": {
         "eyebrow": "Trayectoria",
-        "title": "volumen de streams en el tiempo",
+        "title": "Volumen de streams en el tiempo",
         "description": "Cada línea es un género; el tamaño de bucket viene de la barra superior.",
         "badge": "Multi-serie"
       }
@@ -1647,7 +1654,7 @@
       },
       "chart": {
         "eyebrow": "Trayectoria",
-        "title": "volumen de streamss en el tiempo",
+        "title": "Volumen de streams en el tiempo",
         "description": "Cada línea sigue a un artista; el intervalo temporal viene del control superior.",
         "badge": "Multi-serie"
       }
@@ -1933,7 +1940,7 @@
       },
       "chart": {
         "eyebrow": "Trayectoria",
-        "title": "volumen de streamss en el tiempo",
+        "title": "Volumen de streams en el tiempo",
         "description": "Cada línea representa un título; el intervalo temporal sale del control superior.",
         "badge": "Multi-serie"
       }
@@ -2350,7 +2357,7 @@
       },
       "libraryTrends": {
         "title": "Vistas de tendencias de canciones y artistas",
-        "paragraph": "Más allá de los resúmenes por género, <code>/dashboard/tracks/trends</code> y <code>/dashboard/artists/trends</code> muestran el volumen de streamss en el rango filtrado con buckets día, semana o mes — para seguir canciones concretas o tus artistas más streameados a lo largo del tiempo. Comparten el mismo filtro global de fechas que el resto del dashboard."
+        "paragraph": "Más allá de los resúmenes por género, <code>/dashboard/tracks/trends</code> y <code>/dashboard/artists/trends</code> muestran el volumen de streams en el rango filtrado con buckets día, semana o mes — para seguir canciones concretas o tus artistas más streameados a lo largo del tiempo. Comparten el mismo filtro global de fechas que el resto del dashboard."
       },
       "ai": {
         "title": "Insights impulsados por IA",

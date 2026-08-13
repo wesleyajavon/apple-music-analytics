@@ -49,23 +49,17 @@ describe('GET /api/timeline', () => {
     vi.mocked(isActivePublicProfileUserId).mockResolvedValue(false);
   });
 
-  it('should return timeline data with valid dates and default period (day)', async () => {
+  it('should return timeline data with valid dates and default period (month)', async () => {
     const mockData = [
       {
-        date: '2024-01-01',
-        listens: 10,
-        uniqueTracks: 5,
-        uniqueArtists: 3,
-      },
-      {
-        date: '2024-01-02',
-        listens: 15,
-        uniqueTracks: 8,
-        uniqueArtists: 4,
+        month: '2024-01',
+        listens: 100,
+        uniqueTracks: 50,
+        uniqueArtists: 30,
       },
     ];
 
-    vi.mocked(getDailyAggregatedListens).mockResolvedValue(mockData);
+    vi.mocked(getMonthlyAggregatedListens).mockResolvedValue(mockData);
 
     const request = new NextRequest(
       'http://localhost/api/timeline?startDate=2024-01-01&endDate=2024-01-31'
@@ -75,14 +69,14 @@ describe('GET /api/timeline', () => {
     expect(response.status).toBe(200);
     const data = await response.json();
     expect(Array.isArray(data)).toBe(true);
-    expect(data).toHaveLength(2);
+    expect(data).toHaveLength(1);
     expect(data[0]).toMatchObject({
-      date: '2024-01-01',
-      listens: 10,
-      uniqueTracks: 5,
-      uniqueArtists: 3,
+      date: '2024-01',
+      listens: 100,
+      uniqueTracks: 50,
+      uniqueArtists: 30,
     });
-    expect(getDailyAggregatedListens).toHaveBeenCalledOnce();
+    expect(getMonthlyAggregatedListens).toHaveBeenCalledOnce();
     expect(response.headers.get('Cache-Control')).toContain('private');
   });
 
@@ -155,14 +149,14 @@ describe('GET /api/timeline', () => {
     vi.mocked(getListenDateRange).mockResolvedValue({ minDate, maxDate });
 
     const mockData: never[] = [];
-    vi.mocked(getDailyAggregatedListens).mockResolvedValue(mockData);
+    vi.mocked(getMonthlyAggregatedListens).mockResolvedValue(mockData);
 
     const request = new NextRequest('http://localhost/api/timeline');
     const response = await GET(request);
     
     expect(response.status).toBe(200);
     expect(getListenDateRange).toHaveBeenCalledWith('user-1');
-    expect(getDailyAggregatedListens).toHaveBeenCalledWith(
+    expect(getMonthlyAggregatedListens).toHaveBeenCalledWith(
       minDate,
       maxDate,
       'user-1'
@@ -180,7 +174,7 @@ describe('GET /api/timeline', () => {
     const data = await response.json();
     expect(data).toEqual([]);
     expect(getListenDateRange).toHaveBeenCalledOnce();
-    expect(getDailyAggregatedListens).not.toHaveBeenCalled();
+    expect(getMonthlyAggregatedListens).not.toHaveBeenCalled();
     expect(response.headers.get('Cache-Control')).toContain('private');
   });
 
@@ -210,7 +204,7 @@ describe('GET /api/timeline', () => {
 
   it('should ignore query userId and use authenticated user', async () => {
     const mockData: never[] = [];
-    vi.mocked(getDailyAggregatedListens).mockResolvedValue(mockData);
+    vi.mocked(getMonthlyAggregatedListens).mockResolvedValue(mockData);
 
     const request = new NextRequest(
       'http://localhost/api/timeline?startDate=2024-01-01&endDate=2024-01-31&userId=user123'
@@ -218,7 +212,7 @@ describe('GET /api/timeline', () => {
     const response = await GET(request);
     
     expect(response.status).toBe(200);
-    const callArgs = vi.mocked(getDailyAggregatedListens).mock.calls[0];
+    const callArgs = vi.mocked(getMonthlyAggregatedListens).mock.calls[0];
     expect(callArgs[2]).toBe('user-1');
     expect(response.headers.get('Cache-Control')).toContain('private');
   });
@@ -248,10 +242,10 @@ describe('GET /api/timeline', () => {
       expect(response.status).toBe(200);
       expect(getPublicProfileTimelineAllTimeCached).toHaveBeenCalledWith(
         DEFAULT_PUBLIC_PROFILE_USER_ID,
-        'day'
+        'month'
       );
       expect(getListenDateRange).not.toHaveBeenCalled();
-      expect(getDailyAggregatedListens).not.toHaveBeenCalled();
+      expect(getMonthlyAggregatedListens).not.toHaveBeenCalled();
       const cc = response.headers.get('Cache-Control') ?? '';
       expect(cc).toContain('public');
       expect(cc).toContain('s-maxage=60');
@@ -267,13 +261,13 @@ describe('GET /api/timeline', () => {
 
       expect(response.status).toBe(200);
       expect(getPublicProfileTimelineRangeCached).toHaveBeenCalled();
-      expect(getDailyAggregatedListens).not.toHaveBeenCalled();
+      expect(getMonthlyAggregatedListens).not.toHaveBeenCalled();
       expect(response.headers.get('Cache-Control')).toContain('public');
     });
   });
 
   it('should return 500 when service throws an error', async () => {
-    vi.mocked(getDailyAggregatedListens).mockRejectedValue(
+    vi.mocked(getMonthlyAggregatedListens).mockRejectedValue(
       new Error('Database error')
     );
 

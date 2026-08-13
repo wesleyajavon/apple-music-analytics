@@ -14,7 +14,7 @@ import {
   type DuetChartViewMode,
 } from "@/lib/components/duet/duet-entity-duel-blocks";
 import { DuetChartViewToggle } from "@/lib/components/duet/duet-chart-view-toggle";
-import { PeriodSelector, getPeriodFromSearchParams } from "@/lib/components/period-selector";
+import { PeriodSelector, getPeriodFromSearchParams, type PeriodType } from "@/lib/components/period-selector";
 import { EmptyState } from "@/lib/components/empty-state";
 import { ErrorState } from "@/lib/components/error-state";
 import { UserAvatar } from "@/lib/components/user-avatar";
@@ -153,6 +153,7 @@ function EntityHeadToHeadPanel({
   viewerAvatarUrl,
   friendAvatarUrl,
   locale,
+  period,
   t,
   chartTheme,
   resolvedTheme,
@@ -190,6 +191,7 @@ function EntityHeadToHeadPanel({
   viewerAvatarUrl?: string | null;
   friendAvatarUrl?: string | null;
   locale: string;
+  period: PeriodType;
   t: ReturnType<typeof useTranslations<"duet.compare">>;
   chartTheme: (typeof DASHBOARD_CHART_THEME)[keyof typeof DASHBOARD_CHART_THEME];
   resolvedTheme: string;
@@ -315,6 +317,8 @@ function EntityHeadToHeadPanel({
             <div className={DASHBOARD_SPOTLIGHT_INNER_WELL}>
               <DuetDualLineChart
                 data={displayChartData}
+                period={period}
+                locale={locale}
                 chartTheme={chartTheme}
                 resolvedTheme={resolvedTheme}
                 selfLabel={t("seriesSelf")}
@@ -341,6 +345,12 @@ function formatShareDateRange(
   if (!startIso || !endIso) return "";
   const fmt = new Intl.DateTimeFormat(locale, { dateStyle: "medium" });
   return `${fmt.format(new Date(startIso))} – ${fmt.format(new Date(endIso))}`;
+}
+
+function getPeriodChartDescriptionKey(period: PeriodType) {
+  if (period === "day") return "chartDescriptionDaily";
+  if (period === "week") return "chartDescriptionWeekly";
+  return "chartDescriptionMonthly";
 }
 
 function CompareContent() {
@@ -693,13 +703,7 @@ function CompareContent() {
           viewerName={viewer.name}
           viewerAvatar={viewer.avatarUrl}
           locale={locale}
-          stats={
-            acceptedFriends.length > 0 ? (
-              <p className="pt-4 text-sm leading-6 text-white/75">
-                {t("pickerReadyCount", { count: acceptedFriends.length })}
-              </p>
-            ) : undefined
-          }
+          friendsReadyCount={acceptedFriends.length}
         />
 
         {acceptedFriends.length === 0 ? (
@@ -759,7 +763,7 @@ function CompareContent() {
     );
   }
 
-  if (isLoading || (!isAll && isRangeLoading)) {
+  if ((isLoading && !timeline) || (!isAll && isRangeLoading && !timeline)) {
     return (
       <div className="space-y-8">
         <DuetCompareHero
@@ -829,7 +833,9 @@ function CompareContent() {
           eyebrow={t("timelineEyebrow")}
           title={t("chartTitle", { friendName })}
           description={
-            chartView === "cumulative" ? t("chartDescriptionCumulative") : t("chartDescription")
+            chartView === "cumulative"
+              ? t("chartDescriptionCumulative")
+              : t(getPeriodChartDescriptionKey(period))
           }
           badge={t("timelineBadge")}
           action={
@@ -846,6 +852,8 @@ function CompareContent() {
             <div className={DASHBOARD_SPOTLIGHT_INNER_WELL}>
               <DuetDualLineChart
                 data={timelineDisplayChartData}
+                period={period}
+                locale={locale}
                 chartTheme={chartTheme}
                 resolvedTheme={resolvedTheme}
                 selfLabel={t("seriesSelf")}
@@ -953,6 +961,7 @@ function CompareContent() {
                   viewerAvatarUrl={viewer?.avatarUrl}
                   friendAvatarUrl={friendUser?.avatarUrl}
                   locale={locale}
+                  period={period}
                   t={t}
                   chartTheme={chartTheme}
                   resolvedTheme={resolvedTheme}
@@ -1004,6 +1013,7 @@ function CompareContent() {
                   viewerAvatarUrl={viewer?.avatarUrl}
                   friendAvatarUrl={friendUser?.avatarUrl}
                   locale={locale}
+                  period={period}
                   t={t}
                   chartTheme={chartTheme}
                   resolvedTheme={resolvedTheme}
@@ -1053,6 +1063,7 @@ function CompareContent() {
                   viewerAvatarUrl={viewer?.avatarUrl}
                   friendAvatarUrl={friendUser?.avatarUrl}
                   locale={locale}
+                  period={period}
                   t={t}
                   chartTheme={chartTheme}
                   resolvedTheme={resolvedTheme}

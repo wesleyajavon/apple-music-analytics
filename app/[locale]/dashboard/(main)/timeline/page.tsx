@@ -17,7 +17,11 @@ import { useTimeline, type TimelineDataPoint } from "@/lib/hooks/use-listening";
 import { ChartResponsiveContainer } from "@/lib/components/chart-responsive-container";
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
-import { PeriodSelector, PeriodType } from "@/lib/components/period-selector";
+import {
+  getPeriodFromSearchParams,
+  PeriodSelector,
+  type PeriodType,
+} from "@/lib/components/period-selector";
 import { ListenTrendChartViewToggle } from "@/lib/components/charts/listen-trend-chart-view-toggle";
 import {
   applyListenTrendChartViewSingle,
@@ -657,7 +661,7 @@ function TimelineContent() {
   );
   const startDate = searchParams.get("startDate") || undefined;
   const endDate = searchParams.get("endDate") || undefined;
-  const period = (searchParams.get("period") || "month") as PeriodType;
+  const period = getPeriodFromSearchParams(searchParams, "month");
   const userId = searchParams.get("userId") ?? undefined;
 
   const { data, isLoading, error, refetch } = useTimeline(
@@ -702,7 +706,7 @@ function TimelineContent() {
     <>
       <div className={TIMELINE_TOOLBAR_CLASS}>
         <div className="flex flex-wrap items-center gap-3">
-          <PeriodSelector defaultPeriod="month" />
+          <PeriodSelector defaultPeriod="month" value={period} />
           <ListenTrendChartViewToggle value={chartView} onChange={setChartView} />
         </div>
       </div>
@@ -787,7 +791,7 @@ function TimelineContent() {
 function TimelineFallback() {
   const t = useTranslations("timeline");
   const searchParams = useSearchParams();
-  const period = (searchParams.get("period") || "month") as PeriodType;
+  const period = getPeriodFromSearchParams(searchParams, "month");
   const periodBadgeLabel =
     period === "day"
       ? t("periodBadgeDay")

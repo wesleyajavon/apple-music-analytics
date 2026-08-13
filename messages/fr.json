@@ -210,17 +210,22 @@
     },
     "compare": {
       "pageTitle": "Comparer avec un ami",
-      "pageDescription": "Timeline à deux séries et duel artiste sur la période choisie.",
+      "pageDescription": "Timeline à deux, artistes en commun et duels artiste, morceau ou genre sur la période choisie.",
       "heroEyebrow": "Duet",
       "heroTitle": "Qui stream le plus ?",
       "heroTitleBattle": "Le face-à-face",
-      "heroSubtitle": "Choisissez un ami, comparez vos streams et tranchez — artiste par artiste.",
+      "heroSubtitle": "Choisissez un ami, comparez vos streams sur la période, découvrez vos artistes en commun et tranchez en duel — artiste, morceau ou genre.",
       "heroSubtitleBattle": "Vous et {friendName} sur la même timeline. Même période. Pas d'excuses.",
       "heroStatBadge": "Comment ça marche",
-      "heroStatTag": "Head-to-head",
-      "heroTrust1": "Les timelines à deux montrent qui a le plus streamé sur la période.",
-      "heroTrust2": "L'arène artiste tranche les débats — cherchez un artiste et couronnez un gagnant.",
-      "heroTrust3": "Seuls les amis qui ont accepté voient vos stats. Révocable à tout moment.",
+      "heroStatTag": "3 étapes",
+      "heroTrustPanelHint": "Même période, mêmes règles — vous et votre ami côte à côte.",
+      "heroStep1Title": "Choisissez un ami",
+      "heroStep1": "Un ami qui a accepté votre invitation Duet. Cliquez sur sa carte ci-dessous pour lancer le duel.",
+      "heroStep2Title": "Comparez la période",
+      "heroStep2": "La timeline montre qui a le plus streamé sur la plage de dates active — jour, semaine ou mois.",
+      "heroStep3Title": "Creuser le détail",
+      "heroStep3": "Artistes en commun, puis duels artiste, morceau ou genre — cherchez une cible et tranchez.",
+      "heroPrivacyNote": "Seuls vos amis Duet voient ces stats. Révocable à tout moment depuis Amis.",
       "changeFriend": "Changer d'adversaire",
       "pickerEyebrow": "Choisissez votre rival",
       "pickerBadge": "Prêt à dueller",
@@ -296,9 +301,11 @@
       "scopeInsufficientDescription": "Cet ami n’a pas partagé assez de données pour cette vue.",
       "notFoundTitle": "Comparaison indisponible",
       "notFoundDescription": "Aucune amitié active trouvée pour cette comparaison.",
-      "rangeClamped": "En vue journalière, la plage est limitée aux 2 dernières années (volume de streamss élevé). Passez en vue mensuelle pour voir tout l’historique.",
+      "rangeClamped": "En vue journalière, la plage est limitée aux 2 dernières années (volume de streams élevé). Passez en vue mensuelle pour voir tout l’historique.",
       "chartTitle": "Vous vs {friendName}",
-      "chartDescription": "streams par jour sur la même période.",
+      "chartDescriptionDaily": "Streams par jour sur la même période.",
+      "chartDescriptionWeekly": "Streams par semaine sur la même période.",
+      "chartDescriptionMonthly": "Streams par mois sur la même période.",
       "chartDescriptionCumulative": "Total cumulé des streams sur la période — voyez qui prend l'avantage.",
       "chartViewLabel": "Vue du graphique",
       "chartViewPeriod": "Par période",
@@ -1494,7 +1501,7 @@
       },
       "chart": {
         "eyebrow": "Trajectoire",
-        "title": "volume de streams dans le temps",
+        "title": "Volume de streams dans le temps",
         "description": "Chaque ligne suit un genre ; la taille des paquets vient de la barre de contrôle.",
         "badge": "Multi-séries"
       }
@@ -1600,7 +1607,7 @@
     "modeArtists": "Top artistes",
     "modeTracks": "Top titres",
     "modeAriaLabel": "File de mapping : prioriser par artiste ou par titre",
-    "subtitleArtists": "Corrigez les genres inconnus artiste par artiste, triés par volume de streamss.",
+    "subtitleArtists": "Corrigez les genres inconnus artiste par artiste, triés par volume de streams.",
     "subtitleTracks": "Corrigez les genres inconnus titre par titre, triés par nombre de streams (les plus joués en premier).",
     "whyImplementedTitle": "Pourquoi Palette a ete implemente",
     "whyImplementedBody": "Apple Music et Spotify ne fournissent pas un acces API fiable pour recuperer et normaliser les genres de chaque artiste/piste a grande echelle. Resultat: une partie de la bibliotheque reste en \"Unknown\".",
@@ -1665,7 +1672,7 @@
       },
       "chart": {
         "eyebrow": "Trajectoire",
-        "title": "volume de streamss dans le temps",
+        "title": "Volume de streams dans le temps",
         "description": "Chaque ligne suit un artiste ; le pas temporel vient du sélecteur en haut de page.",
         "badge": "Multi-séries"
       }
@@ -1951,7 +1958,7 @@
       },
       "chart": {
         "eyebrow": "Trajectoire",
-        "title": "volume de streamss dans le temps",
+        "title": "Volume de streams dans le temps",
         "description": "Chaque ligne suit un titre ; le pas temporel vient du sélecteur en haut de page.",
         "badge": "Multi-séries"
       }
@@ -2368,7 +2375,7 @@
       },
       "libraryTrends": {
         "title": "Vues tendances titres et artistes",
-        "paragraph": "Au-delà des résumés par genre, <code>/dashboard/tracks/trends</code> et <code>/dashboard/artists/trends</code> tracent le volume de streamss sur la plage filtrée par buckets jour, semaine ou mois — pour suivre des titres précis ou vos artistes les plus joués dans le temps. Le filtre de dates global du dashboard s'applique de la même façon."
+        "paragraph": "Au-delà des résumés par genre, <code>/dashboard/tracks/trends</code> et <code>/dashboard/artists/trends</code> tracent le volume de streams sur la plage filtrée par buckets jour, semaine ou mois — pour suivre des titres précis ou vos artistes les plus joués dans le temps. Le filtre de dates global du dashboard s'applique de la même façon."
       },
       "ai": {
         "title": "Insights alimentés par l'IA",

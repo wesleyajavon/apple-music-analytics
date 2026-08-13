@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { DuetShareScope } from "@prisma/client";
 import { apiClient } from "@/lib/api-client";
 import { duetKeys } from "@/lib/hooks/query-keys";
@@ -14,6 +14,7 @@ import type {
   FriendshipDto,
 } from "@/lib/dto/duet";
 import type { PeriodType } from "@/lib/components/period-selector";
+import { CACHE_STALE_TIME } from "@/lib/constants/config";
 
 function buildCompareQuery(
   friendUserId: string,
@@ -65,6 +66,8 @@ export function useDuetCompareTimeline(params: {
       apiClient.get<CompareTimelineResponse>(
         `/duet/compare/timeline?${buildCompareQuery(params.friendUserId!, params)}`
       ),
+    staleTime: CACHE_STALE_TIME.TIMELINE,
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -103,6 +106,8 @@ export function useDuetCompareEntity(params: {
       if (params.period) q.set("period", params.period);
       return apiClient.get<CompareEntityResponse>(`/duet/compare/entity?${q.toString()}`);
     },
+    staleTime: CACHE_STALE_TIME.TIMELINE,
+    placeholderData: keepPreviousData,
   });
 }
 

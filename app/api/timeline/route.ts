@@ -58,7 +58,7 @@ const TIMELINE_RATE_LIMIT = {
  *         schema:
  *           type: string
  *           enum: [day, week, month]
- *           default: day
+ *           default: month
  *         description: Aggregation period (day, week or month)
  *       - in: query
  *         name: userId
@@ -110,7 +110,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const hasStartDate = searchParams.has("startDate");
     const hasEndDate = searchParams.has("endDate");
-    const period = extractPeriod(request, "day");
+    const period = extractPeriod(request, "month");
 
     if (!hasStartDate && !hasEndDate && isPublicDemoDataset) {
       const chartData = await getPublicProfileTimelineAllTimeCached(

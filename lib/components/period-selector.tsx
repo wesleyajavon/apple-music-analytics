@@ -107,7 +107,7 @@ export function PeriodSelector({ defaultPeriod = "day", value }: PeriodSelectorP
         });
       }
 
-      router.push(`${pathname}?${params.toString()}`);
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
     },
     [router, pathname, searchParams, prefetchWithOptimisticUpdate, startDate, endDate, currentPeriod]
   );

@@ -47,10 +47,13 @@ export function DuetFriendsHero({
                 {t("ctaCompare")}
               </Link>
             ) : null}
-            <span className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-black/20 backdrop-blur">
+            <Link
+              href="/dashboard/duet/friends?section=invite"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-black/20 backdrop-blur transition-all hover:-translate-y-0.5 hover:border-white/30 hover:bg-white/15"
+            >
               <UserPlus className="h-4 w-4" aria-hidden />
               {t("heroStatTag")}
-            </span>
+            </Link>
           </div>
         </div>
 

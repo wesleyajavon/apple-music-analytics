@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { motion } from "motion/react";
 import {
   LineChart,
@@ -16,8 +17,10 @@ import { ChartResponsiveContainer } from "@/lib/components/chart-responsive-cont
 import { DuetShareCardActions } from "@/lib/components/duet/duet-share-card-actions";
 import type { DuetArenaMode } from "@/lib/components/duet/duet-battle-arena-ui";
 import { generateDuetBattleSharePng } from "@/lib/utils/duet-battle-share-image";
+import type { PeriodType } from "@/lib/components/period-selector";
 import { DASHBOARD_CHART_THEME } from "@/lib/constants/dashboard-spotlight";
 import type { DualLineChartPoint } from "@/lib/utils/listen-trend-chart-view";
+import { formatTrendDate } from "@/lib/utils/genre-trends-pivot";
 
 export type { DualLineChartPoint, ListenTrendChartViewMode as DuetChartViewMode } from "@/lib/utils/listen-trend-chart-view";
 
@@ -26,24 +29,66 @@ export {
   toCumulativeDualLineChartData,
 } from "@/lib/utils/listen-trend-chart-view";
 
+type DuetDualLineChartRow = DualLineChartPoint & { formattedDate: string };
+
+function formatDuetChartDate(date: string, period: PeriodType, locale: string): string {
+  const dateOptions: Intl.DateTimeFormatOptions = {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  };
+
+  if (period === "day") {
+    return new Date(date).toLocaleDateString(locale, dateOptions);
+  }
+
+  if (period === "week") {
+    const weekStart = new Date(date);
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekEnd.getDate() + 6);
+    const startStr = weekStart.toLocaleDateString(locale, dateOptions);
+    const endStr = weekEnd.toLocaleDateString(locale, dateOptions);
+    return `${startStr} - ${endStr}`;
+  }
+
+  return formatTrendDate(date, period, locale);
+}
+
 export function DuetDualLineChart({
   data,
+  period,
+  locale,
   chartTheme,
   resolvedTheme,
   selfLabel,
   friendLabel,
 }: {
   data: DualLineChartPoint[];
+  period: PeriodType;
+  locale: string;
   chartTheme: (typeof DASHBOARD_CHART_THEME)[keyof typeof DASHBOARD_CHART_THEME];
   resolvedTheme: string;
   selfLabel: string;
   friendLabel: string;
 }) {
+  const chartData = useMemo<DuetDualLineChartRow[]>(
+    () =>
+      data.map((row) => ({
+        ...row,
+        formattedDate: formatDuetChartDate(row.date, period, locale),
+      })),
+    [data, period, locale]
+  );
+
   return (
     <ChartResponsiveContainer token="trendsLine">
-      <LineChart data={data} margin={{ top: 5, right: 20, left: 10, bottom: 40 }}>
+      <LineChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: 40 }}>
         <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} />
-        <XAxis dataKey="date" tick={{ fill: chartTheme.tick, fontSize: 12 }} stroke={chartTheme.axisStroke} />
+        <XAxis
+          dataKey="formattedDate"
+          tick={{ fill: chartTheme.tick, fontSize: 12 }}
+          stroke={chartTheme.axisStroke}
+        />
         <YAxis tick={{ fill: chartTheme.tick, fontSize: 12 }} stroke={chartTheme.axisStroke} />
         <Tooltip
           contentStyle={{

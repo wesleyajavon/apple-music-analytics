@@ -3,9 +3,92 @@
 import { type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { ArrowLeft, Swords, Sparkles } from "lucide-react";
+import {
+  ArrowLeft,
+  LineChart,
+  ShieldCheck,
+  Sparkles,
+  Swords,
+  Users,
+} from "lucide-react";
 import { LiveStatusDot } from "@/lib/components/live-status-dot";
 import { UserAvatar } from "@/lib/components/user-avatar";
+
+const COMPARE_HOW_IT_WORKS_STEPS = [
+  {
+    titleKey: "heroStep1Title",
+    bodyKey: "heroStep1",
+    icon: Users,
+    iconClass:
+      "border-violet-300/30 bg-gradient-to-br from-violet-500/30 to-violet-400/10 text-violet-100 shadow-[0_0_22px_rgba(139,92,246,0.28)]",
+  },
+  {
+    titleKey: "heroStep2Title",
+    bodyKey: "heroStep2",
+    icon: LineChart,
+    iconClass:
+      "border-cyan-300/30 bg-gradient-to-br from-cyan-500/25 to-cyan-400/10 text-cyan-100 shadow-[0_0_22px_rgba(34,211,238,0.22)]",
+  },
+  {
+    titleKey: "heroStep3Title",
+    bodyKey: "heroStep3",
+    icon: Swords,
+    iconClass:
+      "border-pink-300/30 bg-gradient-to-br from-pink-500/25 to-pink-400/10 text-pink-100 shadow-[0_0_22px_rgba(244,114,182,0.22)]",
+  },
+] as const;
+
+function CompareHowItWorksPanel({ friendsReadyCount }: { friendsReadyCount?: number }) {
+  const t = useTranslations("duet.compare");
+
+  return (
+    <>
+      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-white/10 pb-4">
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="font-mono text-[0.66rem] font-semibold uppercase tracking-[0.24em] text-slate-400">
+              {t("heroStatBadge")}
+            </p>
+            <span className="rounded-full border border-violet-300/25 bg-violet-300/10 px-2.5 py-1 text-[0.66rem] font-semibold text-violet-100">
+              {t("heroStatTag")}
+            </span>
+          </div>
+          <p className="mt-2 text-sm leading-6 text-white/60">{t("heroTrustPanelHint")}</p>
+        </div>
+        {friendsReadyCount != null && friendsReadyCount > 0 ? (
+          <span className="shrink-0 rounded-full border border-emerald-300/30 bg-emerald-400/12 px-3 py-1.5 text-xs font-semibold text-emerald-100">
+            {t("pickerReadyCount", { count: friendsReadyCount })}
+          </span>
+        ) : null}
+      </div>
+
+      <ol className="mt-4 space-y-2.5">
+        {COMPARE_HOW_IT_WORKS_STEPS.map(({ titleKey, bodyKey, icon: Icon, iconClass }) => (
+          <li
+            key={titleKey}
+            className="flex gap-3 rounded-2xl border border-white/10 bg-white/[0.045] p-3.5 transition-colors hover:border-white/16 hover:bg-white/[0.07]"
+          >
+            <div
+              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${iconClass}`}
+              aria-hidden
+            >
+              <Icon className="h-4 w-4" strokeWidth={2.1} />
+            </div>
+            <div className="min-w-0 pt-0.5">
+              <p className="text-sm font-semibold text-white">{t(titleKey)}</p>
+              <p className="mt-0.5 text-sm leading-5 text-white/65">{t(bodyKey)}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
+
+      <p className="mt-4 flex items-start gap-2 rounded-xl border border-white/8 bg-white/[0.03] px-3.5 py-3 text-xs leading-5 text-white/55">
+        <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-300/80" aria-hidden />
+        <span>{t("heroPrivacyNote")}</span>
+      </p>
+    </>
+  );
+}
 
 const DUET_COMPARE_HERO_SHELL =
   "relative overflow-hidden rounded-[2rem] border border-white/10 bg-gray-950 px-5 py-6 text-white shadow-2xl shadow-violet-500/15 sm:px-8 sm:py-9 lg:px-10 lg:py-10";
@@ -19,7 +102,7 @@ type BattleHeroProps = {
   selfTotal?: number;
   friendTotal?: number;
   locale: string;
-  stats?: ReactNode;
+  friendsReadyCount?: number;
   shareActions?: ReactNode;
 };
 
@@ -32,7 +115,7 @@ export function DuetCompareHero({
   selfTotal = 0,
   friendTotal = 0,
   locale,
-  stats,
+  friendsReadyCount,
   shareActions,
 }: BattleHeroProps) {
   const t = useTranslations("duet.compare");
@@ -157,32 +240,7 @@ export function DuetCompareHero({
                     {shareActions ? <div className="pt-1">{shareActions}</div> : null}
                   </div>
                 ) : (
-                  <>
-                    <div className="flex items-center justify-between border-b border-white/10 pb-4">
-                      <p className="font-mono text-[0.66rem] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                        {t("heroStatBadge")}
-                      </p>
-                      <span className="rounded-full border border-pink-300/25 bg-pink-300/10 px-2.5 py-1 text-[0.66rem] font-semibold text-pink-100">
-                        {t("heroStatTag")}
-                      </span>
-                    </div>
-                    {stats ?? (
-                      <ul className="mt-4 space-y-3 text-sm leading-6 text-white/75">
-                        <li className="flex gap-2">
-                          <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-violet-400 shadow-[0_0_10px_rgba(167,139,250,0.55)]" aria-hidden />
-                          <span>{t("heroTrust1")}</span>
-                        </li>
-                        <li className="flex gap-2">
-                          <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.55)]" aria-hidden />
-                          <span>{t("heroTrust2")}</span>
-                        </li>
-                        <li className="flex gap-2">
-                          <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-pink-400 shadow-[0_0_10px_rgba(244,114,182,0.55)]" aria-hidden />
-                          <span>{t("heroTrust3")}</span>
-                        </li>
-                      </ul>
-                    )}
-                  </>
+                  <CompareHowItWorksPanel friendsReadyCount={friendsReadyCount} />
                 )}
               </div>
             </div>

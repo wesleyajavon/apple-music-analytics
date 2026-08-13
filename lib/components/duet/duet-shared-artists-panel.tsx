@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { motion, useReducedMotion } from "motion/react";
 import { ChevronDown, Crown, Swords, X } from "lucide-react";
 import { ArtistAvatarHydrated } from "@/lib/components/artist-avatar-hydrated";
 import { EmptyState } from "@/lib/components/empty-state";
@@ -31,6 +32,20 @@ import type { CompareSharedArtistsResponse } from "@/lib/dto/duet";
 import { ApiError } from "@/lib/api-client";
 
 const VISIBLE_ARTISTS_COUNT = 5;
+
+const DUEL_PANEL_SCROLL_MARGIN =
+  "scroll-mt-[calc(var(--dashboard-filter-height,4.5rem)+0.75rem)]";
+
+function scrollElementIntoView(
+  element: HTMLElement | null,
+  options: { block?: ScrollLogicalPosition; behavior?: ScrollBehavior } = {}
+) {
+  if (!element) return;
+  element.scrollIntoView({
+    behavior: options.behavior ?? "smooth",
+    block: options.block ?? "start",
+  });
+}
 
 type SharedArtistStatChipProps = {
   label: string;
@@ -159,10 +174,15 @@ export function DuetSharedArtistsPanel({
   const locale = useLocale();
   const { resolvedTheme } = useTheme();
   const chartTheme = DASHBOARD_CHART_THEME[resolvedTheme === "dark" ? "dark" : "light"];
+  const prefersReducedMotion = useReducedMotion();
+  const scrollBehavior: ScrollBehavior = prefersReducedMotion ? "auto" : "smooth";
 
   const [listExpanded, setListExpanded] = useState(false);
   const [selectedArtistId, setSelectedArtistId] = useState<string | undefined>();
   const [selectedArtistName, setSelectedArtistName] = useState("");
+  const duelPanelRef = useRef<HTMLDivElement>(null);
+  const duelHeadingRef = useRef<HTMLHeadingElement>(null);
+  const duelChartRef = useRef<HTMLDivElement>(null);
 
   const {
     data: artistCompare,
@@ -222,6 +242,42 @@ export function DuetSharedArtistsPanel({
     setSelectedArtistName("");
   }
 
+  useEffect(() => {
+    if (!selectedArtistId) return;
+
+    const frame = window.requestAnimationFrame(() => {
+      scrollElementIntoView(duelPanelRef.current, {
+        behavior: scrollBehavior,
+        block: "start",
+      });
+      duelHeadingRef.current?.focus({ preventScroll: true });
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [selectedArtistId, scrollBehavior]);
+
+  useEffect(() => {
+    if (!selectedArtistId) return;
+    if (isArtistCompareLoading || isArtistCompareFetching) return;
+    if (!artistCompare || artistChartData.length === 0) return;
+
+    const frame = window.requestAnimationFrame(() => {
+      scrollElementIntoView(duelChartRef.current ?? duelPanelRef.current, {
+        behavior: scrollBehavior,
+        block: "nearest",
+      });
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [
+    selectedArtistId,
+    isArtistCompareLoading,
+    isArtistCompareFetching,
+    artistCompare,
+    artistChartData.length,
+    scrollBehavior,
+  ]);
+
   const duelArtistName =
     artistCompare?.type === "artist" ? (artistCompare.artistName ?? selectedArtistName) : selectedArtistName;
   const duelArtistImageUrl =
@@ -265,6 +321,7 @@ export function DuetSharedArtistsPanel({
                       type="button"
                       onClick={() => handleArtistClick(artist.artistId, artist.artistName)}
                       aria-expanded={isSelected}
+                      aria-controls={isSelected ? "duet-shared-artist-duel" : undefined}
                       className={`group flex w-full gap-3 rounded-xl border px-3 py-3 text-left transition-all sm:items-start ${
                         isSelected
                           ? "border-lime-400/80 bg-lime-50/80 shadow-sm ring-2 ring-lime-300/40 dark:border-lime-400/40 dark:bg-lime-400/10 dark:ring-lime-400/20"
@@ -359,13 +416,28 @@ export function DuetSharedArtistsPanel({
             ) : null}
 
             {selectedArtistId ? (
-              <div className={`space-y-4 ${DASHBOARD_SPOTLIGHT_INNER_WELL} p-4 sm:p-5`}>
+              <motion.div
+                ref={duelPanelRef}
+                id="duet-shared-artist-duel"
+                role="region"
+                aria-labelledby="duet-shared-artist-duel-heading"
+                aria-busy={isArtistCompareLoading || isArtistCompareFetching}
+                initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.35, ease: "easeOut" }}
+                className={`space-y-4 ${DASHBOARD_SPOTLIGHT_INNER_WELL} ${DUEL_PANEL_SCROLL_MARGIN} p-4 sm:p-5`}
+              >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
                     <p className="font-mono text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-lime-700 dark:text-lime-300">
                       {t("sharedArtistsDuelEyebrow")}
                     </p>
-                    <h3 className="mt-1 text-base font-semibold text-slate-900 dark:text-white">
+                    <h3
+                      ref={duelHeadingRef}
+                      id="duet-shared-artist-duel-heading"
+                      tabIndex={-1}
+                      className="mt-1 text-base font-semibold text-slate-900 outline-none dark:text-white"
+                    >
                       {t("artistChartTitle", { artistName: duelArtistName, friendName })}
                     </h3>
                     <p className={`mt-1 text-sm ${DASHBOARD_SPOTLIGHT_MUTED}`}>
@@ -439,17 +511,21 @@ export function DuetSharedArtistsPanel({
                         description={t("artistNoDataDescription")}
                       />
                     ) : (
-                      <DuetDualLineChart
-                        data={artistDisplayChartData}
-                        chartTheme={chartTheme}
-                        resolvedTheme={resolvedTheme}
-                        selfLabel={t("seriesSelf")}
-                        friendLabel={t("seriesFriend", { friendName })}
-                      />
+                      <div ref={duelChartRef}>
+                        <DuetDualLineChart
+                          data={artistDisplayChartData}
+                          period={period}
+                          locale={locale}
+                          chartTheme={chartTheme}
+                          resolvedTheme={resolvedTheme}
+                          selfLabel={t("seriesSelf")}
+                          friendLabel={t("seriesFriend", { friendName })}
+                        />
+                      </div>
                     )}
                   </div>
                 ) : null}
-              </div>
+              </motion.div>
             ) : null}
           </>
         )}

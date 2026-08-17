@@ -2864,16 +2864,13 @@
           "eyebrow": "Step 2",
           "title": "Explore",
           "verb": "Decode",
-          "description": "Trends, heatmap, musical profile: see the phases, rituals, and obsessions hidden in your streams. Well beyond an annual Spotify Wrapped or Apple Music Replay.",
-          "cta": "View the public demo"
+          "description": "Trends, heatmap, musical profile: see the phases, rituals, and obsessions hidden in your streams. Well beyond an annual Spotify Wrapped or Apple Music Replay."
         },
         "interact": {
           "eyebrow": "Step 3",
           "title": "Interact",
           "verb": "Dialogue",
-          "description": "Ask your data anything. Add your friends and settle it: who is the bigger fan of that artist?",
-          "ctaChat": "Try the chat",
-          "ctaDuet": "Start a duel"
+          "description": "Ask your data anything. Add your friends and settle it: who is the bigger fan of that artist?"
         }
       }
     },
@@ -2932,13 +2929,13 @@
       "heroSubtitle": "Pick an artist. See who streams more.",
       "liveBadge": "Demo",
       "arenaEyebrow": "Artist duel",
-      "artistName": "Tyler, The Creator",
+      "artistName": "Bad Bunny",
       "periodMeta": "Last 90 days · same filters",
       "selfName": "You",
       "selfInitials": "YO",
       "friendName": "Josh",
       "friendInitials": "JO",
-      "winnerHeadline": "You stream more Tyler.",
+      "winnerHeadline": "You stream more Bad Bunny.",
       "insightEyebrow": "Head-to-head",
       "insightCopy": "Add a friend, pick any artist, and see who really dominates—streams counted from your actual libraries.",
       "trendLabel": "Streams over time",
@@ -3055,15 +3052,11 @@
       "faq": {
         "export": {
           "question": "How do I import my Apple Music or Spotify history?",
-          "answer": "After creating an account, guided onboarding walks you through exporting your streaming history from Apple Music or Spotify and uploading it. Most imports complete in minutes."
+          "answer": "After creating an account, guided onboarding walks you through requesting your streaming history export from Apple Music or Spotify and uploading it. The history request itself can take a few days from Apple or Spotify; once you have the file, most imports complete in minutes."
         },
         "privacy": {
           "question": "Is my streaming data private?",
           "answer": "Yes. Your data is yours. We don't sell your streaming history, and you can export or delete everything at any time from your account settings."
-        },
-        "providers": {
-          "question": "Do I need Apple Music or Spotify?",
-          "answer": "Either works. Import from Apple Music Replay exports, Spotify Extended Streaming History, or connect Spotify via OAuth. You can use one or both."
         },
         "pricing": {
           "question": "Is Soundprint free?",
@@ -3071,7 +3064,7 @@
         },
         "deepdive": {
           "question": "What's an artist deepdive?",
-          "answer": "Pick any artist from your history—or type their name plus deepdive in Soundprint chat. Soundprint fetches your streams with that artist and shows totals, top tracks, a year-by-year breakdown, and a clear written summary."
+          "answer": "Pick any artist from your history—or type their name plus deepdive in Soundprint chat. Soundprint fetches your streams with that artist and shows totals, top tracks, a year-by-year breakdown, and a clear written summary of your history with that artist."
         }
       },
       "cta": {

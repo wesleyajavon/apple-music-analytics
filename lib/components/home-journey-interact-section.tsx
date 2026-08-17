@@ -2,30 +2,12 @@
 
 import { useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
 import { DemoTerminalHero } from "@/lib/components/demo-terminal-hero";
 import { HomeDuetPreview } from "@/lib/components/home-duet-preview";
 import { HomeBlurFadeReveal, HomeClipReveal, HomeTextReveal } from "@/lib/components/home-animations";
 import { HOME_JOURNEY_SECTION_SCROLL_MT } from "@/lib/constants/home-journey-nav";
-import { withPublicDemoUserId } from "@/lib/constants/public-profile";
 
-type HomeJourneyInteractSectionProps = {
-  isAuthenticated: boolean;
-  publicProfileUserId: string | null;
-};
-
-function ArrowRightIcon({ className = "h-4 w-4" }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-    </svg>
-  );
-}
-
-export function HomeJourneyInteractSection({
-  isAuthenticated,
-  publicProfileUserId,
-}: HomeJourneyInteractSectionProps) {
+export function HomeJourneyInteractSection() {
   const t = useTranslations("home.journey.steps.interact");
   const tHome = useTranslations("home");
 
@@ -37,14 +19,6 @@ export function HomeJourneyInteractSection({
       })),
     [tHome],
   );
-
-  const chatHref = isAuthenticated
-    ? "/dashboard/ask-your-soundprint"
-    : publicProfileUserId
-      ? withPublicDemoUserId("/dashboard/ask-your-soundprint", publicProfileUserId)
-      : "/sign-in";
-
-  const duetHref = isAuthenticated ? "/dashboard/duet/friends" : "/sign-up";
 
   return (
     <section
@@ -100,23 +74,6 @@ export function HomeJourneyInteractSection({
             <HomeDuetPreview />
           </HomeClipReveal>
         </div>
-
-        <HomeBlurFadeReveal delay={0.12} className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-          <Link
-            href={chatHref}
-            className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-7 py-3 text-sm font-semibold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:opacity-95 sm:w-auto sm:min-w-[12rem]"
-          >
-            {t("ctaChat")}
-            <ArrowRightIcon />
-          </Link>
-          <Link
-            href={duetHref}
-            className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-card-border bg-card-surface px-7 py-3 text-sm font-semibold text-foreground shadow-card transition-all hover:-translate-y-0.5 hover:shadow-card-hover sm:w-auto sm:min-w-[12rem]"
-          >
-            {t("ctaDuet")}
-            <ArrowRightIcon />
-          </Link>
-        </HomeBlurFadeReveal>
       </div>
     </section>
   );

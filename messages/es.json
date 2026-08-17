@@ -2846,16 +2846,13 @@
           "eyebrow": "Paso 2",
           "title": "Explorar",
           "verb": "Decodificar",
-          "description": "Tendencias, heatmap, perfil musical: descubre las fases, rituales y obsesiones ocultas en tus streams. Más allá de un Spotify Wrapped o un Apple Music Replay anual.",
-          "cta": "Ver la demo pública"
+          "description": "Tendencias, heatmap, perfil musical: descubre las fases, rituales y obsesiones ocultas en tus streams. Más allá de un Spotify Wrapped o un Apple Music Replay anual."
         },
         "interact": {
           "eyebrow": "Paso 3",
           "title": "Interactuar",
           "verb": "Dialogar",
-          "description": "Pregunta lo que quieras a tus datos. Añade a tus amigos y decide: ¿quién es el mayor fan de ese artista?",
-          "ctaChat": "Probar el chat",
-          "ctaDuet": "Lanzar un duelo"
+          "description": "Pregunta lo que quieras a tus datos. Añade a tus amigos y decide: ¿quién es el mayor fan de ese artista?"
         }
       }
     },
@@ -2914,13 +2911,13 @@
       "heroSubtitle": "Elige un artista. Mira quién reproduce más.",
       "liveBadge": "Demo",
       "arenaEyebrow": "Duelo de artista",
-      "artistName": "Tyler, The Creator",
+      "artistName": "Bad Bunny",
       "periodMeta": "Últimos 90 días · mismos filtros",
       "selfName": "Tú",
       "selfInitials": "TU",
       "friendName": "Josh",
       "friendInitials": "JO",
-      "winnerHeadline": "Tú reproduces más a Tyler.",
+      "winnerHeadline": "Tú reproduces más a Bad Bunny.",
       "insightEyebrow": "Cara a cara",
       "insightCopy": "Añade un amigo, elige un artista y mira quién domina de verdad — streams contadas desde vuestras bibliotecas reales.",
       "trendLabel": "streams en el tiempo",
@@ -3037,15 +3034,11 @@
       "faq": {
         "export": {
           "question": "¿Cómo importo mi historial de Apple Music o Spotify?",
-          "answer": "Después de crear una cuenta, el onboarding guiado te acompaña para exportar tu historial de streams desde Apple Music o Spotify y subirlo. La mayoría de las importaciones se completan en minutos."
+          "answer": "Después de crear una cuenta, el onboarding guiado te acompaña para solicitar la exportación de tu historial de streams desde Apple Music o Spotify y subirlo. La solicitud del historial puede tardar unos días por parte de Apple o Spotify; una vez que tengas el archivo, la mayoría de las importaciones se completan en minutos."
         },
         "privacy": {
           "question": "¿Son privados mis datos de streams?",
           "answer": "Sí. Tus datos son tuyos. No vendemos tu historial de streams, y puedes exportar o eliminar todo en cualquier momento desde la configuración de tu cuenta."
-        },
-        "providers": {
-          "question": "¿Necesito Apple Music o Spotify?",
-          "answer": "Cualquiera funciona. Importa desde exportaciones Apple Music Replay, historial extendido de Spotify, o conecta Spotify vía OAuth. Puedes usar uno o ambos."
         },
         "pricing": {
           "question": "¿Soundprint es gratuito?",
@@ -3053,7 +3046,7 @@
         },
         "deepdive": {
           "question": "¿Qué es un deepdive de artista?",
-          "answer": "Elige cualquier artista de tu historial — o escribe su nombre seguido de deepdive en el chat Soundprint. Soundprint recupera tus streams con ese artista y muestra totales, top canciones, desglose año a año y un resumen claro."
+          "answer": "Elige cualquier artista de tu historial — o escribe su nombre seguido de deepdive en el chat Soundprint. Soundprint recupera tus streams con ese artista y muestra totales, top canciones, desglose año a año y un resumen claro de tu historia con ese artista."
         }
       },
       "cta": {

@@ -52,8 +52,7 @@ function ArrowRightIcon({ className = "h-4 w-4" }: { className?: string }) {
 export default function Home() {
   const t = useTranslations("home");
   const tAuth = useTranslations("auth");
-  const { publicDemoOverviewPath: publicDemoPath, publicProfileUserId: publicProfileId } =
-    usePublicDemo();
+  const { publicDemoOverviewPath: publicDemoPath } = usePublicDemo();
   const [firstName, setFirstName] = useState<string | null>(null);
   const [profileName, setProfileName] = useState<string | null>(null);
   const [profileEmail, setProfileEmail] = useState<string | null>(null);
@@ -373,6 +372,14 @@ export default function Home() {
           publicDemoPath={publicDemoPath}
         />
 
+        <SoundprintBrandDividerSection
+          align="start"
+          logoSize="lg"
+          lineStyle="fade"
+          maxWidth="medium"
+          className="py-8 sm:py-12"
+        />
+
         <section className="relative mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
           <Home3DHero
             variant="ambient"
@@ -380,7 +387,7 @@ export default function Home() {
           />
         </section>
 
-        <HomeJourneyExploreSection publicDemoPath={publicDemoPath} />
+        <HomeJourneyExploreSection />
 
         <SoundprintBrandDividerSection
           align="start"
@@ -388,10 +395,7 @@ export default function Home() {
           className="py-6 sm:py-10"
         />
 
-        <HomeJourneyInteractSection
-          isAuthenticated={isAuthenticated}
-          publicProfileUserId={publicProfileId}
-        />
+        <HomeJourneyInteractSection />
 
         <SoundprintBrandDividerSection
           align="start"

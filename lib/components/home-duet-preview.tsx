@@ -1,7 +1,13 @@
 "use client";
 
+import Image from "next/image";
 import { useTranslations } from "next-intl";
+import { AUTH_PREVIEW_ARTISTS } from "@/lib/constants/auth-artist-preview";
 import { SoundprintLogo } from "@/lib/components/soundprint-logo";
+
+const DUET_PREVIEW_ARTIST_IMAGE =
+  AUTH_PREVIEW_ARTISTS.find((artist) => artist.name === "Bad Bunny")?.imageSrc ??
+  "/brand/auth-artists/bad-bunny.jpg";
 
 const SELF_LISTENS = 847;
 const FRIEND_LISTENS = 612;
@@ -161,17 +167,38 @@ export function HomeDuetPreview({ className }: { className?: string }) {
           <div className="relative grid gap-3 p-2 pt-4 sm:grid-cols-[0.88fr_1.12fr]">
             <div className="space-y-3">
               <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.06] p-4">
+                <div className="pointer-events-none absolute inset-0" aria-hidden>
+                  <Image
+                    src={DUET_PREVIEW_ARTIST_IMAGE}
+                    alt=""
+                    fill
+                    className="object-cover object-top opacity-35"
+                    sizes="(min-width: 640px) 280px, 80vw"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-slate-950/45" />
+                </div>
                 <div
                   className="absolute -right-10 -top-10 h-24 w-24 rounded-full bg-accent-violet/20 blur-2xl"
                   aria-hidden
                 />
-                <div className="relative">
-                  <p className="font-mono text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-violet-200">
-                    {t("arenaEyebrow")}
-                  </p>
-                  <p className="mt-2 text-lg font-semibold leading-snug tracking-tight text-white sm:text-xl">
-                    {t("artistName")}
-                  </p>
+                <div className="relative flex items-center gap-3">
+                  <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-2xl ring-1 ring-white/20 shadow-lg shadow-black/40">
+                    <Image
+                      src={DUET_PREVIEW_ARTIST_IMAGE}
+                      alt=""
+                      fill
+                      className="object-cover"
+                      sizes="56px"
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-mono text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-violet-200">
+                      {t("arenaEyebrow")}
+                    </p>
+                    <p className="mt-1 truncate text-lg font-semibold leading-snug tracking-tight text-white sm:text-xl">
+                      {t("artistName")}
+                    </p>
+                  </div>
                 </div>
 
                 <div className="relative mt-4 grid grid-cols-2 gap-2">

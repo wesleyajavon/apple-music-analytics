@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { DashboardPreviewShell } from "@/lib/components/dashboard-preview-shell";
+import { AUTH_PREVIEW_ARTISTS } from "@/lib/constants/auth-artist-preview";
 import { HOME_PREVIEW_ALBUMS } from "@/lib/constants/home-album-preview";
 import { HOME_JOURNEY_SECTION_SCROLL_MT } from "@/lib/constants/home-journey-nav";
 import {
@@ -15,10 +16,10 @@ import {
 } from "@/lib/components/home-animations";
 
 const PREVIEW_GENRES = [
-  { name: "Indie Rock", color: "#818cf8", active: true },
-  { name: "Synth-pop", color: "#f472b6", active: true },
-  { name: "R&B", color: "#06b6d4", active: true },
-  { name: "Electronic", color: "#84cc16", active: false },
+  { name: "Rap", color: "#818cf8", active: true },
+  { name: "R&B", color: "#f472b6", active: true },
+  { name: "Reggaeton", color: "#06b6d4", active: true },
+  { name: "Pop", color: "#84cc16", active: false },
 ] as const;
 
 const CHART_MONTHS = ["Jan", "Mar", "May", "Jul", "Sep", "Nov"] as const;
@@ -30,9 +31,9 @@ const GENRE_LINE_PATHS = [
 ] as const;
 
 const PREVIEW_TOP_ARTISTS = [
-  { name: "Radiohead", initials: "RH", listens: 842, share: 100, color: "#818cf8" },
-  { name: "Bon Iver", initials: "BV", listens: 611, share: 72, color: "#f472b6" },
-  { name: "Frank Ocean", initials: "FO", listens: 488, share: 58, color: "#06b6d4" },
+  { ...AUTH_PREVIEW_ARTISTS[0], listens: 842, share: 100 },
+  { ...AUTH_PREVIEW_ARTISTS[1], listens: 611, share: 72 },
+  { ...AUTH_PREVIEW_ARTISTS[2], listens: 488, share: 58 },
 ] as const;
 
 const TIMELINE_AREA_PATH =
@@ -268,15 +269,16 @@ function MiniTopArtistsChart() {
             className="rounded-2xl border border-white/[0.06] bg-black/20 p-3"
           >
             <div className="flex items-center gap-3">
-              <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/10 bg-gradient-to-br from-white/10 to-white/[0.02] text-xs font-black text-white shadow-lg shadow-black/30">
-                <span
-                  className="absolute inset-0 rounded-full opacity-70"
-                  style={{
-                    background: `radial-gradient(circle at 30% 25%, ${artist.color}, transparent 68%)`,
-                  }}
-                  aria-hidden
-                />
-                <span className="relative">{artist.initials}</span>
+              <div className="relative h-11 w-11 shrink-0">
+                <div className="relative h-full w-full overflow-hidden rounded-full border border-white/10 bg-slate-900 shadow-lg shadow-black/30">
+                  <Image
+                    src={artist.imageSrc}
+                    alt=""
+                    fill
+                    className="object-cover"
+                    sizes="44px"
+                  />
+                </div>
                 <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full border border-white/20 bg-slate-950 text-[0.55rem] font-black text-white">
                   {index + 1}
                 </span>

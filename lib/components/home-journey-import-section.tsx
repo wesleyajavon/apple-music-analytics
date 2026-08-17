@@ -64,7 +64,7 @@ function ImportPreviewPanel() {
               key={key}
               className="flex items-start gap-3 rounded-xl border border-card-border/80 bg-background/50 px-3.5 py-3"
             >
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-violet-400/25 bg-violet-500/10 font-mono text-[0.65rem] font-bold text-violet-200">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-violet-300/70 bg-violet-100 font-mono text-[0.65rem] font-bold text-violet-800 dark:border-violet-400/25 dark:bg-violet-500/10 dark:text-violet-200">
                 {index + 1}
               </span>
               <span className="pt-0.5 text-sm leading-6 text-foreground/90">

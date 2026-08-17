@@ -9,17 +9,20 @@ const STEP_STYLES: Record<
 > = {
   import: {
     ring: "hover:border-violet-400/35 hover:bg-violet-500/[0.06]",
-    badge: "border-violet-400/25 bg-violet-500/10 text-violet-200",
+    badge:
+      "border-violet-300/70 bg-violet-100 text-violet-800 dark:border-violet-400/25 dark:bg-violet-500/10 dark:text-violet-200",
     dot: "bg-violet-400",
   },
   explore: {
     ring: "hover:border-cyan-400/35 hover:bg-cyan-500/[0.06]",
-    badge: "border-cyan-400/25 bg-cyan-500/10 text-cyan-100",
+    badge:
+      "border-cyan-300/70 bg-cyan-100 text-cyan-800 dark:border-cyan-400/25 dark:bg-cyan-500/10 dark:text-cyan-100",
     dot: "bg-cyan-400",
   },
   interact: {
     ring: "hover:border-fuchsia-400/35 hover:bg-fuchsia-500/[0.06]",
-    badge: "border-fuchsia-400/25 bg-fuchsia-500/10 text-fuchsia-100",
+    badge:
+      "border-fuchsia-300/70 bg-fuchsia-100 text-fuchsia-800 dark:border-fuchsia-400/25 dark:bg-fuchsia-500/10 dark:text-fuchsia-100",
     dot: "bg-fuchsia-400",
   },
 };

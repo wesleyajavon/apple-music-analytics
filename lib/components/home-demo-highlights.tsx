@@ -22,7 +22,6 @@ export function HomeDemoHighlights() {
           eyebrow: t("demoHighlights.artistAnalysis.eyebrow"),
           title: t("demoHighlights.artistAnalysis.title"),
           description: t("demoHighlights.artistAnalysis.description"),
-          metric: t("demoHighlights.artistAnalysis.metric"),
           reverse: false,
         },
         {
@@ -32,7 +31,6 @@ export function HomeDemoHighlights() {
           eyebrow: t("demoHighlights.listeningTrends.eyebrow"),
           title: t("demoHighlights.listeningTrends.title"),
           description: t("demoHighlights.listeningTrends.description"),
-          metric: t("demoHighlights.listeningTrends.metric"),
           reverse: true,
         },
       ] as const,
@@ -88,9 +86,6 @@ export function HomeDemoHighlights() {
                 </h4>
                 <p className="mt-4 text-base leading-7 text-muted sm:text-lg">
                   {highlight.description}
-                </p>
-                <p className="mt-5 inline-flex rounded-full border border-primary/20 bg-primary/10 px-4 py-2 text-sm font-semibold text-primary">
-                  {highlight.metric}
                 </p>
               </HomeBlurFadeReveal>
             </HomePerspectiveReveal>

@@ -1,7 +1,13 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { DASHBOARD_SPOTLIGHT_MUTED, DASHBOARD_SPOTLIGHT_PILL_MUTED } from "@/lib/constants/dashboard-spotlight";
+import { DASHBOARD_SPOTLIGHT_MUTED } from "@/lib/constants/dashboard-spotlight";
+
+export const SETTINGS_INPUT_CLASS =
+  "mt-2 w-full rounded-xl border border-slate-200/90 bg-white px-3 py-2.5 text-base text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-400/15 sm:text-sm dark:border-white/10 dark:bg-black/30 dark:text-white dark:placeholder:text-slate-500";
+
+export const SETTINGS_PRIMARY_SAVE_CLASS =
+  "inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-2xl bg-slate-950 px-5 text-sm font-semibold text-white shadow-xl shadow-slate-950/20 transition hover:-translate-y-0.5 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 dark:bg-white dark:text-slate-950 dark:shadow-black/25 dark:hover:bg-slate-100 sm:w-auto";
 
 export function SettingsSwitch({
   id,
@@ -38,59 +44,6 @@ export function SettingsSwitch({
   );
 }
 
-const SUBNAV_STICKY_TOP =
-  "top-[calc(var(--dashboard-filter-height,4.5rem)+0.5rem)]";
-
-export function SettingsPageNav({
-  ariaLabel,
-  items,
-}: {
-  ariaLabel: string;
-  items: ReadonlyArray<{ href: string; label: string }>;
-}) {
-  return (
-    <nav
-      className={`sticky ${SUBNAV_STICKY_TOP} z-20 -mx-1 mb-6 flex gap-2 overflow-x-auto overscroll-x-contain border-b border-slate-200/80 bg-white/85 px-1 pb-3 backdrop-blur-md [-ms-overflow-style:none] [scrollbar-width:none] dark:border-white/10 dark:bg-slate-950/85 lg:flex-wrap lg:overflow-visible [&::-webkit-scrollbar]:hidden`}
-      aria-label={ariaLabel}
-    >
-      {items.map((item) => (
-        <a
-          key={item.href}
-          href={item.href}
-          className={`${DASHBOARD_SPOTLIGHT_PILL_MUTED} shrink-0 whitespace-nowrap px-4 py-2.5 text-sm font-semibold no-underline transition hover:border-violet-300/50 hover:bg-white dark:hover:bg-white/15`}
-        >
-          {item.label}
-        </a>
-      ))}
-    </nav>
-  );
-}
-
-export function SettingsMobileSectionNav({
-  ariaLabel,
-  items,
-}: {
-  ariaLabel: string;
-  items: ReadonlyArray<{ href: string; label: string }>;
-}) {
-  return (
-    <nav
-      className="-mx-1 flex gap-2 overflow-x-auto overscroll-x-contain px-1 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-      aria-label={ariaLabel}
-    >
-      {items.map((item) => (
-        <a
-          key={item.href}
-          href={item.href}
-          className="inline-flex min-h-10 shrink-0 items-center rounded-full border border-slate-200/90 bg-white px-3.5 text-xs font-semibold text-slate-800 no-underline shadow-sm dark:border-white/10 dark:bg-slate-950 dark:text-slate-100"
-        >
-          {item.label}
-        </a>
-      ))}
-    </nav>
-  );
-}
-
 export function SettingsSectionHeader({
   id,
   title,
@@ -121,14 +74,6 @@ export function SettingsSectionHeader({
       <p className={`mt-1.5 max-w-3xl text-sm leading-relaxed ${leadClass}`}>{lead}</p>
       {children}
     </header>
-  );
-}
-
-export function SettingsMobileSectionLabel({ children }: { children: ReactNode }) {
-  return (
-    <p className="px-0.5 text-[0.66rem] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-      {children}
-    </p>
   );
 }
 

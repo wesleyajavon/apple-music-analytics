@@ -536,7 +536,7 @@
   "settings": {
     "metaTitle": "Account settings",
     "title": "Settings",
-    "subtitle": "Profile, preferences, your data, and account safety — organized in four clear sections.",
+    "subtitle": "Profile, preferences, your data, and account safety — pick a section below.",
     "heroEyebrow": "Account hub",
     "heroStatBadge": "Your controls",
     "heroStatTag": "Simple & yours",
@@ -550,6 +550,10 @@
     "ctaOverview": "Music overview",
     "pageEyebrow": "Account",
     "navOnThisPage": "On this page",
+    "viewSwitcher": {
+      "navLabel": "Account settings sections",
+      "hint": "Choose a section to update it."
+    },
     "sectionProfile": "Profile",
     "sectionProfileLead": "Photo, display name, and the email tied to your sign-in.",
     "sectionPreferencesLead": "Optional prompts, AI features, and Duet sharing — flip what you need.",

@@ -1,25 +1,36 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { GROQ_AI_CONSENT_SETTINGS_HASH } from "@/lib/constants/groq-ai-settings";
 
-/** Opens mobile disclosures and scrolls to the Groq consent block when the URL hash matches. */
-export function GroqAiSettingsFocus() {
+/** Opens Preferences and scrolls to the Groq consent block when the URL hash matches. */
+export function GroqAiSettingsFocus({
+  preferencesVisible,
+  onOpenPreferences,
+}: {
+  preferencesVisible: boolean;
+  onOpenPreferences: () => void;
+}) {
+  const didOpenRef = useRef(false);
+
+  useEffect(() => {
+    if (didOpenRef.current) return;
+    if (window.location.hash !== `#${GROQ_AI_CONSENT_SETTINGS_HASH}`) return;
+    didOpenRef.current = true;
+    onOpenPreferences();
+  }, [onOpenPreferences]);
+
   useEffect(() => {
     if (window.location.hash !== `#${GROQ_AI_CONSENT_SETTINGS_HASH}`) return;
+    if (!preferencesVisible) return;
 
     const el = document.getElementById(GROQ_AI_CONSENT_SETTINGS_HASH);
     if (!el) return;
 
-    const details = el.closest("details");
-    if (details && !details.open) {
-      details.open = true;
-    }
-
     window.requestAnimationFrame(() => {
       el.scrollIntoView({ behavior: "smooth", block: "start" });
     });
-  }, []);
+  }, [preferencesVisible]);
 
   return null;
 }

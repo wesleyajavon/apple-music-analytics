@@ -536,7 +536,7 @@
   "settings": {
     "metaTitle": "Ajustes de la cuenta",
     "title": "Ajustes",
-    "subtitle": "Perfil, preferencias, importaciones y borrado de analytics — todo en un solo sitio.",
+    "subtitle": "Perfil, preferencias, tus datos y seguridad de la cuenta — elige una sección abajo.",
     "heroEyebrow": "Centro de cuenta",
     "heroStatBadge": "Tus controles",
     "heroStatTag": "Simple y tuyo",
@@ -550,6 +550,10 @@
     "ctaOverview": "Tu música",
     "pageEyebrow": "Cuenta",
     "navOnThisPage": "En esta página",
+    "viewSwitcher": {
+      "navLabel": "Secciones de ajustes de la cuenta",
+      "hint": "Elige una sección para actualizarla."
+    },
     "sectionProfile": "Perfil",
     "sectionProfileLead": "Foto, nombre visible y email de tu sesión.",
     "profileImageLabel": "Imagen de perfil",

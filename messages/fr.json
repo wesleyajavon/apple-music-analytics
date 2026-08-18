@@ -536,7 +536,7 @@
   "settings": {
     "metaTitle": "Paramètres du compte",
     "title": "Paramètres",
-    "subtitle": "Profil, préférences, imports et effacement des analytics — tout au même endroit.",
+    "subtitle": "Profil, préférences, vos données et sécurité du compte — choisissez une section ci-dessous.",
     "heroEyebrow": "Espace compte",
     "heroStatBadge": "Vos réglages",
     "heroStatTag": "Simple & à vous",
@@ -546,6 +546,10 @@
     "ctaOverview": "Vue Musique",
     "pageEyebrow": "Compte",
     "navOnThisPage": "Sur cette page",
+    "viewSwitcher": {
+      "navLabel": "Sections des paramètres du compte",
+      "hint": "Choisissez une section pour la modifier."
+    },
     "sectionProfile": "Profil",
     "sectionProfileLead": "Photo, nom affiché et email lié à votre connexion.",
     "profileImageLabel": "Image de profil",
@@ -576,7 +580,7 @@
     "importExportsTitle": "Import des données de streams",
     "importExportsBody": "Ajoutez ou mettez à jour un export Spotify ou Apple à tout moment — les streams déjà enregistrés (sync ou import) sont ignorés en doublon.",
     "importExportsCta": "Ouvrir l’assistant d’import",
-    "dashboardExportsTitle": "exports de streams",
+    "dashboardExportsTitle": "Exports de streams",
     "dashboardExportsBody": "Téléchargez vos streams (CSV), les statistiques agrégées (JSON) ou un rapport PDF annuel. Si une période est sélectionnée dans le filtre du tableau de bord, les exports utilisent cette plage ; sinon, toute votre bibliothèque ou l’année en cours s’applique.",
     "signedOutHeroEyebrow": "Connexion requise",
     "signedOutStatBadge": "Privé par défaut",

@@ -390,7 +390,7 @@
   "askSoundprint": {
     "eyebrow": "Tu biblioteca, en conversación",
     "title": "Pregunta a tu Soundprint",
-    "subtitle": "¿Quién suena en bucle? ¿Cuándo escuchas más? Pregunta lo que quieras — inmersiones de artista incluidas — desde tu historial real de streams.",
+    "subtitle": "¿Quién suena en bucle? ¿Cuándo escuchas más? Pregunta lo que quieras — deepdives de artista incluidos — desde tu historial real de streams.",
     "compactTrust": "Tus streams reales. Solo lectura. Aquí no se editan playlists ni imports.",
     "periodChip": "Respuestas sobre {range}",
     "periodChipAll": "Todo el historial · {range}",
@@ -415,7 +415,7 @@
     "publicDemoIntro": "Modo demo: elige una pregunta para ver cómo suenan las respuestas antes de conectar tu propio historial.",
     "inputLabel": "Pregunta para tu Soundprint",
     "inputPlaceholder": "Ej. ¿cuáles fueron mis canciones más escuchadas en 2022?",
-    "inputPlaceholderWithArtist": "Ej.: inmersión {artist}",
+    "inputPlaceholderWithArtist": "Ej.: {artist} deepdive",
     "artistDeepDiveQuestion": "Cuéntame mi historial de streams con {artist}.",
     "topTracksYearQuestion": "¿Cuáles fueron mis canciones más escuchadas en {year}?",
     "topArtistsYearQuestion": "¿Quiénes fueron mis artistas más escuchados en {year}?",
@@ -501,8 +501,7 @@
       "weekly-taste-evolution": {
         "label": "Evolución semanal",
         "question": "¿Cómo han evolucionado mis gustos semana a semana en las últimas semanas?",
-        "recentWindowHint": "Usa aproximadamente los últimos {days} días (UTC), comparaciones por semanas ISO — no el filtro de fechas del panel.",
-        "detailLink": "Ver desglose semanal"
+        "recentWindowHint": "Usa aproximadamente los últimos {days} días (UTC), comparaciones por semanas ISO — no el filtro de fechas del panel."
       },
       "yearly-trends": {
         "label": "Tendencias anuales",
@@ -518,8 +517,8 @@
         "recentWindowHint": "Usa aproximadamente los últimos {days} días (UTC), no todo el historial — da igual el filtro de fechas del panel."
       },
       "artist-deep-dive": {
-        "label": "Inmersión de artista",
-        "labelRich": "<em>artista</em> — inmersión",
+        "label": "Deepdive de artista",
+        "labelRich": "<em>artista</em> deepdive",
         "question": "Cuéntame mi historial de streams con Radiohead."
       },
       "track-obsessions": {

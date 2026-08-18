@@ -398,20 +398,20 @@ function getUnsupportedMusicChatAnswer(locale: AiLocale): string {
     case "fr":
       return [
         "Je ne peux pas faire cette tâche dans Ask your Soundprint.",
-        "Je peux par contre analyser ton historique d'écoute : top titres, artistes et genres sur une période, comparaison de périodes, évolution de tes goûts, habitudes par heure ou jour, artistes les plus constants, deep dive artiste, et morceaux avec pics d'écoute.",
+        "Je peux par contre analyser ton historique d'écoute : top titres, artistes et genres sur une période, comparaison de périodes, évolution de tes goûts, habitudes par heure ou jour, artistes les plus constants, deepdive artiste, et morceaux avec pics d'écoute.",
         "Essaie par exemple : \"Quels étaient mes titres les plus écoutés en 2022 ?\"",
       ].join("\n\n");
     case "es":
       return [
         "No puedo hacer esa tarea en Ask your Soundprint.",
-        "Sí puedo analizar tu historial de escucha: canciones, artistas y géneros principales por periodo, comparación de periodos, cambios de gusto, hábitos por hora o día, artistas más constantes, deep dives de artistas y canciones con picos de escucha.",
+        "Sí puedo analizar tu historial de escucha: canciones, artistas y géneros principales por periodo, comparación de periodos, cambios de gusto, hábitos por hora o día, artistas más constantes, deepdives de artistas y canciones con picos de escucha.",
         "Prueba con algo como: \"¿Cuáles fueron mis canciones más escuchadas en 2022?\"",
       ].join("\n\n");
     case "en":
     default:
       return [
         "I can't do that task in Ask your Soundprint.",
-        "I can help analyze your listening history: top tracks, artists, and genres for a period; period comparisons; taste shifts; habits by hour or day; most consistent artists; artist deep dives; and tracks with listening spikes.",
+        "I can help analyze your listening history: top tracks, artists, and genres for a period; period comparisons; taste shifts; habits by hour or day; most consistent artists; artist deepdives; and tracks with listening spikes.",
         "Try something like: \"What were my top tracks in 2022?\"",
       ].join("\n\n");
   }

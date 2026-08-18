@@ -390,7 +390,7 @@
   "askSoundprint": {
     "eyebrow": "Your library, in conversation",
     "title": "Ask your Soundprint",
-    "subtitle": "Who's on repeat? When do you stream most? Ask anything—including artist deep dives—from your real streaming history.",
+    "subtitle": "Who's on repeat? When do you stream most? Ask anything—including artist deepdives—from your real streaming history.",
     "compactTrust": "Your real streams. Read-only. Nothing here edits playlists or imports.",
     "periodChip": "Answers on {range}",
     "periodChipAll": "Full history · {range}",
@@ -415,7 +415,7 @@
     "publicDemoIntro": "Demo mode: choose a preset to see how answers feel before you connect your own history.",
     "inputLabel": "Question for Ask your Soundprint",
     "inputPlaceholder": "Example: What were my top tracks in 2022?",
-    "inputPlaceholderWithArtist": "Example: {artist} deep dive",
+    "inputPlaceholderWithArtist": "Example: {artist} deepdive",
     "artistDeepDiveQuestion": "Tell me my streaming history with {artist}.",
     "topTracksYearQuestion": "What were my top tracks in {year}?",
     "topArtistsYearQuestion": "Who were my top artists in {year}?",
@@ -501,8 +501,7 @@
       "weekly-taste-evolution": {
         "label": "Weekly taste shifts",
         "question": "How has my taste evolved week by week over the past few weeks?",
-        "recentWindowHint": "Uses about the last {days} days (UTC) with ISO week comparisons—not your full dashboard date filter.",
-        "detailLink": "View weekly breakdown"
+        "recentWindowHint": "Uses about the last {days} days (UTC) with ISO week comparisons—not your full dashboard date filter."
       },
       "yearly-trends": {
         "label": "Yearly trends",
@@ -518,8 +517,8 @@
         "recentWindowHint": "Uses about the last {days} days (UTC), not your full history—regardless of the dashboard date filter."
       },
       "artist-deep-dive": {
-        "label": "Artist deep dive",
-        "labelRich": "<em>artist</em> deep dive",
+        "label": "Artist deepdive",
+        "labelRich": "<em>artist</em> deepdive",
         "question": "Tell me my streaming history with Radiohead."
       },
       "track-obsessions": {

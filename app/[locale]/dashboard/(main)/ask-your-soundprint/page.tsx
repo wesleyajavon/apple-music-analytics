@@ -22,7 +22,6 @@ import {
   UserRound,
   X,
 } from "lucide-react";
-import { Link } from "@/i18n/navigation";
 import { MobileBottomSheet } from "@/lib/components/mobile-bottom-sheet";
 import { LiveStatusDot } from "@/lib/components/live-status-dot";
 import {
@@ -46,7 +45,6 @@ import { getProfileDateRangeParts } from "@/lib/utils/musical-profile-date-range
 import {
   LATE_NIGHT_PRESET_RECENT_WINDOW_DAYS,
   WEEKLY_TASTE_EVOLUTION_PRESET_WINDOW_DAYS,
-  getWeeklyTasteEvolutionPresetDateRange,
   type MusicChatMessage,
   type MusicChatPresetArgs,
   type MusicChatPresetQuestionId,
@@ -331,28 +329,6 @@ function usePresetExampleContent(
   return { label, question, hint };
 }
 
-function WeeklyTasteEvolutionDetailLink({ className }: { className?: string }) {
-  const t = useTranslations("askSoundprint");
-  const href = useMemo(() => {
-    const { startDate, endDate } = getWeeklyTasteEvolutionPresetDateRange();
-    const params = new URLSearchParams({ startDate, endDate });
-    return `/dashboard/taste-evolution?${params.toString()}`;
-  }, []);
-
-  return (
-    <Link
-      href={href}
-      className={
-        className ??
-        "mt-2 inline-flex items-center gap-1 text-xs font-medium text-cyan-700 hover:text-cyan-800 dark:text-cyan-300 dark:hover:text-cyan-200"
-      }
-    >
-      {t("examples.weekly-taste-evolution.detailLink")}
-      <span aria-hidden>→</span>
-    </Link>
-  );
-}
-
 function PresetExampleButton({
   example,
   ctx,
@@ -390,9 +366,6 @@ function PresetExampleButton({
             </span>
           ) : null}
         </button>
-        {example.id === "weekly-taste-evolution" ? (
-          <WeeklyTasteEvolutionDetailLink className="mt-1.5 px-1 text-[0.7rem] font-medium text-cyan-700 dark:text-cyan-300" />
-        ) : null}
       </div>
     );
   }
@@ -423,7 +396,6 @@ function PresetExampleButton({
           </span>
         ) : null}
       </button>
-      {example.id === "weekly-taste-evolution" ? <WeeklyTasteEvolutionDetailLink /> : null}
     </div>
   );
 }

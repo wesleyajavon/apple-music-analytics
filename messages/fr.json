@@ -390,7 +390,7 @@
   "askSoundprint": {
     "eyebrow": "Votre bibliothèque, en conversation",
     "title": "Interrogez votre Soundprint",
-    "subtitle": "Qui passe en boucle ? Quand streamez-vous le plus ? Posez vos questions — plongées artiste comprises — à partir de votre vrai historique de streams.",
+    "subtitle": "Qui passe en boucle ? Quand streamez-vous le plus ? Posez vos questions — deepdives artiste compris — à partir de votre vrai historique de streams.",
     "compactTrust": "Vos vrais streams. Lecture seule. Rien ici ne modifie vos playlists ni vos imports.",
     "periodChip": "Réponses sur {range}",
     "periodChipAll": "Tout l’historique · {range}",
@@ -415,7 +415,7 @@
     "publicDemoIntro": "Mode démo : choisissez une question pour voir le ton des réponses avant de connecter votre propre historique.",
     "inputLabel": "Question à poser à votre Soundprint",
     "inputPlaceholder": "Ex. quels étaient mes titres les plus streamés en 2022 ?",
-    "inputPlaceholderWithArtist": "Ex. : plongée {artist}",
+    "inputPlaceholderWithArtist": "Ex. : {artist} deepdive",
     "artistDeepDiveQuestion": "Raconte-moi mon historique de streams avec {artist}.",
     "topTracksYearQuestion": "Quels étaient mes titres les plus streamés en {year} ?",
     "topArtistsYearQuestion": "Quels étaient mes artistes les plus streamés en {year} ?",
@@ -501,8 +501,7 @@
       "weekly-taste-evolution": {
         "label": "Évolution hebdomadaire",
         "question": "Comment mes goûts ont-ils évolué semaine après semaine ces dernières semaines ?",
-        "recentWindowHint": "Environ les {days} derniers jours (UTC), comparaisons par semaines ISO — pas le filtre de dates du tableau de bord.",
-        "detailLink": "Voir le détail semaine par semaine"
+        "recentWindowHint": "Environ les {days} derniers jours (UTC), comparaisons par semaines ISO — pas le filtre de dates du tableau de bord."
       },
       "yearly-trends": {
         "label": "Tendances annuelles",
@@ -518,8 +517,8 @@
         "recentWindowHint": "Environ les {days} derniers jours (UTC), pas tout l’historique — indépendamment du filtre du tableau de bord."
       },
       "artist-deep-dive": {
-        "label": "Plongée artiste",
-        "labelRich": "<em>artiste</em> — plongée",
+        "label": "Deepdive artiste",
+        "labelRich": "<em>artiste</em> deepdive",
         "question": "Raconte-moi mon historique de streams avec Radiohead."
       },
       "track-obsessions": {

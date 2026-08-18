@@ -206,7 +206,7 @@ const GROQ_TPM_RESERVE_OUTPUT_CAP = 3072;
 export function estimateGroqChatTokens(
   params: Pick<
     ChatCompletionCreateParamsNonStreaming,
-    "messages" | "max_tokens"
+    "messages" | "max_tokens" | "max_completion_tokens"
   >
 ): number {
   let chars = 0;
@@ -223,7 +223,7 @@ export function estimateGroqChatTokens(
     }
   }
   const inputTokens = Math.ceil(chars / 4);
-  const configured = params.max_tokens ?? 500;
+  const configured = params.max_completion_tokens ?? params.max_tokens ?? 500;
   const reservedOutput = Math.min(configured, GROQ_TPM_RESERVE_OUTPUT_CAP);
   return inputTokens + reservedOutput;
 }

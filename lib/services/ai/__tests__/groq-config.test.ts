@@ -1,11 +1,13 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import {
+  GROQ_DEFAULT_MODEL,
   getGroqTpmLimit,
   getGroqRpmLimit,
   getGroqTpmSafetyFactor,
   getGroqEffectiveTpmBudget,
   getGroqEffectiveRpmBudget,
   isGroqRateLimitEnabled,
+  resolveGroqModel,
 } from "../groq-config";
 
 describe("groq-config", () => {
@@ -75,5 +77,13 @@ describe("groq-config", () => {
     expect(isGroqRateLimitEnabled()).toBe(true);
     process.env.GROQ_RATE_LIMIT_ENABLED = "false";
     expect(isGroqRateLimitEnabled()).toBe(false);
+  });
+
+  it("resolveGroqModel remaps models shut down on 2026-08-16", () => {
+    expect(resolveGroqModel()).toBe(GROQ_DEFAULT_MODEL);
+    expect(resolveGroqModel("")).toBe(GROQ_DEFAULT_MODEL);
+    expect(resolveGroqModel("llama-3.1-8b-instant")).toBe("openai/gpt-oss-20b");
+    expect(resolveGroqModel("llama-3.3-70b-versatile")).toBe("openai/gpt-oss-120b");
+    expect(resolveGroqModel("openai/gpt-oss-20b")).toBe("openai/gpt-oss-20b");
   });
 });

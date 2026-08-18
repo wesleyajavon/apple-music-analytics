@@ -119,6 +119,11 @@ export const tasteEvolutionKeys = {
   }) => [...tasteEvolutionKeys.all, params] as const,
 } as const;
 
+export const genreBackfillKeys = {
+  all: ["genre-backfill"] as const,
+  eligibility: () => [...genreBackfillKeys.all, "eligibility"] as const,
+} as const;
+
 export const predictionKeys = {
   all: ["predictions"] as const,
   listeningHabit: (params: {

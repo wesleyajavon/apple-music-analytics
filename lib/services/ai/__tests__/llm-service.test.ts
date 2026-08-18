@@ -8,7 +8,7 @@ const { mockChatCompletionsCreate } = vi.hoisted(() => ({
 
 vi.mock("@/lib/services/ai/groq-chat", () => ({
   createGroqChatCompletion: mockChatCompletionsCreate,
-  GROQ_DEFAULT_MODEL: "llama-3.1-8b-instant",
+  GROQ_DEFAULT_MODEL: "openai/gpt-oss-20b",
 }));
 
 describe("llm-service", () => {
@@ -51,7 +51,7 @@ describe("llm-service", () => {
     expect(result[2]).toContain("Artist A");
     expect(mockChatCompletionsCreate).toHaveBeenCalledWith(
       expect.objectContaining({
-        model: "llama-3.1-8b-instant",
+        model: "openai/gpt-oss-20b",
         messages: expect.any(Array),
       })
     );

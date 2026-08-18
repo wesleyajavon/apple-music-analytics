@@ -36,7 +36,10 @@ import {
   OverviewFeaturePromosSkeleton,
 } from "@/lib/components/overview-feature-promos";
 import { UserAvatarPhoto } from "@/lib/components/user-avatar";
-import { SoundprintBrandDividerSection } from "@/lib/components/soundprint-brand-divider";
+import {
+  SoundprintBrandDivider,
+  SoundprintBrandDividerSection,
+} from "@/lib/components/soundprint-brand-divider";
 import { SoundprintBrandMark } from "@/lib/components/soundprint-brand-mark";
 import {
   DASHBOARD_CINEMATIC_HERO_SHELL,
@@ -44,9 +47,14 @@ import {
 } from "@/lib/components/dashboard-ui";
 import {
   TopLibraryCard,
+  SpotlightRankBubble,
   LIBRARY_LEADER_ACCENTS,
   type LibraryLeaderItem,
 } from "@/lib/components/overview-library-rankings";
+import {
+  OverviewPeriodBadgeButton,
+  OverviewPeriodHint,
+} from "@/lib/components/overview-period-nudge";
 
 const MOBILE_DATE_OPTS = { month: "2-digit", day: "2-digit", year: "2-digit" } as const;
 
@@ -118,6 +126,7 @@ function OverviewHeroFrame({
   description,
   badgeLabel,
   hasComparison,
+  showPeriodHint = false,
   soundprintChatHref,
   duetHref,
   featurePromos,
@@ -127,6 +136,7 @@ function OverviewHeroFrame({
   description: string;
   badgeLabel: string;
   hasComparison: boolean;
+  showPeriodHint?: boolean;
   soundprintChatHref: string;
   duetHref: string;
   featurePromos?: ReactNode;
@@ -152,9 +162,7 @@ function OverviewHeroFrame({
                 showWordmarkOnMobile={false}
                 interactive={false}
               />
-              <span className="inline-flex items-center justify-center rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-white/80">
-                {badgeLabel}
-              </span>
+              <OverviewPeriodBadgeButton badgeLabel={badgeLabel} />
             </div>
             <h1 className="max-w-4xl text-balance text-4xl font-semibold tracking-[-0.06em] sm:text-5xl lg:text-6xl">
               {title}
@@ -162,13 +170,14 @@ function OverviewHeroFrame({
             <p className="mt-5 max-w-2xl text-base leading-7 text-white/70 sm:text-lg">
               {description}
             </p>
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-              {hasComparison ? (
+            {showPeriodHint ? <OverviewPeriodHint /> : null}
+            {hasComparison ? (
+              <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <span className="inline-flex items-center justify-center rounded-2xl border border-emerald-300/30 bg-emerald-400/15 px-5 py-3 text-sm font-medium text-emerald-100">
                   {t("vsPreviousPeriod")}
                 </span>
-              ) : null}
-            </div>
+              </div>
+            ) : null}
           </div>
         </div>
 
@@ -207,18 +216,48 @@ function OverviewSectionHeader({
   );
 }
 
+/** Quiet pause between sibling overview blocks. */
+function OverviewSectionRule({
+  compact = false,
+  plain = false,
+}: {
+  compact?: boolean;
+  plain?: boolean;
+}) {
+  const spacing = compact ? "py-4" : "py-6 sm:py-8";
+
+  if (plain) {
+    return (
+      <div className={`mx-auto w-full max-w-2xl ${spacing}`} aria-hidden>
+        <div className="h-px bg-gradient-to-r from-transparent via-card-border to-transparent" />
+      </div>
+    );
+  }
+
+  return (
+    <SoundprintBrandDivider
+      logoSize="sm"
+      lineStyle="fade"
+      maxWidth="narrow"
+      className={spacing}
+    />
+  );
+}
+
 function TopLibraryHeroPill({
   label,
   item,
   accent,
   locale,
   listensLabel,
+  showPercentage = false,
 }: {
   label: string;
   item?: LibraryLeaderItem;
   accent: (typeof LIBRARY_LEADER_ACCENTS)[keyof typeof LIBRARY_LEADER_ACCENTS];
   locale: string;
   listensLabel: string;
+  showPercentage?: boolean;
 }) {
   if (!item) return null;
   return (
@@ -238,9 +277,11 @@ function TopLibraryHeroPill({
           <p className="text-3xl font-semibold tabular-nums tracking-[-0.05em] text-white">
             {item.count.toLocaleString(locale)}
           </p>
-          <p className="rounded-full border border-white/10 bg-white/10 px-2.5 py-1 text-xs font-semibold text-slate-200">
-            {item.percentage.toFixed(1)}%
-          </p>
+          {showPercentage ? (
+            <p className="rounded-full border border-white/10 bg-white/10 px-2.5 py-1 text-xs font-semibold text-slate-200">
+              {item.percentage.toFixed(1)}%
+            </p>
+          ) : null}
         </div>
         <p className="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{listensLabel}</p>
       </div>
@@ -326,18 +367,18 @@ function MobileLeaderRow({
   index,
   locale,
   listensLabel,
+  showPercentage = false,
 }: {
   item: MobileLeaderItem;
   index: number;
   locale: string;
   listensLabel: string;
+  showPercentage?: boolean;
 }) {
   const content = (
     <>
       <div className="flex min-w-0 items-center gap-3">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.07] text-xs font-black text-white">
-          {index + 1}
-        </span>
+        <SpotlightRankBubble rank={index + 1} />
         <div className="min-w-0">
           <p className="truncate text-sm font-semibold text-white" title={item.title}>
             {item.title}
@@ -354,7 +395,7 @@ function MobileLeaderRow({
           {item.count.toLocaleString(locale)}
         </p>
         <p className="text-[11px] text-slate-400">
-          {item.percentage.toFixed(1)}% · {listensLabel}
+          {showPercentage ? `${item.percentage.toFixed(1)}% · ${listensLabel}` : listensLabel}
         </p>
       </div>
     </>
@@ -416,6 +457,7 @@ function MobileOverviewFlow({
   title,
   badgeLabel,
   hasComparison,
+  showPeriodHint = false,
   data,
   changes,
   momentumSlides,
@@ -435,6 +477,7 @@ function MobileOverviewFlow({
   title: string;
   badgeLabel: string;
   hasComparison: boolean;
+  showPeriodHint?: boolean;
   data: OverviewStatsWithTopArtists;
   changes: OverviewStatsChanges;
   momentumSlides: OverviewMomentumSlide[];
@@ -518,6 +561,7 @@ function MobileOverviewFlow({
       title: t("topTracks"),
       description: t("yourTopTracks"),
       href: tracksHref,
+      showPercentage: false,
       items: topTracks.slice(0, 3).map((track) => ({
         id: track.trackId,
         title: track.name,
@@ -531,6 +575,7 @@ function MobileOverviewFlow({
       title: t("topArtists"),
       description: t("yourTopArtists"),
       href: artistsHref,
+      showPercentage: false,
       items: topArtists.slice(0, 3).map((artist) => ({
         id: artist.artistId,
         title: artist.name,
@@ -543,6 +588,7 @@ function MobileOverviewFlow({
       title: t("topGenres"),
       description: t("yourTopGenres"),
       href: genresHref,
+      showPercentage: true,
       items: topGenres.slice(0, 3).map((genre) => ({
         id: genre.genre,
         title: genre.genre,
@@ -571,9 +617,7 @@ function MobileOverviewFlow({
               showWordmarkOnMobile={false}
               interactive={false}
             />
-            <span className="inline-flex min-h-8 shrink-0 items-center whitespace-nowrap rounded-full border border-white/15 bg-white/10 px-2.5 text-[11px] font-semibold text-white/85">
-              {badgeLabel}
-            </span>
+            <OverviewPeriodBadgeButton badgeLabel={badgeLabel} compact />
           </div>
 
           <div className="mt-6">
@@ -586,6 +630,7 @@ function MobileOverviewFlow({
             <p className="mt-3 text-sm leading-6 text-slate-300">
               {primaryInsight.subtitle}
             </p>
+            {showPeriodHint ? <OverviewPeriodHint compact /> : null}
           </div>
 
           <div className="mt-5 flex items-end justify-between gap-4 rounded-3xl border border-white/10 bg-white/[0.07] p-4">
@@ -628,18 +673,23 @@ function MobileOverviewFlow({
       <MobileMetricRail stats={stats} comparisonLabel={t("mobile.vsShort")} />
 
       {momentumSlides.length > 0 ? (
-        <section className="space-y-3">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">
-              {t("sections.momentum.eyebrow")}
-            </p>
-            <h2 className="mt-1 text-lg font-semibold tracking-[-0.04em] text-foreground dark:text-white">
-              {t("sections.momentum.title")}
-            </h2>
-          </div>
-          <OverviewMomentumCarousel slides={momentumSlides} />
-        </section>
+        <>
+          <OverviewSectionRule compact />
+          <section className="space-y-3">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+                {t("sections.momentum.eyebrow")}
+              </p>
+              <h2 className="mt-1 text-lg font-semibold tracking-[-0.04em] text-foreground dark:text-white">
+                {t("sections.momentum.title")}
+              </h2>
+            </div>
+            <OverviewMomentumCarousel slides={momentumSlides} />
+          </section>
+        </>
       ) : null}
+
+      <OverviewSectionRule compact />
 
       <div className="space-y-3">
         <MobileDisclosure
@@ -670,6 +720,7 @@ function MobileOverviewFlow({
                       index={index}
                       locale={locale}
                       listensLabel={t("listens")}
+                      showPercentage={section.showPercentage}
                     />
                   ))}
                 </div>
@@ -721,9 +772,7 @@ function MobileOverviewLoadingFallback({
               showWordmarkOnMobile={false}
               interactive={false}
             />
-            <span className="inline-flex min-h-8 shrink-0 items-center whitespace-nowrap rounded-full border border-white/15 bg-white/10 px-2.5 text-[11px] font-semibold">
-              {badgeLabel}
-            </span>
+            <OverviewPeriodBadgeButton badgeLabel={badgeLabel} compact />
           </div>
           <h1 className="mt-6 text-3xl font-semibold tracking-[-0.06em]">{title}</h1>
           <div className="mt-5 space-y-3">
@@ -783,9 +832,7 @@ function MobileOverviewUnavailable({
               showWordmarkOnMobile={false}
               interactive={false}
             />
-            <span className="inline-flex min-h-8 shrink-0 items-center whitespace-nowrap rounded-full border border-white/15 bg-white/10 px-2.5 text-[11px] font-semibold">
-              {badgeLabel}
-            </span>
+            <OverviewPeriodBadgeButton badgeLabel={badgeLabel} compact />
           </div>
           <h1 className="mt-6 text-3xl font-semibold tracking-[-0.06em]">{title}</h1>
           <p className="mt-3 text-sm leading-6 text-slate-300">{description}</p>
@@ -1135,6 +1182,7 @@ function OverviewContent() {
             title={overviewTitle}
             badgeLabel={mobileBadgeLabel}
             hasComparison={hasComparison}
+            showPeriodHint={isAll}
             data={data}
             changes={changes}
             momentumSlides={momentumSlides}
@@ -1161,6 +1209,7 @@ function OverviewContent() {
           description={t("subtitle")}
           badgeLabel={badgeLabel}
           hasComparison={hasComparison}
+          showPeriodHint={isAll}
           soundprintChatHref={musicAgentHref}
           duetHref={duetHref}
           avatarUrl={avatarUrl}
@@ -1171,22 +1220,24 @@ function OverviewContent() {
           }
         />
 
-        <SoundprintBrandDividerSection logoSize="lg" lineStyle="fade" maxWidth="medium" className="py-4 sm:py-6" />
+        <SoundprintBrandDividerSection logoSize="lg" lineStyle="fade" maxWidth="medium" className="py-6 sm:py-8" />
 
-        <div className="space-y-12">
+        <div>
         <section className="relative">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
-            <div className="flex min-h-[280px] w-full min-w-0 sm:col-span-2 lg:col-span-4">
-              <TasteProfileSummaryWidget />
-            </div>
-
-            <TopThreeArtistsOverviewWidget
-              startDate={startDate}
-              endDate={endDate}
-              onOpenArtistInsights={handleOpenArtistInsights}
-            />
+          <div className="flex min-h-[280px] w-full min-w-0">
+            <TasteProfileSummaryWidget />
           </div>
+
+          <OverviewSectionRule compact />
+
+          <TopThreeArtistsOverviewWidget
+            startDate={startDate}
+            endDate={endDate}
+            onOpenArtistInsights={handleOpenArtistInsights}
+          />
         </section>
+
+        <OverviewSectionRule />
 
         <section className="relative">
           <OverviewSectionHeader
@@ -1196,6 +1247,8 @@ function OverviewContent() {
           />
           <OverviewMomentumCarousel slides={momentumSlides} />
         </section>
+
+        <OverviewSectionRule />
 
         <section className="relative">
           <OverviewSectionHeader
@@ -1268,11 +1321,16 @@ function OverviewContent() {
                       accent={LIBRARY_LEADER_ACCENTS.genres}
                       locale={locale}
                       listensLabel={t("listens")}
+                      showPercentage
                     />
                   </div>
                 </div>
               </div>
             )}
+
+            {topTracksForChart[0] || topArtistsForChart[0] || topGenres[0] ? (
+              <OverviewSectionRule compact plain />
+            ) : null}
 
             <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
             {topTracksForChart.length > 0 && (
@@ -1327,13 +1385,14 @@ function OverviewContent() {
                 locale={locale}
                 listensLabel={t("listens")}
                 ctaLabel={t("seeAll")}
+                showPercentage
               />
             )}
             </div>
           </div>
         </section>
 
-        <SoundprintBrandDividerSection logoSize="md" lineStyle="gradient" maxWidth="narrow" className="py-4 sm:py-6" />
+        <SoundprintBrandDividerSection logoSize="md" lineStyle="gradient" maxWidth="narrow" className="py-8 sm:py-10" />
 
         <section className="relative">
           <OverviewSectionHeader
@@ -1350,6 +1409,8 @@ function OverviewContent() {
             </div>
           </div>
         </section>
+
+        <OverviewSectionRule />
 
         <section className="relative">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">

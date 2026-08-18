@@ -10,6 +10,7 @@ import { DashboardUserMenu } from "@/lib/components/dashboard-user-menu";
 import { NotificationCenter } from "@/lib/components/notification-center";
 import { useMobileSidebar } from "@/lib/components/sidebar";
 import { useHideNotificationCenterForPublicDemo } from "@/lib/hooks/use-public-demo-viewer";
+import { DASHBOARD_DATE_RANGE_FILTER_ID } from "@/lib/constants/date-range-filter";
 
 export type DateRangePreset = "7d" | "30d" | "ytd" | "all" | "custom";
 
@@ -391,7 +392,10 @@ export function DateRangeFilter() {
   );
 
   return (
-    <div className="px-3 py-2 lg:px-8 lg:py-3">
+    <div
+      id={DASHBOARD_DATE_RANGE_FILTER_ID}
+      className="px-3 py-2 transition-[box-shadow] duration-500 data-[highlighted]:shadow-[inset_0_0_0_2px_rgb(152_80_208_/_0.45)] lg:px-8 lg:py-3"
+    >
       <div className="flex min-w-0 items-center gap-2 lg:justify-between lg:gap-4">
         <button
           type="button"

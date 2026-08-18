@@ -8,7 +8,6 @@ import { routing } from "@/i18n/routing";
 import { resolveActivePublicProfileUserId } from "@/lib/services/user/public-profile-access";
 import { PublicDemoProvider } from "@/lib/providers/public-demo-provider";
 import { Providers } from "./providers";
-import { AiMasterToggle } from "@/lib/components/ai-master-toggle";
 import { ConditionalAnalytics } from "@/lib/components/conditional-analytics";
 import { ConditionalSentry } from "@/lib/components/conditional-sentry";
 import { CookieConsentBanner } from "@/lib/components/cookie-consent-banner";
@@ -75,7 +74,6 @@ export default async function RootLayout({
             <NextIntlClientProvider messages={messages}>
               <GroqAiConsentPromptProvider>
                 {children}
-                <AiMasterToggle />
                 <CookieConsentBanner />
               </GroqAiConsentPromptProvider>
             </NextIntlClientProvider>

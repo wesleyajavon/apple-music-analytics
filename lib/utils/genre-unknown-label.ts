@@ -8,6 +8,15 @@ export function isUnknownGenreLabel(genre: string): boolean {
   return genre.trim().toLowerCase() === "unknown";
 }
 
+/** Share of listens on the Unknown placeholder (0–100). */
+export function unknownListenSharePercent(
+  distribution: Array<{ genre: string; percentage: number }> | undefined | null
+): number {
+  if (!distribution?.length) return 0;
+  const unknown = distribution.find((g) => isUnknownGenreLabel(g.genre));
+  return unknown?.percentage ?? 0;
+}
+
 /** First genre in API order (typically by listen count) that is not the Unknown placeholder. */
 export function firstKnownGenreName(
   genres: GenreDistributionDto[] | undefined | null

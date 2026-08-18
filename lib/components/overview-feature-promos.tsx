@@ -5,7 +5,6 @@ import { Link } from "@/i18n/navigation";
 import { ChevronRight, Sparkles, Swords } from "lucide-react";
 import { useDashboardViewerUserId } from "@/lib/context/dashboard-viewer-context";
 import { usePublicDemoViewer } from "@/lib/hooks/use-public-demo-viewer";
-import { SoundprintLogo } from "@/lib/components/soundprint-logo";
 
 type OverviewFeaturePromosProps = {
   soundprintChatHref: string;
@@ -144,23 +143,8 @@ export function OverviewFeaturePromos({
     <div className="relative">
       <div className="absolute -inset-4 rounded-[2rem] bg-brand-gradient-soft blur-2xl" aria-hidden />
       <div className="relative overflow-hidden rounded-[1.75rem] border border-white/15 bg-white/10 p-3 shadow-2xl shadow-black/35 backdrop-blur-xl">
-        <div className="rounded-[1.35rem] border border-white/10 bg-gray-950/75 p-4">
-          <div className="flex items-center justify-between border-b border-white/10 pb-4">
-            <div className="flex items-center gap-2.5">
-              <SoundprintLogo
-                src="/brand/favicon.png"
-                showText={false}
-                imageClassName="h-6 w-6 object-contain opacity-90"
-              />
-              <p className="font-mono text-[0.66rem] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                {t("panelBadge")}
-              </p>
-            </div>
-            <span className="rounded-full border border-accent-emerald/25 bg-accent-emerald/10 px-2.5 py-1 text-[0.66rem] font-semibold text-emerald-100">
-              {t("panelTag")}
-            </span>
-          </div>
-          <div className="mt-4 space-y-3">{cards}</div>
+        <div className="space-y-3 rounded-[1.35rem] border border-white/10 bg-gray-950/75 p-4">
+          {cards}
         </div>
       </div>
     </div>
@@ -194,15 +178,9 @@ export function OverviewFeaturePromosSkeleton({ variant = "panel" }: { variant?:
   return (
     <div className="relative">
       <div className="relative overflow-hidden rounded-[1.75rem] border border-white/15 bg-white/10 p-3">
-        <div className="rounded-[1.35rem] border border-white/10 bg-gray-950/70 p-4">
-          <div className="mb-4 flex items-center justify-between border-b border-white/10 pb-4">
-            <div className="h-3 w-24 animate-pulse rounded bg-white/15" />
-            <div className="h-5 w-14 animate-pulse rounded-full bg-white/15" />
-          </div>
-          <div className="space-y-3">
-            {cardSkeleton}
-            {cardSkeleton}
-          </div>
+        <div className="space-y-3 rounded-[1.35rem] border border-white/10 bg-gray-950/70 p-4">
+          {cardSkeleton}
+          {cardSkeleton}
         </div>
       </div>
     </div>

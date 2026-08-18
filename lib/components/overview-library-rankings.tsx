@@ -70,20 +70,39 @@ export const LIBRARY_LEADER_ACCENTS = {
   },
 } satisfies Record<string, LibraryLeaderAccent>;
 
-function formatRank(index: number) {
-  return String(index + 1).padStart(2, "0");
+/** Same rank bubble as Spotlight Artists (`TopThreeArtists`). */
+function SpotlightRankBubble({
+  rank,
+  size = "sm",
+}: {
+  rank: number;
+  size?: "sm" | "lg";
+}) {
+  return (
+    <span
+      className={`flex shrink-0 items-center justify-center rounded-full border border-white/70 bg-white/90 font-black text-gray-950 shadow-xl shadow-black/10 backdrop-blur ring-1 ring-black/5 dark:border-white/20 dark:bg-slate-900/95 dark:text-white dark:shadow-black/40 dark:ring-white/10 ${
+        size === "lg" ? "h-11 w-11 text-lg" : "h-8 w-8 text-xs"
+      }`}
+    >
+      {rank}
+    </span>
+  );
 }
+
+export { SpotlightRankBubble };
 
 function TopLibraryFeaturedRow({
   item,
   accent,
   locale,
   listensLabel,
+  showPercentage,
 }: {
   item: LibraryLeaderItem;
   accent: LibraryLeaderAccent;
   locale: string;
   listensLabel: string;
+  showPercentage: boolean;
 }) {
   return (
     <div
@@ -99,18 +118,18 @@ function TopLibraryFeaturedRow({
       />
       <div className="relative pl-3">
         <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
-              #{formatRank(0)}
-            </p>
-            <p className="mt-2 truncate text-lg font-semibold tracking-[-0.03em] text-white" title={item.title}>
-              {item.title}
-            </p>
-            {item.subtitle ? (
-              <p className="mt-1 truncate text-sm text-slate-400" title={item.subtitle}>
-                {item.subtitle}
+          <div className="flex min-w-0 items-start gap-3">
+            <SpotlightRankBubble rank={1} size="lg" />
+            <div className="min-w-0 pt-0.5">
+              <p className="truncate text-lg font-semibold tracking-[-0.03em] text-white" title={item.title}>
+                {item.title}
               </p>
-            ) : null}
+              {item.subtitle ? (
+                <p className="mt-1 truncate text-sm text-slate-400" title={item.subtitle}>
+                  {item.subtitle}
+                </p>
+              ) : null}
+            </div>
           </div>
           <div className="shrink-0 text-right">
             <p className="text-2xl font-semibold tabular-nums tracking-[-0.05em] text-white">
@@ -119,20 +138,14 @@ function TopLibraryFeaturedRow({
             <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
               {listensLabel}
             </p>
+            {showPercentage ? (
+              <span
+                className={`mt-2 inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold tabular-nums ${accent.badge}`}
+              >
+                {item.percentage.toFixed(1)}%
+              </span>
+            ) : null}
           </div>
-        </div>
-        <div className="mt-4 flex items-center gap-3">
-          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
-            <div
-              className={`h-full rounded-full bg-gradient-to-r ${accent.progress} shadow-[0_0_12px_rgba(255,255,255,0.25)]`}
-              style={{ width: "100%" }}
-            />
-          </div>
-          <span
-            className={`rounded-full border px-2.5 py-1 text-xs font-semibold tabular-nums ${accent.badge}`}
-          >
-            {item.percentage.toFixed(1)}%
-          </span>
         </div>
       </div>
     </div>
@@ -142,17 +155,17 @@ function TopLibraryFeaturedRow({
 function TopLibraryRow({
   item,
   index,
-  maxCount,
   accent,
   locale,
   listensLabel,
+  showPercentage,
 }: {
   item: LibraryLeaderItem;
   index: number;
-  maxCount: number;
   accent: LibraryLeaderAccent;
   locale: string;
   listensLabel: string;
+  showPercentage: boolean;
 }) {
   if (index === 0) {
     return (
@@ -161,19 +174,16 @@ function TopLibraryRow({
         accent={accent}
         locale={locale}
         listensLabel={listensLabel}
+        showPercentage={showPercentage}
       />
     );
   }
 
-  const widthPercent = maxCount > 0 ? Math.max(6, (item.count / maxCount) * 100) : 0;
-
   return (
-    <div className="group rounded-2xl border border-white/[0.08] bg-white/[0.03] px-3 py-3 transition-all duration-300 hover:border-white/15 hover:bg-white/[0.06]">
+    <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] px-3 py-3 transition-all duration-300 hover:border-white/15 hover:bg-white/[0.06]">
       <div className="flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.05] font-mono text-[11px] font-bold text-slate-300">
-            {formatRank(index)}
-          </span>
+          <SpotlightRankBubble rank={index + 1} />
           <div className="min-w-0">
             <p className="truncate text-sm font-medium text-white/90" title={item.title}>
               {item.title}
@@ -189,16 +199,12 @@ function TopLibraryRow({
           <p className="text-sm font-semibold tabular-nums text-white">
             {item.count.toLocaleString(locale)}
           </p>
-          <p className="text-[11px] text-slate-500">
-            {item.percentage.toFixed(1)}%
-          </p>
+          {showPercentage ? (
+            <p className="text-[11px] text-slate-500">
+              {item.percentage.toFixed(1)}%
+            </p>
+          ) : null}
         </div>
-      </div>
-      <div className="mt-2.5 h-1 overflow-hidden rounded-full bg-white/[0.06]">
-        <div
-          className={`h-full rounded-full bg-gradient-to-r ${accent.progress} opacity-80 transition-all duration-500 ease-out group-hover:opacity-100`}
-          style={{ width: `${widthPercent}%` }}
-        />
       </div>
     </div>
   );
@@ -213,6 +219,7 @@ export function TopLibraryCard({
   locale,
   listensLabel,
   ctaLabel,
+  showPercentage = false,
 }: {
   title: string;
   description: string;
@@ -222,9 +229,8 @@ export function TopLibraryCard({
   locale: string;
   listensLabel: string;
   ctaLabel: string;
+  showPercentage?: boolean;
 }) {
-  const maxCount = items[0]?.count ?? 1;
-
   return (
     <article
       className={`relative flex h-full flex-col overflow-hidden rounded-[2rem] border ${accent.cardBorder} bg-slate-950 text-white shadow-2xl shadow-black/25 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-black/35`}
@@ -269,10 +275,10 @@ export function TopLibraryCard({
               key={item.id}
               item={item}
               index={index}
-              maxCount={maxCount}
               accent={accent}
               locale={locale}
               listensLabel={listensLabel}
+              showPercentage={showPercentage}
             />
           ))}
         </div>

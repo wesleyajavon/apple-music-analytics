@@ -360,6 +360,9 @@ export const ArtistUserInsightsPanel = memo(
                           count: query.data.activeListeningDays,
                         })}
                       </p>
+                      <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
+                        {t("insightsActiveDaysHint")}
+                      </p>
                     </div>
                     <div className="bg-white px-4 py-3 sm:col-span-3 dark:bg-slate-950/90">
                       <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300/85">
@@ -369,6 +372,9 @@ export const ArtistUserInsightsPanel = memo(
                         {t("insightsDaysValue", {
                           count: query.data.listeningSpanDays,
                         })}
+                      </p>
+                      <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
+                        {t("insightsSpanDaysHint")}
                       </p>
                     </div>
                   </div>

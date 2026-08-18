@@ -691,7 +691,7 @@
     "skipToContent": "Skip to sign-in form",
     "homeLinkAriaLabel": "Soundprint-AI — home",
     "authNavAriaLabel": "Account pages",
-    "dashboardLink": "Wesley's dashboard",
+    "dashboardLink": "Wesley's public dashboard",
     "continueWithGoogle": "Continue with Google",
     "continueWithSpotify": "Continue with Spotify",
     "orDivider": "or",
@@ -1067,7 +1067,13 @@
       "title": "AI features are paused for a moment",
       "body": "We’re organizing your music by genre in the background. That step uses the same assistant as other AI features here, so those stay on hold until classification finishes.",
       "pauseHint": "Want AI back right away? Pause classification from the progress banner at the top of the dashboard — you can resume anytime.",
-      "openProgressCta": "Open classification progress"
+      "openProgressCta": "Open classification progress",
+      "unsortedCoverage": {
+        "title": "This reading is still partial",
+        "body": "{pct}% of your tracks don’t have a genre yet. This summary uses the slice that’s already labeled — Groq or Palette make it more accurate.",
+        "groqCta": "Classify with AI",
+        "paletteCta": "Open Palette"
+      }
     }
   },
   "footer": {
@@ -1090,8 +1096,6 @@
     "title": "Your music",
     "titlePersonal": "{name}'s music",
     "featurePromos": {
-      "panelBadge": "Go deeper",
-      "panelTag": "Featured",
       "soundprint": {
         "badge": "AI chat",
         "title": "Chat with your Soundprint",
@@ -1107,9 +1111,15 @@
         "aria": "Open Duet friends"
       }
     },
-    "subtitle": "Your personal streaming stats. Analyze your trends and discover your favorite genres.",
+    "subtitle": "What your streams actually say — the trends, the phases, and the artists taking over.",
     "periodBadge": "Period",
     "allData": "All data",
+    "periodNudge": {
+      "adjust": "Change",
+      "badgeTitle": "Change the analysis period",
+      "badgeAria": "Showing {label}. Go to the period filter at the top of the page.",
+      "hint": "Want to look at recent streams only? Change the period up top — 7 days, 30 days, or a custom range."
+    },
     "stats": {
       "totalListens": "Total streams",
       "uniqueArtists": "Different artists",
@@ -1118,7 +1128,7 @@
     },
     "statsSectionBadge": "Summary",
     "statsSectionTitle": "Your numbers for this period",
-    "statsSectionDescription": "How much you streamed, how wide your rotation was, and how long you spent streaming.",
+    "statsSectionDescription": "How much you listened, how many artists and tracks, and how long it added up to.",
     "statsSectionListensHint": "Every replay, shuffle, and deep cut adds up to your streaming pulse for this window.",
     "statsSectionBreadthLabel": "Catalog reach",
     "statsSectionBreadthHint": "How many different artists and tracks shaped your rotation.",
@@ -1183,25 +1193,20 @@
     "emptyStateAside": "Metrics · zero rows",
     "emptyStateMetricHint": "Awaiting import",
     "sections": {
-      "snapshot": {
-        "eyebrow": "Snapshot",
-        "title": "Your streaming at a glance.",
-        "description": "Lead with volume, variety, and taste before you scroll into trends and detailed rankings."
-      },
       "momentum": {
         "eyebrow": "Momentum",
         "title": "See what is moving right now.",
-        "description": "Trend widgets turn raw stream counts into shifts, surges, and recent streaming direction."
+        "description": "What's speeding up, what's slowing down — artists, genres, and tracks included."
       },
       "library": {
-        "eyebrow": "Library signals",
+        "eyebrow": "Strong signals",
         "title": "The artists, tracks, and genres behind the story.",
-        "description": "Rankings keep the product grounded in concrete streaming behavior."
+        "description": "Here's your leaderboard: the tracks, artists, and genres you keep coming back to."
       },
       "intelligence": {
         "eyebrow": "AI & calendar",
         "title": "Add context to the patterns.",
-        "description": "AI summaries and calendar intensity help explain when and why your streaming changes."
+        "description": "A look at your habits, and the days you listened the most."
       }
     },
     "mobile": {
@@ -1861,8 +1866,10 @@
     "insightsBusiestCalendarDay": "Busiest day ever",
     "insightsBusiestMeta": "{date} · {streams} streams",
     "insightsNoSignal": "Not enough patterned data yet",
-    "insightsActiveDays": "Active",
-    "insightsSpanDays": "Span",
+    "insightsActiveDays": "Days you streamed",
+    "insightsActiveDaysHint": "Distinct days with at least one stream of this artist",
+    "insightsSpanDays": "First to last stream",
+    "insightsSpanDaysHint": "Calendar days from your first stream to your most recent",
     "insightsDaysValue": "{count, plural, one {# day} other {# days}}",
     "insightsByHour": "Streaming by hour of day",
     "insightsByWeekday": "Streaming by weekday",
@@ -2023,6 +2030,11 @@
   "ai-insights": {
     "title": "AI Insights",
     "heroEyebrow": "Digest from your analytics",
+    "overviewWidget": {
+      "eyebrow": "Insight cards",
+      "title": "What your streams are saying.",
+      "description": "A few short takes on your listening habits."
+    },
     "heroStatBadge": "Signal quality",
     "heroStatTag": "Grounded in streams",
     "heroTrust1": "Cards summarize aggregates already in Soundprint—nothing is fabricated from the web.",
@@ -2139,12 +2151,11 @@
     },
     "yourProfile": "Your musical profile",
     "overviewWidget": {
-      "title": "Your musical fingerprint, decoded.",
-      "description": "AI pulls influences, standout quirks, and a one-line take from your active filters.",
-      "scrollCue": "Your read is below"
+      "eyebrow": "Taste profile",
+      "title": "Your soundprint",
+      "description": "One line on your sound, then what shapes it and what sets you apart."
     },
     "pullQuoteLabel": "Your sound in one line",
-    "exploreProfileCta": "Explore my profile",
     "inBrief": "In brief",
     "influences": "Influences",
     "coreGenres": "Core genres",

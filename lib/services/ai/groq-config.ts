@@ -13,9 +13,25 @@
  *   Voir `lib/services/ai/ai-master.ts`.
  */
 
-export const GROQ_DEFAULT_MODEL = "llama-3.1-8b-instant";
+/**
+ * Groq production replacement for `llama-3.1-8b-instant` (shutdown 2026-08-16).
+ * @see https://console.groq.com/docs/deprecations
+ */
+export const GROQ_DEFAULT_MODEL = "openai/gpt-oss-20b";
 
-/** Default TPM for `llama-3.1-8b-instant` per Groq public rate-limit table (adjust in console if your org differs). */
+/** Retired developer/free model IDs → current Groq replacements. */
+const DEPRECATED_GROQ_MODELS: Record<string, string> = {
+  "llama-3.1-8b-instant": "openai/gpt-oss-20b",
+  "llama-3.3-70b-versatile": "openai/gpt-oss-120b",
+};
+
+/** Resolves env/caller model IDs, remapping models Groq shut down on 2026-08-16. */
+export function resolveGroqModel(model?: string | null): string {
+  const requested = (model ?? "").trim() || GROQ_DEFAULT_MODEL;
+  return DEPRECATED_GROQ_MODELS[requested] ?? requested;
+}
+
+/** Conservative local TPM (gpt-oss-20b free table is 8K; align `GROQ_TPM_LIMIT` with your console). */
 const DEFAULT_GROQ_TPM = 6000;
 
 /** Default RPM for the same model (Groq may enforce RPM before TPM on small requests). */

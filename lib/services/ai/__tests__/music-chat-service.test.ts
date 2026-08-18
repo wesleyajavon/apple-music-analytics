@@ -7,7 +7,7 @@ const { mockCreateGroqChatCompletion, mockExecuteMusicChatTool } = vi.hoisted(()
 
 vi.mock("@/lib/services/ai/groq-chat", () => ({
   createGroqChatCompletion: mockCreateGroqChatCompletion,
-  GROQ_DEFAULT_MODEL: "llama-3.1-8b-instant",
+  GROQ_DEFAULT_MODEL: "openai/gpt-oss-20b",
 }));
 
 vi.mock("@/lib/services/ai/music-chat-tools", async (importOriginal) => {

@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { isGroqGenreNudgeEligible } from "@/lib/utils/genre-ai-nudge-eligibility";
+import {
+  isGroqGenreNudgeEligible,
+  isUnsortedGenreCoverage,
+} from "@/lib/utils/genre-ai-nudge-eligibility";
 
 describe("isGroqGenreNudgeEligible", () => {
   it("returns false when Groq is not configured", () => {
@@ -44,5 +47,29 @@ describe("isGroqGenreNudgeEligible", () => {
         totalTrackCount: 40,
       })
     ).toBe(true);
+  });
+});
+
+describe("isUnsortedGenreCoverage", () => {
+  it("returns true without Groq when the library is mostly unlabeled", () => {
+    expect(
+      isUnsortedGenreCoverage({
+        groqConfigured: false,
+        unknownRatio: 80,
+        unknownTrackCount: 100,
+        totalTrackCount: 120,
+      })
+    ).toBe(true);
+  });
+
+  it("returns false below the majority threshold", () => {
+    expect(
+      isUnsortedGenreCoverage({
+        groqConfigured: false,
+        unknownRatio: 49,
+        unknownTrackCount: 20,
+        totalTrackCount: 40,
+      })
+    ).toBe(false);
   });
 });

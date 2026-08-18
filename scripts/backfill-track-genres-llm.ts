@@ -106,7 +106,7 @@ async function main() {
       ? "Mode DRY-RUN : aucune écriture en base.\n"
       : "Mise à jour des genres (LLM Groq, prompts compacts).\n"
   );
-  console.log(`Modèle : ${process.env.GROQ_MODEL?.trim() || "llama-3.1-8b-instant (défaut)"}`);
+  console.log(`Modèle : ${process.env.GROQ_MODEL?.trim() || "openai/gpt-oss-20b (défaut)"}`);
   console.log(`Délai entre appels LLM : ${DELAY_MS} ms`);
   if (LIMIT != null && !Number.isNaN(LIMIT)) {
     console.log(`Limite de morceaux : ${LIMIT}`);

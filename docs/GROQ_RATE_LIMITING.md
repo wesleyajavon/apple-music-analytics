@@ -20,7 +20,7 @@ To reduce **429 rate limit** errors under load, we implement **client-side slidi
 
 | Variable | Default | Meaning |
 |----------|---------|---------|
-| `GROQ_TPM_LIMIT` | `6000` | TPM for `llama-3.1-8b-instant` — align with **your** org from the console |
+| `GROQ_TPM_LIMIT` | `6000` | Conservative TPM for `openai/gpt-oss-20b` — align with **your** org from the console |
 | `GROQ_RPM_LIMIT` | `30` | RPM for the same model (public table / console) |
 | `GROQ_TPM_SAFETY` | `0.72` | Fraction (0–1) applied to **both** TPM and RPM effective budgets |
 | `GROQ_RATE_LIMIT_ENABLED` | enabled | Set to `false` to disable our limiter (not recommended in production) |

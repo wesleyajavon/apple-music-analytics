@@ -34,6 +34,16 @@ describe("groq-rate-limiter", () => {
     ).toBe(3072);
   });
 
+  it("estimateGroqChatTokens prefers max_completion_tokens over max_tokens", () => {
+    expect(
+      estimateGroqChatTokens({
+        messages: [{ role: "user", content: "" }],
+        max_tokens: 100,
+        max_completion_tokens: 250,
+      })
+    ).toBe(250);
+  });
+
   it("defaults max_tokens to 500 when omitted", () => {
     expect(
       estimateGroqChatTokens({

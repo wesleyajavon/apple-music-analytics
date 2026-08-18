@@ -691,7 +691,7 @@
     "skipToContent": "Aller au formulaire de connexion",
     "homeLinkAriaLabel": "Soundprint-AI — accueil",
     "authNavAriaLabel": "Navigation compte",
-    "dashboardLink": "Dashboard de Wesley",
+    "dashboardLink": "Dashboard public de Wesley",
     "continueWithGoogle": "Continuer avec Google",
     "continueWithSpotify": "Continuer avec Spotify",
     "orDivider": "ou",
@@ -1067,7 +1067,13 @@
       "title": "Les fonctions IA font une petite pause",
       "body": "Nous classons vos morceaux par genre en arrière-plan. Cette étape utilise la même capacité que les autres expériences IA : elles restent en attente jusqu’à la fin de la classification.",
       "pauseHint": "Vous voulez retrouver l’IA tout de suite ? Mettez la classification en pause depuis la bannière de progression en haut du tableau de bord — vous pourrez la reprendre quand vous voulez.",
-      "openProgressCta": "Voir la progression de la classification"
+      "openProgressCta": "Voir la progression de la classification",
+      "unsortedCoverage": {
+        "title": "Lecture encore partielle",
+        "body": "{pct} % de vos titres n’ont pas encore de genre. Cette synthèse s’appuie sur la part déjà classée — Groq ou Palette la rendent plus juste.",
+        "groqCta": "Classer avec l’IA",
+        "paletteCta": "Ouvrir Palette"
+      }
     }
   },
   "footer": {
@@ -1090,8 +1096,6 @@
     "title": "Votre musique",
     "titlePersonal": "La musique de {name}",
     "featurePromos": {
-      "panelBadge": "Aller plus loin",
-      "panelTag": "À la une",
       "soundprint": {
         "badge": "Chat IA",
         "title": "Discutez avec votre Soundprint",
@@ -1107,9 +1111,15 @@
         "aria": "Ouvrir Duet — amis"
       }
     },
-    "subtitle": "Vos statistiques de streams personnelles. Analysez vos tendances et découvrez vos genres favoris.",
+    "subtitle": "Ce que vos streams racontent vraiment — les tendances, les phases, et les artistes qui prennent le dessus.",
     "periodBadge": "Période",
     "allData": "Toutes les données",
+    "periodNudge": {
+      "adjust": "Modifier",
+      "badgeTitle": "Changer la période d’analyse",
+      "badgeAria": "Période affichée : {label}. Aller au filtre de période en haut de la page.",
+      "hint": "Envie de n’analyser que vos streams récents ? Changez la période en haut — 7 jours, 30 jours, ou une plage perso."
+    },
     "stats": {
       "totalListens": "Total de streams",
       "uniqueArtists": "Artistes uniques",
@@ -1118,7 +1128,7 @@
     },
     "statsSectionBadge": "Synthèse",
     "statsSectionTitle": "Vos chiffres sur la période",
-    "statsSectionDescription": "volume de streams, diversité et temps cumulé — les indicateurs qui résument votre activité.",
+    "statsSectionDescription": "Combien vous avez écouté, combien d'artistes et de titres, et le temps que ça représente.",
     "statsSectionListensHint": "Chaque relecture, shuffle et découverte nourrit le pouls de streams de cette période.",
     "statsSectionBreadthLabel": "Portée du catalogue",
     "statsSectionBreadthHint": "Combien d'artistes et de titres différents ont rythmé vos streams.",
@@ -1162,8 +1172,8 @@
       }
     },
     "libraryLeaders": {
-      "badge": "Leaders bibliothèque",
-      "title": "Ce qui mène votre bibliothèque.",
+      "badge": "Tops bibliothèque",
+      "title": "Ce qui domine votre bibliothèque.",
       "description": "Votre titre, artiste et genre les plus forts.",
       "topTrack": "Top titre",
       "topArtist": "Top artiste",
@@ -1183,25 +1193,20 @@
     "emptyStateAside": "Métriques · zéro ligne",
     "emptyStateMetricHint": "En attente d'import",
     "sections": {
-      "snapshot": {
-        "eyebrow": "Snapshot",
-        "title": "Vos streams en un coup d'œil.",
-        "description": "Volume, variété et goûts en premier — avant les tendances et les classements détaillés."
-      },
       "momentum": {
         "eyebrow": "Momentum",
-        "title": "Voyez ce qui bouge maintenant.",
-        "description": "Les widgets de tendance transforment les streams brutes en changements, pics et direction récente."
+        "title": "Voyez ce qui prend de l'élan.",
+        "description": "Ce qui accélère, ce qui ralentit — artistes, genres et titres compris."
       },
       "library": {
-        "eyebrow": "Signaux bibliothèque",
-        "title": "Les artistes, titres et genres derrière l'histoire.",
-        "description": "Les classements gardent le produit ancré dans votre comportement de streaming réel."
+        "eyebrow": "Signaux forts",
+        "title": "Les artistes, titres et genres derrière vos streams.",
+        "description": "Voici votre palmarès : les titres, artistes et genres que vous revenez chercher."
       },
       "intelligence": {
-        "eyebrow": "AI & calendrier",
-        "title": "Ajoutez du contexte aux patterns.",
-        "description": "Les résumés AI et l'intensité calendrier aident à expliquer quand et pourquoi votre stream change."
+        "eyebrow": "IA & calendrier",
+        "title": "Une autre manière de voir les choses.",
+        "description": "Un regard sur vos habitudes, et les jours où vous avez le plus écouté."
       }
     },
     "mobile": {
@@ -1861,11 +1866,13 @@
     "insightsBusiestCalendarDay": "Jour le plus actif",
     "insightsBusiestMeta": "{date} · {listens} streams",
     "insightsNoSignal": "Pas assez de données pour dégager une tendance",
-    "insightsActiveDays": "Actifs",
-    "insightsSpanDays": "Durée",
+    "insightsActiveDays": "Jours d'écoute",
+    "insightsActiveDaysHint": "Jours distincts avec au moins un stream de cet artiste",
+    "insightsSpanDays": "Du premier au dernier",
+    "insightsSpanDaysHint": "Jours calendaires entre votre premier et votre dernier stream",
     "insightsDaysValue": "{count, plural, one {# jour} other {# jours}}",
     "insightsByHour": "Streams par heure de la journée",
-    "insightsByWeekday": "streams par jour de semaine",
+    "insightsByWeekday": "Streams par jour de la semaine",
     "insightsTopTracks": "Titres les plus joués avec cet artiste",
     "insightsSources": "Origine des streams",
     "insightsFootnoteTz": "Les heures et jours reflètent l’horodatage stocké avec chaque stream (souvent UTC selon l’export). Les totaux respectent les filtres de dates actifs.",
@@ -2021,8 +2028,13 @@
     }
   },
   "ai-insights": {
-    "title": "AI Insights",
-    "heroEyebrow": "Synthèse depuis vos analytics",
+    "title": "Vos streams, racontés.",
+    "heroEyebrow": "Cartes insights",
+    "overviewWidget": {
+      "eyebrow": "Cartes insights",
+      "title": "Ce que vos streams racontent.",
+      "description": "Quelques phrases pour relire vos habitudes."
+    },
     "heroStatBadge": "Qualité du signal",
     "heroStatTag": "Ancré dans les streams",
     "heroTrust1": "Les cartes résument les agrégats déjà dans Soundprint — rien n’est inventé depuis le web.",
@@ -2035,9 +2047,9 @@
     "heroStatStatus": "Quota / cache",
     "heroFresh": "Réponse en direct",
     "subtitle": "Jusqu’à cinq phrases percutantes par rafraîchissement — générées uniquement depuis votre fenêtre d’stream filtrée.",
-    "subtitleShort": "Analyse de vos données de streams",
+    "subtitleShort": "Quelques phrases pour relire vos habitudes.",
     "seeMore": "Voir plus",
-    "loading": "Analyse de vos données de streams en cours...",
+    "loading": "Lecture de vos streams en cours...",
     "generating": "Synthèse des cartes insights à partir de vos derniers agrégats…",
     "errorLoading": "Impossible de charger les insights.",
     "errorMessage": "Erreur lors de la génération des insights",
@@ -2139,12 +2151,11 @@
     },
     "yourProfile": "Votre profil musical",
     "overviewWidget": {
-      "title": "Votre empreinte sonore, décryptée.",
-      "description": "L'IA tire influences, singularités et une synthèse en une ligne depuis vos filtres actifs.",
-      "scrollCue": "Votre lecture juste en dessous"
+      "eyebrow": "Profil de goût",
+      "title": "Votre soundprint",
+      "description": "Une phrase sur votre univers, puis ce qui l’oriente et ce qui vous distingue."
     },
     "pullQuoteLabel": "Votre univers en une phrase",
-    "exploreProfileCta": "Explorer mon profil",
     "inBrief": "En bref",
     "influences": "Influences",
     "coreGenres": "Genres principaux",
@@ -2213,7 +2224,7 @@
     "features": {
       "badge": "Et maintenant",
       "title": "Trois façons d'explorer votre bibliothèque",
-      "lead": "vos streams sont prêtes. Commencez par la vue d'ensemble, posez des questions en langage clair, ou comparez avec des amis.",
+      "lead": "Vos streams sont prêts. Commencez par la vue d'ensemble, posez des questions en langage clair, ou comparez avec des amis.",
       "yourMusic": {
         "eyebrow": "Hub analytique",
         "title": "Your Music",
@@ -2690,9 +2701,9 @@
       "exportMenuJson": "Statistiques",
       "exportMenuPdf": "Rapport annuel",
       "presets": {
-        "7d": "7d",
-        "30d": "30d",
-        "ytd": "YTD",
+        "7d": "7 jours",
+        "30d": "30 jours",
+        "ytd": "Cette année",
         "all": "Tout",
         "custom": "Perso"
       },

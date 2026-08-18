@@ -3,23 +3,17 @@
 import { useRef } from "react";
 import { GripVertical } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { usePathname } from "@/i18n/navigation";
 import { AiMasterToggleSwitch } from "@/lib/components/ai-master-toggle-switch";
 import { useDraggableFloatingPosition } from "@/lib/hooks/use-draggable-floating-position";
 
 /**
- * Toggle bas droite (desktop uniquement). Sur mobile, utiliser le menu Plus du dashboard.
+ * Toggle bas droite (desktop uniquement), monté dans le layout dashboard (main).
+ * Sur mobile, utiliser le menu Plus du dashboard.
  */
 export function AiMasterToggle() {
-  const pathname = usePathname();
   const t = useTranslations("aiMasterToggle");
-  const isOnboarding = pathname.includes("/dashboard/onboarding");
   const containerRef = useRef<HTMLDivElement>(null);
   const { style, isDragging, dragHandleProps } = useDraggableFloatingPosition(containerRef);
-
-  if (isOnboarding) {
-    return null;
-  }
 
   return (
     <div

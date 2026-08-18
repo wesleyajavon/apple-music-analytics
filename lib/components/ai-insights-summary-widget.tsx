@@ -26,6 +26,7 @@ import {
   OverviewStartupSurfaceBg,
 } from "@/lib/components/overview-startup-surface";
 import { LiveStatusDot } from "@/lib/components/live-status-dot";
+import { AiSummaryUnsortedGenresNotice } from "@/lib/components/ai-summary-unsorted-genres-notice";
 
 /** Number of insights to show in the overview widget */
 const PREVIEW_INSIGHTS_COUNT = 3;
@@ -85,10 +86,10 @@ function AiInsightsPublicDemoTeaser() {
       <div className={`relative ${OVERVIEW_STARTUP_WIDGET_HEADER_BORDER_CLASS} px-6 py-5 sm:px-8`}>
         <div className={OVERVIEW_STARTUP_EYEBROW_PILL_CLASS}>
           <LiveStatusDot />
-          {t("heroEyebrow")}
+          {t("overviewWidget.eyebrow")}
         </div>
-        <h2 className={OVERVIEW_STARTUP_WIDGET_TITLE_CLASS}>{t("title")}</h2>
-        <p className={OVERVIEW_STARTUP_WIDGET_SUBTITLE_CLASS}>{t("subtitleShort")}</p>
+        <h2 className={OVERVIEW_STARTUP_WIDGET_TITLE_CLASS}>{t("overviewWidget.title")}</h2>
+        <p className={OVERVIEW_STARTUP_WIDGET_SUBTITLE_CLASS}>{t("overviewWidget.description")}</p>
       </div>
       <div className="relative flex-1 space-y-3 p-6 sm:p-8">
         <div className={OVERVIEW_STARTUP_INNER_PANEL_CLASS}>
@@ -151,10 +152,10 @@ export function AiInsightsSummaryWidget() {
         <div className={`relative ${OVERVIEW_STARTUP_WIDGET_HEADER_BORDER_CLASS} px-6 py-5 sm:px-8`}>
           <div className={OVERVIEW_STARTUP_EYEBROW_PILL_CLASS}>
             <LiveStatusDot />
-            {t("heroEyebrow")}
+            {t("overviewWidget.eyebrow")}
           </div>
-          <h2 className={OVERVIEW_STARTUP_WIDGET_TITLE_CLASS}>{t("title")}</h2>
-          <p className={OVERVIEW_STARTUP_WIDGET_SUBTITLE_CLASS}>{t("subtitleShort")}</p>
+          <h2 className={OVERVIEW_STARTUP_WIDGET_TITLE_CLASS}>{t("overviewWidget.title")}</h2>
+          <p className={OVERVIEW_STARTUP_WIDGET_SUBTITLE_CLASS}>{t("overviewWidget.description")}</p>
         </div>
         <div className="relative flex-1 p-6 sm:p-8">
           <div className={OVERVIEW_STARTUP_INNER_PANEL_CLASS}>
@@ -225,10 +226,10 @@ export function AiInsightsSummaryWidget() {
           <div className={`relative ${OVERVIEW_STARTUP_WIDGET_HEADER_BORDER_CLASS} px-6 py-5 sm:px-8`}>
             <div className={OVERVIEW_STARTUP_EYEBROW_PILL_CLASS}>
               <LiveStatusDot />
-              {t("heroEyebrow")}
+              {t("overviewWidget.eyebrow")}
             </div>
-            <h2 className={OVERVIEW_STARTUP_WIDGET_TITLE_CLASS}>{t("title")}</h2>
-            <p className={OVERVIEW_STARTUP_WIDGET_SUBTITLE_CLASS}>{t("subtitleShort")}</p>
+            <h2 className={OVERVIEW_STARTUP_WIDGET_TITLE_CLASS}>{t("overviewWidget.title")}</h2>
+            <p className={OVERVIEW_STARTUP_WIDGET_SUBTITLE_CLASS}>{t("overviewWidget.description")}</p>
           </div>
           <div className="relative flex-1 p-6 sm:p-8">
             <div className={OVERVIEW_STARTUP_INNER_PANEL_CLASS}>
@@ -240,13 +241,13 @@ export function AiInsightsSummaryWidget() {
     }
     return (
       <AiWidgetQuotaOrError
-        title={t("title")}
-        subtitle={t("subtitleShort")}
+        title={t("overviewWidget.title")}
+        subtitle={t("overviewWidget.description")}
         seeMoreHref={seeMoreHref}
         seeMoreLabel={t("seeMore")}
         error={error}
         surface="startup"
-        eyebrow={t("heroEyebrow")}
+        eyebrow={t("overviewWidget.eyebrow")}
       />
     );
   }
@@ -254,13 +255,13 @@ export function AiInsightsSummaryWidget() {
   if (data?.aiUnavailable) {
     return (
       <AiFeatureDisabledPlaceholder
-        title={t("title")}
-        subtitle={t("subtitleShort")}
+        title={t("overviewWidget.title")}
+        subtitle={t("overviewWidget.description")}
         seeMoreHref={seeMoreHref}
         seeMoreLabel={t("seeMore")}
         reason={data.aiUnavailableReason ?? "client"}
         surface="startup"
-        eyebrow={t("heroEyebrow")}
+        eyebrow={t("overviewWidget.eyebrow")}
       />
     );
   }
@@ -279,10 +280,10 @@ export function AiInsightsSummaryWidget() {
           <div className="min-w-0">
             <div className={OVERVIEW_STARTUP_EYEBROW_PILL_CLASS}>
               <LiveStatusDot />
-              {t("heroEyebrow")}
+              {t("overviewWidget.eyebrow")}
             </div>
-            <h2 className={OVERVIEW_STARTUP_WIDGET_TITLE_CLASS}>{t("title")}</h2>
-            <p className={OVERVIEW_STARTUP_WIDGET_SUBTITLE_CLASS}>{t("subtitleShort")}</p>
+            <h2 className={OVERVIEW_STARTUP_WIDGET_TITLE_CLASS}>{t("overviewWidget.title")}</h2>
+            <p className={OVERVIEW_STARTUP_WIDGET_SUBTITLE_CLASS}>{t("overviewWidget.description")}</p>
           </div>
           <Link href={seeMoreHref} className={OVERVIEW_STARTUP_HEADER_LINK_CLASS}>
             {t("seeMore")}
@@ -293,6 +294,11 @@ export function AiInsightsSummaryWidget() {
         </div>
       </div>
       <div className="relative flex-1 space-y-3 p-6 sm:p-8">
+        <AiSummaryUnsortedGenresNotice
+          enabled={!viewerUserId}
+          startDate={startDate}
+          endDate={endDate}
+        />
         <div className={OVERVIEW_STARTUP_INNER_PANEL_CLASS}>
           <div className="space-y-3">
             {previewInsights.map((insight, index) => (

@@ -1,6 +1,7 @@
 import { redirect } from "@/i18n/navigation";
 import { getCurrentUserId } from "@/lib/auth/get-current-user-id";
 import { prisma } from "@/lib/prisma";
+import { AiMasterToggle } from "@/lib/components/ai-master-toggle";
 import { GenreBackfillGlobalBadge } from "@/lib/components/genre-backfill-global-badge";
 
 type Props = {
@@ -32,6 +33,7 @@ export default async function DashboardMainLayout({ children, params }: Props) {
     <>
       <GenreBackfillGlobalBadge />
       {children}
+      <AiMasterToggle />
     </>
   );
 }

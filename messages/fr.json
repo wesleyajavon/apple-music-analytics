@@ -1908,6 +1908,8 @@
     "first": "Première",
     "last": "Dernière",
     "uniqueTracks": "titre(s) unique(s)",
+    "signatureSound": "Son signature",
+    "signatureSoundUnavailable": "Pas encore de titre signature",
     "listensCount": "streams",
     "rank1st": "1er",
     "rankNth": "{n}e",

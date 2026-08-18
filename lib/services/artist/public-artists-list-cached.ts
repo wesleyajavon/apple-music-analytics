@@ -43,6 +43,7 @@ export function getPublicProfileArtistsListCached(
     },
     [
       "api-artists",
+      "signature-track-v1",
       "public-profile",
       publicUserId,
       dateSeg(startDate),

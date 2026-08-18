@@ -8,6 +8,12 @@ import { prisma } from "../../prisma";
 import { transformBigIntToNumber } from "../../dto/transformers";
 import type { ArtistTrendsChartArtist } from "@/lib/dto/artist";
 
+export interface ArtistSignatureTrack {
+  trackId: string;
+  title: string;
+  listenCount: number;
+}
+
 export interface ArtistStats {
   artistId: string;
   artistName: string;
@@ -19,6 +25,8 @@ export interface ArtistStats {
   totalPlayTime: number; // in seconds
   /** Rang global sur la période (présent quand une recherche filtre la liste). */
   rank?: number;
+  /** Morceau le plus streamé de cet artiste sur la période. */
+  signatureTrack?: ArtistSignatureTrack | null;
 }
 
 export interface ArtistTrendPoint {
@@ -51,11 +59,28 @@ export async function getArtistStats(
       ? `%${escapeLikePattern(normalizedSearch)}%`
       : null;
 
+  const rangeFilters = Prisma.sql`
+    ${startDate ? Prisma.sql`AND l."playedAt" >= ${startDate}` : Prisma.sql``}
+    ${endDate ? Prisma.sql`AND l."playedAt" <= ${endDate}` : Prisma.sql``}
+    ${userId ? Prisma.sql`AND l."userId" = ${userId}` : Prisma.sql``}
+  `;
+
   const listenFilters = Prisma.sql`
     WHERE 1=1
-      ${startDate ? Prisma.sql`AND l."playedAt" >= ${startDate}` : Prisma.sql``}
-      ${endDate ? Prisma.sql`AND l."playedAt" <= ${endDate}` : Prisma.sql``}
-      ${userId ? Prisma.sql`AND l."userId" = ${userId}` : Prisma.sql``}
+      ${rangeFilters}
+  `;
+
+  const signatureJoin = Prisma.sql`
+    LEFT JOIN LATERAL (
+      SELECT t.id AS track_id, t.title, COUNT(*)::bigint AS listen_count
+      FROM "Listen" l
+      JOIN "Track" t ON l."trackId" = t.id
+      WHERE t."artistId" = s.artist_id
+        ${rangeFilters}
+      GROUP BY t.id, t.title
+      ORDER BY listen_count DESC, t.title ASC
+      LIMIT 1
+    ) sig ON true
   `;
 
   const query = namePattern
@@ -77,41 +102,76 @@ export async function getArtistStats(
           JOIN "Artist" a ON t."artistId" = a.id
           ${listenFilters}
           GROUP BY a.id, a.name, a."nameLower", a."imageUrl"
+        ),
+        s AS (
+          SELECT
+            artist_id,
+            artist_name,
+            image_url,
+            listen_count,
+            unique_tracks,
+            first_listen_date,
+            last_listen_date,
+            total_play_time,
+            rank
+          FROM ranked
+          WHERE name_lower LIKE ${namePattern} ESCAPE ${"\\"}
+          ORDER BY listen_count DESC, artist_name ASC
+          LIMIT ${limit}
+          OFFSET ${offset}
         )
         SELECT
-          artist_id,
-          artist_name,
-          image_url,
-          listen_count,
-          unique_tracks,
-          first_listen_date,
-          last_listen_date,
-          total_play_time,
-          rank
-        FROM ranked
-        WHERE name_lower LIKE ${namePattern} ESCAPE ${"\\"}
-        ORDER BY listen_count DESC, artist_name ASC
-        LIMIT ${limit}
-        OFFSET ${offset}
+          s.artist_id,
+          s.artist_name,
+          s.image_url,
+          s.listen_count,
+          s.unique_tracks,
+          s.first_listen_date,
+          s.last_listen_date,
+          s.total_play_time,
+          s.rank,
+          sig.track_id AS signature_track_id,
+          sig.title AS signature_track_title,
+          sig.listen_count AS signature_listen_count
+        FROM s
+        ${signatureJoin}
+        ORDER BY s.listen_count DESC, s.artist_name ASC
       `
     : Prisma.sql`
-        SELECT 
-          a.id as artist_id,
-          a.name as artist_name,
-          a."imageUrl" as image_url,
-          COUNT(*)::bigint as listen_count,
-          COUNT(DISTINCT t.id)::bigint as unique_tracks,
-          MIN(l."playedAt") as first_listen_date,
-          MAX(l."playedAt") as last_listen_date,
-          COALESCE(SUM(t.duration), 0)::bigint as total_play_time
-        FROM "Listen" l
-        JOIN "Track" t ON l."trackId" = t.id
-        JOIN "Artist" a ON t."artistId" = a.id
-        ${listenFilters}
-        GROUP BY a.id, a.name, a."imageUrl"
-        ORDER BY listen_count DESC
-        LIMIT ${limit}
-        OFFSET ${offset}
+        WITH s AS (
+          SELECT 
+            a.id as artist_id,
+            a.name as artist_name,
+            a."imageUrl" as image_url,
+            COUNT(*)::bigint as listen_count,
+            COUNT(DISTINCT t.id)::bigint as unique_tracks,
+            MIN(l."playedAt") as first_listen_date,
+            MAX(l."playedAt") as last_listen_date,
+            COALESCE(SUM(t.duration), 0)::bigint as total_play_time
+          FROM "Listen" l
+          JOIN "Track" t ON l."trackId" = t.id
+          JOIN "Artist" a ON t."artistId" = a.id
+          ${listenFilters}
+          GROUP BY a.id, a.name, a."imageUrl"
+          ORDER BY listen_count DESC
+          LIMIT ${limit}
+          OFFSET ${offset}
+        )
+        SELECT
+          s.artist_id,
+          s.artist_name,
+          s.image_url,
+          s.listen_count,
+          s.unique_tracks,
+          s.first_listen_date,
+          s.last_listen_date,
+          s.total_play_time,
+          sig.track_id AS signature_track_id,
+          sig.title AS signature_track_title,
+          sig.listen_count AS signature_listen_count
+        FROM s
+        ${signatureJoin}
+        ORDER BY s.listen_count DESC, s.artist_name ASC
       `;
 
   const result = await prisma.$queryRaw<Array<{
@@ -124,27 +184,12 @@ export async function getArtistStats(
     last_listen_date: Date;
     total_play_time: bigint;
     rank?: bigint | number;
+    signature_track_id?: string | null;
+    signature_track_title?: string | null;
+    signature_listen_count?: bigint | number | null;
   }>>(query);
 
-  return result.map(row => {
-    const transformed = transformBigIntToNumber({
-      listen_count: row.listen_count,
-      unique_tracks: row.unique_tracks,
-      total_play_time: row.total_play_time,
-    });
-
-    return {
-      artistId: row.artist_id,
-      artistName: row.artist_name,
-      imageUrl: row.image_url,
-      listenCount: transformed.listen_count,
-      uniqueTracks: transformed.unique_tracks,
-      firstListenDate: row.first_listen_date.toISOString(),
-      lastListenDate: row.last_listen_date.toISOString(),
-      totalPlayTime: transformed.total_play_time,
-      ...(row.rank != null ? { rank: Number(row.rank) } : {}),
-    };
-  });
+  return result.map(mapArtistStatsRow);
 }
 
 export async function countArtistsForRange(
@@ -440,6 +485,55 @@ function escapeLikePattern(value: string): string {
   return value.replace(/[\\%_]/g, "\\$&");
 }
 
+type ArtistStatsRow = {
+  artist_id: string;
+  artist_name: string;
+  image_url: string | null;
+  listen_count: bigint;
+  unique_tracks: bigint;
+  first_listen_date: Date;
+  last_listen_date: Date;
+  total_play_time: bigint;
+  rank?: bigint | number;
+  signature_track_id?: string | null;
+  signature_track_title?: string | null;
+  signature_listen_count?: bigint | number | null;
+};
+
+function mapSignatureTrack(row: ArtistStatsRow): ArtistSignatureTrack | null {
+  if (!row.signature_track_id || !row.signature_track_title) {
+    return null;
+  }
+  return {
+    trackId: row.signature_track_id,
+    title: row.signature_track_title,
+    listenCount: transformBigIntToNumber({
+      c: row.signature_listen_count ?? 0,
+    }).c,
+  };
+}
+
+function mapArtistStatsRow(row: ArtistStatsRow): ArtistStats {
+  const transformed = transformBigIntToNumber({
+    listen_count: row.listen_count,
+    unique_tracks: row.unique_tracks,
+    total_play_time: row.total_play_time,
+  });
+
+  return {
+    artistId: row.artist_id,
+    artistName: row.artist_name,
+    imageUrl: row.image_url,
+    listenCount: transformed.listen_count,
+    uniqueTracks: transformed.unique_tracks,
+    firstListenDate: row.first_listen_date.toISOString(),
+    lastListenDate: row.last_listen_date.toISOString(),
+    totalPlayTime: transformed.total_play_time,
+    signatureTrack: mapSignatureTrack(row),
+    ...(row.rank != null ? { rank: Number(row.rank) } : {}),
+  };
+}
+
 /**
  * Recherche dans le catalogue Artist (nameLower indexé).
  * Les correspondances exactes et préfixe passent avant les featurings
@@ -698,6 +792,15 @@ export async function getArtistUserInsights(
     total_play_time: s.total_play_time,
   });
 
+  const topTracks = topTracksRows.map((row) => {
+    const bc = transformBigIntToNumber({ c: row.listen_count }).c;
+    return {
+      trackId: row.track_id,
+      title: row.title,
+      listenCount: bc,
+    };
+  });
+
   const artist: ArtistStats = {
     artistId: s.artist_id,
     artistName: s.artist_name,
@@ -707,16 +810,8 @@ export async function getArtistUserInsights(
     firstListenDate: s.first_listen_date.toISOString(),
     lastListenDate: s.last_listen_date.toISOString(),
     totalPlayTime: transformed.total_play_time,
+    signatureTrack: topTracks[0] ?? null,
   };
-
-  const topTracks = topTracksRows.map((row) => {
-    const bc = transformBigIntToNumber({ c: row.listen_count }).c;
-    return {
-      trackId: row.track_id,
-      title: row.title,
-      listenCount: bc,
-    };
-  });
 
   const hourMap = new Map<number, number>();
   for (const row of hourRows) {

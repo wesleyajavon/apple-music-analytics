@@ -25,6 +25,7 @@ function toDto(insights: ArtistUserInsights): ArtistUserInsightsDto {
       firstListenDate: insights.artist.firstListenDate,
       lastListenDate: insights.artist.lastListenDate,
       totalPlayTime: insights.artist.totalPlayTime,
+      signatureTrack: insights.artist.signatureTrack ?? insights.topTracks[0] ?? null,
     },
     topTracks: insights.topTracks,
     listensByHour: insights.listensByHour,

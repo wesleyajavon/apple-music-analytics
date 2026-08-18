@@ -1,6 +1,7 @@
 "use client";
 
 import { memo } from "react";
+import { Music2 } from "lucide-react";
 import type { ArtistStatsDto } from "@/lib/dto/artist";
 import { ArtistAvatarHydrated } from "@/lib/components/artist-avatar-hydrated";
 
@@ -65,14 +66,27 @@ export const TopThreeArtists = memo(
                 <span className="absolute right-4 top-4 z-20 flex h-11 w-11 items-center justify-center rounded-full border border-white/70 bg-white/90 text-lg font-black text-gray-950 shadow-xl shadow-black/10 backdrop-blur ring-1 ring-black/5 dark:border-white/20 dark:bg-slate-900/95 dark:text-white dark:shadow-black/40 dark:ring-white/10">
                   {index + 1}
                 </span>
+                {artist.signatureTrack?.title ? (
+                  <div
+                    className="absolute left-4 top-4 z-20 flex max-w-[calc(100%-5.5rem)] items-center gap-1.5 rounded-full border border-white/55 bg-black/55 px-2.5 py-1 text-xs font-semibold text-white shadow-lg shadow-black/25 backdrop-blur-md"
+                    title={artist.signatureTrack.title}
+                  >
+                    <Music2 className="h-3.5 w-3.5 shrink-0 text-cyan-200" aria-hidden />
+                    <span className="truncate">{artist.signatureTrack.title}</span>
+                    <span className="sr-only">{t("signatureSound")}</span>
+                  </div>
+                ) : null}
                 <div className="absolute inset-x-3 bottom-3 translate-y-5 rounded-3xl border border-white/80 bg-white/90 p-4 opacity-0 shadow-2xl shadow-black/20 backdrop-blur-xl transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100 dark:border-white/10 dark:bg-slate-950/80">
                   <div className="flex items-end justify-between gap-3">
                     <div className="min-w-0">
                       <h3 className="truncate text-xl font-semibold tracking-[-0.03em] text-gray-950 dark:text-white">
                         {artist.artistName}
                       </h3>
-                      <p className="mt-1 text-sm font-medium text-muted">
-                        {artist.uniqueTracks.toLocaleString(locale)} {t("uniqueTracks")}
+                      <p className="mt-1 flex items-center gap-1.5 text-sm font-medium text-muted">
+                        <Music2 className="h-3.5 w-3.5 shrink-0 text-violet-500 dark:text-violet-300" aria-hidden />
+                        <span className="truncate">
+                          {artist.signatureTrack?.title?.trim() || t("signatureSoundUnavailable")}
+                        </span>
                       </p>
                     </div>
                     <div className="shrink-0 text-right">

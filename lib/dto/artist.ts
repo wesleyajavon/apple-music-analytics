@@ -2,6 +2,13 @@
  * Data Transfer Objects (DTOs) for artist data
  */
 
+/** Titre le plus joué avec un artiste (période filtrée). */
+export interface ArtistSignatureTrackDto {
+  trackId: string;
+  title: string;
+  listenCount: number;
+}
+
 /**
  * Statistiques détaillées d'un artiste
  */
@@ -16,6 +23,8 @@ export interface ArtistStatsDto {
   totalPlayTime: number; // in seconds
   /** Rang global sur la période, renvoyé lors d’une recherche sur le classement. */
   rank?: number;
+  /** Morceau le plus streamé de cet artiste sur la période. */
+  signatureTrack?: ArtistSignatureTrackDto | null;
 }
 
 /**
@@ -92,11 +101,7 @@ export interface ArtistSearchResponse {
 }
 
 /** Titre le plus joué avec cet artiste (période filtrée). */
-export interface ArtistUserInsightsTrackDto {
-  trackId: string;
-  title: string;
-  listenCount: number;
-}
+export type ArtistUserInsightsTrackDto = ArtistSignatureTrackDto;
 
 export interface ArtistUserInsightsHourBucketDto {
   hour: number;

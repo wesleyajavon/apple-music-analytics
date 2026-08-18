@@ -30,6 +30,9 @@ describe("artist-service", () => {
           first_listen_date: new Date("2024-01-01T00:00:00.000Z"),
           last_listen_date: new Date("2024-01-31T23:59:59.000Z"),
           total_play_time: BigInt(3600),
+          signature_track_id: "track-1",
+          signature_track_title: "Blinding Lights",
+          signature_listen_count: BigInt(42),
         },
       ];
 
@@ -47,6 +50,11 @@ describe("artist-service", () => {
         firstListenDate: "2024-01-01T00:00:00.000Z",
         lastListenDate: "2024-01-31T23:59:59.000Z",
         totalPlayTime: 3600,
+        signatureTrack: {
+          trackId: "track-1",
+          title: "Blinding Lights",
+          listenCount: 42,
+        },
       });
     });
 
@@ -71,6 +79,7 @@ describe("artist-service", () => {
       expect(result[0].imageUrl).toBeNull();
       expect(result[0].listenCount).toBe(50);
       expect(result[0].totalPlayTime).toBe(1200);
+      expect(result[0].signatureTrack).toBeNull();
     });
 
     it("should pass date range and userId to query", async () => {

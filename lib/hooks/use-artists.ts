@@ -26,7 +26,7 @@ import { useDebouncedValue } from "@/lib/hooks/use-debounced-value";
 export const artistKeys = {
   all: ["artists"] as const,
   stats: (params: { startDate?: string; endDate?: string; userId?: string; limit?: number; offset?: number; q?: string }) =>
-    [...artistKeys.all, "stats", params] as const,
+    [...artistKeys.all, "stats", "signature-track-v1", params] as const,
   trends: (params: {
     startDate?: string;
     endDate?: string;

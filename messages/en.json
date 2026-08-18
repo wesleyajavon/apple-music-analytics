@@ -1908,6 +1908,8 @@
     "first": "First",
     "last": "Last",
     "uniqueTracks": "unique track(s)",
+    "signatureSound": "Signature sound",
+    "signatureSoundUnavailable": "No signature track yet",
     "listensCount": "streams",
     "rank1st": "1st",
     "rankNth": "{n}th",

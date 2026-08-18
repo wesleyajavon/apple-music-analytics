@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useMemo, type ReactNode } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useQueryClient } from "@tanstack/react-query";
@@ -14,6 +14,7 @@ import {
   YAxis,
 } from "recharts";
 import { fetchTrackStats, trackKeys, useTrackStats } from "@/lib/hooks/use-tracks";
+import { useDebouncedValue } from "@/lib/hooks/use-debounced-value";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
 import { formatOverviewDateRangeLabel } from "@/lib/utils/overview-date-range-label";
 import { OverviewSkeleton } from "@/lib/components/skeleton-loaders";
@@ -45,11 +46,45 @@ import {
 } from "@/lib/constants/dashboard-spotlight";
 import { useTheme } from "@/lib/providers/theme-provider";
 import type { TrackOverviewDto, TracksResponseDto, TrackStatsDto } from "@/lib/dto/track";
-import { LineChart } from "lucide-react";
+import { BarChart3, LineChart, ListMusic, Search } from "lucide-react";
+import {
+  DashboardSectionPanel,
+  DashboardSectionSwitcher,
+  useDashboardSectionView,
+  type DashboardSectionItem,
+} from "@/lib/components/dashboard-section-switcher";
 
 const TRACKS_HERO_SHELL_CLASS =
   "relative overflow-hidden rounded-[2rem] border border-white/10 bg-gray-950 px-5 py-6 text-white shadow-2xl shadow-accent-cyan/15 sm:px-8 sm:py-9 lg:px-10 lg:py-10";
 const MOBILE_DATE_OPTS = { month: "2-digit", day: "2-digit", year: "2-digit" } as const;
+const TRACKS_VIEWS = ["leaderboard", "ranking"] as const;
+type TracksView = (typeof TRACKS_VIEWS)[number];
+
+function TracksViewSwitcher({
+  idPrefix,
+  activeView,
+  onChange,
+}: {
+  idPrefix: string;
+  activeView: TracksView;
+  onChange: (view: TracksView) => void;
+}) {
+  const t = useTranslations("tracks.viewSwitcher");
+  const items: DashboardSectionItem<TracksView>[] = [
+    { id: "leaderboard", label: t("views.leaderboard"), icon: BarChart3 },
+    { id: "ranking", label: t("views.ranking"), icon: ListMusic },
+  ];
+
+  return (
+    <DashboardSectionSwitcher
+      items={items}
+      activeView={activeView}
+      onChange={onChange}
+      idPrefix={idPrefix}
+      navLabel={t("navLabel")}
+    />
+  );
+}
 
 function TracksHeroFrame({
   trendsHref,
@@ -393,41 +428,35 @@ function MobileTrackBarRow({
   );
 }
 
-function MobileTracksDisclosure({
-  title,
-  description,
-  children,
-  defaultOpen = false,
+function TracksRankingSearchField({
+  value,
+  onChange,
+  id,
 }: {
-  title: string;
-  description: string;
-  children: ReactNode;
-  defaultOpen?: boolean;
+  value: string;
+  onChange: (value: string) => void;
+  id: string;
 }) {
+  const t = useTranslations("tracks");
   return (
-    <details
-      className="group rounded-[1.75rem] border border-card-border bg-white/85 shadow-card backdrop-blur dark:border-white/[0.08] dark:bg-[#090b14]"
-      open={defaultOpen}
-    >
-      <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-4">
-        <span>
-          <span className="block text-sm font-semibold text-foreground dark:text-white">
-            {title}
-          </span>
-          <span className="mt-1 block text-xs leading-5 text-muted dark:text-slate-400">
-            {description}
-          </span>
-        </span>
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-card-border bg-white/70 text-muted transition-transform group-open:rotate-90 dark:border-white/[0.10] dark:bg-white/[0.06] dark:text-slate-300">
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-        </span>
-      </summary>
-      <div className="border-t border-card-border px-4 py-4 dark:border-white/[0.08]">
-        {children}
+    <div className="space-y-2">
+      <label htmlFor={id} className="sr-only">
+        {t("rankingSearchAria")}
+      </label>
+      <div className="relative">
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden />
+        <input
+          id={id}
+          type="search"
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          placeholder={t("rankingSearchPlaceholder")}
+          autoComplete="off"
+          spellCheck={false}
+          className="min-h-11 w-full rounded-2xl border border-card-border bg-white py-2.5 pl-10 pr-3 text-sm text-foreground shadow-sm placeholder:text-muted focus:border-accent-violet/40 focus:outline-none focus:ring-2 focus:ring-accent-violet/25 dark:border-white/15 dark:bg-white/10 dark:text-white"
+        />
       </div>
-    </details>
+    </div>
   );
 }
 
@@ -458,6 +487,10 @@ function MobileTracksRanking({
     );
   }
 
+  if (tracks.length === 0) {
+    return <p className="px-1 py-8 text-center text-sm text-muted">{t("rankingSearchEmpty")}</p>;
+  }
+
   return (
     <div className="space-y-2">
       {tracks.map((track, index) => (
@@ -467,7 +500,7 @@ function MobileTracksRanking({
         >
           <div className="flex min-w-0 items-center gap-3">
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-xs font-black text-white dark:bg-white/[0.08]">
-              {offset + index + 1}
+              {track.rank ?? offset + index + 1}
             </span>
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold text-foreground dark:text-white" title={track.trackTitle}>
@@ -563,6 +596,10 @@ function MobileTracksFlow({
   trendsHref,
   badgeLabel,
   locale,
+  activeView,
+  setView,
+  searchInput,
+  onSearchInputChange,
   updatePaginationParams,
 }: {
   topData: TracksResponseDto;
@@ -579,6 +616,10 @@ function MobileTracksFlow({
   trendsHref: string;
   badgeLabel: string;
   locale: string;
+  activeView: TracksView;
+  setView: (view: TracksView) => void;
+  searchInput: string;
+  onSearchInputChange: (value: string) => void;
   updatePaginationParams: (nextPage: number, nextPageSize: number) => void;
 }) {
   const t = useTranslations("tracks");
@@ -622,78 +663,85 @@ function MobileTracksFlow({
 
       <MobileTracksMetricRail stats={stats} />
 
-      <section className="rounded-[1.75rem] bg-slate-950 p-3 shadow-2xl shadow-black/15">
-        <div className="px-1 pb-3 pt-1">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-100">
-            {t("mobile.topFiveEyebrow")}
-          </p>
-          <h2 className="mt-2 text-xl font-semibold tracking-[-0.04em] text-white">
-            {t("mobile.topFiveTitle")}
-          </h2>
-          <p className="mt-1 text-xs leading-5 text-slate-400">
-            {t("mobile.topFiveDescription")}
-          </p>
-        </div>
-        <div className="space-y-2">
-          {topData.topTracks.slice(0, 5).map((track, index) => (
-            <MobileTrackBarRow
-              key={track.trackId}
-              track={track}
-              rank={index + 1}
-              maxListens={maxListens}
-              totalListens={topData.overview.totalListens}
-              locale={locale}
-            />
-          ))}
-        </div>
-      </section>
+      <TracksViewSwitcher
+        idPrefix="tracks-mobile"
+        activeView={activeView}
+        onChange={setView}
+      />
 
-      <div className="space-y-3">
-        {topData.topTracks.length > 5 ? (
-          <MobileTracksDisclosure
-            title={t("mobile.disclosures.top20.title")}
-            description={t("mobile.disclosures.top20.description")}
-          >
-            <div className="space-y-2 rounded-3xl bg-slate-950 p-3">
-              {topData.topTracks.slice(5, 20).map((track, index) => (
+      <DashboardSectionPanel idPrefix="tracks-mobile" view="leaderboard" activeView={activeView}>
+        <div className="space-y-3">
+          <section className="rounded-[1.75rem] bg-slate-950 p-3 shadow-2xl shadow-black/15">
+            <div className="px-1 pb-3 pt-1">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-100">
+                {t("mobile.topFiveEyebrow")}
+              </p>
+              <h2 className="mt-2 text-xl font-semibold tracking-[-0.04em] text-white">
+                {t("mobile.topFiveTitle")}
+              </h2>
+              <p className="mt-1 text-xs leading-5 text-slate-400">
+                {t("mobile.topFiveDescription")}
+              </p>
+            </div>
+            <div className="space-y-2">
+              {topData.topTracks.slice(0, 5).map((track, index) => (
                 <MobileTrackBarRow
                   key={track.trackId}
                   track={track}
-                  rank={index + 6}
+                  rank={index + 1}
                   maxListens={maxListens}
                   totalListens={topData.overview.totalListens}
                   locale={locale}
                 />
               ))}
             </div>
-          </MobileTracksDisclosure>
-        ) : null}
+          </section>
 
-        <MobileTracksDisclosure
-          title={t("mobile.disclosures.ranking.title")}
-          description={t("mobile.disclosures.ranking.description")}
-        >
-          <div className="space-y-3">
-            <MobileTracksRanking
-              tracks={pagedTracks}
-              isFetching={isPagedFetching || !pagedData}
+          {topData.topTracks.length > 5 ? (
+            <section className="rounded-[1.75rem] bg-slate-950 p-3 shadow-2xl shadow-black/15">
+              <div className="space-y-2">
+                {topData.topTracks.slice(5, 20).map((track, index) => (
+                  <MobileTrackBarRow
+                    key={track.trackId}
+                    track={track}
+                    rank={index + 6}
+                    maxListens={maxListens}
+                    totalListens={topData.overview.totalListens}
+                    locale={locale}
+                  />
+                ))}
+              </div>
+            </section>
+          ) : null}
+        </div>
+      </DashboardSectionPanel>
+
+      <DashboardSectionPanel idPrefix="tracks-mobile" view="ranking" activeView={activeView}>
+        <div className="space-y-3">
+          <TracksRankingSearchField
+            id="tracks-ranking-search-mobile"
+            value={searchInput}
+            onChange={onSearchInputChange}
+          />
+          <MobileTracksRanking
+            tracks={pagedTracks}
+            isFetching={isPagedFetching || !pagedData}
+            pageSize={pageSize}
+            offset={offset}
+            locale={locale}
+          />
+          {pagedData?.pagination ? (
+            <MobileTracksPagination
+              page={page}
               pageSize={pageSize}
-              offset={offset}
-              locale={locale}
+              totalPages={totalPages}
+              paginationSummary={paginationSummary}
+              hasMore={pagedData.pagination.hasMore}
+              updatePaginationParams={updatePaginationParams}
             />
-            {pagedData?.pagination ? (
-              <MobileTracksPagination
-                page={page}
-                pageSize={pageSize}
-                totalPages={totalPages}
-                paginationSummary={paginationSummary}
-                hasMore={pagedData.pagination.hasMore}
-                updatePaginationParams={updatePaginationParams}
-              />
-            ) : null}
-          </div>
-        </MobileTracksDisclosure>
-      </div>
+          ) : null}
+        </div>
+      </DashboardSectionPanel>
     </div>
   );
 }
@@ -767,6 +815,10 @@ function TracksContent() {
     ? Number.parseInt(searchParams.get("pageSize") ?? String(DEFAULT_PAGE_SIZE), 10)
     : DEFAULT_PAGE_SIZE;
   const offset = (page - 1) * pageSize;
+  const qParam = (searchParams.get("q") ?? "").trim();
+  const [searchInput, setSearchInput] = useState(qParam);
+  const debouncedSearch = useDebouncedValue(searchInput.trim().slice(0, 200), 320);
+  const rankingQuery = debouncedSearch.length > 0 ? debouncedSearch : undefined;
 
   const updatePaginationParams = useCallback(
     (nextPage: number, nextPageSize: number) => {
@@ -778,6 +830,20 @@ function TracksContent() {
     },
     [pathname, router, searchParams]
   );
+
+  useEffect(() => {
+    const currentQ = (searchParams.get("q") ?? "").trim();
+    if (debouncedSearch === currentQ) return;
+    const params = new URLSearchParams(searchParams.toString());
+    if (debouncedSearch) {
+      params.set("q", debouncedSearch);
+    } else {
+      params.delete("q");
+    }
+    params.set("page", "1");
+    const qs = params.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }, [debouncedSearch, pathname, router, searchParams]);
 
   const {
     data: topData,
@@ -791,7 +857,7 @@ function TracksContent() {
     isFetching: isPagedFetching,
     error: pagedError,
     refetch: refetchPaged,
-  } = useTrackStats(startDate, endDate, userId, pageSize, offset);
+  } = useTrackStats(startDate, endDate, userId, pageSize, offset, { q: rankingQuery });
 
   const topTracks = useMemo(() => topData?.topTracks ?? [], [topData?.topTracks]);
   const pagedTracks = useMemo(() => pagedData?.topTracks ?? [], [pagedData?.topTracks]);
@@ -801,6 +867,7 @@ function TracksContent() {
   const pageEnd = Math.min(offset + pagedTracks.length, totalTracksInRange);
   const totalPages = Math.max(1, Math.ceil(totalTracksInRange / pageSize));
   const trendsHref = useTracksTrendsHref();
+  const { activeView, setView } = useDashboardSectionView(TRACKS_VIEWS, "leaderboard");
 
   useEffect(() => {
     if (page > totalPages) {
@@ -818,10 +885,11 @@ function TracksContent() {
         userId,
         limit: pageSize,
         offset: nextOffset,
+        q: rankingQuery,
       }),
-      queryFn: () => fetchTrackStats(startDate, endDate, userId, pageSize, nextOffset),
+      queryFn: () => fetchTrackStats(startDate, endDate, userId, pageSize, nextOffset, rankingQuery),
     });
-  }, [endDate, offset, pageSize, pagination?.hasMore, queryClient, startDate, userId]);
+  }, [endDate, offset, pageSize, pagination?.hasMore, queryClient, rankingQuery, startDate, userId]);
 
   const chartData = useMemo(
     () =>
@@ -886,13 +954,24 @@ function TracksContent() {
         trendsHref={trendsHref}
         badgeLabel={mobileBadgeLabel}
         locale={locale}
+        activeView={activeView}
+        setView={setView}
+        searchInput={searchInput}
+        onSearchInputChange={setSearchInput}
         updatePaginationParams={updatePaginationParams}
       />
 
       <div className="hidden space-y-12 lg:block">
         <TracksHeroFrame trendsHref={trendsHref} badgeLabel={badgeLabel} stats={heroStats} />
 
-        <section className="relative animate-fade-in-up">
+        <TracksViewSwitcher
+          idPrefix="tracks-desktop"
+          activeView={activeView}
+          onChange={setView}
+        />
+
+        <DashboardSectionPanel idPrefix="tracks-desktop" view="leaderboard" activeView={activeView}>
+          <section className="relative animate-fade-in-up">
           <TracksSectionHeader
             eyebrow={t("sections.chart.eyebrow")}
             title={t("sections.chart.title")}
@@ -962,9 +1041,11 @@ function TracksContent() {
               </div>
             </div>
           </div>
-        </section>
+          </section>
+        </DashboardSectionPanel>
 
-        <section className="relative animate-fade-in-up" style={{ animationDelay: "60ms" }}>
+        <DashboardSectionPanel idPrefix="tracks-desktop" view="ranking" activeView={activeView}>
+          <section className="relative animate-fade-in-up" style={{ animationDelay: "60ms" }}>
           <TracksSectionHeader
             eyebrow={t("sections.table.eyebrow")}
             title={t("sections.table.title")}
@@ -974,9 +1055,18 @@ function TracksContent() {
             <div className={DASHBOARD_SPOTLIGHT_GRADIENT_TABLE} aria-hidden />
             <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} aria-hidden />
             <div className={`relative ${DASHBOARD_SPOTLIGHT_HEADER_BOTTOM} px-5 py-5 sm:px-8`}>
-              <div className={DASHBOARD_SPOTLIGHT_BADGE_VIOLET}>
-                <LiveStatusDot tone="violet" />
-                {t("sections.table.badge")}
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div className={DASHBOARD_SPOTLIGHT_BADGE_VIOLET}>
+                  <LiveStatusDot tone="violet" />
+                  {t("sections.table.badge")}
+                </div>
+                <div className="w-full sm:max-w-sm">
+                  <TracksRankingSearchField
+                    id="tracks-ranking-search-desktop"
+                    value={searchInput}
+                    onChange={setSearchInput}
+                  />
+                </div>
               </div>
             </div>
             <div className="relative hidden max-h-[min(70vh,640px)] overflow-x-auto overflow-y-auto lg:block">
@@ -1000,10 +1090,18 @@ function TracksContent() {
                 <tbody className="divide-y divide-slate-100 dark:divide-white/5">
                   {isPagedFetching || !pagedData ? (
                     <TracksTableRowsSkeleton count={Math.min(pageSize, 10)} />
+                  ) : pagedTracks.length === 0 ? (
+                    <tr>
+                      <td colSpan={4} className="px-5 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
+                        {t("rankingSearchEmpty")}
+                      </td>
+                    </tr>
                   ) : (
                     pagedTracks.map((track, index) => (
                       <tr key={track.trackId} className={DASHBOARD_SPOTLIGHT_TABLE_ROW_HOVER}>
-                        <td className="whitespace-nowrap px-5 py-4 text-sm tabular-nums text-slate-500 dark:text-slate-400">{offset + index + 1}</td>
+                        <td className="whitespace-nowrap px-5 py-4 text-sm tabular-nums text-slate-500 dark:text-slate-400">
+                          {track.rank ?? offset + index + 1}
+                        </td>
                         <td className="px-5 py-4 text-sm font-semibold text-slate-900 dark:text-white">{track.trackTitle}</td>
                         <td className="px-5 py-4 text-sm text-slate-600 dark:text-slate-400">{track.artistName}</td>
                         <td className="whitespace-nowrap px-5 py-4 text-right text-sm font-semibold tabular-nums text-slate-900 dark:text-white">
@@ -1061,7 +1159,8 @@ function TracksContent() {
             ) : null}
             {isPagedFetching ? <div className="px-5 pb-4 text-xs text-slate-500 dark:text-slate-500 sm:px-8">{t("paginationLoading")}</div> : null}
           </div>
-        </section>
+          </section>
+        </DashboardSectionPanel>
       </div>
     </>
   );

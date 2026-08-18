@@ -9,7 +9,7 @@ import { usePublicDemoViewer } from "@/lib/hooks/use-public-demo-viewer";
 type OverviewFeaturePromosProps = {
   soundprintChatHref: string;
   duetHref: string;
-  variant?: "panel" | "stack";
+  variant?: "panel" | "stack" | "grid";
 };
 
 function FeaturePromoCard({
@@ -137,6 +137,10 @@ export function OverviewFeaturePromos({
 
   if (variant === "stack") {
     return <div className="space-y-3">{cards}</div>;
+  }
+
+  if (variant === "grid") {
+    return <div className="grid gap-3 sm:grid-cols-2">{cards}</div>;
   }
 
   return (

@@ -166,7 +166,7 @@ function ProfileCockpitRhythm({
               {formatCompactNumber(uniqueTracks, locale)}
             </p>
             <p className="mt-1 text-xs text-cyan-100">{t("profileCockpit.tracksExploredHint")}</p>
-            <p className="mt-2 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+            <p className="mt-2 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400" title={t("metrics.uniqueTracksHint")}>
               {t("metrics.uniqueTracks")}
             </p>
           </div>
@@ -320,6 +320,91 @@ function AiIdentityQuote({
   );
 }
 
+type ProfileMetric = {
+  hint: string;
+  label: string;
+  value: string;
+};
+
+function PageFramingSection({
+  withFilters,
+  compact = false,
+}: {
+  withFilters: (href: string) => string;
+  compact?: boolean;
+}) {
+  const t = useTranslations("musical-profile");
+  const bullets = [t("emptyFeature.item1"), t("emptyFeature.item2"), t("emptyFeature.item3")];
+
+  return (
+    <section className="relative overflow-hidden rounded-[2rem] border border-card-border bg-card-surface p-5 shadow-card sm:p-8">
+      <div
+        className="pointer-events-none absolute inset-0 opacity-50 dark:opacity-35"
+        style={{
+          background:
+            "radial-gradient(circle at 8% 0%, rgba(139, 92, 246, 0.08), transparent 32%), radial-gradient(circle at 92% 100%, rgba(6, 182, 212, 0.07), transparent 28%)",
+        }}
+        aria-hidden
+      />
+      <div className="relative">
+        <p className="font-mono text-xs font-semibold uppercase tracking-[0.28em] text-primary">
+          {compact ? t("landing.badge") : t("emptyFeature.badge")}
+        </p>
+        <h2 className="mt-3 text-xl font-semibold tracking-[-0.04em] text-gray-950 dark:text-white sm:text-3xl">
+          {compact ? t("mobile.nextTitle") : t("emptyFeature.title")}
+        </h2>
+        <p className="mt-3 max-w-3xl text-sm leading-7 text-gray-600 dark:text-gray-300 sm:text-base">
+          {compact ? t("mobile.nextLead") : t("emptyFeature.lead")}
+        </p>
+
+        {compact ? null : (
+          <ul className="mt-5 space-y-2.5">
+            {bullets.map((item) => (
+              <li key={item} className="flex gap-3 text-sm leading-6 text-gray-600 dark:text-gray-300">
+                <span
+                  className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-violet"
+                  aria-hidden
+                />
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {compact ? null : (
+          <div className="mt-6 rounded-2xl border border-card-border bg-surface-glass/80 p-4">
+          <p className="font-mono text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-primary">
+            {t("overviewCallout.badge")}
+          </p>
+          <p className="mt-2 text-sm font-semibold text-gray-950 dark:text-white">{t("overviewCallout.title")}</p>
+          <p className="mt-1 text-xs font-medium text-gray-500 dark:text-gray-400">
+            {t("overviewCallout.philosophyEyebrow")}
+          </p>
+          <ul className="mt-3 space-y-2 text-sm leading-6 text-gray-600 dark:text-gray-300">
+            <li>{t("overviewCallout.philosophyBullet1")}</li>
+            <li>{t("overviewCallout.philosophyBullet2")}</li>
+          </ul>
+          </div>
+        )}
+
+        {compact ? null : (
+          <>
+            <p className="mt-6 text-sm font-semibold text-gray-950 dark:text-white">{t("landing.title")}</p>
+            <p className="mt-1 max-w-2xl text-sm leading-6 text-gray-600 dark:text-gray-300">{t("landing.lead")}</p>
+            <Link
+              href={withFilters("/dashboard/overview")}
+              className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-5 py-3 text-sm font-bold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:shadow-card-hover focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background sm:w-auto"
+            >
+              {t("landing.primaryCta")}
+              <ArrowRightIcon className="h-4 w-4" />
+            </Link>
+          </>
+        )}
+      </div>
+    </section>
+  );
+}
+
 function FeaturePillarCard({
   href,
   eyebrow,
@@ -378,6 +463,7 @@ function SoundprintIdentitySection({
   aiCached,
   aiError,
   aiLoading,
+  compactSignature = false,
   interactiveAiBlockedByGenreBackfill,
   profileDescription,
   showAiUnavailable,
@@ -387,6 +473,7 @@ function SoundprintIdentitySection({
   aiCached?: boolean;
   aiError: Error | null;
   aiLoading: boolean;
+  compactSignature?: boolean;
   interactiveAiBlockedByGenreBackfill: boolean;
   profileDescription: string;
   showAiUnavailable?: boolean;
@@ -404,30 +491,32 @@ function SoundprintIdentitySection({
       <div className="pointer-events-none absolute -bottom-28 left-1/2 h-64 w-[85%] -translate-x-1/2 rounded-full bg-accent-violet/20 blur-3xl" />
       <div className="relative p-5 sm:p-8 lg:p-10">
         <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:gap-12">
-          <div className="flex shrink-0 flex-col items-center text-center lg:items-start lg:text-left">
-            <SoundprintBrandMark
-              size="xl"
-              layout="stacked"
-              tone="onDark"
-              showAiBadgeOnMobile
-              priority
-              interactive={false}
-              tagline={t("identityWelcome")}
-              className="flex-col items-center lg:items-start"
-            />
-            <div className="mt-6 flex flex-wrap justify-center gap-2 lg:justify-start">
-              {topArtistName ? (
-                <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white/90">
-                  {topArtistName}
-                </span>
-              ) : null}
-              {topGenreName ? (
-                <span className="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1.5 text-xs font-semibold text-cyan-100">
-                  {topGenreName}
-                </span>
-              ) : null}
+          {compactSignature ? null : (
+            <div className="flex shrink-0 flex-col items-center text-center lg:items-start lg:text-left">
+              <SoundprintBrandMark
+                size="xl"
+                layout="stacked"
+                tone="onDark"
+                showAiBadgeOnMobile
+                priority
+                interactive={false}
+                tagline={t("identityWelcome")}
+                className="flex-col items-center lg:items-start"
+              />
+              <div className="mt-6 flex flex-wrap justify-center gap-2 lg:justify-start">
+                {topArtistName ? (
+                  <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white/90">
+                    {topArtistName}
+                  </span>
+                ) : null}
+                {topGenreName ? (
+                  <span className="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1.5 text-xs font-semibold text-cyan-100">
+                    {topGenreName}
+                  </span>
+                ) : null}
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="min-w-0 flex-1">
             <h2 className="text-2xl font-semibold tracking-[-0.04em] sm:text-4xl lg:text-[2.75rem] lg:leading-tight">
@@ -452,14 +541,12 @@ function SoundprintIdentitySection({
             </div>
 
             {aiCached ? (
-              <p className="mt-4 inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-white/70">
+              <p className="mt-4 text-[0.7rem] text-white/40" title={t("aiCached")}>
                 {t("aiCached")}
               </p>
             ) : null}
             {showAiUnavailable ? (
-              <p className="mt-4 rounded-2xl border border-amber-200/20 bg-amber-300/10 px-4 py-3 text-sm leading-6 text-amber-50">
-                {t("aiUnavailable")}
-              </p>
+              <p className="mt-4 text-xs leading-6 text-white/45">{t("aiUnavailable")}</p>
             ) : null}
           </div>
         </div>
@@ -546,6 +633,7 @@ function MobileMusicalProfileView({
   interactiveAiBlockedByGenreBackfill,
   locale,
   profileDescription,
+  profileMetrics,
   showAiUnavailable,
   startDate,
   topArtistName,
@@ -560,6 +648,7 @@ function MobileMusicalProfileView({
   interactiveAiBlockedByGenreBackfill: boolean;
   locale: string;
   profileDescription: string;
+  profileMetrics: ProfileMetric[];
   showAiUnavailable?: boolean;
   startDate?: string;
   topArtistName: string;
@@ -638,21 +727,52 @@ function MobileMusicalProfileView({
               </p>
             </div>
           </div>
+
+          <div>
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/50">
+              {t("mobile.storyTitle")}
+            </p>
+            <div className="grid grid-cols-3 gap-2">
+              {profileMetrics.map((metric) => (
+                <div
+                  key={metric.label}
+                  className="rounded-xl border border-white/10 bg-white/[0.06] p-2.5"
+                  title={metric.hint}
+                >
+                  <p className="text-base font-semibold tracking-tight">{metric.value}</p>
+                  <p className="mt-1 truncate text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                    {metric.label}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <Link
+            href={withFilters("/dashboard/overview")}
+            className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25"
+          >
+            {t("mobile.overviewCta")}
+            <ArrowRightIcon className="h-4 w-4" />
+          </Link>
         </CinematicStagger>
       </motion.section>
+
+      <PageFramingSection withFilters={withFilters} compact />
+
+      <ExploreFeaturesSection withFilters={withFilters} />
 
       <SoundprintIdentitySection
         aiCached={aiCached}
         aiError={aiError}
         aiLoading={aiLoading}
+        compactSignature
         interactiveAiBlockedByGenreBackfill={interactiveAiBlockedByGenreBackfill}
         profileDescription={profileDescription}
         showAiUnavailable={showAiUnavailable}
         topArtistName={topArtistName}
         topGenreName={topGenreName}
       />
-
-      <ExploreFeaturesSection withFilters={withFilters} />
     </div>
   );
 }
@@ -722,7 +842,7 @@ function MusicalProfileNoDataView({
         </motion.section>
       </ParallaxHero>
 
-      <ExploreFeaturesSection withFilters={withFilters} />
+      <PageFramingSection withFilters={withFilters} />
 
       <EmptyState
         variant="startup"
@@ -731,15 +851,7 @@ function MusicalProfileNoDataView({
         description={t("importDescription")}
       />
 
-      <div className="flex justify-center pt-6">
-        <Link
-          href={withFilters("/dashboard/overview")}
-          className="inline-flex items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-5 py-3 text-sm font-bold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:shadow-card-hover focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
-        >
-          {t("overviewCallout.cta")}
-          <span aria-hidden="true">&rarr;</span>
-        </Link>
-      </div>
+      <ExploreFeaturesSection withFilters={withFilters} />
     </div>
   );
 }
@@ -836,7 +948,7 @@ function MusicalProfileContent() {
       genre: topGenreName || t("unknownGenre"),
     });
   const showAiUnavailable = aiProfile?.aiUnavailable;
-  const profileMetrics = [
+  const profileMetrics: ProfileMetric[] = [
     {
       label: t("metrics.totalListens"),
       value: formatCompactNumber(overview?.totalListens, locale),
@@ -865,6 +977,7 @@ function MusicalProfileContent() {
         interactiveAiBlockedByGenreBackfill={interactiveAiBlockedByGenreBackfill}
         locale={locale}
         profileDescription={profileDescription}
+        profileMetrics={profileMetrics}
         showAiUnavailable={showAiUnavailable}
         topArtistName={topArtistName}
         topArtists={topArtists}
@@ -984,7 +1097,11 @@ function MusicalProfileContent() {
 
                   <CinematicStagger className="mt-5 grid gap-2 sm:grid-cols-3" delay={0.4} inView>
                     {profileMetrics.map((metric) => (
-                      <div key={metric.label} className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
+                      <div
+                        key={metric.label}
+                        className="rounded-2xl border border-white/10 bg-white/[0.06] p-3"
+                        title={metric.hint}
+                      >
                         <p className="text-xl font-semibold tracking-tight">{metric.value}</p>
                         <p className="mt-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
                           {metric.label}
@@ -1006,7 +1123,13 @@ function MusicalProfileContent() {
         </motion.section>
       </ParallaxHero>
 
-      <SoundprintBrandDividerSection logoSize="lg" lineStyle="fade" maxWidth="medium" className="py-4 sm:py-6" />
+      <PageFramingSection withFilters={withFilters} />
+
+      <ScrollRevealSection>
+        <ExploreFeaturesSection withFilters={withFilters} />
+      </ScrollRevealSection>
+
+      <SoundprintBrandDividerSection logoSize="md" lineStyle="gradient" maxWidth="narrow" className="py-4 sm:py-6" />
 
       <ScrollRevealSection>
         <SoundprintIdentitySection
@@ -1019,12 +1142,6 @@ function MusicalProfileContent() {
           topArtistName={topArtistName}
           topGenreName={topGenreName}
         />
-      </ScrollRevealSection>
-
-      <SoundprintBrandDividerSection logoSize="md" lineStyle="gradient" maxWidth="narrow" className="py-4 sm:py-6" />
-
-      <ScrollRevealSection>
-        <ExploreFeaturesSection withFilters={withFilters} />
       </ScrollRevealSection>
       </div>
     </>

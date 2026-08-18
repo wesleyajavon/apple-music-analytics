@@ -38,8 +38,10 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const limitParam = searchParams.get("limit");
     const offsetParam = searchParams.get("offset");
+    const qParam = searchParams.get("q")?.trim() ?? "";
     const limit = limitParam ? Number.parseInt(limitParam, 10) : 20;
     const offset = offsetParam ? Number.parseInt(offsetParam, 10) : 0;
+    const searchQuery = qParam.length > 0 ? qParam.slice(0, 200) : undefined;
 
     if (Number.isNaN(limit) || limit < 1 || limit > 100) {
       return NextResponse.json(
@@ -61,13 +63,14 @@ export async function GET(request: NextRequest) {
         startDate,
         endDate,
         limit,
-        offset
+        offset,
+        searchQuery
       );
     } else {
       const [overview, total, topTracks] = await Promise.all([
         getTrackOverview(startDate, endDate, userId),
-        countTracksForRange(startDate, endDate, userId),
-        getTrackStats(startDate, endDate, userId, limit, offset),
+        countTracksForRange(startDate, endDate, userId, searchQuery),
+        getTrackStats(startDate, endDate, userId, limit, offset, searchQuery),
       ]);
       response = {
         overview,

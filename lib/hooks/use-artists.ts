@@ -25,7 +25,7 @@ import { useDebouncedValue } from "@/lib/hooks/use-debounced-value";
  */
 export const artistKeys = {
   all: ["artists"] as const,
-  stats: (params: { startDate?: string; endDate?: string; userId?: string; limit?: number; offset?: number }) =>
+  stats: (params: { startDate?: string; endDate?: string; userId?: string; limit?: number; offset?: number; q?: string }) =>
     [...artistKeys.all, "stats", params] as const,
   trends: (params: {
     startDate?: string;
@@ -68,7 +68,8 @@ export async function fetchArtistStats(
   endDate?: string,
   userId?: string,
   limit?: number,
-  offset?: number
+  offset?: number,
+  q?: string
 ): Promise<ArtistsResponseDto> {
   const searchParams = new URLSearchParams();
   
@@ -77,6 +78,7 @@ export async function fetchArtistStats(
   if (userId) searchParams.append("userId", userId);
   if (limit) searchParams.append("limit", limit.toString());
   if (offset != null) searchParams.append("offset", offset.toString());
+  if (q) searchParams.append("q", q);
 
   const queryString = searchParams.toString();
   const endpoint = `/artists${queryString ? `?${queryString}` : ""}`;
@@ -143,16 +145,17 @@ export function useArtistStats(
   options?: Omit<
     UseQueryOptions<ArtistsResponseDto, Error>,
     "queryKey" | "queryFn" | "staleTime" | "placeholderData"
-  >
+  > & { q?: string }
 ) {
-  const queryKey = artistKeys.stats({ startDate, endDate, userId, limit, offset });
+  const { q, ...queryOptions } = options ?? {};
+  const queryKey = artistKeys.stats({ startDate, endDate, userId, limit, offset, q });
 
   return useQuery<ArtistsResponseDto, Error>({
     queryKey,
-    queryFn: () => fetchArtistStats(startDate, endDate, userId, limit, offset),
+    queryFn: () => fetchArtistStats(startDate, endDate, userId, limit, offset, q),
     staleTime: CACHE_STALE_TIME.OVERVIEW,
     placeholderData: keepPreviousData,
-    ...options,
+    ...queryOptions,
   });
 }
 

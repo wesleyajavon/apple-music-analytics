@@ -5,31 +5,35 @@ import {
   useCallback,
   useEffect,
   useMemo,
-  useRef,
   useState,
-  type KeyboardEvent,
   type ReactNode,
 } from "react";
 import { useSearchParams } from "next/navigation";
+import { useRouter, usePathname } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { motion } from "motion/react";
-import { Search, Swords, X } from "lucide-react";
 import {
   DuetDualLineChart,
-  EntityBattleScorecard,
   applyDuetChartView,
-  type DualLineChartPoint,
   type DuetChartViewMode,
 } from "@/lib/components/duet/duet-entity-duel-blocks";
-import { DuetChartViewToggle } from "@/lib/components/duet/duet-chart-view-toggle";
-import { PeriodSelector, getPeriodFromSearchParams, type PeriodType } from "@/lib/components/period-selector";
+import { EntityHeadToHeadPanel } from "@/lib/components/duet/duet-entity-head-to-head-panel";
+import { getPeriodFromSearchParams, type PeriodType } from "@/lib/components/period-selector";
 import { EmptyState } from "@/lib/components/empty-state";
 import { ErrorState } from "@/lib/components/error-state";
 import { UserAvatar } from "@/lib/components/user-avatar";
 import { DuetMetadataBanner } from "@/lib/components/duet/duet-metadata-banner";
 import { DuetSharedArtistsPanel } from "@/lib/components/duet/duet-shared-artists-panel";
 import { DuetCompareHero } from "@/lib/components/duet/duet-compare-hero";
+import { DuetCompareContextBar } from "@/lib/components/duet/duet-compare-context-bar";
+import {
+  DuetCompareSectionTabs,
+  buildCompareTargetParams,
+  resolveCompareSection,
+  type DuetCompareSection,
+} from "@/lib/components/duet/duet-compare-section-tabs";
+import { DuetSubNav } from "@/lib/components/duet/duet-sub-nav";
 import {
   DuetCompareBattleSkeleton,
   DuetComparePageFallback,
@@ -45,6 +49,7 @@ import {
   generateDuetTimelineSharePng,
   resolveDuetTimelineWinner,
 } from "@/lib/utils/duet-timeline-share-image";
+import { formatOverviewDateRangeLabel } from "@/lib/utils/overview-date-range-label";
 import {
   getDuetDisplayName,
   getViewerDisplayName,
@@ -79,7 +84,6 @@ import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
 import { useArtistSearch } from "@/lib/hooks/use-artists";
 import { useTrackSearch } from "@/lib/hooks/use-tracks";
 import { useGenres } from "@/lib/hooks/use-listening";
-import type { CompareEntityResponse } from "@/lib/dto/duet";
 import { ApiError } from "@/lib/api-client";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
@@ -128,336 +132,6 @@ function SpotlightSectionHeader({
   );
 }
 
-type EntitySuggestion = { id: string; label: string; subtitle?: string };
-
-function EntityHeadToHeadPanel({
-  searchPlaceholder,
-  clearLabel,
-  loadingLabel,
-  errorLabel,
-  chartTitle,
-  chartDescription,
-  chartDescriptionCumulative,
-  noDataTitle,
-  noDataDescription,
-  query,
-  onQueryChange,
-  selectedEntityId,
-  onSelectEntity,
-  onClear,
-  suggestions,
-  showSuggestions,
-  entityCompare,
-  isEntityLoading,
-  isEntityFetching,
-  entityError,
-  refetchEntity,
-  chartData,
-  entityDisplayName,
-  entitySubtitle,
-  entityImageUrl,
-  arenaMode,
-  viewerName,
-  friendName,
-  viewerAvatarUrl,
-  friendAvatarUrl,
-  locale,
-  period,
-  t,
-  chartTheme,
-  resolvedTheme,
-  chartView,
-  onChartViewChange,
-}: {
-  searchPlaceholder: string;
-  clearLabel: string;
-  loadingLabel: string;
-  errorLabel: string;
-  chartTitle: string;
-  chartDescription: string;
-  chartDescriptionCumulative: string;
-  noDataTitle: string;
-  noDataDescription: string;
-  query: string;
-  onQueryChange: (value: string) => void;
-  selectedEntityId?: string;
-  onSelectEntity: (id: string, label: string) => void;
-  onClear: () => void;
-  suggestions: EntitySuggestion[];
-  showSuggestions: boolean;
-  entityCompare?: CompareEntityResponse;
-  isEntityLoading: boolean;
-  isEntityFetching: boolean;
-  entityError: Error | null;
-  refetchEntity: () => void;
-  chartData: DualLineChartPoint[];
-  entityDisplayName: string;
-  entitySubtitle?: string;
-  entityImageUrl?: string | null;
-  arenaMode: DuetArenaMode;
-  viewerName: string;
-  friendName: string;
-  viewerAvatarUrl?: string | null;
-  friendAvatarUrl?: string | null;
-  locale: string;
-  period: PeriodType;
-  t: ReturnType<typeof useTranslations<"duet.compare">>;
-  chartTheme: (typeof DASHBOARD_CHART_THEME)[keyof typeof DASHBOARD_CHART_THEME];
-  resolvedTheme: string;
-  chartView: DuetChartViewMode;
-  onChartViewChange: (mode: DuetChartViewMode) => void;
-}) {
-  const displayChartData = useMemo(
-    () => applyDuetChartView(chartData, chartView),
-    [chartData, chartView]
-  );
-  const [highlightIndex, setHighlightIndex] = useState(0);
-  const optionRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
-  const skipSuggestionScrollRef = useRef(true);
-  const suggestionListId = `duet-entity-suggestions-${arenaMode}`;
-  const clampedHighlight =
-    suggestions.length === 0 ? 0 : Math.min(highlightIndex, suggestions.length - 1);
-  const activeSuggestion = showSuggestions ? suggestions[clampedHighlight] : undefined;
-
-  useEffect(() => {
-    setHighlightIndex(0);
-    skipSuggestionScrollRef.current = true;
-  }, [query]);
-
-  useEffect(() => {
-    if (!showSuggestions || !activeSuggestion) return;
-    if (skipSuggestionScrollRef.current) {
-      skipSuggestionScrollRef.current = false;
-      return;
-    }
-    optionRefs.current.get(activeSuggestion.id)?.scrollIntoView({ block: "nearest" });
-  }, [activeSuggestion, showSuggestions]);
-
-  const setOptionRef = useCallback((id: string, el: HTMLButtonElement | null) => {
-    if (el) optionRefs.current.set(id, el);
-    else optionRefs.current.delete(id);
-  }, []);
-
-  const handleSearchKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLInputElement>) => {
-      if (!showSuggestions || suggestions.length === 0) {
-        if (event.key === "Escape" && (query || selectedEntityId)) {
-          event.preventDefault();
-          onClear();
-        }
-        return;
-      }
-
-      if (event.key === "ArrowDown") {
-        event.preventDefault();
-        setHighlightIndex((index) => Math.min(index + 1, suggestions.length - 1));
-        return;
-      }
-      if (event.key === "ArrowUp") {
-        event.preventDefault();
-        setHighlightIndex((index) => Math.max(index - 1, 0));
-        return;
-      }
-      if (event.key === "Home") {
-        event.preventDefault();
-        setHighlightIndex(0);
-        return;
-      }
-      if (event.key === "End") {
-        event.preventDefault();
-        setHighlightIndex(suggestions.length - 1);
-        return;
-      }
-      if (event.key === "Enter") {
-        const selected = suggestions[clampedHighlight];
-        if (!selected) return;
-        event.preventDefault();
-        onSelectEntity(selected.id, selected.label);
-        return;
-      }
-      if (event.key === "Escape") {
-        event.preventDefault();
-        onClear();
-      }
-    },
-    [
-      clampedHighlight,
-      onClear,
-      onSelectEntity,
-      query,
-      selectedEntityId,
-      showSuggestions,
-      suggestions,
-    ]
-  );
-
-  return (
-    <div className="space-y-4">
-      <div className={`relative ${DASHBOARD_SPOTLIGHT_INNER_WELL}`}>
-        <Search
-          className="pointer-events-none absolute left-8 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 sm:left-10"
-          aria-hidden
-        />
-        <input
-          type="search"
-          role="combobox"
-          aria-expanded={showSuggestions}
-          aria-haspopup="listbox"
-          aria-autocomplete="list"
-          aria-controls={suggestionListId}
-          aria-activedescendant={
-            activeSuggestion ? `${suggestionListId}-${activeSuggestion.id}` : undefined
-          }
-          value={query}
-          onChange={(e) => onQueryChange(e.target.value)}
-          onKeyDown={handleSearchKeyDown}
-          placeholder={searchPlaceholder}
-          autoComplete="off"
-          spellCheck={false}
-          className="w-full rounded-xl border border-slate-200/80 bg-white py-3 pl-10 pr-10 text-sm text-slate-900 shadow-sm focus:border-violet-300 focus:outline-none focus:ring-2 focus:ring-violet-200/60 dark:border-white/10 dark:bg-black/30 dark:text-white dark:focus:border-violet-400/40 dark:focus:ring-violet-400/20"
-        />
-        {selectedEntityId || query ? (
-          <button
-            type="button"
-            onClick={onClear}
-            className="absolute right-8 top-1/2 -translate-y-1/2 rounded-lg p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-white/10 dark:hover:text-slate-200 sm:right-10"
-            aria-label={clearLabel}
-          >
-            <X className="h-4 w-4" />
-          </button>
-        ) : null}
-      </div>
-
-      {showSuggestions ? (
-        <div className="overflow-hidden rounded-[1.35rem] border border-slate-200/80 bg-white shadow-sm dark:border-white/10 dark:bg-slate-950/80">
-          <p className="border-b border-slate-100 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:border-white/5 dark:text-slate-400">
-            {t("searchResultsCount", { count: suggestions.length })}
-          </p>
-          <ul
-            id={suggestionListId}
-            role="listbox"
-            aria-label={t("searchSuggestionsLabel")}
-            className="max-h-[min(60vh,24rem)] overflow-y-auto overscroll-contain"
-          >
-            {suggestions.map((item, index) => {
-              const highlighted = index === clampedHighlight;
-              return (
-                <li key={item.id} className="border-b border-slate-100 last:border-0 dark:border-white/5">
-                  <button
-                    type="button"
-                    id={`${suggestionListId}-${item.id}`}
-                    ref={(el) => setOptionRef(item.id, el)}
-                    role="option"
-                    aria-selected={highlighted}
-                    onMouseEnter={() => setHighlightIndex(index)}
-                    onClick={() => onSelectEntity(item.id, item.label)}
-                    className={`flex w-full flex-col items-start gap-0.5 px-4 py-3 text-left text-sm transition-colors ${
-                      highlighted
-                        ? "bg-violet-50 dark:bg-violet-500/15"
-                        : "hover:bg-violet-50 dark:hover:bg-violet-500/10"
-                    }`}
-                  >
-                    <span className="flex items-start gap-3 font-medium text-slate-900 dark:text-white">
-                      <Swords
-                        className="mt-0.5 h-4 w-4 shrink-0 text-violet-500 dark:text-violet-300"
-                        aria-hidden
-                      />
-                      <span className="min-w-0 break-words">{item.label}</span>
-                    </span>
-                    {item.subtitle ? (
-                      <span className="pl-7 text-xs text-slate-500 dark:text-slate-400">
-                        {item.subtitle}
-                      </span>
-                    ) : null}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      ) : null}
-
-      {selectedEntityId && (isEntityLoading || isEntityFetching) ? (
-        <p className={`text-sm ${DASHBOARD_SPOTLIGHT_MUTED}`}>{loadingLabel}</p>
-      ) : null}
-
-      {selectedEntityId && entityError ? (
-        entityError instanceof ApiError &&
-        (entityError.statusCode === 403 || entityError.statusCode === 404) ? (
-          <EmptyState
-            variant="startup"
-            message={
-              entityError.statusCode === 403 ? t("scopeInsufficientTitle") : t("notFoundTitle")
-            }
-            description={
-              entityError.statusCode === 403
-                ? t("scopeInsufficientDescription")
-                : t("notFoundDescription")
-            }
-          />
-        ) : (
-          <ErrorState
-            variant="startup"
-            error={entityError}
-            message={errorLabel}
-            onRetry={() => refetchEntity()}
-          />
-        )
-      ) : null}
-
-      {selectedEntityId && entityCompare && !isEntityLoading && !isEntityFetching && !entityError ? (
-        <div className="space-y-5">
-          <EntityBattleScorecard
-            selfCount={entityCompare.selfCount}
-            friendCount={entityCompare.friendCount}
-            viewerName={viewerName}
-            friendName={friendName}
-            viewerAvatarUrl={viewerAvatarUrl}
-            friendAvatarUrl={friendAvatarUrl}
-            winner={entityCompare.winner}
-            entityName={entityDisplayName}
-            entitySubtitle={entitySubtitle}
-            entityImageUrl={entityImageUrl}
-            arenaMode={arenaMode}
-            locale={locale}
-            t={t}
-          />
-
-          {entityCompare.rangeClamped ? (
-            <p className={`text-sm ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("rangeClamped")}</p>
-          ) : null}
-
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <h3 className="text-base font-semibold text-slate-900 dark:text-white">{chartTitle}</h3>
-              <p className={`mt-1 text-sm ${DASHBOARD_SPOTLIGHT_MUTED}`}>
-                {chartView === "cumulative" ? chartDescriptionCumulative : chartDescription}
-              </p>
-            </div>
-            <DuetChartViewToggle value={chartView} onChange={onChartViewChange} />
-          </div>
-
-          {chartData.length === 0 ? (
-            <EmptyState variant="startup" message={noDataTitle} description={noDataDescription} />
-          ) : (
-            <div className={DASHBOARD_SPOTLIGHT_INNER_WELL}>
-              <DuetDualLineChart
-                data={displayChartData}
-                period={period}
-                locale={locale}
-                chartTheme={chartTheme}
-                resolvedTheme={resolvedTheme}
-                selfLabel={t("seriesSelf")}
-                friendLabel={t("seriesFriend", { friendName })}
-              />
-            </div>
-          )}
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
 function parseInitialArenaMode(value: string | null): DuetArenaMode | null {
   if (value === "artist" || value === "track" || value === "genre") return value;
   return null;
@@ -484,10 +158,13 @@ function CompareContent() {
   const tPeriod = useTranslations("components.periodSelector");
   const locale = useLocale();
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
   const { resolvedTheme } = useTheme();
   const chartTheme = DASHBOARD_CHART_THEME[resolvedTheme === "dark" ? "dark" : "light"];
 
   const friendUserId = searchParams.get("friendUserId") ?? undefined;
+  const activeSection = resolveCompareSection(searchParams);
   const { startDate: filterStartDate, endDate: filterEndDate, isAll, isLoading: isRangeLoading } =
     useListenDateRange();
   const startDate = isAll ? undefined : filterStartDate;
@@ -579,11 +256,12 @@ function CompareContent() {
   const initialArenaMode = parseInitialArenaMode(searchParams.get("arenaMode"));
   const initialEntityType = searchParams.get("entityType") ?? searchParams.get("type");
   const initialEntityId = searchParams.get("entityId") ?? undefined;
+  const initialEntityName = searchParams.get("entityName") ?? undefined;
 
   const [arenaMode, setArenaMode] = useState<DuetArenaMode | null>(initialArenaMode);
   const [chartView, setChartView] = useState<DuetChartViewMode>("period");
   const [artistQuery, setArtistQuery] = useState(
-    initialEntityType === "artist" && initialEntityId ? initialEntityId : ""
+    initialEntityType === "artist" && initialEntityId ? (initialEntityName ?? "") : ""
   );
   const [selectedArtistId, setSelectedArtistId] = useState<string | undefined>(
     initialEntityType === "artist" ? initialEntityId : undefined
@@ -604,9 +282,7 @@ function CompareContent() {
     period,
   });
 
-  const [trackQuery, setTrackQuery] = useState(
-    initialEntityType === "track" && initialEntityId ? "" : ""
-  );
+  const [trackQuery, setTrackQuery] = useState("");
   const [selectedTrackId, setSelectedTrackId] = useState<string | undefined>(
     initialEntityType === "track" ? initialEntityId : undefined
   );
@@ -649,10 +325,20 @@ function CompareContent() {
   });
 
   useEffect(() => {
+    if (initialArenaMode) setArenaMode(initialArenaMode);
+  }, [initialArenaMode]);
+
+  useEffect(() => {
     if (trackCompare?.type === "track" && selectedTrackId && !trackQuery) {
       setTrackQuery(trackCompare.trackTitle ?? "");
     }
   }, [trackCompare, selectedTrackId, trackQuery]);
+
+  useEffect(() => {
+    if (artistCompare?.type === "artist" && selectedArtistId && !artistQuery) {
+      setArtistQuery(artistCompare.artistName ?? "");
+    }
+  }, [artistCompare, selectedArtistId, artistQuery]);
 
   const showArtistSuggestions =
     !!artistResults?.artists?.length && artistQuery.trim().length >= 2 && !selectedArtistId;
@@ -717,6 +403,31 @@ function CompareContent() {
     return { selfTotal, friendTotal };
   }, [chartData]);
 
+  const dateRangeLabel = formatOverviewDateRangeLabel(
+    timeline?.startDate ?? startDate,
+    timeline?.endDate ?? endDate,
+    locale
+  );
+
+  const handleCompareArtist = useCallback(
+    (artistId: string, artistName: string) => {
+      const params = buildCompareTargetParams(
+        new URLSearchParams(searchParams.toString()),
+        artistId,
+        artistName
+      );
+      setArenaMode("artist");
+      setSelectedArtistId(artistId);
+      setArtistQuery(artistName);
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+      document.getElementById("duet-compare-context-bar")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    },
+    [pathname, router, searchParams]
+  );
+
   const timelineShareActions = useMemo(() => {
     const total = periodTotals.selfTotal + periodTotals.friendTotal;
     if (total <= 0) return null;
@@ -724,9 +435,9 @@ function CompareContent() {
     const winner = resolveDuetTimelineWinner(periodTotals.selfTotal, periodTotals.friendTotal);
     const periodLabel =
       period === "day" ? tPeriod("daily") : period === "week" ? tPeriod("weekly") : tPeriod("monthly");
-    const dateRange = formatShareDateRange(timeline?.startDate, timeline?.endDate, locale);
-    const subtitle = dateRange
-      ? t("shareTimelineSubtitle", { periodLabel, dateRange })
+    const shareDateRange = formatShareDateRange(timeline?.startDate, timeline?.endDate, locale);
+    const subtitle = shareDateRange
+      ? t("shareTimelineSubtitle", { periodLabel, dateRange: shareDateRange })
       : periodLabel;
     const viewerName = viewer?.name ?? t("seriesSelf");
     const winnerHeadline =
@@ -771,7 +482,7 @@ function CompareContent() {
             selfTotal: periodTotals.selfTotal.toLocaleString(locale),
             friendName,
             friendTotal: periodTotals.friendTotal.toLocaleString(locale),
-            dateRange: dateRange || subtitle,
+            dateRange: shareDateRange || subtitle,
             outcome,
           })
         }
@@ -808,10 +519,280 @@ function CompareContent() {
   const selectedGenreName =
     genreCompare?.type === "genre" ? genreCompare.genreName : genreQuery;
 
+  const renderTargetSection = () => (
+    <section className={DASHBOARD_SPOTLIGHT_SHELL}>
+      <div
+        className={
+          arenaMode === "genre"
+            ? DASHBOARD_SPOTLIGHT_GRADIENT_LIME
+            : arenaMode === "track"
+              ? DASHBOARD_SPOTLIGHT_GRADIENT_CYAN
+              : arenaMode === "artist"
+                ? DASHBOARD_SPOTLIGHT_GRADIENT_LIME
+                : DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY
+        }
+      />
+      <div
+        className={
+          arenaMode === "genre"
+            ? DASHBOARD_SPOTLIGHT_HAIRLINE_LIME
+            : arenaMode === "track"
+              ? DASHBOARD_SPOTLIGHT_HAIRLINE_CYAN
+              : arenaMode === "artist"
+                ? DASHBOARD_SPOTLIGHT_HAIRLINE_LIME
+                : DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET
+        }
+      />
+      <SpotlightSectionHeader
+        eyebrow={t("arenaEyebrow")}
+        title={t("arenaTitle")}
+        description={t("arenaDescription")}
+        badge={t("arenaBadge")}
+        badgeVariant={arenaMode === "track" ? "violet" : "lime"}
+      />
+      <div className="space-y-5 px-5 pb-6 sm:px-8">
+        {!arenaMode ? (
+          <DuetArenaModePicker onSelect={setArenaMode} />
+        ) : (
+          <>
+            <DuetArenaModeToggle mode={arenaMode} onChange={setArenaMode} />
+            {arenaMode === "artist" ? (
+              <EntityHeadToHeadPanel
+                searchPlaceholder={t("artistSearchPlaceholder")}
+                clearLabel={t("artistClear")}
+                loadingLabel={t("artistLoading")}
+                errorLabel={t("artistError")}
+                chartTitle={t("artistChartTitle", { artistName: selectedArtistName, friendName })}
+                chartDescription={t("artistChartDescription")}
+                chartDescriptionCumulative={t("chartDescriptionCumulative")}
+                noDataTitle={t("artistNoDataTitle")}
+                noDataDescription={t("artistNoDataDescription")}
+                query={artistQuery}
+                onQueryChange={(value) => {
+                  setArtistQuery(value);
+                  setSelectedArtistId(undefined);
+                }}
+                selectedEntityId={selectedArtistId}
+                onSelectEntity={(id, label) => {
+                  setSelectedArtistId(id);
+                  setArtistQuery(label);
+                }}
+                onClear={() => {
+                  setArtistQuery("");
+                  setSelectedArtistId(undefined);
+                }}
+                suggestions={(artistResults?.artists ?? []).map((artist) => ({
+                  id: artist.id,
+                  label: artist.name,
+                }))}
+                showSuggestions={showArtistSuggestions}
+                entityCompare={artistCompare}
+                isEntityLoading={isArtistCompareLoading}
+                isEntityFetching={isArtistCompareFetching}
+                entityError={artistCompareError}
+                refetchEntity={() => void refetchArtistCompare()}
+                chartData={artistChartData}
+                entityDisplayName={selectedArtistName}
+                entityImageUrl={
+                  artistCompare?.type === "artist" ? artistCompare.imageUrl : undefined
+                }
+                arenaMode="artist"
+                viewerName={viewer?.name ?? t("seriesSelf")}
+                friendName={friendName}
+                viewerAvatarUrl={viewer?.avatarUrl}
+                friendAvatarUrl={friendUser?.avatarUrl}
+                locale={locale}
+                period={period}
+                t={t}
+                chartTheme={chartTheme}
+                resolvedTheme={resolvedTheme}
+                chartView={chartView}
+                onChartViewChange={setChartView}
+              />
+            ) : arenaMode === "track" ? (
+              <EntityHeadToHeadPanel
+                searchPlaceholder={t("trackSearchPlaceholder")}
+                clearLabel={t("trackClear")}
+                loadingLabel={t("trackLoading")}
+                errorLabel={t("trackError")}
+                chartTitle={t("trackChartTitle", { trackName: selectedTrackName, friendName })}
+                chartDescription={t("trackChartDescription")}
+                chartDescriptionCumulative={t("chartDescriptionCumulative")}
+                noDataTitle={t("trackNoDataTitle")}
+                noDataDescription={t("trackNoDataDescription")}
+                query={trackQuery}
+                onQueryChange={(value) => {
+                  setTrackQuery(value);
+                  setSelectedTrackId(undefined);
+                }}
+                selectedEntityId={selectedTrackId}
+                onSelectEntity={(id, label) => {
+                  setSelectedTrackId(id);
+                  setTrackQuery(label);
+                }}
+                onClear={() => {
+                  setTrackQuery("");
+                  setSelectedTrackId(undefined);
+                }}
+                suggestions={(trackResults?.tracks ?? []).map((track) => ({
+                  id: track.id,
+                  label: track.title,
+                  subtitle: track.artistName,
+                }))}
+                showSuggestions={showTrackSuggestions}
+                entityCompare={trackCompare}
+                isEntityLoading={isTrackCompareLoading}
+                isEntityFetching={isTrackCompareFetching}
+                entityError={trackCompareError}
+                refetchEntity={() => void refetchTrackCompare()}
+                chartData={trackChartData}
+                entityDisplayName={selectedTrackName}
+                entitySubtitle={selectedTrackArtistName ?? undefined}
+                arenaMode="track"
+                viewerName={viewer?.name ?? t("seriesSelf")}
+                friendName={friendName}
+                viewerAvatarUrl={viewer?.avatarUrl}
+                friendAvatarUrl={friendUser?.avatarUrl}
+                locale={locale}
+                period={period}
+                t={t}
+                chartTheme={chartTheme}
+                resolvedTheme={resolvedTheme}
+                chartView={chartView}
+                onChartViewChange={setChartView}
+              />
+            ) : (
+              <EntityHeadToHeadPanel
+                searchPlaceholder={t("genreSearchPlaceholder")}
+                clearLabel={t("genreClear")}
+                loadingLabel={t("genreLoading")}
+                errorLabel={t("genreError")}
+                chartTitle={t("genreChartTitle", { genreName: selectedGenreName, friendName })}
+                chartDescription={t("genreChartDescription")}
+                chartDescriptionCumulative={t("chartDescriptionCumulative")}
+                noDataTitle={t("genreNoDataTitle")}
+                noDataDescription={t("genreNoDataDescription")}
+                query={genreQuery}
+                onQueryChange={(value) => {
+                  setGenreQuery(value);
+                  setSelectedGenre(undefined);
+                }}
+                selectedEntityId={selectedGenre}
+                onSelectEntity={(id, label) => {
+                  setSelectedGenre(id);
+                  setGenreQuery(label);
+                }}
+                onClear={() => {
+                  setGenreQuery("");
+                  setSelectedGenre(undefined);
+                }}
+                suggestions={genreSuggestions.map((row) => ({
+                  id: row.genre,
+                  label: row.genre,
+                }))}
+                showSuggestions={showGenreSuggestions}
+                entityCompare={genreCompare}
+                isEntityLoading={isGenreCompareLoading}
+                isEntityFetching={isGenreCompareFetching}
+                entityError={genreCompareError}
+                refetchEntity={() => void refetchGenreCompare()}
+                chartData={genreChartData}
+                entityDisplayName={selectedGenreName}
+                arenaMode="genre"
+                viewerName={viewer?.name ?? t("seriesSelf")}
+                friendName={friendName}
+                viewerAvatarUrl={viewer?.avatarUrl}
+                friendAvatarUrl={friendUser?.avatarUrl}
+                locale={locale}
+                period={period}
+                t={t}
+                chartTheme={chartTheme}
+                resolvedTheme={resolvedTheme}
+                chartView={chartView}
+                onChartViewChange={setChartView}
+              />
+            )}
+          </>
+        )}
+      </div>
+    </section>
+  );
+
+  const renderOverviewSection = () => (
+    <>
+      <DuetMetadataBanner friendName={friendName} metadata={metadata} />
+
+      {timeline?.rangeClamped ? (
+        <p className={`rounded-2xl border border-slate-200/80 bg-slate-50/80 px-4 py-3 text-sm ${DASHBOARD_SPOTLIGHT_MUTED} dark:border-white/10 dark:bg-white/5`}>
+          {t("rangeClamped")}
+        </p>
+      ) : null}
+
+      <section className={DASHBOARD_SPOTLIGHT_SHELL}>
+        <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} />
+        <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} />
+        <SpotlightSectionHeader
+          eyebrow={t("timelineEyebrow")}
+          title={t("chartTitle", { friendName })}
+          description={
+            chartView === "cumulative"
+              ? t("chartDescriptionCumulative")
+              : t(getPeriodChartDescriptionKey(period))
+          }
+          badge={t("timelineBadge")}
+        />
+        <div className="space-y-4 px-5 pb-6 sm:px-8">
+          {chartData.length === 0 ? (
+            <EmptyState variant="startup" message={t("noDataTitle")} description={t("noDataDescription")} />
+          ) : (
+            <>
+              <div className={DASHBOARD_SPOTLIGHT_INNER_WELL}>
+                <DuetDualLineChart
+                  data={timelineDisplayChartData}
+                  period={period}
+                  locale={locale}
+                  chartTheme={chartTheme}
+                  resolvedTheme={resolvedTheme}
+                  selfLabel={t("seriesSelf")}
+                  friendLabel={t("seriesFriend", { friendName })}
+                />
+              </div>
+              {timelineShareActions ? (
+                <div className="flex justify-center sm:justify-end">{timelineShareActions}</div>
+              ) : null}
+            </>
+          )}
+        </div>
+      </section>
+    </>
+  );
+
+  const renderSectionContent = (section: DuetCompareSection) => {
+    if (section === "shared") {
+      return (
+        <DuetSharedArtistsPanel
+          friendName={friendName}
+          data={sharedArtists}
+          isLoading={isSharedArtistsLoading}
+          error={sharedArtistsError}
+          onRetry={() => void refetchSharedArtists()}
+          onCompareArtist={handleCompareArtist}
+        />
+      );
+    }
+
+    if (section === "target") {
+      return renderTargetSection();
+    }
+
+    return renderOverviewSection();
+  };
+
   if (!friendUserId) {
     if (friendsLoading || viewer === null) {
       return (
         <div className="space-y-8">
+          <DuetSubNav />
           <DuetCompareHero mode="picker" viewerName={t("seriesSelf")} locale={locale} />
           <DuetComparePickerSkeleton />
         </div>
@@ -822,6 +803,7 @@ function CompareContent() {
 
     return (
       <div className="space-y-8">
+        <DuetSubNav />
         <DuetCompareHero
           mode="picker"
           viewerName={viewer.name}
@@ -862,7 +844,7 @@ function CompareContent() {
                     transition={{ duration: 0.3, delay: index * 0.05 }}
                   >
                     <Link
-                      href={`/dashboard/duet/compare?friendUserId=${encodeURIComponent(peer.id)}`}
+                      href={`/dashboard/duet/compare?friendUserId=${encodeURIComponent(peer.id)}&section=overview`}
                       className="group relative flex min-h-[9.5rem] flex-col items-center justify-center gap-3 overflow-hidden rounded-[1.35rem] border border-slate-200/80 bg-white p-5 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-violet-300/60 hover:shadow-lg hover:shadow-violet-500/10 dark:border-white/10 dark:bg-slate-950/60 dark:hover:border-violet-400/30"
                     >
                       <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-violet-500/0 via-transparent to-cyan-500/0 opacity-0 transition-opacity duration-300 group-hover:from-violet-500/5 group-hover:to-cyan-500/8 group-hover:opacity-100" />
@@ -873,9 +855,6 @@ function CompareContent() {
                           {t("challengeCta")}
                         </p>
                       </div>
-                      <span className="absolute right-3 top-3 rounded-full border border-pink-200/80 bg-pink-50 px-2 py-0.5 text-[0.6rem] font-black uppercase tracking-widest text-pink-600 dark:border-pink-400/25 dark:bg-pink-400/10 dark:text-pink-200">
-                        VS
-                      </span>
                     </Link>
                   </motion.div>
                 );
@@ -890,6 +869,7 @@ function CompareContent() {
   if ((isLoading && !timeline) || (!isAll && isRangeLoading && !timeline)) {
     return (
       <div className="space-y-8">
+        <DuetSubNav />
         <DuetCompareHero
           mode="battle"
           viewerName={viewer?.name ?? t("seriesSelf")}
@@ -907,6 +887,7 @@ function CompareContent() {
     if (error instanceof ApiError && (error.statusCode === 403 || error.statusCode === 404)) {
       return (
         <div className="space-y-6">
+          <DuetSubNav />
           <DuetCompareHero mode="picker" viewerName={viewer?.name ?? t("seriesSelf")} locale={locale} />
           <EmptyState
             variant="startup"
@@ -922,6 +903,7 @@ function CompareContent() {
     }
     return (
       <div className="space-y-6">
+        <DuetSubNav />
         <DuetCompareHero mode="picker" viewerName={viewer?.name ?? t("seriesSelf")} locale={locale} />
         <ErrorState variant="startup" error={error} message={t("error")} onRetry={() => refetch()} />
       </div>
@@ -930,6 +912,7 @@ function CompareContent() {
 
   return (
     <div className="space-y-8">
+      <DuetSubNav />
       <DuetCompareHero
         mode="battle"
         viewerName={viewer?.name ?? t("seriesSelf")}
@@ -939,266 +922,23 @@ function CompareContent() {
         selfTotal={periodTotals.selfTotal}
         friendTotal={periodTotals.friendTotal}
         locale={locale}
-        shareActions={timelineShareActions}
       />
 
-      <DuetMetadataBanner friendName={friendName} metadata={metadata} />
-
-      {timeline?.rangeClamped ? (
-        <p className={`rounded-2xl border border-slate-200/80 bg-slate-50/80 px-4 py-3 text-sm ${DASHBOARD_SPOTLIGHT_MUTED} dark:border-white/10 dark:bg-white/5`}>
-          {t("rangeClamped")}
-        </p>
-      ) : null}
-
-      <section className={DASHBOARD_SPOTLIGHT_SHELL}>
-        <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} />
-        <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} />
-        <SpotlightSectionHeader
-          eyebrow={t("timelineEyebrow")}
-          title={t("chartTitle", { friendName })}
-          description={
-            chartView === "cumulative"
-              ? t("chartDescriptionCumulative")
-              : t(getPeriodChartDescriptionKey(period))
-          }
-          badge={t("timelineBadge")}
-          action={
-            <div className="flex flex-col items-start gap-3 sm:items-end">
-              <PeriodSelector value={period} defaultPeriod="month" />
-              <DuetChartViewToggle value={chartView} onChange={setChartView} />
-            </div>
-          }
-        />
-        <div className="px-5 pb-6 sm:px-8">
-          {chartData.length === 0 ? (
-            <EmptyState variant="startup" message={t("noDataTitle")} description={t("noDataDescription")} />
-          ) : (
-            <div className={DASHBOARD_SPOTLIGHT_INNER_WELL}>
-              <DuetDualLineChart
-                data={timelineDisplayChartData}
-                period={period}
-                locale={locale}
-                chartTheme={chartTheme}
-                resolvedTheme={resolvedTheme}
-                selfLabel={t("seriesSelf")}
-                friendLabel={t("seriesFriend", { friendName })}
-              />
-            </div>
-          )}
-        </div>
-      </section>
-
-      <DuetSharedArtistsPanel
-        friendUserId={friendUserId}
-        friendName={friendName}
+      <DuetCompareContextBar
+        id="duet-compare-context-bar"
         viewerName={viewer?.name ?? t("seriesSelf")}
-        startDate={startDate}
-        endDate={endDate}
+        viewerAvatar={viewer?.avatarUrl}
+        friendName={friendName}
+        friendAvatar={friendUser?.avatarUrl}
+        dateRangeLabel={dateRangeLabel}
         period={period}
         chartView={chartView}
         onChartViewChange={setChartView}
-        data={sharedArtists}
-        isLoading={isSharedArtistsLoading}
-        error={sharedArtistsError}
-        onRetry={() => void refetchSharedArtists()}
       />
 
-      <section className={DASHBOARD_SPOTLIGHT_SHELL}>
-        <div
-          className={
-            arenaMode === "genre"
-              ? DASHBOARD_SPOTLIGHT_GRADIENT_LIME
-              : arenaMode === "track"
-                ? DASHBOARD_SPOTLIGHT_GRADIENT_CYAN
-                : arenaMode === "artist"
-                  ? DASHBOARD_SPOTLIGHT_GRADIENT_LIME
-                  : DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY
-          }
-        />
-        <div
-          className={
-            arenaMode === "genre"
-              ? DASHBOARD_SPOTLIGHT_HAIRLINE_LIME
-              : arenaMode === "track"
-                ? DASHBOARD_SPOTLIGHT_HAIRLINE_CYAN
-                : arenaMode === "artist"
-                  ? DASHBOARD_SPOTLIGHT_HAIRLINE_LIME
-                  : DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET
-          }
-        />
-        <SpotlightSectionHeader
-          eyebrow={t("arenaEyebrow")}
-          title={t("arenaTitle")}
-          description={t("arenaDescription")}
-          badge={t("arenaBadge")}
-          badgeVariant={arenaMode === "track" ? "violet" : "lime"}
-        />
-        <div className="space-y-5 px-5 pb-6 sm:px-8">
-          {!arenaMode ? (
-            <DuetArenaModePicker onSelect={setArenaMode} />
-          ) : (
-            <>
-              <DuetArenaModeToggle mode={arenaMode} onChange={setArenaMode} />
-              {arenaMode === "artist" ? (
-                <EntityHeadToHeadPanel
-                  searchPlaceholder={t("artistSearchPlaceholder")}
-                  clearLabel={t("artistClear")}
-                  loadingLabel={t("artistLoading")}
-                  errorLabel={t("artistError")}
-                  chartTitle={t("artistChartTitle", { artistName: selectedArtistName, friendName })}
-                  chartDescription={t("artistChartDescription")}
-                  chartDescriptionCumulative={t("chartDescriptionCumulative")}
-                  noDataTitle={t("artistNoDataTitle")}
-                  noDataDescription={t("artistNoDataDescription")}
-                  query={artistQuery}
-                  onQueryChange={(value) => {
-                    setArtistQuery(value);
-                    setSelectedArtistId(undefined);
-                  }}
-                  selectedEntityId={selectedArtistId}
-                  onSelectEntity={(id, label) => {
-                    setSelectedArtistId(id);
-                    setArtistQuery(label);
-                  }}
-                  onClear={() => {
-                    setArtistQuery("");
-                    setSelectedArtistId(undefined);
-                  }}
-                  suggestions={(artistResults?.artists ?? []).map((artist) => ({
-                    id: artist.id,
-                    label: artist.name,
-                  }))}
-                  showSuggestions={showArtistSuggestions}
-                  entityCompare={artistCompare}
-                  isEntityLoading={isArtistCompareLoading}
-                  isEntityFetching={isArtistCompareFetching}
-                  entityError={artistCompareError}
-                  refetchEntity={() => void refetchArtistCompare()}
-                  chartData={artistChartData}
-                  entityDisplayName={selectedArtistName}
-                  entityImageUrl={
-                    artistCompare?.type === "artist" ? artistCompare.imageUrl : undefined
-                  }
-                  arenaMode="artist"
-                  viewerName={viewer?.name ?? t("seriesSelf")}
-                  friendName={friendName}
-                  viewerAvatarUrl={viewer?.avatarUrl}
-                  friendAvatarUrl={friendUser?.avatarUrl}
-                  locale={locale}
-                  period={period}
-                  t={t}
-                  chartTheme={chartTheme}
-                  resolvedTheme={resolvedTheme}
-                  chartView={chartView}
-                  onChartViewChange={setChartView}
-                />
-              ) : arenaMode === "track" ? (
-                <EntityHeadToHeadPanel
-                  searchPlaceholder={t("trackSearchPlaceholder")}
-                  clearLabel={t("trackClear")}
-                  loadingLabel={t("trackLoading")}
-                  errorLabel={t("trackError")}
-                  chartTitle={t("trackChartTitle", { trackName: selectedTrackName, friendName })}
-                  chartDescription={t("trackChartDescription")}
-                  chartDescriptionCumulative={t("chartDescriptionCumulative")}
-                  noDataTitle={t("trackNoDataTitle")}
-                  noDataDescription={t("trackNoDataDescription")}
-                  query={trackQuery}
-                  onQueryChange={(value) => {
-                    setTrackQuery(value);
-                    setSelectedTrackId(undefined);
-                  }}
-                  selectedEntityId={selectedTrackId}
-                  onSelectEntity={(id, label) => {
-                    setSelectedTrackId(id);
-                    setTrackQuery(label);
-                  }}
-                  onClear={() => {
-                    setTrackQuery("");
-                    setSelectedTrackId(undefined);
-                  }}
-                  suggestions={(trackResults?.tracks ?? []).map((track) => ({
-                    id: track.id,
-                    label: track.title,
-                    subtitle: track.artistName,
-                  }))}
-                  showSuggestions={showTrackSuggestions}
-                  entityCompare={trackCompare}
-                  isEntityLoading={isTrackCompareLoading}
-                  isEntityFetching={isTrackCompareFetching}
-                  entityError={trackCompareError}
-                  refetchEntity={() => void refetchTrackCompare()}
-                  chartData={trackChartData}
-                  entityDisplayName={selectedTrackName}
-                  entitySubtitle={selectedTrackArtistName ?? undefined}
-                  arenaMode="track"
-                  viewerName={viewer?.name ?? t("seriesSelf")}
-                  friendName={friendName}
-                  viewerAvatarUrl={viewer?.avatarUrl}
-                  friendAvatarUrl={friendUser?.avatarUrl}
-                  locale={locale}
-                  period={period}
-                  t={t}
-                  chartTheme={chartTheme}
-                  resolvedTheme={resolvedTheme}
-                  chartView={chartView}
-                  onChartViewChange={setChartView}
-                />
-              ) : (
-                <EntityHeadToHeadPanel
-                  searchPlaceholder={t("genreSearchPlaceholder")}
-                  clearLabel={t("genreClear")}
-                  loadingLabel={t("genreLoading")}
-                  errorLabel={t("genreError")}
-                  chartTitle={t("genreChartTitle", { genreName: selectedGenreName, friendName })}
-                  chartDescription={t("genreChartDescription")}
-                  chartDescriptionCumulative={t("chartDescriptionCumulative")}
-                  noDataTitle={t("genreNoDataTitle")}
-                  noDataDescription={t("genreNoDataDescription")}
-                  query={genreQuery}
-                  onQueryChange={(value) => {
-                    setGenreQuery(value);
-                    setSelectedGenre(undefined);
-                  }}
-                  selectedEntityId={selectedGenre}
-                  onSelectEntity={(id, label) => {
-                    setSelectedGenre(id);
-                    setGenreQuery(label);
-                  }}
-                  onClear={() => {
-                    setGenreQuery("");
-                    setSelectedGenre(undefined);
-                  }}
-                  suggestions={genreSuggestions.map((row) => ({
-                    id: row.genre,
-                    label: row.genre,
-                  }))}
-                  showSuggestions={showGenreSuggestions}
-                  entityCompare={genreCompare}
-                  isEntityLoading={isGenreCompareLoading}
-                  isEntityFetching={isGenreCompareFetching}
-                  entityError={genreCompareError}
-                  refetchEntity={() => void refetchGenreCompare()}
-                  chartData={genreChartData}
-                  entityDisplayName={selectedGenreName}
-                  arenaMode="genre"
-                  viewerName={viewer?.name ?? t("seriesSelf")}
-                  friendName={friendName}
-                  viewerAvatarUrl={viewer?.avatarUrl}
-                  friendAvatarUrl={friendUser?.avatarUrl}
-                  locale={locale}
-                  period={period}
-                  t={t}
-                  chartTheme={chartTheme}
-                  resolvedTheme={resolvedTheme}
-                  chartView={chartView}
-                  onChartViewChange={setChartView}
-                />
-              )}
-            </>
-          )}
-        </div>
-      </section>
+      <DuetCompareSectionTabs activeSection={activeSection} />
+
+      <div className="space-y-8">{renderSectionContent(activeSection)}</div>
     </div>
   );
 }

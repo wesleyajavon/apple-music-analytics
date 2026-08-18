@@ -12,6 +12,8 @@ export interface TrackStatsDto {
   firstListenDate: string;
   lastListenDate: string;
   totalPlayTime: number;
+  /** Rang global sur la période, renvoyé lors d’une recherche sur le classement. */
+  rank?: number;
 }
 
 export interface TrackOverviewDto {

@@ -141,9 +141,9 @@ flowchart TB
 ```mermaid
 flowchart TD
     subgraph DashboardFeatures["Fonctionnalités dashboard"]
-        MP["/dashboard/musical-profile<br/>(page par défaut)"]
-        MP --> OV[Overview & stats globales]
-        MP --> TL[Timeline & heatmap]
+        MP["/dashboard/musical-profile<br/>(page d'accueil par défaut)"]
+    MP --> OV[Overview / Your Music]
+    MP --> TL[Timeline & heatmap]
         MP --> GN[Genres & tendances]
         MP --> AR[Artistes & tracks]
         MP --> TA[Analyse temporelle]
@@ -183,6 +183,8 @@ flowchart TD
 ## Résumé
 
 Un visiteur arrive sur la **landing i18n**, s'**authentifie via Supabase** (ou consulte la **démo publique**), passe par l'**onboarding d'import** (CSV Apple Music / ZIP Spotify / Last.fm), les écoutes sont **normalisées en PostgreSQL**, puis le **dashboard React** interroge les **API Next.js** qui agrègent les stats — avec **Groq** en option pour l'IA et **Duet** pour comparer avec des amis.
+
+**Accueil dashboard.** `/dashboard` et la fin d'onboarding mènent à `/dashboard/musical-profile` (hub narratif). Your Music (`/dashboard/overview`) est le hub analytique : faits d'abord, features ensuite. Mobile et laptop racontent la même histoire — période, insight concret (top titre / artiste), KPIs, un seul bloc de tops, tendances en onglets, calendrier + extraits IA, teaser vers le profil musical, puis Chat et Duet en « aller plus loin ». Tracks (`/dashboard/tracks`), Artists (`/dashboard/artists`) et Genres (`/dashboard/genres`) reprennent le même pattern de boutons de section : un panneau à la fois (fiches / Top 20 ou répartition / classement complet). La sidebar desktop liste Profil musical puis Your Music ; la barre mobile liste Profil, Your Music, Artistes, Genres, puis Plus (timeline, heatmap, chat, Duet, réglages).
 
 ## Fichiers clés
 

@@ -45,21 +45,21 @@ const icons = {
       <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
     </svg>
   ),
+  timeline: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M2.25 18 9 11.25l4.5 4.5L21.75 7M21.75 7h-5.25M21.75 7v5.25"
+      />
+    </svg>
+  ),
   tracks: (props: React.SVGProps<SVGSVGElement>) => (
     <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
         d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 0 1 0 3.75H5.625a1.875 1.875 0 0 1 0-3.75Z"
-      />
-    </svg>
-  ),
-  musicalProfile: (props: React.SVGProps<SVGSVGElement>) => (
-    <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z"
       />
     </svg>
   ),
@@ -128,6 +128,7 @@ const PLUS_SECTIONS: PlusNavSection[] = [
     groupKey: "patterns",
     items: [
       { href: "/dashboard/heatmap", labelKey: "heatmap", icon: icons.heatmap },
+      { href: "/dashboard/timeline", labelKey: "timeline", icon: icons.timeline },
       { href: "/dashboard/temporal-analysis", labelKey: "temporalAnalysis", icon: icons.clock },
     ],
   },
@@ -135,7 +136,6 @@ const PLUS_SECTIONS: PlusNavSection[] = [
     groupKey: "library",
     items: [
       { href: "/dashboard/tracks", labelKey: "tracks", icon: icons.tracks },
-      { href: "/dashboard/musical-profile", labelKey: "musicalProfile", icon: icons.musicalProfile },
       { href: "/dashboard/genres/palette", labelKey: "palette", icon: icons.palette },
     ],
   },

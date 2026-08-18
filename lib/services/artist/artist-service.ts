@@ -17,6 +17,8 @@ export interface ArtistStats {
   firstListenDate: string;
   lastListenDate: string;
   totalPlayTime: number; // in seconds
+  /** Rang global sur la période (présent quand une recherche filtre la liste). */
+  rank?: number;
 }
 
 export interface ArtistTrendPoint {
@@ -40,30 +42,77 @@ export async function getArtistStats(
   endDate?: Date,
   userId?: string,
   limit: number = 20,
-  offset: number = 0
+  offset: number = 0,
+  searchQuery?: string
 ): Promise<ArtistStats[]> {
-  const query = Prisma.sql`
-    SELECT 
-      a.id as artist_id,
-      a.name as artist_name,
-      a."imageUrl" as image_url,
-      COUNT(*)::bigint as listen_count,
-      COUNT(DISTINCT t.id)::bigint as unique_tracks,
-      MIN(l."playedAt") as first_listen_date,
-      MAX(l."playedAt") as last_listen_date,
-      COALESCE(SUM(t.duration), 0)::bigint as total_play_time
-    FROM "Listen" l
-    JOIN "Track" t ON l."trackId" = t.id
-    JOIN "Artist" a ON t."artistId" = a.id
+  const normalizedSearch = searchQuery?.trim().toLowerCase() ?? "";
+  const namePattern =
+    normalizedSearch.length > 0
+      ? `%${escapeLikePattern(normalizedSearch)}%`
+      : null;
+
+  const listenFilters = Prisma.sql`
     WHERE 1=1
       ${startDate ? Prisma.sql`AND l."playedAt" >= ${startDate}` : Prisma.sql``}
       ${endDate ? Prisma.sql`AND l."playedAt" <= ${endDate}` : Prisma.sql``}
       ${userId ? Prisma.sql`AND l."userId" = ${userId}` : Prisma.sql``}
-    GROUP BY a.id, a.name, a."imageUrl"
-    ORDER BY listen_count DESC
-    LIMIT ${limit}
-    OFFSET ${offset}
   `;
+
+  const query = namePattern
+    ? Prisma.sql`
+        WITH ranked AS (
+          SELECT
+            a.id as artist_id,
+            a.name as artist_name,
+            a."nameLower" as name_lower,
+            a."imageUrl" as image_url,
+            COUNT(*)::bigint as listen_count,
+            COUNT(DISTINCT t.id)::bigint as unique_tracks,
+            MIN(l."playedAt") as first_listen_date,
+            MAX(l."playedAt") as last_listen_date,
+            COALESCE(SUM(t.duration), 0)::bigint as total_play_time,
+            ROW_NUMBER() OVER (ORDER BY COUNT(*) DESC, a.name ASC) as rank
+          FROM "Listen" l
+          JOIN "Track" t ON l."trackId" = t.id
+          JOIN "Artist" a ON t."artistId" = a.id
+          ${listenFilters}
+          GROUP BY a.id, a.name, a."nameLower", a."imageUrl"
+        )
+        SELECT
+          artist_id,
+          artist_name,
+          image_url,
+          listen_count,
+          unique_tracks,
+          first_listen_date,
+          last_listen_date,
+          total_play_time,
+          rank
+        FROM ranked
+        WHERE name_lower LIKE ${namePattern} ESCAPE ${"\\"}
+        ORDER BY listen_count DESC, artist_name ASC
+        LIMIT ${limit}
+        OFFSET ${offset}
+      `
+    : Prisma.sql`
+        SELECT 
+          a.id as artist_id,
+          a.name as artist_name,
+          a."imageUrl" as image_url,
+          COUNT(*)::bigint as listen_count,
+          COUNT(DISTINCT t.id)::bigint as unique_tracks,
+          MIN(l."playedAt") as first_listen_date,
+          MAX(l."playedAt") as last_listen_date,
+          COALESCE(SUM(t.duration), 0)::bigint as total_play_time
+        FROM "Listen" l
+        JOIN "Track" t ON l."trackId" = t.id
+        JOIN "Artist" a ON t."artistId" = a.id
+        ${listenFilters}
+        GROUP BY a.id, a.name, a."imageUrl"
+        ORDER BY listen_count DESC
+        LIMIT ${limit}
+        OFFSET ${offset}
+      `;
 
   const result = await prisma.$queryRaw<Array<{
     artist_id: string;
@@ -74,6 +123,7 @@ export async function getArtistStats(
     first_listen_date: Date;
     last_listen_date: Date;
     total_play_time: bigint;
+    rank?: bigint | number;
   }>>(query);
 
   return result.map(row => {
@@ -92,6 +142,7 @@ export async function getArtistStats(
       firstListenDate: row.first_listen_date.toISOString(),
       lastListenDate: row.last_listen_date.toISOString(),
       totalPlayTime: transformed.total_play_time,
+      ...(row.rank != null ? { rank: Number(row.rank) } : {}),
     };
   });
 }
@@ -99,17 +150,29 @@ export async function getArtistStats(
 export async function countArtistsForRange(
   startDate?: Date,
   endDate?: Date,
-  userId?: string
+  userId?: string,
+  searchQuery?: string
 ): Promise<number> {
+  const normalizedSearch = searchQuery?.trim().toLowerCase() ?? "";
+  const namePattern =
+    normalizedSearch.length > 0
+      ? `%${escapeLikePattern(normalizedSearch)}%`
+      : null;
+
   const query = Prisma.sql`
-    SELECT COUNT(DISTINCT a.id)::bigint AS total
-    FROM "Listen" l
-    JOIN "Track" t ON l."trackId" = t.id
-    JOIN "Artist" a ON t."artistId" = a.id
-    WHERE 1=1
-      ${startDate ? Prisma.sql`AND l."playedAt" >= ${startDate}` : Prisma.sql``}
-      ${endDate ? Prisma.sql`AND l."playedAt" <= ${endDate}` : Prisma.sql``}
-      ${userId ? Prisma.sql`AND l."userId" = ${userId}` : Prisma.sql``}
+    SELECT COUNT(*)::bigint AS total
+    FROM (
+      SELECT a.id
+      FROM "Listen" l
+      JOIN "Track" t ON l."trackId" = t.id
+      JOIN "Artist" a ON t."artistId" = a.id
+      WHERE 1=1
+        ${startDate ? Prisma.sql`AND l."playedAt" >= ${startDate}` : Prisma.sql``}
+        ${endDate ? Prisma.sql`AND l."playedAt" <= ${endDate}` : Prisma.sql``}
+        ${userId ? Prisma.sql`AND l."userId" = ${userId}` : Prisma.sql``}
+        ${namePattern ? Prisma.sql`AND a."nameLower" LIKE ${namePattern} ESCAPE ${"\\"}` : Prisma.sql``}
+      GROUP BY a.id
+    ) counted
   `;
 
   const result = await prisma.$queryRaw<Array<{ total: bigint }>>(query);

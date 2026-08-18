@@ -29,6 +29,7 @@ export function DuetCompareDeepLink({
       const value = searchParams.get(key);
       if (value) params.set(key, value);
     }
+    params.set("section", "target");
     params.set("arenaMode", entityType);
     params.set("entityType", entityType);
     params.set("entityId", entityId);

@@ -80,6 +80,7 @@
     "items": {
       "overview": "Your Music",
       "musicalProfile": "Musical Profile",
+      "musicalProfileShort": "Profile",
       "timeline": "Pulse chart",
       "heatmap": "Heat grid",
       "temporalAnalysis": "Rhythm lab",
@@ -226,11 +227,20 @@
       "heroStep3Title": "Drill down",
       "heroStep3": "Shared top artists, then artist, track, or genre duels — search a target and crown a winner.",
       "heroPrivacyNote": "Only your Duet friends see these stats. Revoke access anytime from Friends.",
-      "changeFriend": "Switch opponent",
-      "pickerEyebrow": "Choose your rival",
-      "pickerBadge": "Ready to duel",
+      "changeFriend": "Switch friend",
+      "pickerEyebrow": "Step 1 · Pick a friend",
+      "pickerBadge": "Ready to compare",
       "pickerReadyCount": "{count, plural, one {# friend ready to compare} other {# friends ready to compare}}",
-      "challengeCta": "Start the duel",
+      "challengeCta": "Compare",
+      "sectionNavLabel": "Comparison sections",
+      "sectionOverview": "Overview",
+      "sectionOverviewHint": "Totals and trend for the period",
+      "sectionShared": "Shared artists",
+      "sectionSharedHint": "Top artists you both listen to",
+      "sectionTarget": "Targeted comparison",
+      "sectionTargetHint": "Specific artist, track, or genre",
+      "contextBarPeriodLabel": "Compared period",
+      "contextBarPeriodHint": "Change it with the filter at the top of the dashboard",
       "scoreboardLeads": "{name} leads",
       "scoreboardTie": "Dead heat",
       "scoreboardMargin": "+{margin} streams ahead",
@@ -244,7 +254,7 @@
       "sharedArtistsError": "Could not load shared artists.",
       "sharedArtistsEmptyTitle": "No shared artists",
       "sharedArtistsEmptyDescription": "Your tops don’t overlap on this period. Try “All time” or a wider date range.",
-      "sharedArtistsDuelCta": "Duel",
+      "sharedArtistsDuelCta": "Compare this artist",
       "sharedArtistsListens": "streams",
       "sharedArtistsTop50RankSelf": "#{rank} of your top {topPool}",
       "sharedArtistsTop50RankFriend": "#{rank} of {friendName}'s top {topPool}",
@@ -254,8 +264,8 @@
       "sharedArtistsCloseDuel": "Close duel",
       "sharedArtistsTotal": "{count, plural, one {# artist in common} other {# artists in common}}",
       "arenaEyebrow": "The showdown",
-      "arenaTitle": "Pick your battlefield",
-      "arenaDescription": "Choose artist or track, search your target, then crown a winner — switch anytime.",
+      "arenaTitle": "Compare something specific",
+      "arenaDescription": "Search for an artist, track, or genre to see who streamed more on this period.",
       "arenaBadge": "Head-to-head",
       "arenaPickTitle": "What are you battling over?",
       "arenaPickDescription": "Same period, same rules — only the target changes.",
@@ -295,7 +305,7 @@
       "loading": "Loading comparison…",
       "error": "Could not load comparison.",
       "selectFriendTitle": "Pick a friend",
-      "selectFriendDescription": "Choose a friend from your list to compare streaming stats.",
+      "selectFriendDescription": "Pick an accepted friend below. No friends yet? Invite someone from the Friends page.",
       "goToFriends": "Go to friends",
       "scopeInsufficientTitle": "Sharing not enabled",
       "scopeInsufficientDescription": "This friend has not shared enough data for this view.",
@@ -1113,7 +1123,7 @@
         "aria": "Open Duet friends"
       }
     },
-    "subtitle": "What your streams actually say — the trends, the phases, and the artists taking over.",
+    "subtitle": "Your streams, artists, and listening time for this period. Open a card to go deeper.",
     "periodBadge": "Period",
     "allData": "All data",
     "periodNudge": {
@@ -1148,10 +1158,10 @@
     "listensPerDay": "Streams per day",
     "listensPerMonth": "Track the surges, dips, and streaming arcs that shape your music story month by month.",
     "seeMore": "See more",
-    "topGenres": "Genres shaping your sound",
-    "yourTopGenres": "The styles setting the tone of your library.",
-    "yourTopArtists": "The names owning your rotation right now.",
-    "yourTopTracks": "The songs pulling you back again and again.",
+    "topGenres": "Top genres",
+    "yourTopGenres": "The genres that make up this period.",
+    "yourTopArtists": "The artists you streamed most in this period.",
+    "yourTopTracks": "The songs you streamed most in this period.",
     "seeAll": "See all",
     "artistSpotlight": {
       "badge": "Artist spotlight",
@@ -1162,12 +1172,10 @@
       "badge": "Artist trends",
       "seeMoreHint": "To explore more artists, click See more."
     },
-    "momentumCarousel": {
-      "previous": "Previous chart",
-      "next": "Next chart",
-      "slideCounter": "{current} / {total}",
-      "slides": {
-        "timeline": "Streaming momentum",
+    "momentumTabs": {
+      "navLabel": "Trend charts",
+      "tabs": {
+        "timeline": "Streaming volume",
         "artists": "Artist trends",
         "genres": "Genre trends",
         "tracks": "Track trends"
@@ -1181,8 +1189,8 @@
       "topArtist": "Top artist",
       "topGenre": "Top genre"
     },
-    "topArtists": "Artists owning your rotation",
-    "topTracks": "Tracks on repeat",
+    "topArtists": "Top artists",
+    "topTracks": "Top tracks",
     "yourFavoriteArtists": "Your standout artists by stream count",
     "listens": "streams",
     "Listens": "Streams",
@@ -1194,21 +1202,44 @@
     "emptyStateEyebrow": "Library idle",
     "emptyStateAside": "Metrics · zero rows",
     "emptyStateMetricHint": "Awaiting import",
+    "viewSwitcher": {
+      "navLabel": "Overview sections",
+      "views": {
+        "summary": "Summary",
+        "spotlight": "Artist spotlight",
+        "tops": "Your tops",
+        "trends": "Trends",
+        "context": "Calendar",
+        "further": "Go further"
+      }
+    },
+    "tasteTeaser": {
+      "eyebrow": "Musical profile",
+      "title": "Your sound in one page",
+      "description": "A narrative read of this period — signature artist, genre, and identity.",
+      "cta": "Open musical profile",
+      "aria": "Open musical profile"
+    },
     "sections": {
       "momentum": {
-        "eyebrow": "Momentum",
-        "title": "See what is moving right now.",
-        "description": "What's speeding up, what's slowing down — artists, genres, and tracks included."
+        "eyebrow": "Trends",
+        "title": "How listening moved",
+        "description": "Volume over time, plus what is rising or falling for artists, genres, and tracks."
       },
       "library": {
-        "eyebrow": "Strong signals",
-        "title": "The artists, tracks, and genres behind the story.",
-        "description": "Here's your leaderboard: the tracks, artists, and genres you keep coming back to."
+        "eyebrow": "Your tops",
+        "title": "Tracks, artists, and genres",
+        "description": "Your leaderboard for this period. Open a list to see the full ranking."
       },
       "intelligence": {
-        "eyebrow": "AI & calendar",
-        "title": "Add context to the patterns.",
-        "description": "A look at your habits, and the days you listened the most."
+        "eyebrow": "When you listened",
+        "title": "Calendar and habits",
+        "description": "The days you streamed most, plus a short AI read of the same period."
+      },
+      "goFurther": {
+        "eyebrow": "Go further",
+        "title": "Ask questions or compare with a friend",
+        "description": "Chat uses your real streams. Duet puts two libraries side by side."
       }
     },
     "mobile": {
@@ -1217,12 +1248,12 @@
       "comparisonHint": "Compared with the previous matching period when available.",
       "vsShort": "vs prev.",
       "primaryInsight": {
-        "topTrackEyebrow": "Your strongest signal",
-        "topTrackBody": "This is the track pulling you back most in this window, led by {artist}.",
-        "topArtistEyebrow": "Your rotation anchor",
-        "topArtistBody": "This artist carries the most weight in your streaming right now.",
-        "libraryEyebrow": "Your streaming shape",
-        "libraryBody": "Your overview starts with volume, variety, and the patterns behind them."
+        "topTrackEyebrow": "Top track this period",
+        "topTrackBody": "Most streamed in this window, by {artist}.",
+        "topArtistEyebrow": "Top artist this period",
+        "topArtistBody": "The artist you streamed most in this window.",
+        "libraryEyebrow": "This period",
+        "libraryBody": "Volume, variety, and the patterns behind them."
       },
       "momentum": {
         "eyebrow": "Momentum",
@@ -1232,16 +1263,16 @@
       },
       "disclosures": {
         "leaders": {
-          "title": "Top signals",
-          "description": "Three quick ladders for tracks, artists, and genres."
+          "title": "Your tops",
+          "description": "Tracks, artists, and genres for this period."
         },
         "taste": {
-          "title": "Taste profile",
-          "description": "Open the larger profile only when you want more context."
+          "title": "Musical profile",
+          "description": "Open the narrative page when you want more context."
         },
         "context": {
-          "title": "AI and calendar context",
-          "description": "Secondary explanations stay one tap deeper on mobile."
+          "title": "Calendar and AI",
+          "description": "When you listened, plus a short AI read."
         }
       }
     }
@@ -1441,6 +1472,7 @@
     "statTopGenre": "Top genre",
     "top3Title": "Your top 3 genres",
     "top3Subtitle": "The genres you streamed most often, front and center",
+    "galleryTitle": "Ranks 4–10",
     "allData": "All data",
     "other": "Other",
     "apiMappingNoticeTitle": "Improve your genre mapping",
@@ -1460,14 +1492,32 @@
       "spotlight": {
         "eyebrow": "Spotlight",
         "title": "Your top genres",
-        "description": "The lanes you stream most often—ranked and framed by the artists behind them."
+        "description": "The lanes you stream most often—ranked and framed by the artists behind them.",
+        "top3Badge": "Podium",
+        "galleryBadge": "Next seven"
       },
       "distribution": {
         "eyebrow": "Breakdown",
         "title": "How your streams split",
-        "description": "Switch chart geometry, then page through the full ladder with the same filters as the rest of the dashboard."
+        "description": "Switch between pie and bars to see how this window concentrates across genres."
+      },
+      "ranking": {
+        "eyebrow": "Index",
+        "title": "Full genre ranking",
+        "description": "Every genre in this window, with its share of streams. Search keeps the global rank."
       }
     },
+    "viewSwitcher": {
+      "navLabel": "Genre sections",
+      "views": {
+        "spotlight": "Genre cards",
+        "distribution": "Breakdown",
+        "ranking": "Full ranking"
+      }
+    },
+    "rankingSearchPlaceholder": "Search a genre…",
+    "rankingSearchAria": "Search a genre in the ranking",
+    "rankingSearchEmpty": "No genres match this search.",
     "paginationSummary": "Showing {start}-{end} of {total}",
     "paginationPrevious": "Previous",
     "paginationNext": "Next",
@@ -1485,8 +1535,8 @@
       "artistContext": "Artists behind it",
       "noArtistContext": "Artist context is not available for this genre yet.",
       "supportingMetrics": "Supporting metrics",
-      "distributionTitle": "The compact breakdown",
-      "distributionDescription": "{total} streams are grouped by genre. The first five stay upfront; the rest stays tucked away.",
+      "distributionTitle": "How the mix splits",
+      "distributionDescription": "{total} streams grouped by genre. Switch chart type without leaving this panel.",
       "showMoreGenres": "Show genres 6-10",
       "accuracySummary": "About genre accuracy",
       "loading": "Loading"
@@ -1765,23 +1815,30 @@
     "sections": {
       "charts": {
         "eyebrow": "Signals",
-        "title": "Rank depth & concentration",
-        "description": "Bar chart for who dominates your hours; donut for how the top six split your streams.",
-        "barBadge": "Top 10",
-        "pieBadge": "Top 6 split"
+        "title": "Top 20 ranking",
+        "description": "Vertical bars for the 20 artists with the most streams in this window.",
+        "barBadge": "Top 20"
       },
       "roster": {
         "eyebrow": "Spotlight",
         "title": "Your artist cards",
-        "description": "Tap a card to open streaming insights—same filters as the rest of the dashboard.",
+        "description": "Podium for the top 3, then gallery cards from 4th to 10th — tap a card for streaming insights.",
         "top3Badge": "Podium",
         "gridBadge": "Gallery"
       },
       "table": {
         "eyebrow": "Full index",
         "title": "Detailed ranking",
-        "description": "Expand for timestamps, track counts, and pagination through the full list.",
+        "description": "Timestamps, unique tracks, and pagination through the full list.",
         "badge": "Dataset"
+      }
+    },
+    "viewSwitcher": {
+      "navLabel": "Artist sections",
+      "views": {
+        "spotlight": "Artist cards",
+        "leaderboard": "Top 20",
+        "ranking": "Full ranking"
       }
     },
     "mobile": {
@@ -1823,11 +1880,10 @@
     "listens": "Streams",
     "topArtist": "Top artist streams",
     "top3Title": "Your top 3 artists",
-    "allArtists": "All your artists",
+    "allArtists": "Ranks 4–10",
     "evolutionTitle": "Top artists evolution",
     "evolutionSubtitle": "Streams per day · 5 artists",
-    "top10Listens": "Top 10 · Streams",
-    "distributionTop6": "Distribution · Top 6",
+    "top20Listens": "Top 20 · Streams",
     "detailedView": "Detailed view",
     "datesAndTracks": "Dates and unique tracks",
     "rank": "Rank",
@@ -1850,6 +1906,10 @@
     "paginationPage": "Page {page} / {totalPages}",
     "pageSizeLabel": "Rows",
     "paginationLoading": "Loading next page...",
+    "rankingSearchPlaceholder": "Search an artist…",
+    "rankingSearchAria": "Search an artist in the ranking",
+    "rankingSearchEmpty": "No artists match this search.",
+    "rankingClickHint": "Click a row to open insights.",
     "artistInsightsAriaOpen": "Open streaming insights for {name}",
     "insightsCloseAria": "Close insights panel",
     "insightsEyebrow": "Your streaming",
@@ -1930,6 +1990,13 @@
         }
       }
     },
+    "viewSwitcher": {
+      "navLabel": "Track sections",
+      "views": {
+        "leaderboard": "Top 20",
+        "ranking": "Full ranking"
+      }
+    },
     "heroEyebrow": "Rankings & overview",
     "heroTitle": "Your tracks",
     "heroSubtitle": "Top tracks for the selected period",
@@ -1949,7 +2016,10 @@
     "paginationNext": "Next",
     "paginationPage": "Page {page} / {totalPages}",
     "pageSizeLabel": "Rows",
-    "paginationLoading": "Loading next page..."
+    "paginationLoading": "Loading next page...",
+    "rankingSearchPlaceholder": "Search a track or artist…",
+    "rankingSearchAria": "Search a track or artist in the ranking",
+    "rankingSearchEmpty": "No tracks match this search."
   },
   "trackTrends": {
     "title": "Track trends",
@@ -2250,15 +2320,9 @@
     "aiUnavailable": "AI is currently disabled for this environment or browser, so this page is showing a deterministic profile from your stats.",
     "aiErrorTitle": "AI analysis unavailable. Showing a data-based summary instead.",
     "mobile": {
-      "dateRangeFallback": "Range",
       "signatureLabel": "Anchor",
       "genreFallback": "Genre signal pending",
       "storyTitle": "What this period says",
-      "genresTitle": "Dominant mix",
-      "genresHint": "Top genre signals, kept short for mobile reading.",
-      "anchorShare": "{percent}% from top artist",
-      "artistsTitle": "Artists shaping it",
-      "artistsHint": "Open only when you want the supporting signal.",
       "nextTitle": "Go deeper when ready",
       "nextLead": "Your Music keeps the larger charts, comparisons, and detailed tools.",
       "overviewCta": "Open full dashboard"
@@ -2267,7 +2331,6 @@
       "badge": "Start with the heart of Soundprint-AI",
       "title": "Your Music is the overview that ties everything together",
       "cta": "Open Your Music",
-      "philosophyLogoAlt": "Soundprint-AI",
       "philosophyEyebrow": "What Soundprint stands for",
       "philosophyBullet1": "Your musical identity is grounded in the streams you actually logged—not a generic taste label or a one-off mood.",
       "philosophyBullet2": "Every screen draws from the same history and date filters, so the story up top and the details below never fight each other."
@@ -2276,27 +2339,7 @@
       "badge": "A friendly place to start",
       "title": "Your Music is where the real tools live",
       "lead": "This page sets the tone. Your Music is the hub for comparisons, charts, and drill-downs—same date filters, fuller context.",
-      "primaryCta": "Go to Your Music",
-      "secondaryHint": "Or jump to a focused view",
-      "cards": {
-        "statsTitle": "Period snapshot",
-        "statsBody": "Streams, streaming time, artist and track variety—with comparison to the previous range when you need it.",
-        "movementTitle": "Recent movement",
-        "movementBody": "Area charts and trend context so you see momentum, not only totals.",
-        "mixTitle": "Genre & taste context",
-        "mixBody": "Top genres and how your mix shifts—aligned with the rest of your analytics."
-      }
-    },
-    "genreDnaTitle": "Genre DNA",
-    "artistConstellationTitle": "Artist constellation",
-    "trackObsessionTitle": "Repeat-worthy tracks",
-    "aiAttributesTitle": "AI profile attributes",
-    "sections": {
-      "sonicIdentity": "Soundprint identity",
-      "topArtists": "Top artists",
-      "topTracks": "Top tracks",
-      "topGenres": "Dominant genres",
-      "aiAttributes": "Deeper signals"
+      "primaryCta": "Go to Your Music"
     },
     "metrics": {
       "totalListens": "Streams",
@@ -2316,19 +2359,7 @@
     "units": {
       "hours": "h",
       "minutes": "min"
-    },
-    "cards": {
-      "influences": "Influences",
-      "coreGenres": "Core genres",
-      "uniqueAspect": "What makes it yours"
-    },
-    "ctas": {
-      "artists": "Explore artists",
-      "tracks": "Explore tracks",
-      "genres": "Explore genres",
-      "tasteProfile": "Open full taste profile"
-    },
-    "exploreMore": "Keep exploring"
+    }
   },
   "annualReport": {
     "title": "Annual Report {year}",
@@ -2365,7 +2396,7 @@
       "sectionTitle": "Patterns Revealed by the Data",
       "overview": {
         "title": "Your Music",
-        "paragraph": "The <code>/dashboard/overview</code> page is the main snapshot: headline KPIs versus the prior window of the same length, a recent-streams area chart, and links into deeper views. It also embeds summary widgets—heatmap preview, genre/artist/track momentum cards, taste profile teaser, an AI insights excerpt, top artists, and expandable per-artist breakdowns aligned with the artists area. Related routes include <code>/dashboard/tracks</code>, <code>/dashboard/artists</code>, <code>/dashboard/musical-profile</code>, and this methodology page at <code>/dashboard/insights</code>."
+        "paragraph": "The <code>/dashboard/overview</code> page is the analytics hub: period, a concrete top-track or top-artist insight, headline KPIs versus the prior window of the same length, one leaderboard for tracks/artists/genres, trend charts behind visible tabs, a heatmap plus AI excerpt, a teaser to Musical Profile, then Chat and Duet. Related routes include <code>/dashboard/tracks</code>, <code>/dashboard/artists</code>, <code>/dashboard/musical-profile</code>, and this methodology page at <code>/dashboard/insights</code>."
       },
       "timeline": {
         "title": "Timeline and Temporal Trends",

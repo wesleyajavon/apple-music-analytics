@@ -17,25 +17,19 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  PieChart,
-  Pie,
-  Cell,
 } from "recharts";
 import { artistKeys, fetchArtistStats, useArtistStats } from "@/lib/hooks/use-artists";
-import { useIsLgChartViewport } from "@/lib/hooks/use-chart-viewport";
+import { useDebouncedValue } from "@/lib/hooks/use-debounced-value";
+import { useChartHeight, useIsLgChartViewport } from "@/lib/hooks/use-chart-viewport";
 import { ChartResponsiveContainer } from "@/lib/components/chart-responsive-container";
 import {
   DASHBOARD_SPOTLIGHT_SHELL,
   DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY,
-  DASHBOARD_SPOTLIGHT_GRADIENT_LIME,
   DASHBOARD_SPOTLIGHT_GRADIENT_TABLE,
   DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET,
-  DASHBOARD_SPOTLIGHT_HAIRLINE_LIME,
   DASHBOARD_SPOTLIGHT_HEADER_BOTTOM,
   DASHBOARD_SPOTLIGHT_TITLE,
-  DASHBOARD_SPOTLIGHT_MUTED,
   DASHBOARD_SPOTLIGHT_BADGE_VIOLET,
-  DASHBOARD_SPOTLIGHT_BADGE_LIME,
   DASHBOARD_SPOTLIGHT_BADGE_CYAN_COMPACT,
   DASHBOARD_SPOTLIGHT_INNER_WELL,
   DASHBOARD_SPOTLIGHT_TABLE_HEAD,
@@ -58,22 +52,45 @@ import { TopThreeArtists } from "@/lib/components/top-three-artists-cards";
 import { ArtistAvatarHydrated } from "@/lib/components/artist-avatar-hydrated";
 import { ArtistUserInsightsPanel } from "@/lib/components/artist-user-insights-panel";
 import { LiveStatusDot } from "@/lib/components/live-status-dot";
-import { LineChart } from "lucide-react";
+import { BarChart3, LineChart, ListMusic, Search, Users } from "lucide-react";
+import {
+  DashboardSectionPanel,
+  DashboardSectionSwitcher,
+  useDashboardSectionView,
+  type DashboardSectionItem,
+} from "@/lib/components/dashboard-section-switcher";
 
-/**
- * Couleurs pour avatars et graphiques (sans # pour UI Avatars)
- */
-const CHART_COLORS = [
-  "#8b5cf6",
-  "#06b6d4",
-  "#84cc16",
-  "#f97316",
-  "#ec4899",
-  "#14b8a6",
-  "#a855f7",
-  "#38bdf8",
-];
-const ARTIST_RAIL_CLASS = "bg-gradient-to-r from-violet-400 via-cyan-300 to-lime-300";
+const ARTISTS_VIEWS = ["spotlight", "leaderboard", "ranking"] as const;
+type ArtistsView = (typeof ARTISTS_VIEWS)[number];
+const GALLERY_START_RANK = 4;
+const GALLERY_END_RANK = 10;
+
+function ArtistsViewSwitcher({
+  idPrefix,
+  activeView,
+  onChange,
+}: {
+  idPrefix: string;
+  activeView: ArtistsView;
+  onChange: (view: ArtistsView) => void;
+}) {
+  const t = useTranslations("artists.viewSwitcher");
+  const items: DashboardSectionItem<ArtistsView>[] = [
+    { id: "spotlight", label: t("views.spotlight"), icon: Users },
+    { id: "leaderboard", label: t("views.leaderboard"), icon: BarChart3 },
+    { id: "ranking", label: t("views.ranking"), icon: ListMusic },
+  ];
+
+  return (
+    <DashboardSectionSwitcher
+      items={items}
+      activeView={activeView}
+      onChange={onChange}
+      idPrefix={idPrefix}
+      navLabel={t("navLabel")}
+    />
+  );
+}
 
 const ARTISTS_HERO_SHELL_CLASS =
   "relative overflow-hidden rounded-[2rem] border border-white/10 bg-gray-950 px-5 py-6 text-white shadow-2xl shadow-violet-500/15 sm:px-8 sm:py-9 lg:px-10 lg:py-10";
@@ -235,9 +252,9 @@ function ArtistsGridSkeleton({ count = 6 }: { count?: number }) {
 
 function ArtistsBarChartSkeleton() {
   return (
-    <div className="h-[360px] rounded-[1.35rem] border border-slate-200/80 bg-slate-100/50 p-5 dark:border-white/10 dark:bg-black/30" aria-busy="true">
+    <div className="h-[640px] rounded-[1.35rem] border border-slate-200/80 bg-slate-100/50 p-5 dark:border-white/10 dark:bg-black/30" aria-busy="true">
       <div className="flex h-full flex-col justify-between">
-        {Array.from({ length: 8 }).map((_, index) => (
+        {Array.from({ length: 12 }).map((_, index) => (
           <div key={index} className="flex items-center gap-4">
             <div className="h-3 w-24 rounded bg-slate-200/90 animate-shimmer dark:bg-white/10" />
             <div
@@ -247,14 +264,6 @@ function ArtistsBarChartSkeleton() {
           </div>
         ))}
       </div>
-    </div>
-  );
-}
-
-function ArtistsPieChartSkeleton() {
-  return (
-    <div className="flex h-[360px] items-center justify-center rounded-[1.35rem] border border-slate-200/80 bg-slate-100/50 p-6 dark:border-white/10 dark:bg-black/30" aria-busy="true">
-      <div className="h-56 w-56 rounded-full border-[34px] border-violet-200/50 bg-slate-200/40 animate-shimmer dark:border-violet-400/25 dark:bg-white/10" />
     </div>
   );
 }
@@ -418,61 +427,31 @@ const ArtistCard = memo(({
 
 ArtistCard.displayName = "ArtistCard";
 
-const VISIBLE_ARTISTS_COUNT = 8;
-
 /**
- * Grille "All your artists" : top 8 visibles, toggle en 9e position, reste togglable
+ * Galerie des fiches : 4e au 10e, sans redoubler le podium.
  */
 const AllArtistsGrid = memo(({
-  topArtists,
+  artists,
+  startRank,
   t,
   locale,
   onOpenArtistInsights,
 }: {
-  topArtists: ArtistStatsDto[];
+  artists: ArtistStatsDto[];
+  startRank: number;
   t: (k: string, v?: Record<string, string | number>) => string;
   locale: string;
   onOpenArtistInsights: (artist: ArtistStatsDto, avatarColorIndex: number) => void;
 }) => {
-  const [expanded, setExpanded] = useState(false);
-  const visibleArtists = topArtists.slice(0, VISIBLE_ARTISTS_COUNT);
-  const restArtists = topArtists.slice(VISIBLE_ARTISTS_COUNT);
-  const hasMore = restArtists.length > 0;
+  if (artists.length === 0) return null;
 
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {visibleArtists.map((artist, index) => (
+      {artists.map((artist, index) => (
         <ArtistCard
           key={artist.artistId}
           artist={artist}
-          rank={index + 1}
-          t={t}
-          locale={locale}
-          onOpenInsights={onOpenArtistInsights}
-        />
-      ))}
-      {hasMore && (
-        <div
-          className="group relative flex min-h-[140px] cursor-pointer items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-cyan-300/35 dark:border-cyan-300/20
-            bg-[radial-gradient(circle_at_top_left,_rgba(6,182,212,0.12),_transparent_36%),rgb(var(--card-rgb)/0.78)] transition-all duration-300
-            hover:border-lime-400/50 hover:bg-lime-500/5 dark:hover:bg-lime-500/10"
-          onClick={() => setExpanded((e) => !e)}
-          onKeyDown={(ev) => ev.key === "Enter" && setExpanded((e) => !e)}
-          role="button"
-          tabIndex={0}
-          aria-expanded={expanded}
-          aria-label={expanded ? t("showLessArtists") : t("showMoreArtists", { count: restArtists.length })}
-        >
-          <span className="text-sm font-semibold text-gray-600 dark:text-gray-400 group-hover:text-cyan-700 dark:group-hover:text-cyan-200">
-            {expanded ? t("showLessArtists") : t("showMoreArtists", { count: restArtists.length })}
-          </span>
-        </div>
-      )}
-      {expanded && restArtists.map((artist, index) => (
-        <ArtistCard
-          key={artist.artistId}
-          artist={artist}
-          rank={VISIBLE_ARTISTS_COUNT + index + 1}
+          rank={startRank + index}
           t={t}
           locale={locale}
           onOpenInsights={onOpenArtistInsights}
@@ -589,6 +568,7 @@ function ArtistsMobileExperience({
   badgeLabel,
   overview,
   topArtists,
+  galleryArtists,
   pagedArtists,
   isTopLoading,
   isPagedFetching,
@@ -602,11 +582,16 @@ function ArtistsMobileExperience({
   onPageSizeChange,
   onOpenArtistInsights,
   locale,
+  activeView,
+  setView,
+  searchInput,
+  onSearchInputChange,
 }: {
   trendsHref: string;
   badgeLabel: string;
   overview: ArtistOverviewDto | undefined;
   topArtists: ArtistStatsDto[];
+  galleryArtists: ArtistStatsDto[];
   pagedArtists: ArtistStatsDto[];
   isTopLoading: boolean;
   isPagedFetching: boolean;
@@ -620,11 +605,13 @@ function ArtistsMobileExperience({
   onPageSizeChange: (nextPageSize: number) => void;
   onOpenArtistInsights: (artist: ArtistStatsDto, avatarColorIndex: number) => void;
   locale: string;
+  activeView: ArtistsView;
+  setView: (view: ArtistsView) => void;
+  searchInput: string;
+  onSearchInputChange: (value: string) => void;
 }) {
   const t = useTranslations("artists");
   const topArtist = topArtists[0];
-  const topFive = topArtists.slice(0, 5);
-  const supportingArtists = topArtists.slice(5, 20);
   const maxListens = topArtist?.listenCount ?? 1;
   const topShare = overview && overview.totalListens > 0 && topArtist
     ? topArtist.listenCount / overview.totalListens
@@ -722,65 +709,84 @@ function ArtistsMobileExperience({
         </div>
       </section>
 
-      <section className="rounded-[1.5rem] border border-card-border bg-card-surface p-4 shadow-sm">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{t("mobile.topFiveEyebrow")}</p>
-            <h2 className="mt-1 text-lg font-semibold tracking-[-0.035em] text-foreground">{t("mobile.topFiveTitle")}</h2>
-            <p className="mt-1 text-sm leading-6 text-muted">{t("mobile.topFiveDescription")}</p>
-          </div>
-        </div>
-        <div className="mt-4 space-y-2">
-          {topFive.map((artist, index) => (
-            <MobileArtistRow
-              key={artist.artistId}
-              artist={artist}
-              rank={index + 1}
-              locale={locale}
-              maxListens={maxListens}
-              onOpenInsights={onOpenArtistInsights}
-            />
-          ))}
-        </div>
-      </section>
+      <ArtistsViewSwitcher
+        idPrefix="artists-mobile"
+        activeView={activeView}
+        onChange={setView}
+      />
 
-      {supportingArtists.length > 0 && (
-        <details className="group rounded-[1.5rem] border border-card-border bg-card-surface shadow-sm">
-          <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-left [&::-webkit-details-marker]:hidden">
-            <span>
-              <span className="block text-sm font-semibold text-foreground">{t("mobile.disclosures.supporting.title")}</span>
-              <span className="mt-0.5 block text-xs leading-5 text-muted">{t("mobile.disclosures.supporting.description")}</span>
-            </span>
-            <span className="rounded-full border border-card-border bg-surface px-3 py-1 text-xs font-semibold text-muted transition group-open:bg-primary group-open:text-primary-foreground">
-              {t("showMoreArtists", { count: supportingArtists.length })}
-            </span>
-          </summary>
-          <div className="space-y-2 border-t border-card-border p-4">
-            {supportingArtists.map((artist, index) => (
+      <DashboardSectionPanel idPrefix="artists-mobile" view="spotlight" activeView={activeView}>
+        <div className="space-y-4">
+          <section className="rounded-[1.5rem] border border-card-border bg-card-surface p-4 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-700 dark:text-violet-200">
+              {t("sections.roster.top3Badge")}
+            </p>
+            <h2 className="mt-1 text-lg font-semibold tracking-[-0.035em] text-foreground">{t("top3Title")}</h2>
+            <div className="mt-4">
+              <TopThreeArtists
+                artists={topArtists}
+                maxListens={maxListens}
+                t={t}
+                locale={locale}
+                onArtistSelect={onOpenArtistInsights}
+              />
+            </div>
+          </section>
+
+          {galleryArtists.length > 0 ? (
+            <section className="rounded-[1.5rem] border border-card-border bg-card-surface p-4 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-cyan-800 dark:text-cyan-200">
+                {t("sections.roster.gridBadge")}
+              </p>
+              <h2 className="mt-1 text-lg font-semibold tracking-[-0.035em] text-foreground">{t("allArtists")}</h2>
+              <div className="mt-4">
+                <AllArtistsGrid
+                  artists={galleryArtists}
+                  startRank={GALLERY_START_RANK}
+                  t={t}
+                  locale={locale}
+                  onOpenArtistInsights={onOpenArtistInsights}
+                />
+              </div>
+            </section>
+          ) : null}
+        </div>
+      </DashboardSectionPanel>
+
+      <DashboardSectionPanel idPrefix="artists-mobile" view="leaderboard" activeView={activeView}>
+        <section className="rounded-[1.5rem] border border-card-border bg-card-surface p-4 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
+            {t("sections.charts.barBadge")}
+          </p>
+          <h2 className="mt-1 text-lg font-semibold tracking-[-0.035em] text-foreground">
+            {t("top20Listens")}
+          </h2>
+          <p className="mt-1 text-sm leading-6 text-muted">
+            {t("sections.charts.description")}
+          </p>
+          <div className="mt-4 space-y-2">
+            {topArtists.slice(0, 20).map((artist, index) => (
               <MobileArtistRow
                 key={artist.artistId}
                 artist={artist}
-                rank={index + 6}
+                rank={index + 1}
                 locale={locale}
                 maxListens={maxListens}
                 onOpenInsights={onOpenArtistInsights}
               />
             ))}
           </div>
-        </details>
-      )}
+        </section>
+      </DashboardSectionPanel>
 
-      <details className="group rounded-[1.5rem] border border-card-border bg-card-surface shadow-sm">
-        <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-left [&::-webkit-details-marker]:hidden">
-          <span>
-            <span className="block text-sm font-semibold text-foreground">{t("mobile.disclosures.index.title")}</span>
-            <span className="mt-0.5 block text-xs leading-5 text-muted">{t("mobile.disclosures.index.description")}</span>
-          </span>
-          <span className="rounded-full border border-card-border bg-surface px-3 py-1 text-xs font-semibold text-muted transition group-open:bg-primary group-open:text-primary-foreground">
-            {t("mobile.open")}
-          </span>
-        </summary>
-        <div className="border-t border-card-border">
+      <DashboardSectionPanel idPrefix="artists-mobile" view="ranking" activeView={activeView}>
+        <div className="space-y-3">
+          <ArtistsRankingSearchField
+            id="artists-ranking-search-mobile"
+            value={searchInput}
+            onChange={onSearchInputChange}
+          />
+          <div className="overflow-hidden rounded-[1.5rem] border border-card-border bg-card-surface shadow-sm">
           <div className="divide-y divide-card-border">
             {isPagedFetching
               ? Array.from({ length: Math.min(pageSize, 6) }).map((_, index) => (
@@ -792,11 +798,15 @@ function ArtistsMobileExperience({
                     </div>
                   </div>
                 ))
-              : pagedArtists.map((artist, index) => (
+              : pagedArtists.length === 0
+                ? (
+                    <p className="px-4 py-8 text-center text-sm text-muted">{t("rankingSearchEmpty")}</p>
+                  )
+                : pagedArtists.map((artist, index) => (
                   <MobileArtistRow
                     key={artist.artistId}
                     artist={artist}
-                    rank={offset + index + 1}
+                    rank={artist.rank ?? offset + index + 1}
                     locale={locale}
                     maxListens={maxListens}
                     onOpenInsights={onOpenArtistInsights}
@@ -844,32 +854,47 @@ function ArtistsMobileExperience({
             </label>
           </div>
         </div>
-      </details>
+        </div>
+      </DashboardSectionPanel>
     </div>
   );
 }
 
-function ChevronIcon({ direction }: { direction: "up" | "down" }) {
+function ArtistsRankingSearchField({
+  value,
+  onChange,
+  id,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  id: string;
+}) {
+  const t = useTranslations("artists");
   return (
-    <svg
-      className="h-4 w-4 shrink-0 transition-transform"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={2}
-      aria-hidden
-    >
-      {direction === "down" ? (
-        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-      ) : (
-        <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
-      )}
-    </svg>
+    <div className="space-y-2">
+      <label htmlFor={id} className="sr-only">
+        {t("rankingSearchAria")}
+      </label>
+      <div className="relative">
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden />
+        <input
+          id={id}
+          type="search"
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          placeholder={t("rankingSearchPlaceholder")}
+          autoComplete="off"
+          spellCheck={false}
+          className="min-h-11 w-full rounded-2xl border border-card-border bg-white py-2.5 pl-10 pr-3 text-sm text-foreground shadow-sm placeholder:text-muted focus:border-accent-violet/40 focus:outline-none focus:ring-2 focus:ring-accent-violet/25 dark:border-white/15 dark:bg-white/10 dark:text-white"
+        />
+      </div>
+      <p className="text-xs leading-5 text-muted dark:text-slate-400">{t("rankingClickHint")}</p>
+    </div>
   );
 }
 
 /**
- * Tableau détaillé – header cliquable pour expand/collapse
+ * Tableau détaillé – toujours visible (la vue ranking gère déjà l’affichage).
  */
 const DetailedViewSection = memo(({
   artists,
@@ -885,6 +910,8 @@ const DetailedViewSection = memo(({
   onOpenArtistInsights,
   t,
   locale,
+  searchInput,
+  onSearchInputChange,
 }: {
   artists: ArtistStatsDto[];
   page: number;
@@ -899,8 +926,9 @@ const DetailedViewSection = memo(({
   onOpenArtistInsights: (artist: ArtistStatsDto, avatarColorIndex: number) => void;
   t: (k: string, v?: Record<string, string | number>) => string;
   locale: string;
+  searchInput: string;
+  onSearchInputChange: (value: string) => void;
 }) => {
-  const [expanded, setExpanded] = useState(false);
   const pageStart = total === 0 ? 0 : offset + 1;
   const pageEnd = Math.min(offset + artists.length, total);
 
@@ -908,233 +936,189 @@ const DetailedViewSection = memo(({
     <div className={DASHBOARD_SPOTLIGHT_SHELL}>
       <div className={DASHBOARD_SPOTLIGHT_GRADIENT_TABLE} aria-hidden />
       <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} aria-hidden />
-      <button
-        type="button"
-        onClick={() => setExpanded((e) => !e)}
-        className={`relative flex w-full items-start justify-between gap-4 ${DASHBOARD_SPOTLIGHT_HEADER_BOTTOM} px-5 py-5 text-left transition-colors hover:bg-slate-50/90 dark:hover:bg-white/[0.04] sm:px-8`}
-        aria-expanded={expanded}
-      >
-        <div>
-          <div className={`mb-2 ${DASHBOARD_SPOTLIGHT_BADGE_CYAN_COMPACT}`}>
+      <div className={`relative ${DASHBOARD_SPOTLIGHT_HEADER_BOTTOM} px-5 py-5 sm:px-8`}>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className={DASHBOARD_SPOTLIGHT_BADGE_CYAN_COMPACT}>
             <LiveStatusDot tone="cyan" />
             {t("sections.table.badge")}
           </div>
-          <h3 className={DASHBOARD_SPOTLIGHT_TITLE}>{t("sections.table.title")}</h3>
-          <p className={`mt-1 ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("datesAndTracks")}</p>
-        </div>
-        <span className="text-slate-500 dark:text-slate-400">
-          <ChevronIcon direction={expanded ? "up" : "down"} />
-        </span>
-      </button>
-      {expanded && (
-        <>
-        <div className="divide-y divide-slate-200/90 dark:divide-white/10 lg:hidden">
-          {isFetching
-            ? Array.from({ length: Math.min(pageSize, 6) }).map((_, index) => (
-                <div key={`artist-mobile-skeleton-${index}`} className="flex items-center gap-3 px-4 py-4">
-                  <div className="h-10 w-10 shrink-0 animate-pulse rounded-full bg-slate-200/90 dark:bg-white/10" />
-                  <div className="min-w-0 flex-1 space-y-2">
-                    <div className="h-4 w-32 animate-pulse rounded bg-slate-200/90 dark:bg-white/10" />
-                    <div className="h-3 w-20 animate-pulse rounded bg-slate-200/90 dark:bg-white/10" />
-                  </div>
-                </div>
-              ))
-            : artists.map((artist, index) => {
-                const avatarColorIndex = offset + index;
-                const openInsights = () => onOpenArtistInsights(artist, avatarColorIndex);
-                return (
-                  <button
-                    key={artist.artistId}
-                    type="button"
-                    className="flex min-h-[56px] w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-slate-50/90 active:bg-slate-100/90 dark:hover:bg-white/[0.04] dark:active:bg-white/[0.06]"
-                    onClick={openInsights}
-                  >
-                    <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-200/80 text-sm font-bold text-slate-600 dark:bg-white/10 dark:text-slate-300">
-                      {offset + index + 1}
-                    </span>
-                    <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full">
-                      <ArtistAvatarHydrated
-                        artistId={artist.artistId}
-                        artistName={artist.artistName}
-                        imageUrl={artist.imageUrl}
-                        avatarApiSize={72}
-                        colorIndex={avatarColorIndex}
-                        alt=""
-                        width={40}
-                        height={40}
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">{artist.artistName}</p>
-                      <p className="mt-0.5 text-xs text-slate-600 dark:text-slate-400">
-                        {artist.listenCount.toLocaleString(locale)} {t("listensLabel")} · {artist.uniqueTracks} {t("tracks")}
-                      </p>
-                    </div>
-                  </button>
-                );
-              })}
-        </div>
-        <div className="relative hidden max-h-[min(70vh,640px)] overflow-x-auto overflow-y-auto lg:block">
-          <table className="min-w-full divide-y divide-slate-200/90 dark:divide-white/10">
-            <thead className={DASHBOARD_SPOTLIGHT_TABLE_HEAD}>
-              <tr>
-                <th scope="col" className={`px-5 py-3 text-left ${DASHBOARD_SPOTLIGHT_TABLE_HEAD_CELL}`}>
-                  {t("rank")}
-                </th>
-                <th scope="col" className={`px-5 py-3 text-left ${DASHBOARD_SPOTLIGHT_TABLE_HEAD_CELL}`}>
-                  {t("artist")}
-                </th>
-                <th scope="col" className={`px-5 py-3 text-right ${DASHBOARD_SPOTLIGHT_TABLE_HEAD_CELL}`}>
-                  {t("listensLabel")}
-                </th>
-                <th scope="col" className={`px-5 py-3 text-right ${DASHBOARD_SPOTLIGHT_TABLE_HEAD_CELL}`}>
-                  {t("tracks")}
-                </th>
-                <th scope="col" className={`px-5 py-3 text-right ${DASHBOARD_SPOTLIGHT_TABLE_HEAD_CELL}`}>
-                  {t("first")}
-                </th>
-                <th scope="col" className={`px-5 py-3 text-right ${DASHBOARD_SPOTLIGHT_TABLE_HEAD_CELL}`}>
-                  {t("last")}
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-white/5">
-              {isFetching
-                ? Array.from({ length: Math.min(pageSize, 10) }).map((_, index) => (
-                    <tr key={`artist-skeleton-${index}`}>
-                      <td className="whitespace-nowrap px-5 py-4">
-                        <div className="h-8 w-8 animate-pulse rounded-lg bg-slate-200/90 dark:bg-white/10" />
-                      </td>
-                      <td className="whitespace-nowrap px-5 py-4">
-                        <div className="h-4 w-44 animate-pulse rounded bg-slate-200/90 dark:bg-white/10" />
-                      </td>
-                      <td className="whitespace-nowrap px-5 py-4">
-                        <div className="ml-auto h-4 w-16 animate-pulse rounded bg-slate-200/90 dark:bg-white/10" />
-                      </td>
-                      <td className="whitespace-nowrap px-5 py-4">
-                        <div className="ml-auto h-4 w-10 animate-pulse rounded bg-slate-200/90 dark:bg-white/10" />
-                      </td>
-                      <td className="whitespace-nowrap px-5 py-4">
-                        <div className="ml-auto h-4 w-24 animate-pulse rounded bg-slate-200/90 dark:bg-white/10" />
-                      </td>
-                      <td className="whitespace-nowrap px-5 py-4">
-                        <div className="ml-auto h-4 w-24 animate-pulse rounded bg-slate-200/90 dark:bg-white/10" />
-                      </td>
-                    </tr>
-                  ))
-                : artists.map((artist, index) => {
-                const rankStyles = ["text-amber-700 dark:text-amber-400", "text-slate-600 dark:text-slate-300", "text-amber-800 dark:text-amber-500"];
-                const rankBg = ["bg-amber-100 dark:bg-amber-400/20", "bg-slate-200 dark:bg-slate-400/15", "bg-amber-100 dark:bg-amber-500/20"];
-                const rankStyle = index < 3 ? rankStyles[index] : "text-slate-500 dark:text-slate-500";
-                const rankBgStyle = index < 3 ? rankBg[index] : "bg-slate-200/80 dark:bg-white/10";
-                const avatarColorIndex = offset + index;
-                const rowInteractive =
-                  `cursor-pointer ${DASHBOARD_SPOTLIGHT_TABLE_ROW_HOVER} ` +
-                  "focus-visible:bg-slate-100/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-cyan-500/50 dark:focus-visible:bg-white/[0.06] dark:focus-visible:ring-cyan-400/60";
-                const openInsights = () => onOpenArtistInsights(artist, avatarColorIndex);
-                return (
-                  <tr
-                    key={artist.artistId}
-                    className={rowInteractive}
-                    tabIndex={0}
-                    role="button"
-                    aria-label={t("artistInsightsAriaOpen", { name: artist.artistName })}
-                    onClick={openInsights}
-                    onKeyDown={(ev) => {
-                      if (ev.key !== "Enter" && ev.key !== " ") return;
-                      ev.preventDefault();
-                      openInsights();
-                    }}
-                  >
-                    <td className="whitespace-nowrap px-5 py-4">
-                      <span className={`inline-flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold ${rankStyle} ${rankBgStyle}`}>
-                        {offset + index + 1}
-                      </span>
-                    </td>
-                    <td className="whitespace-nowrap px-5 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full">
-                          <ArtistAvatarHydrated
-                            artistId={artist.artistId}
-                            artistName={artist.artistName}
-                            imageUrl={artist.imageUrl}
-                            avatarApiSize={72}
-                            colorIndex={avatarColorIndex}
-                            alt=""
-                            width={36}
-                            height={36}
-                            className="h-full w-full object-cover"
-                          />
-                        </div>
-                        <span className="text-sm font-semibold text-slate-900 dark:text-white">{artist.artistName}</span>
-                      </div>
-                    </td>
-                    <td className="whitespace-nowrap px-5 py-4 text-right text-sm font-semibold tabular-nums text-slate-900 dark:text-white">
-                      {artist.listenCount.toLocaleString(locale)}
-                    </td>
-                    <td className="whitespace-nowrap px-5 py-4 text-right text-sm tabular-nums text-slate-600 dark:text-slate-400">
-                      {artist.uniqueTracks}
-                    </td>
-                    <td className="whitespace-nowrap px-5 py-4 text-right text-sm text-slate-600 dark:text-slate-400">
-                      {new Date(artist.firstListenDate).toLocaleDateString(locale)}
-                    </td>
-                    <td className="whitespace-nowrap px-5 py-4 text-right text-sm text-slate-600 dark:text-slate-400">
-                      {new Date(artist.lastListenDate).toLocaleDateString(locale)}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-        <div className={DASHBOARD_SPOTLIGHT_FOOTER}>
-          <p className={DASHBOARD_SPOTLIGHT_FOOTER_TEXT}>
-            {t("paginationSummary", {
-              start: pageStart,
-              end: pageEnd,
-              total,
-            })}
-          </p>
-          <div className="flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              onClick={() => onPageChange(page - 1)}
-              disabled={page === 1}
-              className={DASHBOARD_SPOTLIGHT_BTN_SECONDARY}
-            >
-              {t("paginationPrevious")}
-            </button>
-            <label className={DASHBOARD_SPOTLIGHT_LABEL}>
-              <span>{t("pageSizeLabel")}</span>
-              <select
-                value={pageSize}
-                onChange={(e) => onPageSizeChange(Number(e.target.value))}
-                className={DASHBOARD_SPOTLIGHT_SELECT}
-              >
-                <option value={20}>20</option>
-                <option value={50}>50</option>
-                <option value={100}>100</option>
-              </select>
-            </label>
-            <span className={`px-2 ${DASHBOARD_SPOTLIGHT_FOOTER_TEXT}`}>
-              {t("paginationPage", { page, totalPages })}
-            </span>
-            <button
-              type="button"
-              onClick={() => onPageChange(page + 1)}
-              disabled={!hasMore}
-              className={DASHBOARD_SPOTLIGHT_BTN_SECONDARY}
-            >
-              {t("paginationNext")}
-            </button>
+          <div className="w-full sm:max-w-sm">
+            <ArtistsRankingSearchField
+              id="artists-ranking-search-desktop"
+              value={searchInput}
+              onChange={onSearchInputChange}
+            />
           </div>
         </div>
-        {isFetching ? (
-          <div className="px-5 pb-4 text-xs text-slate-500 dark:text-slate-500 sm:px-8">{t("paginationLoading")}</div>
-        ) : null}
-        </>
-      )}
+      </div>
+      <div className="relative max-h-[min(70vh,640px)] overflow-x-auto overflow-y-auto">
+        <table className="min-w-full divide-y divide-slate-200/90 dark:divide-white/10">
+          <thead className={DASHBOARD_SPOTLIGHT_TABLE_HEAD}>
+            <tr>
+              <th scope="col" className={`px-5 py-3 text-left ${DASHBOARD_SPOTLIGHT_TABLE_HEAD_CELL}`}>
+                {t("rank")}
+              </th>
+              <th scope="col" className={`px-5 py-3 text-left ${DASHBOARD_SPOTLIGHT_TABLE_HEAD_CELL}`}>
+                {t("artist")}
+              </th>
+              <th scope="col" className={`px-5 py-3 text-right ${DASHBOARD_SPOTLIGHT_TABLE_HEAD_CELL}`}>
+                {t("listensLabel")}
+              </th>
+              <th scope="col" className={`px-5 py-3 text-right ${DASHBOARD_SPOTLIGHT_TABLE_HEAD_CELL}`}>
+                {t("tracks")}
+              </th>
+              <th scope="col" className={`px-5 py-3 text-right ${DASHBOARD_SPOTLIGHT_TABLE_HEAD_CELL}`}>
+                {t("first")}
+              </th>
+              <th scope="col" className={`px-5 py-3 text-right ${DASHBOARD_SPOTLIGHT_TABLE_HEAD_CELL}`}>
+                {t("last")}
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100 dark:divide-white/5">
+            {isFetching
+              ? Array.from({ length: Math.min(pageSize, 10) }).map((_, index) => (
+                  <tr key={`artist-skeleton-${index}`}>
+                    <td className="whitespace-nowrap px-5 py-4">
+                      <div className="h-8 w-8 animate-pulse rounded-lg bg-slate-200/90 dark:bg-white/10" />
+                    </td>
+                    <td className="whitespace-nowrap px-5 py-4">
+                      <div className="h-4 w-44 animate-pulse rounded bg-slate-200/90 dark:bg-white/10" />
+                    </td>
+                    <td className="whitespace-nowrap px-5 py-4">
+                      <div className="ml-auto h-4 w-16 animate-pulse rounded bg-slate-200/90 dark:bg-white/10" />
+                    </td>
+                    <td className="whitespace-nowrap px-5 py-4">
+                      <div className="ml-auto h-4 w-10 animate-pulse rounded bg-slate-200/90 dark:bg-white/10" />
+                    </td>
+                    <td className="whitespace-nowrap px-5 py-4">
+                      <div className="ml-auto h-4 w-24 animate-pulse rounded bg-slate-200/90 dark:bg-white/10" />
+                    </td>
+                    <td className="whitespace-nowrap px-5 py-4">
+                      <div className="ml-auto h-4 w-24 animate-pulse rounded bg-slate-200/90 dark:bg-white/10" />
+                    </td>
+                  </tr>
+                ))
+              : artists.length === 0
+                ? (
+                    <tr>
+                      <td colSpan={6} className="px-5 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
+                        {t("rankingSearchEmpty")}
+                      </td>
+                    </tr>
+                  )
+              : artists.map((artist, index) => {
+              const displayRank = artist.rank ?? offset + index + 1;
+              const rankStyles = ["text-amber-700 dark:text-amber-400", "text-slate-600 dark:text-slate-300", "text-amber-800 dark:text-amber-500"];
+              const rankBg = ["bg-amber-100 dark:bg-amber-400/20", "bg-slate-200 dark:bg-slate-400/15", "bg-amber-100 dark:bg-amber-500/20"];
+              const isPodium = displayRank <= 3;
+              const rankStyle = isPodium ? rankStyles[displayRank - 1] : "text-slate-500 dark:text-slate-500";
+              const rankBgStyle = isPodium ? rankBg[displayRank - 1] : "bg-slate-200/80 dark:bg-white/10";
+              const avatarColorIndex = displayRank - 1;
+              const rowInteractive =
+                `cursor-pointer ${DASHBOARD_SPOTLIGHT_TABLE_ROW_HOVER} ` +
+                "focus-visible:bg-slate-100/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-cyan-500/50 dark:focus-visible:bg-white/[0.06] dark:focus-visible:ring-cyan-400/60";
+              const openInsights = () => onOpenArtistInsights(artist, avatarColorIndex);
+              return (
+                <tr
+                  key={artist.artistId}
+                  className={rowInteractive}
+                  tabIndex={0}
+                  role="button"
+                  aria-label={t("artistInsightsAriaOpen", { name: artist.artistName })}
+                  onClick={openInsights}
+                  onKeyDown={(ev) => {
+                    if (ev.key !== "Enter" && ev.key !== " ") return;
+                    ev.preventDefault();
+                    openInsights();
+                  }}
+                >
+                  <td className="whitespace-nowrap px-5 py-4">
+                    <span className={`inline-flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold ${rankStyle} ${rankBgStyle}`}>
+                      {displayRank}
+                    </span>
+                  </td>
+                  <td className="whitespace-nowrap px-5 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full">
+                        <ArtistAvatarHydrated
+                          artistId={artist.artistId}
+                          artistName={artist.artistName}
+                          imageUrl={artist.imageUrl}
+                          avatarApiSize={72}
+                          colorIndex={avatarColorIndex}
+                          alt=""
+                          width={36}
+                          height={36}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                      <span className="text-sm font-semibold text-slate-900 dark:text-white">{artist.artistName}</span>
+                    </div>
+                  </td>
+                  <td className="whitespace-nowrap px-5 py-4 text-right text-sm font-semibold tabular-nums text-slate-900 dark:text-white">
+                    {artist.listenCount.toLocaleString(locale)}
+                  </td>
+                  <td className="whitespace-nowrap px-5 py-4 text-right text-sm tabular-nums text-slate-600 dark:text-slate-400">
+                    {artist.uniqueTracks}
+                  </td>
+                  <td className="whitespace-nowrap px-5 py-4 text-right text-sm text-slate-600 dark:text-slate-400">
+                    {new Date(artist.firstListenDate).toLocaleDateString(locale)}
+                  </td>
+                  <td className="whitespace-nowrap px-5 py-4 text-right text-sm text-slate-600 dark:text-slate-400">
+                    {new Date(artist.lastListenDate).toLocaleDateString(locale)}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      <div className={DASHBOARD_SPOTLIGHT_FOOTER}>
+        <p className={DASHBOARD_SPOTLIGHT_FOOTER_TEXT}>
+          {t("paginationSummary", {
+            start: pageStart,
+            end: pageEnd,
+            total,
+          })}
+        </p>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => onPageChange(page - 1)}
+            disabled={page === 1}
+            className={DASHBOARD_SPOTLIGHT_BTN_SECONDARY}
+          >
+            {t("paginationPrevious")}
+          </button>
+          <label className={DASHBOARD_SPOTLIGHT_LABEL}>
+            <span>{t("pageSizeLabel")}</span>
+            <select
+              value={pageSize}
+              onChange={(e) => onPageSizeChange(Number(e.target.value))}
+              className={DASHBOARD_SPOTLIGHT_SELECT}
+            >
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
+          </label>
+          <span className={`px-2 ${DASHBOARD_SPOTLIGHT_FOOTER_TEXT}`}>
+            {t("paginationPage", { page, totalPages })}
+          </span>
+          <button
+            type="button"
+            onClick={() => onPageChange(page + 1)}
+            disabled={!hasMore}
+            className={DASHBOARD_SPOTLIGHT_BTN_SECONDARY}
+          >
+            {t("paginationNext")}
+          </button>
+        </div>
+      </div>
+      {isFetching ? (
+        <div className="px-5 pb-4 text-xs text-slate-500 dark:text-slate-500 sm:px-8">{t("paginationLoading")}</div>
+      ) : null}
     </div>
   );
 });
@@ -1163,6 +1147,10 @@ function ArtistsContent() {
     ? Number.parseInt(searchParams.get("pageSize") ?? String(DEFAULT_PAGE_SIZE), 10)
     : DEFAULT_PAGE_SIZE;
   const offset = (page - 1) * pageSize;
+  const qParam = (searchParams.get("q") ?? "").trim();
+  const [searchInput, setSearchInput] = useState(qParam);
+  const debouncedSearch = useDebouncedValue(searchInput.trim().slice(0, 200), 320);
+  const rankingQuery = debouncedSearch.length > 0 ? debouncedSearch : undefined;
 
   const [artistInsightsTarget, setArtistInsightsTarget] = useState<{
     artist: ArtistStatsDto;
@@ -1183,6 +1171,20 @@ function ArtistsContent() {
     },
     [pathname, router, searchParams]
   );
+
+  useEffect(() => {
+    const currentQ = (searchParams.get("q") ?? "").trim();
+    if (debouncedSearch === currentQ) return;
+    const params = new URLSearchParams(searchParams.toString());
+    if (debouncedSearch) {
+      params.set("q", debouncedSearch);
+    } else {
+      params.delete("q");
+    }
+    params.set("page", "1");
+    const qs = params.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }, [debouncedSearch, pathname, router, searchParams]);
 
   const badgeLabel = useArtistsHeroBadge();
 
@@ -1208,7 +1210,8 @@ function ArtistsContent() {
     endDate,
     userId,
     pageSize,
-    offset
+    offset,
+    { q: rankingQuery }
   );
 
   const topArtists = useMemo(() => topData?.topArtists ?? [], [topData?.topArtists]);
@@ -1218,6 +1221,11 @@ function ArtistsContent() {
   const totalPages = Math.max(1, Math.ceil(totalArtistsInRange / pageSize));
   const maxListens = topArtists[0]?.listenCount ?? 1;
   const trendsHref = useArtistsTrendsHref();
+  const { activeView, setView } = useDashboardSectionView(ARTISTS_VIEWS, "spotlight");
+  const galleryArtists = useMemo(
+    () => topArtists.slice(GALLERY_START_RANK - 1, GALLERY_END_RANK),
+    [topArtists]
+  );
 
   useEffect(() => {
     if (page > totalPages) {
@@ -1235,8 +1243,9 @@ function ArtistsContent() {
         userId,
         limit: pageSize,
         offset: nextOffset,
+        q: rankingQuery,
       }),
-      queryFn: () => fetchArtistStats(startDate, endDate, userId, pageSize, nextOffset),
+      queryFn: () => fetchArtistStats(startDate, endDate, userId, pageSize, nextOffset, rankingQuery),
     });
   }, [
     endDate,
@@ -1244,26 +1253,21 @@ function ArtistsContent() {
     pageSize,
     pagination?.hasMore,
     queryClient,
+    rankingQuery,
     startDate,
     userId,
   ]);
 
   const barChartData = useMemo(() => {
-    return topArtists.slice(0, 10).map((artist) => ({
+    return topArtists.slice(0, 20).map((artist) => ({
       name: artist.artistName.length > 20 ? artist.artistName.substring(0, 20) + "..." : artist.artistName,
       fullName: artist.artistName,
       listens: artist.listenCount,
       titres: artist.uniqueTracks,
     }));
   }, [topArtists]);
-
-  const pieChartData = useMemo(() => {
-    return topArtists.slice(0, 6).map((artist, index) => ({
-      name: artist.artistName,
-      value: artist.listenCount,
-      color: CHART_COLORS[index % CHART_COLORS.length],
-    }));
-  }, [topArtists]);
+  const baseChartHeight = useChartHeight("tracksMain");
+  const artistsBarChartHeight = Math.max(baseChartHeight, barChartData.length * 32 + 16);
 
   if (!isTopLoading && topError && !topData) {
     return (
@@ -1302,6 +1306,7 @@ function ArtistsContent() {
             badgeLabel={badgeLabel}
             overview={topData?.overview}
             topArtists={topArtists}
+            galleryArtists={galleryArtists}
             pagedArtists={[]}
             isTopLoading={isTopLoading}
             isPagedFetching={false}
@@ -1315,6 +1320,10 @@ function ArtistsContent() {
             onPageSizeChange={(nextPageSize) => updatePaginationParams(1, nextPageSize)}
             onOpenArtistInsights={handleOpenArtistInsights}
             locale={locale}
+            activeView={activeView}
+            setView={setView}
+            searchInput={searchInput}
+            onSearchInputChange={setSearchInput}
           />
           <ErrorState variant="startup" error={pagedError} message={t("errorLoading")} onRetry={refetchPaged} />
         </div>
@@ -1356,6 +1365,7 @@ function ArtistsContent() {
         badgeLabel={badgeLabel}
         overview={overview}
         topArtists={topArtists}
+        galleryArtists={galleryArtists}
         pagedArtists={pagedArtists}
         isTopLoading={isTopLoading}
         isPagedFetching={isPagedFetching || !pagedData}
@@ -1369,6 +1379,10 @@ function ArtistsContent() {
         onPageSizeChange={(nextPageSize) => updatePaginationParams(1, nextPageSize)}
         onOpenArtistInsights={handleOpenArtistInsights}
         locale={locale}
+        activeView={activeView}
+        setView={setView}
+        searchInput={searchInput}
+        onSearchInputChange={setSearchInput}
       />
     </div>
 
@@ -1385,13 +1399,78 @@ function ArtistsContent() {
         }
       />
 
-      <section className="relative animate-fade-in-up">
-        <ArtistsSectionHeader
-          eyebrow={t("sections.charts.eyebrow")}
-          title={t("sections.charts.title")}
-          description={t("sections.charts.description")}
-        />
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+      <ArtistsViewSwitcher
+        idPrefix="artists-desktop"
+        activeView={activeView}
+        onChange={setView}
+      />
+
+      <DashboardSectionPanel idPrefix="artists-desktop" view="spotlight" activeView={activeView}>
+        <section className="relative animate-fade-in-up">
+          <ArtistsSectionHeader
+            eyebrow={t("sections.roster.eyebrow")}
+            title={t("sections.roster.title")}
+            description={t("sections.roster.description")}
+          />
+          <div className="relative overflow-hidden rounded-[2rem] border border-slate-200/90 bg-gradient-to-br from-white via-slate-50/90 to-white text-slate-900 shadow-xl shadow-slate-900/[0.07] ring-1 ring-slate-900/[0.04] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-2xl hover:shadow-slate-900/10 dark:border-white/10 dark:from-slate-950 dark:via-slate-950 dark:to-slate-950 dark:text-white dark:shadow-2xl dark:shadow-black/25 dark:ring-0 dark:hover:shadow-black/35">
+            <div
+              className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.06),transparent_38%),radial-gradient(circle_at_90%_8%,rgba(6,182,212,0.05),transparent_32%)] dark:bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.2),transparent_36%),radial-gradient(circle_at_86%_18%,rgba(6,182,212,0.14),transparent_30%)]"
+              aria-hidden
+            />
+            <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-violet-300/45 to-transparent dark:via-violet-200/45" aria-hidden />
+            <div className="relative border-b border-slate-200/80 px-5 py-6 sm:px-8 dark:border-white/10">
+              <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-violet-700 dark:text-violet-200">
+                <span className="h-2 w-2 rounded-full bg-violet-500 shadow-[0_0_12px_rgba(139,92,246,0.4)] dark:bg-violet-300 dark:shadow-[0_0_14px_rgba(167,139,250,0.55)]" aria-hidden />
+                {t("sections.roster.top3Badge")}
+              </div>
+              <h3 className="mt-3 text-lg font-semibold text-slate-900 sm:text-xl dark:text-white">{t("top3Title")}</h3>
+            </div>
+            <div className="relative p-5 sm:p-6 lg:p-8">
+              {isTopLoading ? (
+                <ArtistsGridSkeleton count={3} />
+              ) : (
+                <TopThreeArtists
+                  artists={topArtists}
+                  maxListens={maxListens}
+                  t={t}
+                  locale={locale}
+                  onArtistSelect={handleOpenArtistInsights}
+                />
+              )}
+            </div>
+            {isTopLoading || galleryArtists.length > 0 ? (
+              <div className="relative border-t border-slate-200/80 px-5 py-6 sm:px-8 dark:border-white/10">
+                <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-800 dark:text-cyan-200">
+                  <span className="h-2 w-2 rounded-full bg-cyan-500 shadow-[0_0_12px_rgba(6,182,212,0.4)] dark:bg-cyan-300 dark:shadow-[0_0_14px_rgb(34_211_238_/0.45)]" aria-hidden />
+                  {t("sections.roster.gridBadge")}
+                </div>
+                <h3 className="mt-3 text-lg font-semibold text-slate-900 sm:text-xl dark:text-white">{t("allArtists")}</h3>
+                <div className="mt-5">
+                  {isTopLoading ? (
+                    <ArtistsGridSkeleton count={7} />
+                  ) : (
+                    <AllArtistsGrid
+                      artists={galleryArtists}
+                      startRank={GALLERY_START_RANK}
+                      t={t}
+                      locale={locale}
+                      onOpenArtistInsights={handleOpenArtistInsights}
+                    />
+                  )}
+                </div>
+              </div>
+            ) : null}
+          </div>
+        </section>
+      </DashboardSectionPanel>
+
+      <DashboardSectionPanel idPrefix="artists-desktop" view="leaderboard" activeView={activeView}>
+        <section className="relative animate-fade-in-up">
+          <ArtistsSectionHeader
+            eyebrow={t("sections.charts.eyebrow")}
+            title={t("sections.charts.title")}
+            description={t("sections.charts.description")}
+          />
           <div className={DASHBOARD_SPOTLIGHT_SHELL}>
             <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} aria-hidden />
             <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} aria-hidden />
@@ -1400,14 +1479,14 @@ function ArtistsContent() {
                 <LiveStatusDot tone="violet" />
                 {t("sections.charts.barBadge")}
               </div>
-              <h3 className={`mt-3 ${DASHBOARD_SPOTLIGHT_TITLE}`}>{t("top10Listens")}</h3>
+              <h3 className={`mt-3 ${DASHBOARD_SPOTLIGHT_TITLE}`}>{t("top20Listens")}</h3>
             </div>
             <div className="relative p-5 sm:p-6 lg:p-8">
               <div className={DASHBOARD_SPOTLIGHT_INNER_WELL}>
                 {isTopLoading ? (
                   <ArtistsBarChartSkeleton />
                 ) : (
-                  <ChartResponsiveContainer token="spotlightBar">
+                  <ChartResponsiveContainer token="tracksMain" heightOverride={artistsBarChartHeight}>
                     <BarChart
                       data={barChartData}
                       layout="vertical"
@@ -1428,6 +1507,7 @@ function ArtistsContent() {
                       <YAxis
                         type="category"
                         dataKey="name"
+                        interval={0}
                         tick={{ fill: chartTheme.tickStrong, fontSize: 12, fontWeight: 600 }}
                         axisLine={false}
                         tickLine={false}
@@ -1451,139 +1531,35 @@ function ArtistsContent() {
               </div>
             </div>
           </div>
+        </section>
+      </DashboardSectionPanel>
 
-          <div className={DASHBOARD_SPOTLIGHT_SHELL}>
-            <div className={DASHBOARD_SPOTLIGHT_GRADIENT_LIME} aria-hidden />
-            <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_LIME} aria-hidden />
-            <div className={`relative ${DASHBOARD_SPOTLIGHT_HEADER_BOTTOM} px-5 py-5 sm:px-8`}>
-              <div className={DASHBOARD_SPOTLIGHT_BADGE_LIME}>
-                <LiveStatusDot tone="emerald" />
-                {t("sections.charts.pieBadge")}
-              </div>
-              <h3 className={`mt-3 ${DASHBOARD_SPOTLIGHT_TITLE}`}>{t("distributionTop6")}</h3>
-            </div>
-            <div className="relative p-5 sm:p-6 lg:p-8">
-              <div className={DASHBOARD_SPOTLIGHT_INNER_WELL}>
-                {isTopLoading ? (
-                  <ArtistsPieChartSkeleton />
-                ) : (
-                  <ChartResponsiveContainer token="spotlightBar">
-                    <PieChart>
-                      <defs>
-                        <filter id="artistPieGlow" x="-30%" y="-30%" width="160%" height="160%">
-                          <feDropShadow dx="0" dy="8" stdDeviation="10" floodColor="#8b5cf6" floodOpacity="0.2" />
-                        </filter>
-                      </defs>
-                      <Pie
-                        data={pieChartData}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        label={({ name, percent }) =>
-                          `${name.length > 12 ? name.substring(0, 12) + "…" : name} (${(percent * 100).toFixed(1)}%)`
-                        }
-                        innerRadius={58}
-                        outerRadius={116}
-                        paddingAngle={2}
-                        fill="#a855f7"
-                        dataKey="value"
-                        filter="url(#artistPieGlow)"
-                      >
-                        {pieChartData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} stroke={chartTheme.pieStroke} strokeWidth={2} />
-                        ))}
-                      </Pie>
-                      <Tooltip
-                        contentStyle={CHART_TOOLTIP_STYLES.contentStyle}
-                        labelStyle={CHART_TOOLTIP_STYLES.labelStyle}
-                        itemStyle={CHART_TOOLTIP_STYLES.itemStyle}
-                        formatter={(value: number) => [`${value.toLocaleString(locale)} ${t("listensCount")}`, t("listens")]}
-                      />
-                    </PieChart>
-                  </ChartResponsiveContainer>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="relative animate-fade-in-up" style={{ animationDelay: "60ms" }}>
-        <ArtistsSectionHeader
-          eyebrow={t("sections.roster.eyebrow")}
-          title={t("sections.roster.title")}
-          description={t("sections.roster.description")}
-        />
-        <div className="relative overflow-hidden rounded-[2rem] border border-slate-200/90 bg-gradient-to-br from-white via-slate-50/90 to-white text-slate-900 shadow-xl shadow-slate-900/[0.07] ring-1 ring-slate-900/[0.04] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-2xl hover:shadow-slate-900/10 dark:border-white/10 dark:from-slate-950 dark:via-slate-950 dark:to-slate-950 dark:text-white dark:shadow-2xl dark:shadow-black/25 dark:ring-0 dark:hover:shadow-black/35">
-          <div
-            className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.06),transparent_38%),radial-gradient(circle_at_90%_8%,rgba(6,182,212,0.05),transparent_32%)] dark:bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.2),transparent_36%),radial-gradient(circle_at_86%_18%,rgba(6,182,212,0.14),transparent_30%)]"
-            aria-hidden
+      <DashboardSectionPanel idPrefix="artists-desktop" view="ranking" activeView={activeView}>
+        <section className="relative animate-fade-in-up">
+          <ArtistsSectionHeader
+            eyebrow={t("sections.table.eyebrow")}
+            title={t("sections.table.title")}
+            description={t("sections.table.description")}
           />
-          <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-violet-300/45 to-transparent dark:via-violet-200/45" aria-hidden />
-          <div className="relative border-b border-slate-200/80 px-5 py-6 sm:px-8 dark:border-white/10">
-            <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-violet-700 dark:text-violet-200">
-              <span className="h-2 w-2 rounded-full bg-violet-500 shadow-[0_0_12px_rgba(139,92,246,0.4)] dark:bg-violet-300 dark:shadow-[0_0_14px_rgba(167,139,250,0.55)]" aria-hidden />
-              {t("sections.roster.top3Badge")}
-            </div>
-            <h3 className="mt-3 text-lg font-semibold text-slate-900 sm:text-xl dark:text-white">{t("top3Title")}</h3>
-          </div>
-          <div className="relative p-5 sm:p-6 lg:p-8">
-            {isTopLoading ? (
-              <ArtistsGridSkeleton count={3} />
-            ) : (
-              <TopThreeArtists
-                artists={topArtists}
-                maxListens={maxListens}
-                t={t}
-                locale={locale}
-                onArtistSelect={handleOpenArtistInsights}
-              />
-            )}
-          </div>
-          <div className="relative border-t border-slate-200/80 px-5 py-6 sm:px-8 dark:border-white/10">
-            <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-800 dark:text-cyan-200">
-              <span className="h-2 w-2 rounded-full bg-cyan-500 shadow-[0_0_12px_rgba(6,182,212,0.4)] dark:bg-cyan-300 dark:shadow-[0_0_14px_rgb(34_211_238_/0.45)]" aria-hidden />
-              {t("sections.roster.gridBadge")}
-            </div>
-            <h3 className="mt-3 text-lg font-semibold text-slate-900 sm:text-xl dark:text-white">{t("allArtists")}</h3>
-            <div className="mt-5">
-              {isTopLoading ? (
-                <ArtistsGridSkeleton />
-              ) : (
-                <AllArtistsGrid
-                  topArtists={topArtists}
-                  t={t}
-                  locale={locale}
-                  onOpenArtistInsights={handleOpenArtistInsights}
-                />
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="relative animate-fade-in-up" style={{ animationDelay: "100ms" }}>
-        <ArtistsSectionHeader
-          eyebrow={t("sections.table.eyebrow")}
-          title={t("sections.table.title")}
-          description={t("sections.table.description")}
-        />
-        <DetailedViewSection
-          artists={pagedArtists}
-          page={page}
-          pageSize={pageSize}
-          totalPages={totalPages}
-          total={totalArtistsInRange}
-          hasMore={pagination?.hasMore ?? false}
-          offset={offset}
-          isFetching={isPagedFetching || !pagedData}
-          onPageChange={(nextPage) => updatePaginationParams(nextPage, pageSize)}
-          onPageSizeChange={(nextPageSize) => updatePaginationParams(1, nextPageSize)}
-          onOpenArtistInsights={handleOpenArtistInsights}
-          t={t}
-          locale={locale}
-        />
-      </section>
+          <DetailedViewSection
+            artists={pagedArtists}
+            page={page}
+            pageSize={pageSize}
+            totalPages={totalPages}
+            total={totalArtistsInRange}
+            hasMore={pagination?.hasMore ?? false}
+            offset={offset}
+            isFetching={isPagedFetching || !pagedData}
+            onPageChange={(nextPage) => updatePaginationParams(nextPage, pageSize)}
+            onPageSizeChange={(nextPageSize) => updatePaginationParams(1, nextPageSize)}
+            onOpenArtistInsights={handleOpenArtistInsights}
+            t={t}
+            locale={locale}
+            searchInput={searchInput}
+            onSearchInputChange={setSearchInput}
+          />
+        </section>
+      </DashboardSectionPanel>
     </div>
     <ArtistUserInsightsPanel
       open={artistInsightsTarget != null}

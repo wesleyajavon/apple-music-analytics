@@ -19,6 +19,7 @@ export const trackKeys = {
     userId?: string;
     limit?: number;
     offset?: number;
+    q?: string;
   }) => [...trackKeys.all, "stats", params] as const,
   trendsChart: (params: {
     startDate?: string;
@@ -36,7 +37,8 @@ export async function fetchTrackStats(
   endDate?: string,
   userId?: string,
   limit?: number,
-  offset?: number
+  offset?: number,
+  q?: string
 ): Promise<TracksResponseDto> {
   const searchParams = new URLSearchParams();
   if (startDate) searchParams.append("startDate", startDate);
@@ -44,6 +46,7 @@ export async function fetchTrackStats(
   if (userId) searchParams.append("userId", userId);
   if (limit != null) searchParams.append("limit", String(limit));
   if (offset != null) searchParams.append("offset", String(offset));
+  if (q) searchParams.append("q", q);
   const queryString = searchParams.toString();
   return apiClient.get<TracksResponseDto>(`/tracks${queryString ? `?${queryString}` : ""}`);
 }
@@ -57,15 +60,16 @@ export function useTrackStats(
   options?: Omit<
     UseQueryOptions<TracksResponseDto, Error>,
     "queryKey" | "queryFn" | "staleTime" | "placeholderData"
-  >
+  > & { q?: string }
 ) {
-  const queryKey = trackKeys.stats({ startDate, endDate, userId, limit, offset });
+  const { q, ...queryOptions } = options ?? {};
+  const queryKey = trackKeys.stats({ startDate, endDate, userId, limit, offset, q });
   return useQuery<TracksResponseDto, Error>({
     queryKey,
-    queryFn: () => fetchTrackStats(startDate, endDate, userId, limit, offset),
+    queryFn: () => fetchTrackStats(startDate, endDate, userId, limit, offset, q),
     staleTime: CACHE_STALE_TIME.OVERVIEW,
     placeholderData: keepPreviousData,
-    ...options,
+    ...queryOptions,
   });
 }
 

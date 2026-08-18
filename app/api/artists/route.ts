@@ -76,8 +76,10 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const limitParam = searchParams.get("limit");
     const offsetParam = searchParams.get("offset");
+    const qParam = searchParams.get("q")?.trim() ?? "";
     const limit = limitParam ? parseInt(limitParam, 10) : 20;
     const offset = offsetParam ? parseInt(offsetParam, 10) : 0;
+    const searchQuery = qParam.length > 0 ? qParam.slice(0, 200) : undefined;
 
     // Valider le limit
     if (isNaN(limit) || limit < 1 || limit > 100) {
@@ -100,13 +102,14 @@ export async function GET(request: NextRequest) {
         startDate,
         endDate,
         limit,
-        offset
+        offset,
+        searchQuery
       );
     } else {
       const [overview, total, topArtists] = await Promise.all([
         getArtistOverview(startDate, endDate, userId),
-        countArtistsForRange(startDate, endDate, userId),
-        getArtistStats(startDate, endDate, userId, limit, offset),
+        countArtistsForRange(startDate, endDate, userId, searchQuery),
+        getArtistStats(startDate, endDate, userId, limit, offset, searchQuery),
       ]);
       response = {
         overview,

@@ -54,7 +54,7 @@ describe("GET /api/tracks", () => {
     const data = await response.json();
     expect(data.pagination.limit).toBe(20);
     expect(data.pagination.offset).toBe(0);
-    expect(getTrackStats).toHaveBeenCalledWith(undefined, undefined, "user-1", 20, 0);
+    expect(getTrackStats).toHaveBeenCalledWith(undefined, undefined, "user-1", 20, 0, undefined);
   });
 
   it("supports explicit pagination", async () => {
@@ -69,7 +69,7 @@ describe("GET /api/tracks", () => {
 
     const response = await GET(new NextRequest("http://localhost/api/tracks?limit=15&offset=30"));
     expect(response.status).toBe(200);
-    expect(getTrackStats).toHaveBeenCalledWith(undefined, undefined, "user-1", 15, 30);
+    expect(getTrackStats).toHaveBeenCalledWith(undefined, undefined, "user-1", 15, 30, undefined);
   });
 
   it("rejects invalid limit", async () => {

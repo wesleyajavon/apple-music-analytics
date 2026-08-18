@@ -19,14 +19,16 @@ export function getPublicProfileArtistsListCached(
   startDate: Date | undefined,
   endDate: Date | undefined,
   limit: number,
-  offset: number
+  offset: number,
+  searchQuery?: string
 ): Promise<ArtistsResponseDto> {
+  const qSeg = searchQuery?.trim().toLowerCase() || "all";
   const fetcher = unstable_cache(
     async () => {
       const [overview, total, topArtists] = await Promise.all([
         getArtistOverview(startDate, endDate, publicUserId),
-        countArtistsForRange(startDate, endDate, publicUserId),
-        getArtistStats(startDate, endDate, publicUserId, limit, offset),
+        countArtistsForRange(startDate, endDate, publicUserId, searchQuery),
+        getArtistStats(startDate, endDate, publicUserId, limit, offset, searchQuery),
       ]);
       return {
         overview,
@@ -47,6 +49,7 @@ export function getPublicProfileArtistsListCached(
       dateSeg(endDate),
       String(limit),
       String(offset),
+      qSeg,
     ],
     {
       revalidate: PUBLIC_DEMO_CACHE_REVALIDATE_SECONDS,

@@ -14,6 +14,8 @@ export interface ArtistStatsDto {
   firstListenDate: string;
   lastListenDate: string;
   totalPlayTime: number; // in seconds
+  /** Rang global sur la période, renvoyé lors d’une recherche sur le classement. */
+  rank?: number;
 }
 
 /**

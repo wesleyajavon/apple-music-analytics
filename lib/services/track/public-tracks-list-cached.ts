@@ -19,14 +19,16 @@ export function getPublicProfileTracksListCached(
   startDate: Date | undefined,
   endDate: Date | undefined,
   limit: number,
-  offset: number
+  offset: number,
+  searchQuery?: string
 ): Promise<TracksResponseDto> {
+  const qSeg = searchQuery?.trim().toLowerCase() || "all";
   const fetcher = unstable_cache(
     async () => {
       const [overview, total, topTracks] = await Promise.all([
         getTrackOverview(startDate, endDate, publicUserId),
-        countTracksForRange(startDate, endDate, publicUserId),
-        getTrackStats(startDate, endDate, publicUserId, limit, offset),
+        countTracksForRange(startDate, endDate, publicUserId, searchQuery),
+        getTrackStats(startDate, endDate, publicUserId, limit, offset, searchQuery),
       ]);
       return {
         overview,
@@ -47,6 +49,7 @@ export function getPublicProfileTracksListCached(
       dateSeg(endDate),
       String(limit),
       String(offset),
+      qSeg,
     ],
     {
       revalidate: PUBLIC_DEMO_CACHE_REVALIDATE_SECONDS,

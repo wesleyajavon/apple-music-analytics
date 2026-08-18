@@ -12,12 +12,21 @@ import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params"
 
 type BottomNavItem = {
   href: string;
-  labelKey: "overview" | "artists" | "genres" | "timeline" | "more";
+  labelKey: "musicalProfile" | "overview" | "artists" | "genres" | "more";
   isMore?: boolean;
   icon: (props: React.SVGProps<SVGSVGElement>) => JSX.Element;
 };
 
 const icons = {
+  musicalProfile: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z"
+      />
+    </svg>
+  ),
   overview: (props: React.SVGProps<SVGSVGElement>) => (
     <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
       <path
@@ -46,15 +55,6 @@ const icons = {
       <path strokeLinecap="round" strokeLinejoin="round" d="M6 6h.008v.008H6V6Z" />
     </svg>
   ),
-  timeline: (props: React.SVGProps<SVGSVGElement>) => (
-    <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M2.25 18 9 11.25l4.5 4.5L21.75 7M21.75 7h-5.25M21.75 7v5.25"
-      />
-    </svg>
-  ),
   more: (props: React.SVGProps<SVGSVGElement>) => (
     <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -63,16 +63,16 @@ const icons = {
 };
 
 const NAV_ITEMS: BottomNavItem[] = [
+  { href: "/dashboard/musical-profile", labelKey: "musicalProfile", icon: icons.musicalProfile },
   { href: "/dashboard/overview", labelKey: "overview", icon: icons.overview },
   { href: "/dashboard/artists", labelKey: "artists", icon: icons.artists },
   { href: "/dashboard/genres", labelKey: "genres", icon: icons.genres },
-  { href: "/dashboard/timeline", labelKey: "timeline", icon: icons.timeline },
   { href: "#more", labelKey: "more", isMore: true, icon: icons.more },
 ];
 
 function isTabActive(href: string, pathname: string): boolean {
-  if (href === "/dashboard/overview") {
-    return pathname === "/dashboard" || pathname === href || pathname.startsWith("/dashboard/overview");
+  if (href === "/dashboard/musical-profile") {
+    return pathname === "/dashboard" || pathname === href || pathname.startsWith(`${href}/`);
   }
   return pathname === href || pathname.startsWith(`${href}/`);
 }
@@ -105,7 +105,11 @@ export function DashboardMobileBottomNav() {
       >
         <ul className="mx-auto flex max-w-lg items-stretch justify-around px-1 pt-1">
           {NAV_ITEMS.map((item) => {
-            const label = item.isMore ? tCommon("more") : t(`items.${item.labelKey}`);
+            const label = item.isMore
+              ? tCommon("more")
+              : item.labelKey === "musicalProfile"
+                ? t("items.musicalProfileShort")
+                : t(`items.${item.labelKey}`);
             const active = item.isMore
               ? isPlusOpen || isPlusRouteActive
               : isTabActive(item.href, pathname);

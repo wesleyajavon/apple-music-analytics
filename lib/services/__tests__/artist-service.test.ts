@@ -93,12 +93,28 @@ describe("artist-service", () => {
       expect(prisma.$queryRaw).toHaveBeenCalledOnce();
     });
 
-    it("should handle empty results", async () => {
-      vi.mocked(prisma.$queryRaw).mockResolvedValue([]);
+    it("should keep global rank when filtering by name", async () => {
+      const mockRows = [
+        {
+          artist_id: "artist-9",
+          artist_name: "Drake",
+          image_url: null,
+          listen_count: BigInt(80),
+          unique_tracks: BigInt(12),
+          first_listen_date: new Date("2024-01-01T00:00:00.000Z"),
+          last_listen_date: new Date("2024-01-20T00:00:00.000Z"),
+          total_play_time: BigInt(900),
+          rank: BigInt(4),
+        },
+      ];
 
-      const result = await getArtistStats();
+      vi.mocked(prisma.$queryRaw).mockResolvedValue(mockRows);
 
-      expect(result).toEqual([]);
+      const result = await getArtistStats(undefined, undefined, "user-123", 20, 0, "dra");
+
+      expect(result).toHaveLength(1);
+      expect(result[0].artistName).toBe("Drake");
+      expect(result[0].rank).toBe(4);
     });
   });
 

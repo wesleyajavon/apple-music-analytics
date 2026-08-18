@@ -1,19 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { motion, useReducedMotion } from "motion/react";
-import { ChevronDown, Crown, Swords, X } from "lucide-react";
+import { ChevronDown, Crown, Search } from "lucide-react";
 import { ArtistAvatarHydrated } from "@/lib/components/artist-avatar-hydrated";
 import { EmptyState } from "@/lib/components/empty-state";
 import { ErrorState } from "@/lib/components/error-state";
-import {
-  DuetDualLineChart,
-  EntityBattleScorecard,
-  applyDuetChartView,
-  type DuetChartViewMode,
-} from "@/lib/components/duet/duet-entity-duel-blocks";
-import { DuetChartViewToggle } from "@/lib/components/duet/duet-chart-view-toggle";
 import {
   DASHBOARD_SPOTLIGHT_SHELL,
   DASHBOARD_SPOTLIGHT_GRADIENT_LIME,
@@ -23,29 +15,10 @@ import {
   DASHBOARD_SPOTLIGHT_BADGE_LIME,
   DASHBOARD_SPOTLIGHT_BADGE_DOT_LIME,
   DASHBOARD_SPOTLIGHT_HEADER_BOTTOM,
-  DASHBOARD_CHART_THEME,
 } from "@/lib/constants/dashboard-spotlight";
-import type { PeriodType } from "@/lib/components/period-selector";
-import { useTheme } from "@/lib/providers/theme-provider";
-import { useDuetCompareEntity } from "@/lib/hooks/use-duet";
 import type { CompareSharedArtistsResponse } from "@/lib/dto/duet";
-import { ApiError } from "@/lib/api-client";
 
 const VISIBLE_ARTISTS_COUNT = 5;
-
-const DUEL_PANEL_SCROLL_MARGIN =
-  "scroll-mt-[calc(var(--dashboard-filter-height,4.5rem)+0.75rem)]";
-
-function scrollElementIntoView(
-  element: HTMLElement | null,
-  options: { block?: ScrollLogicalPosition; behavior?: ScrollBehavior } = {}
-) {
-  if (!element) return;
-  element.scrollIntoView({
-    behavior: options.behavior ?? "smooth",
-    block: options.block ?? "start",
-  });
-}
 
 type SharedArtistStatChipProps = {
   label: string;
@@ -107,18 +80,12 @@ function SharedArtistStatChip({
 }
 
 type DuetSharedArtistsPanelProps = {
-  friendUserId: string;
   friendName: string;
-  viewerName: string;
-  startDate?: string;
-  endDate?: string;
-  period: PeriodType;
-  chartView: DuetChartViewMode;
-  onChartViewChange: (mode: DuetChartViewMode) => void;
   data?: CompareSharedArtistsResponse;
   isLoading: boolean;
   error: Error | null;
   onRetry: () => void;
+  onCompareArtist: (artistId: string, artistName: string) => void;
 };
 
 function SharedArtistsHeader({
@@ -157,132 +124,25 @@ function SharedArtistsHeader({
 }
 
 export function DuetSharedArtistsPanel({
-  friendUserId,
   friendName,
-  viewerName,
-  startDate,
-  endDate,
-  period,
-  chartView,
-  onChartViewChange,
   data,
   isLoading,
   error,
   onRetry,
+  onCompareArtist,
 }: DuetSharedArtistsPanelProps) {
   const t = useTranslations("duet.compare");
   const locale = useLocale();
-  const { resolvedTheme } = useTheme();
-  const chartTheme = DASHBOARD_CHART_THEME[resolvedTheme === "dark" ? "dark" : "light"];
-  const prefersReducedMotion = useReducedMotion();
-  const scrollBehavior: ScrollBehavior = prefersReducedMotion ? "auto" : "smooth";
-
   const [listExpanded, setListExpanded] = useState(false);
-  const [selectedArtistId, setSelectedArtistId] = useState<string | undefined>();
-  const [selectedArtistName, setSelectedArtistName] = useState("");
-  const duelPanelRef = useRef<HTMLDivElement>(null);
-  const duelHeadingRef = useRef<HTMLHeadingElement>(null);
-  const duelChartRef = useRef<HTMLDivElement>(null);
-
-  const {
-    data: artistCompare,
-    isLoading: isArtistCompareLoading,
-    isFetching: isArtistCompareFetching,
-    error: artistCompareError,
-    refetch: refetchArtistCompare,
-  } = useDuetCompareEntity({
-    friendUserId,
-    type: "artist",
-    entityId: selectedArtistId,
-    startDate,
-    endDate,
-    period,
-  });
-
-  const artistChartData = useMemo(
-    () =>
-      artistCompare?.merged.map((row) => ({ date: row.date, self: row.self, friend: row.friend })) ?? [],
-    [artistCompare]
-  );
-
-  const artistDisplayChartData = useMemo(
-    () => applyDuetChartView(artistChartData, chartView),
-    [artistChartData, chartView]
-  );
 
   const visibleArtists = useMemo(() => {
     if (!data?.artists.length) return [];
     if (listExpanded) return data.artists;
-
-    const initial = data.artists.slice(0, VISIBLE_ARTISTS_COUNT);
-    if (!selectedArtistId) return initial;
-
-    const selected = data.artists.find((artist) => artist.artistId === selectedArtistId);
-    if (!selected || initial.some((artist) => artist.artistId === selectedArtistId)) {
-      return initial;
-    }
-    return [...initial, selected];
-  }, [data?.artists, listExpanded, selectedArtistId]);
+    return data.artists.slice(0, VISIBLE_ARTISTS_COUNT);
+  }, [data?.artists, listExpanded]);
 
   const hiddenCount = Math.max(0, (data?.artists.length ?? 0) - VISIBLE_ARTISTS_COUNT);
   const hasMore = hiddenCount > 0;
-
-  function handleArtistClick(artistId: string, artistName: string) {
-    if (selectedArtistId === artistId) {
-      setSelectedArtistId(undefined);
-      setSelectedArtistName("");
-      return;
-    }
-    setSelectedArtistId(artistId);
-    setSelectedArtistName(artistName);
-  }
-
-  function handleCloseDuel() {
-    setSelectedArtistId(undefined);
-    setSelectedArtistName("");
-  }
-
-  useEffect(() => {
-    if (!selectedArtistId) return;
-
-    const frame = window.requestAnimationFrame(() => {
-      scrollElementIntoView(duelPanelRef.current, {
-        behavior: scrollBehavior,
-        block: "start",
-      });
-      duelHeadingRef.current?.focus({ preventScroll: true });
-    });
-
-    return () => window.cancelAnimationFrame(frame);
-  }, [selectedArtistId, scrollBehavior]);
-
-  useEffect(() => {
-    if (!selectedArtistId) return;
-    if (isArtistCompareLoading || isArtistCompareFetching) return;
-    if (!artistCompare || artistChartData.length === 0) return;
-
-    const frame = window.requestAnimationFrame(() => {
-      scrollElementIntoView(duelChartRef.current ?? duelPanelRef.current, {
-        behavior: scrollBehavior,
-        block: "nearest",
-      });
-    });
-
-    return () => window.cancelAnimationFrame(frame);
-  }, [
-    selectedArtistId,
-    isArtistCompareLoading,
-    isArtistCompareFetching,
-    artistCompare,
-    artistChartData.length,
-    scrollBehavior,
-  ]);
-
-  const duelArtistName =
-    artistCompare?.type === "artist" ? (artistCompare.artistName ?? selectedArtistName) : selectedArtistName;
-  const duelArtistImageUrl =
-    data?.artists.find((artist) => artist.artistId === selectedArtistId)?.imageUrl ??
-    (artistCompare?.type === "artist" ? artistCompare.imageUrl : null);
 
   return (
     <section className={DASHBOARD_SPOTLIGHT_SHELL}>
@@ -313,89 +173,76 @@ export function DuetSharedArtistsPanel({
         ) : (
           <>
             <ul className={`space-y-2 ${DASHBOARD_SPOTLIGHT_INNER_WELL} p-3 sm:p-4`}>
-              {visibleArtists.map((artist, index) => {
-                const isSelected = selectedArtistId === artist.artistId;
-                return (
-                  <li key={artist.artistId}>
-                    <button
-                      type="button"
-                      onClick={() => handleArtistClick(artist.artistId, artist.artistName)}
-                      aria-expanded={isSelected}
-                      aria-controls={isSelected ? "duet-shared-artist-duel" : undefined}
-                      className={`group flex w-full gap-3 rounded-xl border px-3 py-3 text-left transition-all sm:items-start ${
-                        isSelected
-                          ? "border-lime-400/80 bg-lime-50/80 shadow-sm ring-2 ring-lime-300/40 dark:border-lime-400/40 dark:bg-lime-400/10 dark:ring-lime-400/20"
-                          : "border-slate-200/80 bg-white/80 hover:border-lime-300/70 hover:bg-lime-50/50 hover:shadow-sm dark:border-white/10 dark:bg-slate-950/40 dark:hover:border-lime-400/30 dark:hover:bg-lime-400/5"
-                      }`}
-                    >
-                      <div className="relative shrink-0 self-start overflow-hidden rounded-xl ring-1 ring-slate-200/90 shadow-sm dark:ring-white/10">
-                        <ArtistAvatarHydrated
-                          artistId={artist.artistId}
-                          artistName={artist.artistName}
-                          imageUrl={artist.imageUrl}
-                          avatarApiSize={112}
-                          colorIndex={index}
-                          alt=""
-                          width={56}
-                          height={56}
-                          className="h-14 w-14 object-cover transition-transform duration-300 group-hover:scale-105"
-                          loading="lazy"
+              {visibleArtists.map((artist, index) => (
+                <li key={artist.artistId}>
+                  <div className="group flex w-full gap-3 rounded-xl border border-slate-200/80 bg-white/80 px-3 py-3 transition-all sm:items-start dark:border-white/10 dark:bg-slate-950/40">
+                    <div className="relative shrink-0 self-start overflow-hidden rounded-xl ring-1 ring-slate-200/90 shadow-sm dark:ring-white/10">
+                      <ArtistAvatarHydrated
+                        artistId={artist.artistId}
+                        artistName={artist.artistName}
+                        imageUrl={artist.imageUrl}
+                        avatarApiSize={112}
+                        colorIndex={index}
+                        alt=""
+                        width={56}
+                        height={56}
+                        className="h-14 w-14 object-cover"
+                        loading="lazy"
+                      />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="truncate font-semibold text-slate-900 dark:text-white">{artist.artistName}</p>
+                        <button
+                          type="button"
+                          onClick={() => onCompareArtist(artist.artistId, artist.artistName)}
+                          className="hidden shrink-0 items-center gap-1 rounded-full border border-lime-200/80 bg-lime-50 px-2.5 py-1 text-[0.65rem] font-black uppercase tracking-widest text-lime-700 transition-colors hover:border-lime-300 hover:bg-lime-100 dark:border-lime-400/25 dark:bg-lime-400/10 dark:text-lime-200 dark:hover:bg-lime-400/15 sm:inline-flex"
+                        >
+                          <Search className="h-3 w-3" aria-hidden />
+                          {t("sharedArtistsDuelCta")}
+                        </button>
+                      </div>
+                      <div className="mt-2.5 grid grid-cols-2 gap-2">
+                        <SharedArtistStatChip
+                          label={t("seriesSelf")}
+                          listenCount={artist.selfCount}
+                          listensLabel={t("sharedArtistsListens")}
+                          rankLabel={t("sharedArtistsTop50RankSelf", {
+                            rank: artist.selfRank,
+                            topPool: data.topPool,
+                          })}
+                          variant="self"
+                          isWinner={artist.winner === "self"}
+                          locale={locale}
+                        />
+                        <SharedArtistStatChip
+                          label={friendName}
+                          listenCount={artist.friendCount}
+                          listensLabel={t("sharedArtistsListens")}
+                          rankLabel={t("sharedArtistsTop50RankFriend", {
+                            rank: artist.friendRank,
+                            friendName,
+                            topPool: data.topPool,
+                          })}
+                          variant="friend"
+                          isWinner={artist.winner === "friend"}
+                          locale={locale}
                         />
                       </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-start justify-between gap-2">
-                          <p className="truncate font-semibold text-slate-900 dark:text-white">{artist.artistName}</p>
-                          <span
-                            className={`hidden shrink-0 items-center gap-1 rounded-full border border-lime-200/80 bg-lime-50 px-2.5 py-1 text-[0.65rem] font-black uppercase tracking-widest text-lime-700 transition-opacity dark:border-lime-400/25 dark:bg-lime-400/10 dark:text-lime-200 sm:inline-flex ${
-                              isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-                            }`}
-                          >
-                            <Swords className="h-3 w-3" aria-hidden />
-                            {t("sharedArtistsDuelCta")}
-                          </span>
-                        </div>
-                        <div className="mt-2.5 grid grid-cols-2 gap-2">
-                          <SharedArtistStatChip
-                            label={t("seriesSelf")}
-                            listenCount={artist.selfCount}
-                            listensLabel={t("sharedArtistsListens")}
-                            rankLabel={t("sharedArtistsTop50RankSelf", {
-                              rank: artist.selfRank,
-                              topPool: data.topPool,
-                            })}
-                            variant="self"
-                            isWinner={artist.winner === "self"}
-                            locale={locale}
-                          />
-                          <SharedArtistStatChip
-                            label={friendName}
-                            listenCount={artist.friendCount}
-                            listensLabel={t("sharedArtistsListens")}
-                            rankLabel={t("sharedArtistsTop50RankFriend", {
-                              rank: artist.friendRank,
-                              friendName,
-                              topPool: data.topPool,
-                            })}
-                            variant="friend"
-                            isWinner={artist.winner === "friend"}
-                            locale={locale}
-                          />
-                        </div>
-                        <div className="mt-2.5 flex justify-end sm:hidden">
-                          <span
-                            className={`inline-flex items-center gap-1 rounded-full border border-lime-200/80 bg-lime-50 px-2.5 py-1 text-[0.65rem] font-black uppercase tracking-widest text-lime-700 dark:border-lime-400/25 dark:bg-lime-400/10 dark:text-lime-200 ${
-                              isSelected ? "opacity-100" : "opacity-100"
-                            }`}
-                          >
-                            <Swords className="h-3 w-3" aria-hidden />
-                            {t("sharedArtistsDuelCta")}
-                          </span>
-                        </div>
+                      <div className="mt-2.5 flex justify-end sm:hidden">
+                        <button
+                          type="button"
+                          onClick={() => onCompareArtist(artist.artistId, artist.artistName)}
+                          className="inline-flex items-center gap-1 rounded-full border border-lime-200/80 bg-lime-50 px-2.5 py-1 text-[0.65rem] font-black uppercase tracking-widest text-lime-700 dark:border-lime-400/25 dark:bg-lime-400/10 dark:text-lime-200"
+                        >
+                          <Search className="h-3 w-3" aria-hidden />
+                          {t("sharedArtistsDuelCta")}
+                        </button>
                       </div>
-                    </button>
-                  </li>
-                );
-              })}
+                    </div>
+                  </div>
+                </li>
+              ))}
             </ul>
 
             {hasMore ? (
@@ -413,119 +260,6 @@ export function DuetSharedArtistsPanel({
                   ? t("sharedArtistsShowLess")
                   : t("sharedArtistsShowMore", { count: hiddenCount })}
               </button>
-            ) : null}
-
-            {selectedArtistId ? (
-              <motion.div
-                ref={duelPanelRef}
-                id="duet-shared-artist-duel"
-                role="region"
-                aria-labelledby="duet-shared-artist-duel-heading"
-                aria-busy={isArtistCompareLoading || isArtistCompareFetching}
-                initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.35, ease: "easeOut" }}
-                className={`space-y-4 ${DASHBOARD_SPOTLIGHT_INNER_WELL} ${DUEL_PANEL_SCROLL_MARGIN} p-4 sm:p-5`}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0 flex-1">
-                    <p className="font-mono text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-lime-700 dark:text-lime-300">
-                      {t("sharedArtistsDuelEyebrow")}
-                    </p>
-                    <h3
-                      ref={duelHeadingRef}
-                      id="duet-shared-artist-duel-heading"
-                      tabIndex={-1}
-                      className="mt-1 text-base font-semibold text-slate-900 outline-none dark:text-white"
-                    >
-                      {t("artistChartTitle", { artistName: duelArtistName, friendName })}
-                    </h3>
-                    <p className={`mt-1 text-sm ${DASHBOARD_SPOTLIGHT_MUTED}`}>
-                      {chartView === "cumulative"
-                        ? t("chartDescriptionCumulative")
-                        : t("artistChartDescription")}
-                    </p>
-                  </div>
-                  <div className="flex shrink-0 flex-col items-end gap-2">
-                    <DuetChartViewToggle value={chartView} onChange={onChartViewChange} />
-                    <button
-                      type="button"
-                      onClick={handleCloseDuel}
-                      className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-white/10 dark:hover:text-slate-200"
-                      aria-label={t("sharedArtistsCloseDuel")}
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-
-                {isArtistCompareLoading || isArtistCompareFetching ? (
-                  <p className={`text-sm ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("artistLoading")}</p>
-                ) : artistCompareError ? (
-                  artistCompareError instanceof ApiError &&
-                  (artistCompareError.statusCode === 403 || artistCompareError.statusCode === 404) ? (
-                    <EmptyState
-                      variant="startup"
-                      message={
-                        artistCompareError.statusCode === 403
-                          ? t("scopeInsufficientTitle")
-                          : t("notFoundTitle")
-                      }
-                      description={
-                        artistCompareError.statusCode === 403
-                          ? t("scopeInsufficientDescription")
-                          : t("notFoundDescription")
-                      }
-                    />
-                  ) : (
-                    <ErrorState
-                      variant="startup"
-                      error={artistCompareError}
-                      message={t("artistError")}
-                      onRetry={() => void refetchArtistCompare()}
-                    />
-                  )
-                ) : artistCompare ? (
-                  <div className="space-y-5">
-                    <EntityBattleScorecard
-                      selfCount={artistCompare.selfCount}
-                      friendCount={artistCompare.friendCount}
-                      viewerName={viewerName}
-                      friendName={friendName}
-                      winner={artistCompare.winner}
-                      entityName={duelArtistName}
-                      entityImageUrl={duelArtistImageUrl}
-                      arenaMode="artist"
-                      locale={locale}
-                      t={t}
-                    />
-
-                    {artistCompare.rangeClamped ? (
-                      <p className={`text-sm ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("rangeClamped")}</p>
-                    ) : null}
-
-                    {artistChartData.length === 0 ? (
-                      <EmptyState
-                        variant="startup"
-                        message={t("artistNoDataTitle")}
-                        description={t("artistNoDataDescription")}
-                      />
-                    ) : (
-                      <div ref={duelChartRef}>
-                        <DuetDualLineChart
-                          data={artistDisplayChartData}
-                          period={period}
-                          locale={locale}
-                          chartTheme={chartTheme}
-                          resolvedTheme={resolvedTheme}
-                          selfLabel={t("seriesSelf")}
-                          friendLabel={t("seriesFriend", { friendName })}
-                        />
-                      </div>
-                    )}
-                  </div>
-                ) : null}
-              </motion.div>
             ) : null}
           </>
         )}

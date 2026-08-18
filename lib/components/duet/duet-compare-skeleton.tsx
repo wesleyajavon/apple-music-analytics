@@ -3,15 +3,16 @@
 import {
   DASHBOARD_SPOTLIGHT_SHELL,
   DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY,
-  DASHBOARD_SPOTLIGHT_GRADIENT_LIME,
   DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET,
-  DASHBOARD_SPOTLIGHT_HAIRLINE_LIME,
   DASHBOARD_SPOTLIGHT_HEADER_BOTTOM,
   DASHBOARD_SPOTLIGHT_INNER_WELL,
 } from "@/lib/constants/dashboard-spotlight";
 
 const DUET_COMPARE_HERO_SHELL =
   "relative overflow-hidden rounded-[2rem] border border-white/10 bg-gray-950 px-5 py-6 text-white shadow-2xl shadow-violet-500/15 sm:px-8 sm:py-9 lg:px-10 lg:py-10";
+
+const DUET_SUB_NAV_SHELL =
+  "flex w-full flex-wrap gap-1 rounded-2xl border border-slate-200/80 bg-slate-100/80 p-1 dark:border-white/10 dark:bg-black/30";
 
 function ShimmerBar({ className }: { className: string }) {
   return <div className={`animate-shimmer rounded bg-slate-200/90 dark:bg-white/10 ${className}`} />;
@@ -102,27 +103,35 @@ function DuetTimelineChartSkeleton() {
   );
 }
 
-function SharedArtistRowSkeleton() {
+function ContextBarSkeleton() {
   return (
-    <div className="flex items-center gap-4 rounded-[1.15rem] border border-slate-200/80 bg-white/70 px-4 py-3 dark:border-white/10 dark:bg-slate-950/40">
-      <ShimmerBar className="h-11 w-11 shrink-0 rounded-xl" />
-      <div className="min-w-0 flex-1 space-y-2">
-        <ShimmerBar className="h-4 w-36" />
-        <div className="grid grid-cols-2 gap-2">
-          <ShimmerBar className="h-14 rounded-lg" />
-          <ShimmerBar className="h-14 rounded-lg" />
+    <div
+      className="-mx-4 border-b border-slate-200/80 bg-white/85 px-4 py-3 dark:border-white/10 dark:bg-slate-950/80 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8"
+      aria-hidden
+    >
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex items-center gap-3">
+          <ShimmerBar className="h-8 w-8 rounded-full" />
+          <ShimmerBar className="h-4 w-16" />
+          <ShimmerBar className="h-6 w-10 rounded-full" />
+          <ShimmerBar className="h-8 w-8 rounded-full" />
+          <ShimmerBar className="h-4 w-16" />
+        </div>
+        <div className="flex gap-3">
+          <ShimmerBar className="h-9 w-32 rounded-xl" />
+          <ShimmerBar className="h-9 w-36 rounded-xl" />
         </div>
       </div>
     </div>
   );
 }
 
-function ArenaModeCardSkeleton() {
+function SectionTabsSkeleton() {
   return (
-    <div className="rounded-[1.35rem] border border-slate-200/80 bg-white/80 p-5 dark:border-white/10 dark:bg-slate-950/50">
-      <ShimmerBar className="h-10 w-10 rounded-xl" />
-      <ShimmerBar className="mt-4 h-5 w-28" />
-      <ShimmerBar className="mt-2 h-4 w-full" />
+    <div className="flex flex-col gap-2 sm:flex-row" aria-hidden>
+      {Array.from({ length: 3 }).map((_, index) => (
+        <ShimmerBar key={index} className="h-[4.25rem] flex-1 rounded-2xl" />
+      ))}
     </div>
   );
 }
@@ -155,40 +164,14 @@ export function DuetComparePickerSkeleton() {
 export function DuetCompareBattleSkeleton() {
   return (
     <div className="space-y-8" aria-busy="true" aria-hidden>
+      <ContextBarSkeleton />
+      <SectionTabsSkeleton />
       <section className={DASHBOARD_SPOTLIGHT_SHELL}>
         <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} />
         <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} />
         <SpotlightHeaderSkeleton />
         <div className="px-5 pb-6 sm:px-8">
-          <div className="mb-4 flex justify-end">
-            <ShimmerBar className="h-9 w-32 rounded-lg" />
-          </div>
           <DuetTimelineChartSkeleton />
-        </div>
-      </section>
-
-      <section className={DASHBOARD_SPOTLIGHT_SHELL}>
-        <div className={DASHBOARD_SPOTLIGHT_GRADIENT_LIME} />
-        <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_LIME} />
-        <SpotlightHeaderSkeleton />
-        <div className="space-y-3 px-5 pb-6 sm:px-8">
-          {Array.from({ length: 4 }).map((_, index) => (
-            <SharedArtistRowSkeleton key={index} />
-          ))}
-        </div>
-      </section>
-
-      <section className={DASHBOARD_SPOTLIGHT_SHELL}>
-        <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} />
-        <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} />
-        <SpotlightHeaderSkeleton />
-        <div className="space-y-4 px-5 pb-6 sm:px-8">
-          <ShimmerBar className="h-20 w-full rounded-[1.35rem]" />
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 3 }).map((_, index) => (
-              <ArenaModeCardSkeleton key={index} />
-            ))}
-          </div>
         </div>
       </section>
     </div>
@@ -198,8 +181,21 @@ export function DuetCompareBattleSkeleton() {
 export function DuetComparePageFallback() {
   return (
     <div className="space-y-8" aria-busy="true">
+      <div className={DUET_SUB_NAV_SHELL} aria-hidden>
+        <ShimmerBar className="h-10 flex-1 rounded-xl" />
+        <ShimmerBar className="h-10 flex-1 rounded-xl" />
+      </div>
       <DuetCompareHeroSkeleton />
       <DuetCompareBattleSkeleton />
+    </div>
+  );
+}
+
+export function DuetCompareSubNavSkeleton() {
+  return (
+    <div className={DUET_SUB_NAV_SHELL} aria-hidden>
+      <ShimmerBar className="h-10 flex-1 rounded-xl" />
+      <ShimmerBar className="h-10 flex-1 rounded-xl" />
     </div>
   );
 }

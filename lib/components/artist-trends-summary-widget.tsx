@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useMemo, useEffect, useState, useCallback } from "react";
+import { memo, useMemo, useEffect, useState, useCallback, useRef } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import {
@@ -25,6 +25,9 @@ import {
   applyListenTrendChartViewMulti,
   type ListenTrendChartViewMode,
 } from "@/lib/utils/listen-trend-chart-view";
+import { ArtistTrendsArtistPicker } from "@/lib/components/artist-trends-artist-picker";
+import type { ArtistTrendsChartArtist } from "@/lib/dto/artist";
+import { useDebouncedValue } from "@/lib/hooks/use-debounced-value";
 
 const COLORS = [
   "#8b5cf6",
@@ -103,6 +106,9 @@ function createTrendsTooltip(t: (k: string) => string, locale: string) {
 const DEFAULT_ARTIST_COUNT = 5;
 /** Limite d’artistes renvoyés par l’API pour garder le widget léger */
 const OVERVIEW_ARTIST_TRENDS_TOP_N = 15;
+const MAX_SERIES_ARTISTS = 50;
+/** Délai après lequel les sélections d’artistes hors catalogue déclenchent le chart. */
+const ARTIST_SELECTION_DEBOUNCE_MS = 450;
 
 export type ArtistTrendsSummaryWidgetProps = {
   startDate?: string;
@@ -128,14 +134,63 @@ export function ArtistTrendsSummaryWidget({
   const isLgChart = useIsLgChartViewport();
   const TrendsTooltip = useMemo(() => createTrendsTooltip(t, locale), [t, locale]);
 
-  const { data, isLoading, error, refetch } = useArtistTrendsChart(
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [extraSearchArtists, setExtraSearchArtists] = useState<ArtistTrendsChartArtist[]>([]);
+  const [useExplicitSeries, setUseExplicitSeries] = useState(false);
+  const [chartView, setChartView] = useState<ListenTrendChartViewMode>("period");
+  const [selectionDebounceMs, setSelectionDebounceMs] = useState(0);
+  const defaultSelectionAppliedRef = useRef(false);
+
+  useEffect(() => {
+    defaultSelectionAppliedRef.current = false;
+    setExtraSearchArtists([]);
+    setSelectedIds([]);
+    setUseExplicitSeries(false);
+    setSelectionDebounceMs(0);
+  }, [startDate, endDate, viewerUserId]);
+
+  const debouncedSelectedIds = useDebouncedValue(
+    selectedIds,
+    useExplicitSeries ? selectionDebounceMs : 0
+  );
+
+  const artistIdsForFetch =
+    useExplicitSeries && debouncedSelectedIds.length > 0
+      ? debouncedSelectedIds
+      : undefined;
+
+  const { data, isLoading, isFetching, error, refetch } = useArtistTrendsChart(
     startDate,
     endDate,
     "month",
-    undefined,
+    artistIdsForFetch,
     OVERVIEW_ARTIST_TRENDS_TOP_N,
     viewerUserId
   );
+
+  useEffect(() => {
+    if (!useExplicitSeries) return;
+    if (!isFetching && data != null && !error) {
+      setSelectionDebounceMs(ARTIST_SELECTION_DEBOUNCE_MS);
+    }
+  }, [useExplicitSeries, isFetching, data, error]);
+
+  const pickerArtists = useMemo(() => {
+    const base = data?.catalogArtists ?? data?.availableArtists ?? [];
+    const merged = new Map<string, ArtistTrendsChartArtist>();
+    for (const artist of base) merged.set(artist.id, artist);
+    for (const artist of extraSearchArtists) merged.set(artist.id, artist);
+    return Array.from(merged.values());
+  }, [data?.catalogArtists, data?.availableArtists, extraSearchArtists]);
+
+  useEffect(() => {
+    const catalog = data?.catalogArtists;
+    if (!catalog?.length) return;
+    setExtraSearchArtists((prev) => {
+      const ids = new Set(catalog.map((artist) => artist.id));
+      return prev.filter((artist) => !ids.has(artist.id));
+    });
+  }, [data?.catalogArtists]);
 
   const availableArtists = useMemo(
     () => data?.availableArtists ?? [],
@@ -146,35 +201,61 @@ export function ArtistTrendsSummaryWidget({
     () => (chartData.length > 8 ? Math.max(280, chartData.length * 28) : undefined),
     [chartData.length],
   );
+  const chartSyncing = useExplicitSeries && isFetching;
 
   const idToName = useMemo(() => {
     const m = new Map<string, string>();
-    for (const a of availableArtists) {
-      m.set(a.id, a.name);
+    for (const artist of pickerArtists) m.set(artist.id, artist.name);
+    for (const artist of availableArtists) {
+      if (!m.has(artist.id)) m.set(artist.id, artist.name);
     }
     return m;
-  }, [availableArtists]);
-
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [chartView, setChartView] = useState<ListenTrendChartViewMode>("period");
+  }, [pickerArtists, availableArtists]);
 
   const displayChartData = useMemo(
     () => applyListenTrendChartViewMulti(chartData, chartView, selectedIds),
     [chartData, chartView, selectedIds]
   );
 
+  const defaultSourceIds = useMemo(
+    () => (data?.catalogArtists ?? data?.availableArtists)?.map((artist) => artist.id) ?? [],
+    [data?.catalogArtists, data?.availableArtists]
+  );
+
   useEffect(() => {
-    if (availableArtists.length === 0) return;
+    if (defaultSourceIds.length === 0) return;
+    if (defaultSelectionAppliedRef.current) return;
     if (selectedIds.length > 0) return;
-    const n = Math.min(DEFAULT_ARTIST_COUNT, availableArtists.length);
-    setSelectedIds(availableArtists.slice(0, n).map((a) => a.id));
-  }, [availableArtists, selectedIds.length]);
+    const n = Math.min(DEFAULT_ARTIST_COUNT, defaultSourceIds.length);
+    setSelectedIds(defaultSourceIds.slice(0, n));
+    defaultSelectionAppliedRef.current = true;
+  }, [defaultSourceIds, selectedIds.length]);
 
   const toggleArtist = useCallback((id: string) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    );
+    setSelectedIds((prev) => {
+      if (prev.includes(id)) return prev.filter((x) => x !== id);
+      if (prev.length >= MAX_SERIES_ARTISTS) return prev;
+      return [...prev, id];
+    });
   }, []);
+
+  const handlePickRemoteArtist = useCallback((artist: ArtistTrendsChartArtist) => {
+    setUseExplicitSeries(true);
+    setExtraSearchArtists((prev) => {
+      if (prev.some((item) => item.id === artist.id)) return prev;
+      return [...prev, artist];
+    });
+    setSelectedIds((prev) => {
+      if (prev.includes(artist.id)) return prev;
+      if (prev.length >= MAX_SERIES_ARTISTS) return prev;
+      return [...prev, artist.id];
+    });
+  }, []);
+
+  const getArtistIndex = useCallback(
+    (artistId: string) => pickerArtists.findIndex((artist) => artist.id === artistId),
+    [pickerArtists]
+  );
 
   const trendsQuery = useMemo(() => {
     const p = new URLSearchParams();
@@ -201,6 +282,7 @@ export function ArtistTrendsSummaryWidget({
             <div className="mt-3 h-4 w-80 max-w-full animate-shimmer rounded bg-gray-100 dark:bg-gray-700" />
           </div>
           <div className="relative space-y-4 p-6">
+            <div className="h-11 w-full max-w-md animate-shimmer rounded-xl bg-white/70 dark:bg-[#1a1d2a]" />
             <div className="flex flex-wrap gap-2">
               {[0, 1, 2, 3, 4].map((i) => (
                 <div
@@ -232,7 +314,7 @@ export function ArtistTrendsSummaryWidget({
     );
   }
 
-  if (!data || (chartData.length === 0 && availableArtists.length === 0)) {
+  if (!data || (chartData.length === 0 && pickerArtists.length === 0)) {
     return null;
   }
 
@@ -272,46 +354,21 @@ export function ArtistTrendsSummaryWidget({
 
           <div className="relative space-y-5 p-6">
             <div className="rounded-3xl border border-white/70 bg-white/55 p-3 shadow-sm backdrop-blur dark:border-white/[0.06] dark:bg-[#0c0e18]">
-              <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted dark:text-slate-400">
-                  {t("artistsToDisplay")}
-                </p>
-                <span className="rounded-full border border-accent-cyan/20 bg-accent-cyan/10 px-3 py-1 text-xs font-semibold tabular-nums text-cyan-700 dark:text-cyan-100">
-                  {selectedIds.length}/{availableArtists.length}
-                </span>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {availableArtists.map((artist, idx) => {
-                  const selected = selectedIds.includes(artist.id);
-                  return (
-                    <button
-                      key={artist.id}
-                      type="button"
-                      onClick={() => toggleArtist(artist.id)}
-                      className={`group inline-flex max-w-[min(100%,240px)] items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 ${
-                        selected
-                          ? "border-accent-violet/25 bg-white/85 text-gray-950 shadow-card dark:border-white/12 dark:bg-slate-800/95 dark:text-white"
-                          : "border-white/70 bg-white/45 text-muted hover:bg-white/75 dark:border-white/[0.07] dark:bg-[#12141f] dark:text-slate-300 dark:hover:bg-[#181b28]"
-                      }`}
-                      title={artist.name}
-                    >
-                      <span
-                        className="h-2.5 w-2.5 shrink-0 rounded-full transition-transform group-hover:scale-110"
-                        style={{
-                          backgroundColor: selected ? getColor(idx) : "transparent",
-                          boxShadow: selected ? `0 0 16px ${getColor(idx)}66` : "none",
-                          border: selected
-                            ? "none"
-                            : resolvedTheme === "dark"
-                              ? "1px solid rgba(148, 163, 184, 0.32)"
-                              : "1px solid rgba(148, 163, 184, 0.55)",
-                        }}
-                      />
-                      <span className="truncate">{artist.name}</span>
-                    </button>
-                  );
-                })}
-              </div>
+              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-muted dark:text-slate-400">
+                {t("artistsToDisplay")}
+              </p>
+              <ArtistTrendsArtistPicker
+                catalogArtists={pickerArtists}
+                selectedIds={selectedIds}
+                onToggle={toggleArtist}
+                getColor={getColor}
+                getArtistIndex={getArtistIndex}
+                enableRemoteSearch
+                onPickRemoteArtist={handlePickRemoteArtist}
+                maxSelectable={MAX_SERIES_ARTISTS}
+                idPrefix="overview-artist-trends"
+                compact
+              />
             </div>
 
             {selectedIds.length === 0 ? (
@@ -319,7 +376,12 @@ export function ArtistTrendsSummaryWidget({
                 {t("selectAtLeastOne")}
               </p>
             ) : (
-              <div className="relative rounded-3xl border border-white/70 bg-white/60 p-3 shadow-inner backdrop-blur dark:border-white/[0.06] dark:bg-[#080913]">
+              <div
+                className={`relative rounded-3xl border border-white/70 bg-white/60 p-3 shadow-inner backdrop-blur transition-opacity dark:border-white/[0.06] dark:bg-[#080913] ${
+                  chartSyncing ? "opacity-70" : ""
+                }`}
+                aria-busy={chartSyncing}
+              >
                 <div className="pointer-events-none absolute left-1/2 top-8 h-56 w-56 -translate-x-1/2 rounded-full bg-accent-cyan/10 blur-3xl dark:bg-accent-cyan/15" />
                 <ChartResponsiveContainer token="trendsLine" minWidth={trendsMinWidth}>
                     <LineChart
@@ -359,7 +421,7 @@ export function ArtistTrendsSummaryWidget({
                         }}
                       />
                       {selectedIds.map((artistId) => {
-                        const idx = availableArtists.findIndex((a) => a.id === artistId);
+                        const idx = getArtistIndex(artistId);
                         const name = idToName.get(artistId) ?? artistId;
                         const color = getColor(idx >= 0 ? idx : 0);
                         return (

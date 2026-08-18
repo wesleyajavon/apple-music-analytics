@@ -33,6 +33,10 @@ export type ArtistTrendsArtistPickerProps = {
   /** Ajout depuis les résultats API (hors catalogue courant) */
   onPickRemoteArtist?: (artist: ArtistTrendsChartArtist) => void;
   maxSelectable?: number;
+  /** Préfixe d’ids DOM (évite les collisions si plusieurs pickers coexistent). */
+  idPrefix?: string;
+  /** Liste plus courte — adapté aux cartes overview. */
+  compact?: boolean;
 };
 
 /**
@@ -47,11 +51,16 @@ export function ArtistTrendsArtistPicker({
   enableRemoteSearch = false,
   onPickRemoteArtist,
   maxSelectable = 50,
+  idPrefix = "artist-trends",
+  compact = false,
 }: ArtistTrendsArtistPickerProps) {
   const t = useTranslations("artistTrends");
   const [query, setQuery] = useState("");
   const [highlightIndex, setHighlightIndex] = useState(-1);
   const optionRefs = useRef<Map<string, HTMLLabelElement>>(new Map());
+  const searchInputId = `${idPrefix}-search`;
+  const listboxId = `${idPrefix}-listbox`;
+  const searchHintId = `${idPrefix}-search-hint`;
 
   const { data: remoteData, isFetching: remoteLoading } = useArtistSearch(
     enableRemoteSearch ? query : ""
@@ -150,7 +159,7 @@ export function ArtistTrendsArtistPicker({
     <div className="space-y-3">
       <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
         <div className="min-w-0 flex-1">
-          <label htmlFor="artist-trends-search" className="sr-only">
+          <label htmlFor={searchInputId} className="sr-only">
             {t("searchAriaLabel")}
           </label>
           <div className="relative">
@@ -163,7 +172,7 @@ export function ArtistTrendsArtistPicker({
               </svg>
             </span>
             <input
-              id="artist-trends-search"
+              id={searchInputId}
               type="search"
               role="combobox"
               aria-expanded={true}
@@ -176,16 +185,16 @@ export function ArtistTrendsArtistPicker({
               autoComplete="off"
               spellCheck={false}
               className="w-full rounded-xl border border-border bg-surface-raised py-2.5 pl-9 pr-3 text-sm text-foreground shadow-sm placeholder:text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
-              aria-controls="artist-trends-listbox"
-              aria-describedby="artist-trends-search-hint"
+              aria-controls={listboxId}
+              aria-describedby={searchHintId}
               aria-activedescendant={
                 highlightIndex >= 0 && filtered[highlightIndex]
-                  ? `artist-opt-${filtered[highlightIndex].id}`
+                  ? `${idPrefix}-opt-${filtered[highlightIndex].id}`
                   : undefined
               }
             />
           </div>
-          <p id="artist-trends-search-hint" className="mt-1 text-xs text-muted">
+          <p id={searchHintId} className="mt-1 text-xs text-muted">
             {enableRemoteSearch ? t("searchKeyboardHintExtended") : t("searchKeyboardHint")}
           </p>
         </div>
@@ -268,11 +277,13 @@ export function ArtistTrendsArtistPicker({
       )}
 
       <div
-        id="artist-trends-listbox"
+        id={listboxId}
         role="listbox"
         aria-label={t("artistsToDisplay")}
         aria-multiselectable="true"
-        className="mt-3 flex max-h-[min(50vh,22rem)] flex-wrap content-start gap-2 overflow-y-auto rounded-xl border border-border bg-surface p-2"
+        className={`mt-3 flex flex-wrap content-start gap-2 overflow-y-auto rounded-xl border border-border bg-surface p-2 ${
+          compact ? "max-h-[min(40vh,14rem)]" : "max-h-[min(50vh,22rem)]"
+        }`}
       >
         {filtered.length === 0 ? (
           <p className="px-2 py-6 text-center text-sm text-muted">
@@ -286,7 +297,7 @@ export function ArtistTrendsArtistPicker({
             return (
               <label
                 key={artist.id}
-                id={`artist-opt-${artist.id}`}
+                id={`${idPrefix}-opt-${artist.id}`}
                 ref={(el) => setOptionRef(artist.id, el)}
                 role="option"
                 aria-selected={selected}

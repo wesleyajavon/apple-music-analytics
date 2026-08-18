@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useMemo, useEffect, useState, useCallback } from "react";
+import { memo, useMemo, useEffect, useState, useCallback, useRef } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import {
@@ -26,6 +26,9 @@ import {
   type ListenTrendChartViewMode,
 } from "@/lib/utils/listen-trend-chart-view";
 import { getTrackLabel } from "@/lib/utils/track-trends-pivot";
+import { TrackTrendsTrackPicker } from "@/lib/components/track-trends-track-picker";
+import type { TrackTrendsChartTrack } from "@/lib/dto/track";
+import { useDebouncedValue } from "@/lib/hooks/use-debounced-value";
 
 const COLORS = [
   "#06b6d4",
@@ -103,6 +106,9 @@ function createTrendsTooltip(t: (k: string) => string, locale: string) {
 
 const DEFAULT_TRACK_COUNT = 5;
 const OVERVIEW_TRACK_TRENDS_TOP_N = 20;
+const MAX_SERIES_TRACKS = 50;
+/** Délai après lequel les sélections de titres hors catalogue déclenchent le chart. */
+const TRACK_SELECTION_DEBOUNCE_MS = 450;
 
 export type TrackTrendsSummaryWidgetProps = {
   startDate?: string;
@@ -124,14 +130,63 @@ export function TrackTrendsSummaryWidget({
   const isLgChart = useIsLgChartViewport();
   const TrendsTooltip = useMemo(() => createTrendsTooltip(t, locale), [t, locale]);
 
-  const { data, isLoading, error, refetch } = useTrackTrendsChart(
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [extraSearchTracks, setExtraSearchTracks] = useState<TrackTrendsChartTrack[]>([]);
+  const [useExplicitSeries, setUseExplicitSeries] = useState(false);
+  const [chartView, setChartView] = useState<ListenTrendChartViewMode>("period");
+  const [selectionDebounceMs, setSelectionDebounceMs] = useState(0);
+  const defaultSelectionAppliedRef = useRef(false);
+
+  useEffect(() => {
+    defaultSelectionAppliedRef.current = false;
+    setExtraSearchTracks([]);
+    setSelectedIds([]);
+    setUseExplicitSeries(false);
+    setSelectionDebounceMs(0);
+  }, [startDate, endDate, viewerUserId]);
+
+  const debouncedSelectedIds = useDebouncedValue(
+    selectedIds,
+    useExplicitSeries ? selectionDebounceMs : 0
+  );
+
+  const trackIdsForFetch =
+    useExplicitSeries && debouncedSelectedIds.length > 0
+      ? debouncedSelectedIds
+      : undefined;
+
+  const { data, isLoading, isFetching, error, refetch } = useTrackTrendsChart(
     startDate,
     endDate,
     "month",
-    undefined,
+    trackIdsForFetch,
     OVERVIEW_TRACK_TRENDS_TOP_N,
     viewerUserId
   );
+
+  useEffect(() => {
+    if (!useExplicitSeries) return;
+    if (!isFetching && data != null && !error) {
+      setSelectionDebounceMs(TRACK_SELECTION_DEBOUNCE_MS);
+    }
+  }, [useExplicitSeries, isFetching, data, error]);
+
+  const pickerTracks = useMemo(() => {
+    const base = data?.catalogTracks ?? data?.availableTracks ?? [];
+    const merged = new Map<string, TrackTrendsChartTrack>();
+    for (const track of base) merged.set(track.id, track);
+    for (const track of extraSearchTracks) merged.set(track.id, track);
+    return Array.from(merged.values());
+  }, [data?.catalogTracks, data?.availableTracks, extraSearchTracks]);
+
+  useEffect(() => {
+    const catalog = data?.catalogTracks;
+    if (!catalog?.length) return;
+    setExtraSearchTracks((prev) => {
+      const ids = new Set(catalog.map((track) => track.id));
+      return prev.filter((track) => !ids.has(track.id));
+    });
+  }, [data?.catalogTracks]);
 
   const availableTracks = useMemo(
     () => data?.availableTracks ?? [],
@@ -142,35 +197,63 @@ export function TrackTrendsSummaryWidget({
     () => (chartData.length > 8 ? Math.max(280, chartData.length * 28) : undefined),
     [chartData.length],
   );
+  const chartSyncing = useExplicitSeries && isFetching;
 
   const idToLabel = useMemo(() => {
     const map = new Map<string, string>();
-    for (const track of availableTracks) {
+    for (const track of pickerTracks) {
       map.set(track.id, getTrackLabel(track));
     }
+    for (const track of availableTracks) {
+      if (!map.has(track.id)) map.set(track.id, getTrackLabel(track));
+    }
     return map;
-  }, [availableTracks]);
-
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [chartView, setChartView] = useState<ListenTrendChartViewMode>("period");
+  }, [pickerTracks, availableTracks]);
 
   const displayChartData = useMemo(
     () => applyListenTrendChartViewMulti(chartData, chartView, selectedIds),
     [chartData, chartView, selectedIds]
   );
 
+  const defaultSourceIds = useMemo(
+    () => (data?.catalogTracks ?? data?.availableTracks)?.map((track) => track.id) ?? [],
+    [data?.catalogTracks, data?.availableTracks]
+  );
+
   useEffect(() => {
-    if (availableTracks.length === 0) return;
+    if (defaultSourceIds.length === 0) return;
+    if (defaultSelectionAppliedRef.current) return;
     if (selectedIds.length > 0) return;
-    const n = Math.min(DEFAULT_TRACK_COUNT, availableTracks.length);
-    setSelectedIds(availableTracks.slice(0, n).map((track) => track.id));
-  }, [availableTracks, selectedIds.length]);
+    const n = Math.min(DEFAULT_TRACK_COUNT, defaultSourceIds.length);
+    setSelectedIds(defaultSourceIds.slice(0, n));
+    defaultSelectionAppliedRef.current = true;
+  }, [defaultSourceIds, selectedIds.length]);
 
   const toggleTrack = useCallback((id: string) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    );
+    setSelectedIds((prev) => {
+      if (prev.includes(id)) return prev.filter((x) => x !== id);
+      if (prev.length >= MAX_SERIES_TRACKS) return prev;
+      return [...prev, id];
+    });
   }, []);
+
+  const handlePickRemoteTrack = useCallback((track: TrackTrendsChartTrack) => {
+    setUseExplicitSeries(true);
+    setExtraSearchTracks((prev) => {
+      if (prev.some((item) => item.id === track.id)) return prev;
+      return [...prev, track];
+    });
+    setSelectedIds((prev) => {
+      if (prev.includes(track.id)) return prev;
+      if (prev.length >= MAX_SERIES_TRACKS) return prev;
+      return [...prev, track.id];
+    });
+  }, []);
+
+  const getTrackIndex = useCallback(
+    (trackId: string) => pickerTracks.findIndex((track) => track.id === trackId),
+    [pickerTracks]
+  );
 
   const trendsQuery = useMemo(() => {
     const p = new URLSearchParams();
@@ -197,6 +280,7 @@ export function TrackTrendsSummaryWidget({
             <div className="mt-3 h-4 w-80 max-w-full animate-shimmer rounded bg-gray-100 dark:bg-gray-700" />
           </div>
           <div className="relative space-y-4 p-6">
+            <div className="h-11 w-full max-w-md animate-shimmer rounded-xl bg-white/70 dark:bg-[#1a1d2a]" />
             <div className="flex flex-wrap gap-2">
               {[0, 1, 2, 3, 4].map((i) => (
                 <div
@@ -228,7 +312,7 @@ export function TrackTrendsSummaryWidget({
     );
   }
 
-  if (!data || (chartData.length === 0 && availableTracks.length === 0)) {
+  if (!data || (chartData.length === 0 && pickerTracks.length === 0)) {
     return null;
   }
 
@@ -268,46 +352,21 @@ export function TrackTrendsSummaryWidget({
 
           <div className="relative space-y-5 p-6">
             <div className="rounded-3xl border border-white/70 bg-white/55 p-3 shadow-sm backdrop-blur dark:border-white/[0.06] dark:bg-[#0c0e18]">
-              <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted dark:text-slate-400">
-                  {t("tracksToDisplay")}
-                </p>
-                <span className="rounded-full border border-cyan-300/25 bg-cyan-300/10 px-3 py-1 text-xs font-semibold tabular-nums text-cyan-700 dark:text-cyan-100">
-                  {selectedIds.length}/{availableTracks.length}
-                </span>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {availableTracks.map((track, idx) => {
-                  const selected = selectedIds.includes(track.id);
-                  return (
-                    <button
-                      key={track.id}
-                      type="button"
-                      onClick={() => toggleTrack(track.id)}
-                      className={`group inline-flex max-w-[min(100%,240px)] items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 ${
-                        selected
-                          ? "border-cyan-300/30 bg-white/85 text-gray-950 shadow-card dark:border-white/12 dark:bg-slate-800/95 dark:text-white"
-                          : "border-white/70 bg-white/45 text-muted hover:bg-white/75 dark:border-white/[0.07] dark:bg-[#12141f] dark:text-slate-300 dark:hover:bg-[#181b28]"
-                      }`}
-                      title={getTrackLabel(track)}
-                    >
-                      <span
-                        className="h-2.5 w-2.5 shrink-0 rounded-full transition-transform group-hover:scale-110"
-                        style={{
-                          backgroundColor: selected ? getColor(idx) : "transparent",
-                          boxShadow: selected ? `0 0 16px ${getColor(idx)}66` : "none",
-                          border: selected
-                            ? "none"
-                            : resolvedTheme === "dark"
-                              ? "1px solid rgba(148, 163, 184, 0.32)"
-                              : "1px solid rgba(148, 163, 184, 0.55)",
-                        }}
-                      />
-                      <span className="truncate">{track.title}</span>
-                    </button>
-                  );
-                })}
-              </div>
+              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-muted dark:text-slate-400">
+                {t("tracksToDisplay")}
+              </p>
+              <TrackTrendsTrackPicker
+                catalogTracks={pickerTracks}
+                selectedIds={selectedIds}
+                onToggle={toggleTrack}
+                getColor={getColor}
+                getTrackIndex={getTrackIndex}
+                enableRemoteSearch
+                onPickRemoteTrack={handlePickRemoteTrack}
+                maxSelectable={MAX_SERIES_TRACKS}
+                idPrefix="overview-track-trends"
+                compact
+              />
             </div>
 
             {selectedIds.length === 0 ? (
@@ -315,7 +374,12 @@ export function TrackTrendsSummaryWidget({
                 {t("selectAtLeastOne")}
               </p>
             ) : (
-              <div className="relative rounded-3xl border border-white/70 bg-white/60 p-3 shadow-inner backdrop-blur dark:border-white/[0.06] dark:bg-[#080913]">
+              <div
+                className={`relative rounded-3xl border border-white/70 bg-white/60 p-3 shadow-inner backdrop-blur transition-opacity dark:border-white/[0.06] dark:bg-[#080913] ${
+                  chartSyncing ? "opacity-70" : ""
+                }`}
+                aria-busy={chartSyncing}
+              >
                 <div className="pointer-events-none absolute left-1/2 top-8 h-56 w-56 -translate-x-1/2 rounded-full bg-accent-cyan/10 blur-3xl dark:bg-accent-cyan/15" />
                 <ChartResponsiveContainer token="trendsLine" minWidth={trendsMinWidth}>
                     <LineChart
@@ -355,7 +419,7 @@ export function TrackTrendsSummaryWidget({
                         }}
                       />
                       {selectedIds.map((trackId) => {
-                        const idx = availableTracks.findIndex((track) => track.id === trackId);
+                        const idx = getTrackIndex(trackId);
                         const label = idToLabel.get(trackId) ?? trackId;
                         const color = getColor(idx >= 0 ? idx : 0);
                         return (

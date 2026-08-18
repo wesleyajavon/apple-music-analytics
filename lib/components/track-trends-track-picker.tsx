@@ -24,6 +24,8 @@ type Props = {
   onPickRemoteTrack?: (track: TrackTrendsChartTrack) => void;
   maxSelectable?: number;
   idPrefix?: string;
+  /** Liste plus courte — adapté aux cartes overview. */
+  compact?: boolean;
 };
 
 export function TrackTrendsTrackPicker({
@@ -36,6 +38,7 @@ export function TrackTrendsTrackPicker({
   onPickRemoteTrack,
   maxSelectable = 50,
   idPrefix = "track-trends",
+  compact = false,
 }: Props) {
   const t = useTranslations("trackTrends");
   const [query, setQuery] = useState("");
@@ -234,7 +237,9 @@ export function TrackTrendsTrackPicker({
         role="listbox"
         aria-label={t("tracksToDisplay")}
         aria-multiselectable="true"
-        className="mt-3 flex max-h-[min(50vh,22rem)] flex-wrap content-start gap-2 overflow-y-auto rounded-xl border border-card-border bg-surface/60 p-2"
+        className={`mt-3 flex flex-wrap content-start gap-2 overflow-y-auto rounded-xl border border-card-border bg-surface/60 p-2 ${
+          compact ? "max-h-[min(40vh,14rem)]" : "max-h-[min(50vh,22rem)]"
+        }`}
       >
         {filtered.length === 0 ? (
           <p className="px-2 py-6 text-center text-sm text-muted">{t("searchNoResults")}</p>

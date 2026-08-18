@@ -26,7 +26,13 @@ import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
 import { TemporalAnalysisSkeleton } from "@/lib/components/skeleton-loaders";
 import { LiveStatusDot } from "@/lib/components/live-status-dot";
-import { Clock, Activity, CalendarDays } from "lucide-react";
+import { Clock, Activity, CalendarDays, Timer } from "lucide-react";
+import {
+  DashboardSectionPanel,
+  DashboardSectionSwitcher,
+  useDashboardSectionView,
+  type DashboardSectionItem,
+} from "@/lib/components/dashboard-section-switcher";
 import {
   DASHBOARD_SPOTLIGHT_SHELL,
   DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY,
@@ -42,10 +48,40 @@ import {
 type DayOfWeekChartType = "bar" | "distribution" | "radar";
 type HourOfDayChartType = "bar" | "distribution" | "radar";
 
+const TEMPORAL_VIEWS = ["spotlight", "weekday", "hour"] as const;
+type TemporalView = (typeof TEMPORAL_VIEWS)[number];
+
 const TEMPORAL_HERO_SHELL_CLASS =
   "relative overflow-hidden rounded-[2rem] border border-white/10 bg-gray-950 px-5 py-6 text-white shadow-2xl shadow-violet-500/15 sm:px-8 sm:py-9 lg:px-10 lg:py-10";
 
 const TEMPORAL_SECTION_CLASS = `relative ${DASHBOARD_SPOTLIGHT_SHELL}`;
+
+function TemporalViewSwitcher({
+  idPrefix,
+  activeView,
+  onChange,
+}: {
+  idPrefix: string;
+  activeView: TemporalView;
+  onChange: (view: TemporalView) => void;
+}) {
+  const t = useTranslations("temporal-analysis.viewSwitcher");
+  const items: DashboardSectionItem<TemporalView>[] = [
+    { id: "spotlight", label: t("views.spotlight"), icon: Clock },
+    { id: "weekday", label: t("views.weekday"), icon: CalendarDays },
+    { id: "hour", label: t("views.hour"), icon: Timer },
+  ];
+
+  return (
+    <DashboardSectionSwitcher
+      items={items}
+      activeView={activeView}
+      onChange={onChange}
+      idPrefix={idPrefix}
+      navLabel={t("navLabel")}
+    />
+  );
+}
 
 const WEEKDAY_KEYS = [
   "sunday",
@@ -325,6 +361,10 @@ function TemporalAnalysisContent() {
     useState<DayOfWeekChartType>("bar");
   const [hourOfDayChartType, setHourOfDayChartType] =
     useState<HourOfDayChartType>("bar");
+  const { activeView, setView } = useDashboardSectionView(
+    TEMPORAL_VIEWS,
+    "spotlight",
+  );
   const formatTemporalTooltip = useMemo(
     () => createTemporalTooltipFormatter(t, locale),
     [t, locale],
@@ -441,8 +481,16 @@ function TemporalAnalysisContent() {
         }
       />
       <TemporalNoteCallout />
-      <div className="space-y-8">
-            {/* Spotlight: Your listening rhythm — moment de pic combiné avec visuel créatif */}
+      <TemporalViewSwitcher
+        idPrefix="temporal"
+        activeView={activeView}
+        onChange={setView}
+      />
+      <DashboardSectionPanel
+        idPrefix="temporal"
+        view="spotlight"
+        activeView={activeView}
+      >
             {isLoading ? (
               <TemporalSpotlightSkeleton />
             ) : data && (data.peakDay || data.peakHour) ? (
@@ -609,8 +657,12 @@ function TemporalAnalysisContent() {
                 </div>
               </section>
             ) : null}
-
-            {/* Graphique par jour de la semaine - Barres ou distribution (comme heatmap) */}
+      </DashboardSectionPanel>
+      <DashboardSectionPanel
+        idPrefix="temporal"
+        view="weekday"
+        activeView={activeView}
+      >
             <section className={TEMPORAL_SECTION_CLASS}>
               <div className={DASHBOARD_SPOTLIGHT_GRADIENT_CYAN} aria-hidden />
               <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_CYAN} aria-hidden />
@@ -820,8 +872,12 @@ function TemporalAnalysisContent() {
               </div>
             </div>
             </section>
-
-            {/* Graphique par heure de la journée - Barres, distribution ou radar */}
+      </DashboardSectionPanel>
+      <DashboardSectionPanel
+        idPrefix="temporal"
+        view="hour"
+        activeView={activeView}
+      >
             <section className={TEMPORAL_SECTION_CLASS}>
               <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} aria-hidden />
               <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} aria-hidden />
@@ -1036,7 +1092,7 @@ function TemporalAnalysisContent() {
               </div>
             </div>
             </section>
-      </div>
+      </DashboardSectionPanel>
     </div>
   );
 }

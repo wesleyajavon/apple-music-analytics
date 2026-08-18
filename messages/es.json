@@ -1451,7 +1451,15 @@
     "on": "el",
     "atThisHour": "a esta hora",
     "tracks": "Títulos",
-    "artists": "Artistas"
+    "artists": "Artistas",
+    "viewSwitcher": {
+      "navLabel": "Secciones de ritmo",
+      "views": {
+        "spotlight": "Hueco firma",
+        "weekday": "Semana",
+        "hour": "Horas"
+      }
+    }
   },
   "genres": {
     "title": "Géneros",

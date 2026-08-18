@@ -1451,7 +1451,15 @@
     "on": "on",
     "atThisHour": "at this hour",
     "tracks": "Tracks",
-    "artists": "Artists"
+    "artists": "Artists",
+    "viewSwitcher": {
+      "navLabel": "Rhythm sections",
+      "views": {
+        "spotlight": "Signature slot",
+        "weekday": "Weekdays",
+        "hour": "Hours"
+      }
+    }
   },
   "genres": {
     "title": "Genres",

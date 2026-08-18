@@ -1451,7 +1451,15 @@
     "on": "le",
     "atThisHour": "à cette heure",
     "tracks": "Titres",
-    "artists": "Artistes"
+    "artists": "Artistes",
+    "viewSwitcher": {
+      "navLabel": "Sections rythme",
+      "views": {
+        "spotlight": "Fenêtre signature",
+        "weekday": "Semaine",
+        "hour": "Heures"
+      }
+    }
   },
   "genres": {
     "title": "Genres",

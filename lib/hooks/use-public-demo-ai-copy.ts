@@ -43,7 +43,7 @@ export function useTasteProfileDemoCopy(snapshot: PublicDemoSoundprintSnapshot |
           })
         : snapshot.topGenre
           ? t("publicDemoTeaser.influencesSingle", { genre: snapshot.topGenre.name })
-          : null;
+          : undefined;
 
     const uniqueAspect =
       snapshot.peakDay && snapshot.peakHour

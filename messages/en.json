@@ -91,7 +91,7 @@
       "artists": "Artists",
       "trackTrends": "Track Trends",
       "tracks": "Tracks",
-      "askSoundprint": "Soundprint chat",
+      "askSoundprint": "Ask your Soundprint",
       "aiInsights": "Insight cards",
       "tasteEvolution": "Taste shifts",
       "tasteProfile": "Taste Profile",
@@ -228,7 +228,7 @@
       "heroStep3": "Shared top artists, then artist, track, or genre duels — search a target and crown a winner.",
       "heroPrivacyNote": "Only your Duet friends see these stats. Revoke access anytime from Friends.",
       "changeFriend": "Switch friend",
-      "pickerEyebrow": "Step 1 · Pick a friend",
+      "pickerEyebrow": "The lineup",
       "pickerBadge": "Ready to compare",
       "pickerReadyCount": "{count, plural, one {# friend ready to compare} other {# friends ready to compare}}",
       "challengeCta": "Compare",
@@ -388,9 +388,12 @@
     }
   },
   "askSoundprint": {
-    "eyebrow": "Ask your library",
-    "title": "Chat with your Soundprint",
-    "subtitle": "Who's on repeat? When do you stream most? Ask anything—including artist deepdives—from your real streaming history.",
+    "eyebrow": "Your library, in conversation",
+    "title": "Ask your Soundprint",
+    "subtitle": "Who's on repeat? When do you stream most? Ask anything—including artist deep dives—from your real streaming history.",
+    "compactTrust": "Your real streams. Read-only. Nothing here edits playlists or imports.",
+    "periodChip": "Answers on {range}",
+    "periodChipAll": "Full history · {range}",
     "heroStatBadge": "Answers you can trust",
     "heroStatTag": "Your history only",
     "heroTrustPanelHint": "Three promises before you ask.",
@@ -404,11 +407,15 @@
     "ctaOverview": "Music overview",
     "ctaAiInsights": "AI Insights",
     "publicDemoMode": "Public demo mode: only preset questions are available.",
-    "emptyAssistantMessage": "Ask anything about your library—or tap a preset. Replies only use analytics we've already computed for you.",
+    "emptyAssistantMessage": "Pick a question or write your own. Replies only use analytics we've already computed for you.",
+    "emptyActionHint": "Pick a question or write your own.",
+    "featuredTitle": "Quick starts",
+    "allQuestions": "All questions",
+    "allQuestionsHint": "Every supported question template. Signed-in users can also type a custom version.",
     "publicDemoIntro": "Demo mode: choose a preset to see how answers feel before you connect your own history.",
     "inputLabel": "Question for Ask your Soundprint",
     "inputPlaceholder": "Example: What were my top tracks in 2022?",
-    "inputPlaceholderWithArtist": "Example: {artist} deepdive",
+    "inputPlaceholderWithArtist": "Example: {artist} deep dive",
     "artistDeepDiveQuestion": "Tell me my streaming history with {artist}.",
     "topTracksYearQuestion": "What were my top tracks in {year}?",
     "topArtistsYearQuestion": "Who were my top artists in {year}?",
@@ -435,8 +442,8 @@
       "core": "Everyday pulls",
       "maestroUpgrade": "Deeper arcs"
     },
-    "guardrailHint": "Soundprint chat uses allowlisted analytics tools: no free-form generated SQL, no writes, and bounded results.",
-    "unsupportedTitle": "What is not supported?",
+    "guardrailHint": "Ask your Soundprint uses allowlisted analytics tools: no free-form generated SQL, no writes, and bounded results.",
+    "unsupportedTitle": "What this tool does not do",
     "unsupportedExamples": "playlist creation, account changes, data deletion/imports, external artist facts, free-form SQL, and general non-music tasks.",
     "publicDemoFreeTextBlocked": "Public demo mode only accepts preset questions.",
     "genericError": "Could not generate an answer. Please try again.",
@@ -446,13 +453,13 @@
     "aiDisabledEnv": "AI is disabled server-side. Ask your Soundprint is not available here.",
     "mobile": {
       "eyebrow": "Streaming Q&A",
-      "storyTitle": "Ask your library anything",
+      "storyTitle": "Ask your Soundprint",
       "storyBody": "Every answer comes from your real streaming history—no guesswork.",
       "demoBadge": "Preset demo",
       "featuredPresets": "Quick starts",
       "featuredPresetsHint": "One tap sends a structured question.",
-      "browseAllPresets": "All presets",
-      "presetSheetTitle": "Preset playbook",
+      "browseAllPresets": "All questions",
+      "presetSheetTitle": "All questions",
       "presetSheetHint": "Browse every supported question template.",
       "trustSummary": "Your real streams. Read-only. Your date range.",
       "guardrailsTitle": "Limits & guardrails"
@@ -511,8 +518,8 @@
         "recentWindowHint": "Uses about the last {days} days (UTC), not your full history—regardless of the dashboard date filter."
       },
       "artist-deep-dive": {
-        "label": "Artist deepdive",
-        "labelRich": "<em>artist</em> deepdive",
+        "label": "Artist deep dive",
+        "labelRich": "<em>artist</em> deep dive",
         "question": "Tell me my streaming history with Radiohead."
       },
       "track-obsessions": {
@@ -1110,7 +1117,7 @@
     "featurePromos": {
       "soundprint": {
         "badge": "AI chat",
-        "title": "Chat with your Soundprint",
+        "title": "Ask your Soundprint",
         "description": "Ask about tops, streaks, and taste shifts—answers pull from your real streaming data.",
         "cta": "Open chat",
         "aria": "Open Soundprint chat"
@@ -2120,7 +2127,7 @@
     "heroTrust1": "Cards summarize aggregates already in Soundprint—nothing is fabricated from the web.",
     "heroTrust2": "Human vs technical only changes tone; the underlying stats stay identical.",
     "heroTrust3": "Uses the date range active on your dashboard.",
-    "ctaAskSoundprint": "Ask Soundprint",
+    "ctaAskSoundprint": "Ask your Soundprint",
     "ctaOverview": "Music overview",
     "heroStatInsights": "Cards",
     "heroStatTone": "Tone",

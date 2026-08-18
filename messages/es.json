@@ -91,7 +91,7 @@
       "artists": "Artistas",
       "trackTrends": "Tendencias de títulos",
       "tracks": "Títulos",
-      "askSoundprint": "Chat Soundprint",
+      "askSoundprint": "Pregunta a tu Soundprint",
       "aiInsights": "Tarjetas de insights",
       "tasteEvolution": "Cambios de gusto",
       "tasteProfile": "Perfil de gusto",
@@ -228,7 +228,7 @@
       "heroStep3": "Artistas en común, luego duelos de artista, pista o género — busca un objetivo y decide.",
       "heroPrivacyNote": "Solo tus amigos Duet ven estas stats. Revoca el acceso cuando quieras desde Amigos.",
       "changeFriend": "Cambiar de amigo",
-      "pickerEyebrow": "Paso 1 · Elegir un amigo",
+      "pickerEyebrow": "El casting",
       "pickerBadge": "Listo para comparar",
       "pickerReadyCount": "{count, plural, one {# amigo listo para comparar} other {# amigos listos para comparar}}",
       "challengeCta": "Comparar",
@@ -388,9 +388,12 @@
     }
   },
   "askSoundprint": {
-    "eyebrow": "Pregunta a tu biblioteca",
-    "title": "Chatea con tu Soundprint",
-    "subtitle": "¿Quién suena en bucle? ¿Cuándo streams más? Pregunta lo que quieras — deepdives de artista incluidos — desde tu historial real de stream.",
+    "eyebrow": "Tu biblioteca, en conversación",
+    "title": "Pregunta a tu Soundprint",
+    "subtitle": "¿Quién suena en bucle? ¿Cuándo escuchas más? Pregunta lo que quieras — inmersiones de artista incluidas — desde tu historial real de streams.",
+    "compactTrust": "Tus streams reales. Solo lectura. Aquí no se editan playlists ni imports.",
+    "periodChip": "Respuestas sobre {range}",
+    "periodChipAll": "Todo el historial · {range}",
     "heroStatBadge": "Respuestas en las que confiar",
     "heroStatTag": "Tu historial",
     "heroTrustPanelHint": "Tres promesas antes de preguntar.",
@@ -400,18 +403,22 @@
     "heroTrust2": "Explora con tranquilidad — aquí no se editan playlists ni imports.",
     "heroTrust3Title": "Tu rango de fechas",
     "heroTrust3": "Se ajusta al periodo que elegiste en el panel.",
-    "heroDemoPill": "Demo solo presets",
+    "heroDemoPill": "Demo solo plantillas",
     "ctaOverview": "Resumen musical",
     "ctaAiInsights": "Tarjetas AI Insights",
     "publicDemoMode": "Modo demo pública: solo están disponibles las preguntas predefinidas.",
-    "emptyAssistantMessage": "Pregunta lo que quieras sobre tu biblioteca o toca un preset. Solo uso analytics que ya calculamos para ti.",
-    "publicDemoIntro": "Modo demo: elige un preset para ver cómo suenan las respuestas antes de conectar tu propio historial.",
-    "inputLabel": "Pregunta para Ask your Soundprint",
-    "inputPlaceholder": "Ej. ¿cuáles fueron mis canciones más streameadas en 2022?",
-    "inputPlaceholderWithArtist": "Ej.: {artist} deepdive",
+    "emptyAssistantMessage": "Elige una pregunta o escribe la tuya. Solo uso analytics que ya calculamos para ti.",
+    "emptyActionHint": "Elige una pregunta o escribe la tuya.",
+    "featuredTitle": "Inicios rápidos",
+    "allQuestions": "Todas las preguntas",
+    "allQuestionsHint": "Todas las plantillas compatibles. Las cuentas conectadas también pueden escribir una versión personalizada.",
+    "publicDemoIntro": "Modo demo: elige una pregunta para ver cómo suenan las respuestas antes de conectar tu propio historial.",
+    "inputLabel": "Pregunta para tu Soundprint",
+    "inputPlaceholder": "Ej. ¿cuáles fueron mis canciones más escuchadas en 2022?",
+    "inputPlaceholderWithArtist": "Ej.: inmersión {artist}",
     "artistDeepDiveQuestion": "Cuéntame mi historial de streams con {artist}.",
-    "topTracksYearQuestion": "¿Cuáles fueron mis canciones más streameadas en {year}?",
-    "topArtistsYearQuestion": "¿Quiénes fueron mis artistas más streameados en {year}?",
+    "topTracksYearQuestion": "¿Cuáles fueron mis canciones más escuchadas en {year}?",
+    "topArtistsYearQuestion": "¿Quiénes fueron mis artistas más escuchados en {year}?",
     "comparePeriodsQuestion": "Compara mis tops de canciones y artistas entre {earlierYear} y {laterYear}.",
     "trackObsessionsYearQuestion": "¿Qué canciones me obsesionaron en {year}?",
     "publicDemoPlaceholder": "El texto libre está desactivado en modo demo.",
@@ -424,44 +431,44 @@
     "thinkingStep3": "Casi listo — dando forma a una respuesta clara…",
     "thinkingStep4": "Calculando estadísticas por canción y por año (puede tardar un poco con historiales grandes)…",
     "thinkingPatience": "Las respuestas completas pueden tardar un poco — gracias por esperar.",
-    "presetTitle": "Playbook de presets",
+    "presetTitle": "Todas las preguntas",
     "presetDescription": "Un toque lanza una pregunta estructurada para ver rápido qué cubre este agente.",
     "customizeHint": "Estas preguntas son plantillas: los usuarios conectados pueden cambiar el artista, el año, el rango de fechas, los períodos a comparar, el tamaño de ventana o el límite de resultados en texto libre.",
-    "heavyPresetHistoryNotice": "Algunas preguntas rápidas solo analizan una ventana reciente (mira cada tarjeta) o el rango del panel para que las respuestas sigan siendo ágiles: no siempre es todo tu historial.",
+    "heavyPresetHistoryNotice": "Algunas preguntas solo analizan una ventana reciente (mira cada tarjeta) o el rango del panel para que las respuestas sigan siendo ágiles: no siempre es todo tu historial.",
     "dismissHintAria": "Cerrar aviso",
-    "supportedGuideTitle": "Explorar el playbook",
+    "supportedGuideTitle": "Todas las preguntas",
     "demoPresetOnlyHint": "Disponible como texto libre para cuentas conectadas.",
     "presetSections": {
       "core": "Consultas del día a día",
       "maestroUpgrade": "Arcos más profundos"
     },
-    "guardrailHint": "El chat Soundprint usa herramientas analytics autorizadas: sin SQL generado libremente, sin escrituras y con resultados limitados.",
-    "unsupportedTitle": "Qué no está soportado",
+    "guardrailHint": "Las respuestas usan herramientas analytics autorizadas: sin SQL generado libremente, sin escrituras y con resultados limitados.",
+    "unsupportedTitle": "Lo que esta herramienta no hace",
     "unsupportedExamples": "Crear playlists, cambiar cuentas, borrar/importar datos, hechos externos sobre artistas, SQL libre y tareas generales fuera de analytics musicales.",
     "publicDemoFreeTextBlocked": "El modo demo pública solo acepta preguntas predefinidas.",
     "genericError": "No se pudo generar una respuesta. Inténtalo de nuevo.",
     "requestTimeoutError": "La respuesta tardó más de lo que el navegador permite (unos tres minutos), así que la petición se canceló. Prueba con un rango de fechas más corto en el panel o inténtalo más tarde: el modelo o la base de datos pueden haber ido lentos.",
-    "aiDisabledClient": "La IA está desactivada para este navegador. Activa el interruptor IA para usar Ask your Soundprint.",
-    "aiDisabledConsent": "Activa la IA Groq en Ajustes → Datos y privacidad para usar Ask your Soundprint.",
-    "aiDisabledEnv": "La IA está desactivada en el servidor. Ask your Soundprint no está disponible aquí.",
+    "aiDisabledClient": "La IA está desactivada para este navegador. Activa el interruptor IA para usar Pregunta a tu Soundprint.",
+    "aiDisabledConsent": "Activa la IA Groq en Ajustes → Datos y privacidad para usar Pregunta a tu Soundprint.",
+    "aiDisabledEnv": "La IA está desactivada en el servidor. Pregunta a tu Soundprint no está disponible aquí.",
     "mobile": {
       "eyebrow": "Preguntas musicales",
-      "storyTitle": "Pregunta lo que quieras a tu biblioteca",
-      "storyBody": "Cada respuesta sale de tu historial real de stream — sin conjeturas.",
-      "demoBadge": "Demo presets",
+      "storyTitle": "Pregunta a tu Soundprint",
+      "storyBody": "Cada respuesta sale de tu historial real de streams — sin conjeturas.",
+      "demoBadge": "Demo plantillas",
       "featuredPresets": "Inicios rápidos",
       "featuredPresetsHint": "Un toque envía una pregunta estructurada.",
-      "browseAllPresets": "Todos los presets",
-      "presetSheetTitle": "Playbook de presets",
+      "browseAllPresets": "Todas las preguntas",
+      "presetSheetTitle": "Todas las preguntas",
       "presetSheetHint": "Explora todas las plantillas de preguntas soportadas.",
       "trustSummary": "Tus streams reales. Solo lectura. Tu periodo.",
-      "guardrailsTitle": "Límites y guardrails"
+      "guardrailsTitle": "Límites y barreras"
     },
     "presets": {
-      "summer-2022-top-tracks": "¿Cuáles fueron mis canciones más streameadas en 2022?",
-      "summer-2022-top-artists": "¿Quiénes fueron mis artistas más streameados en 2022?",
-      "consistent-artists": "¿Qué artista he streameado de forma más constante a lo largo de los años?",
-      "late-night-habits": "¿Qué he estado streameando tarde por la noche últimamente?",
+      "summer-2022-top-tracks": "¿Cuáles fueron mis canciones más escuchadas en 2022?",
+      "summer-2022-top-artists": "¿Quiénes fueron mis artistas más escuchados en 2022?",
+      "consistent-artists": "¿Qué artista he escuchado de forma más constante a lo largo de los años?",
+      "late-night-habits": "¿Qué he estado escuchando tarde por la noche últimamente?",
       "artist-deep-dive": "Cuéntame mi historial de streams con Radiohead.",
       "taste-shift-2020-2024": "¿Cómo cambiaron mis gustos entre 2020 y 2024?",
       "weekly-taste-evolution": "¿Cómo han evolucionado mis gustos semana a semana en las últimas semanas?",
@@ -473,11 +480,11 @@
     "examples": {
       "top-tracks": {
         "label": "Top canciones",
-        "question": "¿Cuáles fueron mis canciones más streameadas en un año destacado de mi historial?"
+        "question": "¿Cuáles fueron mis canciones más escuchadas en un año destacado de mi historial?"
       },
       "top-artists": {
         "label": "Top artistas",
-        "question": "¿Quiénes fueron mis artistas más streameados en un año destacado de mi historial?"
+        "question": "¿Quiénes fueron mis artistas más escuchados en un año destacado de mi historial?"
       },
       "genre-breakdown": {
         "label": "Desglose de géneros",
@@ -503,16 +510,16 @@
       },
       "consistent-artists": {
         "label": "Artistas constantes",
-        "question": "¿Qué artista he streameado de forma más constante a lo largo de los años?"
+        "question": "¿Qué artista he escuchado de forma más constante a lo largo de los años?"
       },
       "time-of-day": {
         "label": "Hábitos horarios",
-        "question": "¿Qué he estado streameando tarde por la noche últimamente?",
+        "question": "¿Qué he estado escuchando tarde por la noche últimamente?",
         "recentWindowHint": "Usa aproximadamente los últimos {days} días (UTC), no todo el historial — da igual el filtro de fechas del panel."
       },
       "artist-deep-dive": {
-        "label": "Deepdive de artista",
-        "labelRich": "<em>artista</em> deepdive",
+        "label": "Inmersión de artista",
+        "labelRich": "<em>artista</em> — inmersión",
         "question": "Cuéntame mi historial de streams con Radiohead."
       },
       "track-obsessions": {
@@ -1110,7 +1117,7 @@
     "featurePromos": {
       "soundprint": {
         "badge": "Chat IA",
-        "title": "Chatea con tu Soundprint",
+        "title": "Pregunta a tu Soundprint",
         "description": "Pregunta por tops, rachas y cambios de gusto — las respuestas usan tus streams reales.",
         "cta": "Abrir chat",
         "aria": "Abrir chat Soundprint"
@@ -1244,7 +1251,7 @@
     },
     "mobile": {
       "heroEyebrow": "Sonando",
-      "askAgentCta": "Preguntar a Soundprint",
+      "askAgentCta": "Pregunta a tu Soundprint",
       "comparisonHint": "Comparado con el período anterior equivalente cuando hay datos.",
       "vsShort": "vs ant.",
       "primaryInsight": {
@@ -2120,7 +2127,7 @@
     "heroTrust1": "Las tarjetas resumen agregados que ya están en Soundprint: nada inventado desde la web.",
     "heroTrust2": "Humano vs técnico solo cambia el tono; los números de fondo son los mismos.",
     "heroTrust3": "Respeta el rango de fechas activo en tu panel.",
-    "ctaAskSoundprint": "Chat Soundprint",
+    "ctaAskSoundprint": "Pregunta a tu Soundprint",
     "ctaOverview": "Resumen musical",
     "heroStatInsights": "Tarjetas",
     "heroStatTone": "Tono",

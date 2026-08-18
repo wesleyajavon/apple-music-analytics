@@ -318,6 +318,8 @@
       "artistTitle": "Artist head-to-head",
       "artistDescription": "Who streamed an artist more on this period?",
       "artistSearchPlaceholder": "Search an artist…",
+      "searchSuggestionsLabel": "Matching names",
+      "searchResultsCount": "{count, plural, one {# match} other {# matches}}",
       "artistLoading": "Comparing streams for this artist…",
       "artistError": "Could not load the artist comparison",
       "artistChartTitle": "{artistName} — you vs {friendName}",

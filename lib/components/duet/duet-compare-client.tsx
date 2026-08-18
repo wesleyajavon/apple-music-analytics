@@ -1,11 +1,20 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type ReactNode,
+} from "react";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { motion } from "motion/react";
-import { Crown, Search, Swords, X } from "lucide-react";
+import { Search, Swords, X } from "lucide-react";
 import {
   DuetDualLineChart,
   EntityBattleScorecard,
@@ -202,6 +211,85 @@ function EntityHeadToHeadPanel({
     () => applyDuetChartView(chartData, chartView),
     [chartData, chartView]
   );
+  const [highlightIndex, setHighlightIndex] = useState(0);
+  const optionRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
+  const skipSuggestionScrollRef = useRef(true);
+  const suggestionListId = `duet-entity-suggestions-${arenaMode}`;
+  const clampedHighlight =
+    suggestions.length === 0 ? 0 : Math.min(highlightIndex, suggestions.length - 1);
+  const activeSuggestion = showSuggestions ? suggestions[clampedHighlight] : undefined;
+
+  useEffect(() => {
+    setHighlightIndex(0);
+    skipSuggestionScrollRef.current = true;
+  }, [query]);
+
+  useEffect(() => {
+    if (!showSuggestions || !activeSuggestion) return;
+    if (skipSuggestionScrollRef.current) {
+      skipSuggestionScrollRef.current = false;
+      return;
+    }
+    optionRefs.current.get(activeSuggestion.id)?.scrollIntoView({ block: "nearest" });
+  }, [activeSuggestion, showSuggestions]);
+
+  const setOptionRef = useCallback((id: string, el: HTMLButtonElement | null) => {
+    if (el) optionRefs.current.set(id, el);
+    else optionRefs.current.delete(id);
+  }, []);
+
+  const handleSearchKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLInputElement>) => {
+      if (!showSuggestions || suggestions.length === 0) {
+        if (event.key === "Escape" && (query || selectedEntityId)) {
+          event.preventDefault();
+          onClear();
+        }
+        return;
+      }
+
+      if (event.key === "ArrowDown") {
+        event.preventDefault();
+        setHighlightIndex((index) => Math.min(index + 1, suggestions.length - 1));
+        return;
+      }
+      if (event.key === "ArrowUp") {
+        event.preventDefault();
+        setHighlightIndex((index) => Math.max(index - 1, 0));
+        return;
+      }
+      if (event.key === "Home") {
+        event.preventDefault();
+        setHighlightIndex(0);
+        return;
+      }
+      if (event.key === "End") {
+        event.preventDefault();
+        setHighlightIndex(suggestions.length - 1);
+        return;
+      }
+      if (event.key === "Enter") {
+        const selected = suggestions[clampedHighlight];
+        if (!selected) return;
+        event.preventDefault();
+        onSelectEntity(selected.id, selected.label);
+        return;
+      }
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onClear();
+      }
+    },
+    [
+      clampedHighlight,
+      onClear,
+      onSelectEntity,
+      query,
+      selectedEntityId,
+      showSuggestions,
+      suggestions,
+    ]
+  );
 
   return (
     <div className="space-y-4">
@@ -212,9 +300,20 @@ function EntityHeadToHeadPanel({
         />
         <input
           type="search"
+          role="combobox"
+          aria-expanded={showSuggestions}
+          aria-haspopup="listbox"
+          aria-autocomplete="list"
+          aria-controls={suggestionListId}
+          aria-activedescendant={
+            activeSuggestion ? `${suggestionListId}-${activeSuggestion.id}` : undefined
+          }
           value={query}
           onChange={(e) => onQueryChange(e.target.value)}
+          onKeyDown={handleSearchKeyDown}
           placeholder={searchPlaceholder}
+          autoComplete="off"
+          spellCheck={false}
           className="w-full rounded-xl border border-slate-200/80 bg-white py-3 pl-10 pr-10 text-sm text-slate-900 shadow-sm focus:border-violet-300 focus:outline-none focus:ring-2 focus:ring-violet-200/60 dark:border-white/10 dark:bg-black/30 dark:text-white dark:focus:border-violet-400/40 dark:focus:ring-violet-400/20"
         />
         {selectedEntityId || query ? (
@@ -230,25 +329,52 @@ function EntityHeadToHeadPanel({
       </div>
 
       {showSuggestions ? (
-        <ul className="overflow-hidden rounded-[1.35rem] border border-slate-200/80 bg-white shadow-sm dark:border-white/10 dark:bg-slate-950/80">
-          {suggestions.map((item) => (
-            <li key={item.id} className="border-b border-slate-100 last:border-0 dark:border-white/5">
-              <button
-                type="button"
-                onClick={() => onSelectEntity(item.id, item.label)}
-                className="flex w-full flex-col items-start gap-0.5 px-4 py-3 text-left text-sm transition-colors hover:bg-violet-50 dark:hover:bg-violet-500/10"
-              >
-                <span className="flex items-center gap-3 font-medium text-slate-900 dark:text-white">
-                  <Swords className="h-4 w-4 shrink-0 text-violet-500 dark:text-violet-300" aria-hidden />
-                  {item.label}
-                </span>
-                {item.subtitle ? (
-                  <span className="pl-7 text-xs text-slate-500 dark:text-slate-400">{item.subtitle}</span>
-                ) : null}
-              </button>
-            </li>
-          ))}
-        </ul>
+        <div className="overflow-hidden rounded-[1.35rem] border border-slate-200/80 bg-white shadow-sm dark:border-white/10 dark:bg-slate-950/80">
+          <p className="border-b border-slate-100 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:border-white/5 dark:text-slate-400">
+            {t("searchResultsCount", { count: suggestions.length })}
+          </p>
+          <ul
+            id={suggestionListId}
+            role="listbox"
+            aria-label={t("searchSuggestionsLabel")}
+            className="max-h-[min(60vh,24rem)] overflow-y-auto overscroll-contain"
+          >
+            {suggestions.map((item, index) => {
+              const highlighted = index === clampedHighlight;
+              return (
+                <li key={item.id} className="border-b border-slate-100 last:border-0 dark:border-white/5">
+                  <button
+                    type="button"
+                    id={`${suggestionListId}-${item.id}`}
+                    ref={(el) => setOptionRef(item.id, el)}
+                    role="option"
+                    aria-selected={highlighted}
+                    onMouseEnter={() => setHighlightIndex(index)}
+                    onClick={() => onSelectEntity(item.id, item.label)}
+                    className={`flex w-full flex-col items-start gap-0.5 px-4 py-3 text-left text-sm transition-colors ${
+                      highlighted
+                        ? "bg-violet-50 dark:bg-violet-500/15"
+                        : "hover:bg-violet-50 dark:hover:bg-violet-500/10"
+                    }`}
+                  >
+                    <span className="flex items-start gap-3 font-medium text-slate-900 dark:text-white">
+                      <Swords
+                        className="mt-0.5 h-4 w-4 shrink-0 text-violet-500 dark:text-violet-300"
+                        aria-hidden
+                      />
+                      <span className="min-w-0 break-words">{item.label}</span>
+                    </span>
+                    {item.subtitle ? (
+                      <span className="pl-7 text-xs text-slate-500 dark:text-slate-400">
+                        {item.subtitle}
+                      </span>
+                    ) : null}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
       ) : null}
 
       {selectedEntityId && (isEntityLoading || isEntityFetching) ? (
@@ -536,10 +662,8 @@ function CompareContent() {
   const genreSuggestions = useMemo(() => {
     const q = genreQuery.trim().toLowerCase();
     const genres = genreCatalog?.data ?? [];
-    if (q.length < 1) return genres.slice(0, 8);
-    return genres
-      .filter((row) => row.genre.toLowerCase().includes(q))
-      .slice(0, 8);
+    if (q.length < 1) return genres;
+    return genres.filter((row) => row.genre.toLowerCase().includes(q));
   }, [genreCatalog, genreQuery]);
 
   const showGenreSuggestions =
@@ -940,7 +1064,7 @@ function CompareContent() {
                     setArtistQuery("");
                     setSelectedArtistId(undefined);
                   }}
-                  suggestions={(artistResults?.artists ?? []).slice(0, 8).map((artist) => ({
+                  suggestions={(artistResults?.artists ?? []).map((artist) => ({
                     id: artist.id,
                     label: artist.name,
                   }))}
@@ -993,7 +1117,7 @@ function CompareContent() {
                     setTrackQuery("");
                     setSelectedTrackId(undefined);
                   }}
-                  suggestions={(trackResults?.tracks ?? []).slice(0, 8).map((track) => ({
+                  suggestions={(trackResults?.tracks ?? []).map((track) => ({
                     id: track.id,
                     label: track.title,
                     subtitle: track.artistName,

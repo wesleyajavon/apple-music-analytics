@@ -138,6 +138,7 @@ export function EntityBattleScorecard({
   const selfPct = total > 0 ? (selfCount / total) * 100 : 50;
   const friendPct = total > 0 ? 100 - selfPct : 50;
   const canShare = total > 0;
+  const artistPhotoUrl = arenaMode === "artist" ? entityImageUrl?.trim() || null : null;
 
   const winnerLabel =
     winner === "tie"
@@ -206,11 +207,31 @@ export function EntityBattleScorecard({
       <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <motion.div
-            animate={winner !== "tie" ? { rotate: [0, -8, 8, 0], scale: [1, 1.08, 1] } : undefined}
+            animate={winner !== "tie" && !artistPhotoUrl ? { rotate: [0, -8, 8, 0], scale: [1, 1.08, 1] } : undefined}
             transition={{ duration: 0.55, delay: 0.15 }}
-            className="flex h-12 w-12 items-center justify-center rounded-2xl border border-amber-200/80 bg-amber-50 text-amber-600 dark:border-amber-400/25 dark:bg-amber-400/10 dark:text-amber-200"
+            className={
+              artistPhotoUrl
+                ? "h-12 w-12 shrink-0 overflow-hidden rounded-2xl border border-slate-200/80 shadow-sm dark:border-white/15"
+                : "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-amber-200/80 bg-amber-50 text-amber-600 dark:border-amber-400/25 dark:bg-amber-400/10 dark:text-amber-200"
+            }
           >
-            {winner === "tie" ? <Swords className="h-5 w-5" aria-hidden /> : <Trophy className="h-5 w-5" aria-hidden />}
+            {artistPhotoUrl ? (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img
+                src={artistPhotoUrl}
+                alt=""
+                width={48}
+                height={48}
+                className="h-full w-full object-cover"
+                loading="lazy"
+                decoding="async"
+                referrerPolicy="no-referrer"
+              />
+            ) : winner === "tie" ? (
+              <Swords className="h-5 w-5" aria-hidden />
+            ) : (
+              <Trophy className="h-5 w-5" aria-hidden />
+            )}
           </motion.div>
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">

@@ -370,26 +370,43 @@ export async function getTopArtistCatalogForRange(
   return topArtists.map((a) => ({ id: a.artist_id, name: a.artist_name }));
 }
 
+/** Cap for catalog name search (featuring credits can explode the match set). */
+export const ARTIST_SEARCH_MAX_RESULTS = 100;
+
+function escapeLikePattern(value: string): string {
+  return value.replace(/[\\%_]/g, "\\$&");
+}
+
 /**
  * Recherche dans le catalogue Artist (nameLower indexé).
+ * Les correspondances exactes et préfixe passent avant les featurings
+ * (ex. « Drake » n’est pas noyé sous « 21 Savage, Drake »).
  */
 export async function searchArtistsByName(
   query: string,
-  limit: number = 25
+  limit: number = ARTIST_SEARCH_MAX_RESULTS
 ): Promise<ArtistTrendsChartArtist[]> {
   const q = query.trim().toLowerCase();
   if (q.length < 2) return [];
 
-  const take = Math.min(Math.max(limit, 1), 50);
+  const take = Math.min(Math.max(limit, 1), ARTIST_SEARCH_MAX_RESULTS);
+  const escaped = escapeLikePattern(q);
+  const containsPattern = `%${escaped}%`;
+  const prefixPattern = `${escaped}%`;
 
-  const rows = await prisma.artist.findMany({
-    where: {
-      nameLower: { contains: q },
-    },
-    take,
-    orderBy: { name: "asc" },
-    select: { id: true, name: true },
-  });
+  const rows = await prisma.$queryRaw<Array<{ id: string; name: string }>>(Prisma.sql`
+    SELECT a.id, a.name
+    FROM "Artist" a
+    WHERE a."nameLower" LIKE ${containsPattern} ESCAPE ${"\\"}
+    ORDER BY
+      CASE
+        WHEN a."nameLower" = ${q} THEN 0
+        WHEN a."nameLower" LIKE ${prefixPattern} ESCAPE ${"\\"} THEN 1
+        ELSE 2
+      END ASC,
+      a.name ASC
+    LIMIT ${take}
+  `);
 
   return rows.map((r) => ({ id: r.id, name: r.name }));
 }

@@ -51,7 +51,7 @@ export const artistKeys = {
     locale?: string;
     mode?: "technical" | "light" | "both";
   }) => [...artistKeys.all, "artistTrendsCommentary", params] as const,
-  search: (q: string) => [...artistKeys.all, "search", q] as const,
+  search: (q: string, limit?: number) => [...artistKeys.all, "search", q, limit] as const,
   insights: (params: {
     artistId: string;
     startDate?: string;
@@ -362,8 +362,13 @@ export function useArtistTrendsCommentary(
   });
 }
 
+const ARTIST_SEARCH_FETCH_LIMIT = 100;
+
 async function fetchArtistSearch(q: string): Promise<ArtistSearchResponse> {
-  const searchParams = new URLSearchParams({ q });
+  const searchParams = new URLSearchParams({
+    q,
+    limit: String(ARTIST_SEARCH_FETCH_LIMIT),
+  });
   return apiClient.get<ArtistSearchResponse>(
     `/artists/search?${searchParams.toString()}`
   );
@@ -375,7 +380,7 @@ async function fetchArtistSearch(q: string): Promise<ArtistSearchResponse> {
 export function useArtistSearch(query: string) {
   const debounced = useDebouncedValue(query.trim(), 320);
   return useQuery<ArtistSearchResponse, Error>({
-    queryKey: artistKeys.search(debounced),
+    queryKey: artistKeys.search(debounced, ARTIST_SEARCH_FETCH_LIMIT),
     queryFn: () => fetchArtistSearch(debounced),
     enabled: debounced.length >= 2,
     staleTime: 60 * 1000,

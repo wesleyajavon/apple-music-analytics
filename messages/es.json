@@ -318,6 +318,8 @@
       "artistTitle": "Duelo por artista",
       "artistDescription": "¿Quién escuchó más a este artista en el periodo?",
       "artistSearchPlaceholder": "Buscar un artista…",
+      "searchSuggestionsLabel": "Nombres coincidentes",
+      "searchResultsCount": "{count, plural, one {# coincidencia} other {# coincidencias}}",
       "artistLoading": "Comparando streams de este artista…",
       "artistError": "No se pudo cargar la comparación del artista",
       "artistChartTitle": "{artistName} — tú vs {friendName}",

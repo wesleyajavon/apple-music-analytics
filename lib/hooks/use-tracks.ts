@@ -122,8 +122,13 @@ export function useTrackTrendsChart(
   });
 }
 
+const TRACK_SEARCH_FETCH_LIMIT = 50;
+
 async function fetchTrackSearch(q: string): Promise<TrackSearchResponse> {
-  const searchParams = new URLSearchParams({ q });
+  const searchParams = new URLSearchParams({
+    q,
+    limit: String(TRACK_SEARCH_FETCH_LIMIT),
+  });
   return apiClient.get<TrackSearchResponse>(`/tracks/search?${searchParams.toString()}`);
 }
 

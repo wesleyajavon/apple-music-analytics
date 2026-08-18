@@ -3,6 +3,7 @@ import {
   getArtistStats,
   getArtistOverview,
   getArtistTrends,
+  searchArtistsByName,
 } from "../artist/artist-service";
 import { prisma } from "../../prisma";
 
@@ -263,6 +264,31 @@ describe("artist-service", () => {
       expect(result).toHaveLength(1);
       expect(result[0].date).toMatch(/^\d{4}-\d{2}$/);
       expect(result[0].listenCount).toBe(100);
+    });
+  });
+
+  describe("searchArtistsByName", () => {
+    it("returns an empty list for queries shorter than 2 characters", async () => {
+      const result = await searchArtistsByName("d");
+      expect(result).toEqual([]);
+      expect(prisma.$queryRaw).not.toHaveBeenCalled();
+    });
+
+    it("maps ranked catalog rows", async () => {
+      vi.mocked(prisma.$queryRaw).mockResolvedValue([
+        { id: "drake", name: "Drake" },
+        { id: "drake-future", name: "Drake & Future" },
+        { id: "feat", name: "21 Savage, Drake" },
+      ]);
+
+      const result = await searchArtistsByName("Drake", 100);
+
+      expect(result).toEqual([
+        { id: "drake", name: "Drake" },
+        { id: "drake-future", name: "Drake & Future" },
+        { id: "feat", name: "21 Savage, Drake" },
+      ]);
+      expect(prisma.$queryRaw).toHaveBeenCalledTimes(1);
     });
   });
 });

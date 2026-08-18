@@ -318,6 +318,8 @@
       "artistTitle": "Duel artiste",
       "artistDescription": "Qui a le plus streamé cet artiste sur la période ?",
       "artistSearchPlaceholder": "Rechercher un artiste…",
+      "searchSuggestionsLabel": "Noms correspondants",
+      "searchResultsCount": "{count, plural, one {# correspondance} other {# correspondances}}",
       "artistLoading": "Comparaison des streams pour cet artiste…",
       "artistError": "Impossible de charger le duel artiste",
       "artistChartTitle": "{artistName} — vous vs {friendName}",

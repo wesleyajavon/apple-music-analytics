@@ -1989,7 +1989,6 @@
       "primaryInsightEyebrow": "Most replayed",
       "primaryInsightBody": "This is the track you returned to most in this window, led by {artist}.",
       "shareLabel": "Share of streams",
-      "trendsCta": "See how it moved",
       "topFiveEyebrow": "First five",
       "topFiveTitle": "The songs setting the tone",
       "topFiveDescription": "A compact read of the tracks carrying the most streaming weight right now.",
@@ -2014,7 +2013,8 @@
       "navLabel": "Track sections",
       "views": {
         "leaderboard": "Top 20",
-        "ranking": "Full ranking"
+        "ranking": "Full ranking",
+        "trends": "Trends"
       }
     },
     "heroEyebrow": "Rankings & overview",
@@ -2030,7 +2030,6 @@
     "allTracks": "Tracks ranking",
     "rank": "Rank",
     "listensCount": "streams",
-    "viewTrends": "View track trends",
     "paginationSummary": "Showing {start}-{end} of {total}",
     "paginationPrevious": "Previous",
     "paginationNext": "Next",
@@ -2062,7 +2061,6 @@
         "badge": "Multi-series"
       }
     },
-    "backToTracks": "Back to track rankings",
     "subtitle": "Evolution of your most streamed tracks",
     "subtitleExtended": "Compare track evolution over time. Start with top 20, then add other tracks via catalog search.",
     "errorLoading": "Unable to load track trends",

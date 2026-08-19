@@ -3,7 +3,7 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { Link, usePathname } from "@/i18n/navigation";
+import { usePathname } from "@/i18n/navigation";
 import {
   CartesianGrid,
   Legend,
@@ -31,7 +31,6 @@ import { useTrackTrendsChart } from "@/lib/hooks/use-tracks";
 import { getTrackLabel } from "@/lib/utils/track-trends-pivot";
 import { CHART_TOOLTIP_STYLES } from "@/lib/constants/config";
 import { ChartResponsiveContainer } from "@/lib/components/chart-responsive-container";
-import { ArrowLeft } from "lucide-react";
 import {
   DASHBOARD_SPOTLIGHT_SHELL,
   DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY,
@@ -47,6 +46,7 @@ import {
 import { useTheme } from "@/lib/providers/theme-provider";
 import { DuetCompareDeepLink } from "@/lib/components/duet/duet-compare-deep-link";
 import { LiveStatusDot } from "@/lib/components/live-status-dot";
+import { TracksSectionSwitcher } from "@/lib/components/tracks-section-switcher";
 
 const COLORS = [
   "#22d3ee",
@@ -212,12 +212,10 @@ function TrackTrendsHeroPanel({ period, selectedCount }: { period: PeriodType; s
 }
 
 function TrackTrendsHeroFrame({
-  tracksHref,
   subtitleKey,
   badgeLabel,
   panel,
 }: {
-  tracksHref: string;
   subtitleKey: "subtitle" | "subtitleExtended";
   badgeLabel: string;
   panel: ReactNode;
@@ -233,13 +231,6 @@ function TrackTrendsHeroFrame({
           <h1 className="max-w-4xl text-balance text-4xl font-semibold tracking-[-0.06em] text-white sm:text-5xl lg:text-6xl">{t("title")}</h1>
           <p className="mt-5 max-w-2xl text-base leading-7 text-white/70 sm:text-lg">{t(subtitleKey)}</p>
           <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            <Link
-              href={tracksHref}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25 transition-all hover:-translate-y-0.5 hover:bg-gray-100"
-            >
-              <ArrowLeft className="h-4 w-4" aria-hidden />
-              {t("backToTracks")}
-            </Link>
             <span className="inline-flex items-center justify-center rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-sm font-bold text-white backdrop-blur">{badgeLabel}</span>
           </div>
         </div>
@@ -334,10 +325,8 @@ function TrackTrendsMobileSkeleton() {
 }
 
 function TrackTrendsMobileEmptyHero({
-  tracksHref,
   badgeLabel,
 }: {
-  tracksHref: string;
   badgeLabel: string;
 }) {
   const t = useTranslations("trackTrends");
@@ -350,19 +339,11 @@ function TrackTrendsMobileEmptyHero({
       </div>
       <h1 className="mt-4 text-3xl font-semibold tracking-[-0.055em] text-white">{t("mobile.heroTitle")}</h1>
       <p className="mt-3 text-sm leading-6 text-white/68">{t("mobile.heroSubtitle")}</p>
-      <Link
-        href={tracksHref}
-        className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-white px-4 text-sm font-bold text-gray-950 shadow-lg shadow-black/20"
-      >
-        <ArrowLeft className="h-4 w-4" aria-hidden />
-        {t("backToTracks")}
-      </Link>
     </div>
   );
 }
 
 function TrackTrendsMobileExperience({
-  tracksHref,
   badgeLabel,
   period,
   selectedIds,
@@ -380,7 +361,6 @@ function TrackTrendsMobileExperience({
   handlePickRemoteTrack,
   chartTheme,
 }: {
-  tracksHref: string;
   badgeLabel: string;
   period: PeriodType;
   selectedIds: string[];
@@ -448,16 +428,10 @@ function TrackTrendsMobileExperience({
               <p className="mt-2 text-sm leading-6 text-white/70">{t("mobile.topTrackFallback")}</p>
             )}
           </div>
-
-          <Link
-            href={tracksHref}
-            className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-white px-4 text-sm font-bold text-gray-950 shadow-lg shadow-black/20"
-          >
-            <ArrowLeft className="h-4 w-4" aria-hidden />
-            {t("backToTracks")}
-          </Link>
         </div>
       </section>
+
+      <TracksSectionSwitcher idPrefix="track-trends-mobile" activeSection="trends" />
 
       <section aria-label={t("mobile.signalsLabel")} className="-mx-4 overflow-x-auto px-4 pb-1">
         <div className="flex gap-3">
@@ -634,12 +608,6 @@ function TrendsContent() {
   const period = getPeriodFromSearchParams(searchParams, "month");
   const userId = searchParams.get("userId") ?? undefined;
 
-  const tracksHref = useMemo(() => {
-    const params = new URLSearchParams(searchParams.toString());
-    const qs = params.toString();
-    return qs ? `/dashboard/tracks?${qs}` : "/dashboard/tracks";
-  }, [searchParams]);
-
   const startDate = startDateParam || undefined;
   const endDate = endDateParam || undefined;
 
@@ -751,16 +719,17 @@ function TrendsContent() {
           </div>
         </div>
         <div className="mt-5 space-y-6 lg:hidden">
-          <TrackTrendsMobileEmptyHero tracksHref={tracksHref} badgeLabel={badgeLabel} />
+          <TrackTrendsMobileEmptyHero badgeLabel={badgeLabel} />
+          <TracksSectionSwitcher idPrefix="track-trends-mobile" activeSection="trends" />
           <ErrorState variant="startup" error={error} message={t("errorLoading")} onRetry={() => refetch()} />
         </div>
         <div className="mt-6 hidden space-y-12 lg:block">
           <TrackTrendsHeroFrame
-            tracksHref={tracksHref}
             subtitleKey="subtitleExtended"
             badgeLabel={badgeLabel}
             panel={<TrackTrendsHeroPanel period={period} selectedCount={selectedIds.length} />}
           />
+          <TracksSectionSwitcher idPrefix="track-trends-desktop" activeSection="trends" />
         </div>
       </>
     );
@@ -776,7 +745,8 @@ function TrendsContent() {
           </div>
         </div>
         <div className="mt-5 space-y-6 lg:hidden">
-          <TrackTrendsMobileEmptyHero tracksHref={tracksHref} badgeLabel={badgeLabel} />
+          <TrackTrendsMobileEmptyHero badgeLabel={badgeLabel} />
+          <TracksSectionSwitcher idPrefix="track-trends-mobile" activeSection="trends" />
           <EmptyState
             variant="startup"
             {...emptyStatePresets.changeDates(pathname)}
@@ -786,11 +756,11 @@ function TrendsContent() {
         </div>
         <div className="mt-6 hidden space-y-12 lg:block">
           <TrackTrendsHeroFrame
-            tracksHref={tracksHref}
             subtitleKey="subtitleExtended"
             badgeLabel={badgeLabel}
             panel={<TrackTrendsHeroPanel period={period} selectedCount={selectedIds.length} />}
           />
+          <TracksSectionSwitcher idPrefix="track-trends-desktop" activeSection="trends" />
         </div>
       </>
     );
@@ -807,7 +777,6 @@ function TrendsContent() {
 
       <div className="mt-5 lg:hidden">
         <TrackTrendsMobileExperience
-          tracksHref={tracksHref}
           badgeLabel={badgeLabel}
           period={period}
           selectedIds={selectedIds}
@@ -829,11 +798,12 @@ function TrendsContent() {
 
       <div className="mt-6 hidden space-y-12 lg:block">
         <TrackTrendsHeroFrame
-          tracksHref={tracksHref}
           subtitleKey="subtitleExtended"
           badgeLabel={badgeLabel}
           panel={heroPanel}
         />
+
+        <TracksSectionSwitcher idPrefix="track-trends-desktop" activeSection="trends" />
 
         <section className="relative animate-fade-in-up">
           <TrackTrendsSectionHeader
@@ -1000,11 +970,6 @@ function TrackTrendsFallback() {
   const searchParams = useSearchParams();
   const badgeLabel = useTrackTrendsBadgeLabel();
   const period = getPeriodFromSearchParams(searchParams, "month");
-  const tracksHref = useMemo(() => {
-    const params = new URLSearchParams(searchParams.toString());
-    const qs = params.toString();
-    return qs ? `/dashboard/tracks?${qs}` : "/dashboard/tracks";
-  }, [searchParams]);
 
   return (
     <>
@@ -1016,11 +981,11 @@ function TrackTrendsFallback() {
       </div>
       <div className="mt-6 hidden space-y-12 lg:block">
         <TrackTrendsHeroFrame
-          tracksHref={tracksHref}
           subtitleKey="subtitle"
           badgeLabel={badgeLabel}
           panel={<TrackTrendsHeroPanel period={period} selectedCount={0} />}
         />
+        <TracksSectionSwitcher idPrefix="track-trends-desktop-fallback" activeSection="trends" />
         <GenreTrendsSkeleton />
       </div>
     </>

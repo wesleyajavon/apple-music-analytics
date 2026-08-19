@@ -1989,7 +1989,6 @@
       "primaryInsightEyebrow": "Más repetido",
       "primaryInsightBody": "Este es el título al que más volviste en esta ventana, impulsado por {artist}.",
       "shareLabel": "Parte de streams",
-      "trendsCta": "Ver cómo evolucionó",
       "topFiveEyebrow": "Primeros cinco",
       "topFiveTitle": "Las canciones que marcan el tono",
       "topFiveDescription": "Una lectura compacta de los temas que más peso tienen en tus streams actuales.",
@@ -2014,7 +2013,8 @@
       "navLabel": "Secciones de canciones",
       "views": {
         "leaderboard": "Top 20",
-        "ranking": "Ranking completo"
+        "ranking": "Ranking completo",
+        "trends": "Tendencias"
       }
     },
     "heroEyebrow": "Ranking y resumen",
@@ -2030,7 +2030,6 @@
     "allTracks": "Ranking de títulos",
     "rank": "Rango",
     "listensCount": "streams",
-    "viewTrends": "Ver tendencias de títulos",
     "paginationSummary": "Mostrando {start}-{end} de {total}",
     "paginationPrevious": "Anterior",
     "paginationNext": "Siguiente",
@@ -2062,7 +2061,6 @@
         "badge": "Multi-serie"
       }
     },
-    "backToTracks": "Volver al ranking de títulos",
     "subtitle": "Evolución de tus títulos más streameados",
     "subtitleExtended": "Compara la evolución de títulos en el tiempo. Empieza con top 20 y añade otros títulos mediante búsqueda de catálogo.",
     "errorLoading": "No se pueden cargar las tendencias de títulos",

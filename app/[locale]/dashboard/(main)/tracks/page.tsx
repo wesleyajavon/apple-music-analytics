@@ -4,7 +4,7 @@ import { Suspense, useCallback, useEffect, useMemo, useState, type ReactNode } f
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useQueryClient } from "@tanstack/react-query";
-import { Link, usePathname, useRouter } from "@/i18n/navigation";
+import { usePathname, useRouter } from "@/i18n/navigation";
 import {
   Bar,
   BarChart,
@@ -46,52 +46,22 @@ import {
 } from "@/lib/constants/dashboard-spotlight";
 import { useTheme } from "@/lib/providers/theme-provider";
 import type { TrackOverviewDto, TracksResponseDto, TrackStatsDto } from "@/lib/dto/track";
-import { BarChart3, LineChart, ListMusic, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import {
   DashboardSectionPanel,
-  DashboardSectionSwitcher,
   useDashboardSectionView,
-  type DashboardSectionItem,
 } from "@/lib/components/dashboard-section-switcher";
+import { TracksSectionSwitcher } from "@/lib/components/tracks-section-switcher";
+import { TRACKS_LOCAL_VIEWS, type TracksLocalView } from "@/lib/utils/tracks-section";
 
 const TRACKS_HERO_SHELL_CLASS =
   "relative overflow-hidden rounded-[2rem] border border-white/10 bg-gray-950 px-5 py-6 text-white shadow-2xl shadow-accent-cyan/15 sm:px-8 sm:py-9 lg:px-10 lg:py-10";
 const MOBILE_DATE_OPTS = { month: "2-digit", day: "2-digit", year: "2-digit" } as const;
-const TRACKS_VIEWS = ["leaderboard", "ranking"] as const;
-type TracksView = (typeof TRACKS_VIEWS)[number];
-
-function TracksViewSwitcher({
-  idPrefix,
-  activeView,
-  onChange,
-}: {
-  idPrefix: string;
-  activeView: TracksView;
-  onChange: (view: TracksView) => void;
-}) {
-  const t = useTranslations("tracks.viewSwitcher");
-  const items: DashboardSectionItem<TracksView>[] = [
-    { id: "leaderboard", label: t("views.leaderboard"), icon: BarChart3 },
-    { id: "ranking", label: t("views.ranking"), icon: ListMusic },
-  ];
-
-  return (
-    <DashboardSectionSwitcher
-      items={items}
-      activeView={activeView}
-      onChange={onChange}
-      idPrefix={idPrefix}
-      navLabel={t("navLabel")}
-    />
-  );
-}
 
 function TracksHeroFrame({
-  trendsHref,
   stats,
   badgeLabel,
 }: {
-  trendsHref: string;
   stats: ReactNode;
   badgeLabel: string;
 }) {
@@ -108,13 +78,6 @@ function TracksHeroFrame({
           </h1>
           <p className="mt-5 max-w-2xl text-base leading-7 text-white/70 sm:text-lg">{t("subtitle")}</p>
           <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            <Link
-              href={trendsHref}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25 transition-all hover:-translate-y-0.5 hover:bg-gray-100"
-            >
-              <LineChart className="h-4 w-4" aria-hidden />
-              {t("viewTrends")}
-            </Link>
             <span className="inline-flex items-center justify-center rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-sm font-bold text-white backdrop-blur">
               {badgeLabel}
             </span>
@@ -232,10 +195,8 @@ type MobileTrackStat = {
 
 function MobileTracksLoadingFallback({
   badgeLabel,
-  trendsHref,
 }: {
   badgeLabel: string;
-  trendsHref: string;
 }) {
   const t = useTranslations("tracks");
   return (
@@ -256,12 +217,6 @@ function MobileTracksLoadingFallback({
             <div className="h-8 w-11/12 animate-pulse rounded bg-white/20" />
             <div className="h-4 w-8/12 animate-pulse rounded bg-white/10" />
           </div>
-          <Link
-            href={trendsHref}
-            className="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-white px-4 text-sm font-bold text-gray-950"
-          >
-            {t("viewTrends")}
-          </Link>
         </div>
       </section>
       <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none]">
@@ -280,13 +235,11 @@ function MobileTracksHero({
   topTrack,
   overview,
   badgeLabel,
-  trendsHref,
   locale,
 }: {
   topTrack: TrackStatsDto;
   overview: TrackOverviewDto;
   badgeLabel: string;
-  trendsHref: string;
   locale: string;
 }) {
   const t = useTranslations("tracks");
@@ -339,14 +292,6 @@ function MobileTracksHero({
             </div>
           </div>
         </div>
-
-        <Link
-          href={trendsHref}
-          className="mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-white px-4 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25"
-        >
-          <LineChart className="h-4 w-4" aria-hidden />
-          {t("mobile.trendsCta")}
-        </Link>
       </div>
     </section>
   );
@@ -593,7 +538,6 @@ function MobileTracksFlow({
   pageEnd,
   totalTracksInRange,
   totalPages,
-  trendsHref,
   badgeLabel,
   locale,
   activeView,
@@ -613,11 +557,10 @@ function MobileTracksFlow({
   pageEnd: number;
   totalTracksInRange: number;
   totalPages: number;
-  trendsHref: string;
   badgeLabel: string;
   locale: string;
-  activeView: TracksView;
-  setView: (view: TracksView) => void;
+  activeView: TracksLocalView;
+  setView: (view: TracksLocalView) => void;
   searchInput: string;
   onSearchInputChange: (value: string) => void;
   updatePaginationParams: (nextPage: number, nextPageSize: number) => void;
@@ -657,16 +600,15 @@ function MobileTracksFlow({
         topTrack={topTrack}
         overview={topData.overview}
         badgeLabel={badgeLabel}
-        trendsHref={trendsHref}
         locale={locale}
       />
 
       <MobileTracksMetricRail stats={stats} />
 
-      <TracksViewSwitcher
+      <TracksSectionSwitcher
         idPrefix="tracks-mobile"
-        activeView={activeView}
-        onChange={setView}
+        activeSection={activeView}
+        onLocalViewChange={setView}
       />
 
       <DashboardSectionPanel idPrefix="tracks-mobile" view="leaderboard" activeView={activeView}>
@@ -746,17 +688,6 @@ function MobileTracksFlow({
   );
 }
 
-function useTracksTrendsHref() {
-  const searchParams = useSearchParams();
-  return useMemo(() => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.delete("page");
-    params.delete("pageSize");
-    const qs = params.toString();
-    return qs ? `/dashboard/tracks/trends?${qs}` : "/dashboard/tracks/trends";
-  }, [searchParams]);
-}
-
 function useTracksBadgeLabel() {
   const locale = useLocale();
   const tOverview = useTranslations("overview");
@@ -777,14 +708,19 @@ function useTracksMobileBadgeLabel() {
 }
 
 function TracksPageFallback() {
-  const trendsHref = useTracksTrendsHref();
   const badgeLabel = useTracksBadgeLabel();
   const mobileBadgeLabel = useTracksMobileBadgeLabel();
+  const { activeView, setView } = useDashboardSectionView(TRACKS_LOCAL_VIEWS, "leaderboard");
   return (
     <>
-      <MobileTracksLoadingFallback badgeLabel={mobileBadgeLabel} trendsHref={trendsHref} />
+      <MobileTracksLoadingFallback badgeLabel={mobileBadgeLabel} />
       <div className="hidden space-y-8 lg:block">
-        <TracksHeroFrame trendsHref={trendsHref} badgeLabel={badgeLabel} stats={<TracksHeroStatsSkeleton />} />
+        <TracksHeroFrame badgeLabel={badgeLabel} stats={<TracksHeroStatsSkeleton />} />
+        <TracksSectionSwitcher
+          idPrefix="tracks-desktop-fallback"
+          activeSection={activeView}
+          onLocalViewChange={setView}
+        />
         <OverviewSkeleton />
       </div>
     </>
@@ -866,8 +802,7 @@ function TracksContent() {
   const pageStart = totalTracksInRange === 0 ? 0 : offset + 1;
   const pageEnd = Math.min(offset + pagedTracks.length, totalTracksInRange);
   const totalPages = Math.max(1, Math.ceil(totalTracksInRange / pageSize));
-  const trendsHref = useTracksTrendsHref();
-  const { activeView, setView } = useDashboardSectionView(TRACKS_VIEWS, "leaderboard");
+  const { activeView, setView } = useDashboardSectionView(TRACKS_LOCAL_VIEWS, "leaderboard");
 
   useEffect(() => {
     if (page > totalPages) {
@@ -912,7 +847,12 @@ function TracksContent() {
   if (!isTopLoading && topError && !topData) {
     return (
       <div className="space-y-12">
-        <TracksHeroFrame trendsHref={trendsHref} badgeLabel={badgeLabel} stats={null} />
+        <TracksHeroFrame badgeLabel={badgeLabel} stats={null} />
+        <TracksSectionSwitcher
+          idPrefix="tracks-error"
+          activeSection={activeView}
+          onLocalViewChange={setView}
+        />
         <ErrorState variant="startup" error={topError} message={t("errorLoading")} onRetry={refetchTop} />
       </div>
     );
@@ -920,7 +860,12 @@ function TracksContent() {
   if (!isTopLoading && (!topData || topData.topTracks.length === 0)) {
     return (
       <div className="space-y-12">
-        <TracksHeroFrame trendsHref={trendsHref} badgeLabel={badgeLabel} stats={null} />
+        <TracksHeroFrame badgeLabel={badgeLabel} stats={null} />
+        <TracksSectionSwitcher
+          idPrefix="tracks-empty"
+          activeSection={activeView}
+          onLocalViewChange={setView}
+        />
         <EmptyState variant="startup" {...emptyStatePresets.importData} />
       </div>
     );
@@ -931,7 +876,12 @@ function TracksContent() {
   if (!isPagedLoading && pagedError && !pagedData) {
     return (
       <div className="space-y-12">
-        <TracksHeroFrame trendsHref={trendsHref} badgeLabel={badgeLabel} stats={heroStats} />
+        <TracksHeroFrame badgeLabel={badgeLabel} stats={heroStats} />
+        <TracksSectionSwitcher
+          idPrefix="tracks-paged-error"
+          activeSection={activeView}
+          onLocalViewChange={setView}
+        />
         <ErrorState variant="startup" error={pagedError} message={t("errorLoading")} onRetry={refetchPaged} />
       </div>
     );
@@ -951,7 +901,6 @@ function TracksContent() {
         pageEnd={pageEnd}
         totalTracksInRange={totalTracksInRange}
         totalPages={totalPages}
-        trendsHref={trendsHref}
         badgeLabel={mobileBadgeLabel}
         locale={locale}
         activeView={activeView}
@@ -962,12 +911,12 @@ function TracksContent() {
       />
 
       <div className="hidden space-y-12 lg:block">
-        <TracksHeroFrame trendsHref={trendsHref} badgeLabel={badgeLabel} stats={heroStats} />
+        <TracksHeroFrame badgeLabel={badgeLabel} stats={heroStats} />
 
-        <TracksViewSwitcher
+        <TracksSectionSwitcher
           idPrefix="tracks-desktop"
-          activeView={activeView}
-          onChange={setView}
+          activeSection={activeView}
+          onLocalViewChange={setView}
         />
 
         <DashboardSectionPanel idPrefix="tracks-desktop" view="leaderboard" activeView={activeView}>

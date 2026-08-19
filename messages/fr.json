@@ -71,7 +71,7 @@
     "groups": {
       "home": "Accueil",
       "library": "Bibliothèque",
-      "patterns": "Rythmes d’stream",
+      "patterns": "Rythmes de streams",
       "aiPredictions": "IA et prédictions",
       "helpProduct": "Aide et produit",
       "account": "Compte",
@@ -1989,7 +1989,6 @@
       "primaryInsightEyebrow": "Le plus réstreamé",
       "primaryInsightBody": "C'est le titre auquel vous êtes le plus revenu sur cette fenêtre, porté par {artist}.",
       "shareLabel": "Part des streams",
-      "trendsCta": "Voir son évolution",
       "topFiveEyebrow": "Top cinq",
       "topFiveTitle": "Les titres qui donnent le ton",
       "topFiveDescription": "Une lecture compacte des morceaux qui pèsent le plus dans vos streams actuelles.",
@@ -2014,7 +2013,8 @@
       "navLabel": "Sections des titres",
       "views": {
         "leaderboard": "Top 20",
-        "ranking": "Classement complet"
+        "ranking": "Classement complet",
+        "trends": "Tendances"
       }
     },
     "heroEyebrow": "Classement et vue d'ensemble",
@@ -2030,7 +2030,6 @@
     "allTracks": "Classement des titres",
     "rank": "Rang",
     "listensCount": "streams",
-    "viewTrends": "Voir les tendances de titres",
     "paginationSummary": "Affichage de {start} à {end} sur {total}",
     "paginationPrevious": "Précédent",
     "paginationNext": "Suivant",
@@ -2062,7 +2061,6 @@
         "badge": "Multi-séries"
       }
     },
-    "backToTracks": "Retour au classement des titres",
     "subtitle": "Évolution de vos titres les le plus streamés",
     "subtitleExtended": "Comparez l'évolution de vos titres dans le temps. Sélectionnez le top 20 ou ajoutez d'autres titres via la recherche catalogue.",
     "errorLoading": "Impossible de charger les tendances de titres",

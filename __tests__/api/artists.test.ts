@@ -71,8 +71,8 @@ describe("GET /api/artists", () => {
     expect(data).toHaveProperty("topArtists", mockTopArtists);
     expect(data).toHaveProperty("pagination");
     expect(getArtistOverview).toHaveBeenCalledWith(undefined, undefined, "user-1");
-    expect(countArtistsForRange).toHaveBeenCalledWith(undefined, undefined, "user-1");
-    expect(getArtistStats).toHaveBeenCalledWith(undefined, undefined, "user-1", 20, 0);
+    expect(countArtistsForRange).toHaveBeenCalledWith(undefined, undefined, "user-1", undefined);
+    expect(getArtistStats).toHaveBeenCalledWith(undefined, undefined, "user-1", 20, 0, undefined);
   });
 
   it("should return artists stats with date range", async () => {
@@ -112,7 +112,7 @@ describe("GET /api/artists", () => {
     const response = await GET(request);
 
     expect(response.status).toBe(200);
-    expect(getArtistStats).toHaveBeenCalledWith(undefined, undefined, "user-1", 50, 0);
+    expect(getArtistStats).toHaveBeenCalledWith(undefined, undefined, "user-1", 50, 0, undefined);
   });
 
   it("should ignore query userId and use authenticated user", async () => {
@@ -127,8 +127,8 @@ describe("GET /api/artists", () => {
 
     expect(response.status).toBe(200);
     expect(getArtistOverview).toHaveBeenCalledWith(undefined, undefined, "user-1");
-    expect(countArtistsForRange).toHaveBeenCalledWith(undefined, undefined, "user-1");
-    expect(getArtistStats).toHaveBeenCalledWith(undefined, undefined, "user-1", 20, 0);
+    expect(countArtistsForRange).toHaveBeenCalledWith(undefined, undefined, "user-1", undefined);
+    expect(getArtistStats).toHaveBeenCalledWith(undefined, undefined, "user-1", 20, 0, undefined);
   });
 
   it("should return 400 for invalid limit (too low)", async () => {
@@ -207,6 +207,19 @@ describe("GET /api/artists", () => {
     const response = await GET(request);
 
     expect(response.status).toBe(200);
-    expect(getArtistStats).toHaveBeenCalledWith(undefined, undefined, "user-1", 5, 0);
+    expect(getArtistStats).toHaveBeenCalledWith(undefined, undefined, "user-1", 5, 0, undefined);
+  });
+
+  it("should pass search query to artist stats and count", async () => {
+    vi.mocked(getArtistOverview).mockResolvedValue(mockOverview);
+    vi.mocked(countArtistsForRange).mockResolvedValue(2);
+    vi.mocked(getArtistStats).mockResolvedValue(mockTopArtists);
+
+    const request = new NextRequest("http://localhost/api/artists?q=drake");
+    const response = await GET(request);
+
+    expect(response.status).toBe(200);
+    expect(countArtistsForRange).toHaveBeenCalledWith(undefined, undefined, "user-1", "drake");
+    expect(getArtistStats).toHaveBeenCalledWith(undefined, undefined, "user-1", 20, 0, "drake");
   });
 });

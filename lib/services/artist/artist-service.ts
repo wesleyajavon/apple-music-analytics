@@ -507,9 +507,7 @@ function mapSignatureTrack(row: ArtistStatsRow): ArtistSignatureTrack | null {
   return {
     trackId: row.signature_track_id,
     title: row.signature_track_title,
-    listenCount: transformBigIntToNumber({
-      c: row.signature_listen_count ?? 0,
-    }).c,
+    listenCount: Number(row.signature_listen_count ?? 0),
   };
 }
 

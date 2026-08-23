@@ -265,6 +265,31 @@ const navGroups: NavGroup[] = [
   },
 ];
 
+const MOBILE_RARE_HREFS = new Set([
+  "/dashboard/artists/trends",
+  "/dashboard/genres/trends",
+  "/dashboard/tracks/trends",
+  "/dashboard/spotify-snapshot",
+  "/dashboard/spotify-playground",
+]);
+
+function getMobileRareNavGroups(groups: NavGroup[]): NavGroup[] {
+  const items: NavItem[] = [];
+  for (const group of groups) {
+    for (const item of group.items) {
+      if (MOBILE_RARE_HREFS.has(item.href)) {
+        items.push({ ...item, children: undefined });
+      }
+      for (const child of item.children ?? []) {
+        if (MOBILE_RARE_HREFS.has(child.href)) {
+          items.push(child);
+        }
+      }
+    }
+  }
+  return [{ labelKey: "rare", items }];
+}
+
 function getStoredCollapsed(): boolean {
   if (typeof window === "undefined") return false;
   try {
@@ -762,13 +787,18 @@ function SidebarContent() {
 
           {/* Navigation */}
           <nav className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-5">
-            {navGroups.map((group) => {
+            {(isMobileMenuOpen ? getMobileRareNavGroups(navGroups) : navGroups).map((group) => {
               const groupLabel = t(`groups.${group.labelKey}`);
-              const isGroupOpen = isNavGroupOpen(openGroupKeys, group.labelKey);
+              const isGroupOpen = isMobileMenuOpen || isNavGroupOpen(openGroupKeys, group.labelKey);
 
               return (
                 <div key={group.labelKey} className="mb-6 last:mb-0">
-                  {!displayCollapsed && (
+                  {!displayCollapsed &&
+                    (isMobileMenuOpen ? (
+                      <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-wider text-muted">
+                        {groupLabel}
+                      </p>
+                    ) : (
                     <button
                       type="button"
                       onClick={() => toggleNavGroup(group.labelKey)}
@@ -796,7 +826,7 @@ function SidebarContent() {
                         />
                       </svg>
                     </button>
-                  )}
+                    ))}
                   {(displayCollapsed || isGroupOpen) && (
                     <div className="space-y-0.5">
                       {group.items.map((item) => renderNavItem(item))}

@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useCallback, useLayoutEffect, useState, type CSSProperties } from "react";
+import { DASHBOARD_BOTTOM_NAV_OFFSET_VAR } from "@/lib/constants/dashboard-chrome";
 import { Sidebar, SidebarProvider } from "@/lib/components/sidebar";
 import { DashboardStickyHeader } from "@/lib/components/dashboard-sticky-header";
 import { DashboardMainArea } from "@/lib/components/dashboard-main-area";
@@ -15,9 +16,15 @@ import { DashboardMobileBottomNav } from "@/lib/components/dashboard-mobile-bott
 export function DashboardScrollWrapper({ children }: { children: React.ReactNode }) {
   const [filterElement, setFilterElement] = useState<HTMLDivElement | null>(null);
   const [filterHeight, setFilterHeight] = useState(0);
+  const [navElement, setNavElement] = useState<HTMLElement | null>(null);
+  const [navHeight, setNavHeight] = useState(0);
 
   const filterRef = useCallback((node: HTMLDivElement | null) => {
     setFilterElement(node);
+  }, []);
+
+  const navRef = useCallback((node: HTMLElement | null) => {
+    setNavElement(node);
   }, []);
 
   useLayoutEffect(() => {
@@ -40,8 +47,32 @@ export function DashboardScrollWrapper({ children }: { children: React.ReactNode
     };
   }, [filterElement]);
 
+  useLayoutEffect(() => {
+    const el = navElement;
+    if (!el) {
+      setNavHeight(0);
+      return;
+    }
+
+    const updateNavHeight = () => {
+      setNavHeight(el.getBoundingClientRect().height);
+    };
+
+    updateNavHeight();
+
+    const observer = new ResizeObserver(updateNavHeight);
+    observer.observe(el);
+    window.addEventListener("resize", updateNavHeight);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", updateNavHeight);
+    };
+  }, [navElement]);
+
   const dashboardStyle = {
     "--dashboard-filter-height": `${filterHeight}px`,
+    [DASHBOARD_BOTTOM_NAV_OFFSET_VAR]: `${navHeight}px`,
   } as CSSProperties;
 
   return (
@@ -52,13 +83,13 @@ export function DashboardScrollWrapper({ children }: { children: React.ReactNode
         <NotificationCenterProvider>
         <GenreBackfillJobProvider>
           <GenreGroqClassificationNudgeNotifier />
-          <div className="min-w-0 flex-1 bg-surface-dashboard shadow-[0_0_0_1px_rgb(152_80_208_/_0.08)]">
+          <div className="min-w-0 flex-1 bg-surface-dashboard shadow-[0_0_0_1px_rgb(152_80_208_/_0.08)] max-lg:pb-[var(--dashboard-bottom-nav-offset,0px)]">
           <DashboardStickyHeader filterRef={filterRef} />
-          <Suspense fallback={<main className="min-w-0"><div className="p-4 sm:p-6 lg:p-8">{children}</div></main>}>
+          <Suspense fallback={<main className="min-w-0"><div className="p-4 lg:p-8">{children}</div></main>}>
             <DashboardViewerProvider>
               <DashboardMainArea>{children}</DashboardMainArea>
               <Footer />
-              <DashboardMobileBottomNav />
+              <DashboardMobileBottomNav navRef={navRef} />
             </DashboardViewerProvider>
           </Suspense>
           </div>

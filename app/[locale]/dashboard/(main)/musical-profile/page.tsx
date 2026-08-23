@@ -43,6 +43,11 @@ import { firstKnownGenreName } from "@/lib/utils/genre-unknown-label";
 import { ArtistAvatarHydrated } from "@/lib/components/artist-avatar-hydrated";
 import { getAvatarUrl } from "@/lib/components/artist-avatar-utils";
 import { MusicalProfilePeriodBadge } from "@/lib/components/musical-profile-period-badge";
+import {
+  MobileMusicalProfileView,
+  MusicalProfileNoDataMobileView,
+  type ProfileMetric,
+} from "@/lib/components/musical-profile-mobile";
 
 const TOP_LIMIT = 6;
 const PROFILE_AI_STALE_TIME = 5 * 60 * 1000;
@@ -319,12 +324,6 @@ function AiIdentityQuote({
     </div>
   );
 }
-
-type ProfileMetric = {
-  hint: string;
-  label: string;
-  value: string;
-};
 
 function PageFramingSection({
   withFilters,
@@ -625,158 +624,6 @@ function ExploreFeaturesSection({
   );
 }
 
-function MobileMusicalProfileView({
-  aiCached,
-  aiError,
-  aiLoading,
-  endDate,
-  interactiveAiBlockedByGenreBackfill,
-  locale,
-  profileDescription,
-  profileMetrics,
-  showAiUnavailable,
-  startDate,
-  topArtistName,
-  topArtists,
-  topGenreName,
-  withFilters,
-}: {
-  aiCached?: boolean;
-  aiError: Error | null;
-  aiLoading: boolean;
-  endDate?: string;
-  interactiveAiBlockedByGenreBackfill: boolean;
-  locale: string;
-  profileDescription: string;
-  profileMetrics: ProfileMetric[];
-  showAiUnavailable?: boolean;
-  startDate?: string;
-  topArtistName: string;
-  topArtists: ArtistStatsDto[];
-  topGenreName: string | undefined;
-  withFilters: (href: string) => string;
-}) {
-  const t = useTranslations("musical-profile");
-  const primaryArtist = topArtists[0];
-
-  return (
-    <div className="space-y-5 pb-8 lg:hidden">
-      <motion.section
-        className="relative overflow-hidden rounded-[2rem] bg-gray-950 p-4 text-white shadow-2xl shadow-accent-violet/20"
-        initial={{ opacity: 0, y: 32, scale: 0.94 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-      >
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_10%_0%,rgba(240,64,104,0.35),transparent_34%),radial-gradient(circle_at_90%_20%,rgba(6,182,212,0.26),transparent_32%),linear-gradient(160deg,rgba(3,7,18,0.98),rgba(30,27,75,0.9)_52%,rgba(8,47,73,0.76))]" />
-        <CinematicFloatingOrbs />
-        <CinematicFilmGrain />
-        <CinematicLightSweep />
-        <CinematicStagger className="relative space-y-5" delay={0.15}>
-          <div className="flex items-center justify-between gap-3">
-            <SoundprintBrandMark size="sm" tone="onDark" showAiBadgeOnMobile priority interactive={false} />
-            <MusicalProfilePeriodBadge
-              startDate={startDate}
-              endDate={endDate}
-              locale={locale}
-              variant="mobile"
-            />
-          </div>
-
-          <div className="grid grid-cols-[5rem_minmax(0,1fr)] items-center gap-4">
-            <CinematicFloat className="relative h-20 w-20" intensity="subtle">
-              <div className="relative h-full w-full overflow-hidden rounded-[1.35rem] shadow-2xl shadow-black/35 ring-1 ring-white/15">
-              {primaryArtist ? (
-                <ArtistAvatarHydrated
-                  artistId={primaryArtist.artistId}
-                  artistName={primaryArtist.artistName}
-                  imageUrl={primaryArtist.imageUrl}
-                  avatarApiSize={256}
-                  colorIndex={0}
-                  alt=""
-                  className="h-full w-full object-cover"
-                  loading="eager"
-                  decoding="async"
-                  referrerPolicy="no-referrer"
-                />
-              ) : (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img
-                  src={getAvatarUrl(topArtistName || t("unknownArtist"), 256, 0)}
-                  alt=""
-                  className="h-full w-full object-cover"
-                  loading="eager"
-                  decoding="async"
-                  referrerPolicy="no-referrer"
-                />
-              )}
-              <div
-                className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-violet-600/20 via-transparent to-cyan-500/20"
-                aria-hidden
-              />
-              </div>
-            </CinematicFloat>
-            <div className="min-w-0">
-              <p className="whitespace-nowrap text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-cyan">
-                {t("mobile.signatureLabel")}
-              </p>
-              <h1 className="mt-2 truncate text-3xl font-semibold tracking-[-0.06em]">
-                <CinematicWordReveal text={topArtistName || t("unknownArtist")} delay={0.2} />
-              </h1>
-              <p className="mt-2 line-clamp-2 text-sm leading-6 text-white/62">
-                {topGenreName ? t("heroSignatureHint", { genre: topGenreName }) : t("mobile.genreFallback")}
-              </p>
-            </div>
-          </div>
-
-          <div>
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/50">
-              {t("mobile.storyTitle")}
-            </p>
-            <div className="grid grid-cols-3 gap-2">
-              {profileMetrics.map((metric) => (
-                <div
-                  key={metric.label}
-                  className="rounded-xl border border-white/10 bg-white/[0.06] p-2.5"
-                  title={metric.hint}
-                >
-                  <p className="text-base font-semibold tracking-tight">{metric.value}</p>
-                  <p className="mt-1 truncate text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-slate-400">
-                    {metric.label}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <Link
-            href={withFilters("/dashboard/overview")}
-            className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25"
-          >
-            {t("mobile.overviewCta")}
-            <ArrowRightIcon className="h-4 w-4" />
-          </Link>
-        </CinematicStagger>
-      </motion.section>
-
-      <PageFramingSection withFilters={withFilters} compact />
-
-      <ExploreFeaturesSection withFilters={withFilters} />
-
-      <SoundprintIdentitySection
-        aiCached={aiCached}
-        aiError={aiError}
-        aiLoading={aiLoading}
-        compactSignature
-        interactiveAiBlockedByGenreBackfill={interactiveAiBlockedByGenreBackfill}
-        profileDescription={profileDescription}
-        showAiUnavailable={showAiUnavailable}
-        topArtistName={topArtistName}
-        topGenreName={topGenreName}
-      />
-    </div>
-  );
-}
-
 function MusicalProfileNoDataView({
   locale,
   withFilters,
@@ -789,7 +636,7 @@ function MusicalProfileNoDataView({
   const { startDate, endDate } = useListenDateRange();
 
   return (
-    <div className="space-y-8 pb-10">
+    <div className="hidden space-y-8 pb-10 lg:block">
       <ParallaxHero>
         <motion.section
           initial={{ opacity: 0, y: 24 }}
@@ -936,7 +783,12 @@ function MusicalProfileContent() {
   }
 
   if (!isLoading && !hasListeningData) {
-    return <MusicalProfileNoDataView locale={locale} withFilters={withFilters} />;
+    return (
+      <>
+        <MusicalProfileNoDataMobileView locale={locale} />
+        <MusicalProfileNoDataView locale={locale} withFilters={withFilters} />
+      </>
+    );
   }
 
   const topArtistName = getTopArtistFallback(topArtists, overview);
@@ -1171,7 +1023,7 @@ export default function MusicalProfilePage() {
   const pathname = usePathname();
 
   return (
-    <div className="relative px-4 py-6 sm:px-0">
+    <div className="relative sm:py-6">
       <Suspense fallback={<MusicalProfileFallback />}>
         <div key={pathname}>
           <MusicalProfileContent />

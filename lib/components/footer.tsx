@@ -44,16 +44,22 @@ export function Footer({ variant = "dashboard" }: { variant?: FooterVariant }) {
         shrink-0 px-4 sm:px-6 lg:px-8 py-5
         ${hideOnMobileOnboarding ? "max-lg:hidden" : ""}
         ${isHome
-          ? "border-t border-card-border bg-surface-glass pb-24 backdrop-blur-sm md:pb-5"
-          : "border-t border-card-border pb-20 lg:pb-5"
+          ? "border-t border-card-border bg-surface-glass backdrop-blur-sm"
+          : "border-t border-card-border lg:pb-5"
         }
       `}
       role="contentinfo"
     >
       <div className="mx-auto w-full max-w-7xl">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div
+          className={`flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between ${
+            isHome ? "items-center text-center sm:items-center sm:text-left" : ""
+          }`}
+        >
         <nav
-          className="flex flex-wrap items-center gap-x-5 gap-y-1"
+          className={`flex flex-wrap items-center gap-x-5 gap-y-1 ${
+            isHome ? "justify-center sm:justify-start" : ""
+          }`}
           aria-label={t("navAriaLabel")}
         >
           {links.map((link) => (
@@ -66,7 +72,11 @@ export function Footer({ variant = "dashboard" }: { variant?: FooterVariant }) {
             </Link>
           ))}
         </nav>
-        <div className="flex flex-col gap-1 sm:items-end">
+        <div
+          className={`flex flex-col gap-1 ${
+            isHome ? "items-center sm:items-end" : "sm:items-end"
+          }`}
+        >
           <p className="text-xs text-muted/75">
             © {currentYear} {t("copyright")} · {t("madeWith")}
           </p>

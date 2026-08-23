@@ -102,7 +102,7 @@ export function HomeJourneyImportSection({
       className={`relative mx-auto w-full max-w-7xl ${HOME_JOURNEY_SECTION_SCROLL_MT} px-4 pb-12 sm:px-6 sm:pb-16 lg:px-8`}
     >
       <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1.02fr)_minmax(0,0.98fr)] lg:gap-12">
-        <HomeBlurFadeReveal>
+        <HomeBlurFadeReveal className="flex flex-col items-center text-center lg:items-start lg:text-left">
           <p className="font-mono text-xs font-semibold uppercase tracking-[0.28em] text-primary">
             {t("eyebrow")}
           </p>
@@ -117,13 +117,13 @@ export function HomeJourneyImportSection({
             caption={tHome("supportedStreamingCaption")}
             spotifyLogoAlt={tHome("spotifyLogoAlt")}
             appleMusicLogoAlt={tHome("appleMusicLogoAlt")}
-            className="mt-6"
+            className="mt-6 items-center sm:justify-center lg:items-start lg:justify-start"
           />
 
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+          <div className="mt-8 flex w-full flex-col items-center gap-3 sm:flex-row sm:flex-wrap sm:justify-center lg:justify-start">
             <Link
               href={primaryHref}
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-7 py-3 text-sm font-semibold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:opacity-95"
+              className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-7 py-3 text-sm font-semibold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:opacity-95 sm:w-auto"
             >
               {primaryLabel}
               <ArrowRightIcon />
@@ -131,7 +131,7 @@ export function HomeJourneyImportSection({
             {publicDemoPath ? (
               <Link
                 href={publicDemoPath}
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-card-border bg-card-surface px-6 py-3 text-sm font-semibold text-foreground shadow-card transition-all hover:-translate-y-0.5 hover:shadow-card-hover"
+                className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-card-border bg-card-surface px-6 py-3 text-sm font-semibold text-foreground shadow-card transition-all hover:-translate-y-0.5 hover:shadow-card-hover sm:w-auto"
               >
                 {t("ctaDemo")}
               </Link>
@@ -139,7 +139,7 @@ export function HomeJourneyImportSection({
             {isAuthenticated ? (
               <Link
                 href="/dashboard"
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-card-border bg-card-surface px-6 py-3 text-sm font-semibold text-foreground shadow-card transition-all hover:-translate-y-0.5 hover:shadow-card-hover"
+                className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-card-border bg-card-surface px-6 py-3 text-sm font-semibold text-foreground shadow-card transition-all hover:-translate-y-0.5 hover:shadow-card-hover sm:w-auto"
               >
                 {tHome("goToDashboardShort")}
               </Link>

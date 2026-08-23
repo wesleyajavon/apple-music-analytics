@@ -38,6 +38,14 @@ describe("getProfileDateRangeParts", () => {
     expect(parts?.startLabel).toContain("2023");
     expect(parts?.endLabel).toContain("2024");
   });
+
+  it("formats numeric ranges without month names", () => {
+    const parts = getProfileDateRangeParts("2023-12-28", "2024-06-12", "en-US", "numeric");
+    expect(parts?.isSingleDay).toBe(false);
+    expect(parts?.startLabel).toMatch(/\d{2}\/\d{2}\/\d{2}/);
+    expect(parts?.endLabel).toMatch(/\d{2}\/\d{2}\/\d{2}/);
+    expect(parts?.compactLabel).toContain("–");
+  });
 });
 
 describe("getProfileDurationParts", () => {

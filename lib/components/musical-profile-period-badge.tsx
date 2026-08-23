@@ -83,7 +83,7 @@ export function MusicalProfilePeriodBadge({
   const preset = getDateRangePresetFromSearchParams(searchParams);
 
   const rangeParts = useMemo(
-    () => getProfileDateRangeParts(startDate, endDate, locale, variant === "mobile" ? "compact" : "full"),
+    () => getProfileDateRangeParts(startDate, endDate, locale, variant === "mobile" ? "numeric" : "full"),
     [startDate, endDate, locale, variant],
   );
 
@@ -114,27 +114,33 @@ export function MusicalProfilePeriodBadge({
   if (variant === "mobile") {
     return (
       <div
-        className={`inline-flex max-w-[min(100%,13.5rem)] items-center gap-2 rounded-2xl border border-white/12 bg-white/[0.07] px-2.5 py-2 backdrop-blur-sm ${className}`}
+        className={`inline-flex min-w-0 max-w-full items-start gap-2 rounded-2xl border border-white/12 bg-white/[0.07] px-2 py-1.5 backdrop-blur-sm ${className}`}
         role="group"
         aria-label={ariaLabel}
       >
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/10 text-cyan-100">
-          <CalendarIcon className="h-4 w-4" />
+        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/10 text-cyan-100">
+          <CalendarIcon className="h-3.5 w-3.5" />
         </span>
-        <span className="min-w-0">
-          <span className="block truncate text-[10px] font-semibold uppercase tracking-[0.14em] text-cyan-100/90">
+        <span className="min-w-0 text-left">
+          <span className="block text-[10px] font-semibold uppercase leading-tight tracking-[0.12em] text-cyan-100/90">
             {presetLabel}
           </span>
-          <span className="mt-0.5 block truncate text-[11px] font-medium tabular-nums text-white/75">
+          <span className="mt-0.5 block text-[11px] font-medium leading-snug tabular-nums text-white/75">
             {rangeParts.isSingleDay ? (
-              <time dateTime={rangeParts.startDate}>{rangeParts.compactLabel}</time>
+              <time dateTime={rangeParts.startDate} className="whitespace-nowrap">
+                {rangeParts.compactLabel}
+              </time>
             ) : (
               <>
-                <time dateTime={rangeParts.startDate}>{rangeParts.startLabel}</time>
+                <time dateTime={rangeParts.startDate} className="whitespace-nowrap">
+                  {rangeParts.startLabel}
+                </time>
                 <span className="mx-0.5 text-white/35" aria-hidden>
                   →
                 </span>
-                <time dateTime={rangeParts.endDate}>{rangeParts.endLabel}</time>
+                <time dateTime={rangeParts.endDate} className="whitespace-nowrap">
+                  {rangeParts.endLabel}
+                </time>
               </>
             )}
           </span>

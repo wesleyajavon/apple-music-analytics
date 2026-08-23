@@ -969,6 +969,7 @@ function HeatmapContent() {
         open={!!selectedDate}
         onClose={() => setSelectedDate(null)}
         ariaLabelledBy="heatmap-day-details-title"
+        insetAboveBottomNav
       >
         {selectedDate ? (
           <section

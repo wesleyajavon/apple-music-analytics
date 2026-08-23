@@ -38,7 +38,7 @@ export function HomeJourneySteps({ className }: HomeJourneyStepsProps) {
   return (
     <nav
       aria-label={t("stepsListAriaLabel")}
-      className={["w-full min-w-0 max-w-2xl", className].filter(Boolean).join(" ")}
+      className={["mx-auto w-full min-w-0 max-w-2xl lg:mx-0", className].filter(Boolean).join(" ")}
     >
       <ol className="grid gap-2.5 sm:grid-cols-3 sm:gap-3">
         {HOME_JOURNEY_NAV_ITEMS.map((item, index) => {
@@ -51,9 +51,9 @@ export function HomeJourneySteps({ className }: HomeJourneyStepsProps) {
               <a
                 href={item.href}
                 aria-label={t("stepLinkAria", { step: stepLabel })}
-                className={`group flex h-full flex-col rounded-2xl border border-card-border bg-card-surface/70 px-3.5 py-3 shadow-card backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:shadow-card-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${styles.ring}`}
+                className={`group flex h-full flex-col items-center rounded-2xl border border-card-border bg-card-surface/70 px-3.5 py-3 text-center shadow-card backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:shadow-card-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background lg:items-start lg:text-left ${styles.ring}`}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-center gap-2 lg:justify-start">
                   <span
                     className={`inline-flex h-6 min-w-6 items-center justify-center rounded-full border px-1.5 font-mono text-[0.65rem] font-bold tabular-nums ${styles.badge}`}
                     aria-hidden

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, type RefCallback } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
@@ -77,7 +77,11 @@ function isTabActive(href: string, pathname: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function DashboardMobileBottomNav() {
+export function DashboardMobileBottomNav({
+  navRef,
+}: {
+  navRef?: RefCallback<HTMLElement | null>;
+}) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const t = useTranslations("sidebar");
@@ -99,6 +103,7 @@ export function DashboardMobileBottomNav() {
     <>
       <DashboardMobilePlusMenu open={isPlusOpen} onClose={closePlus} />
       <nav
+        ref={navRef}
         className="fixed inset-x-0 bottom-0 z-20 border-t border-card-border bg-surface-glass/95 backdrop-blur-xl lg:hidden"
         style={{ paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))" }}
         aria-label={t("mobileBottomNavLabel")}

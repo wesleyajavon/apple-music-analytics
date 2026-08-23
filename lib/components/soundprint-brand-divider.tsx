@@ -40,8 +40,8 @@ const LOGO_SIZE = {
 
 const MAX_WIDTH = {
   full: { center: "", start: "" },
-  medium: { center: "mx-auto max-w-4xl", start: "max-w-4xl" },
-  narrow: { center: "mx-auto max-w-2xl", start: "max-w-2xl" },
+  medium: { center: "mx-auto max-w-4xl", start: "mx-auto max-w-4xl lg:mx-0" },
+  narrow: { center: "mx-auto max-w-2xl", start: "mx-auto max-w-2xl lg:mx-0" },
 } as const;
 
 const GAP = {
@@ -94,18 +94,9 @@ export function SoundprintBrandDivider({
       className={`flex items-center ${gapClass} ${widthClass} ${className}`}
       aria-hidden
     >
-      {align === "start" ? (
-        <>
-          {logo}
-          <div className={`h-px flex-1 ${lineClass}`} />
-        </>
-      ) : (
-        <>
-          <div className={`h-px flex-1 ${lineClass}`} />
-          {logo}
-          <div className={`h-px flex-1 ${lineClass}`} />
-        </>
-      )}
+      <div className={`h-px flex-1 ${lineClass} ${align === "start" ? "lg:hidden" : ""}`} />
+      {logo}
+      <div className={`h-px flex-1 ${lineClass}`} />
     </div>
   );
 }

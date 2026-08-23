@@ -156,7 +156,7 @@ export function NotificationCenter() {
         aria-label={t("openLabel")}
         aria-expanded={open}
         aria-haspopup="dialog"
-        className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border bg-background/80 text-muted shadow-[0_1px_2px_rgb(0_0_0/0.04)] backdrop-blur-sm transition-colors hover:border-foreground/15 hover:bg-foreground/[0.03] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background dark:shadow-[0_1px_0_rgb(255_255_255/0.06)_inset,0_1px_2px_rgb(0_0_0/0.35)]"
+        className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border bg-background/80 text-muted shadow-[0_1px_2px_rgb(0_0_0/0.04)] backdrop-blur-sm transition-colors hover:border-foreground/15 hover:bg-foreground/[0.03] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background max-lg:h-11 max-lg:w-11 dark:shadow-[0_1px_0_rgb(255_255_255/0.06)_inset,0_1px_2px_rgb(0_0_0/0.35)]"
       >
         <svg
           className="h-[18px] w-[18px]"

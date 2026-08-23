@@ -132,7 +132,7 @@ export function HomeTextRevealLines({
     return (
       <Tag className={`w-full min-w-0 ${className}`}>
         {lines.map((line, i) => (
-          <div key={i} className="min-w-0">
+          <div key={i} className="min-w-0 max-w-full break-words">
             {line}
           </div>
         ))}
@@ -160,7 +160,7 @@ export function HomeTextRevealLines({
         <motion.div
           key={index}
           variants={lineVariants}
-          className="w-full min-w-0 overflow-hidden pb-[0.08em]"
+          className="block w-full min-w-0 max-w-full break-words pb-[0.08em]"
         >
           {line}
         </motion.div>

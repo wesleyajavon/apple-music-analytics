@@ -832,7 +832,7 @@ function AskSoundprintMobileExperience({
       <div
         className="fixed inset-x-0 z-10 border-t border-card-border bg-surface-glass/95 px-4 py-3 backdrop-blur-xl lg:hidden"
         style={{
-          bottom: "calc(4.25rem + env(safe-area-inset-bottom))",
+          bottom: "var(--dashboard-bottom-nav-offset, 0px)",
         }}
       >
         {errorMessage ? (

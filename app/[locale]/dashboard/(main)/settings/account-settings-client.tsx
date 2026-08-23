@@ -530,7 +530,7 @@ function AccountSettingsContent({ gdprContactEmail = null }: AccountSettingsClie
   }
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6 pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-0">
+    <div className="mx-auto max-w-6xl space-y-6">
       <GroqAiSettingsFocus
         preferencesVisible={activeView === "preferences"}
         onOpenPreferences={openPreferences}

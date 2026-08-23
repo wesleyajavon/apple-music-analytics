@@ -7,7 +7,8 @@
     "export": "Export",
     "error": "Error",
     "less": "Less",
-    "more": "More"
+    "more": "More",
+    "close": "Close"
   },
   "languageSwitcher": {
     "ariaLabel": "Change language"
@@ -51,7 +52,7 @@
     "mobilePlusOpenLabel": "Open more destinations",
     "mobilePlusSheetTitle": "More",
     "mobilePlusOpenFullMenu": "All sections",
-    "mobilePlusHint": "Heatmap, AI, settings, and the full sidebar are here.",
+    "mobilePlusHint": "Heatmap, AI, and settings are here. Trends and Spotify are in the menu button.",
     "mobilePlusAiHint": "Controls AI summaries and widgets in this browser.",
     "collapseSidebar": "Collapse sidebar",
     "expandSidebar": "Expand sidebar",
@@ -75,7 +76,8 @@
       "aiPredictions": "AI & Predictions",
       "helpProduct": "Help & Product",
       "account": "Account",
-      "social": "Social"
+      "social": "Social",
+      "rare": "More"
     },
     "items": {
       "overview": "Your Music",
@@ -2339,11 +2341,16 @@
     "aiErrorTitle": "AI analysis unavailable. Showing a data-based summary instead.",
     "mobile": {
       "signatureLabel": "Anchor",
-      "genreFallback": "Genre signal pending",
-      "storyTitle": "What this period says",
-      "nextTitle": "Go deeper when ready",
-      "nextLead": "Your Music keeps the larger charts, comparisons, and detailed tools.",
-      "overviewCta": "Open full dashboard"
+      "genreFallback": "Genre pending",
+      "storyTitle": "This period",
+      "destinationsTitle": "Explore",
+      "yourMusicLead": "Charts, trends, and your calendar.",
+      "chatLead": "Ask a question about your streams.",
+      "duetLead": "Compare libraries with a friend.",
+      "identityTitle": "Identity",
+      "emptyTitle": "Import your streams",
+      "emptyLead": "Your signature appears once history is in.",
+      "emptyCta": "Import history"
     },
     "overviewCallout": {
       "badge": "Start with the heart of Soundprint-AI",
@@ -2764,6 +2771,24 @@
       "customApply": "Apply",
       "customCancel": "Cancel",
       "customInvalidRange": "Please choose a start and end date.",
+      "mobile": {
+        "openLabel": "Period: {period}",
+        "sheetTitle": "Listening period",
+        "chip": {
+          "7d": "7d",
+          "30d": "30d",
+          "ytd": "YTD",
+          "all": "All",
+          "custom": "Custom"
+        },
+        "presets": {
+          "7d": "Last 7 days",
+          "30d": "Last 30 days",
+          "ytd": "Year to date",
+          "all": "All time",
+          "custom": "Custom"
+        }
+      },
       "toastFilterUpdated": "Filter updated",
       "toastPeriodSelected": "Selected period: {label}",
       "toastExportInProgress": "Export {type} in progress...",

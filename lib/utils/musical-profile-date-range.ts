@@ -31,12 +31,13 @@ function formatDay(date: Date, locale: string, opts: Intl.DateTimeFormatOptions)
  * - même mois → « 3 – 28 mars 2025 »
  * - même année → « 15 janv. – 12 juin 2025 »
  * - années différentes → dates complètes
+ * - numeric → dates courtes type 15/01/24, pour les badges mobiles
  */
 export function getProfileDateRangeParts(
   startDate: string | undefined,
   endDate: string | undefined,
   locale: string,
-  variant: "full" | "compact" = "full",
+  variant: "full" | "compact" | "numeric" = "full",
 ): ProfileDateRangeParts | null {
   if (!startDate || !endDate) return null;
 
@@ -49,6 +50,22 @@ export function getProfileDateRangeParts(
   const dayMonthShort = { day: "numeric" as const, month: "short" as const };
   const dayMonthYear = { day: "numeric" as const, month: "short" as const, year: "numeric" as const };
   const dayMonthYearLong = { day: "numeric" as const, month: "long" as const, year: "numeric" as const };
+  const numericDate = { day: "2-digit" as const, month: "2-digit" as const, year: "2-digit" as const };
+
+  if (variant === "numeric") {
+    const startLabel = formatDay(start, locale, numericDate);
+    const endLabel = formatDay(end, locale, numericDate);
+    const compactLabel = isSingleDay ? startLabel : `${startLabel}–${endLabel}`;
+    return {
+      startDate,
+      endDate,
+      isSingleDay,
+      startLabel,
+      endLabel: isSingleDay ? null : endLabel,
+      compactLabel,
+      fullLabel: compactLabel,
+    };
+  }
 
   if (isSingleDay) {
     const label =

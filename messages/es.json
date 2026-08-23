@@ -7,7 +7,8 @@
     "export": "Exportar",
     "error": "Error",
     "less": "Menos",
-    "more": "Más"
+    "more": "Más",
+    "close": "Cerrar"
   },
   "languageSwitcher": {
     "ariaLabel": "Cambiar idioma"
@@ -51,7 +52,7 @@
     "mobilePlusOpenLabel": "Abrir más destinos",
     "mobilePlusSheetTitle": "Más",
     "mobilePlusOpenFullMenu": "Todas las secciones",
-    "mobilePlusHint": "Mapa de calor, IA, ajustes y el menú completo están aquí.",
+    "mobilePlusHint": "El mapa de calor, la IA y los ajustes están aquí. Tendencias y Spotify están en el botón de menú.",
     "mobilePlusAiHint": "Controla resúmenes y widgets de IA en este navegador.",
     "collapseSidebar": "Contraer barra lateral",
     "expandSidebar": "Expandir barra lateral",
@@ -75,7 +76,8 @@
       "aiPredictions": "IA y predicciones",
       "helpProduct": "Ayuda y producto",
       "account": "Cuenta",
-      "social": "Social"
+      "social": "Social",
+      "rare": "Más"
     },
     "items": {
       "overview": "Your Music",
@@ -2338,12 +2340,17 @@
     "aiUnavailable": "La IA está desactivada para este entorno o navegador, por lo que esta página muestra un perfil determinista basado en tus estadísticas.",
     "aiErrorTitle": "Análisis IA no disponible. Mostrando un resumen basado en datos.",
     "mobile": {
-      "signatureLabel": "Anclaje",
-      "genreFallback": "Señal de género pendiente",
-      "storyTitle": "Lo que cuenta este periodo",
-      "nextTitle": "Profundiza cuando quieras",
-      "nextLead": "Your Music mantiene los gráficos grandes, comparaciones y herramientas detalladas.",
-      "overviewCta": "Abrir dashboard completo"
+      "signatureLabel": "Ancla",
+      "genreFallback": "Género pendiente",
+      "storyTitle": "Este periodo",
+      "destinationsTitle": "Explorar",
+      "yourMusicLead": "Rankings, tendencias y calendario.",
+      "chatLead": "Pregunta sobre tus streams.",
+      "duetLead": "Compara tu biblioteca con un amigo.",
+      "identityTitle": "Identidad",
+      "emptyTitle": "Importa tus streams",
+      "emptyLead": "Tu firma aparece cuando el historial está listo.",
+      "emptyCta": "Importar historial"
     },
     "overviewCallout": {
       "badge": "Empieza por el corazón de Soundprint-AI",
@@ -2764,6 +2771,24 @@
       "customApply": "Aplicar",
       "customCancel": "Cancelar",
       "customInvalidRange": "Elige una fecha de inicio y una de fin.",
+      "mobile": {
+        "openLabel": "Período: {period}",
+        "sheetTitle": "Período de escucha",
+        "chip": {
+          "7d": "7d",
+          "30d": "30d",
+          "ytd": "YTD",
+          "all": "Todo",
+          "custom": "Personalizado"
+        },
+        "presets": {
+          "7d": "Últimos 7 días",
+          "30d": "Últimos 30 días",
+          "ytd": "Este año",
+          "all": "Todo",
+          "custom": "Personalizado"
+        }
+      },
       "toastFilterUpdated": "Filtro actualizado",
       "toastPeriodSelected": "Período seleccionado: {label}",
       "toastExportInProgress": "Export {type} en curso...",

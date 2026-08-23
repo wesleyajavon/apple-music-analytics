@@ -4,11 +4,14 @@ import { DEFAULT_PUBLIC_PROFILE_USER_ID } from "../../lib/constants/public-profi
 const publicDemoQuery = `?userId=${DEFAULT_PUBLIC_PROFILE_USER_ID}`;
 
 test.describe("Mobile dashboard UX", () => {
-  test("home exposes mobile menu and sticky CTA", async ({ page }) => {
+  test("home exposes mobile menu and header sign-in", async ({ page, isMobile }) => {
+    test.skip(!isMobile, "Hamburger is mobile-only");
+
     await page.goto("/en");
 
     await expect(page.getByRole("button", { name: /open page sections menu/i })).toBeVisible();
-    await expect(page.getByRole("link", { name: /sign up/i }).first()).toBeVisible();
+    await expect(page.getByRole("link", { name: /^sign in$/i })).toBeVisible();
+    await expect(page.getByRole("region", { name: /quick actions/i })).toHaveCount(0);
   });
 
   test("dashboard overview loads with mobile bottom nav", async ({ page }) => {
@@ -16,6 +19,26 @@ test.describe("Mobile dashboard UX", () => {
 
     await expect(page.getByRole("navigation", { name: /main dashboard navigation/i })).toBeVisible();
     await expect(page.getByRole("link", { name: /your music/i })).toBeVisible();
+  });
+
+  test("musical profile hub shows signature and destinations", async ({ page }) => {
+    await page.goto(`/en/dashboard/musical-profile${publicDemoQuery}`);
+
+    const main = page.getByRole("main");
+    await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 20_000 });
+    await expect(main.getByRole("link", { name: /^your music$/i })).toBeVisible();
+    await expect(main.getByRole("link", { name: /soundprint chat/i })).toBeVisible();
+    await expect(main.getByRole("link", { name: /^duet$/i })).toBeVisible();
+  });
+
+  test("musical profile hub is usable in French", async ({ page }) => {
+    await page.goto(`/fr/dashboard/musical-profile${publicDemoQuery}`);
+
+    const main = page.getByRole("main");
+    await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 20_000 });
+    await expect(main.getByRole("link", { name: /^your music$/i })).toBeVisible();
+    await expect(main.getByRole("link", { name: /soundprint chat/i })).toBeVisible();
+    await expect(main.getByRole("link", { name: /^duet$/i })).toBeVisible();
   });
 
   test("genres page shows distribution chart on mobile", async ({ page }) => {
@@ -79,5 +102,31 @@ test.describe("Mobile dashboard UX", () => {
 
     await expect(page.getByRole("dialog")).toBeVisible();
     await expect(page.locator("#heatmap-day-details-title")).toBeVisible();
+  });
+
+  test("period control opens a sheet and applies 30d", async ({ page }) => {
+    await page.goto(`/en/dashboard/overview${publicDemoQuery}`);
+
+    await page.getByRole("button", { name: /period:/i }).click();
+    const sheet = page.getByRole("dialog", { name: /listening period/i });
+    await expect(sheet).toBeVisible();
+    await expect(page.getByRole("navigation", { name: /main dashboard navigation/i })).toBeVisible();
+
+    await sheet.getByRole("button", { name: /last 30 days/i }).click();
+    await expect(page).toHaveURL(/preset=30d/);
+    await expect(page).toHaveURL(/startDate=/);
+    await expect(page).toHaveURL(/endDate=/);
+    await expect(page).toHaveURL(/userId=/);
+  });
+
+  test("period sheet shows full French labels", async ({ page }) => {
+    await page.goto(`/fr/dashboard/overview${publicDemoQuery}`);
+
+    await page.getByRole("button", { name: /période :/i }).click();
+    const sheet = page.getByRole("dialog", { name: /période d[’']écoute/i });
+    await expect(sheet).toBeVisible();
+    await expect(sheet.getByRole("button", { name: /^cette année$/i })).toBeVisible();
+    await expect(sheet.getByRole("button", { name: /^personnalisé$/i })).toBeVisible();
+    await expect(page.getByRole("navigation", { name: /navigation principale du dashboard/i })).toBeVisible();
   });
 });

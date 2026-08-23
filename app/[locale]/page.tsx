@@ -16,7 +16,6 @@ import { HomeJourneyInteractSection } from "@/lib/components/home-journey-intera
 import { HomeClosingSection } from "@/lib/components/home-closing-section";
 import { HomeJourneySteps } from "@/lib/components/home-journey-steps";
 import { HomeMobileNav } from "@/lib/components/home-mobile-nav";
-import { HomeMobileStickyCta } from "@/lib/components/home-mobile-sticky-cta";
 import { UserAvatar } from "@/lib/components/user-avatar";
 import {
   HOME_JOURNEY_NAV_ITEMS,
@@ -220,12 +219,12 @@ export default function Home() {
         />
 
         <section className="relative mx-auto grid w-full min-w-0 max-w-7xl items-center gap-10 px-4 pb-16 pt-10 sm:gap-12 sm:px-6 sm:pb-20 sm:pt-14 lg:grid-cols-[0.95fr_1.05fr] lg:gap-14 lg:px-8 lg:pb-28 lg:pt-20">
-          <div className="relative z-10 min-w-0 w-full text-left">
-            <HomeBlurFadeReveal delay={0} immediate>
+          <div className="relative z-10 flex min-w-0 w-full flex-col items-stretch text-center lg:items-start lg:text-left">
+            <HomeBlurFadeReveal delay={0} immediate className="flex justify-center lg:justify-start">
             {isAuthenticated ? (
               <Link
                 href="/dashboard"
-                className="group mb-7 inline-flex max-w-full items-center gap-3 rounded-[1.35rem] border border-card-border bg-card-surface/85 p-2.5 pr-4 shadow-card backdrop-blur-xl transition-all hover:-translate-y-0.5 hover:shadow-card-hover focus:outline-none focus:ring-2 focus:ring-ring"
+                className="group mb-7 inline-flex max-w-full items-center gap-3 rounded-[1.35rem] border border-card-border bg-card-surface/85 p-2.5 pr-4 text-left shadow-card backdrop-blur-xl transition-all hover:-translate-y-0.5 hover:shadow-card-hover focus:outline-none focus:ring-2 focus:ring-ring"
               >
                 <UserAvatar
                   src={avatarUrl}
@@ -268,7 +267,7 @@ export default function Home() {
             </HomeBlurFadeReveal>
 
             {!isAuthenticated ? (
-              <HomeBlurFadeReveal delay={0.04} immediate>
+              <HomeBlurFadeReveal delay={0.04} immediate className="flex justify-center lg:justify-start">
                 <p className="mb-4 font-mono text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-primary sm:text-xs">
                   {t("journey.tagline")}
                 </p>
@@ -277,14 +276,14 @@ export default function Home() {
 
             <HomeTextRevealLines
               as="h1"
-              className="w-full min-w-0 max-w-4xl text-balance text-[2.15rem] font-semibold leading-[1.15] tracking-[-0.05em] text-foreground min-[400px]:text-[2.35rem] sm:text-6xl sm:leading-snug sm:tracking-[-0.06em] lg:text-7xl lg:leading-[1.12]"
+              className="w-full min-w-0 max-w-full text-center text-[1.75rem] font-semibold leading-[1.25] tracking-[-0.04em] text-foreground min-[380px]:text-[1.95rem] sm:max-w-4xl sm:text-balance sm:text-6xl sm:leading-snug sm:tracking-[-0.06em] lg:text-left lg:text-7xl lg:leading-[1.12]"
               lines={[
-                <span key="welcome">{welcomeMessage}</span>,
+                <span key="welcome" className="block w-full max-w-full">{welcomeMessage}</span>,
                 ...(!firstName
                   ? [
                       <span
                         key="gradient"
-                        className="mt-1 block bg-brand-gradient bg-clip-text pb-1.5 leading-normal text-transparent sm:pb-2"
+                        className="mt-1 block w-full max-w-full bg-brand-gradient bg-clip-text pb-1.5 leading-normal text-transparent sm:pb-2"
                       >
                         {t("heroGradient")}
                       </span>,
@@ -293,8 +292,8 @@ export default function Home() {
               ]}
             />
 
-            <HomeBlurFadeReveal delay={0.2} className="mt-5 w-full min-w-0 max-w-2xl">
-              <p className="text-base leading-7 text-muted sm:text-xl sm:leading-8">
+            <HomeBlurFadeReveal delay={0.2} className="mx-auto mt-5 w-full min-w-0 max-w-2xl lg:mx-0">
+              <p className="text-center text-base leading-7 text-muted sm:text-xl sm:leading-8 lg:text-left">
                 {t("journey.pitch")}
               </p>
             </HomeBlurFadeReveal>
@@ -307,11 +306,11 @@ export default function Home() {
               <HomeHeroDashboardPreview compact />
             </HomeClipReveal>
 
-            <HomeBlurFadeReveal delay={0.4} className="mt-8 flex w-full min-w-0 flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <HomeBlurFadeReveal delay={0.4} className="mt-8 flex w-full min-w-0 flex-col items-center gap-3 sm:flex-row sm:flex-wrap sm:justify-center lg:items-start lg:justify-start">
               {isAuthenticated ? (
                 <Link
                   href="/dashboard"
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-7 py-3 text-sm font-semibold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:opacity-95"
+                  className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-7 py-3 text-sm font-semibold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:opacity-95 sm:w-auto"
                 >
                   {t("goToDashboard")}
                   <ArrowRightIcon />
@@ -319,7 +318,7 @@ export default function Home() {
               ) : (
                 <Link
                   href="/sign-up"
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-7 py-3 text-sm font-semibold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:opacity-95"
+                  className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-7 py-3 text-sm font-semibold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:opacity-95 sm:w-auto"
                 >
                   {t("heroPrimaryCta")}
                   <ArrowRightIcon />
@@ -328,7 +327,7 @@ export default function Home() {
               {!isAuthenticated && publicDemoPath ? (
                 <Link
                   href={publicDemoPath}
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-card-border bg-card-surface px-7 py-3 text-sm font-semibold text-foreground shadow-card transition-all hover:-translate-y-0.5 hover:shadow-card-hover"
+                  className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-card-border bg-card-surface px-7 py-3 text-sm font-semibold text-foreground shadow-card transition-all hover:-translate-y-0.5 hover:shadow-card-hover sm:w-auto"
                 >
                   {t("accessDashboard")}
                   <ArrowRightIcon />
@@ -337,7 +336,7 @@ export default function Home() {
             </HomeBlurFadeReveal>
 
             <HomeBlurFadeReveal delay={0.48} className="mt-6 w-full min-w-0">
-              <ul className="flex flex-wrap gap-2" aria-label={t("heroProof.ariaLabel")}>
+              <ul className="flex flex-wrap justify-center gap-2 lg:justify-start" aria-label={t("heroProof.ariaLabel")}>
                 {(["private", "demoFirst", "appleSpotify"] as const).map((key) => (
                   <li
                     key={key}
@@ -411,7 +410,6 @@ export default function Home() {
         />
         </div>
       </main>
-      <HomeMobileStickyCta isAuthenticated={isAuthenticated} />
       <Footer variant="home" />
     </div>
   );

@@ -7,7 +7,8 @@
     "export": "Export",
     "error": "Erreur",
     "less": "Moins",
-    "more": "Plus"
+    "more": "Plus",
+    "close": "Fermer"
   },
   "languageSwitcher": {
     "ariaLabel": "Changer la langue"
@@ -51,7 +52,7 @@
     "mobilePlusOpenLabel": "Ouvrir plus de destinations",
     "mobilePlusSheetTitle": "Plus",
     "mobilePlusOpenFullMenu": "Toutes les sections",
-    "mobilePlusHint": "Heatmap, IA, paramètres et menu complet sont ici.",
+    "mobilePlusHint": "Heatmap, IA et paramètres sont ici. Tendances et Spotify sont dans le bouton menu.",
     "mobilePlusAiHint": "Active les résumés et widgets IA dans ce navigateur.",
     "collapseSidebar": "Réduire la barre latérale",
     "expandSidebar": "Développer la barre latérale",
@@ -75,7 +76,8 @@
       "aiPredictions": "IA et prédictions",
       "helpProduct": "Aide et produit",
       "account": "Compte",
-      "social": "Social"
+      "social": "Social",
+      "rare": "Autres"
     },
     "items": {
       "overview": "Your Music",
@@ -2339,11 +2341,16 @@
     "aiErrorTitle": "Analyse IA indisponible. Affichage d'un résumé basé sur les données.",
     "mobile": {
       "signatureLabel": "Ancrage",
-      "genreFallback": "Signal genre en attente",
-      "storyTitle": "Ce que raconte cette période",
-      "nextTitle": "Approfondir au bon moment",
-      "nextLead": "Your Music garde les grands graphiques, comparaisons et outils détaillés.",
-      "overviewCta": "Ouvrir le dashboard complet"
+      "genreFallback": "Genre en attente",
+      "storyTitle": "Cette période",
+      "destinationsTitle": "Explorer",
+      "yourMusicLead": "Classements, tendances et calendrier.",
+      "chatLead": "Pose une question sur tes streams.",
+      "duetLead": "Compare ta bibliothèque avec un ami.",
+      "identityTitle": "Identité",
+      "emptyTitle": "Importe tes streams",
+      "emptyLead": "Ton ancrage apparaît dès que l’historique est là.",
+      "emptyCta": "Importer l’historique"
     },
     "overviewCallout": {
       "badge": "Commencez par le cœur de Soundprint-AI",
@@ -2764,6 +2771,24 @@
       "customApply": "Appliquer",
       "customCancel": "Annuler",
       "customInvalidRange": "Choisissez une date de début et une date de fin.",
+      "mobile": {
+        "openLabel": "Période : {period}",
+        "sheetTitle": "Période d’écoute",
+        "chip": {
+          "7d": "7 j",
+          "30d": "30 j",
+          "ytd": "Cette année",
+          "all": "Tout",
+          "custom": "Perso"
+        },
+        "presets": {
+          "7d": "7 jours",
+          "30d": "30 jours",
+          "ytd": "Cette année",
+          "all": "Tout",
+          "custom": "Personnalisé"
+        }
+      },
       "toastFilterUpdated": "Filtre mis à jour",
       "toastPeriodSelected": "Période sélectionnée : {label}",
       "toastExportInProgress": "Export {type} en cours...",

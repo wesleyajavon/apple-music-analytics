@@ -66,12 +66,50 @@ test.describe("Mobile dashboard UX", () => {
     await expect(main.getByRole("link", { name: /^duet$/i })).toBeVisible();
   });
 
-  test("genres page shows distribution chart on mobile", async ({ page }) => {
+  test("genres ranking shows a tappable first row and keeps dates", async ({ page }) => {
     await page.goto(`/en/dashboard/genres${publicDemoQuery}`);
 
-    await expect(page.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 20_000 });
-    await expect(page.getByRole("button", { name: /^pie$/i })).toBeVisible();
-    await expect(page.getByRole("button", { name: /^bar$/i })).toBeVisible();
+    await page.getByRole("button", { name: /period:/i }).click();
+    await page.getByRole("dialog", { name: /listening period/i }).getByRole("button", { name: /last 30 days/i }).click();
+    await expect(page).toHaveURL(/preset=30d/);
+    await expect(page).toHaveURL(/startDate=/);
+    await expect(page).toHaveURL(/endDate=/);
+    await expect(page).toHaveURL(/userId=/);
+
+    const main = page.getByRole("main");
+    await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByRole("tablist", { name: /genre sections/i })).toHaveCount(0);
+
+    const firstRow = main.getByRole("button", { name: /open mix details/i }).first();
+    await expect(firstRow).toBeVisible();
+    await firstRow.click();
+    await expect(page.getByRole("dialog")).toBeVisible();
+    await expect(page).toHaveURL(/preset=30d/);
+    await expect(page).toHaveURL(/userId=/);
+
+    await page.getByRole("button", { name: /close genre details/i }).click();
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+
+    await main.getByRole("link", { name: /genre trends/i }).click();
+    await expect(page).toHaveURL(/\/en\/dashboard\/genres\/trends/);
+    await expect(page).toHaveURL(/preset=30d/);
+    await expect(page).toHaveURL(/startDate=/);
+    await expect(page).toHaveURL(/endDate=/);
+    await expect(page).toHaveURL(/userId=/);
+  });
+
+  test("genres ranking is usable in French", async ({ page }) => {
+    await page.goto(`/fr/dashboard/genres${publicDemoQuery}`);
+
+    const main = page.getByRole("main");
+    await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByRole("tablist", { name: /sections genres/i })).toHaveCount(0);
+
+    const firstRow = main.getByRole("button", { name: /voir le détail/i }).first();
+    await expect(firstRow).toBeVisible({ timeout: 20_000 });
+    await firstRow.click();
+    await expect(page.getByRole("dialog")).toBeVisible();
+    await expect(page).toHaveURL(/userId=/);
   });
 
   test("mobile bottom nav navigates to artists", async ({ page }) => {

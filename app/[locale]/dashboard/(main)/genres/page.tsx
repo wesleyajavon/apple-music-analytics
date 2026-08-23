@@ -54,6 +54,12 @@ import {
   useDashboardSectionView,
   type DashboardSectionItem,
 } from "@/lib/components/dashboard-section-switcher";
+import {
+  GenresMobileEmpty,
+  GenresMobileError,
+  GenresMobileExperience,
+  GenresMobileSkeleton,
+} from "@/lib/components/genres-mobile";
 
 type ChartType = "pie" | "bar";
 
@@ -279,7 +285,7 @@ function GenreDetailRowsSkeleton() {
   );
 }
 
-function useGenresTrendsHref() {
+function useGenresDestinationHrefs() {
   const searchParams = useSearchParams();
   return useMemo(() => {
     const params = new URLSearchParams(searchParams.toString());
@@ -288,7 +294,11 @@ function useGenresTrendsHref() {
     params.delete("view");
     params.delete("q");
     const qs = params.toString();
-    return qs ? `/dashboard/genres/trends?${qs}` : "/dashboard/genres/trends";
+    const suffix = qs ? `?${qs}` : "";
+    return {
+      trendsHref: `/dashboard/genres/trends${suffix}`,
+      paletteHref: `/dashboard/genres/palette${suffix}`,
+    };
   }, [searchParams]);
 }
 
@@ -885,344 +895,6 @@ function GenreDistributionChart({
   );
 }
 
-function MobileGenresSkeleton({ badgeLabel }: { badgeLabel: string }) {
-  const t = useTranslations("genres");
-  return (
-    <div className="space-y-5 lg:hidden" aria-busy="true">
-      <section className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-gray-950 p-5 text-white shadow-2xl shadow-violet-500/15">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.24),transparent_34%),radial-gradient(circle_at_85%_8%,rgba(6,182,212,0.18),transparent_34%),linear-gradient(135deg,rgba(3,7,18,0.98),rgba(30,27,75,0.9)_52%,rgba(8,47,73,0.74))]" />
-        <div className="relative">
-          <div className="mb-4 inline-flex items-center rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-violet-100">
-            {badgeLabel}
-          </div>
-          <div className="h-9 w-56 rounded bg-white/20 animate-shimmer" />
-          <div className="mt-3 h-4 w-full rounded bg-white/15 animate-shimmer" />
-          <div className="mt-2 h-4 w-4/5 rounded bg-white/15 animate-shimmer" />
-          <div className="mt-5 grid grid-cols-3 gap-2">
-            {[0, 1, 2].map((i) => (
-              <div key={i} className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
-                <div className="h-6 w-12 rounded bg-white/20 animate-shimmer" />
-                <div className="mt-2 h-3 w-16 rounded bg-white/15 animate-shimmer" />
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-      <section className="rounded-[1.5rem] border border-card-border bg-card-surface p-4 shadow-card">
-        <div className="mb-4 flex items-center justify-between">
-          <div>
-            <div className="h-3 w-24 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
-            <div className="mt-2 h-6 w-40 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
-          </div>
-          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">{t("mobile.loading")}</span>
-        </div>
-        <div className="space-y-3">
-          {[0, 1, 2, 3, 4].map((i) => (
-            <div key={i} className="rounded-2xl border border-card-border/80 bg-muted/25 p-3">
-              <div className="flex items-center justify-between gap-3">
-                <div className="h-4 w-32 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
-                <div className="h-4 w-12 rounded bg-gray-200 animate-shimmer dark:bg-gray-700" />
-              </div>
-              <div className="mt-3 h-2 rounded-full bg-gray-200 animate-shimmer dark:bg-gray-700" />
-            </div>
-          ))}
-        </div>
-      </section>
-    </div>
-  );
-}
-
-function MobileGenresExperience({
-  chartData,
-  galleryGenres,
-  rankingRows,
-  totalListens,
-  badgeLabel,
-  trendsHref,
-  topArtistsByGenre,
-  paletteAccessRestricted,
-  isPublicDemoViewer,
-  userId,
-  locale,
-  activeView,
-  setView,
-  searchInput,
-  onSearchInputChange,
-  detailPage,
-  detailPageSize,
-  detailTotal,
-  detailTotalPages,
-  detailStart,
-  detailEnd,
-  onPageChange,
-  onPageSizeChange,
-  distributionChart,
-}: {
-  chartData: ChartRow[];
-  galleryGenres: ChartRow[];
-  rankingRows: ChartRow[];
-  totalListens: number;
-  badgeLabel: string;
-  trendsHref: string;
-  topArtistsByGenre: Map<string, GenreArtist[]>;
-  paletteAccessRestricted: boolean;
-  isPublicDemoViewer: boolean;
-  userId?: string;
-  locale: string;
-  activeView: GenresView;
-  setView: (view: GenresView) => void;
-  searchInput: string;
-  onSearchInputChange: (value: string) => void;
-  detailPage: number;
-  detailPageSize: number;
-  detailTotal: number;
-  detailTotalPages: number;
-  detailStart: number;
-  detailEnd: number;
-  onPageChange: (nextPage: number) => void;
-  onPageSizeChange: (nextPageSize: number) => void;
-  distributionChart: ReactNode;
-}) {
-  const t = useTranslations("genres");
-  const topGenre = chartData[0];
-  const top3Genres = chartData.slice(0, 3);
-  const topThreeShare = top3Genres.reduce((sum, genre) => sum + genre.percentage, 0);
-  const maxCount = chartData[0]?.count ?? 1;
-
-  if (!topGenre) return null;
-
-  return (
-    <div className="space-y-5 lg:hidden">
-      <section className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-gray-950 p-5 text-white shadow-2xl shadow-violet-500/15">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.24),transparent_34%),radial-gradient(circle_at_85%_8%,rgba(6,182,212,0.18),transparent_34%),linear-gradient(135deg,rgba(3,7,18,0.98),rgba(30,27,75,0.9)_52%,rgba(8,47,73,0.74))]" />
-        <div className="absolute -bottom-20 right-2 h-44 w-44 rounded-full bg-accent-cyan/18 blur-3xl" aria-hidden />
-        <div className="relative">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-violet-100 backdrop-blur">
-            <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_18px_rgb(22_199_132_/0.75)]" />
-            {t("mobile.eyebrow")}
-          </div>
-          <h1 className="text-balance text-3xl font-semibold tracking-[-0.055em] text-white">
-            {t("mobile.title")}
-          </h1>
-          <p className="mt-3 text-base leading-7 text-white/74">
-            {t("mobile.heroInsight", {
-              genre: topGenre.name,
-              percentage: topGenre.percentage.toFixed(1),
-            })}
-          </p>
-
-          <div className="mt-5 grid grid-cols-3 gap-2">
-            <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
-              <p className="text-xl font-semibold tracking-tight text-white">{topGenre.percentage.toFixed(1)}%</p>
-              <p className="mt-1 text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-slate-400">{t("mobile.topGenreLabel")}</p>
-            </div>
-            <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
-              <p className="text-xl font-semibold tracking-tight text-white">{chartData.length.toLocaleString(locale)}</p>
-              <p className="mt-1 text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-slate-400">{t("statGenres")}</p>
-            </div>
-            <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
-              <p className="text-xl font-semibold tracking-tight text-white">{topThreeShare.toFixed(0)}%</p>
-              <p className="mt-1 text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-slate-400">{t("mobile.topThreeLabel")}</p>
-            </div>
-          </div>
-
-          <div className="mt-5 flex flex-col gap-2">
-            <Link
-              href={trendsHref}
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25 transition-all active:scale-[0.99]"
-            >
-              <LineChart className="h-4 w-4" aria-hidden />
-              {t("viewTrends")}
-            </Link>
-            <p className="text-center text-xs font-medium text-white/50">{badgeLabel}</p>
-          </div>
-        </div>
-      </section>
-
-      <GenresViewSwitcher
-        idPrefix="genres-mobile"
-        activeView={activeView}
-        onChange={setView}
-      />
-
-      <DashboardSectionPanel idPrefix="genres-mobile" view="spotlight" activeView={activeView}>
-        <div className="space-y-5">
-          <section>
-            <div className="mb-3 flex items-end justify-between gap-3">
-              <div>
-                <p className="font-mono text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-primary">
-                  {t("mobile.primarySignal")}
-                </p>
-                <h2 className="mt-1 text-xl font-semibold tracking-[-0.04em] text-foreground">
-                  {t("mobile.topLanesTitle")}
-                </h2>
-              </div>
-              <span className="rounded-full border border-card-border bg-card-surface px-3 py-1.5 text-xs font-semibold text-muted shadow-sm">
-                Top 3
-              </span>
-            </div>
-            <div className="-mx-4 overflow-x-auto px-4 pb-2 [scrollbar-width:none]">
-              <div className="flex gap-3">
-                {top3Genres.map((genre, index) => {
-                  const artists = topArtistsByGenre.get(genre.name) ?? [];
-                  return (
-                    <article
-                      key={genre.name}
-                      className="min-w-[76vw] overflow-hidden rounded-[1.5rem] border border-card-border bg-card-surface p-4 shadow-card"
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <span className="inline-flex h-8 min-w-8 items-center justify-center rounded-xl bg-primary/10 px-2 text-xs font-black text-primary">
-                            #{genre.rank}
-                          </span>
-                          <h3 className="mt-3 truncate text-2xl font-semibold tracking-[-0.05em] text-foreground">
-                            {genre.name}
-                          </h3>
-                        </div>
-                        <div className="shrink-0 text-right">
-                          <p className="text-3xl font-semibold tabular-nums tracking-[-0.05em] text-foreground">
-                            {genre.percentage.toFixed(0)}%
-                          </p>
-                          <p className="text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-muted">
-                            {t("mobile.shareLabel")}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="mt-4 h-2 overflow-hidden rounded-full bg-muted">
-                        <div
-                          className="h-full rounded-full shadow-[0_0_18px_-6px_currentColor]"
-                          style={{
-                            width: `${Math.max(8, (genre.count / maxCount) * 100)}%`,
-                            backgroundColor: COLORS[index % COLORS.length],
-                          }}
-                        />
-                      </div>
-                      <div className="mt-4">
-                        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted">
-                          {t("mobile.artistContext")}
-                        </p>
-                        {artists.length > 0 ? (
-                          <div className="flex flex-wrap gap-2">
-                            {artists.slice(0, 3).map((artist) => (
-                              <span key={artist.id} className={GENRE_ARTIST_TAG_CLASS}>
-                                {artist.name}
-                              </span>
-                            ))}
-                          </div>
-                        ) : (
-                          <p className="text-sm leading-6 text-muted">{t("mobile.noArtistContext")}</p>
-                        )}
-                      </div>
-                    </article>
-                  );
-                })}
-              </div>
-            </div>
-          </section>
-
-          {galleryGenres.length > 0 ? (
-            <section className="rounded-[1.5rem] border border-card-border bg-card-surface p-4 shadow-sm">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-cyan-800 dark:text-cyan-200">
-                {t("sections.spotlight.galleryBadge")}
-              </p>
-              <h2 className="mt-1 text-lg font-semibold tracking-[-0.035em] text-foreground">{t("galleryTitle")}</h2>
-              <div className="mt-4">
-                <GenreGallery genres={galleryGenres} maxCount={maxCount} locale={locale} />
-              </div>
-            </section>
-          ) : null}
-        </div>
-      </DashboardSectionPanel>
-
-      <DashboardSectionPanel idPrefix="genres-mobile" view="distribution" activeView={activeView}>
-        <section className="overflow-hidden rounded-[1.5rem] border border-card-border bg-card-surface shadow-card">
-          <div className="border-b border-card-border px-4 py-4">
-            <p className="font-mono text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-primary">
-              {t("mobile.supportingMetrics")}
-            </p>
-            <h2 className="mt-1 text-xl font-semibold tracking-[-0.04em] text-foreground">
-              {t("mobile.distributionTitle")}
-            </h2>
-            <p className="mt-2 text-sm leading-6 text-muted">
-              {t("mobile.distributionDescription", {
-                total: totalListens.toLocaleString(locale),
-              })}
-            </p>
-          </div>
-          <div className="p-4">{distributionChart}</div>
-        </section>
-      </DashboardSectionPanel>
-
-      <DashboardSectionPanel idPrefix="genres-mobile" view="ranking" activeView={activeView}>
-        <div className="space-y-3">
-          <GenresRankingSearchField
-            id="genres-ranking-search-mobile"
-            value={searchInput}
-            onChange={onSearchInputChange}
-          />
-          <div className="overflow-hidden rounded-[1.5rem] border border-card-border bg-card-surface shadow-sm">
-            <div className="p-4">
-              {rankingRows.length === 0 ? (
-                <p className="px-1 py-8 text-center text-sm text-muted">{t("rankingSearchEmpty")}</p>
-              ) : (
-                <GenreRankingRows rows={rankingRows} maxCount={maxCount} locale={locale} />
-              )}
-            </div>
-            <div className="flex flex-col gap-3 border-t border-card-border p-4">
-              <p className="text-xs text-muted">
-                {t("paginationSummary", {
-                  start: detailStart,
-                  end: detailEnd,
-                  total: detailTotal,
-                })}
-              </p>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => onPageChange(detailPage - 1)}
-                  disabled={detailPage === 1}
-                  className="min-h-11 flex-1 rounded-2xl border border-card-border bg-surface px-4 text-sm font-semibold text-foreground disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {t("paginationPrevious")}
-                </button>
-                <span className="shrink-0 px-2 text-xs font-semibold text-muted">
-                  {t("paginationPage", { page: detailPage, totalPages: detailTotalPages })}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => onPageChange(detailPage + 1)}
-                  disabled={detailPage >= detailTotalPages}
-                  className="min-h-11 flex-1 rounded-2xl border border-card-border bg-surface px-4 text-sm font-semibold text-foreground disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {t("paginationNext")}
-                </button>
-              </div>
-              <label className="flex min-h-11 items-center justify-between gap-3 rounded-2xl border border-card-border bg-surface px-4 text-sm font-semibold text-foreground">
-                <span>{t("pageSizeLabel")}</span>
-                <select
-                  value={detailPageSize}
-                  onChange={(e) => onPageSizeChange(Number(e.target.value))}
-                  className="rounded-xl border border-card-border bg-card-surface px-3 py-2 text-sm"
-                >
-                  <option value={10}>10</option>
-                  <option value={20}>20</option>
-                  <option value={50}>50</option>
-                </select>
-              </label>
-            </div>
-          </div>
-        </div>
-      </DashboardSectionPanel>
-
-      <GenrePaletteNotice
-        paletteAccessRestricted={paletteAccessRestricted}
-        isPublicDemoViewer={isPublicDemoViewer}
-        userId={userId}
-      />
-    </div>
-  );
-}
-
 function GenresContent() {
   const searchParams = useSearchParams();
   const { resolvedTheme } = useTheme();
@@ -1361,7 +1033,7 @@ function GenresContent() {
   const detailTotalPages = Math.max(1, Math.ceil(detailTotal / detailPageSize));
   const detailStart = detailTotal === 0 ? 0 : detailOffset + 1;
   const detailEnd = Math.min(detailOffset + detailRows.length, detailTotal);
-  const trendsHref = useGenresTrendsHref();
+  const { trendsHref, paletteHref } = useGenresDestinationHrefs();
   const maxCount = chartData[0]?.count ?? 1;
 
   useEffect(() => {
@@ -1378,7 +1050,16 @@ function GenresContent() {
 
   const topArtistsByGenre = useMemo(() => {
     const entries = data?.topArtistsForTopGenres ?? [];
-    return new Map(entries.map((e) => [e.genre, e.artists]));
+    return new Map(
+      entries.map((entry) => [
+        entry.genre,
+        entry.artists.slice(0, 3).map((artist) => ({
+          id: artist.id,
+          name: artist.name,
+          imageUrl: artist.imageUrl,
+        })),
+      ])
+    );
   }, [data?.topArtistsForTopGenres]);
 
   const heroStats = isLoadingOrFetching ? (
@@ -1420,49 +1101,64 @@ function GenresContent() {
         />
       </div>
       {!isLoadingOrFetching && error ? (
-        <ErrorState
-          variant="startup"
-          error={error}
-          message={t("errorLoading")}
-          onRetry={() => refetch()}
-        />
+        <>
+          <div className="lg:hidden">
+            <GenresMobileError locale={locale}>
+              <ErrorState
+                variant="startup"
+                error={error}
+                message={t("errorLoading")}
+                onRetry={() => refetch()}
+              />
+            </GenresMobileError>
+          </div>
+          <div className="hidden lg:block">
+            <ErrorState
+              variant="startup"
+              error={error}
+              message={t("errorLoading")}
+              onRetry={() => refetch()}
+            />
+          </div>
+        </>
       ) : !isLoadingOrFetching && (!data || data.data.length === 0) ? (
-        <EmptyState variant="startup" {...emptyStatePresets.changeDates(pathname)} />
+        <>
+          <div className="lg:hidden">
+            <GenresMobileEmpty />
+          </div>
+          <div className="hidden lg:block">
+            <EmptyState variant="startup" {...emptyStatePresets.changeDates(pathname)} />
+          </div>
+        </>
       ) : (
         <div className="space-y-8 lg:space-y-12">
-            {isLoadingOrFetching ? (
-              <MobileGenresSkeleton badgeLabel={badgeLabel} />
-            ) : data ? (
-              <MobileGenresExperience
-                chartData={chartData}
-                galleryGenres={galleryGenres}
-                rankingRows={detailRows}
-                totalListens={data.totalListens}
-                badgeLabel={badgeLabel}
-                trendsHref={trendsHref}
-                topArtistsByGenre={topArtistsByGenre}
-                paletteAccessRestricted={paletteAccessRestricted}
-                isPublicDemoViewer={isPublicDemoViewer}
-                userId={userId}
-                locale={locale}
-                activeView={activeView}
-                setView={setView}
-                searchInput={searchInput}
-                onSearchInputChange={setSearchInput}
-                detailPage={detailPage}
-                detailPageSize={detailPageSize}
-                detailTotal={detailTotal}
-                detailTotalPages={detailTotalPages}
-                detailStart={detailStart}
-                detailEnd={detailEnd}
-                onPageChange={(nextPage) => updateDetailPaginationParams(nextPage, detailPageSize)}
-                onPageSizeChange={(nextPageSize) => updateDetailPaginationParams(1, nextPageSize)}
-                distributionChart={
-                  <GenreDistributionChart instanceId="mobile" {...distributionChartProps} />
-                }
-              />
-            ) : null}
-          <div className="hidden lg:block space-y-8">
+            <div className="lg:hidden">
+              {isLoadingOrFetching ? (
+                <GenresMobileSkeleton />
+              ) : data ? (
+                <GenresMobileExperience
+                  trendsHref={trendsHref}
+                  paletteHref={paletteHref}
+                  chartData={chartData}
+                  rankingRows={detailRows}
+                  totalListens={data.totalListens}
+                  topArtistsByGenre={topArtistsByGenre}
+                  showPalette={!paletteAccessRestricted && !isPublicDemoViewer}
+                  locale={locale}
+                  searchInput={searchInput}
+                  onSearchInputChange={setSearchInput}
+                  detailPage={detailPage}
+                  detailPageSize={detailPageSize}
+                  detailTotal={detailTotal}
+                  detailTotalPages={detailTotalPages}
+                  detailStart={detailStart}
+                  detailEnd={detailEnd}
+                  onPageChange={(nextPage) => updateDetailPaginationParams(nextPage, detailPageSize)}
+                  onPageSizeChange={(nextPageSize) => updateDetailPaginationParams(1, nextPageSize)}
+                />
+              ) : null}
+            </div>
+          <div className="hidden space-y-8 lg:block">
             <GenresViewSwitcher
               idPrefix="genres-desktop"
               activeView={activeView}
@@ -1675,11 +1371,11 @@ function GenresContent() {
 }
 
 function GenresFallback() {
-  const trendsHref = useGenresTrendsHref();
+  const { trendsHref } = useGenresDestinationHrefs();
   const badgeLabel = useGenresHeroBadge();
   return (
     <div className="space-y-8 lg:space-y-12">
-      <MobileGenresSkeleton badgeLabel={badgeLabel} />
+      <GenresMobileSkeleton />
       <div className="hidden lg:block">
         <GenresHeroFrame trendsHref={trendsHref} stats={<GenresHeroStatsSkeleton />} badgeLabel={badgeLabel} />
       </div>
@@ -1692,7 +1388,7 @@ function GenresFallback() {
 
 export default function GenresPage() {
   return (
-    <div className="px-4 pb-4 pt-0 sm:px-0 lg:pb-6">
+    <div className="max-lg:p-0 lg:py-6">
       <Suspense fallback={<GenresFallback />}>
         <GenresContent />
       </Suspense>

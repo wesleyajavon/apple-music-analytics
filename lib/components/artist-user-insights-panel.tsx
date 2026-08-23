@@ -30,6 +30,7 @@ import { ErrorState } from "@/lib/components/error-state";
 import { useTheme } from "@/lib/providers/theme-provider";
 import { ChartResponsiveContainer } from "@/lib/components/chart-responsive-container";
 import { useIsLgChartViewport } from "@/lib/hooks/use-chart-viewport";
+import { DASHBOARD_BOTTOM_NAV_OFFSET_VAR } from "@/lib/constants/dashboard-chrome";
 
 const PANEL_DRAWER_SHELL =
   "relative flex min-h-0 w-full flex-col overflow-hidden border-slate-200/90 bg-white text-slate-900 ring-1 ring-black/[0.04] dark:border-white/10 dark:bg-slate-950 dark:text-white dark:ring-0 max-lg:max-h-[min(92dvh,720px)] max-lg:overflow-y-auto max-lg:rounded-t-[1.75rem] max-lg:border-t max-lg:shadow-[0_-16px_48px_rgba(15,23,42,0.12)] lg:h-full lg:max-w-lg lg:border-l lg:shadow-[-28px_0_80px_rgba(15,23,42,0.1)] lg:rounded-l-[1.75rem] dark:max-lg:shadow-[0_-16px_48px_rgba(0,0,0,0.35)] dark:lg:shadow-[-32px_0_96px_rgba(0,0,0,0.45)]";
@@ -218,7 +219,10 @@ export const ArtistUserInsightsPanel = memo(
           role="dialog"
           aria-modal="true"
           aria-labelledby={headingId}
-          style={{ paddingBottom: "max(0px, env(safe-area-inset-bottom))" }}
+          style={{
+            paddingBottom: "max(0px, env(safe-area-inset-bottom))",
+            marginBottom: isLgChart ? undefined : `var(${DASHBOARD_BOTTOM_NAV_OFFSET_VAR}, 0px)`,
+          }}
         >
           <div
             className="mx-auto mb-1 mt-2 h-1 w-10 shrink-0 rounded-full bg-slate-300/80 dark:bg-white/20 lg:hidden"

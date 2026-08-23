@@ -1873,31 +1873,17 @@
       }
     },
     "mobile": {
-      "heroEyebrow": "Pouls artistes",
-      "heroTitle": "Qui tient votre rotation ?",
-      "heroSubtitle": "Commencez par l’artiste qui porte cette fenêtre, puis ouvrez le classement détaillé seulement quand vous voulez tout parcourir.",
-      "primaryInsightEyebrow": "Ancre de rotation",
-      "primaryInsightBody": "{name} est l’artiste qui pèse le plus dans votre stream en ce moment.",
-      "primaryInsightFallback": "Importez des données de streams pour révéler l’artiste leader de cette période.",
+      "heroEyebrow": "Artiste n°1",
+      "emptyTitle": "Pas encore d’artistes",
+      "emptyLead": "Importez l’historique pour voir qui vous streamz.",
+      "emptyCta": "Importer l’historique",
+      "errorLead": "Impossible de charger ce classement.",
       "listenCount": "{count} streams",
       "shareLabel": "{share} des streams",
-      "signalsLabel": "Signaux de vue artistes",
-      "avgSignal": "Moy. / artiste",
-      "concentrationSignal": "Part du top",
-      "topFiveEyebrow": "Top cinq",
-      "topFiveTitle": "Les artistes qui donnent le ton",
-      "topFiveDescription": "Une lecture compacte des noms qui pèsent le plus dans vos streams actuelles.",
-      "open": "Ouvrir",
-      "disclosures": {
-        "supporting": {
-          "title": "Ouvrir le reste du top 20",
-          "description": "Révélez les artistes de soutien sans transformer le premier écran en mur de graphiques."
-        },
-        "index": {
-          "title": "Parcourir tout l’index artistes",
-          "description": "Utilisez la pagination quand vous voulez chaque artiste classé sur cette fenêtre."
-        }
-      }
+      "signalsLabel": "Signaux",
+      "shareSignal": "Part du n°1",
+      "listTitle": "Classement",
+      "trendsLead": "Leur évolution dans le temps."
     },
     "heroEyebrow": "Classement et vue d'ensemble",
     "yourArtists": "Vos artistes",

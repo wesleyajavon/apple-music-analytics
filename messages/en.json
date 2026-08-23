@@ -1873,31 +1873,17 @@
       }
     },
     "mobile": {
-      "heroEyebrow": "Artist pulse",
-      "heroTitle": "Who owns your rotation?",
-      "heroSubtitle": "Start with the artist carrying this window, then open the deeper ranking only when you want the full index.",
-      "primaryInsightEyebrow": "Rotation anchor",
-      "primaryInsightBody": "{name} is the artist with the most weight in your streaming right now.",
-      "primaryInsightFallback": "Import streaming data to reveal the artist leading this period.",
+      "heroEyebrow": "Top artist",
+      "emptyTitle": "No artists yet",
+      "emptyLead": "Import history to see who you stream.",
+      "emptyCta": "Import history",
+      "errorLead": "Couldn't load this ranking.",
       "listenCount": "{count} streams",
       "shareLabel": "{share} of streams",
-      "signalsLabel": "Artist overview signals",
-      "avgSignal": "Avg / artist",
-      "concentrationSignal": "Top share",
-      "topFiveEyebrow": "First five",
-      "topFiveTitle": "The artists setting the tone",
-      "topFiveDescription": "A compact read of the names carrying the most streaming weight right now.",
-      "open": "Open",
-      "disclosures": {
-        "supporting": {
-          "title": "Open the rest of the top 20",
-          "description": "Reveal supporting artists without turning the first screen into a chart wall."
-        },
-        "index": {
-          "title": "Browse the full artist index",
-          "description": "Use pagination when you want every ranked artist in this date window."
-        }
-      }
+      "signalsLabel": "Signals",
+      "shareSignal": "Top share",
+      "listTitle": "Ranking",
+      "trendsLead": "How they move over time."
     },
     "heroEyebrow": "Rankings & overview",
     "yourArtists": "Your artists",

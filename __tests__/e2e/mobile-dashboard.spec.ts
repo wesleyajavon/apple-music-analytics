@@ -81,6 +81,52 @@ test.describe("Mobile dashboard UX", () => {
     await expect(page).toHaveURL(/\/en\/dashboard\/artists/);
   });
 
+  test("artists ranking shows a tappable first row and keeps dates", async ({ page }) => {
+    await page.goto(`/en/dashboard/artists${publicDemoQuery}`);
+
+    await page.getByRole("button", { name: /period:/i }).click();
+    await page.getByRole("dialog", { name: /listening period/i }).getByRole("button", { name: /last 30 days/i }).click();
+    await expect(page).toHaveURL(/preset=30d/);
+    await expect(page).toHaveURL(/startDate=/);
+    await expect(page).toHaveURL(/endDate=/);
+    await expect(page).toHaveURL(/userId=/);
+
+    const main = page.getByRole("main");
+    await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByRole("tablist", { name: /artist sections/i })).toHaveCount(0);
+
+    const firstRow = main.getByRole("button", { name: /open streaming insights/i }).first();
+    await expect(firstRow).toBeVisible();
+    await firstRow.click();
+    await expect(page.getByRole("dialog")).toBeVisible();
+    await expect(page).toHaveURL(/preset=30d/);
+    await expect(page).toHaveURL(/userId=/);
+
+    await page.getByRole("button", { name: /close insights/i }).click();
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+
+    await main.getByRole("link", { name: /artist trends/i }).click();
+    await expect(page).toHaveURL(/\/en\/dashboard\/artists\/trends/);
+    await expect(page).toHaveURL(/preset=30d/);
+    await expect(page).toHaveURL(/startDate=/);
+    await expect(page).toHaveURL(/endDate=/);
+    await expect(page).toHaveURL(/userId=/);
+  });
+
+  test("artists ranking is usable in French", async ({ page }) => {
+    await page.goto(`/fr/dashboard/artists${publicDemoQuery}`);
+
+    const main = page.getByRole("main");
+    await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByRole("tablist", { name: /sections artistes/i })).toHaveCount(0);
+
+    const firstRow = main.getByRole("button", { name: /analyse d/i }).first();
+    await expect(firstRow).toBeVisible({ timeout: 20_000 });
+    await firstRow.click();
+    await expect(page.getByRole("dialog")).toBeVisible();
+    await expect(page).toHaveURL(/userId=/);
+  });
+
   test("mobile plus menu opens heatmap and settings shortcuts", async ({ page }) => {
     await page.goto(`/en/dashboard/overview${publicDemoQuery}`);
 

@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { OverviewPeriodBadgeButton, OverviewPeriodHint } from "@/lib/components/overview-period-nudge";
 import { UserAvatarPhoto } from "@/lib/components/user-avatar";
 import { SoundprintBrandMark } from "@/lib/components/soundprint-brand-mark";
@@ -9,10 +10,14 @@ import {
   DASHBOARD_CINEMATIC_HERO_SHELL,
   DashboardCinematicHeroBg,
 } from "@/lib/components/dashboard-ui";
+import { DASHBOARD_ONBOARDING_REIMPORT_PATH } from "@/lib/utils/onboarding-route";
 import type { OverviewPrimaryInsight } from "@/lib/utils/overview-page";
 
-export const OVERVIEW_MOBILE_HERO_SHELL = `${DASHBOARD_CINEMATIC_HERO_SHELL} p-5 sm:p-6`;
+export const OVERVIEW_MOBILE_HERO_SHELL =
+  "relative overflow-hidden bg-gray-950 px-4 pb-5 pt-4 text-white";
 export const OVERVIEW_DESKTOP_HERO_SHELL = `${DASHBOARD_CINEMATIC_HERO_SHELL} px-5 py-6 sm:px-8 sm:py-9 lg:px-10 lg:py-10`;
+
+const MOBILE_BLEED = "-mx-4 -mt-4 space-y-4 pb-8 lg:hidden";
 
 export function OverviewInsightCard({
   insight,
@@ -129,18 +134,12 @@ export function OverviewHeroFrame({
 
 export function OverviewMobileHero({
   title,
-  description,
-  badgeLabel,
-  showPeriodHint = false,
   avatarUrl,
   insight,
   genreName,
   children,
 }: {
   title: string;
-  description?: string;
-  badgeLabel: string;
-  showPeriodHint?: boolean;
   avatarUrl?: string | null;
   insight?: OverviewPrimaryInsight;
   genreName?: string;
@@ -151,47 +150,32 @@ export function OverviewMobileHero({
   return (
     <section className={OVERVIEW_MOBILE_HERO_SHELL}>
       <DashboardCinematicHeroBg />
-      <div className="relative flex items-start gap-4">
+      <div className="relative flex items-start gap-3.5">
         <UserAvatarPhoto
           src={avatarUrl}
           size="lg"
-          className="ring-2 ring-white/20 shadow-xl shadow-black/25"
+          className="ring-1 ring-white/15"
         />
         <div className="min-w-0 flex-1">
-          <div className="flex items-center justify-between gap-3">
-            <SoundprintBrandMark
-              size="sm"
-              tone="onDark"
-              showAiBadge={false}
-              showWordmarkOnMobile={false}
-              interactive={false}
-            />
-            <OverviewPeriodBadgeButton badgeLabel={badgeLabel} compact />
-          </div>
-
-          <div className="mt-6">
-            {insight ? (
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
-                {insight.eyebrow}
-              </p>
-            ) : null}
-            <h1 className="mt-3 text-balance text-3xl font-semibold tracking-[-0.06em]">
-              {title}
-            </h1>
-            {description ? (
-              <p className="mt-3 text-sm leading-6 text-slate-300">{description}</p>
-            ) : null}
-            {showPeriodHint ? <OverviewPeriodHint compact /> : null}
-          </div>
-
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-cyan">
+            {insight?.eyebrow ?? t("mobile.heroEyebrow")}
+          </p>
+          <h1 className="mt-1 text-[1.55rem] font-semibold leading-[1.12] tracking-[-0.05em]">
+            {title}
+          </h1>
           {insight ? (
-            <div className="mt-5">
-              <OverviewInsightCard
-                insight={insight}
-                genreLabel={t("libraryLeaders.topGenre")}
-                genreName={genreName}
-                compact
-              />
+            <div className="mt-3">
+              <p className="text-3xl font-semibold tabular-nums tracking-[-0.06em] text-white">
+                {insight.metric}
+              </p>
+              <p className="mt-1 truncate text-sm font-semibold text-white/80" title={insight.title}>
+                {insight.title}
+              </p>
+              {genreName ? (
+                <p className="mt-0.5 truncate text-xs text-cyan-100/80" title={genreName}>
+                  {t("libraryLeaders.topGenre")} · {genreName}
+                </p>
+              ) : null}
             </div>
           ) : null}
           {children}
@@ -201,33 +185,25 @@ export function OverviewMobileHero({
   );
 }
 
-export function MobileOverviewLoadingFallback({
-  title,
-  badgeLabel,
-}: {
-  title: string;
-  badgeLabel: string;
-}) {
+export function MobileOverviewLoadingFallback({ title }: { title: string }) {
   return (
-    <div className="space-y-5 lg:hidden">
-      <OverviewMobileHero title={title} badgeLabel={badgeLabel}>
-        <div className="mt-5 space-y-3">
-          <div className="h-4 w-11/12 animate-pulse rounded bg-white/15" />
-          <div className="h-4 w-8/12 animate-pulse rounded bg-white/10" />
-        </div>
-        <div className="mt-5 rounded-3xl border border-white/10 bg-white/[0.07] p-4">
-          <div className="h-10 w-28 animate-pulse rounded bg-white/20" />
-          <div className="mt-3 h-3 w-24 animate-pulse rounded bg-white/10" />
+    <div className={MOBILE_BLEED}>
+      <OverviewMobileHero title={title}>
+        <div className="mt-3 space-y-2" aria-hidden>
+          <div className="h-8 w-24 animate-pulse rounded bg-white/20" />
+          <div className="h-3 w-10/12 animate-pulse rounded bg-white/10" />
         </div>
       </OverviewMobileHero>
-      <div className="-mx-4 flex gap-3 overflow-hidden px-4">
-        {[0, 1, 2].map((i) => (
-          <div
-            key={i}
-            className="h-32 min-w-[9.75rem] animate-pulse rounded-3xl border border-white/10 bg-slate-950/80"
-          />
-        ))}
-      </div>
+      <section className="px-4">
+        <div className="-mx-4 flex gap-3 overflow-hidden px-4">
+          {[0, 1, 2].map((i) => (
+            <div
+              key={i}
+              className="h-24 min-w-[9.75rem] animate-pulse rounded-3xl border border-white/10 bg-slate-950/80"
+            />
+          ))}
+        </div>
+      </section>
     </div>
   );
 }
@@ -235,34 +211,58 @@ export function MobileOverviewLoadingFallback({
 export function MobileOverviewUnavailable({
   title,
   description,
-  badgeLabel,
-  statusLabel,
   avatarUrl,
   children,
 }: {
   title: string;
-  description: string;
-  badgeLabel: string;
-  statusLabel: string;
+  description?: string;
   avatarUrl?: string | null;
-  children: ReactNode;
+  children?: ReactNode;
 }) {
   return (
-    <div className="space-y-5 lg:hidden">
-      <OverviewMobileHero
-        title={title}
-        description={description}
-        badgeLabel={badgeLabel}
-        avatarUrl={avatarUrl}
-      >
-        <div className="mt-5 rounded-3xl border border-dashed border-white/25 bg-white/[0.05] p-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-            {statusLabel}
-          </p>
-          <p className="mt-2 text-3xl font-semibold tabular-nums">—</p>
-        </div>
+    <div className={MOBILE_BLEED}>
+      <OverviewMobileHero title={title} avatarUrl={avatarUrl}>
+        {description ? (
+          <p className="mt-2 max-w-sm text-sm leading-6 text-white/62">{description}</p>
+        ) : null}
       </OverviewMobileHero>
-      {children}
+      {children ? <div className="px-4">{children}</div> : null}
+    </div>
+  );
+}
+
+export function MobileOverviewEmptyView({ avatarUrl }: { avatarUrl?: string | null }) {
+  const t = useTranslations("overview.mobile");
+
+  return (
+    <div className={MOBILE_BLEED}>
+      <section className={OVERVIEW_MOBILE_HERO_SHELL}>
+        <DashboardCinematicHeroBg />
+        <div className="relative space-y-4">
+          {avatarUrl ? (
+            <UserAvatarPhoto
+              src={avatarUrl}
+              size="lg"
+              className="ring-1 ring-white/15"
+            />
+          ) : null}
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-cyan">
+              {t("heroEyebrow")}
+            </p>
+            <h1 className="mt-2 max-w-[16rem] text-[1.55rem] font-semibold leading-[1.15] tracking-[-0.05em]">
+              {t("emptyTitle")}
+            </h1>
+            <p className="mt-2 max-w-sm text-sm leading-6 text-white/62">{t("emptyLead")}</p>
+          </div>
+          <Link
+            href={DASHBOARD_ONBOARDING_REIMPORT_PATH}
+            className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25"
+          >
+            {t("emptyCta")}
+          </Link>
+        </div>
+      </section>
     </div>
   );
 }

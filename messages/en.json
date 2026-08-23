@@ -1256,7 +1256,18 @@
     },
     "mobile": {
       "heroEyebrow": "Now",
+      "metricsTitle": "This period",
       "askAgentCta": "Ask your Soundprint",
+      "askLead": "Ask about this period.",
+      "duetTitle": "Duet",
+      "duetLead": "Compare with a friend.",
+      "profileTitle": "Musical profile",
+      "profileLead": "Your listening signature.",
+      "destinationsTitle": "Next",
+      "emptyTitle": "Import your streams",
+      "emptyLead": "Overview appears once history is in.",
+      "emptyCta": "Import history",
+      "errorLead": "Couldn't load this snapshot.",
       "comparisonHint": "Compared with the previous matching period when available.",
       "vsShort": "vs prev.",
       "primaryInsight": {

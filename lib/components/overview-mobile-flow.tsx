@@ -1,24 +1,13 @@
 "use client";
 
-import { useMemo } from "react";
+import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { HeatmapCalendarOverviewWidget } from "@/lib/components/heatmap-calendar-overview-widget";
-import { AiInsightsSummaryWidget } from "@/lib/components/ai-insights-summary-widget";
-import { OverviewMomentumTabs, type OverviewMomentumSlide } from "@/lib/components/overview-momentum-tabs";
-import { OverviewGoFurtherSection } from "@/lib/components/overview-go-further";
-import { OverviewTasteTeaser } from "@/lib/components/overview-taste-teaser";
 import { OverviewMobileHero } from "@/lib/components/overview-hero";
 import { SpotlightRankBubble, type LibraryLeaderItem } from "@/lib/components/overview-library-rankings";
-import { TopThreeArtistsOverviewWidget } from "@/lib/components/top-three-artists-overview-widget";
-import {
-  OverviewSectionSwitcher,
-  OverviewViewPanel,
-  useOverviewView,
-  type OverviewView,
-} from "@/lib/components/overview-section-switcher";
+import { useDashboardViewerUserId } from "@/lib/context/dashboard-viewer-context";
+import { usePublicDemoViewer } from "@/lib/hooks/use-public-demo-viewer";
 import type { OverviewStatsChanges } from "@/lib/components/overview-stats-section";
-import type { ArtistStatsDto } from "@/lib/dto/artist";
 import type { OverviewStatsWithTopArtists } from "@/lib/hooks/use-listening";
 import {
   buildOverviewPrimaryInsight,
@@ -40,6 +29,50 @@ type MobileOverviewStat = {
 type MobileLeaderItem = LibraryLeaderItem & {
   href?: string;
 };
+
+function ChevronIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+    </svg>
+  );
+}
+
+function ChatIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M8.625 9.75a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375m-13.5 3.75c0 5.385 4.365 9.75 9.75 9.75s9.75-4.365 9.75-9.75S17.385 2.25 12 2.25 2.25 6.615 2.25 12m13.5 0a1.125 1.125 0 0 1-1.125 1.125H9.75a1.125 1.125 0 0 1-1.125-1.125v-6.75m9 0V9.375"
+      />
+    </svg>
+  );
+}
+
+function DuetIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"
+      />
+    </svg>
+  );
+}
+
+function ProfileIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z"
+      />
+    </svg>
+  );
+}
 
 function MobileChangePill({
   change,
@@ -72,13 +105,13 @@ function MobileMetricRail({
   comparisonLabel: string;
 }) {
   return (
-    <div className="-mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none]">
+    <div className="-mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       {stats.map((stat) => (
         <article
           key={stat.label}
-          className="min-w-[9.75rem] snap-start rounded-3xl border border-white/10 bg-slate-950 p-4 text-white shadow-lg shadow-black/10 backdrop-blur"
+          className="min-w-[9.75rem] snap-start rounded-3xl border border-white/10 bg-slate-950 p-4 text-white shadow-lg shadow-black/10"
         >
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
             {stat.label}
           </p>
           <p className="mt-2 text-2xl font-semibold tabular-nums tracking-[-0.04em]">
@@ -111,21 +144,21 @@ function MobileLeaderRow({
       <div className="flex min-w-0 items-center gap-3">
         <SpotlightRankBubble rank={index + 1} />
         <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-white" title={item.title}>
+          <p className="truncate text-sm font-semibold text-gray-950 dark:text-white" title={item.title}>
             {item.title}
           </p>
           {item.subtitle ? (
-            <p className="mt-0.5 truncate text-xs text-slate-400" title={item.subtitle}>
+            <p className="mt-0.5 truncate text-xs text-gray-500 dark:text-gray-400" title={item.subtitle}>
               {item.subtitle}
             </p>
           ) : null}
         </div>
       </div>
       <div className="shrink-0 text-right">
-        <p className="text-sm font-semibold tabular-nums text-white">
+        <p className="text-sm font-semibold tabular-nums text-gray-950 dark:text-white">
           {item.count.toLocaleString(locale)}
         </p>
-        <p className="text-[11px] text-slate-400">
+        <p className="text-[11px] text-gray-500 dark:text-gray-400">
           {showPercentage ? `${item.percentage.toFixed(1)}% · ${listensLabel}` : listensLabel}
         </p>
       </div>
@@ -133,7 +166,7 @@ function MobileLeaderRow({
   );
 
   const className =
-    "flex min-h-14 items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.05] px-3 py-2.5";
+    "flex min-h-11 items-center justify-between gap-3 rounded-2xl border border-card-border bg-card-surface px-3.5 py-2.5 shadow-sm";
 
   if (item.href) {
     return (
@@ -146,14 +179,69 @@ function MobileLeaderRow({
   return <div className={className}>{content}</div>;
 }
 
+function DestinationRow({
+  href,
+  title,
+  lead,
+  icon,
+  primary = false,
+  disabled = false,
+}: {
+  href: string;
+  title: string;
+  lead: string;
+  icon: ReactNode;
+  primary?: boolean;
+  disabled?: boolean;
+}) {
+  const className = primary
+    ? "flex min-h-14 items-center gap-3 rounded-2xl bg-white px-3.5 py-3 text-gray-950 shadow-lg shadow-black/20"
+    : "flex min-h-14 items-center gap-3 rounded-2xl border border-card-border bg-card-surface px-3.5 py-3 text-gray-950 shadow-sm dark:text-white";
+
+  const content = (
+    <>
+      <span
+        className={
+          primary
+            ? "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gray-950 text-white"
+            : "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent-violet/15 text-accent-violet"
+        }
+      >
+        {icon}
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-sm font-semibold tracking-tight">{title}</span>
+        <span
+          className={`mt-0.5 block truncate text-xs leading-5 ${
+            primary ? "text-gray-600" : "text-gray-500 dark:text-gray-400"
+          }`}
+        >
+          {lead}
+        </span>
+      </span>
+      <ChevronIcon className={`h-4 w-4 shrink-0 ${primary ? "text-gray-500" : "text-gray-400"}`} />
+    </>
+  );
+
+  if (disabled) {
+    return (
+      <div className={`${className} cursor-default opacity-80`} aria-disabled="true">
+        {content}
+      </div>
+    );
+  }
+
+  return (
+    <Link href={href} className={className} aria-label={title}>
+      {content}
+    </Link>
+  );
+}
+
 export function MobileOverviewFlow({
   title,
-  badgeLabel,
-  hasComparison,
-  showPeriodHint = false,
   data,
   changes,
-  momentumSlides,
   topTracks,
   topArtists,
   topGenres,
@@ -164,18 +252,11 @@ export function MobileOverviewFlow({
   musicalProfileHref,
   musicAgentHref,
   duetHref,
-  startDate,
-  endDate,
   avatarUrl,
-  onOpenArtistInsights,
 }: {
   title: string;
-  badgeLabel: string;
-  hasComparison: boolean;
-  showPeriodHint?: boolean;
   data: OverviewStatsWithTopArtists;
   changes: OverviewStatsChanges;
-  momentumSlides: OverviewMomentumSlide[];
   topTracks: OverviewTrackLeader[];
   topArtists: OverviewArtistLeader[];
   topGenres: OverviewGenreLeader[];
@@ -186,12 +267,11 @@ export function MobileOverviewFlow({
   musicalProfileHref: string;
   musicAgentHref: string;
   duetHref: string;
-  startDate?: string;
-  endDate?: string;
   avatarUrl?: string | null;
-  onOpenArtistInsights?: (artist: ArtistStatsDto, avatarColorIndex: number) => void;
 }) {
   const t = useTranslations("overview");
+  const viewerUserId = useDashboardViewerUserId();
+  const isPublicDemoViewer = usePublicDemoViewer(viewerUserId);
   const topTrack = topTracks[0];
   const topArtist = topArtists[0];
   const topGenre = topGenres[0];
@@ -237,7 +317,6 @@ export function MobileOverviewFlow({
     {
       key: "tracks",
       title: t("topTracks"),
-      description: t("yourTopTracks"),
       href: tracksHref,
       showPercentage: false,
       items: topTracks.slice(0, 3).map((track) => ({
@@ -251,7 +330,6 @@ export function MobileOverviewFlow({
     {
       key: "artists",
       title: t("topArtists"),
-      description: t("yourTopArtists"),
       href: artistsHref,
       showPercentage: false,
       items: topArtists.slice(0, 3).map((artist) => ({
@@ -264,7 +342,6 @@ export function MobileOverviewFlow({
     {
       key: "genres",
       title: t("topGenres"),
-      description: t("yourTopGenres"),
       href: genresHref,
       showPercentage: true,
       items: topGenres.slice(0, 3).map((genre) => ({
@@ -276,120 +353,78 @@ export function MobileOverviewFlow({
     },
   ].filter((section) => section.items.length > 0);
 
-  const hasLeaders = leaderSections.length > 0;
-  const availableViews = useMemo((): OverviewView[] => {
-    const views: OverviewView[] = ["spotlight"];
-    if (hasLeaders) views.push("tops");
-    if (momentumSlides.length > 0) views.push("trends");
-    views.push("context", "summary", "further");
-    return views;
-  }, [hasLeaders, momentumSlides.length]);
-  const { activeView, setView } = useOverviewView(availableViews);
-
   return (
-    <div className="space-y-5">
+    <div className="-mx-4 -mt-4 space-y-4 pb-8">
       <OverviewMobileHero
         title={title}
-        description={t("subtitle")}
-        badgeLabel={badgeLabel}
-        showPeriodHint={showPeriodHint}
         avatarUrl={avatarUrl}
         insight={primaryInsight}
         genreName={topGenre?.genre}
       />
 
-      <OverviewSectionSwitcher
-        idPrefix="overview-mobile"
-        available={availableViews}
-        activeView={activeView}
-        onChange={setView}
-      />
+      <section className="px-4">
+        <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">
+          {t("mobile.metricsTitle")}
+        </p>
+        <MobileMetricRail stats={stats} comparisonLabel={t("mobile.vsShort")} />
+      </section>
 
-      <OverviewViewPanel idPrefix="overview-mobile" view="summary" activeView={activeView}>
-        <div className="space-y-3">
-          <MobileMetricRail stats={stats} comparisonLabel={t("mobile.vsShort")} />
-          {hasComparison ? (
-            <p className="text-center text-xs font-medium text-muted">
-              {t("mobile.comparisonHint")}
-            </p>
-          ) : null}
-        </div>
-      </OverviewViewPanel>
-
-      <OverviewViewPanel idPrefix="overview-mobile" view="spotlight" activeView={activeView}>
-        <TopThreeArtistsOverviewWidget
-          startDate={startDate}
-          endDate={endDate}
-          onOpenArtistInsights={onOpenArtistInsights}
-        />
-      </OverviewViewPanel>
-
-      {hasLeaders ? (
-        <OverviewViewPanel idPrefix="overview-mobile" view="tops" activeView={activeView}>
-          <div className="space-y-4">
-            {leaderSections.map((section) => (
-              <section key={section.key} className="rounded-3xl bg-slate-950 p-3">
-                <div className="mb-3 flex items-center justify-between gap-3">
-                  <div>
-                    <h3 className="text-sm font-semibold text-white">{section.title}</h3>
-                    <p className="mt-0.5 text-xs text-slate-400">{section.description}</p>
-                  </div>
-                  <Link
-                    href={section.href}
-                    className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] px-3 text-xs font-semibold text-white"
-                  >
-                    {t("seeAll")}
-                  </Link>
-                </div>
-                <div className="space-y-2">
-                  {section.items.map((item, index) => (
-                    <MobileLeaderRow
-                      key={item.id}
-                      item={item}
-                      index={index}
-                      locale={locale}
-                      listensLabel={t("listens")}
-                      showPercentage={section.showPercentage}
-                    />
-                  ))}
-                </div>
-              </section>
+      {leaderSections.map((section) => (
+        <section key={section.key} className="px-4">
+          <div className="mb-2 flex min-h-11 items-center justify-between gap-3">
+            <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">
+              {section.title}
+            </h2>
+            <Link
+              href={section.href}
+              className="inline-flex min-h-11 shrink-0 items-center gap-1 text-xs font-semibold text-foreground"
+            >
+              {t("seeAll")}
+              <ChevronIcon className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+          <div className="space-y-2">
+            {section.items.map((item, index) => (
+              <MobileLeaderRow
+                key={item.id}
+                item={item}
+                index={index}
+                locale={locale}
+                listensLabel={t("listens")}
+                showPercentage={section.showPercentage}
+              />
             ))}
           </div>
-        </OverviewViewPanel>
-      ) : null}
+        </section>
+      ))}
 
-      {momentumSlides.length > 0 ? (
-        <OverviewViewPanel idPrefix="overview-mobile" view="trends" activeView={activeView}>
-          <section className="space-y-3">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">
-                {t("sections.momentum.eyebrow")}
-              </p>
-              <h2 className="mt-1 text-lg font-semibold tracking-[-0.04em] text-foreground dark:text-white">
-                {t("sections.momentum.title")}
-              </h2>
-            </div>
-            <OverviewMomentumTabs slides={momentumSlides} />
-          </section>
-        </OverviewViewPanel>
-      ) : null}
-
-      <OverviewViewPanel idPrefix="overview-mobile" view="context" activeView={activeView}>
-        <div className="space-y-4">
-          <AiInsightsSummaryWidget />
-          <HeatmapCalendarOverviewWidget startDate={startDate} endDate={endDate} />
-          <OverviewTasteTeaser href={musicalProfileHref} />
+      <section className="space-y-2 px-4">
+        <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">
+          {t("mobile.destinationsTitle")}
+        </h2>
+        <div className="space-y-2">
+          <DestinationRow
+            href={musicAgentHref}
+            title={t("mobile.askAgentCta")}
+            lead={t("mobile.askLead")}
+            icon={<ChatIcon className="h-5 w-5" />}
+            primary
+          />
+          <DestinationRow
+            href={duetHref}
+            title={t("mobile.duetTitle")}
+            lead={t("mobile.duetLead")}
+            icon={<DuetIcon className="h-5 w-5" />}
+            disabled={isPublicDemoViewer}
+          />
+          <DestinationRow
+            href={musicalProfileHref}
+            title={t("mobile.profileTitle")}
+            lead={t("mobile.profileLead")}
+            icon={<ProfileIcon className="h-5 w-5" />}
+          />
         </div>
-      </OverviewViewPanel>
-
-      <OverviewViewPanel idPrefix="overview-mobile" view="further" activeView={activeView}>
-        <OverviewGoFurtherSection
-          soundprintChatHref={musicAgentHref}
-          duetHref={duetHref}
-          compact
-        />
-      </OverviewViewPanel>
+      </section>
     </div>
   );
 }

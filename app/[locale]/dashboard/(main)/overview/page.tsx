@@ -18,6 +18,7 @@ import { formatOverviewDateRangeLabel } from "@/lib/utils/overview-date-range-la
 import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
 import {
   OverviewHeroFrame,
+  MobileOverviewEmptyView,
   MobileOverviewLoadingFallback,
   MobileOverviewUnavailable,
 } from "@/lib/components/overview-hero";
@@ -27,7 +28,6 @@ import { ArtistUserInsightsPanel } from "@/lib/components/artist-user-insights-p
 import type { ArtistStatsDto } from "@/lib/dto/artist";
 import {
   buildOverviewStatsChanges,
-  formatMobileDateRangeLabel,
   getPreviousPeriod,
 } from "@/lib/utils/overview-page";
 
@@ -39,8 +39,6 @@ function OverviewContent() {
   const { startDate: rangeStart, endDate: rangeEnd, isAll } = useListenDateRange();
   const dateRangeLabel = formatOverviewDateRangeLabel(rangeStart, rangeEnd, locale);
   const badgeLabel = dateRangeLabel || t("allData");
-  const mobileBadgeLabel = formatMobileDateRangeLabel(rangeStart, rangeEnd, locale) || t("allData");
-  const hasComparison = !isAll && !!rangeStart && !!rangeEnd;
 
   const startDate = searchParams.get("startDate") || undefined;
   const endDate = searchParams.get("endDate") || undefined;
@@ -284,14 +282,10 @@ function OverviewContent() {
       <div className="space-y-8">
         <MobileOverviewUnavailable
           title={overviewTitle}
-          description={t("errorStateHint")}
-          badgeLabel={mobileBadgeLabel}
-          statusLabel={t("errorStateMetricStatus")}
+          description={t("mobile.errorLead")}
           avatarUrl={avatarUrl}
         >
           <ErrorState
-            variant="startup"
-            eyebrow={t("errorStateEyebrow")}
             error={error}
             message={t("errorLoading")}
             onRetry={handleRetry}
@@ -320,22 +314,7 @@ function OverviewContent() {
     const empty = emptyStatePresets.importData;
     return (
       <div className="space-y-8">
-        <MobileOverviewUnavailable
-          title={overviewTitle}
-          description={t("emptyStateHeroDescription")}
-          badgeLabel={mobileBadgeLabel}
-          statusLabel={t("emptyStateMetricHint")}
-          avatarUrl={avatarUrl}
-        >
-          <EmptyState
-            variant="startup"
-            eyebrow={t("emptyStateEyebrow")}
-            aside={t("emptyStateAside")}
-            message={empty.message}
-            description={empty.description}
-            actions={empty.actions}
-          />
-        </MobileOverviewUnavailable>
+        <MobileOverviewEmptyView avatarUrl={avatarUrl} />
         <div className="hidden space-y-8 lg:block">
           <OverviewHeroFrame
             title={overviewTitle}
@@ -361,14 +340,24 @@ function OverviewContent() {
       {data ? (
         <div className="lg:hidden">
           <MobileOverviewFlow
-            {...sharedFlowProps}
-            badgeLabel={mobileBadgeLabel}
-            hasComparison={hasComparison}
+            title={overviewTitle}
             data={data}
+            changes={changes}
+            topTracks={topTracksForChart}
+            topArtists={topArtistsForChart}
+            topGenres={topGenres}
+            locale={locale}
+            tracksHref={tracksHref}
+            artistsHref={artistsHref}
+            genresHref={genresHref}
+            musicalProfileHref={musicalProfileHref}
+            musicAgentHref={musicAgentHref}
+            duetHref={duetHref}
+            avatarUrl={avatarUrl}
           />
         </div>
       ) : (
-        <MobileOverviewLoadingFallback title={overviewTitle} badgeLabel={mobileBadgeLabel} />
+        <MobileOverviewLoadingFallback title={overviewTitle} />
       )}
       <OverviewDesktopFlow
         {...sharedFlowProps}
@@ -398,11 +387,10 @@ function OverviewPageFallback() {
   const { startDate, endDate } = useListenDateRange();
   const dateRangeLabel = formatOverviewDateRangeLabel(startDate, endDate, locale);
   const badgeLabel = dateRangeLabel || t("allData");
-  const mobileBadgeLabel = formatMobileDateRangeLabel(startDate, endDate, locale) || t("allData");
 
   return (
     <div className="space-y-8">
-      <MobileOverviewLoadingFallback title={t("title")} badgeLabel={mobileBadgeLabel} />
+      <MobileOverviewLoadingFallback title={t("title")} />
       <div className="hidden space-y-8 lg:block">
         <OverviewHeroFrame
           title={t("title")}
@@ -422,7 +410,7 @@ export default function OverviewPage() {
   const filterKey = `${startDateParam}-${endDateParam}`;
 
   return (
-    <div className="px-4 py-6 sm:px-0">
+    <div className="max-lg:p-0 lg:py-6">
       <Suspense fallback={<OverviewPageFallback />}>
         <OverviewContent key={filterKey} />
       </Suspense>

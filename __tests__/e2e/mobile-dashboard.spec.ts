@@ -17,8 +17,33 @@ test.describe("Mobile dashboard UX", () => {
   test("dashboard overview loads with mobile bottom nav", async ({ page }) => {
     await page.goto(`/en/dashboard/overview${publicDemoQuery}`);
 
-    await expect(page.getByRole("navigation", { name: /main dashboard navigation/i })).toBeVisible();
-    await expect(page.getByRole("link", { name: /your music/i })).toBeVisible();
+    const bottomNav = page.getByRole("navigation", { name: /main dashboard navigation/i });
+    await expect(bottomNav).toBeVisible();
+    await expect(bottomNav.getByRole("link", { name: /your music/i })).toBeVisible();
+  });
+
+  test("overview now screen shows insight and ask destination", async ({ page }) => {
+    await page.goto(`/en/dashboard/overview${publicDemoQuery}`);
+
+    const main = page.getByRole("main");
+    await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByRole("tablist", { name: /overview sections/i })).toHaveCount(0);
+    await expect(main.getByRole("link", { name: /^ask your soundprint$/i })).toBeVisible({
+      timeout: 20_000,
+    });
+  });
+
+  test("overview now screen is usable in French", async ({ page }) => {
+    await page.goto(`/fr/dashboard/overview${publicDemoQuery}`);
+
+    const main = page.getByRole("main");
+    await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 20_000 });
+    await expect(
+      page.getByRole("tablist", { name: /sections de la vue d['’]ensemble/i })
+    ).toHaveCount(0);
+    await expect(main.getByRole("link", { name: /^interroger soundprint$/i })).toBeVisible({
+      timeout: 20_000,
+    });
   });
 
   test("musical profile hub shows signature and destinations", async ({ page }) => {

@@ -2,6 +2,9 @@ import { test, expect, type Page } from "@playwright/test";
 import { DEFAULT_PUBLIC_PROFILE_USER_ID } from "../../lib/constants/public-profile";
 
 const publicDemoQuery = `?userId=${DEFAULT_PUBLIC_PROFILE_USER_ID}`;
+const e2eAuthEmail = process.env.E2E_AUTH_EMAIL?.trim() ?? "";
+const e2eAuthPassword = process.env.E2E_AUTH_PASSWORD?.trim() ?? "";
+const hasSeededAuthUser = e2eAuthEmail.length > 0 && e2eAuthPassword.length > 0;
 
 async function seedCookieConsent(page: Page) {
   await page.addInitScript(() => {
@@ -490,5 +493,76 @@ test.describe("Mobile dashboard UX", () => {
       await expect(page).toHaveURL(/\/fr\/dashboard\/heatmap/, { timeout: 20_000 });
       await expect(page).toHaveURL(/userId=/);
     }
+  });
+
+  test("public demo cannot open Palette and is redirected", async ({ page }) => {
+    await seedCookieConsent(page);
+    await page.goto(`/en/dashboard/genres/palette${publicDemoQuery}`);
+    await dismissCookieBannerIfPresent(page);
+
+    await expect(page).toHaveURL(/\/en\/dashboard\/genres/, { timeout: 20_000 });
+    await expect(page).toHaveURL(/palette=restricted/);
+    await expect(page).toHaveURL(/userId=/);
+    await expect(page.getByRole("heading", { name: /couldn't load palette/i })).toHaveCount(0);
+  });
+
+  test("signed-in Palette maps or skips one queue item", async ({ page }) => {
+    test.skip(
+      !hasSeededAuthUser,
+      "Set E2E_AUTH_EMAIL and E2E_AUTH_PASSWORD for authenticated E2E flows.",
+    );
+
+    await page.goto("/en/sign-in");
+    await page.locator('input[type="email"]').fill(e2eAuthEmail);
+    await page.locator('input[type="password"]').fill(e2eAuthPassword);
+    await page.locator('button[type="submit"]').click();
+    await page.waitForURL(/\/dashboard(?:\/overview)?/);
+
+    await page.goto(
+      "/en/dashboard/genres/palette?startDate=2024-01-01&endDate=2024-01-31",
+    );
+
+    const main = page.getByRole("main");
+    await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 20_000 });
+
+    const emptyCta = main.getByRole("link", { name: /back to genres/i });
+    const apply = page.getByRole("button", { name: /^apply$/i });
+    const skip = page.getByRole("button", { name: /^skip$/i });
+
+    if (await emptyCta.isVisible()) {
+      await emptyCta.click();
+      await expect(page).toHaveURL(/\/en\/dashboard\/genres/);
+      await expect(page).toHaveURL(/startDate=2024-01-01/);
+      await expect(page).toHaveURL(/endDate=2024-01-31/);
+      return;
+    }
+
+    await expect(apply).toBeDisabled();
+    await main.getByLabel(/^genre$/i).fill("Jazz");
+    await expect(apply).toBeEnabled();
+    await skip.click();
+    await expect(main.getByRole("heading", { level: 1 })).toBeVisible();
+  });
+
+  test("signed-in Palette is usable in French", async ({ page }) => {
+    test.skip(
+      !hasSeededAuthUser,
+      "Set E2E_AUTH_EMAIL and E2E_AUTH_PASSWORD for authenticated E2E flows.",
+    );
+
+    await page.goto("/fr/sign-in");
+    await page.locator('input[type="email"]').fill(e2eAuthEmail);
+    await page.locator('input[type="password"]').fill(e2eAuthPassword);
+    await page.locator('button[type="submit"]').click();
+    await page.waitForURL(/\/dashboard(?:\/overview)?/);
+
+    await page.goto("/fr/dashboard/genres/palette");
+    const main = page.getByRole("main");
+    await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 20_000 });
+    await expect(
+      main.getByRole("link", { name: /retour aux genres/i }).or(
+        page.getByRole("button", { name: /^appliquer$/i }),
+      ),
+    ).toBeVisible();
   });
 });

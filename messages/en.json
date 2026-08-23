@@ -464,7 +464,10 @@
       "presetSheetTitle": "All questions",
       "presetSheetHint": "Browse every supported question template.",
       "trustSummary": "Your real streams. Read-only. Your date range.",
-      "guardrailsTitle": "Limits & guardrails"
+      "guardrailsTitle": "Limits & guardrails",
+      "featuredAskAria": "Ask: {question}",
+      "allQuestionsRowLead": "Browse every template",
+      "allQuestionsAria": "All questions"
     },
     "presets": {
       "summer-2022-top-tracks": "What were my top tracks in 2022?",

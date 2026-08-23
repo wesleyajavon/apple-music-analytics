@@ -22,7 +22,6 @@ import {
   UserRound,
   X,
 } from "lucide-react";
-import { MobileBottomSheet } from "@/lib/components/mobile-bottom-sheet";
 import { LiveStatusDot } from "@/lib/components/live-status-dot";
 import {
   DASHBOARD_SPOTLIGHT_SHELL,
@@ -36,6 +35,11 @@ import {
 import { ApiError } from "@/lib/api-client";
 import { AssistantChatMessageBody } from "@/lib/components/assistant-chat-message-body";
 import { InteractiveAiGenreBackfillNotice } from "@/lib/components/interactive-ai-genre-backfill-notice";
+import {
+  AskSoundprintMobileExperience,
+  AskSoundprintMobileSkeleton,
+  AskSoundprintPresetRow,
+} from "@/lib/components/ask-soundprint-mobile";
 import { useMusicChat } from "@/lib/hooks/use-music-chat";
 import { useArtistStats } from "@/lib/hooks/use-artists";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
@@ -329,6 +333,32 @@ function usePresetExampleContent(
   return { label, question, hint };
 }
 
+
+function AskSoundprintBoundPresetRow({
+  example,
+  ctx,
+  disabled,
+  onSelect,
+}: {
+  example: PresetExample;
+  ctx: PresetDisplayContext;
+  disabled: boolean;
+  onSelect: (presetQuestionId: MusicChatPresetQuestionId) => void;
+}) {
+  const t = useTranslations("askSoundprint");
+  const { label, question, hint } = usePresetExampleContent(example, ctx);
+  return (
+    <AskSoundprintPresetRow
+      label={label}
+      question={question}
+      hint={hint}
+      disabled={disabled}
+      onSelect={() => onSelect(example.presetQuestionId)}
+      ariaLabel={t("mobile.featuredAskAria", { question })}
+    />
+  );
+}
+
 function PresetExampleButton({
   example,
   ctx,
@@ -451,31 +481,12 @@ function FeaturedPresetSuggestions({
   ctx,
   disabled,
   onSelect,
-  layout,
 }: {
   ctx: PresetDisplayContext;
   disabled: boolean;
   onSelect: (presetQuestionId: MusicChatPresetQuestionId) => void;
-  layout: "desktop" | "mobile";
 }) {
   const featuredExamples = useMemo(() => getFeaturedExamples(), []);
-
-  if (layout === "mobile") {
-    return (
-      <div className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {featuredExamples.map((example) => (
-          <PresetExampleButton
-            key={example.id}
-            example={example}
-            ctx={ctx}
-            disabled={disabled}
-            onSelect={onSelect}
-            variant="chip"
-          />
-        ))}
-      </div>
-    );
-  }
 
   return (
     <div className="grid gap-2 sm:grid-cols-2">
@@ -644,253 +655,6 @@ function MusicChatInputForm({
         {!isMobile ? t("send") : null}
       </button>
     </form>
-  );
-}
-
-function AskSoundprintMobileSkeleton() {
-  return (
-    <section className="space-y-4 pb-32 lg:hidden" aria-busy="true">
-      <div className="overflow-hidden rounded-[1.75rem] bg-slate-950 p-5 text-white shadow-xl shadow-violet-500/10">
-        <div className="mb-4 h-6 w-28 animate-pulse rounded-full bg-white/15" />
-        <div className="mb-3 h-8 w-4/5 animate-pulse rounded-xl bg-white/15" />
-        <div className="h-4 w-full animate-pulse rounded bg-white/10" />
-      </div>
-      <div className="rounded-[1.5rem] border border-slate-200/80 bg-white p-4 dark:border-white/10 dark:bg-slate-950">
-        <div className="space-y-3">
-          <div className="h-16 animate-pulse rounded-2xl bg-slate-100 dark:bg-white/10" />
-          <div className="h-24 animate-pulse rounded-2xl bg-slate-100 dark:bg-white/10" />
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function AskSoundprintMobileExperience({
-  isPublicDemoViewer,
-  showGenreBackfillNotice,
-  genreClassify423Notice,
-  interactiveAiBlockedByGenreBackfill,
-  visibleMessages,
-  thinkingStepIndex,
-  thinkingSteps,
-  isPending,
-  errorMessage,
-  input,
-  onInputChange,
-  onSubmit,
-  freeTextDisabled,
-  inputPlaceholder,
-  presetCtx,
-  presetsDisabled,
-  onPresetSelect,
-  hasUserMessages,
-  startDate,
-  endDate,
-  isAll,
-  locale,
-}: {
-  isPublicDemoViewer: boolean;
-  showGenreBackfillNotice: boolean;
-  genreClassify423Notice: boolean;
-  interactiveAiBlockedByGenreBackfill: boolean;
-  visibleMessages: MusicChatMessage[];
-  thinkingStepIndex: number;
-  thinkingSteps: string[];
-  isPending: boolean;
-  errorMessage: string | null;
-  input: string;
-  onInputChange: (value: string) => void;
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
-  freeTextDisabled: boolean;
-  inputPlaceholder: string;
-  presetCtx: PresetDisplayContext;
-  presetsDisabled: boolean;
-  onPresetSelect: (presetQuestionId: MusicChatPresetQuestionId) => void;
-  hasUserMessages: boolean;
-  startDate?: string;
-  endDate?: string;
-  isAll: boolean;
-  locale: string;
-}) {
-  const t = useTranslations("askSoundprint");
-  const [presetSheetOpen, setPresetSheetOpen] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (window.matchMedia("(min-width: 1024px)").matches) return;
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [visibleMessages.length, isPending]);
-
-  return (
-    <>
-      <section
-        className="space-y-4 pb-[calc(10.5rem+env(safe-area-inset-bottom))] lg:hidden"
-        aria-labelledby="ask-soundprint-mobile-title"
-      >
-        {hasUserMessages ? (
-          <div className="flex min-h-11 items-center justify-between gap-3 rounded-2xl bg-slate-950 px-4 py-2.5 text-white shadow-lg shadow-violet-500/10">
-            <h1
-              id="ask-soundprint-mobile-title"
-              className="min-w-0 truncate text-sm font-semibold tracking-tight"
-            >
-              {t("title")}
-            </h1>
-            <AskSoundprintPeriodChip
-              startDate={startDate}
-              endDate={endDate}
-              isAll={isAll}
-              locale={locale}
-              className="shrink-0 border-white/10 bg-white/10 py-0.5 text-[0.65rem]"
-            />
-          </div>
-        ) : (
-          <div className={COMPACT_HEADER_SHELL_CLASS}>
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.28),transparent_34%),radial-gradient(circle_at_85%_12%,rgba(34,211,238,0.2),transparent_32%)]" />
-            <div className="relative">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <span className="inline-flex min-h-8 items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-[0.66rem] font-semibold uppercase tracking-[0.2em] text-violet-100">
-                  <LiveStatusDot />
-                  {t("eyebrow")}
-                </span>
-                {isPublicDemoViewer ? (
-                  <span className="inline-flex min-h-8 items-center rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white/90">
-                    {t("heroDemoPill")}
-                  </span>
-                ) : null}
-              </div>
-              <h1
-                id="ask-soundprint-mobile-title"
-                className="mt-4 flex items-center gap-2 text-2xl font-semibold tracking-[-0.05em] text-balance"
-              >
-                <Sparkles className="h-6 w-6 shrink-0 text-violet-200/90" aria-hidden />
-                {t("title")}
-              </h1>
-              <p className="mt-2 text-sm leading-6 text-white/70">{t("compactTrust")}</p>
-              <div className="mt-3">
-                <AskSoundprintPeriodChip
-                  startDate={startDate}
-                  endDate={endDate}
-                  isAll={isAll}
-                  locale={locale}
-                />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {showGenreBackfillNotice ? (
-          <InteractiveAiGenreBackfillNotice
-            force={genreClassify423Notice && !interactiveAiBlockedByGenreBackfill}
-          />
-        ) : null}
-
-        <div className="rounded-[1.5rem] border border-slate-200/80 bg-white p-4 shadow-lg shadow-slate-900/[0.04] dark:border-white/10 dark:bg-slate-950">
-          <div className="space-y-4">
-            <MusicChatMessages
-              messages={visibleMessages}
-              thinkingStepIndex={thinkingStepIndex}
-              thinkingSteps={thinkingSteps}
-              isPending={isPending}
-            />
-            <div ref={messagesEndRef} aria-hidden />
-          </div>
-        </div>
-
-        {!hasUserMessages ? (
-          <div>
-            <div className="mb-3 flex items-center justify-between gap-3">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-700 dark:text-violet-300">
-                  {t("featuredTitle")}
-                </p>
-                <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                  {t("emptyActionHint")}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setPresetSheetOpen(true)}
-                className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border border-slate-200/90 bg-white px-3 text-xs font-semibold text-slate-700 shadow-sm dark:border-white/10 dark:bg-slate-950 dark:text-slate-200"
-              >
-                <ListTree className="h-4 w-4" aria-hidden />
-                {t("allQuestions")}
-              </button>
-            </div>
-            <FeaturedPresetSuggestions
-              ctx={presetCtx}
-              disabled={presetsDisabled}
-              onSelect={(presetQuestionId) => {
-                onPresetSelect(presetQuestionId);
-                setPresetSheetOpen(false);
-              }}
-              layout="mobile"
-            />
-          </div>
-        ) : null}
-      </section>
-
-      <div
-        className="fixed inset-x-0 z-10 border-t border-card-border bg-surface-glass/95 px-4 py-3 backdrop-blur-xl lg:hidden"
-        style={{
-          bottom: "var(--dashboard-bottom-nav-offset, 0px)",
-        }}
-      >
-        {errorMessage ? (
-          <p className="mb-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-200">
-            {errorMessage}
-          </p>
-        ) : null}
-        {hasUserMessages ? (
-          <button
-            type="button"
-            onClick={() => setPresetSheetOpen(true)}
-            disabled={presetsDisabled}
-            className="mb-2 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border border-slate-200/90 bg-white px-4 text-sm font-semibold text-slate-800 shadow-sm disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-slate-950 dark:text-slate-100"
-          >
-            <ListTree className="h-4 w-4" aria-hidden />
-            {t("allQuestions")}
-          </button>
-        ) : null}
-        <MusicChatInputForm
-          input={input}
-          onInputChange={onInputChange}
-          onSubmit={onSubmit}
-          disabled={freeTextDisabled}
-          placeholder={inputPlaceholder}
-          layout="mobile"
-        />
-      </div>
-
-      <MobileBottomSheet
-        open={presetSheetOpen}
-        onClose={() => setPresetSheetOpen(false)}
-        ariaLabelledBy="ask-soundprint-preset-sheet-title"
-        insetAboveBottomNav
-      >
-        <div className="px-4 pb-4 pt-1">
-          <h2
-            id="ask-soundprint-preset-sheet-title"
-            className="text-lg font-semibold tracking-tight text-slate-950 dark:text-white"
-          >
-            {t("allQuestions")}
-          </h2>
-          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">{t("allQuestionsHint")}</p>
-          <div className="mt-3">
-            <PlaybookHints />
-          </div>
-          <div className="mt-4 space-y-5">
-            <PresetPlaybookSections
-              ctx={presetCtx}
-              disabled={presetsDisabled}
-              onSelect={(presetQuestionId) => {
-                onPresetSelect(presetQuestionId);
-                setPresetSheetOpen(false);
-              }}
-            />
-          </div>
-        </div>
-      </MobileBottomSheet>
-    </>
   );
 }
 
@@ -1266,6 +1030,13 @@ function MusicChatContent() {
   const showGenreBackfillNotice =
     !isPublicDemoViewer &&
     (interactiveAiBlockedByGenreBackfill || genreClassify423Notice);
+  const featuredExample = useMemo(
+    () =>
+      QUICK_QUESTION_SECTIONS.flatMap((section) => section.examples).find(
+        (example) => example.id === "artist-deep-dive"
+      ) ?? null,
+    []
+  );
 
   return (
     <>
@@ -1284,14 +1055,45 @@ function MusicChatContent() {
         onSubmit={handleSubmit}
         freeTextDisabled={freeTextDisabled}
         inputPlaceholder={inputPlaceholder}
-        presetCtx={presetCtx}
         presetsDisabled={presetsDisabled}
-        onPresetSelect={handlePresetClick}
         hasUserMessages={hasUserMessages}
         startDate={startDate}
         endDate={endDate}
         isAll={isAll}
         locale={locale}
+        featuredRow={
+          featuredExample ? (
+            <AskSoundprintBoundPresetRow
+              example={featuredExample}
+              ctx={presetCtx}
+              disabled={presetsDisabled}
+              onSelect={handlePresetClick}
+            />
+          ) : null
+        }
+        playbook={
+          <>
+            {QUICK_QUESTION_SECTIONS.map((section) => (
+              <div key={section.titleKey} className="space-y-2">
+                <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
+                  {t(`presetSections.${section.titleKey}`)}
+                </p>
+                {section.examples.map((example) => (
+                  <AskSoundprintBoundPresetRow
+                    key={example.id}
+                    example={example}
+                    ctx={presetCtx}
+                    disabled={presetsDisabled}
+                    onSelect={(presetQuestionId) => {
+                      handlePresetClick(presetQuestionId);
+                    }}
+                  />
+                ))}
+              </div>
+            ))}
+          </>
+        }
+        sheetHints={<PlaybookHints />}
       />
 
       <div className="mx-auto hidden max-w-6xl space-y-6 lg:block">
@@ -1368,7 +1170,6 @@ function MusicChatContent() {
                       ctx={presetCtx}
                       disabled={presetsDisabled}
                       onSelect={handlePresetClick}
-                      layout="desktop"
                     />
                   </div>
                 ) : null}

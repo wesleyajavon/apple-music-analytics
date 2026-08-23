@@ -565,4 +565,55 @@ test.describe("Mobile dashboard UX", () => {
       ),
     ).toBeVisible();
   });
+
+  test("ask your Soundprint sends a featured preset without covering the nav", async ({ page }) => {
+    test.setTimeout(60_000);
+    await seedCookieConsent(page);
+    await page.goto(`/en/dashboard/ask-your-soundprint${publicDemoQuery}`);
+    await dismissCookieBannerIfPresent(page);
+
+    const main = page.getByRole("main");
+    await expect(main.getByRole("heading", { level: 1, name: /ask your soundprint/i })).toBeVisible({
+      timeout: 20_000,
+    });
+    await expect(page).toHaveURL(/userId=/);
+
+    const featured = main.getByRole("button", { name: /^ask:/i });
+    await expect(featured).toHaveCount(1);
+    await expect(main.getByRole("button", { name: /all questions/i })).toBeVisible();
+
+    await featured.click();
+    await expect(
+      main.getByText(/tell me my streaming history with/i).first()
+    ).toBeVisible({
+      timeout: 20_000,
+    });
+
+    const nav = page.getByRole("navigation", { name: /main dashboard navigation/i });
+    await expect(nav).toBeVisible();
+    const composer = page.locator("#ask-soundprint-composer");
+    const composerBox = await composer.boundingBox();
+    const navBox = await nav.boundingBox();
+    expect(composerBox).toBeTruthy();
+    expect(navBox).toBeTruthy();
+    expect(composerBox!.y + composerBox!.height).toBeLessThanOrEqual(navBox!.y + 1);
+  });
+
+  test("ask your Soundprint is usable in French", async ({ page }) => {
+    test.setTimeout(60_000);
+    await seedCookieConsent(page);
+    await page.goto(`/fr/dashboard/ask-your-soundprint${publicDemoQuery}`);
+    await dismissCookieBannerIfPresent(page);
+
+    const main = page.getByRole("main");
+    await expect(main.getByRole("heading", { level: 1, name: /interrogez votre soundprint/i })).toBeVisible({
+      timeout: 20_000,
+    });
+    const featured = main.getByRole("button", { name: /^poser :/i });
+    await expect(featured).toBeVisible();
+    await expect(main.getByRole("button", { name: /toutes les questions/i })).toBeVisible();
+    await featured.click();
+    await expect(page.getByRole("navigation", { name: /navigation principale du dashboard/i })).toBeVisible();
+    await expect(page).toHaveURL(/userId=/);
+  });
 });

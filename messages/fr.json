@@ -464,7 +464,10 @@
       "presetSheetTitle": "Toutes les questions",
       "presetSheetHint": "Parcourez tous les modèles de questions supportés.",
       "trustSummary": "Vos vrais streams. Lecture seule. Votre période.",
-      "guardrailsTitle": "Limites et garde-fous"
+      "guardrailsTitle": "Limites et garde-fous",
+      "featuredAskAria": "Poser : {question}",
+      "allQuestionsRowLead": "Voir tous les modèles",
+      "allQuestionsAria": "Toutes les questions"
     },
     "presets": {
       "summer-2022-top-tracks": "Quels étaient mes titres les plus streamés en 2022 ?",

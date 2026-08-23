@@ -464,7 +464,10 @@
       "presetSheetTitle": "Todas las preguntas",
       "presetSheetHint": "Explora todas las plantillas de preguntas soportadas.",
       "trustSummary": "Tus streams reales. Solo lectura. Tu periodo.",
-      "guardrailsTitle": "Límites y barreras"
+      "guardrailsTitle": "Límites y barreras",
+      "featuredAskAria": "Preguntar: {question}",
+      "allQuestionsRowLead": "Ver todas las plantillas",
+      "allQuestionsAria": "Todas las preguntas"
     },
     "presets": {
       "summer-2022-top-tracks": "¿Cuáles fueron mis canciones más escuchadas en 2022?",

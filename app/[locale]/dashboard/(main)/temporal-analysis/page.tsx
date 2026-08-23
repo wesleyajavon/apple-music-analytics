@@ -25,6 +25,12 @@ import { CHART_TOOLTIP_STYLES } from "@/lib/constants/config";
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
 import { TemporalAnalysisSkeleton } from "@/lib/components/skeleton-loaders";
+import {
+  TemporalMobileEmpty,
+  TemporalMobileError,
+  TemporalMobileExperience,
+  TemporalMobileSkeleton,
+} from "@/lib/components/temporal-analysis-mobile";
 import { LiveStatusDot } from "@/lib/components/live-status-dot";
 import { Clock, Activity, CalendarDays, Timer } from "lucide-react";
 import {
@@ -44,6 +50,12 @@ import {
   DASHBOARD_SPOTLIGHT_TITLE,
   DASHBOARD_SPOTLIGHT_HEADER_BOTTOM,
 } from "@/lib/constants/dashboard-spotlight";
+import {
+  WEEKDAY_KEYS,
+  formatHourForDisplay,
+  getClockHandAngle,
+  getRhythmKey,
+} from "@/lib/utils/temporal-analysis-display";
 
 type DayOfWeekChartType = "bar" | "distribution" | "radar";
 type HourOfDayChartType = "bar" | "distribution" | "radar";
@@ -83,16 +95,6 @@ function TemporalViewSwitcher({
   );
 }
 
-const WEEKDAY_KEYS = [
-  "sunday",
-  "monday",
-  "tuesday",
-  "wednesday",
-  "thursday",
-  "friday",
-  "saturday",
-] as const;
-
 const TEMPORAL_CHART_COLORS = {
   clock: {
     start: "#60a5fa",
@@ -118,34 +120,6 @@ function chartToggleClass(isActive: boolean): string {
       ? "bg-slate-900 text-white shadow-sm dark:bg-white dark:text-slate-950"
       : "text-muted hover:text-foreground"
   }`;
-}
-
-/** Returns rhythm label based on peak hour (0-23) */
-function getRhythmKey(
-  hour: number,
-):
-  | "rhythmNightOwl"
-  | "rhythmMorningPerson"
-  | "rhythmAfternoon"
-  | "rhythmEvening" {
-  if (hour >= 0 && hour <= 5) return "rhythmNightOwl";
-  if (hour >= 6 && hour <= 11) return "rhythmMorningPerson";
-  if (hour >= 12 && hour <= 17) return "rhythmAfternoon";
-  return "rhythmEvening";
-}
-
-/** 24h clock: hour 0 = top, angle in degrees for SVG transform */
-function getClockHandAngle(hour: number): number {
-  return (hour / 24) * 360 - 90;
-}
-
-/** Format hour for display: 12h AM/PM for English, 24h for others */
-function formatHourForDisplay(hour: number, locale: string): string {
-  const date = new Date(2000, 0, 1, hour, 0, 0);
-  return date.toLocaleTimeString(locale, {
-    hour: "numeric",
-    hour12: locale.startsWith("en"),
-  });
 }
 
 function createTemporalTooltipFormatter(
@@ -434,42 +408,56 @@ function TemporalAnalysisContent() {
     [data, locale],
   );
 
-  if (!isLoading && error) {
-    return (
-      <div className="space-y-8">
-        <TemporalHeroFrame badgeLabel={t("heroBadge")} stats={null} />
-        <TemporalNoteCallout />
-        <section className={TEMPORAL_SECTION_CLASS}>
-          <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} aria-hidden />
-          <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} aria-hidden />
-          <div className="relative p-6 sm:p-8">
+  const isEmpty =
+    !data || (data.byDayOfWeek.length === 0 && data.byHourOfDay.length === 0);
+
+  return (
+    <>
+      <div className="lg:hidden">
+        {isLoading ? (
+          <TemporalMobileSkeleton />
+        ) : error ? (
+          <TemporalMobileError>
             <ErrorState
               variant="startup"
               error={error}
               message={t("errorLoading")}
               onRetry={() => refetch()}
             />
-          </div>
-        </section>
+          </TemporalMobileError>
+        ) : data && !isEmpty ? (
+          <TemporalMobileExperience data={data} locale={locale} />
+        ) : (
+          <TemporalMobileEmpty />
+        )}
       </div>
-    );
-  }
 
-  if (
-    !isLoading &&
-    (!data || (data.byDayOfWeek.length === 0 && data.byHourOfDay.length === 0))
-  ) {
-    return (
-      <div className="space-y-8">
-        <TemporalHeroFrame badgeLabel={t("heroBadge")} stats={null} />
-        <TemporalNoteCallout />
-        <EmptyState variant="startup" {...emptyStatePresets.importData} />
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-8">
+      <div className="mt-4 hidden space-y-8 lg:mt-6 lg:block">
+        {!isLoading && error ? (
+          <>
+            <TemporalHeroFrame badgeLabel={t("heroBadge")} stats={null} />
+            <TemporalNoteCallout />
+            <section className={TEMPORAL_SECTION_CLASS}>
+              <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} aria-hidden />
+              <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} aria-hidden />
+              <div className="relative p-6 sm:p-8">
+                <ErrorState
+                  variant="startup"
+                  error={error}
+                  message={t("errorLoading")}
+                  onRetry={() => refetch()}
+                />
+              </div>
+            </section>
+          </>
+        ) : !isLoading && isEmpty ? (
+          <>
+            <TemporalHeroFrame badgeLabel={t("heroBadge")} stats={null} />
+            <TemporalNoteCallout />
+            <EmptyState variant="startup" {...emptyStatePresets.importData} />
+          </>
+        ) : (
+          <>
       <TemporalHeroFrame
         badgeLabel={t("heroBadge")}
         stats={
@@ -1093,24 +1081,30 @@ function TemporalAnalysisContent() {
             </div>
             </section>
       </DashboardSectionPanel>
-    </div>
+          </>
+        )}
+      </div>
+    </>
   );
 }
 
 function TemporalAnalysisFallback() {
   const t = useTranslations("temporal-analysis");
   return (
-    <div className="space-y-8">
-      <TemporalHeroFrame badgeLabel={t("heroBadge")} stats={<TemporalHeroStatsSkeleton />} />
-      <TemporalNoteCallout />
-      <TemporalAnalysisSkeleton />
-    </div>
+    <>
+      <TemporalMobileSkeleton />
+      <div className="mt-4 hidden space-y-8 lg:mt-6 lg:block">
+        <TemporalHeroFrame badgeLabel={t("heroBadge")} stats={<TemporalHeroStatsSkeleton />} />
+        <TemporalNoteCallout />
+        <TemporalAnalysisSkeleton />
+      </div>
+    </>
   );
 }
 
 export default function TemporalAnalysisPage() {
   return (
-    <div className="px-4 pb-6 pt-0 sm:px-0">
+    <div className="max-lg:p-0 lg:py-6">
       <Suspense fallback={<TemporalAnalysisFallback />}>
         <TemporalAnalysisContent />
       </Suspense>

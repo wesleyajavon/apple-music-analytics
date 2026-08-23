@@ -1477,6 +1477,36 @@
     "atThisHour": "à cette heure",
     "tracks": "Titres",
     "artists": "Artistes",
+    "mobile": {
+      "eyebrow": "Quand",
+      "allTimeBadge": "Archive",
+      "signalsLabel": "Signaux",
+      "railTotal": "Total",
+      "railPeakDay": "Jour pic",
+      "railPeakHour": "Heure pic",
+      "segmentLabel": "Quand vous écoutez",
+      "days": "Jours",
+      "hours": "Heures",
+      "openDay": "Ouvrir {day}",
+      "openHours": "Ouvrir {part}",
+      "sheetCloseAria": "Fermer le détail",
+      "shareOfTotal": "{percent} % de l’archive",
+      "timelineRowTitle": "Pouls",
+      "timelineRowLead": "Le volume dans le temps",
+      "heatmapRowTitle": "Intensité quotidienne",
+      "heatmapRowLead": "La texture jour par jour",
+      "emptyTitle": "Pas encore de rythme",
+      "emptyLead": "Importez l’historique pour voir quand vous streamez.",
+      "emptyCta": "Importer l’historique",
+      "errorLead": "Impossible de charger ce rythme.",
+      "storyBody": "{count} {streams} à cette heure.",
+      "dayParts": {
+        "night": "Nuit",
+        "morning": "Matin",
+        "afternoon": "Après-midi",
+        "evening": "Soir"
+      }
+    },
     "viewSwitcher": {
       "navLabel": "Sections rythme",
       "views": {

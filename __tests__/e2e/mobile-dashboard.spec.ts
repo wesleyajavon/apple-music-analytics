@@ -414,4 +414,81 @@ test.describe("Mobile dashboard UX", () => {
       await expect(page).toHaveURL(/userId=/);
     }
   });
+
+  test("temporal mobile shows heading, rows or empty, and keeps dates", async ({ page }) => {
+    test.setTimeout(90_000);
+    await seedCookieConsent(page);
+    await page.goto(
+      `/en/dashboard/temporal-analysis${publicDemoQuery}&preset=30d&startDate=2026-07-24&endDate=2026-08-23`,
+    );
+    await dismissCookieBannerIfPresent(page);
+
+    const main = page.getByRole("main");
+    await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 45_000 });
+    await expect(page.getByRole("tablist", { name: /rhythm sections/i })).toHaveCount(0);
+
+    const emptyTitle = main.getByRole("heading", { name: /no rhythm yet/i });
+    const segment = main.getByRole("tablist", { name: /when you listen/i });
+    await expect(segment.or(emptyTitle)).toBeVisible({ timeout: 20_000 });
+
+    if (await segment.isVisible()) {
+      await expect(page).toHaveURL(/preset=30d/);
+      await expect(page).toHaveURL(/userId=/);
+
+      const firstRow = main.getByRole("button", { name: /^open /i }).first();
+      await firstRow.evaluate((el) => el.scrollIntoView({ block: "center", inline: "nearest" }));
+      await firstRow.click();
+      await expect(page.getByRole("dialog")).toBeVisible();
+      await expect(page).toHaveURL(/preset=30d/);
+      await expect(page).toHaveURL(/userId=/);
+
+      await page.getByRole("button", { name: /close details/i }).click();
+      await expect(page.getByRole("dialog")).toHaveCount(0);
+
+      await main.getByRole("tab", { name: /^hours$/i }).click();
+      await expect(main.getByRole("button", { name: /^open /i }).first()).toBeVisible();
+
+      const heatmapRow = main.getByRole("link", { name: /daily intensity/i });
+      await expect(heatmapRow).toHaveAttribute("href", /heatmap/);
+      await heatmapRow.click();
+      await expect(page).toHaveURL(/\/en\/dashboard\/heatmap/, { timeout: 20_000 });
+      await expect(page).toHaveURL(/preset=30d/);
+      await expect(page).toHaveURL(/startDate=/);
+      await expect(page).toHaveURL(/endDate=/);
+      await expect(page).toHaveURL(/userId=/);
+    }
+  });
+
+  test("temporal mobile is usable in French", async ({ page }) => {
+    test.setTimeout(90_000);
+    await seedCookieConsent(page);
+    await page.goto(`/fr/dashboard/temporal-analysis${publicDemoQuery}`);
+    await dismissCookieBannerIfPresent(page);
+
+    const main = page.getByRole("main");
+    await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 45_000 });
+    await expect(page.getByRole("tablist", { name: /sections rythme/i })).toHaveCount(0);
+
+    const emptyTitle = main.getByRole("heading", { name: /pas encore de rythme/i });
+    const segment = main.getByRole("tablist", { name: /quand vous écoutez/i });
+    await expect(segment.or(emptyTitle)).toBeVisible({ timeout: 20_000 });
+
+    if (await segment.isVisible()) {
+      const firstRow = main.getByRole("button", { name: /^ouvrir /i }).first();
+      await firstRow.evaluate((el) => el.scrollIntoView({ block: "center", inline: "nearest" }));
+      await firstRow.click();
+      await expect(page.getByRole("dialog")).toBeVisible();
+      await expect(page).toHaveURL(/userId=/);
+
+      await page.getByRole("button", { name: /fermer le détail/i }).click();
+      await expect(page.getByRole("dialog")).toHaveCount(0);
+
+      await main.getByRole("tab", { name: /^heures$/i }).click();
+      const heatmapRow = main.getByRole("link", { name: /intensité quotidienne/i });
+      await expect(heatmapRow).toHaveAttribute("href", /heatmap/);
+      await heatmapRow.click();
+      await expect(page).toHaveURL(/\/fr\/dashboard\/heatmap/, { timeout: 20_000 });
+      await expect(page).toHaveURL(/userId=/);
+    }
+  });
 });

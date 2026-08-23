@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode, type RefObject } from "react";
+import { useEffect, useRef, useState, type ReactNode, type RefObject } from "react";
+import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 import { DASHBOARD_BOTTOM_NAV_OFFSET_VAR } from "@/lib/constants/dashboard-chrome";
 import { useIsLgChartViewport } from "@/lib/hooks/use-chart-viewport";
@@ -30,6 +31,11 @@ export function MobileBottomSheet({
   const t = useTranslations("common");
   const dialogRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -66,7 +72,7 @@ export function MobileBottomSheet({
 
   if (!open) return null;
 
-  return (
+  const panel = (
     <>
       <button
         type="button"
@@ -106,4 +112,13 @@ export function MobileBottomSheet({
       </div>
     </>
   );
+
+  // Header/nav use backdrop-blur, which makes `position: fixed` descendants
+  // attach to that bar instead of the viewport. Portal on mobile only.
+  if (!isLg) {
+    if (!mounted) return null;
+    return createPortal(panel, document.body);
+  }
+
+  return panel;
 }

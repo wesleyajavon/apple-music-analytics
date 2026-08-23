@@ -70,6 +70,14 @@ export function DashboardScrollWrapper({ children }: { children: React.ReactNode
     };
   }, [navElement]);
 
+  useLayoutEffect(() => {
+    const root = document.documentElement;
+    root.style.setProperty(DASHBOARD_BOTTOM_NAV_OFFSET_VAR, `${navHeight}px`);
+    return () => {
+      root.style.removeProperty(DASHBOARD_BOTTOM_NAV_OFFSET_VAR);
+    };
+  }, [navHeight]);
+
   const dashboardStyle = {
     "--dashboard-filter-height": `${filterHeight}px`,
     [DASHBOARD_BOTTOM_NAV_OFFSET_VAR]: `${navHeight}px`,

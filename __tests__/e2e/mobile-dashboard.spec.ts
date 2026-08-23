@@ -1,7 +1,34 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 import { DEFAULT_PUBLIC_PROFILE_USER_ID } from "../../lib/constants/public-profile";
 
 const publicDemoQuery = `?userId=${DEFAULT_PUBLIC_PROFILE_USER_ID}`;
+
+async function seedCookieConsent(page: Page) {
+  await page.addInitScript(() => {
+    window.localStorage.setItem(
+      "ama-cookie-consent-v1",
+      JSON.stringify({
+        version: "2026-06-01",
+        decidedAt: "2026-01-01T00:00:00.000Z",
+        categories: {
+          necessary: true,
+          analytics: false,
+          errorMonitoring: false,
+          sessionReplay: false,
+        },
+      })
+    );
+  });
+}
+
+async function dismissCookieBannerIfPresent(page: Page) {
+  const accept = page.getByRole("button", { name: /accept all|tout accepter/i });
+  try {
+    await accept.click({ timeout: 1500 });
+  } catch {
+    // Banner already dismissed or not shown.
+  }
+}
 
 test.describe("Mobile dashboard UX", () => {
   test("home exposes mobile menu and header sign-in", async ({ page, isMobile }) => {
@@ -163,6 +190,67 @@ test.describe("Mobile dashboard UX", () => {
     await firstRow.click();
     await expect(page.getByRole("dialog")).toBeVisible();
     await expect(page).toHaveURL(/userId=/);
+  });
+
+  test("tracks ranking shows a tappable first row and keeps dates", async ({ page }) => {
+    test.setTimeout(60_000);
+    await seedCookieConsent(page);
+    await page.goto(`/en/dashboard/tracks${publicDemoQuery}`);
+    await dismissCookieBannerIfPresent(page);
+
+    await page.getByRole("button", { name: /period:/i }).click();
+    await page.getByRole("dialog", { name: /listening period/i }).getByRole("button", { name: /last 30 days/i }).click();
+    await expect(page).toHaveURL(/preset=30d/);
+    await expect(page).toHaveURL(/startDate=/);
+    await expect(page).toHaveURL(/endDate=/);
+    await expect(page).toHaveURL(/userId=/);
+
+    const main = page.getByRole("main");
+    await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByRole("tablist", { name: /track sections/i })).toHaveCount(0);
+
+    const rows = main.getByRole("button", { name: /open track details/i });
+    const emptyTitle = main.getByRole("heading", { name: /no tracks yet/i });
+    await expect(rows.first().or(emptyTitle)).toBeVisible({ timeout: 20_000 });
+    const rowCount = await rows.count();
+    if (rowCount === 0) {
+      await expect(emptyTitle).toBeVisible();
+    } else {
+      expect(rowCount).toBeGreaterThanOrEqual(3);
+      await rows.first().click();
+      await expect(page.getByRole("dialog")).toBeVisible();
+      await expect(page).toHaveURL(/preset=30d/);
+      await expect(page).toHaveURL(/userId=/);
+      await page.getByRole("button", { name: /close track details/i }).click();
+      await expect(page.getByRole("dialog")).toHaveCount(0);
+
+      await main.getByRole("link", { name: /view track trends/i }).click();
+      await expect(page).toHaveURL(/\/en\/dashboard\/tracks\/trends/);
+      await expect(page).toHaveURL(/preset=30d/);
+      await expect(page).toHaveURL(/startDate=/);
+      await expect(page).toHaveURL(/endDate=/);
+      await expect(page).toHaveURL(/userId=/);
+    }
+  });
+
+  test("tracks ranking is usable in French", async ({ page }) => {
+    test.setTimeout(60_000);
+    await seedCookieConsent(page);
+    await page.goto(`/fr/dashboard/tracks${publicDemoQuery}`);
+    await dismissCookieBannerIfPresent(page);
+
+    const main = page.getByRole("main");
+    await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByRole("tablist", { name: /sections des titres/i })).toHaveCount(0);
+
+    const firstRow = main.getByRole("button", { name: /voir le détail/i }).first();
+    const emptyTitle = main.getByRole("heading", { name: /pas encore de titres/i });
+    await expect(firstRow.or(emptyTitle)).toBeVisible({ timeout: 20_000 });
+    if (await firstRow.isVisible()) {
+      await firstRow.click();
+      await expect(page.getByRole("dialog")).toBeVisible();
+      await expect(page).toHaveURL(/userId=/);
+    }
   });
 
   test("mobile plus menu opens heatmap and settings shortcuts", async ({ page }) => {

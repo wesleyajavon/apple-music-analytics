@@ -52,11 +52,16 @@ import {
   useDashboardSectionView,
 } from "@/lib/components/dashboard-section-switcher";
 import { TracksSectionSwitcher } from "@/lib/components/tracks-section-switcher";
-import { TRACKS_LOCAL_VIEWS, type TracksLocalView } from "@/lib/utils/tracks-section";
+import {
+  TracksMobileEmpty,
+  TracksMobileError,
+  TracksMobileExperience,
+  TracksMobileSkeleton,
+} from "@/lib/components/tracks-mobile";
+import { TRACKS_LOCAL_VIEWS, type TracksLocalView, buildTracksSectionHref } from "@/lib/utils/tracks-section";
 
 const TRACKS_HERO_SHELL_CLASS =
   "relative overflow-hidden rounded-[2rem] border border-white/10 bg-gray-950 px-5 py-6 text-white shadow-2xl shadow-accent-cyan/15 sm:px-8 sm:py-9 lg:px-10 lg:py-10";
-const MOBILE_DATE_OPTS = { month: "2-digit", day: "2-digit", year: "2-digit" } as const;
 
 function TracksHeroFrame({
   stats,
@@ -187,192 +192,6 @@ function TracksTableRowsSkeleton({ count }: { count: number }) {
   );
 }
 
-type MobileTrackStat = {
-  label: string;
-  value: string;
-  description: string;
-};
-
-function MobileTracksLoadingFallback({
-  badgeLabel,
-}: {
-  badgeLabel: string;
-}) {
-  const t = useTranslations("tracks");
-  return (
-    <div className="space-y-5 lg:hidden">
-      <section className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-slate-950 p-5 text-white shadow-2xl shadow-accent-cyan/20">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(6,182,212,0.22),transparent_34%),radial-gradient(circle_at_86%_18%,rgba(45,212,191,0.18),transparent_34%)]" />
-        <div className="relative">
-          <div className="flex items-center justify-between gap-3">
-            <p className="inline-flex min-h-8 shrink-0 items-center whitespace-nowrap rounded-full border border-white/15 bg-white/10 px-2.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-100">
-              {t("mobile.heroEyebrow")}
-            </p>
-            <span className="inline-flex min-h-8 shrink-0 items-center whitespace-nowrap rounded-full border border-white/15 bg-white/10 px-2.5 text-[11px] font-semibold">
-              {badgeLabel}
-            </span>
-          </div>
-          <div className="mt-6 space-y-3">
-            <div className="h-4 w-32 animate-pulse rounded bg-white/15" />
-            <div className="h-8 w-11/12 animate-pulse rounded bg-white/20" />
-            <div className="h-4 w-8/12 animate-pulse rounded bg-white/10" />
-          </div>
-        </div>
-      </section>
-      <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none]">
-        {[0, 1, 2].map((index) => (
-          <div key={index} className="min-w-[9.5rem] rounded-3xl border border-card-border bg-white/80 p-4 shadow-card dark:border-white/10 dark:bg-slate-950">
-            <div className="h-3 w-20 animate-pulse rounded bg-slate-200 dark:bg-white/10" />
-            <div className="mt-3 h-7 w-24 animate-pulse rounded bg-slate-200 dark:bg-white/15" />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function MobileTracksHero({
-  topTrack,
-  overview,
-  badgeLabel,
-  locale,
-}: {
-  topTrack: TrackStatsDto;
-  overview: TrackOverviewDto;
-  badgeLabel: string;
-  locale: string;
-}) {
-  const t = useTranslations("tracks");
-  const share = overview.totalListens > 0 ? (topTrack.listenCount / overview.totalListens) * 100 : 0;
-  const formattedShare = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(share);
-
-  return (
-    <section className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-slate-950 p-5 text-white shadow-2xl shadow-accent-cyan/20">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(6,182,212,0.24),transparent_34%),radial-gradient(circle_at_86%_18%,rgba(45,212,191,0.20),transparent_32%),linear-gradient(135deg,rgba(3,7,18,0.98),rgba(15,23,42,0.92)_48%,rgba(6,78,59,0.56))]" />
-      <div className="absolute -bottom-24 right-4 h-56 w-56 rounded-full bg-accent-emerald/20 blur-3xl" aria-hidden />
-      <div className="relative">
-        <div className="flex items-center justify-between gap-3">
-          <p className="inline-flex min-h-8 shrink-0 items-center whitespace-nowrap rounded-full border border-white/15 bg-white/10 px-2.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-100">
-            {t("mobile.heroEyebrow")}
-          </p>
-          <span className="inline-flex min-h-8 shrink-0 items-center whitespace-nowrap rounded-full border border-white/15 bg-white/10 px-2.5 text-[11px] font-semibold text-white/85">
-            {badgeLabel}
-          </span>
-        </div>
-
-        <div className="mt-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
-            {t("mobile.primaryInsightEyebrow")}
-          </p>
-          <h1 className="mt-3 text-balance text-3xl font-semibold tracking-[-0.06em]">
-            {topTrack.trackTitle}
-          </h1>
-          <p className="mt-3 text-sm leading-6 text-slate-300">
-            {t("mobile.primaryInsightBody", { artist: topTrack.artistName })}
-          </p>
-        </div>
-
-        <div className="mt-5 rounded-3xl border border-white/10 bg-white/[0.07] p-4">
-          <div className="flex items-end justify-between gap-4">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                {t("listens")}
-              </p>
-              <p className="mt-1 text-4xl font-semibold tabular-nums tracking-[-0.06em]">
-                {topTrack.listenCount.toLocaleString(locale)}
-              </p>
-            </div>
-            <div className="max-w-[8rem] text-right">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                {t("mobile.shareLabel")}
-              </p>
-              <p className="mt-1 text-lg font-semibold text-cyan-100">
-                {formattedShare}%
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function MobileTracksMetricRail({ stats }: { stats: MobileTrackStat[] }) {
-  return (
-    <div className="-mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none]">
-      {stats.map((stat) => (
-        <article
-          key={stat.label}
-          className="min-w-[9.75rem] snap-start rounded-3xl border border-card-border bg-white/85 p-4 shadow-card backdrop-blur dark:border-white/10 dark:bg-slate-950"
-        >
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted dark:text-slate-400">
-            {stat.label}
-          </p>
-          <p className="mt-2 text-2xl font-semibold tabular-nums tracking-[-0.04em] text-foreground dark:text-white">
-            {stat.value}
-          </p>
-          <p className="mt-2 text-xs leading-5 text-muted dark:text-slate-400">
-            {stat.description}
-          </p>
-        </article>
-      ))}
-    </div>
-  );
-}
-
-function MobileTrackBarRow({
-  track,
-  rank,
-  maxListens,
-  totalListens,
-  locale,
-}: {
-  track: TrackStatsDto;
-  rank: number;
-  maxListens: number;
-  totalListens: number;
-  locale: string;
-}) {
-  const t = useTranslations("tracks");
-  const width = maxListens > 0 ? Math.max(8, Math.round((track.listenCount / maxListens) * 100)) : 8;
-  const share = totalListens > 0 ? (track.listenCount / totalListens) * 100 : 0;
-  const formattedShare = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(share);
-
-  return (
-    <article className="rounded-2xl border border-white/10 bg-white/[0.05] p-3">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex min-w-0 gap-3">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.08] text-xs font-black text-white">
-            {rank}
-          </span>
-          <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-white" title={track.trackTitle}>
-              {track.trackTitle}
-            </p>
-            <p className="mt-0.5 truncate text-xs text-slate-400" title={track.artistName}>
-              {track.artistName}
-            </p>
-          </div>
-        </div>
-        <div className="shrink-0 text-right">
-          <p className="text-sm font-semibold tabular-nums text-white">
-            {track.listenCount.toLocaleString(locale)}
-          </p>
-          <p className="text-[11px] text-slate-400">
-            {formattedShare}% · {t("listensCount")}
-          </p>
-        </div>
-      </div>
-      <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/10">
-        <div
-          className="h-full rounded-full bg-gradient-to-r from-cyan-300 via-teal-300 to-emerald-300"
-          style={{ width: `${width}%` }}
-        />
-      </div>
-    </article>
-  );
-}
-
 function TracksRankingSearchField({
   value,
   onChange,
@@ -405,289 +224,6 @@ function TracksRankingSearchField({
   );
 }
 
-function MobileTracksRanking({
-  tracks,
-  isFetching,
-  pageSize,
-  offset,
-  locale,
-}: {
-  tracks: TrackStatsDto[];
-  isFetching: boolean;
-  pageSize: number;
-  offset: number;
-  locale: string;
-}) {
-  const t = useTranslations("tracks");
-  if (isFetching) {
-    return (
-      <div className="space-y-2">
-        {Array.from({ length: Math.min(pageSize, 6) }).map((_, index) => (
-          <div key={`mobile-ranking-skeleton-${index}`} className="rounded-2xl border border-card-border bg-white/60 p-3 dark:border-white/10 dark:bg-white/[0.04]">
-            <div className="h-4 w-3/4 animate-pulse rounded bg-slate-200 dark:bg-white/10" />
-            <div className="mt-2 h-3 w-1/2 animate-pulse rounded bg-slate-200 dark:bg-white/10" />
-          </div>
-        ))}
-      </div>
-    );
-  }
-
-  if (tracks.length === 0) {
-    return <p className="px-1 py-8 text-center text-sm text-muted">{t("rankingSearchEmpty")}</p>;
-  }
-
-  return (
-    <div className="space-y-2">
-      {tracks.map((track, index) => (
-        <article
-          key={track.trackId}
-          className="flex min-h-14 items-center justify-between gap-3 rounded-2xl border border-card-border bg-white/70 px-3 py-2.5 dark:border-white/10 dark:bg-white/[0.05]"
-        >
-          <div className="flex min-w-0 items-center gap-3">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-xs font-black text-white dark:bg-white/[0.08]">
-              {track.rank ?? offset + index + 1}
-            </span>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-foreground dark:text-white" title={track.trackTitle}>
-                {track.trackTitle}
-              </p>
-              <p className="mt-0.5 truncate text-xs text-muted dark:text-slate-400" title={track.artistName}>
-                {track.artistName}
-              </p>
-            </div>
-          </div>
-          <div className="shrink-0 text-right">
-            <p className="text-sm font-semibold tabular-nums text-foreground dark:text-white">
-              {track.listenCount.toLocaleString(locale)}
-            </p>
-            <p className="text-[11px] text-muted dark:text-slate-400">{t("listensCount")}</p>
-          </div>
-        </article>
-      ))}
-    </div>
-  );
-}
-
-function MobileTracksPagination({
-  page,
-  pageSize,
-  totalPages,
-  paginationSummary,
-  hasMore,
-  updatePaginationParams,
-}: {
-  page: number;
-  pageSize: number;
-  totalPages: number;
-  paginationSummary: string;
-  hasMore: boolean;
-  updatePaginationParams: (nextPage: number, nextPageSize: number) => void;
-}) {
-  const t = useTranslations("tracks");
-  return (
-    <div className="space-y-3 rounded-3xl border border-card-border bg-white/70 p-3 dark:border-white/10 dark:bg-white/[0.04]">
-      <p className="text-center text-xs text-muted dark:text-slate-400">{paginationSummary}</p>
-      <div className="grid grid-cols-2 gap-2">
-        <button
-          type="button"
-          onClick={() => updatePaginationParams(page - 1, pageSize)}
-          disabled={page === 1}
-          className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-card-border bg-white px-4 text-sm font-semibold text-foreground disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/15 dark:bg-white/10 dark:text-white"
-        >
-          {t("paginationPrevious")}
-        </button>
-        <button
-          type="button"
-          onClick={() => updatePaginationParams(page + 1, pageSize)}
-          disabled={!hasMore}
-          className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-card-border bg-white px-4 text-sm font-semibold text-foreground disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/15 dark:bg-white/10 dark:text-white"
-        >
-          {t("paginationNext")}
-        </button>
-      </div>
-      <div className="flex min-h-11 items-center justify-between gap-3 rounded-2xl border border-card-border bg-white px-3 dark:border-white/10 dark:bg-white/[0.05]">
-        <span className="text-xs font-medium text-muted dark:text-slate-400">
-          {t("paginationPage", { page, totalPages })}
-        </span>
-        <label className="inline-flex items-center gap-2 text-xs font-medium text-muted dark:text-slate-300">
-          <span>{t("pageSizeLabel")}</span>
-          <select
-            value={pageSize}
-            onChange={(e) => updatePaginationParams(1, Number(e.target.value))}
-            className="min-h-9 rounded-xl border border-card-border bg-white px-2 text-sm font-semibold text-foreground dark:border-white/15 dark:bg-white/10 dark:text-white"
-          >
-            <option value={20}>20</option>
-            <option value={50}>50</option>
-            <option value={100}>100</option>
-          </select>
-        </label>
-      </div>
-    </div>
-  );
-}
-
-function MobileTracksFlow({
-  topData,
-  pagedData,
-  pagedTracks,
-  isPagedFetching,
-  page,
-  pageSize,
-  offset,
-  pageStart,
-  pageEnd,
-  totalTracksInRange,
-  totalPages,
-  badgeLabel,
-  locale,
-  activeView,
-  setView,
-  searchInput,
-  onSearchInputChange,
-  updatePaginationParams,
-}: {
-  topData: TracksResponseDto;
-  pagedData?: TracksResponseDto;
-  pagedTracks: TrackStatsDto[];
-  isPagedFetching: boolean;
-  page: number;
-  pageSize: number;
-  offset: number;
-  pageStart: number;
-  pageEnd: number;
-  totalTracksInRange: number;
-  totalPages: number;
-  badgeLabel: string;
-  locale: string;
-  activeView: TracksLocalView;
-  setView: (view: TracksLocalView) => void;
-  searchInput: string;
-  onSearchInputChange: (value: string) => void;
-  updatePaginationParams: (nextPage: number, nextPageSize: number) => void;
-}) {
-  const t = useTranslations("tracks");
-  const topTrack = topData.topTracks[0];
-  const maxListens = topData.topTracks[0]?.listenCount ?? 0;
-  const numberFormatter = useMemo(() => new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }), [locale]);
-  const stats: MobileTrackStat[] = [
-    {
-      label: t("tracks"),
-      value: topData.overview.totalTracks.toLocaleString(locale),
-      description: t("mobile.stats.uniqueTracks"),
-    },
-    {
-      label: t("listens"),
-      value: topData.overview.totalListens.toLocaleString(locale),
-      description: t("mobile.stats.totalListens"),
-    },
-    {
-      label: t("mobile.stats.averageLabel"),
-      value: numberFormatter.format(topData.overview.averageListensPerTrack),
-      description: t("mobile.stats.average"),
-    },
-  ];
-  const paginationSummary = t("paginationSummary", {
-    start: pageStart,
-    end: pageEnd,
-    total: totalTracksInRange,
-  });
-
-  if (!topTrack) return null;
-
-  return (
-    <div className="space-y-5 lg:hidden">
-      <MobileTracksHero
-        topTrack={topTrack}
-        overview={topData.overview}
-        badgeLabel={badgeLabel}
-        locale={locale}
-      />
-
-      <MobileTracksMetricRail stats={stats} />
-
-      <TracksSectionSwitcher
-        idPrefix="tracks-mobile"
-        activeSection={activeView}
-        onLocalViewChange={setView}
-      />
-
-      <DashboardSectionPanel idPrefix="tracks-mobile" view="leaderboard" activeView={activeView}>
-        <div className="space-y-3">
-          <section className="rounded-[1.75rem] bg-slate-950 p-3 shadow-2xl shadow-black/15">
-            <div className="px-1 pb-3 pt-1">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-100">
-                {t("mobile.topFiveEyebrow")}
-              </p>
-              <h2 className="mt-2 text-xl font-semibold tracking-[-0.04em] text-white">
-                {t("mobile.topFiveTitle")}
-              </h2>
-              <p className="mt-1 text-xs leading-5 text-slate-400">
-                {t("mobile.topFiveDescription")}
-              </p>
-            </div>
-            <div className="space-y-2">
-              {topData.topTracks.slice(0, 5).map((track, index) => (
-                <MobileTrackBarRow
-                  key={track.trackId}
-                  track={track}
-                  rank={index + 1}
-                  maxListens={maxListens}
-                  totalListens={topData.overview.totalListens}
-                  locale={locale}
-                />
-              ))}
-            </div>
-          </section>
-
-          {topData.topTracks.length > 5 ? (
-            <section className="rounded-[1.75rem] bg-slate-950 p-3 shadow-2xl shadow-black/15">
-              <div className="space-y-2">
-                {topData.topTracks.slice(5, 20).map((track, index) => (
-                  <MobileTrackBarRow
-                    key={track.trackId}
-                    track={track}
-                    rank={index + 6}
-                    maxListens={maxListens}
-                    totalListens={topData.overview.totalListens}
-                    locale={locale}
-                  />
-                ))}
-              </div>
-            </section>
-          ) : null}
-        </div>
-      </DashboardSectionPanel>
-
-      <DashboardSectionPanel idPrefix="tracks-mobile" view="ranking" activeView={activeView}>
-        <div className="space-y-3">
-          <TracksRankingSearchField
-            id="tracks-ranking-search-mobile"
-            value={searchInput}
-            onChange={onSearchInputChange}
-          />
-          <MobileTracksRanking
-            tracks={pagedTracks}
-            isFetching={isPagedFetching || !pagedData}
-            pageSize={pageSize}
-            offset={offset}
-            locale={locale}
-          />
-          {pagedData?.pagination ? (
-            <MobileTracksPagination
-              page={page}
-              pageSize={pageSize}
-              totalPages={totalPages}
-              paginationSummary={paginationSummary}
-              hasMore={pagedData.pagination.hasMore}
-              updatePaginationParams={updatePaginationParams}
-            />
-          ) : null}
-        </div>
-      </DashboardSectionPanel>
-    </div>
-  );
-}
-
 function useTracksBadgeLabel() {
   const locale = useLocale();
   const tOverview = useTranslations("overview");
@@ -696,24 +232,14 @@ function useTracksBadgeLabel() {
   return dateRangeLabel || tOverview("allData");
 }
 
-function useTracksMobileBadgeLabel() {
-  const locale = useLocale();
-  const tOverview = useTranslations("overview");
-  const { startDate, endDate } = useListenDateRange();
-  if (!startDate || !endDate) return tOverview("allData");
-
-  const start = new Date(startDate);
-  const end = new Date(endDate);
-  return `${start.toLocaleDateString(locale, MOBILE_DATE_OPTS)}–${end.toLocaleDateString(locale, MOBILE_DATE_OPTS)}`;
-}
-
 function TracksPageFallback() {
   const badgeLabel = useTracksBadgeLabel();
-  const mobileBadgeLabel = useTracksMobileBadgeLabel();
   const { activeView, setView } = useDashboardSectionView(TRACKS_LOCAL_VIEWS, "leaderboard");
   return (
     <>
-      <MobileTracksLoadingFallback badgeLabel={mobileBadgeLabel} />
+      <div className="lg:hidden">
+        <TracksMobileSkeleton />
+      </div>
       <div className="hidden space-y-8 lg:block">
         <TracksHeroFrame badgeLabel={badgeLabel} stats={<TracksHeroStatsSkeleton />} />
         <TracksSectionSwitcher
@@ -739,7 +265,11 @@ function TracksContent() {
   const locale = useLocale();
   const emptyStatePresets = useEmptyStatePresets();
   const badgeLabel = useTracksBadgeLabel();
-  const mobileBadgeLabel = useTracksMobileBadgeLabel();
+  const searchParamsForHref = searchParams;
+  const trendsHref = useMemo(
+    () => buildTracksSectionHref("trends", searchParamsForHref),
+    [searchParamsForHref]
+  );
   const startDate = searchParams.get("startDate") || undefined;
   const endDate = searchParams.get("endDate") || undefined;
   const userId = searchParams.get("userId") || undefined;
@@ -846,28 +376,40 @@ function TracksContent() {
 
   if (!isTopLoading && topError && !topData) {
     return (
-      <div className="space-y-12">
-        <TracksHeroFrame badgeLabel={badgeLabel} stats={null} />
-        <TracksSectionSwitcher
-          idPrefix="tracks-error"
-          activeSection={activeView}
-          onLocalViewChange={setView}
-        />
-        <ErrorState variant="startup" error={topError} message={t("errorLoading")} onRetry={refetchTop} />
-      </div>
+      <>
+        <div className="lg:hidden">
+          <TracksMobileError locale={locale}>
+            <ErrorState variant="startup" error={topError} message={t("errorLoading")} onRetry={refetchTop} />
+          </TracksMobileError>
+        </div>
+        <div className="hidden space-y-12 lg:block">
+          <TracksHeroFrame badgeLabel={badgeLabel} stats={null} />
+          <TracksSectionSwitcher
+            idPrefix="tracks-error"
+            activeSection={activeView}
+            onLocalViewChange={setView}
+          />
+          <ErrorState variant="startup" error={topError} message={t("errorLoading")} onRetry={refetchTop} />
+        </div>
+      </>
     );
   }
   if (!isTopLoading && (!topData || topData.topTracks.length === 0)) {
     return (
-      <div className="space-y-12">
-        <TracksHeroFrame badgeLabel={badgeLabel} stats={null} />
-        <TracksSectionSwitcher
-          idPrefix="tracks-empty"
-          activeSection={activeView}
-          onLocalViewChange={setView}
-        />
-        <EmptyState variant="startup" {...emptyStatePresets.importData} />
-      </div>
+      <>
+        <div className="lg:hidden">
+          <TracksMobileEmpty />
+        </div>
+        <div className="hidden space-y-12 lg:block">
+          <TracksHeroFrame badgeLabel={badgeLabel} stats={null} />
+          <TracksSectionSwitcher
+            idPrefix="tracks-empty"
+            activeSection={activeView}
+            onLocalViewChange={setView}
+          />
+          <EmptyState variant="startup" {...emptyStatePresets.importData} />
+        </div>
+      </>
     );
   }
   if (isTopLoading || !topData) {
@@ -875,40 +417,65 @@ function TracksContent() {
   }
   if (!isPagedLoading && pagedError && !pagedData) {
     return (
-      <div className="space-y-12">
-        <TracksHeroFrame badgeLabel={badgeLabel} stats={heroStats} />
-        <TracksSectionSwitcher
-          idPrefix="tracks-paged-error"
-          activeSection={activeView}
-          onLocalViewChange={setView}
-        />
-        <ErrorState variant="startup" error={pagedError} message={t("errorLoading")} onRetry={refetchPaged} />
-      </div>
+      <>
+        <div className="space-y-6 lg:hidden">
+          <TracksMobileExperience
+            trendsHref={trendsHref}
+            overview={topData?.overview}
+            topTracks={topTracks}
+            pagedTracks={[]}
+            isTopLoading={isTopLoading}
+            isPagedFetching={false}
+            page={page}
+            pageSize={pageSize}
+            totalPages={totalPages}
+            total={totalTracksInRange}
+            hasMore={false}
+            offset={offset}
+            onPageChange={(nextPage) => updatePaginationParams(nextPage, pageSize)}
+            onPageSizeChange={(nextPageSize) => updatePaginationParams(1, nextPageSize)}
+            locale={locale}
+            searchInput={searchInput}
+            onSearchInputChange={setSearchInput}
+          />
+          <ErrorState variant="startup" error={pagedError} message={t("errorLoading")} onRetry={refetchPaged} />
+        </div>
+        <div className="hidden space-y-12 lg:block">
+          <TracksHeroFrame badgeLabel={badgeLabel} stats={heroStats} />
+          <TracksSectionSwitcher
+            idPrefix="tracks-paged-error"
+            activeSection={activeView}
+            onLocalViewChange={setView}
+          />
+          <ErrorState variant="startup" error={pagedError} message={t("errorLoading")} onRetry={refetchPaged} />
+        </div>
+      </>
     );
   }
 
   return (
     <>
-      <MobileTracksFlow
-        topData={topData}
-        pagedData={pagedData}
-        pagedTracks={pagedTracks}
-        isPagedFetching={isPagedFetching}
-        page={page}
-        pageSize={pageSize}
-        offset={offset}
-        pageStart={pageStart}
-        pageEnd={pageEnd}
-        totalTracksInRange={totalTracksInRange}
-        totalPages={totalPages}
-        badgeLabel={mobileBadgeLabel}
-        locale={locale}
-        activeView={activeView}
-        setView={setView}
-        searchInput={searchInput}
-        onSearchInputChange={setSearchInput}
-        updatePaginationParams={updatePaginationParams}
-      />
+      <div className="lg:hidden">
+        <TracksMobileExperience
+          trendsHref={trendsHref}
+          overview={topData.overview}
+          topTracks={topTracks}
+          pagedTracks={pagedTracks}
+          isTopLoading={isTopLoading}
+          isPagedFetching={isPagedFetching || !pagedData}
+          page={page}
+          pageSize={pageSize}
+          totalPages={totalPages}
+          total={totalTracksInRange}
+          hasMore={pagination?.hasMore ?? false}
+          offset={offset}
+          onPageChange={(nextPage) => updatePaginationParams(nextPage, pageSize)}
+          onPageSizeChange={(nextPageSize) => updatePaginationParams(1, nextPageSize)}
+          locale={locale}
+          searchInput={searchInput}
+          onSearchInputChange={setSearchInput}
+        />
+      </div>
 
       <div className="hidden space-y-12 lg:block">
         <TracksHeroFrame badgeLabel={badgeLabel} stats={heroStats} />
@@ -1117,7 +684,7 @@ function TracksContent() {
 
 export default function TracksPage() {
   return (
-    <div className="px-4 py-6 sm:px-0">
+    <div className="max-lg:p-0 lg:py-6">
       <Suspense fallback={<TracksPageFallback />}>
         <TracksContent />
       </Suspense>

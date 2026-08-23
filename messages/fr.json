@@ -1985,29 +1985,26 @@
       }
     },
     "mobile": {
-      "heroEyebrow": "Signal replay",
-      "primaryInsightEyebrow": "Le plus réstreamé",
-      "primaryInsightBody": "C'est le titre auquel vous êtes le plus revenu sur cette fenêtre, porté par {artist}.",
-      "shareLabel": "Part des streams",
-      "topFiveEyebrow": "Top cinq",
-      "topFiveTitle": "Les titres qui donnent le ton",
-      "topFiveDescription": "Une lecture compacte des morceaux qui pèsent le plus dans vos streams actuelles.",
-      "stats": {
-        "uniqueTracks": "Titres uniques présents dans cette période.",
-        "totalListens": "Toutes les streams enregistrés derrière ce classement.",
-        "averageLabel": "Moy. / titre",
-        "average": "À quel point vos réstreams sont concentrées."
-      },
-      "disclosures": {
-        "top20": {
-          "title": "Ouvrir le reste du top 20",
-          "description": "Révélez les titres de soutien sans transformer le premier écran en mur de graphiques."
-        },
-        "ranking": {
-          "title": "Parcourir tout le classement",
-          "description": "Utilisez la pagination quand vous voulez l'index complet des titres."
-        }
-      }
+      "heroEyebrow": "Titre n°1",
+      "emptyTitle": "Pas encore de titres",
+      "emptyLead": "Importez l’historique pour voir vos replays.",
+      "emptyCta": "Importer l’historique",
+      "errorLead": "Impossible de charger ce classement.",
+      "listenCount": "{count} streams",
+      "shareLabel": "{share} des streams",
+      "signalsLabel": "Signaux",
+      "shareSignal": "Part du n°1",
+      "listTitle": "Classement",
+      "trendsLead": "Leur évolution dans le temps.",
+      "filtersLabel": "Filtres",
+      "filtersOpenAria": "Ouvrir les filtres du classement",
+      "sheetOpenAria": "Voir le détail de {title}",
+      "sheetCloseAria": "Fermer le détail du titre",
+      "detailGenre": "Genre",
+      "detailFirst": "Première écoute",
+      "detailLast": "Dernière écoute",
+      "detailPlayTime": "Temps d’écoute",
+      "unavailable": "—"
     },
     "viewSwitcher": {
       "navLabel": "Sections des titres",
@@ -2028,6 +2025,7 @@
     "top12Listens": "Top 12 · Streams",
     "top20Listens": "Top 20 · Streams",
     "allTracks": "Classement des titres",
+    "viewTrends": "Voir les tendances de titres",
     "rank": "Rang",
     "listensCount": "streams",
     "paginationSummary": "Affichage de {start} à {end} sur {total}",

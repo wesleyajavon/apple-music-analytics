@@ -1985,29 +1985,26 @@
       }
     },
     "mobile": {
-      "heroEyebrow": "Replay signal",
-      "primaryInsightEyebrow": "Most replayed",
-      "primaryInsightBody": "This is the track you returned to most in this window, led by {artist}.",
-      "shareLabel": "Share of streams",
-      "topFiveEyebrow": "First five",
-      "topFiveTitle": "The songs setting the tone",
-      "topFiveDescription": "A compact read of the tracks carrying the most streaming weight right now.",
-      "stats": {
-        "uniqueTracks": "Unique songs represented in this range.",
-        "totalListens": "Every saved stream behind this ranking.",
-        "averageLabel": "Avg / track",
-        "average": "How concentrated your repeats are."
-      },
-      "disclosures": {
-        "top20": {
-          "title": "Open the rest of the top 20",
-          "description": "Reveal the supporting tracks without turning the first screen into a chart wall."
-        },
-        "ranking": {
-          "title": "Browse the full ranking",
-          "description": "Use pagination when you want the complete track index."
-        }
-      }
+      "heroEyebrow": "Top track",
+      "emptyTitle": "No tracks yet",
+      "emptyLead": "Import history to see what you replay.",
+      "emptyCta": "Import history",
+      "errorLead": "Couldn't load this ranking.",
+      "listenCount": "{count} streams",
+      "shareLabel": "{share} of streams",
+      "signalsLabel": "Signals",
+      "shareSignal": "Top share",
+      "listTitle": "Ranking",
+      "trendsLead": "How they move over time.",
+      "filtersLabel": "Filters",
+      "filtersOpenAria": "Open ranking filters",
+      "sheetOpenAria": "Open track details for {title}",
+      "sheetCloseAria": "Close track details",
+      "detailGenre": "Genre",
+      "detailFirst": "First play",
+      "detailLast": "Last play",
+      "detailPlayTime": "Play time",
+      "unavailable": "—"
     },
     "viewSwitcher": {
       "navLabel": "Track sections",
@@ -2028,6 +2025,7 @@
     "top12Listens": "Top 12 · Streams",
     "top20Listens": "Top 20 · Streams",
     "allTracks": "Tracks ranking",
+    "viewTrends": "View track trends",
     "rank": "Rank",
     "listensCount": "streams",
     "paginationSummary": "Showing {start}-{end} of {total}",

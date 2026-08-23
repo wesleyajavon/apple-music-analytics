@@ -350,4 +350,68 @@ test.describe("Mobile dashboard UX", () => {
     await expect(sheet.getByRole("button", { name: /^personnalisé$/i })).toBeVisible();
     await expect(page.getByRole("navigation", { name: /navigation principale du dashboard/i })).toBeVisible();
   });
+
+  test("timeline mobile shows heading, spark captions, and bucket or empty", async ({ page }) => {
+    test.setTimeout(90_000);
+    await seedCookieConsent(page);
+    await page.goto(`/en/dashboard/timeline${publicDemoQuery}`);
+    await dismissCookieBannerIfPresent(page);
+
+    const main = page.getByRole("main");
+    await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 45_000 });
+
+    const emptyTitle = main.getByRole("heading", { name: /no pulse yet/i });
+    const spark = main.getByRole("img", { name: /compact streaming trend/i });
+    await expect(spark.or(emptyTitle)).toBeVisible({ timeout: 20_000 });
+
+    if (await spark.isVisible()) {
+      await expect(main.locator("time").first()).toBeVisible();
+      await expect(main.getByText(/peak /i).first()).toBeVisible();
+      const bucket = main.getByRole("button", { name: /^open /i }).first();
+      await bucket.evaluate((el) => el.scrollIntoView({ block: "center", inline: "nearest" }));
+      await bucket.click();
+      await expect(page.getByRole("dialog")).toBeVisible();
+      await expect(page).toHaveURL(/userId=/);
+
+      await page.getByRole("button", { name: /close bucket details/i }).click();
+      await expect(page.getByRole("dialog")).toHaveCount(0);
+      const heatmapRow = main.getByRole("link", { name: /daily intensity/i });
+      await expect(heatmapRow).toHaveAttribute("href", /heatmap/);
+      await heatmapRow.click();
+      await expect(page).toHaveURL(/\/en\/dashboard\/heatmap/, { timeout: 20_000 });
+      await expect(page).toHaveURL(/userId=/);
+    }
+  });
+
+  test("timeline mobile is usable in French", async ({ page }) => {
+    test.setTimeout(90_000);
+    await seedCookieConsent(page);
+    await page.goto(`/fr/dashboard/timeline${publicDemoQuery}`);
+    await dismissCookieBannerIfPresent(page);
+
+    const main = page.getByRole("main");
+    await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 45_000 });
+
+    const emptyTitle = main.getByRole("heading", { name: /pas encore de pouls/i });
+    const spark = main.getByRole("img", { name: /tendance compacte des streams/i });
+    await expect(spark.or(emptyTitle)).toBeVisible({ timeout: 20_000 });
+
+    if (await spark.isVisible()) {
+      await expect(main.locator("time").first()).toBeVisible();
+      await expect(main.getByText(/pic /i).first()).toBeVisible();
+      const bucket = main.getByRole("button", { name: /^ouvrir /i }).first();
+      await bucket.evaluate((el) => el.scrollIntoView({ block: "center", inline: "nearest" }));
+      await bucket.click();
+      await expect(page.getByRole("dialog")).toBeVisible();
+      await expect(page).toHaveURL(/userId=/);
+
+      await page.getByRole("button", { name: /fermer le détail du segment/i }).click();
+      await expect(page.getByRole("dialog")).toHaveCount(0);
+      const heatmapRow = main.getByRole("link", { name: /intensité quotidienne/i });
+      await expect(heatmapRow).toHaveAttribute("href", /heatmap/);
+      await heatmapRow.click();
+      await expect(page).toHaveURL(/\/fr\/dashboard\/heatmap/, { timeout: 20_000 });
+      await expect(page).toHaveURL(/userId=/);
+    }
+  });
 });

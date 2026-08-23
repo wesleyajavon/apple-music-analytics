@@ -24,6 +24,8 @@ export interface PeriodSelectorProps {
   defaultPeriod?: PeriodType;
   /** Page-owned period value, used when the page already normalizes the URL state. */
   value?: PeriodType;
+  /** Full-width 44px segments for native mobile trees. Desktop default is unchanged. */
+  variant?: "default" | "compact";
 }
 
 export function isPeriodType(value: string | null | undefined): value is PeriodType {
@@ -38,7 +40,11 @@ export function getPeriodFromSearchParams(
   return isPeriodType(period) ? period : defaultPeriod;
 }
 
-export function PeriodSelector({ defaultPeriod = "day", value }: PeriodSelectorProps) {
+export function PeriodSelector({
+  defaultPeriod = "day",
+  value,
+  variant = "default",
+}: PeriodSelectorProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -112,18 +118,39 @@ export function PeriodSelector({ defaultPeriod = "day", value }: PeriodSelectorP
     [router, pathname, searchParams, prefetchWithOptimisticUpdate, startDate, endDate, currentPeriod]
   );
 
+  const compact = variant === "compact";
+  const compactLabelKey = {
+    daily: "compactDaily",
+    weekly: "compactWeekly",
+    monthly: "compactMonthly",
+  } as const;
+
   return (
-    <div className="flex items-center gap-4">
-      <span className="text-[10px] font-semibold uppercase tracking-wider text-muted shrink-0">
+    <div className={compact ? "w-full" : "flex items-center gap-4"}>
+      <span
+        className={
+          compact
+            ? "sr-only"
+            : "shrink-0 text-[10px] font-semibold uppercase tracking-wider text-muted"
+        }
+      >
         {t("label")}
       </span>
       <div
         ref={containerRef}
-        className="relative flex items-center bg-surface p-1.5 rounded-xl border border-card-border"
+        className={
+          compact
+            ? "relative flex w-full items-center rounded-2xl border border-card-border bg-surface p-1"
+            : "relative flex items-center rounded-xl border border-card-border bg-surface p-1.5"
+        }
       >
         {indicatorStyle && (
           <div
-            className="absolute h-[calc(100%-12px)] top-1.5 bg-brand-gradient rounded-lg transition-all duration-300 ease-out shadow-sm"
+            className={
+              compact
+                ? "absolute top-1 h-[calc(100%-8px)] rounded-xl bg-brand-gradient shadow-sm transition-all duration-300 ease-out"
+                : "absolute top-1.5 h-[calc(100%-12px)] rounded-lg bg-brand-gradient shadow-sm transition-all duration-300 ease-out"
+            }
             style={{
               left: `${indicatorStyle.left}px`,
               width: `${indicatorStyle.width}px`,
@@ -135,21 +162,22 @@ export function PeriodSelector({ defaultPeriod = "day", value }: PeriodSelectorP
           return (
             <button
               key={period.value}
+              type="button"
               ref={(el) => {
                 buttonRefs.current[period.value] = el;
               }}
               onClick={() => updatePeriod(period.value)}
-              className={`
-                relative z-10 px-4 py-2 text-sm font-semibold rounded-md
-                transition-all duration-200
-                ${
-                  isActive
-                    ? "text-white"
-                    : "text-muted hover:text-foreground"
-                }
-              `}
+              className={
+                compact
+                  ? `relative z-10 min-h-11 flex-1 rounded-xl px-2 text-sm font-semibold transition-all duration-200 ${
+                      isActive ? "text-white" : "text-muted hover:text-foreground"
+                    }`
+                  : `relative z-10 rounded-md px-4 py-2 text-sm font-semibold transition-all duration-200 ${
+                      isActive ? "text-white" : "text-muted hover:text-foreground"
+                    }`
+              }
             >
-              {t(period.labelKey)}
+              {t(compact ? compactLabelKey[period.labelKey] : period.labelKey)}
             </button>
           );
         })}

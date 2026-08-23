@@ -254,7 +254,10 @@ test.describe("Mobile dashboard UX", () => {
   });
 
   test("mobile plus menu opens heatmap and settings shortcuts", async ({ page }) => {
+    test.setTimeout(60_000);
+    await seedCookieConsent(page);
     await page.goto(`/en/dashboard/overview${publicDemoQuery}`);
+    await dismissCookieBannerIfPresent(page);
 
     await page.getByRole("button", { name: /open more destinations/i }).click();
     await expect(page.getByRole("dialog")).toBeVisible();
@@ -264,6 +267,7 @@ test.describe("Mobile dashboard UX", () => {
     await expect(page).toHaveURL(/\/en\/dashboard\/heatmap/);
 
     await page.getByRole("button", { name: /open more destinations/i }).click();
+    await expect(page.getByRole("dialog")).toBeVisible();
     await page.getByRole("link", { name: /account hub/i }).click();
     await expect(page).toHaveURL(/\/en\/dashboard\/settings/);
   });
@@ -286,19 +290,39 @@ test.describe("Mobile dashboard UX", () => {
   });
 
   test("heatmap opens day details sheet on tap", async ({ page }) => {
+    test.setTimeout(60_000);
+    await seedCookieConsent(page);
     await page.goto(`/en/dashboard/heatmap${publicDemoQuery}`);
+    await dismissCookieBannerIfPresent(page);
 
-    const activeDay = page
-      .getByRole("button")
-      .filter({ has: page.locator("[title*='listen' i]") })
-      .filter({ hasNot: page.locator("[title*='no listen' i]") })
-      .first();
+    const main = page.getByRole("main");
+    await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 20_000 });
 
-    await expect(activeDay).toBeVisible({ timeout: 15_000 });
-    await activeDay.click();
+    const peakCta = main.getByRole("button", { name: /open that day/i });
+    await expect(peakCta).toBeVisible();
+    await peakCta.click();
 
     await expect(page.getByRole("dialog")).toBeVisible();
     await expect(page.locator("#heatmap-day-details-title")).toBeVisible();
+    await expect(page).toHaveURL(/userId=/);
+  });
+
+  test("heatmap day details is usable in French", async ({ page }) => {
+    test.setTimeout(60_000);
+    await seedCookieConsent(page);
+    await page.goto(`/fr/dashboard/heatmap${publicDemoQuery}`);
+    await dismissCookieBannerIfPresent(page);
+
+    const main = page.getByRole("main");
+    await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 20_000 });
+
+    const peakCta = main.getByRole("button", { name: /ouvrir ce jour/i });
+    await expect(peakCta).toBeVisible();
+    await peakCta.click();
+
+    await expect(page.getByRole("dialog")).toBeVisible();
+    await expect(page.locator("#heatmap-day-details-title")).toBeVisible();
+    await expect(page).toHaveURL(/userId=/);
   });
 
   test("period control opens a sheet and applies 30d", async ({ page }) => {

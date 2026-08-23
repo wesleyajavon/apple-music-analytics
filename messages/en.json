@@ -1347,22 +1347,19 @@
     "heroEyebrow": "Intensity map",
     "mobile": {
       "heroEyebrow": "Intensity",
-      "primaryInsightEyebrow": "Start here",
       "primaryInsightBody": "{date} carried the strongest signal with {count} streams.",
       "peakMetric": "Peak streams",
       "openPeakDay": "Open that day",
-      "signalsLabel": "Key heatmap signals",
-      "signals": {
-        "playsHint": "across this period"
-      },
-      "topDaysEyebrow": "Highest intensity",
-      "topDaysTitle": "Your days worth opening first",
-      "topDaysDescription": "Large tap targets replace tiny calendar squares for the strongest signals.",
+      "signalsLabel": "Signals",
+      "topDaysTitle": "Loudest days",
       "openDayDetails": "Open details for {date}",
-      "calendarDisclosureTitle": "Explore the full calendar",
-      "calendarDisclosureDescription": "Use the complete heatmap when you want month-by-month context.",
-      "calendarTapHint": "For quick detail, start with the ranked days above; the full grid stays here for scanning patterns.",
-      "open": "Open"
+      "emptyTitle": "No days yet",
+      "emptyLead": "Import history to see your loudest days.",
+      "emptyCta": "Import history",
+      "errorLead": "Couldn't load this calendar.",
+      "monthPrev": "Previous month",
+      "monthNext": "Next month",
+      "monthGridLabel": "Daily intensity"
     },
     "heroStatBadge": "Live snapshot",
     "heroStatTag": "This window",

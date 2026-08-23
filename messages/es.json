@@ -1347,22 +1347,19 @@
     "heroEyebrow": "Mapa de intensidad",
     "mobile": {
       "heroEyebrow": "Intensidad",
-      "primaryInsightEyebrow": "Empieza aquí",
       "primaryInsightBody": "{date} marcó la señal más fuerte con {count} streams.",
       "peakMetric": "Streams pico",
       "openPeakDay": "Abrir ese día",
-      "signalsLabel": "Señales clave del mapa",
-      "signals": {
-        "playsHint": "en este período"
-      },
-      "topDaysEyebrow": "Máxima intensidad",
-      "topDaysTitle": "Los días que conviene abrir primero",
-      "topDaysDescription": "Botones grandes sustituyen las casillas pequeñas para las señales más fuertes.",
+      "signalsLabel": "Señales",
+      "topDaysTitle": "Días más intensos",
       "openDayDetails": "Abrir detalles de {date}",
-      "calendarDisclosureTitle": "Explorar el calendario completo",
-      "calendarDisclosureDescription": "Usa el mapa completo cuando quieras contexto mes a mes.",
-      "calendarTapHint": "Para ver detalles rápido, empieza por los días destacados arriba; la cuadrícula completa queda para detectar patrones.",
-      "open": "Abrir"
+      "emptyTitle": "Aún no hay días",
+      "emptyLead": "Importa el historial para ver tus días más intensos.",
+      "emptyCta": "Importar historial",
+      "errorLead": "No se pudo cargar este calendario.",
+      "monthPrev": "Mes anterior",
+      "monthNext": "Mes siguiente",
+      "monthGridLabel": "Intensidad diaria"
     },
     "heroStatBadge": "Instantánea",
     "heroStatTag": "Esta ventana",

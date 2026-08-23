@@ -22,24 +22,22 @@ import {
   useTemporalAnalysis,
 } from "@/lib/hooks/use-listening";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
-import {
-  formatMobileDateRangeLabel,
-  formatOverviewDateRangeLabel,
-} from "@/lib/utils/overview-date-range-label";
+import { formatOverviewDateRangeLabel } from "@/lib/utils/overview-date-range-label";
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
 import { HeatmapDayDetailsPanel } from "@/lib/components/heatmap-day-details-panel";
+import {
+  HeatmapMobileEmpty,
+  HeatmapMobileError,
+  HeatmapMobileExperience,
+  HeatmapMobileSkeleton,
+  type HeatmapMobileTopDay,
+} from "@/lib/components/heatmap-mobile";
 import { MobileBottomSheet } from "@/lib/components/mobile-bottom-sheet";
 import { HeatmapSkeleton } from "@/lib/components/skeleton-loaders";
 import { LiveStatusDot } from "@/lib/components/live-status-dot";
-import {
-  Activity,
-  CalendarDays,
-  ChevronRight,
-  Flame,
-  Music2,
-  TrendingUp,
-} from "lucide-react";
+import { useIsLgChartViewport } from "@/lib/hooks/use-chart-viewport";
+import { Activity, CalendarDays } from "lucide-react";
 import {
   DASHBOARD_SPOTLIGHT_SHELL,
   DASHBOARD_SPOTLIGHT_GRADIENT_LIME,
@@ -132,14 +130,6 @@ type HeatmapComputedStats = HeatmapSummaryStats & {
   } | null;
 };
 
-type HeatmapTopDay = {
-  date: string;
-  formatted: string;
-  shortLabel: string;
-  listens: number;
-  percentageOfPeak: number;
-};
-
 function HeatmapHeroStats({ stats, locale }: { stats: HeatmapSummaryStats; locale: string }) {
   const t = useTranslations("heatmap");
   const pct =
@@ -186,20 +176,6 @@ function HeatmapHeroStatsSkeleton() {
   );
 }
 
-function HeatmapMobileHeaderRow({ badgeLabel }: { badgeLabel: string }) {
-  const t = useTranslations("heatmap");
-  return (
-    <div className="flex items-center justify-between gap-2">
-      <p className="inline-flex min-h-8 shrink-0 items-center whitespace-nowrap rounded-full border border-white/15 bg-white/10 px-2.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-cyan-100">
-        {t("mobile.heroEyebrow")}
-      </p>
-      <span className="inline-flex min-h-8 shrink-0 items-center whitespace-nowrap rounded-full border border-white/15 bg-white/10 px-2.5 text-[10px] font-semibold tabular-nums text-white/85">
-        {badgeLabel}
-      </span>
-    </div>
-  );
-}
-
 function formatMobileDayLabel(date: string, locale: string, format: "short" | "long") {
   const d = new Date(toDateOnly(date) + "T12:00:00Z");
   if (format === "short") {
@@ -216,348 +192,28 @@ function formatMobileDayLabel(date: string, locale: string, format: "short" | "l
   });
 }
 
-function HeatmapMobileLoadingFallback({ badgeLabel }: { badgeLabel: string }) {
-  const t = useTranslations("heatmap");
-  return (
-    <div className="space-y-5 lg:hidden" aria-busy="true">
-      <section className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-gray-950 p-5 text-white shadow-xl shadow-violet-500/10">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.24),transparent_34%),radial-gradient(circle_at_86%_12%,rgba(6,182,212,0.2),transparent_34%)]" />
-        <div className="relative">
-          <HeatmapMobileHeaderRow badgeLabel={badgeLabel} />
-          <div className="mt-6 h-4 w-32 animate-shimmer rounded bg-white/15" />
-          <div className="mt-3 h-9 w-56 max-w-full animate-shimmer rounded bg-white/20" />
-          <div className="mt-3 h-4 w-full animate-shimmer rounded bg-white/10" />
-          <div className="mt-5 h-24 animate-shimmer rounded-[1.35rem] bg-white/10" />
-        </div>
-      </section>
-      <section aria-label={t("mobile.signalsLabel")} className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-1">
-        {[0, 1, 2, 3].map((item) => (
-          <div key={item} className="h-24 min-w-[9.5rem] animate-shimmer rounded-2xl border border-card-border bg-card-surface" />
-        ))}
-      </section>
-    </div>
-  );
-}
-
-function HeatmapMobileSignalRail({
-  stats,
-  locale,
-}: {
-  stats: HeatmapComputedStats;
-  locale: string;
-}) {
-  const t = useTranslations("heatmap");
-  const activePct =
-    stats.totalDays > 0
-      ? Math.round((stats.daysWithListens / stats.totalDays) * 100)
-      : 0;
-  const signals = [
-    {
-      label: t("totalListens"),
-      value: stats.totalListens.toLocaleString(locale),
-      hint: t("mobile.signals.playsHint"),
-    },
-    {
-      label: t("activeDays"),
-      value: `${activePct}%`,
-      hint: `${stats.daysWithListens.toLocaleString(locale)} / ${stats.totalDays.toLocaleString(locale)}`,
-    },
-    {
-      label: t("avgDaily"),
-      value: stats.averageListens.toLocaleString(locale),
-      hint: t("listensPerDay"),
-    },
-    {
-      label: t("favoriteDay"),
-      value: stats.mostActiveWeekday,
-      hint: t("favoriteDayHint"),
-    },
-  ];
-
-  return (
-    <section aria-label={t("mobile.signalsLabel")} className="-mx-4 overflow-x-auto px-4 pb-1 [scrollbar-width:none]">
-      <div className="flex snap-x gap-3">
-        {signals.map((signal) => (
-          <article
-            key={signal.label}
-            className="min-w-[9.5rem] snap-start rounded-2xl border border-card-border bg-card-surface p-4 shadow-sm"
-          >
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
-              {signal.label}
-            </p>
-            <p className="mt-2 truncate text-xl font-semibold tabular-nums tracking-[-0.04em] text-foreground">
-              {signal.value}
-            </p>
-            <p className="mt-1 truncate text-xs text-muted">{signal.hint}</p>
-          </article>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function HeatmapMobileDayButton({
-  day,
-  rank,
-  locale,
-  onSelect,
-}: {
-  day: HeatmapTopDay;
-  rank: number;
-  locale: string;
-  onSelect: (date: string, count: number) => void;
-}) {
-  const t = useTranslations("heatmap");
-  return (
-    <button
-      type="button"
-      className="group flex min-h-14 w-full items-center gap-3 rounded-2xl border border-card-border bg-surface/70 px-3 py-2.5 text-left transition-colors active:bg-surface-glass"
-      onClick={() => onSelect(day.date, day.listens)}
-      aria-label={t("mobile.openDayDetails", { date: day.formatted })}
-    >
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-950 text-xs font-bold text-white dark:bg-white dark:text-slate-950">
-        {rank}
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="block truncate text-sm font-semibold text-foreground">
-          {day.formatted}
-        </span>
-        <span className="mt-2 block h-1.5 overflow-hidden rounded-full bg-slate-200/80 dark:bg-white/10">
-          <span
-            className="block h-full rounded-full bg-gradient-to-r from-emerald-400 via-sky-400 to-violet-500"
-            style={{ width: `${day.percentageOfPeak}%` }}
-          />
-        </span>
-      </span>
-      <span className="shrink-0 text-right">
-        <span className="block text-sm font-semibold tabular-nums text-foreground">
-          {day.listens.toLocaleString(locale)}
-        </span>
-        <span className="text-[11px] text-muted">{t("listens")}</span>
-      </span>
-      <ChevronRight className="h-4 w-4 shrink-0 text-muted transition-transform group-active:translate-x-0.5" aria-hidden />
-    </button>
-  );
-}
-
-function HeatmapMobileDisclosure({
-  title,
-  description,
-  children,
-}: {
-  title: string;
-  description: string;
-  children: ReactNode;
-}) {
-  const t = useTranslations("heatmap");
-  return (
-    <details className="group rounded-[1.5rem] border border-card-border bg-card-surface shadow-sm">
-      <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-left [&::-webkit-details-marker]:hidden">
-        <span>
-          <span className="block text-sm font-semibold text-foreground">{title}</span>
-          <span className="mt-0.5 block text-xs leading-5 text-muted">{description}</span>
-        </span>
-        <span className="rounded-full border border-card-border bg-surface px-3 py-1 text-xs font-semibold text-muted transition group-open:bg-primary group-open:text-primary-foreground">
-          {t("mobile.open")}
-        </span>
-      </summary>
-      <div className="border-t border-card-border p-4">{children}</div>
-    </details>
-  );
-}
-
-function HeatmapMobileStateCard({
-  badgeLabel,
-  title,
-  description,
-  children,
-}: {
-  badgeLabel: string;
-  title: string;
-  description: string;
-  children: ReactNode;
-}) {
-  return (
-    <div className="space-y-5 lg:hidden">
-      <section className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-gray-950 p-5 text-white shadow-xl shadow-violet-500/10">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.24),transparent_34%),radial-gradient(circle_at_86%_12%,rgba(6,182,212,0.2),transparent_34%),linear-gradient(150deg,rgba(3,7,18,0.98),rgba(30,27,75,0.84)_55%,rgba(8,47,73,0.6))]" aria-hidden />
-        <div className="relative">
-          <HeatmapMobileHeaderRow badgeLabel={badgeLabel} />
-          <h1 className="mt-5 text-balance text-3xl font-semibold tracking-[-0.06em]">
-            {title}
-          </h1>
-          <p className="mt-3 text-sm leading-6 text-slate-300">{description}</p>
-        </div>
-      </section>
-      <div className="rounded-[1.5rem] border border-card-border bg-card-surface p-4 shadow-sm">
-        {children}
-      </div>
-    </div>
-  );
-}
-
-function HeatmapMobileExperience({
-  badgeLabel,
-  stats,
-  topDays,
-  heatmapData,
-  calendarStart,
-  calendarEnd,
-  selectedDate,
-  locale,
-  onDayClick,
-}: {
-  badgeLabel: string;
-  stats: HeatmapComputedStats;
-  topDays: HeatmapTopDay[];
-  heatmapData: HeatmapDataPoint[];
-  calendarStart?: string;
-  calendarEnd?: string;
-  selectedDate: string | null;
-  locale: string;
-  onDayClick: (date: string, count: number) => void;
-}) {
-  const t = useTranslations("heatmap");
-  const peakDay = topDays[0];
-
-  return (
-    <div className="space-y-5 lg:hidden">
-      <section className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-gray-950 p-5 text-white shadow-xl shadow-violet-500/10">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.26),transparent_34%),radial-gradient(circle_at_86%_10%,rgba(6,182,212,0.22),transparent_34%),linear-gradient(150deg,rgba(3,7,18,0.98),rgba(30,27,75,0.84)_55%,rgba(8,47,73,0.6))]" aria-hidden />
-        <div className="relative">
-          <HeatmapMobileHeaderRow badgeLabel={badgeLabel} />
-
-          <div className="mt-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
-              {t("mobile.primaryInsightEyebrow")}
-            </p>
-            <h1 className="mt-3 text-balance text-3xl font-semibold tracking-[-0.06em]">
-              {peakDay ? peakDay.shortLabel : t("title")}
-            </h1>
-            <p className="mt-3 text-sm leading-6 text-slate-300">
-              {peakDay
-                ? t("mobile.primaryInsightBody", {
-                    count: peakDay.listens.toLocaleString(locale),
-                    date: peakDay.formatted,
-                  })
-                : t("subtitle")}
-            </p>
-          </div>
-
-          <div className="mt-5 rounded-[1.35rem] border border-white/12 bg-white/10 p-4 backdrop-blur">
-            <div className="flex items-end justify-between gap-4">
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                  {t("mobile.peakMetric")}
-                </p>
-                <p className="mt-1 text-4xl font-semibold tabular-nums tracking-[-0.06em]">
-                  {(peakDay?.listens ?? stats.maxListens).toLocaleString(locale)}
-                </p>
-              </div>
-              <div className="max-w-[8rem] text-right">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                  {t("favoriteDay")}
-                </p>
-                <p className="mt-1 truncate text-sm font-semibold text-cyan-100">
-                  {stats.mostActiveWeekday}
-                </p>
-              </div>
-            </div>
-            {peakDay ? (
-              <button
-                type="button"
-                onClick={() => onDayClick(peakDay.date, peakDay.listens)}
-                className="mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-white px-4 text-sm font-bold text-gray-950 shadow-lg shadow-black/20"
-              >
-                <Flame className="h-4 w-4" aria-hidden />
-                {t("mobile.openPeakDay")}
-              </button>
-            ) : null}
-          </div>
-        </div>
-      </section>
-
-      <HeatmapMobileSignalRail stats={stats} locale={locale} />
-
-      {topDays.length > 0 ? (
-        <section className="rounded-[1.5rem] border border-card-border bg-card-surface p-4 shadow-sm">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-                <TrendingUp className="h-3.5 w-3.5" aria-hidden />
-                {t("mobile.topDaysEyebrow")}
-              </p>
-              <h2 className="mt-1 text-lg font-semibold tracking-[-0.035em] text-foreground">
-                {t("mobile.topDaysTitle")}
-              </h2>
-              <p className="mt-1 text-sm leading-6 text-muted">
-                {t("mobile.topDaysDescription")}
-              </p>
-            </div>
-          </div>
-          <div className="mt-4 space-y-2">
-            {topDays.map((day, index) => (
-              <HeatmapMobileDayButton
-                key={day.date}
-                day={day}
-                rank={index + 1}
-                locale={locale}
-                onSelect={onDayClick}
-              />
-            ))}
-          </div>
-        </section>
-      ) : null}
-
-      <HeatmapMobileDisclosure
-        title={t("mobile.calendarDisclosureTitle")}
-        description={t("mobile.calendarDisclosureDescription")}
-      >
-        {heatmapData.length > 0 ? (
-          <div className="rounded-[1.25rem] border border-card-border bg-surface/70 p-3">
-            <p className="mb-3 flex items-center gap-2 text-xs font-medium leading-5 text-muted">
-              <Music2 className="h-4 w-4 text-primary" aria-hidden />
-              {t("mobile.calendarTapHint")}
-            </p>
-            <CalendarHeatmap
-              data={heatmapData}
-              startDate={calendarStart}
-              endDate={calendarEnd}
-              selectedDate={selectedDate}
-              onDayClick={onDayClick}
-              locale={locale}
-              colorScheme="aurora"
-            />
-          </div>
-        ) : (
-          <p className="py-6 text-center text-sm text-muted">{t("noDataPeriod")}</p>
-        )}
-      </HeatmapMobileDisclosure>
-    </div>
-  );
-}
-
 function HeatmapPageFallback() {
-  const t = useTranslations("heatmap");
   const tOverview = useTranslations("overview");
   const badgeLabel = tOverview("allData");
   return (
-    <div className="space-y-8">
-      <HeatmapMobileLoadingFallback badgeLabel={badgeLabel} />
-      <div className="hidden lg:block">
+    <>
+      <div className="lg:hidden">
+        <HeatmapMobileSkeleton />
+      </div>
+      <div className="hidden space-y-8 lg:block">
         <HeatmapHeroFrame
           badgeLabel={badgeLabel}
           stats={<HeatmapHeroStatsSkeleton />}
         />
+        <section className={HEATMAP_CALENDAR_SECTION_CLASS}>
+          <div className={DASHBOARD_SPOTLIGHT_GRADIENT_LIME} aria-hidden />
+          <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_LIME} aria-hidden />
+          <div className="relative p-6 sm:p-8">
+            <HeatmapSkeleton />
+          </div>
+        </section>
       </div>
-      <section className={`${HEATMAP_CALENDAR_SECTION_CLASS} hidden lg:block`}>
-        <div className={DASHBOARD_SPOTLIGHT_GRADIENT_LIME} aria-hidden />
-        <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_LIME} aria-hidden />
-        <div className="relative p-6 sm:p-8">
-          <HeatmapSkeleton />
-        </div>
-      </section>
-    </div>
+    </>
   );
 }
 
@@ -572,6 +228,7 @@ function HeatmapContent() {
   const t = useTranslations("heatmap");
   const tOverview = useTranslations("overview");
   const locale = useLocale();
+  const isLg = useIsLgChartViewport();
   const emptyStatePresets = useEmptyStatePresets();
   const selectedDateParam = searchParams.get("selectedDate");
   const [selectedDate, setSelectedDate] = useState<string | null>(
@@ -580,13 +237,13 @@ function HeatmapContent() {
   const dayDetailsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (selectedDate && dayDetailsRef.current) {
+    if (selectedDate && isLg && dayDetailsRef.current) {
       dayDetailsRef.current.scrollIntoView({
         behavior: "smooth",
         block: "start",
       });
     }
-  }, [selectedDate]);
+  }, [selectedDate, isLg]);
 
   const startDate = searchParams.get("startDate") || undefined;
   const endDate = searchParams.get("endDate") || undefined;
@@ -601,9 +258,6 @@ function HeatmapContent() {
   const badgeLabel = badgeRangeLabel
     ? t("dateRangeBadge", { range: badgeRangeLabel })
     : tOverview("allData");
-  const mobileBadgeLabel =
-    formatMobileDateRangeLabel(badgeStart, badgeEnd, locale) ||
-    tOverview("allData");
 
   const {
     data: timelineData,
@@ -775,9 +429,8 @@ function HeatmapContent() {
     locale,
   ]);
 
-  const topActiveDays = useMemo<HeatmapTopDay[]>(() => {
+  const topActiveDays = useMemo<HeatmapMobileTopDay[]>(() => {
     if (!timelineData?.length) return [];
-    const maxListens = Math.max(...timelineData.map((point) => point.listens), 1);
     return [...timelineData]
       .filter((point) => point.listens > 0)
       .sort((a, b) => b.listens - a.listens)
@@ -787,10 +440,6 @@ function HeatmapContent() {
         formatted: formatMobileDayLabel(point.date, locale, "long"),
         shortLabel: formatMobileDayLabel(point.date, locale, "short"),
         listens: point.listens,
-        percentageOfPeak: Math.max(
-          8,
-          Math.round((point.listens / maxListens) * 100),
-        ),
       }));
   }, [timelineData, locale]);
 
@@ -825,19 +474,17 @@ function HeatmapContent() {
 
   if (!isLoading && error) {
     return (
-      <div className="space-y-8">
-        <HeatmapMobileStateCard
-          badgeLabel={mobileBadgeLabel}
-          title={t("title")}
-          description={t("errorLoading")}
-        >
-          <ErrorState
-            variant="startup"
-            error={error}
-            message={t("errorLoading")}
-            onRetry={handleRetry}
-          />
-        </HeatmapMobileStateCard>
+      <>
+        <div className="lg:hidden">
+          <HeatmapMobileError locale={locale}>
+            <ErrorState
+              variant="startup"
+              error={error}
+              message={t("errorLoading")}
+              onRetry={handleRetry}
+            />
+          </HeatmapMobileError>
+        </div>
         <div className="hidden space-y-8 lg:block">
           <HeatmapHeroFrame badgeLabel={badgeLabel} stats={null} />
           <section className={HEATMAP_CALENDAR_SECTION_CLASS}>
@@ -853,45 +500,42 @@ function HeatmapContent() {
             </div>
           </section>
         </div>
-      </div>
+      </>
     );
   }
 
   if (!isLoading && (!timelineData || timelineData.length === 0)) {
     return (
-      <div className="space-y-8">
-        <HeatmapMobileStateCard
-          badgeLabel={mobileBadgeLabel}
-          title={t("title")}
-          description={t("subtitle")}
-        >
-          <EmptyState variant="startup" {...emptyStatePresets.importData} />
-        </HeatmapMobileStateCard>
+      <>
+        <div className="lg:hidden">
+          <HeatmapMobileEmpty />
+        </div>
         <div className="hidden space-y-8 lg:block">
           <HeatmapHeroFrame badgeLabel={badgeLabel} stats={null} />
           <EmptyState variant="startup" {...emptyStatePresets.importData} />
         </div>
-      </div>
+      </>
     );
   }
 
   return (
     <>
-      {isLoading ? (
-        <HeatmapMobileLoadingFallback badgeLabel={mobileBadgeLabel} />
-      ) : stats ? (
-        <HeatmapMobileExperience
-          badgeLabel={mobileBadgeLabel}
-          stats={stats}
-          topDays={topActiveDays}
-          heatmapData={heatmapData}
-          calendarStart={calendarStart}
-          calendarEnd={calendarEnd}
-          selectedDate={selectedDate}
-          locale={locale}
-          onDayClick={handleDayClick}
-        />
-      ) : null}
+      <div className="lg:hidden">
+        {isLoading ? (
+          <HeatmapMobileSkeleton />
+        ) : stats ? (
+          <HeatmapMobileExperience
+            stats={stats}
+            topDays={topActiveDays}
+            heatmapData={heatmapData}
+            calendarStart={calendarStart}
+            calendarEnd={calendarEnd}
+            selectedDate={selectedDate}
+            locale={locale}
+            onDayClick={handleDayClick}
+          />
+        ) : null}
+      </div>
 
       <div className="hidden space-y-8 lg:block">
         <HeatmapHeroFrame
@@ -1009,7 +653,7 @@ export default function HeatmapPage() {
   const filterKey = `${startDateParam}-${endDateParam}-${selectedDateParam}`;
 
   return (
-    <div className="px-4 pb-4 pt-0 sm:px-0 lg:pb-6">
+    <div className="max-lg:p-0 lg:py-6">
       <Suspense fallback={<HeatmapPageFallback />}>
         <HeatmapContent key={filterKey} />
       </Suspense>

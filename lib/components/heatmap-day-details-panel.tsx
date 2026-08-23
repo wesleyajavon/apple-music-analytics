@@ -218,7 +218,7 @@ export function HeatmapDayDetailsPanel({
 
   const showPeakMeter = !isLoading && periodMaxListens > 0;
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-sky-300/20 bg-[rgb(var(--card-rgb)/0.92)] shadow-card backdrop-blur-sm dark:border-sky-300/15 dark:bg-[rgb(var(--card-rgb)/0.9)]">
+    <div className="relative overflow-hidden rounded-2xl border border-sky-300/20 bg-[rgb(var(--card-rgb)/0.92)] shadow-card backdrop-blur-sm max-lg:rounded-none max-lg:border-0 max-lg:bg-transparent max-lg:shadow-none max-lg:backdrop-blur-none dark:border-sky-300/15 dark:bg-[rgb(var(--card-rgb)/0.9)] dark:max-lg:bg-transparent">
       <div className={`pointer-events-none absolute inset-x-0 top-0 z-10 h-px ${RAIL} opacity-90`} />
 
       <header className={HERO_HEADER}>
@@ -311,13 +311,13 @@ export function HeatmapDayDetailsPanel({
 
       <div className="relative border-t border-sky-200/15 dark:border-sky-300/10">
         {isLoading ? (
-          <div className="p-6 sm:p-8">
+          <div className="p-4 lg:p-8">
             <DayDetailsSkeleton />
           </div>
         ) : dayListens && dayListens.data.length > 0 ? (
-          <div className="space-y-8 p-6 sm:p-8">
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-              <div className="group rounded-2xl border border-sky-200/25 bg-white/55 p-4 shadow-sm dark:border-sky-300/12 dark:bg-slate-950/35">
+          <div className="space-y-8 p-4 lg:p-8">
+            <div className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:mx-0 lg:grid lg:grid-cols-3 lg:overflow-visible lg:px-0 lg:pb-0">
+              <div className="min-w-[9.75rem] snap-start rounded-2xl border border-sky-200/25 bg-white/55 p-4 shadow-sm dark:border-sky-300/12 dark:bg-slate-950/35 lg:min-w-0">
                 <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted">
                   <Music2 className="h-4 w-4 text-sky-500 dark:text-sky-300" aria-hidden />
                   {t("totalListens")}
@@ -326,7 +326,7 @@ export function HeatmapDayDetailsPanel({
                   {dayListens.total.toLocaleString(locale)}
                 </p>
               </div>
-              <div className="group rounded-2xl border border-emerald-200/25 bg-white/55 p-4 shadow-sm dark:border-emerald-300/12 dark:bg-slate-950/35">
+              <div className="min-w-[9.75rem] snap-start rounded-2xl border border-emerald-200/25 bg-white/55 p-4 shadow-sm dark:border-emerald-300/12 dark:bg-slate-950/35 lg:min-w-0">
                 <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted">
                   <Users className="h-4 w-4 text-emerald-600 dark:text-emerald-300" aria-hidden />
                   {t("uniqueArtists")}
@@ -335,7 +335,7 @@ export function HeatmapDayDetailsPanel({
                   {analysis.uniqueArtists.toLocaleString(locale)}
                 </p>
               </div>
-              <div className="group rounded-2xl border border-violet-200/25 bg-white/55 p-4 shadow-sm dark:border-violet-300/12 dark:bg-slate-950/35">
+              <div className="min-w-[9.75rem] snap-start rounded-2xl border border-violet-200/25 bg-white/55 p-4 shadow-sm dark:border-violet-300/12 dark:bg-slate-950/35 lg:min-w-0">
                 <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted">
                   <Disc3 className="h-4 w-4 text-violet-600 dark:text-violet-300" aria-hidden />
                   {t("uniqueTracks")}
@@ -545,7 +545,7 @@ export function HeatmapDayDetailsPanel({
             </div>
           </div>
         ) : dayListens && dayListens.data.length === 0 ? (
-          <div className="p-6 sm:p-8">{emptyStateNoPlays}</div>
+          <div className="p-4 lg:p-8">{emptyStateNoPlays}</div>
         ) : null}
       </div>
     </div>

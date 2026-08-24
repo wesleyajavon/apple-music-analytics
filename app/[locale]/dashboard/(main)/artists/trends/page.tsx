@@ -37,6 +37,7 @@ import {
   applyListenTrendChartViewMulti,
   type ListenTrendChartViewMode,
 } from "@/lib/utils/listen-trend-chart-view";
+import { nextDefaultTrendSelection } from "@/lib/utils/listen-trend-default-selection";
 import { GenreTrendsSkeleton } from "@/lib/components/skeleton-loaders";
 import { ArtistTrendsArtistPicker } from "@/lib/components/artist-trends-artist-picker";
 import {
@@ -407,11 +408,12 @@ function TrendsContent() {
   const [extraSearchArtists, setExtraSearchArtists] = useState<
     ArtistTrendsChartArtist[]
   >([]);
-  const defaultSelectionAppliedRef = useRef(false);
+  const selectionTouchedRef = useRef(false);
 
   useEffect(() => {
-    defaultSelectionAppliedRef.current = false;
-  }, [startDate, endDate, period]);
+    if (selectionTouchedRef.current) return;
+    setExtraSearchArtists([]);
+  }, [startDate, endDate]);
 
   /** 0 ms jusqu’à la première réponse chart — pas de délai au premier rendu des sélections par défaut. */
   const [selectionDebounceMs, setSelectionDebounceMs] = useState(0);
@@ -490,18 +492,20 @@ function TrendsContent() {
   }, [data?.catalogArtists, data?.availableArtists]);
 
   useEffect(() => {
-    if (defaultSourceIds.length === 0) return;
-    if (defaultSelectionAppliedRef.current) return;
-    if (selectedIds.length > 0) return;
-    const defaultSelected =
-      defaultSourceIds.length <= 5
-        ? [...defaultSourceIds]
-        : defaultSourceIds.slice(0, 5);
-    setSelectedIds(defaultSelected);
-    defaultSelectionAppliedRef.current = true;
-  }, [defaultSourceIds, selectedIds.length]);
+    if (selectionTouchedRef.current) return;
+    setSelectedIds((prev) => {
+      const next = nextDefaultTrendSelection({
+        selectionTouched: false,
+        chartFetching,
+        catalogIds: defaultSourceIds,
+        currentIds: prev,
+      });
+      return next ?? prev;
+    });
+  }, [startDate, endDate, chartFetching, defaultSourceIds]);
 
   const toggleArtist = useCallback((id: string) => {
+    selectionTouchedRef.current = true;
     setSelectedIds((prev) => {
       if (prev.includes(id)) return prev.filter((x) => x !== id);
       if (prev.length >= MAX_SERIES_ARTISTS) return prev;
@@ -510,6 +514,7 @@ function TrendsContent() {
   }, []);
 
   const handlePickRemoteArtist = useCallback((artist: ArtistTrendsChartArtist) => {
+    selectionTouchedRef.current = true;
     setExtraSearchArtists((prev) => {
       if (prev.some((p) => p.id === artist.id)) return prev;
       return [...prev, artist];
@@ -522,10 +527,12 @@ function TrendsContent() {
   }, []);
 
   const selectAll = useCallback(() => {
+    selectionTouchedRef.current = true;
     setSelectedIds(pickerArtists.slice(0, MAX_SERIES_ARTISTS).map((a) => a.id));
   }, [pickerArtists]);
 
   const selectNone = useCallback(() => {
+    selectionTouchedRef.current = true;
     setSelectedIds([]);
   }, []);
 

@@ -19,6 +19,7 @@ import {
   applyListenTrendChartViewMulti,
   type ListenTrendChartViewMode,
 } from "@/lib/utils/listen-trend-chart-view";
+import { nextDefaultTrendSelection } from "@/lib/utils/listen-trend-default-selection";
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
 import { GenreTrendsSkeleton } from "@/lib/components/skeleton-loaders";
@@ -341,12 +342,13 @@ function TrendsContent() {
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [extraSearchTracks, setExtraSearchTracks] = useState<TrackTrendsChartTrack[]>([]);
-  const defaultSelectionAppliedRef = useRef(false);
+  const selectionTouchedRef = useRef(false);
   const [selectionDebounceMs, setSelectionDebounceMs] = useState(0);
 
   useEffect(() => {
-    defaultSelectionAppliedRef.current = false;
-  }, [startDate, endDate, period]);
+    if (selectionTouchedRef.current) return;
+    setExtraSearchTracks([]);
+  }, [startDate, endDate]);
 
   const debouncedSelectedIds = useDebouncedValue(selectedIds, selectionDebounceMs);
   const selectionPending = !idsEqualSorted(selectedIds, debouncedSelectedIds);
@@ -388,18 +390,26 @@ function TrendsContent() {
     });
   }, [data?.catalogTracks]);
 
-  const defaultSourceIds = useMemo(() => pickerTracks.map((item) => item.id), [pickerTracks]);
+  const defaultSourceIds = useMemo(() => {
+    const src = data?.catalogTracks ?? data?.availableTracks;
+    return src?.map((item) => item.id) ?? [];
+  }, [data?.catalogTracks, data?.availableTracks]);
+
   useEffect(() => {
-    if (defaultSourceIds.length === 0) return;
-    if (defaultSelectionAppliedRef.current) return;
-    if (selectedIds.length > 0) return;
-    const defaultSelected =
-      defaultSourceIds.length <= 5 ? [...defaultSourceIds] : defaultSourceIds.slice(0, 5);
-    setSelectedIds(defaultSelected);
-    defaultSelectionAppliedRef.current = true;
-  }, [defaultSourceIds, selectedIds.length]);
+    if (selectionTouchedRef.current) return;
+    setSelectedIds((prev) => {
+      const next = nextDefaultTrendSelection({
+        selectionTouched: false,
+        chartFetching: isFetching,
+        catalogIds: defaultSourceIds,
+        currentIds: prev,
+      });
+      return next ?? prev;
+    });
+  }, [startDate, endDate, isFetching, defaultSourceIds]);
 
   const toggleTrack = useCallback((id: string) => {
+    selectionTouchedRef.current = true;
     setSelectedIds((prev) => {
       if (prev.includes(id)) return prev.filter((x) => x !== id);
       if (prev.length >= MAX_SERIES_TRACKS) return prev;
@@ -408,6 +418,7 @@ function TrendsContent() {
   }, []);
 
   const handlePickRemoteTrack = useCallback((track: TrackTrendsChartTrack) => {
+    selectionTouchedRef.current = true;
     setExtraSearchTracks((prev) => (prev.some((p) => p.id === track.id) ? prev : [...prev, track]));
     setSelectedIds((prev) => {
       if (prev.includes(track.id)) return prev;
@@ -417,10 +428,14 @@ function TrendsContent() {
   }, []);
 
   const selectAll = useCallback(() => {
+    selectionTouchedRef.current = true;
     setSelectedIds(pickerTracks.slice(0, MAX_SERIES_TRACKS).map((item) => item.id));
   }, [pickerTracks]);
 
-  const selectNone = useCallback(() => setSelectedIds([]), []);
+  const selectNone = useCallback(() => {
+    selectionTouchedRef.current = true;
+    setSelectedIds([]);
+  }, []);
   const getTrackIndex = useCallback((trackId: string) => pickerTracks.findIndex((x) => x.id === trackId), [pickerTracks]);
   const idToTrack = useMemo(() => new Map(pickerTracks.map((item) => [item.id, item])), [pickerTracks]);
   const chartData = data?.data ?? [];

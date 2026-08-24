@@ -40,6 +40,7 @@ import {
   applyListenTrendChartViewMulti,
   type ListenTrendChartViewMode,
 } from "@/lib/utils/listen-trend-chart-view";
+import { nextDefaultTrendSelection } from "@/lib/utils/listen-trend-default-selection";
 import { GenreTrendsSkeleton } from "@/lib/components/skeleton-loaders";
 import { usePublicDemoViewer } from "@/lib/hooks/use-public-demo-viewer";
 import { useDebouncedValue } from "@/lib/hooks/use-debounced-value";
@@ -402,11 +403,7 @@ function TrendsContent() {
     "light"
   );
   const [genreFilterPage, setGenreFilterPage] = useState(0);
-  const defaultSelectionAppliedRef = useRef(false);
-
-  useEffect(() => {
-    defaultSelectionAppliedRef.current = false;
-  }, [startDate, endDate, period]);
+  const selectionTouchedRef = useRef(false);
 
   /** 0 ms jusqu’à la première réponse chart — pas de délai au premier rendu des sélections par défaut. */
   const [selectionDebounceMs, setSelectionDebounceMs] = useState(0);
@@ -454,16 +451,17 @@ function TrendsContent() {
   );
 
   useEffect(() => {
-    if (availableGenres.length === 0) return;
-    if (defaultSelectionAppliedRef.current) return;
-    if (selectedGenres.length > 0) return;
-    const defaultSelected =
-      availableGenres.length <= 5
-        ? [...availableGenres]
-        : availableGenres.slice(0, 5);
-    setSelectedGenres(defaultSelected);
-    defaultSelectionAppliedRef.current = true;
-  }, [availableGenres, selectedGenres.length]);
+    if (selectionTouchedRef.current) return;
+    setSelectedGenres((prev) => {
+      const next = nextDefaultTrendSelection({
+        selectionTouched: false,
+        chartFetching,
+        catalogIds: availableGenres,
+        currentIds: prev,
+      });
+      return next ?? prev;
+    });
+  }, [startDate, endDate, chartFetching, availableGenres]);
 
   const genreFilterPageCount = Math.max(
     1,
@@ -494,6 +492,7 @@ function TrendsContent() {
   }, [genreFilterPage, genreFilterPageCount]);
 
   const toggleGenre = useCallback((genre: string) => {
+    selectionTouchedRef.current = true;
     setSelectedGenres((prev) => {
       if (prev.includes(genre)) return prev.filter((g) => g !== genre);
       if (prev.length >= MAX_SERIES_GENRES) return prev;
@@ -502,14 +501,17 @@ function TrendsContent() {
   }, []);
 
   const selectAll = useCallback(() => {
+    selectionTouchedRef.current = true;
     setSelectedGenres(visibleGenres.slice(0, MAX_SERIES_GENRES));
   }, [visibleGenres]);
 
   const selectAllMobile = useCallback(() => {
+    selectionTouchedRef.current = true;
     setSelectedGenres(availableGenres.slice(0, MAX_SERIES_GENRES));
   }, [availableGenres]);
 
   const selectNone = useCallback(() => {
+    selectionTouchedRef.current = true;
     setSelectedGenres([]);
   }, []);
 

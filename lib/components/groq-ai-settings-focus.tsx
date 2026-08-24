@@ -3,7 +3,17 @@
 import { useEffect, useRef } from "react";
 import { GROQ_AI_CONSENT_SETTINGS_HASH } from "@/lib/constants/groq-ai-settings";
 
-/** Opens Preferences and scrolls to the Groq consent block when the URL hash matches. */
+function queryVisibleElement(id: string): HTMLElement | null {
+  const nodes = document.querySelectorAll(`#${CSS.escape(id)}`);
+  for (const node of nodes) {
+    if (node instanceof HTMLElement && node.getClientRects().length > 0) {
+      return node;
+    }
+  }
+  return null;
+}
+
+/** Opens Preferences (desktop) and scrolls to the Groq consent block when the URL hash matches. */
 export function GroqAiSettingsFocus({
   preferencesVisible,
   onOpenPreferences,
@@ -22,9 +32,7 @@ export function GroqAiSettingsFocus({
 
   useEffect(() => {
     if (window.location.hash !== `#${GROQ_AI_CONSENT_SETTINGS_HASH}`) return;
-    if (!preferencesVisible) return;
-
-    const el = document.getElementById(GROQ_AI_CONSENT_SETTINGS_HASH);
+    const el = queryVisibleElement(GROQ_AI_CONSENT_SETTINGS_HASH);
     if (!el) return;
 
     window.requestAnimationFrame(() => {

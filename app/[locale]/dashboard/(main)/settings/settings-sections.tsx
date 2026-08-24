@@ -21,13 +21,13 @@ import {
   DASHBOARD_SPOTLIGHT_HAIRLINE_CYAN,
   DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET,
   DASHBOARD_SPOTLIGHT_HEADER_BOTTOM,
-  DASHBOARD_SPOTLIGHT_INNER_WELL,
   DASHBOARD_SPOTLIGHT_MUTED,
   DASHBOARD_SPOTLIGHT_SHELL,
 } from "@/lib/constants/dashboard-spotlight";
 import {
   SETTINGS_INPUT_CLASS,
   SETTINGS_PRIMARY_SAVE_CLASS,
+  DangerPhraseFields,
   SettingsDataCard,
   SettingsSectionHeader,
   SettingsToggleRow,
@@ -530,63 +530,6 @@ export function SettingsYourDataSection({
         </SettingsDataCard>
       </div>
     </section>
-  );
-}
-
-function DangerPhraseFields({
-  expectedPhrase,
-  phraseLoadError,
-  phraseInput,
-  onPhraseInputChange,
-  inputId,
-}: {
-  expectedPhrase: string | null;
-  phraseLoadError: string | null;
-  phraseInput: string;
-  onPhraseInputChange: (value: string) => void;
-  inputId: string;
-}) {
-  const t = useTranslations("settings");
-  const tCommon = useTranslations("common");
-
-  if (phraseLoadError) {
-    return (
-      <p className="text-sm font-medium text-red-800 dark:text-red-300" role="alert">
-        {phraseLoadError}
-      </p>
-    );
-  }
-
-  if (!expectedPhrase) {
-    return <p className={DASHBOARD_SPOTLIGHT_MUTED}>{tCommon("pleaseWait")}</p>;
-  }
-
-  return (
-    <div className="space-y-3">
-      <p className="text-sm text-slate-800 dark:text-slate-200">{t("phraseInstruction")}</p>
-      <div
-        className={`${DASHBOARD_SPOTLIGHT_INNER_WELL} font-mono text-base font-semibold tracking-wide text-slate-900 dark:text-white`}
-      >
-        {expectedPhrase}
-      </div>
-      <div>
-        <label className="text-sm font-medium text-slate-900 dark:text-white" htmlFor={inputId}>
-          {t("phraseLabel")}
-        </label>
-        <input
-          id={inputId}
-          type="text"
-          name={inputId}
-          autoComplete="off"
-          spellCheck={false}
-          value={phraseInput}
-          onChange={(e) => onPhraseInputChange(e.target.value)}
-          placeholder={t("phrasePlaceholder")}
-          className={`${SETTINGS_INPUT_CLASS} font-mono`}
-        />
-        <p className={`mt-2 text-xs ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("phraseHint")}</p>
-      </div>
-    </div>
   );
 }
 

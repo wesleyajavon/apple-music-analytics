@@ -704,34 +704,15 @@
     "consentTableMissing": "Consent storage is not ready. Run npm run db:migrate, then restart the dev server.",
     "publicProfileSaving": "Saving…",
     "mobile": {
-      "eyebrow": "Account hub",
-      "storyTitle": "Your account, your controls",
-      "storyTitleNamed": "{name}",
-      "storyBody": "Jump to a section below when you need to update something.",
+      "eyebrow": "Settings",
       "unnamedAccount": "Unnamed account",
-      "signalsLabel": "Account signals",
-      "signals": {
-        "displayName": "Display name",
-        "photo": "Profile photo",
-        "photoSet": "Set",
-        "photoMissing": "None",
-        "genreBanner": "Groq prompts",
-        "genreHidden": "Hidden",
-        "genreVisible": "Visible",
-        "data": "streaming data"
-      },
-      "profileDisclosureTitle": "Edit profile",
-      "profileDisclosureSummary": "Photo, name, and email",
-      "preferencesDisclosureTitle": "Preferences",
-      "preferencesDisclosureSummary": "Prompts, AI, and Duet sharing",
-      "yourDataDisclosureTitle": "Your data",
-      "yourDataDisclosureSummary": "Imports, reports, and full export",
-      "dangerDisclosureTitle": "Danger zone",
-      "dangerDisclosureSummary": "Clear streaming data or delete account",
-      "trustDisclosureTitle": "What you control here",
-      "trustDisclosureSummary": "Identity, comfort, and your data",
-      "signedOutStoryTitle": "Sign in to manage your account",
-      "signedOutStoryBody": "Profile, imports, and data controls unlock after authentication."
+      "groupAccount": "Account",
+      "groupDataPrivacy": "Data & privacy",
+      "groupAi": "AI",
+      "groupDemo": "Demo",
+      "groupDanger": "Danger zone",
+      "signedOutTitle": "Sign in to manage your account",
+      "signedOutBody": "Profile, imports, and data controls unlock after you sign in."
     }
   },
   "auth": {

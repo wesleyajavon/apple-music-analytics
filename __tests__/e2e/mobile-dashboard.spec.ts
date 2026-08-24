@@ -730,4 +730,64 @@ test.describe("Mobile dashboard UX", () => {
     await expect(page.getByRole("navigation", { name: /sections de comparaison/i })).toBeHidden();
     await expect(page).toHaveURL(/userId=/);
   });
+
+  test("settings signed-out mobile has no section switcher", async ({ page, isMobile }) => {
+    test.skip(!isMobile, "Mobile Settings tree is lg:hidden");
+    test.setTimeout(90_000);
+    await seedCookieConsent(page);
+    await page.goto(`/en/dashboard/settings${publicDemoQuery}`);
+    await dismissCookieBannerIfPresent(page);
+
+    const main = page.getByRole("main");
+    await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 20_000 });
+    await expect(main.getByRole("link", { name: /^sign in$/i })).toBeVisible();
+    await expect(page.getByRole("tablist", { name: /account settings sections/i })).toBeHidden();
+    await expect(main.getByText(/three things you can manage here/i)).toHaveCount(0);
+  });
+
+  test("settings hub shows account and data groups", async ({ page, isMobile }) => {
+    test.skip(!isMobile, "Mobile Settings tree is lg:hidden");
+    test.skip(
+      !hasSeededAuthUser,
+      "Set E2E_AUTH_EMAIL and E2E_AUTH_PASSWORD for authenticated E2E flows.",
+    );
+    test.setTimeout(90_000);
+    await seedCookieConsent(page);
+
+    await page.goto("/en/sign-in");
+    await dismissCookieBannerIfPresent(page);
+    await page.locator('input[type="email"]').fill(e2eAuthEmail);
+    await page.locator('input[type="password"]').fill(e2eAuthPassword);
+    await page.locator('button[type="submit"]').click();
+    await page.waitForURL(/\/dashboard(?:\/overview)?/);
+
+    await page.goto("/en/dashboard/settings");
+    const main = page.getByRole("main");
+    await expect(main.getByRole("heading", { name: /^account$/i })).toBeVisible({ timeout: 20_000 });
+    await expect(main.getByRole("heading", { name: /^data & privacy$/i })).toBeVisible();
+    await expect(page.getByRole("tablist", { name: /account settings sections/i })).toBeHidden();
+  });
+
+  test("settings hub is usable in French", async ({ page, isMobile }) => {
+    test.skip(!isMobile, "Mobile Settings tree is lg:hidden");
+    test.skip(
+      !hasSeededAuthUser,
+      "Set E2E_AUTH_EMAIL and E2E_AUTH_PASSWORD for authenticated E2E flows.",
+    );
+    test.setTimeout(90_000);
+    await seedCookieConsent(page);
+
+    await page.goto("/fr/sign-in");
+    await dismissCookieBannerIfPresent(page);
+    await page.locator('input[type="email"]').fill(e2eAuthEmail);
+    await page.locator('input[type="password"]').fill(e2eAuthPassword);
+    await page.locator('button[type="submit"]').click();
+    await page.waitForURL(/\/dashboard(?:\/overview)?/);
+
+    await page.goto("/fr/dashboard/settings");
+    const main = page.getByRole("main");
+    await expect(main.getByRole("heading", { name: /^compte$/i })).toBeVisible({ timeout: 20_000 });
+    await expect(main.getByRole("heading", { name: /^données et confidentialité$/i })).toBeVisible();
+    await expect(page.getByRole("tablist", { name: /sections des paramètres du compte/i })).toBeHidden();
+  });
 });

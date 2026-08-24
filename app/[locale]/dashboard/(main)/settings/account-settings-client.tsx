@@ -1,6 +1,7 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "@/i18n/navigation";
@@ -16,11 +17,17 @@ import {
   setGenreBackfillBannerOptOut,
 } from "@/lib/utils/genre-backfill-banner-prefs";
 import { GroqAiSettingsFocus } from "@/lib/components/groq-ai-settings-focus";
+import {
+  SettingsMobileExperience,
+  SettingsMobileSignedOut,
+  SettingsMobileSkeleton,
+} from "@/lib/components/settings-mobile";
 import { AI_MASTER_QUERY_KEY } from "@/lib/hooks/use-ai-master-toggle";
 import {
   DashboardSectionPanel,
   useDashboardSectionView,
 } from "@/lib/components/dashboard-section-switcher";
+import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
 import {
   SETTINGS_VIEWS,
   SettingsDangerSection,
@@ -44,7 +51,12 @@ function AccountSettingsContent({ gdprContactEmail = null }: AccountSettingsClie
   const t = useTranslations("settings");
   const router = useRouter();
   const queryClient = useQueryClient();
+  const searchParams = useSearchParams();
   const { activeView, setView } = useDashboardSectionView(SETTINGS_VIEWS, "profile");
+  const withFilters = useMemo(
+    () => (href: string) => mergeDashboardSearchParams(href, searchParams),
+    [searchParams]
+  );
   const [userId, setUserId] = useState<string | null>(null);
   const [authReady, setAuthReady] = useState(false);
   const [expectedPhrase, setExpectedPhrase] = useState<string | null>(null);
@@ -522,128 +534,237 @@ function AccountSettingsContent({ gdprContactEmail = null }: AccountSettingsClie
   }, [expectedPhrase, phraseInput, phraseOk, router, t]);
 
   if (!authReady) {
-    return <SettingsPageSkeleton />;
+    return (
+      <>
+        <SettingsMobileSkeleton />
+        <div className="hidden lg:block">
+          <SettingsPageSkeleton />
+        </div>
+      </>
+    );
   }
 
   if (!userId) {
-    return <SettingsHeroSignedOut />;
+    return (
+      <>
+        <SettingsMobileSignedOut />
+        <div className="hidden lg:block">
+          <SettingsHeroSignedOut />
+        </div>
+      </>
+    );
   }
 
+  const mobileExperience = (
+    <SettingsMobileExperience
+      withFilters={withFilters}
+      gdprContactEmail={gdprContactEmail}
+      profileLoadError={profileLoadError}
+      avatarUrl={avatarUrl}
+      nameInput={nameInput}
+      accountEmail={accountEmail}
+      avatarUploading={avatarUploading}
+      avatarDeleting={avatarDeleting}
+      avatarError={avatarError}
+      onAvatarSelect={(file) => {
+        void uploadAvatar(file);
+      }}
+      onAvatarDelete={() => {
+        void deleteAvatar();
+      }}
+      onNameChange={(value) => {
+        setNameInput(value);
+        setProfileSaved(false);
+        setProfileSaveError(null);
+        if (value.length > 200) setNameFieldError(t("profileNameTooLong"));
+        else setNameFieldError(null);
+      }}
+      nameFieldError={nameFieldError}
+      onSaveProfile={() => {
+        void saveProfile();
+      }}
+      profileSaveDisabled={profileSaveDisabled}
+      profileSaving={profileSaving}
+      profileSaved={profileSaved}
+      profileSaveError={profileSaveError}
+      hideGenreBanner={hideGenreBanner}
+      onHideGenreBannerChange={(next) => {
+        if (next) setGenreBackfillBannerOptOut(true);
+        else clearGenreBackfillBannerBlockingPrefs();
+        setHideGenreBanner(next);
+      }}
+      groqConsentGranted={groqConsentGranted}
+      onGroqConsentChange={(next) => {
+        void patchPrivacyPreference({ groqGenreConsent: next });
+      }}
+      publicProfileEligible={publicProfileEligible}
+      publicProfileGranted={publicProfileGranted}
+      onPublicProfileChange={(next) => {
+        void patchPrivacyPreference({ publicProfile: next });
+      }}
+      privacyPrefsLoaded={privacyPrefsLoaded}
+      privacySaving={privacySaving}
+      privacyError={privacyError}
+      exportError={exportError}
+      exporting={exporting}
+      onExport={() => {
+        void runExport();
+      }}
+      expectedPhrase={expectedPhrase}
+      phraseLoadError={phraseLoadError}
+      phraseInput={phraseInput}
+      onPhraseInputChange={(value) => {
+        setPhraseInput(value);
+        setError(null);
+      }}
+      phraseOk={phraseOk}
+      understood={understood}
+      onUnderstoodChange={(next) => {
+        setUnderstood(next);
+        setError(null);
+      }}
+      clearing={clearing}
+      clearError={error}
+      onRunClear={() => {
+        void runClear();
+      }}
+      deleteAccountPhraseInput={deleteAccountPhraseInput}
+      onDeleteAccountPhraseChange={(value) => {
+        setDeleteAccountPhraseInput(value);
+        setDeleteAccountError(null);
+      }}
+      deleteAccountPhraseOk={deleteAccountPhraseOk}
+      deleteAccountUnderstood={deleteAccountUnderstood}
+      onDeleteAccountUnderstoodChange={(next) => {
+        setDeleteAccountUnderstood(next);
+        setDeleteAccountError(null);
+      }}
+      deletingAccount={deletingAccount}
+      deleteAccountError={deleteAccountError}
+      onDeleteAccount={() => {
+        void runDeleteAccount();
+      }}
+    />
+  );
+
   return (
-    <div className="mx-auto max-w-6xl space-y-6">
+    <>
       <GroqAiSettingsFocus
         preferencesVisible={activeView === "preferences"}
         onOpenPreferences={openPreferences}
       />
-      <SettingsIdentityHeader name={nameInput} email={accountEmail} avatarUrl={avatarUrl} saved={profileSaved} />
-      <SettingsViewNav activeView={activeView} onChange={setView} />
+      {mobileExperience}
+      <div className="mx-auto hidden max-w-6xl space-y-6 lg:block">
+        <SettingsIdentityHeader name={nameInput} email={accountEmail} avatarUrl={avatarUrl} saved={profileSaved} />
+        <SettingsViewNav activeView={activeView} onChange={setView} />
 
-      <DashboardSectionPanel view="profile" activeView={activeView} idPrefix="settings">
-        <SettingsProfileSection
-          profileLoadError={profileLoadError}
-          avatarUrl={avatarUrl}
-          nameInput={nameInput}
-          accountEmail={accountEmail}
-          avatarUploading={avatarUploading}
-          avatarDeleting={avatarDeleting}
-          avatarError={avatarError}
-          onAvatarSelect={(file) => {
-            void uploadAvatar(file);
-          }}
-          onAvatarDelete={() => {
-            void deleteAvatar();
-          }}
-          onNameChange={(value) => {
-            setNameInput(value);
-            setProfileSaved(false);
-            setProfileSaveError(null);
-            if (value.length > 200) setNameFieldError(t("profileNameTooLong"));
-            else setNameFieldError(null);
-          }}
-          nameFieldError={nameFieldError}
-          onSaveProfile={() => {
-            void saveProfile();
-          }}
-          profileSaveDisabled={profileSaveDisabled}
-          profileSaving={profileSaving}
-          profileSaved={profileSaved}
-          profileSaveError={profileSaveError}
-        />
-      </DashboardSectionPanel>
+        <DashboardSectionPanel view="profile" activeView={activeView} idPrefix="settings">
+          <SettingsProfileSection
+            profileLoadError={profileLoadError}
+            avatarUrl={avatarUrl}
+            nameInput={nameInput}
+            accountEmail={accountEmail}
+            avatarUploading={avatarUploading}
+            avatarDeleting={avatarDeleting}
+            avatarError={avatarError}
+            onAvatarSelect={(file) => {
+              void uploadAvatar(file);
+            }}
+            onAvatarDelete={() => {
+              void deleteAvatar();
+            }}
+            onNameChange={(value) => {
+              setNameInput(value);
+              setProfileSaved(false);
+              setProfileSaveError(null);
+              if (value.length > 200) setNameFieldError(t("profileNameTooLong"));
+              else setNameFieldError(null);
+            }}
+            nameFieldError={nameFieldError}
+            onSaveProfile={() => {
+              void saveProfile();
+            }}
+            profileSaveDisabled={profileSaveDisabled}
+            profileSaving={profileSaving}
+            profileSaved={profileSaved}
+            profileSaveError={profileSaveError}
+          />
+        </DashboardSectionPanel>
 
-      <DashboardSectionPanel view="preferences" activeView={activeView} idPrefix="settings">
-        <SettingsPreferencesSection
-          hideGenreBanner={hideGenreBanner}
-          onHideGenreBannerChange={(next) => {
-            if (next) setGenreBackfillBannerOptOut(true);
-            else clearGenreBackfillBannerBlockingPrefs();
-            setHideGenreBanner(next);
-          }}
-          groqConsentGranted={groqConsentGranted}
-          onGroqConsentChange={(next) => {
-            void patchPrivacyPreference({ groqGenreConsent: next });
-          }}
-          publicProfileEligible={publicProfileEligible}
-          publicProfileGranted={publicProfileGranted}
-          onPublicProfileChange={(next) => {
-            void patchPrivacyPreference({ publicProfile: next });
-          }}
-          privacyPrefsLoaded={privacyPrefsLoaded}
-          privacySaving={privacySaving}
-          privacyError={privacyError}
-        />
-      </DashboardSectionPanel>
+        <DashboardSectionPanel view="preferences" activeView={activeView} idPrefix="settings">
+          <SettingsPreferencesSection
+            hideGenreBanner={hideGenreBanner}
+            onHideGenreBannerChange={(next) => {
+              if (next) setGenreBackfillBannerOptOut(true);
+              else clearGenreBackfillBannerBlockingPrefs();
+              setHideGenreBanner(next);
+            }}
+            groqConsentGranted={groqConsentGranted}
+            onGroqConsentChange={(next) => {
+              void patchPrivacyPreference({ groqGenreConsent: next });
+            }}
+            publicProfileEligible={publicProfileEligible}
+            publicProfileGranted={publicProfileGranted}
+            onPublicProfileChange={(next) => {
+              void patchPrivacyPreference({ publicProfile: next });
+            }}
+            privacyPrefsLoaded={privacyPrefsLoaded}
+            privacySaving={privacySaving}
+            privacyError={privacyError}
+          />
+        </DashboardSectionPanel>
 
-      <DashboardSectionPanel view="data" activeView={activeView} idPrefix="settings">
-        <SettingsYourDataSection
-          gdprContactEmail={gdprContactEmail}
-          exportError={exportError}
-          exporting={exporting}
-          onExport={() => {
-            void runExport();
-          }}
-        />
-      </DashboardSectionPanel>
+        <DashboardSectionPanel view="data" activeView={activeView} idPrefix="settings">
+          <SettingsYourDataSection
+            gdprContactEmail={gdprContactEmail}
+            exportError={exportError}
+            exporting={exporting}
+            onExport={() => {
+              void runExport();
+            }}
+          />
+        </DashboardSectionPanel>
 
-      <DashboardSectionPanel view="danger" activeView={activeView} idPrefix="settings">
-        <SettingsDangerSection
-          expectedPhrase={expectedPhrase}
-          phraseLoadError={phraseLoadError}
-          phraseInput={phraseInput}
-          onPhraseInputChange={(value) => {
-            setPhraseInput(value);
-            setError(null);
-          }}
-          phraseOk={phraseOk}
-          understood={understood}
-          onUnderstoodChange={(next) => {
-            setUnderstood(next);
-            setError(null);
-          }}
-          clearing={clearing}
-          clearError={error}
-          onRunClear={() => {
-            void runClear();
-          }}
-          deleteAccountPhraseInput={deleteAccountPhraseInput}
-          onDeleteAccountPhraseChange={(value) => {
-            setDeleteAccountPhraseInput(value);
-            setDeleteAccountError(null);
-          }}
-          deleteAccountPhraseOk={deleteAccountPhraseOk}
-          deleteAccountUnderstood={deleteAccountUnderstood}
-          onDeleteAccountUnderstoodChange={(next) => {
-            setDeleteAccountUnderstood(next);
-            setDeleteAccountError(null);
-          }}
-          deletingAccount={deletingAccount}
-          deleteAccountError={deleteAccountError}
-          onDeleteAccount={() => {
-            void runDeleteAccount();
-          }}
-        />
-      </DashboardSectionPanel>
-    </div>
+        <DashboardSectionPanel view="danger" activeView={activeView} idPrefix="settings">
+          <SettingsDangerSection
+            expectedPhrase={expectedPhrase}
+            phraseLoadError={phraseLoadError}
+            phraseInput={phraseInput}
+            onPhraseInputChange={(value) => {
+              setPhraseInput(value);
+              setError(null);
+            }}
+            phraseOk={phraseOk}
+            understood={understood}
+            onUnderstoodChange={(next) => {
+              setUnderstood(next);
+              setError(null);
+            }}
+            clearing={clearing}
+            clearError={error}
+            onRunClear={() => {
+              void runClear();
+            }}
+            deleteAccountPhraseInput={deleteAccountPhraseInput}
+            onDeleteAccountPhraseChange={(value) => {
+              setDeleteAccountPhraseInput(value);
+              setDeleteAccountError(null);
+            }}
+            deleteAccountPhraseOk={deleteAccountPhraseOk}
+            deleteAccountUnderstood={deleteAccountUnderstood}
+            onDeleteAccountUnderstoodChange={(next) => {
+              setDeleteAccountUnderstood(next);
+              setDeleteAccountError(null);
+            }}
+            deletingAccount={deletingAccount}
+            deleteAccountError={deleteAccountError}
+            onDeleteAccount={() => {
+              void runDeleteAccount();
+            }}
+          />
+        </DashboardSectionPanel>
+      </div>
+    </>
   );
 }
 

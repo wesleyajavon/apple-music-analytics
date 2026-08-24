@@ -1,7 +1,8 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { DASHBOARD_SPOTLIGHT_MUTED } from "@/lib/constants/dashboard-spotlight";
+import { useTranslations } from "next-intl";
+import { DASHBOARD_SPOTLIGHT_INNER_WELL, DASHBOARD_SPOTLIGHT_MUTED } from "@/lib/constants/dashboard-spotlight";
 
 export const SETTINGS_INPUT_CLASS =
   "mt-2 w-full rounded-xl border border-slate-200/90 bg-white px-3 py-2.5 text-base text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-400/15 sm:text-sm dark:border-white/10 dark:bg-black/30 dark:text-white dark:placeholder:text-slate-500";
@@ -14,14 +15,17 @@ export function SettingsSwitch({
   checked,
   onChange,
   disabled,
+  size = "default",
   "aria-label": ariaLabel,
 }: {
   id?: string;
   checked: boolean;
   onChange: (next: boolean) => void;
   disabled?: boolean;
+  size?: "default" | "touch";
   "aria-label": string;
 }) {
+  const isTouch = size === "touch";
   return (
     <button
       type="button"
@@ -31,13 +35,17 @@ export function SettingsSwitch({
       aria-label={ariaLabel}
       disabled={disabled}
       onClick={() => !disabled && onChange(!checked)}
-      className={`relative inline-flex h-7 w-12 shrink-0 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950 ${
-        checked ? "bg-accent-emerald" : "bg-white/20"
-      } ${disabled ? "cursor-not-allowed opacity-50" : ""}`}
+      className={`relative inline-flex shrink-0 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950 ${
+        isTouch ? "h-11 w-16 items-center" : "h-7 w-12"
+      } ${checked ? "bg-accent-emerald" : isTouch ? "bg-slate-300 dark:bg-white/20" : "bg-white/20"} ${
+        disabled ? "cursor-not-allowed opacity-50" : ""
+      }`}
     >
       <span
-        className={`pointer-events-none block h-6 w-6 translate-y-0.5 rounded-full bg-white shadow transition-transform ${
-          checked ? "translate-x-5" : "translate-x-0.5"
+        className={`pointer-events-none block rounded-full bg-white shadow transition-transform ${
+          isTouch
+            ? `h-9 w-9 ${checked ? "translate-x-6" : "translate-x-1"}`
+            : `h-6 w-6 translate-y-0.5 ${checked ? "translate-x-5" : "translate-x-0.5"}`
         }`}
       />
     </button>
@@ -159,6 +167,63 @@ export function SettingsSubsection({
         {hint ? <p className={`mt-1 text-xs leading-relaxed ${DASHBOARD_SPOTLIGHT_MUTED}`}>{hint}</p> : null}
       </div>
       {children}
+    </div>
+  );
+}
+
+export function DangerPhraseFields({
+  expectedPhrase,
+  phraseLoadError,
+  phraseInput,
+  onPhraseInputChange,
+  inputId,
+}: {
+  expectedPhrase: string | null;
+  phraseLoadError: string | null;
+  phraseInput: string;
+  onPhraseInputChange: (value: string) => void;
+  inputId: string;
+}) {
+  const t = useTranslations("settings");
+  const tCommon = useTranslations("common");
+
+  if (phraseLoadError) {
+    return (
+      <p className="text-sm font-medium text-red-800 dark:text-red-300" role="alert">
+        {phraseLoadError}
+      </p>
+    );
+  }
+
+  if (!expectedPhrase) {
+    return <p className={DASHBOARD_SPOTLIGHT_MUTED}>{tCommon("pleaseWait")}</p>;
+  }
+
+  return (
+    <div className="space-y-3">
+      <p className="text-sm text-slate-800 dark:text-slate-200">{t("phraseInstruction")}</p>
+      <div
+        className={`${DASHBOARD_SPOTLIGHT_INNER_WELL} font-mono text-base font-semibold tracking-wide text-slate-900 dark:text-white`}
+      >
+        {expectedPhrase}
+      </div>
+      <div>
+        <label className="text-sm font-medium text-slate-900 dark:text-white" htmlFor={inputId}>
+          {t("phraseLabel")}
+        </label>
+        <input
+          id={inputId}
+          type="text"
+          name={inputId}
+          autoComplete="off"
+          spellCheck={false}
+          value={phraseInput}
+          onChange={(e) => onPhraseInputChange(e.target.value)}
+          placeholder={t("phrasePlaceholder")}
+          className={`${SETTINGS_INPUT_CLASS} font-mono`}
+        />
+        <p className={`mt-2 text-xs ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("phraseHint")}</p>
+      </div>
     </div>
   );
 }

@@ -370,7 +370,7 @@ EN + FR. e2e au moins une des trois.
 
 Déjà onboarding-mobile-sticky-actions (bottom-nav off). Objectif : un step = un job, CTA unique dans le pouce, pas le wizard desktop scrollable. Progression visible. États erreur import / permissions au moment du besoin, pas un overlay coach marks.
 
-Ne casse pas le funnel d’import (Apple CSV, Spotify, Last.fm). Vérifier pb-32 / collision sticky. EN + FR.
+Ne casse pas le funnel d’import (Apple CSV, Spotify). Vérifier pb-32 / collision sticky. EN + FR.
 ```
 
 ---

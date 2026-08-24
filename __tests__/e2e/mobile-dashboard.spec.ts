@@ -895,4 +895,67 @@ test.describe("Mobile dashboard UX", () => {
     await expect(main.getByText(/last\.fm/i)).toHaveCount(0);
     await expect(page.getByRole("tablist")).toHaveCount(0);
   });
+
+  test("onboarding mobile has no bottom nav and continue opens pick", async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(!isMobile, "Onboarding mobile tree is lg:hidden");
+    test.skip(
+      !hasSeededAuthUser,
+      "Set E2E_AUTH_EMAIL and E2E_AUTH_PASSWORD for authenticated E2E flows.",
+    );
+    test.setTimeout(90_000);
+    await seedCookieConsent(page);
+
+    await page.goto("/en/sign-in");
+    await dismissCookieBannerIfPresent(page);
+    await page.locator('input[type="email"]').fill(e2eAuthEmail);
+    await page.locator('input[type="password"]').fill(e2eAuthPassword);
+    await page.locator('button[type="submit"]').click();
+    await page.waitForURL(/\/dashboard(?:\/overview)?/);
+
+    await page.goto("/en/dashboard/onboarding?addData=1");
+
+    await expect(
+      page.getByRole("navigation", { name: /main dashboard navigation/i }),
+    ).toHaveCount(0);
+
+    const continueBtn = page.getByRole("button", { name: /^get started$/i });
+    await expect(continueBtn).toBeVisible({ timeout: 20_000 });
+    await continueBtn.click();
+
+    await expect(page.getByRole("button", { name: /spotify/i })).toBeVisible();
+    await expect(page.getByRole("button", { name: /apple music/i })).toBeVisible();
+  });
+
+  test("onboarding mobile is usable in French", async ({ page, isMobile }) => {
+    test.skip(!isMobile, "Onboarding mobile tree is lg:hidden");
+    test.skip(
+      !hasSeededAuthUser,
+      "Set E2E_AUTH_EMAIL and E2E_AUTH_PASSWORD for authenticated E2E flows.",
+    );
+    test.setTimeout(90_000);
+    await seedCookieConsent(page);
+
+    await page.goto("/fr/sign-in");
+    await dismissCookieBannerIfPresent(page);
+    await page.locator('input[type="email"]').fill(e2eAuthEmail);
+    await page.locator('input[type="password"]').fill(e2eAuthPassword);
+    await page.locator('button[type="submit"]').click();
+    await page.waitForURL(/\/dashboard(?:\/overview)?/);
+
+    await page.goto("/fr/dashboard/onboarding?addData=1");
+
+    await expect(
+      page.getByRole("navigation", { name: /navigation principale du dashboard/i }),
+    ).toHaveCount(0);
+
+    const continueBtn = page.getByRole("button", { name: /^commencer$/i });
+    await expect(continueBtn).toBeVisible({ timeout: 20_000 });
+    await continueBtn.click();
+
+    await expect(page.getByRole("button", { name: /spotify/i })).toBeVisible();
+    await expect(page.getByRole("button", { name: /apple music/i })).toBeVisible();
+  });
 });

@@ -7,7 +7,7 @@ export function DashboardMainArea({ children }: { children: React.ReactNode }) {
   const isOnboarding = pathname.includes("/dashboard/onboarding");
 
   const contentClass = isOnboarding
-    ? "p-4 pb-32 lg:p-8 lg:pb-8"
+    ? "p-4 pb-4 lg:p-8 lg:pb-8"
     : "p-4 lg:p-8 lg:pb-8";
 
   return (

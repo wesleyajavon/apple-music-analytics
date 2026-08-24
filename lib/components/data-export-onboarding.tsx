@@ -15,7 +15,7 @@ import {
   UploadCloud,
 } from "lucide-react";
 import { DashboardHeroTitle } from "@/lib/components/dashboard-hero-title";
-import { OnboardingMobileStickyActions } from "@/lib/components/onboarding-mobile-sticky-actions";
+import { OnboardingMobile } from "@/lib/components/onboarding-mobile";
 import { SoundprintBrandMark } from "@/lib/components/soundprint-brand-mark";
 import {
   DASHBOARD_BTN_GHOST,
@@ -432,6 +432,7 @@ export function DataExportOnboarding({
   const [stepIndex, setStepIndex] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [importFile, setImportFile] = useState<File | null>(null);
+  const [lastImportError, setLastImportError] = useState<string | null>(null);
   const [isImporting, setIsImporting] = useState(false);
   const [importOverlayKind, setImportOverlayKind] =
     useState<ImportOverlayKind>("file");
@@ -732,9 +733,12 @@ export function DataExportOnboarding({
 
   const submitImport = useCallback(async () => {
     if (!provider || !importFile) {
-      toast.error(t("import.noFile"));
+      const message = t("import.noFile");
+      setLastImportError(message);
+      toast.error(message);
       return;
     }
+    setLastImportError(null);
     setImportOverlayKind("file");
     setImportProgress({
       phase: "reading",
@@ -865,6 +869,7 @@ export function DataExportOnboarding({
         await yieldToBrowser();
         const jsonTexts = await extractSpotifyStreamingHistoryJsonTextsFromZip(buf);
         if (jsonTexts.length === 0) {
+          setLastImportError(t("import.zipMissingAudioJson"));
           toast.error(t("import.zipMissingAudioJson"));
           return;
         }
@@ -1108,8 +1113,86 @@ export function DataExportOnboarding({
         !hasActiveGroqJobShared,
     ) || Boolean(effectiveBackfill);
 
+  const currentGuideStep = provider ? steps[stepIndex] : undefined;
+
   return (
-    <div className="mx-auto max-w-2xl space-y-8 pb-24 lg:space-y-10 lg:pb-16">
+    <>
+      <OnboardingMobile
+        phase={phase}
+        provider={provider}
+        flowProgressPercent={flowProgressPercent}
+        flowStepLabel={flowStepLabel}
+        flowProgressAria={flowProgressAria}
+        isSubmitting={isSubmitting}
+        onContinueWelcome={() => setPhase("pick")}
+        onSkipOnboarding={() => void completeOnboarding()}
+        onBackToWelcome={() => setPhase("welcome")}
+        onSelectProvider={selectProvider}
+        guideTitle={
+          provider && currentGuideStep
+            ? t(`${provider}.${currentGuideStep.titleKey}` as Parameters<typeof t>[0])
+            : ""
+        }
+        guideBody={
+          provider && currentGuideStep
+            ? t(`${provider}.${currentGuideStep.bodyKey}` as Parameters<typeof t>[0])
+            : ""
+        }
+        guideImageSrc={currentGuideStep?.imageSrc ?? ""}
+        guideImageAlt={currentGuideStep ? t(currentGuideStep.altKey) : ""}
+        guideImageSrc2={currentGuideStep?.imageSrc2}
+        guideImageAlt2={currentGuideStep?.altKey2 ? t(currentGuideStep.altKey2) : undefined}
+        guideIndex={stepIndex}
+        guideTotal={steps.length}
+        privacyHref={provider === "spotify" ? spotifyPrivacyUrl : applePrivacyUrl}
+        privacyLabel={
+          provider === "spotify" ? t("openSpotifyPrivacy") : t("openApplePrivacy")
+        }
+        onGuideNext={goNextGuide}
+        onGuideBack={goBackGuide}
+        importFile={importFile}
+        onImportFile={(file) => {
+          setImportFile(file);
+          setLastImportError(null);
+        }}
+        fileInputRef={fileInputRef}
+        isImporting={isImporting}
+        importOverlayKind={importOverlayKind}
+        importProgress={importProgress}
+        importMode={importMode}
+        onImportMode={setImportMode}
+        providerHasExistingData={providerHasExistingData}
+        providerLabel={providerLabel}
+        importCursorDateLabel={importCursorDateLabel}
+        listenCount={providerImportStatus?.listenCount ?? 0}
+        hasSpotifyWebConnection={hasSpotifyWebConnection}
+        importInlineError={lastImportError}
+        appleArchiveUrl={appleArchiveUrl}
+        onVerifySpotifyWeb={() => void verifySpotifyWebConnection()}
+        onSubmitImport={() => void submitImport()}
+        onSkipImport={skipImportToFinish}
+        onBackImport={goBackImport}
+        importSummary={importSummary}
+        genreLlmAfterImport={genreLlmAfterImport}
+        genreLlmDeclined={genreLlmDeclined}
+        onDeclineGenreLlm={() => {
+          setGenreLlmDeclined(true);
+          setGenreBackfillBannerOptOut(true);
+        }}
+        onStartGenreLlm={() => void startLlmGenreBackfill()}
+        isStartingLlmBackfill={isStartingLlmBackfill}
+        hasActiveGroqJobShared={hasActiveGroqJobShared}
+        effectiveBackfill={effectiveBackfill}
+        hasBackfillInProgress={hasBackfillInProgress}
+        shouldOfferNextLlmSession={shouldOfferNextLlmSession}
+        shouldOfferRetryLlmSession={shouldOfferRetryLlmSession}
+        backfillProgressRatio={backfillProgressRatio}
+        paletteInvitation={paletteInvitation}
+        onGoToMusicalProfile={() => void completeOnboarding("/dashboard/musical-profile")}
+        onGoToDashboard={() => void completeOnboarding()}
+        onGoToPalette={() => void completeOnboarding("/dashboard/genres/palette")}
+      />
+      <div className="mx-auto hidden max-w-2xl space-y-8 pb-24 lg:block lg:space-y-10 lg:pb-16">
       <OnboardingTopProgress
         percent={flowProgressPercent}
         stepLabel={flowStepLabel}
@@ -1688,36 +1771,6 @@ export function DataExportOnboarding({
         </div>
       )}
 
-      {phase === "guide" && provider ? (
-        <OnboardingMobileStickyActions
-          mode="guide"
-          onBack={goBackGuide}
-          onPrimary={goNextGuide}
-          primaryLabel={t("next")}
-        />
-      ) : null}
-
-      {phase === "import" && provider ? (
-        <OnboardingMobileStickyActions
-          mode="import"
-          onBack={goBackImport}
-          onPrimary={() => void submitImport()}
-          primaryLabel={
-            isImporting
-              ? t("import.importing")
-              : providerHasExistingData
-                ? importMode === "incremental"
-                  ? t("import.importSubmitIncremental")
-                  : t("import.importSubmitFull")
-                : t("import.importSubmitFirst")
-          }
-          primaryDisabled={isImporting || !importFile}
-          secondaryLabel={t("import.skipImport")}
-          onSecondary={skipImportToFinish}
-          secondaryDisabled={isImporting}
-          isLoading={isImporting}
-        />
-      ) : null}
 
       {phase === "finish" && (
         importSummary ? (
@@ -2026,6 +2079,7 @@ export function DataExportOnboarding({
         </div>
         )
       )}
-    </div>
+      </div>
+    </>
   );
 }

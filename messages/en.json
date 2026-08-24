@@ -999,6 +999,19 @@
       "requestsUsed": "Groq calls used: {count}",
       "ratio": "Unknown ratio: {initial}% -> {current}% (target: {target}%)",
       "error": "Last error: {message}"
+    },
+    "mobile": {
+      "regionWelcome": "Get started",
+      "regionPick": "Choose a service",
+      "regionFinish": "Finish setup",
+      "chooseFile": "Choose file",
+      "extraScreenshotRow": "Another screenshot",
+      "extraScreenshotTitle": "More detail",
+      "fileHelpRow": "How to find the file",
+      "modeRow": "Import mode",
+      "modeHintIncremental": "Add new streams only",
+      "modeHintFull": "Re-read the whole file",
+      "spotifyWebRow": "Use connected Spotify"
     }
   },
   "partialSyncPreview": {

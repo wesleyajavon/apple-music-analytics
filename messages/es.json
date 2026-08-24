@@ -1001,6 +1001,19 @@
       "requestsUsed": "Llamadas a Groq usadas: {count}",
       "ratio": "Ratio unknown: {initial}% -> {current}% (objetivo: {target}%)",
       "error": "Último error: {message}"
+    },
+    "mobile": {
+      "regionWelcome": "Empezar",
+      "regionPick": "Elegir un servicio",
+      "regionFinish": "Terminar",
+      "chooseFile": "Elegir archivo",
+      "extraScreenshotRow": "Otra captura",
+      "extraScreenshotTitle": "Más detalle",
+      "fileHelpRow": "Cómo encontrar el archivo",
+      "modeRow": "Modo de importación",
+      "modeHintIncremental": "Añadir streams nuevos",
+      "modeHintFull": "Releer el archivo entero",
+      "spotifyWebRow": "Usar Spotify conectado"
     }
   },
   "partialSyncPreview": {

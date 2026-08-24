@@ -369,6 +369,90 @@ export function MobileMusicalProfileView({
   );
 }
 
+export function MusicalProfileMobileSkeleton() {
+  return (
+    <div className="-mx-4 -mt-4 space-y-4 pb-8 lg:hidden" aria-busy="true">
+      <section className="relative overflow-hidden bg-gray-950 px-4 pb-5 pt-4 text-white">
+        <div className="relative space-y-4">
+          <div className="ml-auto h-8 w-36 animate-pulse rounded-full bg-white/15" />
+          <div className="flex items-center gap-3.5">
+            <div className="h-[4.5rem] w-[4.5rem] animate-pulse rounded-[1.2rem] bg-white/15" />
+            <div className="min-w-0 flex-1 space-y-2">
+              <div className="h-3 w-20 animate-pulse rounded bg-white/15" />
+              <div className="h-7 w-40 animate-pulse rounded bg-white/20" />
+              <div className="h-3 w-24 animate-pulse rounded bg-white/10" />
+            </div>
+          </div>
+        </div>
+      </section>
+      <section className="px-4">
+        <div className="-mx-4 flex gap-3 overflow-hidden px-4">
+          {[0, 1, 2].map((item) => (
+            <div
+              key={item}
+              className="h-24 min-w-[9.75rem] animate-pulse rounded-3xl border border-white/10 bg-slate-950/80"
+            />
+          ))}
+        </div>
+      </section>
+      <section className="space-y-2 px-4">
+        {[0, 1, 2].map((item) => (
+          <div key={item} className="h-11 animate-pulse rounded-2xl border border-card-border bg-card-surface" />
+        ))}
+      </section>
+    </div>
+  );
+}
+
+export function MusicalProfileMobileError({
+  locale,
+  error,
+  onRetry,
+}: {
+  locale: string;
+  error?: Error | null;
+  onRetry: () => void;
+}) {
+  const t = useTranslations("musical-profile");
+  const tCommon = useTranslations("common");
+  const isQuota = isGroqDailyQuotaError(error);
+
+  return (
+    <div className="-mx-4 -mt-4 space-y-4 pb-8 lg:hidden">
+      <section className="relative overflow-hidden bg-gray-950 px-4 pb-6 pt-4 text-white">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.4),transparent_36%),radial-gradient(circle_at_85%_20%,rgba(6,182,212,0.24),transparent_32%),linear-gradient(160deg,rgba(3,7,18,0.98),rgba(76,29,149,0.72))]" />
+        <CinematicFloatingOrbs />
+        <CinematicFilmGrain />
+        <CinematicLightSweep />
+        <div className="relative space-y-4">
+          <div className="flex justify-end">
+            <MusicalProfilePeriodBadge locale={locale} variant="mobile" className="min-w-0" />
+          </div>
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-cyan">
+              {t("mobile.signatureLabel")}
+            </p>
+            <h1 className="mt-2 max-w-[16rem] text-[1.55rem] font-semibold leading-[1.15] tracking-[-0.05em]">
+              {t("mobile.errorLead")}
+            </h1>
+          </div>
+          {isQuota ? (
+            <GroqQuotaNotice error={error} />
+          ) : (
+            <button
+              type="button"
+              onClick={onRetry}
+              className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25"
+            >
+              {tCommon("retry")}
+            </button>
+          )}
+        </div>
+      </section>
+    </div>
+  );
+}
+
 export function MusicalProfileNoDataMobileView({ locale }: { locale: string }) {
   const t = useTranslations("musical-profile");
   return (

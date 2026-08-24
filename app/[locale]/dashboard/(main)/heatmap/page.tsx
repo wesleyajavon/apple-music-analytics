@@ -30,6 +30,7 @@ import {
   HeatmapMobileEmpty,
   HeatmapMobileError,
   HeatmapMobileExperience,
+  HeatmapMobileNoDayDetail,
   HeatmapMobileSkeleton,
   type HeatmapMobileTopDay,
 } from "@/lib/components/heatmap-mobile";
@@ -476,14 +477,7 @@ function HeatmapContent() {
     return (
       <>
         <div className="lg:hidden">
-          <HeatmapMobileError locale={locale}>
-            <ErrorState
-              variant="startup"
-              error={error}
-              message={t("errorLoading")}
-              onRetry={handleRetry}
-            />
-          </HeatmapMobileError>
+          <HeatmapMobileError locale={locale} error={error} onRetry={handleRetry} />
         </div>
         <div className="hidden space-y-8 lg:block">
           <HeatmapHeroFrame badgeLabel={badgeLabel} stats={null} />
@@ -635,7 +629,14 @@ function HeatmapContent() {
                 stats?.maxDay ? toDateOnly(stats.maxDay.date) : null
               }
               emptyStateNoPlays={
-                <EmptyState variant="startup" {...emptyStatePresets.noDayDetail} />
+                <>
+                  <div className="lg:hidden">
+                    <HeatmapMobileNoDayDetail />
+                  </div>
+                  <div className="hidden lg:block">
+                    <EmptyState variant="startup" {...emptyStatePresets.noDayDetail} />
+                  </div>
+                </>
               }
             />
           </section>

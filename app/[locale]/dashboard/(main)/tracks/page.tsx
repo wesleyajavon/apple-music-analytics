@@ -18,7 +18,8 @@ import { useDebouncedValue } from "@/lib/hooks/use-debounced-value";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
 import { formatOverviewDateRangeLabel } from "@/lib/utils/overview-date-range-label";
 import { OverviewSkeleton } from "@/lib/components/skeleton-loaders";
-import { ErrorState } from "@/lib/components/error-state";
+import { ErrorState, GroqQuotaNotice } from "@/lib/components/error-state";
+import { isGroqDailyQuotaError } from "@/lib/utils/groq-quota-message";
 import { LiveStatusDot } from "@/lib/components/live-status-dot";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
 import { CHART_TOOLTIP_STYLES } from "@/lib/constants/config";
@@ -262,6 +263,7 @@ function TracksContent() {
   const pathname = usePathname();
   const queryClient = useQueryClient();
   const t = useTranslations("tracks");
+  const tCommon = useTranslations("common");
   const locale = useLocale();
   const emptyStatePresets = useEmptyStatePresets();
   const badgeLabel = useTracksBadgeLabel();
@@ -378,9 +380,7 @@ function TracksContent() {
     return (
       <>
         <div className="lg:hidden">
-          <TracksMobileError locale={locale}>
-            <ErrorState variant="startup" error={topError} message={t("errorLoading")} onRetry={refetchTop} />
-          </TracksMobileError>
+          <TracksMobileError locale={locale} error={topError} onRetry={refetchTop} />
         </div>
         <div className="hidden space-y-12 lg:block">
           <TracksHeroFrame badgeLabel={badgeLabel} stats={null} />
@@ -438,7 +438,21 @@ function TracksContent() {
             searchInput={searchInput}
             onSearchInputChange={setSearchInput}
           />
-          <ErrorState variant="startup" error={pagedError} message={t("errorLoading")} onRetry={refetchPaged} />
+          {isGroqDailyQuotaError(pagedError) ? (
+            <div className="px-4">
+              <GroqQuotaNotice error={pagedError} />
+            </div>
+          ) : (
+            <div className="px-4">
+              <button
+                type="button"
+                onClick={() => refetchPaged()}
+                className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl border border-card-border bg-card-surface px-5 py-3 text-sm font-bold text-foreground"
+              >
+                {tCommon("retry")}
+              </button>
+            </div>
+          )}
         </div>
         <div className="hidden space-y-12 lg:block">
           <TracksHeroFrame badgeLabel={badgeLabel} stats={heroStats} />

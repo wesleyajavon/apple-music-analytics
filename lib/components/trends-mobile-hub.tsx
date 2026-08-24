@@ -1,11 +1,12 @@
 "use client";
 
-import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { DashboardCinematicHeroBg } from "@/lib/components/dashboard-ui";
+import { GroqQuotaNotice } from "@/lib/components/error-state";
 import { MusicalProfilePeriodBadge } from "@/lib/components/musical-profile-period-badge";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
+import { isGroqDailyQuotaError } from "@/lib/utils/groq-quota-message";
 
 export const TRENDS_MOBILE_BLEED =
   "-mx-4 -mt-4 space-y-4 pb-8 max-lg:pb-[max(2rem,calc(var(--dashboard-bottom-nav-offset,0px)+1rem))] lg:hidden";
@@ -192,7 +193,6 @@ export function TrendsMobileEmpty({
   leaderboardHref,
   leaderboardTitle,
   leaderboardLead,
-  children,
 }: {
   locale: string;
   eyebrow: string;
@@ -201,7 +201,6 @@ export function TrendsMobileEmpty({
   leaderboardHref: string;
   leaderboardTitle: string;
   leaderboardLead: string;
-  children?: ReactNode;
 }) {
   return (
     <div className={TRENDS_MOBILE_BLEED}>
@@ -214,7 +213,60 @@ export function TrendsMobileEmpty({
           lead={leaderboardLead}
         />
       </div>
-      {children ? <div className="px-4">{children}</div> : null}
+    </div>
+  );
+}
+
+export function TrendsMobileError({
+  locale,
+  eyebrow,
+  heading,
+  error,
+  onRetry,
+}: {
+  locale: string;
+  eyebrow: string;
+  heading: string;
+  error?: Error | null;
+  onRetry: () => void;
+}) {
+  const tCommon = useTranslations("common");
+  const { startDate, endDate } = useListenDateRange();
+  const isQuota = isGroqDailyQuotaError(error);
+
+  return (
+    <div className={TRENDS_MOBILE_BLEED}>
+      <section className={TRENDS_MOBILE_HERO}>
+        <DashboardCinematicHeroBg />
+        <div className="relative space-y-4">
+          <div className="flex items-start justify-between gap-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-cyan">
+              {eyebrow}
+            </p>
+            <MusicalProfilePeriodBadge
+              startDate={startDate}
+              endDate={endDate}
+              locale={locale}
+              variant="mobile"
+              className="min-w-0"
+            />
+          </div>
+          <h1 className="text-[1.55rem] font-semibold leading-[1.12] tracking-[-0.05em]">
+            {heading}
+          </h1>
+          {isQuota ? (
+            <GroqQuotaNotice error={error} />
+          ) : (
+            <button
+              type="button"
+              onClick={onRetry}
+              className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25"
+            >
+              {tCommon("retry")}
+            </button>
+          )}
+        </div>
+      </section>
     </div>
   );
 }

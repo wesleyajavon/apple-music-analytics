@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useMemo, useState, type ReactNode } from "react";
+import { useId, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { ArtistTrendsArtistPicker } from "@/lib/components/artist-trends-artist-picker";
 import { ListenTrendChartViewToggle } from "@/lib/components/charts/listen-trend-chart-view-toggle";
@@ -13,6 +13,7 @@ import {
   TrendsMobileActionRow,
   TrendsMobileDestinationRow,
   TrendsMobileEmpty,
+  TrendsMobileError,
   TrendsMobileHero,
   TrendsMobileLegendRow,
   TrendsMobileSheetHeader,
@@ -82,10 +83,8 @@ function buildArtistTrendSignals({
 
 export function ArtistTrendsMobileEmpty({
   artistsHref,
-  children,
 }: {
   artistsHref: string;
-  children?: ReactNode;
 }) {
   const locale = useLocale();
   const t = useTranslations("artistTrends");
@@ -99,9 +98,28 @@ export function ArtistTrendsMobileEmpty({
       leaderboardHref={artistsHref}
       leaderboardTitle={t("backToArtists")}
       leaderboardLead={t("mobile.leaderboardLead")}
-    >
-      {children}
-    </TrendsMobileEmpty>
+    />
+  );
+}
+
+export function ArtistTrendsMobileError({
+  error,
+  onRetry,
+}: {
+  error?: Error | null;
+  onRetry: () => void;
+}) {
+  const locale = useLocale();
+  const t = useTranslations("artistTrends");
+
+  return (
+    <TrendsMobileError
+      locale={locale}
+      eyebrow={t("mobile.eyebrow")}
+      heading={t("mobile.errorLead")}
+      error={error}
+      onRetry={onRetry}
+    />
   );
 }
 

@@ -1409,6 +1409,8 @@
       "emptyLead": "Importa el historial para ver tus días más intensos.",
       "emptyCta": "Importar historial",
       "errorLead": "No se pudo cargar este calendario.",
+      "noDayDetailTitle": "Sin streams ese día",
+      "noDayDetailLead": "Prueba otra casilla del calendario.",
       "monthPrev": "Mes anterior",
       "monthNext": "Mes siguiente",
       "monthGridLabel": "Intensidad diaria"
@@ -1734,6 +1736,7 @@
       "eyebrow": "Tendencias de géneros",
       "emptyTitle": "Aún no hay tendencia",
       "emptyLead": "Cambia las fechas o abre el ranking.",
+      "errorLead": "No se pudo cargar esta tendencia.",
       "listenCount": "{count} streams",
       "peakLine": "Pico {count} · {date}",
       "noPeak": "Sin pico aún",
@@ -1888,6 +1891,7 @@
       "eyebrow": "Tendencias de artistas",
       "emptyTitle": "Aún no hay tendencia",
       "emptyLead": "Cambia las fechas o abre el ranking.",
+      "errorLead": "No se pudo cargar esta tendencia.",
       "listenCount": "{count} streams",
       "peakLine": "Pico {count} · {date}",
       "noPeak": "Sin pico aún",
@@ -2161,6 +2165,7 @@
       "eyebrow": "Tendencias de temas",
       "emptyTitle": "Aún no hay tendencia",
       "emptyLead": "Cambia las fechas o abre el ranking.",
+      "errorLead": "No se pudo cargar esta tendencia.",
       "listenCount": "{count} streams",
       "peakLine": "Pico {count} · {date}",
       "noPeak": "Sin pico aún",
@@ -2304,7 +2309,14 @@
     "cached": "(caché)",
     "skippedWeeks": "Semanas excluidas",
     "weeklyTrends": "Tarjetas diff semanal",
-    "pp": "pp"
+    "pp": "pp",
+    "mobile": {
+      "eyebrow": "Gustos",
+      "emptyTitle": "Hacen falta más semanas",
+      "emptyLead": "Importa el historial para ver los cambios de una semana a otra.",
+      "emptyCta": "Importar historial",
+      "errorLead": "No se pudo cargar esta evolución."
+    }
   },
   "taste-profile": {
     "title": "Tu Soundprint-AI, descifrado",
@@ -2437,7 +2449,8 @@
       "identityTitle": "Identidad",
       "emptyTitle": "Importa tus streams",
       "emptyLead": "Tu firma aparece cuando el historial está listo.",
-      "emptyCta": "Importar historial"
+      "emptyCta": "Importar historial",
+      "errorLead": "No se pudo cargar esta firma."
     },
     "overviewCallout": {
       "badge": "Empieza por el corazón de Soundprint-AI",

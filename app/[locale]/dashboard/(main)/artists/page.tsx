@@ -44,7 +44,8 @@ import {
 } from "@/lib/constants/dashboard-spotlight";
 import { CHART_TOOLTIP_STYLES } from "@/lib/constants/config";
 import { useTheme } from "@/lib/providers/theme-provider";
-import { ErrorState } from "@/lib/components/error-state";
+import { ErrorState, GroqQuotaNotice } from "@/lib/components/error-state";
+import { isGroqDailyQuotaError } from "@/lib/utils/groq-quota-message";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
 import { OverviewSkeleton } from "@/lib/components/skeleton-loaders";
 import type { ArtistOverviewDto, ArtistStatsDto } from "@/lib/dto/artist";
@@ -743,6 +744,7 @@ function ArtistsContent() {
   const pathname = usePathname();
   const queryClient = useQueryClient();
   const t = useTranslations("artists");
+  const tCommon = useTranslations("common");
   const locale = useLocale();
   const emptyStatePresets = useEmptyStatePresets();
   const startDate = searchParams.get("startDate") || undefined;
@@ -881,9 +883,7 @@ function ArtistsContent() {
     return (
       <>
         <div className="lg:hidden">
-          <ArtistsMobileError locale={locale}>
-            <ErrorState variant="startup" error={topError} message={t("errorLoading")} onRetry={refetchTop} />
-          </ArtistsMobileError>
+          <ArtistsMobileError locale={locale} error={topError} onRetry={refetchTop} />
         </div>
         <div className="hidden space-y-12 lg:block">
           <ArtistsHeroFrame trendsHref={trendsHref} badgeLabel={badgeLabel} stats={null} />
@@ -929,7 +929,21 @@ function ArtistsContent() {
             searchInput={searchInput}
             onSearchInputChange={setSearchInput}
           />
-          <ErrorState variant="startup" error={pagedError} message={t("errorLoading")} onRetry={refetchPaged} />
+          {isGroqDailyQuotaError(pagedError) ? (
+            <div className="px-4">
+              <GroqQuotaNotice error={pagedError} />
+            </div>
+          ) : (
+            <div className="px-4">
+              <button
+                type="button"
+                onClick={() => refetchPaged()}
+                className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl border border-card-border bg-card-surface px-5 py-3 text-sm font-bold text-foreground"
+              >
+                {tCommon("retry")}
+              </button>
+            </div>
+          )}
         </div>
         <div className="hidden space-y-12 lg:block">
           <ArtistsHeroFrame

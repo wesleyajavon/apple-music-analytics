@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useMemo, useState, type ReactNode } from "react";
+import { useId, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { ListenTrendChartViewToggle } from "@/lib/components/charts/listen-trend-chart-view-toggle";
 import { GroqQuotaNotice } from "@/lib/components/error-state";
@@ -12,6 +12,7 @@ import {
   TrendsMobileActionRow,
   TrendsMobileDestinationRow,
   TrendsMobileEmpty,
+  TrendsMobileError,
   TrendsMobileHero,
   TrendsMobileLegendRow,
   TrendsMobileSheetHeader,
@@ -84,10 +85,8 @@ function buildGenreTrendSignals({
 
 export function GenreTrendsMobileEmpty({
   genresHref,
-  children,
 }: {
   genresHref: string;
-  children?: ReactNode;
 }) {
   const locale = useLocale();
   const t = useTranslations("genreTrends");
@@ -101,9 +100,28 @@ export function GenreTrendsMobileEmpty({
       leaderboardHref={genresHref}
       leaderboardTitle={t("backToGenres")}
       leaderboardLead={t("mobile.leaderboardLead")}
-    >
-      {children}
-    </TrendsMobileEmpty>
+    />
+  );
+}
+
+export function GenreTrendsMobileError({
+  error,
+  onRetry,
+}: {
+  error?: Error | null;
+  onRetry: () => void;
+}) {
+  const locale = useLocale();
+  const t = useTranslations("genreTrends");
+
+  return (
+    <TrendsMobileError
+      locale={locale}
+      eyebrow={t("mobile.eyebrow")}
+      heading={t("mobile.errorLead")}
+      error={error}
+      onRetry={onRetry}
+    />
   );
 }
 

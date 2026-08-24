@@ -31,6 +31,7 @@ import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
 import { GenreAccuracyChooser } from "@/lib/components/palette/genre-accuracy-chooser";
 import {
   GenreTrendsMobileEmpty,
+  GenreTrendsMobileError,
   GenreTrendsMobileExperience,
   GenreTrendsMobileSkeleton,
 } from "@/lib/components/genre-trends-mobile";
@@ -611,14 +612,7 @@ function TrendsContent() {
           </div>
         </div>
         <div className="lg:hidden">
-          <GenreTrendsMobileEmpty genresHref={genresHref}>
-            <ErrorState
-              variant="startup"
-              error={error}
-              message={t("errorLoading")}
-              onRetry={() => refetch()}
-            />
-          </GenreTrendsMobileEmpty>
+          <GenreTrendsMobileError error={error} onRetry={() => refetch()} />
         </div>
         <div className="mt-6 hidden space-y-12 lg:block">
           <GenreTrendsHeroFrame

@@ -1103,14 +1103,7 @@ function GenresContent() {
       {!isLoadingOrFetching && error ? (
         <>
           <div className="lg:hidden">
-            <GenresMobileError locale={locale}>
-              <ErrorState
-                variant="startup"
-                error={error}
-                message={t("errorLoading")}
-                onRetry={() => refetch()}
-              />
-            </GenresMobileError>
+            <GenresMobileError locale={locale} error={error} onRetry={() => refetch()} />
           </div>
           <div className="hidden lg:block">
             <ErrorState

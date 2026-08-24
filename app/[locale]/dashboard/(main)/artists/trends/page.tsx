@@ -42,6 +42,7 @@ import { GenreTrendsSkeleton } from "@/lib/components/skeleton-loaders";
 import { ArtistTrendsArtistPicker } from "@/lib/components/artist-trends-artist-picker";
 import {
   ArtistTrendsMobileEmpty,
+  ArtistTrendsMobileError,
   ArtistTrendsMobileExperience,
   ArtistTrendsMobileSkeleton,
 } from "@/lib/components/artist-trends-mobile";
@@ -635,14 +636,7 @@ function TrendsContent() {
           </div>
         </div>
         <div className="lg:hidden">
-          <ArtistTrendsMobileEmpty artistsHref={artistsHref}>
-            <ErrorState
-              variant="startup"
-              error={error}
-              message={t("errorLoading")}
-              onRetry={() => refetch()}
-            />
-          </ArtistTrendsMobileEmpty>
+          <ArtistTrendsMobileError error={error} onRetry={() => refetch()} />
         </div>
         <div className="mt-6 hidden space-y-12 lg:block">
             <ArtistTrendsHeroFrame

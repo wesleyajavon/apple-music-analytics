@@ -427,14 +427,7 @@ function TimelineContent() {
         {isLoading ? (
           <TimelineMobileSkeleton />
         ) : error ? (
-          <TimelineMobileError locale={locale}>
-            <ErrorState
-              variant="startup"
-              error={error}
-              message={t("errorLoading")}
-              onRetry={() => refetch()}
-            />
-          </TimelineMobileError>
+          <TimelineMobileError locale={locale} error={error} onRetry={() => refetch()} />
         ) : !data || data.length === 0 ? (
           <TimelineMobileEmpty />
         ) : (

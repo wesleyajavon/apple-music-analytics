@@ -17,9 +17,12 @@ import {
   DASHBOARD_SPOTLIGHT_TITLE,
 } from "@/lib/constants/dashboard-spotlight";
 import { useTasteEvolution } from "@/lib/hooks/use-taste-evolution";
-import { ErrorState } from "@/lib/components/error-state";
+import { DashboardCinematicHeroBg } from "@/lib/components/dashboard-ui";
+import { ErrorState, GroqQuotaNotice } from "@/lib/components/error-state";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
 import { TasteEvolutionSpotlightSkeleton } from "@/lib/components/skeleton-loaders";
+import { isGroqDailyQuotaError } from "@/lib/utils/groq-quota-message";
+import { DASHBOARD_ONBOARDING_REIMPORT_PATH } from "@/lib/utils/onboarding-route";
 import type {
   TasteEvolutionResponse,
   WeekToWeekTrend,
@@ -43,6 +46,95 @@ const TASTE_NEGATIVE_SUBCARD_CLASS =
 /** Même shell hero que `/dashboard/timeline` — vibe startup / Vercel */
 const TASTE_EVOLUTION_HERO_SHELL_CLASS =
   "relative overflow-hidden rounded-[2rem] border border-white/10 bg-gray-950 px-5 py-6 text-white shadow-2xl shadow-violet-500/15 sm:px-8 sm:py-9 lg:px-10 lg:py-10";
+
+const TASTE_MOBILE_BLEED = "-mx-4 -mt-4 space-y-4 pb-8 lg:hidden";
+const TASTE_MOBILE_HERO = "relative overflow-hidden bg-gray-950 px-4 pb-6 pt-4 text-white";
+const TASTE_MOBILE_RETRY =
+  "inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25";
+
+function TasteEvolutionMobileSkeleton() {
+  return (
+    <div className={TASTE_MOBILE_BLEED} aria-busy="true">
+      <section className={TASTE_MOBILE_HERO}>
+        <DashboardCinematicHeroBg />
+        <div className="relative space-y-3">
+          <div className="h-3 w-20 animate-pulse rounded bg-white/15" />
+          <div className="h-8 w-48 animate-pulse rounded bg-white/20" />
+          <div className="h-3 w-10/12 animate-pulse rounded bg-white/10" />
+        </div>
+      </section>
+      <section className="px-4">
+        <div className="-mx-4 flex gap-3 overflow-hidden px-4">
+          {[0, 1, 2].map((item) => (
+            <div
+              key={item}
+              className="h-24 min-w-[9.75rem] animate-pulse rounded-3xl border border-white/10 bg-slate-950/80"
+            />
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function TasteEvolutionMobileEmpty() {
+  const t = useTranslations("taste-evolution");
+
+  return (
+    <div className={TASTE_MOBILE_BLEED}>
+      <section className={TASTE_MOBILE_HERO}>
+        <DashboardCinematicHeroBg />
+        <div className="relative space-y-4">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-cyan">
+            {t("mobile.eyebrow")}
+          </p>
+          <h1 className="max-w-[16rem] text-[1.55rem] font-semibold leading-[1.15] tracking-[-0.05em]">
+            {t("mobile.emptyTitle")}
+          </h1>
+          <p className="max-w-sm text-sm leading-6 text-white/62">{t("mobile.emptyLead")}</p>
+          <Link href={DASHBOARD_ONBOARDING_REIMPORT_PATH} className={TASTE_MOBILE_RETRY}>
+            {t("mobile.emptyCta")}
+          </Link>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function TasteEvolutionMobileError({
+  error,
+  onRetry,
+}: {
+  error?: Error | null;
+  onRetry: () => void;
+}) {
+  const t = useTranslations("taste-evolution");
+  const tCommon = useTranslations("common");
+  const isQuota = isGroqDailyQuotaError(error);
+
+  return (
+    <div className={TASTE_MOBILE_BLEED}>
+      <section className={TASTE_MOBILE_HERO}>
+        <DashboardCinematicHeroBg />
+        <div className="relative space-y-4">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-cyan">
+            {t("mobile.eyebrow")}
+          </p>
+          <h1 className="max-w-[16rem] text-[1.55rem] font-semibold leading-[1.15] tracking-[-0.05em]">
+            {t("mobile.errorLead")}
+          </h1>
+          {isQuota ? (
+            <GroqQuotaNotice error={error} />
+          ) : (
+            <button type="button" onClick={onRetry} className={TASTE_MOBILE_RETRY}>
+              {tCommon("retry")}
+            </button>
+          )}
+        </div>
+      </section>
+    </div>
+  );
+}
 
 function formatDateRange(startDate: string, endDate: string, locale?: string): string {
   const start = new Date(startDate);
@@ -484,7 +576,9 @@ function TasteEvolutionContent() {
 
   if (isLoading) {
     return (
-      <div className={pageWrap}>
+      <>
+        <TasteEvolutionMobileSkeleton />
+        <div className={`hidden lg:block ${pageWrap}`}>
         <section aria-labelledby="taste-evolution-heading">
           <h2 id="taste-evolution-heading" className="sr-only">
             {t("title")}
@@ -505,13 +599,16 @@ function TasteEvolutionContent() {
             ))}
           </div>
         </div>
-      </div>
+        </div>
+      </>
     );
   }
 
   if (error) {
     return (
-      <div className={pageWrap}>
+      <>
+        <TasteEvolutionMobileError error={error} onRetry={handleRetry} />
+        <div className={`hidden lg:block ${pageWrap}`}>
         <section aria-labelledby="taste-evolution-heading">
           <h2 id="taste-evolution-heading" className="sr-only">
             {t("title")}
@@ -525,13 +622,16 @@ function TasteEvolutionContent() {
             <ErrorState variant="startup" error={error} message={t("errorMessage")} onRetry={handleRetry} />
           </div>
         </div>
-      </div>
+        </div>
+      </>
     );
   }
 
   if (!data || data.trends.length === 0) {
     return (
-      <div className={pageWrap}>
+      <>
+        <TasteEvolutionMobileEmpty />
+        <div className={`hidden lg:block ${pageWrap}`}>
         <section aria-labelledby="taste-evolution-heading">
           <h2 id="taste-evolution-heading" className="sr-only">
             {t("title")}
@@ -539,7 +639,8 @@ function TasteEvolutionContent() {
           <TasteEvolutionHeroFrame badgeLabel={rangeLabel} description={t("emptySubtitle")} stats={null} />
         </section>
         <EmptyState variant="startup" {...emptyStatePresets.importData} message={t("insufficientData")} description={t("importDescription")} />
-      </div>
+        </div>
+      </>
     );
   }
 
@@ -627,7 +728,9 @@ function TasteEvolutionFallback() {
   start.setDate(start.getDate() - 56);
   const rangeLabel = formatDateRange(start.toISOString().split("T")[0], end.toISOString().split("T")[0], locale);
   return (
-    <div className="mx-auto max-w-6xl space-y-6 lg:space-y-8">
+    <>
+      <TasteEvolutionMobileSkeleton />
+      <div className="mx-auto hidden max-w-6xl space-y-6 lg:block lg:space-y-8">
       <section aria-labelledby="taste-evolution-heading">
         <h2 id="taste-evolution-heading" className="sr-only">
           {t("title")}
@@ -648,7 +751,8 @@ function TasteEvolutionFallback() {
           ))}
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
 

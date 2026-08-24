@@ -1407,6 +1407,8 @@
       "emptyLead": "Import history to see your loudest days.",
       "emptyCta": "Import history",
       "errorLead": "Couldn't load this calendar.",
+      "noDayDetailTitle": "No plays that day",
+      "noDayDetailLead": "Try another square on the calendar.",
       "monthPrev": "Previous month",
       "monthNext": "Next month",
       "monthGridLabel": "Daily intensity"
@@ -1732,6 +1734,7 @@
       "eyebrow": "Genre trends",
       "emptyTitle": "No genre trend yet",
       "emptyLead": "Change the dates, or open the ranking.",
+      "errorLead": "Couldn't load this trend.",
       "listenCount": "{count} streams",
       "peakLine": "Peak {count} · {date}",
       "noPeak": "No peak yet",
@@ -1886,6 +1889,7 @@
       "eyebrow": "Artist trends",
       "emptyTitle": "No artist trend yet",
       "emptyLead": "Change the dates, or open the ranking.",
+      "errorLead": "Couldn't load this trend.",
       "listenCount": "{count} streams",
       "peakLine": "Peak {count} · {date}",
       "noPeak": "No peak yet",
@@ -2159,6 +2163,7 @@
       "eyebrow": "Track trends",
       "emptyTitle": "No track trend yet",
       "emptyLead": "Change the dates, or open the ranking.",
+      "errorLead": "Couldn't load this trend.",
       "listenCount": "{count} streams",
       "peakLine": "Peak {count} · {date}",
       "noPeak": "No peak yet",
@@ -2302,7 +2307,14 @@
     "cached": "(cached)",
     "skippedWeeks": "Skipped weeks",
     "weeklyTrends": "Weekly diff cards",
-    "pp": "pp"
+    "pp": "pp",
+    "mobile": {
+      "eyebrow": "Taste",
+      "emptyTitle": "Need more weeks",
+      "emptyLead": "Import history so week-to-week shifts can appear.",
+      "emptyCta": "Import history",
+      "errorLead": "Couldn't load this evolution."
+    }
   },
   "taste-profile": {
     "title": "Your Soundprint-AI, decoded",
@@ -2435,7 +2447,8 @@
       "identityTitle": "Identity",
       "emptyTitle": "Import your streams",
       "emptyLead": "Your signature appears once history is in.",
-      "emptyCta": "Import history"
+      "emptyCta": "Import history",
+      "errorLead": "Couldn't load this signature."
     },
     "overviewCallout": {
       "badge": "Start with the heart of Soundprint-AI",

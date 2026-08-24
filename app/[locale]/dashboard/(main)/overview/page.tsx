@@ -284,13 +284,9 @@ function OverviewContent() {
           title={overviewTitle}
           description={t("mobile.errorLead")}
           avatarUrl={avatarUrl}
-        >
-          <ErrorState
-            error={error}
-            message={t("errorLoading")}
-            onRetry={handleRetry}
-          />
-        </MobileOverviewUnavailable>
+          error={error}
+          onRetry={handleRetry}
+        />
         <div className="hidden space-y-8 lg:block">
           <OverviewHeroFrame
             title={overviewTitle}

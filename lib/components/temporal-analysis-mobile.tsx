@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { DashboardCinematicHeroBg } from "@/lib/components/dashboard-ui";
+import { GroqQuotaNotice } from "@/lib/components/error-state";
 import { MobileBottomSheet } from "@/lib/components/mobile-bottom-sheet";
 import type {
   DayOfWeekAggregationDto,
@@ -12,6 +13,7 @@ import type {
   TemporalAnalysisDto,
 } from "@/lib/dto/listening";
 import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
+import { isGroqDailyQuotaError } from "@/lib/utils/groq-quota-message";
 import { DASHBOARD_ONBOARDING_REIMPORT_PATH } from "@/lib/utils/onboarding-route";
 import {
   TEMPORAL_DAY_PARTS,
@@ -214,8 +216,16 @@ export function TemporalMobileEmpty() {
   );
 }
 
-export function TemporalMobileError({ children }: { children?: ReactNode }) {
+export function TemporalMobileError({
+  error,
+  onRetry,
+}: {
+  error?: Error | null;
+  onRetry: () => void;
+}) {
   const t = useTranslations("temporal-analysis.mobile");
+  const tCommon = useTranslations("common");
+  const isQuota = isGroqDailyQuotaError(error);
 
   return (
     <div className={MOBILE_BLEED}>
@@ -228,9 +238,19 @@ export function TemporalMobileError({ children }: { children?: ReactNode }) {
           <h1 className="text-[1.55rem] font-semibold leading-[1.12] tracking-[-0.05em]">
             {t("errorLead")}
           </h1>
+          {isQuota ? (
+            <GroqQuotaNotice error={error} />
+          ) : (
+            <button
+              type="button"
+              onClick={onRetry}
+              className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25"
+            >
+              {tCommon("retry")}
+            </button>
+          )}
         </div>
       </section>
-      {children ? <div className="px-4">{children}</div> : null}
     </div>
   );
 }

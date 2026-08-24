@@ -1,14 +1,16 @@
 "use client";
 
-import { useId, useMemo, useState, type ReactNode } from "react";
+import { useId, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Search, SlidersHorizontal } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { DashboardCinematicHeroBg } from "@/lib/components/dashboard-ui";
+import { GroqQuotaNotice } from "@/lib/components/error-state";
 import { MobileBottomSheet } from "@/lib/components/mobile-bottom-sheet";
 import { MusicalProfilePeriodBadge } from "@/lib/components/musical-profile-period-badge";
 import type { TrackOverviewDto, TrackStatsDto } from "@/lib/dto/track";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
+import { isGroqDailyQuotaError } from "@/lib/utils/groq-quota-message";
 import { DASHBOARD_ONBOARDING_REIMPORT_PATH } from "@/lib/utils/onboarding-route";
 import { formatListeningTime } from "@/lib/utils/overview-page";
 
@@ -155,17 +157,51 @@ export function TracksMobileEmpty() {
 
 export function TracksMobileError({
   locale,
-  children,
+  error,
+  onRetry,
 }: {
   locale: string;
-  children?: ReactNode;
+  error?: Error | null;
+  onRetry: () => void;
 }) {
   const t = useTranslations("tracks.mobile");
+  const tCommon = useTranslations("common");
+  const { startDate, endDate } = useListenDateRange();
+  const isQuota = isGroqDailyQuotaError(error);
 
   return (
     <div className={MOBILE_BLEED}>
-      <TracksMobileHero locale={locale} heading={t("errorLead")} />
-      {children ? <div className="px-4">{children}</div> : null}
+      <section className={HERO_SHELL}>
+        <DashboardCinematicHeroBg />
+        <div className="relative space-y-4">
+          <div className="flex justify-end">
+            <MusicalProfilePeriodBadge
+              startDate={startDate}
+              endDate={endDate}
+              locale={locale}
+              variant="mobile"
+              className="min-w-0"
+            />
+          </div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-cyan">
+            {t("heroEyebrow")}
+          </p>
+          <h1 className="max-w-[16rem] text-[1.55rem] font-semibold leading-[1.15] tracking-[-0.05em]">
+            {t("errorLead")}
+          </h1>
+          {isQuota ? (
+            <GroqQuotaNotice error={error} />
+          ) : (
+            <button
+              type="button"
+              onClick={onRetry}
+              className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25"
+            >
+              {tCommon("retry")}
+            </button>
+          )}
+        </div>
+      </section>
     </div>
   );
 }

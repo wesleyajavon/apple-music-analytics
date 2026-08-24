@@ -50,6 +50,7 @@ import { LiveStatusDot } from "@/lib/components/live-status-dot";
 import { TracksSectionSwitcher } from "@/lib/components/tracks-section-switcher";
 import {
   TrackTrendsMobileEmpty,
+  TrackTrendsMobileError,
   TrackTrendsMobileExperience,
   TrackTrendsMobileSkeleton,
 } from "@/lib/components/track-trends-mobile";
@@ -462,9 +463,7 @@ function TrendsContent() {
           </div>
         </div>
         <div className="lg:hidden">
-          <TrackTrendsMobileEmpty tracksHref={tracksHref}>
-            <ErrorState variant="startup" error={error} message={t("errorLoading")} onRetry={() => refetch()} />
-          </TrackTrendsMobileEmpty>
+          <TrackTrendsMobileError error={error} onRetry={() => refetch()} />
         </div>
         <div className="mt-6 hidden space-y-12 lg:block">
           <TrackTrendsHeroFrame

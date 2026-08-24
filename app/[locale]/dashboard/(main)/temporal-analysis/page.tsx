@@ -417,14 +417,7 @@ function TemporalAnalysisContent() {
         {isLoading ? (
           <TemporalMobileSkeleton />
         ) : error ? (
-          <TemporalMobileError>
-            <ErrorState
-              variant="startup"
-              error={error}
-              message={t("errorLoading")}
-              onRetry={() => refetch()}
-            />
-          </TemporalMobileError>
+          <TemporalMobileError error={error} onRetry={() => refetch()} />
         ) : data && !isEmpty ? (
           <TemporalMobileExperience data={data} locale={locale} />
         ) : (

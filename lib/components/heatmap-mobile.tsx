@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import type { HeatmapDataPoint } from "@/lib/components/calendar-heatmap";
 import { DashboardCinematicHeroBg } from "@/lib/components/dashboard-ui";
+import { GroqQuotaNotice } from "@/lib/components/error-state";
 import { MusicalProfilePeriodBadge } from "@/lib/components/musical-profile-period-badge";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
 import { useTheme } from "@/lib/providers/theme-provider";
+import { isGroqDailyQuotaError } from "@/lib/utils/groq-quota-message";
 import { DASHBOARD_ONBOARDING_REIMPORT_PATH } from "@/lib/utils/onboarding-route";
 
 const MOBILE_BLEED = "-mx-4 -mt-4 space-y-4 pb-8 lg:hidden";
@@ -321,19 +323,64 @@ export function HeatmapMobileEmpty() {
   );
 }
 
-export function HeatmapMobileError({
-  locale,
-  children,
-}: {
-  locale: string;
-  children?: ReactNode;
-}) {
+export function HeatmapMobileNoDayDetail() {
   const t = useTranslations("heatmap.mobile");
 
   return (
+    <div className="space-y-1 px-1 py-2">
+      <p className="text-sm font-semibold text-foreground">{t("noDayDetailTitle")}</p>
+      <p className="text-sm leading-6 text-muted">{t("noDayDetailLead")}</p>
+    </div>
+  );
+}
+
+export function HeatmapMobileError({
+  locale,
+  error,
+  onRetry,
+}: {
+  locale: string;
+  error?: Error | null;
+  onRetry: () => void;
+}) {
+  const t = useTranslations("heatmap.mobile");
+  const tCommon = useTranslations("common");
+  const { startDate, endDate } = useListenDateRange();
+  const isQuota = isGroqDailyQuotaError(error);
+
+  return (
     <div className={MOBILE_BLEED}>
-      <HeatmapMobileHero locale={locale} heading={t("errorLead")} />
-      {children ? <div className="px-4">{children}</div> : null}
+      <section className={HERO_SHELL}>
+        <DashboardCinematicHeroBg />
+        <div className="relative space-y-4">
+          <div className="flex justify-end">
+            <MusicalProfilePeriodBadge
+              startDate={startDate}
+              endDate={endDate}
+              locale={locale}
+              variant="mobile"
+              className="min-w-0"
+            />
+          </div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-cyan">
+            {t("heroEyebrow")}
+          </p>
+          <h1 className="max-w-[16rem] text-[1.55rem] font-semibold leading-[1.15] tracking-[-0.05em]">
+            {t("errorLead")}
+          </h1>
+          {isQuota ? (
+            <GroqQuotaNotice error={error} />
+          ) : (
+            <button
+              type="button"
+              onClick={onRetry}
+              className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25"
+            >
+              {tCommon("retry")}
+            </button>
+          )}
+        </div>
+      </section>
     </div>
   );
 }

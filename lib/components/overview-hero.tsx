@@ -10,7 +10,9 @@ import {
   DASHBOARD_CINEMATIC_HERO_SHELL,
   DashboardCinematicHeroBg,
 } from "@/lib/components/dashboard-ui";
+import { GroqQuotaNotice } from "@/lib/components/error-state";
 import { DASHBOARD_ONBOARDING_REIMPORT_PATH } from "@/lib/utils/onboarding-route";
+import { isGroqDailyQuotaError } from "@/lib/utils/groq-quota-message";
 import type { OverviewPrimaryInsight } from "@/lib/utils/overview-page";
 
 export const OVERVIEW_MOBILE_HERO_SHELL =
@@ -212,21 +214,38 @@ export function MobileOverviewUnavailable({
   title,
   description,
   avatarUrl,
-  children,
+  error,
+  onRetry,
 }: {
   title: string;
   description?: string;
   avatarUrl?: string | null;
-  children?: ReactNode;
+  error?: Error | null;
+  onRetry: () => void;
 }) {
+  const tCommon = useTranslations("common");
+  const isQuota = isGroqDailyQuotaError(error);
+
   return (
     <div className={MOBILE_BLEED}>
       <OverviewMobileHero title={title} avatarUrl={avatarUrl}>
         {description ? (
           <p className="mt-2 max-w-sm text-sm leading-6 text-white/62">{description}</p>
         ) : null}
+        {isQuota ? (
+          <div className="mt-3">
+            <GroqQuotaNotice error={error} />
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={onRetry}
+            className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25"
+          >
+            {tCommon("retry")}
+          </button>
+        )}
       </OverviewMobileHero>
-      {children ? <div className="px-4">{children}</div> : null}
     </div>
   );
 }

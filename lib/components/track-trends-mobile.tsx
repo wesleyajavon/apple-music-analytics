@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useMemo, useState, type ReactNode } from "react";
+import { useId, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { ListenTrendChartViewToggle } from "@/lib/components/charts/listen-trend-chart-view-toggle";
 import { MobileBottomSheet } from "@/lib/components/mobile-bottom-sheet";
@@ -12,6 +12,7 @@ import {
   TrendsMobileActionRow,
   TrendsMobileDestinationRow,
   TrendsMobileEmpty,
+  TrendsMobileError,
   TrendsMobileHero,
   TrendsMobileLegendRow,
   TrendsMobileSheetHeader,
@@ -82,10 +83,8 @@ function buildTrackTrendSignals({
 
 export function TrackTrendsMobileEmpty({
   tracksHref,
-  children,
 }: {
   tracksHref: string;
-  children?: ReactNode;
 }) {
   const locale = useLocale();
   const t = useTranslations("trackTrends");
@@ -99,9 +98,28 @@ export function TrackTrendsMobileEmpty({
       leaderboardHref={tracksHref}
       leaderboardTitle={t("mobile.leaderboardTitle")}
       leaderboardLead={t("mobile.leaderboardLead")}
-    >
-      {children}
-    </TrendsMobileEmpty>
+    />
+  );
+}
+
+export function TrackTrendsMobileError({
+  error,
+  onRetry,
+}: {
+  error?: Error | null;
+  onRetry: () => void;
+}) {
+  const locale = useLocale();
+  const t = useTranslations("trackTrends");
+
+  return (
+    <TrendsMobileError
+      locale={locale}
+      eyebrow={t("mobile.eyebrow")}
+      heading={t("mobile.errorLead")}
+      error={error}
+      onRetry={onRetry}
+    />
   );
 }
 

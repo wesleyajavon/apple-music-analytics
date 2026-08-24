@@ -1409,6 +1409,8 @@
       "emptyLead": "Importez l'historique pour voir vos jours les plus forts.",
       "emptyCta": "Importer l'historique",
       "errorLead": "Impossible de charger ce calendrier.",
+      "noDayDetailTitle": "Aucun stream ce jour-là",
+      "noDayDetailLead": "Essaie une autre case du calendrier.",
       "monthPrev": "Mois précédent",
       "monthNext": "Mois suivant",
       "monthGridLabel": "Intensité quotidienne"
@@ -1734,6 +1736,7 @@
       "eyebrow": "Tendances genres",
       "emptyTitle": "Pas encore de tendance",
       "emptyLead": "Changez les dates, ou ouvrez le classement.",
+      "errorLead": "Impossible de charger cette tendance.",
       "listenCount": "{count} streams",
       "peakLine": "Pic {count} · {date}",
       "noPeak": "Pas encore de pic",
@@ -1888,6 +1891,7 @@
       "eyebrow": "Tendances artistes",
       "emptyTitle": "Pas encore de tendance",
       "emptyLead": "Changez les dates, ou ouvrez le classement.",
+      "errorLead": "Impossible de charger cette tendance.",
       "listenCount": "{count} streams",
       "peakLine": "Pic {count} · {date}",
       "noPeak": "Pas encore de pic",
@@ -2161,6 +2165,7 @@
       "eyebrow": "Tendances titres",
       "emptyTitle": "Pas encore de tendance",
       "emptyLead": "Changez les dates, ou ouvrez le classement.",
+      "errorLead": "Impossible de charger cette tendance.",
       "listenCount": "{count} streams",
       "peakLine": "Pic {count} · {date}",
       "noPeak": "Pas encore de pic",
@@ -2304,7 +2309,14 @@
     "cached": "(cache)",
     "skippedWeeks": "Semaines exclues",
     "weeklyTrends": "Cartes de diff hebdo",
-    "pp": "pp"
+    "pp": "pp",
+    "mobile": {
+      "eyebrow": "Goûts",
+      "emptyTitle": "Il faut plus de semaines",
+      "emptyLead": "Importe l’historique pour voir les décalages semaine après semaine.",
+      "emptyCta": "Importer l’historique",
+      "errorLead": "Impossible de charger cette évolution."
+    }
   },
   "taste-profile": {
     "title": "Votre Soundprint-AI décrypté",
@@ -2437,7 +2449,8 @@
       "identityTitle": "Identité",
       "emptyTitle": "Importe tes streams",
       "emptyLead": "Ton ancrage apparaît dès que l’historique est là.",
-      "emptyCta": "Importer l’historique"
+      "emptyCta": "Importer l’historique",
+      "errorLead": "Impossible de charger cette signature."
     },
     "overviewCallout": {
       "badge": "Commencez par le cœur de Soundprint-AI",

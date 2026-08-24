@@ -45,6 +45,8 @@ import { getAvatarUrl } from "@/lib/components/artist-avatar-utils";
 import { MusicalProfilePeriodBadge } from "@/lib/components/musical-profile-period-badge";
 import {
   MobileMusicalProfileView,
+  MusicalProfileMobileError,
+  MusicalProfileMobileSkeleton,
   MusicalProfileNoDataMobileView,
   type ProfileMetric,
 } from "@/lib/components/musical-profile-mobile";
@@ -771,14 +773,21 @@ function MusicalProfileContent() {
 
   if (!isLoading && dataError && !hasListeningData) {
     return (
-      <div className="max-w-4xl">
-        <ErrorState
-          variant="startup"
+      <>
+        <MusicalProfileMobileError
+          locale={locale}
           error={dataError}
-          message={t("errorLoading")}
           onRetry={() => void refetch()}
         />
-      </div>
+        <div className="hidden max-w-4xl lg:block">
+          <ErrorState
+            variant="startup"
+            error={dataError}
+            message={t("errorLoading")}
+            onRetry={() => void refetch()}
+          />
+        </div>
+      </>
     );
   }
 
@@ -1002,20 +1011,23 @@ function MusicalProfileContent() {
 
 function MusicalProfileFallback() {
   return (
-    <div className="space-y-8">
-      <motion.div
-        className="h-72 rounded-[2rem] bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800"
-        initial={{ opacity: 0.4 }}
-        animate={{ opacity: [0.4, 0.7, 0.4] }}
-        transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <motion.div
-        className="h-80 rounded-[2rem] bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800"
-        initial={{ opacity: 0.4 }}
-        animate={{ opacity: [0.4, 0.7, 0.4] }}
-        transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}
-      />
-    </div>
+    <>
+      <MusicalProfileMobileSkeleton />
+      <div className="hidden space-y-8 lg:block">
+        <motion.div
+          className="h-72 rounded-[2rem] bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800"
+          initial={{ opacity: 0.4 }}
+          animate={{ opacity: [0.4, 0.7, 0.4] }}
+          transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="h-80 rounded-[2rem] bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800"
+          initial={{ opacity: 0.4 }}
+          animate={{ opacity: [0.4, 0.7, 0.4] }}
+          transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}
+        />
+      </div>
+    </>
   );
 }
 

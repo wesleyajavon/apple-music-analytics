@@ -29,11 +29,20 @@ import { DuetCompareHero } from "@/lib/components/duet/duet-compare-hero";
 import { DuetCompareContextBar } from "@/lib/components/duet/duet-compare-context-bar";
 import {
   DuetCompareSectionTabs,
+  buildCompareFriendHref,
   buildCompareTargetParams,
   resolveCompareSection,
   type DuetCompareSection,
 } from "@/lib/components/duet/duet-compare-section-tabs";
 import { DuetSubNav } from "@/lib/components/duet/duet-sub-nav";
+import {
+  DuetCompareMobileError,
+  DuetCompareMobileExperience,
+  DuetCompareMobileGated,
+  DuetCompareMobilePicker,
+  DuetCompareMobileSkeleton,
+  DuetCompareMobileUnavailable,
+} from "@/lib/components/duet/duet-compare-mobile";
 import {
   DuetCompareBattleSkeleton,
   DuetComparePageFallback,
@@ -86,6 +95,8 @@ import { useTrackSearch } from "@/lib/hooks/use-tracks";
 import { useGenres } from "@/lib/hooks/use-listening";
 import { ApiError } from "@/lib/api-client";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { usePublicDemoViewer, useSupabaseAuthUserId } from "@/lib/hooks/use-public-demo-viewer";
+import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
 
 type ViewerProfile = {
   id: string;
@@ -153,6 +164,15 @@ function getPeriodChartDescriptionKey(period: PeriodType) {
   return "chartDescriptionMonthly";
 }
 
+function CompareSplit({ mobile, desktop }: { mobile: ReactNode; desktop: ReactNode }) {
+  return (
+    <>
+      <div className="lg:hidden">{mobile}</div>
+      <div className="hidden lg:block">{desktop}</div>
+    </>
+  );
+}
+
 function CompareContent() {
   const t = useTranslations("duet.compare");
   const tPeriod = useTranslations("components.periodSelector");
@@ -165,13 +185,40 @@ function CompareContent() {
 
   const friendUserId = searchParams.get("friendUserId") ?? undefined;
   const activeSection = resolveCompareSection(searchParams);
+  const authUserId = useSupabaseAuthUserId();
+  const userIdFromUrl = searchParams.get("userId");
+  const isPublicDemoViewer = usePublicDemoViewer(userIdFromUrl);
+  const withFilters = useCallback(
+    (href: string) => mergeDashboardSearchParams(href, searchParams),
+    [searchParams]
+  );
+  const hrefForFriend = useCallback(
+    (friendId: string) => buildCompareFriendHref(pathname, searchParams, friendId),
+    [pathname, searchParams]
+  );
+  const handleSelectFriend = useCallback(
+    (friendId: string) => {
+      router.replace(buildCompareFriendHref(pathname, searchParams, friendId), { scroll: false });
+    },
+    [pathname, router, searchParams]
+  );
+  const handleSectionChange = useCallback(
+    (section: DuetCompareSection) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("section", section);
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [pathname, router, searchParams]
+  );
   const { startDate: filterStartDate, endDate: filterEndDate, isAll, isLoading: isRangeLoading } =
     useListenDateRange();
   const startDate = isAll ? undefined : filterStartDate;
   const endDate = isAll ? undefined : filterEndDate;
   const period = getPeriodFromSearchParams(searchParams, "month");
 
-  const { data: friendsData, isLoading: friendsLoading } = useDuetFriends();
+  const { data: friendsData, isLoading: friendsLoading } = useDuetFriends({
+    enabled: authUserId !== undefined && !isPublicDemoViewer,
+  });
   const [viewer, setViewer] = useState<ViewerProfile | null>(null);
 
   useEffect(() => {
@@ -420,10 +467,12 @@ function CompareContent() {
       setSelectedArtistId(artistId);
       setArtistQuery(artistName);
       router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-      document.getElementById("duet-compare-context-bar")?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
+      if (window.matchMedia("(min-width: 1024px)").matches) {
+        document.getElementById("duet-compare-context-bar")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }
     },
     [pathname, router, searchParams]
   );
@@ -518,6 +567,93 @@ function CompareContent() {
     trackCompare?.type === "track" ? trackCompare.artistName : undefined;
   const selectedGenreName =
     genreCompare?.type === "genre" ? genreCompare.genreName : genreQuery;
+
+  const targetMode: DuetArenaMode = arenaMode ?? "artist";
+  const mobileTarget =
+    targetMode === "track"
+      ? {
+          query: trackQuery,
+          onQueryChange: (value: string) => {
+            setTrackQuery(value);
+            setSelectedTrackId(undefined);
+          },
+          suggestions: (trackResults?.tracks ?? []).map((track) => ({
+            id: track.id,
+            label: track.title,
+            subtitle: track.artistName,
+          })),
+          showSuggestions: showTrackSuggestions,
+          selectedLabel: selectedTrackId ? selectedTrackName : "",
+          subtitle: selectedTrackArtistName ?? undefined,
+          compare: trackCompare,
+          chartData: trackChartData,
+          loading: isTrackCompareLoading || isTrackCompareFetching,
+          error: Boolean(trackCompareError),
+          retry: () => void refetchTrackCompare(),
+          select: (id: string, label: string) => {
+            setSelectedTrackId(id);
+            setTrackQuery(label);
+          },
+          clear: () => {
+            setTrackQuery("");
+            setSelectedTrackId(undefined);
+          },
+        }
+      : targetMode === "genre"
+        ? {
+            query: genreQuery,
+            onQueryChange: (value: string) => {
+              setGenreQuery(value);
+              setSelectedGenre(undefined);
+            },
+            suggestions: genreSuggestions.map((row) => ({
+              id: row.genre,
+              label: row.genre,
+            })),
+            showSuggestions: showGenreSuggestions,
+            selectedLabel: selectedGenre ? selectedGenreName : "",
+            subtitle: undefined as string | undefined,
+            compare: genreCompare,
+            chartData: genreChartData,
+            loading: isGenreCompareLoading || isGenreCompareFetching,
+            error: Boolean(genreCompareError),
+            retry: () => void refetchGenreCompare(),
+            select: (id: string, label: string) => {
+              setSelectedGenre(id);
+              setGenreQuery(label);
+            },
+            clear: () => {
+              setGenreQuery("");
+              setSelectedGenre(undefined);
+            },
+          }
+        : {
+            query: artistQuery,
+            onQueryChange: (value: string) => {
+              setArtistQuery(value);
+              setSelectedArtistId(undefined);
+            },
+            suggestions: (artistResults?.artists ?? []).map((artist) => ({
+              id: artist.id,
+              label: artist.name,
+            })),
+            showSuggestions: showArtistSuggestions,
+            selectedLabel: selectedArtistId ? selectedArtistName : "",
+            subtitle: undefined as string | undefined,
+            compare: artistCompare,
+            chartData: artistChartData,
+            loading: isArtistCompareLoading || isArtistCompareFetching,
+            error: Boolean(artistCompareError),
+            retry: () => void refetchArtistCompare(),
+            select: (id: string, label: string) => {
+              setSelectedArtistId(id);
+              setArtistQuery(label);
+            },
+            clear: () => {
+              setArtistQuery("");
+              setSelectedArtistId(undefined);
+            },
+          };
 
   const renderTargetSection = () => (
     <section className={DASHBOARD_SPOTLIGHT_SHELL}>
@@ -788,158 +924,294 @@ function CompareContent() {
     return renderOverviewSection();
   };
 
+  if (authUserId === undefined) {
+    return (
+      <CompareSplit
+        mobile={<DuetCompareMobileSkeleton locale={locale} />}
+        desktop={
+          <div className="space-y-8">
+            <DuetSubNav />
+            <DuetCompareHero mode="picker" viewerName={t("seriesSelf")} locale={locale} />
+            <DuetComparePickerSkeleton />
+          </div>
+        }
+      />
+    );
+  }
+
+  if (isPublicDemoViewer) {
+    return (
+      <CompareSplit
+        mobile={<DuetCompareMobileGated locale={locale} withFilters={withFilters} />}
+        desktop={
+          <div className="space-y-8">
+            <DuetSubNav />
+            <EmptyState
+              variant="startup"
+              message={t("selectFriendTitle")}
+              description={t("selectFriendDescription")}
+              actions={[{ label: t("mobile.gatedCta"), href: "/sign-in" }]}
+            />
+          </div>
+        }
+      />
+    );
+  }
+
   if (!friendUserId) {
     if (friendsLoading || viewer === null) {
       return (
-        <div className="space-y-8">
-          <DuetSubNav />
-          <DuetCompareHero mode="picker" viewerName={t("seriesSelf")} locale={locale} />
-          <DuetComparePickerSkeleton />
-        </div>
+        <CompareSplit
+          mobile={<DuetCompareMobileSkeleton locale={locale} />}
+          desktop={
+            <div className="space-y-8">
+              <DuetSubNav />
+              <DuetCompareHero mode="picker" viewerName={t("seriesSelf")} locale={locale} />
+              <DuetComparePickerSkeleton />
+            </div>
+          }
+        />
       );
     }
 
     const acceptedFriends = friendsData?.friends ?? [];
 
     return (
-      <div className="space-y-8">
-        <DuetSubNav />
-        <DuetCompareHero
-          mode="picker"
-          viewerName={viewer.name}
-          viewerAvatar={viewer.avatarUrl}
-          locale={locale}
-          friendsReadyCount={acceptedFriends.length}
-        />
-
-        {acceptedFriends.length === 0 ? (
-          <EmptyState
-            variant="startup"
-            message={t("selectFriendTitle")}
-            description={t("selectFriendDescription")}
-            actions={[{ label: t("goToFriends"), href: "/dashboard/duet/friends" }]}
+      <CompareSplit
+        mobile={
+          <DuetCompareMobilePicker
+            locale={locale}
+            viewerId={viewer.id}
+            friends={acceptedFriends}
+            hrefForFriend={hrefForFriend}
+            withFilters={withFilters}
           />
-        ) : (
-          <section className={DASHBOARD_SPOTLIGHT_SHELL}>
-            <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} />
-            <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} />
-            <SpotlightSectionHeader
-              eyebrow={t("pickerEyebrow")}
-              title={t("selectFriendTitle")}
-              description={t("selectFriendDescription")}
-              badge={t("pickerBadge")}
+        }
+        desktop={
+          <div className="space-y-8">
+            <DuetSubNav />
+            <DuetCompareHero
+              mode="picker"
+              viewerName={viewer.name}
+              viewerAvatar={viewer.avatarUrl}
+              locale={locale}
+              friendsReadyCount={acceptedFriends.length}
             />
-            <div className="grid gap-3 px-5 pb-6 sm:grid-cols-2 sm:px-8 lg:grid-cols-3">
-              {acceptedFriends.map((friendship, index) => {
-                const peer =
-                  friendship.requester.id === viewer.id
-                    ? friendship.addressee
-                    : friendship.requester;
-                const displayName = getDuetDisplayName(peer);
-                return (
-                  <motion.div
-                    key={friendship.id}
-                    initial={{ opacity: 0, y: 16 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: index * 0.05 }}
-                  >
-                    <Link
-                      href={`/dashboard/duet/compare?friendUserId=${encodeURIComponent(peer.id)}&section=overview`}
-                      className="group relative flex min-h-[9.5rem] flex-col items-center justify-center gap-3 overflow-hidden rounded-[1.35rem] border border-slate-200/80 bg-white p-5 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-violet-300/60 hover:shadow-lg hover:shadow-violet-500/10 dark:border-white/10 dark:bg-slate-950/60 dark:hover:border-violet-400/30"
-                    >
-                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-violet-500/0 via-transparent to-cyan-500/0 opacity-0 transition-opacity duration-300 group-hover:from-violet-500/5 group-hover:to-cyan-500/8 group-hover:opacity-100" />
-                      <UserAvatar name={displayName} src={peer.avatarUrl} size="lg" />
-                      <div className="relative">
-                        <p className="truncate font-semibold text-slate-900 dark:text-white">{displayName}</p>
-                        <p className="mt-1 text-xs font-bold uppercase tracking-[0.16em] text-violet-600 transition-colors group-hover:text-violet-500 dark:text-violet-300">
-                          {t("challengeCta")}
-                        </p>
-                      </div>
-                    </Link>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </section>
-        )}
-      </div>
+
+            {acceptedFriends.length === 0 ? (
+              <EmptyState
+                variant="startup"
+                message={t("selectFriendTitle")}
+                description={t("selectFriendDescription")}
+                actions={[{ label: t("goToFriends"), href: "/dashboard/duet/friends" }]}
+              />
+            ) : (
+              <section className={DASHBOARD_SPOTLIGHT_SHELL}>
+                <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} />
+                <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} />
+                <SpotlightSectionHeader
+                  eyebrow={t("pickerEyebrow")}
+                  title={t("selectFriendTitle")}
+                  description={t("selectFriendDescription")}
+                  badge={t("pickerBadge")}
+                />
+                <div className="grid gap-3 px-5 pb-6 sm:grid-cols-2 sm:px-8 lg:grid-cols-3">
+                  {acceptedFriends.map((friendship, index) => {
+                    const peer =
+                      friendship.requester.id === viewer.id
+                        ? friendship.addressee
+                        : friendship.requester;
+                    const displayName = getDuetDisplayName(peer);
+                    return (
+                      <motion.div
+                        key={friendship.id}
+                        initial={{ opacity: 0, y: 16 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3, delay: index * 0.05 }}
+                      >
+                        <Link
+                          href={`/dashboard/duet/compare?friendUserId=${encodeURIComponent(peer.id)}&section=overview`}
+                          className="group relative flex min-h-[9.5rem] flex-col items-center justify-center gap-3 overflow-hidden rounded-[1.35rem] border border-slate-200/80 bg-white p-5 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-violet-300/60 hover:shadow-lg hover:shadow-violet-500/10 dark:border-white/10 dark:bg-slate-950/60 dark:hover:border-violet-400/30"
+                        >
+                          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-violet-500/0 via-transparent to-cyan-500/0 opacity-0 transition-opacity duration-300 group-hover:from-violet-500/5 group-hover:to-cyan-500/8 group-hover:opacity-100" />
+                          <UserAvatar name={displayName} src={peer.avatarUrl} size="lg" />
+                          <div className="relative">
+                            <p className="truncate font-semibold text-slate-900 dark:text-white">{displayName}</p>
+                            <p className="mt-1 text-xs font-bold uppercase tracking-[0.16em] text-violet-600 transition-colors group-hover:text-violet-500 dark:text-violet-300">
+                              {t("challengeCta")}
+                            </p>
+                          </div>
+                        </Link>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+          </div>
+        }
+      />
     );
   }
 
   if ((isLoading && !timeline) || (!isAll && isRangeLoading && !timeline)) {
     return (
-      <div className="space-y-8">
-        <DuetSubNav />
-        <DuetCompareHero
-          mode="battle"
-          viewerName={viewer?.name ?? t("seriesSelf")}
-          viewerAvatar={viewer?.avatarUrl}
-          friendName={friendName}
-          friendAvatar={friendUser?.avatarUrl}
-          locale={locale}
-        />
-        <DuetCompareBattleSkeleton />
-      </div>
+      <CompareSplit
+        mobile={<DuetCompareMobileSkeleton locale={locale} />}
+        desktop={
+          <div className="space-y-8">
+            <DuetSubNav />
+            <DuetCompareHero
+              mode="battle"
+              viewerName={viewer?.name ?? t("seriesSelf")}
+              viewerAvatar={viewer?.avatarUrl}
+              friendName={friendName}
+              friendAvatar={friendUser?.avatarUrl}
+              locale={locale}
+            />
+            <DuetCompareBattleSkeleton />
+          </div>
+        }
+      />
     );
   }
 
   if (error) {
     if (error instanceof ApiError && (error.statusCode === 403 || error.statusCode === 404)) {
       return (
-        <div className="space-y-6">
-          <DuetSubNav />
-          <DuetCompareHero mode="picker" viewerName={viewer?.name ?? t("seriesSelf")} locale={locale} />
-          <EmptyState
-            variant="startup"
-            message={error.statusCode === 403 ? t("scopeInsufficientTitle") : t("notFoundTitle")}
-            description={
-              error.statusCode === 403
-                ? t("scopeInsufficientDescription")
-                : t("notFoundDescription")
-            }
-          />
-        </div>
+        <CompareSplit
+          mobile={
+            <DuetCompareMobileUnavailable
+              locale={locale}
+              withFilters={withFilters}
+              title={error.statusCode === 403 ? t("scopeInsufficientTitle") : t("notFoundTitle")}
+              description={
+                error.statusCode === 403
+                  ? t("scopeInsufficientDescription")
+                  : t("notFoundDescription")
+              }
+            />
+          }
+          desktop={
+            <div className="space-y-6">
+              <DuetSubNav />
+              <DuetCompareHero mode="picker" viewerName={viewer?.name ?? t("seriesSelf")} locale={locale} />
+              <EmptyState
+                variant="startup"
+                message={error.statusCode === 403 ? t("scopeInsufficientTitle") : t("notFoundTitle")}
+                description={
+                  error.statusCode === 403
+                    ? t("scopeInsufficientDescription")
+                    : t("notFoundDescription")
+                }
+              />
+            </div>
+          }
+        />
       );
     }
     return (
-      <div className="space-y-6">
-        <DuetSubNav />
-        <DuetCompareHero mode="picker" viewerName={viewer?.name ?? t("seriesSelf")} locale={locale} />
-        <ErrorState variant="startup" error={error} message={t("error")} onRetry={() => refetch()} />
-      </div>
+      <CompareSplit
+        mobile={
+          <DuetCompareMobileError
+            locale={locale}
+            withFilters={withFilters}
+            onRetry={() => refetch()}
+          />
+        }
+        desktop={
+          <div className="space-y-6">
+            <DuetSubNav />
+            <DuetCompareHero mode="picker" viewerName={viewer?.name ?? t("seriesSelf")} locale={locale} />
+            <ErrorState variant="startup" error={error} message={t("error")} onRetry={() => refetch()} />
+          </div>
+        }
+      />
     );
   }
 
   return (
-    <div className="space-y-8">
-      <DuetSubNav />
-      <DuetCompareHero
-        mode="battle"
-        viewerName={viewer?.name ?? t("seriesSelf")}
-        viewerAvatar={viewer?.avatarUrl}
-        friendName={friendName}
-        friendAvatar={friendUser?.avatarUrl}
-        selfTotal={periodTotals.selfTotal}
-        friendTotal={periodTotals.friendTotal}
-        locale={locale}
-      />
+    <CompareSplit
+      mobile={
+        <DuetCompareMobileExperience
+          locale={locale}
+          viewer={{
+            id: viewer?.id ?? authUserId ?? "",
+            name: viewer?.name ?? t("seriesSelf"),
+            avatarUrl: viewer?.avatarUrl ?? null,
+          }}
+          friendName={friendName}
+          friendAvatarUrl={friendUser?.avatarUrl ?? null}
+          friends={friendsData?.friends ?? []}
+          hrefForFriend={hrefForFriend}
+          withFilters={withFilters}
+          onSelectFriend={handleSelectFriend}
+          activeSection={activeSection}
+          onSectionChange={handleSectionChange}
+          selfTotal={periodTotals.selfTotal}
+          friendTotal={periodTotals.friendTotal}
+          rangeClamped={Boolean(timeline?.rangeClamped)}
+          metadataBanner={<DuetMetadataBanner friendName={friendName} metadata={metadata} />}
+          chartData={chartData}
+          period={period}
+          resolvedTheme={resolvedTheme}
+          chartView={chartView}
+          onChartViewChange={setChartView}
+          shareActions={timelineShareActions}
+          sharedArtists={sharedArtists?.artists}
+          sharedLoading={isSharedArtistsLoading}
+          sharedError={Boolean(sharedArtistsError)}
+          onRetryShared={() => void refetchSharedArtists()}
+          onCompareArtist={handleCompareArtist}
+          arenaMode={arenaMode}
+          onArenaModeChange={setArenaMode}
+          searchQuery={mobileTarget.query}
+          onSearchQueryChange={mobileTarget.onQueryChange}
+          suggestions={mobileTarget.suggestions}
+          showSuggestions={mobileTarget.showSuggestions}
+          selectedEntityLabel={mobileTarget.selectedLabel}
+          selectedEntitySubtitle={mobileTarget.subtitle}
+          onSelectEntity={mobileTarget.select}
+          onClearEntity={mobileTarget.clear}
+          entityCompare={mobileTarget.compare}
+          entityChartData={mobileTarget.chartData}
+          entityLoading={mobileTarget.loading}
+          entityError={mobileTarget.error}
+          onRetryEntity={mobileTarget.retry}
+        />
+      }
+      desktop={
+        <div className="space-y-8">
+          <DuetSubNav />
+          <DuetCompareHero
+            mode="battle"
+            viewerName={viewer?.name ?? t("seriesSelf")}
+            viewerAvatar={viewer?.avatarUrl}
+            friendName={friendName}
+            friendAvatar={friendUser?.avatarUrl}
+            selfTotal={periodTotals.selfTotal}
+            friendTotal={periodTotals.friendTotal}
+            locale={locale}
+          />
 
-      <DuetCompareContextBar
-        id="duet-compare-context-bar"
-        viewerName={viewer?.name ?? t("seriesSelf")}
-        viewerAvatar={viewer?.avatarUrl}
-        friendName={friendName}
-        friendAvatar={friendUser?.avatarUrl}
-        dateRangeLabel={dateRangeLabel}
-        period={period}
-        chartView={chartView}
-        onChartViewChange={setChartView}
-      />
+          <DuetCompareContextBar
+            id="duet-compare-context-bar"
+            viewerName={viewer?.name ?? t("seriesSelf")}
+            viewerAvatar={viewer?.avatarUrl}
+            friendName={friendName}
+            friendAvatar={friendUser?.avatarUrl}
+            dateRangeLabel={dateRangeLabel}
+            period={period}
+            chartView={chartView}
+            onChartViewChange={setChartView}
+          />
 
-      <DuetCompareSectionTabs activeSection={activeSection} />
+          <DuetCompareSectionTabs activeSection={activeSection} />
 
-      <div className="space-y-8">{renderSectionContent(activeSection)}</div>
-    </div>
+          <div className="space-y-8">{renderSectionContent(activeSection)}</div>
+        </div>
+      }
+    />
   );
 }
 

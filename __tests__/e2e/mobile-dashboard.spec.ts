@@ -695,4 +695,39 @@ test.describe("Mobile dashboard UX", () => {
     await expect(main.getByRole("tablist", { name: /sections amis/i })).toBeHidden();
     await expect(page).toHaveURL(/userId=/);
   });
+
+  test("duet compare mobile shows heading and gated empty", async ({ page, isMobile }) => {
+    test.skip(!isMobile, "Mobile Duet Compare tree is lg:hidden");
+    test.setTimeout(90_000);
+    await seedCookieConsent(page);
+    await page.goto(`/en/dashboard/duet/compare${publicDemoQuery}`);
+    await dismissCookieBannerIfPresent(page);
+
+    const main = page.getByRole("main");
+    await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 45_000 });
+
+    const signIn = main.getByRole("link", { name: /^sign in$/i });
+    const pickFriend = main.getByRole("heading", { name: /pick a friend/i });
+    await expect(signIn.or(pickFriend)).toBeVisible({ timeout: 45_000 });
+    await expect(page.getByRole("navigation", { name: /comparison sections/i })).toBeHidden();
+    await expect(main.getByText(/change it with the filter at the top of the dashboard/i)).toHaveCount(0);
+    await expect(page).toHaveURL(/userId=/);
+  });
+
+  test("duet compare mobile is usable in French", async ({ page, isMobile }) => {
+    test.skip(!isMobile, "Mobile Duet Compare tree is lg:hidden");
+    test.setTimeout(90_000);
+    await seedCookieConsent(page);
+    await page.goto(`/fr/dashboard/duet/compare${publicDemoQuery}`);
+    await dismissCookieBannerIfPresent(page);
+
+    const main = page.getByRole("main");
+    await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 45_000 });
+
+    const signIn = main.getByRole("link", { name: /^se connecter$/i });
+    const pickFriend = main.getByRole("heading", { name: /choisis un ami/i });
+    await expect(signIn.or(pickFriend)).toBeVisible({ timeout: 45_000 });
+    await expect(page.getByRole("navigation", { name: /sections de comparaison/i })).toBeHidden();
+    await expect(page).toHaveURL(/userId=/);
+  });
 });

@@ -6,6 +6,8 @@ import { useRouter, usePathname } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { BarChart3, Mic2, Users } from "lucide-react";
 
+export { buildCompareFriendHref } from "@/lib/utils/duet-compare-href";
+
 export type DuetCompareSection = "overview" | "shared" | "target";
 
 const SECTIONS: {

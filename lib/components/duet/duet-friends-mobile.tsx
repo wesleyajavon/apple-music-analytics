@@ -8,6 +8,7 @@ import { MobileBottomSheet } from "@/lib/components/mobile-bottom-sheet";
 import { MusicalProfilePeriodBadge } from "@/lib/components/musical-profile-period-badge";
 import { UserAvatar } from "@/lib/components/user-avatar";
 import { getDuetDisplayName } from "@/lib/components/duet/duet-utils";
+import { DuetMobileSubNav } from "@/lib/components/duet/duet-mobile-sub-nav";
 import type { DuetFriendsSection } from "@/lib/constants/duet-friends";
 import { DASHBOARD_BOTTOM_NAV_OFFSET_VAR } from "@/lib/constants/dashboard-chrome";
 import type { FriendshipDto } from "@/lib/dto/duet";
@@ -110,31 +111,6 @@ function HeroFrame({
         {children}
       </div>
     </section>
-  );
-}
-
-function DuetHeroSubNav({ withFilters }: { withFilters: (href: string) => string }) {
-  const t = useTranslations("duet.friends");
-
-  return (
-    <div
-      role="group"
-      aria-label={t("duetNavLabel")}
-      className="inline-flex w-full gap-1 rounded-xl border border-white/15 bg-white/10 p-1"
-    >
-      <span
-        aria-current="page"
-        className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg bg-white px-3 text-sm font-semibold text-gray-950 shadow-sm"
-      >
-        {t("duetNavFriends")}
-      </span>
-      <Link
-        href={withFilters("/dashboard/duet/compare")}
-        className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg px-3 text-sm font-semibold text-white/70 no-underline"
-      >
-        {t("duetNavCompare")}
-      </Link>
-    </div>
   );
 }
 
@@ -261,7 +237,7 @@ export function DuetFriendsMobileGated({
   return (
     <div className="-mx-4 -mt-4 space-y-4 pb-8 lg:hidden">
       <HeroFrame locale={locale} heading={t("gatedTitle")}>
-        <DuetHeroSubNav withFilters={withFilters} />
+        <DuetMobileSubNav current="friends" withFilters={withFilters} />
         <p className="max-w-sm text-sm leading-6 text-white/70">{t("gatedLead")}</p>
         <Link
           href="/sign-in"
@@ -348,7 +324,7 @@ export function DuetFriendsMobileExperience({
   return (
     <div className={MOBILE_BLEED}>
       <HeroFrame locale={locale} heading={tm("title")}>
-        <DuetHeroSubNav withFilters={withFilters} />
+        <DuetMobileSubNav current="friends" withFilters={withFilters} />
       </HeroFrame>
 
       <section className="px-4" aria-label={tm("railLabel")}>

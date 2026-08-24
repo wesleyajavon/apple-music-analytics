@@ -46,6 +46,7 @@ Les tests end-to-end utilisent Playwright pour tester l'application complète da
 **Fichiers de test :**
 - `dashboard.spec.ts` - Tests de navigation et intégration du dashboard
 - `auth-hardening.spec.ts` - Couverture auth: bootstrap (sign-up ou fallback sign-in), session requise (`401`) et isolation cross-user
+- `mobile-dashboard.spec.ts` - UX dashboard mobile (projet Playwright `mobile-chrome`, Pixel 5). Ignoré sur chromium / firefox / webkit.
 
 **Prérequis :**
 ```bash
@@ -58,6 +59,9 @@ npx playwright install
 # Tous les tests
 npm run test:e2e
 
+# Dashboard mobile uniquement (Pixel 5)
+npx playwright test --project=mobile-chrome
+
 # Avec interface graphique
 npm run test:e2e:ui
 
@@ -66,6 +70,18 @@ npm run test:e2e:headed
 ```
 
 **Note :** Les tests E2E nécessitent que l'application soit en cours d'exécution (Playwright la démarre automatiquement via `webServer`).
+
+**Serveur déjà lancé / Prisma hors CI :** `global-setup.ts` exécute `prisma migrate deploy` dès que `DATABASE_URL` est défini (souvent via `.env.local`). Un pooler Neon peut échouer (P1002 / advisory lock). Hors CI, si l’URL est absente, migrate est ignoré.
+
+Pour pointer Playwright vers un `npm run dev` déjà up (sans relancer `next` ni se battre avec le webServer interne) :
+
+```bash
+PLAYWRIGHT_SKIP_WEBSERVER=1 PLAYWRIGHT_TEST_BASE_URL=http://localhost:3000 npx playwright test --project=mobile-chrome
+```
+
+`PLAYWRIGHT_TEST_BASE_URL` ou `PLAYWRIGHT_SKIP_WEBSERVER` suffisent à désactiver `webServer` dans `playwright.config.ts`. Port interne par défaut : `PLAYWRIGHT_TEST_PORT` (3100).
+
+Si migrate casse encore hors CI alors que l’app tourne déjà : lancer le process Playwright avec `DATABASE_URL` vide (skip migrate non-CI) — le schéma est celui du serveur déjà up.
 
 **Notes auth E2E (CI-friendly) :**
 - Variables minimales recommandées: `E2E_AUTH_EMAIL` et `E2E_AUTH_PASSWORD` (utilisateur seedé dédié aux tests).

@@ -5,6 +5,42 @@ const publicDemoQuery = `?userId=${DEFAULT_PUBLIC_PROFILE_USER_ID}`;
 const e2eAuthEmail = process.env.E2E_AUTH_EMAIL?.trim() ?? "";
 const e2eAuthPassword = process.env.E2E_AUTH_PASSWORD?.trim() ?? "";
 const hasSeededAuthUser = e2eAuthEmail.length > 0 && e2eAuthPassword.length > 0;
+const urlTimeout = { timeout: 15_000 };
+
+async function expectDashboardFilters(page: Page) {
+  await expect(page).toHaveURL(/preset=30d/, urlTimeout);
+  await expect(page).toHaveURL(/startDate=/, urlTimeout);
+  await expect(page).toHaveURL(/endDate=/, urlTimeout);
+  await expect(page).toHaveURL(/userId=/, urlTimeout);
+}
+
+async function waitForDashboardMain(page: Page) {
+  await expect(page.getByRole("main").getByRole("heading", { level: 1 })).toBeVisible({
+    timeout: 20_000,
+  });
+}
+
+async function applyLast30DayPreset(page: Page) {
+  const trigger = page.getByRole("button", { name: /period:/i });
+  await expect(trigger).toBeVisible();
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    if (/preset=30d/.test(page.url())) {
+      await expectDashboardFilters(page);
+      return;
+    }
+    await trigger.click();
+    const sheet = page.getByRole("dialog", { name: /listening period/i });
+    await expect(sheet).toBeVisible();
+    await sheet.getByRole("button", { name: /last 30 days/i }).click();
+    try {
+      await expect(page).toHaveURL(/preset=30d/, { timeout: 8_000 });
+      await expectDashboardFilters(page);
+      return;
+    } catch (error) {
+      if (attempt === 1) throw error;
+    }
+  }
+}
 
 async function seedCookieConsent(page: Page) {
   await page.addInitScript(() => {
@@ -329,23 +365,83 @@ test.describe("Mobile dashboard UX", () => {
     }
   });
 
+  test("bottom nav and plus menu keep date filters across destinations", async ({ page }) => {
+    test.setTimeout(60_000);
+    await seedCookieConsent(page);
+    await page.goto(`/en/dashboard/overview${publicDemoQuery}`);
+    await dismissCookieBannerIfPresent(page);
+    await waitForDashboardMain(page);
+    await applyLast30DayPreset(page);
+    await expect(page.getByRole("dialog", { name: /listening period/i })).toHaveCount(0);
+    await waitForDashboardMain(page);
+
+    const bottomNav = page.getByRole("navigation", { name: /main dashboard navigation/i });
+    await expect(bottomNav).toBeVisible();
+    const profileLink = bottomNav.getByRole("link", { name: /^profile$/i });
+    await expect(profileLink).toHaveAttribute("href", /preset=30d/);
+    await profileLink.click();
+    await expect(page).toHaveURL(/\/en\/dashboard\/musical-profile/, urlTimeout);
+    await expectDashboardFilters(page);
+    await waitForDashboardMain(page);
+
+    await bottomNav.getByRole("link", { name: /your music/i }).click();
+    await expect(page).toHaveURL(/\/en\/dashboard\/overview/, urlTimeout);
+    await expectDashboardFilters(page);
+    await waitForDashboardMain(page);
+
+    await bottomNav.getByRole("link", { name: /^artists$/i }).click();
+    await expect(page).toHaveURL(/\/en\/dashboard\/artists/, urlTimeout);
+    await expectDashboardFilters(page);
+    await waitForDashboardMain(page);
+
+    await bottomNav.getByRole("link", { name: /^genres$/i }).click();
+    await expect(page).toHaveURL(/\/en\/dashboard\/genres/, urlTimeout);
+    await expectDashboardFilters(page);
+    await waitForDashboardMain(page);
+
+    await bottomNav.getByRole("button", { name: /open more destinations/i }).click();
+    const plusSheet = page.getByRole("dialog");
+    await expect(plusSheet).toBeVisible();
+    await expect(plusSheet.getByRole("heading", { name: /^more$/i })).toBeVisible();
+
+    await plusSheet.getByRole("link", { name: /heat grid/i }).click();
+    await expect(page).toHaveURL(/\/en\/dashboard\/heatmap/, urlTimeout);
+    await expectDashboardFilters(page);
+    await waitForDashboardMain(page);
+
+    await bottomNav.getByRole("button", { name: /open more destinations/i }).click();
+    const plusSheetAgain = page.getByRole("dialog");
+    await expect(plusSheetAgain).toBeVisible();
+    await plusSheetAgain.getByRole("link", { name: /ask your soundprint/i }).click();
+    await expect(page).toHaveURL(/\/en\/dashboard\/ask-your-soundprint/, urlTimeout);
+    await expectDashboardFilters(page);
+  });
+
   test("mobile plus menu opens heatmap and settings shortcuts", async ({ page }) => {
     test.setTimeout(60_000);
     await seedCookieConsent(page);
     await page.goto(`/en/dashboard/overview${publicDemoQuery}`);
     await dismissCookieBannerIfPresent(page);
+    await waitForDashboardMain(page);
+    await applyLast30DayPreset(page);
+    await waitForDashboardMain(page);
 
     await page.getByRole("button", { name: /open more destinations/i }).click();
-    await expect(page.getByRole("dialog")).toBeVisible();
-    await expect(page.getByRole("heading", { name: /^more$/i })).toBeVisible();
+    const plusSheet = page.getByRole("dialog");
+    await expect(plusSheet).toBeVisible();
+    await expect(plusSheet.getByRole("heading", { name: /^more$/i })).toBeVisible();
 
-    await page.getByRole("link", { name: /heat grid/i }).click();
-    await expect(page).toHaveURL(/\/en\/dashboard\/heatmap/);
+    await plusSheet.getByRole("link", { name: /heat grid/i }).click();
+    await expect(page).toHaveURL(/\/en\/dashboard\/heatmap/, urlTimeout);
+    await expectDashboardFilters(page);
+    await waitForDashboardMain(page);
 
     await page.getByRole("button", { name: /open more destinations/i }).click();
-    await expect(page.getByRole("dialog")).toBeVisible();
-    await page.getByRole("link", { name: /account hub/i }).click();
-    await expect(page).toHaveURL(/\/en\/dashboard\/settings/);
+    const plusSheetAgain = page.getByRole("dialog");
+    await expect(plusSheetAgain).toBeVisible();
+    await plusSheetAgain.getByRole("link", { name: /account hub/i }).click();
+    await expect(page).toHaveURL(/\/en\/dashboard\/settings/, urlTimeout);
+    await expectDashboardFilters(page);
   });
 
   test("sign-in page is usable on mobile", async ({ page }) => {
@@ -370,16 +466,16 @@ test.describe("Mobile dashboard UX", () => {
     await seedCookieConsent(page);
     await page.goto(`/en/dashboard/heatmap${publicDemoQuery}`);
     await dismissCookieBannerIfPresent(page);
+    await waitForDashboardMain(page);
 
     const main = page.getByRole("main");
-    await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 20_000 });
-
     const peakCta = main.getByRole("button", { name: /open that day/i });
-    await expect(peakCta).toBeVisible();
+    await expect(peakCta).toBeVisible({ timeout: 20_000 });
     await peakCta.click();
 
-    await expect(page.getByRole("dialog")).toBeVisible();
-    await expect(page.locator("#heatmap-day-details-title")).toBeVisible();
+    const daySheet = page.getByRole("dialog");
+    await expect(daySheet).toBeVisible();
+    await expect(daySheet.getByRole("heading", { level: 2 })).toBeVisible();
     await expect(page).toHaveURL(/userId=/);
   });
 
@@ -388,16 +484,16 @@ test.describe("Mobile dashboard UX", () => {
     await seedCookieConsent(page);
     await page.goto(`/fr/dashboard/heatmap${publicDemoQuery}`);
     await dismissCookieBannerIfPresent(page);
+    await waitForDashboardMain(page);
 
     const main = page.getByRole("main");
-    await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 20_000 });
-
     const peakCta = main.getByRole("button", { name: /ouvrir ce jour/i });
-    await expect(peakCta).toBeVisible();
+    await expect(peakCta).toBeVisible({ timeout: 20_000 });
     await peakCta.click();
 
-    await expect(page.getByRole("dialog")).toBeVisible();
-    await expect(page.locator("#heatmap-day-details-title")).toBeVisible();
+    const daySheet = page.getByRole("dialog");
+    await expect(daySheet).toBeVisible();
+    await expect(daySheet.getByRole("heading", { level: 2 })).toBeVisible();
     await expect(page).toHaveURL(/userId=/);
   });
 

@@ -51,6 +51,7 @@ function runPrismaMigrateDeployWithRetry(env: NodeJS.ProcessEnv): void {
  * CI pipelines sometimes run e2e without a preceding `prisma migrate deploy`, or
  * the app may connect to a different URL than the migrate step — this keeps
  * migrations tied to the same process env as the test run.
+ * Local skip/webServer env: see `__tests__/README.md` (PLAYWRIGHT_SKIP_WEBSERVER, PLAYWRIGHT_TEST_BASE_URL).
  */
 export default async function globalSetup(): Promise<void> {
   // Playwright doesn't automatically load Next.js env files for globalSetup.

@@ -329,10 +329,8 @@ function AiIdentityQuote({
 
 function PageFramingSection({
   withFilters,
-  compact = false,
 }: {
   withFilters: (href: string) => string;
-  compact?: boolean;
 }) {
   const t = useTranslations("musical-profile");
   const bullets = [t("emptyFeature.item1"), t("emptyFeature.item2"), t("emptyFeature.item3")];
@@ -349,17 +347,16 @@ function PageFramingSection({
       />
       <div className="relative">
         <p className="font-mono text-xs font-semibold uppercase tracking-[0.28em] text-primary">
-          {compact ? t("landing.badge") : t("emptyFeature.badge")}
+          {t("emptyFeature.badge")}
         </p>
         <h2 className="mt-3 text-xl font-semibold tracking-[-0.04em] text-gray-950 dark:text-white sm:text-3xl">
-          {compact ? t("mobile.nextTitle") : t("emptyFeature.title")}
+          {t("emptyFeature.title")}
         </h2>
         <p className="mt-3 max-w-3xl text-sm leading-7 text-gray-600 dark:text-gray-300 sm:text-base">
-          {compact ? t("mobile.nextLead") : t("emptyFeature.lead")}
+          {t("emptyFeature.lead")}
         </p>
 
-        {compact ? null : (
-          <ul className="mt-5 space-y-2.5">
+        <ul className="mt-5 space-y-2.5">
             {bullets.map((item) => (
               <li key={item} className="flex gap-3 text-sm leading-6 text-gray-600 dark:text-gray-300">
                 <span
@@ -370,10 +367,8 @@ function PageFramingSection({
               </li>
             ))}
           </ul>
-        )}
 
-        {compact ? null : (
-          <div className="mt-6 rounded-2xl border border-card-border bg-surface-glass/80 p-4">
+        <div className="mt-6 rounded-2xl border border-card-border bg-surface-glass/80 p-4">
           <p className="font-mono text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-primary">
             {t("overviewCallout.badge")}
           </p>
@@ -386,11 +381,8 @@ function PageFramingSection({
             <li>{t("overviewCallout.philosophyBullet2")}</li>
           </ul>
           </div>
-        )}
 
-        {compact ? null : (
-          <>
-            <p className="mt-6 text-sm font-semibold text-gray-950 dark:text-white">{t("landing.title")}</p>
+        <p className="mt-6 text-sm font-semibold text-gray-950 dark:text-white">{t("landing.title")}</p>
             <p className="mt-1 max-w-2xl text-sm leading-6 text-gray-600 dark:text-gray-300">{t("landing.lead")}</p>
             <Link
               href={withFilters("/dashboard/overview")}
@@ -399,8 +391,6 @@ function PageFramingSection({
               {t("landing.primaryCta")}
               <ArrowRightIcon className="h-4 w-4" />
             </Link>
-          </>
-        )}
       </div>
     </section>
   );

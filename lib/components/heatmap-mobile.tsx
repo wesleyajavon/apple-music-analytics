@@ -615,7 +615,7 @@ export function HeatmapMobileExperience({
         }
         peakLabel={tm("peakMetric")}
         peakValue={(peakDay?.listens ?? stats.maxListens).toLocaleString(locale)}
-        favoriteLabel={t("favoriteDay")}
+        favoriteLabel={tm("railFavorite")}
         favoriteValue={stats.mostActiveWeekday}
         ctaLabel={peakDay ? tm("openPeakDay") : undefined}
         onOpenPeak={peakDay ? () => onDayClick(peakDay.date, peakDay.listens) : undefined}
@@ -626,10 +626,10 @@ export function HeatmapMobileExperience({
           {tm("signalsLabel")}
         </p>
         <div className={SNAP_RAIL}>
-          <SignalTile label={t("totalListens")} value={stats.totalListens.toLocaleString(locale)} />
-          <SignalTile label={t("activeDays")} value={`${activePct}%`} />
-          <SignalTile label={t("avgDaily")} value={stats.averageListens.toLocaleString(locale)} />
-          <SignalTile label={t("favoriteDay")} value={stats.mostActiveWeekday} />
+          <SignalTile label={tm("railTotal")} value={stats.totalListens.toLocaleString(locale)} />
+          <SignalTile label={tm("railActive")} value={`${activePct}%`} />
+          <SignalTile label={tm("railAvg")} value={stats.averageListens.toLocaleString(locale)} />
+          <SignalTile label={tm("railFavorite")} value={stats.mostActiveWeekday} />
         </div>
       </section>
 

@@ -422,9 +422,9 @@ export function TimelineMobileExperience({
           {tm("signalsLabel")}
         </p>
         <div className={SNAP_RAIL}>
-          <SignalTile label={t("heroStatTotal")} value={summary.total.toLocaleString(locale)} />
+          <SignalTile label={tm("railTotal")} value={summary.total.toLocaleString(locale)} />
           <SignalTile
-            label={t("heroStatPeak")}
+            label={tm("railPeak")}
             value={summary.peak.listens.toLocaleString(locale)}
           />
           <SignalTile

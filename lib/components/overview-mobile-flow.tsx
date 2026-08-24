@@ -297,17 +297,17 @@ export function MobileOverviewFlow({
 
   const stats: MobileOverviewStat[] = [
     {
-      label: t("stats.totalListens"),
+      label: t("mobile.railStreams"),
       value: data.totalListens.toLocaleString(locale),
       change: changes?.totalListens,
     },
     {
-      label: t("stats.uniqueArtists"),
+      label: t("mobile.railArtists"),
       value: data.uniqueArtists.toLocaleString(locale),
       change: changes?.uniqueArtists,
     },
     {
-      label: t("stats.totalTime"),
+      label: t("mobile.railTime"),
       value: formatListeningTime(data.totalPlayTime, t("notAvailable")),
       change: changes?.totalPlayTime,
     },

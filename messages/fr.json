@@ -502,17 +502,17 @@
     "aiDisabledConsent": "Activez l’IA Groq dans Paramètres → Données et confidentialité pour poser des questions à votre Soundprint.",
     "aiDisabledEnv": "L’IA est désactivée côté serveur. Impossible de poser des questions à votre Soundprint ici.",
     "mobile": {
-      "eyebrow": "Questions musicales",
-      "storyTitle": "Interrogez votre Soundprint",
-      "storyBody": "Chaque réponse vient de votre vrai historique de streams — pas d'approximation.",
+      "eyebrow": "Questions",
+      "storyTitle": "Votre Soundprint",
+      "storyBody": "Réponses tirées de vos vrais streams.",
       "demoBadge": "Démo modèles",
-      "featuredPresets": "Démarrages rapides",
-      "featuredPresetsHint": "Un tap envoie une question structurée.",
+      "featuredPresets": "Démarrages",
+      "featuredPresetsHint": "Un tap envoie la question.",
       "browseAllPresets": "Toutes les questions",
       "presetSheetTitle": "Toutes les questions",
-      "presetSheetHint": "Parcourez tous les modèles de questions supportés.",
+      "presetSheetHint": "Tous les modèles.",
       "trustSummary": "Vos vrais streams. Lecture seule. Votre période.",
-      "guardrailsTitle": "Limites et garde-fous",
+      "guardrailsTitle": "Limites",
       "featuredAskAria": "Poser : {question}",
       "allQuestionsRowLead": "Voir tous les modèles",
       "allQuestionsAria": "Toutes les questions"
@@ -695,7 +695,7 @@
       "eyebrow": "Réglages",
       "unnamedAccount": "Compte sans nom",
       "groupAccount": "Compte",
-      "groupDataPrivacy": "Données et confidentialité",
+      "groupDataPrivacy": "Données",
       "groupAi": "IA",
       "groupDemo": "Démo",
       "groupDanger": "Zone sensible",
@@ -1304,7 +1304,7 @@
     "mobile": {
       "heroEyebrow": "Stream",
       "metricsTitle": "Cette période",
-      "askAgentCta": "Interroger Soundprint",
+      "askAgentCta": "Questionner",
       "askLead": "Une question sur vos streams.",
       "duetTitle": "Duet",
       "duetLead": "Comparer avec un ami.",
@@ -1315,8 +1315,10 @@
       "emptyLead": "L'aperçu s'affiche dès l'historique.",
       "emptyCta": "Importer l'historique",
       "errorLead": "Impossible de charger ce snapshot.",
-      "comparisonHint": "Comparé à la période précédente équivalente lorsque disponible.",
       "vsShort": "vs préc.",
+      "railStreams": "Streams",
+      "railArtists": "Artistes",
+      "railTime": "Temps",
       "primaryInsight": {
         "topTrackEyebrow": "Titre le plus écouté",
         "topTrackBody": "Le plus streamé sur cette fenêtre, par {artist}.",
@@ -1324,26 +1326,6 @@
         "topArtistBody": "L'artiste que vous avez le plus streamé sur cette fenêtre.",
         "libraryEyebrow": "Cette période",
         "libraryBody": "Le volume, la variété, et les patterns qui les expliquent."
-      },
-      "momentum": {
-        "eyebrow": "Momentum",
-        "title": "Comment votre stream a bougé",
-        "total": "Streams tracées",
-        "peak": "Mois de pic"
-      },
-      "disclosures": {
-        "leaders": {
-          "title": "Vos tops",
-          "description": "Titres, artistes et genres de cette période."
-        },
-        "taste": {
-          "title": "Profil musical",
-          "description": "Ouvrez la page narrative quand vous voulez plus de contexte."
-        },
-        "context": {
-          "title": "Calendrier et IA",
-          "description": "Quand vous avez écouté, plus une courte lecture IA."
-        }
       }
     }
   },
@@ -1370,7 +1352,9 @@
       "eyebrow": "Pouls",
       "storyBody": "{count} {streams} sur ce segment. Voyez comment le pouls bouge autour.",
       "average": "Moy. segment",
-      "trend": "Dernier mouvement",
+      "trend": "Tendance",
+      "railTotal": "Streams",
+      "railPeak": "Pic",
       "trendUp": "En hausse",
       "trendDown": "En recul",
       "trendFlat": "Stable",
@@ -1400,9 +1384,13 @@
     "mobile": {
       "heroEyebrow": "Intensité",
       "primaryInsightBody": "{date} porte le signal le plus fort avec {count} streams.",
-      "peakMetric": "Pic d'streams",
+      "peakMetric": "Pic",
       "openPeakDay": "Ouvrir ce jour",
       "signalsLabel": "Signaux",
+      "railTotal": "Streams",
+      "railActive": "Actifs",
+      "railAvg": "Moy. jour",
+      "railFavorite": "Jour phare",
       "topDaysTitle": "Jours les plus forts",
       "openDayDetails": "Ouvrir les détails du {date}",
       "emptyTitle": "Pas encore de jours",
@@ -1644,7 +1632,7 @@
       "listenCount": "{count} streams",
       "shareLabel": "{share} des streams",
       "signalsLabel": "Signaux",
-      "topThreeSignal": "Part du top 3",
+      "topThreeSignal": "Top 3",
       "listTitle": "Classement",
       "trendsLead": "L’évolution du mix dans le temps.",
       "paletteLead": "Affiner le mapping des genres.",
@@ -1743,7 +1731,7 @@
       "signalsLabel": "Signaux",
       "periodSignal": "Cadence",
       "selectedSignal": "Sélection",
-      "moverSignal": "Plus fort mouvement",
+      "moverSignal": "Écart max",
       "noMover": "Stable",
       "deltaUp": "+{count}",
       "deltaDown": "-{count}",
@@ -1898,7 +1886,7 @@
       "signalsLabel": "Signaux",
       "periodSignal": "Cadence",
       "selectedSignal": "Sélection",
-      "moverSignal": "Plus fort mouvement",
+      "moverSignal": "Écart max",
       "noMover": "Stable",
       "deltaUp": "+{count}",
       "deltaDown": "-{count}",
@@ -2172,7 +2160,7 @@
       "signalsLabel": "Signaux",
       "periodSignal": "Cadence",
       "selectedSignal": "Sélection",
-      "moverSignal": "Plus fort mouvement",
+      "moverSignal": "Écart max",
       "noMover": "Stable",
       "deltaUp": "+{count}",
       "deltaDown": "-{count}",

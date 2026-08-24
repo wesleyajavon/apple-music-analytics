@@ -182,7 +182,29 @@
       "emptyOutgoing": "No hay solicitudes enviadas pendientes",
       "emptyOutgoingDescription": "Las invitaciones que enviaste y siguen en espera aparecerán aquí.",
       "emptyFriendsSection": "Aún no hay amigos",
-      "emptyFriendsSectionDescription": "Acepta una solicitud o envía una invitación para formar tu squad."
+      "emptyFriendsSectionDescription": "Acepta una solicitud o envía una invitación para formar tu squad.",
+      "mobile": {
+        "eyebrow": "Duet",
+        "title": "Amigos",
+        "gatedTitle": "Amigos",
+        "gatedLead": "Inicia sesión para invitar amigos y comparar bibliotecas.",
+        "gatedCta": "Iniciar sesión",
+        "errorLead": "No se pudieron cargar tus amigos.",
+        "railLabel": "Contadores de amigos",
+        "railFriends": "Amigos",
+        "railIncoming": "Recibidas",
+        "railOutgoing": "Enviadas",
+        "listNavLabel": "Listas de amigos",
+        "listTitleIncoming": "Recibidas",
+        "listTitleOutgoing": "Enviadas",
+        "listTitleFriends": "Amigos",
+        "emptyLead": "Invita a alguien para comparar vuestras bibliotecas.",
+        "openActions": "Ver acciones",
+        "inviteCta": "Invitar a un amigo",
+        "inviteSheetTitle": "Invitar a un amigo",
+        "acceptSheetTitle": "Aceptar solicitud",
+        "actionsTitle": "Acciones"
+      }
     },
     "inviteAccept": {
       "sharePrompt": "¿Qué quieres compartir con este amigo?",

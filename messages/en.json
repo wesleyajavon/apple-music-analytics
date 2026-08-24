@@ -182,7 +182,29 @@
       "emptyOutgoing": "No pending sent requests",
       "emptyOutgoingDescription": "Invitations you've sent that are still waiting will show up here.",
       "emptyFriendsSection": "No friends yet",
-      "emptyFriendsSectionDescription": "Accept a request or send an invite to build your squad."
+      "emptyFriendsSectionDescription": "Accept a request or send an invite to build your squad.",
+      "mobile": {
+        "eyebrow": "Duet",
+        "title": "Friends",
+        "gatedTitle": "Friends",
+        "gatedLead": "Sign in to invite friends and compare libraries.",
+        "gatedCta": "Sign in",
+        "errorLead": "Couldn't load your friends.",
+        "railLabel": "Friend counts",
+        "railFriends": "Friends",
+        "railIncoming": "Incoming",
+        "railOutgoing": "Sent",
+        "listNavLabel": "Friend lists",
+        "listTitleIncoming": "Incoming",
+        "listTitleOutgoing": "Sent",
+        "listTitleFriends": "Friends",
+        "emptyLead": "Invite someone to compare your libraries.",
+        "openActions": "Open actions",
+        "inviteCta": "Invite a friend",
+        "inviteSheetTitle": "Invite a friend",
+        "acceptSheetTitle": "Accept request",
+        "actionsTitle": "Actions"
+      }
     },
     "inviteAccept": {
       "sharePrompt": "What would you like to share with this friend?",

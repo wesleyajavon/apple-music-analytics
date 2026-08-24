@@ -65,6 +65,22 @@ describe("middleware public Palette access", () => {
     );
   });
 
+  it("lets anonymous public-demo viewers open Duet friends", async () => {
+    const sessionResponse = NextResponse.next();
+    vi.mocked(updateSession).mockResolvedValue({
+      response: sessionResponse,
+      user: null,
+    });
+    const request = new NextRequest(
+      `http://localhost/en/dashboard/duet/friends?userId=${PUBLIC_PROFILE_ID}`
+    );
+
+    const response = await middleware(request);
+
+    expect(response).toBe(sessionResponse);
+    expect(response.status).toBe(200);
+  });
+
   it("does not block authenticated users on Palette", async () => {
     const sessionResponse = NextResponse.next();
     vi.mocked(updateSession).mockResolvedValue({

@@ -661,4 +661,38 @@ test.describe("Mobile dashboard UX", () => {
       await expect(page).toHaveURL(/userId=/);
     }
   });
+
+  test("duet friends mobile shows heading and invite or gated empty", async ({ page, isMobile }) => {
+    test.skip(!isMobile, "Mobile Duet Friends tree is lg:hidden");
+    test.setTimeout(90_000);
+    await seedCookieConsent(page);
+    await page.goto(`/en/dashboard/duet/friends${publicDemoQuery}`);
+    await dismissCookieBannerIfPresent(page);
+
+    const main = page.getByRole("main");
+    await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 45_000 });
+
+    const invite = main.getByRole("button", { name: /invite a friend/i });
+    const gated = main.getByRole("link", { name: /^sign in$/i });
+    await expect(invite.or(gated)).toBeVisible({ timeout: 45_000 });
+    await expect(main.getByRole("tablist", { name: /friends sections/i })).toBeHidden();
+    await expect(page).toHaveURL(/userId=/);
+  });
+
+  test("duet friends mobile is usable in French", async ({ page, isMobile }) => {
+    test.skip(!isMobile, "Mobile Duet Friends tree is lg:hidden");
+    test.setTimeout(90_000);
+    await seedCookieConsent(page);
+    await page.goto(`/fr/dashboard/duet/friends${publicDemoQuery}`);
+    await dismissCookieBannerIfPresent(page);
+
+    const main = page.getByRole("main");
+    await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 45_000 });
+
+    const invite = main.getByRole("button", { name: /inviter un ami/i });
+    const gated = main.getByRole("link", { name: /^se connecter$/i });
+    await expect(invite.or(gated)).toBeVisible({ timeout: 45_000 });
+    await expect(main.getByRole("tablist", { name: /sections amis/i })).toBeHidden();
+    await expect(page).toHaveURL(/userId=/);
+  });
 });

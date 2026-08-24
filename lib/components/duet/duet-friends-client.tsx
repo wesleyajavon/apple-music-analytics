@@ -58,10 +58,17 @@ import {
   type DuetFriendsSection,
 } from "@/lib/constants/duet-friends";
 import { DuetSubNav } from "@/lib/components/duet/duet-sub-nav";
+import {
+  DuetFriendsMobileError,
+  DuetFriendsMobileExperience,
+  DuetFriendsMobileGated,
+  DuetFriendsMobileSkeleton,
+} from "@/lib/components/duet/duet-friends-mobile";
 import { useDuetFriends, useDuetMutations, type DuetShareScopeOption } from "@/lib/hooks/use-duet";
+import { usePublicDemoViewer, useSupabaseAuthUserId } from "@/lib/hooks/use-public-demo-viewer";
 import type { FriendshipDto } from "@/lib/dto/duet";
 import { getDuetDisplayName } from "@/lib/components/duet/duet-utils";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
 
 function SpotlightSectionHeader({
   eyebrow,
@@ -641,21 +648,24 @@ function DuetFriendsContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  const { data, isLoading, error, refetch } = useDuetFriends();
+  const authUserId = useSupabaseAuthUserId();
+  const userIdFromUrl = searchParams.get("userId");
+  const isPublicDemoViewer = usePublicDemoViewer(userIdFromUrl);
+  const viewerId = authUserId ?? null;
+  const withFilters = useCallback(
+    (href: string) => mergeDashboardSearchParams(href, searchParams),
+    [searchParams]
+  );
+  const { data, isLoading, error, refetch } = useDuetFriends({
+    enabled: authUserId !== undefined && !isPublicDemoViewer,
+  });
   const { invite, patchFriendship, blockFriendship, createInviteLink } = useDuetMutations();
   const [email, setEmail] = useState("");
-  const [viewerId, setViewerId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [feedbackError, setFeedbackError] = useState(false);
   const [inviteLinkUrl, setInviteLinkUrl] = useState<string | null>(null);
   const [inviteLinkExpiresAt, setInviteLinkExpiresAt] = useState<string | null>(null);
   const [linkFeedback, setLinkFeedback] = useState<string | null>(null);
-
-  useEffect(() => {
-    void createSupabaseBrowserClient()
-      .auth.getUser()
-      .then(({ data: auth }) => setViewerId(auth.user?.id ?? null));
-  }, []);
 
   const busy =
     invite.isPending ||
@@ -810,28 +820,57 @@ function DuetFriendsContent() {
     }
   }, [data, isLoading, sectionCounts, sectionParam, updateFriendsParams]);
 
-  if (isLoading) {
+  if (authUserId === undefined || (isLoading && !isPublicDemoViewer)) {
     return (
-      <div className="space-y-8">
-        <DuetSubNav />
-        <DuetFriendsHeroSkeleton />
-        <DuetFriendsContentSkeleton />
-      </div>
+      <>
+        <div className="lg:hidden">
+          <DuetFriendsMobileSkeleton locale={locale} />
+        </div>
+        <div className="hidden space-y-8 lg:block">
+          <DuetSubNav />
+          <DuetFriendsHeroSkeleton />
+          <DuetFriendsContentSkeleton />
+        </div>
+      </>
+    );
+  }
+
+  if (isPublicDemoViewer) {
+    return (
+      <>
+        <div className="lg:hidden">
+          <DuetFriendsMobileGated locale={locale} withFilters={withFilters} />
+        </div>
+        <div className="hidden space-y-8 lg:block">
+          <DuetSubNav />
+          <EmptyState
+            variant="startup"
+            message={t("emptyTitle")}
+            description={t("emptyDescription")}
+            actions={[{ label: t("mobile.gatedCta"), href: "/sign-in" }]}
+          />
+        </div>
+      </>
     );
   }
 
   if (error) {
     return (
-      <div className="space-y-8">
-        <DuetSubNav />
-        <DuetFriendsHero
-          friendsCount={0}
-          pendingIncomingCount={0}
-          pendingOutgoingCount={0}
-          locale={locale}
-        />
-        <ErrorState variant="startup" error={error} message={t("error")} onRetry={() => refetch()} />
-      </div>
+      <>
+        <div className="lg:hidden">
+          <DuetFriendsMobileError locale={locale} onRetry={() => refetch()} />
+        </div>
+        <div className="hidden space-y-8 lg:block">
+          <DuetSubNav />
+          <DuetFriendsHero
+            friendsCount={0}
+            pendingIncomingCount={0}
+            pendingOutgoingCount={0}
+            locale={locale}
+          />
+          <ErrorState variant="startup" error={error} message={t("error")} onRetry={() => refetch()} />
+        </div>
+      </>
     );
   }
 
@@ -951,8 +990,41 @@ function DuetFriendsContent() {
   );
 
   return (
-    <div className="space-y-8">
-      <DuetSubNav />
+    <>
+      {viewerId ? (
+        <div className="lg:hidden">
+          <DuetFriendsMobileExperience
+            locale={locale}
+            viewerId={viewerId}
+            activeSection={activeSection}
+            counts={sectionCounts}
+            incoming={incomingPagination}
+            outgoing={outgoingPagination}
+            friends={friendsPagination}
+            busy={busy}
+            email={email}
+            onEmailChange={setEmail}
+            onInvite={handleInvite}
+            inviteFeedback={feedback}
+            inviteFeedbackError={feedbackError}
+            onCreateInviteLink={() => void handleCreateInviteLink()}
+            onCopyInviteLink={() => void handleCopyInviteLink()}
+            inviteLinkUrl={inviteLinkUrl}
+            inviteLinkExpiresAt={inviteLinkExpiresAt}
+            linkFeedback={linkFeedback}
+            withFilters={withFilters}
+            onSectionChange={handleSectionChange}
+            onPageChange={handlePageChange}
+            {...mutationHandlers}
+          />
+        </div>
+      ) : (
+        <div className="lg:hidden">
+          <DuetFriendsMobileSkeleton locale={locale} />
+        </div>
+      )}
+      <div className="hidden space-y-8 lg:block">
+        <DuetSubNav />
 
       <DuetFriendsHero
         friendsCount={friendsCount}
@@ -1036,7 +1108,8 @@ function DuetFriendsContent() {
           />
         )
       ) : null}
-    </div>
+      </div>
+    </>
   );
 }
 

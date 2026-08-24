@@ -57,9 +57,16 @@ function redirectToSignIn(
   return NextResponse.redirect(signInUrl);
 }
 
+function withUrlHeader(request: NextRequest): NextRequest {
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-url", request.nextUrl.href);
+  return new NextRequest(request, { headers: requestHeaders });
+}
+
 export default async function middleware(request: NextRequest) {
-  const response = handleI18nRouting(request);
-  const { response: sessionResponse, user } = await updateSession(request, response);
+  const requestWithUrl = withUrlHeader(request);
+  const response = handleI18nRouting(requestWithUrl);
+  const { response: sessionResponse, user } = await updateSession(requestWithUrl, response);
 
   const normalizedPath = getPathWithoutLocalePrefix(request.nextUrl.pathname);
   const isDashboardRoute =
@@ -69,11 +76,6 @@ export default async function middleware(request: NextRequest) {
     const configuredPublicId = getConfiguredPublicProfileUserId();
     const userIdParam = request.nextUrl.searchParams.get("userId");
     const locale = getLocaleFromPathname(request.nextUrl.pathname);
-
-    if (normalizedPath.startsWith("/dashboard/duet")) {
-      const nextPath = `${normalizedPath}${request.nextUrl.search}`;
-      return redirectToSignIn(request, locale, nextPath);
-    }
 
     let activePublicId: string | null = null;
     if (configuredPublicId && userIdParam === configuredPublicId) {
@@ -96,6 +98,14 @@ export default async function middleware(request: NextRequest) {
         return redirectToPublicPaletteFallback(request, locale, activePublicId);
       }
       return redirectToPublicHome(request, locale);
+    }
+
+    if (normalizedPath.startsWith("/dashboard/duet")) {
+      if (activePublicId) {
+        return sessionResponse;
+      }
+      const nextPath = `${normalizedPath}${request.nextUrl.search}`;
+      return redirectToSignIn(request, locale, nextPath);
     }
 
     if (activePublicId) {

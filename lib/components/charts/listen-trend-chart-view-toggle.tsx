@@ -39,7 +39,7 @@ export function ListenTrendChartViewToggle({
             role="tab"
             aria-selected={selected}
             onClick={() => onChange(segment.value)}
-            className={`inline-flex min-h-10 flex-1 items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold transition-all sm:flex-none ${
+            className={`inline-flex min-h-11 flex-1 items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold transition-all sm:flex-none ${
               selected
                 ? "bg-white text-violet-800 shadow-sm dark:bg-violet-500/20 dark:text-violet-100"
                 : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"

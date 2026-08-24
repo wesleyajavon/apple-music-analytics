@@ -39,6 +39,11 @@ import {
 } from "@/lib/utils/listen-trend-chart-view";
 import { GenreTrendsSkeleton } from "@/lib/components/skeleton-loaders";
 import { ArtistTrendsArtistPicker } from "@/lib/components/artist-trends-artist-picker";
+import {
+  ArtistTrendsMobileEmpty,
+  ArtistTrendsMobileExperience,
+  ArtistTrendsMobileSkeleton,
+} from "@/lib/components/artist-trends-mobile";
 import type { ArtistTrendsChartArtist, ArtistTrendsChartDataPoint } from "@/lib/dto/artist";
 import { useDebouncedValue } from "@/lib/hooks/use-debounced-value";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
@@ -73,7 +78,7 @@ const TRENDS_HERO_SHELL_CLASS =
   "relative overflow-hidden rounded-[2rem] border border-white/10 bg-gray-950 px-5 py-6 text-white shadow-2xl shadow-violet-500/15 sm:px-8 sm:py-9 lg:px-10 lg:py-10";
 
 const GROUP_BY_BAR_CLASS =
-  "sticky top-[var(--dashboard-filter-height)] z-20 -mx-4 -mt-4 border-b border-white/10 bg-surface-glass/95 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:-mt-6 sm:px-6 lg:-mx-8 lg:-mt-8 lg:px-8";
+  "hidden lg:block sticky top-[var(--dashboard-filter-height)] z-20 -mx-4 -mt-4 border-b border-white/10 bg-surface-glass/95 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:-mt-6 sm:px-6 lg:-mx-8 lg:-mt-8 lg:px-8";
 
 function useArtistsListHref() {
   const searchParams = useSearchParams();
@@ -375,398 +380,6 @@ function createTrendsTooltip(t: (k: string) => string, locale: string) {
   return TrendsTooltipInner;
 }
 
-function ArtistTrendsMobileSkeleton() {
-  return (
-    <div className="space-y-4" aria-busy="true">
-      <div className="rounded-[1.75rem] border border-white/10 bg-gray-950 p-5 shadow-xl shadow-violet-500/10">
-        <div className="h-4 w-28 animate-shimmer rounded bg-white/15" />
-        <div className="mt-5 h-8 w-56 animate-shimmer rounded bg-white/20" />
-        <div className="mt-3 h-4 w-full animate-shimmer rounded bg-white/10" />
-      </div>
-      <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-1">
-        {[0, 1, 2].map((item) => (
-          <div key={item} className="h-24 min-w-[9.5rem] animate-shimmer rounded-2xl border border-card-border bg-card-surface" />
-        ))}
-      </div>
-      <div className="h-64 animate-shimmer rounded-[1.5rem] border border-card-border bg-surface/70" />
-    </div>
-  );
-}
-
-function ArtistTrendsMobileEmptyHero({
-  artistsHref,
-  badgeLabel,
-}: {
-  artistsHref: string;
-  badgeLabel: string;
-}) {
-  const t = useTranslations("artistTrends");
-
-  return (
-    <div className="overflow-hidden rounded-[1.75rem] border border-white/10 bg-gray-950 p-5 text-white shadow-xl shadow-violet-500/10">
-      <div className="flex items-center justify-between gap-3">
-        <p className="font-mono text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-violet-200">{t("mobile.eyebrow")}</p>
-        <span className="shrink-0 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[0.68rem] font-semibold text-white/75">{badgeLabel}</span>
-      </div>
-      <h1 className="mt-4 text-3xl font-semibold tracking-[-0.055em] text-white">{t("mobile.heroTitle")}</h1>
-      <p className="mt-3 text-sm leading-6 text-white/68">{t("mobile.heroSubtitle")}</p>
-      <Link
-        href={artistsHref}
-        className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-white px-4 text-sm font-bold text-gray-950 shadow-lg shadow-black/20"
-      >
-        <ArrowLeft className="h-4 w-4" aria-hidden />
-        {t("backToArtists")}
-      </Link>
-    </div>
-  );
-}
-
-function ArtistTrendsMobileExperience({
-  artistsHref,
-  badgeLabel,
-  period,
-  selectedIds,
-  pickerArtists,
-  chartData,
-  chartDisplayData,
-  isLoading,
-  isFetching,
-  selectionPending,
-  idToName,
-  getArtistIndex,
-  toggleArtist,
-  selectAll,
-  selectNone,
-  handlePickRemoteArtist,
-  chartTheme,
-  tooltipContent,
-  aiVisible,
-  summaryVersion,
-  setSummaryVersion,
-  showAiSkeleton,
-  activeAiError,
-  aiUnavailable,
-  hasDisplayableAiParagraph,
-  displayAiCommentary,
-  aiRefreshing,
-  commentaryCached,
-}: {
-  artistsHref: string;
-  badgeLabel: string;
-  period: PeriodType;
-  selectedIds: string[];
-  pickerArtists: ArtistTrendsChartArtist[];
-  chartData: ArtistTrendsChartDataPoint[];
-  chartDisplayData: ArtistTrendsChartDataPoint[];
-  isLoading: boolean;
-  isFetching: boolean;
-  selectionPending: boolean;
-  idToName: Map<string, string>;
-  getArtistIndex: (artistId: string) => number;
-  toggleArtist: (id: string) => void;
-  selectAll: () => void;
-  selectNone: () => void;
-  handlePickRemoteArtist: (artist: ArtistTrendsChartArtist) => void;
-  chartTheme: ChartTheme;
-  tooltipContent: ReactElement;
-  aiVisible: boolean;
-  summaryVersion: "light" | "technical";
-  setSummaryVersion: (version: "light" | "technical") => void;
-  showAiSkeleton: boolean;
-  activeAiError: Error | null;
-  aiUnavailable: boolean;
-  hasDisplayableAiParagraph: boolean;
-  displayAiCommentary: string;
-  aiRefreshing: boolean;
-  commentaryCached: boolean;
-}) {
-  const locale = useLocale();
-  const t = useTranslations("artistTrends");
-  const tPeriod = useTranslations("components.periodSelector");
-  const numberFormatter = useMemo(() => new Intl.NumberFormat(locale), [locale]);
-  const signals = useMemo(
-    () => buildArtistTrendSignals({ chartData, selectedIds, idToName, getArtistIndex }),
-    [chartData, getArtistIndex, idToName, selectedIds]
-  );
-  const visibleSignals = signals.slice(0, 5);
-  const leadSignal = signals[0];
-  const movementSignal = signals.reduce<ArtistTrendSignal | undefined>((best, signal) => {
-    if (!best) return signal;
-    return Math.abs(signal.delta) > Math.abs(best.delta) ? signal : best;
-  }, undefined);
-  const chartArtistIds = visibleSignals.map((signal) => signal.id);
-  const remainingSelectedCount = Math.max(0, selectedIds.length - visibleSignals.length);
-  const isUpdating = isFetching || selectionPending;
-
-  if (isLoading) return <ArtistTrendsMobileSkeleton />;
-
-  return (
-    <div className="space-y-5">
-      <section className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-gray-950 p-5 text-white shadow-xl shadow-violet-500/10">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(168,85,247,0.24),transparent_34%),radial-gradient(circle_at_88%_12%,rgba(34,211,238,0.2),transparent_35%),linear-gradient(150deg,rgba(3,7,18,0.98),rgba(46,16,101,0.82)_55%,rgba(8,47,73,0.58))]" aria-hidden />
-        <div className="relative">
-          <div className="flex items-center justify-between gap-3">
-            <p className="font-mono text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-violet-200">{t("mobile.eyebrow")}</p>
-            <span className="shrink-0 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[0.68rem] font-semibold text-white/75">{badgeLabel}</span>
-          </div>
-          <h1 className="mt-4 text-3xl font-semibold tracking-[-0.055em] text-white">{t("mobile.heroTitle")}</h1>
-          <p className="mt-3 text-sm leading-6 text-white/68">{t("mobile.heroSubtitle")}</p>
-
-          <div className="mt-5 rounded-[1.35rem] border border-white/12 bg-white/10 p-4 backdrop-blur">
-            <p className="text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-violet-100/80">{t("mobile.topArtistLabel")}</p>
-            {leadSignal ? (
-              <>
-                <p className="mt-2 line-clamp-2 text-2xl font-semibold tracking-[-0.045em] text-white">{leadSignal.label}</p>
-                <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold text-white/78">
-                  <span className="rounded-full bg-white/10 px-3 py-1.5">{t("mobile.listenCount", { count: numberFormatter.format(leadSignal.total) })}</span>
-                  <span className="rounded-full bg-white/10 px-3 py-1.5">
-                    {leadSignal.peak > 0
-                      ? t("mobile.peakLine", { count: numberFormatter.format(leadSignal.peak), date: leadSignal.peakDate })
-                      : t("mobile.noPeak")}
-                  </span>
-                </div>
-              </>
-            ) : (
-              <p className="mt-2 text-sm leading-6 text-white/70">{t("mobile.topArtistFallback")}</p>
-            )}
-          </div>
-
-          <Link
-            href={artistsHref}
-            className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-white px-4 text-sm font-bold text-gray-950 shadow-lg shadow-black/20"
-          >
-            <ArrowLeft className="h-4 w-4" aria-hidden />
-            {t("backToArtists")}
-          </Link>
-        </div>
-      </section>
-
-      <section aria-label={t("mobile.signalsLabel")} className="-mx-4 overflow-x-auto px-4 pb-1">
-        <div className="flex gap-3">
-          <div className="min-w-[9rem] rounded-2xl border border-card-border bg-card-surface p-4 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">{t("mobile.periodSignal")}</p>
-            <p className="mt-2 text-lg font-semibold text-foreground">{tPeriod(periodToLabelKey(period))}</p>
-          </div>
-          <div className="min-w-[9rem] rounded-2xl border border-card-border bg-card-surface p-4 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">{t("mobile.selectedSignal")}</p>
-            <p className="mt-2 text-lg font-semibold text-foreground">{selectedIds.length}</p>
-          </div>
-          <div className="min-w-[9rem] rounded-2xl border border-card-border bg-card-surface p-4 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">{t("mobile.bucketsSignal")}</p>
-            <p className="mt-2 text-lg font-semibold text-foreground">{chartData.length}</p>
-          </div>
-          <div className="min-w-[10rem] rounded-2xl border border-card-border bg-card-surface p-4 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">{t("mobile.riserSignal")}</p>
-            <p className="mt-2 truncate text-lg font-semibold text-foreground">{movementSignal?.label ?? t("mobile.noRiser")}</p>
-            {movementSignal && (
-              <p className="mt-1 text-xs font-medium text-muted">
-                {movementSignal.delta > 0
-                  ? t("mobile.deltaUp", { count: numberFormatter.format(movementSignal.delta) })
-                  : movementSignal.delta < 0
-                    ? t("mobile.deltaDown", { count: numberFormatter.format(Math.abs(movementSignal.delta)) })
-                    : t("mobile.deltaFlat")}
-              </p>
-            )}
-          </div>
-        </div>
-      </section>
-
-      <section className="rounded-[1.5rem] border border-card-border bg-card-surface p-4 shadow-sm">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h2 className="text-lg font-semibold tracking-[-0.035em] text-foreground">{t("mobile.quickFocusTitle")}</h2>
-            <p className="mt-1 text-sm leading-6 text-muted">{t("mobile.quickFocusDescription")}</p>
-          </div>
-          {remainingSelectedCount > 0 && (
-            <span className="shrink-0 rounded-full border border-card-border bg-surface px-3 py-1 text-xs font-semibold text-muted">
-              {t("mobile.moreSelected", { count: remainingSelectedCount })}
-            </span>
-          )}
-        </div>
-        <div className="mt-4 space-y-2">
-          {visibleSignals.length === 0 ? (
-            <p className="rounded-2xl border border-dashed border-card-border px-4 py-5 text-sm text-muted">{t("selectAtLeastOne")}</p>
-          ) : (
-            visibleSignals.map((signal, index) => (
-              <div key={signal.id} className="flex min-h-11 items-center gap-3 rounded-2xl border border-card-border bg-surface/70 px-3 py-2">
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white" style={{ backgroundColor: signal.color }}>
-                  {index + 1}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-foreground">{signal.label}</p>
-                  <p className="text-xs text-muted">
-                    {t("mobile.listenCount", { count: numberFormatter.format(signal.total) })} · {t("mobile.activeBuckets", { count: numberFormatter.format(signal.activeBuckets) })}
-                  </p>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      </section>
-
-      {aiVisible && (
-        <details className="group rounded-[1.5rem] border border-card-border bg-card-surface shadow-sm" aria-busy={aiRefreshing}>
-          <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-left [&::-webkit-details-marker]:hidden">
-            <span>
-              <span className="block text-sm font-semibold text-foreground">{t("mobile.aiTitle")}</span>
-              <span className="mt-0.5 block text-xs leading-5 text-muted">
-                {commentaryCached ? `${t("mobile.aiDescription")} ${t("aiCached")}` : t("mobile.aiDescription")}
-              </span>
-            </span>
-            <span className="rounded-full border border-card-border bg-surface px-3 py-1 text-xs font-semibold text-muted transition group-open:bg-primary group-open:text-primary-foreground">
-              {t("mobile.readSummary")}
-            </span>
-          </summary>
-          <div className="space-y-4 border-t border-card-border p-4">
-            <div className="flex rounded-xl border border-card-border bg-surface p-1" role="tablist" aria-label={t("aiExplanation")}>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={summaryVersion === "light"}
-                onClick={() => setSummaryVersion("light")}
-                className={`min-h-11 flex-1 rounded-lg px-3 text-sm font-semibold transition-colors ${
-                  summaryVersion === "light" ? "bg-card text-foreground shadow-sm" : "text-muted"
-                }`}
-              >
-                {t("summaryVersionLight")}
-              </button>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={summaryVersion === "technical"}
-                onClick={() => setSummaryVersion("technical")}
-                className={`min-h-11 flex-1 rounded-lg px-3 text-sm font-semibold transition-colors ${
-                  summaryVersion === "technical" ? "bg-card text-foreground shadow-sm" : "text-muted"
-                }`}
-              >
-                {t("summaryVersionTechnical")}
-              </button>
-            </div>
-            <div className="rounded-[1.25rem] border border-card-border bg-surface/70 p-4">
-              {showAiSkeleton ? (
-                <div className="space-y-3 animate-pulse" aria-busy="true">
-                  <div className="h-4 w-full rounded bg-muted/20" />
-                  <div className="h-4 w-5/6 rounded bg-muted/20" />
-                  <div className="h-4 w-2/3 rounded bg-muted/20" />
-                </div>
-              ) : activeAiError ? (
-                isGroqDailyQuotaError(activeAiError) ? (
-                  <GroqQuotaNotice error={activeAiError} />
-                ) : (
-                  <p className="text-sm text-red-600 dark:text-red-300" role="alert">{activeAiError.message}</p>
-                )
-              ) : aiUnavailable ? (
-                <p className="text-sm text-muted">{t("aiUnavailable")}</p>
-              ) : hasDisplayableAiParagraph ? (
-                <p className={`whitespace-pre-line text-sm leading-6 text-foreground transition-opacity duration-200 ${aiRefreshing ? "opacity-60" : ""}`}>
-                  {displayAiCommentary}
-                </p>
-              ) : (
-                <p className="text-sm text-muted">{t("aiEmpty")}</p>
-              )}
-            </div>
-          </div>
-        </details>
-      )}
-
-      <section className="rounded-[1.5rem] border border-card-border bg-card-surface p-4 shadow-sm">
-        <div className="mb-4 flex items-start justify-between gap-3">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{t("sections.chart.eyebrow")}</p>
-            <h2 className="mt-1 text-lg font-semibold tracking-[-0.035em] text-foreground">{t("mobile.chartTitle")}</h2>
-            <p className="mt-1 text-sm leading-6 text-muted">{t("mobile.chartSubtitle")}</p>
-          </div>
-          {selectedIds.length > chartArtistIds.length && (
-            <span className="shrink-0 rounded-full border border-card-border bg-surface px-3 py-1 text-xs font-semibold text-muted">
-              {t("mobile.chartLimited", { count: selectedIds.length })}
-            </span>
-          )}
-        </div>
-
-        {selectedIds.length === 0 ? (
-          <div className="rounded-[1.25rem] border border-dashed border-card-border px-4 py-8 text-center text-sm text-muted">{t("selectAtLeastOne")}</div>
-        ) : (
-          <div className="relative min-h-[260px] rounded-[1.25rem] border border-card-border bg-surface/70 p-2" aria-busy={isUpdating}>
-            {isUpdating && (
-              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 rounded-[1.25rem] bg-white/90 px-4 text-center backdrop-blur-[2px] dark:bg-slate-950/80">
-                <span className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-violet-600 border-t-transparent dark:border-violet-400" aria-hidden />
-                <span className="text-sm font-medium text-slate-900 dark:text-white">{selectionPending ? t("selectionPending") : t("chartUpdating")}</span>
-              </div>
-            )}
-            <div className={`transition-opacity duration-200 ${isUpdating ? "pointer-events-none opacity-40" : ""}`}>
-              <ChartResponsiveContainer token="tracksMain">
-                <RechartsLineChart data={chartDisplayData} margin={{ top: 12, right: 10, left: -18, bottom: 18 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} />
-                  <XAxis dataKey="formattedDate" tick={{ fill: chartTheme.tick, fontSize: 10 }} stroke={chartTheme.axisStroke} minTickGap={18} />
-                  <YAxis tick={{ fill: chartTheme.tick, fontSize: 10 }} stroke={chartTheme.axisStroke} width={34} />
-                  <Tooltip content={tooltipContent} />
-                  {chartArtistIds.map((artistId) => {
-                    const signal = visibleSignals.find((item) => item.id === artistId);
-                    return (
-                      <Line
-                        key={artistId}
-                        type="monotone"
-                        dataKey={artistId}
-                        name={signal?.label ?? artistId}
-                        stroke={signal?.color ?? getColor(0)}
-                        strokeWidth={2.5}
-                        dot={false}
-                        activeDot={{ r: 5 }}
-                        animationDuration={500}
-                        animationEasing="ease-in-out"
-                      />
-                    );
-                  })}
-                </RechartsLineChart>
-              </ChartResponsiveContainer>
-            </div>
-          </div>
-        )}
-      </section>
-
-      <details className="group rounded-[1.5rem] border border-card-border bg-card-surface shadow-sm">
-        <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-left [&::-webkit-details-marker]:hidden">
-          <span>
-            <span className="block text-sm font-semibold text-foreground">{t("mobile.editTitle")}</span>
-            <span className="mt-0.5 block text-xs leading-5 text-muted">{t("mobile.editDescription")}</span>
-          </span>
-          <span className="rounded-full border border-card-border bg-surface px-3 py-1 text-xs font-semibold text-muted transition group-open:bg-primary group-open:text-primary-foreground">
-            {t("mobile.editSummary")}
-          </span>
-        </summary>
-        <div className="border-t border-card-border p-4">
-          <div className="mb-4 flex gap-2">
-            <button
-              type="button"
-              onClick={selectAll}
-              className="min-h-11 flex-1 rounded-2xl border border-violet-200/80 bg-white px-4 text-sm font-semibold text-violet-950 shadow-sm transition-colors hover:bg-violet-50/90 dark:border-violet-400/35 dark:bg-violet-500/15 dark:text-violet-100 dark:shadow-none dark:hover:bg-violet-400/20"
-            >
-              {t("all")}
-            </button>
-            <button
-              type="button"
-              onClick={selectNone}
-              className="min-h-11 flex-1 rounded-2xl border border-card-border bg-surface px-4 text-sm font-semibold text-foreground transition-colors hover:bg-surface-glass"
-            >
-              {t("none")}
-            </button>
-          </div>
-          <ArtistTrendsArtistPicker
-            catalogArtists={pickerArtists}
-            selectedIds={selectedIds}
-            onToggle={toggleArtist}
-            getColor={getColor}
-            getArtistIndex={getArtistIndex}
-            enableRemoteSearch
-            onPickRemoteArtist={handlePickRemoteArtist}
-            maxSelectable={MAX_SERIES_ARTISTS}
-          />
-        </div>
-      </details>
-    </div>
-  );
-}
-
 function TrendsContent() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -1014,17 +627,17 @@ function TrendsContent() {
             <ListenTrendChartViewToggle value={chartView} onChange={setChartView} />
           </div>
         </div>
-        <div className="mt-6">
-          <div className="space-y-5 lg:hidden">
-            <ArtistTrendsMobileEmptyHero artistsHref={artistsHref} badgeLabel={badgeLabel} />
+        <div className="lg:hidden">
+          <ArtistTrendsMobileEmpty artistsHref={artistsHref}>
             <ErrorState
               variant="startup"
               error={error}
               message={t("errorLoading")}
               onRetry={() => refetch()}
             />
-          </div>
-          <div className="hidden space-y-12 lg:block">
+          </ArtistTrendsMobileEmpty>
+        </div>
+        <div className="mt-6 hidden space-y-12 lg:block">
             <ArtistTrendsHeroFrame
               artistsHref={artistsHref}
               subtitleKey="subtitleExtended"
@@ -1038,7 +651,6 @@ function TrendsContent() {
               onRetry={() => refetch()}
             />
           </div>
-        </div>
       </>
     );
   }
@@ -1052,17 +664,10 @@ function TrendsContent() {
             <ListenTrendChartViewToggle value={chartView} onChange={setChartView} />
           </div>
         </div>
-        <div className="mt-6">
-          <div className="space-y-5 lg:hidden">
-            <ArtistTrendsMobileEmptyHero artistsHref={artistsHref} badgeLabel={badgeLabel} />
-            <EmptyState
-              variant="startup"
-              {...emptyStatePresets.changeDates(pathname)}
-              message={t("noArtistData")}
-              description={t("changeDatesDescription")}
-            />
-          </div>
-          <div className="hidden space-y-12 lg:block">
+        <div className="lg:hidden">
+          <ArtistTrendsMobileEmpty artistsHref={artistsHref} />
+        </div>
+        <div className="mt-6 hidden space-y-12 lg:block">
             <ArtistTrendsHeroFrame
               artistsHref={artistsHref}
               subtitleKey="subtitleExtended"
@@ -1076,7 +681,6 @@ function TrendsContent() {
               description={t("changeDatesDescription")}
             />
           </div>
-        </div>
       </>
     );
   }
@@ -1090,44 +694,43 @@ function TrendsContent() {
         </div>
       </div>
 
-      <div className="mt-6">
-        <div className="lg:hidden">
-          <ArtistTrendsMobileExperience
-            artistsHref={artistsHref}
-            badgeLabel={badgeLabel}
-            period={period}
-            selectedIds={selectedIds}
-            pickerArtists={pickerArtists}
-            chartData={chartData}
-            chartDisplayData={displayChartData}
-            isLoading={isLoading}
-            isFetching={chartFetching}
-            selectionPending={selectionPending}
-            idToName={idToName}
-            getArtistIndex={getArtistIndex}
-            toggleArtist={toggleArtist}
-            selectAll={selectAll}
-            selectNone={selectNone}
-            handlePickRemoteArtist={handlePickRemoteArtist}
-            chartTheme={chartTheme}
-            tooltipContent={<TrendsTooltip />}
-            aiVisible={debouncedSelectedIds.length > 0 && chartData.length > 0}
-            summaryVersion={summaryVersion}
-            setSummaryVersion={setSummaryVersion}
-            showAiSkeleton={showAiSkeleton}
-            activeAiError={activeAiError}
-            aiUnavailable={Boolean(aiCommentary?.aiUnavailable)}
-            hasDisplayableAiParagraph={hasDisplayableAiParagraph}
-            displayAiCommentary={displayAiCommentary}
-            aiRefreshing={aiRefreshing}
-            commentaryCached={Boolean(
-              (summaryVersion === "technical" && aiCommentary?.commentaryCached) ||
-                (summaryVersion === "light" && aiCommentary?.commentaryLightCached)
-            )}
-          />
-        </div>
+      <div className="lg:hidden">
+        <ArtistTrendsMobileExperience
+          artistsHref={artistsHref}
+          period={period}
+          selectedIds={selectedIds}
+          pickerArtists={pickerArtists}
+          chartData={chartData}
+          chartDisplayData={displayChartData}
+          isLoading={isLoading}
+          isUpdating={chartFetching || selectionPending}
+          idToName={idToName}
+          getArtistIndex={getArtistIndex}
+          getColor={getColor}
+          toggleArtist={toggleArtist}
+          selectAll={selectAll}
+          selectNone={selectNone}
+          handlePickRemoteArtist={handlePickRemoteArtist}
+          maxSelectable={MAX_SERIES_ARTISTS}
+          chartView={chartView}
+          setChartView={setChartView}
+          aiVisible={debouncedSelectedIds.length > 0 && chartData.length > 0}
+          summaryVersion={summaryVersion}
+          setSummaryVersion={setSummaryVersion}
+          showAiSkeleton={showAiSkeleton}
+          activeAiError={activeAiError}
+          aiUnavailable={Boolean(aiCommentary?.aiUnavailable)}
+          hasDisplayableAiParagraph={hasDisplayableAiParagraph}
+          displayAiCommentary={displayAiCommentary}
+          aiRefreshing={aiRefreshing}
+          commentaryCached={Boolean(
+            (summaryVersion === "technical" && aiCommentary?.commentaryCached) ||
+              (summaryVersion === "light" && aiCommentary?.commentaryLightCached)
+          )}
+        />
+      </div>
 
-        <div className="hidden space-y-12 lg:block">
+      <div className="mt-6 hidden space-y-12 lg:block">
           <ArtistTrendsHeroFrame
             artistsHref={artistsHref}
             subtitleKey="subtitleExtended"
@@ -1415,7 +1018,6 @@ function TrendsContent() {
           )}
           </div>
         </div>
-      </div>
     </>
   );
 }

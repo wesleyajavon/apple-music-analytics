@@ -150,11 +150,16 @@ test.describe("Mobile dashboard UX", () => {
   });
 
   test("artists ranking shows a tappable first row and keeps dates", async ({ page }) => {
+    test.setTimeout(60_000);
+    await seedCookieConsent(page);
     await page.goto(`/en/dashboard/artists${publicDemoQuery}`);
 
+    await expect(page.getByRole("button", { name: /period:/i })).toBeVisible({ timeout: 20_000 });
     await page.getByRole("button", { name: /period:/i }).click();
-    await page.getByRole("dialog", { name: /listening period/i }).getByRole("button", { name: /last 30 days/i }).click();
-    await expect(page).toHaveURL(/preset=30d/);
+    const periodSheet = page.getByRole("dialog", { name: /listening period/i });
+    await expect(periodSheet).toBeVisible();
+    await periodSheet.getByRole("button", { name: /last 30 days/i }).click();
+    await expect(page).toHaveURL(/preset=30d/, { timeout: 15_000 });
     await expect(page).toHaveURL(/startDate=/);
     await expect(page).toHaveURL(/endDate=/);
     await expect(page).toHaveURL(/userId=/);
@@ -179,6 +184,74 @@ test.describe("Mobile dashboard UX", () => {
     await expect(page).toHaveURL(/startDate=/);
     await expect(page).toHaveURL(/endDate=/);
     await expect(page).toHaveURL(/userId=/);
+
+    await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 20_000 });
+    await expect(
+      page.getByRole("img", { name: /sparkline of the leading selected artists/i })
+    ).toBeVisible();
+    await main.getByRole("button", { name: /compare/i }).click();
+    await expect(page.getByRole("dialog")).toBeVisible();
+    await page.getByRole("dialog").getByRole("button", { name: /^close$/i }).click();
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+
+    await main.getByRole("link", { name: /artist rankings/i }).click();
+    await expect(page).toHaveURL(/\/en\/dashboard\/artists(?:\?|$)/);
+    await expect(page).toHaveURL(/preset=30d/);
+    await expect(page).toHaveURL(/userId=/);
+  });
+
+  test("artist trends is usable in French", async ({ page }) => {
+    test.setTimeout(60_000);
+    await seedCookieConsent(page);
+    await page.goto(`/fr/dashboard/artists/trends${publicDemoQuery}`);
+
+    const main = page.getByRole("main");
+    await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 20_000 });
+    await expect(
+      page.getByRole("img", { name: /courbes compactes des artistes en tête/i })
+    ).toBeVisible();
+    await main.getByRole("button", { name: /comparer/i }).click();
+    await expect(page.getByRole("dialog")).toBeVisible();
+  });
+
+  test("artist trends is usable in English", async ({ page }) => {
+    test.setTimeout(60_000);
+    await seedCookieConsent(page);
+    await page.goto(`/en/dashboard/artists/trends${publicDemoQuery}`);
+
+    const main = page.getByRole("main");
+    await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 20_000 });
+    await expect(
+      page.getByRole("img", { name: /sparkline of the leading selected artists/i })
+    ).toBeVisible();
+    await main.getByRole("button", { name: /compare/i }).click();
+    await expect(page.getByRole("dialog")).toBeVisible();
+    await page.getByRole("dialog").getByRole("button", { name: /^close$/i }).click();
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await expect(main.getByRole("link", { name: /artist rankings/i })).toBeVisible();
+    await expect(page).toHaveURL(/userId=/);
+  });
+
+  test.describe("artist trends large iPhone", () => {
+    test.use({
+      viewport: { width: 430, height: 932 },
+      isMobile: true,
+      hasTouch: true,
+    });
+
+    test("hero spark and compare stay usable", async ({ page }) => {
+      test.setTimeout(60_000);
+      await seedCookieConsent(page);
+      await page.goto(`/en/dashboard/artists/trends${publicDemoQuery}`);
+
+      const main = page.getByRole("main");
+      await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 20_000 });
+      await expect(
+        page.getByRole("img", { name: /sparkline of the leading selected artists/i })
+      ).toBeVisible();
+      await main.getByRole("button", { name: /compare/i }).click();
+      await expect(page.getByRole("dialog")).toBeVisible();
+    });
   });
 
   test("artists ranking is usable in French", async ({ page }) => {

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { useTranslations, useFormatter } from "next-intl";
 import Image from "next/image";
-import { Code2, LayoutDashboard, Loader2, Music2, RefreshCw, Sparkles } from "lucide-react";
+import { ChevronRight, Code2, LayoutDashboard, Loader2, Music2, RefreshCw, Sparkles } from "lucide-react";
 import { Link, useRouter } from "@/i18n/navigation";
 import { DASHBOARD_ONBOARDING_REIMPORT_PATH } from "@/lib/utils/onboarding-route";
 import {
@@ -280,8 +280,8 @@ function SpotifySnapshotMobileDisclosure({
 function SpotifySnapshotMobileLoading() {
   const t = useTranslations("partialSyncPreview");
   return (
-    <div className="space-y-5">
-      <section className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-slate-950 p-5 text-white shadow-2xl shadow-violet-500/20">
+    <div className="-mx-4 -mt-4 space-y-4 pb-8">
+      <section className="relative overflow-hidden bg-slate-950 px-4 pb-5 pt-4 text-white">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.22),transparent_34%),radial-gradient(circle_at_86%_18%,rgba(6,182,212,0.18),transparent_34%)]" />
         <div className="relative">
           <div className="flex items-center justify-between gap-3">
@@ -290,8 +290,8 @@ function SpotifySnapshotMobileLoading() {
           </div>
           <div className="mt-6 h-9 w-3/4 animate-pulse rounded bg-white/15" />
           <div className="mt-3 h-4 w-full animate-pulse rounded bg-white/10" />
-          <div className="mt-5 flex gap-4 rounded-3xl border border-white/10 bg-white/[0.07] p-4">
-            <div className="h-16 w-16 shrink-0 animate-pulse rounded-2xl bg-white/15" />
+          <div className="mt-5 flex items-center gap-3">
+            <div className="h-11 w-11 shrink-0 animate-pulse rounded-xl bg-white/15" />
             <div className="min-w-0 flex-1 space-y-2">
               <div className="h-4 w-4/5 animate-pulse rounded bg-white/15" />
               <div className="h-3 w-2/5 animate-pulse rounded bg-white/10" />
@@ -299,101 +299,16 @@ function SpotifySnapshotMobileLoading() {
           </div>
         </div>
       </section>
-      <div>
+      <div className="px-4">
         <div className="h-3 w-28 animate-pulse rounded bg-muted/40" />
         <div className="-mx-4 mt-3 flex gap-3 overflow-hidden px-4">
           {[0, 1, 2].map((i) => (
-            <div
-              key={i}
-              className="h-28 min-w-[8.5rem] animate-pulse rounded-3xl border border-white/10 bg-slate-950/80"
-            />
+            <div key={i} className="h-24 min-w-[9.25rem] animate-pulse rounded-3xl bg-slate-200 dark:bg-white/10" />
           ))}
         </div>
       </div>
-      <p className="text-center text-xs text-muted">{t("loading")}</p>
+      <p className="px-4 text-center text-xs text-muted">{t("loading")}</p>
     </div>
-  );
-}
-
-function SpotifySnapshotMobileTrackCard({
-  track,
-  rank,
-}: {
-  track: SpotifyTrack;
-  rank: number;
-}) {
-  const t = useTranslations("partialSyncPreview");
-  const img = coverUrl(track.album?.images);
-  const artistLine = track.artists?.map((a) => a.name).filter(Boolean).join(", ");
-  const title = track.name ?? "—";
-
-  return (
-    <article className="min-w-[8.5rem] max-w-[8.5rem] snap-start rounded-3xl border border-white/10 bg-slate-950 p-3 text-white shadow-lg shadow-black/10">
-      <div className="relative">
-        {img ? (
-          <Image
-            src={img}
-            alt={t("coverAlt", { title })}
-            width={120}
-            height={120}
-            className="aspect-square w-full rounded-2xl border border-white/10 object-cover"
-            sizes="120px"
-          />
-        ) : (
-          <div className="flex aspect-square w-full items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06]">
-            <Music2 className="h-8 w-8 text-slate-400" aria-hidden />
-          </div>
-        )}
-        <span className="absolute left-2 top-2 inline-flex min-h-7 min-w-7 items-center justify-center rounded-full border border-white/15 bg-black/55 px-2 text-[11px] font-bold text-white backdrop-blur">
-          {t("mobile.rankLabel", { rank })}
-        </span>
-      </div>
-      <p className="mt-3 line-clamp-2 text-sm font-semibold leading-5" title={title}>
-        {title}
-      </p>
-      <p className="mt-1 truncate text-xs text-slate-400" title={artistLine || undefined}>
-        {artistLine || "—"}
-      </p>
-    </article>
-  );
-}
-
-function SpotifySnapshotMobileArtistChip({
-  artist,
-  rank,
-}: {
-  artist: { name?: string; images?: SpotifyImage[] };
-  rank: number;
-}) {
-  const t = useTranslations("partialSyncPreview");
-  const img = coverUrl(artist.images);
-  const name = artist.name ?? "—";
-
-  return (
-    <article className="min-w-[7.5rem] snap-start rounded-3xl border border-white/10 bg-slate-950 p-3 text-white shadow-lg shadow-black/10">
-      <div className="flex flex-col items-center text-center">
-        {img ? (
-          <Image
-            src={img}
-            alt={t("artistCoverAlt", { name })}
-            width={64}
-            height={64}
-            className="h-16 w-16 rounded-full border border-white/10 object-cover"
-            sizes="64px"
-          />
-        ) : (
-          <div className="flex h-16 w-16 items-center justify-center rounded-full border border-white/10 bg-white/[0.06]">
-            <Music2 className="h-6 w-6 text-slate-400" aria-hidden />
-          </div>
-        )}
-        <p className="mt-3 line-clamp-2 text-sm font-semibold leading-5" title={name}>
-          {name}
-        </p>
-        <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
-          {t("mobile.rankLabel", { rank })}
-        </p>
-      </div>
-    </article>
   );
 }
 
@@ -413,18 +328,18 @@ function SpotifySnapshotMobileCompactRow({
   roundClass?: string;
 }) {
   return (
-    <div className="flex min-h-14 items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.05] px-3 py-2.5">
+    <div className="flex min-h-11 items-center gap-3 py-1.5">
       <CoverThumb src={imageSrc} alt={imageAlt} roundClass={roundClass} />
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold text-white" title={title}>
+        <p className="truncate text-sm font-semibold text-foreground dark:text-white" title={title}>
           {title}
         </p>
         {subtitle ? (
-          <p className="truncate text-xs text-slate-400" title={subtitle}>
+          <p className="truncate text-xs text-muted dark:text-slate-400" title={subtitle}>
             {subtitle}
           </p>
         ) : null}
-        {meta ? <p className="mt-0.5 text-[11px] text-slate-500">{meta}</p> : null}
+        {meta ? <p className="mt-0.5 text-[11px] text-muted dark:text-slate-500">{meta}</p> : null}
       </div>
     </div>
   );
@@ -534,8 +449,8 @@ function SpotifySnapshotMobileFlow({
   }
 
   return (
-    <div className="space-y-5">
-      <section className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-slate-950 p-5 text-white shadow-2xl shadow-violet-500/20">
+    <div className="-mx-4 -mt-4 space-y-4 pb-8">
+      <section className="relative overflow-hidden bg-slate-950 px-4 pb-5 pt-4 text-white">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.24),transparent_34%),radial-gradient(circle_at_86%_18%,rgba(6,182,212,0.20),transparent_34%),linear-gradient(135deg,rgba(3,7,18,0.98),rgba(30,27,75,0.86)_48%,rgba(8,47,73,0.72))]" />
         <div className="relative">
           <div className="flex items-center justify-between gap-3">
@@ -568,19 +483,19 @@ function SpotifySnapshotMobileFlow({
             <p className="mt-3 text-sm leading-6 text-slate-300">{primaryInsight.body}</p>
           </div>
 
-          <div className="mt-5 flex items-center gap-4 rounded-3xl border border-white/10 bg-white/[0.07] p-4">
+          <div className="mt-5 flex items-center gap-3">
             {primaryInsight.cover ? (
               <Image
                 src={primaryInsight.cover}
                 alt={t("coverAlt", { title: primaryInsight.coverTitle })}
-                width={72}
-                height={72}
-                className="h-[4.5rem] w-[4.5rem] shrink-0 rounded-2xl border border-white/10 object-cover"
-                sizes="72px"
+                width={44}
+                height={44}
+                className="h-11 w-11 shrink-0 rounded-xl border border-white/10 object-cover"
+                sizes="44px"
               />
             ) : (
-              <div className="flex h-[4.5rem] w-[4.5rem] shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06]">
-                <Music2 className="h-7 w-7 text-slate-400" aria-hidden />
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06]">
+                <Music2 className="h-5 w-5 text-slate-400" aria-hidden />
               </div>
             )}
             <div className="min-w-0">
@@ -588,29 +503,14 @@ function SpotifySnapshotMobileFlow({
                 {primaryInsight.subtitle}
               </p>
               {spotifyDisplayName ? (
-                <p className="mt-1 truncate text-xs text-slate-400">{t("connectedAs", { name: spotifyDisplayName })}</p>
+                <p className="mt-0.5 truncate text-xs text-slate-400">{t("connectedAs", { name: spotifyDisplayName })}</p>
               ) : null}
             </div>
           </div>
-
-          <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-            <Link
-              href="/dashboard/overview"
-              className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-2xl bg-white px-4 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25"
-            >
-              <LayoutDashboard className="h-4 w-4" aria-hidden />
-              {tm("goToOverview")}
-            </Link>
-            <Link
-              href="/dashboard/spotify-playground"
-              className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-4 text-sm font-semibold text-white"
-            >
-              <Code2 className="h-4 w-4" aria-hidden />
-              {tm("playgroundCta")}
-            </Link>
-          </div>
         </div>
       </section>
+
+      <div className="space-y-4 px-4">
 
       {loadError ? (
         <div
@@ -641,59 +541,31 @@ function SpotifySnapshotMobileFlow({
       </div>
 
       {topTracks.length > 0 ? (
-        <div>
-          <div className="mb-3">
-            <h2 className="text-base font-semibold text-foreground dark:text-white">{tm("tracksRailTitle")}</h2>
-            <p className="mt-1 text-xs leading-5 text-muted dark:text-slate-400">{tm("tracksRailHint")}</p>
-          </div>
-          <div className="-mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none]">
-            {topTracks.slice(0, 5).map((track, i) => (
-              <SpotifySnapshotMobileTrackCard key={`${track.name ?? "track"}-${i}`} track={track} rank={i + 1} />
-            ))}
-          </div>
-        </div>
-      ) : null}
-
-      {topArtists.length > 0 ? (
-        <div>
-          <h2 className="text-base font-semibold text-foreground dark:text-white">{tm("artistsRailTitle")}</h2>
-          <div className="-mx-4 mt-3 flex snap-x gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none]">
-            {topArtists.slice(0, 5).map((artist, i) => (
-              <SpotifySnapshotMobileArtistChip key={`${artist.name ?? "artist"}-${i}`} artist={artist} rank={i + 1} />
-            ))}
-          </div>
-        </div>
-      ) : null}
-
-      <div className="space-y-3">
-        {topTracks.length > 0 ? (
-          <SpotifySnapshotMobileDisclosure
+        <SpotifySnapshotMobileDisclosure
             title={tm("topTracksDisclosureTitle")}
             description={tm("topTracksDisclosureDescription")}
           >
-            <div className="rounded-3xl bg-slate-950 p-3">
-              {endpointError("topTracks") ? (
-                <p className="text-sm text-red-400">{endpointError("topTracks")}</p>
-              ) : (
-                <div className="space-y-2">
-                  {topTracks.map((track, i) => {
-                    const img = coverUrl(track.album?.images);
-                    const artistLine = track.artists?.map((a) => a.name).filter(Boolean).join(", ");
-                    const title = track.name ?? "—";
-                    return (
-                      <SpotifySnapshotMobileCompactRow
-                        key={`${track.name ?? "track"}-${i}`}
-                        title={title}
-                        subtitle={artistLine || "—"}
-                        meta={track.album?.name}
-                        imageSrc={img}
-                        imageAlt={t("coverAlt", { title })}
-                      />
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+            {endpointError("topTracks") ? (
+              <p className="text-sm text-red-600 dark:text-red-400">{endpointError("topTracks")}</p>
+            ) : (
+              <div className="divide-y divide-slate-200/80 dark:divide-white/10">
+                {topTracks.map((track, i) => {
+                  const img = coverUrl(track.album?.images);
+                  const artistLine = track.artists?.map((a) => a.name).filter(Boolean).join(", ");
+                  const title = track.name ?? "—";
+                  return (
+                    <SpotifySnapshotMobileCompactRow
+                      key={`${track.name ?? "track"}-${i}`}
+                      title={title}
+                      subtitle={artistLine || "—"}
+                      meta={track.album?.name}
+                      imageSrc={img}
+                      imageAlt={t("coverAlt", { title })}
+                    />
+                  );
+                })}
+              </div>
+            )}
           </SpotifySnapshotMobileDisclosure>
         ) : null}
 
@@ -702,23 +574,21 @@ function SpotifySnapshotMobileFlow({
             title={tm("topArtistsDisclosureTitle")}
             description={tm("topArtistsDisclosureDescription")}
           >
-            <div className="rounded-3xl bg-slate-950 p-3">
-              {endpointError("topArtists") ? (
-                <p className="text-sm text-red-400">{endpointError("topArtists")}</p>
-              ) : (
-                <div className="space-y-2">
-                  {topArtists.map((artist, i) => (
-                    <SpotifySnapshotMobileCompactRow
-                      key={`${artist.name ?? "artist"}-${i}`}
-                      title={artist.name ?? "—"}
-                      imageSrc={coverUrl(artist.images)}
-                      imageAlt={t("artistCoverAlt", { name: artist.name ?? "—" })}
-                      roundClass="rounded-full"
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
+            {endpointError("topArtists") ? (
+              <p className="text-sm text-red-600 dark:text-red-400">{endpointError("topArtists")}</p>
+            ) : (
+              <div className="divide-y divide-slate-200/80 dark:divide-white/10">
+                {topArtists.map((artist, i) => (
+                  <SpotifySnapshotMobileCompactRow
+                    key={`${artist.name ?? "artist"}-${i}`}
+                    title={artist.name ?? "—"}
+                    imageSrc={coverUrl(artist.images)}
+                    imageAlt={t("artistCoverAlt", { name: artist.name ?? "—" })}
+                    roundClass="rounded-full"
+                  />
+                ))}
+              </div>
+            )}
           </SpotifySnapshotMobileDisclosure>
         ) : null}
 
@@ -732,9 +602,8 @@ function SpotifySnapshotMobileFlow({
           ) : recent.length === 0 ? (
             <p className={DASHBOARD_SPOTLIGHT_MUTED}>{t("emptySection")}</p>
           ) : (
-            <div className="rounded-3xl bg-slate-950 p-3">
-              <div className="space-y-2">
-                {recent.map((row, i) => {
+            <div className="divide-y divide-slate-200/80 dark:divide-white/10">
+              {recent.map((row, i) => {
                   const tr = row.track;
                   const img = tr ? coverUrl(tr.album?.images) : null;
                   const played = row.played_at ? new Date(row.played_at) : null;
@@ -755,7 +624,6 @@ function SpotifySnapshotMobileFlow({
                     />
                   );
                 })}
-              </div>
             </div>
           )}
         </SpotifySnapshotMobileDisclosure>
@@ -779,14 +647,11 @@ function SpotifySnapshotMobileFlow({
             </li>
           </ul>
         </SpotifySnapshotMobileDisclosure>
-      </div>
-
-      <section className="rounded-[1.75rem] border border-card-border bg-white/80 p-4 shadow-card backdrop-blur dark:border-white/[0.08] dark:bg-[#090b14]">
+        <section>
         <h2 className="text-sm font-semibold text-foreground dark:text-white">{tm("nextStepsTitle")}</h2>
         <p className="mt-1 text-xs leading-5 text-muted dark:text-slate-400">{tm("nextStepsDescription")}</p>
-        <p className={`mt-3 text-sm leading-6 ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("nextStepsHint")}</p>
         {payload?.fetchedAt ? (
-          <p className={`mt-3 text-center text-xs ${DASHBOARD_SPOTLIGHT_MUTED}`}>
+          <p className={`mt-3 text-xs ${DASHBOARD_SPOTLIGHT_MUTED}`}>
             {t("fetchedAt", {
               time: format.dateTime(new Date(payload.fetchedAt), {
                 dateStyle: "medium",
@@ -795,7 +660,7 @@ function SpotifySnapshotMobileFlow({
             })}
           </p>
         ) : null}
-        <div className="mt-4 flex flex-col gap-3">
+        <div className="mt-4 flex flex-col gap-1">
           <button type="button" className={primaryBtnClass} onClick={onCompleteOnboarding} disabled={isSubmitting}>
             {isSubmitting ? (
               <>
@@ -807,13 +672,27 @@ function SpotifySnapshotMobileFlow({
             )}
           </button>
           <Link
-            href={DASHBOARD_ONBOARDING_REIMPORT_PATH}
-            className={`${DASHBOARD_SPOTLIGHT_BTN_SECONDARY} inline-flex min-h-11 items-center justify-center no-underline`}
+            href="/dashboard/spotify-playground"
+            className="flex min-h-11 items-center gap-3 border-t border-slate-200/80 py-2 dark:border-white/10"
           >
-            {t("backToImport")}
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-500/15 text-violet-700 dark:text-violet-300">
+              <Code2 className="h-4 w-4" aria-hidden />
+            </span>
+            <span className="min-w-0 flex-1 truncate text-sm font-semibold tracking-tight text-foreground dark:text-white">
+              {tm("playgroundCta")}
+            </span>
+            <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />
+          </Link>
+          <Link
+            href={DASHBOARD_ONBOARDING_REIMPORT_PATH}
+            className="flex min-h-11 items-center justify-between gap-3 text-sm font-semibold text-foreground no-underline dark:text-white"
+          >
+            <span>{t("backToImport")}</span>
+            <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />
           </Link>
         </div>
       </section>
+      </div>
     </div>
   );
 }

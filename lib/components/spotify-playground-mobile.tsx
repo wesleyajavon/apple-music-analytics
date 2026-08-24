@@ -6,7 +6,6 @@ import {
   CheckCircle2,
   ChevronDown,
   Code2,
-  LayoutDashboard,
   Loader2,
   RefreshCw,
   Sparkles,
@@ -31,6 +30,14 @@ export type SpotifyPlaygroundPayload = {
 };
 
 const TAB_ORDER: SpotifyPlaygroundTabId[] = ["me", "topTracks", "topArtists", "recentlyPlayed"];
+
+function ChevronIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+    </svg>
+  );
+}
 
 function getEndpointPreviewLines(tabId: SpotifyPlaygroundTabId, data: unknown): string[] {
   if (!data || typeof data !== "object") return [];
@@ -109,21 +116,21 @@ function countHealthyEndpoints(payload: SpotifyPlaygroundPayload | null): number
 
 function SpotifyPlaygroundMobileSkeleton() {
   return (
-    <section className="space-y-4 lg:hidden" aria-busy="true">
-      <div className="overflow-hidden rounded-[1.75rem] bg-slate-950 p-5 text-white shadow-2xl shadow-violet-500/15">
+    <section className="-mx-4 -mt-4 space-y-4 pb-8 lg:hidden" aria-busy="true">
+      <div className="overflow-hidden bg-slate-950 px-4 pb-5 pt-4 text-white">
         <div className="mb-5 h-6 w-28 animate-pulse rounded-full bg-white/15" />
         <div className="mb-3 h-8 w-4/5 animate-pulse rounded-xl bg-white/15" />
         <div className="h-4 w-full animate-pulse rounded bg-white/10" />
-        <div className="mt-6 grid grid-cols-2 gap-2">
-          {[0, 1, 2, 3].map((index) => (
-            <div key={index} className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
-              <div className="mb-3 h-6 w-16 animate-pulse rounded bg-white/15" />
-              <div className="h-3 w-20 animate-pulse rounded bg-white/10" />
-            </div>
-          ))}
-        </div>
       </div>
-      <div className="rounded-[1.5rem] border border-slate-200/80 bg-white p-4 shadow-lg shadow-slate-900/[0.04] dark:border-white/10 dark:bg-slate-950">
+      <div className="-mx-0 flex snap-x gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {[0, 1, 2, 3].map((index) => (
+          <div
+            key={index}
+            className="h-24 min-w-[9.75rem] snap-start animate-pulse rounded-3xl bg-slate-200 dark:bg-white/10"
+          />
+        ))}
+      </div>
+      <div className="px-4">
         <div className="h-24 animate-pulse rounded-2xl bg-slate-100 dark:bg-white/10" />
       </div>
     </section>
@@ -134,8 +141,8 @@ export function SpotifyPlaygroundMobileDisconnected() {
   const t = useTranslations("spotifyPlayground");
 
   return (
-    <section className="space-y-4 pb-6 lg:hidden" aria-labelledby="spotify-playground-mobile-disconnected-title">
-      <div className="relative overflow-hidden rounded-[1.75rem] bg-slate-950 p-5 text-white shadow-2xl shadow-violet-500/15">
+    <section className="-mx-4 -mt-4 space-y-4 pb-8 lg:hidden" aria-labelledby="spotify-playground-mobile-disconnected-title">
+      <div className="relative overflow-hidden bg-slate-950 px-4 pb-5 pt-4 text-white">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.28),transparent_34%),radial-gradient(circle_at_85%_12%,rgba(251,191,36,0.18),transparent_32%)]" />
         <div className="absolute -bottom-20 right-4 h-48 w-48 rounded-full bg-amber-400/10 blur-3xl" />
         <div className="relative">
@@ -155,18 +162,11 @@ export function SpotifyPlaygroundMobileDisconnected() {
           >
             {t("notConnected.cta")}
           </Link>
-          <Link
-            href="/dashboard/overview"
-            className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-5 text-sm font-semibold text-white"
-          >
-            <LayoutDashboard className="h-4 w-4" aria-hidden />
-            {t("ctaOverview")}
-          </Link>
         </div>
       </div>
 
-      <details className="group rounded-[1.5rem] border border-slate-200/80 bg-white shadow-lg shadow-slate-900/[0.04] dark:border-white/10 dark:bg-slate-950">
-        <summary className="flex min-h-[52px] cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-left">
+      <details className="group mx-4 border-t border-slate-200/80 dark:border-white/10">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 py-3 text-left">
           <div>
             <p className="text-sm font-semibold text-slate-950 dark:text-white">{t("mobile.whyLinkTitle")}</p>
             <p className="text-xs text-slate-500 dark:text-slate-400">{t("mobile.whyLinkSummary")}</p>
@@ -176,7 +176,7 @@ export function SpotifyPlaygroundMobileDisconnected() {
             aria-hidden
           />
         </summary>
-        <ul className="space-y-3 border-t border-slate-200/80 px-4 py-3 text-sm leading-relaxed text-slate-600 dark:border-white/10 dark:text-slate-400">
+        <ul className="space-y-3 border-t border-slate-200/80 py-3 text-sm leading-relaxed text-slate-600 dark:border-white/10 dark:text-slate-400">
           {(["noConnectionTrust1", "noConnectionTrust2", "noConnectionTrust3"] as const).map((key) => (
             <li key={key} className="flex gap-2">
               <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" aria-hidden />
@@ -272,8 +272,8 @@ export function SpotifyPlaygroundMobileConnected({
 
   return (
     <>
-      <section className="space-y-4 pb-6 lg:hidden" aria-labelledby="spotify-playground-mobile-title">
-        <div className="relative overflow-hidden rounded-[1.75rem] bg-slate-950 p-5 text-white shadow-2xl shadow-violet-500/15">
+      <section className="-mx-4 -mt-4 space-y-4 pb-8 lg:hidden" aria-labelledby="spotify-playground-mobile-title">
+        <div className="relative overflow-hidden bg-slate-950 px-4 pb-5 pt-4 text-white">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.28),transparent_34%),radial-gradient(circle_at_85%_12%,rgba(34,211,238,0.2),transparent_32%)]" />
           <div className="absolute -bottom-20 right-4 h-48 w-48 rounded-full bg-cyan-400/15 blur-3xl" />
           <div className="relative">
@@ -299,34 +299,39 @@ export function SpotifyPlaygroundMobileConnected({
               {storyTitle}
             </h1>
             <p className="mt-3 text-sm leading-6 text-white/70">{storyBody}</p>
-            <div className="mt-6 grid grid-cols-2 gap-2">
-              {metricCards.map((metric) => (
-                <div key={metric.label} className="rounded-2xl border border-white/10 bg-white/[0.07] p-3 backdrop-blur">
-                  <p
-                    className={`text-xl font-semibold tracking-tight tabular-nums ${
-                      "tone" in metric && metric.tone === "ok"
-                        ? "text-emerald-300"
-                        : "tone" in metric && metric.tone === "error"
-                          ? "text-red-300"
-                          : "tone" in metric && metric.tone === "warn"
-                            ? "text-amber-300"
-                            : "text-white"
-                    }`}
-                  >
-                    {metric.value}
-                  </p>
-                  <p className="mt-1 text-[0.66rem] font-semibold uppercase tracking-[0.16em] text-white/45">
-                    {metric.label}
-                  </p>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
 
+        <div className="px-4">
+          <div className="-mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {metricCards.map((metric) => (
+              <article
+                key={metric.label}
+                className="min-w-[9.75rem] snap-start rounded-3xl border border-white/10 bg-slate-950 p-4 text-white shadow-lg shadow-black/10"
+              >
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">{metric.label}</p>
+                <p
+                  className={`mt-2 text-xl font-semibold tracking-tight tabular-nums ${
+                    "tone" in metric && metric.tone === "ok"
+                      ? "text-emerald-300"
+                      : "tone" in metric && metric.tone === "error"
+                        ? "text-red-300"
+                        : "tone" in metric && metric.tone === "warn"
+                          ? "text-amber-300"
+                          : "text-white"
+                  }`}
+                >
+                  {metric.value}
+                </p>
+              </article>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-4 px-4">
         {showApiTroubleshootHint ? (
-          <details className="group rounded-[1.5rem] border border-amber-200/80 bg-amber-50/90 shadow-lg shadow-amber-900/[0.04] dark:border-amber-400/25 dark:bg-amber-950/35">
-            <summary className="flex min-h-[52px] cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-left">
+          <details className="group border-t border-amber-200/70 dark:border-amber-800/40">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 py-3 text-left">
               <div>
                 <p className="text-sm font-semibold text-amber-950 dark:text-amber-50">{t("apiTroubleshootTitle")}</p>
                 <p className="text-xs text-amber-900/80 dark:text-amber-100/80">{t("mobile.troubleshootSummary")}</p>
@@ -336,10 +341,10 @@ export function SpotifyPlaygroundMobileConnected({
                 aria-hidden
               />
             </summary>
-            <div className="space-y-3 border-t border-amber-200/70 px-4 py-3 text-sm leading-relaxed text-amber-950/90 dark:border-amber-800/40 dark:text-amber-50/90">
+            <div className="space-y-3 border-t border-amber-200/70 py-3 text-sm leading-relaxed text-amber-950/90 dark:border-amber-800/40 dark:text-amber-50/90">
               <p className="whitespace-pre-line">{t("apiTroubleshootBody")}</p>
               {payload?.expectedSpotifyApiScopes ? (
-                <div className="rounded-xl border border-amber-300/50 bg-white/70 p-3 text-xs dark:border-amber-800/40 dark:bg-black/25">
+                <div className="text-xs">
                   <p className="font-medium text-slate-900 dark:text-white">{t("scopeStoredLabel")}</p>
                   <p className="mt-1 break-all font-mono text-slate-600 dark:text-slate-400">
                     {payload.spotifyConnectionScope?.trim() || "—"}
@@ -355,22 +360,17 @@ export function SpotifyPlaygroundMobileConnected({
         ) : null}
 
         {loadError ? (
-          <div
-            role="alert"
-            className="rounded-[1.5rem] border border-red-200/90 bg-red-50 px-4 py-3 text-sm text-red-900 dark:border-red-900/40 dark:bg-red-950/35 dark:text-red-100"
-          >
+          <div role="alert" className="py-3 text-sm text-red-900 dark:text-red-100">
             {loadError}
           </div>
         ) : null}
 
         <div>
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-700 dark:text-violet-300">
-                {t("mobile.endpointsEyebrow")}
-              </p>
-              <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">{t("mobile.endpointsHint")}</p>
-            </div>
+          <div className="mb-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-700 dark:text-violet-300">
+              {t("mobile.endpointsEyebrow")}
+            </p>
+            <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">{t("mobile.endpointsHint")}</p>
           </div>
           <div
             className="-mx-4 flex snap-x snap-mandatory gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
@@ -410,13 +410,10 @@ export function SpotifyPlaygroundMobileConnected({
           </div>
         </div>
 
-        <div
-          className="rounded-[1.5rem] border border-slate-200/80 bg-white p-4 shadow-lg shadow-slate-900/[0.04] dark:border-white/10 dark:bg-slate-950"
-          role="tabpanel"
-        >
+        <div role="tabpanel">
           {activeResult ? (
             <>
-              <div className="mb-4 flex flex-wrap items-center gap-2">
+              <div className="mb-3 flex flex-wrap items-center gap-2">
                 <code className="rounded-lg border border-slate-200/90 bg-slate-50 px-2 py-1 font-mono text-[0.65rem] text-slate-900 dark:border-white/10 dark:bg-white/10 dark:text-white">
                   GET {activeResult.path}
                 </code>
@@ -435,14 +432,16 @@ export function SpotifyPlaygroundMobileConnected({
 
               {activeResult.ok ? (
                 previewLines.length > 0 ? (
-                  <ul className="space-y-2">
+                  <ul>
                     {previewLines.map((line, index) => (
                       <li
                         key={`${activeTab}-${index}`}
-                        className="rounded-xl border border-slate-200/80 bg-slate-50/80 px-3 py-2.5 text-sm text-slate-800 dark:border-white/10 dark:bg-black/25 dark:text-slate-100"
+                        className="flex min-h-11 items-center gap-3 border-t border-slate-200/80 py-2 text-sm text-slate-800 first:border-t-0 dark:border-white/10 dark:text-slate-100"
                       >
-                        <span className="mr-2 font-mono text-xs text-violet-600 dark:text-violet-300">{index + 1}.</span>
-                        {line}
+                        <span className="w-5 shrink-0 font-mono text-xs text-violet-600 dark:text-violet-300">
+                          {index + 1}.
+                        </span>
+                        <span className="min-w-0 truncate">{line}</span>
                       </li>
                     ))}
                   </ul>
@@ -450,15 +449,13 @@ export function SpotifyPlaygroundMobileConnected({
                   <p className="text-sm text-slate-600 dark:text-slate-400">{t("mobile.previewEmpty")}</p>
                 )
               ) : (
-                <p className="rounded-xl border border-red-200/90 bg-red-50/90 px-3 py-2.5 text-sm text-red-900 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-100">
-                  {activeResult.error}
-                </p>
+                <p className="py-2.5 text-sm text-red-900 dark:text-red-100">{activeResult.error}</p>
               )}
 
               <button
                 type="button"
                 onClick={() => setJsonSheetOpen(true)}
-                className="mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border border-slate-200/90 bg-white px-4 text-sm font-semibold text-slate-800 shadow-sm dark:border-white/10 dark:bg-slate-950 dark:text-slate-100"
+                className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border border-slate-200/90 bg-white px-4 text-sm font-semibold text-slate-800 dark:border-white/10 dark:bg-slate-950 dark:text-slate-100"
               >
                 <Code2 className="h-4 w-4" aria-hidden />
                 {t("mobile.viewRawJson")}
@@ -469,25 +466,21 @@ export function SpotifyPlaygroundMobileConnected({
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
-          <Link
-            href="/dashboard/spotify-snapshot"
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-slate-200/90 bg-white px-3 text-sm font-semibold text-slate-800 shadow-sm dark:border-white/10 dark:bg-slate-950 dark:text-slate-100"
-          >
-            <Sparkles className="h-4 w-4 shrink-0" aria-hidden />
+        <Link
+          href="/dashboard/spotify-snapshot"
+          className="flex min-h-11 items-center gap-3 border-t border-slate-200/80 py-2 dark:border-white/10"
+        >
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-500/15 text-violet-700 dark:text-violet-300">
+            <Sparkles className="h-4 w-4" aria-hidden />
+          </span>
+          <span className="min-w-0 flex-1 truncate text-sm font-semibold tracking-tight text-slate-950 dark:text-white">
             {t("ctaSnapshot")}
-          </Link>
-          <Link
-            href="/dashboard/overview"
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-slate-200/90 bg-white px-3 text-sm font-semibold text-slate-800 shadow-sm dark:border-white/10 dark:bg-slate-950 dark:text-slate-100"
-          >
-            <LayoutDashboard className="h-4 w-4 shrink-0" aria-hidden />
-            {t("ctaOverview")}
-          </Link>
-        </div>
+          </span>
+          <ChevronIcon className="h-4 w-4 shrink-0 text-slate-400" />
+        </Link>
 
-        <details className="group rounded-[1.5rem] border border-slate-200/80 bg-white shadow-lg shadow-slate-900/[0.04] dark:border-white/10 dark:bg-slate-950">
-          <summary className="flex min-h-[52px] cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-left">
+        <details className="group border-t border-slate-200/80 dark:border-white/10">
+          <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 py-3 text-left">
             <div>
               <p className="text-sm font-semibold text-slate-950 dark:text-white">{t("mobile.trustTitle")}</p>
               <p className="text-xs text-slate-500 dark:text-slate-400">{t("mobile.trustSummary")}</p>
@@ -497,7 +490,7 @@ export function SpotifyPlaygroundMobileConnected({
               aria-hidden
             />
           </summary>
-          <ul className="space-y-3 border-t border-slate-200/80 px-4 py-3 text-sm leading-relaxed text-slate-600 dark:border-white/10 dark:text-slate-400">
+          <ul className="space-y-3 border-t border-slate-200/80 py-3 text-sm leading-relaxed text-slate-600 dark:border-white/10 dark:text-slate-400">
             {(["heroTrust1", "heroTrust2", "heroTrust3"] as const).map((key) => (
               <li key={key} className="flex gap-2">
                 <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" aria-hidden />
@@ -506,6 +499,7 @@ export function SpotifyPlaygroundMobileConnected({
             ))}
           </ul>
         </details>
+        </div>
       </section>
 
       <MobileBottomSheet

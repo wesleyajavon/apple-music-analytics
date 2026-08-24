@@ -28,7 +28,7 @@ export default async function SpotifyPlaygroundPage({ params }: Props) {
   });
 
   return (
-    <div className="px-4 py-6 sm:px-0">
+    <div className="max-lg:p-0 px-4 py-6 sm:px-0">
       <SpotifyPlaygroundClient
         hasSpotifyConnection={Boolean(conn)}
         spotifyDisplayName={conn?.spotifyDisplayName ?? null}

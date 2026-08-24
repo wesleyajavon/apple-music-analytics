@@ -34,7 +34,7 @@ export default async function SpotifySnapshotPage({ params }: Props) {
 
   if (conn) {
     return (
-      <div className="px-4 py-6 sm:px-0">
+      <div className="max-lg:p-0 px-4 py-6 sm:px-0">
         <SpotifyPartialSyncPreviewClient spotifyDisplayName={conn.spotifyDisplayName} />
       </div>
     );

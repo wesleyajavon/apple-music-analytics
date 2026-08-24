@@ -69,6 +69,8 @@ export interface AiInsightsInput {
   peakHour?: { hour: number; listens: number };
   /** Optional presentation style. Defaults to "technical" for backwards compatibility. */
   insightStyle?: AiInsightsStyle;
+  /** Deterministic relational facts — when set, the summarizer omits isolated tops. */
+  relationalFacts?: string[];
 }
 
 /**
@@ -84,8 +86,28 @@ export interface AiInsightItem {
 /** Why AI output was not generated when `aiUnavailable` is true. */
 export type AiUnavailableReason = "env" | "client" | "consent";
 
+export type AiInsightMomentKind =
+  | "oneHit"
+  | "catalog"
+  | "comeback"
+  | "genreSlot"
+  | "firstHeard";
+
+export interface AiInsightMoment {
+  id: string;
+  kind: AiInsightMomentKind;
+  title: string;
+  body: string;
+  metric: string;
+  href: string;
+  /** When set, the UI opens the artist insights overlay instead of navigating. */
+  artistId?: string;
+  artistName?: string;
+}
+
 export interface AiInsightsResponse {
-  insights: string[]; // 3-5 bullet points
+  insights: string[]; // 3-5 bullet points (moment bodies, for older clients)
+  moments?: AiInsightMoment[];
   cached: boolean; // Whether response was served from cache
   /** True when AI is disabled (AI_MASTER_ENABLED / cookie). */
   aiUnavailable?: boolean;

@@ -10,16 +10,48 @@
 
 import { createHash } from "crypto";
 import { getRedisClient } from "@/lib/redis";
+import type { AiInsightMoment, AiInsightsStyle } from "@/lib/dto/ai-insights";
 import type { AnalyticsSummary } from "./analytics-summarizer";
-import type { AiInsightsStyle } from "@/lib/dto/ai-insights";
 import type { AiLocale } from "./locale-utils";
 
-const CACHE_PREFIX = "ai:insights:";
+const CACHE_PREFIX = "ai:insights:v3:";
 const CACHE_TTL_SECONDS = 24 * 60 * 60; // 24 hours
 
+export type CachedInsightsPayload = {
+  insights: string[];
+  moments?: AiInsightMoment[];
+};
+
 // In-memory fallback when Redis is unavailable (e.g. dev without Redis)
-const memoryCache = new Map<string, { insights: string[]; expiresAt: number }>();
+const memoryCache = new Map<
+  string,
+  { payload: CachedInsightsPayload; expiresAt: number }
+>();
 const MEMORY_CACHE_TTL_MS = CACHE_TTL_SECONDS * 1000;
+
+function normalizeCachedPayload(parsed: unknown): CachedInsightsPayload | null {
+  if (Array.isArray(parsed) && parsed.every((item) => typeof item === "string")) {
+    return { insights: parsed };
+  }
+  if (
+    parsed &&
+    typeof parsed === "object" &&
+    Array.isArray((parsed as CachedInsightsPayload).insights)
+  ) {
+    const value = parsed as CachedInsightsPayload;
+    return {
+      insights: value.insights,
+      moments: Array.isArray(value.moments) ? value.moments : undefined,
+    };
+  }
+  return null;
+}
+
+function toPayload(
+  value: CachedInsightsPayload | string[]
+): CachedInsightsPayload {
+  return Array.isArray(value) ? { insights: value } : value;
+}
 
 /**
  * Computes a deterministic hash of the exact LLM user-message body + locale + style.
@@ -38,11 +70,11 @@ export function computeCacheKey(
  * Gets cached insights if available.
  *
  * @param cacheKey - Hash from computeCacheKey(summary)
- * @returns Cached insights array, or null if miss
+ * @returns Cached payload, or null if miss
  */
 export async function getCachedInsights(
   cacheKey: string
-): Promise<string[] | null> {
+): Promise<CachedInsightsPayload | null> {
   const redis = getRedisClient();
 
   if (redis) {
@@ -50,18 +82,16 @@ export async function getCachedInsights(
       const key = CACHE_PREFIX + cacheKey;
       const cached = await redis.get(key);
       if (cached) {
-        const parsed = JSON.parse(cached) as string[];
-        return Array.isArray(parsed) ? parsed : null;
+        return normalizeCachedPayload(JSON.parse(cached));
       }
     } catch {
       // Redis error: fall through to memory cache
     }
   }
 
-  // In-memory fallback
   const entry = memoryCache.get(cacheKey);
   if (entry && entry.expiresAt > Date.now()) {
-    return entry.insights;
+    return entry.payload;
   }
   if (entry) {
     memoryCache.delete(cacheKey);
@@ -74,26 +104,26 @@ export async function getCachedInsights(
  * Stores insights in cache.
  *
  * @param cacheKey - Hash from computeCacheKey(summary)
- * @param insights - Generated insight strings to cache
+ * @param insights - Generated insight strings or typed moments payload
  */
 export async function setCachedInsights(
   cacheKey: string,
-  insights: string[]
+  insights: CachedInsightsPayload | string[]
 ): Promise<void> {
+  const payload = toPayload(insights);
   const redis = getRedisClient();
 
   if (redis) {
     try {
       const key = CACHE_PREFIX + cacheKey;
-      await redis.setex(key, CACHE_TTL_SECONDS, JSON.stringify(insights));
+      await redis.setex(key, CACHE_TTL_SECONDS, JSON.stringify(payload));
     } catch {
       // Redis error: fall through to memory cache
     }
   }
 
-  // In-memory fallback
   memoryCache.set(cacheKey, {
-    insights,
+    payload,
     expiresAt: Date.now() + MEMORY_CACHE_TTL_MS,
   });
 }

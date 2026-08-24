@@ -64,7 +64,7 @@ describe("insights-cache", () => {
       await setCachedInsights(cacheKey, insights);
       const result = await getCachedInsights(cacheKey);
 
-      expect(result).toEqual(insights);
+      expect(result).toEqual({ insights });
     });
   });
 
@@ -78,7 +78,7 @@ describe("insights-cache", () => {
       } as any);
 
       const result = await getCachedInsights(cacheKey);
-      expect(result).toEqual(insights);
+      expect(result).toEqual({ insights });
     });
 
     it("returns null when Redis returns non-array JSON", async () => {
@@ -102,7 +102,7 @@ describe("insights-cache", () => {
 
       await setCachedInsights(cacheKey, insights);
       const result = await getCachedInsights(cacheKey);
-      expect(result).toEqual(insights);
+      expect(result).toEqual({ insights });
     });
 
     it("uses Redis setex when storing", async () => {
@@ -114,9 +114,9 @@ describe("insights-cache", () => {
 
       await setCachedInsights("store-key", ["Insight"]);
       expect(setex).toHaveBeenCalledWith(
-        "ai:insights:store-key",
+        "ai:insights:v3:store-key",
         24 * 60 * 60,
-        JSON.stringify(["Insight"])
+        JSON.stringify({ insights: ["Insight"] })
       );
     });
   });

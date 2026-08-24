@@ -1,9 +1,9 @@
 "use client";
 
-import { useCallback, Suspense, useState, type ReactNode } from "react";
+import { useCallback, Suspense, useMemo, useState, type ReactNode } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
-import { LayoutDashboard, MessageSquareText } from "lucide-react";
+import { LayoutDashboard, MessageSquareText, ChevronRight } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import {
   DASHBOARD_SPOTLIGHT_SHELL,
@@ -16,13 +16,45 @@ import {
 } from "@/lib/constants/dashboard-spotlight";
 import { useAiInsights } from "@/lib/hooks/use-ai-insights";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
+import {
+  AiInsightsMobileBackfill,
+  AiInsightsMobileEmpty,
+  AiInsightsMobileError,
+  AiInsightsMobileExperience,
+  AiInsightsMobileQuota,
+  AiInsightsMobileSkeleton,
+  AiInsightsMobileUnavailable,
+} from "@/lib/components/ai-insights-mobile";
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
 import { InteractiveAiGenreBackfillNotice } from "@/lib/components/interactive-ai-genre-backfill-notice";
 import { useInteractiveAiBlockedByGenreBackfill } from "@/lib/hooks/use-interactive-ai-blocked-by-genre-backfill";
-import { isGroqGenreClassificationBlockingError } from "@/lib/utils/groq-quota-message";
+import {
+  isGroqDailyQuotaError,
+  isGroqGenreClassificationBlockingError,
+} from "@/lib/utils/groq-quota-message";
 import { LiveStatusDot } from "@/lib/components/live-status-dot";
-import type { AiInsightsStyle } from "@/lib/dto/ai-insights";
+import type { AiInsightMoment, AiInsightsStyle } from "@/lib/dto/ai-insights";
+import type { ArtistStatsDto } from "@/lib/dto/artist";
+import { ArtistUserInsightsPanel } from "@/lib/components/artist-user-insights-panel";
+import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
+
+function artistPreviewFromMoment(
+  moment: AiInsightMoment,
+  startDate?: string,
+  endDate?: string
+): ArtistStatsDto {
+  return {
+    artistId: moment.artistId ?? "",
+    artistName: moment.artistName ?? "",
+    imageUrl: null,
+    listenCount: 0,
+    uniqueTracks: 0,
+    firstListenDate: startDate ?? "",
+    lastListenDate: endDate ?? "",
+    totalPlayTime: 0,
+  };
+}
 
 /** Accent color variants for insight cards */
 const INSIGHT_ACCENTS = [
@@ -193,6 +225,76 @@ function AiInsightsHeroStatsSkeleton() {
   );
 }
 
+function InsightMomentCard({
+  moment,
+  index,
+  href,
+  onOpenArtist,
+}: {
+  moment: AiInsightMoment;
+  index: number;
+  href: string;
+  onOpenArtist?: (moment: AiInsightMoment) => void;
+}) {
+  const t = useTranslations("ai-insights");
+  const accent = INSIGHT_ACCENTS[index % INSIGHT_ACCENTS.length];
+  const className = `
+        relative block overflow-hidden rounded-xl border border-slate-200/90 border-l-4 bg-white shadow-sm
+        transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-slate-900/[0.06]
+        dark:border-white/10 dark:bg-slate-950/60 dark:shadow-none dark:hover:shadow-black/25
+        ${accent.border} ${accent.bg}
+        opacity-0 animate-fade-in-up
+      `;
+  const inner = (
+      <div className="flex gap-4 p-6">
+        <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${accent.iconBg} ${accent.icon}`} aria-hidden>
+          <SparkIcon className="h-5 w-5" />
+        </span>
+        <div className="min-w-0 flex-1 space-y-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="rounded-full border border-slate-200/90 bg-slate-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-600 dark:border-white/10 dark:bg-white/10 dark:text-slate-300">
+              {t(`kinds.${moment.kind}`)}
+            </span>
+            {moment.metric ? (
+              <span className="text-sm font-semibold tabular-nums text-slate-900 dark:text-white">
+                {moment.metric}
+              </span>
+            ) : null}
+          </div>
+          {moment.title ? (
+            <p className="text-base font-semibold tracking-tight text-slate-900 dark:text-white">{moment.title}</p>
+          ) : null}
+          <p className="leading-relaxed text-slate-700 dark:text-slate-300">{moment.body}</p>
+          <p className="flex items-center gap-1 text-xs font-semibold text-violet-700 dark:text-violet-300">
+            {t("openMoment")}
+            <ChevronRight className="h-3.5 w-3.5" aria-hidden />
+          </p>
+        </div>
+      </div>
+  );
+  if (moment.artistId && onOpenArtist) {
+    return (
+      <button
+        type="button"
+        onClick={() => onOpenArtist(moment)}
+        className={`${className} w-full text-left`}
+        style={{ animationDelay: `${index * 80}ms` }}
+      >
+        {inner}
+      </button>
+    );
+  }
+  return (
+    <Link
+      href={href}
+      className={className}
+      style={{ animationDelay: `${index * 80}ms` }}
+    >
+      {inner}
+    </Link>
+  );
+}
+
 function InsightStyleToggle({
   insightStyle,
   onStyleChange,
@@ -243,6 +345,15 @@ function InsightCardSkeleton() {
   );
 }
 
+function splitScreen(mobile: ReactNode, desktop: ReactNode) {
+  return (
+    <>
+      <div className="lg:hidden">{mobile}</div>
+      <div className="hidden lg:block">{desktop}</div>
+    </>
+  );
+}
+
 function AiInsightsContent() {
   const t = useTranslations("ai-insights");
   const tOverview = useTranslations("overview");
@@ -252,6 +363,12 @@ function AiInsightsContent() {
   const userId = searchParams.get("userId") ?? undefined;
   const { startDate, endDate, isLoading: isRangeLoading } = useListenDateRange();
   const [insightStyle, setInsightStyle] = useState<AiInsightsStyle>("human");
+  const [artistOverlayMoment, setArtistOverlayMoment] = useState<AiInsightMoment | null>(null);
+  const withFilters = useMemo(
+    () => (href: string) => mergeDashboardSearchParams(href, searchParams),
+    [searchParams],
+  );
+  const askHref = withFilters("/dashboard/ask-your-soundprint");
 
   const { data, isLoading, error, refetch } = useAiInsights(startDate, endDate, {
     insightStyle,
@@ -267,10 +384,16 @@ function AiInsightsContent() {
     refetch();
   }, [refetch]);
 
+  const handleOpenArtist = useCallback((moment: AiInsightMoment) => {
+    if (!moment.artistId) return;
+    setArtistOverlayMoment(moment);
+  }, []);
+
   const styleToggle = <InsightStyleToggle insightStyle={insightStyle} onStyleChange={setInsightStyle} />;
 
   if (interactiveAiBlockedByGenreBackfill && !isRangeLoading) {
-    return (
+    return splitScreen(
+      <AiInsightsMobileBackfill locale={locale} startDate={startDate} endDate={endDate} />,
       <div className="mx-auto max-w-6xl space-y-8">
         <section aria-labelledby="ai-insights-heading">
           <h2 id="ai-insights-heading" className="sr-only">
@@ -284,12 +407,13 @@ function AiInsightsContent() {
           />
         </section>
         <InteractiveAiGenreBackfillNotice />
-      </div>
+      </div>,
     );
   }
 
   if (isLoadingOrFetching) {
-    return (
+    return splitScreen(
+      <AiInsightsMobileSkeleton locale={locale} startDate={startDate} endDate={endDate} />,
       <div className="mx-auto max-w-6xl space-y-8">
         <section aria-labelledby="ai-insights-heading">
           <h2 id="ai-insights-heading" className="sr-only">
@@ -311,13 +435,14 @@ function AiInsightsContent() {
             ))}
           </div>
         </div>
-      </div>
+      </div>,
     );
   }
 
   if (error) {
     if (isGroqGenreClassificationBlockingError(error)) {
-      return (
+      return splitScreen(
+        <AiInsightsMobileBackfill locale={locale} startDate={startDate} endDate={endDate} force />,
         <div className="mx-auto max-w-6xl space-y-8">
           <section aria-labelledby="ai-insights-heading">
             <h2 id="ai-insights-heading" className="sr-only">
@@ -331,10 +456,15 @@ function AiInsightsContent() {
             />
           </section>
           <InteractiveAiGenreBackfillNotice force />
-        </div>
+        </div>,
       );
     }
-    return (
+    return splitScreen(
+      isGroqDailyQuotaError(error) ? (
+        <AiInsightsMobileQuota error={error} locale={locale} startDate={startDate} endDate={endDate} />
+      ) : (
+        <AiInsightsMobileError locale={locale} startDate={startDate} endDate={endDate} onRetry={handleRetry} />
+      ),
       <div className="mx-auto max-w-6xl space-y-8">
         <section aria-labelledby="ai-insights-heading">
           <h2 id="ai-insights-heading" className="sr-only">
@@ -355,12 +485,22 @@ function AiInsightsContent() {
             <p className={`mt-4 ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("checkApiKey")}</p>
           </div>
         </div>
-      </div>
+      </div>,
     );
   }
 
   if (!data || !data.insights.length) {
-    return (
+    return splitScreen(
+      data?.aiUnavailable ? (
+        <AiInsightsMobileUnavailable
+          locale={locale}
+          reason={data.aiUnavailableReason}
+          startDate={startDate}
+          endDate={endDate}
+        />
+      ) : (
+        <AiInsightsMobileEmpty locale={locale} startDate={startDate} endDate={endDate} />
+      ),
       <div className="mx-auto max-w-6xl space-y-8">
         <section aria-labelledby="ai-insights-heading">
           <h2 id="ai-insights-heading" className="sr-only">
@@ -379,11 +519,27 @@ function AiInsightsContent() {
           message={t("notEnoughData")}
           description={t("importDescription")}
         />
-      </div>
+      </div>,
     );
   }
 
   return (
+    <>
+    {splitScreen(
+    <AiInsightsMobileExperience
+      askHref={askHref}
+      cached={data.cached}
+      endDate={endDate}
+      insightStyle={insightStyle}
+      insights={data.insights}
+      locale={locale}
+      moments={data.moments}
+      onOpenArtist={handleOpenArtist}
+      onStyleChange={setInsightStyle}
+      rateLimitRemaining={data.rateLimit?.remaining}
+      startDate={startDate}
+      withFilters={withFilters}
+    />,
     <div className="mx-auto max-w-6xl space-y-8">
       <section aria-labelledby="ai-insights-heading">
         <h2 id="ai-insights-heading" className="sr-only">
@@ -422,44 +578,73 @@ function AiInsightsContent() {
             </div>
           </div>
           <div className="space-y-4 p-6 sm:p-8 md:p-10">
-            {data.insights.map((insight, index) => {
-              const accent = INSIGHT_ACCENTS[index % INSIGHT_ACCENTS.length];
-              return (
-                <div
-                  key={index}
-                  className={`
-                    relative overflow-hidden rounded-xl border border-slate-200/90 border-l-4 bg-white shadow-sm
-                    transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-slate-900/[0.06]
-                    dark:border-white/10 dark:bg-slate-950/60 dark:shadow-none dark:hover:shadow-black/25
-                    ${accent.border} ${accent.bg}
-                    opacity-0 animate-fade-in-up
-                  `}
-                  style={{ animationDelay: `${index * 80}ms` }}
-                >
-                  <div className="flex gap-4 p-6">
-                    <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${accent.iconBg} ${accent.icon}`} aria-hidden>
-                      <SparkIcon className="h-5 w-5" />
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="leading-relaxed text-slate-700 dark:text-slate-300">{insight}</p>
+            {(data.moments && data.moments.length > 0
+              ? data.moments.map((moment, index) => (
+                  <InsightMomentCard
+                    key={moment.id}
+                    moment={moment}
+                    index={index}
+                    href={withFilters(moment.href)}
+                    onOpenArtist={handleOpenArtist}
+                  />
+                ))
+              : data.insights.map((insight, index) => {
+                  const accent = INSIGHT_ACCENTS[index % INSIGHT_ACCENTS.length];
+                  return (
+                    <div
+                      key={index}
+                      className={`
+                        relative overflow-hidden rounded-xl border border-slate-200/90 border-l-4 bg-white shadow-sm
+                        transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-slate-900/[0.06]
+                        dark:border-white/10 dark:bg-slate-950/60 dark:shadow-none dark:hover:shadow-black/25
+                        ${accent.border} ${accent.bg}
+                        opacity-0 animate-fade-in-up
+                      `}
+                      style={{ animationDelay: `${index * 80}ms` }}
+                    >
+                      <div className="flex gap-4 p-6">
+                        <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${accent.iconBg} ${accent.icon}`} aria-hidden>
+                          <SparkIcon className="h-5 w-5" />
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="leading-relaxed text-slate-700 dark:text-slate-300">{insight}</p>
+                        </div>
+                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-200/90 bg-slate-50 text-sm font-semibold text-slate-700 dark:border-white/10 dark:bg-white/10 dark:text-white" aria-hidden>
+                          {index + 1}
+                        </span>
+                      </div>
                     </div>
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-200/90 bg-slate-50 text-sm font-semibold text-slate-700 dark:border-white/10 dark:bg-white/10 dark:text-white" aria-hidden>
-                      {index + 1}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
+                  );
+                }))}
           </div>
         </div>
       </section>
-    </div>
+    </div>,
+    )}
+    <ArtistUserInsightsPanel
+      open={artistOverlayMoment != null}
+      artistId={artistOverlayMoment?.artistId ?? null}
+      previewArtist={
+        artistOverlayMoment?.artistId
+          ? artistPreviewFromMoment(artistOverlayMoment, startDate, endDate)
+          : null
+      }
+      startDate={startDate}
+      endDate={endDate}
+      userId={userId}
+      locale={locale}
+      colorIndex={0}
+      onClose={() => setArtistOverlayMoment(null)}
+    />
+    </>
   );
 }
 
 function AiInsightsFallback() {
   const t = useTranslations("ai-insights");
-  return (
+  const locale = useLocale();
+  return splitScreen(
+    <AiInsightsMobileSkeleton locale={locale} />,
     <div className="mx-auto max-w-6xl space-y-8">
       <section aria-labelledby="ai-insights-heading">
         <h2 id="ai-insights-heading" className="sr-only">
@@ -486,7 +671,7 @@ function AiInsightsFallback() {
           ))}
         </div>
       </div>
-    </div>
+    </div>,
   );
 }
 
@@ -496,7 +681,7 @@ function AiInsightsFallback() {
  */
 export default function AiInsightsPage() {
   return (
-    <div className="px-4 py-6 sm:px-0">
+    <div className="max-lg:p-0 px-4 py-6 sm:px-0">
       <Suspense fallback={<AiInsightsFallback />}>
         <AiInsightsContent />
       </Suspense>

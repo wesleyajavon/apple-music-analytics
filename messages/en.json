@@ -2158,11 +2158,11 @@
   },
   "ai-insights": {
     "title": "AI Insights",
-    "heroEyebrow": "Digest from your analytics",
+    "heroEyebrow": "What the charts don’t say",
     "overviewWidget": {
-      "eyebrow": "Insight cards",
-      "title": "What your streams are saying.",
-      "description": "A few short takes on your listening habits."
+      "eyebrow": "What the charts don’t say",
+      "title": "Moments hiding in your streams.",
+      "description": "Relations, gaps, and first times — not another top 5."
     },
     "heroStatBadge": "Signal quality",
     "heroStatTag": "Grounded in streams",
@@ -2175,7 +2175,7 @@
     "heroStatTone": "Tone",
     "heroStatStatus": "Quota / cache",
     "heroFresh": "Live response",
-    "subtitle": "Five crisp takeaways per refresh—generated only from your filtered streaming window.",
+    "subtitle": "Four surprising moments per refresh, computed from your streams then phrased by AI.",
     "subtitleShort": "Analysis of your streaming data",
     "seeMore": "See more",
     "loading": "Analyzing your streaming data...",
@@ -2187,10 +2187,10 @@
     "changeDates": "Modify the dates to get insights.",
     "notEnoughData": "Not enough data",
     "importDescription": "Import your streaming data (Spotify/Apple exports recommended) and select a period to get insights.",
-    "yourInsights": "Short, opinionated blurbs grounded in the same charts you already trust—toggle tone without changing the math.",
+    "yourInsights": "Four relations your rankings hide — one-hit loyalty, comebacks, genre × time, first heard vs now.",
     "insightsFromData": "Insights generated from your aggregated streaming data.",
-    "spotlightTitle": "Insight cards",
-    "spotlightHint": "Grounded in your dashboard filters and stored streams",
+    "spotlightTitle": "Moments the graphs miss",
+    "spotlightHint": "Not a restated top 5 — each card is a contrast, gap, or first time.",
     "cached": "(cached result)",
     "quotaRemaining": "Quota: {count} remaining",
     "styleToggle": {
@@ -2200,12 +2200,37 @@
       "technical": "Technical"
     },
     "loadingShort": "Loading...",
+    "mobile": {
+      "eyebrow": "What charts miss",
+      "railLabel": "Signal",
+      "railCount": "Cards",
+      "railTone": "Tone",
+      "railStatus": "Status",
+      "moreTitle": "More takes",
+      "askLead": "Ask a follow-up",
+      "emptyTitle": "No insights yet",
+      "emptyLead": "Import history so we can write a few takes.",
+      "emptyCta": "Import history",
+      "quotaLead": "AI quota is used up for today.",
+      "unavailableLead": "AI is off, so these cards stay empty.",
+      "errorLead": "Couldn't write insights.",
+      "generatingLead": "Writing your cards…"
+    },
     "publicDemoTeaser": {
       "insightTopGenre": "{genre} accounts for {pct} of classified streams in this range.",
       "insightTopArtist": "{artist} is your most streamed artist with {count} streams.",
       "insightRhythm": "Your strongest streaming rhythm shows up on {peakDay} around {peakHour}.",
       "insightDiversity": "You explored {artistCount} artists and {trackCount} distinct tracks in this window."
-    }
+    },
+    "kinds": {
+      "oneHit": "One-hit",
+      "catalog": "Deep catalog",
+      "comeback": "Comeback",
+      "genreSlot": "Genre × time",
+      "firstHeard": "First heard"
+    },
+    "openMoment": "Open in dashboard",
+    "momentMetric": "Anchored figure"
   },
   "taste-evolution": {
     "title": "Taste evolution",

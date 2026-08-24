@@ -616,4 +616,49 @@ test.describe("Mobile dashboard UX", () => {
     await expect(page.getByRole("navigation", { name: /navigation principale du dashboard/i })).toBeVisible();
     await expect(page).toHaveURL(/userId=/);
   });
+
+  test("ai insights mobile shows heading and an insight or empty/quota", async ({ page }) => {
+    test.setTimeout(90_000);
+    await seedCookieConsent(page);
+    await page.goto(`/en/dashboard/ai-insights${publicDemoQuery}`);
+    await dismissCookieBannerIfPresent(page);
+
+    const main = page.getByRole("main");
+    await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 45_000 });
+
+    const featured = main.locator("blockquote");
+    const emptyTitle = main.getByRole("heading", { name: /no insights yet/i });
+    const quota = main.getByRole("alert");
+    const retry = main.getByRole("button", { name: /^retry$/i });
+    await expect(featured.or(emptyTitle).or(quota).or(retry)).toBeVisible({ timeout: 45_000 });
+
+    if (await featured.isVisible()) {
+      const ask = main.getByRole("link", { name: /ask your soundprint/i });
+      await expect(ask).toBeVisible();
+      await expect(ask).toHaveAttribute("href", /ask-your-soundprint/);
+      await expect(page).toHaveURL(/userId=/);
+    }
+  });
+
+  test("ai insights mobile is usable in French", async ({ page }) => {
+    test.setTimeout(90_000);
+    await seedCookieConsent(page);
+    await page.goto(`/fr/dashboard/ai-insights${publicDemoQuery}`);
+    await dismissCookieBannerIfPresent(page);
+
+    const main = page.getByRole("main");
+    await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 45_000 });
+
+    const featured = main.locator("blockquote");
+    const emptyTitle = main.getByRole("heading", { name: /pas encore d['’]insights/i });
+    const quota = main.getByRole("alert");
+    const retry = main.getByRole("button", { name: /^réessayer$/i });
+    await expect(featured.or(emptyTitle).or(quota).or(retry)).toBeVisible({ timeout: 45_000 });
+
+    if (await featured.isVisible()) {
+      const ask = main.getByRole("link", { name: /interrogez votre soundprint/i });
+      await expect(ask).toBeVisible();
+      await expect(page).toHaveURL(/userId=/);
+    }
+  });
 });

@@ -270,7 +270,10 @@ export function AiInsightsSummaryWidget() {
     return null;
   }
 
-  const previewInsights = data.insights.slice(0, PREVIEW_INSIGHTS_COUNT);
+  const previewMoments = data.moments?.slice(0, PREVIEW_INSIGHTS_COUNT) ?? [];
+  const previewInsights = previewMoments.length > 0
+    ? []
+    : data.insights.slice(0, PREVIEW_INSIGHTS_COUNT);
 
   return (
     <div className={`${OVERVIEW_STARTUP_SURFACE_BASE} flex min-h-[280px] flex-col animate-fade-in-up`}>
@@ -301,7 +304,22 @@ export function AiInsightsSummaryWidget() {
         />
         <div className={OVERVIEW_STARTUP_INNER_PANEL_CLASS}>
           <div className="space-y-3">
-            {previewInsights.map((insight, index) => (
+            {previewMoments.length > 0
+              ? previewMoments.map((moment, index) => (
+                  <div
+                    key={moment.id}
+                    className={`flex gap-3 rounded-xl border border-slate-200/90 bg-white p-3 shadow-sm backdrop-blur dark:border-white/[0.06] dark:bg-[#0f111a] dark:shadow-none ${INSIGHT_ACCENTS[index % INSIGHT_ACCENTS.length]}`}
+                  >
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-slate-100 text-xs font-semibold text-slate-800 dark:border-white/[0.08] dark:bg-[#1a1d2a] dark:text-cyan-100">
+                      {moment.metric || index + 1}
+                    </span>
+                    <span className="min-w-0 flex-1 text-sm leading-relaxed text-slate-700 dark:text-slate-200">
+                      {moment.title ? `${moment.title} — ` : ""}
+                      {moment.body}
+                    </span>
+                  </div>
+                ))
+              : previewInsights.map((insight, index) => (
               <div
                 key={index}
                 className={`flex gap-3 rounded-xl border border-slate-200/90 bg-white p-3 shadow-sm backdrop-blur dark:border-white/[0.06] dark:bg-[#0f111a] dark:shadow-none ${INSIGHT_ACCENTS[index % INSIGHT_ACCENTS.length]}`}

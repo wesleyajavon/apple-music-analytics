@@ -11,7 +11,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { summarizeAnalytics } from "@/lib/services/ai/analytics-summarizer";
-import { generateInsights } from "@/lib/services/ai/llm-service";
+import { generateInsightMoments } from "@/lib/services/ai/llm-service";
+import {
+  buildFallbackMoments,
+  collectInsightFacts,
+  formatInsightFactsForPrompt,
+} from "@/lib/services/ai/insight-facts";
+import { AppError } from "@/lib/utils/error-handler";
 import {
   computeCacheKey,
   getCachedInsights,
@@ -131,8 +137,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(degraded);
     }
 
-    // 1. Summarize and normalize (deterministic, localized)
-    const summary = summarizeAnalytics(input, locale);
+    const facts = await collectInsightFacts(
+      userId,
+      input.dateRange.start,
+      input.dateRange.end
+    );
+    const inputWithFacts: AiInsightsInput = {
+      ...input,
+      relationalFacts: facts.length > 0 ? [formatInsightFactsForPrompt(facts)] : [],
+    };
+
+    // 1. Summarize relational facts (tops omitted when facts exist)
+    const summary = summarizeAnalytics(inputWithFacts, locale);
 
     // 2. Compute cache key from summary hash + locale
     const cacheKey = computeCacheKey(summary, locale, insightStyle);
@@ -141,23 +157,40 @@ export async function POST(request: NextRequest) {
     const cached = await getCachedInsights(cacheKey);
     if (cached) {
       const response: AiInsightsResponse = {
-        insights: cached,
+        insights: cached.insights,
+        moments: cached.moments,
         cached: true,
       };
       return NextResponse.json(response);
     }
 
-    await assertInteractiveGroqNotBlockedByImportGenreBackfill(userId);
-    await assertGroqUserQuotaForRequest(request, userId);
+    if (facts.length === 0) {
+      const empty: AiInsightsResponse = {
+        insights: [],
+        moments: [],
+        cached: false,
+      };
+      return NextResponse.json(empty);
+    }
 
-    // 4. Generate insights via LLM
-    const insights = await generateInsights(summary, locale, insightStyle);
+    let moments = buildFallbackMoments(facts, locale);
+    try {
+      await assertInteractiveGroqNotBlockedByImportGenreBackfill(userId);
+      await assertGroqUserQuotaForRequest(request, userId);
+      moments = await generateInsightMoments(facts, locale, insightStyle);
+    } catch (error) {
+      if (error instanceof AppError) throw error;
+      moments = buildFallbackMoments(facts, locale);
+    }
+
+    const insights = moments.map((moment) => moment.body);
 
     // 5. Store in cache for future requests
-    await setCachedInsights(cacheKey, insights);
+    await setCachedInsights(cacheKey, { insights, moments });
 
     const response: AiInsightsResponse = {
       insights,
+      moments,
       cached: false,
     };
 

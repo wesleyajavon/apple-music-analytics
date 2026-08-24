@@ -61,11 +61,17 @@ export function summarizeAnalytics(
     `${labels.summary.period}: ${input.dateRange.start} ${labels.summary.periodConnector} ${input.dateRange.end}`
   );
 
+  const relationalFacts = input.relationalFacts ?? [];
+  const useRelationalFacts = relationalFacts.length > 0;
+  if (useRelationalFacts) {
+    parts.push(relationalFacts.join("\n"));
+  }
+
   // Genre distribution - top 10, sorted by count descending
   const sortedGenres = [...input.genreDistribution]
     .sort((a, b) => b.count - a.count)
     .slice(0, 10);
-  if (sortedGenres.length > 0) {
+  if (!useRelationalFacts && sortedGenres.length > 0) {
     const genreLines = sortedGenres.map(
       (g) =>
         `  - ${g.genre}: ${g.count} ${labels.summary.listens} (${g.percentage.toFixed(1)}%)`
@@ -79,7 +85,7 @@ export function summarizeAnalytics(
   const sortedHours = [...input.listeningByTimeOfDay]
     .sort((a, b) => b.listens - a.listens)
     .slice(0, 5);
-  if (sortedHours.length > 0) {
+  if (!useRelationalFacts && sortedHours.length > 0) {
     const hourLines = sortedHours.map(
       (h) =>
         `  - ${h.hour}h-${h.hour + 1}h: ${h.listens} ${labels.summary.listens}`
@@ -93,7 +99,7 @@ export function summarizeAnalytics(
   const sortedArtists = [...input.topArtists]
     .sort((a, b) => b.listenCount - a.listenCount)
     .slice(0, 10);
-  if (sortedArtists.length > 0) {
+  if (!useRelationalFacts && sortedArtists.length > 0) {
     const artistLines = sortedArtists.map((a) =>
       a.genre
         ? `  - ${a.artistName} (${a.genre}): ${a.listenCount} ${labels.summary.listens}`
@@ -103,7 +109,7 @@ export function summarizeAnalytics(
   }
 
   // Year-over-year deltas
-  if (input.yearOverYearDeltas && input.yearOverYearDeltas.length > 0) {
+  if (!useRelationalFacts && input.yearOverYearDeltas && input.yearOverYearDeltas.length > 0) {
     const deltaLines = input.yearOverYearDeltas.map((d) => {
       const isTimeMetric = /time|écoute|escucha|play/i.test(d.metric);
       const formatVal = (v: number) =>
@@ -116,12 +122,12 @@ export function summarizeAnalytics(
   }
 
   // Peak day/hour if available
-  if (input.peakDay) {
+  if (!useRelationalFacts && input.peakDay) {
     parts.push(
       `${labels.summary.peakDay}: ${input.peakDay.dayName} (${input.peakDay.listens} ${labels.summary.listens})`
     );
   }
-  if (input.peakHour !== undefined) {
+  if (!useRelationalFacts && input.peakHour !== undefined) {
     parts.push(
       `${labels.summary.peakHour}: ${input.peakHour.hour}h (${input.peakHour.listens} ${labels.summary.listens})`
     );
@@ -138,9 +144,10 @@ export function summarizeAnalytics(
       peakDay: input.peakDay ?? null,
       peakHour: input.peakHour ?? null,
       timeFormatVersion: 1, // 1 = readable (Xh Ymin), 0 = seconds
-      topArtists: sortedArtists,
-      topGenres: sortedGenres,
-      topHours: sortedHours,
+      topArtists: useRelationalFacts ? [] : sortedArtists,
+      topGenres: useRelationalFacts ? [] : sortedGenres,
+      topHours: useRelationalFacts ? [] : sortedHours,
+      relationalFacts: relationalFacts,
     },
     null,
     0

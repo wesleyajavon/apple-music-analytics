@@ -11,8 +11,13 @@
 
 import type { AnalyticsSummary } from "./analytics-summarizer";
 import { createGroqChatCompletion, GROQ_DEFAULT_MODEL } from "@/lib/services/ai/groq-chat";
-import type { AiInsightsStyle } from "@/lib/dto/ai-insights";
+import type { AiInsightMoment, AiInsightsStyle } from "@/lib/dto/ai-insights";
 import { getLanguageName, type AiLocale } from "./locale-utils";
+import {
+  buildFallbackMoments,
+  formatInsightFactsForPrompt,
+  type InsightFact,
+} from "./insight-facts";
 
 const SYSTEM_PROMPTS: Record<
   AiLocale,
@@ -246,4 +251,105 @@ export async function generateInsights(
   }
 
   return insights;
+}
+
+const MOMENT_SYSTEM_PROMPTS: Record<
+  AiLocale,
+  Record<AiInsightsStyle, (lang: string) => string>
+> = {
+  fr: {
+    technical: (lang) =>
+      `Tu rédiges 4 moments d'écoute à partir de FAITS RELATIONNELS déjà calculés.
+RÈGLES: langue ${lang}. N'invente aucun nom, %, date ou chiffre. Interdit: top genre isolé, top artiste isolé, heure de pic isolée. Chaque moment = titre court + une phrase qui reprend le chiffre du fait. Réponds UNIQUEMENT en JSON: {"moments":[{"id":"...","title":"...","body":"..."}]}`,
+    human: (lang) =>
+      `Tu racontes 4 moments d'écoute que les classements ne montrent pas.
+RÈGLES: langue ${lang}. Uniquement les faits fournis — aucun nom ou chiffre inventé. Interdit de reformuler un palmarès (top genre / top artiste / heure de pic seuls). Ton: naturel, précis. JSON uniquement: {"moments":[{"id":"...","title":"...","body":"..."}]}`,
+  },
+  en: {
+    technical: (lang) =>
+      `You write 4 listening moments from precomputed RELATIONAL FACTS.
+RULES: language ${lang}. Invent no names, %, dates, or numbers. Banned: isolated top genre, top artist, or peak hour. Each moment = short title + one sentence that reuses the fact's number. JSON only: {"moments":[{"id":"...","title":"...","body":"..."}]}`,
+    human: (lang) =>
+      `You tell 4 listening moments the rankings do not show.
+RULES: language ${lang}. Use only the supplied facts — invent no names or numbers. Do not restate a leaderboard (top genre / top artist / peak hour alone). Tone: natural, precise. JSON only: {"moments":[{"id":"...","title":"...","body":"..."}]}`,
+  },
+  es: {
+    technical: (lang) =>
+      `Redactas 4 momentos de escucha a partir de HECHOS RELACIONALES ya calculados.
+REGLAS: idioma ${lang}. No inventes nombres, %, fechas ni cifras. Prohibido: top género aislado, top artista aislado, hora pico aislada. Cada momento = título corto + una frase con la cifra del hecho. Solo JSON: {"moments":[{"id":"...","title":"...","body":"..."}]}`,
+    human: (lang) =>
+      `Cuentas 4 momentos de escucha que las clasificaciones no muestran.
+REGLAS: idioma ${lang}. Solo los hechos dados — sin nombres ni cifras inventados. No reformules un ranking (top género / top artista / hora pico solos). Tono natural y preciso. Solo JSON: {"moments":[{"id":"...","title":"...","body":"..."}]}`,
+  },
+};
+
+function extractJsonObject(raw: string): unknown {
+  const fenced = raw.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  const candidate = (fenced?.[1] ?? raw).trim();
+  const start = candidate.indexOf("{");
+  const end = candidate.lastIndexOf("}");
+  if (start < 0 || end <= start) return null;
+  try {
+    return JSON.parse(candidate.slice(start, end + 1));
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Phrases selected relational facts into 4 typed moments. Never invents entities.
+ * Falls back to deterministic copy when the model is unavailable or off-schema.
+ */
+export async function generateInsightMoments(
+  facts: InsightFact[],
+  locale: AiLocale = "fr",
+  insightStyle: AiInsightsStyle = "technical"
+): Promise<AiInsightMoment[]> {
+  const fallback = buildFallbackMoments(facts, locale);
+  if (facts.length === 0) return [];
+
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) return fallback;
+
+  const lang = getLanguageName(locale);
+  const userPrompt = `${formatInsightFactsForPrompt(facts)}\n\nWrite exactly ${facts.length} moments. Reuse each fact id.`;
+
+  try {
+    const response = await createGroqChatCompletion({
+      model: GROQ_DEFAULT_MODEL,
+      messages: [
+        {
+          role: "system",
+          content: MOMENT_SYSTEM_PROMPTS[locale][insightStyle](lang),
+        },
+        { role: "user", content: userPrompt },
+      ],
+      temperature: 0.2,
+      max_tokens: 700,
+    });
+    const content = response.choices[0]?.message?.content?.trim();
+    if (!content) return fallback;
+
+    const parsed = extractJsonObject(content) as {
+      moments?: Array<{ id?: string; title?: string; body?: string }>;
+    } | null;
+    const byId = new Map(
+      (parsed?.moments ?? [])
+        .filter((row) => row.id && row.title && row.body)
+        .map((row) => [row.id as string, row])
+    );
+
+    return facts.map((fact, index) => {
+      const base = fallback[index];
+      const drafted = byId.get(fact.id);
+      if (!drafted || !base) return base;
+      return {
+        ...base,
+        title: drafted.title!.trim() || base.title,
+        body: drafted.body!.trim() || base.body,
+      };
+    });
+  } catch {
+    return fallback;
+  }
 }

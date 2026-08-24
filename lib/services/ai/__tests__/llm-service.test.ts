@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { generateInsights } from "../llm-service";
+import { generateInsights, generateInsightMoments } from "../llm-service";
+import type { InsightFact } from "../insight-facts";
 import type { AnalyticsSummary } from "../analytics-summarizer";
 
 const { mockChatCompletionsCreate } = vi.hoisted(() => ({
@@ -131,5 +132,55 @@ describe("llm-service", () => {
 
     const result = await generateInsights(mockSummary);
     expect(result).toHaveLength(5);
+  });
+
+  it("phrases moments as JSON keyed by fact id without inventing entities", async () => {
+    process.env.GROQ_API_KEY = "test-key";
+    mockChatCompletionsCreate.mockResolvedValue({
+      choices: [
+        {
+          message: {
+            content: JSON.stringify({
+              moments: [
+                {
+                  id: "oneHit:drake",
+                  title: "One-hit gravity",
+                  body: "71% of Drake plays are one track.",
+                },
+              ],
+            }),
+          },
+        },
+      ],
+    });
+
+    const facts: InsightFact[] = [
+      {
+        id: "oneHit:drake",
+        kind: "oneHit",
+        score: 4,
+        metric: "71%",
+        href: "/dashboard/artists?q=Drake",
+        promptLine: '71% of Drake plays are "One Dance".',
+        fallbackTitle: { en: "One-hit", fr: "One-hit", es: "One-hit" },
+        fallbackBody: { en: "fallback", fr: "fallback", es: "fallback" },
+      },
+    ];
+
+    const moments = await generateInsightMoments(facts, "en", "human");
+    expect(moments).toHaveLength(1);
+    expect(moments[0]?.title).toBe("One-hit gravity");
+    expect(moments[0]?.body).toContain("71%");
+    expect(moments[0]?.href).toBe("/dashboard/artists?q=Drake");
+    expect(mockChatCompletionsCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        messages: expect.arrayContaining([
+          expect.objectContaining({
+            role: "system",
+            content: expect.stringMatching(/top genre|top artist|peak hour/i),
+          }),
+        ]),
+      })
+    );
   });
 });

@@ -2158,11 +2158,11 @@
   },
   "ai-insights": {
     "title": "AI Insights",
-    "heroEyebrow": "Digest desde tus analytics",
+    "heroEyebrow": "Lo que los gráficos no dicen",
     "overviewWidget": {
-      "eyebrow": "Tarjetas de insights",
-      "title": "Lo que cuentan tus streams.",
-      "description": "Unas frases para releer tus hábitos de escucha."
+      "eyebrow": "Lo que los gráficos no dicen",
+      "title": "Momentos escondidos en tus streams.",
+      "description": "Relaciones, huecos y primeras veces — no otro top 5."
     },
     "heroStatBadge": "Calidad de señal",
     "heroStatTag": "Basado en streams",
@@ -2175,7 +2175,7 @@
     "heroStatTone": "Tono",
     "heroStatStatus": "Cuota / caché",
     "heroFresh": "Respuesta en vivo",
-    "subtitle": "Hasta cinco frases por actualización—solo desde tu ventana de stream filtrada.",
+    "subtitle": "Cuatro momentos sorprendentes por actualización, calculados de tus streams y redactados por la IA.",
     "subtitleShort": "Análisis de tus datos de streams",
     "seeMore": "Ver más",
     "loading": "Analizando tus datos de streams...",
@@ -2187,10 +2187,10 @@
     "changeDates": "Modifica las fechas para obtener insights.",
     "notEnoughData": "No hay suficientes datos",
     "importDescription": "Importa tus datos de streams (exportaciones Spotify/Apple recomendadas) y selecciona un período para obtener insights.",
-    "yourInsights": "Frases breves ancladas a los mismos gráficos que ya ves—cambia el tono sin cambiar la cuenta.",
+    "yourInsights": "Cuatro relaciones que tus rankings ocultan — one-hit, regresos, género × horario, primera escucha vs ahora.",
     "insightsFromData": "Insights generados a partir de tus datos de streams agregados.",
-    "spotlightTitle": "Tarjetas de insights",
-    "spotlightHint": "Basado en los filtros del panel y tus streams guardadas",
+    "spotlightTitle": "Momentos que los gráficos no muestran",
+    "spotlightHint": "No es un top 5 reformulado — cada tarjeta es un contraste, un hueco o una primera vez.",
     "cached": "(resultado en caché)",
     "quotaRemaining": "Cuota: {count} restantes",
     "styleToggle": {
@@ -2200,12 +2200,37 @@
       "technical": "Técnico"
     },
     "loadingShort": "Cargando...",
+    "mobile": {
+      "eyebrow": "Fuera del ranking",
+      "railLabel": "Señal",
+      "railCount": "Tarjetas",
+      "railTone": "Tono",
+      "railStatus": "Estado",
+      "moreTitle": "Más lecturas",
+      "askLead": "Haz una pregunta",
+      "emptyTitle": "Aún no hay insights",
+      "emptyLead": "Importa el historial para generar unas lecturas.",
+      "emptyCta": "Importar historial",
+      "quotaLead": "La cuota de IA se ha agotado hoy.",
+      "unavailableLead": "La IA está apagada, las tarjetas quedan vacías.",
+      "errorLead": "No se pudieron escribir los insights.",
+      "generatingLead": "Escribiendo tus tarjetas…"
+    },
     "publicDemoTeaser": {
       "insightTopGenre": "{genre} representa el {pct} de las streams clasificadas en este rango.",
       "insightTopArtist": "{artist} es tu artista más streameado con {count} streams.",
       "insightRhythm": "Tu ritmo de stream más marcado aparece el {peakDay} alrededor de {peakHour}.",
       "insightDiversity": "Exploraste {artistCount} artistas y {trackCount} pistas distintas en esta ventana."
-    }
+    },
+    "kinds": {
+      "oneHit": "One-hit",
+      "catalog": "Catálogo profundo",
+      "comeback": "Regreso",
+      "genreSlot": "Género × momento",
+      "firstHeard": "Primera vez"
+    },
+    "openMoment": "Abrir en el panel",
+    "momentMetric": "Cifra anclada"
   },
   "taste-evolution": {
     "title": "Evolución de gustos",

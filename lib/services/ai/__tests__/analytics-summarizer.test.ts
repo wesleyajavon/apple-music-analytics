@@ -118,4 +118,22 @@ describe("analytics-summarizer", () => {
     expect(parsed.topGenres).toHaveLength(3);
     expect(parsed.topArtists).toHaveLength(2);
   });
+
+  it("omits isolated tops when relational facts are provided", () => {
+    const result = summarizeAnalytics({
+      ...minimalInput,
+      relationalFacts: [
+        "RELATIONAL FACTS (the only numbers and names you may use):",
+        '1. [id=oneHit:x] [kind=oneHit] [metric=71%] 71% of Drake plays are "One Dance".',
+      ],
+    });
+    expect(result.text).toContain("71%");
+    expect(result.text).toContain("Drake");
+    expect(result.text).not.toContain("Rock");
+    expect(result.text).not.toContain("Artist A");
+    expect(result.text).not.toContain("18h-19h");
+    const parsed = JSON.parse(result.structured);
+    expect(parsed.topGenres).toEqual([]);
+    expect(parsed.topArtists).toEqual([]);
+  });
 });

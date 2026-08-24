@@ -13,6 +13,30 @@ vi.mock("@/lib/auth/require-auth-user-id", () => ({
   ),
 }));
 
+vi.mock("@/lib/services/ai/insight-facts", () => ({
+  collectInsightFacts: vi.fn().mockResolvedValue([]),
+  formatInsightFactsForPrompt: vi.fn().mockReturnValue(""),
+  buildFallbackMoments: vi.fn().mockReturnValue([]),
+  pickInsightFacts: vi.fn((facts: unknown) => facts),
+}));
+
+vi.mock("@/lib/services/ai/llm-service", () => ({
+  generateInsights: vi.fn().mockResolvedValue([]),
+  generateInsightMoments: vi.fn().mockResolvedValue([]),
+}));
+
+vi.mock("@/lib/services/ai/groq-ai-request-guard", () => ({
+  getGroqAiUnavailableReason: vi.fn().mockResolvedValue(null),
+}));
+
+vi.mock("@/lib/services/ai/groq-user-quota", () => ({
+  assertGroqUserQuotaForRequest: vi.fn().mockResolvedValue(undefined),
+}));
+
+vi.mock("@/lib/security/rate-limit", () => ({
+  assertRateLimit: vi.fn().mockResolvedValue(undefined),
+}));
+
 /**
  * API tests for POST /api/ai/insights
  * Validates input validation and error handling.
@@ -80,8 +104,7 @@ describe("POST /api/ai/insights", () => {
       body: JSON.stringify(body),
     });
     const response = await POST(request);
-    // Empty array is valid per schema; without OPENAI_API_KEY we get 500 from LLM
-    expect([400, 500]).toContain(response.status);
+    expect([200, 400]).toContain(response.status);
   });
 
   it("should return 400 for invalid hour in listeningByTimeOfDay", async () => {
@@ -113,7 +136,9 @@ describe("POST /api/ai/insights", () => {
 
     process.env.GROQ_API_KEY = originalEnv;
 
-    // Without API key, generateInsights throws - we expect 500
-    expect([500, 200]).toContain(response.status);
+    // No relational facts → empty payload, Groq is not called
+    expect(response.status).toBe(200);
+    const json = await response.json();
+    expect(json.insights).toEqual([]);
   });
 });

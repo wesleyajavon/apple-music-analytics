@@ -790,4 +790,36 @@ test.describe("Mobile dashboard UX", () => {
     await expect(main.getByRole("heading", { name: /^données et confidentialité$/i })).toBeVisible();
     await expect(page.getByRole("tablist", { name: /sections des paramètres du compte/i })).toBeHidden();
   });
+
+  test("about hub shows product legal and credits groups", async ({ page, isMobile }) => {
+    test.skip(!isMobile, "Mobile About tree is lg:hidden");
+    test.setTimeout(90_000);
+    await seedCookieConsent(page);
+    await page.goto(`/en/dashboard/about${publicDemoQuery}`);
+    await dismissCookieBannerIfPresent(page);
+
+    const main = page.getByRole("main");
+    await expect(main.getByRole("heading", { name: /^about$/i })).toBeVisible({ timeout: 20_000 });
+    await expect(main.getByRole("heading", { name: /^product$/i })).toBeVisible();
+    await expect(main.getByRole("heading", { name: /^legal$/i })).toBeVisible();
+    await expect(main.getByRole("heading", { name: /^credits$/i })).toBeVisible();
+    await expect(main.getByRole("link", { name: /^privacy$/i })).toBeVisible();
+    await expect(main.getByText(/last\.fm/i)).toHaveCount(0);
+    await expect(page.getByRole("tablist")).toHaveCount(0);
+  });
+
+  test("about hub is usable in French", async ({ page, isMobile }) => {
+    test.skip(!isMobile, "Mobile About tree is lg:hidden");
+    test.setTimeout(90_000);
+    await seedCookieConsent(page);
+    await page.goto(`/fr/dashboard/about${publicDemoQuery}`);
+    await dismissCookieBannerIfPresent(page);
+
+    const main = page.getByRole("main");
+    await expect(main.getByRole("heading", { name: /^à propos$/i })).toBeVisible({ timeout: 20_000 });
+    await expect(main.getByRole("button", { name: /^données$/i })).toBeVisible();
+    await expect(main.getByRole("link", { name: /^confidentialité$/i })).toBeVisible();
+    await expect(main.getByText(/last\.fm/i)).toHaveCount(0);
+    await expect(page.getByRole("tablist")).toHaveCount(0);
+  });
 });

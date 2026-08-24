@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Map } from "lucide-react";
+import { AboutMobile } from "@/lib/components/about-mobile";
 import { DashboardHeroTitle } from "@/lib/components/dashboard-hero-title";
 import { SoundprintBrandMark } from "@/lib/components/soundprint-brand-mark";
 
@@ -37,14 +38,9 @@ const SectionIcons = {
       <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z" />
     </svg>
   ),
-  whyLastfm: (
+  dataSources: (
     <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" />
-    </svg>
-  ),
-  whatIsLastfm: (
-    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12M12 16.5V3" />
     </svg>
   ),
   workflow: (
@@ -71,11 +67,31 @@ const FEATURE_ROUTES: Record<string, string> = {
   timeAnalysis: "/dashboard/temporal-analysis",
   musicalProfile: "/dashboard/musical-profile",
   insights: "/dashboard/insights",
+  palette: "/dashboard/genres/palette",
+  askSoundprint: "/dashboard/ask-your-soundprint",
+  duet: "/dashboard/duet/friends",
   tasteEvolution: "/dashboard/taste-evolution",
   aiInsights: "/dashboard/ai-insights",
 };
 
-export default function AboutPage() {
+const FEATURE_KEYS = [
+  "overview",
+  "timeline",
+  "heatmap",
+  "tracks",
+  "genres",
+  "artists",
+  "timeAnalysis",
+  "musicalProfile",
+  "insights",
+  "palette",
+  "askSoundprint",
+  "duet",
+  "tasteEvolution",
+  "aiInsights",
+] as const;
+
+function AboutDesktop() {
   const t = useTranslations("about");
 
   const workflowSteps = [
@@ -87,22 +103,8 @@ export default function AboutPage() {
     t("workflow.steps.step6"),
   ];
 
-  const featureKeys = [
-    "overview",
-    "timeline",
-    "heatmap",
-    "tracks",
-    "genres",
-    "artists",
-    "timeAnalysis",
-    "musicalProfile",
-    "insights",
-    "tasteEvolution",
-    "aiInsights",
-  ] as const;
-
   return (
-    <div className="px-4 py-6 sm:px-0 max-w-4xl">
+    <div className="max-w-4xl">
       <header className="mb-10">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-accent-violet/10 to-accent-indigo/10 dark:from-accent-violet/20 dark:to-accent-indigo/20 border border-accent-violet/20 mb-6">
           <BookIcon className="w-5 h-5 text-accent-violet" />
@@ -137,7 +139,6 @@ export default function AboutPage() {
       </section>
 
       <div className="space-y-6">
-        {/* What is this */}
         <section className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card border-l-4 border-l-accent-violet">
           <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-3">
@@ -154,41 +155,22 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* Why Last.fm */}
         <section className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card border-l-4 border-l-accent-cyan">
           <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-3">
               <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-cyan/15 text-accent-cyan">
-                {SectionIcons.whyLastfm}
+                {SectionIcons.dataSources}
               </span>
-              {t("whyLastfm.title")}
+              {t("dataSources.title")}
             </h2>
           </div>
           <div className="p-6">
             <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
-              {t("whyLastfm.paragraph")}
+              {t("dataSources.paragraph")}
             </p>
           </div>
         </section>
 
-        {/* What is Last.fm */}
-        <section className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card border-l-4 border-l-accent-rose">
-          <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-rose/15 text-accent-rose">
-                {SectionIcons.whatIsLastfm}
-              </span>
-              {t("whatIsLastfm.title")}
-            </h2>
-          </div>
-          <div className="p-6">
-            <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
-              {t("whatIsLastfm.paragraph")}
-            </p>
-          </div>
-        </section>
-
-        {/* Workflow */}
         <section className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card border-l-4 border-l-accent-indigo">
           <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-3">
@@ -205,7 +187,6 @@ export default function AboutPage() {
                   key={index}
                   className="relative flex gap-4 pb-6 last:pb-0"
                 >
-                  {/* Vertical timeline line */}
                   {index < workflowSteps.length - 1 && (
                     <span
                       className="absolute left-3.5 top-7 bottom-0 w-0.5 bg-accent-indigo/30 -translate-x-1/2"
@@ -222,7 +203,6 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* Features */}
         <section className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800/90 shadow-card border-l-4 border-l-accent-emerald">
           <div className="border-b border-gray-100 dark:border-gray-700/50 px-6 py-4">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-3">
@@ -234,7 +214,7 @@ export default function AboutPage() {
           </div>
           <div className="p-6">
             <div className="grid gap-3 sm:grid-cols-2">
-              {featureKeys.map((key) => {
+              {FEATURE_KEYS.map((key) => {
                 const href = FEATURE_ROUTES[key];
                 const content = (
                   <>
@@ -269,6 +249,17 @@ export default function AboutPage() {
             </div>
           </div>
         </section>
+      </div>
+    </div>
+  );
+}
+
+export default function AboutPage() {
+  return (
+    <div className="px-4 py-6 sm:px-0">
+      <AboutMobile />
+      <div className="hidden lg:block">
+        <AboutDesktop />
       </div>
     </div>
   );

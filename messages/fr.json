@@ -2958,33 +2958,29 @@
   },
   "about": {
     "title": "Comment ça marche",
-    "subtitle": "Un guide rapide pour comprendre d'où viennent vos données de streams et ce que vous pouvez explorer dans le dashboard aujourd'hui.",
-    "heroBadge": "Guide utilisateur",
+    "subtitle": "D’où viennent vos données de streams, et comment Soundprint les utilise.",
+    "heroBadge": "À propos",
     "brandCard": {
       "title": "Soundprint-AI",
-      "lead": "Un espace d’analytics personnel pour votre historique Apple Music et Last.fm : tendances, habitudes et insights dans un tableau de bord lisible."
+      "lead": "Un espace d’analytics personnel pour votre historique Apple Music et Spotify : tendances, habitudes et insights dans un tableau de bord lisible."
     },
     "whatIs": {
       "title": "C'est quoi ?",
-      "paragraph": "Soundprint-AI est un tableau de bord personnel qui visualise l'évolution de vos habitudes de streaming. Vous pouvez alimenter les données depuis les scrobbles Last.fm ou des exports CSV Apple Music, puis explorer stats, tendances et insights au même endroit."
+      "paragraph": "Soundprint est un tableau de bord personnel qui visualise l’évolution de vos habitudes de streaming. Vous importez votre historique Apple Music ou Spotify, puis explorez stats, tendances et insights au même endroit."
     },
-    "whyLastfm": {
-      "title": "Pourquoi Last.fm plutôt qu'Apple Music ?",
-      "paragraph": "L'API officielle Apple Music nécessite un abonnement développeur payant et peut entraîner des coûts d'usage. Last.fm reste une source gratuite et pratique pour un projet personnel, et les imports CSV servent de solution de secours pour compléter l'historique."
-    },
-    "whatIsLastfm": {
-      "title": "C'est quoi Last.fm ?",
-      "paragraph": "Last.fm est un service musical qui suit vos streams sur plusieurs plateformes (Apple Music, Spotify, etc.). Chaque scrobble contient des métadonnées comme l'artiste, le titre et l'horodatage. Ce projet récupère cet historique et le stocke localement pour l'analyse."
+    "dataSources": {
+      "title": "D’où viennent les données ?",
+      "paragraph": "Vous importez un export CSV Apple Music ou un ZIP Spotify pendant l’onboarding. Soundprint n’a pas besoin d’API de streaming payante de votre côté."
     },
     "workflow": {
       "title": "Comment les données arrivent-elles ici ?",
       "steps": {
-        "step1": "streamez de la musique — Utilisez Apple Music (ou toute app supportée) sur votre téléphone comme d'habitude.",
-        "step2": "Scrobbling Last.fm — Last.fm est lié à votre compte Apple Music et enregistre automatiquement chaque stream.",
-        "step3": "Capture et synchronisation — Les nouvelles streams sont envoyées vers Last.fm via le scrobbling, ou importées plus tard via des CSV Apple Music.",
-        "step4": "Mise à jour de la base — Lancez les scripts d'update/import pour récupérer les streams récents et les stocker en base locale.",
-        "step5": "Rafraîchissement du dashboard — Une fois le pipeline terminé, graphiques et indicateurs reflètent les dernières données.",
-        "step6": "Données obsolètes ? — Dans la plupart des cas, c'est simplement qu'aucune sync/import récente n'a encore été exécutée."
+        "step1": "Streamez comme d’habitude — continuez à utiliser Apple Music ou Spotify sur votre téléphone.",
+        "step2": "Demandez votre export — Apple ou Spotify vous envoie une copie de votre historique d’écoute.",
+        "step3": "Importez dans Soundprint — déposez le CSV Apple Music ou le ZIP Spotify dans l’onboarding.",
+        "step4": "Le dashboard se remplit — les écoutes sont normalisées et les graphiques reflètent votre historique.",
+        "step5": "Explorez — tendances, profil musical, Duet avec des amis, et Interroger Soundprint.",
+        "step6": "Encore de l’historique ? — réimportez à tout moment depuis Paramètres."
       }
     },
     "features": {
@@ -2993,16 +2989,34 @@
         "overview": "Your Music — Stats globales (streams, artistes, titres, temps total)",
         "timeline": "Timeline — Évolution de vos streams dans le temps (jour/semaine/mois)",
         "heatmap": "Heatmap — Calendrier style GitHub de votre intensité de streams",
-        "tracks": "Titres — Morceaux les le plus streamés et patterns de relecture",
+        "tracks": "Titres — Morceaux les plus streamés et patterns de relecture",
         "genres": "Genres — Répartition par genre et tendances temporelles",
         "artists": "Artistes — Top artistes et statistiques détaillées",
         "timeAnalysis": "Analyse temporelle — Habitudes par heure et jour de la semaine",
-        "musicalProfile": "Profil musical — Votre persona d'stream basé sur vos patterns",
+        "musicalProfile": "Profil musical — Votre persona de stream basé sur vos patterns",
         "insights": "Insights — Résumés générés par le produit et signaux de streams clés",
-        "tasteProfile": "Profil de goût — Explication IA de vos préférences musicales",
+        "palette": "Palette — Cartographiez et affinez les genres de votre bibliothèque",
+        "askSoundprint": "Interroger Soundprint — Discutez avec vos données de streams",
+        "duet": "Duet — Comparez vos écoutes avec des amis",
         "tasteEvolution": "Évolution des goûts — Changements semaine par semaine de vos goûts musicaux",
         "aiInsights": "AI Insights — Insights en langage naturel (optionnel)"
       }
+    },
+    "mobile": {
+      "eyebrow": "Soundprint",
+      "title": "À propos",
+      "lead": "Analytics de streams personnels, depuis Apple Music et Spotify.",
+      "groupProduct": "Produit",
+      "groupLegal": "Mentions",
+      "groupCredits": "Crédits",
+      "whatIsTitle": "C’est quoi ?",
+      "whatIsBody": "Soundprint transforme votre historique Apple Music ou Spotify en tableau de bord personnel : tendances, habitudes et insights.",
+      "dataTitle": "Données",
+      "dataBody": "Vous importez vos propres fichiers : un CSV Apple Music ou un ZIP Spotify. Déposez-les dans l’onboarding ; Soundprint s’occupe du reste.",
+      "privacy": "Confidentialité",
+      "terms": "CGU",
+      "cookies": "Cookies",
+      "affiliation": "Non affilié à Apple ni à Spotify."
     }
   },
   "home": {
@@ -3287,8 +3301,8 @@
     "privacy": {
       "eyebrow": "Mentions légales",
       "title": "Politique de confidentialité",
-      "lastUpdated": "Dernière mise à jour : 9 juin 2026",
-      "intro": "Un résumé clair de la façon dont Soundprint-AI gère vos données. Cette app sert à vos stats d'stream — pas à vendre vos informations.",
+      "lastUpdated": "Dernière mise à jour : 24 août 2026",
+      "intro": "Un résumé clair de la façon dont Soundprint-AI gère vos données. Cette app sert à vos stats Apple Music et Spotify — pas à vendre vos informations.",
       "sections": [
         {
           "title": "Qui est responsable",
@@ -3303,8 +3317,8 @@
           ],
           "bullets": [
             "Compte — e-mail, nom, photo de profil et mode de connexion.",
-            "historique de streams — artistes, titres et dates d'stream.",
-            "Connexions — si vous liez Spotify ou des services similaires.",
+            "Historique de streams — artistes, titres et dates d’écoute, depuis les fichiers que vous importez : un CSV Apple Music ou un ZIP Spotify.",
+            "Connexion Spotify (optionnel) — si vous vous connectez avec Spotify, nous stockons ce lien pour le vérifier. L’historique du dashboard vient de l’export que vous uploadez, pas d’une API de streaming en direct.",
             "Vos choix — préférences cookies, réglages IA et autres consentements.",
             "Duet (optionnel) — si vous utilisez le partage avec amis : statut de la relation, niveau de partage choisi, et statistiques de streams que vous autorisez à voir vos amis acceptés."
           ]
@@ -3312,7 +3326,7 @@
         {
           "title": "Pourquoi nous les utilisons",
           "paragraphs": [
-            "Pour afficher vos stats, vous garder connecté et améliorer l'app. L'analytique et le signalement d'erreurs optionnels ne s'activent que si vous acceptez dans les paramètres cookies.",
+            "Pour afficher vos stats à partir de l’historique que vous importez, vous garder connecté et améliorer l'app. L'analytique et le signalement d'erreurs optionnels ne s'activent que si vous acceptez dans les paramètres cookies.",
             "Les fonctions IA qui envoient des noms d'artistes ou de titres à un prestataire ne s'activent que si vous y consentez.",
             "Duet (partage avec amis) ne s'active que si vous acceptez une invitation ou en envoyez une, et uniquement selon le niveau de partage que vous choisissez pour chaque ami."
           ]
@@ -3333,6 +3347,13 @@
             "Groq (États-Unis) — fonctionnalités IA optionnelles si vous y consentez ; peut recevoir des titres d'artistes/morceaux et des stats agrégées.",
             "Vercel (mondial) — héberge l'app ; analytique optionnelle uniquement si vous acceptez les cookies.",
             "Sentry (US/UE) — surveillance d'erreurs et replay de session optionnels uniquement si vous acceptez les cookies."
+          ]
+        },
+        {
+          "title": "Apple Music et Spotify",
+          "paragraphs": [
+            "Vous demandez votre historique à Apple ou Spotify, puis vous uploadez le fichier dans Soundprint. Apple et Spotify ne sont pas nos sous-traitants pour cet export — nous ne recevons que ce que vous choisissez d’importer.",
+            "Si vous vous connectez optionnellement avec Spotify, les règles de Spotify s’appliquent à cette connexion. Soundprint-AI n’est pas affilié à Apple ni à Spotify."
           ]
         },
         {
@@ -3375,13 +3396,13 @@
     "terms": {
       "eyebrow": "Conditions d'utilisation",
       "title": "Conditions générales d'utilisation",
-      "lastUpdated": "Dernière mise à jour : 6 juin 2026",
-      "intro": "Un aperçu simple de vos droits et des nôtres lorsque vous utilisez Soundprint-AI. En utilisant l'application, vous acceptez ces conditions.",
+      "lastUpdated": "Dernière mise à jour : 24 août 2026",
+      "intro": "Un aperçu simple de vos droits et des nôtres lorsque vous utilisez Soundprint-AI, votre tableau de bord personnel Apple Music et Spotify. En utilisant l'application, vous acceptez ces conditions.",
       "sections": [
         {
           "title": "De quoi il s'agit",
           "paragraphs": [
-            "Soundprint-AI est votre tableau de bord d'stream personnel. Importez votre historique ou connectez des services comme Spotify pour explorer vos stats."
+            "Soundprint-AI est votre tableau de bord d’écoute personnel. Vous importez un CSV Apple Music ou un ZIP Spotify, puis vous explorez vos stats."
           ]
         },
         {
@@ -3393,13 +3414,14 @@
         {
           "title": "Vos données musicales",
           "paragraphs": [
-            "Vos données de streams restent les vôtres. Vous nous autorisez à les traiter uniquement pour faire fonctionner le tableau de bord. N'importez que des données que vous possédez ou êtes autorisé à utiliser."
+            "Vos données de streams restent les vôtres. Vous uploadez un CSV Apple Music ou un ZIP Spotify ; nous les traitons uniquement pour faire fonctionner le tableau de bord. N'importez que des données que vous possédez ou êtes autorisé à utiliser."
           ]
         },
         {
-          "title": "Services connectés",
+          "title": "Apple Music, Spotify et IA",
           "paragraphs": [
-            "Si vous liez Spotify, Apple Music, Last.fm ou des fonctions IA, leurs règles s'appliquent aussi. Soundprint-AI n'est pas affilié à Apple, Spotify ou Last.fm."
+            "Vous demandez votre historique à Apple ou Spotify, puis vous uploadez le fichier. Leurs règles s’appliquent à cet export. La connexion Spotify optionnelle sert seulement à vérifier le lien — ce n’est pas comme ça que le dashboard se remplit.",
+            "Si vous activez les fonctions IA, les règles du prestataire s’appliquent aussi. Soundprint-AI n’est pas affilié à Apple ni à Spotify."
           ]
         },
         {
@@ -3427,8 +3449,8 @@
     "cookies": {
       "eyebrow": "Politique cookies",
       "title": "Politique relative aux cookies",
-      "lastUpdated": "Dernière mise à jour : 6 juin 2026",
-      "intro": "Nous utilisons quelques cookies pour vous garder connecté et mémoriser vos choix. Les optionnels nous aident à améliorer l'app — seulement si vous acceptez.",
+      "lastUpdated": "Dernière mise à jour : 24 août 2026",
+      "intro": "Nous utilisons quelques cookies pour vous garder connecté et mémoriser vos choix sur Soundprint-AI, votre tableau de bord personnel Apple Music et Spotify. Les optionnels nous aident à améliorer l'app — seulement si vous acceptez.",
       "sections": [
         {
           "title": "Ce que nous utilisons",
@@ -3440,6 +3462,13 @@
             "Préférences — thème, affichage, etc.",
             "Analytique optionnelle — nous aide à voir quelles pages sont utilisées.",
             "Signalement d'erreurs optionnel — nous aide à corriger les bugs plus vite."
+          ]
+        },
+        {
+          "title": "L’historique d’écoute n’est pas dans les cookies",
+          "paragraphs": [
+            "Votre historique vient des fichiers que vous importez : un CSV Apple Music ou un ZIP Spotify. Ces données vivent dans votre compte, pas dans les cookies.",
+            "La connexion Spotify optionnelle n’utilise des cookies de compte que pour vérifier le lien. Elle ne remplit pas le dashboard."
           ]
         },
         {
@@ -3457,7 +3486,7 @@
           "bullets": [
             "Cookies d'auth Supabase (sb-*-auth-token) — essentiels ; maintiennent votre session.",
             "ai_master_disabled — httpOnly ; mémorise si vous avez désactivé l'IA sur ce navigateur.",
-            "ama_oauth_terms — courte durée ; confirme l'acceptation des CGU avant une redirection OAuth.",
+            "ama_oauth_terms — courte durée ; confirme l'acceptation des CGU avant une redirection Google ou Spotify.",
             "ama_anonymous_id — relie les choix cookies anonymes à votre compte après connexion.",
             "localStorage ama-cookie-consent-v1 — vos choix de la bannière cookies sur cet appareil.",
             "localStorage ama_anonymous_id — identifiant anonyme avant création de compte.",

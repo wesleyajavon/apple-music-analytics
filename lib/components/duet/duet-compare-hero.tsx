@@ -6,6 +6,7 @@ import { Link } from "@/i18n/navigation";
 import {
   ArrowLeft,
   LineChart,
+  Music2,
   ShieldCheck,
   Sparkles,
   Swords,
@@ -104,6 +105,7 @@ type BattleHeroProps = {
   locale: string;
   friendsReadyCount?: number;
   shareActions?: ReactNode;
+  seeMusicHref?: string | null;
 };
 
 export function DuetCompareHero({
@@ -117,6 +119,7 @@ export function DuetCompareHero({
   locale,
   friendsReadyCount,
   shareActions,
+  seeMusicHref,
 }: BattleHeroProps) {
   const t = useTranslations("duet.compare");
 
@@ -136,13 +139,24 @@ export function DuetCompareHero({
 
       <div className="relative">
         {mode === "battle" && friendName ? (
-          <Link
-            href="/dashboard/duet/compare"
-            className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white/80 backdrop-blur transition-colors hover:bg-white/15 hover:text-white"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
-            {t("changeFriend")}
-          </Link>
+          <div className="mb-6 flex flex-wrap items-center gap-2">
+            <Link
+              href="/dashboard/duet/compare"
+              className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white/80 backdrop-blur transition-colors hover:bg-white/15 hover:text-white"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
+              {t("changeFriend")}
+            </Link>
+            {seeMusicHref ? (
+              <Link
+                href={seeMusicHref}
+                className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white/80 no-underline backdrop-blur transition-colors hover:bg-white/15 hover:text-white"
+              >
+                <Music2 className="h-3.5 w-3.5" aria-hidden />
+                {t("seeMusic")}
+              </Link>
+            ) : null}
+          </div>
         ) : null}
 
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] lg:items-center">

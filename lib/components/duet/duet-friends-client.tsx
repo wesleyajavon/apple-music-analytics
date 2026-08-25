@@ -13,6 +13,7 @@ import {
   Copy,
   Link2,
   Mail,
+  Music2,
   Send,
   Shield,
   Swords,
@@ -69,6 +70,7 @@ import { usePublicDemoViewer, useSupabaseAuthUserId } from "@/lib/hooks/use-publ
 import type { FriendshipDto } from "@/lib/dto/duet";
 import { getDuetDisplayName } from "@/lib/components/duet/duet-utils";
 import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
+import { buildFriendMusicHref } from "@/lib/utils/duet-compare-href";
 
 function SpotlightSectionHeader({
   eyebrow,
@@ -396,9 +398,11 @@ function FriendRow({
 }) {
   const t = useTranslations("duet.friends");
   const tAccept = useTranslations("duet.inviteAccept");
+  const searchParams = useSearchParams();
   const peer =
     friendship.requester.id === viewerId ? friendship.addressee : friendship.requester;
   const displayName = getDuetDisplayName(peer);
+  const musicHref = buildFriendMusicHref(searchParams, peer.id);
   const [pendingShareScope, setPendingShareScope] = useState<DuetShareScopeOption>("aggregates");
   const activeShareScope =
     friendship.status === "accepted" && friendship.shareScope !== "none"
@@ -527,6 +531,13 @@ function FriendRow({
                   <Swords className="h-4 w-4" aria-hidden />
                   {t("compare")}
                 </Link>
+                <Link
+                  href={musicHref}
+                  className={`inline-flex min-h-10 items-center gap-1.5 no-underline ${DASHBOARD_SPOTLIGHT_BTN_SECONDARY}`}
+                >
+                  <Music2 className="h-4 w-4" aria-hidden />
+                  {t("seeMusic")}
+                </Link>
                 <button
                   type="button"
                   disabled={busy}
@@ -654,6 +665,10 @@ function DuetFriendsContent() {
   const viewerId = authUserId ?? null;
   const withFilters = useCallback(
     (href: string) => mergeDashboardSearchParams(href, searchParams),
+    [searchParams]
+  );
+  const hrefForMusic = useCallback(
+    (friendId: string) => buildFriendMusicHref(searchParams, friendId),
     [searchParams]
   );
   const { data, isLoading, error, refetch } = useDuetFriends({
@@ -1013,6 +1028,7 @@ function DuetFriendsContent() {
             inviteLinkExpiresAt={inviteLinkExpiresAt}
             linkFeedback={linkFeedback}
             withFilters={withFilters}
+            hrefForMusic={hrefForMusic}
             onSectionChange={handleSectionChange}
             onPageChange={handlePageChange}
             {...mutationHandlers}

@@ -411,6 +411,7 @@ export function DuetCompareMobileExperience({
   friends,
   hrefForFriend,
   withFilters,
+  seeMusicHref,
   onSelectFriend,
   activeSection,
   onSectionChange,
@@ -452,6 +453,7 @@ export function DuetCompareMobileExperience({
   friends: FriendshipDto[];
   hrefForFriend: (friendId: string) => string;
   withFilters: (href: string) => string;
+  seeMusicHref?: string | null;
   onSelectFriend: (friendId: string) => void;
   activeSection: DuetCompareSection;
   onSectionChange: (section: DuetCompareSection) => void;
@@ -535,7 +537,7 @@ export function DuetCompareMobileExperience({
         </div>
       </section>
 
-      <div className="px-4">
+      <div className="space-y-2 px-4">
         <button
           type="button"
           onClick={() => setFriendSheetOpen(true)}
@@ -543,6 +545,14 @@ export function DuetCompareMobileExperience({
         >
           {t("changeFriend")}
         </button>
+        {seeMusicHref ? (
+          <Link
+            href={seeMusicHref}
+            className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl border border-card-border bg-card-surface text-sm font-semibold text-foreground no-underline"
+          >
+            {t("seeMusic")}
+          </Link>
+        ) : null}
       </div>
 
       <div className="px-4">

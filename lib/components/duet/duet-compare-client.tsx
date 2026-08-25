@@ -97,6 +97,7 @@ import { ApiError } from "@/lib/api-client";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { usePublicDemoViewer, useSupabaseAuthUserId } from "@/lib/hooks/use-public-demo-viewer";
 import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
+import { buildFriendMusicHref } from "@/lib/utils/duet-compare-href";
 
 type ViewerProfile = {
   id: string;
@@ -196,6 +197,9 @@ function CompareContent() {
     (friendId: string) => buildCompareFriendHref(pathname, searchParams, friendId),
     [pathname, searchParams]
   );
+  const seeMusicHref = friendUserId
+    ? buildFriendMusicHref(searchParams, friendUserId)
+    : null;
   const handleSelectFriend = useCallback(
     (friendId: string) => {
       router.replace(buildCompareFriendHref(pathname, searchParams, friendId), { scroll: false });
@@ -1068,6 +1072,7 @@ function CompareContent() {
               friendName={friendName}
               friendAvatar={friendUser?.avatarUrl}
               locale={locale}
+              seeMusicHref={seeMusicHref}
             />
             <DuetCompareBattleSkeleton />
           </div>
@@ -1145,6 +1150,7 @@ function CompareContent() {
           friends={friendsData?.friends ?? []}
           hrefForFriend={hrefForFriend}
           withFilters={withFilters}
+          seeMusicHref={seeMusicHref}
           onSelectFriend={handleSelectFriend}
           activeSection={activeSection}
           onSectionChange={handleSectionChange}
@@ -1192,6 +1198,7 @@ function CompareContent() {
             selfTotal={periodTotals.selfTotal}
             friendTotal={periodTotals.friendTotal}
             locale={locale}
+            seeMusicHref={seeMusicHref}
           />
 
           <DuetCompareContextBar
@@ -1204,6 +1211,7 @@ function CompareContent() {
             period={period}
             chartView={chartView}
             onChartViewChange={setChartView}
+            seeMusicHref={seeMusicHref}
           />
 
           <DuetCompareSectionTabs activeSection={activeSection} />

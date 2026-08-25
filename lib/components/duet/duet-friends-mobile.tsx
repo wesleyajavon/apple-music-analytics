@@ -270,6 +270,7 @@ export function DuetFriendsMobileExperience({
   inviteLinkExpiresAt,
   linkFeedback,
   withFilters,
+  hrefForMusic,
   onSectionChange,
   onPageChange,
   ...mutations
@@ -293,6 +294,7 @@ export function DuetFriendsMobileExperience({
   inviteLinkExpiresAt: string | null;
   linkFeedback: string | null;
   withFilters: (href: string) => string;
+  hrefForMusic: (friendId: string) => string;
   onSectionChange: (section: DuetFriendsSection) => void;
   onPageChange: (page: number) => void;
 } & MutationHandlers) {
@@ -645,6 +647,12 @@ export function DuetFriendsMobileExperience({
                     className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-gray-950 text-sm font-bold text-white no-underline dark:bg-white dark:text-gray-950"
                   >
                     {t("compare")}
+                  </Link>
+                  <Link
+                    href={hrefForMusic(getPeer(actionTarget, viewerId).id)}
+                    className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-card-border text-sm font-semibold text-foreground no-underline"
+                  >
+                    {t("seeMusic")}
                   </Link>
                   <button
                     type="button"

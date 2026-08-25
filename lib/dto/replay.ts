@@ -4,7 +4,9 @@
  */
 
 /**
- * Represents a top artist entry in Replay data
+ * Represents a top artist entry in Replay data.
+ * `imageUrl` is accepted for backward compatibility but ignored:
+ * artist portraits are filled from Spotify only.
  */
 export interface ReplayTopArtistInput {
   name: string;

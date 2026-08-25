@@ -81,7 +81,7 @@ model Artist {
   name      String   @unique
   nameLower String   @unique // Lowercase version for case-insensitive searches
   mbid      String?  @unique // MusicBrainz ID
-  imageUrl  String?
+  imageUrl  String? // Spotify CDN URL only (artist-image-enrichment)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

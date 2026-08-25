@@ -1,5 +1,6 @@
 /**
- * Enrichissement de Artist.imageUrl via Spotify Web API (client_credentials).
+ * Seul writer de Artist.imageUrl : Spotify Web API (client_credentials).
+ * Last.fm / Replay / imports CSV ne doivent pas poser d’URL d’image.
  * Partagé par le script CLI, l’onboarding/import, sync Spotify, autres imports — et hydrate à la carte (route API image).
  */
 
@@ -8,6 +9,79 @@ import { prisma as defaultPrisma } from "@/lib/prisma";
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/** Hosts used by Spotify Web API artist images (CDN). */
+export function isSpotifyCdnArtistImageUrl(
+  url: string | null | undefined
+): boolean {
+  const trimmed = url?.trim();
+  if (!trimmed) return false;
+  try {
+    const host = new URL(trimmed).hostname.toLowerCase();
+    return (
+      host === "scdn.co" ||
+      host.endsWith(".scdn.co") ||
+      host === "spotifycdn.com" ||
+      host.endsWith(".spotifycdn.com")
+    );
+  } catch {
+    return false;
+  }
+}
+
+const CLEAR_NON_SPOTIFY_ID_CHUNK = 500;
+
+/**
+ * Met `Artist.imageUrl` à null si l’URL n’est pas un CDN Spotify.
+ * Idempotent. Les portraits sont refillés par l’enrichissement Spotify.
+ */
+export async function clearNonSpotifyArtistImageUrls(params?: {
+  db?: typeof defaultPrisma;
+  dryRun?: boolean;
+}): Promise<{
+  scanned: number;
+  cleared: number;
+  sampleHosts: string[];
+}> {
+  const db = params?.db ?? defaultPrisma;
+  const dryRun = params?.dryRun ?? false;
+
+  const rows = await db.artist.findMany({
+    where: { imageUrl: { not: null } },
+    select: { id: true, imageUrl: true },
+  });
+
+  const toClear = rows.filter(
+    (row) => !isSpotifyCdnArtistImageUrl(row.imageUrl)
+  );
+
+  const hosts = new Set<string>();
+  for (const row of toClear) {
+    try {
+      hosts.add(new URL(row.imageUrl!.trim()).hostname.toLowerCase());
+    } catch {
+      hosts.add("(invalid-url)");
+    }
+  }
+
+  if (!dryRun && toClear.length > 0) {
+    for (let i = 0; i < toClear.length; i += CLEAR_NON_SPOTIFY_ID_CHUNK) {
+      const ids = toClear
+        .slice(i, i + CLEAR_NON_SPOTIFY_ID_CHUNK)
+        .map((row) => row.id);
+      await db.artist.updateMany({
+        where: { id: { in: ids } },
+        data: { imageUrl: null },
+      });
+    }
+  }
+
+  return {
+    scanned: rows.length,
+    cleared: toClear.length,
+    sampleHosts: [...hosts].sort(),
+  };
 }
 
 export async function fetchSpotifyClientCredentialsToken(

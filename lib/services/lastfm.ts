@@ -149,10 +149,6 @@ function generateMockRecentTracks(
  * Normalize Last.fm track to internal format
  */
 function normalizeTrack(track: LastFmTrack): NormalizedLastFmTrack {
-  const imageUrl =
-    track.image?.find((img) => img.size === "large" || img.size === "extralarge")
-      ?.["#text"] || track.image?.[0]?.["#text"];
-
   return {
     trackName: track.name,
     artistName: track.artist["#text"],
@@ -164,7 +160,6 @@ function normalizeTrack(track: LastFmTrack): NormalizedLastFmTrack {
     artistMbid: track.artist.mbid,
     albumMbid: track.album?.mbid,
     url: track.url,
-    imageUrl,
     isNowPlaying: track["@attr"]?.nowplaying === "true",
   };
 }
@@ -570,13 +565,11 @@ export async function importLastFmTracks(
                     name: track.artistName,
                     nameLower: artistNameLower,
                     ...(track.artistMbid && { mbid: track.artistMbid }),
-                    ...(track.imageUrl && { imageUrl: track.imageUrl }),
                   },
                   create: {
                     name: track.artistName,
                     nameLower: artistNameLower,
                     ...(track.artistMbid && { mbid: track.artistMbid }),
-                    ...(track.imageUrl && { imageUrl: track.imageUrl }),
                   },
                 });
 

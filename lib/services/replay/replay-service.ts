@@ -93,12 +93,10 @@ export async function importReplayYearly(
           update: {
             name: artistInput.name,
             nameLower: artistNameLower,
-            ...(artistInput.imageUrl && { imageUrl: artistInput.imageUrl }),
           },
           create: {
             name: artistInput.name,
             nameLower: artistNameLower,
-            ...(artistInput.imageUrl && { imageUrl: artistInput.imageUrl }),
           },
         });
         artistMap.set(artistInput.name, artist.id);

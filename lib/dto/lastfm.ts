@@ -68,7 +68,6 @@ export interface NormalizedLastFmTrack {
   artistMbid?: string;
   albumMbid?: string;
   url: string;
-  imageUrl?: string;
   isNowPlaying: boolean;
 }
 

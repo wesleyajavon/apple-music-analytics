@@ -13,6 +13,7 @@ import { DuetMobileSubNav } from "@/lib/components/duet/duet-mobile-sub-nav";
 import { SpotlightRankBubble } from "@/lib/components/overview-library-rankings";
 import { getDuetDisplayName, getDuetFriendFromFriendship } from "@/lib/components/duet/duet-utils";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
+import { DUET_SHARE_SETTINGS_PATH } from "@/lib/constants/duet-settings";
 import { CHART_TOOLTIP_STYLES } from "@/lib/constants/config";
 import type { FriendshipDto } from "@/lib/dto/duet";
 import type { OverviewStatsDto } from "@/lib/dto/listening";
@@ -308,6 +309,7 @@ export function DuetFriendMusicMobileExperience({
   topTracks,
   chartData,
   emptyStats,
+  showAggregatesHint,
 }: {
   locale: string;
   withFilters: (href: string) => string;
@@ -321,6 +323,7 @@ export function DuetFriendMusicMobileExperience({
   topTracks: FriendMusicLeaderItem[] | null;
   chartData: FriendMusicChartPoint[];
   emptyStats: boolean;
+  showAggregatesHint: boolean;
 }) {
   const t = useTranslations("duet.friendMusic");
   const tm = useTranslations("duet.friendMusic.mobile");
@@ -454,8 +457,22 @@ export function DuetFriendMusicMobileExperience({
             </section>
           ) : null}
 
+          {showAggregatesHint ? (
+            <div className="space-y-3 px-4">
+              <p className="rounded-2xl border border-card-border bg-card-surface px-3.5 py-4 text-sm leading-6 text-muted">
+                {t("aggregatesTracksHint")}
+              </p>
+              <Link
+                href={DUET_SHARE_SETTINGS_PATH}
+                className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl border border-card-border bg-card-surface px-4 text-sm font-bold text-foreground no-underline"
+              >
+                {t("aggregatesTracksHintCta")}
+              </Link>
+            </div>
+          ) : null}
+
           {topTracks ? (
-            <section className="space-y-2 px-4">
+            <section className="space-y-2 px-4" data-testid="duet-friend-music-top-tracks">
               <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
                 {tm("tracksLabel")}
               </h2>

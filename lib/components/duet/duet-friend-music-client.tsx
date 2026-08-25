@@ -26,7 +26,11 @@ import {
   type FriendMusicChartPoint,
   type FriendMusicLeaderItem,
 } from "@/lib/components/duet/duet-friend-music-mobile";
-import { getDuetDisplayName, getDuetFriendFromFriendship } from "@/lib/components/duet/duet-utils";
+import {
+  getDuetDisplayName,
+  getDuetFriendFromFriendship,
+  resolveAcceptedFriendName,
+} from "@/lib/components/duet/duet-utils";
 import { useDuetFriendOverview, useDuetFriends } from "@/lib/hooks/use-duet";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
 import { usePublicDemoViewer, useSupabaseAuthUserId } from "@/lib/hooks/use-public-demo-viewer";
@@ -45,6 +49,7 @@ import {
   DASHBOARD_SPOTLIGHT_MUTED,
   DASHBOARD_SPOTLIGHT_SHELL,
 } from "@/lib/constants/dashboard-spotlight";
+import { DUET_SHARE_SETTINGS_PATH } from "@/lib/constants/duet-settings";
 import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
 import { buildCompareFriendHref, buildFriendMusicHref } from "@/lib/utils/duet-compare-href";
 import { formatOverviewDateRangeLabel } from "@/lib/utils/overview-date-range-label";
@@ -276,7 +281,7 @@ function FriendMusicContent() {
   const dateRangeLabel = formatOverviewDateRangeLabel(filterStartDate, filterEndDate, locale);
 
   const { data: friendsData, isLoading: friendsLoading } = useDuetFriends({
-    enabled: authUserId !== undefined && !isPublicDemoViewer && !friendUserId,
+    enabled: Boolean(authUserId) && !isPublicDemoViewer,
   });
 
   const {
@@ -422,9 +427,24 @@ function FriendMusicContent() {
 
   if (error) {
     if (error instanceof ApiError && (error.statusCode === 403 || error.statusCode === 404)) {
+      if (error.statusCode === 403 && friendsLoading) {
+        return (
+          <MusicSplit
+            mobile={<DuetFriendMusicMobileSkeleton locale={locale} />}
+            desktop={<DesktopSkeleton />}
+          />
+        );
+      }
+
       const title = error.statusCode === 403 ? t("scopeInsufficientTitle") : t("notFoundTitle");
+      const scopeFriendName =
+        error.statusCode === 403 && authUserId && friendUserId
+          ? resolveAcceptedFriendName(friendsData?.friends, authUserId, friendUserId, t("friendFallback"))
+          : t("friendFallback");
       const description =
-        error.statusCode === 403 ? t("scopeInsufficientDescription") : t("notFoundDescription");
+        error.statusCode === 403
+          ? t("scopeInsufficientDescription", { name: scopeFriendName })
+          : t("notFoundDescription");
       return (
         <MusicSplit
           mobile={
@@ -524,6 +544,7 @@ function FriendMusicContent() {
           topTracks={topTracks}
           chartData={chartData}
           emptyStats={emptyStats}
+          showAggregatesHint={!emptyStats && data.shareScope === "aggregates"}
         />
       }
       desktop={
@@ -616,8 +637,23 @@ function FriendMusicContent() {
                 </section>
               ) : null}
 
+              {data.shareScope === "aggregates" ? (
+                <p
+                  role="status"
+                  className={`rounded-[1.35rem] border border-slate-200/80 bg-white px-5 py-4 text-sm leading-6 dark:border-white/10 dark:bg-slate-950/60 ${DASHBOARD_SPOTLIGHT_MUTED}`}
+                >
+                  {t("aggregatesTracksHint")}{" "}
+                  <Link
+                    href={DUET_SHARE_SETTINGS_PATH}
+                    className="font-semibold text-violet-600 no-underline underline-offset-2 hover:underline dark:text-violet-300"
+                  >
+                    {t("aggregatesTracksHintCta")}
+                  </Link>
+                </p>
+              ) : null}
+
               {topTracks ? (
-                <section className={DASHBOARD_SPOTLIGHT_SHELL}>
+                <section className={DASHBOARD_SPOTLIGHT_SHELL} data-testid="duet-friend-music-top-tracks">
                   <div className={DASHBOARD_SPOTLIGHT_GRADIENT_CYAN} />
                   <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_CYAN} />
                   <SpotlightSectionHeader

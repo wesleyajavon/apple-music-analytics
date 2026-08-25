@@ -12,6 +12,7 @@ import {
   DashboardSectionSwitcher,
   type DashboardSectionItem,
 } from "@/lib/components/dashboard-section-switcher";
+import { DUET_SHARE_SETTINGS_HASH } from "@/lib/constants/duet-settings";
 import { GROQ_AI_CONSENT_SETTINGS_HASH } from "@/lib/constants/groq-ai-settings";
 import { DASHBOARD_ONBOARDING_REIMPORT_PATH } from "@/lib/utils/onboarding-route";
 import {
@@ -447,7 +448,10 @@ export function SettingsPreferencesSection({
           />
         ) : null}
 
-        <div className="rounded-2xl border border-slate-200/80 bg-slate-50/50 p-4 dark:border-white/10 dark:bg-black/15">
+        <div
+          id={DUET_SHARE_SETTINGS_HASH}
+          className="scroll-mt-28 rounded-2xl border border-slate-200/80 bg-slate-50/50 p-4 dark:border-white/10 dark:bg-black/15"
+        >
           <DuetShareSettingsSection />
         </div>
 

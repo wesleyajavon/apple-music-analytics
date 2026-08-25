@@ -14,6 +14,7 @@ import { DashboardCinematicHeroBg } from "@/lib/components/dashboard-ui";
 import { MobileBottomSheet } from "@/lib/components/mobile-bottom-sheet";
 import { UserAvatar } from "@/lib/components/user-avatar";
 import { DASHBOARD_BOTTOM_NAV_OFFSET_VAR } from "@/lib/constants/dashboard-chrome";
+import { DUET_SHARE_SETTINGS_HASH } from "@/lib/constants/duet-settings";
 import { GROQ_AI_CONSENT_SETTINGS_HASH } from "@/lib/constants/groq-ai-settings";
 import { useDashboardExports } from "@/lib/hooks/use-dashboard-exports";
 import { useDuetMutations, useDuetSettings } from "@/lib/hooks/use-duet";
@@ -127,6 +128,8 @@ function SettingsMobileDeepLink() {
     let id: string | null = null;
     if (hash === GROQ_AI_CONSENT_SETTINGS_HASH) {
       id = GROQ_AI_CONSENT_SETTINGS_HASH;
+    } else if (hash === DUET_SHARE_SETTINGS_HASH) {
+      id = DUET_SHARE_SETTINGS_HASH;
     } else if (view === "data") {
       id = SETTINGS_MOBILE_GROUP_IDS.data;
     } else if (view === "danger") {
@@ -184,6 +187,7 @@ function SettingsMobileDuetRows() {
           <option value="full">{t("scopeFull")}</option>
         </select>
       </div>
+      <p className="px-3.5 py-2.5 text-xs leading-5 text-muted">{t("friendMusicHint")}</p>
     </>
   );
 }
@@ -497,7 +501,9 @@ export function SettingsMobileExperience(props: SettingsMobileExperienceProps) {
             <ChevronIcon className="h-4 w-4 shrink-0 text-muted" />
           </a>
         ) : null}
-        <SettingsMobileDuetRows />
+        <div id={DUET_SHARE_SETTINGS_HASH} className="scroll-mt-24">
+          <SettingsMobileDuetRows />
+        </div>
       </SettingsMobileGroup>
 
       <SettingsMobileGroup id={SETTINGS_MOBILE_GROUP_IDS.ai} title={t("mobile.groupAi")}>

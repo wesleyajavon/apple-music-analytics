@@ -57,6 +57,7 @@ export function DuetShareSettingsSection() {
       </div>
 
       <p className={`text-xs leading-relaxed ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("consentHint")}</p>
+      <p className={`text-xs leading-relaxed ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("friendMusicHint")}</p>
     </div>
   );
 }

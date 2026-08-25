@@ -1,5 +1,5 @@
 import type { User as SupabaseUser } from "@supabase/supabase-js";
-import type { DuetUserSummaryDto } from "@/lib/dto/duet";
+import type { DuetUserSummaryDto, FriendshipDto } from "@/lib/dto/duet";
 
 export function getDuetDisplayName(user: DuetUserSummaryDto): string {
   return user.name?.trim() || user.email?.split("@")[0] || user.id.slice(0, 8);
@@ -26,4 +26,15 @@ export function getDuetFriendFromFriendship(
   viewerId: string
 ): DuetUserSummaryDto {
   return friendship.requester.id === viewerId ? friendship.addressee : friendship.requester;
+}
+
+export function resolveAcceptedFriendName(
+  friends: FriendshipDto[] | undefined,
+  viewerId: string,
+  friendUserId: string,
+  fallback: string
+): string {
+  const friendship = friends?.find((row) => getDuetFriendFromFriendship(row, viewerId).id === friendUserId);
+  if (!friendship) return fallback;
+  return getDuetDisplayName(getDuetFriendFromFriendship(friendship, viewerId));
 }

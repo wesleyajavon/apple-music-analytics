@@ -20,6 +20,7 @@ import { requireAuthenticatedUserId } from "@/lib/auth/require-auth-user-id";
 import { assertFriendDataAccess } from "@/lib/services/duet/assert-friend-data-access";
 import { assertAnalyticsRateLimit } from "@/lib/security/analytics-rate-limit";
 import {
+  DUET_COMPARE_RATE_LIMIT,
   parseFriendUserId,
   requireDuetCompareAccess,
   requireDuetFriendAccess,
@@ -91,5 +92,22 @@ describe("duet-compare-guard", () => {
 
   it("requireDuetFriendAccess is an alias of requireDuetCompareAccess", () => {
     expect(requireDuetFriendAccess).toBe(requireDuetCompareAccess);
+  });
+
+  it("requireDuetFriendAccess applies compare rate limit on friend-overview route", async () => {
+    const result = await requireDuetFriendAccess(
+      new NextRequest(
+        `http://localhost/api/duet/friend-overview?friendUserId=${FRIEND_ID}`
+      ),
+      "/api/duet/friend-overview",
+      "aggregates"
+    );
+
+    expect(result.ok).toBe(true);
+    expect(assertAnalyticsRateLimit).toHaveBeenCalledWith(
+      expect.any(NextRequest),
+      { ...DUET_COMPARE_RATE_LIMIT, route: "/api/duet/friend-overview" },
+      VIEWER_ID
+    );
   });
 });

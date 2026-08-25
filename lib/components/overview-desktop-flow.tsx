@@ -6,6 +6,7 @@ import { HeatmapCalendarOverviewWidget } from "@/lib/components/heatmap-calendar
 import { AiInsightsSummaryWidget } from "@/lib/components/ai-insights-summary-widget";
 import { OverviewMomentumTabs, type OverviewMomentumSlide } from "@/lib/components/overview-momentum-tabs";
 import { OverviewGoFurtherSection } from "@/lib/components/overview-go-further";
+import { OverviewFriendsSection } from "@/lib/components/overview-friends-section";
 import { OverviewTasteTeaser } from "@/lib/components/overview-taste-teaser";
 import { OverviewSectionHeader } from "@/lib/components/overview-section";
 import { OverviewHeroFrame } from "@/lib/components/overview-hero";
@@ -30,6 +31,8 @@ import {
   type OverviewGenreLeader,
   type OverviewTrackLeader,
 } from "@/lib/utils/overview-page";
+import { usePublicDemoViewer, useSupabaseAuthUserId } from "@/lib/hooks/use-public-demo-viewer";
+import { useDashboardViewerUserId } from "@/lib/context/dashboard-viewer-context";
 
 export function OverviewDesktopFlow({
   title,
@@ -77,6 +80,10 @@ export function OverviewDesktopFlow({
   onOpenArtistInsights?: (artist: ArtistStatsDto, avatarColorIndex: number) => void;
 }) {
   const t = useTranslations("overview");
+  const authUserId = useSupabaseAuthUserId();
+  const viewerUserId = useDashboardViewerUserId();
+  const isPublicDemoViewer = usePublicDemoViewer(viewerUserId);
+  const showFriendsTab = Boolean(authUserId) && !isPublicDemoViewer;
   const topTrack = topTracks[0];
   const topArtist = topArtists[0];
   const topGenre = topGenres[0];
@@ -107,9 +114,11 @@ export function OverviewDesktopFlow({
     const views: OverviewView[] = ["spotlight"];
     if (hasLeaders) views.push("tops");
     if (momentumSlides.length > 0) views.push("trends");
-    views.push("context", "summary", "further");
+    views.push("context", "summary");
+    if (showFriendsTab) views.push("friends");
+    views.push("further");
     return views;
-  }, [hasLeaders, momentumSlides.length]);
+  }, [hasLeaders, momentumSlides.length, showFriendsTab]);
   const { activeView, setView } = useOverviewView(availableViews);
 
   return (
@@ -260,6 +269,12 @@ export function OverviewDesktopFlow({
           </div>
         </section>
       </OverviewViewPanel>
+
+      {showFriendsTab ? (
+        <OverviewViewPanel idPrefix="overview-desktop" view="friends" activeView={activeView}>
+          <OverviewFriendsSection />
+        </OverviewViewPanel>
+      ) : null}
 
       <OverviewViewPanel idPrefix="overview-desktop" view="further" activeView={activeView}>
         <OverviewGoFurtherSection

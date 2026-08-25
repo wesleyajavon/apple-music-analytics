@@ -41,6 +41,7 @@ Voir aussi : [PUBLIC_DEMO_HARDENING.md](./PUBLIC_DEMO_HARDENING.md) (levier 1, p
 | `/dashboard/sentry-test` | **Admin uniquement** | Ne doit pas être concerné par le mode public ; déjà filtré admin en prod dans la sidebar. |
 | `/dashboard/duet/friends` | **Fermer** | Social auth-only : invitations, relations, consentement `duet_sharing`. Pas de parcours démo publique ; redirect sign-in sans session (`duet/layout.tsx`). Même politique pour `/dashboard/duet/compare` et `/api/duet/*`. |
 | `/dashboard/duet/compare` | **Fermer** | Comparaison cross-user via `friendUserId` + `assertFriendDataAccess` — jamais via `?userId=` des routes analytics solo. Auth obligatoire ; absent de la sidebar en démo publique anonyme. |
+| `/dashboard/duet/music` | **Fermer** | Your Music ami (lecture seule) via `friendUserId` + `assertFriendDataAccess` — jamais via `?userId=` des routes analytics solo. Auth obligatoire ; absent de la sidebar et du plus-menu en démo publique anonyme. Redirect sign-in sans session (`duet/layout.tsx`). |
 
 ---
 

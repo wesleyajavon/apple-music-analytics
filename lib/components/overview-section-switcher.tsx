@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import {
   BarChart3,
   CalendarDays,
+  HeartHandshake,
   ListMusic,
   Sparkles,
   TrendingUp,
@@ -24,6 +25,7 @@ export const OVERVIEW_VIEWS = [
   "trends",
   "context",
   "summary",
+  "friends",
   "further",
 ] as const;
 
@@ -35,6 +37,7 @@ const VIEW_ICONS: Record<OverviewView, LucideIcon> = {
   tops: ListMusic,
   trends: TrendingUp,
   context: CalendarDays,
+  friends: HeartHandshake,
   further: Sparkles,
 };
 

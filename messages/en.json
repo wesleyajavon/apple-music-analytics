@@ -1327,8 +1327,24 @@
         "tops": "Your tops",
         "trends": "Trends",
         "context": "Calendar",
+        "friends": "Friends",
         "further": "Go further"
       }
+    },
+    "friends": {
+      "eyebrow": "Friends",
+      "title": "See a friend’s Your Music",
+      "description": "Open a friend’s listening hub in read-only mode. Your own Your Music stays on this page.",
+      "seeMusic": "See their music",
+      "seeMusicAria": "See {name}’s music",
+      "readOnlyHint": "Read-only · opens in Duet",
+      "manageFriends": "Manage friends",
+      "emptyTitle": "No friends yet",
+      "emptyDescription": "Invite someone in Duet, then come back here to open their Your Music.",
+      "emptyCta": "Invite a friend",
+      "errorTitle": "Couldn’t load friends",
+      "errorRetry": "Try again",
+      "loadingLabel": "Loading friends"
     },
     "tasteTeaser": {
       "eyebrow": "Musical profile",

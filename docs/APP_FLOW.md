@@ -104,7 +104,7 @@ flowchart TB
     subgraph API["API Routes"]
         NEXT --> ANALYTICS["/api/overview · timeline · genres<br/>artists · tracks · temporal-analysis<br/>predictions/listening-habit"]
         NEXT --> AI["/api/ai/*<br/>insights · taste-profile · music-chat"]
-        NEXT --> DUET["/api/duet/*<br/>friends · compare"]
+        NEXT --> DUET["/api/duet/*<br/>friends · compare · friend-overview"]
         NEXT --> USERAPI["/api/user/*<br/>me · consent · export · settings"]
     end
 
@@ -174,8 +174,13 @@ flowchart TD
         FR["/dashboard/duet/friends"]
         FR --> INV[Invite link / ami]
         INV --> CMP["/dashboard/duet/compare"]
+        FR --> MUSIC["/dashboard/duet/music"]
+        CMP --> MUSIC
+        MUSIC --> CMP
         CMP --> DC["/api/duet/compare/*<br/>metadata · timeline · shared-artists"]
+        MUSIC --> FO["GET /api/duet/friend-overview"]
         DC --> AUTHZ[assert-friend-data-access]
+        FO --> AUTHZ
         AUTHZ --> PG2[(PostgreSQL)]
     end
 ```

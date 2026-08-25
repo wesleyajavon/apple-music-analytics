@@ -645,4 +645,31 @@ describe("music-chat-service", () => {
       "Never expose raw tool field names or metadata labels"
     );
   });
+
+  it("does not expose friendUserId to Groq tools or prompts", async () => {
+    mockCreateGroqChatCompletion.mockResolvedValue({
+      choices: [
+        {
+          message: {
+            content: "Your top tracks are scoped to your own library.",
+          },
+        },
+      ],
+    });
+
+    await generateMusicChatAnswer({
+      userId: "user-123",
+      locale: "en",
+      messages: [
+        {
+          role: "user",
+          content: "What have I been listening to this year?",
+        },
+      ],
+    });
+
+    const params = mockCreateGroqChatCompletion.mock.calls[0]?.[0];
+    expect(JSON.stringify(params.tools)).not.toContain("friendUserId");
+    expect(JSON.stringify(params.messages)).not.toContain("friendUserId");
+  });
 });

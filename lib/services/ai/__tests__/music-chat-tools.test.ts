@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/lib/prisma", () => ({
@@ -577,5 +579,18 @@ describe("music-chat-tools", () => {
       expect(key).not.toMatch(/friend/i);
     }
     expect(JSON.stringify(MUSIC_CHAT_PRESET_QUESTIONS)).not.toContain("friendUserId");
+  });
+
+  it("does not accept friendUserId in Maestro tool sources", () => {
+    const toolsSource = readFileSync(
+      join(process.cwd(), "lib/services/ai/music-chat-tools.ts"),
+      "utf8"
+    );
+    const serviceSource = readFileSync(
+      join(process.cwd(), "lib/services/ai/music-chat-service.ts"),
+      "utf8"
+    );
+    expect(toolsSource).not.toContain("friendUserId");
+    expect(serviceSource).not.toContain("friendUserId");
   });
 });

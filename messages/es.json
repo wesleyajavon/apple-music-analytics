@@ -1329,8 +1329,24 @@
         "tops": "Tus tops",
         "trends": "Tendencias",
         "context": "Calendario",
+        "friends": "Amigos",
         "further": "Ir más allá"
       }
+    },
+    "friends": {
+      "eyebrow": "Amigos",
+      "title": "Ver el Your Music de un amigo",
+      "description": "Abre el hub de escucha de un amigo en solo lectura. Tu propio Your Music sigue en esta página.",
+      "seeMusic": "Ver su música",
+      "seeMusicAria": "Ver la música de {name}",
+      "readOnlyHint": "Solo lectura · se abre en Duet",
+      "manageFriends": "Gestionar amigos",
+      "emptyTitle": "Aún no hay amigos",
+      "emptyDescription": "Invita a alguien en Duet y vuelve aquí para abrir su Your Music.",
+      "emptyCta": "Invitar a un amigo",
+      "errorTitle": "No se pudieron cargar los amigos",
+      "errorRetry": "Reintentar",
+      "loadingLabel": "Cargando amigos"
     },
     "tasteTeaser": {
       "eyebrow": "Perfil musical",

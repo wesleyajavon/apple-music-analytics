@@ -7,6 +7,7 @@ import { OverviewMobileHero } from "@/lib/components/overview-hero";
 import { SpotlightRankBubble, type LibraryLeaderItem } from "@/lib/components/overview-library-rankings";
 import { useDashboardViewerUserId } from "@/lib/context/dashboard-viewer-context";
 import { usePublicDemoViewer } from "@/lib/hooks/use-public-demo-viewer";
+import { OverviewFriendsSection } from "@/lib/components/overview-friends-section";
 import type { OverviewStatsChanges } from "@/lib/components/overview-stats-section";
 import type { OverviewStatsWithTopArtists } from "@/lib/hooks/use-listening";
 import {
@@ -397,6 +398,10 @@ export function MobileOverviewFlow({
           </div>
         </section>
       ))}
+
+      <section className="px-4">
+        <OverviewFriendsSection compact />
+      </section>
 
       <section className="space-y-2 px-4">
         <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">

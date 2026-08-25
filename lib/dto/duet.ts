@@ -1,4 +1,7 @@
 import type { DuetShareScope, FriendshipStatus } from "@prisma/client";
+import type { GenreDistributionDto } from "@/lib/dto/genres";
+import type { OverviewStatsDto, TopArtistDto } from "@/lib/dto/listening";
+import type { TrackStatsDto } from "@/lib/dto/track";
 
 export type DuetUserSummaryDto = {
   id: string;
@@ -118,4 +121,20 @@ export type CompareSharedArtistsResponse = {
   topPool: number;
   totalShared: number;
   artists: CompareSharedArtistItem[];
+};
+
+export type FriendOverviewSubjectDto = {
+  name: string | null;
+  avatarUrl: string | null;
+};
+
+export type FriendOverviewResponse = {
+  friendUserId: string;
+  shareScope: "aggregates" | "full";
+  subject: FriendOverviewSubjectDto;
+  stats: OverviewStatsDto;
+  topArtists: TopArtistDto[];
+  topGenres: GenreDistributionDto[];
+  timeline: CompareTimelinePoint[];
+  topTracks?: TrackStatsDto[];
 };

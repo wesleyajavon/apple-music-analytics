@@ -1,3 +1,4 @@
+import type { DuetShareScope } from "@prisma/client";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { z } from "zod";
@@ -20,7 +21,7 @@ export const DUET_COMPARE_RATE_LIMIT = {
 const FriendUserIdSchema = z.string().uuid();
 
 export type DuetCompareAccess =
-  | { ok: true; viewerId: string; friendUserId: string }
+  | { ok: true; viewerId: string; friendUserId: string; shareScope: DuetShareScope }
   | { ok: false; response: NextResponse };
 
 export function parseFriendUserId(request: NextRequest): string | null {
@@ -76,5 +77,7 @@ export async function requireDuetCompareAccess(
     viewerId
   );
 
-  return { ok: true, viewerId, friendUserId };
+  return { ok: true, viewerId, friendUserId, shareScope: access.shareScope };
 }
+
+export const requireDuetFriendAccess = requireDuetCompareAccess;

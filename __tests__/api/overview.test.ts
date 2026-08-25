@@ -130,6 +130,27 @@ describe('GET /api/overview', () => {
     expect(callArgs[2]).toBe('user-1');
   });
 
+  it('should ignore a foreign UUID userId query and use authenticated user', async () => {
+    const mockStats = {
+      totalListens: 200,
+      uniqueArtists: 30,
+      uniqueTracks: 100,
+      totalDuration: 720000,
+      totalPlayTime: 720,
+    };
+
+    vi.mocked(getOverviewStats).mockResolvedValue(mockStats);
+
+    const request = new NextRequest(
+      'http://localhost/api/overview?userId=22222222-2222-4222-8222-222222222222'
+    );
+    const response = await GET(request);
+
+    expect(response.status).toBe(200);
+    const callArgs = vi.mocked(getOverviewStats).mock.calls[0];
+    expect(callArgs[2]).toBe('user-1');
+  });
+
   it('should use public profile cache and CDN-friendly headers for demo dataset', async () => {
     vi.mocked(resolveAuthorizedDataUserId).mockResolvedValue({
       ok: true,

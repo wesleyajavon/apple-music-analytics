@@ -22,6 +22,7 @@ import { assertAnalyticsRateLimit } from "@/lib/security/analytics-rate-limit";
 import {
   parseFriendUserId,
   requireDuetCompareAccess,
+  requireDuetFriendAccess,
 } from "@/lib/services/duet/duet-compare-guard";
 
 const VIEWER_ID = "11111111-1111-4111-8111-111111111111";
@@ -83,7 +84,12 @@ describe("duet-compare-guard", () => {
     if (result.ok) {
       expect(result.viewerId).toBe(VIEWER_ID);
       expect(result.friendUserId).toBe(FRIEND_ID);
+      expect(result.shareScope).toBe("full");
     }
     expect(assertAnalyticsRateLimit).toHaveBeenCalled();
+  });
+
+  it("requireDuetFriendAccess is an alias of requireDuetCompareAccess", () => {
+    expect(requireDuetFriendAccess).toBe(requireDuetCompareAccess);
   });
 });

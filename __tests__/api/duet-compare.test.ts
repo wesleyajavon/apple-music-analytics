@@ -54,6 +54,7 @@ describe("Duet compare API", () => {
       ok: true,
       viewerId: VIEWER_ID,
       friendUserId: FRIEND_ID,
+      shareScope: "full",
     });
   });
 

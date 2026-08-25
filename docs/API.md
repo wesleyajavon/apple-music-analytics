@@ -300,9 +300,18 @@ Toutes les routes Duet exigent une **session** authentifiée (pas de `userId` d�
 | GET | `/api/duet/settings` | `{ allowFriendRequests, defaultShareScope }`. |
 | PATCH | `/api/duet/settings` | Body partiel : `allowFriendRequests`, `defaultShareScope` (`none` \| `aggregates` \| `full`). |
 
-### Your Music ami (à venir)
+### Your Music ami
 
-`GET /api/duet/friend-overview` — lecture seule du hub analytics d’un ami `accepted`, derrière `assertFriendDataAccess` et query `friendUserId`. Même famille de données que D2 (`aggregates` / `full`). **Pas encore exposé.** Ne pas utiliser `userId` sur `/api/overview` pour cibler un ami.
+`GET /api/duet/friend-overview` — lecture seule du hub analytics d’un ami `accepted`. **Ne pas** utiliser `userId` sur `/api/overview` (ni `/api/timeline`, `/api/genres`, `/api/tracks`) pour cibler un ami : `userId` reste le canal démo publique ; un UUID étranger est ignoré (données du viewer).
+
+| Champ | Détail |
+|-------|--------|
+| Auth | Session obligatoire. Rate limit `DUET_COMPARE_RATE_LIMIT` (20 / 60 s). |
+| Query | **`friendUserId`** (UUID, requis). `startDate` / `endDate` optionnels — même sémantique que `/api/overview` (absent = all-time). |
+| Scope | `aggregates` : KPIs, timeline (série unique, granularité **month**), top artistes (~6), top genres (~6). **`full`** : + `topTracks` (~6). Jamais de heatmap ni d’IA. |
+| Status | **400** UUID invalide ou `viewer === friendUserId` ; **401** sans session ; **404** pas d’amitié `accepted` (anti-énumération, y compris pending / blocked) ; **403** si `shareScope === none`. |
+
+Réponse `{ friendUserId, shareScope, subject: { name, avatarUrl }, stats, topArtists, topGenres, timeline, topTracks? }`. `topTracks` est **omis** si `shareScope === aggregates` ; peuplé si `full`. `uniqueTracks` dans `stats` est un compteur (pas une liste de titres).
 
 ### Comparaison (auth + relation `accepted`)
 

@@ -11,8 +11,8 @@ describe("buildPublicDemoSoundprintSnapshot", () => {
         uniqueTracks: 240,
         totalPlayTime: 0,
         topArtists: [
-          { artistId: "a1", artistName: "Drake", listenCount: 42 },
-          { artistId: "a2", artistName: "Beyoncé", listenCount: 30 },
+          { artistId: "a1", artistName: "Drake", listenCount: 42, imageUrl: null },
+          { artistId: "a2", artistName: "Beyoncé", listenCount: 30, imageUrl: null },
         ],
       },
       genres: {

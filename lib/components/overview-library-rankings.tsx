@@ -1,6 +1,7 @@
 "use client";
 
 import { Link } from "@/i18n/navigation";
+import { ArtistAvatarHydrated } from "@/lib/components/artist-avatar-hydrated";
 import { LiveStatusDot } from "@/lib/components/live-status-dot";
 
 type LibraryLeaderAccent = {
@@ -23,6 +24,7 @@ export type LibraryLeaderItem = {
   subtitle?: string;
   count: number;
   percentage: number;
+  imageUrl?: string | null;
 };
 
 export const LIBRARY_LEADER_ACCENTS = {
@@ -91,18 +93,55 @@ function SpotlightRankBubble({
 
 export { SpotlightRankBubble };
 
+function LeaderArtistAvatar({
+  item,
+  index,
+  size = "sm",
+}: {
+  item: LibraryLeaderItem;
+  index: number;
+  size?: "sm" | "lg";
+}) {
+  const dimension = size === "lg" ? 56 : 40;
+  const className =
+    size === "lg"
+      ? "h-14 w-14 rounded-2xl object-cover"
+      : "h-10 w-10 rounded-xl object-cover";
+
+  return (
+    <div className="relative shrink-0 overflow-hidden ring-1 ring-white/15">
+      <ArtistAvatarHydrated
+        artistId={item.id}
+        artistName={item.title}
+        imageUrl={item.imageUrl}
+        avatarApiSize={dimension * 2}
+        colorIndex={index}
+        alt=""
+        width={dimension}
+        height={dimension}
+        className={className}
+        loading="lazy"
+        decoding="async"
+        referrerPolicy="no-referrer"
+      />
+    </div>
+  );
+}
+
 function TopLibraryFeaturedRow({
   item,
   accent,
   locale,
   listensLabel,
   showPercentage,
+  showArtistAvatars,
 }: {
   item: LibraryLeaderItem;
   accent: LibraryLeaderAccent;
   locale: string;
   listensLabel: string;
   showPercentage: boolean;
+  showArtistAvatars: boolean;
 }) {
   return (
     <div
@@ -120,6 +159,7 @@ function TopLibraryFeaturedRow({
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 items-start gap-3">
             <SpotlightRankBubble rank={1} size="lg" />
+            {showArtistAvatars ? <LeaderArtistAvatar item={item} index={0} size="lg" /> : null}
             <div className="min-w-0 pt-0.5">
               <p className="truncate text-lg font-semibold tracking-[-0.03em] text-white" title={item.title}>
                 {item.title}
@@ -159,6 +199,7 @@ function TopLibraryRow({
   locale,
   listensLabel,
   showPercentage,
+  showArtistAvatars,
 }: {
   item: LibraryLeaderItem;
   index: number;
@@ -166,6 +207,7 @@ function TopLibraryRow({
   locale: string;
   listensLabel: string;
   showPercentage: boolean;
+  showArtistAvatars: boolean;
 }) {
   if (index === 0) {
     return (
@@ -175,6 +217,7 @@ function TopLibraryRow({
         locale={locale}
         listensLabel={listensLabel}
         showPercentage={showPercentage}
+        showArtistAvatars={showArtistAvatars}
       />
     );
   }
@@ -184,6 +227,7 @@ function TopLibraryRow({
       <div className="flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
           <SpotlightRankBubble rank={index + 1} />
+          {showArtistAvatars ? <LeaderArtistAvatar item={item} index={index} /> : null}
           <div className="min-w-0">
             <p className="truncate text-sm font-medium text-white/90" title={item.title}>
               {item.title}
@@ -220,16 +264,18 @@ export function TopLibraryCard({
   listensLabel,
   ctaLabel,
   showPercentage = false,
+  showArtistAvatars = false,
 }: {
   title: string;
   description: string;
-  href: string;
+  href?: string;
   accent: LibraryLeaderAccent;
   items: LibraryLeaderItem[];
   locale: string;
   listensLabel: string;
-  ctaLabel: string;
+  ctaLabel?: string;
   showPercentage?: boolean;
+  showArtistAvatars?: boolean;
 }) {
   return (
     <article
@@ -257,15 +303,17 @@ export function TopLibraryCard({
               </div>
               <p className="text-sm leading-6 text-slate-300">{description}</p>
             </div>
-            <Link
-              href={href}
-              className="inline-flex shrink-0 items-center gap-1.5 rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white/15"
-            >
-              {ctaLabel}
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
+            {href && ctaLabel ? (
+              <Link
+                href={href}
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white/15"
+              >
+                {ctaLabel}
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            ) : null}
           </div>
         </div>
 
@@ -279,6 +327,7 @@ export function TopLibraryCard({
               locale={locale}
               listensLabel={listensLabel}
               showPercentage={showPercentage}
+              showArtistAvatars={showArtistAvatars}
             />
           ))}
         </div>

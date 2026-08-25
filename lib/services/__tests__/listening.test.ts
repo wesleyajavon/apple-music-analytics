@@ -392,6 +392,7 @@ describe('listening service', () => {
         {
           artist_id: 'a1',
           artist_name: 'Test Artist',
+          image_url: 'https://i.scdn.co/image/example',
           listen_count: BigInt(42),
         },
       ]);
@@ -407,6 +408,7 @@ describe('listening service', () => {
       expect(result[0]).toEqual({
         artistId: 'a1',
         artistName: 'Test Artist',
+        imageUrl: 'https://i.scdn.co/image/example',
         listenCount: 42,
       });
     });

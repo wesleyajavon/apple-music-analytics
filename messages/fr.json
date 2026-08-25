@@ -464,6 +464,39 @@
       "timelineDescription": "Streams mensuels de {name} sur la période sélectionnée.",
       "timelineBadge": "Timeline",
       "listens": "streams",
+      "viewSwitcher": {
+        "navLabel": "Sections musique ami",
+        "views": {
+          "summary": "Synthèse",
+          "tops": "Tops",
+          "trends": "Tendances"
+        }
+      },
+      "sections": {
+        "summary": {
+          "eyebrow": "Synthèse",
+          "title": "Totaux de la période",
+          "description": "Streams, artistes, titres et temps d’écoute pour {name}."
+        },
+        "tops": {
+          "eyebrow": "Tops",
+          "title": "Ce qui ressort",
+          "description": "Classements de {name} sur cette période — lecture seule, sans drill-down bibliothèque."
+        },
+        "trends": {
+          "eyebrow": "Tendances",
+          "title": "Écoute dans le temps",
+          "description": "Streams mensuels de {name} sur la période sélectionnée."
+        }
+      },
+      "insight": {
+        "topTrackEyebrow": "Titre le plus écouté",
+        "topTrackBody": "Le plus streamé sur cette fenêtre, par {artist}.",
+        "topArtistEyebrow": "Artiste le plus écouté",
+        "topArtistBody": "L’artiste qu’il ou elle a le plus streamé sur cette fenêtre.",
+        "libraryEyebrow": "Cette période",
+        "libraryBody": "Volume et variété pour cet ami."
+      },
       "gatedTitle": "Connecte-toi à Duet",
       "gatedDescription": "La musique d’un ami n’est disponible que si tu es connecté.",
       "gatedCta": "Se connecter",
@@ -1987,14 +2020,14 @@
     "sections": {
       "charts": {
         "eyebrow": "Signaux",
-        "title": "Classement top 20",
-        "description": "Histogramme des 20 artistes les plus streamés sur cette fenêtre.",
-        "barBadge": "Top 20"
+        "title": "Classement par streams",
+        "description": "Histogramme vertical — les artistes qui dominent votre écoute sur cette période.",
+        "barBadge": "Histogramme"
       },
       "roster": {
         "eyebrow": "Spotlight",
-        "title": "Fiches artistes",
-        "description": "Podium pour le top 3, puis galerie du 4e au 10e — touchez une fiche pour ouvrir l’analyse de stream.",
+        "title": "Vos artistes en vedette",
+        "description": "Podium pour le top 3, puis galerie du 4e au 10e — touchez un artiste pour ouvrir l’analyse de stream.",
         "top3Badge": "Podium",
         "gridBadge": "Galerie"
       },
@@ -2008,7 +2041,7 @@
     "viewSwitcher": {
       "navLabel": "Sections artistes",
       "views": {
-        "spotlight": "Fiches",
+        "spotlight": "En vedette",
         "leaderboard": "Top 20",
         "ranking": "Classement complet"
       }

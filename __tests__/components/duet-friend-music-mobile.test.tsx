@@ -7,7 +7,16 @@ import { DuetFriendMusicMobileExperience } from "@/lib/components/duet/duet-frie
 import type { OverviewStatsDto } from "@/lib/dto/listening";
 
 vi.mock("next-intl", () => ({
-  useTranslations: () => (key: string) => key,
+  useTranslations: () => {
+    const t = (key: string) => key;
+    return t;
+  },
+}));
+
+const searchParams = new URLSearchParams("startDate=2026-01-01&endDate=2026-01-31");
+
+vi.mock("next/navigation", () => ({
+  useSearchParams: () => searchParams,
 }));
 
 vi.mock("@/i18n/navigation", () => ({
@@ -23,10 +32,20 @@ vi.mock("@/i18n/navigation", () => ({
       {children}
     </a>
   ),
-}));
-
-vi.mock("next/navigation", () => ({
-  useSearchParams: () => new URLSearchParams("startDate=2026-01-01&endDate=2026-01-31"),
+  usePathname: () => "/fr/dashboard/duet/music",
+  useRouter: () => ({
+    replace: (href: string) => {
+      const qs = href.includes("?") ? href.split("?")[1] ?? "" : "";
+      const next = new URLSearchParams(qs);
+      for (const key of [...searchParams.keys()]) {
+        searchParams.delete(key);
+      }
+      next.forEach((value, key) => {
+        searchParams.set(key, value);
+      });
+    },
+    push: vi.fn(),
+  }),
 }));
 
 vi.mock("@/lib/hooks/use-listen-date-range", () => ({
@@ -61,6 +80,7 @@ const baseProps = {
 
 describe("DuetFriendMusicMobileExperience shareScope", () => {
   it("hides top tracks and shows the aggregates hint", () => {
+    searchParams.delete("view");
     render(
       <DuetFriendMusicMobileExperience
         {...baseProps}
@@ -69,6 +89,10 @@ describe("DuetFriendMusicMobileExperience shareScope", () => {
       />
     );
 
+    expect(screen.getByRole("tab", { name: /viewSwitcher\.views\.tops/i })).toHaveAttribute(
+      "aria-selected",
+      "true"
+    );
     expect(screen.queryByTestId("duet-friend-music-top-tracks")).not.toBeInTheDocument();
     expect(screen.queryByText("tracksLabel")).not.toBeInTheDocument();
     expect(screen.getByText("aggregatesTracksHint")).toBeInTheDocument();
@@ -79,6 +103,7 @@ describe("DuetFriendMusicMobileExperience shareScope", () => {
   });
 
   it("renders top tracks for full scope and omits the aggregates hint", () => {
+    searchParams.delete("view");
     render(
       <DuetFriendMusicMobileExperience
         {...baseProps}
@@ -93,6 +118,7 @@ describe("DuetFriendMusicMobileExperience shareScope", () => {
   });
 
   it("uses the dedicated period empty, not an import CTA", () => {
+    searchParams.delete("view");
     render(
       <DuetFriendMusicMobileExperience
         {...baseProps}

@@ -82,6 +82,7 @@ export type OverviewArtistLeader = {
   name: string;
   count: number;
   percentage: number;
+  imageUrl?: string | null;
 };
 
 export type OverviewGenreLeader = {

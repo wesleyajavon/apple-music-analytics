@@ -464,6 +464,39 @@
       "timelineDescription": "Streams mensuales de {name} en el periodo seleccionado.",
       "timelineBadge": "Línea de tiempo",
       "listens": "streams",
+      "viewSwitcher": {
+        "navLabel": "Secciones de música del amigo",
+        "views": {
+          "summary": "Resumen",
+          "tops": "Tops",
+          "trends": "Tendencias"
+        }
+      },
+      "sections": {
+        "summary": {
+          "eyebrow": "Resumen",
+          "title": "Totales del periodo",
+          "description": "Streams, artistas, canciones y tiempo de escucha de {name}."
+        },
+        "tops": {
+          "eyebrow": "Tops",
+          "title": "Lo que destacó",
+          "description": "Clasificaciones de {name} en este periodo — solo lectura, sin ir a la biblioteca."
+        },
+        "trends": {
+          "eyebrow": "Tendencias",
+          "title": "Escucha en el tiempo",
+          "description": "Streams mensuales de {name} en el periodo seleccionado."
+        }
+      },
+      "insight": {
+        "topTrackEyebrow": "Canción top del periodo",
+        "topTrackBody": "La más reproducida en esta ventana, de {artist}.",
+        "topArtistEyebrow": "Artista top del periodo",
+        "topArtistBody": "El artista que más reprodujo en esta ventana.",
+        "libraryEyebrow": "Este periodo",
+        "libraryBody": "Volumen y variedad de este amigo."
+      },
       "gatedTitle": "Inicia sesión en Duet",
       "gatedDescription": "La música de un amigo solo está disponible si has iniciado sesión.",
       "gatedCta": "Iniciar sesión",
@@ -1987,9 +2020,9 @@
     "sections": {
       "charts": {
         "eyebrow": "Señales",
-        "title": "Ranking top 20",
-        "description": "Barras de los 20 artistas con más streams en esta ventana.",
-        "barBadge": "Top 20"
+        "title": "Ranking por streams",
+        "description": "Barras verticales de los artistas que más dominan tu escucha en este periodo.",
+        "barBadge": "Gráfico"
       },
       "roster": {
         "eyebrow": "Spotlight",

@@ -149,4 +149,5 @@ export interface TopArtistDto {
   artistId: string;
   artistName: string;
   listenCount: number;
+  imageUrl: string | null;
 }

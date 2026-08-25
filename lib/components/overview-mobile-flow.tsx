@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { OverviewMobileHero } from "@/lib/components/overview-hero";
 import { SpotlightRankBubble, type LibraryLeaderItem } from "@/lib/components/overview-library-rankings";
+import { ArtistAvatarHydrated } from "@/lib/components/artist-avatar-hydrated";
 import { useDashboardViewerUserId } from "@/lib/context/dashboard-viewer-context";
 import { usePublicDemoViewer } from "@/lib/hooks/use-public-demo-viewer";
 import { OverviewFriendsSection } from "@/lib/components/overview-friends-section";
@@ -133,17 +134,37 @@ function MobileLeaderRow({
   locale,
   listensLabel,
   showPercentage = false,
+  showArtistAvatars = false,
 }: {
   item: MobileLeaderItem;
   index: number;
   locale: string;
   listensLabel: string;
   showPercentage?: boolean;
+  showArtistAvatars?: boolean;
 }) {
   const content = (
     <>
       <div className="flex min-w-0 items-center gap-3">
         <SpotlightRankBubble rank={index + 1} />
+        {showArtistAvatars ? (
+          <div className="relative shrink-0 overflow-hidden rounded-xl ring-1 ring-card-border">
+            <ArtistAvatarHydrated
+              artistId={item.id}
+              artistName={item.title}
+              imageUrl={item.imageUrl}
+              avatarApiSize={80}
+              colorIndex={index}
+              alt=""
+              width={40}
+              height={40}
+              className="h-10 w-10 object-cover"
+              loading="lazy"
+              decoding="async"
+              referrerPolicy="no-referrer"
+            />
+          </div>
+        ) : null}
         <div className="min-w-0">
           <p className="truncate text-sm font-semibold text-gray-950 dark:text-white" title={item.title}>
             {item.title}
@@ -338,6 +359,7 @@ export function MobileOverviewFlow({
         title: artist.name,
         count: artist.count,
         percentage: artist.percentage,
+        imageUrl: artist.imageUrl,
       })),
     },
     {
@@ -393,6 +415,7 @@ export function MobileOverviewFlow({
                 locale={locale}
                 listensLabel={t("listens")}
                 showPercentage={section.showPercentage}
+                showArtistAvatars={section.key === "artists"}
               />
             ))}
           </div>

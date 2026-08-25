@@ -206,10 +206,12 @@ export function OverviewDesktopFlow({
                     title: artist.name,
                     count: artist.count,
                     percentage: artist.percentage,
+                    imageUrl: artist.imageUrl,
                   }))}
                   locale={locale}
                   listensLabel={t("listens")}
                   ctaLabel={t("seeAll")}
+                  showArtistAvatars
                 />
               ) : null}
 

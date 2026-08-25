@@ -28,8 +28,6 @@ import {
   DASHBOARD_SPOTLIGHT_GRADIENT_TABLE,
   DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET,
   DASHBOARD_SPOTLIGHT_HEADER_BOTTOM,
-  DASHBOARD_SPOTLIGHT_TITLE,
-  DASHBOARD_SPOTLIGHT_BADGE_VIOLET,
   DASHBOARD_SPOTLIGHT_BADGE_CYAN_COMPACT,
   DASHBOARD_SPOTLIGHT_INNER_WELL,
   DASHBOARD_SPOTLIGHT_TABLE_HEAD,
@@ -1088,13 +1086,6 @@ function ArtistsContent() {
           <div className={DASHBOARD_SPOTLIGHT_SHELL}>
             <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} aria-hidden />
             <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} aria-hidden />
-            <div className={`relative ${DASHBOARD_SPOTLIGHT_HEADER_BOTTOM} px-5 py-5 sm:px-8`}>
-              <div className={DASHBOARD_SPOTLIGHT_BADGE_VIOLET}>
-                <LiveStatusDot tone="violet" />
-                {t("sections.charts.barBadge")}
-              </div>
-              <h3 className={`mt-3 ${DASHBOARD_SPOTLIGHT_TITLE}`}>{t("top20Listens")}</h3>
-            </div>
             <div className="relative p-5 sm:p-6 lg:p-8">
               <div className={DASHBOARD_SPOTLIGHT_INNER_WELL}>
                 {isTopLoading ? (

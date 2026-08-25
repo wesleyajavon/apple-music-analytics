@@ -48,7 +48,7 @@ const statsStub = {
 };
 
 const artistsStub = [
-  { artistId: "a1", artistName: "Radiohead", listenCount: 20 },
+  { artistId: "a1", artistName: "Radiohead", listenCount: 20, imageUrl: null },
 ];
 
 const genresStub = [

@@ -165,6 +165,7 @@ function OverviewContent() {
       artistId: a.artistId,
       name: a.artistName,
       count: a.listenCount,
+      imageUrl: a.imageUrl,
       percentage: total > 0 ? (a.listenCount / total) * 100 : 0,
     }));
   }, [data]);

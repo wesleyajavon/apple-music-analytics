@@ -464,6 +464,39 @@
       "timelineDescription": "Monthly streams for {name} on the selected period.",
       "timelineBadge": "Timeline",
       "listens": "streams",
+      "viewSwitcher": {
+        "navLabel": "Friend music sections",
+        "views": {
+          "summary": "Summary",
+          "tops": "Tops",
+          "trends": "Trends"
+        }
+      },
+      "sections": {
+        "summary": {
+          "eyebrow": "Summary",
+          "title": "Period totals",
+          "description": "Streams, artists, tracks, and listening time for {name}."
+        },
+        "tops": {
+          "eyebrow": "Tops",
+          "title": "What stood out",
+          "description": "Leaders for {name} on this period — read only, no library drill-down."
+        },
+        "trends": {
+          "eyebrow": "Trends",
+          "title": "Listening over time",
+          "description": "Monthly streams for {name} across the selected period."
+        }
+      },
+      "insight": {
+        "topTrackEyebrow": "Top track this period",
+        "topTrackBody": "Most streamed in this window, by {artist}.",
+        "topArtistEyebrow": "Top artist this period",
+        "topArtistBody": "The artist they streamed most in this window.",
+        "libraryEyebrow": "This period",
+        "libraryBody": "Volume and variety for this friend."
+      },
       "gatedTitle": "Sign in to Duet",
       "gatedDescription": "Friend music is only available when you’re signed in.",
       "gatedCta": "Sign in",
@@ -1985,9 +2018,9 @@
     "sections": {
       "charts": {
         "eyebrow": "Signals",
-        "title": "Top 20 ranking",
-        "description": "Vertical bars for the 20 artists with the most streams in this window.",
-        "barBadge": "Top 20"
+        "title": "Ranking by streams",
+        "description": "Vertical bars for the artists driving most of your listening in this window.",
+        "barBadge": "Chart"
       },
       "roster": {
         "eyebrow": "Spotlight",

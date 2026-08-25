@@ -581,11 +581,12 @@ export async function getTopArtists(
   endDate?: Date,
   userId?: string,
   limit: number = 10
-): Promise<Array<{ artistId: string; artistName: string; listenCount: number }>> {
+): Promise<Array<{ artistId: string; artistName: string; listenCount: number; imageUrl: string | null }>> {
   const query = Prisma.sql`
-    SELECT 
+    SELECT
       a.id as artist_id,
       a.name as artist_name,
+      MAX(a."imageUrl") as image_url,
       COUNT(*)::bigint as listen_count
     FROM "Listen" l
     JOIN "Track" t ON l."trackId" = t.id
@@ -602,12 +603,14 @@ export async function getTopArtists(
   const result = await prisma.$queryRaw<Array<{
     artist_id: string;
     artist_name: string;
+    image_url: string | null;
     listen_count: bigint;
   }>>(query);
 
   return result.map(row => ({
     artistId: row.artist_id,
     artistName: row.artist_name,
+    imageUrl: row.image_url?.trim() ?? null,
     listenCount: transformBigIntToNumber({ count: row.listen_count }).count,
   }));
 }

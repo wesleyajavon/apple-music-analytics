@@ -1,21 +1,16 @@
 "use client";
 
-import { Suspense, useCallback, useMemo, useState, type ReactNode } from "react";
+import { Suspense, useCallback, useMemo, type ReactNode } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { motion } from "motion/react";
-import { Eye, Swords } from "lucide-react";
-import { Area, AreaChart, CartesianGrid, Tooltip, XAxis, YAxis } from "recharts";
 import { EmptyState } from "@/lib/components/empty-state";
 import { ErrorState } from "@/lib/components/error-state";
 import { UserAvatar } from "@/lib/components/user-avatar";
 import { LiveStatusDot } from "@/lib/components/live-status-dot";
-import { ChartResponsiveContainer } from "@/lib/components/chart-responsive-container";
-import { ListenTrendChartViewToggle } from "@/lib/components/charts/listen-trend-chart-view-toggle";
-import { OverviewStatsSection } from "@/lib/components/overview-stats-section";
-import { SpotlightRankBubble } from "@/lib/components/overview-library-rankings";
 import { DuetSubNav } from "@/lib/components/duet/duet-sub-nav";
+import { DuetFriendMusicDesktopExperience } from "@/lib/components/duet/duet-friend-music-desktop";
 import {
   DuetFriendMusicMobileError,
   DuetFriendMusicMobileExperience,
@@ -35,28 +30,19 @@ import { useDuetFriendOverview, useDuetFriends } from "@/lib/hooks/use-duet";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
 import { usePublicDemoViewer, useSupabaseAuthUserId } from "@/lib/hooks/use-public-demo-viewer";
 import { ApiError } from "@/lib/api-client";
-import { CHART_TOOLTIP_STYLES } from "@/lib/constants/config";
 import {
   DASHBOARD_SPOTLIGHT_BADGE_DOT_VIOLET,
   DASHBOARD_SPOTLIGHT_BADGE_VIOLET,
-  DASHBOARD_SPOTLIGHT_GRADIENT_CYAN,
-  DASHBOARD_SPOTLIGHT_GRADIENT_LIME,
   DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY,
-  DASHBOARD_SPOTLIGHT_HAIRLINE_CYAN,
-  DASHBOARD_SPOTLIGHT_HAIRLINE_LIME,
   DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET,
   DASHBOARD_SPOTLIGHT_HEADER_BOTTOM,
   DASHBOARD_SPOTLIGHT_MUTED,
   DASHBOARD_SPOTLIGHT_SHELL,
 } from "@/lib/constants/dashboard-spotlight";
-import { DUET_SHARE_SETTINGS_PATH } from "@/lib/constants/duet-settings";
 import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
 import { buildCompareFriendHref, buildFriendMusicHref } from "@/lib/utils/duet-compare-href";
 import { formatOverviewDateRangeLabel } from "@/lib/utils/overview-date-range-label";
-import {
-  applyListenTrendChartViewSingle,
-  type ListenTrendChartViewMode,
-} from "@/lib/utils/listen-trend-chart-view";
+import type { OverviewPrimaryInsight } from "@/lib/utils/overview-page";
 
 const MUSIC_HERO_SHELL =
   "relative overflow-hidden rounded-[2rem] border border-white/10 bg-gray-950 px-5 py-6 text-white shadow-2xl shadow-violet-500/15 sm:px-8 sm:py-8";
@@ -119,123 +105,6 @@ function DesktopSkeleton() {
         ))}
       </div>
     </div>
-  );
-}
-
-function LeaderList({
-  items,
-  locale,
-  listensLabel,
-}: {
-  items: FriendMusicLeaderItem[];
-  locale: string;
-  listensLabel: string;
-}) {
-  return (
-    <ul className="space-y-2 px-5 pb-6 sm:px-8">
-      {items.map((item, index) => (
-        <li
-          key={item.id}
-          className="flex items-center gap-3 rounded-[1.2rem] border border-slate-200/80 bg-white px-4 py-3 dark:border-white/10 dark:bg-slate-950/60"
-        >
-          <SpotlightRankBubble rank={index + 1} />
-          <div className="min-w-0 flex-1">
-            <p className="truncate font-semibold text-slate-900 dark:text-white">{item.title}</p>
-            {item.subtitle ? (
-              <p className="truncate text-sm text-slate-500 dark:text-slate-400">{item.subtitle}</p>
-            ) : null}
-          </div>
-          <div className="shrink-0 text-right">
-            <p className="text-sm font-semibold tabular-nums text-slate-900 dark:text-white">
-              {item.count.toLocaleString(locale)}
-            </p>
-            <p className="text-[11px] text-slate-500">{listensLabel}</p>
-          </div>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-function FriendMusicTimelineCard({
-  title,
-  description,
-  badge,
-  chartData,
-  locale,
-  listensLabel,
-}: {
-  title: string;
-  description: string;
-  badge: string;
-  chartData: FriendMusicChartPoint[];
-  locale: string;
-  listensLabel: string;
-}) {
-  const [chartView, setChartView] = useState<ListenTrendChartViewMode>("period");
-  const displayChartData = useMemo(
-    () => applyListenTrendChartViewSingle(chartData, chartView, "listens"),
-    [chartData, chartView]
-  );
-
-  if (chartData.length === 0) return null;
-
-  return (
-    <section className={DASHBOARD_SPOTLIGHT_SHELL}>
-      <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} />
-      <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} />
-      <SpotlightSectionHeader eyebrow={badge} title={title} description={description} badge={badge} />
-      <div className="px-5 pb-6 sm:px-8">
-        <div className="mb-4 flex justify-end">
-          <ListenTrendChartViewToggle value={chartView} onChange={setChartView} />
-        </div>
-        <div className="rounded-[1.5rem] border border-slate-200/80 bg-slate-50/80 p-3 dark:border-white/10 dark:bg-black/20 sm:p-5">
-          <ChartResponsiveContainer
-            token="overviewArea"
-            minWidth={chartData.length > 8 ? Math.max(300, chartData.length * 28) : undefined}
-          >
-            <AreaChart data={displayChartData} margin={{ top: 10, right: 14, left: 0, bottom: 0 }}>
-              <defs>
-                <linearGradient id="friendMusicDesktopArea" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#67e8f9" stopOpacity={0.34} />
-                  <stop offset="48%" stopColor="#a78bfa" stopOpacity={0.16} />
-                  <stop offset="100%" stopColor="#67e8f9" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.2)" vertical={false} />
-              <XAxis
-                dataKey="formattedDate"
-                tick={{ fill: "#94a3b8", fontSize: 11 }}
-                axisLine={false}
-                tickLine={false}
-                angle={-45}
-                textAnchor="end"
-                height={50}
-              />
-              <YAxis tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} width={35} />
-              <Tooltip
-                contentStyle={CHART_TOOLTIP_STYLES.contentStyle}
-                labelStyle={CHART_TOOLTIP_STYLES.labelStyle}
-                itemStyle={CHART_TOOLTIP_STYLES.itemStyle}
-                formatter={(value: number) => [
-                  `${value.toLocaleString(locale)} ${listensLabel}`,
-                  listensLabel,
-                ]}
-              />
-              <Area
-                type="monotone"
-                dataKey="listens"
-                stroke="#67e8f9"
-                strokeWidth={3}
-                fill="url(#friendMusicDesktopArea)"
-                animationDuration={600}
-                animationEasing="ease-out"
-              />
-            </AreaChart>
-          </ChartResponsiveContainer>
-        </div>
-      </div>
-    </section>
   );
 }
 
@@ -507,6 +376,7 @@ function FriendMusicContent() {
     id: artist.artistId,
     title: artist.artistName,
     count: artist.listenCount,
+    imageUrl: artist.imageUrl,
     percentage:
       data.stats.totalListens > 0 ? (artist.listenCount / data.stats.totalListens) * 100 : 0,
   }));
@@ -528,6 +398,44 @@ function FriendMusicContent() {
         }))
       : null;
 
+  const topTrackLeader = topTracks?.[0];
+  const topArtistLeader = topArtists[0];
+  const insight: OverviewPrimaryInsight | undefined = emptyStats
+    ? undefined
+    : topTrackLeader
+      ? {
+          eyebrow: t("insight.topTrackEyebrow"),
+          title: topTrackLeader.title,
+          subtitle: t("insight.topTrackBody", {
+            artist: topTrackLeader.subtitle ?? "",
+          }),
+          metric: topTrackLeader.count.toLocaleString(locale),
+          metricLabel: t("listens"),
+        }
+      : topArtistLeader
+        ? {
+            eyebrow: t("insight.topArtistEyebrow"),
+            title: topArtistLeader.title,
+            subtitle: t("insight.topArtistBody"),
+            metric: topArtistLeader.count.toLocaleString(locale),
+            metricLabel: t("listens"),
+          }
+        : {
+            eyebrow: t("insight.libraryEyebrow"),
+            title: subjectName,
+            subtitle: t("insight.libraryBody"),
+            metric: data.stats.totalListens.toLocaleString(locale),
+            metricLabel: t("listens"),
+          };
+
+  const emptyNode = (
+    <EmptyState
+      variant="startup"
+      message={t("emptyStatsTitle")}
+      description={t("emptyStatsDescription", { name: subjectName })}
+    />
+  );
+
   return (
     <MusicSplit
       mobile={
@@ -538,6 +446,8 @@ function FriendMusicContent() {
           subjectName={subjectName}
           subjectAvatar={subjectAvatar}
           bannerLead={bannerLead}
+          insight={insight}
+          genreName={topGenres[0]?.title}
           stats={data.stats}
           topArtists={topArtists}
           topGenres={topGenres}
@@ -548,132 +458,25 @@ function FriendMusicContent() {
         />
       }
       desktop={
-        <div className="space-y-8">
-          <DuetSubNav />
-          <div className={MUSIC_HERO_SHELL}>
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.28),transparent_30%),radial-gradient(circle_at_80%_12%,rgba(6,182,212,0.16),transparent_32%),linear-gradient(135deg,rgba(3,7,18,0.98),rgba(30,27,75,0.88)_48%,rgba(8,47,73,0.65))]" />
-            <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-              <div className="flex min-w-0 items-start gap-4">
-                <UserAvatar name={subjectName} src={subjectAvatar} size="lg" />
-                <div className="min-w-0">
-                  <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-100 backdrop-blur">
-                    <Eye className="h-3.5 w-3.5" aria-hidden />
-                    {t("readOnlyBadge")}
-                  </div>
-                  <h1 className="text-3xl font-semibold tracking-[-0.06em] text-white sm:text-4xl">
-                    {t("bannerTitle", { name: subjectName })}
-                  </h1>
-                  <p className="mt-3 max-w-2xl text-sm leading-6 text-white/70 sm:text-base">{bannerLead}</p>
-                  {dateRangeLabel ? (
-                    <p className="mt-3 text-xs font-semibold uppercase tracking-[0.16em] text-white/50">
-                      {dateRangeLabel}
-                    </p>
-                  ) : null}
-                </div>
-              </div>
-              <Link
-                href={compareHref}
-                className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25 no-underline transition-all hover:-translate-y-0.5 hover:bg-gray-100"
-              >
-                <Swords className="h-4 w-4" aria-hidden />
-                {t("compareCta")}
-              </Link>
-            </div>
-          </div>
-
-          {emptyStats ? (
-            <EmptyState
-              variant="startup"
-              message={t("emptyStatsTitle")}
-              description={t("emptyStatsDescription", { name: subjectName })}
-            />
-          ) : (
-            <>
-              <div className="grid grid-cols-1 gap-4">
-                <OverviewStatsSection
-                  totalListens={data.stats.totalListens}
-                  uniqueArtists={data.stats.uniqueArtists}
-                  uniqueTracks={data.stats.uniqueTracks}
-                  totalPlayTime={data.stats.totalPlayTime}
-                  changes={null}
-                  showComparison={false}
-                />
-              </div>
-
-              <FriendMusicTimelineCard
-                title={t("timelineTitle")}
-                description={t("timelineDescription", { name: subjectName })}
-                badge={t("timelineBadge")}
-                chartData={chartData}
-                locale={locale}
-                listensLabel={t("listens")}
-              />
-
-              {topArtists.length > 0 ? (
-                <section className={DASHBOARD_SPOTLIGHT_SHELL}>
-                  <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} />
-                  <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} />
-                  <SpotlightSectionHeader
-                    eyebrow={t("topArtistsTitle")}
-                    title={t("topArtistsTitle")}
-                    description={t("topArtistsDescription", { name: subjectName })}
-                    badge={t("pickerBadge")}
-                  />
-                  <LeaderList items={topArtists} locale={locale} listensLabel={t("listens")} />
-                </section>
-              ) : null}
-
-              {topGenres.length > 0 ? (
-                <section className={DASHBOARD_SPOTLIGHT_SHELL}>
-                  <div className={DASHBOARD_SPOTLIGHT_GRADIENT_LIME} />
-                  <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_LIME} />
-                  <SpotlightSectionHeader
-                    eyebrow={t("topGenresTitle")}
-                    title={t("topGenresTitle")}
-                    description={t("topGenresDescription", { name: subjectName })}
-                    badge={t("pickerBadge")}
-                  />
-                  <LeaderList items={topGenres} locale={locale} listensLabel={t("listens")} />
-                </section>
-              ) : null}
-
-              {data.shareScope === "aggregates" ? (
-                <p
-                  role="status"
-                  className={`rounded-[1.35rem] border border-slate-200/80 bg-white px-5 py-4 text-sm leading-6 dark:border-white/10 dark:bg-slate-950/60 ${DASHBOARD_SPOTLIGHT_MUTED}`}
-                >
-                  {t("aggregatesTracksHint")}{" "}
-                  <Link
-                    href={DUET_SHARE_SETTINGS_PATH}
-                    className="font-semibold text-violet-600 no-underline underline-offset-2 hover:underline dark:text-violet-300"
-                  >
-                    {t("aggregatesTracksHintCta")}
-                  </Link>
-                </p>
-              ) : null}
-
-              {topTracks ? (
-                <section className={DASHBOARD_SPOTLIGHT_SHELL} data-testid="duet-friend-music-top-tracks">
-                  <div className={DASHBOARD_SPOTLIGHT_GRADIENT_CYAN} />
-                  <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_CYAN} />
-                  <SpotlightSectionHeader
-                    eyebrow={t("topTracksTitle")}
-                    title={t("topTracksTitle")}
-                    description={t("topTracksDescription", { name: subjectName })}
-                    badge={t("pickerBadge")}
-                  />
-                  {topTracks.length > 0 ? (
-                    <LeaderList items={topTracks} locale={locale} listensLabel={t("listens")} />
-                  ) : (
-                    <p className={`px-5 pb-6 text-sm sm:px-8 ${DASHBOARD_SPOTLIGHT_MUTED}`}>
-                      {t("emptyStatsDescription", { name: subjectName })}
-                    </p>
-                  )}
-                </section>
-              ) : null}
-            </>
-          )}
-        </div>
+        <DuetFriendMusicDesktopExperience
+          locale={locale}
+          compareHref={compareHref}
+          subjectName={subjectName}
+          subjectAvatar={subjectAvatar}
+          bannerLead={bannerLead}
+          badgeLabel={dateRangeLabel || t("pickerBadge")}
+          showPeriodHint={isAll}
+          insight={insight}
+          genreName={topGenres[0]?.title}
+          stats={data.stats}
+          topArtists={topArtists}
+          topGenres={topGenres}
+          topTracks={topTracks}
+          chartData={chartData}
+          emptyStats={emptyStats}
+          showAggregatesHint={!emptyStats && data.shareScope === "aggregates"}
+          emptyNode={emptyNode}
+        />
       }
     />
   );

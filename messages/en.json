@@ -1371,10 +1371,9 @@
     "friends": {
       "eyebrow": "Friends",
       "title": "See a friend’s Your Music",
-      "description": "Open a friend’s listening hub in read-only mode. Your own Your Music stays on this page.",
+      "description": "See what a friend listens to.",
       "seeMusic": "See their music",
       "seeMusicAria": "See {name}’s music",
-      "readOnlyHint": "Read-only · opens in Duet",
       "manageFriends": "Manage friends",
       "emptyTitle": "No friends yet",
       "emptyDescription": "Invite someone in Duet, then come back here to open their Your Music.",

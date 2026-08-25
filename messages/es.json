@@ -1373,10 +1373,9 @@
     "friends": {
       "eyebrow": "Amigos",
       "title": "Ver Your Music de un amigo",
-      "description": "Abre el hub de escucha de un amigo en solo lectura. Tu propio Your Music sigue en esta página.",
+      "description": "Descubre lo que escucha un amigo.",
       "seeMusic": "Ver su música",
       "seeMusicAria": "Ver la música de {name}",
-      "readOnlyHint": "Solo lectura · se abre en Duet",
       "manageFriends": "Gestionar amigos",
       "emptyTitle": "Aún no hay amigos",
       "emptyDescription": "Invita a alguien en Duet y vuelve aquí para abrir su Your Music.",

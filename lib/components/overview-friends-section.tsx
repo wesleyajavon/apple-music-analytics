@@ -119,12 +119,9 @@ export function OverviewFriendsSection({ compact = false }: OverviewFriendsSecti
             <li key={friend.id}>
               <div className="flex items-center gap-3 rounded-[1.25rem] border border-slate-200/80 bg-white px-3 py-2.5 shadow-sm dark:border-white/10 dark:bg-slate-950/50">
                 <UserAvatar name={friend.name} src={friend.avatarUrl} size="md" />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate font-semibold text-slate-900 dark:text-white">
-                    {friend.name}
-                  </p>
-                  <p className="truncate text-xs text-muted-foreground">{t("readOnlyHint")}</p>
-                </div>
+                <p className="min-w-0 flex-1 truncate font-semibold text-slate-900 dark:text-white">
+                  {friend.name}
+                </p>
                 <Link
                   href={friend.musicHref}
                   className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-xl bg-gradient-to-r from-violet-600 to-violet-500 px-3.5 text-sm font-semibold text-white no-underline shadow-md shadow-violet-500/20"

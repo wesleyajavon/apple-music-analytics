@@ -1,16 +1,13 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { Area, AreaChart, CartesianGrid, Tooltip, XAxis, YAxis } from "recharts";
-import { BarChart3, ListMusic, TrendingUp, type LucideIcon } from "lucide-react";
+import { ListMusic, TrendingUp, type LucideIcon } from "lucide-react";
 import { DashboardCinematicHeroBg } from "@/lib/components/dashboard-ui";
 import { MusicalProfilePeriodBadge } from "@/lib/components/musical-profile-period-badge";
 import { OverviewMobileHero } from "@/lib/components/overview-hero";
 import { UserAvatar } from "@/lib/components/user-avatar";
-import { ChartResponsiveContainer } from "@/lib/components/chart-responsive-container";
-import { ListenTrendChartViewToggle } from "@/lib/components/charts/listen-trend-chart-view-toggle";
 import { DuetMobileSubNav } from "@/lib/components/duet/duet-mobile-sub-nav";
 import { SpotlightRankBubble } from "@/lib/components/overview-library-rankings";
 import { ArtistAvatarHydrated } from "@/lib/components/artist-avatar-hydrated";
@@ -21,13 +18,11 @@ import {
   useDashboardSectionView,
   type DashboardSectionItem,
 } from "@/lib/components/dashboard-section-switcher";
+import { TimelineMobileSpark } from "@/lib/components/timeline-mobile-spark";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
 import { DUET_SHARE_SETTINGS_PATH } from "@/lib/constants/duet-settings";
-import { CHART_TOOLTIP_STYLES } from "@/lib/constants/config";
 import type { FriendshipDto } from "@/lib/dto/duet";
-import type { OverviewStatsDto } from "@/lib/dto/listening";
 import type { OverviewPrimaryInsight } from "@/lib/utils/overview-page";
-import { applyListenTrendChartViewSingle, type ListenTrendChartViewMode } from "@/lib/utils/listen-trend-chart-view";
 
 const MOBILE_BLEED =
   "-mx-4 -mt-4 space-y-4 lg:hidden max-lg:pb-[max(2rem,calc(var(--dashboard-bottom-nav-offset,0px)+5.75rem))]";
@@ -37,14 +32,52 @@ const SNAP_RAIL =
 const ROW_CLASS =
   "flex min-h-11 w-full items-center gap-3 rounded-2xl border border-card-border bg-card-surface px-3 py-2 text-left";
 
-const FRIEND_MUSIC_VIEWS = ["summary", "tops", "trends"] as const;
+const FRIEND_MUSIC_VIEWS = ["tops", "trends"] as const;
 type FriendMusicView = (typeof FRIEND_MUSIC_VIEWS)[number];
 
 const VIEW_ICONS: Record<FriendMusicView, LucideIcon> = {
-  summary: BarChart3,
   tops: ListMusic,
   trends: TrendingUp,
 };
+
+type FriendMusicTrendSummary = {
+  total: number;
+  peak: FriendMusicChartPoint;
+  average: number;
+  trendDirection: "up" | "down" | "flat";
+  topBuckets: FriendMusicChartPoint[];
+};
+
+function getFriendMusicTrendSummary(data: FriendMusicChartPoint[]): FriendMusicTrendSummary | null {
+  if (data.length === 0) return null;
+
+  const total = data.reduce((sum, point) => sum + point.listens, 0);
+  const peak = data.reduce((current, point) =>
+    point.listens > current.listens ? point : current,
+  );
+  const first = data[0]?.listens ?? 0;
+  const last = data[data.length - 1]?.listens ?? 0;
+  const trendDelta = last - first;
+  const trendDirection: FriendMusicTrendSummary["trendDirection"] =
+    Math.abs(trendDelta) < 1 ? "flat" : trendDelta > 0 ? "up" : "down";
+
+  return {
+    total,
+    peak,
+    average: total / data.length,
+    trendDirection,
+    topBuckets: [...data].sort((a, b) => b.listens - a.listens).slice(0, 5),
+  };
+}
+
+function SignalTile({ label, value }: { label: string; value: string }) {
+  return (
+    <article className="min-w-[9.75rem] snap-start rounded-3xl border border-card-border bg-gray-950 p-4 text-white shadow-lg shadow-black/10">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">{label}</p>
+      <p className="mt-2 truncate text-2xl font-semibold tabular-nums tracking-[-0.04em]">{value}</p>
+    </article>
+  );
+}
 
 export type FriendMusicLeaderItem = {
   id: string;
@@ -345,7 +378,6 @@ export function DuetFriendMusicMobileExperience({
   bannerLead,
   insight,
   genreName,
-  stats,
   topArtists,
   topGenres,
   topTracks,
@@ -361,7 +393,6 @@ export function DuetFriendMusicMobileExperience({
   bannerLead: string;
   insight?: OverviewPrimaryInsight;
   genreName?: string;
-  stats: OverviewStatsDto;
   topArtists: FriendMusicLeaderItem[];
   topGenres: FriendMusicLeaderItem[];
   topTracks: FriendMusicLeaderItem[] | null;
@@ -371,26 +402,20 @@ export function DuetFriendMusicMobileExperience({
 }) {
   const t = useTranslations("duet.friendMusic");
   const tm = useTranslations("duet.friendMusic.mobile");
-  const tOverview = useTranslations("overview");
-  const [chartView, setChartView] = useState<ListenTrendChartViewMode>("period");
-  const displayChartData = useMemo(
-    () => applyListenTrendChartViewSingle(chartData, chartView, "listens"),
-    [chartData, chartView]
-  );
+  const trendSummary = useMemo(() => getFriendMusicTrendSummary(chartData), [chartData]);
 
   const hasTops =
     topArtists.length > 0 || topGenres.length > 0 || (topTracks !== null && topTracks.length > 0);
-  const hasTrends = chartData.length > 0;
+  const hasTrends = chartData.length > 0 && trendSummary != null;
   const availableViews = useMemo((): FriendMusicView[] => {
     const views: FriendMusicView[] = [];
     if (hasTops) views.push("tops");
-    views.push("summary");
     if (hasTrends) views.push("trends");
     return views;
   }, [hasTops, hasTrends]);
   const fallbackView = availableViews.includes("tops")
     ? "tops"
-    : (availableViews[0] ?? "summary");
+    : (availableViews[0] ?? "tops");
   const { activeView, setView } = useDashboardSectionView(availableViews, fallbackView);
   const switcherItems: DashboardSectionItem<FriendMusicView>[] = availableViews.map((id) => ({
     id,
@@ -398,11 +423,12 @@ export function DuetFriendMusicMobileExperience({
     icon: VIEW_ICONS[id],
   }));
 
-  const metricRail = [
-    { label: tOverview("stats.totalListens"), value: stats.totalListens.toLocaleString(locale) },
-    { label: tOverview("stats.uniqueArtists"), value: stats.uniqueArtists.toLocaleString(locale) },
-    { label: tOverview("stats.uniqueTracks"), value: stats.uniqueTracks.toLocaleString(locale) },
-  ];
+  const trendLabel =
+    trendSummary?.trendDirection === "up"
+      ? tm("trendUp")
+      : trendSummary?.trendDirection === "down"
+        ? tm("trendDown")
+        : tm("trendFlat");
 
   return (
     <div className={MOBILE_BLEED}>
@@ -433,40 +459,17 @@ export function DuetFriendMusicMobileExperience({
         </p>
       ) : (
         <>
-          <div className="px-4">
-            <DashboardSectionSwitcher
-              items={switcherItems}
-              activeView={activeView}
-              onChange={setView}
-              idPrefix="friend-music-mobile"
-              navLabel={t("viewSwitcher.navLabel")}
-            />
-          </div>
-
-          <DashboardSectionPanel
-            view="summary"
-            activeView={activeView}
-            idPrefix="friend-music-mobile"
-          >
-            <section className="space-y-2" aria-label={tm("railLabel")}>
-              <h2 className="px-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
-                {tm("railLabel")}
-              </h2>
-              <div className={SNAP_RAIL}>
-                {metricRail.map((stat) => (
-                  <article
-                    key={stat.label}
-                    className="min-w-[9.75rem] snap-start rounded-3xl border border-white/10 bg-slate-950 p-4 text-white shadow-lg shadow-black/10"
-                  >
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
-                      {stat.label}
-                    </p>
-                    <p className="mt-2 text-2xl font-semibold tabular-nums tracking-[-0.04em]">{stat.value}</p>
-                  </article>
-                ))}
-              </div>
-            </section>
-          </DashboardSectionPanel>
+          {switcherItems.length > 0 ? (
+            <div className="px-4">
+              <DashboardSectionSwitcher
+                items={switcherItems}
+                activeView={activeView}
+                onChange={setView}
+                idPrefix="friend-music-mobile"
+                navLabel={t("viewSwitcher.navLabel")}
+              />
+            </div>
+          ) : null}
 
           {hasTops ? (
             <DashboardSectionPanel
@@ -486,14 +489,6 @@ export function DuetFriendMusicMobileExperience({
                       listensLabel={t("listens")}
                       showArtistAvatars
                     />
-                  </section>
-                ) : null}
-                {topGenres.length > 0 ? (
-                  <section className="space-y-2">
-                    <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
-                      {tm("genresLabel")}
-                    </h2>
-                    <LeaderRows items={topGenres} locale={locale} listensLabel={t("listens")} />
                   </section>
                 ) : null}
                 {showAggregatesHint ? (
@@ -523,66 +518,85 @@ export function DuetFriendMusicMobileExperience({
                     )}
                   </section>
                 ) : null}
+                {topGenres.length > 0 ? (
+                  <section className="space-y-2">
+                    <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
+                      {tm("genresLabel")}
+                    </h2>
+                    <LeaderRows items={topGenres} locale={locale} listensLabel={t("listens")} />
+                  </section>
+                ) : null}
               </div>
             </DashboardSectionPanel>
           ) : null}
 
-          {hasTrends ? (
+          {hasTrends && trendSummary ? (
             <DashboardSectionPanel
               view="trends"
               activeView={activeView}
               idPrefix="friend-music-mobile"
             >
-              <section className="space-y-2 px-4">
-                <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
-                  {tm("timelineLabel")}
-                </h2>
-                <div className="rounded-[1.5rem] border border-card-border bg-card-surface p-3">
-                  <ListenTrendChartViewToggle value={chartView} onChange={setChartView} />
-                  <div className="mt-3">
-                    <ChartResponsiveContainer
-                      token="overviewArea"
-                      minWidth={chartData.length > 8 ? Math.max(300, chartData.length * 28) : undefined}
-                    >
-                      <AreaChart data={displayChartData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-                        <defs>
-                          <linearGradient id="friendMusicMobileArea" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#67e8f9" stopOpacity={0.34} />
-                            <stop offset="100%" stopColor="#67e8f9" stopOpacity={0} />
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.2)" vertical={false} />
-                        <XAxis
-                          dataKey="formattedDate"
-                          tick={{ fill: "#94a3b8", fontSize: 11 }}
-                          axisLine={false}
-                          tickLine={false}
-                          angle={-45}
-                          textAnchor="end"
-                          height={50}
-                        />
-                        <YAxis tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} width={32} />
-                        <Tooltip
-                          contentStyle={CHART_TOOLTIP_STYLES.contentStyle}
-                          labelStyle={CHART_TOOLTIP_STYLES.labelStyle}
-                          itemStyle={CHART_TOOLTIP_STYLES.itemStyle}
-                          formatter={(value: number) => [
-                            `${value.toLocaleString(locale)} ${t("listens")}`,
-                            t("listens"),
-                          ]}
-                        />
-                        <Area
-                          type="monotone"
-                          dataKey="listens"
-                          stroke="#67e8f9"
-                          strokeWidth={3}
-                          fill="url(#friendMusicMobileArea)"
-                        />
-                      </AreaChart>
-                    </ChartResponsiveContainer>
+              <div className="space-y-4">
+                <section className="px-4" aria-label={tm("signalsLabel")}>
+                  <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
+                    {tm("signalsLabel")}
+                  </p>
+                  <div className={SNAP_RAIL}>
+                    <SignalTile
+                      label={tm("railTotal")}
+                      value={trendSummary.total.toLocaleString(locale)}
+                    />
+                    <SignalTile
+                      label={tm("railPeak")}
+                      value={trendSummary.peak.listens.toLocaleString(locale)}
+                    />
+                    <SignalTile
+                      label={tm("average")}
+                      value={Math.round(trendSummary.average).toLocaleString(locale)}
+                    />
+                    <SignalTile label={tm("trend")} value={trendLabel} />
                   </div>
-                </div>
-              </section>
+                </section>
+
+                <section className="space-y-2 px-4">
+                  <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
+                    {tm("sparkTitle")}
+                  </h2>
+                  <TimelineMobileSpark
+                    data={chartData}
+                    ariaLabel={tm("sparkAria")}
+                    startLabel={chartData[0]?.formattedDate ?? ""}
+                    peakCaption={tm("sparkPeakCaption", {
+                      date: trendSummary.peak.formattedDate,
+                    })}
+                    endLabel={chartData[chartData.length - 1]?.formattedDate ?? ""}
+                    gradientId="friendMusicMobileSparkline"
+                  />
+                </section>
+
+                <section className="space-y-2 px-4">
+                  <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
+                    {tm("bucketsTitle")}
+                  </h2>
+                  {trendSummary.topBuckets.map((bucket, index) => (
+                    <div
+                      key={`${bucket.formattedDate}-${index}`}
+                      className="flex min-h-11 w-full items-center gap-3 rounded-2xl border border-card-border bg-card-surface px-3.5 py-2.5 text-left shadow-sm"
+                    >
+                      <span className="w-6 shrink-0 text-center text-xs font-bold tabular-nums text-muted">
+                        {index + 1}
+                      </span>
+                      <span className="min-w-0 flex-1 truncate text-sm font-semibold text-foreground">
+                        {bucket.formattedDate}
+                      </span>
+                      <span className="shrink-0 text-sm font-semibold tabular-nums text-foreground">
+                        {bucket.listens.toLocaleString(locale)}
+                      </span>
+                      <span className="sr-only">{t("listens")}</span>
+                    </div>
+                  ))}
+                </section>
+              </div>
             </DashboardSectionPanel>
           ) : null}
         </>

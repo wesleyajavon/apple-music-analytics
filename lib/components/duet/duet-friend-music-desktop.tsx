@@ -3,7 +3,7 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { Eye, Swords, BarChart3, ListMusic, TrendingUp, type LucideIcon } from "lucide-react";
+import { Eye, Swords, ListMusic, TrendingUp, type LucideIcon } from "lucide-react";
 import { Area, AreaChart, CartesianGrid, Tooltip, XAxis, YAxis } from "recharts";
 import { ChartResponsiveContainer } from "@/lib/components/chart-responsive-container";
 import { ListenTrendChartViewToggle } from "@/lib/components/charts/listen-trend-chart-view-toggle";
@@ -11,7 +11,6 @@ import { DuetSubNav } from "@/lib/components/duet/duet-sub-nav";
 import type { FriendMusicChartPoint, FriendMusicLeaderItem } from "@/lib/components/duet/duet-friend-music-mobile";
 import { OverviewHeroFrame } from "@/lib/components/overview-hero";
 import { OverviewSectionHeader } from "@/lib/components/overview-section";
-import { OverviewStatsSection } from "@/lib/components/overview-stats-section";
 import {
   LIBRARY_LEADER_ACCENTS,
   TopLibraryCard,
@@ -24,18 +23,16 @@ import {
 } from "@/lib/components/dashboard-section-switcher";
 import { CHART_TOOLTIP_STYLES } from "@/lib/constants/config";
 import { DUET_SHARE_SETTINGS_PATH } from "@/lib/constants/duet-settings";
-import type { OverviewStatsDto } from "@/lib/dto/listening";
 import type { OverviewPrimaryInsight } from "@/lib/utils/overview-page";
 import {
   applyListenTrendChartViewSingle,
   type ListenTrendChartViewMode,
 } from "@/lib/utils/listen-trend-chart-view";
 
-const FRIEND_MUSIC_VIEWS = ["summary", "tops", "trends"] as const;
+const FRIEND_MUSIC_VIEWS = ["tops", "trends"] as const;
 type FriendMusicView = (typeof FRIEND_MUSIC_VIEWS)[number];
 
 const VIEW_ICONS: Record<FriendMusicView, LucideIcon> = {
-  summary: BarChart3,
   tops: ListMusic,
   trends: TrendingUp,
 };
@@ -130,7 +127,6 @@ export function DuetFriendMusicDesktopExperience({
   showPeriodHint,
   insight,
   genreName,
-  stats,
   topArtists,
   topGenres,
   topTracks,
@@ -148,7 +144,6 @@ export function DuetFriendMusicDesktopExperience({
   showPeriodHint: boolean;
   insight?: OverviewPrimaryInsight;
   genreName?: string;
-  stats: OverviewStatsDto;
   topArtists: FriendMusicLeaderItem[];
   topGenres: FriendMusicLeaderItem[];
   topTracks: FriendMusicLeaderItem[] | null;
@@ -165,14 +160,13 @@ export function DuetFriendMusicDesktopExperience({
   const availableViews = useMemo((): FriendMusicView[] => {
     const views: FriendMusicView[] = [];
     if (hasTops) views.push("tops");
-    views.push("summary");
     if (hasTrends) views.push("trends");
     return views;
   }, [hasTops, hasTrends]);
 
   const fallbackView = availableViews.includes("tops")
     ? "tops"
-    : (availableViews[0] ?? "summary");
+    : (availableViews[0] ?? "tops");
   const { activeView, setView } = useDashboardSectionView(availableViews, fallbackView);
   const switcherItems: DashboardSectionItem<FriendMusicView>[] = availableViews.map((id) => ({
     id,
@@ -234,37 +228,15 @@ export function DuetFriendMusicDesktopExperience({
         emptyNode
       ) : (
         <>
-          <DashboardSectionSwitcher
-            items={switcherItems}
-            activeView={activeView}
-            onChange={setView}
-            idPrefix="friend-music-desktop"
-            navLabel={t("viewSwitcher.navLabel")}
-          />
-
-          <DashboardSectionPanel
-            view="summary"
-            activeView={activeView}
-            idPrefix="friend-music-desktop"
-          >
-            <section className="relative">
-              <OverviewSectionHeader
-                eyebrow={t("sections.summary.eyebrow")}
-                title={t("sections.summary.title")}
-                description={t("sections.summary.description", { name: subjectName })}
-              />
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
-                <OverviewStatsSection
-                  totalListens={stats.totalListens}
-                  uniqueArtists={stats.uniqueArtists}
-                  uniqueTracks={stats.uniqueTracks}
-                  totalPlayTime={stats.totalPlayTime}
-                  changes={null}
-                  showComparison={false}
-                />
-              </div>
-            </section>
-          </DashboardSectionPanel>
+          {switcherItems.length > 0 ? (
+            <DashboardSectionSwitcher
+              items={switcherItems}
+              activeView={activeView}
+              onChange={setView}
+              idPrefix="friend-music-desktop"
+              navLabel={t("viewSwitcher.navLabel")}
+            />
+          ) : null}
 
           {hasTops ? (
             <DashboardSectionPanel
@@ -279,6 +251,17 @@ export function DuetFriendMusicDesktopExperience({
                   description={t("sections.tops.description", { name: subjectName })}
                 />
                 <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+                  {libraryItems.artists.length > 0 ? (
+                    <TopLibraryCard
+                      title={t("topArtistsTitle")}
+                      description={t("topArtistsDescription", { name: subjectName })}
+                      accent={LIBRARY_LEADER_ACCENTS.artists}
+                      items={libraryItems.artists}
+                      locale={locale}
+                      listensLabel={t("listens")}
+                      showArtistAvatars
+                    />
+                  ) : null}
                   {libraryItems.tracks.length > 0 ? (
                     <div data-testid="duet-friend-music-top-tracks">
                       <TopLibraryCard
@@ -290,17 +273,6 @@ export function DuetFriendMusicDesktopExperience({
                         listensLabel={t("listens")}
                       />
                     </div>
-                  ) : null}
-                  {libraryItems.artists.length > 0 ? (
-                    <TopLibraryCard
-                      title={t("topArtistsTitle")}
-                      description={t("topArtistsDescription", { name: subjectName })}
-                      accent={LIBRARY_LEADER_ACCENTS.artists}
-                      items={libraryItems.artists}
-                      locale={locale}
-                      listensLabel={t("listens")}
-                      showArtistAvatars
-                    />
                   ) : null}
                   {libraryItems.genres.length > 0 ? (
                     <TopLibraryCard

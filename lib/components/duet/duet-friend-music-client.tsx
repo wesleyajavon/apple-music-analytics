@@ -448,7 +448,6 @@ function FriendMusicContent() {
           bannerLead={bannerLead}
           insight={insight}
           genreName={topGenres[0]?.title}
-          stats={data.stats}
           topArtists={topArtists}
           topGenres={topGenres}
           topTracks={topTracks}
@@ -468,7 +467,6 @@ function FriendMusicContent() {
           showPeriodHint={isAll}
           insight={insight}
           genreName={topGenres[0]?.title}
-          stats={data.stats}
           topArtists={topArtists}
           topGenres={topGenres}
           topTracks={topTracks}

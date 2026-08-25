@@ -467,17 +467,11 @@
       "viewSwitcher": {
         "navLabel": "Secciones de música del amigo",
         "views": {
-          "summary": "Resumen",
           "tops": "Tops",
           "trends": "Tendencias"
         }
       },
       "sections": {
-        "summary": {
-          "eyebrow": "Resumen",
-          "title": "Totales del periodo",
-          "description": "Streams, artistas, canciones y tiempo de escucha de {name}."
-        },
         "tops": {
           "eyebrow": "Tops",
           "title": "Lo que destacó",
@@ -510,12 +504,22 @@
         "friendsListLabel": "Amigos",
         "pickFriendTitle": "Elige un amigo",
         "emptyLead": "Invita primero a un amigo y luego abre su música aquí.",
-        "railLabel": "Totales del periodo",
         "compareCta": "Comparar",
         "artistsLabel": "Top artistas",
         "genresLabel": "Top géneros",
         "tracksLabel": "Top canciones",
-        "timelineLabel": "Escucha en el tiempo"
+        "signalsLabel": "Señales",
+        "railTotal": "Streams",
+        "railPeak": "Pico",
+        "average": "Mes medio",
+        "trend": "Tendencia",
+        "trendUp": "Subiendo",
+        "trendDown": "Bajando",
+        "trendFlat": "Estable",
+        "sparkTitle": "Forma",
+        "sparkAria": "Tendencia compacta de streams de este amigo",
+        "sparkPeakCaption": "Pico {date}",
+        "bucketsTitle": "Meses más fuertes"
       }
     },
     "settings": {

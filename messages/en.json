@@ -467,17 +467,11 @@
       "viewSwitcher": {
         "navLabel": "Friend music sections",
         "views": {
-          "summary": "Summary",
           "tops": "Tops",
           "trends": "Trends"
         }
       },
       "sections": {
-        "summary": {
-          "eyebrow": "Summary",
-          "title": "Period totals",
-          "description": "Streams, artists, tracks, and listening time for {name}."
-        },
         "tops": {
           "eyebrow": "Tops",
           "title": "What stood out",
@@ -510,12 +504,22 @@
         "friendsListLabel": "Friends",
         "pickFriendTitle": "Pick a friend",
         "emptyLead": "Invite a friend first, then open their music here.",
-        "railLabel": "Period totals",
         "compareCta": "Compare",
         "artistsLabel": "Top artists",
         "genresLabel": "Top genres",
         "tracksLabel": "Top tracks",
-        "timelineLabel": "Listening over time"
+        "signalsLabel": "Signals",
+        "railTotal": "Streams",
+        "railPeak": "Peak",
+        "average": "Avg. month",
+        "trend": "Last move",
+        "trendUp": "Rising",
+        "trendDown": "Cooling",
+        "trendFlat": "Steady",
+        "sparkTitle": "Shape",
+        "sparkAria": "Compact streaming trend for this friend",
+        "sparkPeakCaption": "Peak {date}",
+        "bucketsTitle": "Loudest months"
       }
     },
     "settings": {

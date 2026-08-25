@@ -8,10 +8,8 @@ import { DashboardCinematicHeroBg } from "@/lib/components/dashboard-ui";
 import { GroqQuotaNotice } from "@/lib/components/error-state";
 import { MobileBottomSheet } from "@/lib/components/mobile-bottom-sheet";
 import { MusicalProfilePeriodBadge } from "@/lib/components/musical-profile-period-badge";
-import {
-  PeriodSelector,
-  type PeriodType,
-} from "@/lib/components/period-selector";
+import { PeriodSelector, type PeriodType } from "@/lib/components/period-selector";
+import { TimelineMobileSpark } from "@/lib/components/timeline-mobile-spark";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
 import type { TimelineDataPoint } from "@/lib/hooks/use-listening";
 import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
@@ -23,14 +21,6 @@ const MOBILE_BLEED =
 const HERO_SHELL = "relative overflow-hidden bg-gray-950 px-4 pb-5 pt-4 text-white";
 const SNAP_RAIL =
   "-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden";
-
-const SPARK = {
-  width: 260,
-  plotHeight: 68,
-  plotBottom: 78,
-  height: 88,
-  padX: 12,
-} as const;
 
 type TimelineMobileSummary = {
   total: number;
@@ -101,36 +91,6 @@ function getTimelineMobileSummary(data: TimelineDataPoint[]): TimelineMobileSumm
     trendDelta,
     trendDirection,
     topBuckets: [...data].sort((a, b) => b.listens - a.listens).slice(0, 5),
-  };
-}
-
-function createSparkGeometry(data: TimelineDataPoint[]) {
-  if (data.length === 0) {
-    return { points: "", peakX: SPARK.width / 2, peakY: SPARK.plotBottom };
-  }
-
-  const values = data.map((point) => point.listens);
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const range = Math.max(max - min, 1);
-  let peakIndex = 0;
-  values.forEach((value, index) => {
-    if (value > values[peakIndex]) peakIndex = index;
-  });
-
-  const coords = data.map((point, index) => {
-    const x =
-      data.length === 1
-        ? SPARK.width / 2
-        : SPARK.padX + (index / (data.length - 1)) * (SPARK.width - SPARK.padX * 2);
-    const y = SPARK.plotBottom - ((point.listens - min) / range) * SPARK.plotHeight;
-    return { x, y };
-  });
-
-  return {
-    points: coords.map((coord) => `${coord.x.toFixed(1)},${coord.y.toFixed(1)}`).join(" "),
-    peakX: coords[peakIndex].x,
-    peakY: coords[peakIndex].y,
   };
 }
 
@@ -374,7 +334,6 @@ export function TimelineMobileExperience({
   const tPeriod = useTranslations("components.periodSelector");
   const searchParams = useSearchParams();
   const summary = useMemo(() => getTimelineMobileSummary(data), [data]);
-  const spark = useMemo(() => createSparkGeometry(data), [data]);
   const [selectedBucket, setSelectedBucket] = useState<TimelineDataPoint | null>(null);
 
   if (!summary) return <TimelineMobileEmpty />;
@@ -439,51 +398,15 @@ export function TimelineMobileExperience({
         <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">
           {tm("sparkTitle")}
         </h2>
-        <div className="rounded-3xl border border-card-border bg-card-surface px-3 pb-3 pt-2">
-          <svg
-            className="h-24 w-full"
-            viewBox={`0 0 ${SPARK.width} ${SPARK.height}`}
-            preserveAspectRatio="none"
-            role="img"
-            aria-label={tm("sparkAria")}
-          >
-            <defs>
-              <linearGradient id="timelineMobileSparkline" x1="0" x2="1" y1="0" y2="0">
-                <stop offset="0%" stopColor="#a78bfa" />
-                <stop offset="60%" stopColor="#6366f1" />
-                <stop offset="100%" stopColor="#22d3ee" />
-              </linearGradient>
-            </defs>
-            <polyline
-              points={spark.points}
-              fill="none"
-              stroke="url(#timelineMobileSparkline)"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="4"
-              vectorEffect="non-scaling-stroke"
-            />
-            <circle
-              cx={spark.peakX}
-              cy={spark.peakY}
-              r="5"
-              fill="#22d3ee"
-              stroke="#f8fafc"
-              strokeWidth="2"
-            />
-          </svg>
-          <div className="mt-1 flex items-start justify-between gap-2 text-[11px] font-semibold leading-4 tracking-tight">
-            <time dateTime={toDateOnly(startDate)} className="min-w-0 flex-1 text-muted">
-              {startLabel}
-            </time>
-            <span className="min-w-0 flex-[1.4] text-center text-cyan-700 dark:text-cyan-300">
-              {tm("sparkPeakCaption", { date: peakDate })}
-            </span>
-            <time dateTime={toDateOnly(endDate)} className="min-w-0 flex-1 text-right text-muted">
-              {endLabel}
-            </time>
-          </div>
-        </div>
+        <TimelineMobileSpark
+          data={data}
+          ariaLabel={tm("sparkAria")}
+          startLabel={startLabel}
+          peakCaption={tm("sparkPeakCaption", { date: peakDate })}
+          endLabel={endLabel}
+          startDateTime={toDateOnly(startDate)}
+          endDateTime={toDateOnly(endDate)}
+        />
       </section>
 
       <section className="space-y-2 px-4">

@@ -27,6 +27,7 @@ import type { ArtistStatsDto } from "@/lib/dto/artist";
 import type { OverviewStatsWithTopArtists } from "@/lib/hooks/use-listening";
 import {
   buildOverviewPrimaryInsight,
+  overviewArtistLeaderToPreview,
   type OverviewArtistLeader,
   type OverviewGenreLeader,
   type OverviewTrackLeader,
@@ -80,6 +81,7 @@ export function OverviewDesktopFlow({
   onOpenArtistInsights?: (artist: ArtistStatsDto, avatarColorIndex: number) => void;
 }) {
   const t = useTranslations("overview");
+  const tArtists = useTranslations("artists");
   const authUserId = useSupabaseAuthUserId();
   const viewerUserId = useDashboardViewerUserId();
   const isPublicDemoViewer = usePublicDemoViewer(viewerUserId);
@@ -212,6 +214,21 @@ export function OverviewDesktopFlow({
                   listensLabel={t("listens")}
                   ctaLabel={t("seeAll")}
                   showArtistAvatars
+                  onItemSelect={
+                    onOpenArtistInsights
+                      ? (item, index) => {
+                          const artist = topArtists[index];
+                          if (!artist || artist.artistId !== item.id) return;
+                          onOpenArtistInsights(
+                            overviewArtistLeaderToPreview(artist, index + 1),
+                            index
+                          );
+                        }
+                      : undefined
+                  }
+                  itemAriaLabel={(item) =>
+                    tArtists("artistInsightsAriaOpen", { name: item.title })
+                  }
                 />
               ) : null}
 

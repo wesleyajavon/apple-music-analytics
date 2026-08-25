@@ -11,9 +11,11 @@ import { usePublicDemoViewer } from "@/lib/hooks/use-public-demo-viewer";
 import { OverviewFriendsSection } from "@/lib/components/overview-friends-section";
 import type { OverviewStatsChanges } from "@/lib/components/overview-stats-section";
 import type { OverviewStatsWithTopArtists } from "@/lib/hooks/use-listening";
+import type { ArtistStatsDto } from "@/lib/dto/artist";
 import {
   buildOverviewPrimaryInsight,
   formatListeningTime,
+  overviewArtistLeaderToPreview,
   type OverviewArtistLeader,
   type OverviewGenreLeader,
   type OverviewTrackLeader,
@@ -30,6 +32,8 @@ type MobileOverviewStat = {
 
 type MobileLeaderItem = LibraryLeaderItem & {
   href?: string;
+  onSelect?: () => void;
+  selectAriaLabel?: string;
 };
 
 function ChevronIcon({ className = "h-4 w-4" }: { className?: string }) {
@@ -190,6 +194,19 @@ function MobileLeaderRow({
   const className =
     "flex min-h-11 items-center justify-between gap-3 rounded-2xl border border-card-border bg-card-surface px-3.5 py-2.5 shadow-sm";
 
+  if (item.onSelect) {
+    return (
+      <button
+        type="button"
+        onClick={item.onSelect}
+        className={`${className} w-full cursor-pointer text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-violet/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[rgb(var(--background-rgb))]`}
+        aria-label={item.selectAriaLabel ?? item.title}
+      >
+        {content}
+      </button>
+    );
+  }
+
   if (item.href) {
     return (
       <Link href={item.href} className={className}>
@@ -275,6 +292,7 @@ export function MobileOverviewFlow({
   musicAgentHref,
   duetHref,
   avatarUrl,
+  onOpenArtistInsights,
 }: {
   title: string;
   data: OverviewStatsWithTopArtists;
@@ -290,8 +308,10 @@ export function MobileOverviewFlow({
   musicAgentHref: string;
   duetHref: string;
   avatarUrl?: string | null;
+  onOpenArtistInsights?: (artist: ArtistStatsDto, avatarColorIndex: number) => void;
 }) {
   const t = useTranslations("overview");
+  const tArtists = useTranslations("artists");
   const viewerUserId = useDashboardViewerUserId();
   const isPublicDemoViewer = usePublicDemoViewer(viewerUserId);
   const topTrack = topTracks[0];
@@ -354,12 +374,20 @@ export function MobileOverviewFlow({
       title: t("topArtists"),
       href: artistsHref,
       showPercentage: false,
-      items: topArtists.slice(0, 3).map((artist) => ({
+      items: topArtists.slice(0, 3).map((artist, index) => ({
         id: artist.artistId,
         title: artist.name,
         count: artist.count,
         percentage: artist.percentage,
         imageUrl: artist.imageUrl,
+        onSelect: onOpenArtistInsights
+          ? () =>
+              onOpenArtistInsights(
+                overviewArtistLeaderToPreview(artist, index + 1),
+                index
+              )
+          : undefined,
+        selectAriaLabel: tArtists("artistInsightsAriaOpen", { name: artist.name }),
       })),
     },
     {

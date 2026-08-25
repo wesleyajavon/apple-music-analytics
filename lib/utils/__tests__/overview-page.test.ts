@@ -5,6 +5,7 @@ import {
   calculateChange,
   formatListeningTime,
   getPreviousPeriod,
+  overviewArtistLeaderToPreview,
 } from "@/lib/utils/overview-page";
 import type { OverviewStatsWithTopArtists } from "@/lib/hooks/use-listening";
 
@@ -96,5 +97,32 @@ describe("buildOverviewPrimaryInsight", () => {
 describe("buildOverviewStatsChanges", () => {
   it("returns null without a previous period", () => {
     expect(buildOverviewStatsChanges(null, undefined, undefined)).toBeNull();
+  });
+});
+
+describe("overviewArtistLeaderToPreview", () => {
+  it("maps overview leaders into an insights preview artist", () => {
+    expect(
+      overviewArtistLeaderToPreview(
+        {
+          artistId: "a1",
+          name: "Daft Punk",
+          count: 42,
+          percentage: 12.5,
+          imageUrl: "https://example.com/daft.png",
+        },
+        1
+      )
+    ).toEqual({
+      artistId: "a1",
+      artistName: "Daft Punk",
+      imageUrl: "https://example.com/daft.png",
+      listenCount: 42,
+      uniqueTracks: 0,
+      firstListenDate: "",
+      lastListenDate: "",
+      totalPlayTime: 0,
+      rank: 1,
+    });
   });
 });

@@ -38,6 +38,11 @@ const INSIGHT_SECTION_TITLE = "text-sm font-semibold text-slate-900 dark:text-wh
 
 const TOP_TRACKS_LIMIT = 12;
 
+function hasUsableListenDate(isoDate: string | undefined): boolean {
+  if (!isoDate) return false;
+  return Number.isFinite(Date.parse(isoDate));
+}
+
 function formatPlaySeconds(seconds: number, notAvailable: string): string {
   if (seconds <= 0) return notAvailable;
   const h = Math.floor(seconds / 3600);
@@ -366,7 +371,7 @@ export const ArtistUserInsightsPanel = memo(
                 ) : null}
               </section>
 
-              {displayArtist ? (
+              {displayArtist && hasUsableListenDate(displayArtist.firstListenDate) ? (
                 <section
                   className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-slate-200/80 bg-slate-200/80 dark:border-white/10 dark:bg-white/10"
                   aria-label={t("insightsTimelineTitle")}

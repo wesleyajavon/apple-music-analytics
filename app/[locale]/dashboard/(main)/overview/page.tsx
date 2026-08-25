@@ -351,6 +351,7 @@ function OverviewContent() {
             musicAgentHref={musicAgentHref}
             duetHref={duetHref}
             avatarUrl={avatarUrl}
+            onOpenArtistInsights={handleOpenArtistInsights}
           />
         </div>
       ) : (

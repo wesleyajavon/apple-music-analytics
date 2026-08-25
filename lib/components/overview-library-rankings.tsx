@@ -128,6 +128,9 @@ function LeaderArtistAvatar({
   );
 }
 
+const INTERACTIVE_ROW_FOCUS =
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/55 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950";
+
 function TopLibraryFeaturedRow({
   item,
   accent,
@@ -200,6 +203,8 @@ function TopLibraryRow({
   listensLabel,
   showPercentage,
   showArtistAvatars,
+  onSelect,
+  ariaLabel,
 }: {
   item: LibraryLeaderItem;
   index: number;
@@ -208,21 +213,20 @@ function TopLibraryRow({
   listensLabel: string;
   showPercentage: boolean;
   showArtistAvatars: boolean;
+  onSelect?: (item: LibraryLeaderItem, index: number) => void;
+  ariaLabel?: string;
 }) {
-  if (index === 0) {
-    return (
-      <TopLibraryFeaturedRow
-        item={item}
-        accent={accent}
-        locale={locale}
-        listensLabel={listensLabel}
-        showPercentage={showPercentage}
-        showArtistAvatars={showArtistAvatars}
-      />
-    );
-  }
-
-  return (
+  const featured = index === 0;
+  const body = featured ? (
+    <TopLibraryFeaturedRow
+      item={item}
+      accent={accent}
+      locale={locale}
+      listensLabel={listensLabel}
+      showPercentage={showPercentage}
+      showArtistAvatars={showArtistAvatars}
+    />
+  ) : (
     <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] px-3 py-3 transition-all duration-300 hover:border-white/15 hover:bg-white/[0.06]">
       <div className="flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
@@ -252,6 +256,23 @@ function TopLibraryRow({
       </div>
     </div>
   );
+
+  if (!onSelect) return body;
+
+  return (
+    <button
+      type="button"
+      onClick={() => onSelect(item, index)}
+      aria-label={ariaLabel ?? item.title}
+      className={`w-full cursor-pointer border-0 bg-transparent p-0 text-left ${INTERACTIVE_ROW_FOCUS} ${
+        featured
+          ? "rounded-[1.35rem] transition-transform duration-300 hover:-translate-y-0.5"
+          : "rounded-2xl"
+      }`}
+    >
+      {body}
+    </button>
+  );
 }
 
 export function TopLibraryCard({
@@ -265,6 +286,8 @@ export function TopLibraryCard({
   ctaLabel,
   showPercentage = false,
   showArtistAvatars = false,
+  onItemSelect,
+  itemAriaLabel,
 }: {
   title: string;
   description: string;
@@ -276,6 +299,8 @@ export function TopLibraryCard({
   ctaLabel?: string;
   showPercentage?: boolean;
   showArtistAvatars?: boolean;
+  onItemSelect?: (item: LibraryLeaderItem, index: number) => void;
+  itemAriaLabel?: (item: LibraryLeaderItem, index: number) => string;
 }) {
   return (
     <article
@@ -328,6 +353,8 @@ export function TopLibraryCard({
               listensLabel={listensLabel}
               showPercentage={showPercentage}
               showArtistAvatars={showArtistAvatars}
+              onSelect={onItemSelect}
+              ariaLabel={itemAriaLabel?.(item, index)}
             />
           ))}
         </div>

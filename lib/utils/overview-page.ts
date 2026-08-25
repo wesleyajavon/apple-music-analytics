@@ -1,4 +1,5 @@
 import type { OverviewStatsChanges } from "@/lib/components/overview-stats-section";
+import type { ArtistStatsDto } from "@/lib/dto/artist";
 import type { OverviewStatsWithTopArtists } from "@/lib/hooks/use-listening";
 
 const MOBILE_DATE_OPTS = { month: "2-digit", day: "2-digit", year: "2-digit" } as const;
@@ -84,6 +85,24 @@ export type OverviewArtistLeader = {
   percentage: number;
   imageUrl?: string | null;
 };
+
+/** Minimal `ArtistStatsDto` so overview tops can open the insights overlay. */
+export function overviewArtistLeaderToPreview(
+  artist: OverviewArtistLeader,
+  rank?: number
+): ArtistStatsDto {
+  return {
+    artistId: artist.artistId,
+    artistName: artist.name,
+    imageUrl: artist.imageUrl ?? null,
+    listenCount: artist.count,
+    uniqueTracks: 0,
+    firstListenDate: "",
+    lastListenDate: "",
+    totalPlayTime: 0,
+    ...(rank != null ? { rank } : {}),
+  };
+}
 
 export type OverviewGenreLeader = {
   genre: string;

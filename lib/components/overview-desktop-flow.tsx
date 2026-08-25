@@ -7,7 +7,6 @@ import { AiInsightsSummaryWidget } from "@/lib/components/ai-insights-summary-wi
 import { OverviewMomentumTabs, type OverviewMomentumSlide } from "@/lib/components/overview-momentum-tabs";
 import { OverviewGoFurtherSection } from "@/lib/components/overview-go-further";
 import { OverviewFriendsSection } from "@/lib/components/overview-friends-section";
-import { OverviewTasteTeaser } from "@/lib/components/overview-taste-teaser";
 import { OverviewSectionHeader } from "@/lib/components/overview-section";
 import { OverviewHeroFrame } from "@/lib/components/overview-hero";
 import { OverviewStatsSection, type OverviewStatsChanges } from "@/lib/components/overview-stats-section";
@@ -50,7 +49,6 @@ export function OverviewDesktopFlow({
   tracksHref,
   artistsHref,
   genresHref,
-  musicalProfileHref,
   musicAgentHref,
   duetHref,
   startDate,
@@ -72,7 +70,6 @@ export function OverviewDesktopFlow({
   tracksHref: string;
   artistsHref: string;
   genresHref: string;
-  musicalProfileHref: string;
   musicAgentHref: string;
   duetHref: string;
   startDate?: string;
@@ -282,9 +279,6 @@ export function OverviewDesktopFlow({
             <div className="min-w-0">
               <HeatmapCalendarOverviewWidget startDate={startDate} endDate={endDate} />
             </div>
-          </div>
-          <div className="mt-5">
-            <OverviewTasteTeaser href={musicalProfileHref} />
           </div>
         </section>
       </OverviewViewPanel>

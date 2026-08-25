@@ -1361,7 +1361,7 @@
         "spotlight": "Spotlight de artistas",
         "tops": "Tus tops",
         "trends": "Tendencias",
-        "context": "Calendario",
+        "context": "Calendario e IA",
         "friends": "Amigos",
         "further": "Ir más allá"
       }
@@ -1381,13 +1381,6 @@
       "errorRetry": "Reintentar",
       "loadingLabel": "Cargando amigos"
     },
-    "tasteTeaser": {
-      "eyebrow": "Perfil musical",
-      "title": "Tu sonido en una página",
-      "description": "Una lectura narrativa de este período: artista firma, género e identidad.",
-      "cta": "Abrir perfil musical",
-      "aria": "Abrir perfil musical"
-    },
     "sections": {
       "momentum": {
         "eyebrow": "Tendencias",
@@ -1400,9 +1393,9 @@
         "description": "Tu ranking de este período. Abre una lista para ver el palmarés completo."
       },
       "intelligence": {
-        "eyebrow": "Cuándo escuchaste",
-        "title": "Calendario y hábitos",
-        "description": "Los días en que más streameaste, más una lectura corta de IA del mismo período."
+        "eyebrow": "Calendario e IA",
+        "title": "Insights de IA y calendario de escucha",
+        "description": "Una lectura de IA de este período, junto a un calendario estilo GitHub de tus días de stream."
       },
       "goFurther": {
         "eyebrow": "Ir más allá",
@@ -1527,7 +1520,7 @@
     "noData": "Sin datos",
     "favoriteDay": "Día favorito",
     "favoriteDayHint": "día más activo (período seleccionado)",
-    "calendarTitle": "Lienzo del calendario",
+    "calendarTitle": "Calendario GitHub",
     "calendarHint": "Más oscura la casilla, más rotación ese día — un clic abre el detalle.",
     "overviewCalendarHint": "Haz clic en un día para abrir sus detalles en el mapa de calor completo.",
     "noDataPeriod": "No hay datos disponibles para este período",
@@ -2291,9 +2284,9 @@
     "title": "AI Insights",
     "heroEyebrow": "Lo que los gráficos no dicen",
     "overviewWidget": {
-      "eyebrow": "Lo que los gráficos no dicen",
+      "eyebrow": "Insights de IA",
       "title": "Momentos escondidos en tus streams.",
-      "description": "Relaciones, huecos y primeras veces — no otro top 5."
+      "description": "La IA encuentra lo que ocultan los rankings: artistas relacionados, pausas de escucha y canciones escuchadas por primera vez."
     },
     "heroStatBadge": "Calidad de señal",
     "heroStatTag": "Basado en streams",

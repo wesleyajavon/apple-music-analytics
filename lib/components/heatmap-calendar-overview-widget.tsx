@@ -2,6 +2,7 @@
 
 import { useMemo, useCallback } from "react";
 import { useTranslations, useLocale } from "next-intl";
+import { Github } from "lucide-react";
 import { Link, useRouter } from "@/i18n/navigation";
 import { CalendarHeatmap, HeatmapDataPoint } from "@/lib/components/calendar-heatmap";
 import { useTimeline } from "@/lib/hooks/use-listening";
@@ -22,6 +23,21 @@ import { LiveStatusDot } from "@/lib/components/live-status-dot";
 
 function toDateOnly(date: string): string {
   return date.split("T")[0];
+}
+
+function GithubCalendarHeading({
+  id,
+  children,
+}: {
+  id?: string;
+  children: string;
+}) {
+  return (
+    <h2 id={id} className={`${OVERVIEW_STARTUP_WIDGET_TITLE_CLASS} flex flex-wrap items-center gap-3`}>
+      <Github className="h-8 w-8 shrink-0 text-foreground sm:h-9 sm:w-9" aria-hidden />
+      <span>{children}</span>
+    </h2>
+  );
 }
 
 export type HeatmapCalendarOverviewWidgetProps = {
@@ -142,9 +158,9 @@ export function HeatmapCalendarOverviewWidget({
             <LiveStatusDot />
             {tHeatmap("heroEyebrow")}
           </div>
-          <h2 id="overview-heatmap-calendar-title" className={OVERVIEW_STARTUP_WIDGET_TITLE_CLASS}>
+          <GithubCalendarHeading id="overview-heatmap-calendar-title">
             {tHeatmap("calendarTitle")}
-          </h2>
+          </GithubCalendarHeading>
           <p className={OVERVIEW_STARTUP_WIDGET_SUBTITLE_CLASS}>{tHeatmap("overviewCalendarHint")}</p>
         </div>
         <div className="relative flex-1 p-6 sm:p-8">
@@ -176,9 +192,9 @@ export function HeatmapCalendarOverviewWidget({
                 <LiveStatusDot />
                 {tHeatmap("heroEyebrow")}
               </div>
-              <h2 id="overview-heatmap-calendar-title" className={OVERVIEW_STARTUP_WIDGET_TITLE_CLASS}>
+              <GithubCalendarHeading id="overview-heatmap-calendar-title">
                 {tHeatmap("calendarTitle")}
-              </h2>
+              </GithubCalendarHeading>
               <p className={OVERVIEW_STARTUP_WIDGET_SUBTITLE_CLASS}>{tHeatmap("overviewCalendarHint")}</p>
             </div>
             <Link href={heatmapPageHref} className={OVERVIEW_STARTUP_HEADER_LINK_CLASS}>

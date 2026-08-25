@@ -38,7 +38,7 @@ import { MobileBottomSheet } from "@/lib/components/mobile-bottom-sheet";
 import { HeatmapSkeleton } from "@/lib/components/skeleton-loaders";
 import { LiveStatusDot } from "@/lib/components/live-status-dot";
 import { useIsLgChartViewport } from "@/lib/hooks/use-chart-viewport";
-import { Activity, CalendarDays } from "lucide-react";
+import { Activity, CalendarDays, Github } from "lucide-react";
 import {
   DASHBOARD_SPOTLIGHT_SHELL,
   DASHBOARD_SPOTLIGHT_GRADIENT_LIME,
@@ -562,7 +562,7 @@ function HeatmapContent() {
             <div className={`${DASHBOARD_SPOTLIGHT_HEADER_BOTTOM} px-6 py-5 sm:px-8`}>
               <div className="flex items-start gap-4">
                 <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-slate-200/90 bg-slate-50/90 text-lime-700 shadow-sm dark:border-white/15 dark:bg-white/10 dark:text-lime-300">
-                  <CalendarDays className="h-5 w-5" strokeWidth={1.75} aria-hidden />
+                  <Github className="h-5 w-5" strokeWidth={1.75} aria-hidden />
                 </div>
                 <div>
                   <h2 id="heatmap-spotlight-title" className={DASHBOARD_SPOTLIGHT_TITLE}>

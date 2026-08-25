@@ -269,7 +269,6 @@ function OverviewContent() {
     tracksHref,
     artistsHref,
     genresHref,
-    musicalProfileHref,
     musicAgentHref,
     duetHref,
     startDate,

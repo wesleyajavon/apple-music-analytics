@@ -1359,7 +1359,7 @@
         "spotlight": "Artist spotlight",
         "tops": "Your tops",
         "trends": "Trends",
-        "context": "Calendar",
+        "context": "Calendar & AI",
         "friends": "Friends",
         "further": "Go further"
       }
@@ -1379,13 +1379,6 @@
       "errorRetry": "Try again",
       "loadingLabel": "Loading friends"
     },
-    "tasteTeaser": {
-      "eyebrow": "Musical profile",
-      "title": "Your sound in one page",
-      "description": "A narrative read of this period — signature artist, genre, and identity.",
-      "cta": "Open musical profile",
-      "aria": "Open musical profile"
-    },
     "sections": {
       "momentum": {
         "eyebrow": "Trends",
@@ -1398,9 +1391,9 @@
         "description": "Your leaderboard for this period. Open a list to see the full ranking."
       },
       "intelligence": {
-        "eyebrow": "When you listened",
-        "title": "Calendar and habits",
-        "description": "The days you streamed most, plus a short AI read of the same period."
+        "eyebrow": "Calendar & AI",
+        "title": "AI insights and your listening calendar",
+        "description": "A short AI read of this period, next to a GitHub-style calendar of the days you streamed."
       },
       "goFurther": {
         "eyebrow": "Go further",
@@ -1525,7 +1518,7 @@
     "noData": "No data",
     "favoriteDay": "Favorite day",
     "favoriteDayHint": "most active day (selected period)",
-    "calendarTitle": "Calendar canvas",
+    "calendarTitle": "GitHub Calendar",
     "calendarHint": "Darker tiles mean heavier rotation—click through for the full play-by-play.",
     "overviewCalendarHint": "Click on a day to open its details in the full heatmap.",
     "noDataPeriod": "No data available for this period",
@@ -2289,9 +2282,9 @@
     "title": "AI Insights",
     "heroEyebrow": "What the charts don’t say",
     "overviewWidget": {
-      "eyebrow": "What the charts don’t say",
+      "eyebrow": "AI Insights",
       "title": "Moments hiding in your streams.",
-      "description": "Relations, gaps, and first times — not another top 5."
+      "description": "AI finds what rankings hide: linked artists, quiet stretches, and tracks you heard for the first time."
     },
     "heroStatBadge": "Signal quality",
     "heroStatTag": "Grounded in streams",

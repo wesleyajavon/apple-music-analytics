@@ -29,6 +29,8 @@ import {
   DashboardOutlineButton,
 } from "@/lib/components/dashboard-ui";
 import { useGenreBackfillJobSafe } from "@/lib/context/genre-backfill-job-context";
+import { useNotificationsSafe } from "@/lib/context/notification-center-context";
+import { IMPORT_COMPLETE_NOTIFICATION_SOURCE } from "@/lib/constants/import-complete-notification";
 import {
   isRecentAuthRequiredError,
   redirectToRecentSignIn,
@@ -422,9 +424,11 @@ export function DataExportOnboarding({
   initialGenreAiLanding?: boolean;
 } = {}) {
   const t = useTranslations("onboarding");
+  const tNotifications = useTranslations("components.notificationCenter");
   const router = useRouter();
   const locale = useLocale();
   const genreBackfillShared = useGenreBackfillJobSafe();
+  const notifications = useNotificationsSafe();
   const hasActiveGroqJobShared = genreBackfillShared?.hasActiveGroqJob ?? false;
   const refreshGroqJobShared = genreBackfillShared?.refreshStatus;
   const [phase, setPhase] = useState<Phase>("welcome");
@@ -808,6 +812,14 @@ export function DataExportOnboarding({
       }
       if (imported > 0) {
         toast.success(t("import.toastSuccess", { count: imported }));
+        notifications?.addNotification({
+          title: tNotifications("importComplete.title"),
+          body: tNotifications("importComplete.body", { count: imported }),
+          severity: "success",
+          href: "/dashboard/overview",
+          source: IMPORT_COMPLETE_NOTIFICATION_SOURCE,
+          importComplete: { count: imported },
+        });
       } else if (importMode === "incremental" && providerHasExistingData) {
         toast.message(t("import.nothingNewAfterCursor"));
       }
@@ -1004,6 +1016,8 @@ export function DataExportOnboarding({
     providerHasExistingData,
     providerImportStatus,
     t,
+    tNotifications,
+    notifications,
   ]);
 
   function skipImportToFinish() {

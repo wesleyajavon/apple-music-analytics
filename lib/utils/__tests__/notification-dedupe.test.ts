@@ -17,10 +17,10 @@ describe("removeDuplicateSourcesWithinWindow", () => {
   it("keeps same-source rows older than the window", () => {
     const now = 10_000_000;
     const items = [
-      { id: "1", source: "export-csv", createdAt: iso(now - 5000) },
-      { id: "2", source: "export-csv", createdAt: iso(now - 130_000) },
+      { id: "1", source: "import-complete", createdAt: iso(now - 5000) },
+      { id: "2", source: "import-complete", createdAt: iso(now - 130_000) },
     ];
-    const next = removeDuplicateSourcesWithinWindow(items, "export-csv", now, 120_000);
+    const next = removeDuplicateSourcesWithinWindow(items, "import-complete", now, 120_000);
     expect(next.map((n) => n.id)).toEqual(["2"]);
   });
 

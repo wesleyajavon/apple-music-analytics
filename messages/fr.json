@@ -3008,13 +3008,24 @@
       "panelTitle": "Activité",
       "panelKicker": "Rien ne bloque l’envoi.",
       "unreadSummary": "{count, plural, one {# non lu} other {# non lus}}",
-      "markAllRead": "Tout lu",
-      "clearAll": "Vider",
+      "markAllRead": "Marquer l’activité",
+      "clearAll": "Effacer l’activité",
       "emptyKicker": "Aucun point bloquant",
-      "empty": "Exports, synchro et tâches en arrière-plan apparaîtront ici quand une action sera utile.",
-      "exportSuccessTitle": "Export {type} terminé",
-      "exportSuccessBody": "Fichier {filename} téléchargé",
-      "exportErrorTitle": "Échec de l’export {type}",
+      "empty": "Les demandes d’ami, les imports et les tâches en arrière-plan apparaîtront ici quand un coup d’œil sera utile.",
+      "importComplete": {
+        "title": "Import terminé",
+        "body": "{count, plural, one {# écoute importée} other {# écoutes importées}}"
+      },
+      "genreBackfillResult": {
+        "completed": {
+          "title": "Backfill genres terminé",
+          "body": "Graphiques et filtres peuvent utiliser les nouveaux labels."
+        },
+        "failed": {
+          "title": "Échec du backfill genres",
+          "body": "Ouvrez la bannière du dashboard pour réessayer ou inspecter la tâche."
+        }
+      },
       "genreGroqNudge": {
         "title": "Compléter les genres manquants",
         "body": "{count, plural, one {# titre} other {# titres}} (~{pct}% de la bibliothèque) sont encore « Inconnus ». Un passage Groq resserre graphiques et filtres.",

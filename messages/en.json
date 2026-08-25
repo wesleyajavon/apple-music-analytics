@@ -3006,13 +3006,24 @@
       "panelTitle": "Activity",
       "panelKicker": "Nothing blocking shipping.",
       "unreadSummary": "{count, plural, one {# unread} other {# unread}}",
-      "markAllRead": "Mark read",
-      "clearAll": "Clear",
+      "markAllRead": "Mark activity read",
+      "clearAll": "Clear activity",
       "emptyKicker": "All clear",
-      "empty": "Exports, sync, and background jobs will show up here when something needs a glance.",
-      "exportSuccessTitle": "Export {type} completed",
-      "exportSuccessBody": "File {filename} downloaded",
-      "exportErrorTitle": "Export {type} failed",
+      "empty": "Friend requests, imports, and background jobs show up here when something needs a glance.",
+      "importComplete": {
+        "title": "Import completed",
+        "body": "{count, plural, one {# listen imported} other {# listens imported}}"
+      },
+      "genreBackfillResult": {
+        "completed": {
+          "title": "Genre backfill finished",
+          "body": "Charts and filters can use the new labels."
+        },
+        "failed": {
+          "title": "Genre backfill failed",
+          "body": "Open the dashboard banner to retry or inspect the job."
+        }
+      },
       "genreGroqNudge": {
         "title": "Backfill missing genres",
         "body": "{count, plural, one {# track} other {# tracks}} (~{pct}% of your library) are still “Unknown.” Run a Groq pass to tighten charts and filters.",

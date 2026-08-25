@@ -11,6 +11,7 @@ import { useGenreBackfillJob } from "@/lib/context/genre-backfill-job-context";
 import { useDuetPendingIncoming } from "@/lib/hooks/use-duet-pending-incoming";
 import {
   buildDuetFriendRequestNotification,
+  isClientActivityNotification,
   mergeNotificationItems,
 } from "@/lib/utils/duet-friend-request-notifications";
 import { clearGenreBackfillBannerBlockingPrefs } from "@/lib/utils/genre-backfill-banner-prefs";
@@ -32,6 +33,24 @@ function formatNotificationDisplay(
         pct: n.genreGroqNudge.pct,
         count: n.genreGroqNudge.count,
       }),
+    };
+  }
+  if (n.importComplete) {
+    return {
+      title: t("importComplete.title"),
+      body: t("importComplete.body", { count: n.importComplete.count }),
+    };
+  }
+  if (n.genreBackfillResult) {
+    if (n.genreBackfillResult.status === "failed") {
+      return {
+        title: t("genreBackfillResult.failed.title"),
+        body: t("genreBackfillResult.failed.body"),
+      };
+    }
+    return {
+      title: t("genreBackfillResult.completed.title"),
+      body: t("genreBackfillResult.completed.body"),
     };
   }
   if (n.source === GENRE_AI_NUDGE_NOTIFICATION_SOURCE && n.title.startsWith("components.")) {
@@ -101,6 +120,16 @@ export function NotificationCenter() {
     () => displayItems.filter((item) => !item.read).length,
     [displayItems]
   );
+
+  const clientItems = useMemo(
+    () => displayItems.filter(isClientActivityNotification),
+    [displayItems]
+  );
+  const hasClientUnread = useMemo(
+    () => clientItems.some((item) => !item.read),
+    [clientItems]
+  );
+  const hasClientItems = clientItems.length > 0;
 
   const startGroqClassification = useCallback(
     async (notificationId: string) => {
@@ -199,7 +228,7 @@ export function NotificationCenter() {
               )}
             </div>
             <div className="flex shrink-0 flex-wrap items-center justify-end gap-1.5">
-              {unreadCount > 0 ? (
+              {hasClientUnread ? (
                 <button
                   type="button"
                   onClick={() => markAllRead()}
@@ -208,7 +237,7 @@ export function NotificationCenter() {
                   {t("markAllRead")}
                 </button>
               ) : null}
-              {displayItems.length > 0 ? (
+              {hasClientItems ? (
                 <button
                   type="button"
                   onClick={() => clearAll()}

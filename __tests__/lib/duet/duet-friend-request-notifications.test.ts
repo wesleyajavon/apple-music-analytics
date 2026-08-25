@@ -38,13 +38,13 @@ describe("duet friend request notifications", () => {
 
   it("merges server items ahead of client items and strips stale duet client copies", () => {
     const serverItem = buildDuetFriendRequestNotification(friendship);
-    const clientExport: NotificationItem = {
-      id: "export-1",
-      title: "Export done",
-      createdAt: "2026-06-09T12:00:00.000Z",
+    const clientImport: NotificationItem = {
+      id: "import-1",
+      title: "Import done",
+      createdAt: "2026-06-11T12:00:00.000Z",
       read: false,
       severity: "success",
-      source: "export-csv",
+      source: "import-complete",
     };
     const staleDuetClient: NotificationItem = {
       id: "old-duet",
@@ -54,9 +54,25 @@ describe("duet friend request notifications", () => {
       source: "duet-friend-request:friendship-1",
     };
 
-    const merged = mergeNotificationItems([clientExport, staleDuetClient], [serverItem]);
+    const merged = mergeNotificationItems([clientImport, staleDuetClient], [serverItem]);
     expect(merged).toHaveLength(2);
     expect(merged[0]?.id).toBe("duet-server-friendship-1");
+    expect(merged[1]?.id).toBe("import-1");
     expect(merged.some((n) => n.id === "old-duet")).toBe(false);
+  });
+
+  it("pins server duet items above newer client activity", () => {
+    const serverItem = buildDuetFriendRequestNotification(friendship);
+    const newerClient: NotificationItem = {
+      id: "import-newer",
+      title: "Import",
+      createdAt: "2026-06-12T12:00:00.000Z",
+      read: false,
+      source: "import-complete",
+    };
+
+    const merged = mergeNotificationItems([newerClient], [serverItem]);
+    expect(merged[0]?.id).toBe("duet-server-friendship-1");
+    expect(merged[1]?.id).toBe("import-newer");
   });
 });

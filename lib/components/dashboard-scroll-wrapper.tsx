@@ -7,6 +7,7 @@ import { DashboardStickyHeader } from "@/lib/components/dashboard-sticky-header"
 import { DashboardMainArea } from "@/lib/components/dashboard-main-area";
 import { Footer } from "@/lib/components/footer";
 import { DashboardViewerProvider } from "@/lib/context/dashboard-viewer-context";
+import { GenreBackfillResultNotifier } from "@/lib/components/genre-backfill-result-notifier";
 import { GenreGroqClassificationNudgeNotifier } from "@/lib/components/genre-groq-classification-nudge-notifier";
 import { GenreBackfillJobProvider } from "@/lib/context/genre-backfill-job-context";
 import { NotificationCenterProvider } from "@/lib/context/notification-center-context";
@@ -91,6 +92,7 @@ export function DashboardScrollWrapper({ children }: { children: React.ReactNode
         <NotificationCenterProvider>
         <GenreBackfillJobProvider>
           <GenreGroqClassificationNudgeNotifier />
+          <GenreBackfillResultNotifier />
           <div className="min-w-0 flex-1 bg-surface-dashboard shadow-[0_0_0_1px_rgb(152_80_208_/_0.08)] max-lg:pb-[var(--dashboard-bottom-nav-offset,0px)]">
           <DashboardStickyHeader filterRef={filterRef} />
           <Suspense fallback={<main className="min-w-0"><div className="p-4 lg:p-8">{children}</div></main>}>

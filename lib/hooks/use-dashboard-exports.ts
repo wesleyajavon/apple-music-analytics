@@ -8,18 +8,11 @@ import {
   isRecentAuthRequiredError,
   redirectToRecentSignIn,
 } from "@/lib/auth/recent-auth-client";
-import { useNotifications } from "@/lib/context/notification-center-context";
-import { useHideNotificationCenterForPublicDemo } from "@/lib/hooks/use-public-demo-viewer";
 
 export function useDashboardExports() {
   const searchParams = useSearchParams();
   const locale = useLocale();
   const t = useTranslations("components.dateRangeFilter");
-  const tNotifications = useTranslations("components.notificationCenter");
-  const { addNotification } = useNotifications();
-  const hideNotificationCenter = useHideNotificationCenterForPublicDemo(
-    searchParams.get("userId")
-  );
 
   const downloadFile = useCallback(
     async (url: string, defaultFilename: string, exportType: string) => {
@@ -59,14 +52,6 @@ export function useDashboardExports() {
           id: toastId,
           description: t("toastFileDownloaded", { filename }),
         });
-        if (!hideNotificationCenter) {
-          addNotification({
-            title: tNotifications("exportSuccessTitle", { type: exportType }),
-            body: tNotifications("exportSuccessBody", { filename }),
-            severity: "success",
-            source: `export-${exportType.toLowerCase()}`,
-          });
-        }
       } catch (error) {
         console.error("Erreur lors de l'export:", error);
         const errorMessage =
@@ -75,17 +60,9 @@ export function useDashboardExports() {
           id: toastId,
           description: errorMessage,
         });
-        if (!hideNotificationCenter) {
-          addNotification({
-            title: tNotifications("exportErrorTitle", { type: exportType }),
-            body: errorMessage,
-            severity: "error",
-            source: `export-${exportType.toLowerCase()}`,
-          });
-        }
       }
     },
-    [t, tNotifications, addNotification, hideNotificationCenter]
+    [t]
   );
 
   const exportCsv = useCallback(async () => {

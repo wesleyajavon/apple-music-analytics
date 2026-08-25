@@ -37,6 +37,15 @@ export type NotificationItem = {
     friendshipId: string;
     requesterName: string;
   };
+  /** Réaffichage correct des traductions après persistance (import). */
+  importComplete?: {
+    count: number;
+  };
+  /** Réaffichage correct des traductions après persistance (backfill Groq). */
+  genreBackfillResult?: {
+    jobId: string;
+    status: "completed" | "failed";
+  };
 };
 
 export type AddNotificationInput = {
@@ -48,6 +57,13 @@ export type AddNotificationInput = {
   genreGroqNudge?: {
     pct: number;
     count: number;
+  };
+  importComplete?: {
+    count: number;
+  };
+  genreBackfillResult?: {
+    jobId: string;
+    status: "completed" | "failed";
   };
 };
 
@@ -73,6 +89,18 @@ function isNotificationItem(x: unknown): x is NotificationItem {
     if (d === null || typeof d !== "object") return false;
     const dx = d as Record<string, unknown>;
     if (typeof dx.friendshipId !== "string" || typeof dx.requesterName !== "string") return false;
+  }
+  if (o.importComplete !== undefined) {
+    const ic = o.importComplete;
+    if (ic === null || typeof ic !== "object") return false;
+    if (typeof (ic as Record<string, unknown>).count !== "number") return false;
+  }
+  if (o.genreBackfillResult !== undefined) {
+    const g = o.genreBackfillResult;
+    if (g === null || typeof g !== "object") return false;
+    const gx = g as Record<string, unknown>;
+    if (typeof gx.jobId !== "string") return false;
+    if (gx.status !== "completed" && gx.status !== "failed") return false;
   }
   return true;
 }
@@ -102,6 +130,7 @@ type NotificationCenterContextValue = {
   hydrated: boolean;
   addNotification: (input: AddNotificationInput) => void;
   markRead: (id: string) => void;
+  markReadBySource: (source: string) => void;
   markAllRead: () => void;
   clearAll: () => void;
 };
@@ -140,6 +169,12 @@ export function NotificationCenterProvider({ children }: { children: ReactNode }
       ...(input.genreGroqNudge !== undefined
         ? { genreGroqNudge: input.genreGroqNudge }
         : {}),
+      ...(input.importComplete !== undefined
+        ? { importComplete: input.importComplete }
+        : {}),
+      ...(input.genreBackfillResult !== undefined
+        ? { genreBackfillResult: input.genreBackfillResult }
+        : {}),
       createdAt: new Date().toISOString(),
       read: false,
     };
@@ -166,6 +201,12 @@ export function NotificationCenterProvider({ children }: { children: ReactNode }
     setItems((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
   }, []);
 
+  const markReadBySource = useCallback((source: string) => {
+    setItems((prev) =>
+      prev.map((n) => (n.source === source ? { ...n, read: true } : n))
+    );
+  }, []);
+
   const markAllRead = useCallback(() => {
     setItems((prev) => prev.map((n) => ({ ...n, read: true })));
   }, []);
@@ -183,10 +224,20 @@ export function NotificationCenterProvider({ children }: { children: ReactNode }
       unreadCount,
       addNotification,
       markRead,
+      markReadBySource,
       markAllRead,
       clearAll,
     }),
-    [items, hydrated, unreadCount, addNotification, markRead, markAllRead, clearAll]
+    [
+      items,
+      hydrated,
+      unreadCount,
+      addNotification,
+      markRead,
+      markReadBySource,
+      markAllRead,
+      clearAll,
+    ]
   );
 
   return (
@@ -200,4 +251,9 @@ export function useNotifications(): NotificationCenterContextValue {
     throw new Error("useNotifications must be used within NotificationCenterProvider");
   }
   return ctx;
+}
+
+/** Hors provider (ex. tests) : pas d’inbox partagée. */
+export function useNotificationsSafe(): NotificationCenterContextValue | null {
+  return useContext(NotificationCenterContext);
 }

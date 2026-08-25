@@ -3008,13 +3008,24 @@
       "panelTitle": "Actividad",
       "panelKicker": "Nada bloque el release.",
       "unreadSummary": "{count, plural, one {# sin leer} other {# sin leer}}",
-      "markAllRead": "Marcar leído",
-      "clearAll": "Vaciar",
+      "markAllRead": "Marcar actividad leída",
+      "clearAll": "Borrar actividad",
       "emptyKicker": "Todo listo",
-      "empty": "Exportaciones, sincronización y trabajos en segundo plano aparecerán aquí cuando haya algo que revisar.",
-      "exportSuccessTitle": "Exportación {type} completada",
-      "exportSuccessBody": "Archivo {filename} descargado",
-      "exportErrorTitle": "Falló la exportación {type}",
+      "empty": "Las solicitudes de amistad, importaciones y trabajos en segundo plano aparecerán aquí cuando haya algo que revisar.",
+      "importComplete": {
+        "title": "Importación completada",
+        "body": "{count, plural, one {# escucha importada} other {# escuchas importadas}}"
+      },
+      "genreBackfillResult": {
+        "completed": {
+          "title": "Backfill de géneros terminado",
+          "body": "Gráficos y filtros pueden usar las nuevas etiquetas."
+        },
+        "failed": {
+          "title": "Falló el backfill de géneros",
+          "body": "Abre el banner del panel para reintentar o revisar el trabajo."
+        }
+      },
       "genreGroqNudge": {
         "title": "Rellenar géneros faltantes",
         "body": "{count, plural, one {# pista} other {# pistas}} (~{pct}% de la biblioteca) siguen como «Desconocido». Un pase con Groq afina gráficos y filtros.",

@@ -4,14 +4,38 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import React from "react";
 import { render, screen, fireEvent, act } from "@testing-library/react";
 import { NotificationCenter } from "@/lib/components/notification-center";
-import {
-  GenreBackfillJobProvider,
-} from "@/lib/context/genre-backfill-job-context";
+import { GenreBackfillJobProvider } from "@/lib/context/genre-backfill-job-context";
 import {
   NotificationCenterProvider,
   useNotifications,
 } from "@/lib/context/notification-center-context";
 import { NOTIFICATION_CENTER_STORAGE_KEY } from "@/lib/constants/notification-storage";
+import type { FriendshipDto } from "@/lib/dto/duet";
+
+const pendingFriendship: FriendshipDto = {
+  id: "friendship-1",
+  status: "pending",
+  shareScope: "none",
+  createdAt: "2026-06-10T12:00:00.000Z",
+  respondedAt: null,
+  direction: "incoming",
+  requester: {
+    id: "user-b",
+    email: "b@test.com",
+    name: "Bob",
+    avatarUrl: null,
+  },
+  addressee: {
+    id: "user-a",
+    email: "a@test.com",
+    name: "Alice",
+    avatarUrl: null,
+  },
+};
+
+const { duetState } = vi.hoisted(() => ({
+  duetState: { pendingIncoming: [] as FriendshipDto[] },
+}));
 
 vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
@@ -35,15 +59,26 @@ vi.mock("@/i18n/navigation", () => ({
 
 vi.mock("@/lib/hooks/use-duet-pending-incoming", () => ({
   useDuetPendingIncoming: () => ({
-    pendingIncoming: [],
-    pendingCount: 0,
+    pendingIncoming: duetState.pendingIncoming,
+    pendingCount: duetState.pendingIncoming.length,
     isLoading: false,
     isFetching: false,
   }),
 }));
 
+function renderCenter() {
+  return render(
+    <GenreBackfillJobProvider>
+      <NotificationCenterProvider>
+        <NotificationCenter />
+      </NotificationCenterProvider>
+    </GenreBackfillJobProvider>
+  );
+}
+
 describe("NotificationCenter (RTL)", () => {
   beforeEach(() => {
+    duetState.pendingIncoming = [];
     vi.stubGlobal("fetch", () =>
       Promise.resolve({
         ok: true,
@@ -61,17 +96,59 @@ describe("NotificationCenter (RTL)", () => {
   });
 
   it("opens the panel and shows empty state", () => {
-    render(
-      <GenreBackfillJobProvider>
-        <NotificationCenterProvider>
-          <NotificationCenter />
-        </NotificationCenterProvider>
-      </GenreBackfillJobProvider>
-    );
+    renderCenter();
 
     fireEvent.click(screen.getByRole("button", { name: "openLabel" }));
     expect(screen.getByRole("dialog", { name: "panelTitle" })).toBeInTheDocument();
     expect(screen.getByText("empty")).toBeInTheDocument();
+  });
+
+  it("hides mark-read and clear when only Duet requests are present", () => {
+    duetState.pendingIncoming = [pendingFriendship];
+    renderCenter();
+
+    fireEvent.click(screen.getByRole("button", { name: "openLabel" }));
+    expect(screen.queryByRole("button", { name: "markAllRead" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "clearAll" })).not.toBeInTheDocument();
+  });
+
+  it("shows mark-read and clear when client activity exists alongside Duet", async () => {
+    duetState.pendingIncoming = [pendingFriendship];
+
+    function Harness() {
+      const { addNotification } = useNotifications();
+      return (
+        <>
+          <button
+            type="button"
+            onClick={() =>
+              addNotification({ title: "imported", source: "import-complete" })
+            }
+          >
+            add-import
+          </button>
+          <NotificationCenter />
+        </>
+      );
+    }
+
+    render(
+      <GenreBackfillJobProvider>
+        <NotificationCenterProvider>
+          <Harness />
+        </NotificationCenterProvider>
+      </GenreBackfillJobProvider>
+    );
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "add-import" }));
+    fireEvent.click(screen.getByRole("button", { name: "openLabel" }));
+
+    expect(screen.getByRole("button", { name: "markAllRead" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "clearAll" })).toBeInTheDocument();
   });
 
   it("dedupes two addNotification calls with the same source when triggered from clicks", async () => {
@@ -81,13 +158,13 @@ describe("NotificationCenter (RTL)", () => {
         <div>
           <button
             type="button"
-            onClick={() => addNotification({ title: "first", source: "export-csv" })}
+            onClick={() => addNotification({ title: "first", source: "import-complete" })}
           >
             add-a
           </button>
           <button
             type="button"
-            onClick={() => addNotification({ title: "second", source: "export-csv" })}
+            onClick={() => addNotification({ title: "second", source: "import-complete" })}
           >
             add-b
           </button>
@@ -158,5 +235,48 @@ describe("NotificationCenter (RTL)", () => {
     const lastPayload = JSON.parse(String(callsForKey.at(-1)![1])) as { title: string }[];
     expect(lastPayload).toHaveLength(1);
     expect(lastPayload[0].title).toBe("hello");
+  });
+
+  it("marks matching source items as read via markReadBySource", async () => {
+    function Harness() {
+      const { addNotification, markReadBySource, items } = useNotifications();
+      return (
+        <div>
+          <button
+            type="button"
+            onClick={() =>
+              addNotification({
+                title: "nudge",
+                source: "genre-groq-unknown-majority",
+              })
+            }
+          >
+            add-nudge
+          </button>
+          <button
+            type="button"
+            onClick={() => markReadBySource("genre-groq-unknown-majority")}
+          >
+            mark-source
+          </button>
+          <span data-testid="read">{String(items[0]?.read ?? "")}</span>
+        </div>
+      );
+    }
+
+    render(
+      <NotificationCenterProvider>
+        <Harness />
+      </NotificationCenterProvider>
+    );
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "add-nudge" }));
+    expect(screen.getByTestId("read")).toHaveTextContent("false");
+    fireEvent.click(screen.getByRole("button", { name: "mark-source" }));
+    expect(screen.getByTestId("read")).toHaveTextContent("true");
   });
 });

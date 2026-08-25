@@ -12,6 +12,7 @@ import type {
   DuetShareSettingsDto,
   FriendshipsListResponse,
   FriendshipDto,
+  FriendOverviewResponse,
 } from "@/lib/dto/duet";
 import type { PeriodType } from "@/lib/components/period-selector";
 import { CACHE_STALE_TIME } from "@/lib/constants/config";
@@ -124,6 +125,31 @@ export function useDuetCompareSharedArtists(params: {
       apiClient.get<CompareSharedArtistsResponse>(
         `/duet/compare/shared-artists?${buildCompareQuery(params.friendUserId!, params)}`
       ),
+  });
+}
+
+export function useDuetFriendOverview(params: {
+  friendUserId?: string;
+  startDate?: string;
+  endDate?: string;
+  enabled?: boolean;
+}) {
+  const enabled = (params.enabled ?? true) && !!params.friendUserId;
+  return useQuery<FriendOverviewResponse, Error>({
+    queryKey: duetKeys.friendOverview({
+      friendUserId: params.friendUserId,
+      startDate: params.startDate,
+      endDate: params.endDate,
+    }),
+    enabled,
+    queryFn: () => {
+      const q = new URLSearchParams({ friendUserId: params.friendUserId! });
+      if (params.startDate) q.set("startDate", params.startDate);
+      if (params.endDate) q.set("endDate", params.endDate);
+      return apiClient.get<FriendOverviewResponse>(`/duet/friend-overview?${q.toString()}`);
+    },
+    staleTime: CACHE_STALE_TIME.TIMELINE,
+    placeholderData: keepPreviousData,
   });
 }
 

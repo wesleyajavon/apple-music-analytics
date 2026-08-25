@@ -96,6 +96,11 @@ export const duetKeys = {
     startDate?: string;
     endDate?: string;
   }) => [...duetKeys.all, "compare", "shared-artists", params] as const,
+  friendOverview: (params?: {
+    friendUserId?: string;
+    startDate?: string;
+    endDate?: string;
+  }) => [...duetKeys.all, "friend-overview", params] as const,
 } as const;
 
 export const tasteProfileKeys = {

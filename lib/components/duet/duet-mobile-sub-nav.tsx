@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 
 type DuetMobileSubNavProps = {
-  current: "friends" | "compare";
+  current: "friends" | "compare" | "music";
   withFilters: (href: string) => string;
 };
 

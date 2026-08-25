@@ -303,6 +303,7 @@ export function DashboardMobilePlusMenu({ open, onClose }: DashboardMobilePlusMe
 }
 
 export function usePlusNavActive(pathname: string): boolean {
+  if (pathname.startsWith("/dashboard/duet")) return true;
   return PLUS_SECTIONS.some((section) =>
     section.items.some((item) => isPlusLinkActive(item.href, pathname)),
   );

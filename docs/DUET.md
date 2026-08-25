@@ -1,6 +1,6 @@
 # Duet — social léger & comparaison d’écoute
 
-**Statut** : Phase 6a en cours — comparaisons artiste / morceau / genre ; MVP prod UE (Phase 5 ✅).
+**Statut** : Phase 6 livrée (compare + cartes) ; MVP prod UE (Phase 5 ✅). Prochaine ligne : **Your Music d’un ami** — [DUET_FRIEND_MUSIC_PLAN_PROMPTS.md](./DUET_FRIEND_MUSIC_PLAN_PROMPTS.md).
 
 **Documents Duet**
 
@@ -8,6 +8,7 @@
 |----------|------|
 | [DUET_PLAYBOOK.md](./DUET_PLAYBOOK.md) | Roadmap, audit architecture, prompts agent par phase, actions hors code |
 | [DUET_PHASE0_DECISIONS.md](./DUET_PHASE0_DECISIONS.md) | Décisions D1–D10 à valider + brouillons copy UX (FR/EN/ES) |
+| [DUET_FRIEND_MUSIC_PLAN_PROMPTS.md](./DUET_FRIEND_MUSIC_PLAN_PROMPTS.md) | Playbook d’exécution : visiter le Your Music d’un ami (préambule + un prompt par étape) |
 
 **Constat** : l’app est aujourd’hui centrée sur **un utilisateur / une bibliothèque**. Beaucoup de personnes découvrent leurs habitudes en les **mettant en perspective** avec celles d’un ami (« qui stream le plus ce groupe », « nos genres sur la même période », etc.).
 
@@ -21,6 +22,7 @@
 - **Comparaison** : choisir un ami + métrique (ex. écoutes agrégées, top artiste partagé, tendance dans le temps) + plage de dates alignée sur les filtres existants du dashboard.
 - **Moments « wow »** : pour un **artiste** donné (ou un titre), afficher un classement ou un ratio « toi vs ami » sur une période — léger, partageable, sans gamification lourde au départ.
 - **Comparaisons ciblées (note 2026-06-09)** : au-delà des graphes globaux, permettre de comparer des stats sur une **entité** — artiste, morceau ou genre — entre utilisateurs (amis). Ex. « qui est le plus grand fan de [artiste] ? », « qui a le plus streamé [titre] ? », « qui domine sur [genre] ? ».
+- **Your Music ami (playbook 2026-08-25)** : un ami accepté peut **ouvrir le hub analytics de l’autre** (KPIs, tops, timeline) en lecture seule — pas seulement un head-to-head. Voir [DUET_FRIEND_MUSIC_PLAN_PROMPTS.md](./DUET_FRIEND_MUSIC_PLAN_PROMPTS.md). Pas de follow, pas de fil, pas de profils publics.
 
 ---
 
@@ -53,9 +55,10 @@
 
 ## Extensions possibles (post-MVP)
 
+- **Your Music d’un ami** — visiter le hub overview d’un ami accepté (playbook : [DUET_FRIEND_MUSIC_PLAN_PROMPTS.md](./DUET_FRIEND_MUSIC_PLAN_PROMPTS.md)).
 - **Classements privés** entre amis sur un artiste / une semaine.
 - **Cartes ou images** de comparaison pour réseaux sociaux (voir aussi pistes dans Encore / Setlist).
-- **Groupes** (>2 personnes) si la demande existe.
+- **Groupes** (>2 personnes) si la demande existe. Hors playbook Your Music ami : follow, fil, profils publics (révision DPIA).
 
 ---
 
@@ -65,3 +68,4 @@
 |-------|--------|
 | **0 — Cadrage** | [DUET_PLAYBOOK.md §6 Phase 0](./DUET_PLAYBOOK.md#phase-0--cadrage-produit--juridique) → livrable [DUET_PHASE0_DECISIONS.md](./DUET_PHASE0_DECISIONS.md) |
 | **1–6 + socle complet** | [DUET_PLAYBOOK.md §6](./DUET_PLAYBOOK.md#6-roadmap-par-phase) et [prompt implémentation complète](./DUET_PLAYBOOK.md#prompt-agent--implémentation-complète-une-session-longue) |
+| **Your Music ami** | [DUET_FRIEND_MUSIC_PLAN_PROMPTS.md](./DUET_FRIEND_MUSIC_PLAN_PROMPTS.md) — une session Plan = un prompt (étapes 0–5) |

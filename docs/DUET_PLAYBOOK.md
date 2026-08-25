@@ -14,7 +14,8 @@ Document de **cadrage, audit et roadmap** pour introduire un réseau social mini
 | 3 — API comparaison | ✅ |
 | 4 — UI MVP + QA manuel | ✅ |
 | 5 — Durcissement & prod | ✅ (monitoring §7.5.2 en cours post-launch) |
-| 6 — Extensions v2 | 🚧 6a ✅ · 6b ✅ · 6c ✅ |
+| 6 — Extensions v2 | ✅ 6a–6e |
+| 7 — Your Music ami | 📋 Playbook : [DUET_FRIEND_MUSIC_PLAN_PROMPTS.md](./DUET_FRIEND_MUSIC_PLAN_PROMPTS.md) |
 
 ---
 
@@ -487,6 +488,7 @@ Priorité suggérée :
 4. Lien d’invitation signé (token 7j) si email trop frictionnel. ✅ (6b)
 5. Cartes partageables (alignement Encore / Setlist). ✅ (6e — arène + timeline ; lib partagée ; Encore UI à venir)
 6. Groupes (>2 utilisateurs).
+7. **Your Music d’un ami** (hub lecture seule, pas un fil) — exécution hors de ce document : [DUET_FRIEND_MUSIC_PLAN_PROMPTS.md](./DUET_FRIEND_MUSIC_PLAN_PROMPTS.md).
 
 #### Prompt agent — Phase 6a (comparaisons titre/genre)
 
@@ -651,6 +653,7 @@ Traductions EN/ES : reprendre le namespace `duet.*` et `legal.privacy` sections 
 | Document | Rôle |
 |----------|------|
 | [DUET.md](./DUET.md) | Résumé codename |
+| [DUET_FRIEND_MUSIC_PLAN_PROMPTS.md](./DUET_FRIEND_MUSIC_PLAN_PROMPTS.md) | Playbook d’exécution Phase 7 — visiter le Your Music d’un ami |
 | [IDEAS_BAG.md](../IDEAS_BAG.md) | Index sac à idées |
 | [API.md](./API.md) | Référence routes (à compléter) |
 | [BREAKWATER.md](./BREAKWATER.md) | Démo publique |
@@ -671,4 +674,4 @@ Traductions EN/ES : reprendre le namespace `duet.*` et `legal.privacy` sections 
 
 ---
 
-*Dernière mise à jour : 2026-06-10 — MVP Duet go prod UE ; smoke preview OK ; monitoring post-launch §7.5.2.*
+*Dernière mise à jour : 2026-08-25 — lien Phase 7 Your Music ami ([DUET_FRIEND_MUSIC_PLAN_PROMPTS.md](./DUET_FRIEND_MUSIC_PLAN_PROMPTS.md)). MVP Duet go prod UE 2026-06-10 ; monitoring post-launch §7.5.2.*

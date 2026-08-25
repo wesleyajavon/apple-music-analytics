@@ -1,6 +1,6 @@
 # Registre des activités de traitement (ROPA)
 
-Document interne — Soundprint-AI. Dernière révision : 2026-06-09 (Duet).
+Document interne — Soundprint-AI. Dernière révision : 2026-08-25 (Duet — consultation Your Music ami).
 
 > Ce registre complète la [politique de confidentialité](/legal/privacy) publique. Il n’est pas destiné aux utilisateurs finaux.
 
@@ -22,7 +22,7 @@ Document interne — Soundprint-AI. Dernière révision : 2026-06-09 (Duet).
 | Cookies analytics | Mesure d’usage | Consentement (bannière) | Pages vues, agrégats | Selon Vercel | Vercel |
 | Error monitoring / replay | Stabilité produit | Consentement (bannière) | Erreurs scrubées, replay masqué | Selon Sentry | Sentry (US/EU) |
 | Rate limiting | Sécurité, anti-abus | Intérêt légitime | IP hash / identifiants requête | Fenêtre glissante courte | Redis (si configuré) |
-| **Partage Duet (amis)** | Comparaison de stats d’écoute entre utilisateurs connectés ayant accepté une relation | **Consentement explicite** (acceptation invitation + choix `shareScope` par ami) | Statut relation, scope partage ; nom/avatar ami ; agrégats d’écoute (timeline, tops, genres) ; comparaisons artiste/titre/genre si scope `full` | Durée du compte ; relation et accès supprimés à la révocation, au blocage ou à la suppression de compte | Supabase ; **autres utilisateurs amis autorisés** (accès lecture selon scope) |
+| **Partage Duet (amis)** | Comparaison de stats d’écoute **et** consultation lecture seule du Your Music ami, entre utilisateurs connectés ayant accepté une relation | **Consentement explicite** (acceptation invitation + choix `shareScope` par ami) | Statut relation, scope partage ; nom/avatar ami ; agrégats d’écoute (timeline, tops, genres) ; **consultation du Your Music ami (agrégats ; tops titres si `full`)** ; comparaisons artiste/titre/genre si scope `full` | Durée du compte ; relation et accès supprimés à la révocation, au blocage ou à la suppression de compte | Supabase ; **autres utilisateurs amis autorisés** (accès lecture selon scope) |
 
 ## Droits des personnes (mise en œuvre produit)
 

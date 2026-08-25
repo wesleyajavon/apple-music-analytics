@@ -210,16 +210,16 @@
       "sharePrompt": "What would you like to share with this friend?",
       "scopeAggregates": {
         "label": "Aggregated stats",
-        "description": "Trends, top artists and genres — no track details."
+        "description": "Trends, top artists and genres: an accepted friend can compare them with their own and view them read-only. No track list."
       },
       "scopeFull": {
         "label": "Detailed comparisons",
-        "description": "Everything above plus head-to-head artist challenges."
+        "description": "Everything above, plus your top tracks and head-to-head « who listened more » for an artist, track or genre."
       }
     },
     "accept": {
       "title": "Friend invite",
-      "subtitle": "Accept to compare streaming stats. No analytics are shown until you confirm.",
+      "subtitle": "Accept to compare streaming stats and let a friend view your dashboard read-only. No analytics are shown until you confirm.",
       "fromLabel": "Invitation from",
       "expiresLabel": "Link expires {date}",
       "acceptCta": "Accept and connect",
@@ -433,7 +433,7 @@
       "defaultScope": "Default sharing for new friends",
       "scopeAggregates": "Aggregated stats",
       "scopeFull": "Detailed comparisons",
-      "consentHint": "By enabling Duet sharing, you agree that aggregated streaming statistics may be visible to friends you authorize. You can revoke access anytime.",
+      "consentHint": "By enabling Duet sharing, you agree that aggregated streaming statistics may be visible to friends you authorize — in comparison and as read-only consultation, at the level you choose. You can revoke access anytime.",
       "error": "Could not load Duet settings."
     }
   },
@@ -3294,7 +3294,7 @@
     "privacy": {
       "eyebrow": "Legal",
       "title": "Privacy Policy",
-      "lastUpdated": "Last updated: August 24, 2026",
+      "lastUpdated": "Last updated: August 25, 2026",
       "intro": "A plain-language summary of how Soundprint-AI handles your data. We built this app for your Apple Music and Spotify stats — not to sell your information.",
       "sections": [
         {
@@ -3321,7 +3321,7 @@
           "paragraphs": [
             "To show your stats from the history you import, keep you signed in, and improve the app. Optional analytics and error reporting only run if you agree in our cookie settings.",
             "AI features that send artist or track names to a provider only run when you opt in.",
-            "Duet (friend sharing) only runs when you accept or send a friend request, and only at the sharing level you choose for each friend."
+            "Duet (friend sharing) only runs when you accept or send a friend request, and only at the sharing level you choose for each friend: comparison and read-only viewing of your stats."
           ]
         },
         {
@@ -3359,10 +3359,10 @@
         {
           "title": "Sharing with friends (Duet)",
           "paragraphs": [
-            "Duet lets you compare streaming statistics with friends who have a Soundprint-AI account. This feature is entirely optional.",
-            "To see another user's stats, you must send them a friend request (by email). They choose whether to accept and what to share with you: aggregated statistics (trends, top artists and genres) or, if they choose, more detailed head-to-head comparisons for an artist, track, or genre.",
+            "Duet lets you compare streaming statistics with friends who have a Soundprint-AI account, and view an accepted friend’s stats dashboard (Your Music) read-only, at the sharing level they chose. This feature is entirely optional.",
+            "To see another user's stats, you must send them a friend request (by email) or accept theirs. They choose whether to accept and what to share: aggregated statistics (trends, top artists and genres — no track list) that can be viewed and compared; or, if they choose detailed sharing, the same aggregates plus top tracks and head-to-head comparisons for an artist, track, or genre.",
             "What you share is decided by you, friend by friend, when you accept a request. You can change the sharing level or revoke a friend anytime in Settings → Duet sharing. We record your consent (type and version) as proof.",
-            "We do not offer public user discovery or open leaderboards. Your email is not shown to friends in Duet. Invitations use a uniform response to limit account enumeration."
+            "We do not offer public user discovery, an activity feed, or open leaderboards. Your email is not shown to friends in Duet. Invitations use a uniform response to limit account enumeration."
           ]
         },
         {

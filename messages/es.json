@@ -210,16 +210,16 @@
       "sharePrompt": "¿Qué quieres compartir con este amigo?",
       "scopeAggregates": {
         "label": "Estadísticas agregadas",
-        "description": "Tendencias, tops de artistas y géneros — sin detalle de canciones."
+        "description": "Tendencias, tops de artistas y géneros: un amigo aceptado puede compararlos con los suyos y consultarlos en solo lectura. Sin lista de canciones."
       },
       "scopeFull": {
         "label": "Comparaciones detalladas",
-        "description": "Todo lo anterior más retos head-to-head por artista."
+        "description": "Todo lo anterior, más tus tops de canciones y los retos « quién escuchó más » por artista, canción o género."
       }
     },
     "accept": {
       "title": "Invitación de amistad",
-      "subtitle": "Acepta para comparar estadísticas. No se muestran datos analíticos hasta que confirmes.",
+      "subtitle": "Acepta para comparar estadísticas y dejar que un amigo consulte tu panel en solo lectura. No se muestran datos analíticos hasta que confirmes.",
       "fromLabel": "Invitación de",
       "expiresLabel": "El enlace caduca el {date}",
       "acceptCta": "Aceptar y conectar",
@@ -433,7 +433,7 @@
       "defaultScope": "Compartir predeterminado para nuevos amigos",
       "scopeAggregates": "Estadísticas agregadas",
       "scopeFull": "Comparaciones detalladas",
-      "consentHint": "Al activar Duet, aceptas que tus estadísticas agregadas puedan ser visibles para los amigos que autorices. Revocable en cualquier momento.",
+      "consentHint": "Al activar Duet, aceptas que tus estadísticas agregadas puedan ser visibles para los amigos que autorices — en comparación y en consulta de solo lectura, según el nivel elegido. Revocable en cualquier momento.",
       "error": "No se pudieron cargar los ajustes Duet."
     }
   },
@@ -3296,7 +3296,7 @@
     "privacy": {
       "eyebrow": "Legal",
       "title": "Política de privacidad",
-      "lastUpdated": "Última actualización: 24 de agosto de 2026",
+      "lastUpdated": "Última actualización: 25 de agosto de 2026",
       "intro": "Un resumen claro de cómo Soundprint-AI maneja tus datos. Creamos esta app para tus estadísticas de Apple Music y Spotify — no para vender tu información.",
       "sections": [
         {
@@ -3323,7 +3323,7 @@
           "paragraphs": [
             "Para mostrar tus estadísticas a partir del historial que importas, mantener tu sesión y mejorar la app. La analítica y los informes de errores opcionales solo funcionan si aceptas en la configuración de cookies.",
             "Las funciones de IA que envían nombres de artistas o canciones a un proveedor solo se activan si das tu consentimiento.",
-            "Duet (compartir con amigos) solo funciona si aceptas o envías una solicitud de amistad, y únicamente según el nivel de compartir que elijas para cada amigo."
+            "Duet (compartir con amigos) solo funciona si aceptas o envías una solicitud de amistad, y únicamente según el nivel de compartir que elijas para cada amigo: comparación y consulta de solo lectura de tus estadísticas."
           ]
         },
         {
@@ -3361,10 +3361,10 @@
         {
           "title": "Compartir con amigos (Duet)",
           "paragraphs": [
-            "Duet te permite comparar tus estadísticas de stream con amigos que tienen cuenta en Soundprint-AI. Esta función es totalmente opcional.",
-            "Para ver las estadísticas de otro usuario, debes enviarle una solicitud de amistad (por correo). Él elige si acepta y qué comparte contigo: estadísticas agregadas (tendencias, tops de artistas y géneros) o, si lo desea, comparaciones más detalladas sobre un artista, una canción o un género.",
+            "Duet te permite comparar tus estadísticas de stream con amigos que tienen cuenta en Soundprint-AI, y consultar en solo lectura el panel de estadísticas (Your Music) de un amigo aceptado, según el nivel de compartir elegido. Esta función es totalmente opcional.",
+            "Para ver las estadísticas de otro usuario, debes enviarle una solicitud de amistad (por correo) o aceptar la suya. Él elige si acepta y qué comparte: estadísticas agregadas (tendencias, tops de artistas y géneros — sin lista de canciones) consultables y comparables; o, si elige el compartir detallado, los mismos agregados más los tops de canciones y las comparaciones concretas sobre un artista, una canción o un género.",
             "Lo que compartes lo decides tú, amigo por amigo, al aceptar una solicitud. Puedes cambiar el nivel de compartir o revocar a un amigo en cualquier momento en Ajustes → Compartir Duet. Registramos tu consentimiento (tipo y versión) como prueba.",
-            "No ofrecemos descubrimiento público de usuarios ni clasificaciones abiertas. Tu correo no se muestra a tus amigos en Duet. Las invitaciones usan un mensaje uniforme para limitar la enumeración de cuentas."
+            "No ofrecemos descubrimiento público de usuarios, un feed de actividad ni clasificaciones abiertas. Tu correo no se muestra a tus amigos en Duet. Las invitaciones usan un mensaje uniforme para limitar la enumeración de cuentas."
           ]
         },
         {

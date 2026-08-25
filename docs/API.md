@@ -300,6 +300,10 @@ Toutes les routes Duet exigent une **session** authentifiée (pas de `userId` d�
 | GET | `/api/duet/settings` | `{ allowFriendRequests, defaultShareScope }`. |
 | PATCH | `/api/duet/settings` | Body partiel : `allowFriendRequests`, `defaultShareScope` (`none` \| `aggregates` \| `full`). |
 
+### Your Music ami (à venir)
+
+`GET /api/duet/friend-overview` — lecture seule du hub analytics d’un ami `accepted`, derrière `assertFriendDataAccess` et query `friendUserId`. Même famille de données que D2 (`aggregates` / `full`). **Pas encore exposé.** Ne pas utiliser `userId` sur `/api/overview` pour cibler un ami.
+
 ### Comparaison (auth + relation `accepted`)
 
 Query **`friendUserId`** (UUID) requis sur toutes les routes ci-dessous. **404** si pas ami (anti-énumération) ; **403** si `shareScope` insuffisant. Rate limit aligné sur `/api/timeline` (20 req / 60 s).

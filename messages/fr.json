@@ -210,16 +210,16 @@
       "sharePrompt": "Que souhaitez-vous partager avec cet ami ?",
       "scopeAggregates": {
         "label": "Statistiques agrégées",
-        "description": "Courbes, tops artistes et genres — sans détail des morceaux."
+        "description": "Courbes, tops artistes et genres : un ami accepté peut les comparer avec les siens et les consulter en lecture seule. Pas de liste de titres."
       },
       "scopeFull": {
         "label": "Comparaisons détaillées",
-        "description": "Tout ce qui précède, plus les défis artiste head-to-head."
+        "description": "Tout ce qui précède, plus tes tops titres et les défis « qui écoute le plus » sur un artiste, un titre ou un genre."
       }
     },
     "accept": {
       "title": "Invitation d’ami",
-      "subtitle": "Acceptez pour comparer vos stats. Aucune donnée analytique n’est affichée avant confirmation.",
+      "subtitle": "Acceptez pour comparer vos stats et laisser un ami consulter votre tableau en lecture seule. Aucune donnée analytique n’est affichée avant confirmation.",
       "fromLabel": "Invitation de",
       "expiresLabel": "Le lien expire le {date}",
       "acceptCta": "Accepter et connecter",
@@ -433,7 +433,7 @@
       "defaultScope": "Partage par défaut pour les nouveaux amis",
       "scopeAggregates": "Statistiques agrégées",
       "scopeFull": "Comparaisons détaillées",
-      "consentHint": "En activant le partage Duet, vous acceptez que vos statistiques agrégées puissent être visibles par les amis que vous autorisez. Révocable à tout moment.",
+      "consentHint": "En activant le partage Duet, vous acceptez que vos statistiques agrégées puissent être visibles par les amis que vous autorisez — en comparaison et en consultation lecture seule, selon le niveau choisi. Révocable à tout moment.",
       "error": "Impossible de charger les paramètres Duet."
     }
   },
@@ -3296,7 +3296,7 @@
     "privacy": {
       "eyebrow": "Mentions légales",
       "title": "Politique de confidentialité",
-      "lastUpdated": "Dernière mise à jour : 24 août 2026",
+      "lastUpdated": "Dernière mise à jour : 25 août 2026",
       "intro": "Un résumé clair de la façon dont Soundprint-AI gère vos données. Cette app sert à vos stats Apple Music et Spotify — pas à vendre vos informations.",
       "sections": [
         {
@@ -3323,7 +3323,7 @@
           "paragraphs": [
             "Pour afficher vos stats à partir de l’historique que vous importez, vous garder connecté et améliorer l'app. L'analytique et le signalement d'erreurs optionnels ne s'activent que si vous acceptez dans les paramètres cookies.",
             "Les fonctions IA qui envoient des noms d'artistes ou de titres à un prestataire ne s'activent que si vous y consentez.",
-            "Duet (partage avec amis) ne s'active que si vous acceptez une invitation ou en envoyez une, et uniquement selon le niveau de partage que vous choisissez pour chaque ami."
+            "Duet (partage avec amis) ne s'active que si vous acceptez une invitation ou en envoyez une, et uniquement selon le niveau de partage que vous choisissez pour chaque ami : comparaison et consultation lecture seule de vos stats."
           ]
         },
         {
@@ -3361,10 +3361,10 @@
         {
           "title": "Partage avec amis (Duet)",
           "paragraphs": [
-            "Duet vous permet de comparer vos statistiques de streams avec des amis qui ont un compte Soundprint-AI. Cette fonctionnalité est entièrement optionnelle.",
-            "Pour voir les stats d'un autre utilisateur, vous devez d'abord lui envoyer une demande d'ami (par e-mail). Il choisit s'il accepte et ce qu'il partage avec vous : statistiques agrégées (courbes, tops artistes et genres) ou, s'il le souhaite, des comparaisons plus détaillées sur un artiste, un titre ou un genre.",
+            "Duet vous permet de comparer vos statistiques de streams avec des amis qui ont un compte Soundprint-AI, et de consulter en lecture seule le tableau de stats (Your Music) d’un ami accepté, selon le niveau de partage choisi. Cette fonctionnalité est entièrement optionnelle.",
+            "Pour voir les stats d'un autre utilisateur, vous devez d'abord lui envoyer une demande d'ami (par e-mail) ou accepter la sienne. Il choisit s'il accepte et ce qu'il partage : statistiques agrégées (courbes, tops artistes et genres — pas de liste de titres) consultables et comparables ; ou, s'il choisit le partage détaillé, les mêmes agrégats plus les tops titres et les comparaisons ciblées sur un artiste, un titre ou un genre.",
             "Ce que vous partagez est décidé par vous, ami par ami, au moment de l'acceptation. Vous pouvez modifier le niveau de partage ou révoquer un ami à tout moment dans Paramètres → Partage Duet. Nous enregistrons votre consentement (type et version) comme preuve.",
-            "Nous n'offrons pas de découverte publique d'utilisateurs ni de classements ouverts. Vos e-mails ne sont pas affichés à vos amis dans Duet. Les invitations utilisent un message uniforme pour limiter l'énumération de comptes."
+            "Nous n'offrons pas de découverte publique d'utilisateurs, de fil d'actualité ni de classements ouverts. Vos e-mails ne sont pas affichés à vos amis dans Duet. Les invitations utilisent un message uniforme pour limiter l'énumération de comptes."
           ]
         },
         {

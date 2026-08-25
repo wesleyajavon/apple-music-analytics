@@ -27,8 +27,9 @@ Cocher ou remplir la colonne **Décision finale** une fois tranché. Les valeurs
 ### Notes de cadrage (rappel)
 
 - **D1 + D2** : à l’acceptation, l’utilisateur choisit le niveau de partage pour *cette* relation. Il peut le modifier ou révoquer plus tard dans Paramètres → Partage Duet.
+- **D2 (note 2026-08-25)** : pas de nouvel enum. `aggregates` = timeline / tops artistes-genres **en compare et en hub Your Music ami lecture seule** (KPIs, pas de liste de titres). `full` = + tops titres sur le hub **et** défis entité (déjà livrés). Toujours pas de heatmap / Maestro / insights IA sur données ami. La consultation du hub n’élargit pas le traitement : mêmes catégories, autre présentation (route Duet, pas Overview).
 - **D4 + D5** : l’API renvoie toujours « invitation traitée » ; pas de distinction visible entre email inconnu et invitation envoyée.
-- **D10** : texte §2.3 aligné avec la section Duet de la politique de confidentialité ; version `DUET_SHARING_CONSENT_VERSION` = `2026-06-09`.
+- **D10** : texte §2.3 aligné avec la section Duet de la politique de confidentialité ; version `DUET_SHARING_CONSENT_VERSION` = `2026-06-09` (pas de bump pour le hub ami : mapping D2 inchangé).
 
 ### Checklist validation
 
@@ -61,9 +62,9 @@ Contexte : l’utilisateur B reçoit une demande d’ami de A. Avant d’accepte
 | `duet.inviteAccept.subtitle` | **{requesterName}** souhaite vous ajouter en ami et comparer vos stats d’écoute. |
 | `duet.inviteAccept.sharePrompt` | Que souhaitez-vous partager avec cet ami ? |
 | `duet.inviteAccept.scopeAggregates.label` | Statistiques agrégées |
-| `duet.inviteAccept.scopeAggregates.description` | Courbes d’écoute, tops artistes et genres sur une période — sans détail des morceaux. |
+| `duet.inviteAccept.scopeAggregates.description` | Courbes, tops artistes et genres : un ami accepté peut les comparer avec les siens et les consulter en lecture seule. Pas de liste de titres. |
 | `duet.inviteAccept.scopeFull.label` | Comparaisons détaillées |
-| `duet.inviteAccept.scopeFull.description` | Tout ce qui précède, plus les défis « qui écoute le plus » sur un artiste, un titre ou un genre. |
+| `duet.inviteAccept.scopeFull.description` | Tout ce qui précède, plus tes tops titres et les défis « qui écoute le plus » sur un artiste, un titre ou un genre. |
 | `duet.inviteAccept.consentHint` | En acceptant, vous autorisez le partage choisi avec **{requesterName}**. Vous pourrez modifier ou révoquer ce partage à tout moment. |
 | `duet.inviteAccept.accept` | Accepter et partager |
 | `duet.inviteAccept.decline` | Refuser |
@@ -77,9 +78,9 @@ Contexte : l’utilisateur B reçoit une demande d’ami de A. Avant d’accepte
 | `duet.inviteAccept.subtitle` | **{requesterName}** wants to add you as a friend and compare listening stats. |
 | `duet.inviteAccept.sharePrompt` | What would you like to share with this friend? |
 | `duet.inviteAccept.scopeAggregates.label` | Aggregated stats |
-| `duet.inviteAccept.scopeAggregates.description` | Listening trends, top artists and genres over a period — no individual track details. |
+| `duet.inviteAccept.scopeAggregates.description` | Trends, top artists and genres: an accepted friend can compare them with their own and view them read-only. No track list. |
 | `duet.inviteAccept.scopeFull.label` | Detailed comparisons |
-| `duet.inviteAccept.scopeFull.description` | Everything above, plus head-to-head « who listened more » for an artist, track or genre. |
+| `duet.inviteAccept.scopeFull.description` | Everything above, plus your top tracks and head-to-head « who listened more » for an artist, track or genre. |
 | `duet.inviteAccept.consentHint` | By accepting, you allow the selected sharing with **{requesterName}**. You can change or revoke this at any time. |
 | `duet.inviteAccept.accept` | Accept and share |
 | `duet.inviteAccept.decline` | Decline |
@@ -93,9 +94,9 @@ Contexte : l’utilisateur B reçoit une demande d’ami de A. Avant d’accepte
 | `duet.inviteAccept.subtitle` | **{requesterName}** quiere añadirte como amigo y comparar estadísticas de escucha. |
 | `duet.inviteAccept.sharePrompt` | ¿Qué quieres compartir con este amigo? |
 | `duet.inviteAccept.scopeAggregates.label` | Estadísticas agregadas |
-| `duet.inviteAccept.scopeAggregates.description` | Tendencias de escucha, artistas y géneros más escuchados en un periodo — sin detalle de canciones. |
+| `duet.inviteAccept.scopeAggregates.description` | Tendencias, tops de artistas y géneros: un amigo aceptado puede compararlos con los suyos y consultarlos en solo lectura. Sin lista de canciones. |
 | `duet.inviteAccept.scopeFull.label` | Comparaciones detalladas |
-| `duet.inviteAccept.scopeFull.description` | Todo lo anterior, más retos « quién escuchó más » por artista, canción o género. |
+| `duet.inviteAccept.scopeFull.description` | Todo lo anterior, más tus tops de canciones y los retos « quién escuchó más » por artista, canción o género. |
 | `duet.inviteAccept.consentHint` | Al aceptar, autorizas el nivel de compartición elegido con **{requesterName}**. Puedes cambiarlo o revocarlo en cualquier momento. |
 | `duet.inviteAccept.accept` | Aceptar y compartir |
 | `duet.inviteAccept.decline` | Rechazar |

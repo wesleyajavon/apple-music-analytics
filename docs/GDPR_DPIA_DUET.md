@@ -1,8 +1,8 @@
-# DPIA — Partage social Duet (comparaison entre amis)
+# DPIA — Partage social Duet (comparaison et consultation entre amis)
 
-Document interne — Soundprint-AI. Dernière révision : 2026-06-09.
+Document interne — Soundprint-AI. Dernière révision : 2026-08-25.
 
-> **Analyse d’impact relative à la protection des données (Art. 35 RGPD)** pour **Duet** : relations amis, invitations et partage comparatif de statistiques d’écoute entre utilisateurs connectés.  
+> **Analyse d’impact relative à la protection des données (Art. 35 RGPD)** pour **Duet** : relations amis, invitations, comparaison de statistiques d’écoute, et consultation lecture seule du hub analytics d’un ami accepté (Your Music), toujours hors découverte publique.  
 > Statut : **auto-évaluation interne** — revue externe non retenue pour le MVP ; responsable du traitement assume la conformité.
 
 Documents associés : [GDPR_ROPA.md](./GDPR_ROPA.md), [DUET_PLAYBOOK.md](./DUET_PLAYBOOK.md), [DUET_PHASE0_DECISIONS.md](./DUET_PHASE0_DECISIONS.md).
@@ -13,7 +13,7 @@ Documents associés : [GDPR_ROPA.md](./GDPR_ROPA.md), [DUET_PLAYBOOK.md](./DUET_
 
 | Champ | Valeur |
 |-------|--------|
-| **Nom** | Duet — partage comparatif avec amis acceptés |
+| **Nom** | Duet — partage comparatif et consultation lecture seule avec amis acceptés |
 | **Responsable** | Wesley Ajavon (Soundprint-AI) |
 | **Sous-traitants** | Supabase (stockage relations + données d’écoute) — pas de nouveau prestataire |
 | **Date DPIA** | 2026-06-09 |
@@ -25,9 +25,10 @@ Documents associés : [GDPR_ROPA.md](./GDPR_ROPA.md), [DUET_PLAYBOOK.md](./DUET_
 |---------|--------|
 | Invitations | Par email (lookup compte existant uniquement) ; message uniforme anti-énumération |
 | Relation | Demande → acceptation / refus ; statut `Friendship` ; blocage |
-| Partage | Opt-in **par ami** à l’acceptation ; scopes `aggregates` ou `full` |
-| Comparaisons | Timeline dual, tops/genres agrégés ; head-to-head artiste (scope `full`) |
-| Exclusions MVP | Pas de découverte publique, pas de démo anonyme, pas de chat, pas de groupes |
+| Partage | Opt-in **par ami** à l’acceptation ; scopes `aggregates` ou `full` (mapping D2, pas de nouvel enum) |
+| Comparaisons | Timeline dual, tops/genres agrégés ; head-to-head artiste / titre / genre (scope `full`) |
+| Consultation Your Music ami | Lecture seule du hub analytics de l’ami (`/dashboard/duet/music`, **pas** Overview) : KPIs, timeline, tops artistes et genres si `aggregates` ; + tops titres si `full`. Pas de heatmap, pas d’IA. Toujours entre amis `accepted`. |
+| Exclusions MVP | Pas de découverte publique, pas de fil, pas de follow, pas de profil public, pas de « view as » dashboard, pas de démo anonyme, pas de chat, pas de groupes |
 
 ### Données traitées
 
@@ -35,7 +36,7 @@ Documents associés : [GDPR_ROPA.md](./GDPR_ROPA.md), [DUET_PLAYBOOK.md](./DUET_
 |-----------|----------|---------------------|
 | Relation | IDs, statut, `shareScope`, date | Non (métadonnée interne) |
 | Profil minimal | Nom, avatar | Oui (identification de l’ami) |
-| Stats d’écoute | Agrégats timeline, tops, genres ; détail artiste/titre selon scope | Oui, selon scope choisi par la personne qui partage |
+| Stats d’écoute | Agrégats timeline, tops, genres ; détail artiste/titre selon scope. Le hub Your Music ami **réutilise ces catégories** (présentation en lecture seule, pas un nouveau jeu de données). | Oui, selon scope choisi par la personne qui partage |
 | Email (invitation) | Lookup `User.email` | Non exposé à l’ami |
 
 ---
@@ -44,7 +45,7 @@ Documents associés : [GDPR_ROPA.md](./GDPR_ROPA.md), [DUET_PLAYBOOK.md](./DUET_
 
 ### Finalités
 
-Permettre à des utilisateurs de comparer leurs habitudes d’écoute avec des amis qui ont **accepté explicitement** le partage, dans le cadre du tableau de bord analytics.
+Permettre à des utilisateurs de **comparer** leurs habitudes d’écoute **et de consulter en lecture seule** le hub analytics (Your Music) d’un ami qui a **accepté explicitement** le partage, selon le `shareScope` de la relation, dans le cadre du tableau de bord analytics.
 
 ### Base légale retenue (auto-évaluation)
 
@@ -103,7 +104,7 @@ L’inviteur ne voit les stats de l’invité que si celui-ci accepte et choisit
 | Nouvelles technologies | Non |
 | **Croisement / communication à des tiers** | **Oui, limité** — communication à d’**autres utilisateurs** amis identifiés |
 
-**Conclusion** : risque modéré au MVP (volume limité, opt-in explicite, pas de public). **DPIA documentée** (ce fichier) et **mesures renforcées** sur l’autorisation cross-user. **Nouvelle revue obligatoire** si : découverte publique, scale massif UE, ou extension des données partagées (géoloc, contacts téléphone, etc.).
+**Conclusion** : risque modéré au MVP (volume limité, opt-in explicite, pas de public). **DPIA documentée** (ce fichier) et **mesures renforcées** sur l’autorisation cross-user. La consultation lecture seule du Your Music ami **n’est pas** un déclencheur « découverte d’inconnus » : mêmes destinataires (amis `accepted`), mêmes catégories D2, autre présentation. **Nouvelle revue obligatoire** si : découverte publique, scale massif UE, ou extension des données partagées (géoloc, contacts téléphone, heatmap jour par jour, IA sur données ami, etc.).
 
 ---
 
@@ -151,5 +152,13 @@ L’inviteur ne voit les stats de l’invité que si celui-ci accepte et choisit
 | Version | Date | Changement |
 |---------|------|------------|
 | 0.1 | 2026-06-09 | Création — auto-évaluation Duet MVP |
+| 0.2 | 2026-08-25 | Périmètre : consultation lecture seule du hub Your Music ami selon `shareScope` (D2 inchangé). Pas de bump `DUET_SHARING_CONSENT_VERSION`. Copy acceptation + privacy alignés. |
+
+**Ce qui change pour l’utilisateur (0.2)**
+
+- **Aujourd’hui :** pas de nouvel écran. Si tu acceptes une invitation (ou relis la privacy), le texte dit qu’un ami pourra ouvrir tes stats agrégées, pas seulement te comparer. `full` = aussi tes tops titres. Toujours pas de fil ni de profil public.
+- **Inchangé :** niveau de partage (`aggregates` / `full`), révocation, pas de découverte d’inconnus, Overview = ta musique.
+- **Pas de re-consentement :** version `2026-06-09` inchangée ; mêmes catégories de données qu’à l’acceptation initiale.
+- **Plus tard (hors de cette révision docs) :** bouton « Voir sa musique » et page `/dashboard/duet/music`.
 
 **Prochaine revue** : avant ouverture publique à grande échelle, ajout découverte d’inconnus, ou incident de sécurité cross-user.

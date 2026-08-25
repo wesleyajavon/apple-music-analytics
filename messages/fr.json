@@ -1372,7 +1372,7 @@
     },
     "friends": {
       "eyebrow": "Amis",
-      "title": "Voir le Your Music d’un ami",
+      "title": "Voir Your Music d’un ami",
       "description": "Ouvrez le hub d’écoute d’un ami en lecture seule. Votre propre Your Music reste sur cette page.",
       "seeMusic": "Voir sa musique",
       "seeMusicAria": "Voir la musique de {name}",

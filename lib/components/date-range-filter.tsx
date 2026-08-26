@@ -120,7 +120,7 @@ export function DateRangeFilter() {
       id={DASHBOARD_DATE_RANGE_FILTER_ID}
       className="transition-[box-shadow] duration-500 data-[highlighted]:shadow-[inset_0_0_0_2px_rgb(152_80_208_/_0.45)]"
     >
-      <div className="flex min-w-0 items-center gap-2 px-3 py-2 lg:hidden">
+      <div className="flex min-w-0 items-center gap-2.5 px-3 py-2 lg:hidden">
         <DateRangeFilterMobile
           currentPreset={currentPreset}
           startDate={searchParams.get("startDate")}
@@ -135,7 +135,7 @@ export function DateRangeFilter() {
           }}
           onApplyCustom={applyCustomRange}
         />
-        <div className="flex shrink-0 items-center gap-0.5">{headerActions}</div>
+        <div className="flex shrink-0 items-center gap-2.5">{headerActions}</div>
       </div>
 
       <div className="hidden px-8 py-3 lg:block">

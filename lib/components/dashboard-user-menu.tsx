@@ -124,7 +124,7 @@ export function DashboardUserMenu() {
         aria-haspopup="menu"
         aria-label={t("menuLabel")}
         title={accountDisplayName ?? tSidebar("items.settings")}
-        className="rounded-xl outline-none transition-transform hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        className="flex h-9 w-9 items-center justify-center rounded-xl outline-none transition-transform hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background max-lg:h-11 max-lg:w-11"
       >
         <UserAvatar
           src={profileAvatarUrl}

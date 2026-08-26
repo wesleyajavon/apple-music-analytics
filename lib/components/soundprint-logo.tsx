@@ -7,6 +7,7 @@ type SoundprintLogoProps = {
   textClassName?: string;
   showText?: boolean;
   priority?: boolean;
+  alt?: string;
 };
 
 const LOGO_SRC = "/brand/soundprint-ai-logo.png";
@@ -18,12 +19,13 @@ export function SoundprintLogo({
   textClassName = "text-sm font-semibold tracking-wide text-foreground",
   showText = true,
   priority = false,
+  alt,
 }: SoundprintLogoProps) {
   return (
     <span className={`inline-flex items-center gap-2 ${className}`}>
       <Image
         src={src}
-        alt={showText ? "" : "Soundprint-AI"}
+        alt={alt ?? (showText ? "" : "Soundprint-AI")}
         width={256}
         height={256}
         className={`object-cover ${imageClassName}`}

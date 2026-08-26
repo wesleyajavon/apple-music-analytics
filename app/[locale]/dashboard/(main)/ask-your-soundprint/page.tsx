@@ -7,34 +7,23 @@ import {
   useRef,
   useState,
   type FormEvent,
-  type KeyboardEvent,
   type ReactNode,
 } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import {
-  Bot,
   CalendarRange,
-  ChevronDown,
   ListTree,
-  Send,
-  Sparkles,
-  UserRound,
   X,
 } from "lucide-react";
-import { LiveStatusDot } from "@/lib/components/live-status-dot";
-import {
-  DASHBOARD_SPOTLIGHT_SHELL,
-  DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY,
-  DASHBOARD_SPOTLIGHT_GRADIENT_CYAN,
-  DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET,
-  DASHBOARD_SPOTLIGHT_HAIRLINE_CYAN,
-  DASHBOARD_SPOTLIGHT_HEADER_BOTTOM,
-  DASHBOARD_SPOTLIGHT_INNER_WELL,
-} from "@/lib/constants/dashboard-spotlight";
 import { ApiError } from "@/lib/api-client";
-import { AssistantChatMessageBody } from "@/lib/components/assistant-chat-message-body";
 import { InteractiveAiGenreBackfillNotice } from "@/lib/components/interactive-ai-genre-backfill-notice";
+import {
+  AskSoundprintChatMessages,
+  AskSoundprintComposer,
+  AskSoundprintMark,
+  AskSoundprintSuggestionTile,
+} from "@/lib/components/ask-soundprint-chat";
 import {
   AskSoundprintMobileExperience,
   AskSoundprintMobileSkeleton,
@@ -83,8 +72,7 @@ const ASK_SOUNDPRINT_DISMISS_CUSTOMIZE_HINT_KEY = "ama-ask-soundprint-dismiss-cu
 const ASK_SOUNDPRINT_DISMISS_HEAVY_PRESET_NOTICE_KEY =
   "ama-ask-soundprint-dismiss-heavy-preset-notice";
 
-const COMPACT_HEADER_SHELL_CLASS =
-  "relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-gray-950 px-5 py-5 text-white shadow-xl shadow-violet-500/10 sm:px-6 sm:py-6";
+const EMPTY_STATE_PRESET_COUNT = 4;
 
 function DismissibleAskHint({
   storageKey,
@@ -160,7 +148,7 @@ function AskSoundprintPeriodChip({
 
   return (
     <span
-      className={`inline-flex min-h-8 max-w-full items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold text-white/90 backdrop-blur ${className}`}
+      className={`inline-flex min-h-8 max-w-full items-center gap-1.5 rounded-full border border-slate-200/90 bg-white/80 px-3 py-1 text-xs font-semibold text-slate-700 backdrop-blur dark:border-white/10 dark:bg-white/10 dark:text-white/90 ${className}`}
     >
       <CalendarRange className="h-3.5 w-3.5 shrink-0" aria-hidden />
       <span className="truncate">
@@ -401,32 +389,13 @@ function PresetExampleButton({
   }
 
   return (
-    <div>
-      <button
-        type="button"
-        disabled={disabled}
-        onClick={() => onSelect(example.presetQuestionId)}
-        className="w-full rounded-xl border border-slate-200/90 bg-white px-4 py-3 text-left shadow-sm transition hover:border-cyan-300/50 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-black/20 dark:hover:border-cyan-400/35 dark:hover:bg-white/[0.04]"
-      >
-        <span
-          className={
-            example.id === "artist-deep-dive"
-              ? "block text-[0.68rem] font-semibold tracking-[0.14em] text-violet-700 dark:text-violet-200"
-              : "block text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-violet-700 dark:text-violet-200"
-          }
-        >
-          {label}
-        </span>
-        <span className="mt-1 block text-sm font-medium leading-snug text-slate-900 dark:text-white">
-          {question}
-        </span>
-        {hint ? (
-          <span className="mt-2 block text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-            {hint}
-          </span>
-        ) : null}
-      </button>
-    </div>
+    <AskSoundprintSuggestionTile
+      label={label}
+      question={question}
+      hint={hint}
+      disabled={disabled}
+      onSelect={() => onSelect(example.presetQuestionId)}
+    />
   );
 }
 
@@ -461,13 +430,12 @@ function PresetPlaybookSections({
               </p>
             ) : null}
             {examples.map((example) => (
-              <PresetExampleButton
+              <AskSoundprintBoundPresetRow
                 key={example.id}
                 example={example}
                 ctx={ctx}
                 disabled={disabled}
                 onSelect={onSelect}
-                variant={variant}
               />
             ))}
           </div>
@@ -486,10 +454,13 @@ function FeaturedPresetSuggestions({
   disabled: boolean;
   onSelect: (presetQuestionId: MusicChatPresetQuestionId) => void;
 }) {
-  const featuredExamples = useMemo(() => getFeaturedExamples(), []);
+  const featuredExamples = useMemo(
+    () => getFeaturedExamples().slice(0, EMPTY_STATE_PRESET_COUNT),
+    []
+  );
 
   return (
-    <div className="grid gap-2 sm:grid-cols-2">
+    <div className="grid w-full gap-3 sm:grid-cols-2">
       {featuredExamples.map((example) => (
         <PresetExampleButton
           key={example.id}
@@ -517,166 +488,17 @@ function PlaybookHints() {
   );
 }
 
-function MusicChatMessages({
-  messages,
-  thinkingStepIndex,
-  thinkingSteps,
-  isPending,
-}: {
-  messages: MusicChatMessage[];
-  thinkingStepIndex: number;
-  thinkingSteps: string[];
-  isPending: boolean;
-}) {
-  const t = useTranslations("askSoundprint");
-
-  return (
-    <>
-      {messages.map((message, index) => {
-        const isAssistant = message.role === "assistant";
-        return (
-          <div
-            key={`${message.role}-${index}-${message.content.slice(0, 12)}`}
-            className={`flex gap-3 ${isAssistant ? "" : "justify-end"}`}
-          >
-            {isAssistant ? (
-              <div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-200/90 bg-white text-slate-700 shadow-sm dark:border-white/10 dark:bg-white/10 dark:text-white">
-                <Bot className="h-5 w-5 shrink-0" aria-hidden />
-              </div>
-            ) : null}
-            <div
-              className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
-                isAssistant
-                  ? "border border-slate-200/90 bg-white text-slate-900 shadow-sm dark:border-white/10 dark:bg-slate-950/80 dark:text-white"
-                  : "whitespace-pre-wrap bg-slate-950 text-white shadow-lg shadow-slate-950/25 dark:bg-white dark:text-slate-950"
-              }`}
-            >
-              {isAssistant ? (
-                <AssistantChatMessageBody content={message.content} />
-              ) : (
-                message.content
-              )}
-            </div>
-            {!isAssistant ? (
-              <div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-950 text-white dark:bg-white dark:text-slate-950">
-                <UserRound className="h-5 w-5" aria-hidden />
-              </div>
-            ) : null}
-          </div>
-        );
-      })}
-      {isPending ? (
-        <div className="flex gap-3">
-          <div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-200/90 bg-white text-slate-700 motion-safe:animate-pulse dark:border-white/10 dark:bg-white/10 dark:text-white">
-            <Bot className="h-5 w-5 shrink-0" aria-hidden />
-          </div>
-          <div
-            className="max-w-[min(100%,28rem)] space-y-2 rounded-2xl border border-slate-200/90 bg-white px-4 py-3 text-sm shadow-sm dark:border-white/10 dark:bg-slate-950/80"
-            aria-live="polite"
-            aria-busy="true"
-          >
-            <p className="font-medium leading-snug text-slate-900 transition-all duration-300 dark:text-white">
-              {thinkingSteps[thinkingStepIndex % thinkingSteps.length]}
-            </p>
-            <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-400">
-              {t("thinkingPatience")}
-            </p>
-            <div
-              className="relative h-1 overflow-hidden rounded-full bg-slate-200 dark:bg-white/10"
-              aria-hidden
-            >
-              <div className="absolute inset-y-0 w-2/5 rounded-full bg-gradient-to-r from-violet-500/80 to-cyan-500/70 motion-safe:animate-onboarding-import-indeterminate dark:from-violet-400/90 dark:to-cyan-400/75" />
-            </div>
-          </div>
-        </div>
-      ) : null}
-    </>
-  );
-}
-
-function MusicChatInputForm({
-  input,
-  onInputChange,
-  onSubmit,
-  disabled,
-  placeholder,
-  layout = "desktop",
-}: {
-  input: string;
-  onInputChange: (value: string) => void;
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
-  disabled: boolean;
-  placeholder: string;
-  layout?: "desktop" | "mobile";
-}) {
-  const t = useTranslations("askSoundprint");
-  const isMobile = layout === "mobile";
-
-  function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
-    if (isMobile) return;
-    if (event.key !== "Enter" || event.shiftKey) return;
-    event.preventDefault();
-    event.currentTarget.form?.requestSubmit();
-  }
-
-  return (
-    <form
-      onSubmit={onSubmit}
-      className={isMobile ? "flex items-end gap-2" : "flex flex-col gap-3 sm:flex-row"}
-    >
-      <label className="sr-only" htmlFor={isMobile ? "ask-soundprint-input-mobile" : "ask-soundprint-input"}>
-        {t("inputLabel")}
-      </label>
-      <textarea
-        id={isMobile ? "ask-soundprint-input-mobile" : "ask-soundprint-input"}
-        value={input}
-        onChange={(event) => onInputChange(event.target.value)}
-        onKeyDown={handleKeyDown}
-        disabled={disabled}
-        placeholder={placeholder}
-        rows={isMobile ? 1 : 2}
-        className={
-          isMobile
-            ? "min-h-11 max-h-28 flex-1 resize-none rounded-2xl border border-slate-200/90 bg-white px-4 py-3 text-base text-slate-900 shadow-inner outline-none transition placeholder:text-slate-400 focus:border-violet-400 focus:ring-2 focus:ring-violet-400/15 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-black/30 dark:text-white dark:placeholder:text-slate-500"
-            : "min-h-[52px] flex-1 resize-none rounded-2xl border border-slate-200/90 bg-white px-4 py-3 text-sm text-slate-900 shadow-inner outline-none transition placeholder:text-slate-400 focus:border-violet-400 focus:ring-2 focus:ring-violet-400/15 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-black/30 dark:text-white dark:placeholder:text-slate-500"
-        }
-      />
-      <button
-        type="submit"
-        disabled={disabled || !input.trim()}
-        className={
-          isMobile
-            ? "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-white shadow-lg shadow-slate-950/20 transition active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-white dark:text-slate-950"
-            : "inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white shadow-xl shadow-slate-950/20 transition hover:-translate-y-0.5 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-white dark:text-slate-950 dark:shadow-black/25 dark:hover:bg-slate-100"
-        }
-        aria-label={t("send")}
-      >
-        <Send className="h-4 w-4" aria-hidden />
-        {!isMobile ? t("send") : null}
-      </button>
-    </form>
-  );
-}
-
 function MusicChatFallback() {
   return (
     <>
       <AskSoundprintMobileSkeleton />
-      <div className="mx-auto hidden max-w-6xl space-y-6 lg:block">
-        <div
-          className="h-28 animate-pulse rounded-[1.75rem] border border-white/10 bg-gray-950 shadow-xl shadow-violet-500/10"
-          aria-busy="true"
-        />
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
-          <div className={`relative min-h-[420px] animate-pulse ${DASHBOARD_SPOTLIGHT_SHELL}`} aria-busy="true">
-            <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} aria-hidden />
-            <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} aria-hidden />
-          </div>
-          <div className={`relative min-h-[240px] animate-pulse ${DASHBOARD_SPOTLIGHT_SHELL}`} aria-busy="true">
-            <div className={DASHBOARD_SPOTLIGHT_GRADIENT_CYAN} aria-hidden />
-            <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_CYAN} aria-hidden />
-          </div>
+      <div className="hidden min-h-[calc(100dvh-var(--dashboard-filter-height,0px))] flex-col lg:flex" aria-busy="true">
+        <div className="flex flex-1 flex-col items-center justify-center gap-4">
+          <div className="h-14 w-14 animate-pulse rounded-full bg-violet-200/70 dark:bg-violet-500/20" />
+          <div className="h-8 w-64 animate-pulse rounded-lg bg-slate-200/80 dark:bg-white/10" />
+          <div className="h-4 w-48 animate-pulse rounded-lg bg-slate-200/60 dark:bg-white/5" />
         </div>
+        <div className="mx-auto mb-6 h-14 w-full max-w-3xl animate-pulse rounded-[1.75rem] bg-slate-200/80 dark:bg-white/10" />
       </div>
     </>
   );
@@ -699,6 +521,7 @@ function formatError(
 
 function MusicChatContent() {
   const t = useTranslations("askSoundprint");
+  const tCommon = useTranslations("common");
   const locale = useLocale();
   const searchParams = useSearchParams();
   const userId = searchParams.get("userId") ?? undefined;
@@ -840,20 +663,7 @@ function MusicChatContent() {
     return () => window.clearInterval(intervalId);
   }, [musicChat.isPending, thinkingSteps.length]);
 
-  const visibleMessages = useMemo(
-    () =>
-      messages.length > 0
-        ? messages
-        : [
-            {
-              role: "assistant" as const,
-              content: isPublicDemoViewer
-                ? t("publicDemoIntro")
-                : t("emptyAssistantMessage"),
-            },
-          ],
-    [isPublicDemoViewer, messages, t]
-  );
+  const visibleMessages = messages;
 
   useEffect(() => {
     if (!window.matchMedia("(min-width: 1024px)").matches) return;
@@ -931,6 +741,7 @@ function MusicChatContent() {
   }
 
   function handlePresetClick(presetQuestionId: MusicChatPresetQuestionId) {
+    setPlaybookOpen(false);
     if (presetQuestionId === "compare-listening-periods") {
       sendMessage(
         t("comparePeriodsQuestion", {
@@ -1096,162 +907,173 @@ function MusicChatContent() {
         sheetHints={<PlaybookHints />}
       />
 
-      <div className="mx-auto hidden max-w-6xl space-y-6 lg:block">
-        <header className={COMPACT_HEADER_SHELL_CLASS}>
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.26),transparent_30%),radial-gradient(circle_at_80%_12%,rgba(6,182,212,0.2),transparent_32%)]" />
-          <div className="relative flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div className="min-w-0">
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-violet-100 backdrop-blur">
-                <LiveStatusDot />
-                {t("eyebrow")}
-              </div>
-              <h1
-                id="ask-soundprint-heading"
-                className="flex flex-wrap items-center gap-2.5 text-2xl font-semibold tracking-[-0.05em] text-white sm:text-3xl"
-              >
-                <Sparkles className="h-7 w-7 shrink-0 text-violet-200/90" aria-hidden />
-                <span>{t("title")}</span>
-              </h1>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-white/70">{t("compactTrust")}</p>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              {isPublicDemoViewer ? (
-                <span className="inline-flex items-center rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white/90">
-                  {t("heroDemoPill")}
-                </span>
-              ) : null}
-              <AskSoundprintPeriodChip
-                startDate={startDate}
-                endDate={endDate}
-                isAll={isAll}
-                locale={locale}
-              />
-            </div>
+      <div className="relative hidden min-h-0 flex-1 flex-col lg:flex">
+        <header className="flex shrink-0 items-center justify-between gap-3 px-6 py-3">
+          {hasUserMessages ? (
+            <h1
+              id="ask-soundprint-heading"
+              className="flex min-w-0 items-center gap-2 text-base font-semibold tracking-tight text-slate-900 dark:text-white"
+            >
+              <AskSoundprintMark size="md" />
+              <span className="truncate">{t("title")}</span>
+            </h1>
+          ) : null}
+          <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
+            {isPublicDemoViewer ? (
+              <span className="inline-flex items-center rounded-full border border-slate-200/90 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 dark:border-white/10 dark:bg-white/10 dark:text-white/90">
+                {t("heroDemoPill")}
+              </span>
+            ) : null}
+            <AskSoundprintPeriodChip
+              startDate={startDate}
+              endDate={endDate}
+              isAll={isAll}
+              locale={locale}
+            />
           </div>
         </header>
 
-        {isPublicDemoViewer ? (
-          <p className="text-center text-sm text-muted-foreground">{t("publicDemoMode")}</p>
+        {showGenreBackfillNotice ? (
+          <div className="px-6 pb-2">
+            <InteractiveAiGenreBackfillNotice
+              force={genreClassify423Notice && !interactiveAiBlockedByGenreBackfill}
+            />
+          </div>
         ) : null}
 
-        <section className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
-          {showGenreBackfillNotice ? (
-            <div className="lg:col-span-2">
-              <InteractiveAiGenreBackfillNotice
-                force={genreClassify423Notice && !interactiveAiBlockedByGenreBackfill}
+        <div ref={desktopWellRef} className="min-h-0 flex-1 overflow-y-auto px-6">
+          {!hasUserMessages && !musicChat.isPending ? (
+            <div className="flex min-h-full flex-col items-center justify-center py-10">
+              <AskSoundprintMark size="lg" className="mb-6" />
+              <h1
+                id="ask-soundprint-heading"
+                className="text-center text-3xl font-semibold tracking-tight text-slate-900 dark:text-white"
+              >
+                {t("title")}
+              </h1>
+              <p className="mt-2 text-center text-base text-slate-500 dark:text-slate-400">
+                {t("compactTrust")}
+              </p>
+              {isPublicDemoViewer ? (
+                <p className="mt-2 max-w-md text-center text-sm text-slate-500 dark:text-slate-400">
+                  {t("publicDemoMode")}
+                </p>
+              ) : (
+                <p className="mt-2 text-center text-sm text-slate-500 dark:text-slate-400">
+                  {t("emptyActionHint")}
+                </p>
+              )}
+              <div className="mt-8 w-full max-w-2xl">
+                <FeaturedPresetSuggestions
+                  ctx={presetCtx}
+                  disabled={presetsDisabled}
+                  onSelect={handlePresetClick}
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => setPlaybookOpen(true)}
+                disabled={presetsDisabled}
+                className="mt-5 text-sm font-medium text-slate-500 transition hover:text-violet-700 disabled:cursor-not-allowed disabled:opacity-60 dark:text-slate-400 dark:hover:text-violet-200"
+              >
+                {t("allQuestions")}
+              </button>
+            </div>
+          ) : (
+            <div className="py-4 pb-8">
+              <AskSoundprintChatMessages
+                messages={visibleMessages}
+                thinkingStepIndex={thinkingStepIndex}
+                thinkingSteps={thinkingSteps}
+                isPending={musicChat.isPending}
               />
             </div>
-          ) : null}
-          <div className={`relative flex flex-col ${DASHBOARD_SPOTLIGHT_SHELL}`}>
-            <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} aria-hidden />
-            <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} aria-hidden />
-            <div className="relative flex flex-col">
-              <div
-                ref={desktopWellRef}
-                className={`${DASHBOARD_SPOTLIGHT_INNER_WELL} mx-4 mt-4 max-h-[min(72dvh,680px)] min-h-[360px] space-y-4 overflow-y-auto sm:mx-5 sm:mt-5 lg:min-h-[480px]`}
-              >
-                <MusicChatMessages
-                  messages={visibleMessages}
-                  thinkingStepIndex={thinkingStepIndex}
-                  thinkingSteps={thinkingSteps}
-                  isPending={musicChat.isPending}
-                />
-                {!hasUserMessages ? (
-                  <div className="space-y-3 pt-1">
-                    <div>
-                      <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-violet-700 dark:text-violet-300">
-                        {t("featuredTitle")}
-                      </p>
-                      <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                        {t("emptyActionHint")}
-                      </p>
-                    </div>
-                    <FeaturedPresetSuggestions
-                      ctx={presetCtx}
-                      disabled={presetsDisabled}
-                      onSelect={handlePresetClick}
-                    />
-                  </div>
-                ) : null}
-              </div>
+          )}
+        </div>
 
-              <div className={`${DASHBOARD_SPOTLIGHT_HEADER_BOTTOM} px-4 py-4 sm:px-6 sm:py-5`}>
-                {errorMessage ? (
-                  <p className="mb-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-200">
-                    {errorMessage}
-                  </p>
-                ) : null}
-                {hasUserMessages ? (
-                  <button
-                    type="button"
-                    onClick={() => setPlaybookOpen(true)}
-                    disabled={presetsDisabled}
-                    className="mb-3 inline-flex min-h-11 items-center gap-2 rounded-2xl border border-slate-200/90 bg-white px-4 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-white/[0.04]"
+        <div className="shrink-0 px-6 pb-5 pt-2">
+          <div className="mx-auto w-full max-w-3xl">
+            {errorMessage ? (
+              <p className="mb-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-200">
+                {errorMessage}
+              </p>
+            ) : null}
+            <AskSoundprintComposer
+              input={input}
+              onInputChange={setInput}
+              onSubmit={handleSubmit}
+              disabled={freeTextDisabled}
+              placeholder={inputPlaceholder}
+              layout="desktop"
+              leadingAction={
+                <button
+                  type="button"
+                  onClick={() => setPlaybookOpen(true)}
+                  disabled={presetsDisabled}
+                  className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-violet-700 disabled:cursor-not-allowed disabled:opacity-50 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-violet-200"
+                  aria-label={t("allQuestions")}
+                >
+                  <ListTree className="h-4 w-4" aria-hidden />
+                </button>
+              }
+            />
+            <p className="mt-2 text-center text-xs text-slate-400 dark:text-slate-500">
+              {t("heroStatTag")}
+            </p>
+          </div>
+        </div>
+
+        {playbookOpen ? (
+          <div className="fixed inset-0 z-40 flex items-center justify-center p-6">
+            <button
+              type="button"
+              className="absolute inset-0 bg-slate-950/40 backdrop-blur-[2px]"
+              aria-label={tCommon("close")}
+              onClick={() => setPlaybookOpen(false)}
+            />
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="ask-soundprint-playbook-title"
+              className="relative z-10 flex max-h-[min(80dvh,40rem)] w-full max-w-lg flex-col overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-2xl dark:border-white/10 dark:bg-slate-950"
+            >
+              <div className="flex items-start justify-between gap-3 border-b border-slate-200/80 px-5 py-4 dark:border-white/10">
+                <div>
+                  <h2
+                    id="ask-soundprint-playbook-title"
+                    className="text-lg font-semibold tracking-tight text-slate-900 dark:text-white"
                   >
-                    <ListTree className="h-4 w-4" aria-hidden />
                     {t("allQuestions")}
-                  </button>
-                ) : null}
-                <MusicChatInputForm
-                  input={input}
-                  onInputChange={setInput}
-                  onSubmit={handleSubmit}
-                  disabled={freeTextDisabled}
-                  placeholder={inputPlaceholder}
-                  layout="desktop"
+                  </h2>
+                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                    {t("allQuestionsHint")}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setPlaybookOpen(false)}
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 dark:hover:bg-white/10"
+                  aria-label={tCommon("close")}
+                >
+                  <X className="h-4 w-4" aria-hidden />
+                </button>
+              </div>
+              <div className="space-y-4 overflow-y-auto px-5 py-4">
+                <PlaybookHints />
+                <PresetPlaybookSections
+                  ctx={presetCtx}
+                  disabled={presetsDisabled}
+                  onSelect={handlePresetClick}
                 />
+                <div className="space-y-2 border-t border-slate-200/80 pt-4 text-sm leading-relaxed text-slate-500 dark:border-white/10 dark:text-slate-400">
+                  <p className="font-medium text-slate-700 dark:text-slate-200">{t("unsupportedTitle")}</p>
+                  <p>{t("guardrailHint")}</p>
+                  <p>{t("unsupportedExamples")}</p>
+                </div>
               </div>
             </div>
           </div>
-
-          <aside className="space-y-4">
-            <div className={`relative ${DASHBOARD_SPOTLIGHT_SHELL}`}>
-              <div className={DASHBOARD_SPOTLIGHT_GRADIENT_CYAN} aria-hidden />
-              <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_CYAN} aria-hidden />
-              <div className="relative space-y-3 p-4 sm:p-5">
-                <details
-                  className="group"
-                  open={playbookOpen}
-                  onToggle={(event) => setPlaybookOpen(event.currentTarget.open)}
-                >
-                  <summary className="flex cursor-pointer list-none items-center justify-between rounded-xl border border-slate-200/90 bg-slate-50/90 px-4 py-3 text-left text-sm font-semibold text-slate-900 transition hover:bg-slate-100 dark:border-white/10 dark:bg-white/[0.06] dark:text-white dark:hover:bg-white/[0.09]">
-                    <span>{t("allQuestions")}</span>
-                    <ChevronDown
-                      className="h-4 w-4 shrink-0 text-slate-500 transition group-open:rotate-180 dark:text-slate-400"
-                      aria-hidden
-                    />
-                  </summary>
-                  <div className="mt-4 space-y-4">
-                    <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                      {t("allQuestionsHint")}
-                    </p>
-                    <PlaybookHints />
-                    <div className="max-h-[min(48dvh,22rem)] space-y-5 overflow-y-auto overscroll-y-contain pr-0.5">
-                      <PresetPlaybookSections
-                        ctx={presetCtx}
-                        disabled={presetsDisabled}
-                        onSelect={handlePresetClick}
-                      />
-                    </div>
-                  </div>
-                </details>
-                <details className="group">
-                  <summary className="flex cursor-pointer list-none items-center justify-between rounded-xl border border-slate-200/90 bg-white px-4 py-3 text-left text-sm font-semibold text-slate-900 transition hover:bg-slate-50 dark:border-white/10 dark:bg-black/20 dark:text-white dark:hover:bg-white/[0.04]">
-                    <span>{t("unsupportedTitle")}</span>
-                    <ChevronDown
-                      className="h-4 w-4 shrink-0 text-slate-500 transition group-open:rotate-180 dark:text-slate-400"
-                      aria-hidden
-                    />
-                  </summary>
-                  <div className="mt-3 space-y-2 px-1 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                    <p>{t("guardrailHint")}</p>
-                    <p>{t("unsupportedExamples")}</p>
-                  </div>
-                </details>
-              </div>
-            </div>
-          </aside>
-        </section>
+        ) : null}
       </div>
     </>
   );

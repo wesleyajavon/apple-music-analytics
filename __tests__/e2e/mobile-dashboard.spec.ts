@@ -792,6 +792,31 @@ test.describe("Mobile dashboard UX", () => {
     expect(composerBox!.y + composerBox!.height).toBeLessThanOrEqual(navBox!.y + 1);
   });
 
+  test("ask your Soundprint closes the all-questions sheet after picking a preset", async ({
+    page,
+  }) => {
+    test.setTimeout(60_000);
+    await seedCookieConsent(page);
+    await page.goto(`/en/dashboard/ask-your-soundprint${publicDemoQuery}`);
+    await dismissCookieBannerIfPresent(page);
+
+    const main = page.getByRole("main");
+    await expect(main.getByRole("heading", { level: 1, name: /ask your soundprint/i })).toBeVisible({
+      timeout: 20_000,
+    });
+
+    await main.getByRole("button", { name: /all questions/i }).click();
+    const sheet = page.getByRole("dialog", { name: /all questions/i });
+    await expect(sheet).toBeVisible();
+
+    await sheet.getByRole("button", { name: /^ask:/i }).first().click();
+    await expect(sheet).toBeHidden();
+    await expect(main.getByText(/tell me my streaming history with/i).first()).toBeVisible({
+      timeout: 20_000,
+    });
+    await expect(page.getByRole("navigation", { name: /main dashboard navigation/i })).toBeVisible();
+  });
+
   test("ask your Soundprint is usable in French", async ({ page }) => {
     test.setTimeout(60_000);
     await seedCookieConsent(page);

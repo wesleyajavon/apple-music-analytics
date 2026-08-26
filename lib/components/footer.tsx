@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
+import { Link, usePathname } from "@/i18n/navigation";
 import { withPublicDemoUserId } from "@/lib/constants/public-profile";
 import { usePublicDemo } from "@/lib/providers/public-demo-provider";
 
@@ -13,10 +13,14 @@ type FooterVariant = "dashboard" | "home";
  */
 export function Footer({ variant = "dashboard" }: { variant?: FooterVariant }) {
   const t = useTranslations("footer");
+  const pathname = usePathname();
+  const { publicProfileUserId, publicDemoOverviewPath } = usePublicDemo();
   const hideOnMobileDashboard = variant === "dashboard";
+  const hideOnAskSoundprint = pathname.includes("/dashboard/ask-your-soundprint");
+
+  if (hideOnAskSoundprint) return null;
 
   const currentYear = new Date().getFullYear();
-  const { publicProfileUserId, publicDemoOverviewPath } = usePublicDemo();
 
   const hrefWithDemo = (href: string) =>
     publicProfileUserId ? withPublicDemoUserId(href, publicProfileUserId) : href;

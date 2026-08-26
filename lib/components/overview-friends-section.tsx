@@ -117,20 +117,24 @@ export function OverviewFriendsSection({ compact = false }: OverviewFriendsSecti
         <ul className="space-y-2">
           {acceptedFriends.map((friend) => (
             <li key={friend.id}>
-              <div className="flex items-center gap-3 rounded-[1.25rem] border border-slate-200/80 bg-white px-3 py-2.5 shadow-sm dark:border-white/10 dark:bg-slate-950/50">
+              <Link
+                href={friend.musicHref}
+                aria-label={t("seeMusicAria", { name: friend.name })}
+                className="group flex min-h-14 cursor-pointer items-center gap-3 rounded-[1.25rem] border border-slate-200/80 bg-white px-3 py-2.5 shadow-sm no-underline outline-none transition-all duration-200 hover:-translate-y-0.5 hover:border-violet-300/70 hover:shadow-md hover:shadow-violet-500/10 focus-visible:ring-2 focus-visible:ring-violet-400/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.99] dark:border-white/10 dark:bg-slate-950/50 dark:hover:border-violet-400/35 dark:hover:shadow-violet-500/10"
+              >
                 <UserAvatar name={friend.name} src={friend.avatarUrl} size="md" />
-                <p className="min-w-0 flex-1 truncate font-semibold text-slate-900 dark:text-white">
+                <p className="min-w-0 flex-1 truncate font-semibold text-slate-900 transition-colors group-hover:text-violet-700 dark:text-white dark:group-hover:text-violet-200">
                   {friend.name}
                 </p>
-                <Link
-                  href={friend.musicHref}
-                  className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-xl bg-gradient-to-r from-violet-600 to-violet-500 px-3.5 text-sm font-semibold text-white no-underline shadow-md shadow-violet-500/20"
-                  aria-label={t("seeMusicAria", { name: friend.name })}
+                <span
+                  className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-xl bg-gradient-to-r from-violet-600 to-violet-500 px-3.5 text-sm font-semibold text-white shadow-md shadow-violet-500/20 transition-all duration-200 group-hover:gap-2 group-hover:shadow-lg group-hover:shadow-violet-500/30"
+                  aria-hidden
                 >
-                  <Music2 className="h-4 w-4" aria-hidden />
+                  <Music2 className="h-4 w-4" />
                   <span className="hidden sm:inline">{t("seeMusic")}</span>
-                </Link>
-              </div>
+                  <ChevronRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+                </span>
+              </Link>
             </li>
           ))}
         </ul>

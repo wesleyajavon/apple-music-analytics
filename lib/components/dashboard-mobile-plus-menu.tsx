@@ -16,7 +16,7 @@ type PlusNavItem = {
   href: string;
   labelKey: string;
   icon: (props: React.SVGProps<SVGSVGElement>) => JSX.Element;
-  badgeKey?: "newAiBadge" | "featuredBadge";
+  badgeKey?: "newAiBadge" | "featuredBadge" | "betaBadge";
 };
 
 type PlusNavSection = {
@@ -125,7 +125,7 @@ const PLUS_SECTIONS: PlusNavSection[] = [
         href: "/dashboard/ask-your-soundprint",
         labelKey: "askSoundprint",
         icon: icons.askSoundprint,
-        badgeKey: "newAiBadge",
+        badgeKey: "betaBadge",
       },
       { href: "/dashboard/ai-insights", labelKey: "aiInsights", icon: icons.aiInsights },
     ],
@@ -172,7 +172,13 @@ function PlusNavLink({
       <item.icon className="h-5 w-5 shrink-0" aria-hidden />
       <span className="min-w-0 flex-1 truncate">{label}</span>
       {item.badgeKey ? (
-        <span className="shrink-0 rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">
+        <span
+          className={
+            item.badgeKey === "betaBadge"
+              ? "shrink-0 rounded-full border border-slate-200/80 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-slate-400 dark:border-white/12 dark:text-slate-500"
+              : "shrink-0 rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary"
+          }
+        >
           {t(item.badgeKey)}
         </span>
       ) : null}

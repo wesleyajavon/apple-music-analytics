@@ -195,7 +195,7 @@ const navGroups: NavGroup[] = [
         labelKey: "askSoundprint",
         icon: icons.askSoundprint,
         featured: true,
-        badgeKey: "newAiBadge",
+        badgeKey: "betaBadge",
       },
       { href: "/dashboard/ai-insights", labelKey: "aiInsights", icon: icons.aiInsights },
     ],
@@ -599,7 +599,13 @@ function SidebarContent() {
               />
             ) : null}
             {isFeatured && !isDirectActive && (
-              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">
+              <span
+                className={
+                  item.badgeKey === "betaBadge"
+                    ? "rounded-full border border-slate-200/80 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-slate-400 dark:border-white/12 dark:text-slate-500"
+                    : "rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary"
+                }
+              >
                 {t(item.badgeKey ?? "featuredBadge")}
               </span>
             )}

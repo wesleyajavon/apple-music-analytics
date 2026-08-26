@@ -66,6 +66,7 @@
     "signingOut": "Cerrando sesión...",
     "featuredBadge": "Clave",
     "newAiBadge": "New",
+    "betaBadge": "Beta",
     "pendingFriendRequestsBadge": "{count, plural, one {# solicitud de amistad pendiente} other {# solicitudes de amistad pendientes}}",
     "groups": {
       "home": "Inicio",
@@ -544,6 +545,8 @@
   "askSoundprint": {
     "eyebrow": "Tu biblioteca, en conversación",
     "title": "Pregunta a tu Soundprint",
+    "betaBadge": "Beta",
+    "betaHint": "Aún en beta — las respuestas pueden fallar.",
     "subtitle": "¿Quién suena en bucle? ¿Cuándo escuchas más? Pregunta lo que quieras — deepdives de artista incluidos — desde tu historial real de streams.",
     "compactTrust": "ChatGPT, versión música.",
     "periodChip": "Respuestas sobre {range}",

@@ -43,6 +43,18 @@ export function AskSoundprintMark({
   );
 }
 
+export function AskSoundprintBetaBadge({ className = "" }: { className?: string }) {
+  const t = useTranslations("askSoundprint");
+  return (
+    <span
+      title={t("betaHint")}
+      className={`inline-flex shrink-0 translate-y-px items-center rounded-full border border-slate-200/70 px-2 py-0.5 text-[0.62rem] font-medium uppercase tracking-[0.14em] text-slate-400 dark:border-white/12 dark:text-slate-500 ${className}`}
+    >
+      {t("betaBadge")}
+    </span>
+  );
+}
+
 function TypingCaret() {
   return (
     <span

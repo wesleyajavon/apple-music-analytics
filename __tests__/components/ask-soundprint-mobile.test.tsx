@@ -29,6 +29,7 @@ vi.mock("@/lib/components/ask-soundprint-chat", () => ({
   AskSoundprintChatMessages: () => <div>chat-messages</div>,
   AskSoundprintComposer: () => <form aria-label="composer" />,
   AskSoundprintMark: () => <span>mark</span>,
+  AskSoundprintBetaBadge: () => <span>beta</span>,
 }));
 
 vi.mock("@/lib/components/mobile-bottom-sheet", () => ({

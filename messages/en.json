@@ -66,6 +66,7 @@
     "signingOut": "Signing out...",
     "featuredBadge": "Core",
     "newAiBadge": "New",
+    "betaBadge": "Beta",
     "pendingFriendRequestsBadge": "{count, plural, one {# pending friend request} other {# pending friend requests}}",
     "groups": {
       "home": "Home",
@@ -544,6 +545,8 @@
   "askSoundprint": {
     "eyebrow": "Your library, in conversation",
     "title": "Ask your Soundprint",
+    "betaBadge": "Beta",
+    "betaHint": "Still in beta — answers can miss.",
     "subtitle": "Who's on repeat? When do you stream most? Ask anything—including artist deepdives—from your real streaming history.",
     "compactTrust": "ChatGPT, but for your music.",
     "periodChip": "Answers on {range}",

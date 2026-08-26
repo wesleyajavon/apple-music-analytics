@@ -19,6 +19,7 @@ import {
 import { ApiError } from "@/lib/api-client";
 import { InteractiveAiGenreBackfillNotice } from "@/lib/components/interactive-ai-genre-backfill-notice";
 import {
+  AskSoundprintBetaBadge,
   AskSoundprintChatMessages,
   AskSoundprintComposer,
   AskSoundprintMark,
@@ -916,6 +917,7 @@ function MusicChatContent() {
             >
               <AskSoundprintMark size="md" />
               <span className="truncate">{t("title")}</span>
+              <AskSoundprintBetaBadge />
             </h1>
           ) : null}
           <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
@@ -947,9 +949,10 @@ function MusicChatContent() {
               <AskSoundprintMark size="lg" className="mb-6" />
               <h1
                 id="ask-soundprint-heading"
-                className="text-center text-3xl font-semibold tracking-tight text-slate-900 dark:text-white"
+                className="inline-flex max-w-full flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center text-3xl font-semibold tracking-tight text-slate-900 dark:text-white"
               >
-                {t("title")}
+                <span>{t("title")}</span>
+                <AskSoundprintBetaBadge />
               </h1>
               <p className="mt-2 text-center text-base text-slate-500 dark:text-slate-400">
                 {t("compactTrust")}

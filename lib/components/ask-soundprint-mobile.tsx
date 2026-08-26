@@ -11,6 +11,7 @@ import {
 import { useTranslations } from "next-intl";
 import { CalendarRange, ChevronRight, ListTree } from "lucide-react";
 import {
+  AskSoundprintBetaBadge,
   AskSoundprintChatMessages,
   AskSoundprintComposer,
   AskSoundprintMark,
@@ -224,6 +225,7 @@ export function AskSoundprintMobileExperience({
             >
               <AskSoundprintMark size="sm" />
               <span className="truncate">{t("title")}</span>
+              <AskSoundprintBetaBadge />
             </h1>
           ) : (
             <span className="min-w-0 flex-1" />
@@ -267,9 +269,10 @@ export function AskSoundprintMobileExperience({
             <AskSoundprintMark size="lg" className="mb-5" />
             <h1
               id="ask-soundprint-mobile-title"
-              className="text-center text-2xl font-semibold tracking-tight text-slate-900 dark:text-white"
+              className="inline-flex max-w-full flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center text-2xl font-semibold tracking-tight text-slate-900 dark:text-white"
             >
-              {t("title")}
+              <span>{t("title")}</span>
+              <AskSoundprintBetaBadge />
             </h1>
             <p className="mt-2 text-center text-sm text-slate-500 dark:text-slate-400">
               {t("compactTrust")}

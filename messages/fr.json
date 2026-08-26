@@ -66,6 +66,7 @@
     "signingOut": "Déconnexion...",
     "featuredBadge": "Cœur",
     "newAiBadge": "New",
+    "betaBadge": "Bêta",
     "pendingFriendRequestsBadge": "{count, plural, one {# demande d'ami en attente} other {# demandes d'ami en attente}}",
     "groups": {
       "home": "Accueil",
@@ -544,6 +545,8 @@
   "askSoundprint": {
     "eyebrow": "Votre bibliothèque, en conversation",
     "title": "Interrogez votre Soundprint",
+    "betaBadge": "Bêta",
+    "betaHint": "Encore en bêta — les réponses peuvent parfois manquer.",
     "subtitle": "Qui passe en boucle ? Quand streamez-vous le plus ? Posez vos questions — deepdives artiste compris — à partir de votre vrai historique de streams.",
     "compactTrust": "ChatGPT, version musique.",
     "periodChip": "Réponses sur {range}",

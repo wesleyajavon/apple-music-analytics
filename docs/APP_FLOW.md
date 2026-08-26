@@ -51,17 +51,14 @@ flowchart LR
     subgraph Sources["Sources d'écoute"]
         AM[Apple Music<br/>app mobile]
         SP[Spotify]
-        AM --> LF[Last.fm scrobbling]
     end
 
     subgraph Ingestion["Ingestion"]
-        LF -->|Script npm run lastfm:update| LFAPI["Last.fm API<br/>/api/lastfm"]
         AM -->|Export CSV| CSV[Apple Play History CSV]
         SP -->|Export ZIP| ZIP[Spotify Streaming History]
         SP -->|OAuth optionnel| SPOAuth["Spotify Web API<br/>/api/spotify/sync"]
         CSV --> IMP["POST /api/user/onboarding/import<br/>ou scripts apple-music:import"]
         ZIP --> IMP
-        LFAPI --> IMP
         SPOAuth --> IMP
     end
 
@@ -127,13 +124,11 @@ flowchart TB
         SUPA[Supabase Auth]
         GROQAPI[Groq API]
         SPAPI[Spotify API]
-        LFEXT[Last.fm API]
     end
 
     SESS --> SUPA
     GROQ --> GROQAPI
     SPOAuth2[spotify/sync] --> SPAPI
-    LFROUTE[/api/lastfm] --> LFEXT
 ```
 
 ## 4. Fonctionnalités avancées (IA & Duet)
@@ -187,7 +182,7 @@ flowchart TD
 
 ## Résumé
 
-Un visiteur arrive sur la **landing i18n**, s'**authentifie via Supabase** (ou consulte la **démo publique**), passe par l'**onboarding d'import** (CSV Apple Music / ZIP Spotify / Last.fm), les écoutes sont **normalisées en PostgreSQL**, puis le **dashboard React** interroge les **API Next.js** qui agrègent les stats — avec **Groq** en option pour l'IA et **Duet** pour comparer avec des amis.
+Un visiteur arrive sur la **landing i18n**, s'**authentifie via Supabase** (ou consulte la **démo publique**), passe par l'**onboarding d'import** (CSV Apple Music / ZIP Spotify), les écoutes sont **normalisées en PostgreSQL**, puis le **dashboard React** interroge les **API Next.js** qui agrègent les stats — avec **Groq** en option pour l'IA et **Duet** pour comparer avec des amis.
 
 **Accueil dashboard.** `/dashboard` et la fin d'onboarding mènent à `/dashboard/musical-profile` (hub narratif). Your Music (`/dashboard/overview`) est le hub analytique : faits d'abord, features ensuite. Mobile et laptop racontent la même histoire — période, insight concret (top titre / artiste), KPIs, un seul bloc de tops, tendances en onglets, calendrier + extraits IA, teaser vers le profil musical, puis Chat et Duet en « aller plus loin ». Tracks (`/dashboard/tracks`), Artists (`/dashboard/artists`) et Genres (`/dashboard/genres`) reprennent le même pattern de boutons de section : un panneau à la fois (fiches / Top 20 ou répartition / classement complet). La sidebar desktop liste Profil musical puis Your Music ; la barre mobile liste Profil, Your Music, Artistes, Titres, puis Plus (genres, timeline, heatmap, chat, Duet, réglages).
 

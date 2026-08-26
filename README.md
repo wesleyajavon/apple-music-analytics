@@ -24,10 +24,10 @@
 
 This GitHub repository is still named [`apple-music-analytics`](https://github.com/wesleyajavon/apple-music-analytics) — that was the original project name. The product is **Soundprint-AI**. See [Repository name](#repository-name) if you are forking or linking to this repo.
 
-Live demo: **[apple-music-analytics.vercel.app](https://apple-music-analytics.vercel.app/fr)** (default locale is French; English and Spanish live at `/en` and `/es`). Anonymous visitors can open a **public demo profile** when `NEXT_PUBLIC_PUBLIC_PROFILE_USER_ID` is set.
+Live demo: **[soundprint-ai.com](https://www.soundprint-ai.com/)**. Default locale is French; English and Spanish live at `/en` and `/es`. Anonymous visitors can try a **public demo** on the live site.
 
 <p align="center">
-  <img src="public/brand/auth-preview.png" alt="Soundprint-AI dashboard — top artists spotlight">
+  <img src="public/brand/dashboard-preview.png" alt="Soundprint-AI — Ask your Soundprint chat">
 </p>
 
 Not affiliated with Apple, Spotify, Last.fm, or Groq.
@@ -39,8 +39,6 @@ Not affiliated with Apple, Spotify, Last.fm, or Groq.
 - [Features](#features)
 - [How data gets in](#how-data-gets-in)
 - [Tech stack](#tech-stack)
-- [Getting started](#getting-started)
-- [Scripts](#scripts)
 - [Documentation](#documentation)
 - [Repository name](#repository-name)
 - [License](#license)
@@ -89,7 +87,7 @@ Soundprint does **not** require a paid Apple Music or Spotify developer API on t
 4. Listens are normalized into PostgreSQL; charts update from that store.
 5. Re-import anytime from Settings if you want a longer history.
 
-**Optional / maintainer paths** (not the primary product flow): Last.fm scrobble sync (`npm run lastfm:update`), Apple Music CSV CLI import, and Spotify Web API sync after OAuth. Genre coverage can be improved with Palette in the app, or with the `genres:*` / Spotify backfill scripts.
+Genre coverage can be improved with Palette in the app.
 
 ## Tech stack
 
@@ -104,68 +102,7 @@ Soundprint does **not** require a paid Apple Music or Spotify developer API on t
 | AI (optional) | [Groq](https://groq.com/) — insights, chat, taste copy, genre backfill |
 | Observability | Sentry, Vercel Analytics |
 | Tests | Vitest, Playwright |
-| Hosting | Vercel (`prisma migrate deploy` runs on Vercel builds; local `npm run build` skips migrate) |
-
-## Getting started
-
-**Prerequisites:** Node.js 20+ (see [`.nvmrc`](.nvmrc)), PostgreSQL, a Supabase project with Auth enabled. Redis is optional locally; in production, rate limiting is fail-closed without it.
-
-```bash
-git clone https://github.com/wesleyajavon/apple-music-analytics.git
-cd apple-music-analytics
-npm install
-cp env.example .env.local
-# Edit .env.local — see env.example for the full list
-npm run db:generate
-npm run db:migrate:dev   # or db:migrate / db:push depending on your workflow
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) (redirects to the default locale).
-
-### Environment variables
-
-**Required to run the app:** `DATABASE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
-
-On Vercel + pooled Postgres, prefer `POSTGRES_PRISMA_URL` for the app and `POSTGRES_URL_NON_POOLING` for migrations.
-
-**Common optional vars:** `GROQ_API_KEY` (AI features), `REDIS_URL` / Upstash REST (cache and rate limits), `NEXT_PUBLIC_PUBLIC_PROFILE_USER_ID` (anonymous demo), `LASTFM_API_KEY` (maintainer Last.fm scripts), Sentry DSNs, Spotify token encryption for OAuth sync. Full list: [`env.example`](env.example).
-
-Safe Prisma workflow (dev vs prod): [`docs/DB_ENV_WORKFLOW.md`](docs/DB_ENV_WORKFLOW.md). Auth notes: [`docs/SUPABASE_AUTH_IMPLEMENTATION.md`](docs/SUPABASE_AUTH_IMPLEMENTATION.md).
-
-## Scripts
-
-| Script | Description |
-|--------|-------------|
-| `npm run dev` | Development server |
-| `npm run dev:turbo` | Dev server with Turbopack |
-| `npm run build` | Production build — on **Vercel**, runs `prisma migrate deploy` first (`scripts/vercel-build.mjs`); locally skips migrate |
-| `npm run start` | Production server |
-| `npm run lint` | ESLint (Next.js) |
-| `npm run test:run` | Unit tests (Vitest) |
-| `npm run test:integration` | API integration tests |
-| `npm run test:e2e` | Playwright E2E tests |
-| `npm run db:migrate:dev` | Create / apply migrations in development |
-| `npm run db:migrate` | Apply migrations (`prisma migrate deploy`) |
-| `npm run db:studio` | Prisma Studio |
-| `npm run vercel:env:pull` | Pull env from Vercel into `.env.local` |
-
-<details>
-<summary>Data and genre maintainer scripts</summary>
-
-| Script | Description |
-|--------|-------------|
-| `npm run apple-music:filter` | Filter an Apple Music export before CSV import |
-| `npm run apple-music:import` | Import Apple Music play history CSV |
-| `npm run lastfm:update` | Fetch Last.fm scrobbles into the database |
-| `npm run listens:sync` / `listens:sync:lastfm` | Sync listens from Apple Music / Last.fm |
-| `npm run spotify:enrich-artist-images` | Backfill artist images via Spotify |
-| `npm run genres:normalize` | Normalize genre labels after backfills |
-| `npm run genres:map-top-unknown` | Interactive CLI to map top “unknown” artists |
-
-See `package.json` and `docs/` for LLM / cascade / consensus genre backfills.
-
-</details>
+| Hosting | [Vercel](https://vercel.com/) |
 
 ## Documentation
 
@@ -188,7 +125,7 @@ TypeDoc HTML for `lib/services/**` and `lib/dto/**` is generated with `npm run d
 | Product | **Soundprint-AI** (short: Soundprint) |
 | GitHub repo | [`wesleyajavon/apple-music-analytics`](https://github.com/wesleyajavon/apple-music-analytics) |
 | `package.json` `name` | `apple-music-analytics` (private; not published to npm) |
-| Live URL | `apple-music-analytics.vercel.app` |
+| Live URL | [soundprint-ai.com](https://www.soundprint-ai.com/) |
 
 Keeping the GitHub slug is fine: many products ship under a historical repo name, and GitHub’s social preview still works if the README leads with the product. If you later rename the repo to `soundprint-ai`, GitHub redirects the old URL automatically — then update clone commands, CI badge URLs, and any Vercel Git settings.
 

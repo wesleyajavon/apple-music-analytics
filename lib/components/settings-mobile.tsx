@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { Suspense, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { LanguageSwitcher } from "@/lib/components/language-switcher";
+import { ThemeSwitcher } from "@/lib/components/theme-switcher";
 import {
   DangerPhraseFields,
   SETTINGS_INPUT_CLASS,
@@ -18,6 +20,8 @@ import { DUET_SHARE_SETTINGS_HASH } from "@/lib/constants/duet-settings";
 import { GROQ_AI_CONSENT_SETTINGS_HASH } from "@/lib/constants/groq-ai-settings";
 import { useDashboardExports } from "@/lib/hooks/use-dashboard-exports";
 import { useDuetMutations, useDuetSettings } from "@/lib/hooks/use-duet";
+import { usePublicDemoViewer } from "@/lib/hooks/use-public-demo-viewer";
+import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
 import { DASHBOARD_ONBOARDING_REIMPORT_PATH } from "@/lib/utils/onboarding-route";
 import type { DuetShareScope } from "@prisma/client";
 
@@ -30,6 +34,7 @@ const ROW_CLASS =
 
 export const SETTINGS_MOBILE_GROUP_IDS = {
   account: "settings-mobile-account",
+  appearance: "settings-mobile-appearance",
   data: "settings-mobile-data",
   ai: "settings-mobile-ai",
   demo: "settings-mobile-demo",
@@ -76,6 +81,44 @@ function SettingsMobileGroup({
         {children}
       </div>
     </section>
+  );
+}
+
+function SettingsMobileAppearanceGroup() {
+  const t = useTranslations("settings");
+
+  return (
+    <SettingsMobileGroup id={SETTINGS_MOBILE_GROUP_IDS.appearance} title={t("mobile.groupAppearance")}>
+      <div className="px-2 py-1.5">
+        <ThemeSwitcher placement="bottom" />
+      </div>
+      <div className="px-2 py-1.5">
+        <Suspense fallback={<div className="h-11 animate-pulse rounded-xl bg-background" />}>
+          <LanguageSwitcher placement="bottom" />
+        </Suspense>
+      </div>
+    </SettingsMobileGroup>
+  );
+}
+
+function SettingsMobileSpotifyRows({ withFilters }: { withFilters: (href: string) => string }) {
+  const tSidebar = useTranslations("sidebar");
+  const searchParams = useSearchParams();
+  const isPublicDemoViewer = usePublicDemoViewer(searchParams.get("userId"));
+
+  return (
+    <>
+      <Link href={withFilters("/dashboard/spotify-snapshot")} className={`${ROW_CLASS} no-underline`}>
+        <span className="min-w-0 truncate">{tSidebar("items.spotifySnapshot")}</span>
+        <ChevronIcon className="h-4 w-4 shrink-0 text-muted" />
+      </Link>
+      {isPublicDemoViewer ? null : (
+        <Link href={withFilters("/dashboard/spotify-playground")} className={`${ROW_CLASS} no-underline`}>
+          <span className="min-w-0 truncate">{tSidebar("items.spotifyPlayground")}</span>
+          <ChevronIcon className="h-4 w-4 shrink-0 text-muted" />
+        </Link>
+      )}
+    </>
   );
 }
 
@@ -256,6 +299,8 @@ export function SettingsMobileSkeleton() {
 
 export function SettingsMobileSignedOut() {
   const t = useTranslations("settings");
+  const searchParams = useSearchParams();
+  const withFilters = (href: string) => mergeDashboardSearchParams(href, searchParams);
 
   return (
     <div className={MOBILE_BLEED}>
@@ -277,6 +322,10 @@ export function SettingsMobileSignedOut() {
           </Link>
         </div>
       </section>
+      <SettingsMobileAppearanceGroup />
+      <SettingsMobileGroup id={SETTINGS_MOBILE_GROUP_IDS.data} title={t("mobile.groupDataPrivacy")}>
+        <SettingsMobileSpotifyRows withFilters={withFilters} />
+      </SettingsMobileGroup>
     </div>
   );
 }
@@ -485,11 +534,14 @@ export function SettingsMobileExperience(props: SettingsMobileExperienceProps) {
         )}
       </SettingsMobileGroup>
 
+      <SettingsMobileAppearanceGroup />
+
       <SettingsMobileGroup id={SETTINGS_MOBILE_GROUP_IDS.data} title={t("mobile.groupDataPrivacy")}>
         <Link href={props.withFilters(DASHBOARD_ONBOARDING_REIMPORT_PATH)} className={`${ROW_CLASS} no-underline`}>
           <span className="min-w-0 truncate">{t("importExportsTitle")}</span>
           <ChevronIcon className="h-4 w-4 shrink-0 text-muted" />
         </Link>
+        <SettingsMobileSpotifyRows withFilters={props.withFilters} />
         <SettingsMobileExportRows
           exportError={props.exportError}
           exporting={props.exporting}

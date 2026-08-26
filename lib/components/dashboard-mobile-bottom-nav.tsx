@@ -12,7 +12,7 @@ import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params"
 
 type BottomNavItem = {
   href: string;
-  labelKey: "musicalProfile" | "overview" | "artists" | "genres" | "more";
+  labelKey: "musicalProfile" | "overview" | "artists" | "tracks" | "more";
   isMore?: boolean;
   icon: (props: React.SVGProps<SVGSVGElement>) => JSX.Element;
 };
@@ -45,14 +45,13 @@ const icons = {
       />
     </svg>
   ),
-  genres: (props: React.SVGProps<SVGSVGElement>) => (
+  tracks: (props: React.SVGProps<SVGSVGElement>) => (
     <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
-        d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.331-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z"
+        d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 0 1 0 3.75H5.625a1.875 1.875 0 0 1 0-3.75Z"
       />
-      <path strokeLinecap="round" strokeLinejoin="round" d="M6 6h.008v.008H6V6Z" />
     </svg>
   ),
   more: (props: React.SVGProps<SVGSVGElement>) => (
@@ -66,7 +65,7 @@ const NAV_ITEMS: BottomNavItem[] = [
   { href: "/dashboard/musical-profile", labelKey: "musicalProfile", icon: icons.musicalProfile },
   { href: "/dashboard/overview", labelKey: "overview", icon: icons.overview },
   { href: "/dashboard/artists", labelKey: "artists", icon: icons.artists },
-  { href: "/dashboard/genres", labelKey: "genres", icon: icons.genres },
+  { href: "/dashboard/tracks", labelKey: "tracks", icon: icons.tracks },
   { href: "#more", labelKey: "more", isMore: true, icon: icons.more },
 ];
 

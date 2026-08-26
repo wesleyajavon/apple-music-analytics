@@ -51,8 +51,6 @@
     "mobileBottomNavLabel": "Navegación principal del dashboard",
     "mobilePlusOpenLabel": "Abrir más destinos",
     "mobilePlusSheetTitle": "Más",
-    "mobilePlusOpenFullMenu": "Todas las secciones",
-    "mobilePlusHint": "El mapa de calor, la IA y los ajustes están aquí. Tendencias y Spotify están en el botón de menú.",
     "mobilePlusAiHint": "Controla resúmenes y widgets de IA en este navegador.",
     "collapseSidebar": "Contraer barra lateral",
     "expandSidebar": "Expandir barra lateral",
@@ -76,8 +74,7 @@
       "aiPredictions": "IA y predicciones",
       "helpProduct": "Ayuda y producto",
       "account": "Cuenta",
-      "social": "Social",
-      "rare": "Más"
+      "social": "Social"
     },
     "items": {
       "overview": "Your Music",
@@ -796,6 +793,7 @@
       "eyebrow": "Ajustes",
       "unnamedAccount": "Cuenta sin nombre",
       "groupAccount": "Cuenta",
+      "groupAppearance": "Apariencia",
       "groupDataPrivacy": "Datos",
       "groupAi": "IA",
       "groupDemo": "Demo",

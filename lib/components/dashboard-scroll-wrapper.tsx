@@ -2,7 +2,7 @@
 
 import { Suspense, useCallback, useLayoutEffect, useState, type CSSProperties } from "react";
 import { DASHBOARD_BOTTOM_NAV_OFFSET_VAR } from "@/lib/constants/dashboard-chrome";
-import { Sidebar, SidebarProvider } from "@/lib/components/sidebar";
+import { Sidebar } from "@/lib/components/sidebar";
 import { DashboardStickyHeader } from "@/lib/components/dashboard-sticky-header";
 import { DashboardMainArea } from "@/lib/components/dashboard-main-area";
 import { Footer } from "@/lib/components/footer";
@@ -85,8 +85,7 @@ export function DashboardScrollWrapper({ children }: { children: React.ReactNode
   } as CSSProperties;
 
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen bg-background" style={dashboardStyle}>
+    <div className="flex min-h-screen bg-background" style={dashboardStyle}>
         <ScrollProgressBar />
         <Sidebar />
         <NotificationCenterProvider>
@@ -105,7 +104,6 @@ export function DashboardScrollWrapper({ children }: { children: React.ReactNode
           </div>
         </GenreBackfillJobProvider>
       </NotificationCenterProvider>
-      </div>
-    </SidebarProvider>
+    </div>
   );
 }

@@ -81,11 +81,22 @@ test.describe("Mobile dashboard UX", () => {
   });
 
   test("dashboard overview loads with mobile bottom nav", async ({ page }) => {
+    await seedCookieConsent(page);
     await page.goto(`/en/dashboard/overview${publicDemoQuery}`);
 
     const bottomNav = page.getByRole("navigation", { name: /main dashboard navigation/i });
     await expect(bottomNav).toBeVisible();
     await expect(bottomNav.getByRole("link", { name: /your music/i })).toBeVisible();
+    await expect(page.getByRole("button", { name: /^open menu$/i })).toHaveCount(0);
+
+    await bottomNav.getByRole("button", { name: /open more destinations/i }).click();
+    const plusSheet = page.getByRole("dialog");
+    await expect(plusSheet.getByRole("heading", { name: /^more$/i })).toBeVisible();
+    await expect(plusSheet.getByRole("button", { name: /all sections/i })).toHaveCount(0);
+    await expect(plusSheet.getByRole("link", { name: /account hub/i })).toHaveCount(0);
+    await expect(plusSheet.getByRole("link", { name: /heat grid/i })).toBeVisible();
+    await expect(plusSheet.getByRole("link", { name: /^genres$/i })).toBeVisible();
+    await expect(bottomNav.getByRole("link", { name: /^tracks$/i })).toBeVisible();
   });
 
   test("overview now screen shows insight and ask destination", async ({ page }) => {
@@ -181,8 +192,19 @@ test.describe("Mobile dashboard UX", () => {
   test("mobile bottom nav navigates to artists", async ({ page }) => {
     await page.goto(`/en/dashboard/overview${publicDemoQuery}`);
 
-    await page.getByRole("link", { name: /^artists$/i }).click();
+    await page.getByRole("navigation", { name: /main dashboard navigation/i })
+      .getByRole("link", { name: /^artists$/i })
+      .click();
     await expect(page).toHaveURL(/\/en\/dashboard\/artists/);
+  });
+
+  test("mobile bottom nav navigates to tracks", async ({ page }) => {
+    await page.goto(`/en/dashboard/overview${publicDemoQuery}`);
+
+    await page.getByRole("navigation", { name: /main dashboard navigation/i })
+      .getByRole("link", { name: /^tracks$/i })
+      .click();
+    await expect(page).toHaveURL(/\/en\/dashboard\/tracks/);
   });
 
   test("artists ranking shows a tappable first row and keeps dates", async ({ page }) => {
@@ -394,8 +416,8 @@ test.describe("Mobile dashboard UX", () => {
     await expectDashboardFilters(page);
     await waitForDashboardMain(page);
 
-    await bottomNav.getByRole("link", { name: /^genres$/i }).click();
-    await expect(page).toHaveURL(/\/en\/dashboard\/genres/, urlTimeout);
+    await bottomNav.getByRole("link", { name: /^tracks$/i }).click();
+    await expect(page).toHaveURL(/\/en\/dashboard\/tracks/, urlTimeout);
     await expectDashboardFilters(page);
     await waitForDashboardMain(page);
 
@@ -403,6 +425,7 @@ test.describe("Mobile dashboard UX", () => {
     const plusSheet = page.getByRole("dialog");
     await expect(plusSheet).toBeVisible();
     await expect(plusSheet.getByRole("heading", { name: /^more$/i })).toBeVisible();
+    await expect(plusSheet.getByRole("button", { name: /all sections/i })).toHaveCount(0);
 
     await plusSheet.getByRole("link", { name: /heat grid/i }).click();
     await expect(page).toHaveURL(/\/en\/dashboard\/heatmap/, urlTimeout);
@@ -417,7 +440,7 @@ test.describe("Mobile dashboard UX", () => {
     await expectDashboardFilters(page);
   });
 
-  test("mobile plus menu opens heatmap and settings shortcuts", async ({ page }) => {
+  test("mobile plus menu opens heatmap; account menu opens settings", async ({ page }) => {
     test.setTimeout(60_000);
     await seedCookieConsent(page);
     await page.goto(`/en/dashboard/overview${publicDemoQuery}`);
@@ -430,18 +453,19 @@ test.describe("Mobile dashboard UX", () => {
     const plusSheet = page.getByRole("dialog");
     await expect(plusSheet).toBeVisible();
     await expect(plusSheet.getByRole("heading", { name: /^more$/i })).toBeVisible();
+    await expect(plusSheet.getByRole("link", { name: /account hub/i })).toHaveCount(0);
+    await expect(plusSheet.getByRole("button", { name: /all sections/i })).toHaveCount(0);
 
     await plusSheet.getByRole("link", { name: /heat grid/i }).click();
     await expect(page).toHaveURL(/\/en\/dashboard\/heatmap/, urlTimeout);
     await expectDashboardFilters(page);
     await waitForDashboardMain(page);
 
-    await page.getByRole("button", { name: /open more destinations/i }).click();
-    const plusSheetAgain = page.getByRole("dialog");
-    await expect(plusSheetAgain).toBeVisible();
-    await plusSheetAgain.getByRole("link", { name: /account hub/i }).click();
+    await page.getByRole("button", { name: /account menu/i }).click();
+    await page.getByRole("menuitem", { name: /account hub/i }).click();
     await expect(page).toHaveURL(/\/en\/dashboard\/settings/, urlTimeout);
     await expectDashboardFilters(page);
+    await expect(page.getByRole("heading", { name: /^appearance$/i })).toBeVisible();
   });
 
   test("sign-in page is usable on mobile", async ({ page }) => {
@@ -910,6 +934,8 @@ test.describe("Mobile dashboard UX", () => {
     const main = page.getByRole("main");
     await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 20_000 });
     await expect(main.getByRole("link", { name: /^sign in$/i })).toBeVisible();
+    await expect(main.getByRole("heading", { name: /^appearance$/i })).toBeVisible();
+    await expect(main.getByRole("link", { name: /spotify snapshot/i })).toBeVisible();
     await expect(page.getByRole("tablist", { name: /account settings sections/i })).toBeHidden();
     await expect(main.getByText(/three things you can manage here/i)).toHaveCount(0);
   });
@@ -933,6 +959,7 @@ test.describe("Mobile dashboard UX", () => {
     await page.goto("/en/dashboard/settings");
     const main = page.getByRole("main");
     await expect(main.getByRole("heading", { name: /^account$/i })).toBeVisible({ timeout: 20_000 });
+    await expect(main.getByRole("heading", { name: /^appearance$/i })).toBeVisible();
     await expect(main.getByRole("heading", { name: /^data & privacy$/i })).toBeVisible();
     await expect(page.getByRole("tablist", { name: /account settings sections/i })).toBeHidden();
   });
@@ -956,7 +983,8 @@ test.describe("Mobile dashboard UX", () => {
     await page.goto("/fr/dashboard/settings");
     const main = page.getByRole("main");
     await expect(main.getByRole("heading", { name: /^compte$/i })).toBeVisible({ timeout: 20_000 });
-    await expect(main.getByRole("heading", { name: /^données et confidentialité$/i })).toBeVisible();
+    await expect(main.getByRole("heading", { name: /^apparence$/i })).toBeVisible();
+    await expect(main.getByRole("heading", { name: /^données$/i })).toBeVisible();
     await expect(page.getByRole("tablist", { name: /sections des paramètres du compte/i })).toBeHidden();
   });
 

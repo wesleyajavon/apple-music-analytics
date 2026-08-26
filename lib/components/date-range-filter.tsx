@@ -5,7 +5,6 @@ import { useEffect, useRef, useState } from "react";
 import { DashboardUserMenu } from "@/lib/components/dashboard-user-menu";
 import { DateRangeFilterMobile } from "@/lib/components/date-range-filter-mobile";
 import { NotificationCenter } from "@/lib/components/notification-center";
-import { useMobileSidebar } from "@/lib/components/sidebar";
 import { DASHBOARD_DATE_RANGE_FILTER_ID } from "@/lib/constants/date-range-filter";
 import { useHideNotificationCenterForPublicDemo } from "@/lib/hooks/use-public-demo-viewer";
 import {
@@ -20,8 +19,6 @@ export { getDateRangePresetFromSearchParams };
 
 export function DateRangeFilter() {
   const t = useTranslations("components.dateRangeFilter");
-  const tSidebar = useTranslations("sidebar");
-  const { toggle: toggleMobileSidebar } = useMobileSidebar();
   const {
     currentPreset,
     searchParams,
@@ -112,19 +109,6 @@ export function DateRangeFilter() {
     </>
   );
 
-  const hamburger = (
-    <button
-      type="button"
-      onClick={toggleMobileSidebar}
-      className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-card-border bg-card-surface text-muted transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden"
-      aria-label={tSidebar("openMenu")}
-    >
-      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-      </svg>
-    </button>
-  );
-
   const presetButtonClass = (active: boolean) =>
     [
       "relative z-10 shrink-0 whitespace-nowrap rounded-md px-4 py-2 text-sm font-semibold transition-all duration-200",
@@ -137,7 +121,6 @@ export function DateRangeFilter() {
       className="transition-[box-shadow] duration-500 data-[highlighted]:shadow-[inset_0_0_0_2px_rgb(152_80_208_/_0.45)]"
     >
       <div className="flex min-w-0 items-center gap-2 px-3 py-2 lg:hidden">
-        {hamburger}
         <DateRangeFilterMobile
           currentPreset={currentPreset}
           startDate={searchParams.get("startDate")}

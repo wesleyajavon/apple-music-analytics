@@ -61,7 +61,7 @@ Chrome partagé (header dates, padding, footer, collision bottom-nav) = **étape
 
 ## Étape 0 — Chrome dashboard (faire en premier)
 
-**Pourquoi en premier :** hamburger + chips `7d / 30d / YTD / All / Custom` + avatar mangent le haut de **tous** les écrans. C’est le signal #1 « site desktop ».
+**Pourquoi en premier :** chips `7d / 30d / YTD / All / Custom` + avatar mangent le haut de **tous** les écrans. C’est le signal #1 « site desktop ». Un hamburger en plus des tabs est un second overflow — à ne pas réintroduire.
 
 ```text
 [Préambule]
@@ -76,7 +76,7 @@ Objectif UX < lg :
 - Padding main prévisible : une seule gouttière ; les pages doivent pouvoir bleeder avec -mx-4 -mt-4 sans double px-4.
 - Footer : ne pas voler un second pb-20 mort au-dessus de la nav.
 - Sheets / composers (ask, heatmap, plus) : un seul système de safe-area + inset bottom nav.
-- Hamburger = destinations rares (trends, spotify), pas la nav primaire (déjà en tabs).
+- Pas de hamburger. Tabs (Profil, Overview, Artists, Tracks, Plus) + sheet Plus pour le secondaire (Genres, heatmap, Duet, Ask). Trends via rangées in-page ; thème / langue / Spotify via avatar → Settings.
 
 Contraintes : même query params de dates (preset, startDate, endDate) ; desktop lg+ inchangé ; pas de redesign visuel « nouveau brand ».
 
@@ -132,7 +132,7 @@ i18n artists.mobile.* courte. e2e : heading, 1ère rangée tapable, conservation
 
 ---
 
-## Étape 3 — Genres (onglet 4)
+## Étape 3 — Genres (Plus → library)
 
 ```text
 [Préambule]
@@ -154,7 +154,7 @@ Desktop inchangé. Extraire genres-mobile.tsx si besoin. e2e pie/bar existants :
 
 ---
 
-## Étape 4 — Tracks (Plus → library)
+## Étape 4 — Tracks (onglet 4)
 
 ```text
 [Préambule]
@@ -318,7 +318,7 @@ Desktop inchangé. Vérifier deep links existants. EN + FR.
 
 Étape 13 — Vue mobile /dashboard/settings.
 
-Les formulaires en stack peuvent rester, mais l’écran doit être un hub iOS Settings : groupes de rangées (compte, data/privacy, IA, démo), pas des cards marketing empilées. Une section = un groupe. Toggles 44px. Pas de 2e hamburger.
+Les formulaires en stack peuvent rester, mais l’écran doit être un hub iOS Settings : groupes de rangées (compte, apparence, data/privacy, IA, démo), pas des cards marketing empilées. Une section = un groupe. Toggles 44px. Pas de hamburger.
 
 Desktop peut rester plus aéré. e2e : au moins Compte + Data & privacy visibles. EN + FR.
 ```
@@ -339,9 +339,9 @@ EN + FR + ES si les clés about.* bougent.
 
 ---
 
-## Étape 15 — Trends (sidebar only aujourd’hui)
+## Étape 15 — Trends (rangées depuis Artists / Genres / Tracks)
 
-Artists / genres / tracks trends : `.../artists/trends`, `.../genres/trends`, `.../tracks/trends`. Accès surtout via le drawer hamburger.
+Artists / genres / tracks trends : `.../artists/trends`, `.../genres/trends`, `.../tracks/trends`. Accès mobile via les rangées des pages parents, pas via un hamburger.
 
 ```text
 [Préambule]
@@ -354,7 +354,7 @@ Même brief pour les trois, un plan qui les aligne :
 - sélection multi en sheet, pas une forêt de chips
 - rangée vers la page leaderboard correspondante
 
-Ne les fusionne pas en une seule route. Desktop inchangé. Si le hamburger est le seul accès, propose une rangée depuis Artists/Genres/Tracks mobile (étape 2–4) plutôt qu’un 6e tab.
+Ne les fusionne pas en une seule route. Desktop inchangé. Accès = rangée depuis Artists/Genres/Tracks mobile (étape 2–4), pas un 6e tab ni un hamburger.
 
 EN + FR. e2e au moins une des trois.
 ```
@@ -421,7 +421,7 @@ Règle : labels courts, actionnels, FR sans wrap dans un rail. Supprimer nextTit
 
 Étape 18c — Étendre __tests__/e2e/mobile-dashboard.spec.ts (projet mobile-chrome, Pixel 5).
 
-Couvrir : bottom nav (profil, overview, artists, genres, plus), heatmap sheet, ask ou settings via plus, conservation des query dates. Selectors par role/name, pas des className. Skip desktop. Si global-setup prisma est fragile hors CI, documente PLAYWRIGHT_SKIP_WEBSERVER + BASE_URL.
+Couvrir : bottom nav (profil, overview, artists, tracks, plus), heatmap sheet, genres via plus, ask via plus, settings via avatar, conservation des query dates. Selectors par role/name, pas des className. Skip desktop. Si global-setup prisma est fragile hors CI, documente PLAYWRIGHT_SKIP_WEBSERVER + BASE_URL.
 ```
 
 ### 18d — QA manuelle finale
@@ -433,8 +433,8 @@ Couvrir : bottom nav (profil, overview, artists, genres, plus), heatmap sheet, a
 
 Parcourir en 390×844 et 430×932, EN et FR, données + empty :
 1. Musical profile (référence)
-2. Overview, Artists, Genres
-3. Plus : heatmap, timeline, temporal, tracks, palette, ask, ai-insights, duet friends/compare, about, settings
+2. Overview, Artists, Tracks
+3. Plus : heatmap, timeline, temporal, genres, palette, ask, ai-insights, duet friends/compare, about, settings
 4. Onboarding si compte sans data
 
 Chasse : double sticky, chips coupés, tap < 44px, footer+nav, clavier sur Ask, sheet sous la nav, 3 cols métriques, copy landing. Livrable : liste bugs P0/P1 par route.

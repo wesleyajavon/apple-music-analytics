@@ -51,8 +51,6 @@
     "mobileBottomNavLabel": "Main dashboard navigation",
     "mobilePlusOpenLabel": "Open more destinations",
     "mobilePlusSheetTitle": "More",
-    "mobilePlusOpenFullMenu": "All sections",
-    "mobilePlusHint": "Heatmap, AI, and settings are here. Trends and Spotify are in the menu button.",
     "mobilePlusAiHint": "Controls AI summaries and widgets in this browser.",
     "collapseSidebar": "Collapse sidebar",
     "expandSidebar": "Expand sidebar",
@@ -76,8 +74,7 @@
       "aiPredictions": "AI & Predictions",
       "helpProduct": "Help & Product",
       "account": "Account",
-      "social": "Social",
-      "rare": "More"
+      "social": "Social"
     },
     "items": {
       "overview": "Your Music",
@@ -804,6 +801,7 @@
       "eyebrow": "Settings",
       "unnamedAccount": "Unnamed account",
       "groupAccount": "Account",
+      "groupAppearance": "Appearance",
       "groupDataPrivacy": "Data & privacy",
       "groupAi": "AI",
       "groupDemo": "Demo",

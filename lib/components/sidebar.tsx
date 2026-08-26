@@ -613,7 +613,7 @@ function SidebarContent() {
   return (
       <aside
         className={`
-          hidden h-screen max-h-none flex-shrink-0 lg:sticky lg:top-0 lg:z-auto lg:block lg:self-start
+          hidden h-screen max-h-none flex-shrink-0 lg:sticky lg:top-0 lg:z-20 lg:block lg:self-start
           ${isCollapsed ? "lg:w-20" : "lg:w-64"}
           bg-surface-sidebar
           border-r border-card-border
@@ -670,7 +670,7 @@ function SidebarContent() {
           </div>
 
           {/* Navigation */}
-          <nav className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-5">
+          <nav className="relative z-0 min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-5">
             {navGroups.map((group) => {
               const groupLabel = t(`groups.${group.labelKey}`);
               const isGroupOpen = isNavGroupOpen(openGroupKeys, group.labelKey);
@@ -718,7 +718,7 @@ function SidebarContent() {
 
           {/* Theme & Language switchers */}
           <div
-            className={`shrink-0 px-3 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] border-t border-card-border space-y-4 transition-all duration-300 ${
+            className={`relative z-10 shrink-0 px-3 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] border-t border-card-border space-y-4 transition-all duration-300 ${
               displayCollapsed ? "flex flex-col items-center gap-2" : ""
             }`}
           >

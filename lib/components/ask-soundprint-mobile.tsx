@@ -315,22 +315,24 @@ export function AskSoundprintMobileExperience({
       <div
         ref={composerRef}
         id="ask-soundprint-composer"
-        className="fixed inset-x-0 z-[19] bg-gradient-to-t from-background via-background/95 to-transparent px-3 pb-3 pt-2 lg:hidden"
+        className="pointer-events-none fixed inset-x-0 z-[19] bg-gradient-to-t from-background via-background/95 to-transparent px-3 pb-3 pt-2 lg:hidden"
         style={{ bottom: composerBottom }}
       >
-        {errorMessage ? (
-          <p className="mb-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-200">
-            {errorMessage}
-          </p>
-        ) : null}
-        <AskSoundprintComposer
-          input={input}
-          onInputChange={onInputChange}
-          onSubmit={onSubmit}
-          disabled={freeTextDisabled}
-          placeholder={inputPlaceholder}
-          layout="mobile"
-        />
+        <div className="pointer-events-auto">
+          {errorMessage ? (
+            <p className="mb-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-200">
+              {errorMessage}
+            </p>
+          ) : null}
+          <AskSoundprintComposer
+            input={input}
+            onInputChange={onInputChange}
+            onSubmit={onSubmit}
+            disabled={freeTextDisabled}
+            placeholder={inputPlaceholder}
+            layout="mobile"
+          />
+        </div>
       </div>
 
       <MobileBottomSheet

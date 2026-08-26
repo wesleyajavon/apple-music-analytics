@@ -1515,28 +1515,106 @@ export async function getMostConsistentArtistsOverTime(
   };
 }
 
-/** Catalog match on Artist only (indexed / small scan); Listen joins pin to these ids instead of scanning every ILIKE hit. */
+/**
+ * Exact Artist.name / nameLower first (uses unique btree). Contains-match is a
+ * separate query so OR … LIKE '%x%' cannot force a catalog seq scan.
+ */
 const ARTIST_DEEP_DIVE_CATALOG_ROW_LIMIT = 64;
 
-function buildArtistDeepDiveCatalogCte(opts: {
+type ArtistDeepDiveSummaryRow = {
+  primary_artist_id: string;
+  primary_artist_name: string;
+  matched_artist_names: string[];
+  selected_artist_ids: string[];
+  total_listens: bigint;
+  unique_tracks: bigint;
+  first_listen_at: Date | null;
+  last_listen_at: Date | null;
+};
+
+function buildExactArtistDeepDiveCatalogCte(opts: {
   requestedArtistName: string;
   artistNameLower: string;
-  artistLikePattern: string;
 }): Prisma.Sql {
   return Prisma.sql`catalog AS (
     SELECT id, name,
       CASE
         WHEN name = ${opts.requestedArtistName} THEN 0
-        WHEN "nameLower" = ${opts.artistNameLower} THEN 1
-        ELSE 2
+        ELSE 1
       END AS match_rank
     FROM "Artist"
     WHERE name = ${opts.requestedArtistName}
       OR "nameLower" = ${opts.artistNameLower}
-      OR name ILIKE ${opts.artistLikePattern} ESCAPE ${"\\"}
-    ORDER BY match_rank ASC, name ASC
+  )`;
+}
+
+function buildPartialArtistDeepDiveCatalogCte(opts: {
+  artistNameLower: string;
+  artistLikePattern: string;
+}): Prisma.Sql {
+  return Prisma.sql`catalog AS (
+    SELECT id, name, 2 AS match_rank
+    FROM "Artist"
+    WHERE "nameLower" LIKE ${opts.artistLikePattern} ESCAPE ${"\\"}
+      AND "nameLower" <> ${opts.artistNameLower}
+    ORDER BY name ASC
     LIMIT ${ARTIST_DEEP_DIVE_CATALOG_ROW_LIMIT}
   )`;
+}
+
+function emptyArtistDeepDiveResult(
+  requestedArtistName: string,
+  period: { startDate: string | null; endDate: string | null }
+) {
+  return {
+    found: false as const,
+    requestedArtistName,
+    period,
+    totalListens: 0,
+    uniqueTracks: 0,
+    firstListenAt: null,
+    lastListenAt: null,
+    topTracks: [],
+    yearlyBreakdown: [],
+  };
+}
+
+async function fetchArtistDeepDiveSummary(opts: {
+  userId: string;
+  catalogCte: Prisma.Sql;
+  startDateFilter: Prisma.Sql;
+  endDateFilter: Prisma.Sql;
+}): Promise<ArtistDeepDiveSummaryRow | undefined> {
+  const rows = await prisma.$queryRaw<ArtistDeepDiveSummaryRow[]>(Prisma.sql`
+    WITH ${opts.catalogCte},
+    listened_candidates AS (
+      SELECT DISTINCT c.id, c.name, c.match_rank
+      FROM catalog c
+      INNER JOIN "Track" t ON t."artistId" = c.id
+      INNER JOIN "Listen" l ON l."trackId" = t.id AND l."userId" = ${opts.userId}
+    ),
+    selected_artists AS (
+      SELECT * FROM listened_candidates
+      WHERE match_rank = (SELECT MIN(match_rank) FROM listened_candidates)
+    )
+    SELECT
+      (SELECT id FROM selected_artists ORDER BY match_rank, name LIMIT 1) as primary_artist_id,
+      (SELECT name FROM selected_artists ORDER BY match_rank, name LIMIT 1) as primary_artist_name,
+      ARRAY(SELECT name FROM selected_artists ORDER BY match_rank, name) as matched_artist_names,
+      ARRAY(SELECT id FROM selected_artists ORDER BY match_rank, name) as selected_artist_ids,
+      COUNT(*)::bigint as total_listens,
+      COUNT(DISTINCT t.id)::bigint as unique_tracks,
+      MIN(l."playedAt") as first_listen_at,
+      MAX(l."playedAt") as last_listen_at
+    FROM selected_artists sa
+    INNER JOIN "Track" t ON t."artistId" = sa.id
+    INNER JOIN "Listen" l ON l."trackId" = t.id AND l."userId" = ${opts.userId}
+    WHERE TRUE
+      ${opts.startDateFilter}
+      ${opts.endDateFilter}
+    HAVING COUNT(*) > 0
+  `);
+  return rows[0];
 }
 
 export async function getArtistDeepDive(
@@ -1554,7 +1632,7 @@ export async function getArtistDeepDive(
 
   const requestedArtistName = args.artistName.trim();
   const artistNameLower = requestedArtistName.toLowerCase();
-  const artistLikePattern = `%${escapeLikePattern(requestedArtistName)}%`;
+  const artistLikePattern = `%${escapeLikePattern(artistNameLower)}%`;
   const limit = clampLimit(args.limit);
   const { startDate, endDate } = parseOptionalDateRange(args);
   const startDateFilter = startDate
@@ -1567,83 +1645,34 @@ export async function getArtistDeepDive(
     startDate: args.startDate ?? null,
     endDate: args.endDate ?? null,
   };
+  const summaryQueryOpts = { userId, startDateFilter, endDateFilter };
 
-  const summaryRows = await prisma.$queryRaw<
-    Array<{
-      primary_artist_id: string;
-      primary_artist_name: string;
-      matched_artist_names: string[];
-      selected_artist_ids: string[];
-      total_listens: bigint;
-      unique_tracks: bigint;
-      first_listen_at: Date | null;
-      last_listen_at: Date | null;
-    }>
-  >(Prisma.sql`
-    WITH ${buildArtistDeepDiveCatalogCte({
+  const exactSummary = await fetchArtistDeepDiveSummary({
+    ...summaryQueryOpts,
+    catalogCte: buildExactArtistDeepDiveCatalogCte({
       requestedArtistName,
       artistNameLower,
-      artistLikePattern,
-    })},
-    listened_candidates AS (
-      SELECT DISTINCT v.id, v.name, v.match_rank
-      FROM "Listen" l
-      JOIN "Track" t ON l."trackId" = t.id
-      INNER JOIN catalog v ON v.id = t."artistId"
-      WHERE l."userId" = ${userId}
-    ),
-    selected_artists AS (
-      SELECT * FROM listened_candidates
-      WHERE match_rank = (SELECT MIN(match_rank) FROM listened_candidates)
-    )
-    SELECT
-      (SELECT id FROM selected_artists ORDER BY match_rank, name LIMIT 1) as primary_artist_id,
-      (SELECT name FROM selected_artists ORDER BY match_rank, name LIMIT 1) as primary_artist_name,
-      ARRAY(SELECT name FROM selected_artists ORDER BY match_rank, name) as matched_artist_names,
-      ARRAY(SELECT id FROM selected_artists ORDER BY match_rank, name) as selected_artist_ids,
-      COUNT(*)::bigint as total_listens,
-      COUNT(DISTINCT t.id)::bigint as unique_tracks,
-      MIN(l."playedAt") as first_listen_at,
-      MAX(l."playedAt") as last_listen_at
-    FROM "Listen" l
-    JOIN "Track" t ON l."trackId" = t.id
-    JOIN selected_artists sa ON sa.id = t."artistId"
-    WHERE l."userId" = ${userId}
-      ${startDateFilter}
-      ${endDateFilter}
-    HAVING COUNT(*) > 0
-  `);
+    }),
+  });
+  const summary =
+    exactSummary ??
+    (await fetchArtistDeepDiveSummary({
+      ...summaryQueryOpts,
+      catalogCte: buildPartialArtistDeepDiveCatalogCte({
+        artistNameLower,
+        artistLikePattern,
+      }),
+    }));
 
-  const summary = summaryRows[0];
   if (!summary) {
-    return {
-      found: false,
-      requestedArtistName,
-      period,
-      totalListens: 0,
-      uniqueTracks: 0,
-      firstListenAt: null,
-      lastListenAt: null,
-      topTracks: [],
-      yearlyBreakdown: [],
-    };
+    return emptyArtistDeepDiveResult(requestedArtistName, period);
   }
 
   const selectedArtistIds = Array.isArray(summary.selected_artist_ids)
     ? summary.selected_artist_ids
     : [];
   if (selectedArtistIds.length === 0) {
-    return {
-      found: false,
-      requestedArtistName,
-      period,
-      totalListens: 0,
-      uniqueTracks: 0,
-      firstListenAt: null,
-      lastListenAt: null,
-      topTracks: [],
-      yearlyBreakdown: [],
-    };
+    return emptyArtistDeepDiveResult(requestedArtistName, period);
   }
 
   const selectedIdInList = Prisma.join(
@@ -1668,10 +1697,9 @@ export async function getArtistDeepDive(
         COUNT(*)::bigint as listen_count,
         MIN(l."playedAt") as first_listen_at,
         MAX(l."playedAt") as last_listen_at
-      FROM "Listen" l
-      JOIN "Track" t ON l."trackId" = t.id
-      WHERE l."userId" = ${userId}
-        AND t."artistId" IN (${selectedIdInList})
+      FROM "Track" t
+      INNER JOIN "Listen" l ON l."trackId" = t.id AND l."userId" = ${userId}
+      WHERE t."artistId" IN (${selectedIdInList})
         ${startDateFilter}
         ${endDateFilter}
       GROUP BY t.id, t.title, t.genre
@@ -1689,10 +1717,9 @@ export async function getArtistDeepDive(
         EXTRACT(YEAR FROM l."playedAt")::int as year,
         COUNT(*)::bigint as listen_count,
         COUNT(DISTINCT t.id)::bigint as unique_tracks
-      FROM "Listen" l
-      JOIN "Track" t ON l."trackId" = t.id
-      WHERE l."userId" = ${userId}
-        AND t."artistId" IN (${selectedIdInList})
+      FROM "Track" t
+      INNER JOIN "Listen" l ON l."trackId" = t.id AND l."userId" = ${userId}
+      WHERE t."artistId" IN (${selectedIdInList})
         ${startDateFilter}
         ${endDateFilter}
       GROUP BY year

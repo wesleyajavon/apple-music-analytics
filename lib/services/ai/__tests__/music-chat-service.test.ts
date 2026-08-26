@@ -25,7 +25,7 @@ import { getLateNightPresetDateRange } from "@/lib/services/ai/music-chat-tools"
 
 describe("music-chat-service", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
   });
 
   it("formats top-tracks preset without calling Groq", async () => {
@@ -165,6 +165,76 @@ describe("music-chat-service", () => {
     expect(response.answer).toContain("Radiohead");
     expect(response.answer).toContain("Paranoid Android");
     expect(response.sources).toHaveLength(1);
+  });
+
+  it("formats a free-text artist deep dive without calling Groq", async () => {
+    mockExecuteMusicChatTool.mockResolvedValue({
+      found: true,
+      requestedArtistName: "Jeune morty",
+      period: { startDate: null, endDate: null },
+      artist: { artistId: "a1", artistName: "Jeune Morty" },
+      totalListens: 12,
+      uniqueTracks: 4,
+      firstListenAt: "2021-01-01T00:00:00.000Z",
+      lastListenAt: "2025-01-01T00:00:00.000Z",
+      matchedArtistNames: ["Jeune Morty"],
+      topTracks: [],
+      yearlyBreakdown: [],
+    });
+
+    const response = await generateMusicChatAnswer({
+      userId: "user-789",
+      locale: "fr",
+      messages: [
+        {
+          role: "user",
+          content: "deepdive Jeune morty",
+        },
+      ],
+    });
+
+    expect(mockExecuteMusicChatTool).toHaveBeenCalledTimes(1);
+    expect(mockExecuteMusicChatTool).toHaveBeenCalledWith(
+      "user-789",
+      "getArtistDeepDive",
+      {
+        artistName: "Jeune morty",
+        limit: 10,
+      }
+    );
+    expect(mockCreateGroqChatCompletion).not.toHaveBeenCalled();
+    expect(response.presetQuestionId).toBe("artist-deep-dive");
+    expect(response.answer).toContain("Jeune Morty");
+  });
+
+  it("formats tell-me-about artist questions without calling Groq", async () => {
+    mockExecuteMusicChatTool.mockResolvedValue({
+      found: true,
+      requestedArtistName: "Jeune morty",
+      period: { startDate: null, endDate: null },
+      artist: { artistId: "a1", artistName: "Jeune Morty" },
+      totalListens: 8,
+      uniqueTracks: 3,
+      firstListenAt: "2021-01-01T00:00:00.000Z",
+      lastListenAt: "2025-01-01T00:00:00.000Z",
+      matchedArtistNames: ["Jeune Morty"],
+      topTracks: [],
+      yearlyBreakdown: [],
+    });
+
+    const response = await generateMusicChatAnswer({
+      userId: "user-789",
+      locale: "en",
+      messages: [{ role: "user", content: "tell me about Jeune morty" }],
+    });
+
+    expect(mockCreateGroqChatCompletion).not.toHaveBeenCalled();
+    expect(mockExecuteMusicChatTool).toHaveBeenCalledWith(
+      "user-789",
+      "getArtistDeepDive",
+      { artistName: "Jeune morty", limit: 10 }
+    );
+    expect(response.answer).toContain("Jeune Morty");
   });
 
   it("short-circuits the 2020 to 2024 taste shift preset to its known tool", async () => {
@@ -389,42 +459,32 @@ describe("music-chat-service", () => {
       deltas: { artists: { rising: [], declining: [] }, genres: { rising: [], declining: [] } },
       dataQuality: { insufficientData: false },
     });
-    mockCreateGroqChatCompletion
-      .mockResolvedValueOnce({
-        choices: [
-          {
-            message: {
-              content: "",
-              tool_calls: [
-                {
-                  id: "call_1",
-                  type: "function",
-                  function: {
-                    name: "getTasteShiftSummary",
-                    arguments: JSON.stringify({
-                      firstStartDate: "2023-01-01",
-                      firstEndDate: "2023-12-31",
-                      secondStartDate: "2026-01-01",
-                      secondEndDate: "2026-12-31",
-                    }),
-                  },
+    mockCreateGroqChatCompletion.mockResolvedValueOnce({
+      choices: [
+        {
+          message: {
+            content: "",
+            tool_calls: [
+              {
+                id: "call_1",
+                type: "function",
+                function: {
+                  name: "getTasteShiftSummary",
+                  arguments: JSON.stringify({
+                    firstStartDate: "2023-01-01",
+                    firstEndDate: "2023-12-31",
+                    secondStartDate: "2026-01-01",
+                    secondEndDate: "2026-12-31",
+                  }),
                 },
-              ],
-            },
+              },
+            ],
           },
-        ],
-      })
-      .mockResolvedValueOnce({
-        choices: [
-          {
-            message: {
-              content: "Between 2023 and 2026, your taste shifted.",
-            },
-          },
-        ],
-      });
+        },
+      ],
+    });
 
-    await generateMusicChatAnswer({
+    const tasteShiftResponse = await generateMusicChatAnswer({
       userId: "user-123",
       locale: "en",
       messages: [
@@ -435,15 +495,27 @@ describe("music-chat-service", () => {
       ],
     });
 
-    const finalParams = mockCreateGroqChatCompletion.mock.calls[1]?.[0];
-    const finalMessages = JSON.stringify(finalParams.messages);
-    expect(finalMessages).not.toContain("dataQuality");
-    expect(finalMessages).not.toContain("insufficientData");
+    expect(mockCreateGroqChatCompletion).toHaveBeenCalledTimes(1);
+    expect(mockExecuteMusicChatTool).toHaveBeenCalledWith(
+      "user-123",
+      "getTasteShiftSummary",
+      expect.objectContaining({
+        firstStartDate: "2023-01-01",
+        secondStartDate: "2026-01-01",
+      })
+    );
+    expect(tasteShiftResponse.answer).toContain("Taste shift between");
+    expect(tasteShiftResponse.answer).not.toContain("dataQuality");
+    expect(tasteShiftResponse.answer).not.toContain("insufficientData");
   });
 
   it("strips raw data-quality metadata from model answers and chat history", async () => {
     mockExecuteMusicChatTool.mockResolvedValue({
-      years: [{ year: 2023, listenCount: 100 }],
+      period: { startDate: null, endDate: null },
+      byHourOfDay: [],
+      peakHour: 22,
+      byDayOfWeek: [],
+      peakDay: 5,
     });
     mockCreateGroqChatCompletion
       .mockResolvedValueOnce({
@@ -456,8 +528,8 @@ describe("music-chat-service", () => {
                   id: "call_1",
                   type: "function",
                   function: {
-                    name: "getListeningTrendsByYear",
-                    arguments: JSON.stringify({ limit: 10 }),
+                    name: "getListeningHabitsByTimeOfDay",
+                    arguments: JSON.stringify({}),
                   },
                 },
               ],

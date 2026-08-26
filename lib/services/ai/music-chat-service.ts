@@ -35,6 +35,7 @@ import {
 } from "@/lib/services/ai/music-chat-top-tracks-direct-answer";
 import {
   formatArtistDeepDivePresetAnswer,
+  inferArtistDeepDiveFromMessages,
   isArtistDeepDiveToolResult,
   resolveArtistNameForDeepDivePreset,
 } from "@/lib/services/ai/music-chat-artist-deep-dive-direct-answer";
@@ -60,8 +61,10 @@ import {
 
 const MAX_TOOL_STEPS = 4;
 const MAX_HISTORY_MESSAGES = 8;
-/** Groq output cap; long artist deep dives need room for many track lines + yearly rows. */
-const MUSIC_CHAT_COMPLETION_MAX_TOKENS = 8192;
+/** Groq tool-selection cap; tool_calls are short JSON, not long essays. */
+const MUSIC_CHAT_TOOL_PLAN_MAX_TOKENS = 1024;
+/** Groq prose cap when no deterministic formatter exists. */
+const MUSIC_CHAT_COMPLETION_MAX_TOKENS = 2048;
 
 type DirectPresetToolCall = {
   id: string;
@@ -385,6 +388,7 @@ function buildSystemPrompt(
     "If a period has no data, say so clearly and suggest a nearby useful follow-up.",
     "For taste-shift comparisons, always name both periods. If the tool result includes a caution about sparse data, explain in plain language that the comparison may be weak because one period has very little data. If there is no caution, do not mention data quality.",
     "For week-to-week taste evolution, summarize each ISO week pair with its classification, volume change, notable genre shifts, and artist rank moves. Prefer getWeeklyTasteEvolution for recent weekly changes; use getTasteShiftSummary for explicit multi-month or multi-year period comparisons.",
+    "When the user asks about one artist in their library (including “tell me about X”, “who is X”, “parle-moi de X”), call getArtistDeepDive with that exact artist name.",
     "Never expose raw tool field names or metadata labels in the final answer.",
     "For track obsession windows, always mention the exact short window and the wider period total.",
     "Exact listening hours are allowed, but avoid dumping unnecessary raw rows.",
@@ -657,6 +661,57 @@ function getDirectPresetToolCall(
   return null;
 }
 
+function tryFormatKnownToolResult(
+  toolName: string,
+  result: unknown,
+  locale: AiLocale
+): string | null {
+  if (toolName === "getArtistDeepDive" && isArtistDeepDiveToolResult(result)) {
+    return formatArtistDeepDivePresetAnswer(locale, result);
+  }
+  if (toolName === "getTopTracksForPeriod" && isTopTracksPeriodToolResult(result)) {
+    return formatTopTracksPresetAnswer(locale, result);
+  }
+  if (toolName === "getTopArtistsForPeriod" && isTopArtistsPeriodToolResult(result)) {
+    return formatTopArtistsPresetAnswer(locale, result);
+  }
+  if (toolName === "getGenreBreakdownForPeriod" && isGenreBreakdownToolResult(result)) {
+    return formatGenreBreakdownPresetAnswer(locale, result);
+  }
+  if (toolName === "compareListeningPeriods" && isComparePeriodsToolResult(result)) {
+    return formatComparePeriodsPresetAnswer(locale, result);
+  }
+  if (toolName === "getListeningTrendsByYear" && isYearlyTrendsToolResult(result)) {
+    return formatYearlyTrendsPresetAnswer(locale, result);
+  }
+  if (
+    toolName === "getMostConsistentArtistsOverTime" &&
+    isConsistentArtistsToolResult(result)
+  ) {
+    return formatConsistentArtistsPresetAnswer(locale, result);
+  }
+  if (
+    toolName === "getLateNightListeningProfile" &&
+    isLateNightProfileToolResult(result)
+  ) {
+    return formatLateNightPresetAnswer(locale, result);
+  }
+  if (toolName === "getTasteShiftSummary" && isTasteShiftSummaryToolResult(result)) {
+    const text = formatTasteShiftPresetAnswer(locale, result);
+    return text.trim() ? text : null;
+  }
+  if (
+    toolName === "getWeeklyTasteEvolution" &&
+    isWeeklyTasteEvolutionToolResult(result)
+  ) {
+    return formatWeeklyTasteEvolutionPresetAnswer(locale, result);
+  }
+  if (toolName === "getTrackObsessionWindows" && isTrackObsessionsToolResult(result)) {
+    return formatTrackObsessionsPresetAnswer(locale, result);
+  }
+  return null;
+}
+
 async function createFinalAnswerFromToolResults(
   groqMessages: Array<Record<string, unknown>>
 ): Promise<string> {
@@ -696,20 +751,33 @@ export async function generateMusicChatAnswer({
   presetArgs?: MusicChatPresetArgs;
   dateRange?: MusicChatDateRangeContext;
 }): Promise<MusicChatResponse> {
+  const inferredDeepDiveArtistName =
+    presetQuestionId === undefined
+      ? inferArtistDeepDiveFromMessages(messages)
+      : null;
+  const effectivePresetQuestionId =
+    presetQuestionId ??
+    (inferredDeepDiveArtistName ? "artist-deep-dive" : undefined);
+  const effectivePresetArgs: MusicChatPresetArgs | undefined =
+    presetArgs ??
+    (inferredDeepDiveArtistName
+      ? { artistName: inferredDeepDiveArtistName }
+      : undefined);
+
   const presetCacheSuffix =
-    presetQuestionId !== undefined
+    effectivePresetQuestionId !== undefined
       ? buildMusicChatPresetCacheSuffix(
-          presetQuestionId,
+          effectivePresetQuestionId,
           messages,
-          presetArgs,
+          effectivePresetArgs,
           dateRange
         )
       : null;
   const presetCacheStorageKey =
-    presetQuestionId !== undefined && presetCacheSuffix !== null
+    effectivePresetQuestionId !== undefined && presetCacheSuffix !== null
       ? buildMusicChatPresetStorageKey(
           userId,
-          presetQuestionId,
+          effectivePresetQuestionId,
           locale,
           presetCacheSuffix,
           dateRange
@@ -726,12 +794,12 @@ export async function generateMusicChatAnswer({
   const sources: MusicChatToolResult[] = [];
   const groqMessages: Array<Record<string, unknown>> = [
     { role: "system", content: buildSystemPrompt(locale, dateRange) },
-    ...toGroqMessages(messages, presetQuestionId),
+    ...toGroqMessages(messages, effectivePresetQuestionId),
   ];
   const directPresetToolCall = getDirectPresetToolCall(
-    presetQuestionId,
+    effectivePresetQuestionId,
     messages,
-    presetArgs,
+    effectivePresetArgs,
     dateRange,
     locale
   );
@@ -769,82 +837,18 @@ export async function generateMusicChatAnswer({
       }
     );
 
-    let answer: string;
-    if (
-      presetQuestionId === "summer-2022-top-tracks" &&
-      directPresetToolCall.toolName === "getTopTracksForPeriod" &&
-      isTopTracksPeriodToolResult(result)
-    ) {
-      answer = formatTopTracksPresetAnswer(locale, result);
-    } else if (
-      presetQuestionId === "summer-2022-top-artists" &&
-      directPresetToolCall.toolName === "getTopArtistsForPeriod" &&
-      isTopArtistsPeriodToolResult(result)
-    ) {
-      answer = formatTopArtistsPresetAnswer(locale, result);
-    } else if (
-      presetQuestionId === "artist-deep-dive" &&
-      directPresetToolCall.toolName === "getArtistDeepDive" &&
-      isArtistDeepDiveToolResult(result)
-    ) {
-      answer = formatArtistDeepDivePresetAnswer(locale, result);
-    } else if (
-      presetQuestionId === "genre-breakdown-last-year" &&
-      directPresetToolCall.toolName === "getGenreBreakdownForPeriod" &&
-      isGenreBreakdownToolResult(result)
-    ) {
-      answer = formatGenreBreakdownPresetAnswer(locale, result);
-    } else if (
-      presetQuestionId === "compare-listening-periods" &&
-      directPresetToolCall.toolName === "compareListeningPeriods" &&
-      isComparePeriodsToolResult(result)
-    ) {
-      answer = formatComparePeriodsPresetAnswer(locale, result);
-    } else if (
-      presetQuestionId === "yearly-listening-trends" &&
-      directPresetToolCall.toolName === "getListeningTrendsByYear" &&
-      isYearlyTrendsToolResult(result)
-    ) {
-      answer = formatYearlyTrendsPresetAnswer(locale, result);
-    } else if (
-      presetQuestionId === "consistent-artists" &&
-      directPresetToolCall.toolName === "getMostConsistentArtistsOverTime" &&
-      isConsistentArtistsToolResult(result)
-    ) {
-      answer = formatConsistentArtistsPresetAnswer(locale, result);
-    } else if (
-      presetQuestionId === "late-night-habits" &&
-      directPresetToolCall.toolName === "getLateNightListeningProfile" &&
-      isLateNightProfileToolResult(result)
-    ) {
-      answer = formatLateNightPresetAnswer(locale, result);
-    } else if (
-      presetQuestionId === "taste-shift-2020-2024" &&
-      directPresetToolCall.toolName === "getTasteShiftSummary" &&
-      isTasteShiftSummaryToolResult(result)
-    ) {
-      answer = formatTasteShiftPresetAnswer(locale, result);
-    } else if (
-      presetQuestionId === "weekly-taste-evolution" &&
-      directPresetToolCall.toolName === "getWeeklyTasteEvolution" &&
-      isWeeklyTasteEvolutionToolResult(result)
-    ) {
-      answer = formatWeeklyTasteEvolutionPresetAnswer(locale, result);
-    } else if (
-      presetQuestionId === "track-obsessions-2022" &&
-      directPresetToolCall.toolName === "getTrackObsessionWindows" &&
-      isTrackObsessionsToolResult(result)
-    ) {
-      answer = formatTrackObsessionsPresetAnswer(locale, result);
-    } else {
-      answer = await createFinalAnswerFromToolResults(groqMessages);
-    }
+    let answer =
+      tryFormatKnownToolResult(
+        directPresetToolCall.toolName,
+        result,
+        locale
+      ) ?? (await createFinalAnswerFromToolResults(groqMessages));
 
     const directPresetResponse: MusicChatResponse = {
       answer,
       sources,
       locale,
-      presetQuestionId,
+      presetQuestionId: effectivePresetQuestionId,
     };
 
     if (presetCacheStorageKey && directPresetResponse.answer) {
@@ -862,7 +866,7 @@ export async function generateMusicChatAnswer({
     const params: ChatCompletionCreateParamsNonStreaming = {
       model: GROQ_DEFAULT_MODEL,
       temperature: 0.2,
-      max_tokens: MUSIC_CHAT_COMPLETION_MAX_TOKENS,
+      max_tokens: MUSIC_CHAT_TOOL_PLAN_MAX_TOKENS,
       messages:
         groqMessages as unknown as ChatCompletionCreateParamsNonStreaming["messages"],
       tools:
@@ -880,7 +884,7 @@ export async function generateMusicChatAnswer({
           answer: getUnsupportedMusicChatAnswer(locale),
           sources,
           locale,
-          presetQuestionId,
+          presetQuestionId: effectivePresetQuestionId,
         };
       }
 
@@ -892,7 +896,7 @@ export async function generateMusicChatAnswer({
         answer,
         sources,
         locale,
-        presetQuestionId,
+        presetQuestionId: effectivePresetQuestionId,
       };
     }
 
@@ -917,12 +921,34 @@ export async function generateMusicChatAnswer({
         content: JSON.stringify(prepareToolResultForModel(result)),
       });
     }
+
+    if (toolCalls.length === 1) {
+      const only = sources[sources.length - 1];
+      if (only) {
+        const formatted = tryFormatKnownToolResult(
+          only.toolName,
+          only.result,
+          locale
+        );
+        if (formatted) {
+          return {
+            answer: formatted,
+            sources,
+            locale,
+            presetQuestionId:
+              only.toolName === "getArtistDeepDive"
+                ? "artist-deep-dive"
+                : effectivePresetQuestionId,
+          };
+        }
+      }
+    }
   }
 
   return {
     answer: await createFinalAnswerFromToolResults(groqMessages),
     sources,
     locale,
-    presetQuestionId,
+    presetQuestionId: effectivePresetQuestionId,
   };
 }

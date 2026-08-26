@@ -3,11 +3,77 @@ import {
   buildArtistDeepDiveCacheSuffix,
   extractArtistNameFromDeepDiveUserMessage,
   formatArtistDeepDivePresetAnswer,
+  inferArtistDeepDiveFromMessages,
+  inferArtistDeepDiveFromUserMessage,
   isArtistDeepDiveToolResult,
   resolveArtistNameForDeepDivePreset,
 } from "@/lib/services/ai/music-chat-artist-deep-dive-direct-answer";
 
 describe("music-chat-artist-deep-dive-direct-answer", () => {
+  it("infers free-text artist deep dives without calling Groq phrasing", () => {
+    expect(inferArtistDeepDiveFromUserMessage("deepdive Jeune morty")).toBe(
+      "Jeune morty"
+    );
+    expect(
+      inferArtistDeepDiveFromUserMessage("artist deep-dive: The Strokes")
+    ).toBe("The Strokes");
+    expect(
+      inferArtistDeepDiveFromUserMessage("fais un deepdive sur Jeune Morty")
+    ).toBe("Jeune Morty");
+    expect(
+      inferArtistDeepDiveFromUserMessage(
+        "Tell me my streaming history with Radiohead."
+      )
+    ).toBe("Radiohead");
+    expect(
+      inferArtistDeepDiveFromUserMessage(
+        "Raconte-moi mon historique de streams avec Daft Punk"
+      )
+    ).toBe("Daft Punk");
+    expect(
+      inferArtistDeepDiveFromUserMessage("tell me about Jeune morty")
+    ).toBe("Jeune morty");
+    expect(
+      inferArtistDeepDiveFromUserMessage("Can you tell me about The Strokes")
+    ).toBe("The Strokes");
+    expect(
+      inferArtistDeepDiveFromUserMessage("what about Radiohead")
+    ).toBe("Radiohead");
+    expect(
+      inferArtistDeepDiveFromUserMessage("parle-moi de Daft Punk")
+    ).toBe("Daft Punk");
+    expect(
+      inferArtistDeepDiveFromUserMessage("who is artist Jeune Morty")
+    ).toBe("Jeune Morty");
+    expect(
+      inferArtistDeepDiveFromMessages([
+        { role: "assistant", content: "Hi" },
+        { role: "user", content: "deep dive Jeune morty" },
+      ])
+    ).toBe("Jeune morty");
+  });
+
+  it("does not infer deep dives for unrelated or comparative questions", () => {
+    expect(
+      inferArtistDeepDiveFromUserMessage(
+        "Which tracks was I obsessed with in short bursts this year?"
+      )
+    ).toBeNull();
+    expect(
+      inferArtistDeepDiveFromUserMessage("Create a playlist from my favorites")
+    ).toBeNull();
+    expect(
+      inferArtistDeepDiveFromUserMessage("deepdive Drake vs Kendrick")
+    ).toBeNull();
+    expect(
+      inferArtistDeepDiveFromUserMessage(
+        "Tell me my streaming history with Radiohead in 2022"
+      )
+    ).toBeNull();
+    expect(inferArtistDeepDiveFromUserMessage("tell me about my top tracks")).toBeNull();
+    expect(inferArtistDeepDiveFromUserMessage("tell me about late night")).toBeNull();
+  });
+
   it("extracts artist names from preset-style questions", () => {
     expect(
       extractArtistNameFromDeepDiveUserMessage(

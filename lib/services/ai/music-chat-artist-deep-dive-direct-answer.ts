@@ -58,6 +58,100 @@ export function extractArtistNameFromDeepDiveUserMessage(content: string): strin
   return m[1].replace(/\s+/g, " ").trim() || null;
 }
 
+const DEEP_DIVE_HISTORY_INTENT_RE =
+  /\b(?:listening history|streaming history|historique|historial|deep[\s-]?dive|deepdive)\b/i;
+
+const DEEP_DIVE_PREFIX_RE =
+  /^(?:(?:un|une|le|la|the|an|a|my|mon|mi)\s+)?(?:artist(?:e)?\s+)?deep[\s-]?dive(?:\s+(?:artiste?|for|on|of|about|sur|de|pour))?\s*[:\-]?\s+(.+)$/i;
+
+const DEEP_DIVE_INLINE_RE =
+  /\b(?:artist(?:e)?\s+)?deep[\s-]?dive(?:\s+artiste)?\s+(?:sur|de|on|for|of|about|pour)\s+(.+)$/i;
+
+const ABOUT_ARTIST_RES: RegExp[] = [
+  /^(?:(?:please|can you|could you)\s+)?tell me(?: more)? about\s+(.+)$/i,
+  /^(?:what can you (?:tell|say)(?: me)? about)\s+(.+)$/i,
+  /^(?:what about)\s+(.+)$/i,
+  /^(?:who(?:'s| is))\s+(.+)$/i,
+  /^(?:parle[- ]moi(?:-en)? (?:de|d['’])|dis[- ]moi(?: en plus)? (?:sur|de|d['’]))\s*(.+)$/i,
+  /^(?:c['’]est qui|c['’]est quoi)\s+(.+)$/i,
+  /^(?:h[aá]blame de|cu[eé]ntame (?:sobre|de)|qui[eé]n es)\s+(.+)$/i,
+];
+
+const PERIOD_OR_COMPARISON_RE =
+  /\b(?:vs\.?|versus|compared|compar(?:e|er|aison)|entre)\b|\b(?:in|en|durante|during|since|depuis)\s+(?:19|20)\d{2}\b|\b(?:19|20)\d{2}\s*(?:vs\.?|versus|and|et|to|à)\s*(?:19|20)\d{2}\b/i;
+
+const NON_ARTIST_ABOUT_SUBJECT_RE =
+  /\b(?:top tracks?|top songs?|top artists?|genres?|late[\s-]?night|night ?time|taste(?:\s+shift)?|playlist|evolution|obsess|listening habits?|time of day|this year|last year)\b|^my\s+(?:top|late|taste|genre|listen|music|histor|year|habit)|^me$|^you$|^this$|^that$|^music$|^soundprint$/i;
+
+function sanitizeInferredArtistName(raw: string): string | null {
+  const name = raw
+    .replace(/\s+/g, " ")
+    .replace(/^["«“']+|["»”']+$/g, "")
+    .replace(/\s+(?:please|stp|s['’]il te pla[iî]t|por favor)$/i, "")
+    .replace(/^(?:the artist|l['’]artiste|el artista|artist(?:e)?|the band)\s+/i, "")
+    .trim();
+  if (name.length < 2 || name.length > 120) return null;
+  if (/\b(?:in|en|during|pendant|durante)\b/i.test(name)) return null;
+  if (NON_ARTIST_ABOUT_SUBJECT_RE.test(name)) return null;
+  return name;
+}
+
+function extractAboutArtistSubject(content: string): string | null {
+  for (const re of ABOUT_ARTIST_RES) {
+    const match = re.exec(content);
+    if (match?.[1]) return match[1];
+  }
+  return null;
+}
+
+/**
+ * Narrow free-text detector: artist deep-dive intent + a usable artist name.
+ * Returns null when Groq should handle the question instead.
+ */
+export function inferArtistDeepDiveFromUserMessage(content: string): string | null {
+  const trimmed = content.trim().replace(/[.!?…]+$/u, "").trim();
+  if (!trimmed) return null;
+  if (PERIOD_OR_COMPARISON_RE.test(trimmed)) return null;
+
+  if (DEEP_DIVE_HISTORY_INTENT_RE.test(trimmed)) {
+    const fromWith = extractArtistNameFromDeepDiveUserMessage(trimmed);
+    if (fromWith) {
+      const sanitized = sanitizeInferredArtistName(fromWith);
+      if (sanitized) return sanitized;
+    }
+  }
+
+  const prefixed = DEEP_DIVE_PREFIX_RE.exec(trimmed);
+  if (prefixed?.[1]) {
+    const sanitized = sanitizeInferredArtistName(prefixed[1]);
+    if (sanitized) return sanitized;
+  }
+
+  const inline = DEEP_DIVE_INLINE_RE.exec(trimmed);
+  if (inline?.[1]) {
+    const sanitized = sanitizeInferredArtistName(inline[1]);
+    if (sanitized) return sanitized;
+  }
+
+  const aboutSubject = extractAboutArtistSubject(trimmed);
+  if (aboutSubject) {
+    return sanitizeInferredArtistName(aboutSubject);
+  }
+
+  return null;
+}
+
+export function inferArtistDeepDiveFromMessages(
+  messages: MusicChatMessage[]
+): string | null {
+  for (let i = messages.length - 1; i >= 0; i -= 1) {
+    const entry = messages[i];
+    if (entry.role !== "user") continue;
+    return inferArtistDeepDiveFromUserMessage(entry.content);
+  }
+  return null;
+}
+
 export function resolveArtistNameForDeepDivePreset(
   presetArgs: { artistName?: string } | undefined,
   messages: MusicChatMessage[]

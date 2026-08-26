@@ -27,6 +27,12 @@ import {
 import { prisma } from "@/lib/prisma";
 import { getTasteEvolutionTrends } from "@/lib/services/taste-evolution/taste-evolution-service";
 
+function prismaSqlText(call: unknown): string {
+  if (!call || typeof call !== "object" || !("strings" in call)) return "";
+  const strings = (call as { strings?: readonly string[] }).strings;
+  return Array.isArray(strings) ? strings.join("") : "";
+}
+
 describe("music-chat-tools", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -255,6 +261,13 @@ describe("music-chat-tools", () => {
       ],
     });
     expect(prisma.$queryRaw).toHaveBeenCalledTimes(3);
+
+    const exactSql = prismaSqlText(vi.mocked(prisma.$queryRaw).mock.calls[0]?.[0]);
+    expect(exactSql).toContain('"nameLower"');
+    expect(exactSql).not.toMatch(/\bLIKE\b/i);
+    expect(exactSql).toContain("FROM catalog c");
+    expect(exactSql).toContain('t."artistId" = c.id');
+    expect(exactSql).not.toMatch(/FROM "Listen" l\s+JOIN "Track"/);
   });
 
   it("resolves artist deep dives case-insensitively", async () => {
@@ -291,6 +304,7 @@ describe("music-chat-tools", () => {
 
   it("falls back to partial artist matches when no exact artist exists", async () => {
     vi.mocked(prisma.$queryRaw)
+      .mockResolvedValueOnce([])
       .mockResolvedValueOnce([
         {
           primary_artist_id: "artist-3",
@@ -319,17 +333,20 @@ describe("music-chat-tools", () => {
       uniqueTracks: 2,
     });
 
-    const query = vi.mocked(prisma.$queryRaw).mock.calls[0]?.[0] as {
+    const exactSql = prismaSqlText(vi.mocked(prisma.$queryRaw).mock.calls[0]?.[0]);
+    expect(exactSql).not.toMatch(/\bLIKE\b/i);
+
+    const partialQuery = vi.mocked(prisma.$queryRaw).mock.calls[1]?.[0] as {
       strings: readonly string[];
       values: readonly unknown[];
     };
-    expect(query.strings.join("")).toContain("ILIKE");
-    expect(query.values).toContain("%Radiohead%");
-    expect(prisma.$queryRaw).toHaveBeenCalledTimes(3);
+    expect(prismaSqlText(partialQuery)).toMatch(/\bLIKE\b/);
+    expect(partialQuery.values).toContain("%radiohead%");
+    expect(prisma.$queryRaw).toHaveBeenCalledTimes(4);
   });
 
   it("returns an empty artist deep dive when the artist is absent", async () => {
-    vi.mocked(prisma.$queryRaw).mockResolvedValueOnce([]);
+    vi.mocked(prisma.$queryRaw).mockResolvedValue([]);
 
     await expect(
       getArtistDeepDive("user-123", { artistName: "Missing Artist" })
@@ -344,7 +361,7 @@ describe("music-chat-tools", () => {
       topTracks: [],
       yearlyBreakdown: [],
     });
-    expect(prisma.$queryRaw).toHaveBeenCalledTimes(1);
+    expect(prisma.$queryRaw).toHaveBeenCalledTimes(2);
   });
 
   it("compares explicit periods for taste shifts with strict limits and data quality", async () => {

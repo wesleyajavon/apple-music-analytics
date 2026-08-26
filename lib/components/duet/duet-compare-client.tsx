@@ -58,6 +58,7 @@ import {
   generateDuetTimelineSharePng,
   resolveDuetTimelineWinner,
 } from "@/lib/utils/duet-timeline-share-image";
+import { duetShareHeadlineKey } from "@/lib/utils/duet-share-headline";
 import { formatOverviewDateRangeLabel } from "@/lib/utils/overview-date-range-label";
 import {
   getDuetDisplayName,
@@ -92,7 +93,6 @@ import {
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
 import { useArtistSearch } from "@/lib/hooks/use-artists";
 import { useTrackSearch } from "@/lib/hooks/use-tracks";
-import { useGenres } from "@/lib/hooks/use-listening";
 import { ApiError } from "@/lib/api-client";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { usePublicDemoViewer, useSupabaseAuthUserId } from "@/lib/hooks/use-public-demo-viewer";
@@ -145,7 +145,7 @@ function SpotlightSectionHeader({
 }
 
 function parseInitialArenaMode(value: string | null): DuetArenaMode | null {
-  if (value === "artist" || value === "track" || value === "genre") return value;
+  if (value === "artist" || value === "track") return value;
   return null;
 }
 
@@ -353,28 +353,6 @@ function CompareContent() {
     period,
   });
 
-  const [genreQuery, setGenreQuery] = useState(
-    initialEntityType === "genre" && initialEntityId ? initialEntityId : ""
-  );
-  const [selectedGenre, setSelectedGenre] = useState<string | undefined>(
-    initialEntityType === "genre" ? initialEntityId : undefined
-  );
-  const { data: genreCatalog } = useGenres(startDate, endDate);
-  const {
-    data: genreCompare,
-    isLoading: isGenreCompareLoading,
-    isFetching: isGenreCompareFetching,
-    error: genreCompareError,
-    refetch: refetchGenreCompare,
-  } = useDuetCompareEntity({
-    friendUserId,
-    type: "genre",
-    entityId: selectedGenre,
-    startDate,
-    endDate,
-    period,
-  });
-
   useEffect(() => {
     if (initialArenaMode) setArenaMode(initialArenaMode);
   }, [initialArenaMode]);
@@ -395,16 +373,6 @@ function CompareContent() {
     !!artistResults?.artists?.length && artistQuery.trim().length >= 2 && !selectedArtistId;
   const showTrackSuggestions =
     !!trackResults?.tracks?.length && trackQuery.trim().length >= 2 && !selectedTrackId;
-
-  const genreSuggestions = useMemo(() => {
-    const q = genreQuery.trim().toLowerCase();
-    const genres = genreCatalog?.data ?? [];
-    if (q.length < 1) return genres;
-    return genres.filter((row) => row.genre.toLowerCase().includes(q));
-  }, [genreCatalog, genreQuery]);
-
-  const showGenreSuggestions =
-    genreSuggestions.length > 0 && genreQuery.trim().length >= 1 && !selectedGenre;
 
   const friend = useMemo(() => {
     if (!friendUserId || !friendsData) return null;
@@ -440,12 +408,6 @@ function CompareContent() {
     () =>
       trackCompare?.merged.map((row) => ({ date: row.date, self: row.self, friend: row.friend })) ?? [],
     [trackCompare]
-  );
-
-  const genreChartData = useMemo(
-    () =>
-      genreCompare?.merged.map((row) => ({ date: row.date, self: row.self, friend: row.friend })) ?? [],
-    [genreCompare]
   );
 
   const periodTotals = useMemo(() => {
@@ -493,18 +455,7 @@ function CompareContent() {
       ? t("shareTimelineSubtitle", { periodLabel, dateRange: shareDateRange })
       : periodLabel;
     const viewerName = viewer?.name ?? t("seriesSelf");
-    const winnerHeadline =
-      winner === "tie"
-        ? t("scoreboardTie")
-        : winner === "self"
-          ? t("battleWinnerSelf")
-          : t("battleWinnerFriend", { friendName });
-    const outcome =
-      winner === "tie"
-        ? t("shareOutcomeTie", { friendName })
-        : winner === "self"
-          ? t("shareOutcomeSelf")
-          : t("shareOutcomeFriend", { friendName });
+    const winnerHeadline = t(duetShareHeadlineKey("timeline", winner), { friendName });
 
     return (
       <DuetShareCardActions
@@ -523,8 +474,8 @@ function CompareContent() {
             friendTotal: periodTotals.friendTotal,
             winner,
             winnerHeadline,
-            selfLabel: t("seriesSelf"),
-            friendLabel: t("seriesFriend", { friendName }),
+            selfLabel: t("shareCountLabel"),
+            friendLabel: t("shareCountLabel"),
             brandName: t("shareBrandName"),
             brandTagline: t("shareBrandTagline"),
           })
@@ -536,7 +487,7 @@ function CompareContent() {
             friendName,
             friendTotal: periodTotals.friendTotal.toLocaleString(locale),
             dateRange: shareDateRange || subtitle,
-            outcome,
+            outcome: winnerHeadline,
           })
         }
         shareLabel={t("shareBattleImage")}
@@ -569,8 +520,6 @@ function CompareContent() {
     trackCompare?.type === "track" ? (trackCompare.trackTitle ?? trackQuery) : trackQuery;
   const selectedTrackArtistName =
     trackCompare?.type === "track" ? trackCompare.artistName : undefined;
-  const selectedGenreName =
-    genreCompare?.type === "genre" ? genreCompare.genreName : genreQuery;
 
   const targetMode: DuetArenaMode = arenaMode ?? "artist";
   const mobileTarget =
@@ -603,84 +552,44 @@ function CompareContent() {
             setSelectedTrackId(undefined);
           },
         }
-      : targetMode === "genre"
-        ? {
-            query: genreQuery,
-            onQueryChange: (value: string) => {
-              setGenreQuery(value);
-              setSelectedGenre(undefined);
-            },
-            suggestions: genreSuggestions.map((row) => ({
-              id: row.genre,
-              label: row.genre,
-            })),
-            showSuggestions: showGenreSuggestions,
-            selectedLabel: selectedGenre ? selectedGenreName : "",
-            subtitle: undefined as string | undefined,
-            compare: genreCompare,
-            chartData: genreChartData,
-            loading: isGenreCompareLoading || isGenreCompareFetching,
-            error: Boolean(genreCompareError),
-            retry: () => void refetchGenreCompare(),
-            select: (id: string, label: string) => {
-              setSelectedGenre(id);
-              setGenreQuery(label);
-            },
-            clear: () => {
-              setGenreQuery("");
-              setSelectedGenre(undefined);
-            },
-          }
-        : {
-            query: artistQuery,
-            onQueryChange: (value: string) => {
-              setArtistQuery(value);
-              setSelectedArtistId(undefined);
-            },
-            suggestions: (artistResults?.artists ?? []).map((artist) => ({
-              id: artist.id,
-              label: artist.name,
-            })),
-            showSuggestions: showArtistSuggestions,
-            selectedLabel: selectedArtistId ? selectedArtistName : "",
-            subtitle: undefined as string | undefined,
-            compare: artistCompare,
-            chartData: artistChartData,
-            loading: isArtistCompareLoading || isArtistCompareFetching,
-            error: Boolean(artistCompareError),
-            retry: () => void refetchArtistCompare(),
-            select: (id: string, label: string) => {
-              setSelectedArtistId(id);
-              setArtistQuery(label);
-            },
-            clear: () => {
-              setArtistQuery("");
-              setSelectedArtistId(undefined);
-            },
-          };
+      : {
+          query: artistQuery,
+          onQueryChange: (value: string) => {
+            setArtistQuery(value);
+            setSelectedArtistId(undefined);
+          },
+          suggestions: (artistResults?.artists ?? []).map((artist) => ({
+            id: artist.id,
+            label: artist.name,
+          })),
+          showSuggestions: showArtistSuggestions,
+          selectedLabel: selectedArtistId ? selectedArtistName : "",
+          subtitle: undefined as string | undefined,
+          compare: artistCompare,
+          chartData: artistChartData,
+          loading: isArtistCompareLoading || isArtistCompareFetching,
+          error: Boolean(artistCompareError),
+          retry: () => void refetchArtistCompare(),
+          select: (id: string, label: string) => {
+            setSelectedArtistId(id);
+            setArtistQuery(label);
+          },
+          clear: () => {
+            setArtistQuery("");
+            setSelectedArtistId(undefined);
+          },
+        };
 
   const renderTargetSection = () => (
     <section className={DASHBOARD_SPOTLIGHT_SHELL}>
       <div
         className={
-          arenaMode === "genre"
-            ? DASHBOARD_SPOTLIGHT_GRADIENT_LIME
-            : arenaMode === "track"
-              ? DASHBOARD_SPOTLIGHT_GRADIENT_CYAN
-              : arenaMode === "artist"
-                ? DASHBOARD_SPOTLIGHT_GRADIENT_LIME
-                : DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY
+          arenaMode === "track" ? DASHBOARD_SPOTLIGHT_GRADIENT_CYAN : DASHBOARD_SPOTLIGHT_GRADIENT_LIME
         }
       />
       <div
         className={
-          arenaMode === "genre"
-            ? DASHBOARD_SPOTLIGHT_HAIRLINE_LIME
-            : arenaMode === "track"
-              ? DASHBOARD_SPOTLIGHT_HAIRLINE_CYAN
-              : arenaMode === "artist"
-                ? DASHBOARD_SPOTLIGHT_HAIRLINE_LIME
-                : DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET
+          arenaMode === "track" ? DASHBOARD_SPOTLIGHT_HAIRLINE_CYAN : DASHBOARD_SPOTLIGHT_HAIRLINE_LIME
         }
       />
       <SpotlightSectionHeader
@@ -749,7 +658,7 @@ function CompareContent() {
                 chartView={chartView}
                 onChartViewChange={setChartView}
               />
-            ) : arenaMode === "track" ? (
+            ) : (
               <EntityHeadToHeadPanel
                 searchPlaceholder={t("trackSearchPlaceholder")}
                 clearLabel={t("trackClear")}
@@ -789,56 +698,6 @@ function CompareContent() {
                 entityDisplayName={selectedTrackName}
                 entitySubtitle={selectedTrackArtistName ?? undefined}
                 arenaMode="track"
-                viewerName={viewer?.name ?? t("seriesSelf")}
-                friendName={friendName}
-                viewerAvatarUrl={viewer?.avatarUrl}
-                friendAvatarUrl={friendUser?.avatarUrl}
-                locale={locale}
-                period={period}
-                t={t}
-                chartTheme={chartTheme}
-                resolvedTheme={resolvedTheme}
-                chartView={chartView}
-                onChartViewChange={setChartView}
-              />
-            ) : (
-              <EntityHeadToHeadPanel
-                searchPlaceholder={t("genreSearchPlaceholder")}
-                clearLabel={t("genreClear")}
-                loadingLabel={t("genreLoading")}
-                errorLabel={t("genreError")}
-                chartTitle={t("genreChartTitle", { genreName: selectedGenreName, friendName })}
-                chartDescription={t("genreChartDescription")}
-                chartDescriptionCumulative={t("chartDescriptionCumulative")}
-                noDataTitle={t("genreNoDataTitle")}
-                noDataDescription={t("genreNoDataDescription")}
-                query={genreQuery}
-                onQueryChange={(value) => {
-                  setGenreQuery(value);
-                  setSelectedGenre(undefined);
-                }}
-                selectedEntityId={selectedGenre}
-                onSelectEntity={(id, label) => {
-                  setSelectedGenre(id);
-                  setGenreQuery(label);
-                }}
-                onClear={() => {
-                  setGenreQuery("");
-                  setSelectedGenre(undefined);
-                }}
-                suggestions={genreSuggestions.map((row) => ({
-                  id: row.genre,
-                  label: row.genre,
-                }))}
-                showSuggestions={showGenreSuggestions}
-                entityCompare={genreCompare}
-                isEntityLoading={isGenreCompareLoading}
-                isEntityFetching={isGenreCompareFetching}
-                entityError={genreCompareError}
-                refetchEntity={() => void refetchGenreCompare()}
-                chartData={genreChartData}
-                entityDisplayName={selectedGenreName}
-                arenaMode="genre"
                 viewerName={viewer?.name ?? t("seriesSelf")}
                 friendName={friendName}
                 viewerAvatarUrl={viewer?.avatarUrl}
@@ -1157,7 +1016,9 @@ function CompareContent() {
           selfTotal={periodTotals.selfTotal}
           friendTotal={periodTotals.friendTotal}
           rangeClamped={Boolean(timeline?.rangeClamped)}
-          metadataBanner={<DuetMetadataBanner friendName={friendName} metadata={metadata} />}
+          metadataBanner={
+            <DuetMetadataBanner friendName={friendName} metadata={metadata} compact />
+          }
           chartData={chartData}
           period={period}
           resolvedTheme={resolvedTheme}

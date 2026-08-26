@@ -8,7 +8,7 @@ import { Swords } from "lucide-react";
 import type { DuetArenaMode } from "@/lib/components/duet/duet-battle-arena-ui";
 
 type DuetCompareDeepLinkProps = {
-  entityType: DuetArenaMode | "genre";
+  entityType: DuetArenaMode;
   entityId: string;
   className?: string;
 };

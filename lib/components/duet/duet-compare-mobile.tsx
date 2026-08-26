@@ -11,6 +11,7 @@ import { ArtistAvatarHydrated } from "@/lib/components/artist-avatar-hydrated";
 import { DuetMobileSubNav } from "@/lib/components/duet/duet-mobile-sub-nav";
 import {
   DuetDualLineChart,
+  EntityBattleShareActions,
   applyDuetChartView,
   type DualLineChartPoint,
   type DuetChartViewMode,
@@ -20,6 +21,7 @@ import type { DuetArenaMode } from "@/lib/components/duet/duet-battle-arena-ui";
 import type { PeriodType } from "@/lib/components/period-selector";
 import type { DuetCompareSection } from "@/lib/components/duet/duet-compare-section-tabs";
 import { getDuetDisplayName } from "@/lib/components/duet/duet-utils";
+import { duetShareHeadlineKey } from "@/lib/utils/duet-share-headline";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
 import { DASHBOARD_CHART_THEME } from "@/lib/constants/dashboard-spotlight";
 import type {
@@ -502,22 +504,15 @@ export function DuetCompareMobileExperience({
   const leaderLabel =
     leader === "tie"
       ? t("scoreboardTie")
-      : t("scoreboardLeads", { name: leader === "self" ? youLabel : friendName });
+      : leader === "self"
+        ? t("scoreboardLeadsSelf")
+        : t("scoreboardLeadsFriend", { name: friendName });
 
   const entityPlaceholder =
-    arenaMode === "track"
-      ? t("trackSearchPlaceholder")
-      : arenaMode === "genre"
-        ? t("genreSearchPlaceholder")
-        : t("artistSearchPlaceholder");
+    arenaMode === "track" ? t("trackSearchPlaceholder") : t("artistSearchPlaceholder");
   const entitySheetTitle =
-    arenaMode === "track"
-      ? tm("entitySheetTitleTrack")
-      : arenaMode === "genre"
-        ? tm("entitySheetTitleGenre")
-        : tm("entitySheetTitleArtist");
-  const entityClearLabel =
-    arenaMode === "track" ? t("trackClear") : arenaMode === "genre" ? t("genreClear") : t("artistClear");
+    arenaMode === "track" ? tm("entitySheetTitleTrack") : tm("entitySheetTitleArtist");
+  const entityClearLabel = arenaMode === "track" ? t("trackClear") : t("artistClear");
 
   return (
     <div className={MOBILE_BLEED}>
@@ -657,7 +652,6 @@ export function DuetCompareMobileExperience({
               options={[
                 { value: "artist", label: tm("arenaArtist") },
                 { value: "track", label: tm("arenaTrack") },
-                { value: "genre", label: tm("arenaGenre") },
               ]}
               onChange={onArenaModeChange}
             />
@@ -693,13 +687,32 @@ export function DuetCompareMobileExperience({
                   rightLabel={friendName}
                   rightValue={formatCount(entityCompare.friendCount, locale)}
                 />
-                <p className="text-sm font-semibold text-foreground">
-                  {entityCompare.winner === "tie"
-                    ? t("battleTie")
-                    : entityCompare.winner === "self"
-                      ? t("battleWinnerSelf")
-                      : t("battleWinnerFriend", { friendName })}
+                <p className="text-sm font-semibold leading-snug text-foreground">
+                  {t(duetShareHeadlineKey(arenaMode ?? "artist", entityCompare.winner), {
+                    friendName,
+                    entityName: selectedEntityLabel,
+                  })}
                 </p>
+                {entityCompare.selfCount + entityCompare.friendCount > 0 ? (
+                  <EntityBattleShareActions
+                    selfCount={entityCompare.selfCount}
+                    friendCount={entityCompare.friendCount}
+                    viewerName={viewer.name}
+                    friendName={friendName}
+                    viewerAvatarUrl={viewer.avatarUrl}
+                    friendAvatarUrl={friendAvatarUrl}
+                    winner={entityCompare.winner}
+                    entityName={selectedEntityLabel}
+                    entitySubtitle={selectedEntitySubtitle}
+                    entityImageUrl={
+                      entityCompare.type === "artist" ? entityCompare.imageUrl : undefined
+                    }
+                    arenaMode={arenaMode ?? "artist"}
+                    locale={locale}
+                    t={t}
+                    variant="mobile"
+                  />
+                ) : null}
                 {entityChartData.length > 0 ? (
                   <>
                     <DuetChartViewToggle
@@ -807,7 +820,7 @@ export function DuetCompareMobileExperience({
                   </li>
                 ))}
               </ul>
-            ) : searchQuery.trim().length >= (arenaMode === "genre" ? 1 : 2) ? (
+            ) : searchQuery.trim().length >= 2 ? (
               <p className="text-sm text-muted">{tm("noResults")}</p>
             ) : null}
           </div>

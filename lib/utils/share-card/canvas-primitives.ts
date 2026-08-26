@@ -366,11 +366,11 @@ export function drawHeadToHeadCard(
     ctx.fill();
   }
 
-  ctx.font = `700 36px ${SHARE_CARD_FONT}`;
+  ctx.font = `700 28px ${SHARE_CARD_FONT}`;
   ctx.fillStyle = input.winner === "tie" ? "#e2e8f0" : "#fde68a";
-  ctx.fillText(
-    truncateText(ctx, input.winnerHeadline, size - 180),
-    size / 2,
-    cardY + 350
-  );
+  const headlineLines = wrapLines(ctx, input.winnerHeadline, size - 220, 2);
+  const headlineStartY = headlineLines.length > 1 ? cardY + 326 : cardY + 348;
+  for (let i = 0; i < headlineLines.length; i++) {
+    ctx.fillText(headlineLines[i] ?? "", size / 2, headlineStartY + i * 34);
+  }
 }

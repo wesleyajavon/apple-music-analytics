@@ -98,7 +98,6 @@ export function HomeDuetPreview({ className }: { className?: string }) {
   const arenaModes = [
     { key: "artist", label: t("arenaModes.artist"), active: true },
     { key: "track", label: t("arenaModes.track"), active: false },
-    { key: "genre", label: t("arenaModes.genre"), active: false },
   ] as const;
 
   const workflowSteps = [t("workflow.step1"), t("workflow.step2"), t("workflow.step3")];

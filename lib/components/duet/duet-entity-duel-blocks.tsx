@@ -17,6 +17,7 @@ import { ChartResponsiveContainer } from "@/lib/components/chart-responsive-cont
 import { DuetShareCardActions } from "@/lib/components/duet/duet-share-card-actions";
 import type { DuetArenaMode } from "@/lib/components/duet/duet-battle-arena-ui";
 import { generateDuetBattleSharePng } from "@/lib/utils/duet-battle-share-image";
+import { duetShareHeadlineKey } from "@/lib/utils/duet-share-headline";
 import type { PeriodType } from "@/lib/components/period-selector";
 import { DASHBOARD_CHART_THEME } from "@/lib/constants/dashboard-spotlight";
 import type { DualLineChartPoint } from "@/lib/utils/listen-trend-chart-view";
@@ -105,6 +106,99 @@ export function DuetDualLineChart({
   );
 }
 
+type EntityBattleShareActionsProps = {
+  selfCount: number;
+  friendCount: number;
+  viewerName: string;
+  friendName: string;
+  viewerAvatarUrl?: string | null;
+  friendAvatarUrl?: string | null;
+  winner: "self" | "friend" | "tie";
+  entityName: string;
+  entitySubtitle?: string;
+  entityImageUrl?: string | null;
+  arenaMode: DuetArenaMode;
+  locale: string;
+  t: ReturnType<typeof useTranslations<"duet.compare">>;
+  variant?: "scorecard" | "mobile";
+};
+
+export function EntityBattleShareActions({
+  selfCount,
+  friendCount,
+  viewerName,
+  friendName,
+  viewerAvatarUrl,
+  friendAvatarUrl,
+  winner,
+  entityName,
+  entitySubtitle,
+  entityImageUrl,
+  arenaMode,
+  locale,
+  t,
+  variant = "scorecard",
+}: EntityBattleShareActionsProps) {
+  const canShare = selfCount + friendCount > 0;
+  const winnerLabel = t(duetShareHeadlineKey(arenaMode, winner), {
+    friendName,
+    entityName,
+  });
+
+  function buildArenaLabel() {
+    return arenaMode === "artist" ? t("shareArenaArtist") : t("shareArenaTrack");
+  }
+
+  async function buildShareImageBlob() {
+    return generateDuetBattleSharePng({
+      arenaLabel: buildArenaLabel(),
+      entityName,
+      entitySubtitle: entitySubtitle || t("shareVersusSubtitle", { friendName }),
+      entityImageUrl: arenaMode === "artist" ? entityImageUrl : undefined,
+      viewerName,
+      friendName,
+      viewerAvatarUrl,
+      friendAvatarUrl,
+      selfCount,
+      friendCount,
+      winner,
+      winnerHeadline: winnerLabel,
+      selfLabel: t("shareCountLabel"),
+      friendLabel: t("shareCountLabel"),
+      brandName: t("shareBrandName"),
+      brandTagline: t("shareBrandTagline"),
+    });
+  }
+
+  function buildShareCaption() {
+    return t("shareBattleText", {
+      arenaLabel: buildArenaLabel(),
+      entityName,
+      selfCount: selfCount.toLocaleString(locale),
+      friendName,
+      friendCount: friendCount.toLocaleString(locale),
+      outcome: winnerLabel,
+    });
+  }
+
+  return (
+    <DuetShareCardActions
+      canShare={canShare}
+      variant={variant}
+      buildImageBlob={buildShareImageBlob}
+      buildCaption={buildShareCaption}
+      shareLabel={t("shareBattleImage")}
+      downloadLabel={t("downloadBattleImage")}
+      preparingLabel={t("shareImagePreparing")}
+      sharedImageLabel={t("shareImageShared")}
+      sharedTextLabel={t("shareShared")}
+      copiedLabel={t("shareCopied")}
+      savedLabel={t("shareImageSaved")}
+      downloadFilename="soundprint-duel.png"
+    />
+  );
+}
+
 export function EntityBattleScorecard({
   selfCount,
   friendCount,
@@ -119,79 +213,17 @@ export function EntityBattleScorecard({
   arenaMode,
   locale,
   t,
-}: {
-  selfCount: number;
-  friendCount: number;
-  viewerName: string;
-  friendName: string;
-  viewerAvatarUrl?: string | null;
-  friendAvatarUrl?: string | null;
-  winner: "self" | "friend" | "tie";
-  entityName: string;
-  entitySubtitle?: string;
-  entityImageUrl?: string | null;
-  arenaMode: DuetArenaMode;
-  locale: string;
-  t: ReturnType<typeof useTranslations<"duet.compare">>;
-}) {
+}: Omit<EntityBattleShareActionsProps, "variant">) {
   const total = selfCount + friendCount;
   const selfPct = total > 0 ? (selfCount / total) * 100 : 50;
   const friendPct = total > 0 ? 100 - selfPct : 50;
   const canShare = total > 0;
   const artistPhotoUrl = arenaMode === "artist" ? entityImageUrl?.trim() || null : null;
 
-  const winnerLabel =
-    winner === "tie"
-      ? t("battleTie")
-      : winner === "self"
-        ? t("battleWinnerSelf")
-        : t("battleWinnerFriend", { friendName });
-
-  function buildArenaLabel() {
-    return arenaMode === "artist"
-      ? t("shareArenaArtist")
-      : arenaMode === "track"
-        ? t("shareArenaTrack")
-        : t("shareArenaGenre");
-  }
-
-  async function buildShareImageBlob() {
-    return generateDuetBattleSharePng({
-      arenaLabel: buildArenaLabel(),
-      entityName,
-      entitySubtitle,
-      entityImageUrl: arenaMode === "artist" ? entityImageUrl : undefined,
-      viewerName,
-      friendName,
-      viewerAvatarUrl,
-      friendAvatarUrl,
-      selfCount,
-      friendCount,
-      winner,
-      winnerHeadline: winnerLabel,
-      selfLabel: t("seriesSelf"),
-      friendLabel: t("seriesFriend", { friendName }),
-      brandName: t("shareBrandName"),
-      brandTagline: t("shareBrandTagline"),
-    });
-  }
-
-  function buildShareCaption() {
-    const outcome =
-      winner === "tie"
-        ? t("shareOutcomeTie", { friendName })
-        : winner === "self"
-          ? t("shareOutcomeSelf")
-          : t("shareOutcomeFriend", { friendName });
-    return t("shareBattleText", {
-      arenaLabel: buildArenaLabel(),
-      entityName,
-      selfCount: selfCount.toLocaleString(locale),
-      friendName,
-      friendCount: friendCount.toLocaleString(locale),
-      outcome,
-    });
-  }
+  const winnerLabel = t(duetShareHeadlineKey(arenaMode, winner), {
+    friendName,
+    entityName,
+  });
 
   return (
     <motion.div
@@ -240,7 +272,7 @@ export function EntityBattleScorecard({
             {entitySubtitle ? (
               <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{entitySubtitle}</p>
             ) : null}
-            <p className="mt-1 text-lg font-bold text-slate-900 dark:text-white">{winnerLabel}</p>
+            <p className="mt-1 text-lg font-bold leading-snug text-slate-900 dark:text-white">{winnerLabel}</p>
           </div>
         </div>
 
@@ -252,18 +284,20 @@ export function EntityBattleScorecard({
             </span>
           ) : null}
           {canShare ? (
-            <DuetShareCardActions
-              canShare={canShare}
-              buildImageBlob={buildShareImageBlob}
-              buildCaption={buildShareCaption}
-              shareLabel={t("shareBattleImage")}
-              downloadLabel={t("downloadBattleImage")}
-              preparingLabel={t("shareImagePreparing")}
-              sharedImageLabel={t("shareImageShared")}
-              sharedTextLabel={t("shareShared")}
-              copiedLabel={t("shareCopied")}
-              savedLabel={t("shareImageSaved")}
-              downloadFilename="soundprint-duel.png"
+            <EntityBattleShareActions
+              selfCount={selfCount}
+              friendCount={friendCount}
+              viewerName={viewerName}
+              friendName={friendName}
+              viewerAvatarUrl={viewerAvatarUrl}
+              friendAvatarUrl={friendAvatarUrl}
+              winner={winner}
+              entityName={entityName}
+              entitySubtitle={entitySubtitle}
+              entityImageUrl={entityImageUrl}
+              arenaMode={arenaMode}
+              locale={locale}
+              t={t}
             />
           ) : null}
         </div>

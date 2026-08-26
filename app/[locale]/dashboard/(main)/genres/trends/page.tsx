@@ -69,7 +69,6 @@ import {
 } from "@/lib/components/overview-startup-surface";
 import { useTheme } from "@/lib/providers/theme-provider";
 import { LiveStatusDot } from "@/lib/components/live-status-dot";
-import { DuetCompareDeepLink } from "@/lib/components/duet/duet-compare-deep-link";
 
 const COLORS = [
   "#a855f7",
@@ -869,9 +868,6 @@ function TrendsContent() {
                     <span className={DASHBOARD_SPOTLIGHT_PILL_MUTED}>
                       {t("selectionCount", { selected: selectedGenres.length, max: MAX_SERIES_GENRES })}
                     </span>
-                    {!isPublicDemoViewer && selectedGenres.length === 1 ? (
-                      <DuetCompareDeepLink entityType="genre" entityId={selectedGenres[0]!} />
-                    ) : null}
                   </div>
                 </div>
               </div>

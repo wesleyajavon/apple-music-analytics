@@ -1,20 +1,19 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Link, usePathname } from "@/i18n/navigation";
+import { Link } from "@/i18n/navigation";
 import { withPublicDemoUserId } from "@/lib/constants/public-profile";
 import { usePublicDemo } from "@/lib/providers/public-demo-provider";
 
 type FooterVariant = "dashboard" | "home";
 
 /**
- * Footer compact et harmonieux - intégré à la surface du contenu
+ * Footer compact et harmonieux - intégré à la surface du contenu.
+ * Hidden below lg on dashboard: bottom nav is the mobile chrome.
  */
 export function Footer({ variant = "dashboard" }: { variant?: FooterVariant }) {
   const t = useTranslations("footer");
-  const pathname = usePathname();
-  const hideOnMobileOnboarding =
-    variant === "dashboard" && pathname.includes("/dashboard/onboarding");
+  const hideOnMobileDashboard = variant === "dashboard";
 
   const currentYear = new Date().getFullYear();
   const { publicProfileUserId, publicDemoOverviewPath } = usePublicDemo();
@@ -42,7 +41,7 @@ export function Footer({ variant = "dashboard" }: { variant?: FooterVariant }) {
     <footer
       className={`
         shrink-0 px-4 sm:px-6 lg:px-8 py-5
-        ${hideOnMobileOnboarding ? "max-lg:hidden" : ""}
+        ${hideOnMobileDashboard ? "max-lg:hidden" : ""}
         ${isHome
           ? "border-t border-card-border bg-surface-glass backdrop-blur-sm"
           : "border-t border-card-border lg:pb-5"

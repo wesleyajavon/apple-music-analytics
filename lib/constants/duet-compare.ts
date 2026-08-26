@@ -9,3 +9,6 @@ export const DUET_SHARED_TOP_POOL = 50;
 
 /** Max shared artists returned to the client. */
 export const DUET_SHARED_TOP_LIMIT = 20;
+
+/** Hint when one library’s date span is below this fraction of the other’s. */
+export const DUET_COVERAGE_SPAN_RATIO = 0.85;

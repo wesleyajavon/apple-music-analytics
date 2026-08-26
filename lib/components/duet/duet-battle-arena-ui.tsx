@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import { Disc3, Mic2, Music2, Swords } from "lucide-react";
+import { Mic2, Music2, Swords } from "lucide-react";
 import { useTranslations } from "next-intl";
 import {
   downloadShareCardImage,
@@ -9,7 +9,7 @@ import {
   type ShareCardOutcome,
 } from "@/lib/utils/share-card/browser-share";
 
-export type DuetArenaMode = "artist" | "track" | "genre";
+export type DuetArenaMode = "artist" | "track";
 
 /** @deprecated Use ShareCardOutcome from lib/utils/share-card/browser-share */
 export type DuetBattleShareOutcome = ShareCardOutcome;
@@ -49,15 +49,6 @@ export function DuetArenaModePicker({ onSelect }: { onSelect: (mode: DuetArenaMo
         "border-cyan-200/90 bg-gradient-to-br from-cyan-50/95 via-white to-violet-50/70 hover:border-cyan-300 dark:border-cyan-400/30 dark:from-cyan-950/40 dark:via-slate-950/70 dark:to-violet-950/30",
       iconClass: "text-cyan-600 dark:text-cyan-300",
     },
-    {
-      mode: "genre" as const,
-      icon: Disc3,
-      title: t("arenaModeGenre"),
-      hint: t("arenaModeGenreHint"),
-      accent:
-        "border-fuchsia-200/90 bg-gradient-to-br from-fuchsia-50/95 via-white to-violet-50/70 hover:border-fuchsia-300 dark:border-fuchsia-400/30 dark:from-fuchsia-950/40 dark:via-slate-950/70 dark:to-violet-950/30",
-      iconClass: "text-fuchsia-600 dark:text-fuchsia-300",
-    },
   ];
 
   return (
@@ -72,7 +63,7 @@ export function DuetArenaModePicker({ onSelect }: { onSelect: (mode: DuetArenaMo
         </p>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2">
         {options.map((option, index) => {
           const Icon = option.icon;
           return (
@@ -121,7 +112,6 @@ export function DuetArenaModeToggle({
   const segments: { value: DuetArenaMode; label: string; icon: typeof Mic2 }[] = [
     { value: "artist", label: t("arenaSwitchArtist"), icon: Mic2 },
     { value: "track", label: t("arenaSwitchTrack"), icon: Music2 },
-    { value: "genre", label: t("arenaSwitchGenre"), icon: Disc3 },
   ];
 
   return (

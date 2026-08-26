@@ -3,6 +3,7 @@ import { wrapLines, truncateText } from "@/lib/utils/share-card/canvas-primitive
 import { computeShareCardVerticalLayout } from "@/lib/utils/share-card/layout";
 import { SHARE_CARD_LAYOUT } from "@/lib/utils/share-card/constants";
 import { resolveDuetTimelineWinner } from "@/lib/utils/duet-timeline-share-image";
+import { duetShareHeadlineKey } from "@/lib/utils/duet-share-headline";
 
 function mockCtx(initialWidth: number): CanvasRenderingContext2D {
   return {
@@ -67,5 +68,33 @@ describe("resolveDuetTimelineWinner", () => {
 
   it("returns friend when friend leads", () => {
     expect(resolveDuetTimelineWinner(40, 90)).toBe("friend");
+  });
+});
+
+describe("duetShareHeadlineKey", () => {
+  it("maps timeline outcomes to music-first copy keys", () => {
+    expect(duetShareHeadlineKey("timeline", "self")).toBe("shareHeadlineTimelineSelf");
+    expect(duetShareHeadlineKey("timeline", "friend")).toBe("shareHeadlineTimelineFriend");
+    expect(duetShareHeadlineKey("timeline", "tie")).toBe("shareHeadlineTimelineTie");
+  });
+
+  it("maps entity duels to subject-specific copy keys", () => {
+    expect(duetShareHeadlineKey("artist", "self")).toBe("shareHeadlineArtistSelf");
+    expect(duetShareHeadlineKey("track", "friend")).toBe("shareHeadlineTrackFriend");
+    expect(duetShareHeadlineKey("genre", "tie")).toBe("shareHeadlineGenreTie");
+  });
+});
+
+describe("share-card headline wrapping", () => {
+  it("keeps a long duel sentence to two lines", () => {
+    const ctx = mockCtx(10);
+    const lines = wrapLines(
+      ctx,
+      "You've streamed Radiohead more than Alex",
+      220,
+      2
+    );
+    expect(lines).toHaveLength(2);
+    expect(lines.join(" ")).toContain("Radiohead");
   });
 });

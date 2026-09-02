@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { useQueryClient } from "@tanstack/react-query";
 import { getPathname, useRouter } from "@/i18n/navigation";
 import { toast } from "sonner";
 import {
@@ -15,7 +16,14 @@ import {
   UploadCloud,
 } from "lucide-react";
 import { DashboardHeroTitle } from "@/lib/components/dashboard-hero-title";
+import {
+  GenreAiPanelChrome,
+  ONBOARDING_GENRE_AI_ACCEPT_BTN,
+  OnboardingGenreLlmConsentCard,
+  OnboardingGroqEnableCard,
+} from "@/lib/components/onboarding-finish-invites";
 import { OnboardingMobile } from "@/lib/components/onboarding-mobile";
+import { AI_MASTER_QUERY_KEY } from "@/lib/hooks/use-ai-master-toggle";
 import { SoundprintBrandMark } from "@/lib/components/soundprint-brand-mark";
 import {
   DASHBOARD_BTN_GHOST,
@@ -47,6 +55,10 @@ import { playedAtToDateKey } from "@/lib/services/listening/onboarding-import-cu
 import { parseApplePlayHistoryDailyTracksCsv } from "@/lib/services/listening/parse-apple-play-history-daily-csv";
 import { parseSpotifyStreamingHistoryAudioJson } from "@/lib/services/listening/parse-spotify-streaming-history-json";
 import { isGroqGenreNudgeEligible } from "@/lib/utils/genre-ai-nudge-eligibility";
+import {
+  shouldShowOnboardingGenreConsent,
+  shouldShowOnboardingGroqEnableInvite,
+} from "@/lib/utils/onboarding-finish-invites";
 import {
   clearGenreBackfillBannerBlockingPrefs,
   getGenreBackfillBannerOptOut,
@@ -210,32 +222,6 @@ function OnboardingShell({ children }: { children: ReactNode }) {
   return (
     <div className={`${ONBOARDING_SHELL_CLASS} px-6 py-8 text-white sm:px-8 sm:py-10`}>
       <DashboardCinematicHeroBg />
-      <div className="relative">{children}</div>
-    </div>
-  );
-}
-
-/** Carte « genres IA » — surfaces thème + accents brand (pas de violet/cyan Tailwind hors tokens). */
-const GENRE_AI_SURFACE =
-  "relative overflow-hidden rounded-2xl border border-card-border bg-card-surface bg-gradient-to-br from-primary/[0.07] via-transparent to-accent-cyan/[0.05] shadow-card ring-1 ring-primary/[0.12] dark:from-primary/[0.11] dark:to-accent-indigo/[0.06] dark:ring-primary/[0.16]";
-
-const GENRE_AI_ACCEPT_BTN =
-  "group inline-flex min-h-[48px] w-full shrink-0 items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-5 py-3 text-sm font-semibold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:opacity-[0.98] hover:shadow-card-hover active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 sm:w-auto sm:min-w-[min(100%,260px)]";
-
-const GENRE_AI_DECLINE_BTN =
-  "inline-flex min-h-[48px] w-full shrink-0 items-center justify-center gap-2 rounded-2xl border border-card-border bg-surface-raised px-5 py-3 text-sm font-semibold text-foreground shadow-sm transition-all hover:border-primary/28 hover:bg-primary/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-55 dark:border-white/12 dark:bg-white/[0.06] dark:hover:border-white/22 dark:hover:bg-white/[0.1] sm:w-auto sm:min-w-[min(100%,200px)]";
-
-function GenreAiPanelChrome({
-  children,
-  className = "",
-}: {
-  children: ReactNode;
-  className?: string;
-}) {
-  return (
-    <div className={`${GENRE_AI_SURFACE} ${className}`}>
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(var(--border-rgb)_/_0.5)_1px,transparent_1px),linear-gradient(90deg,rgb(var(--border-rgb)_/_0.42)_1px,transparent_1px)] bg-[size:22px_22px] opacity-[0.45] dark:opacity-[0.28]" />
-      <div className={`pointer-events-none absolute inset-x-0 top-0 h-px ${ONBOARDING_RAIL_CLASS} opacity-85`} />
       <div className="relative">{children}</div>
     </div>
   );
@@ -425,8 +411,10 @@ export function DataExportOnboarding({
 } = {}) {
   const t = useTranslations("onboarding");
   const tNotifications = useTranslations("components.notificationCenter");
+  const tGroqPrompt = useTranslations("groqAiConsentPrompt");
   const router = useRouter();
   const locale = useLocale();
+  const queryClient = useQueryClient();
   const genreBackfillShared = useGenreBackfillJobSafe();
   const notifications = useNotificationsSafe();
   const hasActiveGroqJobShared = genreBackfillShared?.hasActiveGroqJob ?? false;
@@ -468,6 +456,11 @@ export function DataExportOnboarding({
   } | null>(null);
   const [genreLlmDeclined, setGenreLlmDeclined] = useState(false);
   const [isStartingLlmBackfill, setIsStartingLlmBackfill] = useState(false);
+  const [groqConfigured, setGroqConfigured] = useState(false);
+  const [groqConsentGranted, setGroqConsentGranted] = useState(false);
+  const [groqEnableDeclined, setGroqEnableDeclined] = useState(false);
+  const [isEnablingGroq, setIsEnablingGroq] = useState(false);
+  const [groqFinishReady, setGroqFinishReady] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   /** Après redirection depuis la notification « Unknown majoritaire », défiler jusqu’au consentement IA. */
   const genreAiScrollPendingRef = useRef(false);
@@ -597,6 +590,7 @@ export function DataExportOnboarding({
         if (job && activeStatuses.includes(job.status)) return;
 
         setGenreLlmAfterImport(eligibility);
+        setGroqConfigured(eligibility.groqConfigured);
         setGenreLlmDeclined(false);
         setGenreBackfillJob(null);
         setImportSummary(null);
@@ -625,6 +619,51 @@ export function DataExportOnboarding({
     }, 300);
     return () => window.clearTimeout(id);
   }, [phase, genreLlmAfterImport]);
+
+  useEffect(() => {
+    if (phase !== "finish") {
+      setGroqFinishReady(false);
+      return;
+    }
+    let cancelled = false;
+
+    async function loadFinishGroqState() {
+      try {
+        const [prefsRes, eligibilityRes] = await Promise.all([
+          fetch("/api/user/privacy-preferences"),
+          fetch("/api/user/onboarding/import/genre-backfill/status?includeEligibility=1"),
+        ]);
+        if (cancelled) return;
+
+        if (prefsRes.ok) {
+          const prefs = (await prefsRes.json().catch(() => ({}))) as {
+            groqGenreConsent?: { granted?: boolean };
+          };
+          if (prefs.groqGenreConsent?.granted === true) {
+            setGroqConsentGranted(true);
+          }
+        }
+
+        if (eligibilityRes.ok) {
+          const data = (await eligibilityRes.json().catch(() => ({}))) as {
+            eligibility?: { groqConfigured?: boolean } | null;
+          };
+          if (typeof data.eligibility?.groqConfigured === "boolean") {
+            setGroqConfigured(data.eligibility.groqConfigured);
+          }
+        }
+      } catch {
+        /* best effort — cards stay hidden if Groq status is unknown */
+      } finally {
+        if (!cancelled) setGroqFinishReady(true);
+      }
+    }
+
+    void loadFinishGroqState();
+    return () => {
+      cancelled = true;
+    };
+  }, [phase]);
 
   useEffect(() => {
     if (phase !== "finish" || !genreBackfillJob?.id) return;
@@ -800,13 +839,19 @@ export function DataExportOnboarding({
       setGenreBackfillJob(null);
       setGenreBackfillStatus(null);
       setGenreLlmDeclined(false);
-      if (payload?.genreLlmBackfill && (payload.genreLlmBackfill.unknownTrackCount ?? 0) > 0) {
-        setGenreLlmAfterImport({
-          unknownTrackCount: Number(payload.genreLlmBackfill.unknownTrackCount ?? 0),
-          unknownRatio: Number(payload.genreLlmBackfill.unknownRatio ?? 0),
-          totalTrackCount: Number(payload.genreLlmBackfill.totalTrackCount ?? 0),
-          groqConfigured: Boolean(payload.genreLlmBackfill.groqConfigured),
-        });
+      setGroqEnableDeclined(false);
+      if (payload?.genreLlmBackfill) {
+        setGroqConfigured(Boolean(payload.genreLlmBackfill.groqConfigured));
+        if ((payload.genreLlmBackfill.unknownTrackCount ?? 0) > 0) {
+          setGenreLlmAfterImport({
+            unknownTrackCount: Number(payload.genreLlmBackfill.unknownTrackCount ?? 0),
+            unknownRatio: Number(payload.genreLlmBackfill.unknownRatio ?? 0),
+            totalTrackCount: Number(payload.genreLlmBackfill.totalTrackCount ?? 0),
+            groqConfigured: Boolean(payload.genreLlmBackfill.groqConfigured),
+          });
+        } else {
+          setGenreLlmAfterImport(null);
+        }
       } else {
         setGenreLlmAfterImport(null);
       }
@@ -1026,6 +1071,7 @@ export function DataExportOnboarding({
     setGenreBackfillStatus(null);
     setGenreLlmAfterImport(null);
     setGenreLlmDeclined(false);
+    setGroqEnableDeclined(false);
     setPhase("finish");
   }
 
@@ -1055,7 +1101,9 @@ export function DataExportOnboarding({
         });
         setGenreBackfillStatus(null);
         setGenreLlmAfterImport(null);
+        setGroqConsentGranted(true);
         toast.success(t("genreLlmConsent.startedToast"));
+        void queryClient.invalidateQueries({ queryKey: AI_MASTER_QUERY_KEY });
         if (refreshGroqJobShared) {
           await refreshGroqJobShared();
           window.setTimeout(() => void refreshGroqJobShared(), 500);
@@ -1066,7 +1114,31 @@ export function DataExportOnboarding({
     } finally {
       setIsStartingLlmBackfill(false);
     }
-  }, [t, refreshGroqJobShared]);
+  }, [t, refreshGroqJobShared, queryClient]);
+
+  const enableGroqAi = useCallback(async () => {
+    setIsEnablingGroq(true);
+    try {
+      const res = await fetch("/api/user/privacy-preferences", {
+        method: "PATCH",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ groqGenreConsent: true }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { error?: string };
+      if (!res.ok) {
+        toast.error(typeof data.error === "string" ? data.error : tGroqPrompt("error"));
+        return;
+      }
+      setGroqConsentGranted(true);
+      await queryClient.invalidateQueries({ queryKey: AI_MASTER_QUERY_KEY });
+      toast.success(tGroqPrompt("grantedToast"));
+    } catch {
+      toast.error(tGroqPrompt("error"));
+    } finally {
+      setIsEnablingGroq(false);
+    }
+  }, [queryClient, tGroqPrompt]);
 
   const surfaceShellClass = ONBOARDING_SURFACE_CLASS;
 
@@ -1118,14 +1190,28 @@ export function DataExportOnboarding({
     return effectiveBackfill.status === "completed" ? 1 : 0;
   }, [effectiveBackfill]);
 
+  const showGenreConsent = shouldShowOnboardingGenreConsent({
+    unknownTrackCount: genreLlmAfterImport?.unknownTrackCount ?? 0,
+    hasBackfillJobId: Boolean(genreBackfillJob?.id),
+    genreLlmDeclined,
+    hasActiveGroqJob: hasActiveGroqJobShared,
+  });
+  const showGroqEnableInvite =
+    groqFinishReady &&
+    shouldShowOnboardingGroqEnableInvite({
+      groqConfigured,
+      groqConsentGranted,
+      groqEnableDeclined,
+      showGenreConsent,
+      hasBackfillJobId: Boolean(genreBackfillJob?.id),
+      hasActiveGroqJob: hasActiveGroqJobShared,
+      isStartingLlmBackfill,
+    });
   const finishSurfaceHasExtras =
-    Boolean(
-      genreLlmAfterImport &&
-        genreLlmAfterImport.unknownTrackCount > 0 &&
-        !genreBackfillJob?.id &&
-        !genreLlmDeclined &&
-        !hasActiveGroqJobShared,
-    ) || Boolean(effectiveBackfill);
+    showGenreConsent ||
+    Boolean(effectiveBackfill) ||
+    showGroqEnableInvite ||
+    Boolean(paletteInvitation?.shouldInvite);
 
   const currentGuideStep = provider ? steps[stepIndex] : undefined;
 
@@ -1188,13 +1274,17 @@ export function DataExportOnboarding({
         onBackImport={goBackImport}
         importSummary={importSummary}
         genreLlmAfterImport={genreLlmAfterImport}
-        genreLlmDeclined={genreLlmDeclined}
         onDeclineGenreLlm={() => {
           setGenreLlmDeclined(true);
           setGenreBackfillBannerOptOut(true);
         }}
         onStartGenreLlm={() => void startLlmGenreBackfill()}
         isStartingLlmBackfill={isStartingLlmBackfill}
+        showGenreConsent={showGenreConsent}
+        showGroqEnableInvite={showGroqEnableInvite}
+        isEnablingGroq={isEnablingGroq}
+        onEnableGroq={() => void enableGroqAi()}
+        onDeclineGroqEnable={() => setGroqEnableDeclined(true)}
         hasActiveGroqJobShared={hasActiveGroqJobShared}
         effectiveBackfill={effectiveBackfill}
         hasBackfillInProgress={hasBackfillInProgress}
@@ -1787,7 +1877,8 @@ export function DataExportOnboarding({
 
 
       {phase === "finish" && (
-        importSummary ? (
+        <div className="space-y-6">
+            {importSummary ? (
             <OnboardingShell>
               <div className="space-y-8 text-center">
                 <div
@@ -1824,29 +1915,9 @@ export function DataExportOnboarding({
                     skipped: importSummary.skippedDuplicates,
                   })}
                 </p>
-                <button
-                  type="button"
-                  className={`${continueBtn} mx-auto disabled:pointer-events-none disabled:opacity-60`}
-                  onClick={() => void completeOnboarding("/dashboard/musical-profile")}
-                  disabled={isSubmitting}
-                >
-                  <span>{isSubmitting ? t("finishing") : t("goToMusicalProfile")}</span>
-                  {!isSubmitting ? (
-                    <ArrowRight
-                      className="h-4 w-4 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5"
-                      aria-hidden
-                    />
-                  ) : (
-                    <span
-                      className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-white/40 border-t-white"
-                      aria-hidden
-                    />
-                  )}
-                </button>
               </div>
             </OnboardingShell>
-        ) : (
-        <div className="space-y-6">
+            ) : (
             <OnboardingShell>
               <div className="space-y-4">
                 <p className="font-mono text-xs font-semibold uppercase tracking-[0.24em] text-accent-cyan">
@@ -1858,87 +1929,22 @@ export function DataExportOnboarding({
                 <p className="text-base leading-relaxed text-white/70">{t("finishBody")}</p>
               </div>
             </OnboardingShell>
+            )}
 
           <div className={`${surfaceShellClass} space-y-6`}>
-          {genreLlmAfterImport &&
-          genreLlmAfterImport.unknownTrackCount > 0 &&
-          !genreBackfillJob?.id &&
-          !genreLlmDeclined &&
-          !hasActiveGroqJobShared ? (
-            <section aria-labelledby="onboarding-genre-llm-consent-heading">
-              <GenreAiPanelChrome className="p-5 sm:p-6">
-                <div className="space-y-5">
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                    <div className="flex min-w-0 gap-3 sm:gap-4">
-                      <div
-                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/14 shadow-[inset_0_1px_0_0_rgb(255_255_255_/0.12)] ring-1 ring-primary/25 dark:bg-primary/20"
-                        aria-hidden
-                      >
-                        <Sparkles className="h-5 w-5 text-accent-cyan" />
-                      </div>
-                      <div className="min-w-0 space-y-2">
-                        <h3
-                          id="onboarding-genre-llm-consent-heading"
-                          className="text-base font-semibold leading-snug text-foreground sm:text-[1.05rem]"
-                        >
-                          {t("genreLlmConsent.title")}
-                        </h3>
-                        <p className="text-sm leading-relaxed text-muted">
-                          {t("genreLlmConsent.body", {
-                            unknown: genreLlmAfterImport.unknownTrackCount,
-                            pct: genreLlmAfterImport.unknownRatio.toFixed(1),
-                          })}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  {!genreLlmAfterImport.groqConfigured ? (
-                    <div className="rounded-xl border border-amber-400/40 bg-amber-500/[0.1] px-4 py-3 text-sm font-medium leading-snug text-amber-950 shadow-inner dark:text-amber-50">
-                      {t("genreLlmConsent.missingKey")}
-                    </div>
-                  ) : (
-                    <div className="rounded-xl border border-card-border bg-surface px-4 py-3 text-xs leading-relaxed text-muted shadow-inner dark:bg-surface-raised/80">
-                      {t("genreLlmConsent.privacy")}
-                    </div>
-                  )}
-                  <div className="flex flex-col gap-3 pt-1 lg:flex-row lg:flex-wrap lg:items-stretch">
-                    <button
-                      type="button"
-                      className={`${GENRE_AI_ACCEPT_BTN} sm:flex-1`}
-                      disabled={
-                        !genreLlmAfterImport.groqConfigured ||
-                        isStartingLlmBackfill ||
-                        hasActiveGroqJobShared
-                      }
-                      onClick={() => void startLlmGenreBackfill()}
-                    >
-                      {isStartingLlmBackfill ? (
-                        <>
-                          <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
-                          <span>{t("genreLlmConsent.starting")}</span>
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="h-4 w-4 shrink-0 opacity-90 transition-transform duration-200 group-hover:scale-105" aria-hidden />
-                          <span>{t("genreLlmConsent.accept")}</span>
-                        </>
-                      )}
-                    </button>
-                    <button
-                      type="button"
-                      className={`${GENRE_AI_DECLINE_BTN} sm:flex-1`}
-                      disabled={isStartingLlmBackfill}
-                      onClick={() => {
-                        setGenreLlmDeclined(true);
-                        setGenreBackfillBannerOptOut(true);
-                      }}
-                    >
-                      {t("genreLlmConsent.decline")}
-                    </button>
-                  </div>
-                </div>
-              </GenreAiPanelChrome>
-            </section>
+          {showGenreConsent && genreLlmAfterImport ? (
+            <OnboardingGenreLlmConsentCard
+              unknownTrackCount={genreLlmAfterImport.unknownTrackCount}
+              unknownRatio={genreLlmAfterImport.unknownRatio}
+              groqConfigured={genreLlmAfterImport.groqConfigured}
+              isStarting={isStartingLlmBackfill}
+              hasActiveGroqJob={hasActiveGroqJobShared}
+              onAccept={() => void startLlmGenreBackfill()}
+              onDecline={() => {
+                setGenreLlmDeclined(true);
+                setGenreBackfillBannerOptOut(true);
+              }}
+            />
           ) : null}
           {effectiveBackfill ? (
             <section aria-label={t("genreBackfill.title")}>
@@ -2027,7 +2033,7 @@ export function DataExportOnboarding({
                       </p>
                       <button
                         type="button"
-                        className={`${GENRE_AI_ACCEPT_BTN} w-full sm:w-auto`}
+                        className={`${ONBOARDING_GENRE_AI_ACCEPT_BTN} w-full sm:w-auto`}
                         disabled={isStartingLlmBackfill || hasActiveGroqJobShared}
                         onClick={() => void startLlmGenreBackfill()}
                       >
@@ -2049,6 +2055,13 @@ export function DataExportOnboarding({
               </GenreAiPanelChrome>
             </section>
           ) : null}
+          {showGroqEnableInvite ? (
+            <OnboardingGroqEnableCard
+              isEnabling={isEnablingGroq}
+              onAccept={() => void enableGroqAi()}
+              onDecline={() => setGroqEnableDeclined(true)}
+            />
+          ) : null}
           <div
             className={
               finishSurfaceHasExtras
@@ -2059,10 +2072,18 @@ export function DataExportOnboarding({
             <button
               type="button"
               className={`${continueBtn} disabled:pointer-events-none disabled:opacity-60`}
-              onClick={() => void completeOnboarding()}
+              onClick={() =>
+                void completeOnboarding(importSummary ? "/dashboard/musical-profile" : "/dashboard/overview")
+              }
               disabled={isSubmitting}
             >
-              <span>{isSubmitting ? t("finishing") : t("goToDashboard")}</span>
+              <span>
+                {isSubmitting
+                  ? t("finishing")
+                  : importSummary
+                    ? t("goToMusicalProfile")
+                    : t("goToDashboard")}
+              </span>
               {!isSubmitting ? (
                 <ArrowRight
                   className="h-[1.125rem] w-[1.125rem] shrink-0 transition-transform duration-200 group-hover:translate-x-0.5"
@@ -2091,7 +2112,6 @@ export function DataExportOnboarding({
           </div>
           </div>
         </div>
-        )
       )}
       </div>
     </>

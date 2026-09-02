@@ -33,9 +33,11 @@ flowchart TD
         O --> P["POST /api/user/onboarding/import"]
         P --> Q[(PostgreSQL<br/>Listens, Artists, Tracks)]
         Q --> R{Genres inconnus ?}
-        R -->|Oui| S["Palette + backfill Groq<br/>(optionnel)"]
-        R -->|Non| T["POST /api/user/onboarding/complete"]
-        S --> T
+        R -->|Oui| S["Écran finish : backfill Groq (optionnel)"]
+        R -->|Non| S2["Écran finish : activer Groq AI (optionnel)"]
+        S -->|Refuse backfill| S2
+        S -->|Accepte| T
+        S2 --> T["POST /api/user/onboarding/complete"]
         T --> U[Dashboard principal]
         M -->|Oui| U
     end
@@ -182,7 +184,7 @@ flowchart TD
 
 ## Résumé
 
-Un visiteur arrive sur la **landing i18n**, s'**authentifie via Supabase** (ou consulte la **démo publique**), passe par l'**onboarding d'import** (CSV Apple Music / ZIP Spotify), les écoutes sont **normalisées en PostgreSQL**, puis le **dashboard React** interroge les **API Next.js** qui agrègent les stats — avec **Groq** en option pour l'IA et **Duet** pour comparer avec des amis.
+Un visiteur arrive sur la **landing i18n**, s'**authentifie via Supabase** (ou consulte la **démo publique**), passe par l'**onboarding d'import** (CSV Apple Music / ZIP Spotify), les écoutes sont **normalisées en PostgreSQL**, puis l'**écran final d'import** propose le **backfill genres Groq** et l'**opt-in IA** avant le dashboard — avec **Groq** en option pour l'IA et **Duet** pour comparer avec des amis.
 
 **Accueil dashboard.** `/dashboard` et la fin d'onboarding mènent à `/dashboard/musical-profile` (hub narratif). Your Music (`/dashboard/overview`) est le hub analytique : faits d'abord, features ensuite. Mobile et laptop racontent la même histoire — période, insight concret (top titre / artiste), KPIs, un seul bloc de tops, tendances en onglets, calendrier + extraits IA, teaser vers le profil musical, puis Chat et Duet en « aller plus loin ». Tracks (`/dashboard/tracks`), Artists (`/dashboard/artists`) et Genres (`/dashboard/genres`) reprennent le même pattern de boutons de section : un panneau à la fois (fiches / Top 20 ou répartition / classement complet). La sidebar desktop liste Profil musical puis Your Music ; la barre mobile liste Profil, Your Music, Artistes, Titres, puis Plus (genres, timeline, heatmap, chat, Duet, réglages).
 

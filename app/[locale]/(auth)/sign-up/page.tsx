@@ -172,10 +172,10 @@ export default function SignUpPage() {
             />
           </div>
 
-          <label className="flex items-start gap-3 text-sm text-muted lg:text-white/55">
+          <label className="flex items-start gap-3 text-sm text-white/55">
             <input
               type="checkbox"
-              className="mt-1 h-4 w-4 shrink-0 rounded border-border text-primary focus:ring-primary/30 lg:border-white/25 lg:bg-white/5"
+              className="mt-1 h-4 w-4 shrink-0 rounded border-white/25 bg-white/5 text-primary focus:ring-primary/30"
               checked={termsAccepted}
               onChange={(e) => {
                 setTermsAccepted(e.target.checked);
@@ -186,12 +186,12 @@ export default function SignUpPage() {
             <span>
               {t.rich("termsConsentLabel", {
                 terms: (chunks) => (
-                  <Link href="/legal/terms" className="font-medium text-primary underline-offset-2 hover:underline lg:text-white/85 lg:hover:text-white">
+                  <Link href="/legal/terms" className="font-medium text-white/85 underline-offset-2 hover:text-white hover:underline">
                     {t("termsLink")}
                   </Link>
                 ),
                 privacy: (chunks) => (
-                  <Link href="/legal/privacy" className="font-medium text-primary underline-offset-2 hover:underline lg:text-white/85 lg:hover:text-white">
+                  <Link href="/legal/privacy" className="font-medium text-white/85 underline-offset-2 hover:text-white hover:underline">
                     {t("privacyLink")}
                   </Link>
                 ),
@@ -269,7 +269,7 @@ export default function SignUpPage() {
             type="button"
             onClick={() => void onSpotifySignUp()}
             disabled={isLoading}
-            className={`${AUTH_OAUTH_BUTTON_CLASS} border-[#1ed760]/35 bg-[#191414] text-white hover:bg-[#282828] hover:text-white lg:border-[#1ed760]/40 lg:bg-[#121212]/90 lg:hover:bg-[#1a1a1a]`}
+            className={`${AUTH_OAUTH_BUTTON_CLASS} border-[#1ed760]/40 bg-[#191414] text-white hover:bg-[#282828] hover:text-white`}
           >
             <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" aria-hidden>
               <path
@@ -292,7 +292,7 @@ export default function SignUpPage() {
           <p className="mt-4 text-center sm:hidden">
             <Link
               href={publicDemoPath}
-              className="text-sm font-medium text-muted underline-offset-4 hover:text-primary hover:underline"
+              className="text-sm font-medium text-white/55 underline-offset-4 hover:text-white hover:underline"
             >
               {t("dashboardLink")}
             </Link>

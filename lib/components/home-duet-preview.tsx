@@ -1,41 +1,15 @@
 "use client";
 
 import Image from "next/image";
-import { useTranslations } from "next-intl";
-import { AUTH_PREVIEW_ARTISTS } from "@/lib/constants/auth-artist-preview";
-import { SoundprintLogo } from "@/lib/components/soundprint-logo";
-
-const DUET_PREVIEW_ARTIST_IMAGE =
-  AUTH_PREVIEW_ARTISTS.find((artist) => artist.name === "Bad Bunny")?.imageSrc ??
-  "/brand/auth-artists/bad-bunny.jpg";
-
-const SELF_LISTENS = 847;
-const FRIEND_LISTENS = 612;
-
-const DUAL_CHART_POINTS = [
-  { self: 12, friend: 8 },
-  { self: 18, friend: 14 },
-  { self: 15, friend: 22 },
-  { self: 28, friend: 19 },
-  { self: 24, friend: 31 },
-  { self: 35, friend: 27 },
-  { self: 42, friend: 38 },
-  { self: 38, friend: 45 },
-  { self: 52, friend: 41 },
-  { self: 48, friend: 55 },
-];
-
-function buildPolyline(points: number[], width: number, height: number, padY = 6) {
-  const max = Math.max(...points, 1);
-  const step = width / Math.max(points.length - 1, 1);
-  return points
-    .map((value, index) => {
-      const x = index * step;
-      const y = height - padY - (value / max) * (height - padY * 2);
-      return `${x},${y}`;
-    })
-    .join(" ");
-}
+import { Crown } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import { LiveStatusDot } from "@/lib/components/live-status-dot";
+import {
+  HOME_DUET_PREVIEW_ARTIST_IMAGE,
+  HOME_DUET_PREVIEW_FRIEND_LISTENS,
+  HOME_DUET_PREVIEW_MARGIN,
+  HOME_DUET_PREVIEW_SELF_LISTENS,
+} from "@/lib/constants/home-interact-preview";
 
 function PreviewAvatar({
   initials,
@@ -48,22 +22,24 @@ function PreviewAvatar({
 }) {
   const toneClasses =
     tone === "violet"
-      ? "border-violet-300/30 bg-violet-500/25 text-violet-100"
-      : "border-cyan-300/30 bg-cyan-500/20 text-cyan-100";
+      ? "border-violet-300/35 bg-violet-500/25 text-violet-100"
+      : "border-cyan-300/35 bg-cyan-500/20 text-cyan-100";
 
   return (
     <span className="relative inline-flex">
       <span
-        className={`flex h-9 w-9 items-center justify-center rounded-full border text-xs font-bold ${toneClasses}`}
+        className={`flex h-16 w-16 items-center justify-center rounded-full border text-lg font-bold sm:h-[4.5rem] sm:w-[4.5rem] sm:text-xl ${toneClasses} ${
+          winner ? "ring-2 ring-amber-300/70 ring-offset-2 ring-offset-[#080913]" : ""
+        }`}
       >
         {initials}
       </span>
       {winner ? (
         <span
-          className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full border border-amber-200/40 bg-amber-400/90 text-[0.55rem]"
+          className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full border border-amber-200/40 bg-amber-400 text-[#3b2a08] shadow-[0_8px_18px_-8px_rgba(251,191,36,0.9)]"
           aria-hidden
         >
-          ★
+          <Crown className="h-3.5 w-3.5" strokeWidth={2.4} />
         </span>
       ) : null}
     </span>
@@ -72,289 +48,131 @@ function PreviewAvatar({
 
 export function HomeDuetPreview({ className }: { className?: string }) {
   const t = useTranslations("home.duetPreview");
+  const locale = useLocale();
 
-  const total = SELF_LISTENS + FRIEND_LISTENS;
-  const selfPct = total > 0 ? (SELF_LISTENS / total) * 100 : 50;
+  const total = HOME_DUET_PREVIEW_SELF_LISTENS + HOME_DUET_PREVIEW_FRIEND_LISTENS;
+  const selfPct = total > 0 ? (HOME_DUET_PREVIEW_SELF_LISTENS / total) * 100 : 50;
   const friendPct = total > 0 ? 100 - selfPct : 50;
-
-  const signalRows = [
-    {
-      label: t("signalRows.yourPlays"),
-      value: SELF_LISTENS.toLocaleString(),
-      accentClassName: "bg-accent-violet",
-    },
-    {
-      label: t("signalRows.friendPlays", { friendName: t("friendName") }),
-      value: FRIEND_LISTENS.toLocaleString(),
-      accentClassName: "bg-accent-cyan",
-    },
-    {
-      label: t("signalRows.margin"),
-      value: t("signalValues.margin"),
-      accentClassName: "bg-accent-rose",
-    },
-  ];
-
-  const arenaModes = [
-    { key: "artist", label: t("arenaModes.artist"), active: true },
-    { key: "track", label: t("arenaModes.track"), active: false },
-  ] as const;
-
-  const workflowSteps = [t("workflow.step1"), t("workflow.step2"), t("workflow.step3")];
-
-  const selfLine = buildPolyline(
-    DUAL_CHART_POINTS.map((point) => point.self),
-    280,
-    72
-  );
-  const friendLine = buildPolyline(
-    DUAL_CHART_POINTS.map((point) => point.friend),
-    280,
-    72
-  );
 
   return (
     <div
-      className={["relative z-10 w-full min-w-0 overflow-hidden", className]
+      className={["relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#080913] p-5 shadow-[0_22px_50px_-18px_rgba(0,0,0,0.85)] sm:p-7 lg:p-8", className]
         .filter(Boolean)
         .join(" ")}
+      role="img"
+      aria-label={t("label")}
     >
       <div
-        className="absolute -inset-3 rounded-[2rem] bg-brand-gradient-soft blur-2xl sm:-inset-6"
+        className="pointer-events-none absolute inset-0"
+        aria-hidden
+      >
+        <Image
+          src={HOME_DUET_PREVIEW_ARTIST_IMAGE}
+          alt=""
+          fill
+          className="object-cover object-top opacity-[0.16]"
+          sizes="(min-width: 1024px) 720px, 100vw"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#080913]/55 via-[#080913]/82 to-[#080913]" />
+      </div>
+      <div
+        className="pointer-events-none absolute -left-16 top-8 h-48 w-48 rounded-full bg-violet-500/25 blur-3xl"
         aria-hidden
       />
-      <div className="relative space-y-3 rounded-[2rem] border border-card-border bg-surface-glass p-3 shadow-card backdrop-blur-xl">
+      <div
+        className="pointer-events-none absolute -right-10 bottom-0 h-52 w-52 rounded-full bg-cyan-400/18 blur-3xl"
+        aria-hidden
+      />
+      <span
+        className="pointer-events-none absolute left-1/2 top-[46%] -translate-x-1/2 -translate-y-1/2 select-none font-black tracking-[-0.08em] text-[6.5rem] text-white/[0.045] sm:text-[8rem]"
+        aria-hidden
+      >
+        VS
+      </span>
+
+      <div className="relative flex items-start justify-between gap-3">
+        <p className="font-mono text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-white/55 sm:text-[0.68rem]">
+          {t("periodMeta")}
+        </p>
+        <span className="inline-flex items-center gap-2 rounded-full border border-pink-300/20 bg-pink-400/10 px-2.5 py-1 font-mono text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-pink-100">
+          <LiveStatusDot tone="pink" />
+          {t("liveBadge")}
+        </span>
+      </div>
+
+      <div className="relative mt-6 flex flex-col items-center text-center">
+        <div className="relative h-[4.75rem] w-[4.75rem] overflow-hidden rounded-[1.15rem] bg-[#10111c] shadow-[0_22px_50px_-18px_rgba(0,0,0,0.85)] ring-1 ring-white/10 sm:h-20 sm:w-20">
+          <Image
+            src={HOME_DUET_PREVIEW_ARTIST_IMAGE}
+            alt=""
+            fill
+            className="object-cover"
+            sizes="80px"
+          />
+        </div>
+        <p className="mt-3 font-mono text-[0.62rem] font-semibold uppercase tracking-[0.22em] text-white/70">
+          {t("arenaEyebrow")}
+        </p>
+        <p className="mt-1 text-2xl font-semibold tracking-[-0.04em] text-white sm:text-3xl">
+          {t("artistName")}
+        </p>
+      </div>
+
+      <div className="relative mt-8 grid grid-cols-[1fr_auto_1fr] items-center gap-3 sm:gap-5">
+        <div className="flex flex-col items-center text-center">
+          <PreviewAvatar initials={t("selfInitials")} tone="violet" winner />
+          <p className="mt-3 text-sm font-semibold text-violet-100">{t("selfName")}</p>
+          <p className="mt-1 text-3xl font-semibold tabular-nums tracking-tight text-white sm:text-4xl">
+            {HOME_DUET_PREVIEW_SELF_LISTENS.toLocaleString(locale)}
+          </p>
+          <p className="mt-0.5 text-[0.7rem] font-medium uppercase tracking-[0.16em] text-white/45">
+            {t("playsLabel")}
+          </p>
+        </div>
+
+        <div className="flex flex-col items-center gap-2">
+          <span className="rounded-full border border-pink-300/35 bg-pink-400/15 px-3 py-1.5 text-[0.72rem] font-black uppercase tracking-[0.22em] text-pink-100">
+            {t("vsLabel")}
+          </span>
+          <span className="max-w-[6.5rem] text-center text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-emerald-300">
+            {t("leadLabel")}
+          </span>
+        </div>
+
+        <div className="flex flex-col items-center text-center">
+          <PreviewAvatar initials={t("friendInitials")} tone="cyan" />
+          <p className="mt-3 truncate text-sm font-semibold text-cyan-100">{t("friendName")}</p>
+          <p className="mt-1 text-3xl font-semibold tabular-nums tracking-tight text-white sm:text-4xl">
+            {HOME_DUET_PREVIEW_FRIEND_LISTENS.toLocaleString(locale)}
+          </p>
+          <p className="mt-0.5 text-[0.7rem] font-medium uppercase tracking-[0.16em] text-white/45">
+            {t("playsLabel")}
+          </p>
+        </div>
+      </div>
+
+      <div className="relative mt-7 space-y-3">
         <div
-          className="relative overflow-hidden rounded-[1.5rem] border border-white/10 bg-slate-950 p-3 shadow-2xl shadow-black/30"
-          aria-label={t("label")}
+          className="flex h-3.5 overflow-hidden rounded-full bg-white/10 ring-1 ring-white/10"
+          aria-hidden
         >
           <div
-            className="pointer-events-none absolute -right-20 -top-16 h-64 w-64 rounded-full bg-accent-violet/25 blur-3xl"
-            aria-hidden
+            className="bg-gradient-to-r from-violet-500 to-violet-400"
+            style={{ width: `${selfPct}%` }}
           />
           <div
-            className="pointer-events-none absolute -bottom-20 left-10 h-56 w-56 rounded-full bg-accent-cyan/20 blur-3xl"
-            aria-hidden
+            className="bg-gradient-to-r from-cyan-400 to-cyan-300"
+            style={{ width: `${friendPct}%` }}
           />
-
-          <div className="relative flex flex-col gap-3 border-b border-white/10 px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex min-w-0 items-center gap-3">
-              <div className="flex shrink-0 items-center gap-2" aria-hidden>
-                <span className="h-2.5 w-2.5 rounded-full bg-rose-400" />
-                <span className="h-2.5 w-2.5 rounded-full bg-amber-300" />
-                <span className="h-2.5 w-2.5 rounded-full bg-emerald-300" />
-              </div>
-              <div className="min-w-0">
-                <p className="truncate font-mono text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-slate-300">
-                  {t("heroEyebrow")}
-                </p>
-                <p className="mt-1 text-xs font-medium text-slate-400 sm:text-sm">
-                  {t("heroSubtitle")}
-                </p>
-              </div>
-            </div>
-            <span className="inline-flex w-fit items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1 font-mono text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-cyan-100">
-              <SoundprintLogo
-                src="/brand/favicon.png"
-                showText={false}
-                imageClassName="h-4 w-4 object-contain"
-              />
-              {t("liveBadge")}
-            </span>
-          </div>
-
-          <div className="relative grid gap-3 p-2 pt-4 sm:grid-cols-[0.88fr_1.12fr]">
-            <div className="space-y-3">
-              <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.06] p-4">
-                <div className="pointer-events-none absolute inset-0" aria-hidden>
-                  <Image
-                    src={DUET_PREVIEW_ARTIST_IMAGE}
-                    alt=""
-                    fill
-                    className="object-cover object-top opacity-35"
-                    sizes="(min-width: 640px) 280px, 80vw"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-slate-950/45" />
-                </div>
-                <div
-                  className="absolute -right-10 -top-10 h-24 w-24 rounded-full bg-accent-violet/20 blur-2xl"
-                  aria-hidden
-                />
-                <div className="relative flex items-center gap-3">
-                  <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-2xl ring-1 ring-white/20 shadow-lg shadow-black/40">
-                    <Image
-                      src={DUET_PREVIEW_ARTIST_IMAGE}
-                      alt=""
-                      fill
-                      className="object-cover"
-                      sizes="56px"
-                    />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="font-mono text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-violet-200">
-                      {t("arenaEyebrow")}
-                    </p>
-                    <p className="mt-1 truncate text-lg font-semibold leading-snug tracking-tight text-white sm:text-xl">
-                      {t("artistName")}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="relative mt-4 grid grid-cols-2 gap-2">
-                  <div className="rounded-xl border border-violet-300/20 bg-black/25 p-3">
-                    <div className="flex items-center gap-2">
-                      <PreviewAvatar initials={t("selfInitials")} tone="violet" winner />
-                      <p className="text-xs font-semibold text-violet-100">{t("selfName")}</p>
-                    </div>
-                    <p className="mt-2 text-2xl font-semibold tabular-nums tracking-tight text-white">
-                      {SELF_LISTENS.toLocaleString()}
-                    </p>
-                  </div>
-                  <div className="rounded-xl border border-cyan-300/20 bg-black/25 p-3">
-                    <div className="flex items-center gap-2">
-                      <PreviewAvatar initials={t("friendInitials")} tone="cyan" />
-                      <p className="truncate text-xs font-semibold text-cyan-100">
-                        {t("friendName")}
-                      </p>
-                    </div>
-                    <p className="mt-2 text-2xl font-semibold tabular-nums tracking-tight text-white">
-                      {FRIEND_LISTENS.toLocaleString()}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="relative mt-3 flex h-3 overflow-hidden rounded-full bg-black/30 ring-1 ring-white/10">
-                  <div
-                    className="bg-gradient-to-r from-violet-500 to-violet-400"
-                    style={{ width: `${selfPct}%` }}
-                    aria-hidden
-                  />
-                  <div
-                    className="bg-gradient-to-r from-cyan-400 to-cyan-300"
-                    style={{ width: `${friendPct}%` }}
-                    aria-hidden
-                  />
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-white/10 bg-black/20 p-3">
-                <div className="mb-3 flex items-center justify-between gap-2">
-                  <p className="font-mono text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-slate-400">
-                    {t("trendLabel")}
-                  </p>
-                  <div className="flex items-center gap-3 text-[0.62rem] font-semibold uppercase tracking-[0.14em]">
-                    <span className="inline-flex items-center gap-1.5 text-violet-200">
-                      <span className="h-1.5 w-1.5 rounded-full bg-violet-400" aria-hidden />
-                      {t("selfName")}
-                    </span>
-                    <span className="inline-flex items-center gap-1.5 text-cyan-200">
-                      <span className="h-1.5 w-1.5 rounded-full bg-cyan-300" aria-hidden />
-                      {t("friendName")}
-                    </span>
-                  </div>
-                </div>
-                <svg
-                  viewBox="0 0 280 72"
-                  className="h-16 w-full sm:h-20"
-                  role="img"
-                  aria-label={t("trendLabel")}
-                >
-                  <defs>
-                    <linearGradient id="duet-preview-self" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="rgb(139 92 246 / 0.35)" />
-                      <stop offset="100%" stopColor="rgb(139 92 246 / 0)" />
-                    </linearGradient>
-                    <linearGradient id="duet-preview-friend" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="rgb(34 211 238 / 0.28)" />
-                      <stop offset="100%" stopColor="rgb(34 211 238 / 0)" />
-                    </linearGradient>
-                  </defs>
-                  <polyline
-                    points={`${selfLine} 280,72 0,72`}
-                    fill="url(#duet-preview-self)"
-                    stroke="none"
-                  />
-                  <polyline
-                    points={`${friendLine} 280,72 0,72`}
-                    fill="url(#duet-preview-friend)"
-                    stroke="none"
-                  />
-                  <polyline
-                    points={selfLine}
-                    fill="none"
-                    stroke="rgb(167 139 250)"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <polyline
-                    points={friendLine}
-                    fill="none"
-                    stroke="rgb(34 211 238)"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
-
-              <div className="grid grid-cols-3 gap-2">
-                {arenaModes.map((mode) => (
-                  <div
-                    key={mode.key}
-                    className={`rounded-2xl border p-2 text-center text-[0.65rem] font-semibold ${
-                      mode.active
-                        ? "border-violet-300/30 bg-violet-500/15 text-violet-100"
-                        : "border-white/10 bg-white/[0.05] text-slate-300"
-                    }`}
-                  >
-                    {mode.label}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.06] p-4">
-              <p className="text-xs font-semibold text-cyan-200">{t("insightEyebrow")}</p>
-              <p className="mt-3 text-xl font-semibold leading-snug tracking-tight text-white sm:text-2xl">
-                {t("winnerHeadline")}
-              </p>
-              <p className="mt-3 text-sm leading-6 text-slate-300">{t("insightCopy")}</p>
-              <div className="mt-5 grid gap-2">
-                {signalRows.map((row) => (
-                  <div
-                    key={row.label}
-                    className="flex items-center justify-between rounded-2xl bg-black/20 p-3 ring-1 ring-white/10"
-                  >
-                    <div className="flex min-w-0 items-center gap-3">
-                      <span
-                        className={`h-2.5 w-2.5 shrink-0 rounded-full ${row.accentClassName}`}
-                        aria-hidden
-                      />
-                      <span className="truncate text-sm font-medium text-slate-200">
-                        {row.label}
-                      </span>
-                    </div>
-                    <span className="text-sm font-semibold text-white">{row.value}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-5 hidden space-y-3 sm:block">
-                {workflowSteps.map((step, index) => (
-                  <div
-                    key={step}
-                    className="flex items-center gap-3 rounded-2xl bg-black/20 p-3 text-sm text-slate-200 ring-1 ring-white/10"
-                  >
-                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/10 font-mono text-xs text-cyan-100">
-                      0{index + 1}
-                    </span>
-                    {step}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
         </div>
+        <p className="text-center text-lg font-semibold tracking-tight text-white sm:text-xl">
+          {t("winnerHeadline")}
+        </p>
+        <p className="text-center text-sm text-white/55">
+          {t("marginCaption", {
+            count: HOME_DUET_PREVIEW_MARGIN.toLocaleString(locale),
+          })}
+        </p>
       </div>
     </div>
   );

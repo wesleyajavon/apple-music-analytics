@@ -65,7 +65,7 @@ export function SoundprintBrandMark({
       ? "border-primary/15 bg-primary/10 text-primary lg:border-white/20 lg:bg-white/10 lg:text-white/90"
       : "border-primary/15 bg-primary/10 text-primary";
 
-  const nameToneClasses = tone === "onDark" ? "" : "text-foreground";
+  const nameToneClasses = tone === "onDark" ? "text-white" : "text-foreground";
 
   const badgeVisibility = showAiBadgeOnMobile ? "inline-flex" : "hidden sm:inline-flex";
 

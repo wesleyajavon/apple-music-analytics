@@ -4,7 +4,7 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
+  useLayoutEffect,
   useMemo,
   useState,
   type ReactNode,
@@ -24,6 +24,7 @@ import {
 type CookieConsentContextValue = {
   consent: CookieConsentCategories;
   hasDecided: boolean;
+  hydrated: boolean;
   acceptAll: () => void;
   acceptNecessaryOnly: () => void;
   savePreferences: (categories: Omit<CookieConsentCategories, "necessary">) => void;
@@ -64,7 +65,7 @@ export function CookieConsentProvider({ children }: { children: ReactNode }) {
   const [stored, setStored] = useState<StoredCookieConsent | null>(null);
   const [hydrated, setHydrated] = useState(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const raw = window.localStorage.getItem(COOKIE_CONSENT_STORAGE_KEY);
     const parsed = parseStoredConsent(raw);
     if (parsed && !isStoredCookieConsentCurrent(parsed)) {
@@ -107,6 +108,7 @@ export function CookieConsentProvider({ children }: { children: ReactNode }) {
     () => ({
       consent: stored?.categories ?? DEFAULT_COOKIE_CONSENT,
       hasDecided: hydrated && stored !== null,
+      hydrated,
       acceptAll,
       acceptNecessaryOnly,
       savePreferences,

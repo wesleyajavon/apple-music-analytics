@@ -6,7 +6,10 @@ import { Link } from "@/i18n/navigation";
 import type { ArtistStatsDto } from "@/lib/dto/artist";
 import { useArtistStats } from "@/lib/hooks/use-artists";
 import { useDashboardViewerUserId } from "@/lib/context/dashboard-viewer-context";
-import { TopThreeArtists } from "@/lib/components/top-three-artists-cards";
+import {
+  SPOTLIGHT_ARTISTS_CAROUSEL_LIMIT,
+  TopThreeArtists,
+} from "@/lib/components/top-three-artists-cards";
 import { ErrorState } from "@/lib/components/error-state";
 import { LiveStatusDot } from "@/lib/components/live-status-dot";
 
@@ -17,7 +20,7 @@ export type TopThreeArtistsOverviewWidgetProps = {
 };
 
 /**
- * Bloc « Top 3 artistes » style page /dashboard/artists pour la vue d'ensemble.
+ * Bloc spotlight artistes (jusqu’à 10, carrousel) pour la vue d’ensemble.
  */
 export function TopThreeArtistsOverviewWidget({
   startDate,
@@ -33,10 +36,10 @@ export function TopThreeArtistsOverviewWidget({
     startDate,
     endDate,
     viewerUserId,
-    3
+    SPOTLIGHT_ARTISTS_CAROUSEL_LIMIT
   );
 
-  const topArtists = data?.topArtists ?? [];
+  const topArtists = (data?.topArtists ?? []).slice(0, SPOTLIGHT_ARTISTS_CAROUSEL_LIMIT);
   const maxListens = topArtists[0]?.listenCount ?? 1;
 
   const artistsQuery = useMemo(() => {
@@ -58,11 +61,11 @@ export function TopThreeArtistsOverviewWidget({
             <div className="mt-2 h-4 w-72 bg-gray-100 dark:bg-gray-700 rounded animate-pulse" />
           </div>
           <div className="p-6">
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+            <div className="flex gap-6 overflow-hidden py-3">
               {[0, 1, 2].map((i) => (
                 <div
                   key={i}
-                  className="rounded-3xl border border-gray-200/80 bg-white/80 p-6 dark:border-white/[0.06] dark:bg-[#0c0e18]"
+                  className="w-[calc((100%-3rem)/3)] shrink-0 rounded-3xl border border-gray-200/80 bg-white/80 p-6 dark:border-white/[0.06] dark:bg-[#0c0e18]"
                 >
                   <div className="mx-auto mb-4 h-[120px] w-[120px] rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse" />
                   <div className="mx-auto h-5 w-3/4 rounded bg-gray-200 dark:bg-gray-700 animate-pulse" />
@@ -138,6 +141,11 @@ export function TopThreeArtistsOverviewWidget({
               t={tArtists}
               locale={locale}
               onArtistSelect={onOpenArtistInsights}
+              layout="carousel"
+              maxArtists={SPOTLIGHT_ARTISTS_CAROUSEL_LIMIT}
+              previousLabel={tOverview("artistSpotlight.scrollPrevious")}
+              nextLabel={tOverview("artistSpotlight.scrollNext")}
+              carouselLabel={tOverview("artistSpotlight.carouselLabel")}
             />
           </div>
         </div>

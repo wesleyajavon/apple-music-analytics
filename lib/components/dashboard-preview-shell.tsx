@@ -3,12 +3,10 @@ import type { ReactNode } from "react";
 type BadgeAccent = "violet" | "rose" | "emerald" | "cyan";
 
 const BADGE_ACCENT_CLASS: Record<BadgeAccent, string> = {
-  violet:
-    "border-accent-violet/20 bg-white/70 text-accent-violet dark:border-violet-400/18 dark:bg-[#141622] dark:text-violet-100",
-  rose: "border-rose-300/25 bg-white/70 text-rose-600 dark:border-rose-400/18 dark:bg-[#141622] dark:text-rose-100",
-  emerald:
-    "border-emerald-300/25 bg-white/70 text-emerald-700 dark:border-emerald-400/18 dark:bg-[#141622] dark:text-emerald-100",
-  cyan: "border-cyan-300/25 bg-white/70 text-cyan-700 dark:border-cyan-400/18 dark:bg-[#141622] dark:text-cyan-100",
+  violet: "border-violet-400/18 bg-[#141622] text-violet-100",
+  rose: "border-rose-400/18 bg-[#141622] text-rose-100",
+  emerald: "border-emerald-400/18 bg-[#141622] text-emerald-100",
+  cyan: "border-cyan-400/18 bg-[#141622] text-cyan-100",
 };
 
 const BADGE_DOT_CLASS: Record<BadgeAccent, string> = {

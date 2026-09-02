@@ -1,32 +1,63 @@
 /**
  * Pochettes d'albums de démo pour la page d'accueil.
+ * Les 5 premières alimentent « What stays in your rotation ».
  * Déposer des JPEG 640×640 (Spotify album) dans public/brand/home-albums/ :
- *   abbey-road · thriller · dark-side · nevermind · back-in-black
+ *   npx tsx scripts/download-home-album-images.ts
  */
 export const HOME_PREVIEW_ALBUMS = [
   {
-    name: "Abbey Road",
-    artist: "The Beatles",
-    imageSrc: "/brand/home-albums/abbey-road.jpg",
+    name: "When We All Fall Asleep, Where Do We Go?",
+    artist: "Billie Eilish",
+    imageSrc: "/brand/home-albums/when-we-all-fall-asleep.jpg",
   },
   {
-    name: "Thriller",
-    artist: "Michael Jackson",
-    imageSrc: "/brand/home-albums/thriller.jpg",
+    name: "Views",
+    artist: "Drake",
+    imageSrc: "/brand/home-albums/views.jpg",
   },
   {
-    name: "The Dark Side of the Moon",
-    artist: "Pink Floyd",
-    imageSrc: "/brand/home-albums/dark-side.jpg",
+    name: "Midnights",
+    artist: "Taylor Swift",
+    imageSrc: "/brand/home-albums/midnights.jpg",
   },
   {
-    name: "Nevermind",
-    artist: "Nirvana",
-    imageSrc: "/brand/home-albums/nevermind.jpg",
+    name: "After Hours",
+    artist: "The Weeknd",
+    imageSrc: "/brand/home-albums/after-hours.jpg",
   },
   {
-    name: "Back in Black",
-    artist: "AC/DC",
-    imageSrc: "/brand/home-albums/back-in-black.jpg",
+    name: "Un Verano Sin Ti",
+    artist: "Bad Bunny",
+    imageSrc: "/brand/home-albums/un-verano-sin-ti.jpg",
+  },
+  {
+    name: "Blonde",
+    artist: "Frank Ocean",
+    imageSrc: "/brand/home-albums/blonde.jpg",
+  },
+  {
+    name: "In Rainbows",
+    artist: "Radiohead",
+    imageSrc: "/brand/home-albums/in-rainbows.jpg",
+  },
+  {
+    name: "22, A Million",
+    artist: "Bon Iver",
+    imageSrc: "/brand/home-albums/22-a-million.jpg",
+  },
+  {
+    name: "Random Access Memories",
+    artist: "Daft Punk",
+    imageSrc: "/brand/home-albums/random-access-memories.jpg",
+  },
+  {
+    name: "Rumours",
+    artist: "Fleetwood Mac",
+    imageSrc: "/brand/home-albums/rumours.jpg",
+  },
+  {
+    name: "To Pimp a Butterfly",
+    artist: "Kendrick Lamar",
+    imageSrc: "/brand/home-albums/to-pimp-a-butterfly.jpg",
   },
 ] as const;

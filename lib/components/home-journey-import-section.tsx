@@ -1,9 +1,10 @@
 "use client";
 
+import type { ReactNode } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
+import { FileArchive, FileSpreadsheet } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import { StreamingProviderLogos } from "@/lib/components/streaming-provider-logos";
 import { HOME_JOURNEY_SECTION_SCROLL_MT } from "@/lib/constants/home-journey-nav";
 import { HomeBlurFadeReveal } from "@/lib/components/home-animations";
 
@@ -17,63 +18,87 @@ type HomeJourneyImportSectionProps = {
   publicDemoPath: string | null;
 };
 
-function ImportPreviewPanel() {
-  const t = useTranslations("home.journey.steps.import");
-
+function OverlappingMark({
+  children,
+  overlap = false,
+  rounded = "rounded-full",
+}: {
+  children: ReactNode;
+  overlap?: boolean;
+  rounded?: string;
+}) {
   return (
-    <div className="relative overflow-hidden rounded-[1.75rem] border border-card-border bg-card-surface/80 p-5 shadow-card backdrop-blur-xl sm:p-6">
-      <div
-        className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-violet-500/15 blur-3xl"
-        aria-hidden
-      />
-      <div
-        className="pointer-events-none absolute -bottom-12 -left-8 h-36 w-36 rounded-full bg-cyan-500/10 blur-3xl"
-        aria-hidden
-      />
-      <div className="relative">
-        <p className="font-mono text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-primary">
-          {t("previewBadge")}
-        </p>
-        <p className="mt-2 text-lg font-semibold tracking-[-0.03em] text-foreground">
-          {t("previewTitle")}
-        </p>
-        <div className="mt-5 flex items-center gap-4 rounded-2xl border border-white/10 bg-background/60 p-4">
+    <div
+      className={`flex h-9 w-9 items-center justify-center border border-white/15 bg-[#0c0e18] shadow-[0_8px_20px_-6px_rgba(0,0,0,0.85)] ${rounded} ${overlap ? "-ml-2" : ""}`}
+    >
+      {children}
+    </div>
+  );
+}
+
+function StepVisual({ step }: { step: (typeof PREVIEW_STEPS)[number] }) {
+  if (step === "pick") {
+    return (
+      <div className="flex items-center transition-transform group-hover:scale-105" aria-hidden>
+        <OverlappingMark>
           <Image
             src={SPOTIFY_LOGO_SRC}
             alt=""
-            width={32}
-            height={32}
-            className="h-8 w-8 object-contain"
+            width={18}
+            height={18}
+            className="h-4 w-4 object-contain"
             unoptimized
-            aria-hidden
           />
+        </OverlappingMark>
+        <OverlappingMark overlap>
           <Image
             src={APPLE_MUSIC_LOGO_SRC}
             alt=""
-            width={32}
-            height={32}
-            className="h-8 w-8 object-contain"
+            width={18}
+            height={18}
+            className="h-4 w-4 object-contain"
             unoptimized
-            aria-hidden
           />
-          <span className="text-sm font-medium text-muted">{t("previewProviders")}</span>
-        </div>
-        <ol className="mt-5 space-y-3">
-          {PREVIEW_STEPS.map((key, index) => (
-            <li
-              key={key}
-              className="flex items-start gap-3 rounded-xl border border-card-border/80 bg-background/50 px-3.5 py-3"
-            >
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-violet-300/70 bg-violet-100 font-mono text-[0.65rem] font-bold text-violet-800 dark:border-violet-400/25 dark:bg-violet-500/10 dark:text-violet-200">
-                {index + 1}
-              </span>
-              <span className="pt-0.5 text-sm leading-6 text-foreground/90">
-                {t(`previewSteps.${key}`)}
-              </span>
-            </li>
-          ))}
-        </ol>
+        </OverlappingMark>
       </div>
+    );
+  }
+
+  if (step === "upload") {
+    return (
+      <div className="flex items-center transition-transform group-hover:scale-105" aria-hidden>
+        <OverlappingMark rounded="rounded-[10px]">
+          <span className="flex flex-col items-center leading-none">
+            <FileSpreadsheet className="h-3.5 w-3.5 text-white/80" strokeWidth={2} />
+            <span className="mt-0.5 font-mono text-[8px] font-bold uppercase tracking-wide text-white/70">
+              csv
+            </span>
+          </span>
+        </OverlappingMark>
+        <OverlappingMark overlap rounded="rounded-[10px]">
+          <span className="flex flex-col items-center leading-none">
+            <FileArchive className="h-3.5 w-3.5 text-white/80" strokeWidth={2} />
+            <span className="mt-0.5 font-mono text-[8px] font-bold uppercase tracking-wide text-white/70">
+              zip
+            </span>
+          </span>
+        </OverlappingMark>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-[12px] bg-[#050508] shadow-[0_8px_20px_-6px_rgba(0,0,0,0.85)] ring-1 ring-white/10 transition-transform group-hover:scale-105"
+      aria-hidden
+    >
+      <Image
+        src="/brand/favicon.png"
+        alt=""
+        width={44}
+        height={44}
+        className="h-11 w-11 object-cover"
+      />
     </div>
   );
 }
@@ -99,58 +124,82 @@ export function HomeJourneyImportSection({
   return (
     <section
       id="import"
-      className={`relative mx-auto w-full max-w-7xl ${HOME_JOURNEY_SECTION_SCROLL_MT} px-4 pb-12 sm:px-6 sm:pb-16 lg:px-8`}
+      className={`relative mx-auto w-full max-w-7xl ${HOME_JOURNEY_SECTION_SCROLL_MT} px-4 pb-16 sm:px-6 sm:pb-24 lg:px-8`}
     >
-      <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1.02fr)_minmax(0,0.98fr)] lg:gap-12">
-        <HomeBlurFadeReveal className="flex flex-col items-center text-center lg:items-start lg:text-left">
-          <p className="font-mono text-xs font-semibold uppercase tracking-[0.28em] text-primary">
-            {t("eyebrow")}
-          </p>
-          <h2 className="mt-3 max-w-xl text-2xl font-semibold tracking-[-0.04em] text-foreground sm:text-4xl">
-            {t("title")}
-          </h2>
-          <p className="mt-4 max-w-xl text-base leading-7 text-muted sm:text-lg">
-            {t("description")}
-          </p>
-
-          <StreamingProviderLogos
-            caption={tHome("supportedStreamingCaption")}
-            spotifyLogoAlt={tHome("spotifyLogoAlt")}
-            appleMusicLogoAlt={tHome("appleMusicLogoAlt")}
-            className="mt-6 items-center sm:justify-center lg:items-start lg:justify-start"
+      <HomeBlurFadeReveal>
+        <div className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-white/5 p-5 shadow-[0_18px_50px_-28px_rgba(0,0,0,0.7)] backdrop-blur-xl sm:p-7 lg:p-8">
+          <div
+            className="pointer-events-none absolute -inset-16 -z-10 bg-[radial-gradient(circle_at_center,rgb(152_80_208_/_0.22),transparent_70%)] opacity-70"
+            aria-hidden
+          />
+          <div
+            className="pointer-events-none absolute -bottom-6 -right-6 h-24 w-24 rounded-full bg-brand-gradient opacity-10 blur-2xl"
+            aria-hidden
           />
 
-          <div className="mt-8 flex w-full flex-col items-center gap-3 sm:flex-row sm:flex-wrap sm:justify-center lg:justify-start">
-            <Link
-              href={primaryHref}
-              className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-7 py-3 text-sm font-semibold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:opacity-95 sm:w-auto"
-            >
-              {primaryLabel}
-              <ArrowRightIcon />
-            </Link>
-            {publicDemoPath ? (
-              <Link
-                href={publicDemoPath}
-                className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-card-border bg-card-surface px-6 py-3 text-sm font-semibold text-foreground shadow-card transition-all hover:-translate-y-0.5 hover:shadow-card-hover sm:w-auto"
-              >
-                {t("ctaDemo")}
-              </Link>
-            ) : null}
-            {isAuthenticated ? (
-              <Link
-                href="/dashboard"
-                className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-card-border bg-card-surface px-6 py-3 text-sm font-semibold text-foreground shadow-card transition-all hover:-translate-y-0.5 hover:shadow-card-hover sm:w-auto"
-              >
-                {tHome("goToDashboardShort")}
-              </Link>
-            ) : null}
-          </div>
-        </HomeBlurFadeReveal>
+          <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-10">
+            <div className="flex min-w-0 flex-col items-center text-center lg:items-start lg:text-left">
+              <p className="font-mono text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-white/70 sm:text-xs">
+                {t("eyebrow")}
+              </p>
+              <h2 className="mt-3 max-w-xl text-[1.65rem] font-semibold leading-[1.15] tracking-[-0.045em] text-white min-[380px]:text-[1.85rem] sm:text-4xl sm:leading-[1.08] sm:tracking-[-0.055em]">
+                {t("title")}
+              </h2>
+              <p className="mt-3 max-w-xl text-base leading-7 text-white/68 sm:text-lg sm:leading-8">
+                {t("description")}
+              </p>
+            </div>
 
-        <HomeBlurFadeReveal delay={0.1} direction="right">
-          <ImportPreviewPanel />
-        </HomeBlurFadeReveal>
-      </div>
+            <div className="flex w-full shrink-0 flex-col items-center gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:justify-center lg:justify-end">
+              <Link
+                href={primaryHref}
+                className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-7 py-3 text-sm font-semibold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:opacity-95 sm:w-auto"
+              >
+                {primaryLabel}
+                <ArrowRightIcon />
+              </Link>
+              {publicDemoPath ? (
+                <Link
+                  href={publicDemoPath}
+                  className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_50px_-28px_rgba(0,0,0,0.55)] backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-white/10 sm:w-auto"
+                >
+                  {t("ctaDemo")}
+                </Link>
+              ) : null}
+              {isAuthenticated ? (
+                <Link
+                  href="/dashboard"
+                  className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_50px_-28px_rgba(0,0,0,0.55)] backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-white/10 sm:w-auto"
+                >
+                  {tHome("goToDashboardShort")}
+                </Link>
+              ) : null}
+            </div>
+          </div>
+
+          <ol
+            className="relative mt-7 grid gap-3 sm:grid-cols-3"
+            aria-label={t("previewTitle")}
+          >
+            {PREVIEW_STEPS.map((step, index) => (
+              <li
+                key={step}
+                className="group flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/5 p-3.5 transition-all hover:bg-white/10"
+              >
+                <div className="flex min-w-0 items-center gap-3">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/5 font-mono text-[10px] font-bold text-white/70">
+                    {index + 1}
+                  </span>
+                  <span className="text-sm font-medium leading-5 text-white/90">
+                    {t(`previewSteps.${step}`)}
+                  </span>
+                </div>
+                <StepVisual step={step} />
+              </li>
+            ))}
+          </ol>
+        </div>
+      </HomeBlurFadeReveal>
     </section>
   );
 }

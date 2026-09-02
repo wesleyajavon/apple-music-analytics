@@ -141,7 +141,7 @@ export function ThemeSwitcher({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center rounded-xl text-sm font-medium text-muted hover:text-foreground hover:bg-primary/10 transition-all duration-200 ${
+        className={`flex items-center rounded-xl text-sm font-medium transition-all duration-200 text-muted hover:bg-primary/10 hover:text-foreground ${
           showIconOnly
             ? "justify-center p-2.5"
             : showCompactLabel
@@ -157,14 +157,14 @@ export function ThemeSwitcher({
         {!showIconOnly && (
           <>
             <span
-              className={`flex-1 text-left truncate ${
+              className={`flex-1 truncate text-left ${
                 showCompactLabel ? "hidden sm:block" : ""
               }`}
             >
               {t(theme)}
             </span>
             <svg
-              className={`w-4 h-4 shrink-0 transition-transform ${isOpen ? "rotate-180" : ""} ${
+              className={`h-4 w-4 shrink-0 transition-transform ${isOpen ? "rotate-180" : ""} ${
                 showCompactLabel ? "hidden sm:block" : ""
               }`}
               fill="none"
@@ -181,9 +181,9 @@ export function ThemeSwitcher({
       {isOpen && (
         <ul
           role="listbox"
-          className={`absolute py-1 bg-surface-raised border border-card-border rounded-xl shadow-card overflow-hidden z-50 min-w-[140px] ${
+          className={`absolute z-50 min-w-[140px] overflow-hidden rounded-xl border border-card-border bg-surface-raised py-1 shadow-card ${
             collapsed
-              ? "left-full ml-1 top-0"
+              ? "left-full top-0 ml-1"
               : showCompactLabel
                 ? `right-0 w-max ${placement === "top" ? "bottom-full mb-1" : "top-full mt-1"} sm:left-0 sm:right-0 sm:w-auto`
                 : `left-0 right-0 ${placement === "top" ? "bottom-full mb-1" : "top-full mt-1"}`

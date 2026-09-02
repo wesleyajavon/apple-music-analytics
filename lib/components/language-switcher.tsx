@@ -21,12 +21,15 @@ interface LanguageSwitcherProps {
   collapsed?: boolean;
   /** Header toolbar: icon-only below sm, full label from sm up */
   compactOnMobile?: boolean;
+  /** Cinematic landing chrome: white/glass instead of theme tokens */
+  tone?: "default" | "onDark";
 }
 
 export function LanguageSwitcher({
   placement = "top",
   collapsed = false,
   compactOnMobile = false,
+  tone = "default",
 }: LanguageSwitcherProps) {
   const router = useRouter();
   const nextRouter = useNextRouter();
@@ -36,6 +39,7 @@ export function LanguageSwitcher({
   const t = useTranslations("languageSwitcher");
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const onDark = tone === "onDark";
 
   const locales = routing.locales as readonly string[];
 
@@ -70,7 +74,11 @@ export function LanguageSwitcher({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center rounded-xl text-sm font-medium text-muted hover:text-foreground hover:bg-primary/10 transition-all duration-200 ${
+        className={`flex items-center rounded-xl text-sm font-medium transition-all duration-200 ${
+          onDark
+            ? "text-white/70 hover:bg-white/10 hover:text-white"
+            : "text-muted hover:bg-primary/10 hover:text-foreground"
+        } ${
           showIconOnly
             ? "justify-center p-2.5"
             : showCompactLabel
@@ -85,7 +93,7 @@ export function LanguageSwitcher({
         }
       >
         <svg
-          className="w-5 h-5 shrink-0 text-muted"
+          className={`h-5 w-5 shrink-0 ${onDark ? "text-white/70" : "text-muted"}`}
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -125,7 +133,11 @@ export function LanguageSwitcher({
       {isOpen && (
         <ul
           role="listbox"
-          className={`absolute py-1 bg-surface-raised border border-card-border rounded-xl shadow-card overflow-hidden z-50 min-w-[120px] ${
+          className={`absolute z-50 min-w-[120px] overflow-hidden rounded-xl border py-1 shadow-card ${
+            onDark
+              ? "border-white/10 bg-[#10111c]"
+              : "border-card-border bg-surface-raised"
+          } ${
             collapsed
               ? "left-full ml-1 top-0"
               : showCompactLabel
@@ -143,9 +155,13 @@ export function LanguageSwitcher({
                   className={`
                     w-full px-3 py-2.5 text-left text-sm font-medium transition-colors
                     ${
-                      isActive
-                        ? "bg-primary/10 text-primary"
-                        : "text-muted hover:bg-primary/10 hover:text-foreground"
+                      onDark
+                        ? isActive
+                          ? "bg-white/10 text-white"
+                          : "text-white/70 hover:bg-white/10 hover:text-white"
+                        : isActive
+                          ? "bg-primary/10 text-primary"
+                          : "text-muted hover:bg-primary/10 hover:text-foreground"
                     }
                   `}
                 >

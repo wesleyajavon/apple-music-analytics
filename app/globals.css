@@ -6,7 +6,8 @@
  * Structure des thèmes
  * -------------------
  * - :root = thème light par défaut
- * - html.dark = thème dark par défaut
+ * - html.dark = thème dark (dashboard / ThemeProvider)
+ * - .auth-forced-dark = dark local (pages auth), même si html est light
  */
 
 /* Thème light – variables explicites */
@@ -59,8 +60,9 @@
   --card-shadow-hover: 0 24px 70px -38px rgb(80 42 130 / 0.5), 0 6px 18px -12px rgb(23 19 33 / 0.18);
 }
 
-/* Thème dark – contrôlé par la classe "dark" sur <html> (ThemeProvider) */
-html.dark {
+/* Thème dark – html.dark (ThemeProvider) et pages auth toujours sombres */
+html.dark,
+.auth-forced-dark {
   --background: #06070d;
   --background-rgb: 6 7 13;
   --foreground: #f7f3ff;
@@ -94,6 +96,10 @@ html.dark {
     linear-gradient(135deg, #06070d 0%, #0b0d18 45%, #0a1224 100%);
   --card-shadow: 0 22px 70px -42px rgb(152 80 208 / 0.45), 0 1px 1px rgb(0 0 0 / 0.35);
   --card-shadow-hover: 0 30px 80px -38px rgb(152 80 208 / 0.56), 0 8px 24px -18px rgb(0 0 0 / 0.6);
+}
+
+.auth-forced-dark {
+  color-scheme: dark;
 }
 
 body {
@@ -178,6 +184,54 @@ html.dark input[type="date"]::-webkit-calendar-picker-indicator {
   .animate-grow-bar {
     transform-origin: left;
     animation: grow-bar 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  @keyframes home-hero-marquee-up {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(-50%);
+    }
+  }
+
+  @keyframes home-hero-marquee-down {
+    from {
+      transform: translateY(-50%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes home-hero-album-float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-12px);
+    }
+  }
+
+  .animate-home-hero-marquee-up {
+    animation: home-hero-marquee-up 42s linear infinite;
+  }
+
+  .animate-home-hero-marquee-down {
+    animation: home-hero-marquee-down 48s linear infinite;
+  }
+
+  .animate-home-hero-album-float {
+    animation: home-hero-album-float 7.5s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-home-hero-marquee-up,
+    .animate-home-hero-marquee-down,
+    .animate-home-hero-album-float {
+      animation: none;
+    }
   }
 }
 

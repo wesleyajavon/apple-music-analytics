@@ -9,54 +9,6 @@ import {
   type MotionValue,
 } from "motion/react";
 
-type ParallaxCardProps = {
-  children: ReactNode;
-  index: number;
-  className?: string;
-};
-
-function ParallaxCard({ children, index, className = "" }: ParallaxCardProps) {
-  const ref = useRef<HTMLDivElement>(null);
-  const reducedMotion = useReducedMotion();
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start end", "end start"],
-  });
-
-  const direction = index % 2 === 0 ? 1 : -1;
-  const depth = 28 + (index % 3) * 16;
-  const y = useTransform(scrollYProgress, [0, 1], [depth, -depth]);
-  const x = useTransform(
-    scrollYProgress,
-    [0, 0.5, 1],
-    [direction * 14, 0, direction * -10],
-  );
-  const rotate = useTransform(
-    scrollYProgress,
-    [0, 0.5, 1],
-    [direction * 1.8, 0, direction * -1.2],
-  );
-  const scale = useTransform(scrollYProgress, [0, 0.42, 1], [0.93, 1, 0.97]);
-
-  if (reducedMotion) {
-    return (
-      <div ref={ref} className={className}>
-        {children}
-      </div>
-    );
-  }
-
-  return (
-    <motion.div
-      ref={ref}
-      style={{ y, x, rotate, scale }}
-      className={`will-change-transform ${className}`}
-    >
-      {children}
-    </motion.div>
-  );
-}
-
 function ParallaxBlob({
   className,
   scrollYProgress,
@@ -84,14 +36,10 @@ export function HomeDashboardPreviewsParallax({
   children,
 }: HomeDashboardPreviewsParallaxProps) {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const reducedMotion = useReducedMotion();
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end start"],
   });
-
-  const headlineY = useTransform(scrollYProgress, [0, 1], [40, -24]);
-  const headlineOpacity = useTransform(scrollYProgress, [0, 0.15, 0.85, 1], [0.72, 1, 1, 0.82]);
 
   return (
     <div ref={sectionRef} className="relative">
@@ -118,43 +66,7 @@ export function HomeDashboardPreviewsParallax({
         />
       </div>
 
-      {reducedMotion ? (
-        children
-      ) : (
-        <motion.div style={{ y: headlineY, opacity: headlineOpacity }}>
-          {children}
-        </motion.div>
-      )}
-    </div>
-  );
-}
-
-type HomeDashboardPreviewsParallaxGridProps = {
-  items: ReactNode[];
-};
-
-export function HomeDashboardPreviewsParallaxGrid({
-  items,
-}: HomeDashboardPreviewsParallaxGridProps) {
-  const layoutClasses = [
-    "lg:mt-0",
-    "lg:mt-20",
-    "lg:-mt-6",
-    "lg:mt-14",
-    "lg:col-span-2 lg:mt-10",
-  ];
-
-  return (
-    <div className="relative grid gap-8 lg:grid-cols-2 lg:gap-x-10 lg:gap-y-6 xl:gap-x-14">
-      {items.map((item, index) => (
-        <ParallaxCard
-          key={index}
-          index={index}
-          className={layoutClasses[index] ?? ""}
-        >
-          {item}
-        </ParallaxCard>
-      ))}
+      {children}
     </div>
   );
 }

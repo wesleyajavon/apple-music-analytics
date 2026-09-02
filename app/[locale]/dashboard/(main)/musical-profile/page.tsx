@@ -327,75 +327,6 @@ function AiIdentityQuote({
   );
 }
 
-function PageFramingSection({
-  withFilters,
-}: {
-  withFilters: (href: string) => string;
-}) {
-  const t = useTranslations("musical-profile");
-  const bullets = [t("emptyFeature.item1"), t("emptyFeature.item2"), t("emptyFeature.item3")];
-
-  return (
-    <section className="relative overflow-hidden rounded-[2rem] border border-card-border bg-card-surface p-5 shadow-card sm:p-8">
-      <div
-        className="pointer-events-none absolute inset-0 opacity-50 dark:opacity-35"
-        style={{
-          background:
-            "radial-gradient(circle at 8% 0%, rgba(139, 92, 246, 0.08), transparent 32%), radial-gradient(circle at 92% 100%, rgba(6, 182, 212, 0.07), transparent 28%)",
-        }}
-        aria-hidden
-      />
-      <div className="relative">
-        <p className="font-mono text-xs font-semibold uppercase tracking-[0.28em] text-primary">
-          {t("emptyFeature.badge")}
-        </p>
-        <h2 className="mt-3 text-xl font-semibold tracking-[-0.04em] text-gray-950 dark:text-white sm:text-3xl">
-          {t("emptyFeature.title")}
-        </h2>
-        <p className="mt-3 max-w-3xl text-sm leading-7 text-gray-600 dark:text-gray-300 sm:text-base">
-          {t("emptyFeature.lead")}
-        </p>
-
-        <ul className="mt-5 space-y-2.5">
-            {bullets.map((item) => (
-              <li key={item} className="flex gap-3 text-sm leading-6 text-gray-600 dark:text-gray-300">
-                <span
-                  className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-violet"
-                  aria-hidden
-                />
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
-
-        <div className="mt-6 rounded-2xl border border-card-border bg-surface-glass/80 p-4">
-          <p className="font-mono text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-primary">
-            {t("overviewCallout.badge")}
-          </p>
-          <p className="mt-2 text-sm font-semibold text-gray-950 dark:text-white">{t("overviewCallout.title")}</p>
-          <p className="mt-1 text-xs font-medium text-gray-500 dark:text-gray-400">
-            {t("overviewCallout.philosophyEyebrow")}
-          </p>
-          <ul className="mt-3 space-y-2 text-sm leading-6 text-gray-600 dark:text-gray-300">
-            <li>{t("overviewCallout.philosophyBullet1")}</li>
-            <li>{t("overviewCallout.philosophyBullet2")}</li>
-          </ul>
-          </div>
-
-        <p className="mt-6 text-sm font-semibold text-gray-950 dark:text-white">{t("landing.title")}</p>
-            <p className="mt-1 max-w-2xl text-sm leading-6 text-gray-600 dark:text-gray-300">{t("landing.lead")}</p>
-            <Link
-              href={withFilters("/dashboard/overview")}
-              className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-5 py-3 text-sm font-bold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:shadow-card-hover focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background sm:w-auto"
-            >
-              {t("landing.primaryCta")}
-              <ArrowRightIcon className="h-4 w-4" />
-            </Link>
-      </div>
-    </section>
-  );
-}
-
 function FeaturePillarCard({
   href,
   eyebrow,
@@ -680,8 +611,6 @@ function MusicalProfileNoDataView({
           </CinematicStagger>
         </motion.section>
       </ParallaxHero>
-
-      <PageFramingSection withFilters={withFilters} />
 
       <EmptyState
         variant="startup"
@@ -973,8 +902,6 @@ function MusicalProfileContent() {
           </CinematicStagger>
         </motion.section>
       </ParallaxHero>
-
-      <PageFramingSection withFilters={withFilters} />
 
       <ScrollRevealSection>
         <ExploreFeaturesSection withFilters={withFilters} />

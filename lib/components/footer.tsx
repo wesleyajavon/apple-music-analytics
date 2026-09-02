@@ -47,7 +47,7 @@ export function Footer({ variant = "dashboard" }: { variant?: FooterVariant }) {
         shrink-0 px-4 sm:px-6 lg:px-8 py-5
         ${hideOnMobileDashboard ? "max-lg:hidden" : ""}
         ${isHome
-          ? "border-t border-card-border bg-surface-glass backdrop-blur-sm"
+          ? "border-t border-white/10 bg-black/40 text-white backdrop-blur-xl"
           : "border-t border-card-border lg:pb-5"
         }
       `}
@@ -69,7 +69,11 @@ export function Footer({ variant = "dashboard" }: { variant?: FooterVariant }) {
             <Link
               key={link.label}
               href={link.href}
-              className="text-sm text-muted hover:text-primary transition-colors duration-200"
+              className={
+                isHome
+                  ? "text-sm text-white/55 transition-colors duration-200 hover:text-white"
+                  : "text-sm text-muted transition-colors duration-200 hover:text-primary"
+              }
             >
               {link.label}
             </Link>
@@ -80,10 +84,10 @@ export function Footer({ variant = "dashboard" }: { variant?: FooterVariant }) {
             isHome ? "items-center sm:items-end" : "sm:items-end"
           }`}
         >
-          <p className="text-xs text-muted/75">
+          <p className={`text-xs ${isHome ? "text-white/45" : "text-muted/75"}`}>
             © {currentYear} {t("copyright")} · {t("madeWith")}
           </p>
-          <p className="text-xs text-muted">
+          <p className={`text-xs ${isHome ? "text-white/55" : "text-muted"}`}>
             {t("creatorCredit")}
           </p>
         </div>

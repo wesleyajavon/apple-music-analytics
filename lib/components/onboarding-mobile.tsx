@@ -5,6 +5,10 @@ import { useId, useState, type RefObject } from "react";
 import { useTranslations } from "next-intl";
 import { CheckCircle2, ChevronRight, Loader2, Sparkles, UploadCloud } from "lucide-react";
 import { MobileBottomSheet } from "@/lib/components/mobile-bottom-sheet";
+import {
+  OnboardingGenreLlmConsentCard,
+  OnboardingGroqEnableCard,
+} from "@/lib/components/onboarding-finish-invites";
 import { OnboardingMobileStickyActions } from "@/lib/components/onboarding-mobile-sticky-actions";
 import {
   CinematicFilmGrain,
@@ -111,10 +115,14 @@ export type OnboardingMobileProps = {
   onBackImport: () => void;
   importSummary: OnboardingMobileImportSummary | null;
   genreLlmAfterImport: OnboardingMobileGenreLlm | null;
-  genreLlmDeclined: boolean;
   onDeclineGenreLlm: () => void;
   onStartGenreLlm: () => void;
   isStartingLlmBackfill: boolean;
+  showGenreConsent: boolean;
+  showGroqEnableInvite: boolean;
+  isEnablingGroq: boolean;
+  onEnableGroq: () => void;
+  onDeclineGroqEnable: () => void;
   hasActiveGroqJobShared: boolean;
   effectiveBackfill: OnboardingMobileBackfill | null;
   hasBackfillInProgress: boolean;
@@ -174,15 +182,13 @@ export function OnboardingMobile(props: OnboardingMobileProps) {
   const helpTitleId = useId();
   const secondShotTitleId = useId();
 
-  const showGenreConsent =
-    !props.importSummary &&
-    Boolean(
-      props.genreLlmAfterImport &&
-        props.genreLlmAfterImport.unknownTrackCount > 0 &&
-        !props.effectiveBackfill &&
-        !props.genreLlmDeclined &&
-        !props.hasActiveGroqJobShared,
-    );
+  const showGenreConsent = props.showGenreConsent;
+
+  const finishHasExtras =
+    showGenreConsent ||
+    Boolean(props.effectiveBackfill) ||
+    props.showGroqEnableInvite ||
+    Boolean(props.paletteInvitation?.shouldInvite);
 
   const importSubmitLabel = props.isImporting
     ? t("import.importing")
@@ -625,46 +631,35 @@ export function OnboardingMobile(props: OnboardingMobileProps) {
               </div>
             </section>
           ) : (
-            <>
-              <section className={HERO_SHELL}>
-                <div className="absolute inset-0 bg-[linear-gradient(165deg,rgba(3,7,18,0.98),rgba(30,27,75,0.88))]" />
-                <div className="relative space-y-3">
-                  <MobileProgress
-                    percent={props.flowProgressPercent}
-                    stepLabel={props.flowStepLabel}
-                    ariaLabel={props.flowProgressAria}
-                    onDark
-                  />
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-cyan">
-                    {t("finishSkippedEyebrow")}
-                  </p>
-                  <h1 className="text-[1.45rem] font-semibold leading-[1.12]">{t("finishTitle")}</h1>
-                  <p className="text-sm leading-5 text-white/70">{t("finishBody")}</p>
-                </div>
-              </section>
+            <section className={HERO_SHELL}>
+              <div className="absolute inset-0 bg-[linear-gradient(165deg,rgba(3,7,18,0.98),rgba(30,27,75,0.88))]" />
+              <div className="relative space-y-3">
+                <MobileProgress
+                  percent={props.flowProgressPercent}
+                  stepLabel={props.flowStepLabel}
+                  ariaLabel={props.flowProgressAria}
+                  onDark
+                />
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-cyan">
+                  {t("finishSkippedEyebrow")}
+                </p>
+                <h1 className="text-[1.45rem] font-semibold leading-[1.12]">{t("finishTitle")}</h1>
+                <p className="text-sm leading-5 text-white/70">{t("finishBody")}</p>
+              </div>
+            </section>
+          )}
+          {finishHasExtras ? (
               <div className="space-y-3 px-4 pt-4">
                 {showGenreConsent && props.genreLlmAfterImport ? (
-                  <div className="space-y-3 rounded-2xl border border-card-border bg-card-surface px-3.5 py-4">
-                    <div className="flex gap-3">
-                      <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-accent-cyan" aria-hidden />
-                      <div className="space-y-1">
-                        <h2 className="text-sm font-semibold text-foreground">{t("genreLlmConsent.title")}</h2>
-                        <p className="text-sm leading-5 text-muted">
-                          {t("genreLlmConsent.body", {
-                            unknown: props.genreLlmAfterImport.unknownTrackCount,
-                            pct: props.genreLlmAfterImport.unknownRatio.toFixed(1),
-                          })}
-                        </p>
-                      </div>
-                    </div>
-                    {!props.genreLlmAfterImport.groqConfigured ? (
-                      <p className="rounded-xl bg-amber-500/10 px-3 py-2 text-xs text-amber-950 dark:text-amber-50">
-                        {t("genreLlmConsent.missingKey")}
-                      </p>
-                    ) : (
-                      <p className="text-xs leading-relaxed text-muted">{t("genreLlmConsent.privacy")}</p>
-                    )}
-                  </div>
+                  <OnboardingGenreLlmConsentCard
+                    unknownTrackCount={props.genreLlmAfterImport.unknownTrackCount}
+                    unknownRatio={props.genreLlmAfterImport.unknownRatio}
+                    groqConfigured={props.genreLlmAfterImport.groqConfigured}
+                    isStarting={props.isStartingLlmBackfill}
+                    hasActiveGroqJob={props.hasActiveGroqJobShared}
+                    onAccept={props.onStartGenreLlm}
+                    onDecline={props.onDeclineGenreLlm}
+                  />
                 ) : null}
                 {props.effectiveBackfill ? (
                   <div className="space-y-3 rounded-2xl border border-card-border bg-card-surface px-3.5 py-4">
@@ -722,6 +717,13 @@ export function OnboardingMobile(props: OnboardingMobileProps) {
                     ) : null}
                   </div>
                 ) : null}
+                {props.showGroqEnableInvite ? (
+                  <OnboardingGroqEnableCard
+                    isEnabling={props.isEnablingGroq}
+                    onAccept={props.onEnableGroq}
+                    onDecline={props.onDeclineGroqEnable}
+                  />
+                ) : null}
                 {props.paletteInvitation?.shouldInvite ? (
                   <button
                     type="button"
@@ -736,37 +738,20 @@ export function OnboardingMobile(props: OnboardingMobileProps) {
                   </button>
                 ) : null}
               </div>
-            </>
-          )}
+          ) : null}
           <OnboardingMobileStickyActions
             mode="finish"
             hideBack
-            onPrimary={
-              props.importSummary
-                ? props.onGoToMusicalProfile
-                : showGenreConsent
-                  ? props.onStartGenreLlm
-                  : props.onGoToDashboard
-            }
+            onPrimary={props.importSummary ? props.onGoToMusicalProfile : props.onGoToDashboard}
             primaryLabel={
               props.isSubmitting
                 ? t("finishing")
                 : props.importSummary
                   ? t("goToMusicalProfile")
-                  : showGenreConsent
-                    ? t("genreLlmConsent.accept")
-                    : t("goToDashboard")
+                  : t("goToDashboard")
             }
-            primaryDisabled={
-              props.isSubmitting ||
-              (showGenreConsent &&
-                (!props.genreLlmAfterImport?.groqConfigured ||
-                  props.isStartingLlmBackfill ||
-                  props.hasActiveGroqJobShared))
-            }
-            secondaryLabel={showGenreConsent ? t("genreLlmConsent.decline") : undefined}
-            onSecondary={showGenreConsent ? props.onDeclineGenreLlm : undefined}
-            isLoading={props.isSubmitting || props.isStartingLlmBackfill}
+            primaryDisabled={props.isSubmitting}
+            isLoading={props.isSubmitting}
           />
         </>
       ) : null}

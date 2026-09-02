@@ -33,7 +33,7 @@ export function HomeMobileNav() {
     <div className="md:hidden">
       <button
         type="button"
-        className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-card-border bg-card-surface text-foreground shadow-card transition-colors hover:bg-card-surface/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-white/15 bg-white/5 text-white shadow-[0_18px_50px_-28px_rgba(0,0,0,0.55)] backdrop-blur-sm transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:ring-offset-2 focus-visible:ring-offset-[#050508]"
         aria-expanded={isOpen}
         aria-controls={panelId}
         aria-label={isOpen ? t("mobileNav.closeMenu") : t("mobileNav.openMenu")}
@@ -65,7 +65,7 @@ export function HomeMobileNav() {
           />
           <nav
             id={panelId}
-            className="absolute left-0 right-0 top-[calc(100%+0.25rem)] z-50 rounded-2xl border border-card-border bg-surface-glass p-2 shadow-card backdrop-blur-xl"
+            className="absolute left-0 right-0 top-[calc(100%+0.25rem)] z-50 rounded-2xl border border-white/10 bg-[#10111c]/95 p-2 shadow-[0_18px_50px_-28px_rgba(0,0,0,0.7)] backdrop-blur-xl"
             aria-label={t("mobileNav.menuLabel")}
           >
             <ul className="flex flex-col gap-0.5">
@@ -73,7 +73,7 @@ export function HomeMobileNav() {
                 <li key={item.href}>
                   <a
                     href={item.href}
-                    className="flex min-h-11 items-center rounded-xl px-4 text-sm font-semibold text-foreground transition-colors hover:bg-card-surface active:bg-card-surface"
+                    className="flex min-h-11 items-center rounded-xl px-4 text-sm font-semibold text-white transition-colors hover:bg-white/10 active:bg-white/10"
                     onClick={close}
                   >
                     {tNav(item.labelKey)}

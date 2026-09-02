@@ -8,6 +8,7 @@ export type StreamingProviderLogosProps = {
   spotifyLogoAlt: string;
   appleMusicLogoAlt: string;
   className?: string;
+  tone?: "default" | "onDark";
 };
 
 /**
@@ -19,6 +20,7 @@ export function StreamingProviderLogos({
   spotifyLogoAlt,
   appleMusicLogoAlt,
   className,
+  tone = "default",
 }: StreamingProviderLogosProps) {
   return (
     <div
@@ -29,7 +31,7 @@ export function StreamingProviderLogos({
         .filter(Boolean)
         .join(" ")}
     >
-      <p className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-muted">
+      <p className={`text-[0.7rem] font-semibold uppercase tracking-[0.22em] ${tone === "onDark" ? "text-white/55" : "text-muted"}`}>
         {caption}
       </p>
       <div className="flex items-center gap-5">

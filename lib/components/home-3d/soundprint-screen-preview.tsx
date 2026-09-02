@@ -118,8 +118,10 @@ function MiniAreaChart() {
  */
 export function SoundprintScreenPreview({
   labels,
+  hideSidebar = false,
 }: {
   labels: SoundprintScreenPreviewLabels;
+  hideSidebar?: boolean;
 }) {
   return (
     <div
@@ -137,32 +139,34 @@ export function SoundprintScreenPreview({
         }
       `}</style>
       {/* Sidebar */}
-      <aside className="flex w-[72px] shrink-0 flex-col border-r border-[#28213c]/80 bg-[#090a12] px-2 py-3">
-        <div className="mb-4 flex flex-col items-center gap-1">
-          <Image
-            src="/brand/favicon.png"
-            alt=""
-            width={32}
-            height={32}
-            className="h-8 w-8 object-contain"
-          />
-          <span className="text-[0.45rem] font-bold uppercase tracking-[0.12em] text-[#b06cff]">AI</span>
-        </div>
-        <nav className="flex flex-1 flex-col gap-1">
-          {NAV_ITEM_KEYS.map((item) => (
-            <div
-              key={item.key}
-              className={`rounded-lg px-1.5 py-1.5 text-center text-[0.42rem] font-semibold leading-snug ${
-                item.active
-                  ? "bg-[#151827] text-[#f7f3ff] ring-1 ring-[#9850d0]/30"
-                  : "text-[#a59ab8]"
-              }`}
-            >
-              {labels.nav[item.key]}
-            </div>
-          ))}
-        </nav>
-      </aside>
+      {hideSidebar ? null : (
+        <aside className="flex w-[72px] shrink-0 flex-col border-r border-[#28213c]/80 bg-[#090a12] px-2 py-3">
+          <div className="mb-4 flex flex-col items-center gap-1">
+            <Image
+              src="/brand/favicon.png"
+              alt=""
+              width={32}
+              height={32}
+              className="h-8 w-8 object-contain"
+            />
+            <span className="text-[0.45rem] font-bold uppercase tracking-[0.12em] text-[#b06cff]">AI</span>
+          </div>
+          <nav className="flex flex-1 flex-col gap-1">
+            {NAV_ITEM_KEYS.map((item) => (
+              <div
+                key={item.key}
+                className={`rounded-lg px-1.5 py-1.5 text-center text-[0.42rem] font-semibold leading-snug ${
+                  item.active
+                    ? "bg-[#151827] text-[#f7f3ff] ring-1 ring-[#9850d0]/30"
+                    : "text-[#a59ab8]"
+                }`}
+              >
+                {labels.nav[item.key]}
+              </div>
+            ))}
+          </nav>
+        </aside>
+      )}
 
       {/* Main */}
       <div className="relative min-w-0 flex-1 overflow-hidden bg-[#080913]">

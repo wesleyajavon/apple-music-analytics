@@ -278,7 +278,7 @@ export default function SignInPage() {
             type="button"
             onClick={onSpotifySignIn}
             disabled={isLoading}
-            className={`${AUTH_OAUTH_BUTTON_CLASS} border-[#1ed760]/35 bg-[#191414] text-white hover:bg-[#282828] hover:text-white lg:border-[#1ed760]/40 lg:bg-[#121212]/90 lg:hover:bg-[#1a1a1a]`}
+            className={`${AUTH_OAUTH_BUTTON_CLASS} border-[#1ed760]/40 bg-[#191414] text-white hover:bg-[#282828] hover:text-white`}
           >
             <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" aria-hidden>
               <path
@@ -301,7 +301,7 @@ export default function SignInPage() {
           <p className="mt-4 text-center sm:hidden">
             <Link
               href={publicDemoPath}
-              className="text-sm font-medium text-muted underline-offset-4 hover:text-primary hover:underline"
+              className="text-sm font-medium text-white/55 underline-offset-4 hover:text-white hover:underline"
             >
               {t("dashboardLink")}
             </Link>

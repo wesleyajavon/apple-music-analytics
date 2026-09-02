@@ -74,10 +74,10 @@ export default function AcceptTermsPage() {
         </h1>
         <p className="mt-2 text-sm leading-relaxed text-muted">{t("acceptTermsSubtitle")}</p>
 
-        <label className="mt-8 flex items-start gap-3 text-sm text-muted">
+        <label className="mt-8 flex items-start gap-3 text-sm text-white/55">
           <input
             type="checkbox"
-            className="mt-1 h-4 w-4 shrink-0 rounded border-border text-primary focus:ring-primary/30"
+            className="mt-1 h-4 w-4 shrink-0 rounded border-white/25 bg-white/5 text-primary focus:ring-primary/30"
             checked={accepted}
             onChange={(e) => {
               setAccepted(e.target.checked);
@@ -87,12 +87,12 @@ export default function AcceptTermsPage() {
           <span>
             {t.rich("termsConsentLabel", {
               terms: () => (
-                <Link href="/legal/terms" className="font-medium text-primary underline-offset-2 hover:underline">
+                <Link href="/legal/terms" className="font-medium text-white/85 underline-offset-2 hover:text-white hover:underline">
                   {t("termsLink")}
                 </Link>
               ),
               privacy: () => (
-                <Link href="/legal/privacy" className="font-medium text-primary underline-offset-2 hover:underline">
+                <Link href="/legal/privacy" className="font-medium text-white/85 underline-offset-2 hover:text-white hover:underline">
                   {t("privacyLink")}
                 </Link>
               ),

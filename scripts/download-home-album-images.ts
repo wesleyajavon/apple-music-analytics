@@ -1,5 +1,5 @@
 /**
- * Télécharge les pochettes Spotify des albums de démo home (classiques iconiques).
+ * Télécharge les pochettes Spotify des albums de démo home.
  * Usage: npx tsx scripts/download-home-album-images.ts
  */
 import fs from "fs";
@@ -15,29 +15,59 @@ const OUT_DIR = path.join(__dirname, "..", "public", "brand", "home-albums");
 
 const ALBUMS = [
   {
-    slug: "abbey-road",
-    spotifyId: "0ETLXbWvGoJL5uzREpyKJ8",
-    searchQuery: "Abbey Road The Beatles",
+    slug: "when-we-all-fall-asleep",
+    spotifyId: "0S0KGZnfBGSIssfF54WSJh",
+    searchQuery: "WHEN WE ALL FALL ASLEEP WHERE DO WE GO Billie Eilish",
   },
   {
-    slug: "thriller",
-    spotifyId: "2ANVost0y2y52ema1FvVjS",
-    searchQuery: "Thriller Michael Jackson",
+    slug: "views",
+    spotifyId: "40GMAhriYJRO1rsY4YdrZb",
+    searchQuery: "Views Drake",
   },
   {
-    slug: "dark-side",
-    spotifyId: "4LH4d3cOWNNsVw41Gqt2kj",
-    searchQuery: "The Dark Side of the Moon Pink Floyd",
+    slug: "midnights",
+    spotifyId: "4moVP48t9bji7djUc5VOvi",
+    searchQuery: "Midnights Taylor Swift",
   },
   {
-    slug: "nevermind",
-    spotifyId: "2UJwKSBler6H8DPHv4wOvf",
-    searchQuery: "Nevermind Nirvana",
+    slug: "after-hours",
+    spotifyId: "4yP0jdRZyAZbwwQWdQ3FK5",
+    searchQuery: "After Hours The Weeknd",
   },
   {
-    slug: "back-in-black",
-    spotifyId: "5arCyd4Bx5TkMNgRuHtygE",
-    searchQuery: "Back in Black AC/DC",
+    slug: "un-verano-sin-ti",
+    spotifyId: "3RQQmkQEvNCY4prGKE6oc5",
+    searchQuery: "Un Verano Sin Ti Bad Bunny",
+  },
+  {
+    slug: "blonde",
+    spotifyId: "3mH6qwIyU6g8T19OGkvjC8",
+    searchQuery: "Blonde Frank Ocean",
+  },
+  {
+    slug: "in-rainbows",
+    spotifyId: "5vkqYmiPBYRbWjKVBQsks8",
+    searchQuery: "In Rainbows Radiohead",
+  },
+  {
+    slug: "22-a-million",
+    spotifyId: "4sLtYO2jDdzF9GKibVJKzO",
+    searchQuery: "22 A Million Bon Iver",
+  },
+  {
+    slug: "random-access-memories",
+    spotifyId: "4m2880jivSbbyEGAKfITCa",
+    searchQuery: "Random Access Memories Daft Punk",
+  },
+  {
+    slug: "rumours",
+    spotifyId: "1bt6q2SruMsBtceG00X1Ap",
+    searchQuery: "Rumours Fleetwood Mac",
+  },
+  {
+    slug: "to-pimp-a-butterfly",
+    spotifyId: "7ycBtnsMtyVbbwTfJwRjSP",
+    searchQuery: "To Pimp a Butterfly Kendrick Lamar",
   },
 ] as const;
 

@@ -1096,6 +1096,13 @@
       "nextSessionAfterError": "La sesión anterior se detuvo antes de terminar. ¿Iniciar una nueva sesión?",
       "startError": "No se pudo iniciar la clasificación de géneros."
     },
+    "groqEnableInvite": {
+      "title": "Activar IA Groq (opcional)",
+      "body": "Los insights, el chat y los resúmenes de gustos siguen desactivados hasta que aceptes. Puedes cambiarlo después en Ajustes.",
+      "accept": "Activar IA Groq",
+      "decline": "Ahora no",
+      "enabling": "Guardando…"
+    },
     "genreBackfill": {
       "title": "Clasificación de géneros (IA) en curso",
       "running": "Estamos rellenando géneros faltantes en segundo plano con Groq (LLM).",
@@ -1333,7 +1340,10 @@
     "artistSpotlight": {
       "badge": "Spotlight de artistas",
       "title": "Los artistas que sostienen tu rotación.",
-      "description": "Pasa el cursor por cada portada para revelar streams, variedad de canciones y el peso de tus tres artistas principales."
+      "description": "Desplázate por hasta diez artistas. Pasa el cursor por una portada para ver streams, variedad y la canción que define a cada uno.",
+      "scrollPrevious": "Mostrar artistas anteriores",
+      "scrollNext": "Mostrar artistas siguientes",
+      "carouselLabel": "Carrusel spotlight de artistas"
     },
     "artistTrends": {
       "badge": "Tendencias de artistas",
@@ -2504,14 +2514,6 @@
       "ariaLabelSingleDay": "Periodo analizado el {date}"
     },
     "noData": "Aún no hay datos de streams",
-    "emptyFeature": {
-      "badge": "Para qué sirve esta página",
-      "title": "Una entrada tipo landing antes de entrar en el análisis",
-      "lead": "El perfil musical es a propósito ligero. Tras importar datos y elegir un rango de fechas, obtienes:",
-      "item1": "Un momento destacado con tu artista firma y la señal de género del periodo",
-      "item2": "Una señal clara hacia Your Music, donde están los rankings y desgloses detallados",
-      "item3": "Una línea de identidad sonora poética (en caché) para que siga sintiéndose personal—sin sustituir el panel principal"
-    },
     "importDescription": "Importa tu exportación de Spotify o Apple Music para generar un perfil musical desde tu historial real.",
     "errorLoading": "No se puede cargar tu perfil musical. Inténtalo de nuevo.",
     "unknownArtist": "Artista desconocido",
@@ -2561,18 +2563,7 @@
       "errorLead": "No se pudo cargar esta firma."
     },
     "overviewCallout": {
-      "badge": "Empieza por el corazón de Soundprint-AI",
-      "title": "Your Music es la vista general que conecta todo",
-      "cta": "Abrir Your Music",
-      "philosophyEyebrow": "El espíritu de Soundprint",
-      "philosophyBullet1": "Tu identidad musical nace de las streams que realmente registraste, no de una etiqueta genérica ni de un estado de ánimo puntual.",
-      "philosophyBullet2": "Todas las pantallas comparten el mismo historial y filtros de fechas, para que la parte narrativa y el detalle vayan a la par."
-    },
-    "landing": {
-      "badge": "Un comienzo sencillo y cercano",
-      "title": "Your Music es donde están las herramientas de verdad",
-      "lead": "Esta página marca el tono. Your Music es el centro para comparaciones, gráficas y detalles—mismos filtros de fechas, más contexto.",
-      "primaryCta": "Ir a Your Music"
+      "cta": "Abrir Your Music"
     },
     "metrics": {
       "totalListens": "Streams",
@@ -3147,7 +3138,10 @@
   },
   "home": {
     "title": "Soundprint-AI",
-    "heroEyebrow": "Demo pública disponible",
+    "heroEyebrow": "Apple Music · Spotify",
+    "heroHeadline": "Mira la música que te formó.",
+    "heroSub": "Deja que la IA te cuente más sobre tu historial de escucha.",
+    "heroTrust": "Privado por diseño · Tus archivos, tu cuenta",
     "heroGradient": "tu música decodificada.",
     "welcome": "Bienvenido a Soundprint-AI",
     "welcomePersonal": "Bienvenido de nuevo, {name}",
@@ -3155,28 +3149,27 @@
     "spotifyLogoAlt": "Spotify",
     "appleMusicLogoAlt": "Apple Music",
     "journey": {
-      "tagline": "Tu música, decodificada en 3 pasos.",
-      "pitch": "Importa una vez desde Apple Music o Spotify. Explora tus tendencias, lanza deepdives de artista, habla con tus datos — y desafía a tus amigos.",
-      "stepsListAriaLabel": "Los 3 pasos del recorrido Soundprint",
+      "tagline": "Tu música, decodificada.",
+      "pitch": "Importa una vez desde Apple Music o Spotify. Explora tus tendencias, lanza deepdives de artista, habla con tu música, y compara streams con amigos.",
+      "stepsListAriaLabel": "Secciones de Soundprint",
       "stepLinkAria": "Ir a {step}",
-      "navAriaLabel": "Recorrido Soundprint en 3 pasos",
+      "navAriaLabel": "Secciones de Soundprint",
       "nav": {
         "import": "Importar",
-        "explore": "Explorar",
-        "interact": "Interactuar"
+        "explore": "Tu música",
+        "interact": "Ask & Duet"
       },
       "steps": {
         "import": {
-          "eyebrow": "Paso 1",
-          "title": "Importar",
+          "eyebrow": "Importar",
+          "title": "Tu historial ya está ahí.",
           "verb": "Conectar",
-          "description": "Conecta Apple Music o Spotify. Tu historial de streams se convierte en tu Soundprint — en minutos, sin API de pago para el usuario.",
+          "description": "Importa tu exportación de Apple Music o Spotify. Soundprint lo convierte en un retrato privado de tu gusto, y se queda en tu cuenta.",
           "cta": "Crear mi cuenta",
           "ctaOnboarding": "Importar mi historial",
           "ctaDemo": "Probar la demo primero",
           "previewBadge": "Onboarding guiado",
-          "previewTitle": "Tu exportación en 3 pasos",
-          "previewProviders": "Apple Music o Spotify",
+          "previewTitle": "Estás a 3 pasos",
           "previewSteps": {
             "pick": "Elige tu servicio de streaming",
             "upload": "Sube tu archivo de historial",
@@ -3184,21 +3177,28 @@
           }
         },
         "explore": {
-          "eyebrow": "Paso 2",
-          "title": "Explorar",
+          "eyebrow": "Tu música",
+          "title": "Mira lo que esconde tu escucha.",
           "verb": "Decodificar",
-          "description": "Tendencias, heatmap, perfil musical: descubre las fases, rituales y obsesiones ocultas en tus streams. Más allá de un Spotify Wrapped o un Apple Music Replay anual."
+          "description": "Tendencias, heatmap, perfil musical: las fases, rituales y obsesiones ocultas en tu historial."
         },
         "interact": {
-          "eyebrow": "Paso 3",
-          "title": "Interactuar",
+          "eyebrow": "Ask & Duet",
+          "title": "Habla con tu música. Duet con amigos.",
           "verb": "Dialogar",
-          "description": "Pregunta lo que quieras a tus datos. Añade a tus amigos y decide: ¿quién es el mayor fan de ese artista?"
+          "askLabel": "Ask",
+          "askTitle": "Habla con tu música.",
+          "askDescription": "Un chat al estilo ChatGPT sobre tu historial. Pregunta lo que quieras, en lenguaje natural.",
+          "duetLabel": "Duet",
+          "duetTitle": "Duet con amigos.",
+          "duetDescription": "Invita a tus amigos y compara streams: cualquier artista o tema, quién ha escuchado más.",
+          "connector": "Y",
+          "stageLabel": "Vista previa de Chat Soundprint y Duet"
         }
       }
     },
-    "subtitle": "Importa una vez desde Apple Music o Spotify. Explora tus tendencias. Habla con tus datos — y desafía a tus amigos.",
-    "heroPrimaryCta": "Revela tu Soundprint",
+    "subtitle": "Importa una vez desde Apple Music o Spotify. Explora tus tendencias. Habla con tu música, o compara streams con amigos.",
+    "heroPrimaryCta": "Importar mi historial",
     "heroDashboardPreview": {
       "label": "Vista previa del dashboard Soundprint",
       "eyebrow": "Tus datos de streams",
@@ -3233,7 +3233,7 @@
     },
     "goToDashboard": "Volver a tu dashboard",
     "goToDashboardShort": "Dashboard",
-    "accessDashboard": "Explorar una demo pública del dashboard",
+    "accessDashboard": "Probar la demo",
     "nav": {
       "product": "Producto",
       "insights": "Insights",
@@ -3248,38 +3248,19 @@
     "duetPreview": {
       "sectionEyebrow": "Duet",
       "label": "Vista previa Duet",
-      "heroEyebrow": "En vivo · duelo entre amigos",
-      "heroSubtitle": "Elige un artista. Mira quién reproduce más.",
-      "liveBadge": "Demo",
+      "liveBadge": "Duelo en vivo",
       "arenaEyebrow": "Duelo de artista",
       "artistName": "Bad Bunny",
-      "periodMeta": "Últimos 90 días · mismos filtros",
+      "periodMeta": "Últimos 90 días",
       "selfName": "Tú",
       "selfInitials": "TU",
       "friendName": "Josh",
       "friendInitials": "JO",
+      "vsLabel": "VS",
+      "leadLabel": "Tú vas ganando",
+      "playsLabel": "streams",
       "winnerHeadline": "Tú reproduces más a Bad Bunny.",
-      "insightEyebrow": "Cara a cara",
-      "insightCopy": "Añade un amigo, elige un artista y mira quién domina de verdad — streams contadas desde vuestras bibliotecas reales.",
-      "trendLabel": "streams en el tiempo",
-      "signalRows": {
-        "yourPlays": "Tus streams",
-        "friendPlays": "streams de {friendName}",
-        "margin": "Tu ventaja"
-      },
-      "signalValues": {
-        "margin": "+235 streams"
-      },
-      "arenaModes": {
-        "artist": "Artista",
-        "track": "Canción",
-        "genre": "Género"
-      },
-      "workflow": {
-        "step1": "Añade un amigo con tu enlace de invitación",
-        "step2": "Elige un artista o una canción",
-        "step3": "Mira quién gana — y comparte el marcador"
-      }
+      "marginCaption": "+{count} streams"
     },
     "dashboardPreviews": {
       "eyebrow": "Dentro del dashboard",
@@ -3305,6 +3286,21 @@
         "title": "Lo que sigue en rotación.",
         "description": "Clasificado por tus retornos — la música que ya es reflejo."
       }
+    },
+    "musicHub": {
+      "label": "Vista previa del hub Your Music",
+      "liveBadge": "Vista interactiva",
+      "navAria": "Páginas del dashboard",
+      "tabsAria": "Secciones de Your Music",
+      "periodAria": "Periodo de escucha",
+      "vsPrevious": "vs periodo ant.",
+      "heatmapCell": "{count} streams",
+      "genreToggleAria": "Mostrar u ocultar {genre}",
+      "selectArtistAria": "Seleccionar {name}",
+      "selectAlbumAria": "Seleccionar {name}",
+      "trendsInnerAria": "Vistas de tendencias",
+      "trendsGenres": "Géneros",
+      "trendsPulse": "Pulso"
     },
     "featuresEyebrow": "Por qué se siente distinto",
     "featuresTitle": "Una capa de analytics personal para amantes de la música.",
@@ -3341,8 +3337,8 @@
       }
     },
     "demoHighlightsSection": {
-      "eyebrow": "Míralo en acción",
-      "title": "Historias de artistas y tendencias de stream, directamente desde el dashboard."
+      "eyebrow": "En vivo",
+      "title": "Historias de artistas y tendencias de stream, desde el dashboard real."
     },
     "soundprintAiChatDemo": {
       "sectionEyebrow": "Soundprint Chat",
@@ -3352,6 +3348,10 @@
       "heroSubtitle": "Un preset. Una respuesta.",
       "heroBadge": "Vista previa",
       "videoLabel": "Demo de Soundprint Chat",
+      "previewHint": "Pregunta lo que quieras sobre tu historial de escucha.",
+      "previewPlaceholder": "Ejemplo: deepdive de Vegedream",
+      "previewQuestion": "¿Cuáles fueron mis 3 canciones más escuchadas en 2018?",
+      "previewAnswer": "Tu top 3 de 2018:\n1. Nights — Frank Ocean · 214\n2. God's Plan — Drake · 189\n3. I Fall Apart — Post Malone · 156",
       "cta": "Probar el chat demo",
       "ctaSignedIn": "Abrir Soundprint Chat",
       "features": {
@@ -3389,15 +3389,6 @@
           "question": "¿Qué es un deepdive de artista?",
           "answer": "Elige cualquier artista de tu historial — o escribe su nombre seguido de deepdive en el chat Soundprint. Soundprint recupera tus streams con ese artista y muestra totales, top canciones, desglose año a año y un resumen claro de tu historia con ese artista."
         }
-      },
-      "cta": {
-        "title": "¿Listo para ver tu propio Soundprint?",
-        "signUp": "Revela tu Soundprint",
-        "dashboard": "Ir a tu panel",
-        "demo": "Explorar la demo pública",
-        "microcopy": "Sin tarjeta de crédito · Tus datos son tuyos",
-        "privacyLink": "Política de privacidad",
-        "termsLink": "Términos de servicio"
       }
     }
   },

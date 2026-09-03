@@ -1,9 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { wrapLines, truncateText } from "@/lib/utils/share-card/canvas-primitives";
+import { wrapLines, truncateText, measureSpacedText } from "@/lib/utils/share-card/canvas-primitives";
 import { computeShareCardVerticalLayout } from "@/lib/utils/share-card/layout";
 import { SHARE_CARD_LAYOUT } from "@/lib/utils/share-card/constants";
 import { resolveDuetTimelineWinner } from "@/lib/utils/duet-timeline-share-image";
-import { duetShareHeadlineKey } from "@/lib/utils/duet-share-headline";
+import { duetShareHeadlineKey, duetShareLeadKey } from "@/lib/utils/duet-share-headline";
 
 function mockCtx(initialWidth: number): CanvasRenderingContext2D {
   return {
@@ -26,34 +26,38 @@ describe("share-card canvas-primitives", () => {
     expect(result.endsWith("…")).toBe(true);
     expect(result.length).toBeLessThan("abcdefghij".length + 1);
   });
+
+  it("measureSpacedText includes tracking between characters", () => {
+    const ctx = mockCtx(10);
+    expect(measureSpacedText(ctx, "AB", 4)).toBe(24);
+  });
 });
 
 describe("computeShareCardVerticalLayout", () => {
   it("keeps duel card below artist image and title block", () => {
     const ctx = mockCtx(8);
-    const layout = computeShareCardVerticalLayout(
-      ctx,
-      "Radiohead",
-      undefined,
-      true
-    );
+    const layout = computeShareCardVerticalLayout(ctx, "Radiohead", true);
 
     const entityBottom =
-      (layout.entityImageCenterY ?? 0) + layout.entityImageRadius;
-    expect(layout.titleStartY).toBeGreaterThan(entityBottom + 20);
+      (layout.entityImageCenterY ?? 0) + layout.entityImageSize / 2;
+    expect(layout.eyebrowY).toBeGreaterThan(entityBottom);
+    expect(layout.titleStartY).toBeGreaterThan(layout.eyebrowY);
     expect(layout.cardY).toBeGreaterThan(layout.titleStartY);
     expect(layout.cardY + SHARE_CARD_LAYOUT.duelCardHeight).toBeLessThanOrEqual(
       SHARE_CARD_LAYOUT.footerTop
     );
   });
 
-  it("preserves legacy layout when no entity image", () => {
+  it("skips the artist tile when no entity image", () => {
     const ctx = mockCtx(8);
-    const layout = computeShareCardVerticalLayout(ctx, "Timeline", "May 2026", false);
+    const layout = computeShareCardVerticalLayout(ctx, "Timeline", false);
 
     expect(layout.entityImageCenterY).toBeNull();
-    expect(layout.titleStartY).toBe(250);
-    expect(layout.cardY).toBe(430);
+    expect(layout.titleStartY).toBeGreaterThan(layout.eyebrowY);
+    expect(layout.cardY).toBeGreaterThan(layout.titleStartY);
+    expect(layout.cardY + SHARE_CARD_LAYOUT.duelCardHeight).toBeLessThanOrEqual(
+      SHARE_CARD_LAYOUT.footerTop
+    );
   });
 });
 
@@ -82,6 +86,14 @@ describe("duetShareHeadlineKey", () => {
     expect(duetShareHeadlineKey("artist", "self")).toBe("shareHeadlineArtistSelf");
     expect(duetShareHeadlineKey("track", "friend")).toBe("shareHeadlineTrackFriend");
     expect(duetShareHeadlineKey("genre", "tie")).toBe("shareHeadlineGenreTie");
+  });
+});
+
+describe("duetShareLeadKey", () => {
+  it("maps winners to scoreboard lead copy", () => {
+    expect(duetShareLeadKey("self")).toBe("scoreboardLeadsSelf");
+    expect(duetShareLeadKey("friend")).toBe("scoreboardLeadsFriend");
+    expect(duetShareLeadKey("tie")).toBe("scoreboardTie");
   });
 });
 

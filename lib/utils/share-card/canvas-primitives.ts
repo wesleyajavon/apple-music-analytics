@@ -1,4 +1,10 @@
-import { SHARE_CARD_FONT, SHARE_CARD_LAYOUT } from "@/lib/utils/share-card/constants";
+import { getUserAvatarInitials } from "@/lib/components/user-avatar";
+import {
+  SHARE_CARD_COLORS,
+  SHARE_CARD_FONT,
+  SHARE_CARD_LAYOUT,
+  SHARE_CARD_MONO_FONT,
+} from "@/lib/utils/share-card/constants";
 
 export function truncateText(
   ctx: CanvasRenderingContext2D,
@@ -63,47 +69,169 @@ export function drawRoundedRect(
   ctx.closePath();
 }
 
+export function measureSpacedText(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  spacing: number
+): number {
+  if (text.length <= 1) return ctx.measureText(text).width;
+  let width = 0;
+  for (const ch of text) width += ctx.measureText(ch).width;
+  return width + spacing * (text.length - 1);
+}
+
+export function fillTextSpaced(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  x: number,
+  y: number,
+  spacing: number
+) {
+  const total = measureSpacedText(ctx, text, spacing);
+  let cursor = x;
+  if (ctx.textAlign === "center") cursor = x - total / 2;
+  else if (ctx.textAlign === "right") cursor = x - total;
+
+  const previousAlign = ctx.textAlign;
+  ctx.textAlign = "left";
+  for (const ch of text) {
+    ctx.fillText(ch, cursor, y);
+    cursor += ctx.measureText(ch).width + spacing;
+  }
+  ctx.textAlign = previousAlign;
+}
+
+export function drawCoverImage(
+  ctx: CanvasRenderingContext2D,
+  image: HTMLImageElement,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  align: "center" | "top" = "center"
+) {
+  if (!image.width || !image.height || width <= 0 || height <= 0) return;
+  const scale = Math.max(width / image.width, height / image.height);
+  const drawW = image.width * scale;
+  const drawH = image.height * scale;
+  const drawX = x + (width - drawW) / 2;
+  const drawY = align === "top" ? y : y + (height - drawH) / 2;
+  ctx.drawImage(image, drawX, drawY, drawW, drawH);
+}
+
 export function drawShareCardBackground(
   ctx: CanvasRenderingContext2D,
-  size: number
+  size: number,
+  entityImage?: HTMLImageElement | null
 ) {
-  const bg = ctx.createLinearGradient(0, 0, size, size);
-  bg.addColorStop(0, "#0b0618");
-  bg.addColorStop(0.45, "#1e1140");
-  bg.addColorStop(1, "#0a1628");
-  ctx.fillStyle = bg;
+  ctx.fillStyle = SHARE_CARD_COLORS.canvas;
   ctx.fillRect(0, 0, size, size);
 
-  const glowViolet = ctx.createRadialGradient(180, 140, 20, 180, 140, 320);
-  glowViolet.addColorStop(0, "rgba(139,92,246,0.35)");
+  if (entityImage) {
+    ctx.save();
+    ctx.globalAlpha = 0.16;
+    drawCoverImage(ctx, entityImage, 0, 0, size, size * 0.72, "top");
+    ctx.restore();
+
+    const wash = ctx.createLinearGradient(0, 0, 0, size);
+    wash.addColorStop(0, "rgba(8,9,19,0.55)");
+    wash.addColorStop(0.42, "rgba(8,9,19,0.82)");
+    wash.addColorStop(1, SHARE_CARD_COLORS.canvas);
+    ctx.fillStyle = wash;
+    ctx.fillRect(0, 0, size, size);
+  }
+
+  const glowViolet = ctx.createRadialGradient(80, 160, 20, 80, 160, 360);
+  glowViolet.addColorStop(0, SHARE_CARD_COLORS.violetGlow);
   glowViolet.addColorStop(1, "rgba(139,92,246,0)");
   ctx.fillStyle = glowViolet;
   ctx.fillRect(0, 0, size, size);
 
-  const glowCyan = ctx.createRadialGradient(900, 860, 20, 900, 860, 300);
-  glowCyan.addColorStop(0, "rgba(34,211,238,0.22)");
+  const glowCyan = ctx.createRadialGradient(1000, 980, 20, 1000, 980, 340);
+  glowCyan.addColorStop(0, SHARE_CARD_COLORS.cyanGlow);
   glowCyan.addColorStop(1, "rgba(34,211,238,0)");
   ctx.fillStyle = glowCyan;
   ctx.fillRect(0, 0, size, size);
 
-  ctx.fillStyle = "rgba(255,255,255,0.08)";
-  drawRoundedRect(ctx, 72, 72, size - 144, size - 144, 48);
-  ctx.fill();
+  ctx.fillStyle = SHARE_CARD_COLORS.vsWatermark;
+  ctx.font = `900 210px ${SHARE_CARD_FONT}`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("VS", size / 2, size * 0.46);
+  ctx.textBaseline = "alphabetic";
+}
+
+export function drawShareCardMetaRow(
+  ctx: CanvasRenderingContext2D,
+  size: number,
+  periodLabel: string | undefined,
+  badgeLabel: string | undefined
+) {
+  const { padX, metaBaselineY, badgeHeight, eyebrowTracking } = SHARE_CARD_LAYOUT;
+  ctx.font = `600 22px ${SHARE_CARD_MONO_FONT}`;
+  ctx.textBaseline = "alphabetic";
+
+  if (periodLabel) {
+    ctx.fillStyle = SHARE_CARD_COLORS.meta;
+    ctx.textAlign = "left";
+    fillTextSpaced(
+      ctx,
+      truncateText(ctx, periodLabel.toUpperCase(), size * 0.42),
+      padX,
+      metaBaselineY,
+      eyebrowTracking
+    );
+  }
+
+  if (badgeLabel) {
+    ctx.font = `600 20px ${SHARE_CARD_MONO_FONT}`;
+    const label = badgeLabel.toUpperCase();
+    const textWidth = measureSpacedText(ctx, label, 3.6);
+    const badgeW = textWidth + 72;
+    const badgeH = badgeHeight;
+    const badgeX = size - padX - badgeW;
+    const badgeY = metaBaselineY - 30;
+
+    ctx.fillStyle = SHARE_CARD_COLORS.badgeFill;
+    drawRoundedRect(ctx, badgeX, badgeY, badgeW, badgeH, badgeH / 2);
+    ctx.fill();
+    ctx.strokeStyle = SHARE_CARD_COLORS.badgeBorder;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    const dotX = badgeX + 22;
+    const dotY = badgeY + badgeH / 2;
+    ctx.fillStyle = "rgba(244,114,182,0.35)";
+    ctx.beginPath();
+    ctx.arc(dotX, dotY, 10, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#f9a8d4";
+    ctx.beginPath();
+    ctx.arc(dotX, dotY, 6, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = SHARE_CARD_COLORS.badgeText;
+    ctx.textAlign = "left";
+    fillTextSpaced(ctx, label, badgeX + 40, badgeY + 30, 3.6);
+  }
 }
 
 export function drawShareCardEyebrow(
   ctx: CanvasRenderingContext2D,
   size: number,
-  eyebrowLabel: string
+  eyebrowLabel: string,
+  y: number
 ) {
-  ctx.font = `700 28px ${SHARE_CARD_FONT}`;
-  const arenaWidth = ctx.measureText(eyebrowLabel).width + 64;
-  ctx.fillStyle = "rgba(244,114,182,0.18)";
-  drawRoundedRect(ctx, (size - arenaWidth) / 2, 118, arenaWidth, 52, 26);
-  ctx.fill();
-  ctx.fillStyle = "#fbcfe8";
+  ctx.font = `600 ${SHARE_CARD_LAYOUT.eyebrowFontSize}px ${SHARE_CARD_MONO_FONT}`;
+  ctx.fillStyle = SHARE_CARD_COLORS.eyebrow;
   ctx.textAlign = "center";
-  ctx.fillText(eyebrowLabel.toUpperCase(), size / 2, 152);
+  fillTextSpaced(
+    ctx,
+    eyebrowLabel.toUpperCase(),
+    size / 2,
+    y,
+    SHARE_CARD_LAYOUT.eyebrowTracking
+  );
 }
 
 export function drawShareCardEntityImage(
@@ -111,38 +239,48 @@ export function drawShareCardEntityImage(
   size: number,
   image: HTMLImageElement,
   centerY: number,
-  radius: number
+  imageSize: number,
+  cornerRadius: number
 ) {
-  drawCircularAvatar(ctx, image, size / 2, centerY, radius, {
-    borderColor: "rgba(255,255,255,0.35)",
-    borderWidth: 4,
-  });
+  const x = (size - imageSize) / 2;
+  const y = centerY - imageSize / 2;
+
+  ctx.save();
+  ctx.shadowColor = "rgba(0,0,0,0.55)";
+  ctx.shadowBlur = 36;
+  ctx.shadowOffsetY = 18;
+  ctx.fillStyle = "#10111c";
+  drawRoundedRect(ctx, x, y, imageSize, imageSize, cornerRadius);
+  ctx.fill();
+  ctx.restore();
+
+  ctx.save();
+  drawRoundedRect(ctx, x, y, imageSize, imageSize, cornerRadius);
+  ctx.clip();
+  drawCoverImage(ctx, image, x, y, imageSize, imageSize);
+  ctx.restore();
+
+  ctx.strokeStyle = "rgba(255,255,255,0.12)";
+  ctx.lineWidth = 3;
+  drawRoundedRect(ctx, x, y, imageSize, imageSize, cornerRadius);
+  ctx.stroke();
 }
 
 export function drawShareCardTitleBlock(
   ctx: CanvasRenderingContext2D,
   size: number,
   title: string,
-  subtitle?: string,
   options?: { titleStartY?: number }
 ): number {
-  ctx.fillStyle = "#ffffff";
-  ctx.font = `800 64px ${SHARE_CARD_FONT}`;
+  ctx.fillStyle = SHARE_CARD_COLORS.title;
+  ctx.font = `600 ${SHARE_CARD_LAYOUT.titleFontSize}px ${SHARE_CARD_FONT}`;
   ctx.textAlign = "center";
   const titleLines = wrapLines(ctx, title, size - 200, 2);
   let titleY = options?.titleStartY ?? 250;
   for (const line of titleLines) {
     ctx.fillText(line, size / 2, titleY);
-    titleY += 72;
+    titleY += SHARE_CARD_LAYOUT.titleLineHeight;
   }
-
-  if (subtitle) {
-    ctx.font = `500 32px ${SHARE_CARD_FONT}`;
-    ctx.fillStyle = "rgba(226,232,240,0.85)";
-    ctx.fillText(truncateText(ctx, subtitle, size - 220), size / 2, titleY + 8);
-    titleY += 40;
-  }
-
   return titleY;
 }
 
@@ -172,8 +310,8 @@ export function drawShareCardBrandFooter(
   logo?: HTMLImageElement | null
 ) {
   const { brandLogoSize, brandLogoGap, brandLogoRadius } = SHARE_CARD_LAYOUT;
-  const nameBaselineY = 920;
-  const nameFontSize = 44;
+  const nameBaselineY = 1036;
+  const nameFontSize = 32;
 
   ctx.font = `800 ${nameFontSize}px ${SHARE_CARD_FONT}`;
   ctx.fillStyle = "#ffffff";
@@ -204,9 +342,9 @@ export function drawShareCardBrandFooter(
   }
 
   ctx.textAlign = "center";
-  ctx.font = `500 26px ${SHARE_CARD_FONT}`;
-  ctx.fillStyle = "rgba(148,163,184,0.9)";
-  ctx.fillText(brandTagline, size / 2, 968);
+  ctx.font = `500 22px ${SHARE_CARD_FONT}`;
+  ctx.fillStyle = "rgba(148,163,184,0.85)";
+  ctx.fillText(brandTagline, size / 2, 1068);
 }
 
 export function drawCircularAvatar(
@@ -255,6 +393,137 @@ export function drawCircularAvatar(
   }
 }
 
+function drawCrownIcon(
+  ctx: CanvasRenderingContext2D,
+  cx: number,
+  cy: number,
+  size: number
+) {
+  const w = size;
+  const h = size;
+  const x = cx - w / 2;
+  const y = cy - h / 2;
+  ctx.beginPath();
+  ctx.moveTo(x + w * 0.14, y + h * 0.78);
+  ctx.lineTo(x + w * 0.14, y + h * 0.4);
+  ctx.lineTo(x + w * 0.34, y + h * 0.56);
+  ctx.lineTo(x + w * 0.5, y + h * 0.2);
+  ctx.lineTo(x + w * 0.66, y + h * 0.56);
+  ctx.lineTo(x + w * 0.86, y + h * 0.4);
+  ctx.lineTo(x + w * 0.86, y + h * 0.78);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillRect(x + w * 0.14, y + h * 0.7, w * 0.72, h * 0.12);
+}
+
+function drawCrownBadge(ctx: CanvasRenderingContext2D, cx: number, cy: number) {
+  ctx.save();
+  ctx.shadowColor = "rgba(251,191,36,0.55)";
+  ctx.shadowBlur = 16;
+  ctx.fillStyle = SHARE_CARD_COLORS.crownFill;
+  ctx.beginPath();
+  ctx.arc(cx, cy, 18, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+  ctx.strokeStyle = "rgba(253,230,138,0.45)";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(cx, cy, 18, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.fillStyle = SHARE_CARD_COLORS.crownInk;
+  drawCrownIcon(ctx, cx, cy + 1, 22);
+}
+
+function drawDuelAvatar(
+  ctx: CanvasRenderingContext2D,
+  centerX: number,
+  centerY: number,
+  radius: number,
+  name: string,
+  tone: "self" | "friend",
+  image: HTMLImageElement | null | undefined,
+  winner: boolean
+) {
+  const fill = tone === "self" ? SHARE_CARD_COLORS.selfFill : SHARE_CARD_COLORS.friendFill;
+  const border = tone === "self" ? SHARE_CARD_COLORS.selfBorder : SHARE_CARD_COLORS.friendBorder;
+  const text = tone === "self" ? SHARE_CARD_COLORS.selfText : SHARE_CARD_COLORS.friendText;
+
+  if (winner) {
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius + 10, 0, Math.PI * 2);
+    ctx.strokeStyle = SHARE_CARD_COLORS.canvas;
+    ctx.lineWidth = 8;
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius + 12, 0, Math.PI * 2);
+    ctx.strokeStyle = SHARE_CARD_COLORS.winnerRing;
+    ctx.lineWidth = 4;
+    ctx.stroke();
+  }
+
+  ctx.fillStyle = fill;
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+  ctx.fill();
+
+  if (image) {
+    drawCircularAvatar(ctx, image, centerX, centerY, radius, {
+      borderColor: border,
+      borderWidth: 4,
+    });
+  } else {
+    ctx.strokeStyle = border;
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.fillStyle = text;
+    ctx.font = `700 ${Math.round(radius * 0.62)}px ${SHARE_CARD_FONT}`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(getUserAvatarInitials(name), centerX, centerY + radius * 0.04);
+    ctx.textBaseline = "alphabetic";
+  }
+
+  if (winner) {
+    drawCrownBadge(ctx, centerX + radius * 0.78, centerY - radius * 0.78);
+  }
+}
+
+function drawSplitShareBar(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  selfPct: number
+) {
+  ctx.save();
+  drawRoundedRect(ctx, x, y, width, height, height / 2);
+  ctx.clip();
+  ctx.fillStyle = SHARE_CARD_COLORS.barTrack;
+  ctx.fillRect(x, y, width, height);
+
+  const selfW = width * selfPct;
+  const violet = ctx.createLinearGradient(x, y, x + Math.max(selfW, 1), y);
+  violet.addColorStop(0, "#8b5cf6");
+  violet.addColorStop(1, "#a78bfa");
+  ctx.fillStyle = violet;
+  ctx.fillRect(x, y, selfW, height);
+
+  const cyan = ctx.createLinearGradient(x + selfW, y, x + width, y);
+  cyan.addColorStop(0, "#22d3ee");
+  cyan.addColorStop(1, "#67e8f9");
+  ctx.fillStyle = cyan;
+  ctx.fillRect(x + selfW, y, width - selfW, height);
+  ctx.restore();
+
+  ctx.strokeStyle = "rgba(255,255,255,0.1)";
+  ctx.lineWidth = 2;
+  drawRoundedRect(ctx, x, y, width, height, height / 2);
+  ctx.stroke();
+}
+
 export type HeadToHeadCardInput = {
   size: number;
   cardY?: number;
@@ -268,6 +537,9 @@ export type HeadToHeadCardInput = {
   friendLabel: string;
   winnerHeadline: string;
   winner: "self" | "friend" | "tie";
+  vsLabel?: string;
+  leadLabel?: string;
+  marginCaption?: string;
 };
 
 export function drawHeadToHeadCard(
@@ -276,101 +548,104 @@ export function drawHeadToHeadCard(
 ) {
   const { size } = input;
   const cardY = input.cardY ?? 430;
-  const cardX = 96;
-  const cardW = size - 192;
-  const cardH = 380;
-  const avatarRadius = 36;
+  const { padX, duelAvatarRadius, barHeight } = SHARE_CARD_LAYOUT;
+  const colWidth = (size - padX * 2) / 2;
+  const selfCenterX = padX + colWidth / 2;
+  const friendCenterX = padX + colWidth + colWidth / 2;
+  const avatarCenterY = cardY + duelAvatarRadius;
+  const vsLabel = (input.vsLabel ?? "VS").toUpperCase();
 
-  ctx.fillStyle = "rgba(15,23,42,0.72)";
-  drawRoundedRect(ctx, cardX, cardY, cardW, cardH, 36);
-  ctx.fill();
-
-  const colWidth = cardW / 2;
-  const selfCenterX = cardX + colWidth / 2;
-  const friendCenterX = cardX + colWidth + colWidth / 2;
-  const avatarCenterY = cardY + 52;
-
-  if (input.viewerAvatar) {
-    drawCircularAvatar(ctx, input.viewerAvatar, selfCenterX, avatarCenterY, avatarRadius, {
-      borderColor: "rgba(167,139,250,0.85)",
-      borderWidth: 3,
-    });
-  }
-  if (input.friendAvatar) {
-    drawCircularAvatar(ctx, input.friendAvatar, friendCenterX, avatarCenterY, avatarRadius, {
-      borderColor: "rgba(34,211,238,0.85)",
-      borderWidth: 3,
-    });
-  }
-
-  ctx.textAlign = "center";
-  ctx.fillStyle = "rgba(167,139,250,0.95)";
-  ctx.font = `700 24px ${SHARE_CARD_FONT}`;
-  ctx.fillText(
-    truncateText(ctx, input.viewerName, colWidth - 40),
+  drawDuelAvatar(
+    ctx,
     selfCenterX,
-    cardY + 112
+    avatarCenterY,
+    duelAvatarRadius,
+    input.viewerName,
+    "self",
+    input.viewerAvatar,
+    input.winner === "self"
   );
-  ctx.fillStyle = "rgba(34,211,238,0.95)";
-  ctx.fillText(
-    truncateText(ctx, input.friendName, colWidth - 40),
+  drawDuelAvatar(
+    ctx,
     friendCenterX,
-    cardY + 112
+    avatarCenterY,
+    duelAvatarRadius,
+    input.friendName,
+    "friend",
+    input.friendAvatar,
+    input.winner === "friend"
   );
+
+  ctx.font = `800 22px ${SHARE_CARD_FONT}`;
+  const vsTextWidth = measureSpacedText(ctx, vsLabel, 4.4);
+  const vsW = Math.max(vsTextWidth + 40, 88);
+  const vsH = 44;
+  const vsX = size / 2 - vsW / 2;
+  const vsY = avatarCenterY - vsH / 2 - 10;
+  ctx.fillStyle = SHARE_CARD_COLORS.vsFill;
+  drawRoundedRect(ctx, vsX, vsY, vsW, vsH, vsH / 2);
+  ctx.fill();
+  ctx.strokeStyle = SHARE_CARD_COLORS.vsBorder;
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  ctx.fillStyle = SHARE_CARD_COLORS.vsText;
+  ctx.textAlign = "center";
+  fillTextSpaced(ctx, vsLabel, size / 2, vsY + 30, 4.4);
+
+  if (input.leadLabel) {
+    ctx.font = `700 18px ${SHARE_CARD_FONT}`;
+    ctx.fillStyle =
+      input.winner === "tie" ? SHARE_CARD_COLORS.leadTie : SHARE_CARD_COLORS.lead;
+    ctx.textAlign = "center";
+    const lead = wrapLines(ctx, input.leadLabel.toUpperCase(), 200, 2);
+    let leadY = vsY + vsH + 28;
+    for (const line of lead) {
+      fillTextSpaced(ctx, line, size / 2, leadY, 2.6);
+      leadY += 22;
+    }
+  }
+
+  const nameY = avatarCenterY + duelAvatarRadius + 36;
+  ctx.font = `600 26px ${SHARE_CARD_FONT}`;
+  ctx.textAlign = "center";
+  ctx.fillStyle = SHARE_CARD_COLORS.selfName;
+  ctx.fillText(truncateText(ctx, input.viewerName, colWidth - 36), selfCenterX, nameY);
+  ctx.fillStyle = SHARE_CARD_COLORS.friendName;
+  ctx.fillText(truncateText(ctx, input.friendName, colWidth - 36), friendCenterX, nameY);
 
   ctx.fillStyle = "#ffffff";
-  ctx.font = `800 88px ${SHARE_CARD_FONT}`;
-  ctx.fillText(input.selfCount.toLocaleString(), selfCenterX, cardY + 204);
-  ctx.fillText(input.friendCount.toLocaleString(), friendCenterX, cardY + 204);
+  ctx.font = `600 68px ${SHARE_CARD_FONT}`;
+  ctx.fillText(input.selfCount.toLocaleString(), selfCenterX, nameY + 68);
+  ctx.fillText(input.friendCount.toLocaleString(), friendCenterX, nameY + 68);
 
-  ctx.font = `600 22px ${SHARE_CARD_FONT}`;
-  ctx.fillStyle = "rgba(148,163,184,0.95)";
-  ctx.fillText(input.selfLabel, selfCenterX, cardY + 242);
-  ctx.fillText(input.friendLabel, friendCenterX, cardY + 242);
-
-  ctx.fillStyle = "rgba(255,255,255,0.12)";
-  ctx.fillRect(cardX + colWidth - 1, cardY + 36, 2, 308);
-
-  ctx.font = `900 34px ${SHARE_CARD_FONT}`;
-  ctx.fillStyle = "#f9a8d4";
-  ctx.fillText("VS", size / 2, avatarCenterY + 12);
+  ctx.font = `600 18px ${SHARE_CARD_FONT}`;
+  ctx.fillStyle = SHARE_CARD_COLORS.playsLabel;
+  fillTextSpaced(ctx, input.selfLabel.toUpperCase(), selfCenterX, nameY + 96, 3.2);
+  fillTextSpaced(ctx, input.friendLabel.toUpperCase(), friendCenterX, nameY + 96, 3.2);
 
   const total = input.selfCount + input.friendCount;
   const selfPct = total > 0 ? input.selfCount / total : 0.5;
-  const barX = 132;
-  const barY = cardY + 274;
-  const barW = size - 264;
-  const barH = 28;
-  ctx.fillStyle = "rgba(255,255,255,0.12)";
-  drawRoundedRect(ctx, barX, barY, barW, barH, 14);
-  ctx.fill();
-  if (selfPct > 0) {
-    const selfGrad = ctx.createLinearGradient(barX, barY, barX + barW, barY);
-    selfGrad.addColorStop(0, "#8b5cf6");
-    selfGrad.addColorStop(Math.min(selfPct, 0.98), "#a78bfa");
-    ctx.fillStyle = selfGrad;
-    drawRoundedRect(ctx, barX, barY, Math.max(barW * selfPct, 14), barH, 14);
-    ctx.fill();
-  }
-  if (selfPct < 1) {
-    const friendGrad = ctx.createLinearGradient(
-      barX + barW * selfPct,
-      barY,
-      barX + barW,
-      barY
-    );
-    friendGrad.addColorStop(0, "#22d3ee");
-    friendGrad.addColorStop(1, "#67e8f9");
-    ctx.fillStyle = friendGrad;
-    drawRoundedRect(ctx, barX + barW * selfPct, barY, barW * (1 - selfPct), barH, 14);
-    ctx.fill();
+  const barX = padX;
+  const barY = nameY + 124;
+  const barW = size - padX * 2;
+  drawSplitShareBar(ctx, barX, barY, barW, barHeight, selfPct);
+
+  ctx.font = `600 32px ${SHARE_CARD_FONT}`;
+  ctx.fillStyle = SHARE_CARD_COLORS.headline;
+  ctx.textAlign = "center";
+  const headlineLines = wrapLines(ctx, input.winnerHeadline, size - 160, 2);
+  const headlineStartY = barY + barHeight + 36;
+  for (let i = 0; i < headlineLines.length; i++) {
+    ctx.fillText(headlineLines[i] ?? "", size / 2, headlineStartY + i * 36);
   }
 
-  ctx.font = `700 28px ${SHARE_CARD_FONT}`;
-  ctx.fillStyle = input.winner === "tie" ? "#e2e8f0" : "#fde68a";
-  const headlineLines = wrapLines(ctx, input.winnerHeadline, size - 220, 2);
-  const headlineStartY = headlineLines.length > 1 ? cardY + 326 : cardY + 348;
-  for (let i = 0; i < headlineLines.length; i++) {
-    ctx.fillText(headlineLines[i] ?? "", size / 2, headlineStartY + i * 34);
+  if (input.marginCaption) {
+    ctx.font = `500 22px ${SHARE_CARD_FONT}`;
+    ctx.fillStyle = SHARE_CARD_COLORS.caption;
+    ctx.fillText(
+      truncateText(ctx, input.marginCaption, size - 180),
+      size / 2,
+      headlineStartY + headlineLines.length * 36 + 6
+    );
   }
 }

@@ -5,6 +5,7 @@ import {
   drawShareCardBrandFooter,
   drawShareCardEntityImage,
   drawShareCardEyebrow,
+  drawShareCardMetaRow,
   drawShareCardTitleBlock,
 } from "@/lib/utils/share-card/canvas-primitives";
 import {
@@ -34,6 +35,10 @@ export type HeadToHeadShareCardInput = {
   brandTagline: string;
   /** Artist portrait shown above the title when available (e.g. artist duel). */
   entityImageUrl?: string | null;
+  badgeLabel?: string;
+  vsLabel?: string;
+  leadLabel?: string;
+  marginCaption?: string;
 };
 
 export async function renderHeadToHeadShareCard(
@@ -41,8 +46,8 @@ export async function renderHeadToHeadShareCard(
 ): Promise<HTMLCanvasElement> {
   const entityImageUrl = input.entityImageUrl?.trim();
   const [viewerAvatar, friendAvatar, entityImage, brandLogo] = await Promise.all([
-    loadShareCardAvatar(input.viewerAvatarUrl, input.viewerName, 0),
-    loadShareCardAvatar(input.friendAvatarUrl, input.friendName, 1),
+    loadShareCardAvatar(input.viewerAvatarUrl),
+    loadShareCardAvatar(input.friendAvatarUrl),
     entityImageUrl
       ? loadCanvasImage(entityImageUrl)
       : Promise.resolve(null),
@@ -57,22 +62,33 @@ export async function renderHeadToHeadShareCard(
   const layout = computeShareCardVerticalLayout(
     ctx,
     input.title,
-    input.subtitle,
     Boolean(entityImage)
   );
 
-  drawShareCardBackground(ctx, SHARE_CARD_SIZE);
-  drawShareCardEyebrow(ctx, SHARE_CARD_SIZE, input.eyebrowLabel);
+  drawShareCardBackground(ctx, SHARE_CARD_SIZE, entityImage);
+  drawShareCardMetaRow(
+    ctx,
+    SHARE_CARD_SIZE,
+    input.subtitle,
+    input.badgeLabel
+  );
   if (entityImage && layout.entityImageCenterY !== null) {
     drawShareCardEntityImage(
       ctx,
       SHARE_CARD_SIZE,
       entityImage,
       layout.entityImageCenterY,
-      layout.entityImageRadius
+      layout.entityImageSize,
+      layout.entityImageCornerRadius
     );
   }
-  drawShareCardTitleBlock(ctx, SHARE_CARD_SIZE, input.title, input.subtitle, {
+  drawShareCardEyebrow(
+    ctx,
+    SHARE_CARD_SIZE,
+    input.eyebrowLabel,
+    layout.eyebrowY
+  );
+  drawShareCardTitleBlock(ctx, SHARE_CARD_SIZE, input.title, {
     titleStartY: layout.titleStartY,
   });
   drawHeadToHeadCard(ctx, {
@@ -88,6 +104,9 @@ export async function renderHeadToHeadShareCard(
     friendLabel: input.friendLabel,
     winnerHeadline: input.winnerHeadline,
     winner: input.winner,
+    vsLabel: input.vsLabel,
+    leadLabel: input.leadLabel,
+    marginCaption: input.marginCaption,
   });
   drawShareCardBrandFooter(
     ctx,

@@ -20,7 +20,7 @@ type PlusNavItem = {
 };
 
 type PlusNavSection = {
-  groupKey: "patterns" | "library" | "aiPredictions" | "social";
+  groupKey: "home" | "patterns" | "library" | "social";
   items: PlusNavItem[];
 };
 
@@ -100,11 +100,22 @@ const icons = {
 
 const PLUS_SECTIONS: PlusNavSection[] = [
   {
+    groupKey: "home",
+    items: [
+      {
+        href: "/dashboard/ask-your-soundprint",
+        labelKey: "askSoundprint",
+        icon: icons.askSoundprint,
+      },
+    ],
+  },
+  {
     groupKey: "patterns",
     items: [
       { href: "/dashboard/heatmap", labelKey: "heatmap", icon: icons.heatmap },
       { href: "/dashboard/timeline", labelKey: "timeline", icon: icons.timeline },
       { href: "/dashboard/temporal-analysis", labelKey: "temporalAnalysis", icon: icons.clock },
+      { href: "/dashboard/ai-insights", labelKey: "aiInsights", icon: icons.aiInsights },
     ],
   },
   {
@@ -116,18 +127,6 @@ const PLUS_SECTIONS: PlusNavSection[] = [
     items: [
       { href: "/dashboard/duet/friends", labelKey: "duetFriends", icon: icons.duetUsers },
       { href: "/dashboard/duet/compare", labelKey: "duetCompare", icon: icons.duetCompare },
-    ],
-  },
-  {
-    groupKey: "aiPredictions",
-    items: [
-      {
-        href: "/dashboard/ask-your-soundprint",
-        labelKey: "askSoundprint",
-        icon: icons.askSoundprint,
-        badgeKey: "betaBadge",
-      },
-      { href: "/dashboard/ai-insights", labelKey: "aiInsights", icon: icons.aiInsights },
     ],
   },
 ];

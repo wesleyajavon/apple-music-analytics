@@ -79,8 +79,7 @@
     "groups": {
       "home": "Home",
       "library": "Library",
-      "patterns": "Streaming patterns",
-      "aiPredictions": "AI & Predictions",
+      "patterns": "Listening habits",
       "helpProduct": "Help & Product",
       "account": "Account",
       "social": "Social"
@@ -89,9 +88,9 @@
       "overview": "Your Music",
       "musicalProfile": "Musical Profile",
       "musicalProfileShort": "Profile",
-      "timeline": "Pulse chart",
-      "heatmap": "Heat grid",
-      "temporalAnalysis": "Rhythm lab",
+      "timeline": "Listening activity",
+      "heatmap": "Listening calendar",
+      "temporalAnalysis": "Listening routine",
       "genres": "Genres",
       "genreTrends": "Genre Trends",
       "palette": "Palette",
@@ -99,7 +98,7 @@
       "artists": "Artists",
       "trackTrends": "Track Trends",
       "tracks": "Tracks",
-      "askSoundprint": "Ask your Soundprint",
+      "askSoundprint": "Ask Soundprint",
       "aiInsights": "Insight cards",
       "tasteEvolution": "Taste shifts",
       "tasteProfile": "Taste Profile",
@@ -285,6 +284,7 @@
       "sharedArtistsBadge": "Shared tops",
       "sharedArtistsLoading": "Finding shared artists…",
       "sharedArtistsError": "Could not load shared artists.",
+      "sharedArtistsEmptyEyebrow": "No overlap",
       "sharedArtistsEmptyTitle": "No shared artists",
       "sharedArtistsEmptyDescription": "Your tops don’t overlap on this period. Try “All time” or a wider date range.",
       "sharedArtistsDuelCta": "Compare this artist",
@@ -331,6 +331,7 @@
       "shareOutcomeTie": "We streamed as much as each other",
       "shareBattleText": "🎧 Soundprint {arenaLabel}: \"{entityName}\" — me {selfCount} vs {friendName} {friendCount} streams. {outcome}",
       "shareCountLabel": "streams",
+      "shareVsLabel": "VS",
       "shareVersusSubtitle": "You vs {friendName}",
       "shareHeadlineTimelineSelf": "You've streamed more music than {friendName}",
       "shareHeadlineTimelineFriend": "{friendName} streamed more music than you",
@@ -1463,7 +1464,7 @@
     }
   },
   "timeline": {
-    "title": "Your streaming pulse",
+    "title": "Your listening activity",
     "subtitle": "Zoom from long arcs to sharp spikes—spot where momentum builds, fades, or comes roaring back.",
     "heroStatBadge": "Signals",
     "heroStatTag": "This range",
@@ -1473,14 +1474,14 @@
     "heroStatBuckets": "Buckets plotted",
     "chartTitle": "Volume curve",
     "chartHint": "Buckets follow your selector above—flip day, week, or month without losing the story.",
-    "errorLoading": "We couldn't load your pulse chart—try again.",
+    "errorLoading": "We couldn't load your listening activity—try again.",
     "listens": "streams",
     "Listens": "Streams",
     "periodBadgeDay": "Daily",
     "periodBadgeWeek": "Weekly",
     "periodBadgeMonth": "Monthly",
     "mobile": {
-      "eyebrow": "Pulse",
+      "eyebrow": "Activity",
       "storyBody": "{count} {streams} in that bucket. Scan how the pulse moves around it.",
       "average": "Avg. bucket",
       "trend": "Last move",
@@ -1495,25 +1496,25 @@
       "sparkPeakCaption": "Peak {date}",
       "bucketsTitle": "Loudest buckets",
       "openBucket": "Open {date}",
-      "heatmapRowTitle": "Daily intensity",
+      "heatmapRowTitle": "Listening calendar",
       "heatmapRowLead": "See the day-by-day texture",
       "sheetTitle": "Bucket",
       "sheetCloseAria": "Close bucket details",
       "vsAverage": "vs avg {average}",
       "shareOfTotal": "{percent}% of this range",
       "seeOnHeatmap": "Open on heatmap",
-      "emptyTitle": "No pulse yet",
+      "emptyTitle": "No activity yet",
       "emptyLead": "Import history to see your loudest moment.",
       "emptyCta": "Import history",
-      "errorLead": "Couldn't load this pulse."
+      "errorLead": "Couldn't load this activity."
     }
   },
   "heatmap": {
-    "title": "Your streaming canopy",
+    "title": "Your listening calendar",
     "subtitle": "GitHub-style tiles for every day you streamed. Tap a square to unpack that day's soundtrack.",
-    "heroEyebrow": "Intensity map",
+    "heroEyebrow": "Calendar",
     "mobile": {
-      "heroEyebrow": "Intensity",
+      "heroEyebrow": "Calendar",
       "primaryInsightBody": "{date} carried the strongest signal with {count} streams.",
       "peakMetric": "Peak",
       "openPeakDay": "Open that day",
@@ -1594,7 +1595,7 @@
     "noListen": "no streams"
   },
   "temporal-analysis": {
-    "title": "Rhythm studio",
+    "title": "Your listening routine",
     "subtitle": "Weekday lanes meet the 24-hour clock—surface the pocket where your soundtrack actually locks in.",
     "heroBadge": "All-time archive · date filters paused here",
     "heroStatBadge": "Signal boost",
@@ -1603,7 +1604,7 @@
     "heroStatTotal": "Total streams",
     "note": "Why full history?",
     "noteText": "Short windows lie. We analyze your entire archive so weekday and hour habits mirror real life—not one noisy week.",
-    "errorLoading": "We couldn't load rhythm analytics—try again.",
+    "errorLoading": "We couldn't load your listening routine—try again.",
     "peakDay": "Peak day",
     "peakHour": "Peak hour",
     "weekdays": {
@@ -1655,14 +1656,14 @@
       "openHours": "Open {part}",
       "sheetCloseAria": "Close details",
       "shareOfTotal": "{percent}% of archive",
-      "timelineRowTitle": "Pulse chart",
+      "timelineRowTitle": "Listening activity",
       "timelineRowLead": "How volume moved",
-      "heatmapRowTitle": "Daily intensity",
+      "heatmapRowTitle": "Listening calendar",
       "heatmapRowLead": "See the day-by-day texture",
-      "emptyTitle": "No rhythm yet",
+      "emptyTitle": "No routine yet",
       "emptyLead": "Import history to see when you stream.",
       "emptyCta": "Import history",
-      "errorLead": "Couldn't load this rhythm.",
+      "errorLead": "Couldn't load this routine.",
       "storyBody": "{count} {streams} at that hour.",
       "dayParts": {
         "night": "Night",
@@ -1672,7 +1673,7 @@
       }
     },
     "viewSwitcher": {
-      "navLabel": "Rhythm sections",
+      "navLabel": "Routine sections",
       "views": {
         "spotlight": "Signature slot",
         "weekday": "Weekdays",
@@ -2624,18 +2625,18 @@
         "paragraph": "The <code>/dashboard/overview</code> page is the analytics hub: period, a concrete top-track or top-artist insight, headline KPIs versus the prior window of the same length, one leaderboard for tracks/artists/genres, trend charts behind visible tabs, a heatmap plus AI excerpt, a teaser to Musical Profile, then Chat and Duet. Related routes include <code>/dashboard/tracks</code>, <code>/dashboard/artists</code>, <code>/dashboard/musical-profile</code>, and this methodology page at <code>/dashboard/insights</code>."
       },
       "timeline": {
-        "title": "Timeline and Temporal Trends",
+        "title": "Listening activity and temporal trends",
         "paragraph": "The <code>/dashboard/timeline</code> and <code>/dashboard/genres/trends</code> pages reveal streaming cycles with aggregation by day, week or month:",
         "li1": "Weekly cycles: Days of the week when you stream the most",
         "li2": "Seasonal variations: Monthly evolution of habits",
         "li3": "Genre trends: Genres on the rise or decline over the period (first vs second half comparison)"
       },
       "heatmap": {
-        "title": "Streaming Heatmap",
+        "title": "Listening calendar",
         "paragraph": "The <code>/dashboard/heatmap</code> page displays a GitHub-style calendar with streaming intensity per day. It identifies your most active days and distribution by day of the week."
       },
       "temporal": {
-        "title": "Advanced Temporal Analysis",
+        "title": "Listening routine",
         "paragraph": "The <code>/dashboard/temporal-analysis</code> page details your streaming patterns: streams by day of the week (Monday-Sunday), by hour of the day, and identifies peak moments (day and hour when you stream the most)."
       },
       "genres": {
@@ -3107,12 +3108,12 @@
       "title": "What can you explore?",
       "items": {
         "overview": "Your Music — Global stats (streams, artists, tracks, total time)",
-        "timeline": "Timeline — Evolution of your streams over time (day/week/month)",
-        "heatmap": "Heatmap — GitHub-style calendar of your streaming intensity",
+        "timeline": "Listening activity — Evolution of your streams over time (day/week/month)",
+        "heatmap": "Listening calendar — GitHub-style calendar of your streaming intensity",
         "tracks": "Tracks — most streamed tracks and replay patterns",
         "genres": "Genres — Breakdown by genre and temporal trends",
         "artists": "Artists — Top artists and detailed stats",
-        "timeAnalysis": "Time analysis — Habits by hour and day of week",
+        "timeAnalysis": "Listening routine — Habits by hour and day of week",
         "musicalProfile": "Musical profile — Your streamer persona from behavior patterns",
         "insights": "Insights — Product-generated summaries and key streaming signals",
         "palette": "Palette — Map and refine genres for your library",
@@ -3279,7 +3280,7 @@
         "description": "Your podium artists with real stream counts and share bars — the same ranking cards from the dashboard."
       },
       "timeline": {
-        "description": "Your streaming pulse over time — spot spikes, dips, and momentum shifts at a glance."
+        "description": "Your listening activity over time — spot spikes, dips, and momentum shifts at a glance."
       },
       "tasteProfile": {
         "description": "An AI-assisted read of your musical identity — core genres, signature sound, and a plain-language snapshot.",
@@ -3325,7 +3326,7 @@
     },
     "features": {
       "timeline": {
-        "title": "Timeline",
+        "title": "Listening activity",
         "description": "Visualize your streaming habits over time."
       },
       "genresArtists": {

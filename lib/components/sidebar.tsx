@@ -19,7 +19,6 @@ interface NavItem {
   href: string;
   labelKey: string;
   icon: (props: React.SVGProps<SVGSVGElement>) => JSX.Element;
-  featured?: boolean;
   badgeKey?: string;
   children?: NavItem[];
 }
@@ -143,7 +142,12 @@ const navGroups: NavGroup[] = [
     labelKey: "home",
     items: [
       { href: "/dashboard/musical-profile", labelKey: "musicalProfile", icon: icons.musicalProfile },
-      { href: "/dashboard/overview", labelKey: "overview", icon: icons.overview, featured: true },
+      { href: "/dashboard/overview", labelKey: "overview", icon: icons.overview },
+      {
+        href: "/dashboard/ask-your-soundprint",
+        labelKey: "askSoundprint",
+        icon: icons.askSoundprint,
+      },
     ],
   },
   {
@@ -178,6 +182,7 @@ const navGroups: NavGroup[] = [
       { href: "/dashboard/timeline", labelKey: "timeline", icon: icons.timeline },
       { href: "/dashboard/heatmap", labelKey: "heatmap", icon: icons.heatmap },
       { href: "/dashboard/temporal-analysis", labelKey: "temporalAnalysis", icon: icons.clock },
+      { href: "/dashboard/ai-insights", labelKey: "aiInsights", icon: icons.aiInsights },
     ],
   },
   {
@@ -185,19 +190,6 @@ const navGroups: NavGroup[] = [
     items: [
       { href: "/dashboard/duet/friends", labelKey: "duetFriends", icon: icons.duetUsers },
       { href: "/dashboard/duet/compare", labelKey: "duetCompare", icon: icons.duetCompare },
-    ],
-  },
-  {
-    labelKey: "aiPredictions",
-    items: [
-      {
-        href: "/dashboard/ask-your-soundprint",
-        labelKey: "askSoundprint",
-        icon: icons.askSoundprint,
-        featured: true,
-        badgeKey: "betaBadge",
-      },
-      { href: "/dashboard/ai-insights", labelKey: "aiInsights", icon: icons.aiInsights },
     ],
   },
   {
@@ -492,7 +484,6 @@ function SidebarContent() {
     const isDirectActive = pathname === item.href;
     const isActive = isNavItemActive(item, pathname);
     const isOpen = !displayCollapsed && hasChildren && !!openNavKeys[key];
-    const isFeatured = !!item.featured;
     const Icon = item.icon;
     const label = t(`items.${item.labelKey}`);
     const showPendingFriendRequestsBadge =
@@ -500,27 +491,17 @@ function SidebarContent() {
     const pendingFriendRequestsBadgeLabel = showPendingFriendRequestsBadge
       ? t("pendingFriendRequestsBadge", { count: pendingFriendRequestsCount })
       : undefined;
-      const itemClassName = `
+    const itemClassName = `
       group flex items-center rounded-xl text-sm font-medium transition-all duration-200
       ${displayCollapsed ? "justify-center px-2 py-2.5" : "gap-3 px-3 py-2.5"}
       ${
         isActive
-          ? isFeatured
-            ? "bg-brand-gradient text-white shadow-brand-glow"
-            : "bg-primary/10 text-primary"
-          : isFeatured
-            ? "bg-gradient-to-r from-primary/15 via-accent-violet/10 to-accent-cyan/10 text-foreground ring-1 ring-primary/20 shadow-sm hover:shadow-brand-glow"
-            : "text-muted hover:text-foreground hover:bg-primary/10"
+          ? "bg-primary/10 text-primary"
+          : "text-muted hover:text-foreground hover:bg-primary/10"
       }
     `;
     const iconClassName = `w-5 h-5 shrink-0 transition-transform group-hover:scale-105 ${
-      isFeatured
-        ? isActive
-          ? "text-white"
-          : "text-primary"
-        : isActive
-          ? "text-primary"
-          : "text-muted/75 group-hover:text-primary"
+      isActive ? "text-primary" : "text-muted/75 group-hover:text-primary"
     }`;
 
     if (hasChildren) {
@@ -598,7 +579,7 @@ function SidebarContent() {
                 ariaLabel={pendingFriendRequestsBadgeLabel}
               />
             ) : null}
-            {isFeatured && !isDirectActive && (
+            {item.badgeKey ? (
               <span
                 className={
                   item.badgeKey === "betaBadge"
@@ -606,9 +587,9 @@ function SidebarContent() {
                     : "rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary"
                 }
               >
-                {t(item.badgeKey ?? "featuredBadge")}
+                {t(item.badgeKey)}
               </span>
-            )}
+            ) : null}
             {isDirectActive && <div className="w-1 h-5 rounded-full bg-brand-gradient shrink-0" />}
           </>
         )}

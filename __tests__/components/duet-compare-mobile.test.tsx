@@ -113,6 +113,21 @@ const baseProps = {
   onRetryEntity: vi.fn(),
 };
 
+describe("DuetCompareMobileExperience shared empty", () => {
+  it("shows title and description when there is no overlap", () => {
+    render(
+      <DuetCompareMobileExperience
+        {...baseProps}
+        activeSection="shared"
+        sharedArtists={[]}
+      />
+    );
+
+    expect(screen.getByRole("status", { name: "sharedArtistsEmptyTitle" })).toBeTruthy();
+    expect(screen.getByText("sharedArtistsEmptyDescription")).toBeTruthy();
+  });
+});
+
 describe("DuetCompareMobileExperience arena actions", () => {
   it("shows share and download on an artist duel", () => {
     render(

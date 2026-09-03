@@ -17,7 +17,7 @@ import { ChartResponsiveContainer } from "@/lib/components/chart-responsive-cont
 import { DuetShareCardActions } from "@/lib/components/duet/duet-share-card-actions";
 import type { DuetArenaMode } from "@/lib/components/duet/duet-battle-arena-ui";
 import { generateDuetBattleSharePng } from "@/lib/utils/duet-battle-share-image";
-import { duetShareHeadlineKey } from "@/lib/utils/duet-share-headline";
+import { duetShareHeadlineKey, duetShareLeadKey } from "@/lib/utils/duet-share-headline";
 import type { PeriodType } from "@/lib/components/period-selector";
 import { DASHBOARD_CHART_THEME } from "@/lib/constants/dashboard-spotlight";
 import type { DualLineChartPoint } from "@/lib/utils/listen-trend-chart-view";
@@ -150,6 +150,7 @@ export function EntityBattleShareActions({
   }
 
   async function buildShareImageBlob() {
+    const margin = Math.abs(selfCount - friendCount);
     return generateDuetBattleSharePng({
       arenaLabel: buildArenaLabel(),
       entityName,
@@ -167,6 +168,16 @@ export function EntityBattleShareActions({
       friendLabel: t("shareCountLabel"),
       brandName: t("shareBrandName"),
       brandTagline: t("shareBrandTagline"),
+      badgeLabel: t("heroEyebrow"),
+      vsLabel: t("shareVsLabel"),
+      leadLabel:
+        winner === "friend"
+          ? t("scoreboardLeadsFriend", { name: friendName })
+          : t(duetShareLeadKey(winner)),
+      marginCaption:
+        winner === "tie" || margin === 0
+          ? undefined
+          : t("scoreboardMargin", { margin: margin.toLocaleString(locale) }),
     });
   }
 

@@ -50,15 +50,9 @@ export function createLocalInitialsAvatar(
 }
 
 export async function loadShareCardAvatar(
-  url: string | null | undefined,
-  fallbackName: string,
-  colorIndex: number
-): Promise<HTMLImageElement> {
+  url: string | null | undefined
+): Promise<HTMLImageElement | null> {
   const primary = url?.trim();
-  if (primary) {
-    const loaded = await loadCanvasImage(primary);
-    if (loaded) return loaded;
-  }
-
-  return createLocalInitialsAvatar(fallbackName, colorIndex);
+  if (!primary) return null;
+  return loadCanvasImage(primary);
 }

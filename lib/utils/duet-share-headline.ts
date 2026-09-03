@@ -29,3 +29,9 @@ export function duetShareHeadlineKey(
 ): (typeof HEADLINE_KEYS)[DuetShareHeadlineKind]["self" | "friend" | "tie"] {
   return HEADLINE_KEYS[kind][winner];
 }
+
+export function duetShareLeadKey(winner: "self" | "friend" | "tie") {
+  if (winner === "self") return "scoreboardLeadsSelf" as const;
+  if (winner === "friend") return "scoreboardLeadsFriend" as const;
+  return "scoreboardTie" as const;
+}

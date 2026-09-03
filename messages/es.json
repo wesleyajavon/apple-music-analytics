@@ -79,8 +79,7 @@
     "groups": {
       "home": "Inicio",
       "library": "Biblioteca",
-      "patterns": "patrones de streams",
-      "aiPredictions": "IA y predicciones",
+      "patterns": "Hábitos de escucha",
       "helpProduct": "Ayuda y producto",
       "account": "Cuenta",
       "social": "Social"
@@ -89,9 +88,9 @@
       "overview": "Your Music",
       "musicalProfile": "Perfil musical",
       "musicalProfileShort": "Perfil",
-      "timeline": "Curva pulso",
-      "heatmap": "Cuadrícula térmica",
-      "temporalAnalysis": "Lab de ritmo",
+      "timeline": "Actividad de escucha",
+      "heatmap": "Calendario de escucha",
+      "temporalAnalysis": "Rutina de escucha",
       "genres": "Géneros",
       "genreTrends": "Tendencias de géneros",
       "palette": "Palette",
@@ -99,7 +98,7 @@
       "artists": "Artistas",
       "trackTrends": "Tendencias de títulos",
       "tracks": "Títulos",
-      "askSoundprint": "Pregunta a tu Soundprint",
+      "askSoundprint": "Preguntar",
       "aiInsights": "Tarjetas de insights",
       "tasteEvolution": "Cambios de gusto",
       "tasteProfile": "Perfil de gusto",
@@ -285,6 +284,7 @@
       "sharedArtistsBadge": "Tops compartidos",
       "sharedArtistsLoading": "Buscando artistas en común…",
       "sharedArtistsError": "No se pudieron cargar los artistas compartidos.",
+      "sharedArtistsEmptyEyebrow": "Sin coincidencia",
       "sharedArtistsEmptyTitle": "Ningún artista en común",
       "sharedArtistsEmptyDescription": "Vuestros tops no coinciden en este periodo. Prueba «Todo el historial» o un rango más amplio.",
       "sharedArtistsDuelCta": "Comparar este artista",
@@ -331,6 +331,7 @@
       "shareOutcomeTie": "Hemos reproducido lo mismo",
       "shareBattleText": "🎧 Soundprint {arenaLabel}: «{entityName}» — yo {selfCount} vs {friendName} {friendCount} streams. {outcome}",
       "shareCountLabel": "streams",
+      "shareVsLabel": "VS",
       "shareVersusSubtitle": "Tú vs {friendName}",
       "shareHeadlineTimelineSelf": "Has reproducido más música que {friendName}",
       "shareHeadlineTimelineFriend": "{friendName} ha reproducido más música que tú",
@@ -1465,7 +1466,7 @@
     }
   },
   "timeline": {
-    "title": "El pulso de tu stream",
+    "title": "Tu actividad de escucha",
     "subtitle": "Del arco largo al pico diario — mira dónde crece el ritmo, cae o vuelve con fuerza.",
     "heroStatBadge": "Señales",
     "heroStatTag": "Este rango",
@@ -1475,14 +1476,14 @@
     "heroStatBuckets": "Tramos dibujados",
     "chartTitle": "Curva de volumen",
     "chartHint": "El tamaño de paso sigue el selector de arriba — cambia día, semana o mes sin perder el hilo.",
-    "errorLoading": "No pudimos cargar tu curva pulso — inténtalo otra vez.",
+    "errorLoading": "No pudimos cargar tu actividad de escucha — inténtalo otra vez.",
     "listens": "streams",
     "Listens": "Streams",
     "periodBadgeDay": "Día",
     "periodBadgeWeek": "Semana",
     "periodBadgeMonth": "Mes",
     "mobile": {
-      "eyebrow": "Pulso",
+      "eyebrow": "Actividad",
       "storyBody": "{count} {streams} en ese tramo. Mira cómo se mueve el pulso alrededor.",
       "average": "Prom. tramo",
       "trend": "Tendencia",
@@ -1497,25 +1498,25 @@
       "sparkPeakCaption": "Pico {date}",
       "bucketsTitle": "Tramos más fuertes",
       "openBucket": "Abrir {date}",
-      "heatmapRowTitle": "Intensidad diaria",
+      "heatmapRowTitle": "Calendario de escucha",
       "heatmapRowLead": "Ver la textura día a día",
       "sheetTitle": "Tramo",
       "sheetCloseAria": "Cerrar el detalle del tramo",
       "vsAverage": "vs prom. {average}",
       "shareOfTotal": "{percent}% de este rango",
       "seeOnHeatmap": "Abrir en el heatmap",
-      "emptyTitle": "Aún no hay pulso",
+      "emptyTitle": "Aún no hay actividad",
       "emptyLead": "Importa el historial para ver tu momento más fuerte.",
       "emptyCta": "Importar historial",
-      "errorLead": "No se pudo cargar este pulso."
+      "errorLead": "No se pudo cargar esta actividad."
     }
   },
   "heatmap": {
-    "title": "Tu dosel de stream",
+    "title": "Tu calendario de escucha",
     "subtitle": "Casillas estilo GitHub para cada día que diste play. Toca un cuadrado y desglosa esa sesión.",
-    "heroEyebrow": "Mapa de intensidad",
+    "heroEyebrow": "Calendario",
     "mobile": {
-      "heroEyebrow": "Intensidad",
+      "heroEyebrow": "Calendario",
       "primaryInsightBody": "{date} marcó la señal más fuerte con {count} streams.",
       "peakMetric": "Pico",
       "openPeakDay": "Abrir ese día",
@@ -1596,7 +1597,7 @@
     "noListen": "Sin streams"
   },
   "temporal-analysis": {
-    "title": "Estudio de ritmo",
+    "title": "Tu rutina de escucha",
     "subtitle": "Los días de la semana cruzan las 24 horas — encuentra el hueco donde tu banda sonora encaja de verdad.",
     "heroBadge": "Archivo completo · filtros de fecha en pausa aquí",
     "heroStatBadge": "Refuerzo de señal",
@@ -1605,7 +1606,7 @@
     "heroStatTotal": "Streams totales",
     "note": "¿Por qué todo el historial?",
     "noteText": "Ventanas cortas mienten. Analizamos todo el archivo para que día y hora reflejen tu vida real — no solo una semana ruidosa.",
-    "errorLoading": "No pudimos cargar el laboratorio de ritmo — inténtalo otra vez.",
+    "errorLoading": "No pudimos cargar tu rutina de escucha — inténtalo otra vez.",
     "peakDay": "Día pico",
     "peakHour": "Hora pico",
     "weekdays": {
@@ -1657,14 +1658,14 @@
       "openHours": "Abrir {part}",
       "sheetCloseAria": "Cerrar el detalle",
       "shareOfTotal": "{percent}% del archivo",
-      "timelineRowTitle": "Pulso",
+      "timelineRowTitle": "Actividad de escucha",
       "timelineRowLead": "Cómo se movió el volumen",
-      "heatmapRowTitle": "Intensidad diaria",
+      "heatmapRowTitle": "Calendario de escucha",
       "heatmapRowLead": "La textura día a día",
-      "emptyTitle": "Aún no hay ritmo",
+      "emptyTitle": "Aún no hay rutina",
       "emptyLead": "Importa el historial para ver cuándo streameas.",
       "emptyCta": "Importar historial",
-      "errorLead": "No se pudo cargar este ritmo.",
+      "errorLead": "No se pudo cargar esta rutina.",
       "storyBody": "{count} {streams} a esa hora.",
       "dayParts": {
         "night": "Madrugada",
@@ -1674,7 +1675,7 @@
       }
     },
     "viewSwitcher": {
-      "navLabel": "Secciones de ritmo",
+      "navLabel": "Secciones de rutina",
       "views": {
         "spotlight": "Hueco firma",
         "weekday": "Semana",
@@ -2626,18 +2627,18 @@
         "paragraph": "La página <code>/dashboard/overview</code> es el hub analítico: período, un insight concreto (top canción o artista), KPIs frente a la ventana previa de la misma duración, un solo ranking de canciones/artistas/géneros, gráficos de tendencias detrás de pestañas visibles, heatmap más extracto de IA, teaser al Perfil musical, luego Chat y Duet. Rutas relacionadas: <code>/dashboard/tracks</code>, <code>/dashboard/artists</code>, <code>/dashboard/musical-profile</code> y esta metodología en <code>/dashboard/insights</code>."
       },
       "timeline": {
-        "title": "Timeline y tendencias temporales",
+        "title": "Actividad de escucha y tendencias temporales",
         "paragraph": "Las páginas <code>/dashboard/timeline</code> y <code>/dashboard/genres/trends</code> revelan ciclos de stream con agregación por día, semana o mes:",
         "li1": "Ciclos semanales: Días de la semana en que Más streams",
         "li2": "Variaciones estacionales: Evolución mensual de los hábitos",
         "li3": "Tendencias de géneros: Géneros en alza o en baja en el período (comparación primera vs segunda mitad)"
       },
       "heatmap": {
-        "title": "Heatmap de stream",
+        "title": "Calendario de escucha",
         "paragraph": "La página <code>/dashboard/heatmap</code> muestra un calendario tipo GitHub con la intensidad de stream por día. Identifica tus días más activos y la distribución por día de la semana."
       },
       "temporal": {
-        "title": "Análisis temporal avanzado",
+        "title": "Rutina de escucha",
         "paragraph": "La página <code>/dashboard/temporal-analysis</code> detalla tus patrones de streams: streams por día de la semana (lunes-domingo), por hora del día, e identifica los momentos pico (día y hora en que Más streams)."
       },
       "genres": {
@@ -3109,12 +3110,12 @@
       "title": "¿Qué puedes explorar?",
       "items": {
         "overview": "Your Music — Estadísticas globales (streams, artistas, canciones, tiempo total)",
-        "timeline": "Timeline — Evolución de tus streams en el tiempo (día/semana/mes)",
-        "heatmap": "Heatmap — Calendario estilo GitHub de tu intensidad de stream",
+        "timeline": "Actividad de escucha — Evolución de tus streams en el tiempo (día/semana/mes)",
+        "heatmap": "Calendario de escucha — Calendario estilo GitHub de tu intensidad de stream",
         "tracks": "Canciones — Temas más reproducidos y patrones de repetición",
         "genres": "Géneros — Desglose por género y tendencias temporales",
         "artists": "Artistas — Mejores artistas y estadísticas detalladas",
-        "timeAnalysis": "Análisis temporal — Hábitos por hora y día de la semana",
+        "timeAnalysis": "Rutina de escucha — Hábitos por hora y día de la semana",
         "musicalProfile": "Perfil musical — Tu persona de stream basada en patrones",
         "insights": "Insights — Resúmenes generados por el producto y señales clave de stream",
         "palette": "Palette — Mapea y afina los géneros de tu biblioteca",
@@ -3281,7 +3282,7 @@
         "description": "Tu podio de artistas con streams reales y barras de participación — las mismas tarjetas del dashboard."
       },
       "timeline": {
-        "description": "Tu pulso de stream a lo largo del tiempo — detecta picos, caídas y cambios de momentum de un vistazo."
+        "description": "Tu actividad de escucha a lo largo del tiempo — detecta picos, caídas y cambios de momentum de un vistazo."
       },
       "tasteProfile": {
         "description": "Una lectura asistida por IA de tu identidad musical — géneros clave, sonido distintivo y resumen en lenguaje claro.",
@@ -3327,7 +3328,7 @@
     },
     "features": {
       "timeline": {
-        "title": "Timeline",
+        "title": "Actividad de escucha",
         "description": "Visualiza tus habitos de stream a lo largo del tiempo."
       },
       "genresArtists": {

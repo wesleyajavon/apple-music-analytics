@@ -7,7 +7,9 @@ import { wrapLines } from "@/lib/utils/share-card/canvas-primitives";
 
 export type ShareCardVerticalLayout = {
   entityImageCenterY: number | null;
-  entityImageRadius: number;
+  entityImageSize: number;
+  entityImageCornerRadius: number;
+  eyebrowY: number;
   titleStartY: number;
   cardY: number;
 };
@@ -15,49 +17,46 @@ export type ShareCardVerticalLayout = {
 export function computeShareCardVerticalLayout(
   ctx: CanvasRenderingContext2D,
   title: string,
-  subtitle: string | undefined,
   hasEntityImage: boolean
 ): ShareCardVerticalLayout {
   const {
-    eyebrowBottom,
-    entityImageRadius,
+    metaBaselineY,
+    entityImageSize,
+    entityImageCornerRadius,
     entityImageGapBelow,
     titleFontSize,
     titleLineHeight,
     titleAscent,
-    subtitleBlockHeight,
     sectionGap,
     duelCardHeight,
     footerTop,
   } = SHARE_CARD_LAYOUT;
 
-  if (!hasEntityImage) {
-    return {
-      entityImageCenterY: null,
-      entityImageRadius,
-      titleStartY: 250,
-      cardY: 430,
-    };
-  }
+  const metaBottom = metaBaselineY + 24;
+  const entityTop = hasEntityImage ? metaBottom + 18 : null;
+  const entityImageCenterY =
+    entityTop === null ? null : entityTop + entityImageSize / 2;
+  const eyebrowY =
+    entityTop === null
+      ? metaBottom + 28
+      : entityTop + entityImageSize + entityImageGapBelow;
+  const titleStartY = eyebrowY + 14 + titleAscent;
 
-  const entityImageCenterY = eyebrowBottom + entityImageRadius;
-  const entityImageBottom = entityImageCenterY + entityImageRadius;
-  const titleStartY = entityImageBottom + entityImageGapBelow + titleAscent;
-
-  ctx.font = `800 ${titleFontSize}px ${SHARE_CARD_FONT}`;
+  ctx.font = `600 ${titleFontSize}px ${SHARE_CARD_FONT}`;
   const titleLines = wrapLines(ctx, title, SHARE_CARD_SIZE - 200, 2);
   const titleBlockBottom =
-    titleStartY + (titleLines.length - 1) * titleLineHeight + titleFontSize * 0.15;
-  const titleEndY = subtitle ? titleBlockBottom + subtitleBlockHeight : titleBlockBottom;
+    titleStartY + (titleLines.length - 1) * titleLineHeight;
 
   const cardY = Math.min(
-    Math.max(titleEndY + sectionGap, titleStartY + sectionGap),
+    titleBlockBottom + sectionGap,
     footerTop - duelCardHeight
   );
 
   return {
     entityImageCenterY,
-    entityImageRadius,
+    entityImageSize,
+    entityImageCornerRadius,
+    eyebrowY,
     titleStartY,
     cardY,
   };

@@ -8,6 +8,7 @@ import { MobileBottomSheet } from "@/lib/components/mobile-bottom-sheet";
 import { MusicalProfilePeriodBadge } from "@/lib/components/musical-profile-period-badge";
 import { UserAvatar } from "@/lib/components/user-avatar";
 import { ArtistAvatarHydrated } from "@/lib/components/artist-avatar-hydrated";
+import { DuetSharedArtistsEmpty } from "@/lib/components/duet/duet-shared-artists-empty";
 import { DuetMobileSubNav } from "@/lib/components/duet/duet-mobile-sub-nav";
 import {
   DuetDualLineChart,
@@ -607,9 +608,12 @@ export function DuetCompareMobileExperience({
               {tCommon("retry")}
             </button>
           ) : !sharedArtists?.length ? (
-            <p className="rounded-2xl border border-card-border bg-card-surface px-3.5 py-4 text-sm leading-6 text-muted">
-              {t("sharedArtistsEmptyTitle")}
-            </p>
+            <DuetSharedArtistsEmpty
+              className="rounded-2xl border border-card-border bg-card-surface px-4 py-6"
+              eyebrow={t("sharedArtistsEmptyEyebrow")}
+              title={t("sharedArtistsEmptyTitle")}
+              description={t("sharedArtistsEmptyDescription")}
+            />
           ) : (
             <ul className="space-y-2">
               {sharedArtists.map((artist) => (

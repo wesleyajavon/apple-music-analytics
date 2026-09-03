@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { ChevronDown, Crown, Search } from "lucide-react";
 import { ArtistAvatarHydrated } from "@/lib/components/artist-avatar-hydrated";
-import { EmptyState } from "@/lib/components/empty-state";
+import { DuetSharedArtistsEmpty } from "@/lib/components/duet/duet-shared-artists-empty";
 import { ErrorState } from "@/lib/components/error-state";
 import {
   DASHBOARD_SPOTLIGHT_SHELL,
@@ -14,6 +14,7 @@ import {
   DASHBOARD_SPOTLIGHT_MUTED,
   DASHBOARD_SPOTLIGHT_BADGE_LIME,
   DASHBOARD_SPOTLIGHT_BADGE_DOT_LIME,
+  DASHBOARD_SPOTLIGHT_PILL_MUTED,
   DASHBOARD_SPOTLIGHT_HEADER_BOTTOM,
 } from "@/lib/constants/dashboard-spotlight";
 import type { CompareSharedArtistsResponse } from "@/lib/dto/duet";
@@ -93,12 +94,14 @@ function SharedArtistsHeader({
   title,
   description,
   badge,
+  badgeMuted = false,
   totalLabel,
 }: {
   eyebrow: string;
   title: string;
   description: string;
   badge: string;
+  badgeMuted?: boolean;
   totalLabel?: string;
 }) {
   return (
@@ -114,8 +117,8 @@ function SharedArtistsHeader({
             </p>
           ) : null}
         </div>
-        <span className={DASHBOARD_SPOTLIGHT_BADGE_LIME}>
-          <span className={DASHBOARD_SPOTLIGHT_BADGE_DOT_LIME} aria-hidden />
+        <span className={badgeMuted ? DASHBOARD_SPOTLIGHT_PILL_MUTED : DASHBOARD_SPOTLIGHT_BADGE_LIME}>
+          {badgeMuted ? null : <span className={DASHBOARD_SPOTLIGHT_BADGE_DOT_LIME} aria-hidden />}
           {badge}
         </span>
       </div>
@@ -143,6 +146,7 @@ export function DuetSharedArtistsPanel({
 
   const hiddenCount = Math.max(0, (data?.artists.length ?? 0) - VISIBLE_ARTISTS_COUNT);
   const hasMore = hiddenCount > 0;
+  const isEmpty = !isLoading && !error && !data?.artists.length;
 
   return (
     <section className={DASHBOARD_SPOTLIGHT_SHELL}>
@@ -152,7 +156,8 @@ export function DuetSharedArtistsPanel({
         eyebrow={t("sharedArtistsEyebrow")}
         title={t("sharedArtistsTitle", { friendName })}
         description={t("sharedArtistsDescription")}
-        badge={t("sharedArtistsBadge")}
+        badge={isEmpty ? t("sharedArtistsEmptyEyebrow") : t("sharedArtistsBadge")}
+        badgeMuted={isEmpty}
         totalLabel={
           data && data.totalShared > 0
             ? t("sharedArtistsTotal", { count: data.totalShared })
@@ -164,10 +169,11 @@ export function DuetSharedArtistsPanel({
           <p className={`text-sm ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("sharedArtistsLoading")}</p>
         ) : error ? (
           <ErrorState variant="startup" error={error} message={t("sharedArtistsError")} onRetry={onRetry} />
-        ) : !data?.artists.length ? (
-          <EmptyState
-            variant="startup"
-            message={t("sharedArtistsEmptyTitle")}
+        ) : isEmpty ? (
+          <DuetSharedArtistsEmpty
+            className={`${DASHBOARD_SPOTLIGHT_INNER_WELL} px-5 py-10 sm:px-8 sm:py-12`}
+            eyebrow={t("sharedArtistsEmptyEyebrow")}
+            title={t("sharedArtistsEmptyTitle")}
             description={t("sharedArtistsEmptyDescription")}
           />
         ) : (

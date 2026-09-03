@@ -58,7 +58,7 @@ import {
   generateDuetTimelineSharePng,
   resolveDuetTimelineWinner,
 } from "@/lib/utils/duet-timeline-share-image";
-import { duetShareHeadlineKey } from "@/lib/utils/duet-share-headline";
+import { duetShareHeadlineKey, duetShareLeadKey } from "@/lib/utils/duet-share-headline";
 import { formatOverviewDateRangeLabel } from "@/lib/utils/overview-date-range-label";
 import {
   getDuetDisplayName,
@@ -478,6 +478,21 @@ function CompareContent() {
             friendLabel: t("shareCountLabel"),
             brandName: t("shareBrandName"),
             brandTagline: t("shareBrandTagline"),
+            badgeLabel: t("heroEyebrow"),
+            vsLabel: t("shareVsLabel"),
+            leadLabel:
+              winner === "friend"
+                ? t("scoreboardLeadsFriend", { name: friendName })
+                : t(duetShareLeadKey(winner)),
+            marginCaption:
+              winner === "tie" ||
+              Math.abs(periodTotals.selfTotal - periodTotals.friendTotal) === 0
+                ? undefined
+                : t("scoreboardMargin", {
+                    margin: Math.abs(
+                      periodTotals.selfTotal - periodTotals.friendTotal
+                    ).toLocaleString(locale),
+                  }),
           })
         }
         buildCaption={() =>

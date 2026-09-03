@@ -251,10 +251,10 @@ const QUICK_QUESTION_SECTIONS: Array<{
 /** Presets surfaced first — personalized + high-signal analytics pulls. */
 const FEATURED_PRESET_IDS: QuickQuestionId[] = [
   "artist-deep-dive",
-  "weekly-taste-evolution",
+  "compare-periods",
   "top-tracks",
   "genre-breakdown",
-  "compare-periods",
+  "weekly-taste-evolution",
   "time-of-day",
 ];
 

@@ -94,7 +94,7 @@ test.describe("Mobile dashboard UX", () => {
     await expect(plusSheet.getByRole("heading", { name: /^more$/i })).toBeVisible();
     await expect(plusSheet.getByRole("button", { name: /all sections/i })).toHaveCount(0);
     await expect(plusSheet.getByRole("link", { name: /account hub/i })).toHaveCount(0);
-    await expect(plusSheet.getByRole("link", { name: /heat grid/i })).toBeVisible();
+    await expect(plusSheet.getByRole("link", { name: /listening calendar/i })).toBeVisible();
     await expect(plusSheet.getByRole("link", { name: /^genres$/i })).toBeVisible();
     await expect(bottomNav.getByRole("link", { name: /^tracks$/i })).toBeVisible();
   });
@@ -427,7 +427,7 @@ test.describe("Mobile dashboard UX", () => {
     await expect(plusSheet.getByRole("heading", { name: /^more$/i })).toBeVisible();
     await expect(plusSheet.getByRole("button", { name: /all sections/i })).toHaveCount(0);
 
-    await plusSheet.getByRole("link", { name: /heat grid/i }).click();
+    await plusSheet.getByRole("link", { name: /listening calendar/i }).click();
     await expect(page).toHaveURL(/\/en\/dashboard\/heatmap/, urlTimeout);
     await expectDashboardFilters(page);
     await waitForDashboardMain(page);
@@ -435,7 +435,7 @@ test.describe("Mobile dashboard UX", () => {
     await bottomNav.getByRole("button", { name: /open more destinations/i }).click();
     const plusSheetAgain = page.getByRole("dialog");
     await expect(plusSheetAgain).toBeVisible();
-    await plusSheetAgain.getByRole("link", { name: /ask your soundprint/i }).click();
+    await plusSheetAgain.getByRole("link", { name: /ask soundprint/i }).click();
     await expect(page).toHaveURL(/\/en\/dashboard\/ask-your-soundprint/, urlTimeout);
     await expectDashboardFilters(page);
   });
@@ -456,7 +456,7 @@ test.describe("Mobile dashboard UX", () => {
     await expect(plusSheet.getByRole("link", { name: /account hub/i })).toHaveCount(0);
     await expect(plusSheet.getByRole("button", { name: /all sections/i })).toHaveCount(0);
 
-    await plusSheet.getByRole("link", { name: /heat grid/i }).click();
+    await plusSheet.getByRole("link", { name: /listening calendar/i }).click();
     await expect(page).toHaveURL(/\/en\/dashboard\/heatmap/, urlTimeout);
     await expectDashboardFilters(page);
     await waitForDashboardMain(page);
@@ -571,7 +571,7 @@ test.describe("Mobile dashboard UX", () => {
 
       await page.getByRole("button", { name: /close bucket details/i }).click();
       await expect(page.getByRole("dialog")).toHaveCount(0);
-      const heatmapRow = main.getByRole("link", { name: /daily intensity/i });
+      const heatmapRow = main.getByRole("link", { name: /listening calendar/i });
       await expect(heatmapRow).toHaveAttribute("href", /heatmap/);
       await heatmapRow.click();
       await expect(page).toHaveURL(/\/en\/dashboard\/heatmap/, { timeout: 20_000 });
@@ -603,7 +603,7 @@ test.describe("Mobile dashboard UX", () => {
 
       await page.getByRole("button", { name: /fermer le détail du segment/i }).click();
       await expect(page.getByRole("dialog")).toHaveCount(0);
-      const heatmapRow = main.getByRole("link", { name: /intensité quotidienne/i });
+      const heatmapRow = main.getByRole("link", { name: /calendrier d['’]écoute/i });
       await expect(heatmapRow).toHaveAttribute("href", /heatmap/);
       await heatmapRow.click();
       await expect(page).toHaveURL(/\/fr\/dashboard\/heatmap/, { timeout: 20_000 });
@@ -621,9 +621,9 @@ test.describe("Mobile dashboard UX", () => {
 
     const main = page.getByRole("main");
     await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 45_000 });
-    await expect(page.getByRole("tablist", { name: /rhythm sections/i })).toHaveCount(0);
+    await expect(page.getByRole("tablist", { name: /routine sections/i })).toHaveCount(0);
 
-    const emptyTitle = main.getByRole("heading", { name: /no rhythm yet/i });
+    const emptyTitle = main.getByRole("heading", { name: /no routine yet/i });
     const segment = main.getByRole("tablist", { name: /when you listen/i });
     await expect(segment.or(emptyTitle)).toBeVisible({ timeout: 20_000 });
 
@@ -644,7 +644,7 @@ test.describe("Mobile dashboard UX", () => {
       await main.getByRole("tab", { name: /^hours$/i }).click();
       await expect(main.getByRole("button", { name: /^open /i }).first()).toBeVisible();
 
-      const heatmapRow = main.getByRole("link", { name: /daily intensity/i });
+      const heatmapRow = main.getByRole("link", { name: /listening calendar/i });
       await expect(heatmapRow).toHaveAttribute("href", /heatmap/);
       await heatmapRow.click();
       await expect(page).toHaveURL(/\/en\/dashboard\/heatmap/, { timeout: 20_000 });
@@ -663,9 +663,9 @@ test.describe("Mobile dashboard UX", () => {
 
     const main = page.getByRole("main");
     await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 45_000 });
-    await expect(page.getByRole("tablist", { name: /sections rythme/i })).toHaveCount(0);
+    await expect(page.getByRole("tablist", { name: /sections routine/i })).toHaveCount(0);
 
-    const emptyTitle = main.getByRole("heading", { name: /pas encore de rythme/i });
+    const emptyTitle = main.getByRole("heading", { name: /pas encore de routine/i });
     const segment = main.getByRole("tablist", { name: /quand vous écoutez/i });
     await expect(segment.or(emptyTitle)).toBeVisible({ timeout: 20_000 });
 
@@ -680,7 +680,7 @@ test.describe("Mobile dashboard UX", () => {
       await expect(page.getByRole("dialog")).toHaveCount(0);
 
       await main.getByRole("tab", { name: /^heures$/i }).click();
-      const heatmapRow = main.getByRole("link", { name: /intensité quotidienne/i });
+      const heatmapRow = main.getByRole("link", { name: /calendrier d['’]écoute/i });
       await expect(heatmapRow).toHaveAttribute("href", /heatmap/);
       await heatmapRow.click();
       await expect(page).toHaveURL(/\/fr\/dashboard\/heatmap/, { timeout: 20_000 });

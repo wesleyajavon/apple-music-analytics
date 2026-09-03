@@ -558,7 +558,7 @@
     "betaBadge": "Beta",
     "betaHint": "Aún en beta — las respuestas pueden fallar.",
     "subtitle": "¿Quién suena en bucle? ¿Cuándo escuchas más? Pregunta lo que quieras — deepdives de artista incluidos — desde tu historial real de streams.",
-    "compactTrust": "ChatGPT, versión música.",
+    "compactTrust": "ChatGPT, basado en tus streams",
     "periodChip": "Respuestas sobre {range}",
     "periodChipAll": "Todo el historial · {range}",
     "heroStatBadge": "Respuestas en las que confiar",

@@ -558,7 +558,7 @@
     "betaBadge": "Bêta",
     "betaHint": "Encore en bêta — les réponses peuvent parfois manquer.",
     "subtitle": "Qui passe en boucle ? Quand streamez-vous le plus ? Posez vos questions — deepdives artiste compris — à partir de votre vrai historique de streams.",
-    "compactTrust": "ChatGPT, version musique.",
+    "compactTrust": "ChatGPT, basé sur vos streams",
     "periodChip": "Réponses sur {range}",
     "periodChipAll": "Tout l’historique · {range}",
     "heroStatBadge": "Des réponses fiables",

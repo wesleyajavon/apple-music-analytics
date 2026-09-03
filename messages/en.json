@@ -558,7 +558,7 @@
     "betaBadge": "Beta",
     "betaHint": "Still in beta — answers can miss.",
     "subtitle": "Who's on repeat? When do you stream most? Ask anything—including artist deepdives—from your real streaming history.",
-    "compactTrust": "ChatGPT, but for your music.",
+    "compactTrust": "ChatGPT, based on your streams",
     "periodChip": "Answers on {range}",
     "periodChipAll": "Full history · {range}",
     "heroStatBadge": "Answers you can trust",

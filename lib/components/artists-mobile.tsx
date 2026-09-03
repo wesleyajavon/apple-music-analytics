@@ -5,13 +5,13 @@ import { useTranslations } from "next-intl";
 import { Search } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { ArtistAvatarHydrated } from "@/lib/components/artist-avatar-hydrated";
+import { DashboardMobileImportEmpty } from "@/lib/components/dashboard-mobile-import-empty";
 import { DashboardCinematicHeroBg } from "@/lib/components/dashboard-ui";
 import { GroqQuotaNotice } from "@/lib/components/error-state";
 import { MusicalProfilePeriodBadge } from "@/lib/components/musical-profile-period-badge";
 import type { ArtistOverviewDto, ArtistStatsDto } from "@/lib/dto/artist";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
 import { isGroqDailyQuotaError } from "@/lib/utils/groq-quota-message";
-import { DASHBOARD_ONBOARDING_REIMPORT_PATH } from "@/lib/utils/onboarding-route";
 
 const MOBILE_BLEED = "-mx-4 -mt-4 space-y-4 pb-8 lg:hidden";
 const HERO_SHELL = "relative overflow-hidden bg-gray-950 px-4 pb-5 pt-4 text-white";
@@ -146,26 +146,13 @@ export function ArtistsMobileEmpty() {
   const t = useTranslations("artists.mobile");
 
   return (
-    <div className={MOBILE_BLEED}>
-      <section className={HERO_SHELL}>
-        <DashboardCinematicHeroBg />
-        <div className="relative space-y-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-cyan">
-            {t("heroEyebrow")}
-          </p>
-          <h1 className="max-w-[16rem] text-[1.55rem] font-semibold leading-[1.15] tracking-[-0.05em]">
-            {t("emptyTitle")}
-          </h1>
-          <p className="max-w-sm text-sm leading-6 text-white/62">{t("emptyLead")}</p>
-          <Link
-            href={DASHBOARD_ONBOARDING_REIMPORT_PATH}
-            className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25"
-          >
-            {t("emptyCta")}
-          </Link>
-        </div>
-      </section>
-    </div>
+    <DashboardMobileImportEmpty
+      eyebrow={t("heroEyebrow")}
+      title={t("emptyTitle")}
+      lead={t("emptyLead")}
+      demoPath="/dashboard/artists"
+      importLabel={t("emptyCta")}
+    />
   );
 }
 

@@ -3,13 +3,13 @@
 import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { DashboardMobileImportEmpty } from "@/lib/components/dashboard-mobile-import-empty";
 import { DashboardCinematicHeroBg } from "@/lib/components/dashboard-ui";
 import { GroqQuotaNotice } from "@/lib/components/error-state";
 import { AiUnavailableCta } from "@/lib/components/ai-unavailable-cta";
 import { InteractiveAiGenreBackfillNotice } from "@/lib/components/interactive-ai-genre-backfill-notice";
 import { MusicalProfilePeriodBadge } from "@/lib/components/musical-profile-period-badge";
 import type { AiInsightMoment, AiInsightsStyle, AiUnavailableReason } from "@/lib/dto/ai-insights";
-import { DASHBOARD_ONBOARDING_REIMPORT_PATH } from "@/lib/utils/onboarding-route";
 
 const MOBILE_BLEED = "-mx-4 -mt-4 space-y-4 pb-8 lg:hidden";
 const HERO_SHELL = "relative overflow-hidden bg-gray-950 px-4 pb-5 pt-4 text-white";
@@ -250,17 +250,24 @@ export function AiInsightsMobileEmpty({
   const t = useTranslations("ai-insights");
 
   return (
-    <div className={MOBILE_BLEED}>
-      <MobileHeroFrame locale={locale} startDate={startDate} endDate={endDate} heading={t("mobile.emptyTitle")}>
-        <p className="max-w-sm text-sm leading-6 text-white/70">{t("mobile.emptyLead")}</p>
-        <Link
-          href={DASHBOARD_ONBOARDING_REIMPORT_PATH}
-          className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25"
-        >
-          {t("mobile.emptyCta")}
-        </Link>
-      </MobileHeroFrame>
-    </div>
+    <DashboardMobileImportEmpty
+      eyebrow={t("mobile.eyebrow")}
+      title={t("mobile.emptyTitle")}
+      lead={t("mobile.emptyLead")}
+      demoPath="/dashboard/ai-insights"
+      importLabel={t("mobile.emptyCta")}
+      header={
+        <div className="flex justify-end">
+          <MusicalProfilePeriodBadge
+            startDate={startDate}
+            endDate={endDate}
+            locale={locale}
+            variant="mobile"
+            className="min-w-0"
+          />
+        </div>
+      }
+    />
   );
 }
 

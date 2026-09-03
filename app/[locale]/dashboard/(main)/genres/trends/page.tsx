@@ -84,6 +84,7 @@ const COLORS = [
   "#8b5cf6",
 ];
 
+const DEFAULT_SERIES_GENRES = 2;
 const MAX_SERIES_GENRES = 30;
 const GENRE_FILTER_PAGE_SIZE = 30;
 /** Délai après lequel les sélections de genres déclenchent refetch chart + IA (évite rafales). */
@@ -459,6 +460,7 @@ function TrendsContent() {
         chartFetching,
         catalogIds: availableGenres,
         currentIds: prev,
+        max: DEFAULT_SERIES_GENRES,
       });
       return next ?? prev;
     });

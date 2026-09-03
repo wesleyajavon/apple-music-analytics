@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { wrapLines, truncateText, measureSpacedText } from "@/lib/utils/share-card/canvas-primitives";
 import { computeShareCardVerticalLayout } from "@/lib/utils/share-card/layout";
-import { SHARE_CARD_LAYOUT } from "@/lib/utils/share-card/constants";
+import { SHARE_CARD_HEIGHT, SHARE_CARD_LAYOUT, SHARE_CARD_WIDTH } from "@/lib/utils/share-card/constants";
 import { resolveDuetTimelineWinner } from "@/lib/utils/duet-timeline-share-image";
 import { duetShareHeadlineKey, duetShareLeadKey } from "@/lib/utils/duet-share-headline";
 
@@ -57,6 +57,23 @@ describe("computeShareCardVerticalLayout", () => {
     expect(layout.cardY).toBeGreaterThan(layout.titleStartY);
     expect(layout.cardY + SHARE_CARD_LAYOUT.duelCardHeight).toBeLessThanOrEqual(
       SHARE_CARD_LAYOUT.footerTop
+    );
+  });
+});
+
+describe("share-card story format", () => {
+  it("uses a 9:16 canvas so the image fills an Instagram story", () => {
+    expect(SHARE_CARD_WIDTH).toBe(1080);
+    expect(SHARE_CARD_HEIGHT).toBe(1920);
+    expect(SHARE_CARD_HEIGHT / SHARE_CARD_WIDTH).toBeCloseTo(16 / 9);
+  });
+
+  it("keeps the brand footer above Instagram story chrome", () => {
+    expect(SHARE_CARD_LAYOUT.footerBottomInset).toBeGreaterThanOrEqual(360);
+    expect(SHARE_CARD_LAYOUT.footerTop).toBe(
+      SHARE_CARD_HEIGHT -
+        SHARE_CARD_LAYOUT.footerBottomInset -
+        SHARE_CARD_LAYOUT.brandBlockHeight
     );
   });
 });

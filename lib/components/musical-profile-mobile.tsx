@@ -21,7 +21,8 @@ import {
 } from "@/lib/components/musical-profile-cinematic";
 import { MusicalProfilePeriodBadge } from "@/lib/components/musical-profile-period-badge";
 import type { ArtistStatsDto } from "@/lib/dto/artist";
-import { WaitingForImportMobileCtas } from "@/lib/components/waiting-for-import-demo";
+import { DashboardMobileImportEmpty } from "@/lib/components/dashboard-mobile-import-empty";
+import { SoundprintLogo } from "@/lib/components/soundprint-logo";
 import {
   isGroqDailyQuotaError,
   isGroqGenreClassificationBlockingError,
@@ -33,27 +34,26 @@ export type ProfileMetric = {
   value: string;
 };
 
-function BarsIcon({ className }: { className?: string }) {
+function OverviewIcon({ className }: { className?: string }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
-        d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z"
+        d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z"
       />
     </svg>
   );
 }
 
-function ChatIcon({ className }: { className?: string }) {
+function AskSoundprintIcon() {
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M8.625 9.75a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375m-13.5 3.75c0 5.385 4.365 9.75 9.75 9.75s9.75-4.365 9.75-9.75S17.385 2.25 12 2.25 2.25 6.615 2.25 12m13.5 0a1.125 1.125 0 0 1-1.125 1.125H9.75a1.125 1.125 0 0 1-1.125-1.125v-6.75m9 0V9.375"
-      />
-    </svg>
+    <SoundprintLogo
+      src="/brand/favicon.png"
+      showText={false}
+      alt=""
+      imageClassName="h-10 w-10 object-contain"
+    />
   );
 }
 
@@ -138,12 +138,14 @@ function DestinationRow({
   lead,
   icon,
   primary = false,
+  brandIcon = false,
 }: {
   href: string;
   title: string;
   lead: string;
   icon: ReactNode;
   primary?: boolean;
+  brandIcon?: boolean;
 }) {
   return (
     <Link
@@ -156,8 +158,8 @@ function DestinationRow({
     >
       <span
         className={
-          primary
-            ? "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gray-950 text-white"
+          brandIcon || primary
+            ? "flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gray-950 text-white"
             : "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent-violet/15 text-accent-violet"
         }
       >
@@ -324,14 +326,15 @@ export function MobileMusicalProfileView({
             href={withFilters("/dashboard/overview")}
             title={t("features.yourMusic.title")}
             lead={t("mobile.yourMusicLead")}
-            icon={<BarsIcon className="h-5 w-5" />}
+            icon={<OverviewIcon className="h-5 w-5" />}
             primary
           />
           <DestinationRow
             href={withFilters("/dashboard/ask-your-soundprint")}
             title={t("features.aiChat.title")}
             lead={t("mobile.chatLead")}
-            icon={<ChatIcon className="h-5 w-5" />}
+            icon={<AskSoundprintIcon />}
+            brandIcon
           />
           <DestinationRow
             href={withFilters("/dashboard/duet/friends")}
@@ -462,32 +465,26 @@ export function MusicalProfileMobileError({
 export function MusicalProfileNoDataMobileView({ locale }: { locale: string }) {
   const t = useTranslations("musical-profile");
   return (
-    <div className="-mx-4 -mt-4 space-y-4 pb-8 lg:hidden">
-      <section className="relative overflow-hidden bg-gray-950 px-4 pb-6 pt-4 text-white">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.4),transparent_36%),radial-gradient(circle_at_85%_20%,rgba(6,182,212,0.24),transparent_32%),linear-gradient(160deg,rgba(3,7,18,0.98),rgba(76,29,149,0.72))]" />
-        <CinematicFloatingOrbs />
-        <CinematicFilmGrain />
-        <CinematicLightSweep />
-        <div className="relative space-y-4">
-          <div className="flex justify-end">
-            <MusicalProfilePeriodBadge locale={locale} variant="mobile" className="min-w-0" />
-          </div>
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-cyan">
-              {t("mobile.signatureLabel")}
-            </p>
-            <h1 className="mt-2 max-w-[16rem] text-[1.55rem] font-semibold leading-[1.15] tracking-[-0.05em]">
-              {t("mobile.emptyTitle")}
-            </h1>
-            <p className="mt-2 max-w-sm text-sm leading-6 text-white/62">{t("mobile.emptyLead")}</p>
-          </div>
-          <WaitingForImportMobileCtas
-            demoPath="/dashboard/musical-profile"
-            importLabel={t("mobile.emptyCta")}
-            demoLabel={t("mobile.emptyDemoCta")}
-          />
+    <DashboardMobileImportEmpty
+      eyebrow={t("mobile.signatureLabel")}
+      title={t("mobile.emptyTitle")}
+      lead={t("mobile.emptyLead")}
+      demoPath="/dashboard/musical-profile"
+      importLabel={t("mobile.emptyCta")}
+      demoLabel={t("mobile.emptyDemoCta")}
+      header={
+        <div className="flex justify-end">
+          <MusicalProfilePeriodBadge locale={locale} variant="mobile" className="min-w-0" />
         </div>
-      </section>
-    </div>
+      }
+      atmosphere={
+        <>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.4),transparent_36%),radial-gradient(circle_at_85%_20%,rgba(6,182,212,0.24),transparent_32%),linear-gradient(160deg,rgba(3,7,18,0.98),rgba(76,29,149,0.72))]" />
+          <CinematicFloatingOrbs />
+          <CinematicFilmGrain />
+          <CinematicLightSweep />
+        </>
+      }
+    />
   );
 }

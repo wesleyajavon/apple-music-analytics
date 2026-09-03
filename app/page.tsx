@@ -24,7 +24,7 @@ export default async function Home() {
           priority
         />
         <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-4 tracking-tight">
-          Welcome to Soundprint-AI your music decoded.
+          Welcome to Soundprint-AI. Everything on your streams.
         </h1>
         <p className="text-muted text-lg mb-6 max-w-md">
           Import once from Apple Music or Spotify—then explore trends, chat with your streaming data, and compare streams with friends on any artist.

@@ -12,6 +12,7 @@ import { ErrorState, GroqQuotaNotice } from "@/lib/components/error-state";
 import { ParallaxHero, ScrollRevealSection, StaggerContainer } from "@/lib/components/overview-bis";
 import { SoundprintBrandDividerSection } from "@/lib/components/soundprint-brand-divider";
 import { SoundprintBrandMark } from "@/lib/components/soundprint-brand-mark";
+import { SoundprintLogo } from "@/lib/components/soundprint-logo";
 import {
   CinematicFilmGrain,
   CinematicFloat,
@@ -64,23 +65,26 @@ function ProfileIcon({ className }: { className?: string }) {
   );
 }
 
-function BarsIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z" />
-    </svg>
-  );
-}
-
-function ChatIcon({ className }: { className?: string }) {
+function OverviewIcon({ className }: { className?: string }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
-        d="M8.625 9.75a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375m-13.5 3.75c0 5.385 4.365 9.75 9.75 9.75s9.75-4.365 9.75-9.75S17.385 2.25 12 2.25 2.25 6.615 2.25 12m13.5 0a1.125 1.125 0 0 1-1.125 1.125H9.75a1.125 1.125 0 0 1-1.125-1.125v-6.75m9 0V9.375"
+        d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z"
       />
     </svg>
+  );
+}
+
+function AskSoundprintIcon() {
+  return (
+    <SoundprintLogo
+      src="/brand/favicon.png"
+      showText={false}
+      alt=""
+      imageClassName="h-12 w-12 object-contain"
+    />
   );
 }
 
@@ -497,7 +501,7 @@ function ExploreFeaturesSection({
       title: t("features.yourMusic.title"),
       body: t("features.yourMusic.body"),
       cta: t("features.yourMusic.cta"),
-      icon: <BarsIcon className="h-6 w-6" />,
+      icon: <OverviewIcon className="h-6 w-6" />,
       accentClass: "bg-accent-violet/15 text-accent-violet",
       glowClass: "bg-accent-violet/20",
     },
@@ -507,8 +511,8 @@ function ExploreFeaturesSection({
       title: t("features.aiChat.title"),
       body: t("features.aiChat.body"),
       cta: t("features.aiChat.cta"),
-      icon: <ChatIcon className="h-6 w-6" />,
-      accentClass: "bg-accent-cyan/15 text-accent-cyan",
+      icon: <AskSoundprintIcon />,
+      accentClass: "overflow-hidden bg-gray-950",
       glowClass: "bg-accent-cyan/20",
     },
     {

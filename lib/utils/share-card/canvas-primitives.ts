@@ -2,6 +2,7 @@ import { getUserAvatarInitials } from "@/lib/components/user-avatar";
 import {
   SHARE_CARD_COLORS,
   SHARE_CARD_FONT,
+  SHARE_CARD_HEIGHT,
   SHARE_CARD_LAYOUT,
   SHARE_CARD_MONO_FONT,
 } from "@/lib/utils/share-card/constants";
@@ -121,99 +122,67 @@ export function drawCoverImage(
 
 export function drawShareCardBackground(
   ctx: CanvasRenderingContext2D,
-  size: number,
+  width: number,
+  height: number,
   entityImage?: HTMLImageElement | null
 ) {
   ctx.fillStyle = SHARE_CARD_COLORS.canvas;
-  ctx.fillRect(0, 0, size, size);
+  ctx.fillRect(0, 0, width, height);
 
   if (entityImage) {
     ctx.save();
     ctx.globalAlpha = 0.16;
-    drawCoverImage(ctx, entityImage, 0, 0, size, size * 0.72, "top");
+    drawCoverImage(ctx, entityImage, 0, 0, width, height * 0.62, "top");
     ctx.restore();
 
-    const wash = ctx.createLinearGradient(0, 0, 0, size);
-    wash.addColorStop(0, "rgba(8,9,19,0.55)");
-    wash.addColorStop(0.42, "rgba(8,9,19,0.82)");
+    const wash = ctx.createLinearGradient(0, 0, 0, height);
+    wash.addColorStop(0, "rgba(8,9,19,0.5)");
+    wash.addColorStop(0.38, "rgba(8,9,19,0.82)");
     wash.addColorStop(1, SHARE_CARD_COLORS.canvas);
     ctx.fillStyle = wash;
-    ctx.fillRect(0, 0, size, size);
+    ctx.fillRect(0, 0, width, height);
   }
 
-  const glowViolet = ctx.createRadialGradient(80, 160, 20, 80, 160, 360);
+  const glowViolet = ctx.createRadialGradient(80, 280, 20, 80, 280, 420);
   glowViolet.addColorStop(0, SHARE_CARD_COLORS.violetGlow);
   glowViolet.addColorStop(1, "rgba(139,92,246,0)");
   ctx.fillStyle = glowViolet;
-  ctx.fillRect(0, 0, size, size);
+  ctx.fillRect(0, 0, width, height);
 
-  const glowCyan = ctx.createRadialGradient(1000, 980, 20, 1000, 980, 340);
+  const glowCyan = ctx.createRadialGradient(1000, height - 280, 20, 1000, height - 280, 420);
   glowCyan.addColorStop(0, SHARE_CARD_COLORS.cyanGlow);
   glowCyan.addColorStop(1, "rgba(34,211,238,0)");
   ctx.fillStyle = glowCyan;
-  ctx.fillRect(0, 0, size, size);
+  ctx.fillRect(0, 0, width, height);
 
   ctx.fillStyle = SHARE_CARD_COLORS.vsWatermark;
-  ctx.font = `900 210px ${SHARE_CARD_FONT}`;
+  ctx.font = `900 280px ${SHARE_CARD_FONT}`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText("VS", size / 2, size * 0.46);
+  ctx.fillText("VS", width / 2, height * 0.46);
   ctx.textBaseline = "alphabetic";
 }
 
 export function drawShareCardMetaRow(
   ctx: CanvasRenderingContext2D,
-  size: number,
-  periodLabel: string | undefined,
-  badgeLabel: string | undefined
+  width: number,
+  periodLabel: string | undefined
 ) {
-  const { padX, metaBaselineY, badgeHeight, eyebrowTracking } = SHARE_CARD_LAYOUT;
-  ctx.font = `600 22px ${SHARE_CARD_MONO_FONT}`;
+  const { padX, metaBaselineY, eyebrowTracking } = SHARE_CARD_LAYOUT;
+  ctx.font = `600 24px ${SHARE_CARD_MONO_FONT}`;
   ctx.textBaseline = "alphabetic";
 
-  if (periodLabel) {
-    ctx.fillStyle = SHARE_CARD_COLORS.meta;
-    ctx.textAlign = "left";
-    fillTextSpaced(
-      ctx,
-      truncateText(ctx, periodLabel.toUpperCase(), size * 0.42),
-      padX,
-      metaBaselineY,
-      eyebrowTracking
-    );
-  }
+  if (!periodLabel) return;
 
-  if (badgeLabel) {
-    ctx.font = `600 20px ${SHARE_CARD_MONO_FONT}`;
-    const label = badgeLabel.toUpperCase();
-    const textWidth = measureSpacedText(ctx, label, 3.6);
-    const badgeW = textWidth + 72;
-    const badgeH = badgeHeight;
-    const badgeX = size - padX - badgeW;
-    const badgeY = metaBaselineY - 30;
-
-    ctx.fillStyle = SHARE_CARD_COLORS.badgeFill;
-    drawRoundedRect(ctx, badgeX, badgeY, badgeW, badgeH, badgeH / 2);
-    ctx.fill();
-    ctx.strokeStyle = SHARE_CARD_COLORS.badgeBorder;
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    const dotX = badgeX + 22;
-    const dotY = badgeY + badgeH / 2;
-    ctx.fillStyle = "rgba(244,114,182,0.35)";
-    ctx.beginPath();
-    ctx.arc(dotX, dotY, 10, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = "#f9a8d4";
-    ctx.beginPath();
-    ctx.arc(dotX, dotY, 6, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.fillStyle = SHARE_CARD_COLORS.badgeText;
-    ctx.textAlign = "left";
-    fillTextSpaced(ctx, label, badgeX + 40, badgeY + 30, 3.6);
-  }
+  ctx.fillStyle = SHARE_CARD_COLORS.meta;
+  ctx.textAlign = "center";
+  fillTextSpaced(
+    ctx,
+    truncateText(ctx, periodLabel.toUpperCase(), width - padX * 2),
+    width / 2,
+    metaBaselineY,
+    eyebrowTracking
+  );
 }
 
 export function drawShareCardEyebrow(
@@ -304,14 +273,16 @@ export function drawRoundedShareCardLogo(
 
 export function drawShareCardBrandFooter(
   ctx: CanvasRenderingContext2D,
-  size: number,
+  width: number,
   brandName: string,
   brandTagline: string,
   logo?: HTMLImageElement | null
 ) {
-  const { brandLogoSize, brandLogoGap, brandLogoRadius } = SHARE_CARD_LAYOUT;
-  const nameBaselineY = 1036;
-  const nameFontSize = 32;
+  const { brandLogoSize, brandLogoGap, brandLogoRadius, footerBottomInset } =
+    SHARE_CARD_LAYOUT;
+  const taglineBaselineY = SHARE_CARD_HEIGHT - footerBottomInset;
+  const nameBaselineY = taglineBaselineY - 44;
+  const nameFontSize = 34;
 
   ctx.font = `800 ${nameFontSize}px ${SHARE_CARD_FONT}`;
   ctx.fillStyle = "#ffffff";
@@ -319,7 +290,7 @@ export function drawShareCardBrandFooter(
   if (logo) {
     const textWidth = ctx.measureText(brandName).width;
     const totalWidth = brandLogoSize + brandLogoGap + textWidth;
-    const startX = (size - totalWidth) / 2;
+    const startX = (width - totalWidth) / 2;
     const iconCenterX = startX + brandLogoSize / 2;
     const iconCenterY = nameBaselineY - nameFontSize * 0.35;
 
@@ -338,13 +309,13 @@ export function drawShareCardBrandFooter(
   } else {
     ctx.textAlign = "center";
     ctx.textBaseline = "alphabetic";
-    ctx.fillText(brandName, size / 2, nameBaselineY);
+    ctx.fillText(brandName, width / 2, nameBaselineY);
   }
 
   ctx.textAlign = "center";
-  ctx.font = `500 22px ${SHARE_CARD_FONT}`;
+  ctx.font = `500 24px ${SHARE_CARD_FONT}`;
   ctx.fillStyle = "rgba(148,163,184,0.85)";
-  ctx.fillText(brandTagline, size / 2, 1068);
+  ctx.fillText(brandTagline, width / 2, taglineBaselineY);
 }
 
 export function drawCircularAvatar(
@@ -605,8 +576,8 @@ export function drawHeadToHeadCard(
     }
   }
 
-  const nameY = avatarCenterY + duelAvatarRadius + 36;
-  ctx.font = `600 26px ${SHARE_CARD_FONT}`;
+  const nameY = avatarCenterY + duelAvatarRadius + 48;
+  ctx.font = `600 28px ${SHARE_CARD_FONT}`;
   ctx.textAlign = "center";
   ctx.fillStyle = SHARE_CARD_COLORS.selfName;
   ctx.fillText(truncateText(ctx, input.viewerName, colWidth - 36), selfCenterX, nameY);
@@ -614,38 +585,38 @@ export function drawHeadToHeadCard(
   ctx.fillText(truncateText(ctx, input.friendName, colWidth - 36), friendCenterX, nameY);
 
   ctx.fillStyle = "#ffffff";
-  ctx.font = `600 68px ${SHARE_CARD_FONT}`;
-  ctx.fillText(input.selfCount.toLocaleString(), selfCenterX, nameY + 68);
-  ctx.fillText(input.friendCount.toLocaleString(), friendCenterX, nameY + 68);
+  ctx.font = `600 80px ${SHARE_CARD_FONT}`;
+  ctx.fillText(input.selfCount.toLocaleString(), selfCenterX, nameY + 80);
+  ctx.fillText(input.friendCount.toLocaleString(), friendCenterX, nameY + 80);
 
-  ctx.font = `600 18px ${SHARE_CARD_FONT}`;
+  ctx.font = `600 20px ${SHARE_CARD_FONT}`;
   ctx.fillStyle = SHARE_CARD_COLORS.playsLabel;
-  fillTextSpaced(ctx, input.selfLabel.toUpperCase(), selfCenterX, nameY + 96, 3.2);
-  fillTextSpaced(ctx, input.friendLabel.toUpperCase(), friendCenterX, nameY + 96, 3.2);
+  fillTextSpaced(ctx, input.selfLabel.toUpperCase(), selfCenterX, nameY + 112, 3.2);
+  fillTextSpaced(ctx, input.friendLabel.toUpperCase(), friendCenterX, nameY + 112, 3.2);
 
   const total = input.selfCount + input.friendCount;
   const selfPct = total > 0 ? input.selfCount / total : 0.5;
   const barX = padX;
-  const barY = nameY + 124;
+  const barY = nameY + 152;
   const barW = size - padX * 2;
   drawSplitShareBar(ctx, barX, barY, barW, barHeight, selfPct);
 
-  ctx.font = `600 32px ${SHARE_CARD_FONT}`;
+  ctx.font = `600 36px ${SHARE_CARD_FONT}`;
   ctx.fillStyle = SHARE_CARD_COLORS.headline;
   ctx.textAlign = "center";
   const headlineLines = wrapLines(ctx, input.winnerHeadline, size - 160, 2);
-  const headlineStartY = barY + barHeight + 36;
+  const headlineStartY = barY + barHeight + 48;
   for (let i = 0; i < headlineLines.length; i++) {
-    ctx.fillText(headlineLines[i] ?? "", size / 2, headlineStartY + i * 36);
+    ctx.fillText(headlineLines[i] ?? "", size / 2, headlineStartY + i * 42);
   }
 
   if (input.marginCaption) {
-    ctx.font = `500 22px ${SHARE_CARD_FONT}`;
+    ctx.font = `500 24px ${SHARE_CARD_FONT}`;
     ctx.fillStyle = SHARE_CARD_COLORS.caption;
     ctx.fillText(
       truncateText(ctx, input.marginCaption, size - 180),
       size / 2,
-      headlineStartY + headlineLines.length * 36 + 6
+      headlineStartY + headlineLines.length * 42 + 10
     );
   }
 }

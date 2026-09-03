@@ -19,7 +19,6 @@ export type DuetTimelineShareImageInput = {
   friendLabel: string;
   brandName: string;
   brandTagline: string;
-  badgeLabel?: string;
   vsLabel?: string;
   leadLabel?: string;
   marginCaption?: string;
@@ -42,7 +41,6 @@ function toHeadToHeadInput(input: DuetTimelineShareImageInput) {
     friendLabel: input.friendLabel,
     brandName: input.brandName,
     brandTagline: input.brandTagline,
-    badgeLabel: input.badgeLabel,
     vsLabel: input.vsLabel,
     leadLabel: input.leadLabel,
     marginCaption: input.marginCaption,

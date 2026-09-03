@@ -18,10 +18,12 @@ import { useDashboardViewerUserId } from "@/lib/context/dashboard-viewer-context
 import { ErrorState } from "@/lib/components/error-state";
 import { usePublicDemoViewer } from "@/lib/hooks/use-public-demo-viewer";
 import { GenreAccuracyChooser } from "@/lib/components/palette/genre-accuracy-chooser";
+import { useGroqGenreBackfillMeta } from "@/lib/hooks/use-groq-genre-backfill-meta";
 import { useTheme } from "@/lib/providers/theme-provider";
 import { useIsLgChartViewport } from "@/lib/hooks/use-chart-viewport";
 import { DASHBOARD_CHART_THEME } from "@/lib/constants/dashboard-spotlight";
 import { LiveStatusDot } from "@/lib/components/live-status-dot";
+import { genreCoverageLiveDotTone } from "@/lib/utils/genre-coverage-live-dot";
 import { ListenTrendChartViewToggle } from "@/lib/components/charts/listen-trend-chart-view-toggle";
 import {
   applyListenTrendChartViewMulti,
@@ -102,7 +104,7 @@ function createTrendsTooltip(t: (k: string) => string, locale: string) {
   return TrendsTooltipInner;
 }
 
-const DEFAULT_GENRE_COUNT = 5;
+const DEFAULT_GENRE_COUNT = 2;
 const MAX_FILTER_GENRE_COUNT = 12;
 
 export type GenreTrendsSummaryWidgetProps = {
@@ -136,6 +138,11 @@ export function GenreTrendsSummaryWidget({
     "month",
     undefined,
     viewerUserId
+  );
+  const { meta: genreCoverageMeta } = useGroqGenreBackfillMeta(viewerUserId);
+  const coverageLiveDotTone = genreCoverageLiveDotTone(
+    genreCoverageMeta.eligibility?.unknownTrackCount,
+    genreCoverageMeta.loaded
   );
 
   const availableGenres = useMemo(
@@ -242,7 +249,7 @@ export function GenreTrendsSummaryWidget({
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
               <div className="max-w-2xl">
                 <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-rose-300/25 bg-white/70 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-rose-600 shadow-sm backdrop-blur dark:border-rose-400/18 dark:bg-[#141622] dark:text-rose-100">
-                  <LiveStatusDot tone="amber" />
+                  <LiveStatusDot tone={coverageLiveDotTone} />
                   {t("title")}
                 </div>
                 <h2 className="text-2xl font-semibold tracking-[-0.04em] text-gray-950 dark:text-white sm:text-3xl">

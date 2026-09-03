@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { ArtistAvatarHydrated } from "@/lib/components/artist-avatar-hydrated";
+import { DASHBOARD_MOBILE_EMPTY_BLEED } from "@/lib/components/dashboard-mobile-import-empty";
 import { DashboardCinematicHeroBg } from "@/lib/components/dashboard-ui";
 import { MobileBottomSheet } from "@/lib/components/mobile-bottom-sheet";
 import { DASHBOARD_BOTTOM_NAV_OFFSET_VAR } from "@/lib/constants/dashboard-chrome";
@@ -222,10 +223,10 @@ export function PaletteMobileEmpty() {
   const genresHref = mergeDashboardSearchParams("/dashboard/genres", searchParams);
 
   return (
-    <div className={`${MOBILE_BLEED} max-lg:pb-8`}>
-      <section className={HERO_SHELL}>
+    <div className={DASHBOARD_MOBILE_EMPTY_BLEED}>
+      <section className={`${HERO_SHELL} flex min-h-0 flex-1 flex-col`}>
         <DashboardCinematicHeroBg />
-        <div className="relative space-y-4">
+        <div className="relative flex min-h-0 flex-1 flex-col space-y-4">
           <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-cyan">
             {tm("eyebrow")}
           </p>

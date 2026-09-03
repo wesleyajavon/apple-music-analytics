@@ -20,7 +20,6 @@ export type DuetBattleShareImageInput = {
   brandName: string;
   brandTagline: string;
   entityImageUrl?: string | null;
-  badgeLabel?: string;
   vsLabel?: string;
   leadLabel?: string;
   marginCaption?: string;
@@ -44,7 +43,6 @@ function toHeadToHeadInput(input: DuetBattleShareImageInput) {
     brandName: input.brandName,
     brandTagline: input.brandTagline,
     entityImageUrl: input.entityImageUrl,
-    badgeLabel: input.badgeLabel,
     vsLabel: input.vsLabel,
     leadLabel: input.leadLabel,
     marginCaption: input.marginCaption,

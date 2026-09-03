@@ -478,7 +478,6 @@ function CompareContent() {
             friendLabel: t("shareCountLabel"),
             brandName: t("shareBrandName"),
             brandTagline: t("shareBrandTagline"),
-            badgeLabel: t("heroEyebrow"),
             vsLabel: t("shareVsLabel"),
             leadLabel:
               winner === "friend"

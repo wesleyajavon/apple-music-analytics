@@ -1,4 +1,8 @@
-import { SHARE_CARD_BRAND_LOGO_URL, SHARE_CARD_SIZE } from "@/lib/utils/share-card/constants";
+import {
+  SHARE_CARD_BRAND_LOGO_URL,
+  SHARE_CARD_HEIGHT,
+  SHARE_CARD_SIZE,
+} from "@/lib/utils/share-card/constants";
 import {
   drawHeadToHeadCard,
   drawShareCardBackground,
@@ -35,7 +39,6 @@ export type HeadToHeadShareCardInput = {
   brandTagline: string;
   /** Artist portrait shown above the title when available (e.g. artist duel). */
   entityImageUrl?: string | null;
-  badgeLabel?: string;
   vsLabel?: string;
   leadLabel?: string;
   marginCaption?: string;
@@ -56,7 +59,7 @@ export async function renderHeadToHeadShareCard(
 
   const canvas = createShareCardCanvas();
   canvas.width = SHARE_CARD_SIZE;
-  canvas.height = SHARE_CARD_SIZE;
+  canvas.height = SHARE_CARD_HEIGHT;
   const ctx = getShareCardContext(canvas);
 
   const layout = computeShareCardVerticalLayout(
@@ -65,13 +68,8 @@ export async function renderHeadToHeadShareCard(
     Boolean(entityImage)
   );
 
-  drawShareCardBackground(ctx, SHARE_CARD_SIZE, entityImage);
-  drawShareCardMetaRow(
-    ctx,
-    SHARE_CARD_SIZE,
-    input.subtitle,
-    input.badgeLabel
-  );
+  drawShareCardBackground(ctx, SHARE_CARD_SIZE, SHARE_CARD_HEIGHT, entityImage);
+  drawShareCardMetaRow(ctx, SHARE_CARD_SIZE, input.subtitle);
   if (entityImage && layout.entityImageCenterY !== null) {
     drawShareCardEntityImage(
       ctx,

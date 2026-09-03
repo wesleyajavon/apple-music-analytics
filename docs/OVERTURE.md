@@ -75,7 +75,7 @@ La home **contient déjà** les bons ingrédients (sous-titre proche du pitch, c
 
 | Niveau | Rôle | Copie recommandée (FR) |
 |--------|------|------------------------|
-| **L1 — Tagline** | Partout (hero, OG, bio) | **Votre musique, décodée en 3 temps.** |
+| **L1 — Tagline** | Partout (hero, OG, bio) | **Tout sur vos streams.** |
 | **L2 — Pitch** | Sous-titre hero, README, posts | Importez une fois depuis Apple Music ou Spotify. Explorez vos tendances. Dialoguez avec vos données — et défier vos amis. |
 | **L3 — 3 blocs** | Corps de la home, carrousels | Un bloc par mouvement (titre + 2 lignes + visuel + CTA) |
 | **L4 — Features** | Sous chaque bloc | Heatmap, timeline, AI insights, etc. = **preuves**, jamais lead |
@@ -222,7 +222,7 @@ Fichiers impactés : `app/[locale]/page.tsx`, `lib/components/home-mobile-nav.ts
 {
   "home": {
     "journey": {
-      "tagline": "Votre musique, décodée en 3 temps.",
+      "tagline": "Tout sur vos streams.",
       "pitch": "Importez une fois depuis Apple Music ou Spotify. Explorez vos tendances. Dialoguez avec vos données — et défier vos amis.",
       "nav": {
         "import": "Importer",
@@ -359,7 +359,7 @@ Importer · Explorer · Interagir
 
 **Carrousel social (4 slides)**
 
-1. Votre musique, décodée en 3 temps.
+1. Tout sur vos streams.
 2. ① IMPORTER — Apple Music ou Spotify en minutes
 3. ② EXPLORER — tendances, heatmap, profil musical
 4. ③ INTERAGIR — chat IA + duels entre amis → lien démo

@@ -10,7 +10,7 @@ import {
   DashboardCinematicHeroBg,
 } from "@/lib/components/dashboard-ui";
 import { GroqQuotaNotice } from "@/lib/components/error-state";
-import { WaitingForImportMobileCtas } from "@/lib/components/waiting-for-import-demo";
+import { DashboardMobileImportEmpty } from "@/lib/components/dashboard-mobile-import-empty";
 import { isGroqDailyQuotaError } from "@/lib/utils/groq-quota-message";
 import type { OverviewPrimaryInsight } from "@/lib/utils/overview-page";
 
@@ -253,33 +253,18 @@ export function MobileOverviewEmptyView({ avatarUrl }: { avatarUrl?: string | nu
   const t = useTranslations("overview.mobile");
 
   return (
-    <div className={MOBILE_BLEED}>
-      <section className={OVERVIEW_MOBILE_HERO_SHELL}>
-        <DashboardCinematicHeroBg />
-        <div className="relative space-y-4">
-          {avatarUrl ? (
-            <UserAvatarPhoto
-              src={avatarUrl}
-              size="lg"
-              className="ring-1 ring-white/15"
-            />
-          ) : null}
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-cyan">
-              {t("heroEyebrow")}
-            </p>
-            <h1 className="mt-2 max-w-[16rem] text-[1.55rem] font-semibold leading-[1.15] tracking-[-0.05em]">
-              {t("emptyTitle")}
-            </h1>
-            <p className="mt-2 max-w-sm text-sm leading-6 text-white/62">{t("emptyLead")}</p>
-          </div>
-          <WaitingForImportMobileCtas
-            demoPath="/dashboard/overview"
-            importLabel={t("emptyCta")}
-            demoLabel={t("emptyDemoCta")}
-          />
-        </div>
-      </section>
-    </div>
+    <DashboardMobileImportEmpty
+      eyebrow={t("heroEyebrow")}
+      title={t("emptyTitle")}
+      lead={t("emptyLead")}
+      demoPath="/dashboard/overview"
+      importLabel={t("emptyCta")}
+      demoLabel={t("emptyDemoCta")}
+      header={
+        avatarUrl ? (
+          <UserAvatarPhoto src={avatarUrl} size="lg" className="ring-1 ring-white/15" />
+        ) : undefined
+      }
+    />
   );
 }

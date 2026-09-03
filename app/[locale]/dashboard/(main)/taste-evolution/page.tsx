@@ -17,13 +17,13 @@ import {
   DASHBOARD_SPOTLIGHT_TITLE,
 } from "@/lib/constants/dashboard-spotlight";
 import { useTasteEvolution } from "@/lib/hooks/use-taste-evolution";
+import { DashboardMobileImportEmpty } from "@/lib/components/dashboard-mobile-import-empty";
 import { DashboardCinematicHeroBg } from "@/lib/components/dashboard-ui";
 import { ErrorState, GroqQuotaNotice } from "@/lib/components/error-state";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
 import { AiUnavailableCta } from "@/lib/components/ai-unavailable-cta";
 import { TasteEvolutionSpotlightSkeleton } from "@/lib/components/skeleton-loaders";
 import { isGroqDailyQuotaError } from "@/lib/utils/groq-quota-message";
-import { DASHBOARD_ONBOARDING_REIMPORT_PATH } from "@/lib/utils/onboarding-route";
 import type {
   TasteEvolutionResponse,
   WeekToWeekTrend,
@@ -82,23 +82,13 @@ function TasteEvolutionMobileEmpty() {
   const t = useTranslations("taste-evolution");
 
   return (
-    <div className={TASTE_MOBILE_BLEED}>
-      <section className={TASTE_MOBILE_HERO}>
-        <DashboardCinematicHeroBg />
-        <div className="relative space-y-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-cyan">
-            {t("mobile.eyebrow")}
-          </p>
-          <h1 className="max-w-[16rem] text-[1.55rem] font-semibold leading-[1.15] tracking-[-0.05em]">
-            {t("mobile.emptyTitle")}
-          </h1>
-          <p className="max-w-sm text-sm leading-6 text-white/62">{t("mobile.emptyLead")}</p>
-          <Link href={DASHBOARD_ONBOARDING_REIMPORT_PATH} className={TASTE_MOBILE_RETRY}>
-            {t("mobile.emptyCta")}
-          </Link>
-        </div>
-      </section>
-    </div>
+    <DashboardMobileImportEmpty
+      eyebrow={t("mobile.eyebrow")}
+      title={t("mobile.emptyTitle")}
+      lead={t("mobile.emptyLead")}
+      demoPath="/dashboard/taste-evolution"
+      importLabel={t("mobile.emptyCta")}
+    />
   );
 }
 

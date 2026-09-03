@@ -65,7 +65,7 @@
     "collapseSection": "Replier {label}",
     "expandSection": "Déplier {label}",
     "logo": "Soundprint-AI",
-    "tagline": "Vos streams, en images",
+    "tagline": "Tout sur vos streams",
     "appearance": "Apparence",
     "language": "Langue",
     "signIn": "Se connecter",
@@ -322,7 +322,7 @@
       "shareImageSaved": "Carte téléchargée !",
       "downloadBattleImage": "Télécharger",
       "shareBrandName": "Soundprint-AI",
-      "shareBrandTagline": "Vos streams, décodée.",
+      "shareBrandTagline": "Tout sur vos streams",
       "shareCopied": "Copié !",
       "shareShared": "Partagé !",
       "shareArenaArtist": "Duel artiste",
@@ -2539,7 +2539,7 @@
       "aiChat": {
         "eyebrow": "Conversationnel",
         "title": "Soundprint chat",
-        "body": "Posez n'importe quelle question sur votre historique. Les réponses restent ancrées dans vos streams — pas le web.",
+        "body": "ChatGPT, version musique. Posez n'importe quelle question sur votre historique, en langage naturel — les réponses restent ancrées dans vos streams, pas le web.",
         "cta": "Lancer le chat"
       },
       "duet": {
@@ -2558,7 +2558,7 @@
       "storyTitle": "Cette période",
       "destinationsTitle": "Explorer",
       "yourMusicLead": "Classements, tendances et calendrier.",
-      "chatLead": "Pose une question sur tes streams.",
+      "chatLead": "ChatGPT, version musique.",
       "duetLead": "Compare ta bibliothèque avec un ami.",
       "identityTitle": "Identité",
       "emptyTitle": "Importe tes streams",
@@ -2947,7 +2947,17 @@
         "description": "Choisissez une autre date dans le calendrier pour voir le détail."
       },
       "startupEmptyEyebrow": "Bibliothèque vide",
-      "startupEmptyAside": "Pipeline · aucune ligne"
+      "startupEmptyAside": "Pipeline · aucune ligne",
+      "emptyDemoCta": "Explorer la démo",
+      "mobileUnlock": {
+        "eyebrow": "Bientôt allumé",
+        "hours": "Temps d’écoute",
+        "hoursLead": "Heures, séries et vos semaines les plus intenses.",
+        "catalog": "Artistes et titres",
+        "catalogLead": "Qui vous bouclez, et ce que vous rejouez.",
+        "taste": "Carte de goût",
+        "tasteLead": "Genres, habitudes, et une signature qui est la vôtre."
+      }
     },
     "errorState": {
       "defaultMessage": "Une erreur est survenue lors du chargement des données",
@@ -3149,14 +3159,14 @@
     "heroHeadline": "Voyez la musique qui vous a façonné.",
     "heroSub": "Laissez l’IA vous en dire plus sur votre historique d’écoute.",
     "heroTrust": "Privé par conception · Vos fichiers, votre compte",
-    "heroGradient": "votre musique décodée.",
+    "heroGradient": "Tout sur vos streams",
     "welcome": "Bienvenue sur Soundprint-AI",
     "welcomePersonal": "Bon retour, {name}",
     "supportedStreamingCaption": "Compatible avec",
     "spotifyLogoAlt": "Spotify",
     "appleMusicLogoAlt": "Apple Music",
     "journey": {
-      "tagline": "Votre musique, décodée.",
+      "tagline": "Tout sur vos streams",
       "pitch": "Importez une fois depuis Apple Music ou Spotify. Explorez vos tendances, lancez des deepdives artiste, discutez avec votre musique, et comparez vos streams avec vos amis.",
       "stepsListAriaLabel": "Sections Soundprint",
       "stepLinkAria": "Aller à {step}",

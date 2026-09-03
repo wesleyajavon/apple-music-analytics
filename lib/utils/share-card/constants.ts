@@ -1,5 +1,8 @@
-/** Square PNG size for social share cards (Duet, future Encore). */
-export const SHARE_CARD_SIZE = 1080;
+/** Instagram story / phone portrait share card (9:16). */
+export const SHARE_CARD_WIDTH = 1080;
+export const SHARE_CARD_HEIGHT = 1920;
+/** Horizontal size used by wrap and centering math. */
+export const SHARE_CARD_SIZE = SHARE_CARD_WIDTH;
 
 export const SHARE_CARD_FONT =
   "system-ui, -apple-system, Segoe UI, sans-serif";
@@ -10,7 +13,7 @@ export const SHARE_CARD_MONO_FONT =
 /** Same-origin favicon used in share card footers. */
 export const SHARE_CARD_BRAND_LOGO_URL = "/brand/favicon.png";
 
-/** Landing-duet-preview palette, scaled to the 1080 share canvas. */
+/** Landing-duet-preview palette, scaled to the portrait share canvas. */
 export const SHARE_CARD_COLORS = {
   canvas: "#080913",
   violetGlow: "rgba(139,92,246,0.28)",
@@ -24,9 +27,6 @@ export const SHARE_CARD_COLORS = {
   caption: "rgba(255,255,255,0.55)",
   lead: "#6ee7b7",
   leadTie: "rgba(226,232,240,0.85)",
-  badgeBorder: "rgba(249,168,212,0.28)",
-  badgeFill: "rgba(244,114,182,0.12)",
-  badgeText: "#fce7f3",
   vsBorder: "rgba(249,168,212,0.4)",
   vsFill: "rgba(244,114,182,0.16)",
   vsText: "#fce7f3",
@@ -44,25 +44,30 @@ export const SHARE_CARD_COLORS = {
   barTrack: "rgba(255,255,255,0.1)",
 } as const;
 
-/** Vertical layout tokens for share card composition. */
+/**
+ * Vertical layout tokens for a 1080×1920 story card.
+ * Top/bottom insets keep type out of Instagram story chrome.
+ */
 export const SHARE_CARD_LAYOUT = {
   padX: 72,
-  metaBaselineY: 108,
-  badgeHeight: 44,
-  entityImageSize: 160,
-  entityImageCornerRadius: 36,
-  entityImageGapBelow: 24,
-  eyebrowFontSize: 22,
-  eyebrowTracking: 4.4,
-  titleFontSize: 54,
-  titleLineHeight: 60,
-  titleAscent: 44,
-  sectionGap: 36,
-  duelAvatarRadius: 72,
-  duelCardHeight: 440,
-  barHeight: 20,
-  footerTop: 1008,
-  brandLogoSize: 44,
-  brandLogoGap: 12,
+  metaBaselineY: 300,
+  entityImageSize: 220,
+  entityImageCornerRadius: 48,
+  entityImageGapBelow: 32,
+  eyebrowFontSize: 24,
+  eyebrowTracking: 4.8,
+  titleFontSize: 62,
+  titleLineHeight: 70,
+  titleAscent: 50,
+  sectionGap: 56,
+  duelAvatarRadius: 92,
+  duelCardHeight: 640,
+  barHeight: 24,
+  /** Space below the tagline so IG story UI does not cover the brand. */
+  footerBottomInset: 400,
+  brandBlockHeight: 96,
+  footerTop: 1920 - 400 - 96,
+  brandLogoSize: 48,
+  brandLogoGap: 14,
   brandLogoRadius: 12,
 } as const;

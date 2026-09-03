@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <strong>Vos écoutes, visualisées.</strong><br>
+  <strong>Tout sur vos streams.</strong><br>
   Analytics personnelles pour Apple Music et Spotify — tendances, identité musicale, chat IA et duels entre amis.
 </p>
 

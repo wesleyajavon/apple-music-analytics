@@ -7,13 +7,14 @@
 
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
-import { usePublicDemo } from "@/lib/providers/public-demo-provider";
 import { DASHBOARD_ONBOARDING_REIMPORT_PATH } from "@/lib/utils/onboarding-route";
+import { useWaitingForImportDemoHref } from "@/lib/components/waiting-for-import-demo";
 import {
   OVERVIEW_STARTUP_EYEBROW_PILL_CLASS,
   OVERVIEW_STARTUP_SURFACE_BASE,
   OverviewStartupSurfaceBg,
 } from "@/lib/components/overview-startup-surface";
+import { LiveStatusDot } from "@/lib/components/live-status-dot";
 import { BarChart3, Inbox } from "lucide-react";
 
 export interface EmptyStateAction {
@@ -174,7 +175,7 @@ export function EmptyState({
             <div className="min-w-0">
               {statusEyebrow ? (
                 <div className={OVERVIEW_STARTUP_EYEBROW_PILL_CLASS}>
-                  <span className="h-2 w-2 rounded-full bg-accent-emerald shadow-[0_0_16px_rgb(22_199_132_/0.75)]" />
+                  <LiveStatusDot tone="rose" />
                   {statusEyebrow}
                 </div>
               ) : null}
@@ -297,15 +298,13 @@ export function EmptyState({
 }
 
 /** Hook qui retourne les presets d'état vide traduits */
-export function useEmptyStatePresets() {
+export function useEmptyStatePresets(options?: { demoPath?: string }) {
   const t = useTranslations("components.emptyState");
-  const { publicDemoOverviewPath: publicDemoHref } = usePublicDemo();
+  const demoHref = useWaitingForImportDemoHref(options?.demoPath ?? "/dashboard/overview");
 
   const actionsWithPublicDemo = (primaryHref: string, primaryLabel: string): EmptyStateAction[] => [
     { label: primaryLabel, href: primaryHref },
-    ...(publicDemoHref
-      ? ([{ label: t("publicDemoLabel"), href: publicDemoHref }] as EmptyStateAction[])
-      : []),
+    { label: t("publicDemoLabel"), href: demoHref },
   ];
 
   return {

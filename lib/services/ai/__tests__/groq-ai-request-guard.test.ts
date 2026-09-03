@@ -9,6 +9,7 @@ vi.mock("@/lib/services/user/privacy-preferences", () => ({
 import { hasGroqGenreConsent } from "@/lib/services/user/privacy-preferences";
 import {
   getGroqAiUnavailableReason,
+  getGroqFeatureUnavailableReason,
   isGroqAiEnabledForRequest,
 } from "@/lib/services/ai/groq-ai-request-guard";
 
@@ -43,5 +44,15 @@ describe("groq-ai-request-guard", () => {
     const request = new NextRequest("http://localhost/api/ai/insights");
     await expect(isGroqAiEnabledForRequest(request, "user-1")).resolves.toBe(true);
     await expect(getGroqAiUnavailableReason(request, "user-1")).resolves.toBeNull();
+  });
+
+  it("treats a missing GROQ_API_KEY as env unavailability", async () => {
+    vi.mocked(hasGroqGenreConsent).mockResolvedValue(true);
+    const previous = process.env.GROQ_API_KEY;
+    delete process.env.GROQ_API_KEY;
+    const request = new NextRequest("http://localhost/api/ai/insights");
+    await expect(getGroqFeatureUnavailableReason(request, "user-1")).resolves.toBe("env");
+    if (previous === undefined) delete process.env.GROQ_API_KEY;
+    else process.env.GROQ_API_KEY = previous;
   });
 });

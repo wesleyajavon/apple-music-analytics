@@ -37,6 +37,8 @@ import {
 } from "@/lib/hooks/use-listening";
 import { isGroqDailyQuotaError, isGroqGenreClassificationBlockingError } from "@/lib/utils/groq-quota-message";
 import { InteractiveAiGenreBackfillNotice } from "@/lib/components/interactive-ai-genre-backfill-notice";
+import { AiUnavailableCta } from "@/lib/components/ai-unavailable-cta";
+import type { AiUnavailableReason } from "@/lib/dto/ai-insights";
 import { useInteractiveAiBlockedByGenreBackfill } from "@/lib/hooks/use-interactive-ai-blocked-by-genre-backfill";
 import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
 import { firstKnownGenreName } from "@/lib/utils/genre-unknown-label";
@@ -389,6 +391,7 @@ function SoundprintIdentitySection({
   interactiveAiBlockedByGenreBackfill,
   profileDescription,
   showAiUnavailable,
+  aiUnavailableReason,
   topArtistName,
   topGenreName,
 }: {
@@ -399,6 +402,7 @@ function SoundprintIdentitySection({
   interactiveAiBlockedByGenreBackfill: boolean;
   profileDescription: string;
   showAiUnavailable?: boolean;
+  aiUnavailableReason?: AiUnavailableReason;
   topArtistName: string;
   topGenreName: string | undefined;
 }) {
@@ -468,7 +472,9 @@ function SoundprintIdentitySection({
               </p>
             ) : null}
             {showAiUnavailable ? (
-              <p className="mt-4 text-xs leading-6 text-white/45">{t("aiUnavailable")}</p>
+              <div className="mt-4">
+                <AiUnavailableCta reason={aiUnavailableReason ?? "consent"} tone="onDark" />
+              </div>
             ) : null}
           </div>
         </div>
@@ -555,7 +561,9 @@ function MusicalProfileNoDataView({
   withFilters: (href: string) => string;
 }) {
   const t = useTranslations("musical-profile");
-  const emptyStatePresets = useEmptyStatePresets();
+  const emptyStatePresets = useEmptyStatePresets({
+    demoPath: "/dashboard/musical-profile",
+  });
   const { startDate, endDate } = useListenDateRange();
 
   return (
@@ -728,6 +736,7 @@ function MusicalProfileContent() {
       genre: topGenreName || t("unknownGenre"),
     });
   const showAiUnavailable = aiProfile?.aiUnavailable;
+  const aiUnavailableReason = aiProfile?.aiUnavailableReason;
   const profileMetrics: ProfileMetric[] = [
     {
       label: t("metrics.totalListens"),
@@ -759,6 +768,7 @@ function MusicalProfileContent() {
         profileDescription={profileDescription}
         profileMetrics={profileMetrics}
         showAiUnavailable={showAiUnavailable}
+        aiUnavailableReason={aiUnavailableReason}
         topArtistName={topArtistName}
         topArtists={topArtists}
         topGenreName={topGenreName}
@@ -917,6 +927,7 @@ function MusicalProfileContent() {
           interactiveAiBlockedByGenreBackfill={interactiveAiBlockedByGenreBackfill}
           profileDescription={profileDescription}
           showAiUnavailable={showAiUnavailable}
+          aiUnavailableReason={aiUnavailableReason}
           topArtistName={topArtistName}
           topGenreName={topGenreName}
         />

@@ -6,11 +6,13 @@ import { withPublicDemoUserId } from "@/lib/constants/public-profile";
 type PublicDemoContextValue = {
   publicProfileUserId: string | null;
   publicDemoOverviewPath: string | null;
+  hrefWithPublicDemo: (href: string) => string | null;
 };
 
 const PublicDemoContext = createContext<PublicDemoContextValue>({
   publicProfileUserId: null,
   publicDemoOverviewPath: null,
+  hrefWithPublicDemo: () => null,
 });
 
 export function PublicDemoProvider({
@@ -26,6 +28,8 @@ export function PublicDemoProvider({
       publicDemoOverviewPath: publicProfileUserId
         ? withPublicDemoUserId("/dashboard/overview", publicProfileUserId)
         : null,
+      hrefWithPublicDemo: (href: string) =>
+        publicProfileUserId ? withPublicDemoUserId(href, publicProfileUserId) : null,
     }),
     [publicProfileUserId],
   );

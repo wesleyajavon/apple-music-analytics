@@ -3,7 +3,6 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { usePathname } from "@/i18n/navigation";
 import {
   CartesianGrid,
   Legend,
@@ -326,12 +325,13 @@ function TrackTrendsChartSkeleton() {
 
 function TrendsContent() {
   const tracksHref = useTracksListHref();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
   const { resolvedTheme } = useTheme();
   const chartTheme = DASHBOARD_CHART_THEME[resolvedTheme === "dark" ? "dark" : "light"];
   const t = useTranslations("trackTrends");
-  const emptyStatePresets = useEmptyStatePresets();
+  const emptyStatePresets = useEmptyStatePresets({
+    demoPath: "/dashboard/tracks/trends",
+  });
   const badgeLabel = useTrackTrendsBadgeLabel();
   const startDateParam = searchParams.get("startDate");
   const endDateParam = searchParams.get("endDate");
@@ -496,6 +496,7 @@ function TrendsContent() {
             panel={<TrackTrendsHeroPanel period={period} selectedCount={selectedIds.length} />}
           />
           <TracksSectionSwitcher idPrefix="track-trends-desktop" activeSection="trends" />
+          <EmptyState variant="startup" {...emptyStatePresets.importData} />
         </div>
       </>
     );

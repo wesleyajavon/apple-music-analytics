@@ -1018,7 +1018,9 @@ function GenresContent() {
     );
   }, []);
 
-  const emptyStatePresets = useEmptyStatePresets();
+  const emptyStatePresets = useEmptyStatePresets({
+    demoPath: "/dashboard/genres",
+  });
 
   const badgeLabel = useGenresHeroBadge();
 
@@ -1105,7 +1107,12 @@ function GenresContent() {
           <div className="lg:hidden">
             <GenresMobileError locale={locale} error={error} onRetry={() => refetch()} />
           </div>
-          <div className="hidden lg:block">
+          <div className="hidden space-y-12 lg:block">
+            <GenresViewSwitcher
+              idPrefix="genres-error"
+              activeView={activeView}
+              onChange={setView}
+            />
             <ErrorState
               variant="startup"
               error={error}
@@ -1119,8 +1126,13 @@ function GenresContent() {
           <div className="lg:hidden">
             <GenresMobileEmpty />
           </div>
-          <div className="hidden lg:block">
-            <EmptyState variant="startup" {...emptyStatePresets.changeDates(pathname)} />
+          <div className="hidden space-y-12 lg:block">
+            <GenresViewSwitcher
+              idPrefix="genres-empty"
+              activeView={activeView}
+              onChange={setView}
+            />
+            <EmptyState variant="startup" {...emptyStatePresets.importData} />
           </div>
         </>
       ) : (

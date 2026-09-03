@@ -3,7 +3,6 @@
 import { Suspense, useMemo, useState, type ReactNode } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
-import { Link } from "@/i18n/navigation";
 import type { TemporalAnalysisDto } from "@/lib/dto/listening";
 import {
   BarChart,
@@ -31,8 +30,7 @@ import {
   TemporalMobileExperience,
   TemporalMobileSkeleton,
 } from "@/lib/components/temporal-analysis-mobile";
-import { LiveStatusDot } from "@/lib/components/live-status-dot";
-import { Clock, Activity, CalendarDays, Timer } from "lucide-react";
+import { Clock, CalendarDays, Timer } from "lucide-react";
 import {
   DashboardSectionPanel,
   DashboardSectionSwitcher,
@@ -155,10 +153,6 @@ function TemporalHeroFrame({ badgeLabel, stats }: { badgeLabel: string; stats: R
       <div className="absolute -bottom-28 right-10 h-72 w-72 rounded-full bg-accent-cyan/18 blur-3xl" />
       <div className="relative grid gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-start">
         <div>
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-violet-100 backdrop-blur">
-            <LiveStatusDot />
-            {t("heroEyebrow")}
-          </div>
           <h1 className="flex flex-wrap items-center gap-3 text-4xl font-semibold tracking-[-0.06em] text-white sm:text-5xl lg:text-6xl">
             <Clock className="h-9 w-9 shrink-0 text-violet-200/90 sm:h-11 sm:w-11" strokeWidth={1.5} aria-hidden />
             <span className="max-w-4xl text-balance">{t("title")}</span>
@@ -168,22 +162,6 @@ function TemporalHeroFrame({ badgeLabel, stats }: { badgeLabel: string; stats: R
             <span className="inline-flex items-center rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-white/90 backdrop-blur">
               {badgeLabel}
             </span>
-          </div>
-          <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            <Link
-              href="/dashboard/timeline"
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25 transition-all hover:-translate-y-0.5 hover:bg-gray-100"
-            >
-              <Activity className="h-4 w-4" aria-hidden />
-              {t("ctaTimeline")}
-            </Link>
-            <Link
-              href="/dashboard/heatmap"
-              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-sm font-bold text-white backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white/15"
-            >
-              <CalendarDays className="h-4 w-4" aria-hidden />
-              {t("ctaHeatmap")}
-            </Link>
           </div>
         </div>
 
@@ -384,7 +362,9 @@ function TemporalAnalysisContent() {
   );
 
   // Données pour le graphique radar (jours de la semaine)
-  const emptyStatePresets = useEmptyStatePresets();
+  const emptyStatePresets = useEmptyStatePresets({
+    demoPath: "/dashboard/temporal-analysis",
+  });
 
   const radarData = useMemo(
     () =>
@@ -409,7 +389,8 @@ function TemporalAnalysisContent() {
   );
 
   const isEmpty =
-    !data || (data.byDayOfWeek.length === 0 && data.byHourOfDay.length === 0);
+    !data ||
+    data.byDayOfWeek.reduce((sum, day) => sum + day.listens, 0) === 0;
 
   return (
     <>
@@ -429,24 +410,26 @@ function TemporalAnalysisContent() {
         {!isLoading && error ? (
           <>
             <TemporalHeroFrame badgeLabel={t("heroBadge")} stats={null} />
-            <TemporalNoteCallout />
-            <section className={TEMPORAL_SECTION_CLASS}>
-              <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} aria-hidden />
-              <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} aria-hidden />
-              <div className="relative p-6 sm:p-8">
-                <ErrorState
-                  variant="startup"
-                  error={error}
-                  message={t("errorLoading")}
-                  onRetry={() => refetch()}
-                />
-              </div>
-            </section>
+            <TemporalViewSwitcher
+              idPrefix="temporal-error"
+              activeView={activeView}
+              onChange={setView}
+            />
+            <ErrorState
+              variant="startup"
+              error={error}
+              message={t("errorLoading")}
+              onRetry={() => refetch()}
+            />
           </>
         ) : !isLoading && isEmpty ? (
           <>
             <TemporalHeroFrame badgeLabel={t("heroBadge")} stats={null} />
-            <TemporalNoteCallout />
+            <TemporalViewSwitcher
+              idPrefix="temporal-empty"
+              activeView={activeView}
+              onChange={setView}
+            />
             <EmptyState variant="startup" {...emptyStatePresets.importData} />
           </>
         ) : (

@@ -2,7 +2,6 @@
 
 import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
 import { OverviewPeriodBadgeButton, OverviewPeriodHint } from "@/lib/components/overview-period-nudge";
 import { UserAvatarPhoto } from "@/lib/components/user-avatar";
 import { SoundprintBrandMark } from "@/lib/components/soundprint-brand-mark";
@@ -11,7 +10,7 @@ import {
   DashboardCinematicHeroBg,
 } from "@/lib/components/dashboard-ui";
 import { GroqQuotaNotice } from "@/lib/components/error-state";
-import { DASHBOARD_ONBOARDING_REIMPORT_PATH } from "@/lib/utils/onboarding-route";
+import { WaitingForImportMobileCtas } from "@/lib/components/waiting-for-import-demo";
 import { isGroqDailyQuotaError } from "@/lib/utils/groq-quota-message";
 import type { OverviewPrimaryInsight } from "@/lib/utils/overview-page";
 
@@ -274,12 +273,11 @@ export function MobileOverviewEmptyView({ avatarUrl }: { avatarUrl?: string | nu
             </h1>
             <p className="mt-2 max-w-sm text-sm leading-6 text-white/62">{t("emptyLead")}</p>
           </div>
-          <Link
-            href={DASHBOARD_ONBOARDING_REIMPORT_PATH}
-            className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25"
-          >
-            {t("emptyCta")}
-          </Link>
+          <WaitingForImportMobileCtas
+            demoPath="/dashboard/overview"
+            importLabel={t("emptyCta")}
+            demoLabel={t("emptyDemoCta")}
+          />
         </div>
       </section>
     </div>

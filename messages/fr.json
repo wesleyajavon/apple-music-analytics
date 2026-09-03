@@ -28,7 +28,15 @@
     "widgetHintEnvLocked": "L’IA est désactivée côté serveur. Ce contenu ne peut pas être généré ici.",
     "widgetHintConsentRequired": "Activez l’IA Groq ci-dessous pour utiliser cette fonctionnalité.",
     "consentRequiredHint": "Activez d’abord l’IA Groq dans Paramètres → Préférences.",
-    "enableGroqCta": "Activer l’IA Groq"
+    "enableGroqCta": "Activer l’IA Groq",
+    "unavailableTitle": "L’IA Groq est désactivée",
+    "unavailableTitleClient": "L’IA est en pause sur ce navigateur",
+    "unavailableTitleEnv": "L’IA n’est pas disponible",
+    "unavailableDescriptionConsent": "Votre historique d’écoute est déjà chargé. Activez l’IA Groq pour générer les insights, le chat et les synthèses — aucun nouvel import n’est nécessaire.",
+    "unavailableDescriptionClient": "Votre historique d’écoute est déjà chargé. Réactivez le bouton IA (menu Plus sur mobile, bas à droite sur bureau) pour utiliser cette fonctionnalité.",
+    "unavailableDescriptionEnv": "L’IA est désactivée côté serveur : insights et chat ne peuvent pas être générés ici.",
+    "unavailableEyebrow": "IA Groq",
+    "unavailableAside": "Consentement · off"
   },
   "groqAiConsentPrompt": {
     "title": "Activer l’IA Groq",
@@ -92,7 +100,7 @@
       "trackTrends": "Tendances titres",
       "tracks": "Titres",
       "askSoundprint": "Interrogez votre Soundprint",
-      "aiInsights": "Cartes insights",
+      "aiInsights": "Lectures IA",
       "tasteEvolution": "Glissements de goût",
       "tasteProfile": "Profil de goût",
       "about": "Comment ça marche",
@@ -562,7 +570,7 @@
     "heroTrust3": "Respecte la plage de dates choisie sur le tableau de bord.",
     "heroDemoPill": "Démo — modèles uniquement",
     "ctaOverview": "Vue Musique",
-    "ctaAiInsights": "Cartes AI Insights",
+    "ctaAiInsights": "Lectures IA",
     "publicDemoMode": "Mode démo publique : seules les questions prédéfinies sont disponibles.",
     "emptyAssistantMessage": "Choisissez une question ou écrivez la vôtre. Je réponds uniquement avec les analytics déjà calculées pour vous.",
     "emptyActionHint": "Choisissez une question ou écrivez la vôtre.",
@@ -689,7 +697,7 @@
   },
   "publicDemoAi": {
     "demoPill": "Aperçu démo",
-    "signUpHint": "Les lectures IA nécessitent un compte. Inscrivez-vous pour débloquer votre empreinte sonore complète et vos cartes d’insights.",
+    "signUpHint": "Les lectures IA nécessitent un compte. Inscrivez-vous pour débloquer votre empreinte sonore complète.",
     "signUp": "S'inscrire",
     "signIn": "Se connecter"
   },
@@ -1340,7 +1348,7 @@
     "artistSpotlight": {
       "badge": "Spotlight artistes",
       "title": "Les artistes qui portent votre rotation.",
-      "description": "Faites défiler jusqu’à dix artistes. Survolez une cover pour révéler les streams, la variété et le titre signature.",
+      "description": "Faites défiler jusqu’à dix artistes. Survolez une cover pour révéler les streams, la variété et le titre signature. Cliquez pour avoir un deepdive de cet artiste.",
       "scrollPrevious": "Afficher les artistes précédents",
       "scrollNext": "Afficher les artistes suivants",
       "carouselLabel": "Carrousel spotlight artistes"
@@ -1375,8 +1383,8 @@
     "errorStateEyebrow": "Synthèse indisponible",
     "errorStateHint": "Impossible de charger les métriques de la vue d'ensemble. Il s'agit en général d'un court incident réseau ou serveur — réessayez dans un instant. Vos données de streams restent sur votre compte.",
     "errorStateMetricStatus": "En attente de réponse",
-    "emptyStateHeroDescription": "Votre vue d'ensemble reste à zéro tant qu'aucune importation n'a abouti. Importez un export Spotify ou Apple Music pour commencer.",
-    "emptyStateEyebrow": "Bibliothèque au repos",
+    "emptyStateHeroDescription": "Votre vue d'ensemble reste à zéro tant qu'aucune importation n'a abouti. Si vous n’avez pas encore votre export Spotify ou Apple Music, importez-le dès qu’il arrive — ou explorez la démo en attendant.",
+    "emptyStateEyebrow": "Bibliothèque vide",
     "emptyStateAside": "Métriques · zéro ligne",
     "emptyStateMetricHint": "En attente d'import",
     "viewSwitcher": {
@@ -1418,7 +1426,7 @@
       },
       "intelligence": {
         "eyebrow": "Calendrier et IA",
-        "title": "Insights IA et calendrier d'écoute",
+        "title": "Lectures IA et calendrier d'écoute",
         "description": "Une lecture IA de cette période, à côté d'un calendrier style GitHub de vos jours d'écoute."
       },
       "goFurther": {
@@ -1438,8 +1446,9 @@
       "profileLead": "Votre signature d'écoute.",
       "destinationsTitle": "Ensuite",
       "emptyTitle": "Importez vos streams",
-      "emptyLead": "L'aperçu s'affiche dès l'historique.",
+      "emptyLead": "Pas encore d’historique. Importez-le dès que votre export arrive, ou explorez la démo en attendant.",
       "emptyCta": "Importer l'historique",
+      "emptyDemoCta": "Explorer la démo",
       "errorLead": "Impossible de charger ce snapshot.",
       "vsShort": "vs préc.",
       "railStreams": "Streams",
@@ -1458,11 +1467,9 @@
   "timeline": {
     "title": "Votre pouls de streams",
     "subtitle": "Du grand mouvement au pic quotidien — voyez où l'élan monte, retombe ou revient en force.",
-    "heroEyebrow": "Radar d'élan",
     "heroStatBadge": "Signaux",
     "heroStatTag": "Cette période",
     "heroStatsPlaceholder": "Totaux et pics s'affichent dès que la courbe est chargée.",
-    "ctaHeatmap": "Carte d'intensité",
     "heroStatTotal": "Streams totales",
     "heroStatPeak": "Pic maximal",
     "heroStatBuckets": "Segments tracés",
@@ -1504,7 +1511,7 @@
     }
   },
   "heatmap": {
-    "title": "Votre canopée d'stream",
+    "title": "Votre canopée de stream",
     "subtitle": "Des cases façon GitHub pour chaque jour où vous avez streamé. Touchez une case pour ouvrir cette journée.",
     "heroEyebrow": "Carte d'intensité",
     "mobile": {
@@ -1531,8 +1538,7 @@
     },
     "heroStatBadge": "Instantané live",
     "heroStatTag": "Cette fenêtre",
-    "heroStatsPlaceholder": "Remplissez la grille d'streams et vos KPIs se mettent en place.",
-    "ctaTimeline": "Ouvrir le pouls",
+    "heroStatsPlaceholder": "Remplissez la grille de streams et vos KPIs se mettent en place.",
     "dateRangeBadge": "Plage : {range}",
     "errorLoading": "Impossible de charger le calendrier — réessayez.",
     "activeDays": "Jours actifs",
@@ -1592,13 +1598,10 @@
   "temporal-analysis": {
     "title": "Studio rythme",
     "subtitle": "Les jours de la semaine rencontrent les 24 heures — repérez le créneau où votre bande-son se verrouille vraiment.",
-    "heroEyebrow": "Intelligence des patterns",
     "heroBadge": "Archive complète · filtres de dates en pause ici",
     "heroStatBadge": "Boost signal",
     "heroStatTag": "Historique total",
     "heroStatsPlaceholder": "Le jour et l'heure de pic apparaissent une fois le profil compilé.",
-    "ctaTimeline": "Ouvrir le pouls",
-    "ctaHeatmap": "Carte d'intensité",
     "heroStatTotal": "Streams totales",
     "note": "Pourquoi tout l'historique ?",
     "noteText": "Une petite fenêtre ment. Nous analysons toute votre archive pour que jours et heures reflètent la vie réelle — pas une semaine bruyante.",
@@ -2120,7 +2123,7 @@
     "rankingSearchAria": "Rechercher un artiste dans le classement",
     "rankingSearchEmpty": "Aucun artiste ne correspond à cette recherche.",
     "rankingClickHint": "Cliquez une ligne pour ouvrir le détail.",
-    "artistInsightsAriaOpen": "Voir l’analyse d’stream pour {name}",
+    "artistInsightsAriaOpen": "Voir l’analyse de stream pour {name}",
     "insightsCloseAria": "Fermer le panneau détail",
     "insightsEyebrow": "Vos streams",
     "insightsUniqueTracksShort": "titres uniques",
@@ -2305,21 +2308,20 @@
     }
   },
   "ai-insights": {
-    "title": "Vos streams, racontés.",
-    "heroEyebrow": "Ce que les graphes ne disent pas",
+    "title": "L'IA lit vos streams",
     "overviewWidget": {
-      "eyebrow": "Insights IA",
+      "eyebrow": "Lectures IA",
       "title": "Des moments cachés dans tes streams.",
       "description": "L'IA trouve ce que vos classements cachent : artistes liés, pauses d'écoute et titres entendus pour la première fois."
     },
     "heroStatBadge": "Qualité du signal",
     "heroStatTag": "Ancré dans les streams",
-    "heroTrust1": "Les cartes résument les agrégats déjà dans Soundprint — rien n’est inventé depuis le web.",
+    "heroTrust1": "Les lectures résument les agrégats déjà dans Soundprint — rien n’est inventé depuis le web.",
     "heroTrust2": "Humain ou technique ne change que le ton ; les chiffres sous-jacents restent les mêmes.",
     "heroTrust3": "Utilise la plage de dates active sur votre tableau de bord.",
     "ctaAskSoundprint": "Interrogez votre Soundprint",
     "ctaOverview": "Vue Musique",
-    "heroStatInsights": "Cartes",
+    "heroStatInsights": "Lectures",
     "heroStatTone": "Ton",
     "heroStatStatus": "Quota / cache",
     "heroFresh": "Réponse en direct",
@@ -2327,23 +2329,23 @@
     "subtitleShort": "Quelques phrases pour relire vos habitudes.",
     "seeMore": "Voir plus",
     "loading": "Lecture de vos streams en cours...",
-    "generating": "Synthèse des cartes insights à partir de vos derniers agrégats…",
-    "errorLoading": "Impossible de charger les insights.",
-    "errorMessage": "Erreur lors de la génération des insights",
+    "generating": "Synthèse des lectures IA à partir de vos derniers agrégats…",
+    "errorLoading": "Impossible de charger les lectures IA.",
+    "errorMessage": "Erreur lors de la génération des lectures IA",
     "checkApiKey": "Vérifiez que GROQ_API_KEY est configuré côté serveur.",
-    "noInsights": "Aucune donnée disponible pour générer des insights.",
-    "changeDates": "Modifiez les dates pour obtenir des insights.",
+    "noInsights": "Aucune donnée disponible pour générer des lectures IA.",
+    "changeDates": "Modifiez les dates pour obtenir des lectures IA.",
     "notEnoughData": "Pas assez de données",
-    "importDescription": "Importez vos données de streams (exports Spotify/Apple recommandés) et sélectionnez une période pour obtenir des insights.",
+    "importDescription": "Importez vos données de streams (exports Spotify/Apple recommandés) et sélectionnez une période pour obtenir des lectures IA.",
     "yourInsights": "Quatre relations que tes classements cachent — one-hit, comebacks, genre × créneau, première écoute vs maintenant.",
-    "insightsFromData": "Insights générés à partir de vos données de streams agrégées.",
+    "insightsFromData": "Lectures IA générées à partir de vos données de streams agrégées.",
     "spotlightTitle": "Moments que les graphes ratent",
-    "spotlightHint": "Pas un top 5 reformulé — chaque carte est un contraste, un trou, ou une première fois.",
+    "spotlightHint": "Pas un top 5 reformulé — chaque lecture est un contraste, un trou, ou une première fois.",
     "cached": "(résultat en cache)",
     "quotaRemaining": "Quota: {count} restants",
     "styleToggle": {
-      "label": "Style d'insight",
-      "ariaLabel": "Choisir le style des insights IA",
+      "label": "Style de lecture",
+      "ariaLabel": "Choisir le style des lectures IA",
       "human": "Humain",
       "technical": "Technique"
     },
@@ -2351,23 +2353,23 @@
     "mobile": {
       "eyebrow": "Hors classements",
       "railLabel": "Signal",
-      "railCount": "Cartes",
+      "railCount": "Lectures",
       "railTone": "Ton",
       "railStatus": "Statut",
       "moreTitle": "Autres lectures",
       "askLead": "Posez une question",
-      "emptyTitle": "Pas encore d'insights",
+      "emptyTitle": "Pas encore de lectures",
       "emptyLead": "Importez l'historique pour générer quelques lectures.",
       "emptyCta": "Importer l'historique",
       "quotaLead": "Le quota IA est épuisé pour aujourd'hui.",
-      "unavailableLead": "L'IA est coupée, les cartes restent vides.",
-      "errorLead": "Impossible d'écrire les insights.",
-      "generatingLead": "Rédaction de vos cartes…"
+      "unavailableLead": "L’IA est coupée. Votre historique est déjà là — activez Groq pour écrire ces lectures.",
+      "errorLead": "Impossible d'écrire les lectures.",
+      "generatingLead": "Rédaction de vos lectures…"
     },
     "publicDemoTeaser": {
       "insightTopGenre": "{genre} représente {pct} des streams classifiées sur cette période.",
       "insightTopArtist": "{artist} est votre artiste le plus streamé avec {count} streams.",
-      "insightRhythm": "Votre rythme d’stream le plus marqué apparaît le {peakDay} vers {peakHour}.",
+      "insightRhythm": "Votre rythme de stream le plus marqué apparaît le {peakDay} vers {peakHour}.",
       "insightDiversity": "Vous avez exploré {artistCount} artistes et {trackCount} titres distincts sur cette période."
     },
     "kinds": {
@@ -2400,7 +2402,7 @@
     "loadingShort": "Chargement...",
     "errorLoading": "Impossible de charger les tendances.",
     "errorMessage": "Erreur lors du chargement de l'évolution des goûts",
-    "emptySubtitle": "Nous comparons des semaines ISO consécutives dans votre plage. Importez assez d’streams pour que chaque semaine dépasse le seuil minimum.",
+    "emptySubtitle": "Nous comparons des semaines ISO consécutives dans votre plage. Importez assez de streams pour que chaque semaine dépasse le seuil minimum.",
     "insufficientData": "Données insuffisantes",
     "importDescription": "Importez vos données de streams et sélectionnez une plage d'au moins 2 semaines. Chaque semaine doit contenir au moins 10 streams pour une analyse fiable.",
     "vs": "vs",
@@ -2476,8 +2478,8 @@
       "headlineFallback": "Vos habitudes de streaming se dessinent sur {listenCount} streams.",
       "influences": "{genre1} et {genre2} structurent la majorité de vos streams.",
       "influencesSingle": "{genre} domine votre mix de genres.",
-      "uniqueAspect": "Le pic d’stream tombe le {peakDay} vers {peakHour}.",
-      "uniqueAspectDayOnly": "Le pic d’stream tombe le {peakDay}.",
+      "uniqueAspect": "Le pic de stream tombe le {peakDay} vers {peakHour}.",
+      "uniqueAspectDayOnly": "Le pic de stream tombe le {peakDay}.",
       "uniqueAspectHourOnly": "Les soirées culminent vers {peakHour}.",
       "uniqueAspectFallback": "{artistCount} artistes et {trackCount} titres sur cette période."
     }
@@ -2496,7 +2498,7 @@
       "peakDay": "Jour fort",
       "peakHour": "Heure forte",
       "tracksExploredHint": "morceaux distincts",
-      "rhythmFallback": "Élargissez la période pour révéler vos pics d'stream."
+      "rhythmFallback": "Élargissez la période pour révéler vos pics de stream."
     },
     "periodBadge": {
       "label": "Période",
@@ -2514,7 +2516,7 @@
       "ariaLabelSingleDay": "Période analysée le {date}"
     },
     "noData": "Pas encore de données de streams",
-    "importDescription": "Importez votre export Spotify ou Apple Music pour générer un profil musical depuis votre historique réel.",
+    "importDescription": "Si vous n’avez pas encore votre export Spotify ou Apple Music, importez-le dès qu’il arrive — ou explorez la démo en attendant.",
     "errorLoading": "Impossible de charger votre profil musical. Réessayez.",
     "unknownArtist": "Artiste inconnu",
     "unknownGenre": "votre palette actuelle",
@@ -2558,8 +2560,9 @@
       "duetLead": "Compare ta bibliothèque avec un ami.",
       "identityTitle": "Identité",
       "emptyTitle": "Importe tes streams",
-      "emptyLead": "Ton ancrage apparaît dès que l’historique est là.",
+      "emptyLead": "Ton ancrage apparaît dès que l’historique est là. Explore la démo en attendant ton export.",
       "emptyCta": "Importer l’historique",
+      "emptyDemoCta": "Explorer la démo",
       "errorLead": "Impossible de charger cette signature."
     },
     "overviewCallout": {
@@ -2609,9 +2612,9 @@
     "spotlightTitle": "En bref",
     "spotlightHint": "Résumé rapide de la méthodologie",
     "summary": {
-      "patterns": "Patterns : la vue d'ensemble agrège KPIs et modules récap ; la Bibliothèque couvre titres, artistes, pages tendances et palette ; timeline, heatmap et analyse temporelle explorent le rythme ; l'IA ajoute Ask your Soundprint, Insights IA, le profil musical et l'évolution des goûts. Les entrées Compte (Spotify live, playground API, réglages) et la page démo vidéo sont à côté de ce cœur : elles informent ou font tourner le produit mais ne remplacent pas l'historique issu des exports.",
+      "patterns": "Patterns : la vue d'ensemble agrège KPIs et modules récap ; la Bibliothèque couvre titres, artistes, pages tendances et palette ; timeline, heatmap et analyse temporelle explorent le rythme ; l'IA ajoute Ask your Soundprint, Lectures IA, le profil musical et l'évolution des goûts. Les entrées Compte (Spotify live, playground API, réglages) et la page démo vidéo sont à côté de ce cœur : elles informent ou font tourner le produit mais ne remplacent pas l'historique issu des exports.",
       "calculations": "Calculs : agrégations PostgreSQL (jour/semaine/mois), stats globales, cascade genres (Track → ARTIST_TO_GENRE_MAP → Unknown), exports CSV/JSON/PDF.",
-      "limitations": "Limitations : couverture du mapping genres, complétude des sources, API Spotify live vs historique issu des exports, temps d'stream estimé, performance sur gros volumes, normalisation des noms.",
+      "limitations": "Limitations : couverture du mapping genres, complétude des sources, API Spotify live vs historique issu des exports, temps de stream estimé, performance sur gros volumes, normalisation des noms.",
       "architecture": "Architecture : Next.js App Router, PostgreSQL + Prisma, Redis optionnel (ioredis) et TanStack Query, IA Groq avec cache d'insights côté serveur, Recharts, ingestion Spotify/Apple d'abord (Last.fm optionnel)."
     },
     "expandSection": "Développer la section",
@@ -2624,13 +2627,13 @@
       },
       "timeline": {
         "title": "Timeline et Tendances Temporelles",
-        "paragraph": "Les pages <code>/dashboard/timeline</code> et <code>/dashboard/genres/trends</code> révèlent des cycles d'stream avec agrégation par jour, semaine ou mois:",
+        "paragraph": "Les pages <code>/dashboard/timeline</code> et <code>/dashboard/genres/trends</code> révèlent des cycles de stream avec agrégation par jour, semaine ou mois:",
         "li1": "Cycles hebdomadaires: Jours de la semaine où vous streamez le plus",
         "li2": "Variations saisonnières: Évolution mensuelle des habitudes",
         "li3": "Tendances de genres: Genres en hausse ou en baisse sur la période (comparaison première / seconde moitié)"
       },
       "heatmap": {
-        "title": "Heatmap d'stream",
+        "title": "Heatmap de stream",
         "paragraph": "La page <code>/dashboard/heatmap</code> affiche un calendrier style GitHub avec l'intensité de streams par jour. Elle identifie vos jours les plus actifs et la distribution par jour de la semaine."
       },
       "temporal": {
@@ -2649,7 +2652,7 @@
         "title": "Insights alimentés par l'IA",
         "paragraph": "Plusieurs parcours s'appuient sur des modèles hébergés chez Groq, à partir de vos agrégats et de vos données de streams :",
         "li1": "<code>/dashboard/ask-your-soundprint</code> : assistant conversationnel avec réponses outillées sur votre bibliothèque (respecte le filtre de dates du dashboard)",
-        "li2": "<code>/dashboard/ai-insights</code> : cartes d'insights en langage naturel (optionnel ; clés Groq côté serveur)",
+        "li2": "<code>/dashboard/ai-insights</code> : lectures IA en langage naturel (optionnel ; clés Groq côté serveur)",
         "li3": "<code>/dashboard/musical-profile</code> : enrichit vos statistiques avec une identité musicale générée par IA",
         "li4": "<code>/dashboard/taste-evolution</code> : évolution des goûts semaine par semaine avec commentaires IA",
         "li5": "Les requêtes d'insights IA identiques réutilisent un cache serveur 24 h lorsque <code>REDIS_URL</code> est configuré (repli en mémoire en développement local), pour ne pas rappeler le modèle à chaque fois."
@@ -2660,11 +2663,11 @@
       },
       "accountTooling": {
         "title": "Compte : Spotify live, playground API et réglages",
-        "paragraph": "La section Compte du menu est volontairement distincte du fil conducteur « historique issu des exports ». <code>/dashboard/spotify-snapshot</code> affiche ce que renvoie aujourd'hui la Web API Spotify — profil, tops, titres récemment joués — pour comparer cet instantané live aux lignes <code>Listen</code> construites à partir de vos imports. Cette route est utilisable dès que Spotify est lié en OAuth, même si l'onboarding d'export n'est pas terminé ; elle reflète l'état de l'API, pas l'entrepôt d'stream importé. <code>/dashboard/spotify-playground</code> expose les mêmes familles d'endpoints en JSON brut pour vérifier scopes et réponses ; c'est de l'outil d'exploitation, pas un tableau de bord d'historique. <code>/dashboard/settings</code> regroupe préférences, confirmations et actions sensibles (par ex. suppression) : elles modifient votre expérience et l'état du compte, pas la définition des agrégats calculés sur les streams stockées."
+        "paragraph": "La section Compte du menu est volontairement distincte du fil conducteur « historique issu des exports ». <code>/dashboard/spotify-snapshot</code> affiche ce que renvoie aujourd'hui la Web API Spotify — profil, tops, titres récemment joués — pour comparer cet instantané live aux lignes <code>Listen</code> construites à partir de vos imports. Cette route est utilisable dès que Spotify est lié en OAuth, même si l'onboarding d'export n'est pas terminé ; elle reflète l'état de l'API, pas l'entrepôt de stream importé. <code>/dashboard/spotify-playground</code> expose les mêmes familles d'endpoints en JSON brut pour vérifier scopes et réponses ; c'est de l'outil d'exploitation, pas un tableau de bord d'historique. <code>/dashboard/settings</code> regroupe préférences, confirmations et actions sensibles (par ex. suppression) : elles modifient votre expérience et l'état du compte, pas la définition des agrégats calculés sur les streams stockées."
       },
       "productDemo": {
         "title": "Vidéos de parcours (démo)",
-        "paragraph": "<code>/dashboard/demo</code> intègre des vidéos de présentation pour l'orientation et la narration produit. À considérer comme illustratif — rien n'y est ingéré comme donnée d'stream, et les graphiques personnalisés restent alimentés par les streams présentes sur votre compte."
+        "paragraph": "<code>/dashboard/demo</code> intègre des vidéos de présentation pour l'orientation et la narration produit. À considérer comme illustratif — rien n'y est ingéré comme donnée de stream, et les graphiques personnalisés restent alimentés par les streams présentes sur votre compte."
       }
     },
     "calculations": {
@@ -2691,7 +2694,7 @@
         "li1": "1. Track.genre: Genre stocké sur la piste (depuis Last.fm lorsqu'il est disponible à l'import)",
         "li2": "2. ARTIST_TO_GENRE_MAP: Mapping statique artisanal par nom d'artiste (fallback si Track.genre est null)",
         "li3": "3. \"Unknown\": Si aucun des deux n'est disponible",
-        "li4": "Les streams sont agrégées par genre résolu; les pourcentages sont calculés sur le total d'streams"
+        "li4": "Les streams sont agrégées par genre résolu; les pourcentages sont calculés sur le total de streams"
       },
       "export": {
         "title": "Export de Données",
@@ -2723,14 +2726,14 @@
       },
       "listenTime": {
         "title": "Calcul du Temps d'Stream",
-        "limitation": "Le temps total d'stream est estimé en sommant les durées des pistes, sans tenir compte des interruptions ou streams partielles.",
+        "limitation": "Le temps total de stream est estimé en sommant les durées des pistes, sans tenir compte des interruptions ou streams partielles.",
         "impact": "Le temps calculé peut surestimer le temps réellement passé à streamer si les pistes sont souvent interrompues ou partiellement streamées.",
-        "solution": "Amélioration possible: Utilisation de données de progression d'stream si disponibles dans les sources."
+        "solution": "Amélioration possible: Utilisation de données de progression de stream si disponibles dans les sources."
       },
       "queryPerformance": {
         "title": "Performance des Requêtes",
         "limitation": "Compromis: Les agrégations complexes nécessitent de charger les streams en mémoire pour les calculs.",
-        "impact": "Les performances peuvent se dégrader avec de très grandes quantités de données (millions d'streams).",
+        "impact": "Les performances peuvent se dégrader avec de très grandes quantités de données (millions de streams).",
         "solution": "Optimisations possibles: Utilisation de vues matérialisées, index supplémentaires, ou calculs asynchrones pour les grandes données."
       },
       "dataNormalization": {
@@ -2919,10 +2922,12 @@
   "components": {
     "emptyState": {
       "defaultMessage": "Aucune donnée disponible",
-      "publicDemoLabel": "Voir la démo publique",
+      "publicDemoLabel": "Explorer la démo en attendant",
+      "waitingDemoBanner": "Vous explorez des données d’exemple tant que votre bibliothèque est vide. Importez votre export dès qu’il arrive.",
+      "waitingDemoBack": "Retour à mon dashboard",
       "importData": {
-        "message": "Aucune donnée d'stream disponible",
-        "description": "Importez un export Spotify ou Apple Music pour afficher vos statistiques.",
+        "message": "Aucune donnée de streams disponible",
+        "description": "Si vous n’avez pas encore votre export Spotify ou Apple Music, importez-le dès qu’il arrive — ou explorez la démo en attendant.",
         "actionLabel": "Importer vos données"
       },
       "importReplay": {
@@ -2936,10 +2941,10 @@
         "actionLabel": "Modifier les dates"
       },
       "noDayDetail": {
-        "message": "Aucun stream trouvée pour cette date",
+        "message": "Aucun stream trouvé pour cette date",
         "description": "Choisissez une autre date dans le calendrier pour voir le détail."
       },
-      "startupEmptyEyebrow": "Démarrage à froid",
+      "startupEmptyEyebrow": "Bibliothèque vide",
       "startupEmptyAside": "Pipeline · aucune ligne"
     },
     "errorState": {
@@ -3116,7 +3121,7 @@
         "askSoundprint": "Interroger Soundprint — Discutez avec vos données de streams",
         "duet": "Duet — Comparez vos écoutes avec des amis",
         "tasteEvolution": "Évolution des goûts — Changements semaine par semaine de vos goûts musicaux",
-        "aiInsights": "AI Insights — Insights en langage naturel (optionnel)"
+        "aiInsights": "Lectures IA — Relisez vos streams en langage naturel (optionnel)"
       }
     },
     "mobile": {
@@ -3209,7 +3214,7 @@
           "yourMusic": "Votre musique",
           "musicProfile": "Profil musical",
           "genres": "Genres",
-          "aiInsights": "Insights IA"
+          "aiInsights": "Lectures IA"
         },
         "dashboard": "Dashboard",
         "yourMusic": "Votre musique",
@@ -3309,7 +3314,7 @@
         "eyebrow": "Deepdives artiste",
         "title": "Un artiste, toute votre histoire de streams",
         "description": "Soundprint tire votre historique avec un seul artiste — streams, top titres et évolution — dans le dashboard et le chat.",
-        "metric": "Des top artistes au vrai contexte d'stream",
+        "metric": "Des top artistes au vrai contexte de stream",
         "videoLabel": "Démo deepdive artiste"
       },
       "listeningTrends": {
@@ -3317,7 +3322,7 @@
         "title": "Allez au-delà des totaux avec tendances, graphes et comparaisons.",
         "description": "Explorez votre historique musical avec des graphes de tendances, des plages de dates et des outils de comparaison qui révèlent vos progressions, phases, obsessions et changements d'habitudes.",
         "metric": "Comparez périodes, artistes, titres et habitudes",
-        "videoLabel": "Démo des tendances et comparaisons d'stream"
+        "videoLabel": "Démo des tendances et comparaisons de stream"
       }
     },
     "features": {
@@ -3330,7 +3335,7 @@
         "description": "Explorez vos tops, tendances et evolutions musicales."
       },
       "aiInsights": {
-        "title": "AI Insights",
+        "title": "Lectures IA",
         "description": "Obtenez des analyses rapides basées sur vos statistiques.",
         "demoQuestion": "Pourquoi mes goûts ont changé ?",
         "demoAnswer": "vos streams synth-pop ont doublé après juin."
@@ -3357,7 +3362,7 @@
       "features": {
         "compareEras": {
           "label": "Avant / après",
-          "supporting": "Comparez 2 années d'streams"
+          "supporting": "Comparez 2 années de streams"
         },
         "groundedAnswers": {
           "label": "vos streams",
@@ -3451,7 +3456,7 @@
         {
           "title": "Combien de temps nous les gardons",
           "paragraphs": [
-            "Vos données de compte et d'stream restent tant que votre compte est actif. Si vous supprimez votre compte, nous effaçons vos données rapidement de nos systèmes."
+            "Vos données de compte et de stream restent tant que votre compte est actif. Si vous supprimez votre compte, nous effaçons vos données rapidement de nos systèmes."
           ]
         },
         {

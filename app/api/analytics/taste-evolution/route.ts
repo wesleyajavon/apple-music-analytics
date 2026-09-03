@@ -25,7 +25,7 @@ import {
   setCachedCommentary,
 } from "@/lib/services/taste-evolution/taste-evolution-cache";
 import { handleApiError } from "@/lib/utils/error-handler";
-import { isGroqAiEnabledForRequest } from "@/lib/services/ai/groq-ai-request-guard";
+import { getGroqFeatureUnavailableReason } from "@/lib/services/ai/groq-ai-request-guard";
 import type { TasteEvolutionResponse } from "@/lib/dto/taste-evolution";
 import { resolveAuthorizedDataUserId } from "@/lib/auth/resolve-authorized-data-user-id";
 import {
@@ -115,9 +115,11 @@ export async function GET(request: NextRequest) {
     let commentaryLight: string | null = null;
     let commentaryCached = false;
     let aiUnavailable = false;
+    let aiUnavailableReason: TasteEvolutionResponse["aiUnavailableReason"];
     let interactiveAiPausedForGenreClassification = false;
 
-    const aiOn = await isGroqAiEnabledForRequest(request, userId);
+    const featureUnavailableReason = await getGroqFeatureUnavailableReason(request, userId);
+    const aiOn = featureUnavailableReason === null;
     const genreBackfillBusy =
       trends.length > 0 && aiOn
         ? await hasPendingOrRunningGroqImportGenreBackfillForUser(userId)
@@ -158,6 +160,7 @@ export async function GET(request: NextRequest) {
       interactiveAiPausedForGenreClassification = true;
     } else if (trends.length > 0 && !aiOn) {
       aiUnavailable = true;
+      aiUnavailableReason = featureUnavailableReason ?? "consent";
     }
 
     const response: TasteEvolutionResponse = {
@@ -166,7 +169,7 @@ export async function GET(request: NextRequest) {
       commentaryLight,
       commentaryCached: commentary ? commentaryCached : undefined,
       skippedWeeks,
-      ...(aiUnavailable ? { aiUnavailable: true } : {}),
+      ...(aiUnavailable ? { aiUnavailable: true, aiUnavailableReason } : {}),
       ...(interactiveAiPausedForGenreClassification
         ? { interactiveAiPausedForGenreClassification: true }
         : {}),

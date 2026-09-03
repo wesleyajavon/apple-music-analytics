@@ -6,6 +6,7 @@ import { useMemo } from "react";
 import { useTasteEvolution } from "@/lib/hooks/use-taste-evolution";
 import { AiWidgetQuotaOrError } from "@/lib/components/error-state";
 import { InteractiveAiGenreBackfillNotice } from "@/lib/components/interactive-ai-genre-backfill-notice";
+import { AiUnavailableCta } from "@/lib/components/ai-unavailable-cta";
 import { useDashboardViewerUserId } from "@/lib/context/dashboard-viewer-context";
 import type { WeekToWeekTrend } from "@/lib/dto/taste-evolution";
 import { useInteractiveAiBlockedByGenreBackfill } from "@/lib/hooks/use-interactive-ai-blocked-by-genre-backfill";
@@ -181,6 +182,11 @@ export function TasteEvolutionSummaryWidget() {
               220
             )}
           </p>
+        ) : null}
+        {data.aiUnavailable ? (
+          <div className="mt-2">
+            <AiUnavailableCta reason={data.aiUnavailableReason ?? "consent"} />
+          </div>
         ) : null}
         {(data.interactiveAiPausedForGenreClassification ||
           (interactiveAiBlockedByGenreBackfill && !commentary)) &&

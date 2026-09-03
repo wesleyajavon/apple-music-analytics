@@ -28,7 +28,15 @@
     "widgetHintEnvLocked": "AI is disabled on the server. This content cannot be generated here.",
     "widgetHintConsentRequired": "Enable Groq AI below to use this feature.",
     "consentRequiredHint": "Enable Groq AI in Settings → Preferences first.",
-    "enableGroqCta": "Enable Groq AI"
+    "enableGroqCta": "Enable Groq AI",
+    "unavailableTitle": "Groq AI is off",
+    "unavailableTitleClient": "AI is paused on this browser",
+    "unavailableTitleEnv": "AI is unavailable",
+    "unavailableDescriptionConsent": "Your listening history is already loaded. Enable Groq AI to generate insights, chat, and summaries — you do not need to import again.",
+    "unavailableDescriptionClient": "Your listening history is already loaded. Turn the AI switch back on (Plus menu on mobile, bottom-right on desktop) to use this feature.",
+    "unavailableDescriptionEnv": "AI is disabled on this server, so insights and chat cannot be generated here.",
+    "unavailableEyebrow": "Groq AI",
+    "unavailableAside": "Consent · off"
   },
   "groqAiConsentPrompt": {
     "title": "Enable Groq AI",
@@ -1338,7 +1346,7 @@
     "artistSpotlight": {
       "badge": "Artist spotlight",
       "title": "The artists carrying your rotation.",
-      "description": "Scroll through up to ten artists. Hover a cover to reveal streams, variety, and the track that defines each one.",
+      "description": "Scroll through up to ten artists. Hover a cover to reveal streams, variety, and the track that defines each one. Click to open a deepdive of that artist.",
       "scrollPrevious": "Show previous artists",
       "scrollNext": "Show next artists",
       "carouselLabel": "Artist spotlight carousel"
@@ -1373,8 +1381,8 @@
     "errorStateEyebrow": "Snapshot unavailable",
     "errorStateHint": "We couldn't load your overview metrics. It is usually a brief network or server hiccup—try again in a moment. Your streaming data stays on your account.",
     "errorStateMetricStatus": "Awaiting response",
-    "emptyStateHeroDescription": "Your overview stays at zero until the first import lands. Import a Spotify or Apple Music export to get started.",
-    "emptyStateEyebrow": "Library idle",
+    "emptyStateHeroDescription": "Your overview stays at zero until the first import lands. If you don't have your Spotify or Apple Music export yet, import it when it arrives — or explore the demo while you wait.",
+    "emptyStateEyebrow": "Empty library",
     "emptyStateAside": "Metrics · zero rows",
     "emptyStateMetricHint": "Awaiting import",
     "viewSwitcher": {
@@ -1436,8 +1444,9 @@
       "profileLead": "Your listening signature.",
       "destinationsTitle": "Next",
       "emptyTitle": "Import your streams",
-      "emptyLead": "Overview appears once history is in.",
+      "emptyLead": "No history yet. Import when your export arrives, or explore the demo while you wait.",
       "emptyCta": "Import history",
+      "emptyDemoCta": "Explore the demo",
       "errorLead": "Couldn't load this snapshot.",
       "vsShort": "vs prev.",
       "railStreams": "Streams",
@@ -1456,11 +1465,9 @@
   "timeline": {
     "title": "Your streaming pulse",
     "subtitle": "Zoom from long arcs to sharp spikes—spot where momentum builds, fades, or comes roaring back.",
-    "heroEyebrow": "Momentum radar",
     "heroStatBadge": "Signals",
     "heroStatTag": "This range",
     "heroStatsPlaceholder": "Totals and peaks appear as soon as your timeline loads.",
-    "ctaHeatmap": "Open intensity map",
     "heroStatTotal": "Total streams",
     "heroStatPeak": "Loudest bucket",
     "heroStatBuckets": "Buckets plotted",
@@ -1530,7 +1537,6 @@
     "heroStatBadge": "Live snapshot",
     "heroStatTag": "This window",
     "heroStatsPlaceholder": "Fill this grid with streams and your KPIs snap into place.",
-    "ctaTimeline": "Open pulse chart",
     "dateRangeBadge": "Period: {range}",
     "errorLoading": "We couldn't load your calendar—try again.",
     "activeDays": "Active days",
@@ -1590,13 +1596,10 @@
   "temporal-analysis": {
     "title": "Rhythm studio",
     "subtitle": "Weekday lanes meet the 24-hour clock—surface the pocket where your soundtrack actually locks in.",
-    "heroEyebrow": "Pattern intelligence",
     "heroBadge": "All-time archive · date filters paused here",
     "heroStatBadge": "Signal boost",
     "heroStatTag": "Full history",
     "heroStatsPlaceholder": "Peak weekday and hour appear once your rhythm profile compiles.",
-    "ctaTimeline": "Open pulse chart",
-    "ctaHeatmap": "Open intensity map",
     "heroStatTotal": "Total streams",
     "note": "Why full history?",
     "noteText": "Short windows lie. We analyze your entire archive so weekday and hour habits mirror real life—not one noisy week.",
@@ -2303,8 +2306,7 @@
     }
   },
   "ai-insights": {
-    "title": "AI Insights",
-    "heroEyebrow": "What the charts don’t say",
+    "title": "Your streaming story",
     "overviewWidget": {
       "eyebrow": "AI Insights",
       "title": "Moments hiding in your streams.",
@@ -2358,7 +2360,7 @@
       "emptyLead": "Import history so we can write a few takes.",
       "emptyCta": "Import history",
       "quotaLead": "AI quota is used up for today.",
-      "unavailableLead": "AI is off, so these cards stay empty.",
+      "unavailableLead": "AI is off. Your history is already here — enable Groq to write these cards.",
       "errorLead": "Couldn't write insights.",
       "generatingLead": "Writing your cards…"
     },
@@ -2512,7 +2514,7 @@
       "ariaLabelSingleDay": "Analysis period on {date}"
     },
     "noData": "No streaming data yet",
-    "importDescription": "Import your Spotify or Apple Music export to generate a musical profile from real streaming history.",
+    "importDescription": "If you don't have your Spotify or Apple Music export yet, import it when it arrives — or explore the demo while you wait.",
     "errorLoading": "Unable to load your musical profile. Please try again.",
     "unknownArtist": "Unknown artist",
     "unknownGenre": "your current palette",
@@ -2556,8 +2558,9 @@
       "duetLead": "Compare libraries with a friend.",
       "identityTitle": "Identity",
       "emptyTitle": "Import your streams",
-      "emptyLead": "Your signature appears once history is in.",
+      "emptyLead": "Your signature appears once history is in. Explore the demo while you wait for your export.",
       "emptyCta": "Import history",
+      "emptyDemoCta": "Explore the demo",
       "errorLead": "Couldn't load this signature."
     },
     "overviewCallout": {
@@ -2917,10 +2920,12 @@
   "components": {
     "emptyState": {
       "defaultMessage": "No data available",
-      "publicDemoLabel": "View public demo",
+      "publicDemoLabel": "Explore the demo while you wait",
+      "waitingDemoBanner": "You're exploring sample data while your library is empty. Import your export when it arrives.",
+      "waitingDemoBack": "Back to my dashboard",
       "importData": {
         "message": "No streaming data available",
-        "description": "Import a Spotify or Apple Music export to unlock your statistics.",
+        "description": "If you don't have your Spotify or Apple Music export yet, import it when it arrives — or explore the demo while you wait.",
         "actionLabel": "Import your data"
       },
       "importReplay": {
@@ -2937,7 +2942,7 @@
         "message": "No streaming found for this date",
         "description": "Choose another date in the calendar to see the details."
       },
-      "startupEmptyEyebrow": "Cold start",
+      "startupEmptyEyebrow": "Empty library",
       "startupEmptyAside": "Pipeline · no rows"
     },
     "errorState": {

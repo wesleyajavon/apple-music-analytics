@@ -141,4 +141,22 @@ describe("AskSoundprintMobileExperience all-questions sheet", () => {
     expect(onSelect).toHaveBeenCalledTimes(1);
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
+
+  it("hides the composer and playbook entry when Groq AI is off", () => {
+    render(
+      <AskSoundprintMobileExperience
+        {...baseProps}
+        visibleMessages={[]}
+        isPending={false}
+        hasUserMessages={false}
+        hideComposer
+        featuredRow={<div>enable-groq-gate</div>}
+        playbook={<div>playbook</div>}
+      />,
+    );
+
+    expect(screen.getByText("enable-groq-gate")).toBeInTheDocument();
+    expect(screen.queryByRole("form", { name: "composer" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /allQuestions/ })).not.toBeInTheDocument();
+  });
 });

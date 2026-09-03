@@ -846,9 +846,10 @@ test.describe("Mobile dashboard UX", () => {
 
     const featured = main.locator("blockquote");
     const emptyTitle = main.getByRole("heading", { name: /no insights yet/i });
+    const groqOff = main.getByRole("button", { name: /enable groq ai/i });
     const quota = main.getByRole("alert");
     const retry = main.getByRole("button", { name: /^retry$/i });
-    await expect(featured.or(emptyTitle).or(quota).or(retry)).toBeVisible({ timeout: 45_000 });
+    await expect(featured.or(emptyTitle).or(groqOff).or(quota).or(retry)).toBeVisible({ timeout: 45_000 });
 
     if (await featured.isVisible()) {
       const ask = main.getByRole("link", { name: /ask your soundprint/i });
@@ -868,10 +869,11 @@ test.describe("Mobile dashboard UX", () => {
     await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 45_000 });
 
     const featured = main.locator("blockquote");
-    const emptyTitle = main.getByRole("heading", { name: /pas encore d['’]insights/i });
+    const emptyTitle = main.getByRole("heading", { name: /pas encore de lectures/i });
+    const groqOff = main.getByRole("button", { name: /activer l.ia groq/i });
     const quota = main.getByRole("alert");
     const retry = main.getByRole("button", { name: /^réessayer$/i });
-    await expect(featured.or(emptyTitle).or(quota).or(retry)).toBeVisible({ timeout: 45_000 });
+    await expect(featured.or(emptyTitle).or(groqOff).or(quota).or(retry)).toBeVisible({ timeout: 45_000 });
 
     if (await featured.isVisible()) {
       const ask = main.getByRole("link", { name: /interrogez votre soundprint/i });

@@ -744,7 +744,9 @@ function ArtistsContent() {
   const t = useTranslations("artists");
   const tCommon = useTranslations("common");
   const locale = useLocale();
-  const emptyStatePresets = useEmptyStatePresets();
+  const emptyStatePresets = useEmptyStatePresets({
+    demoPath: "/dashboard/artists",
+  });
   const startDate = searchParams.get("startDate") || undefined;
   const endDate = searchParams.get("endDate") || undefined;
   const userId = searchParams.get("userId") ?? undefined;
@@ -885,6 +887,11 @@ function ArtistsContent() {
         </div>
         <div className="hidden space-y-12 lg:block">
           <ArtistsHeroFrame trendsHref={trendsHref} badgeLabel={badgeLabel} stats={null} />
+          <ArtistsViewSwitcher
+            idPrefix="artists-error"
+            activeView={activeView}
+            onChange={setView}
+          />
           <ErrorState variant="startup" error={topError} message={t("errorLoading")} onRetry={refetchTop} />
         </div>
       </>
@@ -898,6 +905,11 @@ function ArtistsContent() {
         </div>
         <div className="hidden space-y-12 lg:block">
           <ArtistsHeroFrame trendsHref={trendsHref} badgeLabel={badgeLabel} stats={null} />
+          <ArtistsViewSwitcher
+            idPrefix="artists-empty"
+            activeView={activeView}
+            onChange={setView}
+          />
           <EmptyState variant="startup" {...emptyStatePresets.importData} />
         </div>
       </>
@@ -954,6 +966,11 @@ function ArtistsContent() {
                 <ArtistsHeroStatsSkeleton />
               )
             }
+          />
+          <ArtistsViewSwitcher
+            idPrefix="artists-paged-error"
+            activeView={activeView}
+            onChange={setView}
           />
           <ErrorState variant="startup" error={pagedError} message={t("errorLoading")} onRetry={refetchPaged} />
         </div>

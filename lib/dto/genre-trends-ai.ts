@@ -1,4 +1,5 @@
 import type { GenreTrendPeriod } from "@/lib/services/listening/listening-stats";
+import type { AiUnavailableReason } from "@/lib/dto/ai-insights";
 
 export type GenreTrendsTimeFilterMode = "all_time" | "custom_range";
 
@@ -51,6 +52,7 @@ export type GenreTrendsCommentaryApiResponse = {
   commentaryLight: string | null;
   commentaryCached?: boolean;
   commentaryLightCached?: boolean;
-  /** True when GROQ_API_KEY is missing */
+  /** True when Groq AI is off (env, browser toggle, or missing consent). */
   aiUnavailable?: boolean;
+  aiUnavailableReason?: AiUnavailableReason;
 };

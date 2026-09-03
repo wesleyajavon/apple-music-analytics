@@ -8,6 +8,8 @@ import { ArtistAvatarHydrated } from "@/lib/components/artist-avatar-hydrated";
 import { getAvatarUrl } from "@/lib/components/artist-avatar-utils";
 import { GroqQuotaNotice } from "@/lib/components/error-state";
 import { InteractiveAiGenreBackfillNotice } from "@/lib/components/interactive-ai-genre-backfill-notice";
+import { AiUnavailableCta } from "@/lib/components/ai-unavailable-cta";
+import type { AiUnavailableReason } from "@/lib/dto/ai-insights";
 import {
   CinematicFilmGrain,
   CinematicFloat,
@@ -19,7 +21,7 @@ import {
 } from "@/lib/components/musical-profile-cinematic";
 import { MusicalProfilePeriodBadge } from "@/lib/components/musical-profile-period-badge";
 import type { ArtistStatsDto } from "@/lib/dto/artist";
-import { DASHBOARD_ONBOARDING_REIMPORT_PATH } from "@/lib/utils/onboarding-route";
+import { WaitingForImportMobileCtas } from "@/lib/components/waiting-for-import-demo";
 import {
   isGroqDailyQuotaError,
   isGroqGenreClassificationBlockingError,
@@ -229,6 +231,7 @@ export function MobileMusicalProfileView({
   profileDescription,
   profileMetrics,
   showAiUnavailable,
+  aiUnavailableReason,
   startDate,
   topArtistName,
   topArtists,
@@ -244,6 +247,7 @@ export function MobileMusicalProfileView({
   profileDescription: string;
   profileMetrics: ProfileMetric[];
   showAiUnavailable?: boolean;
+  aiUnavailableReason?: AiUnavailableReason;
   startDate?: string;
   topArtistName: string;
   topArtists: ArtistStatsDto[];
@@ -360,7 +364,9 @@ export function MobileMusicalProfileView({
               </p>
             ) : null}
             {showAiUnavailable ? (
-              <p className="mt-3 text-xs leading-5 text-white/45">{t("aiUnavailable")}</p>
+              <div className="mt-3">
+                <AiUnavailableCta reason={aiUnavailableReason ?? "consent"} tone="onDark" />
+              </div>
             ) : null}
           </div>
         </div>
@@ -475,12 +481,11 @@ export function MusicalProfileNoDataMobileView({ locale }: { locale: string }) {
             </h1>
             <p className="mt-2 max-w-sm text-sm leading-6 text-white/62">{t("mobile.emptyLead")}</p>
           </div>
-          <Link
-            href={DASHBOARD_ONBOARDING_REIMPORT_PATH}
-            className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25"
-          >
-            {t("mobile.emptyCta")}
-          </Link>
+          <WaitingForImportMobileCtas
+            demoPath="/dashboard/musical-profile"
+            importLabel={t("mobile.emptyCta")}
+            demoLabel={t("mobile.emptyDemoCta")}
+          />
         </div>
       </section>
     </div>

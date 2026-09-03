@@ -1,4 +1,5 @@
 import type { GenreTrendPeriod } from "@/lib/services/listening/listening-stats";
+import type { AiUnavailableReason } from "@/lib/dto/ai-insights";
 
 export type ArtistTrendsTimeFilterMode = "all_time" | "custom_range";
 
@@ -50,4 +51,5 @@ export type ArtistTrendsCommentaryApiResponse = {
   commentaryCached?: boolean;
   commentaryLightCached?: boolean;
   aiUnavailable?: boolean;
+  aiUnavailableReason?: AiUnavailableReason;
 };

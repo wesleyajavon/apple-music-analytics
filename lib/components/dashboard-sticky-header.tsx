@@ -3,6 +3,7 @@
 import { Suspense, type RefCallback } from "react";
 import { usePathname } from "@/i18n/navigation";
 import { DateRangeFilter } from "@/lib/components/date-range-filter";
+import { SignedInPublicDemoExploreBanner } from "@/lib/components/waiting-for-import-demo";
 
 type DashboardStickyHeaderProps = {
   filterRef: RefCallback<HTMLDivElement | null>;
@@ -17,7 +18,12 @@ function DashboardStickyHeaderInner({ filterRef }: DashboardStickyHeaderProps) {
       ref={filterRef}
       className="sticky top-0 z-30 shrink-0 border-b border-card-border bg-surface-glass shadow-[0_1px_0_0_rgb(152_80_208_/_0.1)] backdrop-blur-md"
     >
-      {!isOnboarding ? <DateRangeFilter /> : null}
+      {!isOnboarding ? (
+        <>
+          <SignedInPublicDemoExploreBanner />
+          <DateRangeFilter />
+        </>
+      ) : null}
     </div>
   );
 }

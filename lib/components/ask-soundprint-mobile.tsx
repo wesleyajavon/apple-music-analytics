@@ -128,6 +128,7 @@ export function AskSoundprintMobileExperience({
   featuredRow,
   playbook,
   sheetHints,
+  hideComposer = false,
 }: {
   isPublicDemoViewer: boolean;
   showGenreBackfillNotice: boolean;
@@ -152,6 +153,7 @@ export function AskSoundprintMobileExperience({
   featuredRow: ReactNode;
   playbook: ReactNode;
   sheetHints: ReactNode;
+  hideComposer?: boolean;
 }) {
   const t = useTranslations("askSoundprint");
   const [presetSheetOpen, setPresetSheetOpen] = useState(false);
@@ -215,7 +217,7 @@ export function AskSoundprintMobileExperience({
       <section
         className="lg:hidden"
         aria-labelledby="ask-soundprint-mobile-title"
-        style={{ paddingBottom: composerHeight }}
+        style={{ paddingBottom: hideComposer ? 0 : composerHeight }}
       >
         <header className="flex min-h-12 items-center justify-between gap-3 px-4 py-3">
           {hasUserMessages ? (
@@ -284,6 +286,7 @@ export function AskSoundprintMobileExperience({
             ) : null}
             <div className="mt-8 w-full space-y-2">
               {featuredRow}
+              {hideComposer ? null : (
               <button
                 type="button"
                 onClick={() => setPresetSheetOpen(true)}
@@ -300,6 +303,7 @@ export function AskSoundprintMobileExperience({
                 </span>
                 <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />
               </button>
+              )}
             </div>
           </div>
         ) : (
@@ -315,6 +319,7 @@ export function AskSoundprintMobileExperience({
         )}
       </section>
 
+      {hideComposer ? null : (
       <div
         ref={composerRef}
         id="ask-soundprint-composer"
@@ -337,6 +342,7 @@ export function AskSoundprintMobileExperience({
           />
         </div>
       </div>
+      )}
 
       <MobileBottomSheet
         open={presetSheetOpen}

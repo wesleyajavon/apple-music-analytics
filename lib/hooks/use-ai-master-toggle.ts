@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { resolveClientAiUnavailableReason } from "@/lib/utils/ai-unavailable-reason";
 
 export type AiMasterStatus = {
   enabled: boolean;
@@ -23,7 +24,7 @@ export function useAiMasterToggle() {
   const t = useTranslations("aiMasterToggle");
   const queryClient = useQueryClient();
 
-  const { data: status } = useQuery({
+  const { data: status, isPending: isStatusLoading } = useQuery({
     queryKey: AI_MASTER_QUERY_KEY,
     queryFn: fetchAiMasterStatus,
     staleTime: 30_000,
@@ -63,6 +64,8 @@ export function useAiMasterToggle() {
     enabled: resolved.enabled,
     locked: resolved.envLocked || resolved.consentRequired === true,
     consentRequired: resolved.consentRequired === true,
+    unavailableReason: isStatusLoading ? null : resolveClientAiUnavailableReason(resolved),
+    isStatusLoading,
     pending: mutation.isPending,
     onToggle: (nextEnabled: boolean) => mutation.mutate(nextEnabled),
   };

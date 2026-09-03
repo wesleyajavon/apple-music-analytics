@@ -36,7 +36,7 @@ vi.mock("@/lib/services/user/public-profile-access", () => ({
 }));
 
 vi.mock("@/lib/services/ai/groq-ai-request-guard", () => ({
-  isGroqAiEnabledForRequest: vi.fn().mockResolvedValue(true),
+  getGroqFeatureUnavailableReason: vi.fn().mockResolvedValue(null),
 }));
 
 vi.mock("@/lib/services/listening/groq-import-genre-backfill-ai-guard", () => ({

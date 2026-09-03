@@ -3,6 +3,8 @@
  * Structured output from deterministic trend computation.
  */
 
+import type { AiUnavailableReason } from "@/lib/dto/ai-insights";
+
 /** Time range for a single week (ISO date strings, week start) */
 export interface WeekTimeRange {
   weekStart: string; // YYYY-MM-DD
@@ -88,6 +90,7 @@ export interface TasteEvolutionResponse {
   skippedWeeks: Array<{ weekStart: string; reason: string }>;
   /** True when AI commentary is disabled (AI_MASTER_ENABLED / cookie). */
   aiUnavailable?: boolean;
+  aiUnavailableReason?: AiUnavailableReason;
   /** True when Groq genre classification is actively running — commentary skipped to reserve capacity. */
   interactiveAiPausedForGenreClassification?: boolean;
 }

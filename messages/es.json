@@ -28,7 +28,15 @@
     "widgetHintEnvLocked": "La IA está desactivada en el servidor. Este contenido no puede generarse aquí.",
     "widgetHintConsentRequired": "Activa la IA Groq abajo para usar esta función.",
     "consentRequiredHint": "Activa primero la IA Groq en Ajustes → Preferencias.",
-    "enableGroqCta": "Activar IA Groq"
+    "enableGroqCta": "Activar IA Groq",
+    "unavailableTitle": "La IA Groq está desactivada",
+    "unavailableTitleClient": "La IA está en pausa en este navegador",
+    "unavailableTitleEnv": "La IA no está disponible",
+    "unavailableDescriptionConsent": "Tu historial de escucha ya está cargado. Activa la IA Groq para generar insights, chat y resúmenes: no hace falta importar de nuevo.",
+    "unavailableDescriptionClient": "Tu historial de escucha ya está cargado. Vuelve a activar el interruptor IA (menú Más en móvil, abajo a la derecha en escritorio) para usar esta función.",
+    "unavailableDescriptionEnv": "La IA está desactivada en el servidor, así que no se pueden generar insights ni chat aquí.",
+    "unavailableEyebrow": "IA Groq",
+    "unavailableAside": "Consentimiento · off"
   },
   "groqAiConsentPrompt": {
     "title": "Activar IA Groq",
@@ -1340,7 +1348,7 @@
     "artistSpotlight": {
       "badge": "Spotlight de artistas",
       "title": "Los artistas que sostienen tu rotación.",
-      "description": "Desplázate por hasta diez artistas. Pasa el cursor por una portada para ver streams, variedad y la canción que define a cada uno.",
+      "description": "Desplázate por hasta diez artistas. Pasa el cursor por una portada para ver streams, variedad y la canción que define a cada uno. Haz clic para ver un deepdive de ese artista.",
       "scrollPrevious": "Mostrar artistas anteriores",
       "scrollNext": "Mostrar artistas siguientes",
       "carouselLabel": "Carrusel spotlight de artistas"
@@ -1375,8 +1383,8 @@
     "errorStateEyebrow": "Resumen no disponible",
     "errorStateHint": "No pudimos cargar las métricas del resumen. Suele ser un fallo breve de red o del servidor: vuelve a intentarlo en un momento. Tus datos de streams siguen en tu cuenta.",
     "errorStateMetricStatus": "Esperando respuesta",
-    "emptyStateHeroDescription": "Tu resumen se queda en cero hasta que llegue la primera importación. Importa una exportación de Spotify o Apple Music para empezar.",
-    "emptyStateEyebrow": "Biblioteca en reposo",
+    "emptyStateHeroDescription": "Tu resumen se queda en cero hasta que llegue la primera importación. Si aún no tienes tu exportación de Spotify o Apple Music, impórtala cuando llegue — o explora la demo mientras esperas.",
+    "emptyStateEyebrow": "Biblioteca vacía",
     "emptyStateAside": "Métricas · cero filas",
     "emptyStateMetricHint": "Esperando importación",
     "viewSwitcher": {
@@ -1438,8 +1446,9 @@
       "profileLead": "Tu firma de escucha.",
       "destinationsTitle": "Siguiente",
       "emptyTitle": "Importa tus streams",
-      "emptyLead": "El resumen aparece con tu historial.",
+      "emptyLead": "Aún no hay historial. Impórtalo cuando llegue tu exportación, o explora la demo mientras esperas.",
       "emptyCta": "Importar historial",
+      "emptyDemoCta": "Explorar la demo",
       "errorLead": "No se pudo cargar este snapshot.",
       "vsShort": "vs ant.",
       "railStreams": "Streams",
@@ -1458,11 +1467,9 @@
   "timeline": {
     "title": "El pulso de tu stream",
     "subtitle": "Del arco largo al pico diario — mira dónde crece el ritmo, cae o vuelve con fuerza.",
-    "heroEyebrow": "Radar de momentum",
     "heroStatBadge": "Señales",
     "heroStatTag": "Este rango",
     "heroStatsPlaceholder": "Totales y picos aparecen en cuanto carga la curva.",
-    "ctaHeatmap": "Mapa de intensidad",
     "heroStatTotal": "Streams totales",
     "heroStatPeak": "Segmento más alto",
     "heroStatBuckets": "Tramos dibujados",
@@ -1532,7 +1539,6 @@
     "heroStatBadge": "Instantánea",
     "heroStatTag": "Esta ventana",
     "heroStatsPlaceholder": "Llena la cuadrícula con streams y tus KPI encajan al momento.",
-    "ctaTimeline": "Abrir pulso",
     "dateRangeBadge": "Período: {range}",
     "errorLoading": "No pudimos cargar el calendario — inténtalo otra vez.",
     "activeDays": "Días activos",
@@ -1592,13 +1598,10 @@
   "temporal-analysis": {
     "title": "Estudio de ritmo",
     "subtitle": "Los días de la semana cruzan las 24 horas — encuentra el hueco donde tu banda sonora encaja de verdad.",
-    "heroEyebrow": "Inteligencia de patrones",
     "heroBadge": "Archivo completo · filtros de fecha en pausa aquí",
     "heroStatBadge": "Refuerzo de señal",
     "heroStatTag": "Historia total",
     "heroStatsPlaceholder": "El día y la hora pico aparecen cuando el perfil termina de compilarse.",
-    "ctaTimeline": "Abrir pulso",
-    "ctaHeatmap": "Mapa de intensidad",
     "heroStatTotal": "Streams totales",
     "note": "¿Por qué todo el historial?",
     "noteText": "Ventanas cortas mienten. Analizamos todo el archivo para que día y hora reflejen tu vida real — no solo una semana ruidosa.",
@@ -2305,8 +2308,7 @@
     }
   },
   "ai-insights": {
-    "title": "AI Insights",
-    "heroEyebrow": "Lo que los gráficos no dicen",
+    "title": "El relato de tus streams",
     "overviewWidget": {
       "eyebrow": "Insights de IA",
       "title": "Momentos escondidos en tus streams.",
@@ -2360,7 +2362,7 @@
       "emptyLead": "Importa el historial para generar unas lecturas.",
       "emptyCta": "Importar historial",
       "quotaLead": "La cuota de IA se ha agotado hoy.",
-      "unavailableLead": "La IA está apagada, las tarjetas quedan vacías.",
+      "unavailableLead": "La IA está apagada. Tu historial ya está aquí: activa Groq para escribir estas tarjetas.",
       "errorLead": "No se pudieron escribir los insights.",
       "generatingLead": "Escribiendo tus tarjetas…"
     },
@@ -2514,7 +2516,7 @@
       "ariaLabelSingleDay": "Periodo analizado el {date}"
     },
     "noData": "Aún no hay datos de streams",
-    "importDescription": "Importa tu exportación de Spotify o Apple Music para generar un perfil musical desde tu historial real.",
+    "importDescription": "Si aún no tienes tu exportación de Spotify o Apple Music, impórtala cuando llegue — o explora la demo mientras esperas.",
     "errorLoading": "No se puede cargar tu perfil musical. Inténtalo de nuevo.",
     "unknownArtist": "Artista desconocido",
     "unknownGenre": "tu paleta actual",
@@ -2558,8 +2560,9 @@
       "duetLead": "Compara tu biblioteca con un amigo.",
       "identityTitle": "Identidad",
       "emptyTitle": "Importa tus streams",
-      "emptyLead": "Tu firma aparece cuando el historial está listo.",
+      "emptyLead": "Tu firma aparece cuando el historial está listo. Explora la demo mientras llega tu exportación.",
       "emptyCta": "Importar historial",
+      "emptyDemoCta": "Explorar la demo",
       "errorLead": "No se pudo cargar esta firma."
     },
     "overviewCallout": {
@@ -2919,10 +2922,12 @@
   "components": {
     "emptyState": {
       "defaultMessage": "No hay datos disponibles",
-      "publicDemoLabel": "Ver la demo pública",
+      "publicDemoLabel": "Explorar la demo mientras esperas",
+      "waitingDemoBanner": "Estás explorando datos de ejemplo mientras tu biblioteca está vacía. Importa tu exportación cuando llegue.",
+      "waitingDemoBack": "Volver a mi dashboard",
       "importData": {
         "message": "No hay datos de streams disponibles",
-        "description": "Importa una exportación de Spotify o Apple Music para ver tus estadísticas.",
+        "description": "Si aún no tienes tu exportación de Spotify o Apple Music, impórtala cuando llegue — o explora la demo mientras esperas.",
         "actionLabel": "Importar tus datos"
       },
       "importReplay": {
@@ -2939,7 +2944,7 @@
         "message": "No se encontraron streams para esta fecha",
         "description": "Elige otra fecha en el calendario para ver los detalles."
       },
-      "startupEmptyEyebrow": "Arranque en frío",
+      "startupEmptyEyebrow": "Biblioteca vacía",
       "startupEmptyAside": "Pipeline · sin filas"
     },
     "errorState": {

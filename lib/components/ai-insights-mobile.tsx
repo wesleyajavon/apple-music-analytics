@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { DashboardCinematicHeroBg } from "@/lib/components/dashboard-ui";
 import { GroqQuotaNotice } from "@/lib/components/error-state";
-import { GroqAiConsentPromptButton } from "@/lib/components/groq-ai-consent-prompt-button";
+import { AiUnavailableCta } from "@/lib/components/ai-unavailable-cta";
 import { InteractiveAiGenreBackfillNotice } from "@/lib/components/interactive-ai-genre-backfill-notice";
 import { MusicalProfilePeriodBadge } from "@/lib/components/musical-profile-period-badge";
 import type { AiInsightMoment, AiInsightsStyle, AiUnavailableReason } from "@/lib/dto/ai-insights";
@@ -299,20 +299,13 @@ export function AiInsightsMobileUnavailable({
   endDate?: string;
 }) {
   const t = useTranslations("ai-insights");
-  const tAi = useTranslations("aiMasterToggle");
-  const hint =
-    reason === "env"
-      ? tAi("widgetHintEnvLocked")
-      : reason === "consent"
-        ? tAi("widgetHintConsentRequired")
-        : tAi("widgetHint");
+  const copyReason = reason ?? "consent";
 
   return (
     <div className={MOBILE_BLEED}>
       <MobileHeroFrame locale={locale} startDate={startDate} endDate={endDate} heading={t("title")}>
         <p className="text-sm leading-6 text-white/70">{t("mobile.unavailableLead")}</p>
-        <p className="text-sm leading-6 text-white/55">{hint}</p>
-        {reason === "consent" ? <GroqAiConsentPromptButton variant="button" /> : null}
+        <AiUnavailableCta reason={copyReason} tone="onDark" />
       </MobileHeroFrame>
     </div>
   );

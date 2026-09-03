@@ -20,6 +20,7 @@ import { useTasteEvolution } from "@/lib/hooks/use-taste-evolution";
 import { DashboardCinematicHeroBg } from "@/lib/components/dashboard-ui";
 import { ErrorState, GroqQuotaNotice } from "@/lib/components/error-state";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
+import { AiUnavailableCta } from "@/lib/components/ai-unavailable-cta";
 import { TasteEvolutionSpotlightSkeleton } from "@/lib/components/skeleton-loaders";
 import { isGroqDailyQuotaError } from "@/lib/utils/groq-quota-message";
 import { DASHBOARD_ONBOARDING_REIMPORT_PATH } from "@/lib/utils/onboarding-route";
@@ -693,6 +694,32 @@ function TasteEvolutionContent() {
             </div>
             <div className="p-6 sm:p-8">
               <p className="leading-relaxed whitespace-pre-line text-slate-700 dark:text-slate-300">{displayCommentary}</p>
+            </div>
+          </div>
+        </section>
+      ) : data.aiUnavailable ? (
+        <section
+          className={`relative ${DASHBOARD_SPOTLIGHT_SHELL} animate-fade-in-up`}
+          aria-labelledby="taste-evolution-spotlight-title"
+        >
+          <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} aria-hidden />
+          <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} aria-hidden />
+          <div className="relative">
+            <div className={`${DASHBOARD_SPOTLIGHT_HEADER_BOTTOM} px-6 py-5 sm:px-8`}>
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200/90 bg-slate-50 text-violet-600 shadow-sm dark:border-white/10 dark:bg-white/10 dark:text-violet-200">
+                  <Zap className="h-5 w-5" aria-hidden />
+                </div>
+                <div>
+                  <h3 id="taste-evolution-spotlight-title" className={DASHBOARD_SPOTLIGHT_TITLE}>
+                    {t("spotlightTitle")}
+                  </h3>
+                  <p className={`mt-0.5 ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("spotlightHint")}</p>
+                </div>
+              </div>
+            </div>
+            <div className="p-6 sm:p-8">
+              <AiUnavailableCta reason={data.aiUnavailableReason ?? "consent"} />
             </div>
           </div>
         </section>

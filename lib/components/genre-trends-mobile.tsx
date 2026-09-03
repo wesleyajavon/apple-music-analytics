@@ -4,6 +4,7 @@ import { useId, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { ListenTrendChartViewToggle } from "@/lib/components/charts/listen-trend-chart-view-toggle";
 import { GroqQuotaNotice } from "@/lib/components/error-state";
+import { AiUnavailableCta } from "@/lib/components/ai-unavailable-cta";
 import { MobileBottomSheet } from "@/lib/components/mobile-bottom-sheet";
 import { PeriodSelector, type PeriodType } from "@/lib/components/period-selector";
 import {
@@ -20,6 +21,7 @@ import {
   TrendsMobileSkeleton,
 } from "@/lib/components/trends-mobile-hub";
 import { numericTrendValue, TrendsMobileSpark } from "@/lib/components/trends-mobile-spark";
+import type { AiUnavailableReason } from "@/lib/dto/ai-insights";
 import type { GenreTrendsDataPoint } from "@/lib/dto/genres";
 import { isGroqDailyQuotaError } from "@/lib/utils/groq-quota-message";
 import type { ListenTrendChartViewMode } from "@/lib/utils/listen-trend-chart-view";
@@ -149,6 +151,7 @@ export function GenreTrendsMobileExperience({
   showAiSkeleton,
   activeAiError,
   aiUnavailable,
+  aiUnavailableReason,
   hasDisplayableAiParagraph,
   displayAiCommentary,
   aiRefreshing,
@@ -174,6 +177,7 @@ export function GenreTrendsMobileExperience({
   showAiSkeleton: boolean;
   activeAiError: Error | null;
   aiUnavailable: boolean;
+  aiUnavailableReason?: AiUnavailableReason;
   hasDisplayableAiParagraph: boolean;
   displayAiCommentary: string;
   aiRefreshing: boolean;
@@ -465,7 +469,7 @@ export function GenreTrendsMobileExperience({
               </p>
             )
           ) : aiUnavailable ? (
-            <p className="text-sm text-muted">{t("aiUnavailable")}</p>
+            <AiUnavailableCta reason={aiUnavailableReason ?? "consent"} />
           ) : hasDisplayableAiParagraph ? (
             <p className={`whitespace-pre-line text-sm leading-6 text-foreground ${aiRefreshing ? "opacity-60" : ""}`}>
               {displayAiCommentary}

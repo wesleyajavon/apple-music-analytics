@@ -17,6 +17,17 @@ export async function getGroqAiUnavailableReason(
   return null;
 }
 
+/** Includes missing GROQ_API_KEY as server-side unavailability. */
+export async function getGroqFeatureUnavailableReason(
+  request: NextRequest,
+  userId: string
+): Promise<GroqAiUnavailableReason | null> {
+  const reason = await getGroqAiUnavailableReason(request, userId);
+  if (reason) return reason;
+  if (!process.env.GROQ_API_KEY) return "env";
+  return null;
+}
+
 export async function isGroqAiEnabledForRequest(
   request: NextRequest,
   userId: string

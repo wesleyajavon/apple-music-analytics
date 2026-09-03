@@ -31,6 +31,7 @@ import {
 import { ErrorState, GroqQuotaNotice } from "@/lib/components/error-state";
 import { isGroqDailyQuotaError } from "@/lib/utils/groq-quota-message";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
+import { AiUnavailableCta } from "@/lib/components/ai-unavailable-cta";
 import { getPeriodFromSearchParams, PeriodSelector, type PeriodType } from "@/lib/components/period-selector";
 import { ListenTrendChartViewToggle } from "@/lib/components/charts/listen-trend-chart-view-toggle";
 import {
@@ -589,6 +590,7 @@ function TrendsContent() {
       commentaryCached: techAi?.commentaryCached,
       commentaryLightCached: lightAi?.commentaryLightCached,
       aiUnavailable: techAi?.aiUnavailable ?? lightAi?.aiUnavailable,
+      aiUnavailableReason: techAi?.aiUnavailableReason ?? lightAi?.aiUnavailableReason,
     }),
     [techAi, lightAi]
   );
@@ -721,6 +723,7 @@ function TrendsContent() {
           showAiSkeleton={showAiSkeleton}
           activeAiError={activeAiError}
           aiUnavailable={Boolean(aiCommentary?.aiUnavailable)}
+          aiUnavailableReason={aiCommentary?.aiUnavailableReason}
           hasDisplayableAiParagraph={hasDisplayableAiParagraph}
           displayAiCommentary={displayAiCommentary}
           aiRefreshing={aiRefreshing}
@@ -1001,7 +1004,7 @@ function TrendsContent() {
                       </p>
                     )
                   ) : aiCommentary?.aiUnavailable ? (
-                    <p className="text-sm text-slate-500 dark:text-slate-400">{t("aiUnavailable")}</p>
+                    <AiUnavailableCta reason={aiCommentary.aiUnavailableReason ?? "consent"} />
                   ) : hasDisplayableAiParagraph ? (
                     <p
                       className={`whitespace-pre-line text-base leading-relaxed text-slate-700 transition-opacity duration-200 dark:text-slate-200 sm:text-[1.05rem] ${

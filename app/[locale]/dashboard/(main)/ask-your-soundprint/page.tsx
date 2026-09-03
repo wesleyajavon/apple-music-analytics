@@ -45,6 +45,9 @@ import {
 } from "@/lib/dto/music-chat";
 import { isGroqGenreClassificationBlockingError } from "@/lib/utils/groq-quota-message";
 import { useInteractiveAiBlockedByGenreBackfill } from "@/lib/hooks/use-interactive-ai-blocked-by-genre-backfill";
+import { useAiMasterToggle } from "@/lib/hooks/use-ai-master-toggle";
+import { AiUnavailableCta } from "@/lib/components/ai-unavailable-cta";
+import type { AiUnavailableReason } from "@/lib/dto/ai-insights";
 
 type QuickQuestionId =
   | "top-tracks"
@@ -74,6 +77,14 @@ const ASK_SOUNDPRINT_DISMISS_HEAVY_PRESET_NOTICE_KEY =
   "ama-ask-soundprint-dismiss-heavy-preset-notice";
 
 const EMPTY_STATE_PRESET_COUNT = 4;
+
+function AskSoundprintGroqGate({ reason }: { reason: AiUnavailableReason }) {
+  return (
+    <div className="w-full max-w-lg text-left">
+      <AiUnavailableCta reason={reason} />
+    </div>
+  );
+}
 
 function DismissibleAskHint({
   storageKey,
@@ -529,6 +540,7 @@ function MusicChatContent() {
   const isPublicDemoViewer = usePublicDemoViewer(userId);
   const musicChat = useMusicChat();
   const interactiveAiBlockedByGenreBackfill = useInteractiveAiBlockedByGenreBackfill();
+  const { unavailableReason, isStatusLoading: isAiStatusLoading } = useAiMasterToggle();
   const {
     startDate,
     endDate,
@@ -552,11 +564,19 @@ function MusicChatContent() {
     disableQuickQuestionsNoListeningData &&
     !isDateRangeLoading &&
     !isLifetimeOverviewLoading;
+  const groqUnavailableReason =
+    !isPublicDemoViewer &&
+    !isAiStatusLoading &&
+    !disableQuickQuestionsNoListeningData &&
+    unavailableReason
+      ? unavailableReason
+      : null;
   const freeTextDisabled =
     musicChat.isPending ||
     isPublicDemoViewer ||
     interactiveAiBlockedByGenreBackfill ||
-    disableQuickQuestionsNoListeningData;
+    disableQuickQuestionsNoListeningData ||
+    groqUnavailableReason != null;
   const topArtistStats = useArtistStats(
     startDate,
     endDate,
@@ -681,6 +701,7 @@ function MusicChatContent() {
     const trimmed = content.trim();
     if (!trimmed && !presetQuestionId) return;
     if (interactiveAiBlockedByGenreBackfill) return;
+    if (groqUnavailableReason) return;
     setErrorMessage(null);
 
     const nextMessages: MusicChatMessage[] = [
@@ -832,12 +853,19 @@ function MusicChatContent() {
   const presetsDisabled =
     musicChat.isPending ||
     interactiveAiBlockedByGenreBackfill ||
-    disableQuickQuestionsNoListeningData;
+    disableQuickQuestionsNoListeningData ||
+    groqUnavailableReason != null;
   const inputPlaceholder = isPublicDemoViewer
     ? t("publicDemoPlaceholder")
-    : showNoListeningDataPlaceholder
-      ? t("noListeningDataPlaceholder")
-      : (personalizedPlaceholder ?? t("inputPlaceholder"));
+    : groqUnavailableReason === "consent"
+      ? t("aiDisabledConsent")
+      : groqUnavailableReason === "client"
+        ? t("aiDisabledClient")
+        : groqUnavailableReason === "env"
+          ? t("aiDisabledEnv")
+          : showNoListeningDataPlaceholder
+            ? t("noListeningDataPlaceholder")
+            : (personalizedPlaceholder ?? t("inputPlaceholder"));
   const hasUserMessages = messages.some((message) => message.role === "user");
   const showGenreBackfillNotice =
     !isPublicDemoViewer &&
@@ -874,7 +902,9 @@ function MusicChatContent() {
         isAll={isAll}
         locale={locale}
         featuredRow={
-          featuredExample ? (
+          groqUnavailableReason ? (
+            <AskSoundprintGroqGate reason={groqUnavailableReason} />
+          ) : featuredExample ? (
             <AskSoundprintBoundPresetRow
               example={featuredExample}
               ctx={presetCtx}
@@ -883,6 +913,7 @@ function MusicChatContent() {
             />
           ) : null
         }
+        hideComposer={groqUnavailableReason != null}
         playbook={
           <>
             {QUICK_QUESTION_SECTIONS.map((section) => (
@@ -961,11 +992,16 @@ function MusicChatContent() {
                 <p className="mt-2 max-w-md text-center text-sm text-slate-500 dark:text-slate-400">
                   {t("publicDemoMode")}
                 </p>
+              ) : groqUnavailableReason ? (
+                <div className="mt-8">
+                  <AskSoundprintGroqGate reason={groqUnavailableReason} />
+                </div>
               ) : (
                 <p className="mt-2 text-center text-sm text-slate-500 dark:text-slate-400">
                   {t("emptyActionHint")}
                 </p>
               )}
+              {groqUnavailableReason ? null : (
               <div className="mt-8 w-full max-w-2xl">
                 <FeaturedPresetSuggestions
                   ctx={presetCtx}
@@ -973,6 +1009,8 @@ function MusicChatContent() {
                   onSelect={handlePresetClick}
                 />
               </div>
+              )}
+              {groqUnavailableReason ? null : (
               <button
                 type="button"
                 onClick={() => setPlaybookOpen(true)}
@@ -981,6 +1019,7 @@ function MusicChatContent() {
               >
                 {t("allQuestions")}
               </button>
+              )}
             </div>
           ) : (
             <div className="py-4 pb-8">
@@ -995,6 +1034,7 @@ function MusicChatContent() {
         </div>
 
         <div className="shrink-0 px-6 pb-5 pt-2">
+          {groqUnavailableReason ? null : (
           <div className="mx-auto w-full max-w-3xl">
             {errorMessage ? (
               <p className="mb-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-200">
@@ -1024,6 +1064,7 @@ function MusicChatContent() {
               {t("heroStatTag")}
             </p>
           </div>
+          )}
         </div>
 
         {playbookOpen ? (

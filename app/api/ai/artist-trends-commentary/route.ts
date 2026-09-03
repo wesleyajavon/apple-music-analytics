@@ -8,7 +8,7 @@ import type { ArtistTrendsCommentaryApiResponse } from "@/lib/dto/artist-trends-
 import type { ArtistTrendsChartArtist } from "@/lib/dto/artist";
 import { AppError, handleApiError } from "@/lib/utils/error-handler";
 import { assertGroqUserQuotaForRequest } from "@/lib/services/ai/groq-user-quota";
-import { isGroqAiEnabledForRequest } from "@/lib/services/ai/groq-ai-request-guard";
+import { getGroqFeatureUnavailableReason } from "@/lib/services/ai/groq-ai-request-guard";
 import {
   extractDateRangeWithDefaults,
   extractPeriod,
@@ -174,21 +174,13 @@ export async function GET(request: NextRequest) {
       return applyRateLimitHeaders(response, rateLimit, AI_ARTIST_TRENDS_RATE_LIMIT);
     }
 
-    if (!(await isGroqAiEnabledForRequest(request, userId))) {
+    const aiUnavailableReason = await getGroqFeatureUnavailableReason(request, userId);
+    if (aiUnavailableReason) {
       const res: ArtistTrendsCommentaryApiResponse = {
         commentary: null,
         commentaryLight: null,
         aiUnavailable: true,
-      };
-      const response = NextResponse.json(res);
-      return applyRateLimitHeaders(response, rateLimit, AI_ARTIST_TRENDS_RATE_LIMIT);
-    }
-
-    if (!process.env.GROQ_API_KEY) {
-      const res: ArtistTrendsCommentaryApiResponse = {
-        commentary: null,
-        commentaryLight: null,
-        aiUnavailable: true,
+        aiUnavailableReason,
       };
       const response = NextResponse.json(res);
       return applyRateLimitHeaders(response, rateLimit, AI_ARTIST_TRENDS_RATE_LIMIT);

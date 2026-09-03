@@ -3,7 +3,7 @@
 import { Suspense, memo, useMemo, useState, type ComponentType, type ReactNode } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
-import { Link, usePathname } from "@/i18n/navigation";
+import { usePathname } from "@/i18n/navigation";
 import {
   LineChart,
   Line,
@@ -12,7 +12,7 @@ import {
   CartesianGrid,
   Tooltip,
 } from "recharts";
-import { Activity, CalendarDays } from "lucide-react";
+import { Activity } from "lucide-react";
 import { useTimeline, type TimelineDataPoint } from "@/lib/hooks/use-listening";
 import { ChartResponsiveContainer } from "@/lib/components/chart-responsive-container";
 import { ErrorState } from "@/lib/components/error-state";
@@ -44,7 +44,6 @@ import {
   DASHBOARD_CHART_THEME,
 } from "@/lib/constants/dashboard-spotlight";
 import { useTheme } from "@/lib/providers/theme-provider";
-import { LiveStatusDot } from "@/lib/components/live-status-dot";
 
 type ChartPalette = (typeof DASHBOARD_CHART_THEME)[keyof typeof DASHBOARD_CHART_THEME];
 
@@ -147,10 +146,6 @@ function TimelineHeroFrame({
       <div className="absolute -bottom-28 right-10 h-72 w-72 rounded-full bg-accent-cyan/18 blur-3xl" />
       <div className="relative grid gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-center">
         <div>
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-violet-100 backdrop-blur">
-            <LiveStatusDot />
-            {t("heroEyebrow")}
-          </div>
           <h1 className="flex flex-wrap items-center gap-3 text-4xl font-semibold tracking-[-0.06em] text-white sm:text-5xl lg:text-6xl">
             <Activity className="h-9 w-9 shrink-0 text-violet-200/90 sm:h-11 sm:w-11" strokeWidth={1.5} aria-hidden />
             <span className="max-w-4xl text-balance">{t("title")}</span>
@@ -160,15 +155,6 @@ function TimelineHeroFrame({
             <span className="inline-flex items-center rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-white/90 backdrop-blur">
               {periodBadgeLabel}
             </span>
-          </div>
-          <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            <Link
-              href="/dashboard/heatmap"
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25 transition-all hover:-translate-y-0.5 hover:bg-gray-100"
-            >
-              <CalendarDays className="h-4 w-4" aria-hidden />
-              {t("ctaHeatmap")}
-            </Link>
           </div>
         </div>
 

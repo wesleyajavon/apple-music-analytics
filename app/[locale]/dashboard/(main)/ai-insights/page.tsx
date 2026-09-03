@@ -27,13 +27,13 @@ import {
 } from "@/lib/components/ai-insights-mobile";
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
+import { AiUnavailableEmptyState } from "@/lib/components/ai-unavailable-empty-state";
 import { InteractiveAiGenreBackfillNotice } from "@/lib/components/interactive-ai-genre-backfill-notice";
 import { useInteractiveAiBlockedByGenreBackfill } from "@/lib/hooks/use-interactive-ai-blocked-by-genre-backfill";
 import {
   isGroqDailyQuotaError,
   isGroqGenreClassificationBlockingError,
 } from "@/lib/utils/groq-quota-message";
-import { LiveStatusDot } from "@/lib/components/live-status-dot";
 import type { AiInsightMoment, AiInsightsStyle } from "@/lib/dto/ai-insights";
 import type { ArtistStatsDto } from "@/lib/dto/artist";
 import { ArtistUserInsightsPanel } from "@/lib/components/artist-user-insights-panel";
@@ -126,10 +126,6 @@ function AiInsightsHeroFrame({
       <div className="absolute -bottom-28 right-10 h-72 w-72 rounded-full bg-accent-cyan/18 blur-3xl" />
       <div className="relative grid gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-center">
         <div>
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-violet-100 backdrop-blur">
-            <LiveStatusDot />
-            {t("heroEyebrow")}
-          </div>
           <h1 className="flex flex-wrap items-center gap-3 text-3xl font-semibold tracking-[-0.06em] text-white sm:text-5xl lg:text-6xl">
             <SparkIcon className="h-9 w-9 shrink-0 text-violet-200/90 sm:h-11 sm:w-11" aria-hidden />
             <span className="max-w-4xl text-balance">{t("title")}</span>
@@ -489,18 +485,34 @@ function AiInsightsContent() {
     );
   }
 
+  if (data?.aiUnavailable) {
+    return splitScreen(
+      <AiInsightsMobileUnavailable
+        locale={locale}
+        reason={data.aiUnavailableReason}
+        startDate={startDate}
+        endDate={endDate}
+      />,
+      <div className="mx-auto max-w-6xl space-y-8">
+        <section aria-labelledby="ai-insights-heading">
+          <h2 id="ai-insights-heading" className="sr-only">
+            {t("title")}
+          </h2>
+          <AiInsightsHeroFrame
+            badgeLabel={badgeLabelBase}
+            description={t("yourInsights")}
+            stats={null}
+            insightStyleToggle={styleToggle}
+          />
+        </section>
+        <AiUnavailableEmptyState reason={data.aiUnavailableReason ?? "consent"} onGranted={() => refetch()} />
+      </div>,
+    );
+  }
+
   if (!data || !data.insights.length) {
     return splitScreen(
-      data?.aiUnavailable ? (
-        <AiInsightsMobileUnavailable
-          locale={locale}
-          reason={data.aiUnavailableReason}
-          startDate={startDate}
-          endDate={endDate}
-        />
-      ) : (
-        <AiInsightsMobileEmpty locale={locale} startDate={startDate} endDate={endDate} />
-      ),
+      <AiInsightsMobileEmpty locale={locale} startDate={startDate} endDate={endDate} />,
       <div className="mx-auto max-w-6xl space-y-8">
         <section aria-labelledby="ai-insights-heading">
           <h2 id="ai-insights-heading" className="sr-only">

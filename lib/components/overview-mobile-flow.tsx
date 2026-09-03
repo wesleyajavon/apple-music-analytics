@@ -9,6 +9,7 @@ import { ArtistAvatarHydrated } from "@/lib/components/artist-avatar-hydrated";
 import { useDashboardViewerUserId } from "@/lib/context/dashboard-viewer-context";
 import { usePublicDemoViewer } from "@/lib/hooks/use-public-demo-viewer";
 import { OverviewFriendsSection } from "@/lib/components/overview-friends-section";
+import { SoundprintLogo } from "@/lib/components/soundprint-logo";
 import type { OverviewStatsChanges } from "@/lib/components/overview-stats-section";
 import type { OverviewStatsWithTopArtists } from "@/lib/hooks/use-listening";
 import type { ArtistStatsDto } from "@/lib/dto/artist";
@@ -44,15 +45,14 @@ function ChevronIcon({ className = "h-4 w-4" }: { className?: string }) {
   );
 }
 
-function ChatIcon({ className }: { className?: string }) {
+function AskSoundprintIcon() {
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M8.625 9.75a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375m-13.5 3.75c0 5.385 4.365 9.75 9.75 9.75s9.75-4.365 9.75-9.75S17.385 2.25 12 2.25 2.25 6.615 2.25 12m13.5 0a1.125 1.125 0 0 1-1.125 1.125H9.75a1.125 1.125 0 0 1-1.125-1.125v-6.75m9 0V9.375"
-      />
-    </svg>
+    <SoundprintLogo
+      src="/brand/favicon.png"
+      showText={false}
+      alt=""
+      imageClassName="h-10 w-10 object-contain"
+    />
   );
 }
 
@@ -234,7 +234,7 @@ function DestinationRow({
   disabled?: boolean;
 }) {
   const className = primary
-    ? "flex min-h-14 items-center gap-3 rounded-2xl bg-white px-3.5 py-3 text-gray-950 shadow-lg shadow-black/20"
+    ? "flex min-h-14 items-center gap-3 rounded-2xl border border-primary/15 bg-card-surface px-3.5 py-3 text-foreground shadow-lg shadow-primary/10"
     : "flex min-h-14 items-center gap-3 rounded-2xl border border-card-border bg-card-surface px-3.5 py-3 text-gray-950 shadow-sm dark:text-white";
 
   const content = (
@@ -242,7 +242,7 @@ function DestinationRow({
       <span
         className={
           primary
-            ? "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gray-950 text-white"
+            ? "flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gray-950"
             : "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent-violet/15 text-accent-violet"
         }
       >
@@ -252,13 +252,13 @@ function DestinationRow({
         <span className="block truncate text-sm font-semibold tracking-tight">{title}</span>
         <span
           className={`mt-0.5 block truncate text-xs leading-5 ${
-            primary ? "text-gray-600" : "text-gray-500 dark:text-gray-400"
+            primary ? "text-muted" : "text-gray-500 dark:text-gray-400"
           }`}
         >
           {lead}
         </span>
       </span>
-      <ChevronIcon className={`h-4 w-4 shrink-0 ${primary ? "text-gray-500" : "text-gray-400"}`} />
+      <ChevronIcon className={`h-4 w-4 shrink-0 ${primary ? "text-muted" : "text-gray-400"}`} />
     </>
   );
 
@@ -463,7 +463,7 @@ export function MobileOverviewFlow({
             href={musicAgentHref}
             title={t("mobile.askAgentCta")}
             lead={t("mobile.askLead")}
-            icon={<ChatIcon className="h-5 w-5" />}
+            icon={<AskSoundprintIcon />}
             primary
           />
           <DestinationRow

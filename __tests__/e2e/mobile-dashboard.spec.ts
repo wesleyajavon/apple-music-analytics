@@ -96,7 +96,10 @@ test.describe("Mobile dashboard UX", () => {
     await expect(plusSheet.getByRole("link", { name: /account hub/i })).toHaveCount(0);
     await expect(plusSheet.getByRole("link", { name: /listening calendar/i })).toBeVisible();
     await expect(plusSheet.getByRole("link", { name: /^genres$/i })).toBeVisible();
-    await expect(bottomNav.getByRole("link", { name: /^tracks$/i })).toBeVisible();
+    await expect(plusSheet.getByRole("link", { name: /^tracks$/i })).toBeVisible();
+    await expect(plusSheet.getByRole("link", { name: /^artists$/i })).toBeVisible();
+    await expect(bottomNav.getByRole("link", { name: /^chat$/i })).toBeVisible();
+    await expect(bottomNav.getByRole("link", { name: /^friends$/i })).toBeVisible();
   });
 
   test("overview now screen shows insight and ask destination", async ({ page }) => {
@@ -189,22 +192,22 @@ test.describe("Mobile dashboard UX", () => {
     await expect(page).toHaveURL(/userId=/);
   });
 
-  test("mobile bottom nav navigates to artists", async ({ page }) => {
+  test("mobile bottom nav navigates to Soundprint chat", async ({ page }) => {
     await page.goto(`/en/dashboard/overview${publicDemoQuery}`);
 
     await page.getByRole("navigation", { name: /main dashboard navigation/i })
-      .getByRole("link", { name: /^artists$/i })
+      .getByRole("link", { name: /^chat$/i })
       .click();
-    await expect(page).toHaveURL(/\/en\/dashboard\/artists/);
+    await expect(page).toHaveURL(/\/en\/dashboard\/ask-your-soundprint/);
   });
 
-  test("mobile bottom nav navigates to tracks", async ({ page }) => {
+  test("mobile bottom nav navigates to friends", async ({ page }) => {
     await page.goto(`/en/dashboard/overview${publicDemoQuery}`);
 
     await page.getByRole("navigation", { name: /main dashboard navigation/i })
-      .getByRole("link", { name: /^tracks$/i })
+      .getByRole("link", { name: /^friends$/i })
       .click();
-    await expect(page).toHaveURL(/\/en\/dashboard\/tracks/);
+    await expect(page).toHaveURL(/\/en\/dashboard\/duet\/friends/);
   });
 
   test("artists ranking shows a tappable first row and keeps dates", async ({ page }) => {
@@ -411,15 +414,14 @@ test.describe("Mobile dashboard UX", () => {
     await expectDashboardFilters(page);
     await waitForDashboardMain(page);
 
-    await bottomNav.getByRole("link", { name: /^artists$/i }).click();
-    await expect(page).toHaveURL(/\/en\/dashboard\/artists/, urlTimeout);
+    await bottomNav.getByRole("link", { name: /^chat$/i }).click();
+    await expect(page).toHaveURL(/\/en\/dashboard\/ask-your-soundprint/, urlTimeout);
     await expectDashboardFilters(page);
     await waitForDashboardMain(page);
 
-    await bottomNav.getByRole("link", { name: /^tracks$/i }).click();
-    await expect(page).toHaveURL(/\/en\/dashboard\/tracks/, urlTimeout);
+    await bottomNav.getByRole("link", { name: /^friends$/i }).click();
+    await expect(page).toHaveURL(/\/en\/dashboard\/duet\/friends/, urlTimeout);
     await expectDashboardFilters(page);
-    await waitForDashboardMain(page);
 
     await bottomNav.getByRole("button", { name: /open more destinations/i }).click();
     const plusSheet = page.getByRole("dialog");
@@ -427,16 +429,16 @@ test.describe("Mobile dashboard UX", () => {
     await expect(plusSheet.getByRole("heading", { name: /^more$/i })).toBeVisible();
     await expect(plusSheet.getByRole("button", { name: /all sections/i })).toHaveCount(0);
 
-    await plusSheet.getByRole("link", { name: /listening calendar/i }).click();
-    await expect(page).toHaveURL(/\/en\/dashboard\/heatmap/, urlTimeout);
+    await plusSheet.getByRole("link", { name: /^artists$/i }).click();
+    await expect(page).toHaveURL(/\/en\/dashboard\/artists/, urlTimeout);
     await expectDashboardFilters(page);
     await waitForDashboardMain(page);
 
     await bottomNav.getByRole("button", { name: /open more destinations/i }).click();
     const plusSheetAgain = page.getByRole("dialog");
     await expect(plusSheetAgain).toBeVisible();
-    await plusSheetAgain.getByRole("link", { name: /ask soundprint/i }).click();
-    await expect(page).toHaveURL(/\/en\/dashboard\/ask-your-soundprint/, urlTimeout);
+    await plusSheetAgain.getByRole("link", { name: /listening calendar/i }).click();
+    await expect(page).toHaveURL(/\/en\/dashboard\/heatmap/, urlTimeout);
     await expectDashboardFilters(page);
   });
 

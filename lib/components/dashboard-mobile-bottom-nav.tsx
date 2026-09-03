@@ -8,17 +8,24 @@ import {
   DashboardMobilePlusMenu,
   usePlusNavActive,
 } from "@/lib/components/dashboard-mobile-plus-menu";
+import { SoundprintLogo } from "@/lib/components/soundprint-logo";
 import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
+
+type BottomNavIconProps = {
+  className?: string;
+  "aria-hidden"?: boolean | "true" | "false";
+};
 
 type BottomNavItem = {
   href: string;
-  labelKey: "musicalProfile" | "overview" | "artists" | "tracks" | "more";
+  labelKey: "musicalProfile" | "overview" | "askSoundprint" | "duetFriends" | "more";
   isMore?: boolean;
-  icon: (props: React.SVGProps<SVGSVGElement>) => JSX.Element;
+  isActive?: (pathname: string) => boolean;
+  icon: (props: BottomNavIconProps) => JSX.Element;
 };
 
 const icons = {
-  musicalProfile: (props: React.SVGProps<SVGSVGElement>) => (
+  musicalProfile: (props: BottomNavIconProps) => (
     <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
       <path
         strokeLinecap="round"
@@ -27,7 +34,7 @@ const icons = {
       />
     </svg>
   ),
-  overview: (props: React.SVGProps<SVGSVGElement>) => (
+  overview: (props: BottomNavIconProps) => (
     <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
       <path
         strokeLinecap="round"
@@ -36,44 +43,54 @@ const icons = {
       />
     </svg>
   ),
-  artists: (props: React.SVGProps<SVGSVGElement>) => (
+  askSoundprint: ({ className, ...props }: BottomNavIconProps) => (
+    <span
+      className={`inline-flex items-center justify-center overflow-hidden rounded-md bg-gray-950 ${className ?? ""}`}
+      {...props}
+    >
+      <SoundprintLogo
+        src="/brand/favicon.png"
+        showText={false}
+        alt=""
+        imageClassName="h-5 w-5 object-contain"
+      />
+    </span>
+  ),
+  duetFriends: (props: BottomNavIconProps) => (
     <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
-        d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
+        d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"
       />
     </svg>
   ),
-  tracks: (props: React.SVGProps<SVGSVGElement>) => (
-    <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 0 1 0 3.75H5.625a1.875 1.875 0 0 1 0-3.75Z"
-      />
-    </svg>
-  ),
-  more: (props: React.SVGProps<SVGSVGElement>) => (
+  more: (props: BottomNavIconProps) => (
     <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
     </svg>
   ),
 };
 
+function isFriendsTabActive(pathname: string): boolean {
+  if (pathname.startsWith("/dashboard/duet/compare")) return false;
+  return pathname === "/dashboard/duet" || pathname.startsWith("/dashboard/duet/");
+}
+
 const NAV_ITEMS: BottomNavItem[] = [
   { href: "/dashboard/musical-profile", labelKey: "musicalProfile", icon: icons.musicalProfile },
   { href: "/dashboard/overview", labelKey: "overview", icon: icons.overview },
-  { href: "/dashboard/artists", labelKey: "artists", icon: icons.artists },
-  { href: "/dashboard/tracks", labelKey: "tracks", icon: icons.tracks },
+  { href: "/dashboard/ask-your-soundprint", labelKey: "askSoundprint", icon: icons.askSoundprint },
+  { href: "/dashboard/duet/friends", labelKey: "duetFriends", icon: icons.duetFriends, isActive: isFriendsTabActive },
   { href: "#more", labelKey: "more", isMore: true, icon: icons.more },
 ];
 
-function isTabActive(href: string, pathname: string): boolean {
-  if (href === "/dashboard/musical-profile") {
-    return pathname === "/dashboard" || pathname === href || pathname.startsWith(`${href}/`);
+function isTabActive(item: BottomNavItem, pathname: string): boolean {
+  if (item.isActive) return item.isActive(pathname);
+  if (item.href === "/dashboard/musical-profile") {
+    return pathname === "/dashboard" || pathname === item.href || pathname.startsWith(`${item.href}/`);
   }
-  return pathname === href || pathname.startsWith(`${href}/`);
+  return pathname === item.href || pathname.startsWith(`${item.href}/`);
 }
 
 export function DashboardMobileBottomNav({
@@ -113,10 +130,12 @@ export function DashboardMobileBottomNav({
               ? tCommon("more")
               : item.labelKey === "musicalProfile"
                 ? t("items.musicalProfileShort")
-                : t(`items.${item.labelKey}`);
+                : item.labelKey === "askSoundprint"
+                  ? t("items.askSoundprintShort")
+                  : t(`items.${item.labelKey}`);
             const active = item.isMore
               ? isPlusOpen || isPlusRouteActive
-              : isTabActive(item.href, pathname);
+              : isTabActive(item, pathname);
             const className = [
               "flex min-h-[3.25rem] min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-1.5 text-[10px] font-semibold transition-colors",
               active ? "text-primary" : "text-muted hover:text-foreground",

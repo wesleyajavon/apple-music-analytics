@@ -169,7 +169,7 @@ export function DuetSharedArtistsPanel({
           <p className={`text-sm ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("sharedArtistsLoading")}</p>
         ) : error ? (
           <ErrorState variant="startup" error={error} message={t("sharedArtistsError")} onRetry={onRetry} />
-        ) : isEmpty ? (
+        ) : !data || data.artists.length === 0 ? (
           <DuetSharedArtistsEmpty
             className={`${DASHBOARD_SPOTLIGHT_INNER_WELL} px-5 py-10 sm:px-8 sm:py-12`}
             eyebrow={t("sharedArtistsEmptyEyebrow")}

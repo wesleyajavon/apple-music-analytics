@@ -1,6 +1,11 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import {
+  DASHBOARD_SEGMENTED_PILL,
+  DASHBOARD_SEGMENTED_PILL_ACTIVE,
+  DASHBOARD_SEGMENTED_TRACK,
+} from "@/lib/components/dashboard-ui";
 import type { ListenTrendChartViewMode } from "@/lib/utils/listen-trend-chart-view";
 
 export type { ListenTrendChartViewMode };
@@ -27,7 +32,7 @@ export function ListenTrendChartViewToggle({
       aria-label={t("label")}
       className={
         className ??
-        "inline-flex w-full flex-wrap gap-1 rounded-2xl border border-slate-200/80 bg-slate-100/80 p-1 dark:border-white/10 dark:bg-black/30 sm:w-auto"
+        `${DASHBOARD_SEGMENTED_TRACK} w-full sm:w-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden`
       }
     >
       {segments.map((segment) => {
@@ -39,11 +44,7 @@ export function ListenTrendChartViewToggle({
             role="tab"
             aria-selected={selected}
             onClick={() => onChange(segment.value)}
-            className={`inline-flex min-h-11 flex-1 items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold transition-all sm:flex-none ${
-              selected
-                ? "bg-white text-violet-800 shadow-sm dark:bg-violet-500/20 dark:text-violet-100"
-                : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
-            }`}
+            className={`${selected ? DASHBOARD_SEGMENTED_PILL_ACTIVE : DASHBOARD_SEGMENTED_PILL} flex-1 sm:flex-none`}
           >
             {segment.label}
           </button>

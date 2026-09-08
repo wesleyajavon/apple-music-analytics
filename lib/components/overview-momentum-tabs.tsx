@@ -114,7 +114,7 @@ export function OverviewMomentumTabs({ slides }: OverviewMomentumTabsProps) {
         role="tabpanel"
         id={`${baseId}-panel-${activeSlide.id}`}
         aria-labelledby={`${baseId}-tab-${activeSlide.id}`}
-        className="relative min-h-[280px] overflow-hidden sm:min-h-[320px]"
+        className="relative min-h-[280px] sm:min-h-[320px]"
       >
         <AnimatePresence mode="wait" initial={false}>
           <motion.div

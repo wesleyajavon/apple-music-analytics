@@ -5,6 +5,13 @@ import { useTranslations } from "next-intl";
 import type { TrackTrendsChartTrack } from "@/lib/dto/track";
 import { useTrackSearch } from "@/lib/hooks/use-tracks";
 import { getTrackLabel } from "@/lib/utils/track-trends-pivot";
+import {
+  DASHBOARD_FILTER_CHIP,
+  DASHBOARD_FILTER_CHIP_ACTIVE,
+  DASHBOARD_LIST_ROW,
+  DASHBOARD_LIST_SEPARATOR,
+  DASHBOARD_SEARCH_FIELD,
+} from "@/lib/components/dashboard-ui";
 
 function normalizeForSearch(s: string): string {
   return s
@@ -43,7 +50,7 @@ export function TrackTrendsTrackPicker({
   const t = useTranslations("trackTrends");
   const [query, setQuery] = useState("");
   const [highlightIndex, setHighlightIndex] = useState(-1);
-  const optionRefs = useRef<Map<string, HTMLLabelElement>>(new Map());
+  const optionRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
   const searchInputId = `${idPrefix}-search`;
   const listboxId = `${idPrefix}-listbox`;
   const searchHintId = `${idPrefix}-search-hint`;
@@ -70,7 +77,7 @@ export function TrackTrendsTrackPicker({
     );
   }, [catalogTracks, query]);
 
-  const setOptionRef = useCallback((id: string, el: HTMLLabelElement | null) => {
+  const setOptionRef = useCallback((id: string, el: HTMLButtonElement | null) => {
     if (el) optionRefs.current.set(id, el);
     else optionRefs.current.delete(id);
   }, []);
@@ -131,14 +138,14 @@ export function TrackTrendsTrackPicker({
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
         <div className="min-w-0 flex-1">
           <label htmlFor={searchInputId} className="sr-only">
             {t("searchAriaLabel")}
           </label>
           <div className="relative">
             <span
-              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted"
+              className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted"
               aria-hidden
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -158,7 +165,7 @@ export function TrackTrendsTrackPicker({
               placeholder={t("searchPlaceholder")}
               autoComplete="off"
               spellCheck={false}
-              className="w-full rounded-xl border border-card-border bg-surface py-2.5 pl-9 pr-3 text-sm text-foreground shadow-sm placeholder:text-muted/70 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/20"
+              className={DASHBOARD_SEARCH_FIELD}
               aria-controls={listboxId}
               aria-describedby={searchHintId}
               aria-activedescendant={
@@ -168,58 +175,49 @@ export function TrackTrendsTrackPicker({
               }
             />
           </div>
-          <p id={searchHintId} className="mt-1 text-xs text-muted">
+          <p id={searchHintId} className="sr-only">
             {enableRemoteSearch ? t("searchKeyboardHintExtended") : t("searchKeyboardHint")}
           </p>
         </div>
-        <p className="rounded-full border border-card-border bg-surface-glass px-2.5 py-1 text-xs text-muted tabular-nums">
+        <p className="text-[13px] tabular-nums text-muted">
           {t("selectionCount", { selected: selectedIds.length, max: maxSelectable })}
         </p>
       </div>
 
-      {enableRemoteSearch && query.trim().length >= 2 && (
+      {enableRemoteSearch && query.trim().length >= 2 ? (
         <div
-          className="rounded-xl border border-card-border bg-card-surface shadow-card"
+          className="overflow-hidden rounded-[12px] border border-glass-hairline"
           role="region"
           aria-label={t("searchDatabaseRegion")}
         >
-          <div className="border-b border-card-border px-3 py-2">
-            <p className="text-xs font-semibold uppercase tracking-wider text-cyan-500 dark:text-cyan-300">
-              {t("searchDatabaseTitle")}
-            </p>
-          </div>
-          <div className="max-h-52 overflow-y-auto p-2">
+          <p className="px-3.5 py-2 text-[13px] text-muted">{t("searchDatabaseTitle")}</p>
+          <div className="max-h-52 overflow-y-auto border-t border-glass-hairline px-2">
             {remoteLoading ? (
-              <p className="px-2 py-4 text-center text-sm text-muted">{t("searchRemoteLoading")}</p>
+              <p className="px-2 py-4 text-center text-[13px] text-muted">{t("searchRemoteLoading")}</p>
             ) : remoteSuggestions.length === 0 ? (
-              <p className="px-2 py-4 text-center text-sm text-muted">
+              <p className="px-2 py-4 text-center text-[13px] text-muted">
                 {t("searchNoResults")}
               </p>
             ) : (
-              <ul className="space-y-1">
+              <ul>
                 {remoteSuggestions.map((track) => {
                   const inCatalog = catalogIdSet.has(track.id);
                   const selected = selectedIds.includes(track.id);
                   const disabledAdd = atCapacity && !selected;
                   return (
-                    <li key={track.id}>
+                    <li key={track.id} className={DASHBOARD_LIST_SEPARATOR}>
                       <button
                         type="button"
                         disabled={inCatalog || selected || disabledAdd}
                         onClick={() => !inCatalog && !selected && handlePickRemote(track)}
-                        className={`
-                          flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors
-                          ${
-                            inCatalog
-                              ? "cursor-default text-muted/60"
-                              : disabledAdd
-                                ? "cursor-not-allowed opacity-50 text-muted"
-                                : "text-foreground hover:bg-cyan-400/10"
-                          }
-                        `}
+                        className={`${DASHBOARD_LIST_ROW} w-full text-[13px] ${
+                          inCatalog || selected || disabledAdd
+                            ? "cursor-default text-muted"
+                            : "text-foreground"
+                        }`}
                       >
                         <span className="min-w-0 truncate font-medium">{getTrackLabel(track)}</span>
-                        <span className="shrink-0 text-xs text-muted">
+                        <span className="shrink-0 text-muted">
                           {inCatalog ? t("searchInCatalog") : selected ? t("searchAdded") : t("searchAdd")}
                         </span>
                       </button>
@@ -230,65 +228,54 @@ export function TrackTrendsTrackPicker({
             )}
           </div>
         </div>
-      )}
+      ) : null}
 
       <div
         id={listboxId}
         role="listbox"
         aria-label={t("tracksToDisplay")}
         aria-multiselectable="true"
-        className={`mt-3 flex flex-wrap content-start gap-2 overflow-y-auto rounded-xl border border-card-border bg-surface/60 p-2 ${
+        className={`flex flex-wrap content-start gap-2 overflow-y-auto ${
           compact ? "max-h-[min(40vh,14rem)]" : "max-h-[min(50vh,22rem)]"
         }`}
       >
         {filtered.length === 0 ? (
-          <p className="px-2 py-6 text-center text-sm text-muted">{t("searchNoResults")}</p>
+          <p className="py-6 text-[13px] text-muted">{t("searchNoResults")}</p>
         ) : (
           filtered.map((track, pos) => {
             const selected = selectedIds.includes(track.id);
             const idx = getTrackIndex(track.id);
             const isHighlighted = highlightIndex === pos;
+            const disabled = !selected && atCapacity;
+            const label = getTrackLabel(track);
             return (
-              <label
+              <button
                 key={track.id}
                 id={`${idPrefix}-opt-${track.id}`}
                 ref={(el) => setOptionRef(track.id, el)}
+                type="button"
                 role="option"
                 aria-selected={selected}
-                className={`
-                  inline-flex max-w-[min(100%,320px)] cursor-pointer items-center gap-2 rounded-lg border px-3 py-1.5 transition-colors
-                  ${
-                    selected
-                      ? "border-cyan-500/50 bg-cyan-100 text-cyan-950 shadow-sm dark:border-cyan-400/55 dark:bg-slate-950 dark:text-cyan-100 dark:shadow-none"
-                      : isHighlighted
-                        ? "border-cyan-500/65 bg-cyan-50 text-cyan-950 ring-2 ring-cyan-400/35 dark:border-cyan-400/60 dark:bg-slate-950 dark:text-cyan-100 dark:ring-cyan-400/40"
-                        : "border-card-border bg-card-surface text-foreground hover:bg-surface-glass"
-                  }
-                `}
+                disabled={disabled}
+                title={label}
+                onClick={() => {
+                  if (disabled) return;
+                  onToggle(track.id);
+                }}
+                className={`${selected ? DASHBOARD_FILTER_CHIP_ACTIVE : DASHBOARD_FILTER_CHIP} max-w-[min(100%,320px)] ${
+                  isHighlighted ? "ring-2 ring-ring" : ""
+                }`}
               >
-                <input
-                  type="checkbox"
-                  checked={selected}
-                  disabled={!selected && atCapacity}
-                  onChange={() => {
-                    if (!selected && atCapacity) return;
-                    onToggle(track.id);
-                  }}
-                  tabIndex={-1}
-                  className="rounded border-card-border bg-surface-raised text-primary accent-primary focus:ring-ring disabled:opacity-40 dark:bg-slate-900 dark:border-white/25"
-                />
                 <span
-                  className="w-3 h-3 shrink-0 rounded-full"
+                  className="h-2 w-2 shrink-0 rounded-full"
                   style={{
                     backgroundColor: selected ? getColor(idx) : "transparent",
-                    border: selected ? "none" : "1px solid #9ca3af",
+                    boxShadow: selected ? undefined : "inset 0 0 0 1px var(--glass-hairline)",
                   }}
                   aria-hidden
                 />
-                <span className="truncate text-sm text-inherit" title={getTrackLabel(track)}>
-                  {getTrackLabel(track)}
-                </span>
-              </label>
+                <span className="truncate">{label}</span>
+              </button>
             );
           })
         )}

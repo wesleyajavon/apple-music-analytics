@@ -331,6 +331,17 @@ html.dark input[type="date"]::-webkit-calendar-picker-indicator {
   color: #374151 !important;
 }
 
+/* Crystal Overview charts: frost pill, follows theme (not the forced-white admin tooltip). */
+.crystal-chart-tooltip {
+  background: var(--glass-chrome);
+  border: 1px solid var(--glass-hairline);
+  border-radius: 16px;
+  padding: 12px 14px;
+  color: var(--foreground);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

@@ -80,6 +80,16 @@ Track = glass. Active pill = opaque contrast. Inactive = muted, no per-chip bord
 
 Hit target 44px (`min-h-11`). Overflow: `overflow-x-auto` on the track.
 
+### Series chips + search (trends pickers)
+
+Pills on the canvas, not a checkbox well. Used by artist / track pickers and Overview genre chips.
+
+| Export | Recipe |
+| --- | --- |
+| `DASHBOARD_SEARCH_FIELD` | `h-11` rounded-full, hairline, 13px, no shadow |
+| `DASHBOARD_FILTER_CHIP` | `min-h-11` rounded-full, muted, no border |
+| `DASHBOARD_FILTER_CHIP_ACTIVE` | Same as active segmented pill (`bg-surface-raised` / `dark:bg-white/12`) + 8px color dot |
+
 ### Section title (on canvas)
 
 ```tsx
@@ -170,6 +180,27 @@ Label 13px, large tabular value, hairline between columns.
 | `DASHBOARD_METRIC_CELL` | `flex min-w-0 flex-1 flex-col gap-1 border-r border-glass-hairline px-5 py-1 first:pl-0 last:border-r-0 last:pr-0` |
 | `DASHBOARD_METRIC_VALUE` | `text-2xl font-semibold tracking-tight tabular-nums text-foreground` |
 | `DASHBOARD_METRIC_LABEL` | `text-[13px] text-muted` |
+
+---
+
+## Crystal charts (Overview `view=trends`)
+
+Swift Charts vocabulary: overlapping `Area` + `Line` (`type="monotone"`) in a `ComposedChart`, plot on the canvas. Not a stacked area (that would change how series are read). Not a widget well (`rounded-3xl`, `shadow-inner`, glow orb).
+
+**Copy:** [`lib/components/charts/overview-trends-chart.tsx`](../lib/components/charts/overview-trends-chart.tsx) + [`lib/constants/crystal-chart.ts`](../lib/constants/crystal-chart.ts). Tooltip: [`overview-trends-tooltip.tsx`](../lib/components/charts/overview-trends-tooltip.tsx) (`.crystal-chart-tooltip` frost pill). Period/cumulative: [`listen-trend-chart-view-toggle.tsx`](../lib/components/charts/listen-trend-chart-view-toggle.tsx) (`DASHBOARD_SEGMENTED_*`).
+
+| Piece | Recipe |
+| --- | --- |
+| Series | `getCrystalSeriesColor(index, theme)` — Soundprint violet / rose / cyan first, then iOS-like hues. Max 10, then wrap. |
+| Fill | Translucent area 16–28% under a 2.5–3px round-cap line. |
+| Axes | Horizontal X labels 12px muted, `interval="preserveStartEnd"`. Y ~3 ticks, `tabular-nums` compact. No rotated dates. |
+| Grid | Horizontal hairlines only, no dash, no vertical grid. |
+| Legend | **None** (Recharts `Legend` forbidden here). Series identity lives in the picker / chips. |
+| Tooltip | `.crystal-chart-tooltip` — `var(--glass-chrome)` + hairline + blur. Follows light/dark. Not `.chart-tooltip-accessible` (forced white admin box). `prefers-reduced-transparency` already zeros `--glass-blur` and opaques `--glass-chrome`. |
+| Toggle | Same segmented track as Overview tabs. Do not restyle with violet chips. |
+| Series chips | `DASHBOARD_FILTER_CHIP` / `_ACTIVE` + color dot. Search: `DASHBOARD_SEARCH_FIELD` (pill 44px). No checkboxes, no bordered chip well. Remote hits: list rows + hairline, not a `shadow-card` panel. |
+
+Do **not** use `DASHBOARD_CHART_THEME` / `Legend` / angled X ticks on Overview trends. Dedicated `/dashboard/*/trends` plots stay legacy until Crystal 7.
 
 ---
 

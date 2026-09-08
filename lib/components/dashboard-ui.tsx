@@ -68,6 +68,18 @@ export const DASHBOARD_SEGMENTED_PILL =
 export const DASHBOARD_SEGMENTED_PILL_ACTIVE =
   "inline-flex min-h-11 shrink-0 items-center justify-center rounded-full bg-surface-raised px-3.5 text-[13px] font-semibold text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:bg-white/12";
 
+/** iOS search field on the canvas (not a card). */
+export const DASHBOARD_SEARCH_FIELD =
+  "h-11 w-full rounded-full border border-glass-hairline bg-surface-raised pl-10 pr-4 text-[13px] text-foreground placeholder:text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+
+/** Inactive series chip (artist / track / genre). */
+export const DASHBOARD_FILTER_CHIP =
+  "inline-flex min-h-11 max-w-[min(100%,260px)] shrink-0 items-center gap-2 rounded-full px-3.5 text-[13px] font-medium text-muted transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-45";
+
+/** Selected series chip: same matter as an active segmented pill. */
+export const DASHBOARD_FILTER_CHIP_ACTIVE =
+  "inline-flex min-h-11 max-w-[min(100%,260px)] shrink-0 items-center gap-2 rounded-full bg-surface-raised px-3.5 text-[13px] font-semibold text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:bg-white/12";
+
 /** Sidebar nav row (inactive). Soft Replay pill, not a card. */
 export const DASHBOARD_NAV_ITEM =
   "group flex min-h-11 items-center rounded-[10px] text-[13px] font-medium text-muted transition-colors hover:bg-black/[0.05] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:hover:bg-white/[0.08]";

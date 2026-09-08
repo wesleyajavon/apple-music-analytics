@@ -1,26 +1,20 @@
 "use client";
 
-import { memo, useMemo, useEffect, useState, useCallback, useRef } from "react";
+import { useMemo, useEffect, useState, useCallback, useRef } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-} from "recharts";
-import { ChartResponsiveContainer } from "@/lib/components/chart-responsive-container";
+import { OverviewTrendsChart } from "@/lib/components/charts/overview-trends-chart";
 import { useTrackTrendsChart } from "@/lib/hooks/use-tracks";
 import { useDashboardViewerUserId } from "@/lib/context/dashboard-viewer-context";
 import { ErrorState } from "@/lib/components/error-state";
 import { useTheme } from "@/lib/providers/theme-provider";
-import { useIsLgChartViewport } from "@/lib/hooks/use-chart-viewport";
-import { DASHBOARD_CHART_THEME } from "@/lib/constants/dashboard-spotlight";
 import { ListenTrendChartViewToggle } from "@/lib/components/charts/listen-trend-chart-view-toggle";
-import { DASHBOARD_BTN_GHOST, DASHBOARD_SECTION_EYEBROW, DASHBOARD_SECTION_TITLE } from "@/lib/components/dashboard-ui";
+import {
+  DASHBOARD_BTN_GHOST,
+  DASHBOARD_SECTION_EYEBROW,
+  DASHBOARD_SECTION_TITLE,
+} from "@/lib/components/dashboard-ui";
+import { getCrystalSeriesColor } from "@/lib/constants/crystal-chart";
 import {
   applyListenTrendChartViewMulti,
   type ListenTrendChartViewMode,
@@ -29,59 +23,6 @@ import { getTrackLabel } from "@/lib/utils/track-trends-pivot";
 import { TrackTrendsTrackPicker } from "@/lib/components/track-trends-track-picker";
 import type { TrackTrendsChartTrack } from "@/lib/dto/track";
 import { useDebouncedValue } from "@/lib/hooks/use-debounced-value";
-
-const COLORS = [
-  "#06b6d4",
-  "#84cc16",
-  "#8b5cf6",
-  "#f43f5e",
-  "#f59e0b",
-  "#10b981",
-  "#f97316",
-  "#6366f1",
-  "#14b8a6",
-  "#ec4899",
-];
-
-function getColor(index: number): string {
-  return COLORS[index % COLORS.length];
-}
-
-const TRACK_TREND_CARD_CLASS = "w-full min-w-0";
-const TRACK_TREND_BACKGROUND = null;
-
-function createTrendsTooltip(t: (k: string) => string, locale: string) {
-  const TrendsTooltipInner = memo(
-    ({
-      active,
-      payload,
-      label,
-    }: {
-      active?: boolean;
-      payload?: Array<{ name: string; value: number; color: string }>;
-      label?: string;
-    }) => {
-      if (!active || !payload?.length || !label) return null;
-      return (
-        <div className="chart-tooltip-accessible min-w-[180px] p-4">
-          <p className="font-semibold mb-2">{label}</p>
-          <ul className="space-y-1.5 text-sm">
-            {payload.map((entry) => (
-              <li key={entry.name} className="flex justify-between gap-4">
-                <span style={{ color: entry.color }}>{entry.name}</span>
-                <span className="chart-tooltip-secondary font-medium tabular-nums">
-                  {Number(entry.value).toLocaleString(locale)} {t("listensDelta")}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      );
-    }
-  );
-  TrendsTooltipInner.displayName = "TrackTrendsTooltip";
-  return TrendsTooltipInner;
-}
 
 const DEFAULT_TRACK_COUNT = 5;
 const OVERVIEW_TRACK_TRENDS_TOP_N = 20;
@@ -105,9 +46,15 @@ export function TrackTrendsSummaryWidget({
   const locale = useLocale();
   const viewerUserId = useDashboardViewerUserId();
   const { resolvedTheme } = useTheme();
-  const chartTheme = DASHBOARD_CHART_THEME[resolvedTheme === "dark" ? "dark" : "light"];
-  const isLgChart = useIsLgChartViewport();
-  const TrendsTooltip = useMemo(() => createTrendsTooltip(t, locale), [t, locale]);
+  const chartThemeName = resolvedTheme === "dark" ? "dark" : "light";
+  const getColor = useCallback(
+    (index: number) => getCrystalSeriesColor(index, chartThemeName),
+    [chartThemeName]
+  );
+  const formatValue = useCallback(
+    (value: number) => `${value.toLocaleString(locale)} ${t("listensDelta")}`,
+    [locale, t]
+  );
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [extraSearchTracks, setExtraSearchTracks] = useState<TrackTrendsChartTrack[]>([]);
@@ -174,7 +121,7 @@ export function TrackTrendsSummaryWidget({
   const chartData = useMemo(() => data?.data ?? [], [data?.data]);
   const trendsMinWidth = useMemo(
     () => (chartData.length > 8 ? Math.max(280, chartData.length * 28) : undefined),
-    [chartData.length],
+    [chartData.length]
   );
   const chartSyncing = useExplicitSeries && isFetching;
 
@@ -234,6 +181,19 @@ export function TrackTrendsSummaryWidget({
     [pickerTracks]
   );
 
+  const chartSeries = useMemo(
+    () =>
+      selectedIds.map((trackId) => {
+        const idx = getTrackIndex(trackId);
+        return {
+          dataKey: trackId,
+          name: idToLabel.get(trackId) ?? trackId,
+          color: getColor(idx),
+        };
+      }),
+    [getColor, getTrackIndex, idToLabel, selectedIds]
+  );
+
   const trendsQuery = useMemo(() => {
     const p = new URLSearchParams();
     if (startDate) p.set("startDate", startDate);
@@ -250,28 +210,10 @@ export function TrackTrendsSummaryWidget({
 
   if (isLoading) {
     return (
-      <div className={shellClass}>
-        <div className={`${TRACK_TREND_CARD_CLASS} animate-fade-in-up`} role="status" aria-label={t("evolution")}>
-          {TRACK_TREND_BACKGROUND}
-          <div className="relative border-b border-white/70 px-6 py-5 dark:border-white/[0.06]">
-            <div className="mb-3 h-7 w-36 animate-shimmer rounded-full bg-gray-200 dark:bg-gray-700" />
-            <div className="h-8 w-64 max-w-full animate-shimmer rounded bg-gray-200 dark:bg-gray-700" />
-            <div className="mt-3 h-4 w-80 max-w-full animate-shimmer rounded bg-gray-100 dark:bg-gray-700" />
-          </div>
-          <div className="relative space-y-4 p-6">
-            <div className="h-11 w-full max-w-md animate-shimmer rounded-xl bg-white/70 dark:bg-[#1a1d2a]" />
-            <div className="flex flex-wrap gap-2">
-              {[0, 1, 2, 3, 4].map((i) => (
-                <div
-                  key={i}
-                  className="h-8 w-32 animate-shimmer rounded-full bg-white/70 dark:bg-[#1a1d2a]"
-                  style={{ animationDelay: `${i * 0.08}s` }}
-                />
-              ))}
-            </div>
-            <div className="h-[260px] animate-shimmer rounded-3xl border border-white/60 bg-white/50 shadow-inner dark:border-white/[0.06] dark:bg-[#0c0e18]" />
-          </div>
-        </div>
+      <div className={shellClass} role="status" aria-label={t("evolution")}>
+        <div className="h-4 w-24 animate-shimmer rounded bg-black/10 dark:bg-white/10" />
+        <div className="mt-2 h-8 w-64 max-w-full animate-shimmer rounded bg-black/10 dark:bg-white/10" />
+        <div className="mt-6 h-[260px] animate-shimmer rounded-[22px] bg-black/10 dark:bg-white/10" />
       </div>
     );
   }
@@ -279,14 +221,7 @@ export function TrackTrendsSummaryWidget({
   if (error) {
     return (
       <div className={embedded ? "w-full min-w-0" : "sm:col-span-2 lg:col-span-4 w-full min-w-0"}>
-        <div className={`${TRACK_TREND_CARD_CLASS} p-6`}>
-          {TRACK_TREND_BACKGROUND}
-          <ErrorState
-            error={error}
-            message={t("errorLoading")}
-            onRetry={() => refetch()}
-          />
-        </div>
+        <ErrorState error={error} message={t("errorLoading")} onRetry={() => refetch()} />
       </div>
     );
   }
@@ -297,127 +232,49 @@ export function TrackTrendsSummaryWidget({
 
   return (
     <div className={shellClass}>
-      <div className={`${TRACK_TREND_CARD_CLASS} animate-fade-in-up`}>
-        {TRACK_TREND_BACKGROUND}
-        <div className="relative">
-          <div className="border-b border-white/70 px-6 py-5 dark:border-white/[0.06]">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-              <div className="max-w-2xl">
-                <p className={DASHBOARD_SECTION_EYEBROW}>{t("title")}</p>
-                <h2 className={`${DASHBOARD_SECTION_TITLE} mt-1`}>{t("evolution")}</h2>
-                <p className="mt-2 max-w-xl text-[13px] leading-6 text-muted">{t("chartHint")}</p>
-              </div>
-              <div className="flex flex-col items-start gap-3 lg:items-end">
-                <ListenTrendChartViewToggle value={chartView} onChange={setChartView} />
-                <Link
-                  href={`/dashboard/tracks/trends${trendsQuery}`}
-                  className={DASHBOARD_BTN_GHOST}
-                >
-                  {tOverview("seeMore")}
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </Link>
-              </div>
-            </div>
-          </div>
-
-          <div className="relative space-y-5 p-6">
-            <div>
-              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-muted dark:text-slate-400">
-                {t("tracksToDisplay")}
-              </p>
-              <TrackTrendsTrackPicker
-                catalogTracks={pickerTracks}
-                selectedIds={selectedIds}
-                onToggle={toggleTrack}
-                getColor={getColor}
-                getTrackIndex={getTrackIndex}
-                enableRemoteSearch
-                onPickRemoteTrack={handlePickRemoteTrack}
-                maxSelectable={MAX_SERIES_TRACKS}
-                idPrefix="overview-track-trends"
-                compact
-              />
-            </div>
-
-            {selectedIds.length === 0 ? (
-              <p className="py-10 text-center text-[13px] text-muted">
-                {t("selectAtLeastOne")}
-              </p>
-            ) : (
-              <div
-                className={chartSyncing ? "opacity-70" : ""}
-                aria-busy={chartSyncing}
-              >
-                <div className="pointer-events-none absolute left-1/2 top-8 h-56 w-56 -translate-x-1/2 rounded-full bg-accent-cyan/10 blur-3xl dark:bg-accent-cyan/15" />
-                <ChartResponsiveContainer token="trendsLine" minWidth={trendsMinWidth}>
-                    <LineChart
-                      data={displayChartData}
-                      margin={{ top: 12, right: 16, left: 0, bottom: isLgChart ? 50 : 44 }}
-                    >
-                      <CartesianGrid
-                        strokeDasharray="4 6"
-                        stroke={chartTheme.grid}
-                        vertical={false}
-                      />
-                      <XAxis
-                        dataKey="formattedDate"
-                        tick={{ fill: chartTheme.tick, fontSize: 11, fontWeight: 600 }}
-                        stroke={chartTheme.axisStroke}
-                        tickLine={false}
-                        axisLine={false}
-                        angle={isLgChart ? -40 : -35}
-                        textAnchor="end"
-                        height={isLgChart ? 70 : 58}
-                      />
-                      <YAxis
-                        tick={{ fill: chartTheme.tick, fontSize: 11, fontWeight: 600 }}
-                        stroke={chartTheme.axisStroke}
-                        tickLine={false}
-                        axisLine={false}
-                        width={42}
-                      />
-                      <Tooltip content={<TrendsTooltip />} />
-                      <Legend
-                        iconType="circle"
-                        wrapperStyle={{
-                          fontSize: 12,
-                          fontWeight: 600,
-                          paddingTop: 8,
-                          color: chartTheme.legend,
-                        }}
-                      />
-                      {selectedIds.map((trackId) => {
-                        const idx = getTrackIndex(trackId);
-                        const label = idToLabel.get(trackId) ?? trackId;
-                        const color = getColor(idx >= 0 ? idx : 0);
-                        return (
-                          <Line
-                            key={trackId}
-                            type="monotone"
-                            dataKey={trackId}
-                            name={label}
-                            stroke={color}
-                            strokeWidth={2.75}
-                            dot={false}
-                            activeDot={{
-                              r: 5,
-                              stroke: chartTheme.pieStroke,
-                              strokeWidth: 2,
-                              fill: color,
-                            }}
-                            animationDuration={650}
-                            animationEasing="ease-in-out"
-                          />
-                        );
-                      })}
-                    </LineChart>
-                </ChartResponsiveContainer>
-              </div>
-            )}
-          </div>
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div className="max-w-2xl">
+          <p className={DASHBOARD_SECTION_EYEBROW}>{t("title")}</p>
+          <h2 className={`${DASHBOARD_SECTION_TITLE} mt-1`}>{t("evolution")}</h2>
+          <p className="mt-2 max-w-xl text-[13px] leading-6 text-muted">{t("chartHint")}</p>
         </div>
+        <div className="flex flex-col items-start gap-3 lg:items-end">
+          <ListenTrendChartViewToggle value={chartView} onChange={setChartView} />
+          <Link href={`/dashboard/tracks/trends${trendsQuery}`} className={`${DASHBOARD_BTN_GHOST} shrink-0`}>
+            {tOverview("seeMore")}
+          </Link>
+        </div>
+      </div>
+
+      <div className="mt-6 space-y-5">
+        <div>
+          <p className="mb-3 text-[13px] text-muted">{t("tracksToDisplay")}</p>
+          <TrackTrendsTrackPicker
+            catalogTracks={pickerTracks}
+            selectedIds={selectedIds}
+            onToggle={toggleTrack}
+            getColor={getColor}
+            getTrackIndex={getTrackIndex}
+            enableRemoteSearch
+            onPickRemoteTrack={handlePickRemoteTrack}
+            maxSelectable={MAX_SERIES_TRACKS}
+            idPrefix="overview-track-trends"
+            compact
+          />
+        </div>
+
+        {selectedIds.length === 0 ? (
+          <p className="py-10 text-center text-[13px] text-muted">{t("selectAtLeastOne")}</p>
+        ) : (
+          <div className={chartSyncing ? "opacity-70" : ""} aria-busy={chartSyncing}>
+            <OverviewTrendsChart
+              data={displayChartData}
+              series={chartSeries}
+              formatValue={formatValue}
+              minWidth={trendsMinWidth}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

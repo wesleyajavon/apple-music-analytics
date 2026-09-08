@@ -12,6 +12,13 @@ import {
 import { useTranslations } from "next-intl";
 import type { ArtistTrendsChartArtist } from "@/lib/dto/artist";
 import { useArtistSearch } from "@/lib/hooks/use-artists";
+import {
+  DASHBOARD_FILTER_CHIP,
+  DASHBOARD_FILTER_CHIP_ACTIVE,
+  DASHBOARD_LIST_ROW,
+  DASHBOARD_LIST_SEPARATOR,
+  DASHBOARD_SEARCH_FIELD,
+} from "@/lib/components/dashboard-ui";
 
 function normalizeForSearch(s: string): string {
   return s
@@ -57,7 +64,7 @@ export function ArtistTrendsArtistPicker({
   const t = useTranslations("artistTrends");
   const [query, setQuery] = useState("");
   const [highlightIndex, setHighlightIndex] = useState(-1);
-  const optionRefs = useRef<Map<string, HTMLLabelElement>>(new Map());
+  const optionRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
   const searchInputId = `${idPrefix}-search`;
   const listboxId = `${idPrefix}-listbox`;
   const searchHintId = `${idPrefix}-search-hint`;
@@ -84,7 +91,7 @@ export function ArtistTrendsArtistPicker({
     );
   }, [catalogArtists, query]);
 
-  const setOptionRef = useCallback((id: string, el: HTMLLabelElement | null) => {
+  const setOptionRef = useCallback((id: string, el: HTMLButtonElement | null) => {
     if (el) optionRefs.current.set(id, el);
     else optionRefs.current.delete(id);
   }, []);
@@ -157,14 +164,14 @@ export function ArtistTrendsArtistPicker({
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
         <div className="min-w-0 flex-1">
           <label htmlFor={searchInputId} className="sr-only">
             {t("searchAriaLabel")}
           </label>
           <div className="relative">
             <span
-              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted"
+              className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted"
               aria-hidden
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -184,7 +191,7 @@ export function ArtistTrendsArtistPicker({
               placeholder={t("searchPlaceholder")}
               autoComplete="off"
               spellCheck={false}
-              className="w-full rounded-xl border border-border bg-surface-raised py-2.5 pl-9 pr-3 text-sm text-foreground shadow-sm placeholder:text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
+              className={DASHBOARD_SEARCH_FIELD}
               aria-controls={listboxId}
               aria-describedby={searchHintId}
               aria-activedescendant={
@@ -194,72 +201,63 @@ export function ArtistTrendsArtistPicker({
               }
             />
           </div>
-          <p id={searchHintId} className="mt-1 text-xs text-muted">
+          <p id={searchHintId} className="sr-only">
             {enableRemoteSearch ? t("searchKeyboardHintExtended") : t("searchKeyboardHint")}
           </p>
         </div>
-        <div className="flex flex-col items-end gap-1 shrink-0">
-          {query.trim() !== "" && (
-            <p className="text-xs text-muted tabular-nums" aria-live="polite">
+        <div className="flex shrink-0 items-center gap-3">
+          {query.trim() !== "" ? (
+            <p className="text-[13px] tabular-nums text-muted" aria-live="polite">
               {t("searchResultsCount", { count: filtered.length, total: catalogArtists.length })}
             </p>
-          )}
-          <p className="rounded-full border border-border bg-surface px-2.5 py-1 text-xs text-muted tabular-nums">
+          ) : null}
+          <p className="text-[13px] tabular-nums text-muted">
             {t("selectionCount", { selected: selectedIds.length, max: maxSelectable })}
           </p>
         </div>
       </div>
 
-      {enableRemoteSearch && query.trim().length >= 2 && (
+      {enableRemoteSearch && query.trim().length >= 2 ? (
         <div
-          className="rounded-xl border border-border bg-card shadow-lg"
+          className="overflow-hidden rounded-[12px] border border-glass-hairline"
           role="region"
           aria-label={t("searchDatabaseRegion")}
         >
-          <div className="border-b border-border px-3 py-2">
-            <p className="text-xs font-semibold uppercase tracking-wider text-primary">
-              {t("searchDatabaseTitle")}
-            </p>
-          </div>
-          <div className="max-h-52 overflow-y-auto p-2">
+          <p className="px-3.5 py-2 text-[13px] text-muted">{t("searchDatabaseTitle")}</p>
+          <div className="max-h-52 overflow-y-auto border-t border-glass-hairline px-2">
             {remoteLoading ? (
-              <p className="px-2 py-4 text-center text-sm text-muted">{t("searchRemoteLoading")}</p>
+              <p className="px-2 py-4 text-center text-[13px] text-muted">{t("searchRemoteLoading")}</p>
             ) : remoteSuggestions.filter((a) => !catalogIdSet.has(a.id)).length === 0 &&
               remoteSuggestions.length > 0 ? (
-              <p className="px-2 py-4 text-center text-sm text-muted">
+              <p className="px-2 py-4 text-center text-[13px] text-muted">
                 {t("searchRemoteAllInCatalog")}
               </p>
             ) : remoteSuggestions.length === 0 ? (
-              <p className="px-2 py-4 text-center text-sm text-muted">
+              <p className="px-2 py-4 text-center text-[13px] text-muted">
                 {t("searchNoResults")}
               </p>
             ) : (
-              <ul className="space-y-1">
+              <ul>
                 {remoteSuggestions.map((artist) => {
                   const inCatalog = catalogIdSet.has(artist.id);
                   const selected = selectedIds.includes(artist.id);
                   const disabledAdd = atCapacity && !selected;
                   return (
-                    <li key={artist.id}>
+                    <li key={artist.id} className={DASHBOARD_LIST_SEPARATOR}>
                       <button
                         type="button"
                         disabled={inCatalog || disabledAdd || selected}
                         onClick={() =>
                           !inCatalog && !selected && handlePickRemote(artist)
                         }
-                        className={`
-                          flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors
-                          ${
-                            inCatalog
-                              ? "cursor-default text-muted/70"
-                              : disabledAdd
-                                ? "cursor-not-allowed text-muted opacity-55"
-                                : "text-foreground hover:bg-primary/12"
-                          }
-                        `}
+                        className={`${DASHBOARD_LIST_ROW} w-full text-[13px] ${
+                          inCatalog || selected || disabledAdd
+                            ? "cursor-default text-muted"
+                            : "text-foreground hover:text-foreground"
+                        }`}
                       >
                         <span className="min-w-0 truncate font-medium">{artist.name}</span>
-                        <span className="shrink-0 text-xs text-muted">
+                        <span className="shrink-0 text-muted">
                           {inCatalog
                             ? t("searchInCatalog")
                             : selected
@@ -274,69 +272,53 @@ export function ArtistTrendsArtistPicker({
             )}
           </div>
         </div>
-      )}
+      ) : null}
 
       <div
         id={listboxId}
         role="listbox"
         aria-label={t("artistsToDisplay")}
         aria-multiselectable="true"
-        className={`mt-3 flex flex-wrap content-start gap-2 overflow-y-auto rounded-xl border border-border bg-surface p-2 ${
+        className={`flex flex-wrap content-start gap-2 overflow-y-auto ${
           compact ? "max-h-[min(40vh,14rem)]" : "max-h-[min(50vh,22rem)]"
         }`}
       >
         {filtered.length === 0 ? (
-          <p className="px-2 py-6 text-center text-sm text-muted">
-            {t("searchNoResults")}
-          </p>
+          <p className="py-6 text-[13px] text-muted">{t("searchNoResults")}</p>
         ) : (
           filtered.map((artist, pos) => {
             const selected = selectedIds.includes(artist.id);
             const idx = getArtistIndex(artist.id);
             const isHighlighted = highlightIndex === pos;
+            const disabled = !selected && atCapacity;
             return (
-              <label
+              <button
                 key={artist.id}
                 id={`${idPrefix}-opt-${artist.id}`}
                 ref={(el) => setOptionRef(artist.id, el)}
+                type="button"
                 role="option"
                 aria-selected={selected}
-                className={`
-                  inline-flex max-w-[min(100%,260px)] cursor-pointer items-center gap-2 rounded-lg border px-3 py-1.5 transition-colors
-                  ${
-                    selected
-                      ? "border-primary/45 bg-primary/12 text-foreground shadow-sm dark:border-primary/60 dark:bg-slate-950 dark:text-violet-100 dark:shadow-none"
-                      : isHighlighted
-                        ? "border-primary/55 bg-primary/10 text-foreground ring-2 ring-primary/28 dark:border-primary/60 dark:bg-slate-950 dark:text-violet-100 dark:ring-primary/40"
-                        : "border-border bg-card text-foreground hover:bg-surface-raised"
-                  }
-                `}
+                disabled={disabled}
+                title={artist.name}
+                onClick={() => {
+                  if (disabled) return;
+                  onToggle(artist.id);
+                }}
+                className={`${selected ? DASHBOARD_FILTER_CHIP_ACTIVE : DASHBOARD_FILTER_CHIP} ${
+                  isHighlighted ? "ring-2 ring-ring" : ""
+                }`}
               >
-                <input
-                  type="checkbox"
-                  checked={selected}
-                  disabled={!selected && atCapacity}
-                  onChange={() => {
-                    if (!selected && atCapacity) return;
-                    onToggle(artist.id);
-                  }}
-                  tabIndex={-1}
-                  className="rounded border-border bg-surface-raised text-primary accent-primary focus:ring-ring disabled:opacity-45 dark:bg-slate-900 dark:border-white/25"
-                />
                 <span
-                  className={`w-3 h-3 shrink-0 rounded-full border ${selected ? "border-transparent" : "border-muted bg-transparent"}`}
+                  className="h-2 w-2 shrink-0 rounded-full"
                   style={{
-                    backgroundColor: selected ? getColor(idx) : undefined,
+                    backgroundColor: selected ? getColor(idx) : "transparent",
+                    boxShadow: selected ? undefined : "inset 0 0 0 1px var(--glass-hairline)",
                   }}
                   aria-hidden
                 />
-                <span
-                  className="truncate text-sm text-inherit"
-                  title={artist.name}
-                >
-                  {artist.name}
-                </span>
-              </label>
+                <span className="truncate">{artist.name}</span>
+              </button>
             );
           })
         )}

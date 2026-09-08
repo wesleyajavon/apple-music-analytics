@@ -1,24 +1,13 @@
 "use client";
 
-import { memo, useMemo, useEffect, useState, useCallback, useRef } from "react";
+import { useMemo, useEffect, useState, useCallback, useRef } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-} from "recharts";
-import { ChartResponsiveContainer } from "@/lib/components/chart-responsive-container";
+import { OverviewTrendsChart } from "@/lib/components/charts/overview-trends-chart";
 import { useArtistTrendsChart } from "@/lib/hooks/use-artists";
 import { useDashboardViewerUserId } from "@/lib/context/dashboard-viewer-context";
 import { ErrorState } from "@/lib/components/error-state";
 import { useTheme } from "@/lib/providers/theme-provider";
-import { useIsLgChartViewport } from "@/lib/hooks/use-chart-viewport";
-import { DASHBOARD_CHART_THEME } from "@/lib/constants/dashboard-spotlight";
 import { ListenTrendChartViewToggle } from "@/lib/components/charts/listen-trend-chart-view-toggle";
 import {
   applyListenTrendChartViewMulti,
@@ -30,58 +19,9 @@ import {
   DASHBOARD_SECTION_EYEBROW,
   DASHBOARD_SECTION_TITLE,
 } from "@/lib/components/dashboard-ui";
+import { getCrystalSeriesColor } from "@/lib/constants/crystal-chart";
 import type { ArtistTrendsChartArtist } from "@/lib/dto/artist";
 import { useDebouncedValue } from "@/lib/hooks/use-debounced-value";
-
-const COLORS = [
-  "#8b5cf6",
-  "#06b6d4",
-  "#84cc16",
-  "#f43f5e",
-  "#f59e0b",
-  "#10b981",
-  "#f97316",
-  "#6366f1",
-  "#14b8a6",
-  "#ec4899",
-];
-
-function getColor(index: number): string {
-  return COLORS[index % COLORS.length];
-}
-
-function createTrendsTooltip(t: (k: string) => string, locale: string) {
-  const TrendsTooltipInner = memo(
-    ({
-      active,
-      payload,
-      label,
-    }: {
-      active?: boolean;
-      payload?: Array<{ name: string; value: number; color: string }>;
-      label?: string;
-    }) => {
-      if (!active || !payload?.length || !label) return null;
-      return (
-        <div className="chart-tooltip-accessible min-w-[180px] p-4">
-          <p className="font-semibold mb-2">{label}</p>
-          <ul className="space-y-1.5 text-sm">
-            {payload.map((entry) => (
-              <li key={entry.name} className="flex justify-between gap-4">
-                <span style={{ color: entry.color }}>{entry.name}</span>
-                <span className="chart-tooltip-secondary font-medium tabular-nums">
-                  {Number(entry.value).toLocaleString(locale)} {t("listensDelta")}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      );
-    }
-  );
-  TrendsTooltipInner.displayName = "ArtistTrendsTooltip";
-  return TrendsTooltipInner;
-}
 
 const DEFAULT_ARTIST_COUNT = 5;
 /** Limite d’artistes renvoyés par l’API pour garder le widget léger */
@@ -110,9 +50,15 @@ export function ArtistTrendsSummaryWidget({
   const locale = useLocale();
   const viewerUserId = useDashboardViewerUserId();
   const { resolvedTheme } = useTheme();
-  const chartTheme = DASHBOARD_CHART_THEME[resolvedTheme === "dark" ? "dark" : "light"];
-  const isLgChart = useIsLgChartViewport();
-  const TrendsTooltip = useMemo(() => createTrendsTooltip(t, locale), [t, locale]);
+  const chartThemeName = resolvedTheme === "dark" ? "dark" : "light";
+  const getColor = useCallback(
+    (index: number) => getCrystalSeriesColor(index, chartThemeName),
+    [chartThemeName]
+  );
+  const formatValue = useCallback(
+    (value: number) => `${value.toLocaleString(locale)} ${t("listensDelta")}`,
+    [locale, t]
+  );
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [extraSearchArtists, setExtraSearchArtists] = useState<ArtistTrendsChartArtist[]>([]);
@@ -237,6 +183,19 @@ export function ArtistTrendsSummaryWidget({
     [pickerArtists]
   );
 
+  const chartSeries = useMemo(
+    () =>
+      selectedIds.map((artistId) => {
+        const idx = getArtistIndex(artistId);
+        return {
+          dataKey: artistId,
+          name: idToName.get(artistId) ?? artistId,
+          color: getColor(idx),
+        };
+      }),
+    [getArtistIndex, getColor, idToName, selectedIds]
+  );
+
   const trendsQuery = useMemo(() => {
     const p = new URLSearchParams();
     if (startDate) p.set("startDate", startDate);
@@ -312,72 +271,15 @@ export function ArtistTrendsSummaryWidget({
           <p className="py-10 text-center text-[13px] text-muted">{t("selectAtLeastOne")}</p>
         ) : (
           <div className={chartSyncing ? "opacity-70" : ""} aria-busy={chartSyncing}>
-            <ChartResponsiveContainer token="trendsLine" minWidth={trendsMinWidth}>
-                    <LineChart
-                      data={displayChartData}
-                      margin={{ top: 12, right: 16, left: 0, bottom: isLgChart ? 50 : 44 }}
-                    >
-                      <CartesianGrid
-                        strokeDasharray="4 6"
-                        stroke={chartTheme.grid}
-                        vertical={false}
-                      />
-                      <XAxis
-                        dataKey="formattedDate"
-                        tick={{ fill: chartTheme.tick, fontSize: 11, fontWeight: 600 }}
-                        stroke={chartTheme.axisStroke}
-                        tickLine={false}
-                        axisLine={false}
-                        angle={isLgChart ? -40 : -35}
-                        textAnchor="end"
-                        height={isLgChart ? 70 : 58}
-                      />
-                      <YAxis
-                        tick={{ fill: chartTheme.tick, fontSize: 11, fontWeight: 600 }}
-                        stroke={chartTheme.axisStroke}
-                        tickLine={false}
-                        axisLine={false}
-                        width={42}
-                      />
-                      <Tooltip content={<TrendsTooltip />} />
-                      <Legend
-                        iconType="circle"
-                        wrapperStyle={{
-                          fontSize: 12,
-                          fontWeight: 600,
-                          paddingTop: 8,
-                          color: chartTheme.legend,
-                        }}
-                      />
-                      {selectedIds.map((artistId) => {
-                        const idx = getArtistIndex(artistId);
-                        const name = idToName.get(artistId) ?? artistId;
-                        const color = getColor(idx >= 0 ? idx : 0);
-                        return (
-                          <Line
-                            key={artistId}
-                            type="monotone"
-                            dataKey={artistId}
-                            name={name}
-                            stroke={color}
-                            strokeWidth={2.75}
-                            dot={false}
-                            activeDot={{
-                              r: 5,
-                              stroke: chartTheme.pieStroke,
-                              strokeWidth: 2,
-                              fill: color,
-                            }}
-                            animationDuration={650}
-                            animationEasing="ease-in-out"
-                          />
-                        );
-                      })}
-                    </LineChart>
-                </ChartResponsiveContainer>
-              </div>
-            )}
+            <OverviewTrendsChart
+              data={displayChartData}
+              series={chartSeries}
+              formatValue={formatValue}
+              minWidth={trendsMinWidth}
+            />
           </div>
-        </div>
-      );
-    }
+        )}
+      </div>
+    </div>
+  );
+}

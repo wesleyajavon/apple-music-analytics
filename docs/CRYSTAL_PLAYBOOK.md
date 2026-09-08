@@ -2,7 +2,7 @@
 
 Playbook pour faire **ressembler** Soundprint à un produit Apple : calme, lisible, tactile, chrome en **verre** — tout en restant un **dashboard à onglets**.
 
-Ce n’est **pas** une conversion Replay → récit / story. [Apple Music Replay](https://music.apple.com/be/replay) sert de **référence visuelle** (sélecteur, section « Your Top Artist », listes sans cartes). [Apple Music Home](https://music.apple.com/be/home) sert pour la **sidebar verre**.
+Ce n’est **pas** une conversion Replay → récit / story. [Apple Music Replay](https://music.apple.com/be/replay) sert de **référence visuelle** (sélecteur, tuiles « Your Top Artists » : portrait + pied verre). [Apple Music Home](https://music.apple.com/be/home) sert pour la **sidebar verre**.
 
 **Première page métier : `/dashboard/overview` (Your Music).**  
 Le chrome (sidebar + header) se fait **avant** Overview, sinon chaque section sera restylée deux fois.
@@ -14,11 +14,13 @@ Le chrome (sidebar + header) se fait **avant** Overview, sinon chaque section se
 | On veut | On ne veut pas |
 | --- | --- |
 | Dashboard. Onglets. Un panneau à la fois (`view=`). | Remplacer les onglets par un scroll-histoire Replay |
-| Le **look** du sélecteur Replay + de « Your Top Artist » | Cloner le wordmark / le rouge Apple Music |
-| Sections **sans boîte** : titre + média + liste | `rounded-[2rem]` + `shadow-card` + hover lift autour de chaque bloc |
-| Verre sur le **chrome** (sidebar, header, sélecteur) | Une carte verre autour de chaque KPI / top / widget |
+| Le **look** du sélecteur Replay + des tuiles « Your Top Artists » | Cloner le wordmark / le rouge Apple Music |
+| Sections **sans boîte widget** : titre sur le canvas + tuiles média | `rounded-[2rem]` + `shadow-card` + hover lift **autour** d’une section |
+| Verre sur le **chrome** et sur le **pied des tuiles média** | Une carte verre autour d’un KPI / d’un widget entier |
 
-Le plus gros écart actuel n’est pas l’architecture d’onglets. C’est la **matière carte** : spotlight (`top-three-artists-cards.tsx`, `CARD_SHELL`), stats (`STATS_SHELL_CLASS`), library (`TopLibraryCard` + gradients), hero (`DASHBOARD_CINEMATIC_HERO_SHELL`).
+**Source de vérité visuel (étape 4, faite) :** tuiles portrait Replay — `aspect-[3/4]`, `rounded-[22px]`, rang grand, pied frost plein cadre (`.dashboard-replay-card-frost`), nom + métrique + sous-titre **toujours visibles**, pager 4-up + flèches circulaires. Recette : [`spotlight-artists-featured-list.tsx`](../lib/components/spotlight-artists-featured-list.tsx).
+
+Le plus gros écart **restant** n’est pas l’architecture d’onglets. C’est encore la **matière carte** sur les autres vues : stats (`STATS_SHELL_CLASS`), library (`TopLibraryCard` + gradients), momentum / further. Spotlight n’est plus le modèle à corriger : c’est le modèle à **copier**.
 
 ---
 
@@ -66,13 +68,14 @@ Interdit : convertir Overview en story Replay (tout le contenu dans un seul scro
 
 Inspiration visuelle (pas le branding) :
 - Apple Music Home (music.apple.com/be/home) : sidebar verre.
-- Apple Music Replay (music.apple.com/be/replay) : sélecteur (pills / segmented, pas une rangée de chips-cartes) ; section « Your Top Artist » = titre de section à même le canvas + grande pochette + nom + métrique, SANS carte autour. Listes numérotées ensuite, pas des widgets.
+- Apple Music Replay (music.apple.com/be/replay) : sélecteur (pills / segmented, pas une rangée de chips-cartes) ; tuiles « Your Top Artists » = portrait 3:4, coins ~22px, rang gros, pied frost plein cadre (nom + métrique toujours visibles). Copier spotlight Overview (étape 4, faite) — pas une liste iOS à la place des tuiles.
 
 Inspirer, ne pas cloner : pas de logo Apple, pas de rouge Apple Music comme marque, pas de SF Pro sous licence. Accent Soundprint (violet / rose / cyan) en touches, pas en glow de carte.
 
 Anti-carte (non négociable sur Overview) :
-Interdit autour d’une section : rounded-[2rem], shadow-card, ring-1, hover:-translate-y, border+gradient « widget », carte dans la carte.
-Autorisé : titre de section (large title / eyebrow 13px) collé au canvas ; pochette 1:1 radius ~12px (carré) ou ronde (artiste) ; liste iOS grouped (séparateurs hairline, pas une boîte par row) ; verre UNIQUEMENT chrome (sidebar, header, piste du sélecteur).
+Interdit autour d’une SECTION : rounded-[2rem], shadow-card, ring-1, hover:-translate-y, border+gradient « widget », carte dans la carte, overlay hover qui cache le nom.
+Autorisé : titre de section (large title / eyebrow 13px) collé au canvas ; tuile Replay (portrait, frost `.dashboard-replay-card-frost`, texte centré en bas) ; metric strip pour les KPI (pas des tuiles) ; verre chrome (sidebar, header, piste segmented, flèches Replay).
+Listes iOS grouped : seulement pour du non-média (amis, settings), pas pour tracks / artistes / genres.
 
 Scale : refined. Tracking négatif titres, labels 13px, cibles 44px.
 Accessibilité verre : WCAG AA ; prefers-reduced-transparency → opaque ; prefers-reduced-motion.
@@ -85,7 +88,7 @@ Avant de proposer un plan : lis les fichiers du prompt. Pose 1 question si besoi
 
 ## Nord visuel Replay → Overview
 
-Référence : [Apple Music Replay](https://music.apple.com/be/replay) — **masthead**, **sélecteur**, et **Your Top Artist**.
+Référence : [Apple Music Replay](https://music.apple.com/be/replay) — **masthead**, **sélecteur**, et **Your Top Artists**.
 
 ### Masthead Overview (pas un hero-carte)
 
@@ -104,23 +107,26 @@ Chez nous, deux sélecteurs à aligner sur cette famille :
 
 Cible : **segmented control iOS** — piste verre, pill actif opaque/contraste, labels seuls (les icônes Lucide peuvent rester en `sm+` ou disparaître si ça fait « toolbar Bootstrap »).
 
-### « Your Top Artist » (section, pas une carte)
+### « Your Top Artists » (tuiles Replay — **fait**, étape 4)
 
-Replay : le titre vit **sur le fond de page**. La pochette / photo **est** le visuel. Nom en large. Compteur en tabular-nums muted. Pas de header de widget, pas de `See all` dans une barre de carte.
+Replay : le titre vit **sur le fond de page**. Quatre tuiles portrait. Photo plein cadre. Rang gros en haut à gauche. Pied **frost** (blur + dégradé, pas une pastille inset) : nom centré, métrique muted, toujours visibles. Flèches circulaires givrées + pager 1–4 / 5–8 / ….
 
-Chez nous, l’équivalent immédiat est la vue **spotlight** :
+Chez nous, c’est **livré** sur Overview `view=spotlight` :
 
-- [`top-three-artists-overview-widget.tsx`](../lib/components/top-three-artists-overview-widget.tsx) — encore une mega-carte `rounded-[2rem] shadow-card`
-- [`top-three-artists-cards.tsx`](../lib/components/top-three-artists-cards.tsx) — `CARD_SHELL` + hover lift + overlay
+- [`top-three-artists-overview-widget.tsx`](../lib/components/top-three-artists-overview-widget.tsx) — section canvas (eyebrow + titre + See all ghost)
+- [`spotlight-artists-featured-list.tsx`](../lib/components/spotlight-artists-featured-list.tsx) — tuiles + pager
+- [`top-three-artists-cards.tsx`](../lib/components/top-three-artists-cards.tsx) — **legacy** `CARD_SHELL` (page `/artists` seulement, jusqu’à 7a)
 
-Cible spotlight :
+Recette à recopier (étapes 5+) :
 
-1. Eyebrow / titre de section type « Your Top Artist » (i18n existant `overview` / `artists`, pas de copy marketing)
-2. **Featured** = artiste #1 : grande image, nom, écoutes — canvas, pas de boîte
-3. **Suite** = 2…n en liste ou rail d’artworks **sans** carte par item
-4. CTA « voir tous les artistes » en lien texte / bouton ghost, pas un footer de carte
+1. Pas de mega-carte autour de la section.
+2. Grille 4-up (desktop) de tuiles `aspect-[3/4] rounded-[22px]`.
+3. Pied `.dashboard-replay-card-frost` + texte blanc centré (nom, count, sous-titre). `prefers-reduced-transparency` : fond opaque, blur 0.
+4. Pager si > 4 items : labels `{start}–{end}` au-dessus + flèches circulaires `bg-white/15 backdrop-blur-xl`.
+5. Nom visible sans hover. Clic tuile = insight / navigation, pas un chrome de carte.
+6. CTA See all = lien ghost, pas un footer de widget.
 
-Les vues **tops** reprennent le même langage : un featured + une liste, plus trois `TopLibraryCard` côte à côte.
+Les vues **tops** (tracks / artistes / genres) et les fiches des pages Artistes / Tracks / Genres **reprennent ces tuiles**, pas trois `TopLibraryCard` ni un featured + list rows.
 
 ### Anti-carte — inventaire Overview
 
@@ -130,7 +136,7 @@ Les vues **tops** reprennent le même langage : un featured + une liste, plus tr
 | --- | --- | --- |
 | Hero | `overview-hero.tsx` + `DASHBOARD_CINEMATIC_HERO_SHELL` | Carte glow violette |
 | Stats | `overview-stats-section.tsx` `STATS_SHELL_CLASS` | 4 cartes dark hover-lift |
-| Spotlight | `top-three-artists-*.tsx` | Carte + sous-cartes |
+| Spotlight | `spotlight-artists-featured-list.tsx` | **Fait** — tuiles Replay |
 | Tops | `overview-library-rankings.tsx` | Widget gradient + rows-cartes |
 | Switcher | `dashboard-section-switcher.tsx` | Barre-carte + chips-cartes |
 | Momentum / go further | widgets + `overview-go-further.tsx` | Cartes promo |
@@ -139,14 +145,15 @@ Remplacement type Apple :
 
 | Au lieu de | Utiliser |
 | --- | --- |
-| Widget card | Section : `h2` + contenu |
+| Widget card autour d’une section | Section : `h2` + contenu sur le canvas |
 | Hero cinématique | Masthead : `h1` + insight en typo, pas de boîte |
 | Carte KPI | Strip : label 13px au-dessus, chiffre large, hairline entre colonnes |
-| Carte artiste | Featured media + meta |
-| Row dans une mini-carte | List row : pochette 40–48px, titre, subtitle, count à droite, séparateur |
-| Chip onglet | Segmented pill |
+| Carte artiste / track / genre | Tuile Replay (portrait + frost) comme spotlight |
+| Row dans une mini-carte (média) | Encore une tuile Replay, ou pager 4-up |
+| Row non-média (amis, settings) | List row : titre, subtitle, count, hairline |
+| Chip onglet | Segmented pill (chrome) ou labels discrets `1–4` (pager tuiles) |
 
-Le verre n’est **pas** une carte de contenu. C’est sidebar / header / piste du tablist.
+Le verre n’est **pas** une carte de section. C’est chrome (sidebar / header / piste) **ou** le pied frost d’une tuile média.
 
 ---
 
@@ -157,7 +164,7 @@ Le verre n’est **pas** une carte de contenu. C’est sidebar / header / piste 
 | Tokens + primitives `dashboard-ui.tsx` d’abord | Restyler Overview avec des `bg-white/10` one-off |
 | Sidebar verre **avant** la page | Peindre Overview sur un chrome encore opaque |
 | Dual tree desktop / mobile | Un seul JSX `lg:` |
-| Primitives : `DASHBOARD_GLASS_CHROME`, `DASHBOARD_SEGMENTED`, `DASHBOARD_SECTION_TITLE`, `DASHBOARD_FEATURED_MEDIA`, `DASHBOARD_LIST_ROW` | Réutiliser `DASHBOARD_WIDGET_CARD_SHELL` / `DASHBOARD_CINEMATIC_HERO_SHELL` sur Overview |
+| Primitives : `DASHBOARD_GLASS_CHROME`, `DASHBOARD_SEGMENTED`, `DASHBOARD_SECTION_TITLE`, tuile Replay (`.dashboard-replay-card-frost`) | Réutiliser `DASHBOARD_WIDGET_CARD_SHELL` / `DASHBOARD_CINEMATIC_HERO_SHELL` / `CARD_SHELL` / `TopLibraryCard` sur Overview |
 | Garder `view=` et un panneau à la fois | Story scroll, TOC-anchors à la place des tabs |
 | Gemini `modify_frontend` après tokens, 1 surface | `create_frontend` d’Overview entier |
 | Light **et** dark | Copier uniquement le dark Replay |
@@ -173,7 +180,7 @@ Fichiers chrome / Overview :
 | Header / période | `dashboard-sticky-header.tsx`, `date-range-filter.tsx` |
 | Masthead Overview | `overview-hero.tsx` (étape 2.5) |
 | Onglets Overview | `dashboard-section-switcher.tsx`, `overview-section-switcher.tsx` |
-| Overview | `overview/page.tsx`, `overview-desktop-flow.tsx`, `overview-hero.tsx`, `overview-stats-section.tsx`, `overview-library-rankings.tsx`, `top-three-artists-overview-widget.tsx`, `top-three-artists-cards.tsx` |
+| Overview | `overview/page.tsx`, `overview-desktop-flow.tsx`, `overview-hero.tsx`, `overview-stats-section.tsx`, `overview-library-rankings.tsx`, `top-three-artists-overview-widget.tsx`, `spotlight-artists-featured-list.tsx` |
 
 ---
 
@@ -284,7 +291,7 @@ Objectif lg+ :
 - Masthead sur le canvas : eyebrow 13px (DASHBOARD_SECTION_EYEBROW) + h1 (titre page, tracking-tight) + insight en typographie (metric tabular-nums + titre + ligne muted). PAS OverviewInsightCard, PAS rounded-3xl border autour de l’insight.
 - Light ET dark : le masthead suit le thème de la page. Interdit : forcer gray-950 / text-white en light.
 - Retirer du masthead : wordmark Soundprint (sidebar), badge période (header étape 2). Avatar : omit, ou taille discrète à côté du titre — pas un header de profil.
-- Artwork : omit, ou pochette 1:1 petite (DASHBOARD_FEATURED_MEDIA, ~120px, radius 12px) du top track. PAS une carte autour. Le featured large = étape 4 Spotlight (artiste #1).
+- Artwork : omit, ou pochette 1:1 petite (DASHBOARD_FEATURED_MEDIA, ~120px, radius 12px) du top track. PAS une carte autour. Le grand visuel média = Spotlight (étape 4, **faite** : tuiles Replay, pas un featured #1 isolé).
 - Garder : h1, buildOverviewPrimaryInsight (data inchangée), hint période si All, children (empty/error). Copy : ne plus dire « open a card » si le subtitle le dit encore (i18n overview.subtitle).
 - Loading / empty / error desktop : même masthead sans-carte, pas le shell cinématique.
 
@@ -323,96 +330,96 @@ Livre : avant/après classes, vérif EN/FR light/dark, artists/tracks/genres swi
 
 ---
 
-## Étape 4 — Overview spotlight : « Your Top Artist » (sans carte)
+## Étape 4 — Overview spotlight : tuiles Replay (**FAIT — ne pas rejouer**)
 
-**Première section métier.** C’est le bloc que tu as cité. Vue `spotlight` uniquement.
+Vue `spotlight` desktop. **Livré.** Ne pas recoller ce prompt. Ne pas revenir à featured #1 + `DASHBOARD_LIST_ROW`.
 
-```text
-[Préambule]
+Recette livrée (à copier aux étapes 5+) :
 
-Étape 4 — Crystal Overview spotlight = Replay « Your Top Artist », pas une grille de cartes.
+- Section canvas : eyebrow + titre + See all ghost. Pas de `rounded-[2rem]` / `shadow-card` autour de la section.
+- Grille 4-up, `SPOTLIGHT_PAGE_SIZE = 4`, jusqu’à 10 artistes. Labels pager `{start}–{end}` au-dessus de la grille.
+- Tuile : `aspect-[3/4] rounded-[22px]`, photo plein cadre, rang gros en haut à gauche, pied `.dashboard-replay-card-frost` (blur + mask, pas une pastille inset). Nom + streams + signature **toujours visibles**, centrés, texte blanc.
+- Flèches circulaires `bg-white/15 backdrop-blur-xl`. Clavier flèches sur le tablist pager.
+- Clic tuile → `onOpenArtistInsights`. Noms dans le document (a11y).
+- Page `/dashboard/artists` : encore `CARD_SHELL` 3-up jusqu’à **7a**.
 
-Fichiers : top-three-artists-overview-widget.tsx, top-three-artists-cards.tsx (ou extraire un featured + list si CARD_SHELL est trop lié au nom).
-Flow : overview-desktop-flow.tsx ne change que si le wrapper mega-carte disparaît (enlever le shell, garder le widget).
-Mobile HORS SCOPE.
-Data : useArtistStats inchangé.
-
-Référence : section Your Top Artist sur music.apple.com/be/replay — titre sur le canvas, grande visuel artiste #1, nom, métrique ; le reste n’est pas 3 cartes hover-lift.
-
-Objectif :
-- Plus de rounded-[2rem] shadow-card autour du widget.
-- Plus de CARD_SHELL / overlay hover qui révèle le nom (le nom et les écoutes sont visibles sans hover — dashboard, pas dribble shot).
-- Featured #1 : DASHBOARD_FEATURED_MEDIA + DASHBOARD_SECTION_TITLE.
-- #2…n : DASHBOARD_LIST_ROW ou rail d’artworks sans boîte. Rank discret (chiffre, pas bubble glass lourde).
-- Loading / error / empty : même langage sans-carte (skeleton pochette + lignes, pas 3 fake cards).
-- onOpenArtistInsights : clic sur featured ou row, pas un chrome de carte.
-
-Contraintes : limite carrousel / count inchangée sauf si le carrousel-cartes n’a plus de sens — alors liste ou rail, même data. i18n. Demo publique. Light/dark.
-
-Livre : structure featured + list, a11y (nom visible, pas seulement sur l’image), tests top-three / overview à adapter si le DOM de carte disparaît.
-```
+Fichiers : `top-three-artists-overview-widget.tsx`, `spotlight-artists-featured-list.tsx`, `.dashboard-replay-card-frost` dans `globals.css`. i18n `overview.artistSpotlight.pageRange` / `pagesNav` / `previousPage` / `nextPage`.
 
 ---
 
 ## Étape 5 — Overview desktop : un-card le reste des onglets
 
-Même langage que spotlight, appliqué aux **autres** panneaux. Les onglets restent.
+Même **vibe Spotlight** (tuiles Replay + frost + pager) sur les panneaux média. Les onglets restent. Spotlight **hors scope** (déjà fait).
+
+KPI ≠ artwork : **summary** reste un metric strip, pas des tuiles 3:4. Amis / settings = list rows. Tracks / artistes / genres = tuiles Replay.
 
 ```text
 [Préambule]
 
-Étape 5 — Crystal Overview desktop : sortir des cartes sur summary, tops, trends, context, friends, further. Masthead (2.5), switcher (3) et spotlight (4) déjà Crystal.
+Étape 5 — Crystal Overview desktop : même matière que spotlight (tuiles Replay) sur summary, tops, trends, context, friends, further.
+Masthead (2.5), switcher (3) et spotlight (4) déjà Crystal — NE PAS retoucher spotlight-artists-featured-list.tsx ni le widget spotlight.
 
 Fichiers : overview-stats-section.tsx, overview-library-rankings.tsx, overview-section.tsx, overview-momentum-tabs.tsx, overview-go-further.tsx, overview-friends-section.tsx, heatmap/AI shells seulement si carte.
 overview-desktop-flow.tsx : wrappers uniquement. overview-hero.tsx hors scope (fait en 2.5).
 Mobile HORS SCOPE.
-Hooks inchangés.
+Hooks / view= / startDate / endDate / userId inchangés.
+
+Source de vérité visuel : lib/components/spotlight-artists-featured-list.tsx + .dashboard-replay-card-frost (globals.css).
+Copier : section canvas (eyebrow + titre + See all ghost) ; grille 4-up aspect-[3/4] rounded-[22px] ; rang gros ; pied frost plein cadre ; nom+métrique toujours visibles ; pager labels {start}–{end} + flèches circulaires givrées si > 4 items.
+Ne PAS faire : featured #1 + DASHBOARD_LIST_ROW pour du média ; 3 TopLibraryCard ; STATS_SHELL_CLASS ; rounded-[2rem] shadow-card autour d’une section ; overlay hover qui cache le nom.
 
 Objectif par vue :
-- summary : metric strip 4 colonnes, hairline, PAS STATS_SHELL_CLASS ni hover-lift par KPI.
-- tops : 3 sections (tracks / artists / genres) en featured + list rows, PAS 3 TopLibraryCard widgets gradient. Grille 3 colonnes OK si ce sont 3 listes nues, pas 3 cartes.
-- trends : sous-onglets = même segmented que étape 3. Chart sans carte-widget autour (axe + plot sur canvas).
-- context / friends / further : titres de section + list rows ; further n’est plus des cartes promo.
+- summary : metric strip 4 colonnes (DASHBOARD_METRIC_STRIP), hairline, PAS STATS_SHELL_CLASS ni hover-lift par KPI. Les KPI ne sont pas des tuiles Replay.
+- tops : 3 sections (tracks / artists / genres) = 3 blocs type spotlight (titre sur canvas + tuiles Replay 4-up + pager si besoin). PAS 3 widgets TopLibraryCard gradient. PAS featured + list rows. Pochette track / artiste / genre dans la tuile ; rang + nom + count dans le frost. Clic tuile = insight / navigation existante.
+- trends : sous-onglets = même segmented que étape 3. Chart sans carte-widget autour (axe + plot sur canvas). Si une entité a une pochette (top track du jour, etc.), c’est une tuile Replay, pas une mini-carte.
+- context : titres de section sur canvas. Média (si présent) = tuiles Replay. List rows seulement pour du non-média.
+- friends : list rows iOS grouped (pas des tuiles 3:4 — ce n’est pas de l’artwork ranking).
+- further : plus de cartes promo. Titre + liens / rows, pas rounded-[2rem] marketing.
 
-Contraintes : toutes les vues restent ; view= ; i18n ; demo ; ArtistUserInsightsPanel fonctionnel. Gemini modify_frontend 1 surface à la fois.
+Contraintes : toutes les vues restent ; i18n EN/FR (+ ES si clés existantes) ; demo ?userId= ; ArtistUserInsightsPanel fonctionnel. Gemini modify_frontend 1 surface à la fois — surface = tuile Replay (pas featured+list). Light + dark.
 
-Livre : checklist anti-carte (grep rounded-[2rem] / shadow-card / STATS_SHELL / CARD_SHELL / TopLibraryCard shell dans les fichiers Overview). Empty/error/skeleton alignés. e2e overview.
+Livre : checklist anti-carte (grep rounded-[2rem] / shadow-card / STATS_SHELL / CARD_SHELL / TopLibraryCard shell dans les fichiers Overview, hors page /artists). Empty/error/skeleton alignés sur canvas (skeletons de tuiles 3:4 pour les tops, pas 3 fake cards). e2e overview.
 ```
 
 ---
 
 ## Étape 6 — Overview mobile : même dashboard, même matière
 
-Pas un récit différent. Garder le flow mobile existant ; retirer les cartes et aligner spotlight / sélecteurs si le mobile a des tabs.
+Pas un récit différent. Garder le flow mobile existant. **Même vibe Spotlight** : tuiles Replay, pas featured + rows. Ne pas fusionner desktop avec des `sm:`.
 
 ```text
 [Préambule]
 
 Étape 6 — Crystal Overview mobile. Référence native : musical-profile-mobile.tsx + MOBILE_UX_PLAN_PROMPTS.md.
+Référence visuel média : spotlight desktop (spotlight-artists-featured-list.tsx) — tuiles Replay, pas featured #1 + list rows.
 
-Fichiers : overview-mobile-flow.tsx, parties mobile overview-hero.tsx, switcher mobile s’il existe.
-Desktop HORS SCOPE.
+Fichiers : overview-mobile-flow.tsx, parties mobile overview-hero.tsx, switcher mobile s’il existe, spotlight / tops / summary mobile s’ils fourchent le desktop.
+Desktop HORS SCOPE. Dual tree : lg:hidden dédié, pas des sm: sur le JSX desktop.
 
-Objectif : dashboard téléphone — insight, métriques en rail, rangées, spotlight type Top Artist (featured + rows). Pas de mega-cards rounded-3xl. Bottom nav déjà verre. Si des tabs existent, DASHBOARD_SEGMENTED_*.
+Objectif : dashboard téléphone — insight, métriques en rail (metric strip / scroll-x, pas des tuiles KPI), média = tuiles Replay.
+- Spotlight + tops (tracks / artists / genres) : grille 2 colonnes de tuiles aspect-[3/4] rounded-[22px] + frost + pager (2-up, mêmes labels {start}–{end} + flèches 44px si > 2 items). Pas de mega-cards rounded-3xl. Pas de CARD_SHELL. Pas de liste iOS à la place des pochettes.
+- Summary : rail de métriques, pas 4 cartes.
+- Friends : list rows. Further : pas de cartes promo.
+- Bottom nav déjà verre. Tabs : DASHBOARD_SEGMENTED_* (scroll-x sur la piste).
 
-Contraintes : 44px, FR, withFilters, empty mobile dédié. ~390×844 + grand iPhone, EN+FR.
+Contraintes : 44px, FR, withFilters, empty mobile dédié. ~390×844 + grand iPhone, EN+FR. prefers-reduced-transparency sur le frost.
 
-Livre : dettes cartes vs desktop Crystal, patchs ciblés, pas de rewrite du flow.
+Livre : dettes cartes vs desktop Crystal, patchs ciblés, pas de rewrite du flow. Ne pas réintroduire featured+list.
 ```
 
 ---
 
 ## Étape 7 — Pages suivantes (après Overview)
 
-Un écran par session. **Garder leurs onglets / panneaux.** Un-card + segmented + featured/list. Ordre :
+Un écran par session. **Garder leurs onglets / panneaux.** Un-card + segmented + **tuiles Replay** pour tout ranking média (même recette que spotlight Overview). List rows seulement pour du non-média. Ordre :
 
 | # | Route | Prompt court |
 | --- | --- | --- |
-| 7a | `/dashboard/artists` | `[Préambule]` Crystal : switcher déjà restylé (étape 3). Un-card fiches / Top 20. Featured artiste si pertinent. |
-| 7b | `/dashboard/tracks` | Idem. |
-| 7c | `/dashboard/genres` | Idem, y compris répartition sans carte-widget. |
-| 7d | `/dashboard/musical-profile` | Matière Crystal, **garder** arbre mobile. Toujours un hub, pas un Replay story. |
-| 7e | Timeline, heatmap, temporal-analysis | Graphiques sur canvas, pas blur sur le SVG. |
+| 7a | `/dashboard/artists` | `[Préambule]` Crystal : switcher déjà restylé (étape 3). Retirer `CARD_SHELL` / `TopThreeArtists` 3-up. Spotlight / Top 20 = tuiles Replay 4-up (desktop) + pager, comme `spotlight-artists-featured-list.tsx`. Fiches artiste : pochette + meta sur canvas, pas une mega-carte. |
+| 7b | `/dashboard/tracks` | Idem : tuiles Replay (pochette track 3:4 ou 1:1 dans le même frame `rounded-[22px]` + frost), pas featured+list ni widgets library. |
+| 7c | `/dashboard/genres` | Idem. Répartition / charts sur canvas (pas une carte-widget). Genres avec visuel = tuiles Replay, pas des chips-cartes. |
+| 7d | `/dashboard/musical-profile` | Matière Crystal, **garder** arbre mobile. Toujours un hub à onglets, pas un Replay story. Média = tuiles ; hub chrome = verre. |
+| 7e | Timeline, heatmap, temporal-analysis | Graphiques sur canvas, pas blur sur le SVG. Entités cliquables avec pochette = tuile Replay, pas une row-carte. |
 | 7f | Ask / Duet | Chrome seulement. |
 
 ---
@@ -423,9 +430,11 @@ Après l’étape 0. **Pas** de `create_frontend` Overview (casserait hooks / i1
 
 | Outil | Usage |
 | --- | --- |
-| `modify_frontend` | 1 surface : segmented, featured Top Artist, metric strip, list row |
-| `snippet_frontend` | Featured + list si tu insères dans le widget existant |
+| `modify_frontend` | 1 surface : segmented, **tuile Replay** (portrait + frost, comme spotlight), metric strip, list row **non-média** |
+| `snippet_frontend` | Grille de tuiles + pager si tu insères dans un widget existant |
 | `create_frontend` | Interdit pour Overview. Bac à sable vibe OK puis extraire vers `docs/dashboard-design-system.md` |
+
+Surface média = tuile Replay. **Pas** featured #1 + list. Coller `docs/dashboard-design-system.md` (section Replay tiles) + pointer `spotlight-artists-featured-list.tsx`. Rejeter toute carte / `CARD_SHELL` / hover overlay réintroduite.
 
 Scale : **`refined`**.  
 `designSystem` : `docs/dashboard-design-system.md` après étape 0, sinon primitives `dashboard-ui.tsx` + tokens — **pas** le landing `design-system.md`.
@@ -439,9 +448,10 @@ Desktop `lg+`, light et dark, EN et FR :
 - [ ] C’est toujours un **dashboard à onglets** (`view=`, un panneau à la fois)
 - [ ] Masthead Overview : large title + insight sur le canvas, plus de `DASHBOARD_CINEMATIC_HERO_SHELL` ni insight-carte
 - [ ] Le switcher ressemble à un sélecteur Replay / iOS, plus à une barre de chips-cartes
-- [ ] Spotlight : « Your Top Artist » — titre + featured + suite, **sans** mega-carte ni `CARD_SHELL`
-- [ ] Stats / tops : plus de `shadow-card` / `rounded-[2rem]` widget autour de la section
-- [ ] Sidebar + header verre ; contenu des onglets mat et lisible
+- [x] Spotlight : tuiles Replay « Your Top Artists » — titre canvas + 4-up frost + pager, **sans** mega-carte ni `CARD_SHELL` (desktop Overview)
+- [ ] Stats : metric strip, plus de `STATS_SHELL_CLASS` / hover-lift
+- [ ] Tops : mêmes tuiles Replay que spotlight (tracks / artists / genres), plus de `TopLibraryCard` / `shadow-card` / `rounded-[2rem]` autour de la section
+- [ ] Sidebar + header verre ; pied frost **sur les tuiles média** ; pas de carte verre autour d’une section
 - [ ] Demo `?userId=` et filtres dates OK
 - [ ] `prefers-reduced-transparency`
 - [ ] Mobile : même modèle dashboard, pas de régression bottom nav
@@ -465,7 +475,9 @@ Desktop `lg+`, light et dark, EN et FR :
 - [`APP_FLOW.md`](./APP_FLOW.md) — rôle de Your Music
 - [`MOBILE_UX_PLAN_PROMPTS.md`](./MOBILE_UX_PLAN_PROMPTS.md) — arbre mobile
 - [`ENCORE_REPLAY_PLAYBOOK.md`](./ENCORE_REPLAY_PLAYBOOK.md) — Replay **données / page annuelle**, pas ce restyle
+- [`dashboard-design-system.md`](./dashboard-design-system.md) — tokens + tuile Replay
 - `lib/components/dashboard-ui.tsx` — shells legacy (cinématique, widget card)
 - `lib/components/overview-hero.tsx` — cible étape 2.5 (masthead)
 - `lib/components/dashboard-section-switcher.tsx` — tablist à passer en segmented
-- `lib/components/top-three-artists-cards.tsx` — cible étape 4
+- `lib/components/spotlight-artists-featured-list.tsx` — **fait** étape 4, recette à copier
+- `lib/components/top-three-artists-cards.tsx` — legacy `CARD_SHELL`, page `/artists` jusqu’à 7a

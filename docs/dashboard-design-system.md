@@ -12,10 +12,11 @@ Typography: **Inter** + `system-ui` / `-apple-system`. Do not use licensed SF Pr
 
 | Surface | Material | Where |
 | --- | --- | --- |
-| Chrome | Frosted glass (`DASHBOARD_GLASS_CHROME`) | Sidebar, header, segmented track |
-| Content | Matte, on the page canvas | Overview sections, lists, metrics, featured art |
+| Chrome | Frosted glass (`DASHBOARD_GLASS_CHROME`) | Sidebar, header, segmented track, Replay pager arrows |
+| Content | Matte, on the page canvas | Overview sections, metric strips, non-media lists |
+| Media tiles | Full-bleed photo + frost footer (`.dashboard-replay-card-frost`) | Artist / track / genre rankings |
 
-Glass is **not** a content card. No `rounded-[2rem]`, `shadow-card`, `ring-1`, hover lift, or nested widget around a section.
+Glass is **not** a section widget. No `rounded-[2rem]`, `shadow-card`, `ring-1`, hover lift, or nested card around a section. Glass **is** allowed on chrome and on the **footer of Replay tiles**.
 
 ---
 
@@ -45,7 +46,7 @@ When `reduce`:
 
 ## Primitives
 
-Exported from `lib/components/dashboard-ui.tsx`. **Not wired** until Crystal steps 1–5.
+Exported from `lib/components/dashboard-ui.tsx`, plus the Replay tile utility in `app/globals.css`. **Overview media rankings** copy [`spotlight-artists-featured-list.tsx`](../lib/components/spotlight-artists-featured-list.tsx) — not `DASHBOARD_FEATURED_MEDIA` + list rows.
 
 ### Chrome
 
@@ -83,7 +84,7 @@ Hit target 44px (`min-h-11`). Overflow: `overflow-x-auto` on the track.
 
 ```tsx
 <p className={DASHBOARD_SECTION_EYEBROW}>Eyebrow</p>
-<h2 className={DASHBOARD_SECTION_TITLE}>Your Top Artist</h2>
+<h2 className={DASHBOARD_SECTION_TITLE}>Your Top Artists</h2>
 ```
 
 | Export | Recipe |
@@ -91,18 +92,55 @@ Hit target 44px (`min-h-11`). Overflow: `overflow-x-auto` on the track.
 | `DASHBOARD_SECTION_EYEBROW` | `text-[13px] font-medium text-muted` |
 | `DASHBOARD_SECTION_TITLE` | `text-[1.75rem] font-semibold leading-tight tracking-tight text-foreground` |
 
-### Featured media (frame, not a card)
+### Replay media tile (Overview spotlight — **source of truth**)
 
-Consumer sets `w-*`. No `ring-1`, `shadow-card`, or hover overlay.
+Portrait ranking tile. Name + metric always visible. Not a widget card. Not featured #1 + iOS rows.
+
+**Copy:** [`lib/components/spotlight-artists-featured-list.tsx`](../lib/components/spotlight-artists-featured-list.tsx). Use for tracks, artists, and genres (Crystal steps 5+). Do **not** use `DASHBOARD_LIST_ROW` or `CARD_SHELL` for media rankings.
+
+```tsx
+<div className="relative aspect-[3/4] w-full overflow-hidden rounded-[22px] bg-black">
+  <img className="absolute inset-0 h-full w-full object-cover object-top" alt="" />
+  <span className="absolute left-4 top-3 z-20 text-[1.75rem] font-semibold leading-none tracking-tight text-white">
+    1
+  </span>
+  <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[46%]" aria-hidden>
+    <div className="dashboard-replay-card-frost absolute inset-0" />
+  </div>
+  <div className="absolute inset-x-0 bottom-0 z-20 px-3 pb-4 pt-12 text-center text-white">
+    <h3 className="truncate text-[15px] font-semibold leading-tight tracking-tight">Name</h3>
+    <p className="mt-0.5 text-[13px] font-medium tabular-nums text-white/70">12,400 plays</p>
+    <p className="mt-0.5 truncate text-[12px] text-white/55">Subtitle</p>
+  </div>
+</div>
+```
+
+| Piece | Recipe |
+| --- | --- |
+| Frame | `relative aspect-[3/4] w-full overflow-hidden rounded-[22px] bg-black` |
+| Rank | Large white numeral, top-left, always visible |
+| Frost | `.dashboard-replay-card-frost` — full-bleed footer, blur + gradient + mask fade. **Not** an inset pill. |
+| Type | Centered white: name 15px semibold, metric 13px `tabular-nums` `text-white/70`, subtitle 12px `text-white/55` |
+| Grid | Desktop 4-up (`SPOTLIGHT_PAGE_SIZE = 4`). Mobile (étape 6): 2-up. |
+| Pager | Range labels `{start}–{end}` above the grid; circular chevrons `h-11 w-11 rounded-full border border-white/25 bg-white/15 backdrop-blur-xl` |
+| Section chrome | Eyebrow + `DASHBOARD_SECTION_TITLE` + ghost “See all”. No `rounded-[2rem]` around the section. |
+
+`prefers-reduced-transparency: reduce` already defined on `.dashboard-replay-card-frost` in `globals.css` (opaque gradient, blur 0, no mask).
+
+Hover must not hide the name. Click the tile (button) for insights — not a card chrome.
+
+### Featured media (small frame only)
+
+For a **small** masthead artwork (~120px), not for rankings. Consumer sets `w-*`. No `ring-1`, `shadow-card`, or hover overlay.
 
 | Export | Recipe |
 | --- | --- |
 | `DASHBOARD_FEATURED_MEDIA` | `relative aspect-square overflow-hidden rounded-[12px] bg-surface` |
 | `DASHBOARD_FEATURED_MEDIA_ARTIST` | `relative aspect-square overflow-hidden rounded-full bg-surface` |
 
-### List row (iOS grouped)
+### List row (iOS grouped — **non-media only**)
 
-Hairline between rows, not a box per row. No `hover:-translate-y`.
+Hairline between rows, not a box per row. No `hover:-translate-y`. Use for friends, settings, and other non-artwork lists. **Do not** use for tracks / artists / genres — those are Replay tiles.
 
 ```tsx
 <button className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_SEPARATOR}`}>
@@ -144,6 +182,8 @@ Do **not** delete yet (onboarding and other pages still use them).
 | `DASHBOARD_WIDGET_CARD_SHELL` | `rounded-[2rem]` + `shadow-card` + hover lift |
 | `DASHBOARD_CINEMATIC_HERO_SHELL` | Glow violet card |
 
+Also forbidden on Overview rankings: `CARD_SHELL` (`top-three-artists-cards.tsx`, still used on `/artists` until Crystal 7a), `TopLibraryCard` widgets, `STATS_SHELL_CLASS`.
+
 `DASHBOARD_GLASS_CARD_SHELL` is onboarding only — not sidebar/header chrome.
 
 ---
@@ -156,4 +196,4 @@ Soundprint violet / rose / cyan as **touches** (focus ring, active text), not ca
 
 ## Gemini
 
-`designSystem` for later Crystal `modify_frontend` jobs: **this file**. Never `create_frontend` of Overview. One surface per `modify_frontend` call.
+`designSystem` for later Crystal `modify_frontend` jobs: **this file**. Never `create_frontend` of Overview. One surface per `modify_frontend` call. Media surface = Replay tile (portrait + frost), not featured + list.

@@ -36,8 +36,6 @@ import { useDashboardViewerUserId } from "@/lib/context/dashboard-viewer-context
 
 export function OverviewDesktopFlow({
   title,
-  badgeLabel,
-  showPeriodHint = false,
   data,
   changes,
   showComparison,
@@ -53,12 +51,9 @@ export function OverviewDesktopFlow({
   duetHref,
   startDate,
   endDate,
-  avatarUrl,
   onOpenArtistInsights,
 }: {
   title: string;
-  badgeLabel: string;
-  showPeriodHint?: boolean;
   data?: OverviewStatsWithTopArtists;
   changes: OverviewStatsChanges;
   showComparison: boolean;
@@ -74,7 +69,6 @@ export function OverviewDesktopFlow({
   duetHref: string;
   startDate?: string;
   endDate?: string;
-  avatarUrl?: string | null;
   onOpenArtistInsights?: (artist: ArtistStatsDto, avatarColorIndex: number) => void;
 }) {
   const t = useTranslations("overview");
@@ -95,13 +89,11 @@ export function OverviewDesktopFlow({
         topArtist,
         labels: {
           topTrackEyebrow: t("mobile.primaryInsight.topTrackEyebrow"),
-          topTrackBody: t("mobile.primaryInsight.topTrackBody", {
-            artist: topTrack?.artistName ?? "",
-          }),
+          topTrackBody: topTrack?.artistName ?? "",
           topArtistEyebrow: t("mobile.primaryInsight.topArtistEyebrow"),
-          topArtistBody: t("mobile.primaryInsight.topArtistBody"),
+          topArtistBody: "",
           libraryEyebrow: t("mobile.primaryInsight.libraryEyebrow"),
-          libraryBody: t("mobile.primaryInsight.libraryBody"),
+          libraryBody: "",
           listens: t("listens"),
           totalListens: t("stats.totalListens"),
         },
@@ -122,15 +114,7 @@ export function OverviewDesktopFlow({
 
   return (
     <div className="hidden space-y-8 lg:block">
-      <OverviewHeroFrame
-        title={title}
-        description={t("subtitle")}
-        badgeLabel={badgeLabel}
-        showPeriodHint={showPeriodHint}
-        avatarUrl={avatarUrl}
-        insight={primaryInsight}
-        genreName={topGenre?.genre}
-      />
+      <OverviewHeroFrame title={title} insight={primaryInsight} />
 
       <OverviewSectionSwitcher
         idPrefix="overview-desktop"

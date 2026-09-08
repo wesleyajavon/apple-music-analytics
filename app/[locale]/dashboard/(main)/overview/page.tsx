@@ -3,7 +3,6 @@
 import { useCallback, useMemo, Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
-import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
 import { useOverviewStats, useTimeline, useGenres } from "@/lib/hooks/use-listening";
 import { useTrackStats } from "@/lib/hooks/use-tracks";
 import { GenreTrendsSummaryWidget } from "@/lib/components/genre-trends-summary-widget";
@@ -14,7 +13,6 @@ import { OverviewListeningMomentumCard } from "@/lib/components/overview-listeni
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
 import { OverviewSkeleton } from "@/lib/components/skeleton-loaders";
-import { formatOverviewDateRangeLabel } from "@/lib/utils/overview-date-range-label";
 import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
 import {
   OverviewHeroFrame,
@@ -36,9 +34,6 @@ function OverviewContent() {
   const t = useTranslations("overview");
   const locale = useLocale();
   const emptyStatePresets = useEmptyStatePresets();
-  const { startDate: rangeStart, endDate: rangeEnd, isAll } = useListenDateRange();
-  const dateRangeLabel = formatOverviewDateRangeLabel(rangeStart, rangeEnd, locale);
-  const badgeLabel = dateRangeLabel || t("allData");
 
   const startDate = searchParams.get("startDate") || undefined;
   const endDate = searchParams.get("endDate") || undefined;
@@ -259,7 +254,6 @@ function OverviewContent() {
 
   const sharedFlowProps = {
     title: overviewTitle,
-    showPeriodHint: isAll,
     changes,
     momentumSlides,
     topTracks: topTracksForChart,
@@ -273,7 +267,6 @@ function OverviewContent() {
     duetHref,
     startDate,
     endDate,
-    avatarUrl,
     onOpenArtistInsights: handleOpenArtistInsights,
   };
 
@@ -291,8 +284,6 @@ function OverviewContent() {
           <OverviewHeroFrame
             title={overviewTitle}
             description={t("errorStateHint")}
-            badgeLabel={badgeLabel}
-            avatarUrl={avatarUrl}
           />
           <ErrorState
             variant="startup"
@@ -315,8 +306,6 @@ function OverviewContent() {
           <OverviewHeroFrame
             title={overviewTitle}
             description={t("emptyStateHeroDescription")}
-            badgeLabel={badgeLabel}
-            avatarUrl={avatarUrl}
           />
           <EmptyState
             variant="startup"
@@ -358,7 +347,6 @@ function OverviewContent() {
       )}
       <OverviewDesktopFlow
         {...sharedFlowProps}
-        badgeLabel={badgeLabel}
         data={data}
         showComparison={!!previousPeriod}
       />
@@ -380,20 +368,12 @@ function OverviewContent() {
 
 function OverviewPageFallback() {
   const t = useTranslations("overview");
-  const locale = useLocale();
-  const { startDate, endDate } = useListenDateRange();
-  const dateRangeLabel = formatOverviewDateRangeLabel(startDate, endDate, locale);
-  const badgeLabel = dateRangeLabel || t("allData");
 
   return (
     <div className="space-y-8">
       <MobileOverviewLoadingFallback title={t("title")} />
       <div className="hidden space-y-8 lg:block">
-        <OverviewHeroFrame
-          title={t("title")}
-          description={t("subtitle")}
-          badgeLabel={badgeLabel}
-        />
+        <OverviewHeroFrame title={t("title")} />
         <OverviewSkeleton />
       </div>
     </div>

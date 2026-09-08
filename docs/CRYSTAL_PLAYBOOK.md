@@ -32,6 +32,7 @@ Le plus gros écart actuel n’est pas l’architecture d’onglets. C’est la 
 | Étape 0 (tokens + primitives sans-carte) | **Plan** | Décisions light/dark, contraste verre |
 | Étape 1 (sidebar verre) | **Plan** | Touche tout le dashboard desktop |
 | Étape 2 (header + sélecteur période) | **Plan** | Chrome partagé |
+| Étape 2.5 (masthead Overview) | **Plan** | Hero cinématique → titre + insight sur canvas, avant le sélecteur |
 | Étapes 3–5 (Overview visuel) | **Plan** | Sélecteur d’onglets + Spotlight + un-card des autres vues |
 | Étapes suivantes | **Plan**, une session = un prompt | Même règle que [`MOBILE_UX_PLAN_PROMPTS.md`](./MOBILE_UX_PLAN_PROMPTS.md) |
 
@@ -84,7 +85,13 @@ Avant de proposer un plan : lis les fichiers du prompt. Pose 1 question si besoi
 
 ## Nord visuel Replay → Overview
 
-Référence : [Apple Music Replay](https://music.apple.com/be/replay) — surtout le **sélecteur** et **Your Top Artist**.
+Référence : [Apple Music Replay](https://music.apple.com/be/replay) — **masthead**, **sélecteur**, et **Your Top Artist**.
+
+### Masthead Overview (pas un hero-carte)
+
+Replay / Apple Music Home : le titre de page vit **sur le canvas**, puis le sélecteur, puis la première section. Pas de billboard glow, pas de logo + avatar + badge dans une `rounded-[2rem]`.
+
+Chez nous, aujourd’hui : [`overview-hero.tsx`](../lib/components/overview-hero.tsx) (`DASHBOARD_CINEMATIC_HERO_SHELL`, always-dark, wordmark, avatar XL, badge période, insight en sous-carte). Cible = **étape 2.5**, avant le restyle du tablist — sinon l’étape 3 se juge sous le glow.
 
 ### Sélecteur
 
@@ -133,6 +140,7 @@ Remplacement type Apple :
 | Au lieu de | Utiliser |
 | --- | --- |
 | Widget card | Section : `h2` + contenu |
+| Hero cinématique | Masthead : `h1` + insight en typo, pas de boîte |
 | Carte KPI | Strip : label 13px au-dessus, chiffre large, hairline entre colonnes |
 | Carte artiste | Featured media + meta |
 | Row dans une mini-carte | List row : pochette 40–48px, titre, subtitle, count à droite, séparateur |
@@ -163,6 +171,7 @@ Fichiers chrome / Overview :
 | Shell | `dashboard-scroll-wrapper.tsx`, `dashboard-main-area.tsx` |
 | Sidebar | `lib/components/sidebar.tsx` |
 | Header / période | `dashboard-sticky-header.tsx`, `date-range-filter.tsx` |
+| Masthead Overview | `overview-hero.tsx` (étape 2.5) |
 | Onglets Overview | `dashboard-section-switcher.tsx`, `overview-section-switcher.tsx` |
 | Overview | `overview/page.tsx`, `overview-desktop-flow.tsx`, `overview-hero.tsx`, `overview-stats-section.tsx`, `overview-library-rankings.tsx`, `top-three-artists-overview-widget.tsx`, `top-three-artists-cards.tsx` |
 
@@ -252,6 +261,40 @@ Livre : plan fichiers, états custom / all, a11y. Pas d’OverviewDesktopFlow ic
 
 ---
 
+## Étape 2.5 — Overview masthead (sortir de la carte glow)
+
+**Pourquoi avant le sélecteur :** le chrome verre (étapes 1–2) a besoin d’un canvas calme. Le hero cinématique est encore la surface la plus « pas Apple » au-dessus des onglets. Restyler le tablist (étape 3) sous un glow violet fausse le jugement. Spotlight (étape 4) possède le grand visuel ; ce bloc ne doit pas le concurrencer.
+
+Ce n’est **pas** une nouvelle carte plus sobre. C’est un en-tête de page.
+
+```text
+[Préambule]
+
+Étape 2.5 — Crystal Overview masthead desktop. Pas de nouvelle carte. Pas d’étape 3 (switcher) ni 4 (spotlight).
+
+Fichiers : lib/components/overview-hero.tsx, overview-desktop-flow.tsx, app/[locale]/dashboard/(main)/overview/page.tsx (états empty / error desktop qui réutilisent OverviewHeroFrame).
+Duet : duet-friend-music-desktop.tsx importe OverviewHeroFrame — le flatten du shell partagé est voulu ; ne pas fourcher un deuxième hero cinématique pour Duet. Si Duet casse, corrige le frame, pas un fork Overview.
+Mobile HORS SCOPE (OverviewMobileHero / étape 6). Ne pas toucher OVERVIEW_MOBILE_HERO_SHELL.
+
+Référence : titre de page Apple Music Home / Replay — large title sur le canvas, puis le sélecteur. Pas de billboard, pas de wordmark dans le contenu.
+Aujourd’hui : DASHBOARD_CINEMATIC_HERO_SHELL + DashboardCinematicHeroBg (always-dark, glow violet) + SoundprintBrandMark + avatar XL + OverviewPeriodBadgeButton + OverviewInsightCard (carte dans la carte).
+
+Objectif lg+ :
+- Plus de DASHBOARD_CINEMATIC_HERO_SHELL / OVERVIEW_DESKTOP_HERO_SHELL glow. Plus de DashboardCinematicHeroBg sur le desktop Overview.
+- Masthead sur le canvas : eyebrow 13px (DASHBOARD_SECTION_EYEBROW) + h1 (titre page, tracking-tight) + insight en typographie (metric tabular-nums + titre + ligne muted). PAS OverviewInsightCard, PAS rounded-3xl border autour de l’insight.
+- Light ET dark : le masthead suit le thème de la page. Interdit : forcer gray-950 / text-white en light.
+- Retirer du masthead : wordmark Soundprint (sidebar), badge période (header étape 2). Avatar : omit, ou taille discrète à côté du titre — pas un header de profil.
+- Artwork : omit, ou pochette 1:1 petite (DASHBOARD_FEATURED_MEDIA, ~120px, radius 12px) du top track. PAS une carte autour. Le featured large = étape 4 Spotlight (artiste #1).
+- Garder : h1, buildOverviewPrimaryInsight (data inchangée), hint période si All, children (empty/error). Copy : ne plus dire « open a card » si le subtitle le dit encore (i18n overview.subtitle).
+- Loading / empty / error desktop : même masthead sans-carte, pas le shell cinématique.
+
+Contraintes : hooks / APIs / query params inchangés. Pas de story scroll. Pas de restyle du switcher ni des panneaux. i18n EN/FR. Demo ?userId=. Gemini modify_frontend 1 surface (masthead) si tu t’en sers.
+
+Livre : avant/après classes, Duet friend-music toujours lisible, light/dark EN/FR desktop lg+. e2e overview si le DOM hero (shell / insight card) est asserté.
+```
+
+---
+
 ## Étape 3 — Overview : sélecteur d’onglets (Replay selector)
 
 **On garde les 7 vues.** On restyle uniquement le tablist pour qu’il ait la famille Replay, plus une barre-carte de chips.
@@ -318,15 +361,14 @@ Même langage que spotlight, appliqué aux **autres** panneaux. Les onglets rest
 ```text
 [Préambule]
 
-Étape 5 — Crystal Overview desktop : sortir des cartes sur hero, summary, tops, trends, context, friends, further. Switcher et spotlight déjà Crystal.
+Étape 5 — Crystal Overview desktop : sortir des cartes sur summary, tops, trends, context, friends, further. Masthead (2.5), switcher (3) et spotlight (4) déjà Crystal.
 
-Fichiers : overview-hero.tsx, overview-stats-section.tsx, overview-library-rankings.tsx, overview-section.tsx, overview-momentum-tabs.tsx, overview-go-further.tsx, overview-friends-section.tsx, heatmap/AI shells seulement si carte.
-overview-desktop-flow.tsx : wrappers uniquement.
+Fichiers : overview-stats-section.tsx, overview-library-rankings.tsx, overview-section.tsx, overview-momentum-tabs.tsx, overview-go-further.tsx, overview-friends-section.tsx, heatmap/AI shells seulement si carte.
+overview-desktop-flow.tsx : wrappers uniquement. overview-hero.tsx hors scope (fait en 2.5).
 Mobile HORS SCOPE.
 Hooks inchangés.
 
 Objectif par vue :
-- (hero au-dessus du switcher) : large title + insight, PAS DASHBOARD_CINEMATIC_HERO_SHELL. Artwork optionnel type featured, pas une carte glow.
 - summary : metric strip 4 colonnes, hairline, PAS STATS_SHELL_CLASS ni hover-lift par KPI.
 - tops : 3 sections (tracks / artists / genres) en featured + list rows, PAS 3 TopLibraryCard widgets gradient. Grille 3 colonnes OK si ce sont 3 listes nues, pas 3 cartes.
 - trends : sous-onglets = même segmented que étape 3. Chart sans carte-widget autour (axe + plot sur canvas).
@@ -395,9 +437,10 @@ Scale : **`refined`**.
 Desktop `lg+`, light et dark, EN et FR :
 
 - [ ] C’est toujours un **dashboard à onglets** (`view=`, un panneau à la fois)
+- [ ] Masthead Overview : large title + insight sur le canvas, plus de `DASHBOARD_CINEMATIC_HERO_SHELL` ni insight-carte
 - [ ] Le switcher ressemble à un sélecteur Replay / iOS, plus à une barre de chips-cartes
 - [ ] Spotlight : « Your Top Artist » — titre + featured + suite, **sans** mega-carte ni `CARD_SHELL`
-- [ ] Stats / tops / hero : plus de `shadow-card` / `rounded-[2rem]` widget autour de la section
+- [ ] Stats / tops : plus de `shadow-card` / `rounded-[2rem]` widget autour de la section
 - [ ] Sidebar + header verre ; contenu des onglets mat et lisible
 - [ ] Demo `?userId=` et filtres dates OK
 - [ ] `prefers-reduced-transparency`
@@ -423,5 +466,6 @@ Desktop `lg+`, light et dark, EN et FR :
 - [`MOBILE_UX_PLAN_PROMPTS.md`](./MOBILE_UX_PLAN_PROMPTS.md) — arbre mobile
 - [`ENCORE_REPLAY_PLAYBOOK.md`](./ENCORE_REPLAY_PLAYBOOK.md) — Replay **données / page annuelle**, pas ce restyle
 - `lib/components/dashboard-ui.tsx` — shells legacy (cinématique, widget card)
+- `lib/components/overview-hero.tsx` — cible étape 2.5 (masthead)
 - `lib/components/dashboard-section-switcher.tsx` — tablist à passer en segmented
 - `lib/components/top-three-artists-cards.tsx` — cible étape 4

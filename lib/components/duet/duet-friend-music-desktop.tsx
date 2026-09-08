@@ -21,6 +21,7 @@ import {
   useDashboardSectionView,
   type DashboardSectionItem,
 } from "@/lib/components/dashboard-section-switcher";
+import { DASHBOARD_BTN_GHOST } from "@/lib/components/dashboard-ui";
 import { CHART_TOOLTIP_STYLES } from "@/lib/constants/config";
 import { DUET_SHARE_SETTINGS_PATH } from "@/lib/constants/duet-settings";
 import type { OverviewPrimaryInsight } from "@/lib/utils/overview-page";
@@ -123,10 +124,7 @@ export function DuetFriendMusicDesktopExperience({
   subjectName,
   subjectAvatar,
   bannerLead,
-  badgeLabel,
-  showPeriodHint,
   insight,
-  genreName,
   topArtists,
   topGenres,
   topTracks,
@@ -140,10 +138,7 @@ export function DuetFriendMusicDesktopExperience({
   subjectName: string;
   subjectAvatar: string | null;
   bannerLead: string;
-  badgeLabel: string;
-  showPeriodHint: boolean;
   insight?: OverviewPrimaryInsight;
-  genreName?: string;
   topArtists: FriendMusicLeaderItem[];
   topGenres: FriendMusicLeaderItem[];
   topTracks: FriendMusicLeaderItem[] | null;
@@ -203,21 +198,25 @@ export function DuetFriendMusicDesktopExperience({
       <OverviewHeroFrame
         title={t("bannerTitle", { name: subjectName })}
         description={bannerLead}
-        badgeLabel={badgeLabel}
-        showPeriodHint={showPeriodHint}
         avatarUrl={subjectAvatar}
-        insight={insight}
-        genreName={genreName}
+        insight={
+          insight
+            ? {
+                ...insight,
+                subtitle:
+                  topTracks?.[0] && insight.title === topTracks[0].title
+                    ? (topTracks[0].subtitle ?? "")
+                    : "",
+              }
+            : undefined
+        }
       >
         <div className="mt-6 flex flex-wrap items-center gap-3">
-          <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-100 backdrop-blur">
+          <span className="inline-flex min-h-11 items-center gap-2 text-[13px] font-medium text-muted">
             <Eye className="h-3.5 w-3.5" aria-hidden />
             {t("readOnlyBadge")}
           </span>
-          <Link
-            href={compareHref}
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25 no-underline transition-all hover:-translate-y-0.5 hover:bg-gray-100"
-          >
+          <Link href={compareHref} className={`${DASHBOARD_BTN_GHOST} gap-2 no-underline`}>
             <Swords className="h-4 w-4" aria-hidden />
             {t("compareCta")}
           </Link>

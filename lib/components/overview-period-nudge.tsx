@@ -50,7 +50,7 @@ export function OverviewPeriodHint({
       className={
         compact
           ? "mt-3 block rounded-lg text-left text-xs leading-5 text-slate-400 transition hover:text-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
-          : "mt-4 block max-w-2xl rounded-lg text-left text-sm leading-6 text-white/45 transition hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+          : "mt-3 block max-w-2xl rounded-lg text-left text-sm leading-6 text-muted transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       }
     >
       {t("hint")}

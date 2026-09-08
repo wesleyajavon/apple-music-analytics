@@ -2,12 +2,11 @@
 
 import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
-import { OverviewPeriodBadgeButton, OverviewPeriodHint } from "@/lib/components/overview-period-nudge";
 import { UserAvatarPhoto } from "@/lib/components/user-avatar";
-import { SoundprintBrandMark } from "@/lib/components/soundprint-brand-mark";
 import {
-  DASHBOARD_CINEMATIC_HERO_SHELL,
   DashboardCinematicHeroBg,
+  DASHBOARD_METRIC_LABEL,
+  DASHBOARD_METRIC_VALUE,
 } from "@/lib/components/dashboard-ui";
 import { GroqQuotaNotice } from "@/lib/components/error-state";
 import { DashboardMobileImportEmpty } from "@/lib/components/dashboard-mobile-import-empty";
@@ -16,51 +15,24 @@ import type { OverviewPrimaryInsight } from "@/lib/utils/overview-page";
 
 export const OVERVIEW_MOBILE_HERO_SHELL =
   "relative overflow-hidden bg-gray-950 px-4 pb-5 pt-4 text-white";
-export const OVERVIEW_DESKTOP_HERO_SHELL = `${DASHBOARD_CINEMATIC_HERO_SHELL} px-5 py-6 sm:px-8 sm:py-9 lg:px-10 lg:py-10`;
+export const OVERVIEW_DESKTOP_HERO_SHELL = "text-foreground";
 
 const MOBILE_BLEED = "-mx-4 -mt-4 space-y-4 pb-8 lg:hidden";
 
-export function OverviewInsightCard({
-  insight,
-  genreLabel,
-  genreName,
-  compact = false,
-}: {
-  insight: OverviewPrimaryInsight;
-  genreLabel?: string;
-  genreName?: string;
-  compact?: boolean;
-}) {
+function OverviewPrimaryInsightBlock({ insight }: { insight: OverviewPrimaryInsight }) {
   return (
-    <div
-      className={`flex items-end justify-between gap-4 rounded-3xl border border-white/10 bg-white/[0.07] ${
-        compact ? "p-4" : "p-5"
-      }`}
-    >
-      <div className="min-w-0">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-          {insight.metricLabel}
+    <div className="mt-6 max-w-2xl">
+      <p className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+        <span className={DASHBOARD_METRIC_VALUE}>{insight.metric}</span>
+        <span className={DASHBOARD_METRIC_LABEL}>{insight.metricLabel}</span>
+      </p>
+      <p className="mt-2 truncate text-sm font-semibold text-foreground" title={insight.title}>
+        {insight.title}
+      </p>
+      {insight.subtitle ? (
+        <p className="mt-1 truncate text-[13px] text-muted" title={insight.subtitle}>
+          {insight.subtitle}
         </p>
-        <p
-          className={`mt-1 font-semibold tabular-nums tracking-[-0.06em] ${
-            compact ? "text-3xl" : "text-4xl"
-          }`}
-        >
-          {insight.metric}
-        </p>
-        <p className="mt-2 truncate text-sm font-semibold text-white" title={insight.title}>
-          {insight.title}
-        </p>
-      </div>
-      {genreName ? (
-        <div className="max-w-[8.5rem] shrink-0 text-right">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-            {genreLabel}
-          </p>
-          <p className="mt-1 truncate text-sm font-semibold text-cyan-100" title={genreName}>
-            {genreName}
-          </p>
-        </div>
       ) : null}
     </div>
   );
@@ -69,63 +41,30 @@ export function OverviewInsightCard({
 export function OverviewHeroFrame({
   title,
   description,
-  badgeLabel,
-  showPeriodHint = false,
   avatarUrl,
   insight,
-  genreName,
   children,
 }: {
   title: string;
-  description: string;
-  badgeLabel: string;
-  showPeriodHint?: boolean;
+  description?: string;
   avatarUrl?: string | null;
   insight?: OverviewPrimaryInsight;
-  genreName?: string;
   children?: ReactNode;
 }) {
-  const t = useTranslations("overview");
+  const showAvatar = Boolean(avatarUrl);
 
   return (
     <div className={OVERVIEW_DESKTOP_HERO_SHELL}>
-      <DashboardCinematicHeroBg />
-      <div className="relative flex items-start gap-5 sm:gap-6 lg:gap-8">
-        <UserAvatarPhoto
-          src={avatarUrl}
-          size="xl"
-          className="ring-2 ring-white/20 shadow-2xl shadow-black/30"
-        />
+      <div className={showAvatar ? "flex items-start gap-4" : undefined}>
+        {showAvatar ? <UserAvatarPhoto src={avatarUrl} size="sm" /> : null}
         <div className="min-w-0 flex-1">
-          <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-            <SoundprintBrandMark
-              size="sm"
-              tone="onDark"
-              showAiBadge={false}
-              showWordmarkOnMobile={false}
-              interactive={false}
-            />
-            <OverviewPeriodBadgeButton badgeLabel={badgeLabel} />
-          </div>
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
-            {insight?.eyebrow ?? t("periodBadge")}
-          </p>
-          <h1 className="mt-3 max-w-4xl text-balance text-4xl font-semibold tracking-[-0.06em] sm:text-5xl lg:text-6xl">
+          <h1 className="max-w-4xl text-balance text-3xl font-semibold tracking-tight text-foreground lg:text-4xl">
             {title}
           </h1>
-          <p className="mt-5 max-w-2xl text-base leading-7 text-white/70 sm:text-lg">
-            {description}
-          </p>
-          {showPeriodHint ? <OverviewPeriodHint /> : null}
-          {insight ? (
-            <div className="mt-6 max-w-2xl">
-              <OverviewInsightCard
-                insight={insight}
-                genreLabel={t("libraryLeaders.topGenre")}
-                genreName={genreName}
-              />
-            </div>
+          {description ? (
+            <p className="mt-3 max-w-2xl text-base leading-7 text-muted">{description}</p>
           ) : null}
+          {insight ? <OverviewPrimaryInsightBlock insight={insight} /> : null}
           {children}
         </div>
       </div>

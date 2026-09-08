@@ -41,7 +41,6 @@ import {
 } from "@/lib/constants/dashboard-spotlight";
 import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
 import { buildCompareFriendHref, buildFriendMusicHref } from "@/lib/utils/duet-compare-href";
-import { formatOverviewDateRangeLabel } from "@/lib/utils/overview-date-range-label";
 import type { OverviewPrimaryInsight } from "@/lib/utils/overview-page";
 
 const MUSIC_HERO_SHELL =
@@ -147,7 +146,6 @@ function FriendMusicContent() {
     useListenDateRange();
   const startDate = isAll ? undefined : filterStartDate;
   const endDate = isAll ? undefined : filterEndDate;
-  const dateRangeLabel = formatOverviewDateRangeLabel(filterStartDate, filterEndDate, locale);
 
   const { data: friendsData, isLoading: friendsLoading } = useDuetFriends({
     enabled: Boolean(authUserId) && !isPublicDemoViewer,
@@ -463,10 +461,7 @@ function FriendMusicContent() {
           subjectName={subjectName}
           subjectAvatar={subjectAvatar}
           bannerLead={bannerLead}
-          badgeLabel={dateRangeLabel || t("pickerBadge")}
-          showPeriodHint={isAll}
           insight={insight}
-          genreName={topGenres[0]?.title}
           topArtists={topArtists}
           topGenres={topGenres}
           topTracks={topTracks}

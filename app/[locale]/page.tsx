@@ -206,56 +206,27 @@ export default function Home() {
           <div className="relative mx-auto grid w-full min-w-0 max-w-7xl items-center gap-10 px-4 pb-20 pt-12 sm:gap-12 sm:px-6 sm:pb-24 sm:pt-16 lg:grid-cols-[minmax(0,0.5fr)_minmax(0,0.5fr)] lg:gap-8 lg:px-8 lg:pb-28 lg:pt-20">
             <div className="relative z-10 flex min-w-0 w-full flex-col items-stretch text-center lg:items-start lg:text-left">
               <HomeBlurFadeReveal delay={0} immediate className="flex justify-center lg:justify-start">
-                {isAuthenticated ? (
-                  <Link
-                    href="/dashboard"
-                    className="group mb-7 inline-flex max-w-full items-center gap-3 rounded-[1.35rem] border border-white/10 bg-white/5 p-2.5 pr-4 text-left shadow-[0_18px_50px_-28px_rgba(0,0,0,0.7)] backdrop-blur-xl transition-all hover:-translate-y-0.5 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/30"
-                  >
-                    <UserAvatar
-                      src={avatarUrl}
-                      name={profileName}
-                      email={profileEmail}
-                      size="lg"
-                      alt={profileName ?? profileEmail ?? t("goToDashboard")}
-                      className="ring-2 ring-white/15"
-                    />
-                    <div className="min-w-0 pr-1">
-                      <div className="mb-1 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[0.65rem] font-bold uppercase tracking-[0.18em] text-white/80">
-                        <span className="h-1.5 w-1.5 rounded-full bg-accent-emerald shadow-[0_0_12px_rgb(22_199_132_/0.7)]" />
-                        {t("goToDashboardShort")}
-                      </div>
-                      <p className="truncate text-base font-semibold tracking-[-0.02em] text-white">
-                        {profileName ?? profileEmail ?? t("goToDashboard")}
-                      </p>
-                      {profileEmail ? (
-                        <p className="truncate text-xs text-white/55">{profileEmail}</p>
-                      ) : null}
-                    </div>
-                    <ArrowRightIcon className="h-4 w-4 shrink-0 text-white/70 transition-transform group-hover:translate-x-0.5" />
-                  </Link>
-                ) : (
-                  <div className="mb-6 inline-flex max-w-full items-center gap-2.5">
-                    <Image
-                      src="/brand/providers/apple-music-icon.svg"
-                      alt=""
-                      width={22}
-                      height={22}
-                      className="h-[1.35rem] w-[1.35rem] object-contain"
-                      unoptimized
-                    />
-                    <Image
-                      src="/brand/providers/spotify-icon.svg"
-                      alt=""
-                      width={22}
-                      height={22}
-                      className="h-[1.35rem] w-[1.35rem] object-contain"
-                      unoptimized
-                    />
-                    <p className="font-mono text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-white/70 sm:text-xs">
-                      {t("heroEyebrow")}
-                    </p>
-                  </div>
-                )}
+                <div className="mb-6 inline-flex max-w-full items-center gap-2.5">
+                  <Image
+                    src="/brand/providers/apple-music-icon.svg"
+                    alt=""
+                    width={22}
+                    height={22}
+                    className="h-[1.35rem] w-[1.35rem] object-contain"
+                    unoptimized
+                  />
+                  <Image
+                    src="/brand/providers/spotify-icon.svg"
+                    alt=""
+                    width={22}
+                    height={22}
+                    className="h-[1.35rem] w-[1.35rem] object-contain"
+                    unoptimized
+                  />
+                  <p className="font-mono text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-white/70 sm:text-xs">
+                    {t("heroEyebrow")}
+                  </p>
+                </div>
               </HomeBlurFadeReveal>
 
               {isAuthenticated ? (
@@ -286,7 +257,7 @@ export default function Home() {
                 {isAuthenticated ? (
                   <Link
                     href="/dashboard"
-                    className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-7 py-3 text-sm font-semibold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:opacity-95 sm:w-auto"
+                    className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,var(--brand-pink)_0%,var(--brand-cyan)_100%)] px-7 py-3 text-sm font-semibold text-white shadow-[0_22px_70px_-24px_rgb(224_64_136_/_0.55),0_22px_70px_-24px_rgb(79_144_224_/_0.5)] transition-all hover:-translate-y-0.5 hover:opacity-95 sm:w-auto"
                   >
                     {t("goToDashboard")}
                     <ArrowRightIcon />

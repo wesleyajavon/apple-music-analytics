@@ -3205,7 +3205,7 @@
           "verb": "Dialoguer",
           "askLabel": "Ask",
           "askTitle": "Parlez à votre musique.",
-          "askDescription": "Un chat façon ChatGPT sur votre historique d’écoute. Posez n’importe quelle question, en langage naturel.",
+          "askDescription": "Un chat façon ChatGPT sur votre historique d’écoute. Posez n’importe quelle question concernant votre musique à l'IA.",
           "duetLabel": "Duet",
           "duetTitle": "Duet avec vos amis.",
           "duetDescription": "Invitez vos amis et comparez vos streams — n’importe quel artiste ou titre, qui a écouté le plus.",

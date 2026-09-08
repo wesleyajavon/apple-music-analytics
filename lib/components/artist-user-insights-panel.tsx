@@ -14,7 +14,6 @@ import { X } from "lucide-react";
 import { CHART_TOOLTIP_STYLES } from "@/lib/constants/config";
 import {
   DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY,
-  DASHBOARD_SPOTLIGHT_INNER_WELL,
   DASHBOARD_SPOTLIGHT_MUTED,
   DASHBOARD_CHART_THEME,
 } from "@/lib/constants/dashboard-spotlight";
@@ -37,6 +36,26 @@ const INSIGHT_CARD_SOLID =
 const INSIGHT_SECTION_TITLE = "text-sm font-semibold text-slate-900 dark:text-white";
 
 const TOP_TRACKS_LIMIT = 12;
+
+/** Tight well: Y ticks sit in `pl-8`. Recharts adds `YAxis.width` to `margin.left`, so left is negative to keep the plot full-bleed. */
+const INSIGHTS_CHART_WELL =
+  "overflow-visible rounded-[1.35rem] border border-slate-200/80 bg-slate-50/70 py-2 pl-8 pr-2 shadow-inner shadow-slate-900/[0.03] backdrop-blur-sm dark:border-white/10 dark:bg-black/25 dark:shadow-none";
+const INSIGHTS_CHART_OVERFLOW =
+  "overflow-visible [&_.recharts-wrapper]:overflow-visible [&_.recharts-surface]:overflow-visible";
+const INSIGHTS_Y_AXIS_WIDTH = 32;
+const INSIGHTS_BAR_CHART_MARGIN = {
+  top: 4,
+  right: 2,
+  left: -INSIGHTS_Y_AXIS_WIDTH,
+  bottom: 0,
+} as const;
+
+function formatInsightsAxisCount(value: number, locale: string): string {
+  return new Intl.NumberFormat(locale, {
+    notation: value >= 1000 ? "compact" : "standard",
+    maximumFractionDigits: value >= 1000 ? 1 : 0,
+  }).format(value);
+}
 
 function hasUsableListenDate(isoDate: string | undefined): boolean {
   if (!isoDate) return false;
@@ -484,9 +503,9 @@ export const ArtistUserInsightsPanel = memo(
 
                   <section>
                     <h3 className={`mb-3 ${INSIGHT_SECTION_TITLE}`}>{t("insightsByHour")}</h3>
-                    <div className={DASHBOARD_SPOTLIGHT_INNER_WELL}>
-                      <ChartResponsiveContainer token="insightsHourBar">
-                          <BarChart data={hourChartData} margin={{ top: 4, right: 4, left: -18, bottom: 0 }}>
+                    <div className={INSIGHTS_CHART_WELL}>
+                      <ChartResponsiveContainer token="insightsHourBar" className={INSIGHTS_CHART_OVERFLOW}>
+                          <BarChart data={hourChartData} margin={INSIGHTS_BAR_CHART_MARGIN} barCategoryGap={2}>
                             <defs>
                               <linearGradient id={`insHourBar-${chartNs}`} x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="0%" stopColor="#8b5cf6" />
@@ -510,7 +529,11 @@ export const ArtistUserInsightsPanel = memo(
                               tick={{ fill: chartTheme.tick, fontSize: 10 }}
                               axisLine={false}
                               tickLine={false}
-                              width={36}
+                              width={INSIGHTS_Y_AXIS_WIDTH}
+                              tickMargin={4}
+                              allowDecimals={false}
+                              domain={[0, "dataMax"]}
+                              tickFormatter={(value: number) => formatInsightsAxisCount(value, locale)}
                             />
                             <Tooltip
                               contentStyle={chartTooltipStyles.contentStyle}
@@ -521,8 +544,7 @@ export const ArtistUserInsightsPanel = memo(
                             <Bar
                               dataKey="listens"
                               fill={`url(#insHourBar-${chartNs})`}
-                              radius={[4, 4, 0, 0]}
-                              maxBarSize={10}
+                              radius={[3, 3, 0, 0]}
                             />
                           </BarChart>
                       </ChartResponsiveContainer>
@@ -531,9 +553,9 @@ export const ArtistUserInsightsPanel = memo(
 
                   <section>
                     <h3 className={`mb-3 ${INSIGHT_SECTION_TITLE}`}>{t("insightsByWeekday")}</h3>
-                    <div className={DASHBOARD_SPOTLIGHT_INNER_WELL}>
-                      <ChartResponsiveContainer token="insightsWeekdayBar">
-                          <BarChart data={weekdayChartData} margin={{ top: 4, right: 4, left: -18, bottom: 4 }}>
+                    <div className={INSIGHTS_CHART_WELL}>
+                      <ChartResponsiveContainer token="insightsWeekdayBar" className={INSIGHTS_CHART_OVERFLOW}>
+                          <BarChart data={weekdayChartData} margin={INSIGHTS_BAR_CHART_MARGIN} barCategoryGap="10%">
                             <defs>
                               <linearGradient id={`insWeekdayBar-${chartNs}`} x1="0" y1="0" x2="1" y2="0">
                                 <stop offset="0%" stopColor="#8b5cf6" />
@@ -555,7 +577,11 @@ export const ArtistUserInsightsPanel = memo(
                               tick={{ fill: chartTheme.tick, fontSize: isLgChart ? 10 : 9 }}
                               axisLine={false}
                               tickLine={false}
-                              width={isLgChart ? 36 : 32}
+                              width={INSIGHTS_Y_AXIS_WIDTH}
+                              tickMargin={4}
+                              allowDecimals={false}
+                              domain={[0, "dataMax"]}
+                              tickFormatter={(value: number) => formatInsightsAxisCount(value, locale)}
                             />
                             <Tooltip
                               contentStyle={chartTooltipStyles.contentStyle}
@@ -566,8 +592,7 @@ export const ArtistUserInsightsPanel = memo(
                             <Bar
                               dataKey="listens"
                               fill={`url(#insWeekdayBar-${chartNs})`}
-                              radius={[4, 4, 0, 0]}
-                              maxBarSize={isLgChart ? 28 : 22}
+                              radius={[6, 6, 0, 0]}
                             />
                           </BarChart>
                       </ChartResponsiveContainer>

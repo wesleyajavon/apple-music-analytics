@@ -3203,7 +3203,7 @@
           "verb": "Dialogue",
           "askLabel": "Ask",
           "askTitle": "Ask your music.",
-          "askDescription": "A ChatGPT-style chat about your listening history. Ask anything, in plain language.",
+          "askDescription": "A ChatGPT-style chat about your listening history. Ask the AI any question about your music.",
           "duetLabel": "Duet",
           "duetTitle": "Duet with friends.",
           "duetDescription": "Invite friends and compare streams — any artist, any track, who listened more.",

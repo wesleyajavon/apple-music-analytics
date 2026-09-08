@@ -28,6 +28,6 @@ export const CHART_HEIGHTS: Record<
   genresPie: { mobile: 260, desktop: 500 },
   genresBar: { mobile: 300, desktop: 500 },
   paletteMini: { mobile: 160, desktop: 180 },
-  insightsHourBar: { mobile: 168, desktop: 176 },
-  insightsWeekdayBar: { mobile: 132, desktop: 144 },
+  insightsHourBar: { mobile: 208, desktop: 220 },
+  insightsWeekdayBar: { mobile: 172, desktop: 188 },
 };

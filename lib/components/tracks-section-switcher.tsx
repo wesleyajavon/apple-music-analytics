@@ -3,7 +3,6 @@
 import { useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { BarChart3, LineChart, ListMusic } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
 import {
   DashboardSectionSwitcher,
@@ -30,9 +29,9 @@ export function TracksSectionSwitcher({
   const router = useRouter();
 
   const items: DashboardSectionItem<TracksSection>[] = [
-    { id: "leaderboard", label: t("views.leaderboard"), icon: BarChart3 },
-    { id: "ranking", label: t("views.ranking"), icon: ListMusic },
-    { id: "trends", label: t("views.trends"), icon: LineChart },
+    { id: "leaderboard", label: t("views.leaderboard") },
+    { id: "ranking", label: t("views.ranking") },
+    { id: "trends", label: t("views.trends") },
   ];
 
   const onChange = useCallback(

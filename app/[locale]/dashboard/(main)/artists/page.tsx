@@ -57,7 +57,7 @@ import {
   ArtistsMobileSkeleton,
 } from "@/lib/components/artists-mobile";
 import { LiveStatusDot } from "@/lib/components/live-status-dot";
-import { BarChart3, LineChart, ListMusic, Music2, Search, Users } from "lucide-react";
+import { LineChart, Music2, Search } from "lucide-react";
 import {
   DashboardSectionPanel,
   DashboardSectionSwitcher,
@@ -81,9 +81,9 @@ function ArtistsViewSwitcher({
 }) {
   const t = useTranslations("artists.viewSwitcher");
   const items: DashboardSectionItem<ArtistsView>[] = [
-    { id: "spotlight", label: t("views.spotlight"), icon: Users },
-    { id: "leaderboard", label: t("views.leaderboard"), icon: BarChart3 },
-    { id: "ranking", label: t("views.ranking"), icon: ListMusic },
+    { id: "spotlight", label: t("views.spotlight") },
+    { id: "leaderboard", label: t("views.leaderboard") },
+    { id: "ranking", label: t("views.ranking") },
   ];
 
   return (

@@ -3,16 +3,6 @@
 import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import {
-  BarChart3,
-  CalendarDays,
-  HeartHandshake,
-  ListMusic,
-  Sparkles,
-  TrendingUp,
-  Users,
-  type LucideIcon,
-} from "lucide-react";
-import {
   DashboardSectionPanel,
   DashboardSectionSwitcher,
   useDashboardSectionView,
@@ -30,16 +20,6 @@ export const OVERVIEW_VIEWS = [
 ] as const;
 
 export type OverviewView = (typeof OVERVIEW_VIEWS)[number];
-
-const VIEW_ICONS: Record<OverviewView, LucideIcon> = {
-  summary: BarChart3,
-  spotlight: Users,
-  tops: ListMusic,
-  trends: TrendingUp,
-  context: CalendarDays,
-  friends: HeartHandshake,
-  further: Sparkles,
-};
 
 export function isOverviewView(value: string | null | undefined): value is OverviewView {
   return OVERVIEW_VIEWS.some((view) => view === value);
@@ -69,7 +49,6 @@ export function OverviewSectionSwitcher({
   const items: DashboardSectionItem<OverviewView>[] = available.map((id) => ({
     id,
     label: t(`views.${id}`),
-    icon: VIEW_ICONS[id],
   }));
 
   return (

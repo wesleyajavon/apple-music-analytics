@@ -2,7 +2,7 @@
 
 import { useRef, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
-import { Download, FileJson, ShieldAlert, SlidersHorizontal, Upload, UserRound } from "lucide-react";
+import { Download, FileJson, SlidersHorizontal, Upload, UserRound } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { LiveStatusDot } from "@/lib/components/live-status-dot";
 import { UserAvatar } from "@/lib/components/user-avatar";
@@ -187,10 +187,10 @@ export function SettingsViewNav({
 }) {
   const t = useTranslations("settings");
   const items: DashboardSectionItem<SettingsView>[] = [
-    { id: "profile", label: t("sectionProfile"), icon: UserRound },
-    { id: "preferences", label: t("sectionPreferences"), icon: SlidersHorizontal },
-    { id: "data", label: t("sectionYourData"), icon: Download },
-    { id: "danger", label: t("sectionDanger"), icon: ShieldAlert },
+    { id: "profile", label: t("sectionProfile") },
+    { id: "preferences", label: t("sectionPreferences") },
+    { id: "data", label: t("sectionYourData") },
+    { id: "danger", label: t("sectionDanger") },
   ];
 
   return (

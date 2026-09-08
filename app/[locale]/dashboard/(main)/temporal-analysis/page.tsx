@@ -30,7 +30,7 @@ import {
   TemporalMobileExperience,
   TemporalMobileSkeleton,
 } from "@/lib/components/temporal-analysis-mobile";
-import { Clock, CalendarDays, Timer } from "lucide-react";
+import { Clock } from "lucide-react";
 import {
   DashboardSectionPanel,
   DashboardSectionSwitcher,
@@ -77,9 +77,9 @@ function TemporalViewSwitcher({
 }) {
   const t = useTranslations("temporal-analysis.viewSwitcher");
   const items: DashboardSectionItem<TemporalView>[] = [
-    { id: "spotlight", label: t("views.spotlight"), icon: Clock },
-    { id: "weekday", label: t("views.weekday"), icon: CalendarDays },
-    { id: "hour", label: t("views.hour"), icon: Timer },
+    { id: "spotlight", label: t("views.spotlight") },
+    { id: "weekday", label: t("views.weekday") },
+    { id: "hour", label: t("views.hour") },
   ];
 
   return (

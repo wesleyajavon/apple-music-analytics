@@ -3,7 +3,7 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { Eye, Swords, ListMusic, TrendingUp, type LucideIcon } from "lucide-react";
+import { Eye, Swords } from "lucide-react";
 import { Area, AreaChart, CartesianGrid, Tooltip, XAxis, YAxis } from "recharts";
 import { ChartResponsiveContainer } from "@/lib/components/chart-responsive-container";
 import { ListenTrendChartViewToggle } from "@/lib/components/charts/listen-trend-chart-view-toggle";
@@ -32,11 +32,6 @@ import {
 
 const FRIEND_MUSIC_VIEWS = ["tops", "trends"] as const;
 type FriendMusicView = (typeof FRIEND_MUSIC_VIEWS)[number];
-
-const VIEW_ICONS: Record<FriendMusicView, LucideIcon> = {
-  tops: ListMusic,
-  trends: TrendingUp,
-};
 
 function FriendMusicTimelinePanel({
   eyebrow,
@@ -166,7 +161,6 @@ export function DuetFriendMusicDesktopExperience({
   const switcherItems: DashboardSectionItem<FriendMusicView>[] = availableViews.map((id) => ({
     id,
     label: t(`viewSwitcher.views.${id}`),
-    icon: VIEW_ICONS[id],
   }));
 
   const libraryItems = {

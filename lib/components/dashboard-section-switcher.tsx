@@ -3,12 +3,15 @@
 import { useCallback, type KeyboardEvent, type ReactNode } from "react";
 import { useSearchParams } from "next/navigation";
 import { usePathname, useRouter } from "@/i18n/navigation";
-import type { LucideIcon } from "lucide-react";
+import {
+  DASHBOARD_SEGMENTED_PILL,
+  DASHBOARD_SEGMENTED_PILL_ACTIVE,
+  DASHBOARD_SEGMENTED_TRACK,
+} from "@/lib/components/dashboard-ui";
 
 export type DashboardSectionItem<T extends string> = {
   id: T;
   label: string;
-  icon: LucideIcon;
 };
 
 export function useDashboardSectionView<T extends string>(
@@ -87,11 +90,10 @@ export function DashboardSectionSwitcher<T extends string>({
         role="tablist"
         aria-label={navLabel}
         onKeyDown={onKeyDown}
-        className="flex gap-2 overflow-x-auto rounded-[1.5rem] border border-slate-200/80 bg-white/80 p-2 shadow-sm backdrop-blur [-ms-overflow-style:none] [scrollbar-width:none] dark:border-white/[0.08] dark:bg-[#0a0c14]/90 sm:flex-wrap sm:overflow-visible [&::-webkit-scrollbar]:hidden"
+        className={`${DASHBOARD_SEGMENTED_TRACK} [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden`}
       >
         {items.map((item) => {
           const isActive = item.id === activeView;
-          const Icon = item.icon;
           return (
             <button
               key={item.id}
@@ -102,13 +104,8 @@ export function DashboardSectionSwitcher<T extends string>({
               aria-controls={`${idPrefix}-panel-${item.id}`}
               tabIndex={isActive ? 0 : -1}
               onClick={() => onChange(item.id)}
-              className={`inline-flex min-h-11 shrink-0 items-center gap-2 rounded-2xl border px-3.5 py-2 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-violet/40 sm:px-4 ${
-                isActive
-                  ? "border-accent-violet/25 bg-accent-violet/10 text-accent-violet dark:border-violet-400/25 dark:bg-violet-500/15 dark:text-violet-100"
-                  : "border-transparent text-slate-500 hover:border-slate-200/80 hover:bg-slate-50 hover:text-slate-800 dark:text-slate-400 dark:hover:border-white/[0.08] dark:hover:bg-white/[0.04] dark:hover:text-slate-200"
-              }`}
+              className={isActive ? DASHBOARD_SEGMENTED_PILL_ACTIVE : DASHBOARD_SEGMENTED_PILL}
             >
-              <Icon className="h-4 w-4 shrink-0" aria-hidden />
               {item.label}
             </button>
           );

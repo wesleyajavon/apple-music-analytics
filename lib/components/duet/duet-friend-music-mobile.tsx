@@ -3,7 +3,6 @@
 import { useMemo, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { ListMusic, TrendingUp, type LucideIcon } from "lucide-react";
 import { DashboardCinematicHeroBg } from "@/lib/components/dashboard-ui";
 import { MusicalProfilePeriodBadge } from "@/lib/components/musical-profile-period-badge";
 import { OverviewMobileHero } from "@/lib/components/overview-hero";
@@ -34,11 +33,6 @@ const ROW_CLASS =
 
 const FRIEND_MUSIC_VIEWS = ["tops", "trends"] as const;
 type FriendMusicView = (typeof FRIEND_MUSIC_VIEWS)[number];
-
-const VIEW_ICONS: Record<FriendMusicView, LucideIcon> = {
-  tops: ListMusic,
-  trends: TrendingUp,
-};
 
 type FriendMusicTrendSummary = {
   total: number;
@@ -420,7 +414,6 @@ export function DuetFriendMusicMobileExperience({
   const switcherItems: DashboardSectionItem<FriendMusicView>[] = availableViews.map((id) => ({
     id,
     label: t(`viewSwitcher.views.${id}`),
-    icon: VIEW_ICONS[id],
   }));
 
   const trendLabel =

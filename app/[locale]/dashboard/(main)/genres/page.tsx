@@ -31,7 +31,7 @@ import { GenresSkeleton } from "@/lib/components/skeleton-loaders";
 import { usePublicDemoViewer } from "@/lib/hooks/use-public-demo-viewer";
 import { useArtistSpotifyImageResolution } from "@/lib/hooks/use-artist-spotify-image-resolution";
 import { LiveStatusDot } from "@/lib/components/live-status-dot";
-import { LayoutGrid, LineChart, ListMusic, PieChart as PieChartIcon, Search } from "lucide-react";
+import { LineChart, Search } from "lucide-react";
 import {
   DASHBOARD_SPOTLIGHT_SHELL,
   DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY,
@@ -107,9 +107,9 @@ function GenresViewSwitcher({
 }) {
   const t = useTranslations("genres.viewSwitcher");
   const items: DashboardSectionItem<GenresView>[] = [
-    { id: "spotlight", label: t("views.spotlight"), icon: LayoutGrid },
-    { id: "distribution", label: t("views.distribution"), icon: PieChartIcon },
-    { id: "ranking", label: t("views.ranking"), icon: ListMusic },
+    { id: "spotlight", label: t("views.spotlight") },
+    { id: "distribution", label: t("views.distribution") },
+    { id: "ranking", label: t("views.ranking") },
   ];
 
   return (

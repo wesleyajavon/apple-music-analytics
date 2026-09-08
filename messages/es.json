@@ -1356,6 +1356,12 @@
       "previousPage": "Artistas anteriores",
       "nextPage": "Artistas siguientes"
     },
+    "replayPager": {
+      "pageRange": "{start}–{end}",
+      "pagesNav": "Páginas del ranking",
+      "previousPage": "Elementos anteriores",
+      "nextPage": "Elementos siguientes"
+    },
     "artistTrends": {
       "badge": "Tendencias de artistas",
       "seeMoreHint": "Para explorar más artistas, haz clic en Ver más."

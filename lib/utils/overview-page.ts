@@ -72,6 +72,7 @@ export function formatListeningTime(totalSeconds: number, notAvailable: string) 
 
 export type OverviewTrackLeader = {
   trackId: string;
+  artistId: string;
   name: string;
   artistName: string;
   count: number;

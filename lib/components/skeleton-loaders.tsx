@@ -60,19 +60,32 @@ export function StatCardsSkeleton({ count = 4 }: { count?: number }) {
  */
 export function OverviewStatsSectionSkeleton() {
   return (
-    <div className="sm:col-span-2 lg:col-span-4">
-      <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950 shadow-2xl shadow-black/40 ring-1 ring-white/[0.06]">
-        <div className="border-b border-white/10 px-5 py-6 sm:px-8 sm:py-7">
-          <div className="h-8 w-32 rounded-full bg-white/10 animate-shimmer" />
-          <div className="mt-4 h-9 w-72 max-w-full rounded bg-white/10 animate-shimmer" />
-          <div className="mt-3 h-4 w-full max-w-xl rounded bg-white/10 animate-shimmer" />
-        </div>
-        <div className="grid gap-4 p-5 sm:p-6 lg:grid-cols-12 lg:gap-5 lg:p-8">
-          <div className="min-h-[320px] rounded-[1.5rem] border border-white/10 bg-white/[0.03] lg:col-span-7 animate-shimmer" />
-          <div className="min-h-[320px] rounded-[1.5rem] border border-white/10 bg-white/[0.03] lg:col-span-5 animate-shimmer" />
-          <div className="min-h-[220px] rounded-[1.5rem] border border-white/10 bg-white/[0.03] lg:col-span-6 animate-shimmer" />
-          <div className="min-h-[220px] rounded-[1.5rem] border border-white/10 bg-white/[0.03] lg:col-span-6 animate-shimmer" />
-        </div>
+    <div className="w-full min-w-0" aria-hidden>
+      <div className="h-4 w-24 rounded bg-black/10 animate-shimmer dark:bg-white/10" />
+      <div className="mt-2 h-8 w-72 max-w-full rounded bg-black/10 animate-shimmer dark:bg-white/10" />
+      <div className="mt-8 flex w-full flex-wrap">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div
+            key={i}
+            className="flex min-w-0 flex-1 flex-col gap-2 border-r border-glass-hairline px-5 py-1 first:pl-0 last:border-r-0 last:pr-0"
+          >
+            <div className="h-3.5 w-20 rounded bg-black/10 animate-shimmer dark:bg-white/10" />
+            <div className="h-7 w-16 rounded bg-black/10 animate-shimmer dark:bg-white/10" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function OverviewDesktopCrystalSkeleton() {
+  return (
+    <div className="space-y-10" aria-hidden>
+      <OverviewStatsSectionSkeleton />
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="aspect-[3/4] w-full animate-pulse rounded-[22px] bg-black/10 dark:bg-white/10" />
+        ))}
       </div>
     </div>
   );

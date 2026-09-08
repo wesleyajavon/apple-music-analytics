@@ -19,13 +19,17 @@ import { ErrorState } from "@/lib/components/error-state";
 import { useTheme } from "@/lib/providers/theme-provider";
 import { useIsLgChartViewport } from "@/lib/hooks/use-chart-viewport";
 import { DASHBOARD_CHART_THEME } from "@/lib/constants/dashboard-spotlight";
-import { LiveStatusDot } from "@/lib/components/live-status-dot";
 import { ListenTrendChartViewToggle } from "@/lib/components/charts/listen-trend-chart-view-toggle";
 import {
   applyListenTrendChartViewMulti,
   type ListenTrendChartViewMode,
 } from "@/lib/utils/listen-trend-chart-view";
 import { ArtistTrendsArtistPicker } from "@/lib/components/artist-trends-artist-picker";
+import {
+  DASHBOARD_BTN_GHOST,
+  DASHBOARD_SECTION_EYEBROW,
+  DASHBOARD_SECTION_TITLE,
+} from "@/lib/components/dashboard-ui";
 import type { ArtistTrendsChartArtist } from "@/lib/dto/artist";
 import { useDebouncedValue } from "@/lib/hooks/use-debounced-value";
 
@@ -45,30 +49,6 @@ const COLORS = [
 function getColor(index: number): string {
   return COLORS[index % COLORS.length];
 }
-
-const TREND_CARD_CLASS =
-  "relative h-full overflow-hidden rounded-[2rem] border border-card-border bg-gradient-to-br from-white via-[#fbf8ff] to-[#eef7ff] shadow-card ring-1 ring-white/70 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent-violet/30 hover:shadow-card-hover dark:border-white/[0.08] dark:from-[#06070d] dark:via-[#070812] dark:to-[#0c0e18] dark:ring-white/[0.06]";
-
-const TREND_BACKGROUND = (
-  <>
-    <div
-      className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.14),transparent_30%),radial-gradient(circle_at_88%_12%,rgba(6,182,212,0.14),transparent_32%),radial-gradient(circle_at_52%_100%,rgba(132,204,22,0.1),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.72),transparent_45%)] dark:bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.14),transparent_34%),radial-gradient(circle_at_88%_12%,rgba(6,182,212,0.10),transparent_32%),radial-gradient(circle_at_52%_100%,rgba(132,204,22,0.08),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.03),transparent_48%)]"
-      aria-hidden
-    />
-    <div
-      className="pointer-events-none absolute -right-20 -top-24 h-56 w-56 rounded-full bg-accent-cyan/20 blur-3xl dark:bg-accent-cyan/12"
-      aria-hidden
-    />
-    <div
-      className="pointer-events-none absolute -bottom-24 left-12 h-56 w-56 rounded-full bg-accent-violet/16 blur-3xl dark:bg-accent-violet/14"
-      aria-hidden
-    />
-    <div
-      className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-accent-cyan/50 to-transparent dark:via-cyan-200/35"
-      aria-hidden
-    />
-  </>
-);
 
 function createTrendsTooltip(t: (k: string) => string, locale: string) {
   const TrendsTooltipInner = memo(
@@ -273,28 +253,10 @@ export function ArtistTrendsSummaryWidget({
 
   if (isLoading) {
     return (
-      <div className={shellClass}>
-        <div className={`${TREND_CARD_CLASS} animate-fade-in-up`} role="status" aria-label={t("evolution")}>
-          {TREND_BACKGROUND}
-          <div className="relative border-b border-white/70 px-6 py-5 dark:border-white/[0.06]">
-            <div className="mb-3 h-7 w-40 animate-shimmer rounded-full bg-gray-200 dark:bg-gray-700" />
-            <div className="h-8 w-64 max-w-full animate-shimmer rounded bg-gray-200 dark:bg-gray-700" />
-            <div className="mt-3 h-4 w-80 max-w-full animate-shimmer rounded bg-gray-100 dark:bg-gray-700" />
-          </div>
-          <div className="relative space-y-4 p-6">
-            <div className="h-11 w-full max-w-md animate-shimmer rounded-xl bg-white/70 dark:bg-[#1a1d2a]" />
-            <div className="flex flex-wrap gap-2">
-              {[0, 1, 2, 3, 4].map((i) => (
-                <div
-                  key={i}
-                  className="h-8 w-28 animate-shimmer rounded-full bg-white/70 dark:bg-[#1a1d2a]"
-                  style={{ animationDelay: `${i * 0.08}s` }}
-                />
-              ))}
-            </div>
-            <div className="h-[260px] animate-shimmer rounded-3xl border border-white/60 bg-white/50 shadow-inner dark:border-white/[0.06] dark:bg-[#0c0e18]" />
-          </div>
-        </div>
+      <div className={shellClass} role="status" aria-label={t("evolution")}>
+        <div className="h-4 w-24 animate-shimmer rounded bg-black/10 dark:bg-white/10" />
+        <div className="mt-2 h-8 w-64 max-w-full animate-shimmer rounded bg-black/10 dark:bg-white/10" />
+        <div className="mt-6 h-[260px] animate-shimmer rounded-[22px] bg-black/10 dark:bg-white/10" />
       </div>
     );
   }
@@ -302,14 +264,7 @@ export function ArtistTrendsSummaryWidget({
   if (error) {
     return (
       <div className={embedded ? "w-full min-w-0" : "sm:col-span-2 lg:col-span-4 w-full min-w-0"}>
-        <div className={`${TREND_CARD_CLASS} p-6`}>
-          {TREND_BACKGROUND}
-          <ErrorState
-            error={error}
-            message={t("errorLoading")}
-            onRetry={() => refetch()}
-          />
-        </div>
+        <ErrorState error={error} message={t("errorLoading")} onRetry={() => refetch()} />
       </div>
     );
   }
@@ -320,70 +275,44 @@ export function ArtistTrendsSummaryWidget({
 
   return (
     <div className={shellClass}>
-      <div className={`${TREND_CARD_CLASS} animate-fade-in-up`}>
-        {TREND_BACKGROUND}
-        <div className="relative">
-          <div className="border-b border-white/70 px-6 py-5 dark:border-white/[0.06]">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-              <div className="max-w-2xl">
-                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-accent-violet/20 bg-white/70 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-accent-violet shadow-sm backdrop-blur dark:border-violet-400/18 dark:bg-[#141622] dark:text-violet-100">
-                  <LiveStatusDot />
-                  {tOverview("artistTrends.badge")}
-                </div>
-                <h2 className="text-2xl font-semibold tracking-[-0.04em] text-gray-950 dark:text-white sm:text-3xl">
-                  {t("evolution")}
-                </h2>
-                <p className="mt-2 max-w-xl text-sm leading-6 text-muted dark:text-slate-400 sm:text-base">
-                  {t("chartHint")} {tOverview("artistTrends.seeMoreHint")}
-                </p>
-              </div>
-              <div className="flex flex-col items-start gap-3 lg:items-end">
-                <ListenTrendChartViewToggle value={chartView} onChange={setChartView} />
-                <Link
-                  href={`/dashboard/artists/trends${trendsQuery}`}
-                  className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-2xl border border-card-border bg-white/70 px-4 py-2.5 text-sm font-semibold text-accent-violet shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow-card dark:border-white/[0.10] dark:bg-[#161822] dark:text-violet-100 dark:hover:bg-[#1c2030]"
-                >
-                  {tOverview("seeMore")}
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </Link>
-              </div>
-            </div>
-          </div>
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div className="max-w-2xl">
+          <p className={DASHBOARD_SECTION_EYEBROW}>{tOverview("artistTrends.badge")}</p>
+          <h2 className={`${DASHBOARD_SECTION_TITLE} mt-1`}>{t("evolution")}</h2>
+          <p className="mt-2 max-w-xl text-[13px] leading-6 text-muted">
+            {t("chartHint")} {tOverview("artistTrends.seeMoreHint")}
+          </p>
+        </div>
+        <div className="flex flex-col items-start gap-3 lg:items-end">
+          <ListenTrendChartViewToggle value={chartView} onChange={setChartView} />
+          <Link href={`/dashboard/artists/trends${trendsQuery}`} className={`${DASHBOARD_BTN_GHOST} shrink-0`}>
+            {tOverview("seeMore")}
+          </Link>
+        </div>
+      </div>
 
-          <div className="relative space-y-5 p-6">
-            <div className="rounded-3xl border border-white/70 bg-white/55 p-3 shadow-sm backdrop-blur dark:border-white/[0.06] dark:bg-[#0c0e18]">
-              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-muted dark:text-slate-400">
-                {t("artistsToDisplay")}
-              </p>
-              <ArtistTrendsArtistPicker
-                catalogArtists={pickerArtists}
-                selectedIds={selectedIds}
-                onToggle={toggleArtist}
-                getColor={getColor}
-                getArtistIndex={getArtistIndex}
-                enableRemoteSearch
-                onPickRemoteArtist={handlePickRemoteArtist}
-                maxSelectable={MAX_SERIES_ARTISTS}
-                idPrefix="overview-artist-trends"
-                compact
-              />
-            </div>
+      <div className="mt-6 space-y-5">
+        <div>
+          <p className="mb-3 text-[13px] text-muted">{t("artistsToDisplay")}</p>
+          <ArtistTrendsArtistPicker
+            catalogArtists={pickerArtists}
+            selectedIds={selectedIds}
+            onToggle={toggleArtist}
+            getColor={getColor}
+            getArtistIndex={getArtistIndex}
+            enableRemoteSearch
+            onPickRemoteArtist={handlePickRemoteArtist}
+            maxSelectable={MAX_SERIES_ARTISTS}
+            idPrefix="overview-artist-trends"
+            compact
+          />
+        </div>
 
-            {selectedIds.length === 0 ? (
-              <p className="rounded-3xl border border-white/70 bg-white/55 py-10 text-center text-sm text-muted shadow-inner dark:border-white/[0.06] dark:bg-[#0c0e18] dark:text-slate-400">
-                {t("selectAtLeastOne")}
-              </p>
-            ) : (
-              <div
-                className={`relative rounded-3xl border border-white/70 bg-white/60 p-3 shadow-inner backdrop-blur transition-opacity dark:border-white/[0.06] dark:bg-[#080913] ${
-                  chartSyncing ? "opacity-70" : ""
-                }`}
-                aria-busy={chartSyncing}
-              >
-                <div className="pointer-events-none absolute left-1/2 top-8 h-56 w-56 -translate-x-1/2 rounded-full bg-accent-cyan/10 blur-3xl dark:bg-accent-cyan/15" />
-                <ChartResponsiveContainer token="trendsLine" minWidth={trendsMinWidth}>
+        {selectedIds.length === 0 ? (
+          <p className="py-10 text-center text-[13px] text-muted">{t("selectAtLeastOne")}</p>
+        ) : (
+          <div className={chartSyncing ? "opacity-70" : ""} aria-busy={chartSyncing}>
+            <ChartResponsiveContainer token="trendsLine" minWidth={trendsMinWidth}>
                     <LineChart
                       data={displayChartData}
                       margin={{ top: 12, right: 16, left: 0, bottom: isLgChart ? 50 : 44 }}
@@ -450,7 +379,5 @@ export function ArtistTrendsSummaryWidget({
             )}
           </div>
         </div>
-      </div>
-    </div>
-  );
-}
+      );
+    }

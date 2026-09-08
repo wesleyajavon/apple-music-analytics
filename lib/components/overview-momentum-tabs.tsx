@@ -10,6 +10,11 @@ import {
 } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useTranslations } from "next-intl";
+import {
+  DASHBOARD_SEGMENTED_PILL,
+  DASHBOARD_SEGMENTED_PILL_ACTIVE,
+  DASHBOARD_SEGMENTED_TRACK,
+} from "@/lib/components/dashboard-ui";
 
 export type OverviewMomentumSlide = {
   id: string;
@@ -82,7 +87,7 @@ export function OverviewMomentumTabs({ slides }: OverviewMomentumTabsProps) {
           role="tablist"
           aria-label={t("navLabel")}
           onKeyDown={onTabListKeyDown}
-          className="flex gap-2 overflow-x-auto rounded-[1.5rem] border border-slate-200/80 bg-white/80 p-2 shadow-sm backdrop-blur [-ms-overflow-style:none] [scrollbar-width:none] dark:border-white/[0.08] dark:bg-[#0a0c14]/90 [&::-webkit-scrollbar]:hidden"
+          className={`${DASHBOARD_SEGMENTED_TRACK} [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden`}
         >
           {slides.map((slide, index) => {
             const isActive = index === activeIndex;
@@ -96,11 +101,7 @@ export function OverviewMomentumTabs({ slides }: OverviewMomentumTabsProps) {
                 aria-controls={`${baseId}-panel-${slide.id}`}
                 tabIndex={isActive ? 0 : -1}
                 onClick={() => goTo(index)}
-                className={`min-h-11 shrink-0 rounded-2xl border px-3.5 py-2 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-violet/40 sm:px-4 ${
-                  isActive
-                    ? "border-accent-violet/25 bg-accent-violet/10 text-accent-violet dark:border-violet-400/25 dark:bg-violet-500/15 dark:text-violet-100"
-                    : "border-transparent text-slate-500 hover:border-slate-200/80 hover:bg-slate-50 hover:text-slate-800 dark:text-slate-400 dark:hover:border-white/[0.08] dark:hover:bg-white/[0.04] dark:hover:text-slate-200"
-                }`}
+                className={isActive ? DASHBOARD_SEGMENTED_PILL_ACTIVE : DASHBOARD_SEGMENTED_PILL}
               >
                 {slide.label}
               </button>

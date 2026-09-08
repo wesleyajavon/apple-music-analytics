@@ -19,8 +19,8 @@ import { ErrorState } from "@/lib/components/error-state";
 import { useTheme } from "@/lib/providers/theme-provider";
 import { useIsLgChartViewport } from "@/lib/hooks/use-chart-viewport";
 import { DASHBOARD_CHART_THEME } from "@/lib/constants/dashboard-spotlight";
-import { LiveStatusDot } from "@/lib/components/live-status-dot";
 import { ListenTrendChartViewToggle } from "@/lib/components/charts/listen-trend-chart-view-toggle";
+import { DASHBOARD_BTN_GHOST, DASHBOARD_SECTION_EYEBROW, DASHBOARD_SECTION_TITLE } from "@/lib/components/dashboard-ui";
 import {
   applyListenTrendChartViewMulti,
   type ListenTrendChartViewMode,
@@ -47,29 +47,8 @@ function getColor(index: number): string {
   return COLORS[index % COLORS.length];
 }
 
-const TRACK_TREND_CARD_CLASS =
-  "relative h-full overflow-hidden rounded-[2rem] border border-card-border bg-gradient-to-br from-white via-[#f8fdff] to-[#f4fff8] shadow-card ring-1 ring-white/70 transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan-300/40 hover:shadow-card-hover dark:border-white/[0.08] dark:from-[#06070d] dark:via-[#070812] dark:to-[#0c0e18] dark:ring-white/[0.06]";
-
-const TRACK_TREND_BACKGROUND = (
-  <>
-    <div
-      className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(6,182,212,0.14),transparent_30%),radial-gradient(circle_at_88%_12%,rgba(132,204,22,0.12),transparent_32%),radial-gradient(circle_at_52%_100%,rgba(139,92,246,0.1),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.72),transparent_45%)] dark:bg-[radial-gradient(circle_at_top_left,rgba(6,182,212,0.14),transparent_34%),radial-gradient(circle_at_88%_12%,rgba(132,204,22,0.10),transparent_32%),radial-gradient(circle_at_52%_100%,rgba(139,92,246,0.08),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.03),transparent_48%)]"
-      aria-hidden
-    />
-    <div
-      className="pointer-events-none absolute -right-20 -top-24 h-56 w-56 rounded-full bg-accent-cyan/20 blur-3xl dark:bg-accent-cyan/12"
-      aria-hidden
-    />
-    <div
-      className="pointer-events-none absolute -bottom-24 left-12 h-56 w-56 rounded-full bg-accent-emerald/16 blur-3xl dark:bg-accent-emerald/12"
-      aria-hidden
-    />
-    <div
-      className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-accent-cyan/55 to-transparent dark:via-cyan-200/38"
-      aria-hidden
-    />
-  </>
-);
+const TRACK_TREND_CARD_CLASS = "w-full min-w-0";
+const TRACK_TREND_BACKGROUND = null;
 
 function createTrendsTooltip(t: (k: string) => string, locale: string) {
   const TrendsTooltipInner = memo(
@@ -324,22 +303,15 @@ export function TrackTrendsSummaryWidget({
           <div className="border-b border-white/70 px-6 py-5 dark:border-white/[0.06]">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
               <div className="max-w-2xl">
-                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-cyan-300/25 bg-white/70 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-700 shadow-sm backdrop-blur dark:border-cyan-400/18 dark:bg-[#141622] dark:text-cyan-100">
-                  <LiveStatusDot />
-                  {t("title")}
-                </div>
-                <h2 className="text-2xl font-semibold tracking-[-0.04em] text-gray-950 dark:text-white sm:text-3xl">
-                  {t("evolution")}
-                </h2>
-                <p className="mt-2 max-w-xl text-sm leading-6 text-muted dark:text-slate-400 sm:text-base">
-                  {t("chartHint")}
-                </p>
+                <p className={DASHBOARD_SECTION_EYEBROW}>{t("title")}</p>
+                <h2 className={`${DASHBOARD_SECTION_TITLE} mt-1`}>{t("evolution")}</h2>
+                <p className="mt-2 max-w-xl text-[13px] leading-6 text-muted">{t("chartHint")}</p>
               </div>
               <div className="flex flex-col items-start gap-3 lg:items-end">
                 <ListenTrendChartViewToggle value={chartView} onChange={setChartView} />
                 <Link
                   href={`/dashboard/tracks/trends${trendsQuery}`}
-                  className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-2xl border border-card-border bg-white/70 px-4 py-2.5 text-sm font-semibold text-cyan-700 shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow-card dark:border-white/[0.10] dark:bg-[#161822] dark:text-cyan-100 dark:hover:bg-[#1c2030]"
+                  className={DASHBOARD_BTN_GHOST}
                 >
                   {tOverview("seeMore")}
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -351,7 +323,7 @@ export function TrackTrendsSummaryWidget({
           </div>
 
           <div className="relative space-y-5 p-6">
-            <div className="rounded-3xl border border-white/70 bg-white/55 p-3 shadow-sm backdrop-blur dark:border-white/[0.06] dark:bg-[#0c0e18]">
+            <div>
               <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-muted dark:text-slate-400">
                 {t("tracksToDisplay")}
               </p>
@@ -370,14 +342,12 @@ export function TrackTrendsSummaryWidget({
             </div>
 
             {selectedIds.length === 0 ? (
-              <p className="rounded-3xl border border-white/70 bg-white/55 py-10 text-center text-sm text-muted shadow-inner dark:border-white/[0.06] dark:bg-[#0c0e18] dark:text-slate-400">
+              <p className="py-10 text-center text-[13px] text-muted">
                 {t("selectAtLeastOne")}
               </p>
             ) : (
               <div
-                className={`relative rounded-3xl border border-white/70 bg-white/60 p-3 shadow-inner backdrop-blur transition-opacity dark:border-white/[0.06] dark:bg-[#080913] ${
-                  chartSyncing ? "opacity-70" : ""
-                }`}
+                className={chartSyncing ? "opacity-70" : ""}
                 aria-busy={chartSyncing}
               >
                 <div className="pointer-events-none absolute left-1/2 top-8 h-56 w-56 -translate-x-1/2 rounded-full bg-accent-cyan/10 blur-3xl dark:bg-accent-cyan/15" />

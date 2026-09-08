@@ -18,13 +18,11 @@ import { useDashboardViewerUserId } from "@/lib/context/dashboard-viewer-context
 import { ErrorState } from "@/lib/components/error-state";
 import { usePublicDemoViewer } from "@/lib/hooks/use-public-demo-viewer";
 import { GenreAccuracyChooser } from "@/lib/components/palette/genre-accuracy-chooser";
-import { useGroqGenreBackfillMeta } from "@/lib/hooks/use-groq-genre-backfill-meta";
 import { useTheme } from "@/lib/providers/theme-provider";
 import { useIsLgChartViewport } from "@/lib/hooks/use-chart-viewport";
 import { DASHBOARD_CHART_THEME } from "@/lib/constants/dashboard-spotlight";
-import { LiveStatusDot } from "@/lib/components/live-status-dot";
-import { genreCoverageLiveDotTone } from "@/lib/utils/genre-coverage-live-dot";
 import { ListenTrendChartViewToggle } from "@/lib/components/charts/listen-trend-chart-view-toggle";
+import { DASHBOARD_BTN_GHOST, DASHBOARD_SECTION_EYEBROW, DASHBOARD_SECTION_TITLE } from "@/lib/components/dashboard-ui";
 import {
   applyListenTrendChartViewMulti,
   type ListenTrendChartViewMode,
@@ -47,29 +45,8 @@ function getColor(index: number): string {
   return COLORS[index % COLORS.length];
 }
 
-const GENRE_TREND_CARD_CLASS =
-  "relative h-full overflow-hidden rounded-[2rem] border border-card-border bg-gradient-to-br from-white via-[#fff8fb] to-[#f3f7ff] shadow-card ring-1 ring-white/70 transition-all duration-300 hover:-translate-y-0.5 hover:border-rose-300/40 hover:shadow-card-hover dark:border-white/[0.08] dark:from-[#06070d] dark:via-[#070812] dark:to-[#0c0e18] dark:ring-white/[0.06]";
-
-const GENRE_TREND_BACKGROUND = (
-  <>
-    <div
-      className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(129,140,248,0.16),transparent_30%),radial-gradient(circle_at_88%_12%,rgba(244,114,182,0.14),transparent_32%),radial-gradient(circle_at_52%_100%,rgba(245,158,11,0.1),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.72),transparent_45%)] dark:bg-[radial-gradient(circle_at_top_left,rgba(129,140,248,0.14),transparent_34%),radial-gradient(circle_at_88%_12%,rgba(244,114,182,0.10),transparent_32%),radial-gradient(circle_at_52%_100%,rgba(245,158,11,0.08),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.03),transparent_48%)]"
-      aria-hidden
-    />
-    <div
-      className="pointer-events-none absolute -right-20 -top-24 h-56 w-56 rounded-full bg-rose-300/20 blur-3xl dark:bg-rose-300/12"
-      aria-hidden
-    />
-    <div
-      className="pointer-events-none absolute -bottom-24 left-12 h-56 w-56 rounded-full bg-indigo-300/18 blur-3xl dark:bg-indigo-300/12"
-      aria-hidden
-    />
-    <div
-      className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-rose-300/60 to-transparent dark:via-rose-200/35"
-      aria-hidden
-    />
-  </>
-);
+const GENRE_TREND_CARD_CLASS = "w-full min-w-0";
+const GENRE_TREND_BACKGROUND = null;
 
 function createTrendsTooltip(t: (k: string) => string, locale: string) {
   const TrendsTooltipInner = memo(
@@ -138,11 +115,6 @@ export function GenreTrendsSummaryWidget({
     "month",
     undefined,
     viewerUserId
-  );
-  const { meta: genreCoverageMeta } = useGroqGenreBackfillMeta(viewerUserId);
-  const coverageLiveDotTone = genreCoverageLiveDotTone(
-    genreCoverageMeta.eligibility?.unknownTrackCount,
-    genreCoverageMeta.loaded
   );
 
   const availableGenres = useMemo(
@@ -248,16 +220,9 @@ export function GenreTrendsSummaryWidget({
           <div className="border-b border-white/70 px-6 py-5 dark:border-white/[0.06]">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
               <div className="max-w-2xl">
-                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-rose-300/25 bg-white/70 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-rose-600 shadow-sm backdrop-blur dark:border-rose-400/18 dark:bg-[#141622] dark:text-rose-100">
-                  <LiveStatusDot tone={coverageLiveDotTone} />
-                  {t("title")}
-                </div>
-                <h2 className="text-2xl font-semibold tracking-[-0.04em] text-gray-950 dark:text-white sm:text-3xl">
-                  {t("evolution")}
-                </h2>
-                <p className="mt-2 max-w-xl text-sm leading-6 text-muted dark:text-slate-400 sm:text-base">
-                  {t("chartHint")}
-                </p>
+                <p className={DASHBOARD_SECTION_EYEBROW}>{t("title")}</p>
+                <h2 className={`${DASHBOARD_SECTION_TITLE} mt-1`}>{t("evolution")}</h2>
+                <p className="mt-2 max-w-xl text-[13px] leading-6 text-muted">{t("chartHint")}</p>
                 {!isPublicDemoViewer ? (
                   <GenreAccuracyChooser viewerUserId={viewerUserId} variant="compact" className="mt-4" />
                 ) : null}
@@ -266,7 +231,7 @@ export function GenreTrendsSummaryWidget({
                 <ListenTrendChartViewToggle value={chartView} onChange={setChartView} />
                 <Link
                   href={`/dashboard/genres/trends${trendsQuery}`}
-                  className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-2xl border border-card-border bg-white/70 px-4 py-2.5 text-sm font-semibold text-rose-600 shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow-card dark:border-white/[0.10] dark:bg-[#161822] dark:text-rose-100 dark:hover:bg-[#1c2030]"
+                  className={DASHBOARD_BTN_GHOST}
                 >
                   {tOverview("seeMore")}
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -278,7 +243,7 @@ export function GenreTrendsSummaryWidget({
           </div>
 
           <div className="relative space-y-5 p-6">
-            <div className="rounded-3xl border border-white/70 bg-white/55 p-3 shadow-sm backdrop-blur dark:border-white/[0.06] dark:bg-[#0c0e18]">
+            <div>
               <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted dark:text-slate-400">
                   {t("genresToDisplay")}
@@ -295,10 +260,10 @@ export function GenreTrendsSummaryWidget({
                       key={genre}
                       type="button"
                       onClick={() => toggleGenre(genre)}
-                      className={`group inline-flex max-w-[min(100%,220px)] items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 ${
+                      className={`group inline-flex max-w-[min(100%,220px)] items-center gap-2 rounded-full border px-3 py-1.5 text-[13px] font-medium ${
                         selected
-                          ? "border-rose-300/30 bg-white/85 text-gray-950 shadow-card dark:border-white/12 dark:bg-slate-800/95 dark:text-white"
-                          : "border-white/70 bg-white/45 text-muted hover:bg-white/75 dark:border-white/[0.07] dark:bg-[#12141f] dark:text-slate-300 dark:hover:bg-[#181b28]"
+                          ? "border-glass-hairline bg-surface-raised text-foreground"
+                          : "border-transparent text-muted hover:text-foreground"
                       }`}
                       title={genre}
                     >
@@ -322,11 +287,11 @@ export function GenreTrendsSummaryWidget({
             </div>
 
             {selectedGenres.length === 0 ? (
-              <p className="rounded-3xl border border-white/70 bg-white/55 py-10 text-center text-sm text-muted shadow-inner dark:border-white/[0.06] dark:bg-[#0c0e18] dark:text-slate-400">
+              <p className="py-10 text-center text-[13px] text-muted">
                 {t("selectAtLeastOne")}
               </p>
             ) : (
-              <div className="relative rounded-3xl border border-white/70 bg-white/60 p-3 shadow-inner backdrop-blur dark:border-white/[0.06] dark:bg-[#080913]">
+              <div>
                 <div className="pointer-events-none absolute left-1/2 top-8 h-56 w-56 -translate-x-1/2 rounded-full bg-rose-300/10 blur-3xl dark:bg-rose-300/14" />
                 <ChartResponsiveContainer token="trendsLine" minWidth={trendsMinWidth}>
                     <LineChart

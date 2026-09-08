@@ -12,7 +12,7 @@ import { type OverviewMomentumSlide } from "@/lib/components/overview-momentum-t
 import { OverviewListeningMomentumCard } from "@/lib/components/overview-listening-momentum-card";
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
-import { OverviewSkeleton } from "@/lib/components/skeleton-loaders";
+import { OverviewDesktopCrystalSkeleton } from "@/lib/components/skeleton-loaders";
 import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
 import {
   OverviewHeroFrame,
@@ -149,7 +149,7 @@ function OverviewContent() {
   );
 
   const topGenres = useMemo(
-    () => genresData?.data.slice(0, 6) || [],
+    () => genresData?.data.slice(0, 8) || [],
     [genresData]
   );
 
@@ -168,8 +168,9 @@ function OverviewContent() {
   const topTracksForChart = useMemo(() => {
     if (!tracksData?.topTracks?.length) return [];
     const total = tracksData.overview.totalListens;
-    return tracksData.topTracks.slice(0, 6).map((track) => ({
+    return tracksData.topTracks.slice(0, 8).map((track) => ({
       trackId: track.trackId,
+      artistId: track.artistId,
       name: track.trackTitle,
       artistName: track.artistName,
       count: track.listenCount,
@@ -374,7 +375,7 @@ function OverviewPageFallback() {
       <MobileOverviewLoadingFallback title={t("title")} />
       <div className="hidden space-y-8 lg:block">
         <OverviewHeroFrame title={t("title")} />
-        <OverviewSkeleton />
+        <OverviewDesktopCrystalSkeleton />
       </div>
     </div>
   );

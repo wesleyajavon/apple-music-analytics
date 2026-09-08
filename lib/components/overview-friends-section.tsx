@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, type ReactNode } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
@@ -16,9 +16,21 @@ import {
 } from "@/lib/components/duet/duet-utils";
 import { buildFriendMusicHref } from "@/lib/utils/duet-compare-href";
 import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
+import {
+  DASHBOARD_BTN_GHOST,
+  DASHBOARD_LIST_ROW,
+  DASHBOARD_LIST_SEPARATOR,
+} from "@/lib/components/dashboard-ui";
 
 type OverviewFriendsSectionProps = {
   compact?: boolean;
+};
+
+type FriendRow = {
+  id: string;
+  name: string;
+  avatarUrl?: string | null;
+  musicHref: string;
 };
 
 export function OverviewFriendsSection({ compact = false }: OverviewFriendsSectionProps) {
@@ -31,7 +43,7 @@ export function OverviewFriendsSection({ compact = false }: OverviewFriendsSecti
 
   const { data, isLoading, isError, refetch } = useDuetFriends({ enabled });
 
-  const acceptedFriends = useMemo(() => {
+  const acceptedFriends = useMemo((): FriendRow[] => {
     if (!authUserId || !data?.friends) return [];
     return data.friends
       .filter((row) => row.status === "accepted")
@@ -51,6 +63,119 @@ export function OverviewFriendsSection({ compact = false }: OverviewFriendsSecti
   if (isPublicDemoViewer || authUserId === null) {
     return null;
   }
+
+  const body: ReactNode =
+    authUserId === undefined || isLoading ? (
+      compact ? (
+        <ul className="space-y-2" aria-busy="true" aria-label={t("loadingLabel")}>
+          {Array.from({ length: 3 }).map((_, index) => (
+            <li
+              key={index}
+              className="h-[4.25rem] animate-pulse rounded-[1.25rem] border border-slate-200/80 bg-slate-100/80 dark:border-white/10 dark:bg-white/5"
+            />
+          ))}
+        </ul>
+      ) : (
+        <ul aria-busy="true" aria-label={t("loadingLabel")}>
+          {Array.from({ length: 3 }).map((_, index) => (
+            <li key={index} className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_SEPARATOR}`}>
+              <div className="h-10 w-10 shrink-0 rounded-full bg-black/10 animate-shimmer dark:bg-white/10" />
+              <div className="h-4 w-40 rounded bg-black/10 animate-shimmer dark:bg-white/10" />
+            </li>
+          ))}
+        </ul>
+      )
+    ) : isError ? (
+      compact ? (
+        <div className="rounded-[1.35rem] border border-rose-200/80 bg-rose-50/80 px-4 py-5 dark:border-rose-400/20 dark:bg-rose-950/30">
+          <p className="text-sm font-medium text-rose-800 dark:text-rose-100">{t("errorTitle")}</p>
+          <button
+            type="button"
+            onClick={() => void refetch()}
+            className="mt-3 inline-flex min-h-10 items-center rounded-xl bg-rose-600 px-3.5 text-sm font-semibold text-white"
+          >
+            {t("errorRetry")}
+          </button>
+        </div>
+      ) : (
+        <div>
+          <p className="text-[15px] font-semibold text-foreground">{t("errorTitle")}</p>
+          <button type="button" onClick={() => void refetch()} className={`${DASHBOARD_BTN_GHOST} mt-2 px-0`}>
+            {t("errorRetry")}
+          </button>
+        </div>
+      )
+    ) : acceptedFriends.length === 0 ? (
+      compact ? (
+        <div className="rounded-[1.35rem] border border-dashed border-slate-300/90 bg-slate-50/80 px-4 py-6 dark:border-white/15 dark:bg-white/[0.04]">
+          <div className="flex items-start gap-3">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white text-violet-600 dark:border-white/10 dark:bg-white/5 dark:text-violet-300">
+              <Users className="h-5 w-5" aria-hidden />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-base font-semibold text-foreground dark:text-white">{t("emptyTitle")}</p>
+              <p className="mt-1 text-sm leading-6 text-muted-foreground">{t("emptyDescription")}</p>
+              <Link
+                href={friendsHref}
+                className="mt-3 inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-primary px-4 text-sm font-semibold text-white no-underline"
+              >
+                {t("emptyCta")}
+                <ChevronRight className="h-4 w-4" aria-hidden />
+              </Link>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div>
+          <p className="text-[15px] font-semibold text-foreground">{t("emptyTitle")}</p>
+          <p className="mt-1 text-[13px] leading-6 text-muted">{t("emptyDescription")}</p>
+          <Link href={friendsHref} className={`${DASHBOARD_BTN_GHOST} mt-2 px-0`}>
+            {t("emptyCta")}
+          </Link>
+        </div>
+      )
+    ) : compact ? (
+      <ul className="space-y-2">
+        {acceptedFriends.map((friend) => (
+          <li key={friend.id}>
+            <Link
+              href={friend.musicHref}
+              aria-label={t("seeMusicAria", { name: friend.name })}
+              className="group flex min-h-14 cursor-pointer items-center gap-3 rounded-[1.25rem] border border-slate-200/80 bg-white px-3 py-2.5 shadow-sm no-underline outline-none transition-all duration-200 hover:-translate-y-0.5 hover:border-violet-300/70 hover:shadow-md hover:shadow-violet-500/10 focus-visible:ring-2 focus-visible:ring-violet-400/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.99] dark:border-white/10 dark:bg-slate-950/50 dark:hover:border-violet-400/35 dark:hover:shadow-violet-500/10"
+            >
+              <UserAvatar name={friend.name} src={friend.avatarUrl} size="md" />
+              <p className="min-w-0 flex-1 truncate font-semibold text-slate-900 transition-colors group-hover:text-violet-700 dark:text-white dark:group-hover:text-violet-200">
+                {friend.name}
+              </p>
+              <span
+                className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-xl bg-gradient-to-r from-violet-600 to-violet-500 px-3.5 text-sm font-semibold text-white shadow-md shadow-violet-500/20 transition-all duration-200 group-hover:gap-2 group-hover:shadow-lg group-hover:shadow-violet-500/30"
+                aria-hidden
+              >
+                <Music2 className="h-4 w-4" />
+                <span className="hidden sm:inline">{t("seeMusic")}</span>
+                <ChevronRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <ul>
+        {acceptedFriends.map((friend) => (
+          <li key={friend.id}>
+            <Link
+              href={friend.musicHref}
+              aria-label={t("seeMusicAria", { name: friend.name })}
+              className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_SEPARATOR} no-underline text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
+            >
+              <UserAvatar name={friend.name} src={friend.avatarUrl} size="md" />
+              <p className="min-w-0 flex-1 truncate text-[15px] font-semibold">{friend.name}</p>
+              <ChevronRight className="h-4 w-4 shrink-0 text-muted" aria-hidden />
+            </Link>
+          </li>
+        ))}
+      </ul>
+    );
 
   return (
     <section className="relative">
@@ -72,79 +197,13 @@ export function OverviewFriendsSection({ compact = false }: OverviewFriendsSecti
         />
       )}
 
-      {authUserId === undefined || isLoading ? (
-        <ul className="space-y-2" aria-busy="true" aria-label={t("loadingLabel")}>
-          {Array.from({ length: 3 }).map((_, index) => (
-            <li
-              key={index}
-              className="h-[4.25rem] animate-pulse rounded-[1.25rem] border border-slate-200/80 bg-slate-100/80 dark:border-white/10 dark:bg-white/5"
-            />
-          ))}
-        </ul>
-      ) : isError ? (
-        <div className="rounded-[1.35rem] border border-rose-200/80 bg-rose-50/80 px-4 py-5 dark:border-rose-400/20 dark:bg-rose-950/30">
-          <p className="text-sm font-medium text-rose-800 dark:text-rose-100">{t("errorTitle")}</p>
-          <button
-            type="button"
-            onClick={() => void refetch()}
-            className="mt-3 inline-flex min-h-10 items-center rounded-xl bg-rose-600 px-3.5 text-sm font-semibold text-white"
-          >
-            {t("errorRetry")}
-          </button>
-        </div>
-      ) : acceptedFriends.length === 0 ? (
-        <div className="rounded-[1.35rem] border border-dashed border-slate-300/90 bg-slate-50/80 px-4 py-6 dark:border-white/15 dark:bg-white/[0.04]">
-          <div className="flex items-start gap-3">
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white text-violet-600 dark:border-white/10 dark:bg-white/5 dark:text-violet-300">
-              <Users className="h-5 w-5" aria-hidden />
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="text-base font-semibold text-foreground dark:text-white">
-                {t("emptyTitle")}
-              </p>
-              <p className="mt-1 text-sm leading-6 text-muted-foreground">{t("emptyDescription")}</p>
-              <Link
-                href={friendsHref}
-                className="mt-3 inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-primary px-4 text-sm font-semibold text-white no-underline"
-              >
-                {t("emptyCta")}
-                <ChevronRight className="h-4 w-4" aria-hidden />
-              </Link>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <ul className="space-y-2">
-          {acceptedFriends.map((friend) => (
-            <li key={friend.id}>
-              <Link
-                href={friend.musicHref}
-                aria-label={t("seeMusicAria", { name: friend.name })}
-                className="group flex min-h-14 cursor-pointer items-center gap-3 rounded-[1.25rem] border border-slate-200/80 bg-white px-3 py-2.5 shadow-sm no-underline outline-none transition-all duration-200 hover:-translate-y-0.5 hover:border-violet-300/70 hover:shadow-md hover:shadow-violet-500/10 focus-visible:ring-2 focus-visible:ring-violet-400/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.99] dark:border-white/10 dark:bg-slate-950/50 dark:hover:border-violet-400/35 dark:hover:shadow-violet-500/10"
-              >
-                <UserAvatar name={friend.name} src={friend.avatarUrl} size="md" />
-                <p className="min-w-0 flex-1 truncate font-semibold text-slate-900 transition-colors group-hover:text-violet-700 dark:text-white dark:group-hover:text-violet-200">
-                  {friend.name}
-                </p>
-                <span
-                  className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-xl bg-gradient-to-r from-violet-600 to-violet-500 px-3.5 text-sm font-semibold text-white shadow-md shadow-violet-500/20 transition-all duration-200 group-hover:gap-2 group-hover:shadow-lg group-hover:shadow-violet-500/30"
-                  aria-hidden
-                >
-                  <Music2 className="h-4 w-4" />
-                  <span className="hidden sm:inline">{t("seeMusic")}</span>
-                  <ChevronRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
+      {body}
 
       {acceptedFriends.length > 0 ? (
         <p className="mt-3 text-center sm:text-left">
           <Link
             href={friendsHref}
-            className="inline-flex min-h-10 items-center gap-1 text-sm font-semibold text-violet-700 no-underline hover:underline dark:text-violet-300"
+            className="inline-flex min-h-10 items-center gap-1 text-[13px] font-medium text-muted no-underline hover:text-foreground"
           >
             {t("manageFriends")}
             <ChevronRight className="h-4 w-4" aria-hidden />

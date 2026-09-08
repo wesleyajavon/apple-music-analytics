@@ -1354,6 +1354,12 @@
       "previousPage": "Previous artists",
       "nextPage": "Next artists"
     },
+    "replayPager": {
+      "pageRange": "{start}–{end}",
+      "pagesNav": "Ranking pages",
+      "previousPage": "Previous items",
+      "nextPage": "Next items"
+    },
     "artistTrends": {
       "badge": "Artist trends",
       "seeMoreHint": "To explore more artists, click See more."

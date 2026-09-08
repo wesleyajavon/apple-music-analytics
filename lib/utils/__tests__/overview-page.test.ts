@@ -81,6 +81,7 @@ describe("buildOverviewPrimaryInsight", () => {
       data,
       topTrack: {
         trackId: "1",
+        artistId: "a1",
         name: "Song",
         artistName: "Artist",
         count: 12,

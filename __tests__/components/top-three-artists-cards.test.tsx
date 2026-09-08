@@ -1,13 +1,14 @@
 /** @vitest-environment jsdom */
 
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import type { ArtistStatsDto } from "@/lib/dto/artist";
+import { TopThreeArtists } from "@/lib/components/top-three-artists-cards";
 import {
   SPOTLIGHT_ARTISTS_CAROUSEL_LIMIT,
-  TopThreeArtists,
-} from "@/lib/components/top-three-artists-cards";
+  SpotlightArtistsFeaturedList,
+} from "@/lib/components/spotlight-artists-featured-list";
 
 vi.mock("@/lib/hooks/use-artist-spotify-image-resolution", () => ({
   useArtistSpotifyImageResolution: () => null,
@@ -34,71 +35,6 @@ const t = (key: string, values?: Record<string, string | number>) => {
 };
 
 describe("TopThreeArtists", () => {
-  const originalScrollBy = HTMLElement.prototype.scrollBy;
-  const originalClientWidth = Object.getOwnPropertyDescriptor(HTMLElement.prototype, "clientWidth");
-  const originalScrollWidth = Object.getOwnPropertyDescriptor(HTMLElement.prototype, "scrollWidth");
-  const originalScrollLeft = Object.getOwnPropertyDescriptor(HTMLElement.prototype, "scrollLeft");
-  const originalOffsetWidth = Object.getOwnPropertyDescriptor(HTMLElement.prototype, "offsetWidth");
-  const originalResizeObserver = globalThis.ResizeObserver;
-  const scrollBy = vi.fn();
-
-  beforeEach(() => {
-    scrollBy.mockReset();
-    HTMLElement.prototype.scrollBy = scrollBy;
-    Object.defineProperty(HTMLElement.prototype, "clientWidth", {
-      configurable: true,
-      get() {
-        return 900;
-      },
-    });
-    Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
-      configurable: true,
-      get() {
-        return 3000;
-      },
-    });
-    Object.defineProperty(HTMLElement.prototype, "scrollLeft", {
-      configurable: true,
-      get() {
-        return 0;
-      },
-    });
-    Object.defineProperty(HTMLElement.prototype, "offsetWidth", {
-      configurable: true,
-      get() {
-        return 280;
-      },
-    });
-    globalThis.ResizeObserver = class {
-      callback: ResizeObserverCallback;
-      constructor(callback: ResizeObserverCallback) {
-        this.callback = callback;
-      }
-      observe() {
-        this.callback([] as unknown as ResizeObserverEntry[], this);
-      }
-      unobserve() {}
-      disconnect() {}
-    } as unknown as typeof ResizeObserver;
-  });
-
-  afterEach(() => {
-    HTMLElement.prototype.scrollBy = originalScrollBy;
-    if (originalClientWidth) {
-      Object.defineProperty(HTMLElement.prototype, "clientWidth", originalClientWidth);
-    }
-    if (originalScrollWidth) {
-      Object.defineProperty(HTMLElement.prototype, "scrollWidth", originalScrollWidth);
-    }
-    if (originalScrollLeft) {
-      Object.defineProperty(HTMLElement.prototype, "scrollLeft", originalScrollLeft);
-    }
-    if (originalOffsetWidth) {
-      Object.defineProperty(HTMLElement.prototype, "offsetWidth", originalOffsetWidth);
-    }
-    globalThis.ResizeObserver = originalResizeObserver;
-  });
-
   it("keeps the artists page grid to the top 3", () => {
     render(
       <TopThreeArtists
@@ -114,33 +50,45 @@ describe("TopThreeArtists", () => {
     expect(screen.queryByText("Artist 4")).toBeNull();
     expect(screen.queryByRole("region")).toBeNull();
   });
+});
 
-  it("renders up to 10 artists in a left-right carousel", () => {
+describe("SpotlightArtistsFeaturedList", () => {
+  it("shows four tiles per page with visible names and pages through 1–10", () => {
+    const onArtistSelect = vi.fn();
     render(
-      <TopThreeArtists
+      <SpotlightArtistsFeaturedList
         artists={Array.from({ length: 12 }, (_, index) => makeArtist(index + 1))}
-        maxListens={200}
         t={t}
         locale="en-US"
-        onArtistSelect={vi.fn()}
-        layout="carousel"
+        onArtistSelect={onArtistSelect}
         maxArtists={SPOTLIGHT_ARTISTS_CAROUSEL_LIMIT}
-        previousLabel="Show previous artists"
-        nextLabel="Show next artists"
-        carouselLabel="Artist spotlight carousel"
+        pageRangeLabel={(start, end) => `${start}–${end}`}
+        pagesNavLabel="Artist pages"
+        previousPageLabel="Previous artists"
+        nextPageLabel="Next artists"
       />
     );
 
-    expect(screen.getByRole("region", { name: "Artist spotlight carousel" })).toBeInTheDocument();
-    expect(screen.getByLabelText("Open insights for Artist 1")).toBeInTheDocument();
-    expect(screen.getByLabelText("Open insights for Artist 10")).toBeInTheDocument();
-    expect(screen.queryByLabelText("Open insights for Artist 11")).toBeNull();
+    expect(screen.getByText("Artist 1")).toBeInTheDocument();
+    expect(screen.getByText("Artist 4")).toBeInTheDocument();
+    expect(screen.queryByText("Artist 5")).toBeNull();
+    expect(screen.queryByText("Artist 11")).toBeNull();
+    expect(document.querySelectorAll("[data-spotlight-artist-tile]")).toHaveLength(4);
+    expect(document.querySelector("[data-spotlight-artist-card]")).toBeNull();
+    expect(document.querySelector("[data-spotlight-featured]")).toBeNull();
 
-    expect(screen.getByRole("button", { name: "Show previous artists" })).toBeDisabled();
-    const next = screen.getByRole("button", { name: "Show next artists" });
-    expect(next).toBeEnabled();
+    fireEvent.click(screen.getByRole("tab", { name: "5–8" }));
+    expect(screen.getByText("Artist 5")).toBeInTheDocument();
+    expect(screen.getByText("Artist 8")).toBeInTheDocument();
+    expect(screen.queryByText("Artist 1")).toBeNull();
 
-    fireEvent.click(next);
-    expect(scrollBy).toHaveBeenCalledWith({ left: 304, behavior: "smooth" });
+    fireEvent.click(screen.getByRole("tab", { name: "9–10" }));
+    expect(screen.getByText("Artist 9")).toBeInTheDocument();
+    expect(screen.getByText("Artist 10")).toBeInTheDocument();
+    expect(screen.queryByText("Artist 11")).toBeNull();
+    expect(document.querySelectorAll("[data-spotlight-artist-tile]")).toHaveLength(2);
+
+    fireEvent.click(screen.getByRole("button", { name: "Open insights for Artist 9" }));
+    expect(onArtistSelect).toHaveBeenCalledWith(expect.objectContaining({ artistId: "artist-9" }), 8);
   });
 });

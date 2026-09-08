@@ -1,14 +1,11 @@
 "use client";
 
-import { memo, useCallback, useLayoutEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Music2 } from "lucide-react";
+import { memo } from "react";
+import { Music2 } from "lucide-react";
 import type { ArtistStatsDto } from "@/lib/dto/artist";
 import { ArtistAvatarHydrated } from "@/lib/components/artist-avatar-hydrated";
 
 export { getAvatarUrl, getArtistImageUrl } from "@/lib/components/artist-avatar-utils";
-
-export const SPOTLIGHT_ARTISTS_CAROUSEL_LIMIT = 10;
-const CAROUSEL_GAP_PX = 24;
 
 type TopThreeArtistsT = (
   key: string,
@@ -33,9 +30,6 @@ const CARD_SHELL = `group relative overflow-hidden rounded-[1.75rem] border bord
 
 const INTERACTIVE_EXTRAS =
   "cursor-pointer text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[rgb(var(--background-rgb))] dark:focus-visible:ring-offset-slate-950";
-
-const NAV_BUTTON_CLASS =
-  "flex h-11 w-11 items-center justify-center rounded-full border border-card-border bg-white/90 text-accent-violet shadow-lg shadow-black/10 backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow-card disabled:pointer-events-none disabled:opacity-0 dark:border-white/[0.10] dark:bg-[#161822] dark:text-violet-100 dark:hover:bg-[#1c2030]";
 
 function SpotlightArtistCard({
   artist,
@@ -130,138 +124,8 @@ function SpotlightArtistCard({
   );
 }
 
-function SpotlightArtistsCarousel({
-  artists,
-  t,
-  locale,
-  onArtistSelect,
-  previousLabel,
-  nextLabel,
-  carouselLabel,
-}: {
-  artists: ArtistStatsDto[];
-  t: TopThreeArtistsT;
-  locale: string;
-  onArtistSelect?: (artist: ArtistStatsDto, avatarColorIndex: number) => void;
-  previousLabel: string;
-  nextLabel: string;
-  carouselLabel: string;
-}) {
-  const scrollerRef = useRef<HTMLDivElement>(null);
-  const [canScrollPrev, setCanScrollPrev] = useState(false);
-  const [canScrollNext, setCanScrollNext] = useState(false);
-
-  const updateScrollState = useCallback(() => {
-    const el = scrollerRef.current;
-    if (!el) return;
-    const maxScroll = el.scrollWidth - el.clientWidth;
-    setCanScrollPrev(el.scrollLeft > 4);
-    setCanScrollNext(maxScroll > 4 && el.scrollLeft < maxScroll - 4);
-  }, []);
-
-  useLayoutEffect(() => {
-    const el = scrollerRef.current;
-    if (!el) return;
-
-    updateScrollState();
-    el.addEventListener("scroll", updateScrollState, { passive: true });
-
-    if (typeof ResizeObserver === "undefined") {
-      window.addEventListener("resize", updateScrollState);
-      return () => {
-        el.removeEventListener("scroll", updateScrollState);
-        window.removeEventListener("resize", updateScrollState);
-      };
-    }
-
-    const observer = new ResizeObserver(updateScrollState);
-    observer.observe(el);
-
-    return () => {
-      el.removeEventListener("scroll", updateScrollState);
-      observer.disconnect();
-    };
-  }, [artists.length, updateScrollState]);
-
-  const scrollByCard = useCallback((direction: -1 | 1) => {
-    const el = scrollerRef.current;
-    if (!el) return;
-    const card = el.querySelector<HTMLElement>("[data-spotlight-artist-card]");
-    const delta = card ? card.offsetWidth + CAROUSEL_GAP_PX : Math.max(el.clientWidth * 0.8, 240);
-    el.scrollBy({ left: direction * delta, behavior: "smooth" });
-  }, []);
-
-  return (
-    <div className="relative">
-      <div
-        ref={scrollerRef}
-        role="region"
-        aria-roledescription="carousel"
-        aria-label={carouselLabel}
-        tabIndex={0}
-        onKeyDown={(event) => {
-          if (event.key === "ArrowRight") {
-            event.preventDefault();
-            scrollByCard(1);
-          }
-          if (event.key === "ArrowLeft") {
-            event.preventDefault();
-            scrollByCard(-1);
-          }
-        }}
-        className="flex snap-x snap-mandatory gap-6 overflow-x-auto overscroll-x-contain scroll-smooth py-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
-      >
-        {artists.map((artist, index) => (
-          <SpotlightArtistCard
-            key={artist.artistId}
-            artist={artist}
-            index={index}
-            t={t}
-            locale={locale}
-            onArtistSelect={onArtistSelect}
-            className="w-[min(20rem,calc(100%-1.5rem))] shrink-0 snap-start sm:w-[calc((100%-1.5rem)/2)] lg:w-[calc((100%-3rem)/3)]"
-          />
-        ))}
-      </div>
-
-      {canScrollPrev ? (
-        <div
-          className="pointer-events-none absolute inset-y-3 left-0 w-16 bg-gradient-to-r from-white via-white/80 to-transparent dark:from-[#070812] dark:via-[#070812]/80"
-          aria-hidden
-        />
-      ) : null}
-      {canScrollNext ? (
-        <div
-          className="pointer-events-none absolute inset-y-3 right-0 w-16 bg-gradient-to-l from-[#eef7ff] via-[#eef7ff]/80 to-transparent dark:from-[#0c0e18] dark:via-[#0c0e18]/80"
-          aria-hidden
-        />
-      ) : null}
-
-      <button
-        type="button"
-        className={`${NAV_BUTTON_CLASS} absolute left-1 top-1/2 z-20 -translate-y-1/2`}
-        onClick={() => scrollByCard(-1)}
-        disabled={!canScrollPrev}
-        aria-label={previousLabel}
-      >
-        <ChevronLeft className="h-5 w-5" aria-hidden />
-      </button>
-      <button
-        type="button"
-        className={`${NAV_BUTTON_CLASS} absolute right-1 top-1/2 z-20 -translate-y-1/2`}
-        onClick={() => scrollByCard(1)}
-        disabled={!canScrollNext}
-        aria-label={nextLabel}
-      >
-        <ChevronRight className="h-5 w-5" aria-hidden />
-      </button>
-    </div>
-  );
-}
-
 /**
- * Top artistes – grandes cartes hero style Apple Music Replay.
- * Grille (page artistes) ou carrousel horizontal (spotlight overview).
+ * Top 3 artistes — cartes hero (page artistes, étape Crystal 7a).
  */
 export const TopThreeArtists = memo(
   ({
@@ -270,41 +134,16 @@ export const TopThreeArtists = memo(
     t,
     locale,
     onArtistSelect,
-    layout = "grid",
-    maxArtists,
-    previousLabel,
-    nextLabel,
-    carouselLabel,
+    maxArtists = 3,
   }: {
     artists: ArtistStatsDto[];
     maxListens: number;
     t: TopThreeArtistsT;
     locale: string;
     onArtistSelect?: (artist: ArtistStatsDto, avatarColorIndex: number) => void;
-    layout?: "grid" | "carousel";
     maxArtists?: number;
-    previousLabel?: string;
-    nextLabel?: string;
-    carouselLabel?: string;
   }) => {
-    const limit =
-      maxArtists ??
-      (layout === "carousel" ? SPOTLIGHT_ARTISTS_CAROUSEL_LIMIT : 3);
-    const visibleArtists = artists.slice(0, limit);
-
-    if (layout === "carousel") {
-      return (
-        <SpotlightArtistsCarousel
-          artists={visibleArtists}
-          t={t}
-          locale={locale}
-          onArtistSelect={onArtistSelect}
-          previousLabel={previousLabel ?? "Previous artists"}
-          nextLabel={nextLabel ?? "Next artists"}
-          carouselLabel={carouselLabel ?? "Artist spotlight"}
-        />
-      );
-    }
+    const visibleArtists = artists.slice(0, maxArtists);
 
     return (
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">

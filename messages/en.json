@@ -1348,10 +1348,11 @@
     "artistSpotlight": {
       "badge": "Artist spotlight",
       "title": "The artists carrying your rotation.",
-      "description": "Scroll through up to ten artists. Hover a cover to reveal streams, variety, and the track that defines each one. Click to open a deepdive of that artist.",
-      "scrollPrevious": "Show previous artists",
-      "scrollNext": "Show next artists",
-      "carouselLabel": "Artist spotlight carousel"
+      "description": "Up to ten artists from this period.",
+      "pageRange": "{start}–{end}",
+      "pagesNav": "Artist pages",
+      "previousPage": "Previous artists",
+      "nextPage": "Next artists"
     },
     "artistTrends": {
       "badge": "Artist trends",

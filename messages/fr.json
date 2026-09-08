@@ -1350,10 +1350,11 @@
     "artistSpotlight": {
       "badge": "Spotlight artistes",
       "title": "Les artistes qui portent votre rotation.",
-      "description": "Faites défiler jusqu’à dix artistes. Survolez une cover pour révéler les streams, la variété et le titre signature. Cliquez pour avoir un deepdive de cet artiste.",
-      "scrollPrevious": "Afficher les artistes précédents",
-      "scrollNext": "Afficher les artistes suivants",
-      "carouselLabel": "Carrousel spotlight artistes"
+      "description": "Jusqu’à dix artistes sur cette période.",
+      "pageRange": "{start}–{end}",
+      "pagesNav": "Pages d’artistes",
+      "previousPage": "Artistes précédents",
+      "nextPage": "Artistes suivants"
     },
     "artistTrends": {
       "badge": "Tendances artistes",

@@ -12,8 +12,17 @@ import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params"
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { usePublicDemo } from "@/lib/providers/public-demo-provider";
 import { useDuetFriends } from "@/lib/hooks/use-duet";
+import {
+  DASHBOARD_GLASS_SIDEBAR,
+  DASHBOARD_NAV_ITEM,
+  DASHBOARD_NAV_ITEM_ACTIVE,
+} from "@/lib/components/dashboard-ui";
 
 const STORAGE_KEY = "sidebar-collapsed";
+const SIDEBAR_PANE =
+  `${DASHBOARD_GLASS_SIDEBAR} hidden rounded-[1.25rem] shadow-[0_8px_40px_rgb(23_19_33_/_0.08)] lg:fixed lg:bottom-3 lg:left-3 lg:top-3 lg:z-20 lg:flex lg:flex-col dark:shadow-[0_12px_40px_rgb(0_0_0_/_0.45)]`;
+const SIDEBAR_SPACER_EXPANDED = "hidden lg:block lg:w-[17.5rem] lg:shrink-0";
+const SIDEBAR_SPACER_COLLAPSED = "hidden lg:block lg:w-[6.5rem] lg:shrink-0";
 
 interface NavItem {
   href: string;
@@ -282,20 +291,17 @@ function PendingFriendRequestsNavBadge({
 
 function SidebarFallback() {
   return (
-    <aside
-      className="hidden h-screen w-64 flex-shrink-0 border-r border-card-border bg-surface-sidebar shadow-card lg:sticky lg:top-0 lg:block"
-      aria-hidden
-    >
-      <div className="min-h-[5.25rem] animate-pulse border-b border-card-border bg-card-surface" />
-      <div className="space-y-2 p-4">
-        {Array.from({ length: 10 }).map((_, i) => (
-          <div
-            key={i}
-            className="h-10 animate-pulse rounded-xl bg-card-surface"
-          />
-        ))}
-      </div>
-    </aside>
+    <>
+      <div className={SIDEBAR_SPACER_EXPANDED} aria-hidden />
+      <aside className={`${SIDEBAR_PANE} lg:w-64`} aria-hidden>
+        <div className="min-h-14 animate-pulse px-4 pt-4" />
+        <div className="space-y-1 px-2.5">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="h-11 animate-pulse rounded-[10px] bg-black/[0.05] dark:bg-white/10" />
+          ))}
+        </div>
+      </aside>
+    </>
   );
 }
 
@@ -465,7 +471,7 @@ function SidebarContent() {
     }));
   };
 
-  const renderNavItem = (item: NavItem, depth = 0) => {
+  const renderNavItem = (item: NavItem) => {
     if (
       isPublicDemoViewer &&
       (item.href === "/dashboard/genres/palette" ||
@@ -481,7 +487,6 @@ function SidebarContent() {
 
     const key = item.href;
     const hasChildren = !!item.children?.length;
-    const isDirectActive = pathname === item.href;
     const isActive = isNavItemActive(item, pathname);
     const isOpen = !displayCollapsed && hasChildren && !!openNavKeys[key];
     const Icon = item.icon;
@@ -492,16 +497,11 @@ function SidebarContent() {
       ? t("pendingFriendRequestsBadge", { count: pendingFriendRequestsCount })
       : undefined;
     const itemClassName = `
-      group flex items-center rounded-xl text-sm font-medium transition-all duration-200
-      ${displayCollapsed ? "justify-center px-2 py-2.5" : "gap-3 px-3 py-2.5"}
-      ${
-        isActive
-          ? "bg-primary/10 text-primary"
-          : "text-muted hover:text-foreground hover:bg-primary/10"
-      }
+      ${isActive ? DASHBOARD_NAV_ITEM_ACTIVE : DASHBOARD_NAV_ITEM}
+      ${displayCollapsed ? "justify-center px-2" : "gap-3 px-3"}
     `;
-    const iconClassName = `w-5 h-5 shrink-0 transition-transform group-hover:scale-105 ${
-      isActive ? "text-primary" : "text-muted/75 group-hover:text-primary"
+    const iconClassName = `w-5 h-5 shrink-0 ${
+      isActive ? "text-primary" : "text-muted/75 group-hover:text-foreground"
     }`;
 
     if (hasChildren) {
@@ -512,36 +512,33 @@ function SidebarContent() {
               href={withFilters(item.href)}
               prefetch={prefetchDashboardNav}
               title={displayCollapsed ? label : undefined}
-              className={`flex min-w-0 flex-1 items-center ${displayCollapsed ? "justify-center" : "gap-3"}`}
+              className={`flex min-w-0 flex-1 items-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${displayCollapsed ? "justify-center" : "gap-3"}`}
             >
               <Icon className={iconClassName} />
               {!displayCollapsed && <span className="flex-1 truncate">{label}</span>}
             </Link>
             {!displayCollapsed && (
-              <>
-                {isDirectActive && <div className="w-1 h-5 rounded-full bg-brand-gradient shrink-0" />}
-                <button
-                  type="button"
-                  onClick={() => toggleNavItem(key)}
-                  className="-mr-1 rounded-md p-1 text-muted transition-colors hover:bg-primary/10 hover:text-primary focus:outline-none focus:ring-2 focus:ring-ring"
-                  aria-expanded={isOpen}
-                  aria-label={t(isOpen ? "collapseSection" : "expandSection", { label })}
+              <button
+                type="button"
+                onClick={() => toggleNavItem(key)}
+                className="-mr-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] text-muted transition-colors hover:bg-black/[0.05] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:hover:bg-white/[0.08]"
+                aria-expanded={isOpen}
+                aria-label={t(isOpen ? "collapseSection" : "expandSection", { label })}
+              >
+                <svg
+                  className={`h-4 w-4 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
                 >
-                  <svg
-                    className={`h-4 w-4 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m19 9-7 7-7-7" />
-                  </svg>
-                </button>
-              </>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m19 9-7 7-7-7" />
+                </svg>
+              </button>
             )}
           </div>
           {isOpen && (
-            <div className="ml-5 mt-1 space-y-0.5 border-l border-card-border pl-2">
-              {item.children?.map((child) => renderNavItem(child, depth + 1))}
+            <div className="ml-4 mt-0.5 space-y-0.5 pl-2">
+              {item.children?.map((child) => renderNavItem(child))}
             </div>
           )}
         </div>
@@ -554,10 +551,7 @@ function SidebarContent() {
         href={withFilters(item.href)}
         prefetch={prefetchDashboardNav}
         title={displayCollapsed ? label : undefined}
-        className={`
-          ${itemClassName}
-          ${depth > 0 && !displayCollapsed ? "py-2 text-[13px]" : ""}
-        `}
+        className={itemClassName}
       >
         <span className="relative shrink-0">
           <Icon className={iconClassName} />
@@ -583,14 +577,13 @@ function SidebarContent() {
               <span
                 className={
                   item.badgeKey === "betaBadge"
-                    ? "rounded-full border border-slate-200/80 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-slate-400 dark:border-white/12 dark:text-slate-500"
+                    ? "rounded-full border border-glass-hairline px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted"
                     : "rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary"
                 }
               >
                 {t(item.badgeKey)}
               </span>
             ) : null}
-            {isDirectActive && <div className="w-1 h-5 rounded-full bg-brand-gradient shrink-0" />}
           </>
         )}
       </Link>
@@ -598,83 +591,70 @@ function SidebarContent() {
   };
 
   return (
+    <>
+      <div
+        className={displayCollapsed ? SIDEBAR_SPACER_COLLAPSED : SIDEBAR_SPACER_EXPANDED}
+        aria-hidden
+      />
       <aside
-        className={`
-          hidden h-screen max-h-none flex-shrink-0 lg:sticky lg:top-0 lg:z-20 lg:block lg:self-start
-          ${isCollapsed ? "lg:w-20" : "lg:w-64"}
-          bg-surface-sidebar
-          border-r border-card-border
-          shadow-[2px_0_18px_-8px_rgb(152_80_208_/_0.32)]
-        `}
+        className={`${SIDEBAR_PANE} ${displayCollapsed ? "lg:w-20" : "lg:w-64"}`}
       >
-        <div className="flex h-full min-h-0 w-full flex-col">
-          {/* Logo + mobile close */}
-          <div
-            className={`flex shrink-0 items-center min-h-[5.25rem] py-3 border-b border-card-border transition-all duration-300 ${
-              displayCollapsed ? "px-3 justify-center" : "justify-between gap-2 px-4 sm:px-6"
-            }`}
+        <div
+          className={`flex shrink-0 items-center gap-1 px-3 pt-3 ${
+            displayCollapsed ? "flex-col" : "justify-between"
+          }`}
+        >
+          <Link
+            href={isPublicDemoViewer ? "/" : withFilters("/dashboard")}
+            prefetch={isPublicDemoViewer ? undefined : prefetchDashboardNav}
+            className="group inline-flex min-w-0 items-center rounded-[10px] outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            title={displayCollapsed ? t("logo") : undefined}
           >
-            <Link
-              href={isPublicDemoViewer ? "/" : withFilters("/dashboard")}
-              prefetch={isPublicDemoViewer ? undefined : prefetchDashboardNav}
-              className={`group inline-flex min-w-0 items-center gap-3 rounded-xl outline-none transition-all hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
-                displayCollapsed ? "justify-center" : ""
-              }`}
-              title={displayCollapsed ? t("logo") : undefined}
-            >
-              <SoundprintBrandMark
-                size="lg"
-                layout="stacked"
-                showWordmark={!displayCollapsed}
-                showAiBadgeOnMobile
-                tagline={displayCollapsed ? undefined : t("tagline")}
-                priority
-              />
-            </Link>
-          </div>
-
-          {/* Desktop collapse toggle */}
-          <div
-            className={`hidden lg:flex px-2 py-2 border-b border-card-border ${
-              isCollapsed ? "justify-center" : "justify-end"
-            }`}
+            <SoundprintBrandMark
+              size="md"
+              layout="inline"
+              showWordmark={!displayCollapsed}
+              showAiBadge={!displayCollapsed}
+              priority
+            />
+          </Link>
+          <button
+            type="button"
+            onClick={toggleCollapsed}
+            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] text-muted transition-colors hover:bg-black/[0.05] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:hover:bg-white/[0.08]"
+            aria-label={isCollapsed ? t("expandSidebar") : t("collapseSidebar")}
+            title={isCollapsed ? t("expandSidebar") : t("collapseSidebar")}
           >
-            <button
-              onClick={toggleCollapsed}
-              className="p-2 rounded-lg text-muted hover:text-primary hover:bg-primary/10 transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
-              aria-label={isCollapsed ? t("expandSidebar") : t("collapseSidebar")}
-              title={isCollapsed ? t("expandSidebar") : t("collapseSidebar")}
+            <svg
+              className={`h-4 w-4 transition-transform duration-300 ${isCollapsed ? "rotate-180" : ""}`}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
             >
-              <svg
-                className={`h-5 w-5 transition-transform duration-300 ${isCollapsed ? "rotate-180" : ""}`}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-              </svg>
-            </button>
-          </div>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+            </svg>
+          </button>
+        </div>
 
           {/* Navigation */}
-          <nav className="relative z-0 min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-5">
+        <nav className="relative z-0 min-h-0 flex-1 overflow-y-auto overscroll-contain px-2.5 pb-2 pt-3">
             {navGroups.map((group) => {
               const groupLabel = t(`groups.${group.labelKey}`);
               const isGroupOpen = isNavGroupOpen(openGroupKeys, group.labelKey);
 
               return (
-                <div key={group.labelKey} className="mb-6 last:mb-0">
+                <div key={group.labelKey} className="mb-4 last:mb-0">
                   {!displayCollapsed && (
                     <button
                       type="button"
                       onClick={() => toggleNavGroup(group.labelKey)}
-                      className="mb-2 flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-left transition-colors hover:bg-primary/5 focus:outline-none focus:ring-2 focus:ring-ring"
+                      className="mb-1 flex w-full items-center justify-between rounded-[10px] px-2.5 py-1 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                       aria-expanded={isGroupOpen}
                       aria-label={t(isGroupOpen ? "collapseSection" : "expandSection", {
                         label: groupLabel,
                       })}
                     >
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">
+                      <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted">
                         {groupLabel}
                       </span>
                       <svg
@@ -703,42 +683,41 @@ function SidebarContent() {
             })}
           </nav>
 
-          {/* Theme & Language switchers */}
-          <div
-            className={`relative z-10 shrink-0 px-3 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] border-t border-card-border space-y-4 transition-all duration-300 ${
-              displayCollapsed ? "flex flex-col items-center gap-2" : ""
-            }`}
-          >
-            {!displayCollapsed && (
-              <div className="px-3 mb-2">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">
-                  {t("appearance")}
-                </span>
-              </div>
-            )}
-            <div className={displayCollapsed ? "w-full flex justify-center" : ""}>
-              <ThemeSwitcher placement="top" collapsed={displayCollapsed} />
-            </div>
-            {!displayCollapsed && (
-              <div className="px-3 mb-2">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">
-                  {t("language")}
-                </span>
-              </div>
-            )}
-            <div className={displayCollapsed ? "w-full flex justify-center" : ""}>
-              <Suspense fallback={<div className="h-10 rounded-xl bg-gray-100 dark:bg-gray-800 animate-pulse" />}>
-                <LanguageSwitcher collapsed={displayCollapsed} />
-              </Suspense>
-            </div>
-            <div className={displayCollapsed ? "flex w-full justify-center" : "space-y-2 px-3"}>
-              {authEmail ? (
-                displayCollapsed ? (
+        <div
+          className={`relative z-10 shrink-0 space-y-1 px-2.5 pb-3 ${
+            displayCollapsed ? "flex flex-col items-center" : ""
+          }`}
+        >
+          <div className={displayCollapsed ? "flex w-full justify-center" : ""}>
+            <ThemeSwitcher placement="top" collapsed={displayCollapsed} />
+          </div>
+          <div className={displayCollapsed ? "flex w-full justify-center" : ""}>
+            <Suspense fallback={<div className="h-11 w-full animate-pulse rounded-[10px] bg-black/[0.05] dark:bg-white/10" />}>
+              <LanguageSwitcher collapsed={displayCollapsed} />
+            </Suspense>
+          </div>
+          <div className={displayCollapsed ? "flex w-full justify-center pt-1" : "space-y-1 pt-1"}>
+            {authEmail ? (
+              displayCollapsed ? (
+                <Link
+                  href={withFilters("/dashboard/settings")}
+                  prefetch={prefetchDashboardNav}
+                  title={accountDisplayName ?? t("items.settings")}
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-full outline-none hover:bg-black/[0.05] focus-visible:ring-2 focus-visible:ring-ring dark:hover:bg-white/[0.08]"
+                >
+                  <UserAvatar
+                    src={profileAvatarUrl}
+                    name={profileName}
+                    email={authEmail}
+                    size="md"
+                  />
+                </Link>
+              ) : (
+                <>
                   <Link
                     href={withFilters("/dashboard/settings")}
                     prefetch={prefetchDashboardNav}
-                    title={accountDisplayName ?? t("items.settings")}
-                    className="rounded-2xl outline-none transition-transform hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                    className="flex min-h-11 min-w-0 items-center gap-3 rounded-[10px] px-2 py-1.5 transition-colors hover:bg-black/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:hover:bg-white/[0.08]"
                   >
                     <UserAvatar
                       src={profileAvatarUrl}
@@ -746,60 +725,46 @@ function SidebarContent() {
                       email={authEmail}
                       size="md"
                     />
-                  </Link>
-                ) : (
-                  <>
-                    <Link
-                      href={withFilters("/dashboard/settings")}
-                      prefetch={prefetchDashboardNav}
-                      className="flex min-w-0 items-center gap-3 rounded-2xl border border-card-border bg-card-surface/70 p-2.5 transition-all hover:-translate-y-0.5 hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-ring"
-                    >
-                      <UserAvatar
-                        src={profileAvatarUrl}
-                        name={profileName}
-                        email={authEmail}
-                        size="md"
-                      />
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate text-sm font-semibold text-foreground">
-                          {accountDisplayName}
-                        </span>
-                        {authEmail ? (
-                          <span className="block truncate text-xs text-muted" title={authEmail}>
-                            {authEmail}
-                          </span>
-                        ) : null}
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-[13px] font-semibold text-foreground">
+                        {accountDisplayName}
                       </span>
-                    </Link>
-                    <button
-                      onClick={handleSignOut}
-                      disabled={isSigningOut}
-                      className="w-full rounded-lg border border-card-border px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      {isSigningOut ? t("signingOut") : t("signOut")}
-                    </button>
-                  </>
-                )
-              ) : !displayCollapsed ? (
-                <div className="grid grid-cols-2 gap-2">
-                  <Link
-                    href="/sign-in"
-                    className="rounded-lg border border-card-border px-3 py-2 text-center text-sm font-medium text-foreground transition-colors hover:bg-primary/10"
-                  >
-                    {t("signIn")}
+                      {authEmail ? (
+                        <span className="block truncate text-xs text-muted" title={authEmail}>
+                          {authEmail}
+                        </span>
+                      ) : null}
+                    </span>
                   </Link>
-                  <Link
-                    href="/sign-up"
-                    className="rounded-lg bg-brand-gradient px-3 py-2 text-center text-sm font-medium text-white transition-opacity hover:opacity-95"
+                  <button
+                    onClick={handleSignOut}
+                    disabled={isSigningOut}
+                    className="min-h-11 w-full rounded-full px-3 text-[13px] font-medium text-muted transition-colors hover:bg-black/[0.05] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60 dark:hover:bg-white/[0.08]"
                   >
-                    {t("signUp")}
-                  </Link>
-                </div>
-              ) : null}
-            </div>
+                    {isSigningOut ? t("signingOut") : t("signOut")}
+                  </button>
+                </>
+              )
+            ) : !displayCollapsed ? (
+              <div className="space-y-1.5">
+                <Link
+                  href="/sign-in"
+                  className="inline-flex min-h-11 w-full items-center justify-center rounded-full bg-brand-gradient px-4 text-[13px] font-semibold text-white transition-opacity hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  {t("signIn")}
+                </Link>
+                <Link
+                  href="/sign-up"
+                  className="inline-flex min-h-11 w-full items-center justify-center rounded-full px-4 text-center text-[13px] font-medium text-muted transition-colors hover:bg-black/[0.05] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:hover:bg-white/[0.08]"
+                >
+                  {t("signUp")}
+                </Link>
+              </div>
+            ) : null}
           </div>
         </div>
       </aside>
+    </>
   );
 }
 

@@ -85,14 +85,14 @@ export function DashboardScrollWrapper({ children }: { children: React.ReactNode
   } as CSSProperties;
 
   return (
-    <div className="flex min-h-screen bg-background" style={dashboardStyle}>
+    <div className="dashboard-shell flex min-h-screen" style={dashboardStyle}>
         <ScrollProgressBar />
         <Sidebar />
         <NotificationCenterProvider>
         <GenreBackfillJobProvider>
           <GenreGroqClassificationNudgeNotifier />
           <GenreBackfillResultNotifier />
-          <div className="min-w-0 flex-1 bg-surface-dashboard shadow-[0_0_0_1px_rgb(152_80_208_/_0.08)] max-lg:pb-[var(--dashboard-bottom-nav-offset,0px)]">
+          <div className="min-w-0 flex-1 max-lg:bg-surface-dashboard max-lg:pb-[var(--dashboard-bottom-nav-offset,0px)]">
           <DashboardStickyHeader filterRef={filterRef} />
           <Suspense fallback={<main className="min-w-0"><div className="p-4 lg:p-8">{children}</div></main>}>
             <DashboardViewerProvider>

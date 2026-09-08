@@ -3,7 +3,10 @@
 import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from "react";
 import { Loader2 } from "lucide-react";
 
-/** Shell héro cinématique partagé (overview, onboarding, musical-profile). */
+/**
+ * Legacy Crystal: cinematic hero card (glow, rounded-[2rem], ring).
+ * Forbidden on Overview Crystal. Keep for onboarding / musical-profile / other pages.
+ */
 export const DASHBOARD_CINEMATIC_HERO_SHELL =
   "relative overflow-hidden rounded-[2rem] border border-accent-violet/30 bg-gray-950 text-white shadow-2xl shadow-accent-violet/25 ring-1 ring-accent-violet/15";
 
@@ -30,13 +33,80 @@ export function DashboardCinematicHeroBg() {
   );
 }
 
-/** Carte verre pour étapes onboarding et panneaux légers. */
+/** Onboarding glass card. Not Crystal chrome — use DASHBOARD_GLASS_CHROME for sidebar/header. */
 export const DASHBOARD_GLASS_CARD_SHELL =
   "relative overflow-hidden rounded-3xl border border-card-border bg-surface-glass px-6 py-8 shadow-card backdrop-blur-xl sm:px-8 sm:py-10";
 
-/** Carte widget pour sections de données (leaders, tendances). */
+/**
+ * Legacy Crystal: widget data card (rounded-[2rem], shadow-card, hover lift).
+ * Forbidden on Overview Crystal. Keep for other dashboard pages until they migrate.
+ */
 export const DASHBOARD_WIDGET_CARD_SHELL =
   "relative overflow-hidden rounded-[2rem] border border-card-border bg-gradient-to-br from-white via-card to-surface shadow-card ring-1 ring-white/70 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-card-hover dark:border-white/[0.08] dark:from-[#06070d] dark:via-[#070812] dark:to-[#0c0e18] dark:ring-white/[0.06]";
+
+/** Crystal chrome (sidebar, header, segmented track). Not a content card. */
+export const DASHBOARD_GLASS_CHROME =
+  "dashboard-glass-chrome border-glass-hairline";
+
+/** Replay-style floating sidebar pane. Inset, rounded, more translucent than header chrome. */
+export const DASHBOARD_GLASS_SIDEBAR =
+  "dashboard-glass-sidebar border border-glass-hairline";
+
+/** Replay / iOS segmented track: glass fill, hairline, no chip-cards. */
+export const DASHBOARD_SEGMENTED_TRACK =
+  "dashboard-glass-chrome inline-flex max-w-full items-center gap-0.5 overflow-x-auto rounded-full border border-glass-hairline p-1";
+
+/** Inactive segmented pill. Pair with DASHBOARD_SEGMENTED_PILL_ACTIVE. */
+export const DASHBOARD_SEGMENTED_PILL =
+  "inline-flex min-h-11 shrink-0 items-center justify-center rounded-full px-3.5 text-[13px] font-medium text-muted transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+
+/** Active segmented pill: opaque contrast, no brand glow. */
+export const DASHBOARD_SEGMENTED_PILL_ACTIVE =
+  "inline-flex min-h-11 shrink-0 items-center justify-center rounded-full bg-surface-raised px-3.5 text-[13px] font-semibold text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:bg-white/12";
+
+/** Sidebar nav row (inactive). Soft Replay pill, not a card. */
+export const DASHBOARD_NAV_ITEM =
+  "group flex min-h-11 items-center rounded-[10px] text-[13px] font-medium text-muted transition-colors hover:bg-black/[0.05] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:hover:bg-white/[0.08]";
+
+/** Sidebar nav row (active): denser frost, no brand tick. */
+export const DASHBOARD_NAV_ITEM_ACTIVE =
+  "group flex min-h-11 items-center rounded-[10px] bg-black/[0.07] text-[13px] font-semibold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:bg-white/12";
+
+/** 13px muted eyebrow above a canvas section title. */
+export const DASHBOARD_SECTION_EYEBROW =
+  "text-[13px] font-medium text-muted";
+
+/** Large section title on the canvas (not a widget header). */
+export const DASHBOARD_SECTION_TITLE =
+  "text-[1.75rem] font-semibold leading-tight tracking-tight text-foreground";
+
+/** Square artwork frame (album / track). Consumer sets width. */
+export const DASHBOARD_FEATURED_MEDIA =
+  "relative aspect-square overflow-hidden rounded-[12px] bg-surface";
+
+/** Round artwork frame (artist). Consumer sets width. */
+export const DASHBOARD_FEATURED_MEDIA_ARTIST =
+  "relative aspect-square overflow-hidden rounded-full bg-surface";
+
+/** iOS grouped list row. Combine with DASHBOARD_LIST_SEPARATOR. */
+export const DASHBOARD_LIST_ROW =
+  "flex min-h-11 w-full items-center gap-3 py-2.5 text-left";
+
+export const DASHBOARD_LIST_SEPARATOR =
+  "border-b border-glass-hairline last:border-b-0";
+
+/** KPI strip container (not STATS_SHELL cards). */
+export const DASHBOARD_METRIC_STRIP =
+  "flex flex-wrap";
+
+export const DASHBOARD_METRIC_CELL =
+  "flex min-w-0 flex-1 flex-col gap-1 border-r border-glass-hairline px-5 py-1 first:pl-0 last:border-r-0 last:pr-0";
+
+export const DASHBOARD_METRIC_VALUE =
+  "text-2xl font-semibold tracking-tight tabular-nums text-foreground";
+
+export const DASHBOARD_METRIC_LABEL =
+  "text-[13px] text-muted";
 
 export const DASHBOARD_BTN_GRADIENT =
   "group inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-6 py-3 text-sm font-semibold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:opacity-[0.98] hover:shadow-card-hover active:translate-y-0 disabled:pointer-events-none disabled:opacity-60 disabled:hover:translate-y-0";

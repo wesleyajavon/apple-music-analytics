@@ -135,18 +135,23 @@ export function ThemeSwitcher({
 
   const showIconOnly = collapsed;
   const showCompactLabel = compactOnMobile && !collapsed;
+  const chromeTrigger = placement === "top" || collapsed;
 
   return (
     <div className="relative shrink-0" ref={dropdownRef}>
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center rounded-xl text-sm font-medium transition-all duration-200 text-muted hover:bg-primary/10 hover:text-foreground ${
+        className={`flex items-center text-[13px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+          chromeTrigger
+            ? "rounded-lg text-muted hover:bg-white/40 hover:text-foreground dark:hover:bg-white/[0.06]"
+            : "rounded-xl text-sm text-muted hover:bg-primary/10 hover:text-foreground"
+        } ${
           showIconOnly
-            ? "justify-center p-2.5"
+            ? "h-11 w-11 justify-center"
             : showCompactLabel
               ? "justify-center p-2.5 sm:gap-2 sm:justify-start sm:px-3 sm:py-2.5"
-              : "gap-2 w-full px-3 py-2.5"
+              : "min-h-11 w-full gap-2 px-3"
         }`}
         aria-label={t("ariaLabel")}
         aria-expanded={isOpen}

@@ -68,22 +68,25 @@ export function LanguageSwitcher({
 
   const showIconOnly = collapsed;
   const showCompactLabel = compactOnMobile && !collapsed;
+  const chromeTrigger = !onDark && (placement === "top" || collapsed);
 
   return (
     <div className="relative shrink-0" ref={dropdownRef}>
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center rounded-xl text-sm font-medium transition-all duration-200 ${
+        className={`flex items-center font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
           onDark
-            ? "text-white/70 hover:bg-white/10 hover:text-white"
-            : "text-muted hover:bg-primary/10 hover:text-foreground"
+            ? "rounded-xl text-sm text-white/70 hover:bg-white/10 hover:text-white"
+            : chromeTrigger
+              ? "rounded-lg text-[13px] text-muted hover:bg-white/40 hover:text-foreground dark:hover:bg-white/[0.06]"
+              : "rounded-xl text-sm text-muted hover:bg-primary/10 hover:text-foreground"
         } ${
           showIconOnly
-            ? "justify-center p-2.5"
+            ? "h-11 w-11 justify-center"
             : showCompactLabel
               ? "justify-center p-2.5 sm:gap-2 sm:justify-start sm:px-3 sm:py-2.5"
-              : "gap-2 w-full px-3 py-2.5"
+              : "min-h-11 w-full gap-2 px-3"
         }`}
         aria-label={t("ariaLabel")}
         aria-expanded={isOpen}

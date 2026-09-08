@@ -19,6 +19,8 @@ const config: Config = {
         "surface-dashboard": "rgb(var(--surface-dashboard-rgb) / <alpha-value>)",
         "card-surface": "var(--card-surface)",
         "card-border": "var(--card-border)",
+        "glass-chrome": "var(--glass-chrome)",
+        "glass-hairline": "var(--glass-hairline)",
         border: "rgb(var(--border-rgb) / <alpha-value>)",
         muted: "rgb(var(--muted-rgb) / <alpha-value>)",
         primary: "rgb(var(--primary-rgb) / <alpha-value>)",

@@ -203,3 +203,4 @@ Un visiteur arrive sur la **landing i18n**, s'**authentifie via Supabase** (ou c
 - [`README.md`](../README.md) — setup et scripts
 - [`docs/API.md`](API.md) — référence des endpoints
 - [`docs/SUPABASE_AUTH_IMPLEMENTATION.md`](SUPABASE_AUTH_IMPLEMENTATION.md) — auth Supabase
+- [`docs/CRYSTAL_PLAYBOOK.md`](CRYSTAL_PLAYBOOK.md) — restyle « produit Apple » (verre, sidebar, Overview)

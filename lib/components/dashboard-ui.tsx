@@ -48,13 +48,17 @@ export const DASHBOARD_WIDGET_CARD_SHELL =
 export const DASHBOARD_GLASS_CHROME =
   "dashboard-glass-chrome border-glass-hairline";
 
-/** Replay-style floating sidebar pane. Inset, rounded, more translucent than header chrome. */
+/** Replay-style floating chrome pane (sidebar + desktop header). */
 export const DASHBOARD_GLASS_SIDEBAR =
   "dashboard-glass-sidebar border border-glass-hairline";
 
-/** Replay / iOS segmented track: glass fill, hairline, no chip-cards. */
+/** Same frost, radius, and shadow for sidebar and desktop header. */
+export const DASHBOARD_GLASS_FLOATING_PANE =
+  `${DASHBOARD_GLASS_SIDEBAR} rounded-[1.25rem] shadow-[0_8px_40px_rgb(23_19_33_/_0.08)] dark:shadow-[0_12px_40px_rgb(0_0_0_/_0.45)]`;
+
+/** Replay / iOS segmented track: same frost as floating chrome, hairline, no chip-cards. */
 export const DASHBOARD_SEGMENTED_TRACK =
-  "dashboard-glass-chrome inline-flex max-w-full items-center gap-0.5 overflow-x-auto rounded-full border border-glass-hairline p-1";
+  "dashboard-glass-sidebar inline-flex max-w-full items-center gap-0.5 overflow-x-auto rounded-full border border-glass-hairline p-1";
 
 /** Inactive segmented pill. Pair with DASHBOARD_SEGMENTED_PILL_ACTIVE. */
 export const DASHBOARD_SEGMENTED_PILL =

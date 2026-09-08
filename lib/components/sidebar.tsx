@@ -13,14 +13,14 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { usePublicDemo } from "@/lib/providers/public-demo-provider";
 import { useDuetFriends } from "@/lib/hooks/use-duet";
 import {
-  DASHBOARD_GLASS_SIDEBAR,
+  DASHBOARD_GLASS_FLOATING_PANE,
   DASHBOARD_NAV_ITEM,
   DASHBOARD_NAV_ITEM_ACTIVE,
 } from "@/lib/components/dashboard-ui";
 
 const STORAGE_KEY = "sidebar-collapsed";
 const SIDEBAR_PANE =
-  `${DASHBOARD_GLASS_SIDEBAR} hidden rounded-[1.25rem] shadow-[0_8px_40px_rgb(23_19_33_/_0.08)] lg:fixed lg:bottom-3 lg:left-3 lg:top-3 lg:z-20 lg:flex lg:flex-col dark:shadow-[0_12px_40px_rgb(0_0_0_/_0.45)]`;
+  `${DASHBOARD_GLASS_FLOATING_PANE} hidden lg:fixed lg:bottom-3 lg:left-3 lg:top-3 lg:z-20 lg:flex lg:flex-col`;
 const SIDEBAR_SPACER_EXPANDED = "hidden lg:block lg:w-[17.5rem] lg:shrink-0";
 const SIDEBAR_SPACER_COLLAPSED = "hidden lg:block lg:w-[6.5rem] lg:shrink-0";
 

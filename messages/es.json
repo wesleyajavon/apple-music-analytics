@@ -2981,6 +2981,13 @@
         "all": "Todo",
         "custom": "Personalizado"
       },
+      "presetsFull": {
+        "7d": "7 días",
+        "30d": "30 días",
+        "ytd": "Este año",
+        "all": "Todo el tiempo",
+        "custom": "Personalizado"
+      },
       "customDialogLabel": "Rango de fechas personalizado",
       "customStart": "Inicio",
       "customEnd": "Fin",

@@ -2335,7 +2335,7 @@
     "heroStatBadge": "Signal quality",
     "heroStatTag": "Grounded in streams",
     "heroTrust1": "Cards summarize aggregates already in Soundprint—nothing is fabricated from the web.",
-    "heroTrust2": "Human vs technical only changes tone; the underlying stats stay identical.",
+    "heroTrust2": "Cards summarize aggregates already in Soundprint—phrased in plain language.",
     "heroTrust3": "Uses the date range active on your dashboard.",
     "ctaAskSoundprint": "Ask your Soundprint",
     "ctaOverview": "Music overview",
@@ -2355,18 +2355,12 @@
     "changeDates": "Modify the dates to get insights.",
     "notEnoughData": "Not enough data",
     "importDescription": "Import your streaming data (Spotify/Apple exports recommended) and select a period to get insights.",
-    "yourInsights": "Four relations your rankings hide — one-hit loyalty, comebacks, genre × time, first heard vs now.",
+    "yourInsights": "What your top lists miss — songs on loop, surprise returns, genres by time of day, and how your taste shifted.",
     "insightsFromData": "Insights generated from your aggregated streaming data.",
-    "spotlightTitle": "Moments the graphs miss",
-    "spotlightHint": "Not a restated top 5 — each card is a contrast, gap, or first time.",
+    "spotlightTitle": "Beyond the rankings",
+    "spotlightHint": "Unexpected takes pulled from your streams.",
     "cached": "(cached result)",
     "quotaRemaining": "Quota: {count} remaining",
-    "styleToggle": {
-      "label": "Insight style",
-      "ariaLabel": "Choose AI insight style",
-      "human": "Human",
-      "technical": "Technical"
-    },
     "loadingShort": "Loading...",
     "mobile": {
       "eyebrow": "What charts miss",
@@ -2391,11 +2385,11 @@
       "insightDiversity": "You explored {artistCount} artists and {trackCount} distinct tracks in this window."
     },
     "kinds": {
-      "oneHit": "One-hit",
-      "catalog": "Deep catalog",
-      "comeback": "Comeback",
-      "genreSlot": "Genre × time",
-      "firstHeard": "First heard"
+      "oneHit": "On loop",
+      "catalog": "Deep cuts",
+      "comeback": "Came back",
+      "genreSlot": "Time of day",
+      "firstHeard": "First time"
     },
     "openMoment": "Open in dashboard",
     "momentMetric": "Anchored figure"

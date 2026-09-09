@@ -79,8 +79,10 @@ describe("buildFallbackMoments", () => {
     const withArtist = fact("oneHit", 9, "oneHit:elton");
     withArtist.artistId = "artist-elton";
     withArtist.artistName = "Elton John";
+    withArtist.imageUrl = "https://cdn.example/elton.jpg";
     const [moment] = buildFallbackMoments([withArtist], "en");
     expect(moment?.artistId).toBe("artist-elton");
     expect(moment?.artistName).toBe("Elton John");
+    expect(moment?.imageUrl).toBe("https://cdn.example/elton.jpg");
   });
 });

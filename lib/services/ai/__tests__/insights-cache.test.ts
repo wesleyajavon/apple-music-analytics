@@ -43,12 +43,6 @@ describe("insights-cache", () => {
       const key2 = computeCacheKey(mockSummary, "en");
       expect(key1).not.toBe(key2);
     });
-
-    it("returns different hash for different insight styles", () => {
-      const key1 = computeCacheKey(mockSummary, "fr", "human");
-      const key2 = computeCacheKey(mockSummary, "fr", "technical");
-      expect(key1).not.toBe(key2);
-    });
   });
 
   describe("getCachedInsights / setCachedInsights (memory fallback)", () => {
@@ -114,7 +108,7 @@ describe("insights-cache", () => {
 
       await setCachedInsights("store-key", ["Insight"]);
       expect(setex).toHaveBeenCalledWith(
-        "ai:insights:v3:store-key",
+        "ai:insights:v4:store-key",
         24 * 60 * 60,
         JSON.stringify({ insights: ["Insight"] })
       );

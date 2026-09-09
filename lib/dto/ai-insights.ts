@@ -40,9 +40,8 @@ export interface YearOverYearDelta {
 }
 
 /**
- * Presentation style for generated insights.
- * "technical" preserves the existing metric-heavy output.
- * "human" keeps the facts but explains them in a more natural way.
+ * @deprecated Ignored — insights always use human tone.
+ * Kept so older clients that still send the field do not fail validation.
  */
 export type AiInsightsStyle = "human" | "technical";
 
@@ -67,7 +66,9 @@ export interface AiInsightsInput {
   /** Optional: peak day/hour from temporal analysis */
   peakDay?: { dayName: string; listens: number };
   peakHour?: { hour: number; listens: number };
-  /** Optional presentation style. Defaults to "technical" for backwards compatibility. */
+  /**
+   * @deprecated Ignored — insights always use human tone.
+   */
   insightStyle?: AiInsightsStyle;
   /** Deterministic relational facts — when set, the summarizer omits isolated tops. */
   relationalFacts?: string[];
@@ -103,6 +104,8 @@ export interface AiInsightMoment {
   /** When set, the UI opens the artist insights overlay instead of navigating. */
   artistId?: string;
   artistName?: string;
+  /** Artist portrait from DB when available; UI may hydrate via Spotify if null. */
+  imageUrl?: string | null;
 }
 
 export interface AiInsightsResponse {

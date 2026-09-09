@@ -11,15 +11,8 @@ import {
   DASHBOARD_LIST_ROW,
   DASHBOARD_LIST_ROW_INTERACTIVE,
   DASHBOARD_LIST_SEPARATOR,
-  DASHBOARD_METRIC_CELL,
-  DASHBOARD_METRIC_LABEL,
-  DASHBOARD_METRIC_STRIP,
-  DASHBOARD_METRIC_VALUE,
   DASHBOARD_SECTION_EYEBROW,
   DASHBOARD_SECTION_TITLE,
-  DASHBOARD_SEGMENTED_PILL,
-  DASHBOARD_SEGMENTED_PILL_ACTIVE,
-  DASHBOARD_SEGMENTED_TRACK,
 } from "@/lib/components/dashboard-ui";
 import { OverviewHeroFrame } from "@/lib/components/overview-hero";
 import { useAiInsights } from "@/lib/hooks/use-ai-insights";
@@ -37,12 +30,13 @@ import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
 import { AiUnavailableEmptyState } from "@/lib/components/ai-unavailable-empty-state";
 import { InteractiveAiGenreBackfillNotice } from "@/lib/components/interactive-ai-genre-backfill-notice";
+import { ArtistAvatarHydrated } from "@/lib/components/artist-avatar-hydrated";
 import { useInteractiveAiBlockedByGenreBackfill } from "@/lib/hooks/use-interactive-ai-blocked-by-genre-backfill";
 import {
   isGroqDailyQuotaError,
   isGroqGenreClassificationBlockingError,
 } from "@/lib/utils/groq-quota-message";
-import type { AiInsightMoment, AiInsightsStyle } from "@/lib/dto/ai-insights";
+import type { AiInsightMoment } from "@/lib/dto/ai-insights";
 import type { ArtistStatsDto } from "@/lib/dto/artist";
 import { ArtistUserInsightsPanel } from "@/lib/components/artist-user-insights-panel";
 import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
@@ -55,7 +49,7 @@ function artistPreviewFromMoment(
   return {
     artistId: moment.artistId ?? "",
     artistName: moment.artistName ?? "",
-    imageUrl: null,
+    imageUrl: moment.imageUrl ?? null,
     listenCount: 0,
     uniqueTracks: 0,
     firstListenDate: startDate ?? "",
@@ -72,113 +66,17 @@ function formatDateRange(startDate?: string, endDate?: string, locale?: string):
   return `${start.toLocaleDateString(loc, { month: "short", day: "numeric", year: "numeric" })} – ${end.toLocaleDateString(loc, { month: "short", day: "numeric", year: "numeric" })}`;
 }
 
-function InsightStyleToggle({
-  insightStyle,
-  onStyleChange,
-}: {
-  insightStyle: AiInsightsStyle;
-  onStyleChange: (style: AiInsightsStyle) => void;
-}) {
-  const t = useTranslations("ai-insights");
-  return (
-    <div className="flex w-full max-w-md flex-col gap-2" role="group" aria-label={t("styleToggle.ariaLabel")}>
-      <span className="text-[13px] font-medium text-muted">{t("styleToggle.label")}</span>
-      <div className={DASHBOARD_SEGMENTED_TRACK}>
-        {(["human", "technical"] as const).map((style) => {
-          const isActive = insightStyle === style;
-          return (
-            <button
-              key={style}
-              type="button"
-              aria-pressed={isActive}
-              onClick={() => onStyleChange(style)}
-              className={isActive ? DASHBOARD_SEGMENTED_PILL_ACTIVE : DASHBOARD_SEGMENTED_PILL}
-            >
-              {t(`styleToggle.${style}`)}
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-function AiInsightsMetricStrip({
-  insightCount,
-  insightStyle,
-  cached,
-  rateLimitRemaining,
-  loading = false,
-}: {
-  insightCount?: number;
-  insightStyle?: AiInsightsStyle;
-  cached?: boolean;
-  rateLimitRemaining?: number;
-  loading?: boolean;
-}) {
-  const t = useTranslations("ai-insights");
-  const statusText =
-    typeof rateLimitRemaining === "number"
-      ? t("quotaRemaining", { count: rateLimitRemaining })
-      : cached
-        ? t("cached")
-        : t("heroFresh");
-
-  const metrics = [
-    {
-      key: "count",
-      label: t("heroStatInsights"),
-      value: insightCount != null ? String(insightCount) : null,
-    },
-    {
-      key: "tone",
-      label: t("heroStatTone"),
-      value: insightStyle ? t(`styleToggle.${insightStyle}`) : null,
-    },
-    {
-      key: "status",
-      label: t("heroStatStatus"),
-      value: loading ? null : statusText,
-    },
-  ];
-
-  return (
-    <div
-      className={`${DASHBOARD_METRIC_STRIP} w-full max-lg:flex-nowrap max-lg:overflow-x-auto`}
-      aria-busy={loading || undefined}
-    >
-      {metrics.map((metric) => (
-        <div key={metric.key} className={`${DASHBOARD_METRIC_CELL} max-lg:min-w-[10.5rem] max-lg:flex-none`}>
-          <span className={DASHBOARD_METRIC_LABEL}>{metric.label}</span>
-          {metric.value == null ? (
-            <span
-              className={`${DASHBOARD_METRIC_VALUE} inline-block h-8 w-20 animate-pulse rounded bg-black/10 dark:bg-white/10`}
-            />
-          ) : (
-            <span className={DASHBOARD_METRIC_VALUE}>{metric.value}</span>
-          )}
-        </div>
-      ))}
-    </div>
-  );
-}
-
 function AiInsightsMasthead({
   description,
   badgeLabel,
-  insightStyleToggle,
-  stats,
 }: {
   description: string;
   badgeLabel: string;
-  insightStyleToggle: ReactNode;
-  stats: ReactNode | null;
 }) {
   const t = useTranslations("ai-insights");
   return (
     <OverviewHeroFrame title={t("title")} description={description}>
       <p className="mt-3 text-[13px] font-medium text-muted">{badgeLabel}</p>
-      <div className="mt-5">{insightStyleToggle}</div>
       <div className="mt-6 flex flex-wrap gap-3">
         <Link href="/dashboard/ask-your-soundprint" className={DASHBOARD_BTN_OUTLINE}>
           <MessageSquareText className="h-4 w-4" aria-hidden />
@@ -189,7 +87,6 @@ function AiInsightsMasthead({
           {t("ctaOverview")}
         </Link>
       </div>
-      {stats ? <div className="mt-8">{stats}</div> : null}
     </OverviewHeroFrame>
   );
 }
@@ -207,6 +104,20 @@ function InsightMomentRow({
   const className = `${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_ROW_INTERACTIVE} ${DASHBOARD_LIST_SEPARATOR} w-full text-left`;
   const inner = (
     <>
+      {moment.artistId && moment.artistName ? (
+        <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full">
+          <ArtistAvatarHydrated
+            artistId={moment.artistId}
+            artistName={moment.artistName}
+            imageUrl={moment.imageUrl}
+            avatarApiSize={80}
+            alt=""
+            width={40}
+            height={40}
+            className="h-full w-full object-cover"
+          />
+        </div>
+      ) : null}
       <div className="min-w-0 flex-1 space-y-1">
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-[13px] font-medium text-muted">{t(`kinds.${moment.kind}`)}</span>
@@ -253,6 +164,7 @@ function InsightListSkeleton() {
     <div className="space-y-0" aria-busy="true">
       {[1, 2, 3, 4, 5].map((i) => (
         <div key={i} className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_SEPARATOR}`}>
+          <div className="h-10 w-10 shrink-0 animate-pulse rounded-full bg-black/10 dark:bg-white/10" />
           <div className="h-4 w-full animate-pulse rounded bg-black/10 dark:bg-white/10" />
         </div>
       ))}
@@ -277,7 +189,6 @@ function AiInsightsContent() {
   const searchParams = useSearchParams();
   const userId = searchParams.get("userId") ?? undefined;
   const { startDate, endDate, isLoading: isRangeLoading } = useListenDateRange();
-  const [insightStyle, setInsightStyle] = useState<AiInsightsStyle>("human");
   const [artistOverlayMoment, setArtistOverlayMoment] = useState<AiInsightMoment | null>(null);
   const withFilters = useMemo(
     () => (href: string) => mergeDashboardSearchParams(href, searchParams),
@@ -286,7 +197,6 @@ function AiInsightsContent() {
   const askHref = withFilters("/dashboard/ask-your-soundprint");
 
   const { data, isLoading, error, refetch } = useAiInsights(startDate, endDate, {
-    insightStyle,
     userId,
   });
   const isLoadingOrFetching = isRangeLoading || isLoading;
@@ -304,8 +214,6 @@ function AiInsightsContent() {
     setArtistOverlayMoment(moment);
   }, []);
 
-  const styleToggle = <InsightStyleToggle insightStyle={insightStyle} onStyleChange={setInsightStyle} />;
-
   if (interactiveAiBlockedByGenreBackfill && !isRangeLoading) {
     return splitScreen(
       <AiInsightsMobileBackfill locale={locale} startDate={startDate} endDate={endDate} />,
@@ -313,8 +221,6 @@ function AiInsightsContent() {
         <AiInsightsMasthead
           badgeLabel={badgeLabelBase}
           description={t("yourInsights")}
-          stats={null}
-          insightStyleToggle={styleToggle}
         />
         <InteractiveAiGenreBackfillNotice />
       </div>,
@@ -328,8 +234,6 @@ function AiInsightsContent() {
         <AiInsightsMasthead
           badgeLabel={t("loadingShort")}
           description={t("generating")}
-          stats={<AiInsightsMetricStrip loading />}
-          insightStyleToggle={styleToggle}
         />
         <section className="w-full min-w-0" aria-labelledby="ai-insights-spotlight-title">
           <p className={DASHBOARD_SECTION_EYEBROW}>{t("spotlightHint")}</p>
@@ -352,8 +256,6 @@ function AiInsightsContent() {
           <AiInsightsMasthead
             badgeLabel={badgeLabelBase}
             description={t("yourInsights")}
-            stats={null}
-            insightStyleToggle={styleToggle}
           />
           <InteractiveAiGenreBackfillNotice force />
         </div>,
@@ -369,8 +271,6 @@ function AiInsightsContent() {
         <AiInsightsMasthead
           badgeLabel={badgeLabelBase}
           description={t("errorLoading")}
-          stats={null}
-          insightStyleToggle={styleToggle}
         />
         <div>
           <ErrorState variant="startup" error={error} message={t("errorMessage")} onRetry={handleRetry} />
@@ -392,8 +292,6 @@ function AiInsightsContent() {
         <AiInsightsMasthead
           badgeLabel={badgeLabelBase}
           description={t("yourInsights")}
-          stats={null}
-          insightStyleToggle={styleToggle}
         />
         <AiUnavailableEmptyState reason={data.aiUnavailableReason ?? "consent"} onGranted={() => refetch()} />
       </div>,
@@ -407,8 +305,6 @@ function AiInsightsContent() {
         <AiInsightsMasthead
           badgeLabel={badgeLabelBase}
           description={t("noInsights")}
-          stats={null}
-          insightStyleToggle={styleToggle}
         />
         <EmptyState
           variant="startup"
@@ -425,15 +321,11 @@ function AiInsightsContent() {
       {splitScreen(
         <AiInsightsMobileExperience
           askHref={askHref}
-          cached={data.cached}
           endDate={endDate}
-          insightStyle={insightStyle}
           insights={data.insights}
           locale={locale}
           moments={data.moments}
           onOpenArtist={handleOpenArtist}
-          onStyleChange={setInsightStyle}
-          rateLimitRemaining={data.rateLimit?.remaining}
           startDate={startDate}
           withFilters={withFilters}
         />,
@@ -441,15 +333,6 @@ function AiInsightsContent() {
           <AiInsightsMasthead
             badgeLabel={badgeLabelBase}
             description={t("yourInsights")}
-            stats={
-              <AiInsightsMetricStrip
-                insightCount={data.insights.length}
-                insightStyle={insightStyle}
-                cached={data.cached}
-                rateLimitRemaining={data.rateLimit?.remaining}
-              />
-            }
-            insightStyleToggle={styleToggle}
           />
 
           <section className="w-full min-w-0" aria-labelledby="ai-insights-spotlight-title">
@@ -502,13 +385,6 @@ function AiInsightsFallback() {
       <AiInsightsMasthead
         badgeLabel={t("loadingShort")}
         description={t("loadingShort")}
-        stats={<AiInsightsMetricStrip loading />}
-        insightStyleToggle={
-          <div className="flex w-full max-w-md flex-col gap-2">
-            <div className="h-3 w-24 animate-pulse rounded bg-black/10 dark:bg-white/10" />
-            <div className="h-11 w-full max-w-xs animate-pulse rounded-full bg-black/10 dark:bg-white/10" />
-          </div>
-        }
       />
       <InsightListSkeleton />
     </div>,

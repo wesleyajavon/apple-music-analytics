@@ -2337,7 +2337,7 @@
     "heroStatBadge": "Qualité du signal",
     "heroStatTag": "Ancré dans les streams",
     "heroTrust1": "Les lectures résument les agrégats déjà dans Soundprint — rien n’est inventé depuis le web.",
-    "heroTrust2": "Humain ou technique ne change que le ton ; les chiffres sous-jacents restent les mêmes.",
+    "heroTrust2": "Les lectures résument les agrégats déjà dans Soundprint — formulées en langage simple.",
     "heroTrust3": "Utilise la plage de dates active sur votre tableau de bord.",
     "ctaAskSoundprint": "Interrogez votre Soundprint",
     "ctaOverview": "Vue Musique",
@@ -2357,18 +2357,12 @@
     "changeDates": "Modifiez les dates pour obtenir des lectures IA.",
     "notEnoughData": "Pas assez de données",
     "importDescription": "Importez vos données de streams (exports Spotify/Apple recommandés) et sélectionnez une période pour obtenir des lectures IA.",
-    "yourInsights": "Quatre relations que tes classements cachent — one-hit, comebacks, genre × créneau, première écoute vs maintenant.",
+    "yourInsights": "Ce que tes tops ne disent pas — titres en boucle, retours surprise, genres selon l’heure, et l’évolution de ton goût.",
     "insightsFromData": "Lectures IA générées à partir de vos données de streams agrégées.",
-    "spotlightTitle": "Moments que les graphes ratent",
-    "spotlightHint": "Pas un top 5 reformulé — chaque lecture est un contraste, un trou, ou une première fois.",
+    "spotlightTitle": "Au-delà des classements",
+    "spotlightHint": "Des lectures inattendues tirées de tes streams.",
     "cached": "(résultat en cache)",
     "quotaRemaining": "Quota: {count} restants",
-    "styleToggle": {
-      "label": "Style de lecture",
-      "ariaLabel": "Choisir le style des lectures IA",
-      "human": "Humain",
-      "technical": "Technique"
-    },
     "loadingShort": "Chargement...",
     "mobile": {
       "eyebrow": "Hors classements",
@@ -2393,10 +2387,10 @@
       "insightDiversity": "Vous avez exploré {artistCount} artistes et {trackCount} titres distincts sur cette période."
     },
     "kinds": {
-      "oneHit": "One-hit",
-      "catalog": "Catalogue profond",
-      "comeback": "Comeback",
-      "genreSlot": "Genre × moment",
+      "oneHit": "En boucle",
+      "catalog": "Tout l’artiste",
+      "comeback": "Retour",
+      "genreSlot": "Selon l’heure",
       "firstHeard": "Première fois"
     },
     "openMoment": "Ouvrir dans le tableau de bord",

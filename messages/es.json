@@ -2337,7 +2337,7 @@
     "heroStatBadge": "Calidad de señal",
     "heroStatTag": "Basado en streams",
     "heroTrust1": "Las tarjetas resumen agregados que ya están en Soundprint: nada inventado desde la web.",
-    "heroTrust2": "Humano vs técnico solo cambia el tono; los números de fondo son los mismos.",
+    "heroTrust2": "Las tarjetas resumen agregados que ya están en Soundprint, en lenguaje sencillo.",
     "heroTrust3": "Respeta el rango de fechas activo en tu panel.",
     "ctaAskSoundprint": "Pregunta a tu Soundprint",
     "ctaOverview": "Resumen musical",
@@ -2357,18 +2357,12 @@
     "changeDates": "Modifica las fechas para obtener insights.",
     "notEnoughData": "No hay suficientes datos",
     "importDescription": "Importa tus datos de streams (exportaciones Spotify/Apple recomendadas) y selecciona un período para obtener insights.",
-    "yourInsights": "Cuatro relaciones que tus rankings ocultan — one-hit, regresos, género × horario, primera escucha vs ahora.",
+    "yourInsights": "Lo que tus tops no cuentan — canciones en bucle, regresos, géneros según la hora, y cómo cambió tu gusto.",
     "insightsFromData": "Insights generados a partir de tus datos de streams agregados.",
-    "spotlightTitle": "Momentos que los gráficos no muestran",
-    "spotlightHint": "No es un top 5 reformulado — cada tarjeta es un contraste, un hueco o una primera vez.",
+    "spotlightTitle": "Más allá de los rankings",
+    "spotlightHint": "Lecturas inesperadas sacadas de tus streams.",
     "cached": "(resultado en caché)",
     "quotaRemaining": "Cuota: {count} restantes",
-    "styleToggle": {
-      "label": "Estilo de insight",
-      "ariaLabel": "Elegir el estilo de los insights de IA",
-      "human": "Humano",
-      "technical": "Técnico"
-    },
     "loadingShort": "Cargando...",
     "mobile": {
       "eyebrow": "Fuera del ranking",
@@ -2393,10 +2387,10 @@
       "insightDiversity": "Exploraste {artistCount} artistas y {trackCount} pistas distintas en esta ventana."
     },
     "kinds": {
-      "oneHit": "One-hit",
-      "catalog": "Catálogo profundo",
+      "oneHit": "En bucle",
+      "catalog": "Todo el artista",
       "comeback": "Regreso",
-      "genreSlot": "Género × momento",
+      "genreSlot": "Según la hora",
       "firstHeard": "Primera vez"
     },
     "openMoment": "Abrir en el panel",

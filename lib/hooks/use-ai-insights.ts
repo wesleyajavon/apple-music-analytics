@@ -8,7 +8,6 @@ import { useInteractiveAiBlockedByGenreBackfill } from "@/lib/hooks/use-interact
 import type {
   AiInsightsInput,
   AiInsightsResponse,
-  AiInsightsStyle,
   YearOverYearDelta,
 } from "@/lib/dto/ai-insights";
 import type { OverviewStatsWithTopArtists } from "./use-listening";
@@ -151,7 +150,6 @@ async function fetchAiInsights(
   startDate: string,
   endDate: string,
   locale: string,
-  insightStyle: AiInsightsStyle,
   userId?: string
 ): Promise<AiInsightsUiResponse> {
   const { prevStartDate, prevEndDate } = getPreviousPeriod(startDate, endDate);
@@ -199,7 +197,6 @@ async function fetchAiInsights(
       : "";
   const result = await apiClient.postWithMeta<AiInsightsResponse>(`/ai/insights${qs}`, {
     ...input,
-    insightStyle,
     locale,
   });
   return {
@@ -214,7 +211,6 @@ export const aiInsightsKeys = {
     startDate?: string;
     endDate?: string;
     locale?: string;
-    insightStyle?: AiInsightsStyle;
     userId?: string;
   }) => [...aiInsightsKeys.all, params] as const,
 };
@@ -230,13 +226,12 @@ export function useAiInsights(
   options?: Omit<
     UseQueryOptions<AiInsightsUiResponse, Error>,
     "queryKey" | "queryFn"
-  > & { insightStyle?: AiInsightsStyle; userId?: string }
+  > & { userId?: string }
 ) {
   const locale = useLocale();
   const hasValidRange = !!startDate && !!endDate;
   const blockedByGenreBackfill = useInteractiveAiBlockedByGenreBackfill();
   const {
-    insightStyle = "technical",
     userId,
     enabled: enabledOption,
     ...queryOptions
@@ -247,11 +242,10 @@ export function useAiInsights(
       startDate,
       endDate,
       locale,
-      insightStyle,
       userId,
     }),
     queryFn: () =>
-      fetchAiInsights(startDate!, endDate!, locale, insightStyle, userId),
+      fetchAiInsights(startDate!, endDate!, locale, userId),
     staleTime: AI_INSIGHTS_STALE_TIME,
     ...queryOptions,
     enabled:

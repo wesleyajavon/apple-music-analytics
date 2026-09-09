@@ -93,7 +93,7 @@ const AiInsightsInputSchema = z.object({
       listens: z.number().int().nonnegative(),
     })
     .optional(),
-  insightStyle: z.enum(["human", "technical"]).optional().default("technical"),
+  insightStyle: z.enum(["human", "technical"]).optional(),
   locale: z.string().optional(),
   /** Optionnel : rattache le quota Groq à un utilisateur (query `userId` prioritaire). */
   userId: z.string().optional(),
@@ -118,7 +118,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { locale: localeParam, insightStyle, ...inputData } = parseResult.data;
+    const { locale: localeParam, insightStyle: _insightStyle, ...inputData } =
+      parseResult.data;
     await assertRateLimit(request, {
       ...AI_INSIGHTS_RATE_LIMIT,
       userId,
@@ -151,7 +152,7 @@ export async function POST(request: NextRequest) {
     const summary = summarizeAnalytics(inputWithFacts, locale);
 
     // 2. Compute cache key from summary hash + locale
-    const cacheKey = computeCacheKey(summary, locale, insightStyle);
+    const cacheKey = computeCacheKey(summary, locale);
 
     // 3. Check cache first (cache logic separated from generation)
     const cached = await getCachedInsights(cacheKey);
@@ -177,7 +178,7 @@ export async function POST(request: NextRequest) {
     try {
       await assertInteractiveGroqNotBlockedByImportGenreBackfill(userId);
       await assertGroqUserQuotaForRequest(request, userId);
-      moments = await generateInsightMoments(facts, locale, insightStyle);
+      moments = await generateInsightMoments(facts, locale);
     } catch (error) {
       if (error instanceof AppError) throw error;
       moments = buildFallbackMoments(facts, locale);

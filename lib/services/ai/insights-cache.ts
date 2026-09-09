@@ -10,11 +10,11 @@
 
 import { createHash } from "crypto";
 import { getRedisClient } from "@/lib/redis";
-import type { AiInsightMoment, AiInsightsStyle } from "@/lib/dto/ai-insights";
+import type { AiInsightMoment } from "@/lib/dto/ai-insights";
 import type { AnalyticsSummary } from "./analytics-summarizer";
 import type { AiLocale } from "./locale-utils";
 
-const CACHE_PREFIX = "ai:insights:v3:";
+const CACHE_PREFIX = "ai:insights:v4:";
 const CACHE_TTL_SECONDS = 24 * 60 * 60; // 24 hours
 
 export type CachedInsightsPayload = {
@@ -54,15 +54,14 @@ function toPayload(
 }
 
 /**
- * Computes a deterministic hash of the exact LLM user-message body + locale + style.
+ * Computes a deterministic hash of the exact LLM user-message body + locale.
  * Uses `summary.text` (not `structured` alone) so the cache key matches what `generateInsights` sends to Groq.
  */
 export function computeCacheKey(
   summary: AnalyticsSummary,
-  locale: AiLocale,
-  insightStyle: AiInsightsStyle = "technical"
+  locale: AiLocale
 ): string {
-  const payload = summary.text + ":" + locale + ":" + insightStyle;
+  const payload = summary.text + ":" + locale + ":human";
   return createHash("sha256").update(payload, "utf8").digest("hex");
 }
 

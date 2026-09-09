@@ -58,7 +58,7 @@ describe("llm-service", () => {
     );
   });
 
-  it("uses human-readable prompt rules when requested", async () => {
+  it("uses human-readable prompt rules", async () => {
     process.env.GROQ_API_KEY = "test-key";
     mockChatCompletionsCreate.mockResolvedValue({
       choices: [
@@ -72,7 +72,7 @@ describe("llm-service", () => {
       ],
     });
 
-    await generateInsights(mockSummary, "fr", "human");
+    await generateInsights(mockSummary, "fr");
 
     expect(mockChatCompletionsCreate).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -167,7 +167,7 @@ describe("llm-service", () => {
       },
     ];
 
-    const moments = await generateInsightMoments(facts, "en", "human");
+    const moments = await generateInsightMoments(facts, "en");
     expect(moments).toHaveLength(1);
     expect(moments[0]?.title).toBe("One-hit gravity");
     expect(moments[0]?.body).toContain("71%");

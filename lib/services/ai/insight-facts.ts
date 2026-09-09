@@ -49,6 +49,7 @@ export interface InsightFact {
   href: string;
   artistId?: string;
   artistName?: string;
+  imageUrl?: string | null;
   /** Locale-neutral line the LLM may rephrase — names and numbers only. */
   promptLine: string;
   fallbackTitle: Record<AiLocale, string>;
@@ -58,6 +59,7 @@ export interface InsightFact {
 interface ArtistShapeRow {
   artist_id: string;
   artist_name: string;
+  image_url: string | null;
   listen_count: bigint | number;
   unique_tracks: bigint | number;
   top_track_title: string | null;
@@ -67,7 +69,9 @@ interface ArtistShapeRow {
 interface ComebackRow {
   track_id: string;
   track_title: string;
+  artist_id: string;
   artist_name: string;
+  image_url: string | null;
   gap_days: number | bigint;
   recent_listens: bigint | number;
   burst_start: Date;
@@ -86,6 +90,7 @@ interface GenreSlotRow {
 interface FirstHeardRow {
   artist_id: string;
   artist_name: string;
+  image_url: string | null;
   first_heard: Date;
   lifetime_listens: bigint | number;
   recent_listens: bigint | number;
@@ -198,7 +203,11 @@ export function buildFallbackMoments(
     metric: fact.metric,
     href: fact.href,
     ...(fact.artistId
-      ? { artistId: fact.artistId, artistName: fact.artistName }
+      ? {
+          artistId: fact.artistId,
+          artistName: fact.artistName,
+          imageUrl: fact.imageUrl ?? null,
+        }
       : {}),
   }));
 }
@@ -257,6 +266,7 @@ function oneHitFacts(rows: ArtistShapeRow[]): InsightFact[] {
       href: artistHref(oneHit.artist_name),
       artistId: oneHit.artist_id,
       artistName: oneHit.artist_name,
+      imageUrl: oneHit.image_url,
       promptLine: `${oneHit.share}% of ${oneHit.artist_name} plays are the single track "${oneHit.top_track_title}" (${oneHit.topListens}/${oneHit.listens} plays, ${oneHit.uniqueTracks} distinct tracks).${promptContrast}`,
       fallbackTitle: {
         en: "One-hit loyalty",
@@ -280,6 +290,7 @@ function oneHitFacts(rows: ArtistShapeRow[]): InsightFact[] {
       href: artistHref(catalog.artist_name),
       artistId: catalog.artist_id,
       artistName: catalog.artist_name,
+      imageUrl: catalog.image_url,
       promptLine: `${catalog.artist_name}: ${catalog.uniqueTracks} distinct tracks in ${catalog.listens} plays; top track is only ${catalog.share}% of that artist.`,
       fallbackTitle: {
         en: "Deep catalog",
@@ -309,6 +320,9 @@ function comebackFacts(rows: ComebackRow[]): InsightFact[] {
         score: (gapDays / 30) * logVolume(recent),
         metric: `${Math.round(gapDays)}d`,
         href: heatmapHref(burstDay),
+        artistId: row.artist_id,
+        artistName: row.artist_name,
+        imageUrl: row.image_url,
         promptLine: `Track "${row.track_title}" by ${row.artist_name} had a ${Math.round(gapDays)}-day gap, then ${recent} plays starting ${burstDay}.`,
         fallbackTitle: {
           en: "Comeback",
@@ -386,6 +400,7 @@ function firstHeardFacts(rows: FirstHeardRow[], rangeEnd: Date): InsightFact[] {
       href: artistHref(row.artist_name),
       artistId: row.artist_id,
       artistName: row.artist_name,
+      imageUrl: row.image_url,
       promptLine: `First played ${row.artist_name} on ${first}. ${recentShare}% of their ${lifetime} lifetime plays (${recent}) fall in the recent window of this range.`,
       fallbackTitle: {
         en: `Since ${yearLabel}`,
@@ -413,6 +428,7 @@ async function queryArtistShapes(
       SELECT
         a.id AS artist_id,
         a.name AS artist_name,
+        a."imageUrl" AS image_url,
         COUNT(*)::bigint AS listen_count,
         COUNT(DISTINCT t.id)::bigint AS unique_tracks
       FROM "Listen" l
@@ -421,7 +437,7 @@ async function queryArtistShapes(
       WHERE l."userId" = ${userId}
         AND l."playedAt" >= ${startAt}
         AND l."playedAt" <= ${endAt}
-      GROUP BY a.id, a.name
+      GROUP BY a.id, a.name, a."imageUrl"
       HAVING COUNT(*) >= 12
       ORDER BY COUNT(*) DESC
       LIMIT 40
@@ -443,6 +459,7 @@ async function queryArtistShapes(
     SELECT
       s.artist_id,
       s.artist_name,
+      s.image_url,
       s.listen_count,
       s.unique_tracks,
       tt.top_track_title,
@@ -463,7 +480,9 @@ async function queryComebacks(
       SELECT
         t.id AS track_id,
         t.title AS track_title,
+        a.id AS artist_id,
         a.name AS artist_name,
+        a."imageUrl" AS image_url,
         COUNT(*)::bigint AS recent_listens,
         MIN(l."playedAt") AS burst_start
       FROM "Listen" l
@@ -472,7 +491,7 @@ async function queryComebacks(
       WHERE l."userId" = ${userId}
         AND l."playedAt" >= ${recentStart}
         AND l."playedAt" <= ${endAt}
-      GROUP BY t.id, t.title, a.name
+      GROUP BY t.id, t.title, a.id, a.name, a."imageUrl"
       HAVING COUNT(*) >= 5
     ),
     prior AS (
@@ -488,7 +507,9 @@ async function queryComebacks(
     SELECT
       r.track_id,
       r.track_title,
+      r.artist_id,
       r.artist_name,
+      r.image_url,
       EXTRACT(EPOCH FROM (r.burst_start - p.last_before)) / 86400.0 AS gap_days,
       r.recent_listens,
       r.burst_start
@@ -570,6 +591,7 @@ async function queryFirstHeard(
       SELECT
         a.id AS artist_id,
         a.name AS artist_name,
+        a."imageUrl" AS image_url,
         COUNT(*)::bigint AS period_listens
       FROM "Listen" l
       JOIN "Track" t ON l."trackId" = t.id
@@ -577,7 +599,7 @@ async function queryFirstHeard(
       WHERE l."userId" = ${userId}
         AND l."playedAt" >= ${startAt}
         AND l."playedAt" <= ${endAt}
-      GROUP BY a.id, a.name
+      GROUP BY a.id, a.name, a."imageUrl"
       HAVING COUNT(*) >= 10
       ORDER BY COUNT(*) DESC
       LIMIT 40
@@ -585,6 +607,7 @@ async function queryFirstHeard(
     SELECT
       pa.artist_id,
       pa.artist_name,
+      pa.image_url,
       MIN(l."playedAt") AS first_heard,
       COUNT(*)::bigint AS lifetime_listens,
       COUNT(*) FILTER (
@@ -593,7 +616,7 @@ async function queryFirstHeard(
     FROM period_artists pa
     JOIN "Track" t ON t."artistId" = pa.artist_id
     JOIN "Listen" l ON l."trackId" = t.id AND l."userId" = ${userId}
-    GROUP BY pa.artist_id, pa.artist_name
+    GROUP BY pa.artist_id, pa.artist_name, pa.image_url
   `);
 }
 

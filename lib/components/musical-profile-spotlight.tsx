@@ -18,12 +18,14 @@ export function MusicalProfileSpotlight({
   isLoading,
   locale,
   seeAllHref,
+  onOpenArtistInsights,
 }: {
   titleId: string;
   artists: ArtistStatsDto[];
   isLoading: boolean;
   locale: string;
   seeAllHref: string;
+  onOpenArtistInsights: (artist: ArtistStatsDto, avatarColorIndex: number) => void;
 }) {
   const t = useTranslations("musical-profile");
   const tArtists = useTranslations("artists");
@@ -33,7 +35,13 @@ export function MusicalProfileSpotlight({
     [artists]
   );
   const items = useMemo(
-    () => toArtistReplayItems(visible, locale, tArtists("listensCount"), (name) => name),
+    () =>
+      toArtistReplayItems(
+        visible,
+        locale,
+        tArtists("listensCount"),
+        (name) => tArtists("artistInsightsAriaOpen", { name })
+      ),
     [locale, tArtists, visible]
   );
 
@@ -56,7 +64,16 @@ export function MusicalProfileSpotlight({
       {isLoading ? (
         <ReplayRankingSkeleton count={MUSICAL_PROFILE_SPOTLIGHT_LIMIT} />
       ) : (
-        <ReplayRankingGrid items={items} maxItems={MUSICAL_PROFILE_SPOTLIGHT_LIMIT} {...pager} />
+        <ReplayRankingGrid
+          items={items}
+          maxItems={MUSICAL_PROFILE_SPOTLIGHT_LIMIT}
+          onSelect={(item, index) => {
+            const artist = visible[index];
+            if (!artist || artist.artistId !== item.id) return;
+            onOpenArtistInsights(artist, index);
+          }}
+          {...pager}
+        />
       )}
     </ReplayRankingSection>
   );

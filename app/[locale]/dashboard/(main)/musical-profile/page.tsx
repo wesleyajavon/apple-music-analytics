@@ -1,11 +1,12 @@
 "use client";
 
-import { Suspense, useMemo } from "react";
+import { Suspense, useCallback, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { usePathname } from "@/i18n/navigation";
 import { apiClient } from "@/lib/api-client";
+import { ArtistUserInsightsPanel } from "@/lib/components/artist-user-insights-panel";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
 import { ErrorState } from "@/lib/components/error-state";
 import { getAiInsightsLabels } from "@/lib/constants/ai-insights-labels";
@@ -167,6 +168,15 @@ function MusicalProfileContent() {
   const { data: temporalData, isLoading: temporalLoading, error: temporalError } =
     useTemporalAnalysis(startDate, endDate, userId);
 
+  const [artistInsightsTarget, setArtistInsightsTarget] = useState<{
+    artist: ArtistStatsDto;
+    avatarColorIndex: number;
+  } | null>(null);
+
+  const handleOpenArtistInsights = useCallback((artist: ArtistStatsDto, avatarColorIndex: number) => {
+    setArtistInsightsTarget({ artist, avatarColorIndex });
+  }, []);
+
   const topArtists = useMemo(
     () => artistsData?.topArtists ?? [],
     [artistsData?.topArtists]
@@ -280,6 +290,7 @@ function MusicalProfileContent() {
         uniqueArtists={overview?.uniqueArtists}
         uniqueTracks={overview?.uniqueTracks}
         withFilters={withFilters}
+        onOpenArtistInsights={handleOpenArtistInsights}
       />
 
       <div className={DESKTOP_CANVAS}>
@@ -300,6 +311,7 @@ function MusicalProfileContent() {
           isLoading={isLoading}
           locale={locale}
           seeAllHref={seeAllArtistsHref}
+          onOpenArtistInsights={handleOpenArtistInsights}
         />
         <MusicalProfileDestinations
           titleId="musical-profile-desktop-explore-title"
@@ -308,6 +320,18 @@ function MusicalProfileContent() {
           duetHref={withFilters("/dashboard/duet/friends")}
         />
       </div>
+
+      <ArtistUserInsightsPanel
+        open={artistInsightsTarget != null}
+        artistId={artistInsightsTarget?.artist.artistId ?? null}
+        previewArtist={artistInsightsTarget?.artist ?? null}
+        startDate={startDate}
+        endDate={endDate}
+        userId={userId}
+        locale={locale}
+        colorIndex={artistInsightsTarget?.avatarColorIndex ?? 0}
+        onClose={() => setArtistInsightsTarget(null)}
+      />
     </>
   );
 }

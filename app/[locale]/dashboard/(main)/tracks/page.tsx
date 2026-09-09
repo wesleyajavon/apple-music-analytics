@@ -188,6 +188,7 @@ function TracksContent() {
       isFetching={isPagedFetching || !pagedData}
       searchFieldId="tracks-ranking-search-desktop"
       layout="table"
+      onOpenTrack={setSelectedTrack}
     />
   );
 

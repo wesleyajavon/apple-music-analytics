@@ -108,6 +108,10 @@ export const DASHBOARD_FEATURED_MEDIA_ARTIST =
 export const DASHBOARD_LIST_ROW =
   "flex min-h-11 w-full items-center gap-3 py-2.5 text-left";
 
+/** Interactive ranking row hover tint (artists / tracks lists). */
+export const DASHBOARD_LIST_ROW_INTERACTIVE =
+  "cursor-pointer transition-colors hover:bg-black/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:hover:bg-white/[0.06]";
+
 export const DASHBOARD_LIST_SEPARATOR =
   "border-b border-glass-hairline last:border-b-0";
 

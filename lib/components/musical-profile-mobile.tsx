@@ -44,6 +44,7 @@ export function MobileMusicalProfileView({
   uniqueArtists,
   uniqueTracks,
   withFilters,
+  onOpenArtistInsights,
 }: {
   aiCached?: boolean;
   aiError: Error | null;
@@ -63,6 +64,7 @@ export function MobileMusicalProfileView({
   uniqueArtists?: number;
   uniqueTracks?: number;
   withFilters: (href: string) => string;
+  onOpenArtistInsights: (artist: ArtistStatsDto, avatarColorIndex: number) => void;
 }) {
   return (
     <div className={MOBILE_CANVAS}>
@@ -94,6 +96,7 @@ export function MobileMusicalProfileView({
         isLoading={artistsLoading}
         locale={locale}
         seeAllHref={seeAllArtistsHref}
+        onOpenArtistInsights={onOpenArtistInsights}
       />
       <MusicalProfileDestinations
         titleId="musical-profile-mobile-explore-title"

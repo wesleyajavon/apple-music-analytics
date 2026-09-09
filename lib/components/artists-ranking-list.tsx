@@ -6,6 +6,7 @@ import { ArtistAvatarHydrated } from "@/lib/components/artist-avatar-hydrated";
 import {
   DASHBOARD_BTN_GHOST,
   DASHBOARD_LIST_ROW,
+  DASHBOARD_LIST_ROW_INTERACTIVE,
   DASHBOARD_LIST_SEPARATOR,
   DASHBOARD_SEARCH_FIELD,
 } from "@/lib/components/dashboard-ui";
@@ -118,7 +119,7 @@ export function ArtistsRankingList({
                   <button
                     key={artist.artistId}
                     type="button"
-                    className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_SEPARATOR} w-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
+                    className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_ROW_INTERACTIVE} ${DASHBOARD_LIST_SEPARATOR} w-full`}
                     aria-label={t("artistInsightsAriaOpen", { name: artist.artistName })}
                     onClick={() => onOpenArtistInsights(artist, avatarColorIndex)}
                   >

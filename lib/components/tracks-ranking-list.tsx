@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import {
   DASHBOARD_BTN_GHOST,
   DASHBOARD_LIST_ROW,
+  DASHBOARD_LIST_ROW_INTERACTIVE,
   DASHBOARD_LIST_SEPARATOR,
   DASHBOARD_SEARCH_FIELD,
 } from "@/lib/components/dashboard-ui";
@@ -140,7 +141,32 @@ export function TracksRankingList({
                       </tr>
                     )
                   : tracks.map((track, index) => (
-                      <tr key={track.trackId} className={DASHBOARD_LIST_SEPARATOR}>
+                      <tr
+                        key={track.trackId}
+                        className={`${DASHBOARD_LIST_SEPARATOR} ${
+                          onOpenTrack
+                            ? "cursor-pointer transition-colors hover:bg-black/[0.04] focus-within:bg-black/[0.04] dark:hover:bg-white/[0.06] dark:focus-within:bg-white/[0.06]"
+                            : ""
+                        }`}
+                        onClick={onOpenTrack ? () => onOpenTrack(track) : undefined}
+                        onKeyDown={
+                          onOpenTrack
+                            ? (event) => {
+                                if (event.key === "Enter" || event.key === " ") {
+                                  event.preventDefault();
+                                  onOpenTrack(track);
+                                }
+                              }
+                            : undefined
+                        }
+                        tabIndex={onOpenTrack ? 0 : undefined}
+                        role={onOpenTrack ? "button" : undefined}
+                        aria-label={
+                          onOpenTrack
+                            ? tm("sheetOpenAria", { title: track.trackTitle })
+                            : undefined
+                        }
+                      >
                         <td className="whitespace-nowrap py-3 pr-4 text-[13px] tabular-nums text-muted">
                           {track.rank ?? offset + index + 1}
                         </td>
@@ -178,7 +204,7 @@ export function TracksRankingList({
                     <button
                       key={track.trackId}
                       type="button"
-                      className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_SEPARATOR} w-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
+                      className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_ROW_INTERACTIVE} ${DASHBOARD_LIST_SEPARATOR} w-full`}
                       aria-label={tm("sheetOpenAria", { title: track.trackTitle })}
                       onClick={() => onOpenTrack?.(track)}
                     >

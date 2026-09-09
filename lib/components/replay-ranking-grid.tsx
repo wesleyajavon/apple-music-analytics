@@ -17,8 +17,14 @@ export const REPLAY_TOPS_LIMIT = 8;
 const TILE_FRAME =
   "relative aspect-[3/4] w-full overflow-hidden rounded-[22px] bg-black";
 
+const TILE_MEDIA_MOTION =
+  "absolute inset-0 origin-center transition-transform duration-500 ease-out motion-reduce:transform-none motion-reduce:transition-none group-hover:scale-[1.045] group-focus-visible:scale-[1.045]";
+
+const TILE_HOVER_SHEEN =
+  "pointer-events-none absolute inset-0 z-[5] bg-white/0 transition-colors duration-300 motion-reduce:transition-none group-hover:bg-white/[0.08] group-focus-visible:bg-white/[0.08]";
+
 const INTERACTIVE_FOCUS =
-  "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-[rgb(var(--background-rgb))]";
+  "group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-[rgb(var(--background-rgb))]";
 
 const REPLAY_ARROW =
   "absolute top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/25 bg-white/15 text-white backdrop-blur-xl transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white disabled:pointer-events-none disabled:opacity-0";
@@ -80,24 +86,28 @@ function ReplayRankingTile({
   index: number;
   onSelect?: (item: ReplayRankingItem, index: number) => void;
 }) {
+  const interactive = Boolean(onSelect || item.href);
   const body = (
     <div className={TILE_FRAME} data-replay-ranking-tile="">
-      {item.media.kind === "artist" ? (
-        <ArtistAvatarHydrated
-          artistId={item.media.artistId}
-          artistName={item.media.artistName}
-          imageUrl={item.media.imageUrl}
-          avatarApiSize={640}
-          colorIndex={index}
-          alt=""
-          className="absolute inset-0 h-full w-full object-cover object-top"
-          loading={index < 4 ? "eager" : "lazy"}
-          decoding="async"
-          referrerPolicy="no-referrer"
-        />
-      ) : (
-        <ReplayRankingMediaFill seed={item.media.seed} index={index} />
-      )}
+      <div className={interactive ? TILE_MEDIA_MOTION : "absolute inset-0"}>
+        {item.media.kind === "artist" ? (
+          <ArtistAvatarHydrated
+            artistId={item.media.artistId}
+            artistName={item.media.artistName}
+            imageUrl={item.media.imageUrl}
+            avatarApiSize={640}
+            colorIndex={index}
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover object-top"
+            loading={index < 4 ? "eager" : "lazy"}
+            decoding="async"
+            referrerPolicy="no-referrer"
+          />
+        ) : (
+          <ReplayRankingMediaFill seed={item.media.seed} index={index} />
+        )}
+      </div>
+      {interactive ? <span className={TILE_HOVER_SHEEN} aria-hidden /> : null}
       <span className="absolute left-4 top-3 z-20 text-[1.75rem] font-semibold leading-none tracking-tight text-white">
         {index + 1}
       </span>

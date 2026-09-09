@@ -48,6 +48,7 @@ type OverviewStatsSectionProps = {
   totalPlayTime: number;
   changes: OverviewStatsChanges;
   showComparison: boolean;
+  headingId?: string;
 };
 
 export function OverviewStatsSection({
@@ -57,6 +58,7 @@ export function OverviewStatsSection({
   totalPlayTime,
   changes,
   showComparison,
+  headingId = "overview-stats-heading",
 }: OverviewStatsSectionProps) {
   const t = useTranslations("overview");
   const locale = useLocale();
@@ -90,9 +92,9 @@ export function OverviewStatsSection({
   ] as const;
 
   return (
-    <section className="w-full min-w-0" aria-labelledby="overview-stats-heading">
+    <section className="w-full min-w-0" aria-labelledby={headingId}>
       <p className={DASHBOARD_SECTION_EYEBROW}>{t("statsSectionBadge")}</p>
-      <h2 id="overview-stats-heading" className={`${DASHBOARD_SECTION_TITLE} mt-1`}>
+      <h2 id={headingId} className={`${DASHBOARD_SECTION_TITLE} mt-1`}>
         {t("statsSectionTitle")}
       </h2>
       <p className="mt-2 max-w-2xl text-[13px] leading-6 text-muted">{t("statsSectionDescription")}</p>
@@ -100,9 +102,9 @@ export function OverviewStatsSection({
         <p className="mt-2 max-w-2xl text-[13px] leading-6 text-muted">{t("statsSectionComparisonNote")}</p>
       ) : null}
 
-      <div className={`${DASHBOARD_METRIC_STRIP} mt-8 w-full`}>
+      <div className={`${DASHBOARD_METRIC_STRIP} mt-8 w-full max-lg:flex-nowrap max-lg:overflow-x-auto`}>
         {metrics.map((metric) => (
-          <div key={metric.key} className={DASHBOARD_METRIC_CELL}>
+          <div key={metric.key} className={`${DASHBOARD_METRIC_CELL} max-lg:min-w-[8rem] max-lg:flex-none`}>
             <span className={DASHBOARD_METRIC_LABEL}>{metric.label}</span>
             <span className={DASHBOARD_METRIC_VALUE}>{metric.value}</span>
             {showComparison ? <ChangeLine change={metric.change} vsLabel={vsLabel} /> : null}

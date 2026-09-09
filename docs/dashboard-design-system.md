@@ -106,7 +106,7 @@ Pills on the canvas, not a checkbox well. Used by artist / track pickers and Ove
 
 Portrait ranking tile. Name + metric always visible. Not a widget card. Not featured #1 + iOS rows.
 
-**Copy:** [`lib/components/spotlight-artists-featured-list.tsx`](../lib/components/spotlight-artists-featured-list.tsx). Use for tracks, artists, and genres (Crystal steps 5+). Do **not** use `DASHBOARD_LIST_ROW` or `CARD_SHELL` for media rankings.
+**Copy:** [`lib/components/replay-ranking-grid.tsx`](../lib/components/replay-ranking-grid.tsx) (tops + later pages). Spotlight first recipe: [`spotlight-artists-featured-list.tsx`](../lib/components/spotlight-artists-featured-list.tsx). Do **not** use `DASHBOARD_LIST_ROW` or `CARD_SHELL` for media rankings.
 
 ```tsx
 <div className="relative aspect-[3/4] w-full overflow-hidden rounded-[22px] bg-black">
@@ -131,7 +131,7 @@ Portrait ranking tile. Name + metric always visible. Not a widget card. Not feat
 | Rank | Large white numeral, top-left, always visible |
 | Frost | `.dashboard-replay-card-frost` — full-bleed footer, blur + gradient + mask fade. **Not** an inset pill. |
 | Type | Centered white: name 15px semibold, metric 13px `tabular-nums` `text-white/70`, subtitle 12px `text-white/55` |
-| Grid | Desktop 4-up (`SPOTLIGHT_PAGE_SIZE = 4`). Mobile (étape 6): 2-up. |
+| Grid | Desktop 4-up (`REPLAY_PAGE_SIZE = 4` in `replay-ranking-grid.tsx`). Mobile (étape 6): same 4-item page as 2×2 (`grid-cols-2`). |
 | Pager | Range labels `{start}–{end}` above the grid; circular chevrons `h-11 w-11 rounded-full border border-white/25 bg-white/15 backdrop-blur-xl` |
 | Section chrome | Eyebrow + `DASHBOARD_SECTION_TITLE` + ghost “See all”. No `rounded-[2rem]` around the section. |
 
@@ -200,7 +200,7 @@ Swift Charts vocabulary: overlapping `Area` + `Line` (`type="monotone"`) in a `C
 | Toggle | Same segmented track as Overview tabs. Do not restyle with violet chips. |
 | Series chips | `DASHBOARD_FILTER_CHIP` / `_ACTIVE` + color dot. Search: `DASHBOARD_SEARCH_FIELD` (pill 44px). No checkboxes, no bordered chip well. Remote hits: list rows + hairline, not a `shadow-card` panel. |
 
-Do **not** use `DASHBOARD_CHART_THEME` / `Legend` / angled X ticks on Overview trends. Dedicated `/dashboard/*/trends` plots stay legacy until Crystal 7.
+Do **not** use `DASHBOARD_CHART_THEME` / `Legend` / angled X ticks on Overview trends. Dedicated `/dashboard/*/trends` **plots** already reuse `OverviewTrendsChart` in the summary widgets. Crystal 7e = page chrome (`rounded-[2rem]` hero), not a second chart recipe.
 
 ---
 
@@ -213,7 +213,7 @@ Do **not** delete yet (onboarding and other pages still use them).
 | `DASHBOARD_WIDGET_CARD_SHELL` | `rounded-[2rem]` + `shadow-card` + hover lift |
 | `DASHBOARD_CINEMATIC_HERO_SHELL` | Glow violet card |
 
-Also forbidden on Overview rankings: `CARD_SHELL` (`top-three-artists-cards.tsx`, still used on `/artists` until Crystal 7a), `TopLibraryCard` widgets, `STATS_SHELL_CLASS`.
+Also forbidden on Overview rankings: `CARD_SHELL` (`top-three-artists-cards.tsx`, still used on `/artists` until Crystal 7a), `TopLibraryCard` widgets (Duet friend-music only), `STATS_SHELL_CLASS`.
 
 `DASHBOARD_GLASS_CARD_SHELL` is onboarding only — not sidebar/header chrome.
 

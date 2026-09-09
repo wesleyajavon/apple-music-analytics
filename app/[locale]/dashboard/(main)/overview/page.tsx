@@ -323,29 +323,13 @@ function OverviewContent() {
 
   return (
     <div className="space-y-8">
-      {data ? (
-        <div className="lg:hidden">
-          <MobileOverviewFlow
-            title={overviewTitle}
-            data={data}
-            changes={changes}
-            topTracks={topTracksForChart}
-            topArtists={topArtistsForChart}
-            topGenres={topGenres}
-            locale={locale}
-            tracksHref={tracksHref}
-            artistsHref={artistsHref}
-            genresHref={genresHref}
-            musicalProfileHref={musicalProfileHref}
-            musicAgentHref={musicAgentHref}
-            duetHref={duetHref}
-            avatarUrl={avatarUrl}
-            onOpenArtistInsights={handleOpenArtistInsights}
-          />
-        </div>
-      ) : (
-        <MobileOverviewLoadingFallback title={overviewTitle} />
-      )}
+      <MobileOverviewFlow
+        {...sharedFlowProps}
+        data={data}
+        showComparison={!!previousPeriod}
+        musicalProfileHref={musicalProfileHref}
+        avatarUrl={avatarUrl}
+      />
       <OverviewDesktopFlow
         {...sharedFlowProps}
         data={data}

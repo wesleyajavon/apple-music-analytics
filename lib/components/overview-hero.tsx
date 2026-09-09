@@ -2,26 +2,34 @@
 
 import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { UserAvatarPhoto } from "@/lib/components/user-avatar";
 import {
-  DashboardCinematicHeroBg,
+  DASHBOARD_BTN_GHOST,
+  DASHBOARD_BTN_OUTLINE,
   DASHBOARD_METRIC_LABEL,
   DASHBOARD_METRIC_VALUE,
 } from "@/lib/components/dashboard-ui";
 import { GroqQuotaNotice } from "@/lib/components/error-state";
-import { DashboardMobileImportEmpty } from "@/lib/components/dashboard-mobile-import-empty";
 import { isGroqDailyQuotaError } from "@/lib/utils/groq-quota-message";
+import { DASHBOARD_ONBOARDING_REIMPORT_PATH } from "@/lib/utils/onboarding-route";
+import { useWaitingForImportDemoHref } from "@/lib/components/waiting-for-import-demo";
+import { OverviewStatsSectionSkeleton } from "@/lib/components/skeleton-loaders";
 import type { OverviewPrimaryInsight } from "@/lib/utils/overview-page";
 
-export const OVERVIEW_MOBILE_HERO_SHELL =
-  "relative overflow-hidden bg-gray-950 px-4 pb-5 pt-4 text-white";
 export const OVERVIEW_DESKTOP_HERO_SHELL = "text-foreground";
 
-const MOBILE_BLEED = "-mx-4 -mt-4 space-y-4 pb-8 lg:hidden";
+const MOBILE_CANVAS = "space-y-8 pb-8 lg:hidden";
 
-function OverviewPrimaryInsightBlock({ insight }: { insight: OverviewPrimaryInsight }) {
+function OverviewPrimaryInsightBlock({
+  insight,
+  compact = false,
+}: {
+  insight: OverviewPrimaryInsight;
+  compact?: boolean;
+}) {
   return (
-    <div className="mt-6 max-w-2xl">
+    <div className={`${compact ? "mt-3" : "mt-6"} max-w-2xl`}>
       <p className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
         <span className={DASHBOARD_METRIC_VALUE}>{insight.metric}</span>
         <span className={DASHBOARD_METRIC_LABEL}>{insight.metricLabel}</span>
@@ -43,12 +51,14 @@ export function OverviewHeroFrame({
   description,
   avatarUrl,
   insight,
+  compact = false,
   children,
 }: {
   title: string;
   description?: string;
   avatarUrl?: string | null;
   insight?: OverviewPrimaryInsight;
+  compact?: boolean;
   children?: ReactNode;
 }) {
   const showAvatar = Boolean(avatarUrl);
@@ -58,13 +68,19 @@ export function OverviewHeroFrame({
       <div className={showAvatar ? "flex items-start gap-4" : undefined}>
         {showAvatar ? <UserAvatarPhoto src={avatarUrl} size="sm" /> : null}
         <div className="min-w-0 flex-1">
-          <h1 className="max-w-4xl text-balance text-3xl font-semibold tracking-tight text-foreground lg:text-4xl">
+          <h1
+            className={
+              compact
+                ? "max-w-4xl text-balance text-2xl font-semibold tracking-tight text-foreground"
+                : "max-w-4xl text-balance text-3xl font-semibold tracking-tight text-foreground lg:text-4xl"
+            }
+          >
             {title}
           </h1>
           {description ? (
             <p className="mt-3 max-w-2xl text-base leading-7 text-muted">{description}</p>
           ) : null}
-          {insight ? <OverviewPrimaryInsightBlock insight={insight} /> : null}
+          {insight ? <OverviewPrimaryInsightBlock insight={insight} compact={compact} /> : null}
           {children}
         </div>
       </div>
@@ -77,73 +93,45 @@ export function OverviewMobileHero({
   avatarUrl,
   insight,
   genreName,
+  description,
   children,
 }: {
   title: string;
   avatarUrl?: string | null;
   insight?: OverviewPrimaryInsight;
   genreName?: string;
+  description?: string;
   children?: ReactNode;
 }) {
   const t = useTranslations("overview");
+  const resolvedInsight =
+    insight && genreName && !insight.subtitle
+      ? { ...insight, subtitle: `${t("libraryLeaders.topGenre")} · ${genreName}` }
+      : insight;
 
   return (
-    <section className={OVERVIEW_MOBILE_HERO_SHELL}>
-      <DashboardCinematicHeroBg />
-      <div className="relative flex items-start gap-3.5">
-        <UserAvatarPhoto
-          src={avatarUrl}
-          size="lg"
-          className="ring-1 ring-white/15"
-        />
-        <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-cyan">
-            {insight?.eyebrow ?? t("mobile.heroEyebrow")}
-          </p>
-          <h1 className="mt-1 text-[1.55rem] font-semibold leading-[1.12] tracking-[-0.05em]">
-            {title}
-          </h1>
-          {insight ? (
-            <div className="mt-3">
-              <p className="text-3xl font-semibold tabular-nums tracking-[-0.06em] text-white">
-                {insight.metric}
-              </p>
-              <p className="mt-1 truncate text-sm font-semibold text-white/80" title={insight.title}>
-                {insight.title}
-              </p>
-              {genreName ? (
-                <p className="mt-0.5 truncate text-xs text-cyan-100/80" title={genreName}>
-                  {t("libraryLeaders.topGenre")} · {genreName}
-                </p>
-              ) : null}
-            </div>
-          ) : null}
-          {children}
-        </div>
-      </div>
-    </section>
+    <OverviewHeroFrame
+      compact
+      title={title}
+      description={description}
+      avatarUrl={avatarUrl}
+      insight={resolvedInsight}
+    >
+      {children}
+    </OverviewHeroFrame>
   );
 }
 
 export function MobileOverviewLoadingFallback({ title }: { title: string }) {
   return (
-    <div className={MOBILE_BLEED}>
+    <div className={MOBILE_CANVAS}>
       <OverviewMobileHero title={title}>
         <div className="mt-3 space-y-2" aria-hidden>
-          <div className="h-8 w-24 animate-pulse rounded bg-white/20" />
-          <div className="h-3 w-10/12 animate-pulse rounded bg-white/10" />
+          <div className="h-8 w-24 animate-pulse rounded bg-black/10 dark:bg-white/10" />
+          <div className="h-3 w-10/12 animate-pulse rounded bg-black/10 dark:bg-white/10" />
         </div>
       </OverviewMobileHero>
-      <section className="px-4">
-        <div className="-mx-4 flex gap-3 overflow-hidden px-4">
-          {[0, 1, 2].map((i) => (
-            <div
-              key={i}
-              className="h-24 min-w-[9.75rem] animate-pulse rounded-3xl border border-white/10 bg-slate-950/80"
-            />
-          ))}
-        </div>
-      </section>
+      <OverviewStatsSectionSkeleton />
     </div>
   );
 }
@@ -165,20 +153,17 @@ export function MobileOverviewUnavailable({
   const isQuota = isGroqDailyQuotaError(error);
 
   return (
-    <div className={MOBILE_BLEED}>
-      <OverviewMobileHero title={title} avatarUrl={avatarUrl}>
-        {description ? (
-          <p className="mt-2 max-w-sm text-sm leading-6 text-white/62">{description}</p>
-        ) : null}
+    <div className={MOBILE_CANVAS}>
+      <OverviewMobileHero title={title} avatarUrl={avatarUrl} description={description}>
         {isQuota ? (
-          <div className="mt-3">
+          <div className="mt-4">
             <GroqQuotaNotice error={error} />
           </div>
         ) : (
           <button
             type="button"
             onClick={onRetry}
-            className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25"
+            className={`${DASHBOARD_BTN_OUTLINE} mt-4 w-full`}
           >
             {tCommon("retry")}
           </button>
@@ -190,20 +175,20 @@ export function MobileOverviewUnavailable({
 
 export function MobileOverviewEmptyView({ avatarUrl }: { avatarUrl?: string | null }) {
   const t = useTranslations("overview.mobile");
+  const demoHref = useWaitingForImportDemoHref("/dashboard/overview");
 
   return (
-    <DashboardMobileImportEmpty
-      eyebrow={t("heroEyebrow")}
-      title={t("emptyTitle")}
-      lead={t("emptyLead")}
-      demoPath="/dashboard/overview"
-      importLabel={t("emptyCta")}
-      demoLabel={t("emptyDemoCta")}
-      header={
-        avatarUrl ? (
-          <UserAvatarPhoto src={avatarUrl} size="lg" className="ring-1 ring-white/15" />
-        ) : undefined
-      }
-    />
+    <div className={MOBILE_CANVAS}>
+      <OverviewMobileHero title={t("emptyTitle")} avatarUrl={avatarUrl} description={t("emptyLead")}>
+        <div className="mt-6 flex flex-col gap-3">
+          <Link href={DASHBOARD_ONBOARDING_REIMPORT_PATH} className={`${DASHBOARD_BTN_OUTLINE} w-full`}>
+            {t("emptyCta")}
+          </Link>
+          <Link href={demoHref} className={`${DASHBOARD_BTN_GHOST} w-full`}>
+            {t("emptyDemoCta")}
+          </Link>
+        </div>
+      </OverviewMobileHero>
+    </div>
   );
 }

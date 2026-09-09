@@ -107,10 +107,15 @@ test.describe("Mobile dashboard UX", () => {
 
     const main = page.getByRole("main");
     await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 20_000 });
-    await expect(page.getByRole("tablist", { name: /overview sections/i })).toHaveCount(0);
-    await expect(main.getByRole("link", { name: /^ask your soundprint$/i })).toBeVisible({
-      timeout: 20_000,
-    });
+    await expect(page.getByRole("tablist", { name: /overview sections/i })).toBeVisible();
+    await expect(
+      main.getByRole("heading", { name: /the artists carrying your rotation/i })
+    ).toBeVisible({ timeout: 20_000 });
+    await expect(main.getByRole("link", { name: /open soundprint chat/i })).toHaveCount(0);
+
+    await page.getByRole("tab", { name: /go further/i }).click();
+    await expect(page).toHaveURL(/view=further/);
+    await expect(main.getByRole("link", { name: /open soundprint chat/i })).toBeVisible();
   });
 
   test("overview now screen is usable in French", async ({ page }) => {
@@ -120,10 +125,16 @@ test.describe("Mobile dashboard UX", () => {
     await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 20_000 });
     await expect(
       page.getByRole("tablist", { name: /sections de la vue d['’]ensemble/i })
-    ).toHaveCount(0);
-    await expect(main.getByRole("link", { name: /^interroger soundprint$/i })).toBeVisible({
-      timeout: 20_000,
-    });
+    ).toBeVisible();
+    await expect(
+      main.getByRole("heading", { name: /les artistes qui portent votre rotation/i })
+    ).toBeVisible({ timeout: 20_000 });
+
+    const furtherTab = page.getByRole("tab", { name: /aller plus loin/i });
+    await expect(furtherTab).toBeVisible();
+    await furtherTab.click();
+    await expect(page).toHaveURL(/view=further/);
+    await expect(main.getByRole("link", { name: /ouvrir le chat soundprint/i })).toBeVisible();
   });
 
   test("musical profile hub shows signature and destinations", async ({ page }) => {

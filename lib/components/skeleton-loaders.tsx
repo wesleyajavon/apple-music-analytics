@@ -63,11 +63,11 @@ export function OverviewStatsSectionSkeleton() {
     <div className="w-full min-w-0" aria-hidden>
       <div className="h-4 w-24 rounded bg-black/10 animate-shimmer dark:bg-white/10" />
       <div className="mt-2 h-8 w-72 max-w-full rounded bg-black/10 animate-shimmer dark:bg-white/10" />
-      <div className="mt-8 flex w-full flex-wrap">
+      <div className="mt-8 flex w-full flex-wrap max-lg:flex-nowrap max-lg:overflow-x-auto">
         {Array.from({ length: 4 }).map((_, i) => (
           <div
             key={i}
-            className="flex min-w-0 flex-1 flex-col gap-2 border-r border-glass-hairline px-5 py-1 first:pl-0 last:border-r-0 last:pr-0"
+            className="flex min-w-0 flex-1 flex-col gap-2 border-r border-glass-hairline px-5 py-1 first:pl-0 last:border-r-0 last:pr-0 max-lg:min-w-[8rem] max-lg:flex-none"
           >
             <div className="h-3.5 w-20 rounded bg-black/10 animate-shimmer dark:bg-white/10" />
             <div className="h-7 w-16 rounded bg-black/10 animate-shimmer dark:bg-white/10" />

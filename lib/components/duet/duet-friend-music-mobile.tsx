@@ -3,7 +3,7 @@
 import { useMemo, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { DashboardCinematicHeroBg } from "@/lib/components/dashboard-ui";
+import { DASHBOARD_BTN_OUTLINE, DashboardCinematicHeroBg } from "@/lib/components/dashboard-ui";
 import { MusicalProfilePeriodBadge } from "@/lib/components/musical-profile-period-badge";
 import { OverviewMobileHero } from "@/lib/components/overview-hero";
 import { UserAvatar } from "@/lib/components/user-avatar";
@@ -433,13 +433,13 @@ export function DuetFriendMusicMobileExperience({
       >
         <div className="mt-3 space-y-3">
           <DuetMobileSubNav current="music" withFilters={withFilters} />
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/55">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
             {t("readOnlyBadge")}
           </p>
-          <p className="text-sm leading-5 text-white/75">{bannerLead}</p>
+          <p className="text-sm leading-5 text-muted">{bannerLead}</p>
           <Link
             href={compareHref}
-            className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25 no-underline"
+            className={`${DASHBOARD_BTN_OUTLINE} w-full no-underline`}
           >
             {tm("compareCta")}
           </Link>

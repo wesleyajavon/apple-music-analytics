@@ -29,6 +29,7 @@ export function TracksSectionSwitcher({
   const router = useRouter();
 
   const items: DashboardSectionItem<TracksSection>[] = [
+    { id: "spotlight", label: t("views.spotlight") },
     { id: "leaderboard", label: t("views.leaderboard") },
     { id: "ranking", label: t("views.ranking") },
     { id: "trends", label: t("views.trends") },

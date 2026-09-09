@@ -11,38 +11,38 @@ import {
   DASHBOARD_SECTION_EYEBROW,
   DASHBOARD_SECTION_TITLE,
 } from "@/lib/components/dashboard-ui";
-import type { ArtistOverviewDto } from "@/lib/dto/artist";
+import type { TrackOverviewDto } from "@/lib/dto/track";
 
-export function ArtistsMasthead({ compact = false }: { compact?: boolean }) {
-  const t = useTranslations("artists");
+export function TracksMasthead({ compact = false }: { compact?: boolean }) {
+  const t = useTranslations("tracks");
 
   return <OverviewHeroFrame title={t("title")} description={t("subtitle")} compact={compact} />;
 }
 
-export function ArtistsMetricStrip({
+export function TracksMetricStrip({
   overview,
   locale,
   loading = false,
 }: {
-  overview?: ArtistOverviewDto;
+  overview?: TrackOverviewDto;
   locale: string;
   loading?: boolean;
 }) {
-  const t = useTranslations("artists");
+  const t = useTranslations("tracks");
   const metrics = overview
     ? [
-        { key: "artists", label: t("artists"), value: overview.totalArtists.toLocaleString(locale) },
+        { key: "tracks", label: t("tracks"), value: overview.totalTracks.toLocaleString(locale) },
         { key: "listens", label: t("listens"), value: overview.totalListens.toLocaleString(locale) },
         {
           key: "top",
-          label: t("topArtist"),
-          value: overview.topArtistListenCount.toLocaleString(locale),
+          label: t("topTrack"),
+          value: overview.topTrackListenCount.toLocaleString(locale),
         },
       ]
     : [
-        { key: "artists", label: t("artists"), value: null },
+        { key: "tracks", label: t("tracks"), value: null },
         { key: "listens", label: t("listens"), value: null },
-        { key: "top", label: t("topArtist"), value: null },
+        { key: "top", label: t("topTrack"), value: null },
       ];
 
   return (
@@ -51,7 +51,7 @@ export function ArtistsMetricStrip({
       aria-busy={loading || undefined}
     >
       {metrics.map((metric) => (
-          <div key={metric.key} className={`${DASHBOARD_METRIC_CELL} max-lg:min-w-[10.5rem] max-lg:flex-none`}>
+        <div key={metric.key} className={`${DASHBOARD_METRIC_CELL} max-lg:min-w-[10.5rem] max-lg:flex-none`}>
           <span className={DASHBOARD_METRIC_LABEL}>{metric.label}</span>
           {metric.value == null ? (
             <span className={`${DASHBOARD_METRIC_VALUE} inline-block h-8 w-20 animate-pulse rounded bg-black/10 dark:bg-white/10`} />
@@ -64,7 +64,7 @@ export function ArtistsMetricStrip({
   );
 }
 
-export function ArtistsCanvasSection({
+export function TracksCanvasSection({
   eyebrow,
   title,
   description,

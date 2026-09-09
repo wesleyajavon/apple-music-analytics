@@ -47,6 +47,7 @@ import {
   ArtistTrendsMobileExperience,
   ArtistTrendsMobileSkeleton,
 } from "@/lib/components/artist-trends-mobile";
+import { ArtistsViewSwitcher } from "@/lib/components/artists-view-switcher";
 import type { ArtistTrendsChartArtist, ArtistTrendsChartDataPoint } from "@/lib/dto/artist";
 import { useDebouncedValue } from "@/lib/hooks/use-debounced-value";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
@@ -647,6 +648,7 @@ function TrendsContent() {
               badgeLabel={badgeLabel}
               panel={<ArtistTrendsHeroPanel period={period} selectedCount={selectedIds.length} />}
             />
+            <ArtistsViewSwitcher idPrefix="artist-trends-desktop" activeSection="trends" />
             <ErrorState
               variant="startup"
               error={error}
@@ -677,6 +679,7 @@ function TrendsContent() {
               badgeLabel={badgeLabel}
               panel={<ArtistTrendsHeroPanel period={period} selectedCount={selectedIds.length} />}
             />
+            <ArtistsViewSwitcher idPrefix="artist-trends-desktop-empty" activeSection="trends" />
             <EmptyState
               variant="startup"
               {...emptyStatePresets.changeDates(pathname)}
@@ -741,6 +744,8 @@ function TrendsContent() {
             badgeLabel={badgeLabel}
             panel={heroPanel}
           />
+
+          <ArtistsViewSwitcher idPrefix="artist-trends-desktop" activeSection="trends" />
 
           <div className="space-y-12">
           <section className="relative animate-fade-in-up">
@@ -1048,6 +1053,7 @@ function ArtistTrendsFallback() {
             badgeLabel={badgeLabel}
             panel={<ArtistTrendsHeroPanel period={period} selectedCount={0} />}
           />
+          <ArtistsViewSwitcher idPrefix="artist-trends-desktop-fallback" activeSection="trends" />
           <GenreTrendsSkeleton />
         </div>
       </div>

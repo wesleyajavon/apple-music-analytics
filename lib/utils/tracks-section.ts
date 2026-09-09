@@ -1,9 +1,9 @@
 import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
 
-export const TRACKS_LOCAL_VIEWS = ["leaderboard", "ranking"] as const;
+export const TRACKS_LOCAL_VIEWS = ["spotlight", "leaderboard", "ranking"] as const;
 export type TracksLocalView = (typeof TRACKS_LOCAL_VIEWS)[number];
 
-export const TRACKS_SECTIONS = ["leaderboard", "ranking", "trends"] as const;
+export const TRACKS_SECTIONS = ["spotlight", "leaderboard", "ranking", "trends"] as const;
 export type TracksSection = (typeof TRACKS_SECTIONS)[number];
 
 export function isTracksLocalView(value: string): value is TracksLocalView {
@@ -18,6 +18,11 @@ export function buildTracksSectionHref(
     return mergeDashboardSearchParams("/dashboard/tracks/trends", searchParams);
   }
 
-  const path = section === "ranking" ? "/dashboard/tracks?view=ranking" : "/dashboard/tracks";
+  const path =
+    section === "ranking"
+      ? "/dashboard/tracks?view=ranking"
+      : section === "leaderboard"
+        ? "/dashboard/tracks?view=leaderboard"
+        : "/dashboard/tracks";
   return mergeDashboardSearchParams(path, searchParams);
 }

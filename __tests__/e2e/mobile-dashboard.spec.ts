@@ -239,6 +239,8 @@ test.describe("Mobile dashboard UX", () => {
     const main = page.getByRole("main");
     await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 20_000 });
     await expect(page.getByRole("tablist", { name: /artist sections/i })).toBeVisible();
+    const artistTabs = page.getByRole("tablist", { name: /artist sections/i }).getByRole("tab");
+    await expect(artistTabs).toHaveCount(4);
 
     const firstRow = main.getByRole("button", { name: /open streaming insights/i }).first();
     await expect(firstRow).toBeVisible();
@@ -250,7 +252,7 @@ test.describe("Mobile dashboard UX", () => {
     await page.getByRole("button", { name: /close insights/i }).click();
     await expect(page.getByRole("dialog")).toHaveCount(0);
 
-    await main.getByRole("link", { name: /artist trends/i }).click();
+    await page.getByRole("tablist", { name: /artist sections/i }).getByRole("tab", { name: /^trends$/i }).click();
     await expect(page).toHaveURL(/\/en\/dashboard\/artists\/trends/);
     await expect(page).toHaveURL(/preset=30d/);
     await expect(page).toHaveURL(/startDate=/);
@@ -332,6 +334,7 @@ test.describe("Mobile dashboard UX", () => {
     const main = page.getByRole("main");
     await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 20_000 });
     await expect(page.getByRole("tablist", { name: /sections artistes/i })).toBeVisible();
+    await expect(page.getByRole("tablist", { name: /sections artistes/i }).getByRole("tab")).toHaveCount(4);
 
     const firstRow = main.getByRole("button", { name: /analyse d/i }).first();
     await expect(firstRow).toBeVisible({ timeout: 20_000 });
@@ -355,24 +358,30 @@ test.describe("Mobile dashboard UX", () => {
 
     const main = page.getByRole("main");
     await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 20_000 });
-    await expect(page.getByRole("tablist", { name: /track sections/i })).toHaveCount(0);
+    await expect(page.getByRole("tablist", { name: /track sections/i })).toBeVisible();
+    const trackTabs = page.getByRole("tablist", { name: /track sections/i }).getByRole("tab");
+    await expect(trackTabs).toHaveCount(4);
 
-    const rows = main.getByRole("button", { name: /open track details/i });
+    const firstTile = main.getByRole("button", { name: /open streaming insights/i }).first();
     const emptyTitle = main.getByRole("heading", { name: /no tracks yet/i });
-    await expect(rows.first().or(emptyTitle)).toBeVisible({ timeout: 20_000 });
-    const rowCount = await rows.count();
-    if (rowCount === 0) {
-      await expect(emptyTitle).toBeVisible();
-    } else {
-      expect(rowCount).toBeGreaterThanOrEqual(3);
-      await rows.first().click();
+    await expect(firstTile.or(emptyTitle)).toBeVisible({ timeout: 20_000 });
+    if (await firstTile.isVisible()) {
+      await firstTile.click();
       await expect(page.getByRole("dialog")).toBeVisible();
       await expect(page).toHaveURL(/preset=30d/);
       await expect(page).toHaveURL(/userId=/);
+      await page.getByRole("button", { name: /close insights/i }).click();
+      await expect(page.getByRole("dialog")).toHaveCount(0);
+
+      await trackTabs.getByText(/^full ranking$/i).click();
+      const rows = main.getByRole("button", { name: /open track details/i });
+      await expect(rows.first()).toBeVisible();
+      await rows.first().click();
+      await expect(page.getByRole("dialog")).toBeVisible();
       await page.getByRole("button", { name: /close track details/i }).click();
       await expect(page.getByRole("dialog")).toHaveCount(0);
 
-      await main.getByRole("link", { name: /view track trends/i }).click();
+      await trackTabs.getByText(/^trends$/i).click();
       await expect(page).toHaveURL(/\/en\/dashboard\/tracks\/trends/);
       await expect(page).toHaveURL(/preset=30d/);
       await expect(page).toHaveURL(/startDate=/);
@@ -389,13 +398,14 @@ test.describe("Mobile dashboard UX", () => {
 
     const main = page.getByRole("main");
     await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 20_000 });
-    await expect(page.getByRole("tablist", { name: /sections des titres/i })).toHaveCount(0);
+    await expect(page.getByRole("tablist", { name: /sections des titres/i })).toBeVisible();
+    await expect(page.getByRole("tablist", { name: /sections des titres/i }).getByRole("tab")).toHaveCount(4);
 
-    const firstRow = main.getByRole("button", { name: /voir le détail/i }).first();
+    const firstTile = main.getByRole("button", { name: /analyse d/i }).first();
     const emptyTitle = main.getByRole("heading", { name: /pas encore de titres/i });
-    await expect(firstRow.or(emptyTitle)).toBeVisible({ timeout: 20_000 });
-    if (await firstRow.isVisible()) {
-      await firstRow.click();
+    await expect(firstTile.or(emptyTitle)).toBeVisible({ timeout: 20_000 });
+    if (await firstTile.isVisible()) {
+      await firstTile.click();
       await expect(page.getByRole("dialog")).toBeVisible();
       await expect(page).toHaveURL(/userId=/);
     }

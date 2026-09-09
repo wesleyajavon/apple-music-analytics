@@ -5,7 +5,8 @@ import {
 } from "@/lib/utils/tracks-section";
 
 describe("isTracksLocalView", () => {
-  it("accepts ranking views on /dashboard/tracks", () => {
+  it("accepts local listing views on /dashboard/tracks", () => {
+    expect(isTracksLocalView("spotlight")).toBe(true);
     expect(isTracksLocalView("leaderboard")).toBe(true);
     expect(isTracksLocalView("ranking")).toBe(true);
     expect(isTracksLocalView("trends")).toBe(false);
@@ -31,10 +32,18 @@ describe("buildTracksSectionHref", () => {
     );
   });
 
-  it("opens the top 20 without a view param", () => {
+  it("opens the top 20 with an explicit view param", () => {
     const params = new URLSearchParams("endDate=2024-03-01&view=ranking");
 
     expect(buildTracksSectionHref("leaderboard", params)).toBe(
+      "/dashboard/tracks?view=leaderboard&endDate=2024-03-01"
+    );
+  });
+
+  it("opens spotlight without a view param", () => {
+    const params = new URLSearchParams("endDate=2024-03-01&view=ranking");
+
+    expect(buildTracksSectionHref("spotlight", params)).toBe(
       "/dashboard/tracks?endDate=2024-03-01"
     );
   });

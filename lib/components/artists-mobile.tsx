@@ -30,11 +30,11 @@ import type { ArtistOverviewDto, ArtistStatsDto } from "@/lib/dto/artist";
 
 const MOBILE_CANVAS = "space-y-8 pb-8 lg:hidden";
 
-export function ArtistsMobileSkeleton({ trendsHref }: { trendsHref: string }) {
+export function ArtistsMobileSkeleton() {
   const locale = useLocale();
   return (
     <div className={MOBILE_CANVAS} aria-busy="true">
-      <ArtistsMasthead trendsHref={trendsHref} compact />
+      <ArtistsMasthead compact />
       <ArtistsMetricStrip locale={locale} loading />
       <ReplayRankingSkeleton />
     </div>
@@ -64,12 +64,10 @@ export function ArtistsMobileEmpty() {
 export function ArtistsMobileError({
   error,
   onRetry,
-  trendsHref,
 }: {
   locale?: string;
   error?: Error | null;
   onRetry: () => void;
-  trendsHref: string;
 }) {
   const t = useTranslations("artists");
   const tm = useTranslations("artists.mobile");
@@ -78,7 +76,7 @@ export function ArtistsMobileError({
 
   return (
     <div className={MOBILE_CANVAS}>
-      <ArtistsMasthead trendsHref={trendsHref} compact />
+      <ArtistsMasthead compact />
       <OverviewHeroFrame compact title={t("title")} description={tm("errorLead")}>
         {isQuota ? (
           <div className="mt-4">
@@ -95,7 +93,6 @@ export function ArtistsMobileError({
 }
 
 export function ArtistsMobileExperience({
-  trendsHref,
   overview,
   topArtists,
   isTopLoading,
@@ -106,7 +103,6 @@ export function ArtistsMobileExperience({
   barChartData,
   rankingList,
 }: {
-  trendsHref: string;
   overview: ArtistOverviewDto | undefined;
   topArtists: ArtistStatsDto[];
   isTopLoading: boolean;
@@ -119,11 +115,11 @@ export function ArtistsMobileExperience({
 }) {
   const t = useTranslations("artists");
 
-  if (isTopLoading) return <ArtistsMobileSkeleton trendsHref={trendsHref} />;
+  if (isTopLoading) return <ArtistsMobileSkeleton />;
 
   return (
     <div className={MOBILE_CANVAS}>
-      <ArtistsMasthead trendsHref={trendsHref} compact />
+      <ArtistsMasthead compact />
       {overview ? (
         <ArtistsMetricStrip overview={overview} locale={locale} />
       ) : (
@@ -132,8 +128,8 @@ export function ArtistsMobileExperience({
 
       <ArtistsViewSwitcher
         idPrefix="artists-mobile"
-        activeView={activeView}
-        onChange={onViewChange}
+        activeSection={activeView}
+        onLocalViewChange={onViewChange}
       />
 
       <DashboardSectionPanel idPrefix="artists-mobile" view="spotlight" activeView={activeView}>

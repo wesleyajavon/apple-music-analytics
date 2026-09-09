@@ -2070,7 +2070,8 @@
       "views": {
         "spotlight": "Top artists",
         "leaderboard": "Top 20",
-        "ranking": "Full ranking"
+        "ranking": "Full ranking",
+        "trends": "Trends"
       }
     },
     "mobile": {
@@ -2176,6 +2177,11 @@
     "heroStatBadge": "Rollup",
     "heroStatTag": "This range",
     "sections": {
+      "roster": {
+        "eyebrow": "Spotlight",
+        "title": "Your top tracks",
+        "description": "Portrait tiles for the songs you stream most — tap one for the artist’s insights."
+      },
       "chart": {
         "eyebrow": "Leaderboard",
         "title": "Top 20 by streams",
@@ -2194,6 +2200,7 @@
       "emptyTitle": "No tracks yet",
       "emptyLead": "Import history to see what you replay.",
       "emptyCta": "Import history",
+      "emptyDemoCta": "Explore the demo",
       "errorLead": "Couldn't load this ranking.",
       "listenCount": "{count} streams",
       "shareLabel": "{share} of streams",
@@ -2214,6 +2221,7 @@
     "viewSwitcher": {
       "navLabel": "Track sections",
       "views": {
+        "spotlight": "Top tracks",
         "leaderboard": "Top 20",
         "ranking": "Full ranking",
         "trends": "Trends"

@@ -32,27 +32,15 @@ import {
 import { ArtistsRankingList } from "@/lib/components/artists-ranking-list";
 import { ReplayRankingSkeleton } from "@/lib/components/replay-ranking-grid";
 
-function useArtistsTrendsHref() {
-  const searchParams = useSearchParams();
-  return useMemo(() => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.delete("page");
-    params.delete("pageSize");
-    const qs = params.toString();
-    return qs ? `/dashboard/artists/trends?${qs}` : "/dashboard/artists/trends";
-  }, [searchParams]);
-}
-
 function ArtistsPageFallback() {
-  const trendsHref = useArtistsTrendsHref();
   const locale = useLocale();
   return (
     <>
       <div className="lg:hidden">
-        <ArtistsMobileSkeleton trendsHref={trendsHref} />
+        <ArtistsMobileSkeleton />
       </div>
       <div className="hidden space-y-12 lg:block">
-        <ArtistsMasthead trendsHref={trendsHref} />
+        <ArtistsMasthead />
         <ArtistsMetricStrip locale={locale} loading />
         <ReplayRankingSkeleton />
       </div>
@@ -140,7 +128,6 @@ function ArtistsContent() {
   const pagination = pagedData?.pagination;
   const totalArtistsInRange = pagination?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(totalArtistsInRange / pageSize));
-  const trendsHref = useArtistsTrendsHref();
   const { activeView, setView } = useDashboardSectionView(ARTISTS_VIEWS, "spotlight");
 
   useEffect(() => {
@@ -236,11 +223,11 @@ function ArtistsContent() {
     return (
       <>
         <div className="lg:hidden">
-          <ArtistsMobileError error={topError} onRetry={refetchTop} trendsHref={trendsHref} />
+          <ArtistsMobileError error={topError} onRetry={refetchTop} />
         </div>
         <div className="hidden space-y-12 lg:block">
-          <ArtistsMasthead trendsHref={trendsHref} />
-          <ArtistsViewSwitcher idPrefix="artists-error" activeView={activeView} onChange={setView} />
+          <ArtistsMasthead />
+          <ArtistsViewSwitcher idPrefix="artists-error" activeSection={activeView} onLocalViewChange={setView} />
           <ErrorState variant="startup" error={topError} message={t("errorLoading")} onRetry={refetchTop} />
         </div>
       </>
@@ -254,8 +241,8 @@ function ArtistsContent() {
           <ArtistsMobileEmpty />
         </div>
         <div className="hidden space-y-12 lg:block">
-          <ArtistsMasthead trendsHref={trendsHref} />
-          <ArtistsViewSwitcher idPrefix="artists-empty" activeView={activeView} onChange={setView} />
+          <ArtistsMasthead />
+          <ArtistsViewSwitcher idPrefix="artists-empty" activeSection={activeView} onLocalViewChange={setView} />
           <EmptyState variant="startup" {...emptyStatePresets.importData} />
         </div>
       </>
@@ -267,7 +254,6 @@ function ArtistsContent() {
       <>
         <div className="space-y-6 lg:hidden">
           <ArtistsMobileExperience
-            trendsHref={trendsHref}
             overview={topData?.overview}
             topArtists={topArtists}
             isTopLoading={isTopLoading}
@@ -299,7 +285,7 @@ function ArtistsContent() {
           )}
         </div>
         <div className="hidden space-y-12 lg:block">
-          <ArtistsMasthead trendsHref={trendsHref} />
+          <ArtistsMasthead />
           {topData ? (
             <ArtistsMetricStrip overview={topData.overview} locale={locale} />
           ) : (
@@ -307,8 +293,8 @@ function ArtistsContent() {
           )}
           <ArtistsViewSwitcher
             idPrefix="artists-paged-error"
-            activeView={activeView}
-            onChange={setView}
+            activeSection={activeView}
+            onLocalViewChange={setView}
           />
           <ErrorState variant="startup" error={pagedError} message={t("errorLoading")} onRetry={refetchPaged} />
         </div>
@@ -323,7 +309,6 @@ function ArtistsContent() {
     <>
       <div className="lg:hidden">
         <ArtistsMobileExperience
-          trendsHref={trendsHref}
           overview={overview}
           topArtists={topArtists}
           isTopLoading={isTopLoading}
@@ -337,7 +322,7 @@ function ArtistsContent() {
       </div>
 
       <div className="hidden space-y-12 lg:block">
-        <ArtistsMasthead trendsHref={trendsHref} />
+        <ArtistsMasthead />
         {overview ? (
           <ArtistsMetricStrip overview={overview} locale={locale} />
         ) : (
@@ -346,8 +331,8 @@ function ArtistsContent() {
 
         <ArtistsViewSwitcher
           idPrefix="artists-desktop"
-          activeView={activeView}
-          onChange={setView}
+          activeSection={activeView}
+          onLocalViewChange={setView}
         />
 
         <DashboardSectionPanel idPrefix="artists-desktop" view="spotlight" activeView={activeView}>

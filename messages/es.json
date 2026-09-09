@@ -2072,7 +2072,8 @@
       "views": {
         "spotlight": "Top artistas",
         "leaderboard": "Top 20",
-        "ranking": "Ranking completo"
+        "ranking": "Ranking completo",
+        "trends": "Tendencias"
       }
     },
     "mobile": {
@@ -2178,6 +2179,11 @@
     "heroStatBadge": "Resumen",
     "heroStatTag": "Este rango",
     "sections": {
+      "roster": {
+        "eyebrow": "Spotlight",
+        "title": "Tus top títulos",
+        "description": "Baldosas retrato de las canciones que más streameas — toca una para ver las estadísticas del artista."
+      },
       "chart": {
         "eyebrow": "Clasificación",
         "title": "Top 20 por streams",
@@ -2196,6 +2202,7 @@
       "emptyTitle": "Aún no hay títulos",
       "emptyLead": "Importa el historial para ver tus replays.",
       "emptyCta": "Importar historial",
+      "emptyDemoCta": "Explorar la demo",
       "errorLead": "No se pudo cargar este ranking.",
       "listenCount": "{count} streams",
       "shareLabel": "{share} de los streams",
@@ -2216,6 +2223,7 @@
     "viewSwitcher": {
       "navLabel": "Secciones de canciones",
       "views": {
+        "spotlight": "Top títulos",
         "leaderboard": "Top 20",
         "ranking": "Ranking completo",
         "trends": "Tendencias"

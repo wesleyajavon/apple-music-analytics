@@ -2072,7 +2072,8 @@
       "views": {
         "spotlight": "Top artistes",
         "leaderboard": "Top 20",
-        "ranking": "Classement complet"
+        "ranking": "Classement complet",
+        "trends": "Tendances"
       }
     },
     "mobile": {
@@ -2178,6 +2179,11 @@
     "heroStatBadge": "Synthèse",
     "heroStatTag": "Cette période",
     "sections": {
+      "roster": {
+        "eyebrow": "Spotlight",
+        "title": "Vos top titres",
+        "description": "Tuiles portrait des morceaux que vous streamez le plus — touchez-en un pour l’analyse de l’artiste."
+      },
       "chart": {
         "eyebrow": "Classement",
         "title": "Top 20 par streams",
@@ -2196,6 +2202,7 @@
       "emptyTitle": "Pas encore de titres",
       "emptyLead": "Importez l’historique pour voir vos replays.",
       "emptyCta": "Importer l’historique",
+      "emptyDemoCta": "Explorer la démo",
       "errorLead": "Impossible de charger ce classement.",
       "listenCount": "{count} streams",
       "shareLabel": "{share} des streams",
@@ -2216,6 +2223,7 @@
     "viewSwitcher": {
       "navLabel": "Sections des titres",
       "views": {
+        "spotlight": "Top titres",
         "leaderboard": "Top 20",
         "ranking": "Classement complet",
         "trends": "Tendances"

@@ -24,7 +24,7 @@ Le chrome (sidebar + header) se fait **avant** Overview, sinon chaque section se
 - Tops + pages suivantes : [`replay-ranking-grid.tsx`](../lib/components/replay-ranking-grid.tsx) (grille partagée, `grid-cols-2` + `lg:grid-cols-4`)
 - Charts Overview : [`overview-trends-chart.tsx`](../lib/components/charts/overview-trends-chart.tsx) + [`crystal-chart.ts`](../lib/constants/crystal-chart.ts)
 
-Le plus gros écart **restant** n’est plus Overview. C’est les pages Artistes / Tracks / Genres (étape 7 : encore `CARD_SHELL` / `rounded-[2rem]`).
+Le plus gros écart **restant** n’est plus Overview. **7a (`/artists`) est livrée** (masthead canvas + tuiles Replay + chart/table un-card). Restant : Tracks / Genres (7b–7c : encore `TRACKS_HERO_SHELL` / `GENRE_SPOTLIGHT_CARD_SHELL` / `rounded-[2rem]`).
 
 ---
 
@@ -113,7 +113,7 @@ Chez nous, c’est **livré** sur Overview `view=spotlight` :
 
 - [`top-three-artists-overview-widget.tsx`](../lib/components/top-three-artists-overview-widget.tsx) — section canvas (eyebrow + titre + See all ghost)
 - [`spotlight-artists-featured-list.tsx`](../lib/components/spotlight-artists-featured-list.tsx) — tuiles + pager
-- [`top-three-artists-cards.tsx`](../lib/components/top-three-artists-cards.tsx) — **legacy** `CARD_SHELL` (page `/artists` seulement, jusqu’à 7a)
+- [`top-three-artists-cards.tsx`](../lib/components/top-three-artists-cards.tsx) — **legacy** `CARD_SHELL` (débranché de `/artists` en 7a)
 
 Recette à recopier (étapes 6+) — primitive partagée : [`replay-ranking-grid.tsx`](../lib/components/replay-ranking-grid.tsx) :
 
@@ -124,7 +124,7 @@ Recette à recopier (étapes 6+) — primitive partagée : [`replay-ranking-grid
 5. Nom visible sans hover. Clic tuile = insight / navigation, pas un chrome de carte.
 6. CTA See all = lien ghost, pas un footer de widget.
 
-Les vues **tops** (desktop + mobile) reprennent déjà ces tuiles (`overview-library-replay.tsx`). Pages Artistes / Tracks / Genres : encore `CARD_SHELL` / widgets jusqu’à **7a–7c**.
+Les vues **tops** (desktop + mobile) reprennent déjà ces tuiles (`overview-library-replay.tsx`). `/artists` : Crystal 7a (tuiles Replay). `/tracks` `/genres` : encore hero/widget jusqu’à **7b–7c**.
 
 ### Anti-carte — inventaire Overview
 
@@ -132,7 +132,7 @@ Overview **fait** (étapes 2.5–6). Restant :
 
 | Surface | Fichier | Pattern actuel |
 | --- | --- | --- |
-| `/artists` | `top-three-artists-cards.tsx` `CARD_SHELL` | Mega-carte 3-up (7a) |
+| `/artists` | 7a **faite** (tuiles Replay + 3 panneaux) | 4ᵉ onglet trends = 7b |
 | `/tracks` `/genres` | shells page `rounded-[2rem]` | Hero/widget jusqu’à 7b–7c |
 | `TopLibraryCard` | `overview-library-rankings.tsx` | Legacy ; encore Duet friend-music |
 
@@ -337,7 +337,7 @@ Recette livrée (à copier via `replay-ranking-grid.tsx` aux étapes 6+) :
 - Tuile : `aspect-[3/4] rounded-[22px]`, photo plein cadre, rang gros en haut à gauche, pied `.dashboard-replay-card-frost` (blur + mask, pas une pastille inset). Nom + streams + signature **toujours visibles**, centrés, texte blanc.
 - Flèches circulaires `bg-white/15 backdrop-blur-xl`. Clavier flèches sur le tablist pager.
 - Clic tuile → `onOpenArtistInsights`. Noms dans le document (a11y).
-- Page `/dashboard/artists` : encore `CARD_SHELL` 3-up jusqu’à **7a**.
+- Page `/dashboard/artists` : **7a faite** (`ReplayRankingGrid`, plus de `CARD_SHELL` 3-up).
 
 Fichiers : `top-three-artists-overview-widget.tsx`, `spotlight-artists-featured-list.tsx`, `.dashboard-replay-card-frost` dans `globals.css`. i18n `overview.artistSpotlight.pageRange` / `pagesNav` / `previousPage` / `nextPage`.
 
@@ -406,22 +406,39 @@ Un écran par session. **Garder leurs onglets / panneaux.** Un-card + segmented 
 
 Catalogue paginé + recherche (vue ranking, 10–50 lignes) : **pas** des tuiles 3:4. Un-card le chrome (`DASHBOARD_SPOTLIGHT_*`), chercheur = `DASHBOARD_SEARCH_FIELD`. Thumb + nom + métrique, hairline — pas `rounded-2xl` + `shadow-sm` par row.
 
-Les plots Overview + widgets `*-trends-summary-widget.tsx` utilisent **déjà** `OverviewTrendsChart`. Ne pas les restyler. `/artists/trends` `/tracks/trends` `/genres/trends` = **7e**.
+Les plots Overview + widgets `*-trends-summary-widget.tsx` utilisent **déjà** `OverviewTrendsChart`. Ne pas les restyler. Le **corps** de `/artists/trends` `/tracks/trends` `/genres/trends` = **7e**. Le **4ᵉ onglet** du listing (lien vers ces routes) = 7b / 7c, pas 7e.
+
+### Contrat d’onglets artists / tracks (cible produit)
+
+Les deux pages ont **le même modèle d’information** : 4 items dans le sélecteur. Les 3 premiers sont des panneaux locaux (`view=`). Le 4ᵉ **n’est pas un panneau** : c’est une navigation vers la page trends dédiée.
+
+| # | `id` | Label EN (FR) | Contenu | Où |
+| --- | --- | --- | --- | --- |
+| 1 | `spotlight` | Top artists / Top tracks (Top artistes / Top titres) | `ReplayRankingGrid` top-N, pager 4 | `view=` défaut (`spotlight`) |
+| 2 | `leaderboard` | Top 20 | BarChart top 20 sur le canvas | `view=leaderboard` |
+| 3 | `ranking` | Full ranking (Classement complet) | catalogue search + pagination, **pas** de tuiles 3:4 | `view=ranking` |
+| 4 | `trends` | Trends (Tendances) | **lien** — pas un 4ᵉ `tabpanel` | `/dashboard/artists/trends` ou `/dashboard/tracks/trends` (dates / `userId` conservés) |
+
+**Ne pas fusionner tuiles + bar chart dans le même onglet.** Spotlight = tuiles Replay. Leaderboard = chart seulement. Ranking = liste. Trends = autre route.
+
+**7a livrée :** 3 onglets locaux (spotlight / leaderboard / ranking) + CTA trends ghost dans le masthead. **Manque :** le 4ᵉ item `trends` dans le switcher (et le même switcher sur `/artists/trends`). 7b aligne `/artists` sur ce contrat **et** livre `/tracks` dessus.
 
 Ordre (index). **7a–7c = blocs complets plus bas.** 7d–7f = encore trop courts : les étendre avant ces sessions.
 
 | # | Route | Session |
 | --- | --- | --- |
-| **7a** | `/dashboard/artists` | Recette. Masthead + strip + `ReplayRankingGrid` + un-card chart/table. Dual tree. |
-| **7b** | `/dashboard/tracks` | Même recette que 7a. Tracks n’a pas de spotlight 3-up : leaderboard = tuiles Replay. |
-| **7c** | `/dashboard/genres` | Même recette. `GENRE_SPOTLIGHT_CARD_SHELL` → `ReplayRankingGrid` `kind: "fill"`. |
+| **7a** | `/dashboard/artists` | **Faite** (visuel). Recette : masthead + strip + `ReplayRankingGrid` + un-card chart/table. Dual tree. 4ᵉ onglet trends = 7b. |
+| **7b** | `/dashboard/tracks` | Même **4 onglets** que la cible artists. 1er = tuiles Top tracks (pas le bar chart). + parité trends sur `/artists`. |
+| **7c** | `/dashboard/genres` | Même contrat 4 onglets (top / chart / ranking / lien trends). `GENRE_SPOTLIGHT_CARD_SHELL` → `ReplayRankingGrid` `kind: "fill"`. |
 | 7d | `/dashboard/musical-profile` | Matière Crystal, **garder** arbre mobile. Hub à onglets, pas un Replay story. Média = tuiles ; hub chrome = verre. |
 | 7e | Timeline, heatmap, `*/trends` | Chrome de page sur canvas (plus de hero `rounded-[2rem]`). Plot : `OverviewTrendsChart` / `crystal-chart.ts` s’il reste du `DASHBOARD_CHART_THEME`. Pas de blur sur le SVG. |
 | 7f | Ask / Duet | Chrome seulement. `TopLibraryCard` sur `duet-friend-music-desktop.tsx` hors scope sauf session friend-music. |
 
 ---
 
-### Étape 7a — `/dashboard/artists` (recette à copier)
+### Étape 7a — `/dashboard/artists` (**FAITE** — recette visuelle à copier)
+
+Visuel Crystal **livré**. Ne pas recoller ce prompt. L’IA **cible** est le [contrat d’onglets](#contrat-donglets-artists--tracks-cible-produit) (4 items). 7a a livré les 3 panneaux locaux ; le 4ᵉ onglet trends se fait en **7b** (parité), pas ici.
 
 ```text
 [Préambule]
@@ -462,32 +479,58 @@ Livre : avant/après (plus de hero always-dark ni CARD_SHELL 3-up), view= deskto
 
 ---
 
-### Étape 7b — `/dashboard/tracks` (après 7a)
+### Étape 7b — `/dashboard/tracks` (après 7a) + parité onglet trends `/artists`
+
+Copier **l’IA livrée en 7a** (3 panneaux : tuiles → bar chart → ranking), puis **fermer le contrat 4 onglets** sur les deux pages. Interdit : coller les tuiles Replay dans l’onglet Top 20.
 
 ```text
 [Préambule]
 
-Étape 7b — Crystal /dashboard/tracks. Même recette que 7a (faite). Composer ReplayRankingGrid + masthead canvas. Ne pas réécrire la tuile. Ne pas retoucher /artists (7a) ni tracks/trends (7e).
+Étape 7b — Crystal /dashboard/tracks + parité 4ᵉ onglet trends sur /artists. Composer ReplayRankingGrid + masthead canvas comme 7a (faite). Ne pas réécrire la tuile. Ne pas restyler le corps de /tracks/trends ni /artists/trends (7e).
 
-Aujourd’hui : TRACKS_HERO_SHELL always-dark rounded-[2rem] + KPI-cartes. Vues leaderboard + ranking seulement (pas de spotlight 3-up). Leaderboard = DASHBOARD_SPOTLIGHT_SHELL + BarChart glow. Ranking = table DASHBOARD_SPOTLIGHT_*. Mobile tracks-mobile.tsx = cinematic hero + SignalTile + rows-cartes. e2e tablist track sections = 0.
+Contrat d’onglets (non négociable, artists ET tracks) — 4 items, même ordre :
 
-Fichiers : app/[locale]/dashboard/(main)/tracks/page.tsx, lib/components/tracks-mobile.tsx, tracks-section-switcher.tsx (déjà Crystal — ne pas restyler). Réutiliser : replay-ranking-grid.tsx, overview-hero.tsx, dashboard-ui.tsx (metric strip, search field, ghost btn), overview-library-replay.tsx (tracks → media.kind "artist" via artistId/artistName — pas d’artwork track dédié). e2e mobile-dashboard.spec.ts. HORS SCOPE : APIs / hooks / query params, tracks/trends.
+1. spotlight — EN "Top tracks" / FR "Top titres" (artists déjà : "Top artists" / "Top artistes"). Panneau : ReplayRankingGrid. Défaut (pas de view= ou view=spotlight).
+2. leaderboard — "Top 20". Panneau : BarChart top 20 SEUL sur le canvas. PAS de tuiles ici.
+3. ranking — "Full ranking" / "Classement complet". Catalogue search + pagination. PAS de tuiles 3:4.
+4. trends — "Trends" / "Tendances". PAS un tabpanel : navigation vers /dashboard/tracks/trends (listing tracks) ou /dashboard/artists/trends (listing artists). Conserver startDate, endDate, userId. Retirer view= / page / pageSize / q du query string trends.
 
-Objectif — garder TRACKS_LOCAL_VIEWS (leaderboard / ranking), view=, un panneau à la fois desktop ET mobile.
+Aujourd’hui (à remplacer) :
+- Tracks desktop : TRACKS_HERO_SHELL always-dark rounded-[2rem] + KPI-cartes. TRACKS_LOCAL_VIEWS = leaderboard + ranking seulement (pas de 1er onglet tuiles). Leaderboard = DASHBOARD_SPOTLIGHT_SHELL + BarChart glow. Ranking = table DASHBOARD_SPOTLIGHT_*. 3ᵉ item switcher = trends (lien) — garder ce pattern, l’insérer en 4ᵉ après le nouveau spotlight.
+- Tracks mobile : tracks-mobile.tsx = cinematic hero + SignalTile + rows-cartes. e2e tablist track sections = 0.
+- Artists (7a livrée) : 3 onglets locaux OK. Trends = seulement CTA ghost masthead (ArtistsMasthead). /artists/trends n’a PAS le switcher (contrairement à /tracks/trends qui a déjà TracksSectionSwitcher). À aligner.
 
-Desktop lg+ :
-- Masthead canvas (OverviewHeroFrame OK) + DASHBOARD_METRIC_STRIP. Plus de TRACKS_HERO_SHELL / glow / badge période carte / KPI rounded-2xl. Light ET dark.
-- Leaderboard = ranking média top-N : ReplayRankingSection + ReplayRankingGrid des top tracks (jusqu’à 8–10, pager 4). title = nom du titre, subtitle = artiste, metric = écoutes, media.kind = "artist" comme Overview tops. PAS featured+list, PAS TopLibraryCard. Le BarChart peut rester SOUS les tuiles, plot sur le canvas, SANS DASHBOARD_SPOTLIGHT_SHELL / glow — ou partir si redondant ; les tuiles gagnent.
-- Ranking catalogue : un-card table + DASHBOARD_SEARCH_FIELD + pagination. PAS des tuiles 3:4 pour 20+ rows.
+Fichiers tracks : app/[locale]/dashboard/(main)/tracks/page.tsx, lib/components/tracks-mobile.tsx, lib/utils/tracks-section.ts, lib/components/tracks-section-switcher.tsx (look déjà Crystal — ne pas restyler les pills ; étendre les items). Nouveau OK : tracks-spotlight.tsx (miroir de artists-spotlight.tsx) + tracks-chrome.tsx si tu sors masthead/strip de page.tsx. Réutiliser SANS copier le JSX tuile : replay-ranking-grid.tsx, artists-spotlight.tsx (recette), overview-hero.tsx, dashboard-ui.tsx (metric strip, search field, section titles). Mapping tuiles : overview-library-replay.tsx — title = nom du titre, subtitle = artiste, metric = écoutes, media.kind = "artist" (artistId / artistName, pas d’artwork track dédié). Limite + pager = même chose que ArtistsSpotlight (ARTISTS_SPOTLIGHT_LIMIT / pager 4). e2e : __tests__/e2e/mobile-dashboard.spec.ts.
+
+Fichiers artists (parité IA seulement, pas un 2ᵉ restyle Crystal) : lib/components/artists-view-switcher.tsx, lib/components/artists-chrome.tsx, app/[locale]/dashboard/(main)/artists/page.tsx, lib/components/artists-mobile.tsx, app/[locale]/dashboard/(main)/artists/trends/page.tsx (+ mobile trends si le switcher y vit). Introduire le même split que tracks-section.ts : vues locales vs section trends (ARTISTS_SECTIONS = spotlight / leaderboard / ranking / trends). Brancher le switcher 4 items sur /artists ET sur /artists/trends (activeSection="trends"), comme TracksSectionSwitcher l’est déjà sur /tracks/trends.
+
+i18n EN+FR+ES : tracks.viewSwitcher.views.spotlight ; artists.viewSwitcher.views.trends. Ne pas rester sur un label "Top 20" pour le 1er onglet tracks.
+
+HORS SCOPE : APIs / hooks data ; query params métier (startDate, endDate, userId, page, pageSize, q) — view= spotlight|leaderboard|ranking EST dans le scope (nouvelle valeur spotlight, défaut = spotlight comme artists). Corps visuel des pages */trends (hero always-dark, charts DASHBOARD_CHART_THEME) = 7e. Overview. Genres.
+
+Objectif tracks — 4 items, un panneau à la fois pour 1–3, y compris mobile (comme artists 7a / Overview étape 6, pas le scroll unique MOBILE_UX).
+
+Desktop lg+ tracks :
+- Masthead canvas (OverviewHeroFrame / même matière qu’ArtistsMasthead) + DASHBOARD_METRIC_STRIP. Plus de TRACKS_HERO_SHELL / glow / badge période carte / KPI rounded-2xl. Light ET dark. Ne PAS remettre un CTA trends dans le masthead : le 4ᵉ onglet EST le chemin.
+- Spotlight (nouveau 1er onglet) : ReplayRankingSection + ReplayRankingGrid des top tracks. PAS featured+list, PAS TopLibraryCard, PAS CARD_SHELL. Loading = ReplayRankingSkeleton. Clic tuile : même règle qu’Overview tops (artiste via media.kind artist) — ne pas inventer un drawer track si la page n’en a pas.
+- Leaderboard : garder le BarChart (IA charts, top 20). Sortir DASHBOARD_SPOTLIGHT_SHELL / INNER_WELL / glow. Plot sur le canvas. INTERDIT de mettre ReplayRankingGrid dans cet onglet (c’est spotlight).
+- Ranking : un-card table + DASHBOARD_SEARCH_FIELD + pagination. PAS des tuiles 3:4 pour 20+ rows.
 - Section titles : DASHBOARD_SECTION_*. Empty / error / loading sans-carte.
+- Switcher : TracksSectionSwitcher à 4 items (spotlight, leaderboard, ranking, trends). trends → router.push /dashboard/tracks/trends + dates/userId. Défaut listing = spotlight.
 
-Mobile < lg :
-- Même 2 vues, TracksSectionSwitcher idPrefix tracks-mobile, view= partagé.
-- Plus de cinematic / SignalTile / rows-cartes média pour le top. Leaderboard = Replay 2×2. Ranking = liste paginée un-carded 44px. e2e : première rangée tappable + lien trends conservent dates / userId.
+Mobile < lg tracks :
+- Mêmes 3 panneaux + 4ᵉ item trends via TracksSectionSwitcher idPrefix tracks-mobile, view= partagé.
+- Plus de cinematic / SignalTile / rows-cartes média pour le top. Spotlight = Replay 2×2. Leaderboard = chart canvas (ou omettre si illisible à 390px — ne pas inventer une 2ᵉ grille tuiles). Ranking = liste paginée un-carded 44px.
+- e2e : tablist désormais attendu (plus de count 0) ; 4 items ; première tuile / rangée tappable ; item trends conserve dates / userId.
 
-Contraintes : 44px, EN+FR, demo ?userId=, frost reduced-transparency. Ne pas inventer une 3e vue spotlight. Ne pas cloner le JSX tuile.
+Parité artists (petit diff, même session) :
+- 4ᵉ item trends dans le switcher (desktop + mobile), même pattern que tracks (local vs navigation).
+- Monter ce switcher sur /artists/trends avec trends actif — ne pas restyler le hero/chart trends.
+- Retirer le Link viewTrends du masthead (ArtistsMasthead) une fois l’onglet en place, pour ne pas avoir deux chemins. Empty / error / skeleton artists : plus besoin de trendsHref dans le masthead.
 
-Livre : plus de hero always-dark ni spotlight-shell autour du ranking média, view= mobile, light/dark EN/FR ~390×844 + lg+, e2e tracks mobile (tablist désormais attendu).
+Contraintes : 44px, EN+FR (+ ES labels switcher), demo ?userId=, frost reduced-transparency. Ne pas cloner le JSX tuile. Ne pas fusionner spotlight et leaderboard. Ne pas changer REPLAY_PAGE_SIZE défaut. Gemini modify_frontend 1 surface si tu t’en sers.
+
+Livre : tracks sans hero always-dark ni spotlight-shell ; 4 onglets identiques artists/tracks (top → top 20 chart → ranking → trends lien) ; view= spotlight par défaut sur /tracks ; /artists a l’onglet trends ; light/dark EN/FR ~390×844 + lg+ ; e2e tracks mobile (tablist attendu) + artists (4ᵉ item).
 ```
 
 ---
@@ -497,28 +540,29 @@ Livre : plus de hero always-dark ni spotlight-shell autour du ranking média, vi
 ```text
 [Préambule]
 
-Étape 7c — Crystal /dashboard/genres. Même recette que 7a–7b (faites). Composer ReplayRankingGrid. Ne pas retoucher artists/tracks ni genres/trends ni palette (sauf régression lien).
+Étape 7c — Crystal /dashboard/genres. Même recette que 7a–7b (faites), y compris le contrat 4 onglets : spotlight (tuiles) / distribution (chart) / ranking / trends = lien vers /dashboard/genres/trends (pas un panneau ; retirer le CTA trends du hero une fois l’onglet en place). Composer ReplayRankingGrid. Ne pas retoucher artists/tracks ni le corps de genres/trends (7e) ni palette (sauf régression lien).
 
 Aujourd’hui : GENRES_HERO_SHELL always-dark. Spotlight = GENRE_SPOTLIGHT_CARD_SHELL 3-up (collage 3 artistes, overlay hover qui cache le nom, panneau verre inset) + gallery 4–10. Distribution = GenreDistributionChart showShell (carte). Ranking = DASHBOARD_SPOTLIGHT_SHELL + rows. Mobile genres-mobile.tsx = cinematic + cartes. e2e tablist genre sections = 0.
 
-Fichiers : app/[locale]/dashboard/(main)/genres/page.tsx, lib/components/genres-mobile.tsx. Réutiliser : replay-ranking-grid.tsx, overview-hero.tsx, dashboard-ui.tsx, overview-library-replay.tsx (genres → media.kind "fill", seed = nom du genre). Switcher déjà Crystal. e2e mobile-dashboard.spec.ts. HORS SCOPE : /genres/trends, /genres/palette (lien ghost OK), APIs / hooks / query params.
+Fichiers : app/[locale]/dashboard/(main)/genres/page.tsx, lib/components/genres-mobile.tsx, app/[locale]/dashboard/(main)/genres/trends/page.tsx (switcher seulement). Réutiliser : replay-ranking-grid.tsx, overview-hero.tsx, dashboard-ui.tsx, overview-library-replay.tsx (genres → media.kind "fill", seed = nom du genre). Switcher déjà Crystal. e2e mobile-dashboard.spec.ts. HORS SCOPE : corps visuel de /genres/trends (7e), /genres/palette (lien ghost OK), APIs / hooks / query params métier.
 
-Objectif — garder GENRES_VIEWS (spotlight / distribution / ranking), view=, un panneau à la fois desktop ET mobile.
+Objectif — GENRES_VIEWS locales (spotlight / distribution / ranking) + 4ᵉ item trends (navigation vers /dashboard/genres/trends), view=, un panneau à la fois desktop ET mobile. Ne pas fusionner tuiles et pie/bar dans le même onglet.
 
 Desktop lg+ :
-- Masthead canvas + metric strip (count genres / écoutes / top genre name). CTA trends = DASHBOARD_BTN_GHOST. Plus de GENRES_HERO_SHELL / glow / KPI-cartes / badge période carte.
+- Masthead canvas + metric strip (count genres / écoutes / top genre name). Plus de GENRES_HERO_SHELL / glow / KPI-cartes / badge période carte. Pas de CTA trends dans le masthead : le 4ᵉ onglet EST le chemin.
 - Spotlight : plus de GENRE_SPOTLIGHT_CARD_SHELL / hover overlay / collage 3-up. ReplayRankingSection + ReplayRankingGrid top genres (jusqu’à 10, pager 4). fill + initiale. title = genre, metric = écoutes, subtitle = % ou 1–3 artistes en texte (pas tags-cartes). Nom toujours visible. Loading = ReplayRankingSkeleton. Ne pas réintroduire group-hover:opacity-0 sur le nom.
 - Distribution : GenreDistributionChart sur le canvas (showShell false / sortir la carte rounded-[2rem]). Garder pie|bar IA. Pas de blur sur le SVG. Ne pas remplacer par OverviewTrendsChart (données différentes). Ne pas restyler les widgets *-trends-summary-widget (déjà Crystal).
 - Ranking catalogue : un-card + DASHBOARD_SEARCH_FIELD + pagination. PAS tuiles 3:4 pour le catalogue.
 - Palette notice / liens : ghost, pas cartes promo.
+- Switcher 4 items ; trends → /dashboard/genres/trends (dates / userId). Monter le même switcher sur /genres/trends (active = trends).
 
 Mobile < lg :
-- Même 3 vues, idPrefix genres-mobile, view= partagé.
-- Plus de cinematic. Spotlight = Replay 2×2 fill. Distribution = plot sans shell. Ranking = liste un-carded. e2e : première rangée tappable, dates / userId, lien trends.
+- Mêmes 3 panneaux + 4ᵉ item trends, idPrefix genres-mobile, view= partagé.
+- Plus de cinematic. Spotlight = Replay 2×2 fill. Distribution = plot sans shell. Ranking = liste un-carded. e2e : tablist attendu, première rangée tappable, dates / userId, item trends.
 
 Contraintes : 44px, EN+FR, demo ?userId=. Ne pas cloner CARD_SHELL « genre ». Ne pas tuer view=.
 
-Livre : plus de GENRE_SPOTLIGHT_CARD_SHELL ni hero always-dark, view= mobile, light/dark EN/FR, e2e genres mobile (tablist désormais attendu).
+Livre : plus de GENRE_SPOTLIGHT_CARD_SHELL ni hero always-dark, 4 onglets (top / chart / ranking / trends lien), view= mobile, light/dark EN/FR, e2e genres mobile (tablist désormais attendu).
 ```
 
 ---
@@ -568,7 +612,8 @@ Desktop `lg+`, light et dark, EN et FR :
 Desktop `lg+` **et** mobile ~390×844, light et dark, EN et FR — par page, après sa session :
 
 - [ ] Toujours un dashboard à onglets (`view=`, un panneau à la fois) — **y compris mobile** (plus de scroll unique MOBILE_UX)
-- [ ] Masthead canvas (light/dark), plus de `*_HERO_SHELL` always-dark
+- [ ] **4 items** artists / tracks (et genres en 7c) : Top artistes|titres → Top 20 (chart) → ranking → trends **lien** vers `*/trends` (pas un 4ᵉ panneau, pas de tuiles dans l’onglet chart)
+- [ ] Masthead canvas (light/dark), plus de `*_HERO_SHELL` always-dark ; plus de CTA trends dupliqué dans le masthead une fois l’onglet en place
 - [ ] KPI = metric strip, pas des mini-cartes
 - [ ] Top-N média = `ReplayRankingGrid` importé (pas `CARD_SHELL` / `GENRE_SPOTLIGHT_CARD_SHELL` / tuile recopiée)
 - [ ] Catalogue ranking = un-card + search pill, pas des posters 3:4
@@ -600,5 +645,5 @@ Desktop `lg+` **et** mobile ~390×844, light et dark, EN et FR — par page, apr
 - `lib/components/replay-ranking-grid.tsx` — **fait** étape 5, recette à composer (6+)
 - `lib/components/spotlight-artists-featured-list.tsx` — **fait** étape 4
 - `lib/components/charts/overview-trends-chart.tsx` — **fait** étape 5
-- `lib/components/top-three-artists-cards.tsx` — legacy `CARD_SHELL` ; 7a le débranche de `/artists`
+- `lib/components/top-three-artists-cards.tsx` — legacy `CARD_SHELL` ; **7a** l’a débranché de `/artists`
 - `lib/components/artists-mobile.tsx` / `tracks-mobile.tsx` / `genres-mobile.tsx` — dual tree jusqu’à 7a–7c

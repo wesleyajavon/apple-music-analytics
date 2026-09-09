@@ -2,17 +2,26 @@
 
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { DashboardCinematicHeroBg } from "@/lib/components/dashboard-ui";
+import {
+  DASHBOARD_BTN_GHOST,
+  DASHBOARD_LIST_ROW,
+  DASHBOARD_LIST_SEPARATOR,
+  DASHBOARD_METRIC_CELL,
+  DASHBOARD_METRIC_LABEL,
+  DASHBOARD_METRIC_STRIP,
+  DASHBOARD_METRIC_VALUE,
+  DASHBOARD_SECTION_EYEBROW,
+} from "@/lib/components/dashboard-ui";
 import { GroqQuotaNotice } from "@/lib/components/error-state";
-import { MusicalProfilePeriodBadge } from "@/lib/components/musical-profile-period-badge";
-import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
+import { OverviewHeroFrame } from "@/lib/components/overview-hero";
 import { isGroqDailyQuotaError } from "@/lib/utils/groq-quota-message";
 
 export const TRENDS_MOBILE_BLEED =
   "-mx-4 -mt-4 space-y-4 pb-8 max-lg:pb-[max(2rem,calc(var(--dashboard-bottom-nav-offset,0px)+1rem))] lg:hidden";
-export const TRENDS_MOBILE_HERO = "relative overflow-hidden bg-gray-950 px-4 pb-5 pt-4 text-white";
+/** @deprecated Prefer canvas masthead; kept for any leftover class references */
+export const TRENDS_MOBILE_HERO = "text-foreground";
 export const TRENDS_MOBILE_SNAP =
-  "-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden";
+  `${DASHBOARD_METRIC_STRIP} w-full flex-nowrap overflow-x-auto`;
 
 export function TrendsMobileChevron({ className = "h-4 w-4" }: { className?: string }) {
   return (
@@ -23,7 +32,7 @@ export function TrendsMobileChevron({ className = "h-4 w-4" }: { className?: str
 }
 
 export function TrendsMobileHero({
-  locale,
+  locale: _locale,
   eyebrow,
   heading,
   listenLabel,
@@ -35,47 +44,36 @@ export function TrendsMobileHero({
   listenLabel?: string;
   peakLabel?: string;
 }) {
-  const { startDate, endDate } = useListenDateRange();
-
   return (
-    <section className={TRENDS_MOBILE_HERO}>
-      <DashboardCinematicHeroBg />
-      <div className="relative space-y-4">
-        <div className="flex items-start justify-between gap-3">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-cyan">
-            {eyebrow}
-          </p>
-          <MusicalProfilePeriodBadge
-            startDate={startDate}
-            endDate={endDate}
-            locale={locale}
-            variant="mobile"
-            className="min-w-0"
-          />
+    <OverviewHeroFrame title={heading} compact>
+      <p className={`${DASHBOARD_SECTION_EYEBROW} mt-2`}>{eyebrow}</p>
+      {listenLabel || peakLabel ? (
+        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[13px] text-muted">
+          {listenLabel ? <span>{listenLabel}</span> : null}
+          {peakLabel ? <span>{peakLabel}</span> : null}
         </div>
-        <h1 className="text-[1.55rem] font-semibold leading-[1.12] tracking-[-0.05em]">{heading}</h1>
-        {listenLabel || peakLabel ? (
-          <div className="flex flex-wrap gap-2 text-xs font-semibold text-white/78">
-            {listenLabel ? (
-              <span className="rounded-full bg-white/10 px-3 py-1.5">{listenLabel}</span>
-            ) : null}
-            {peakLabel ? (
-              <span className="rounded-full bg-white/10 px-3 py-1.5">{peakLabel}</span>
-            ) : null}
-          </div>
-        ) : null}
-      </div>
-    </section>
+      ) : null}
+    </OverviewHeroFrame>
   );
 }
 
-export function TrendsMobileSignalTile({ label, value, hint }: { label: string; value: string; hint?: string }) {
+export function TrendsMobileSignalTile({
+  label,
+  value,
+  hint,
+}: {
+  label: string;
+  value: string;
+  hint?: string;
+}) {
   return (
-    <article className="min-w-[9.75rem] snap-start rounded-3xl border border-card-border bg-gray-950 p-4 text-white shadow-lg shadow-black/10">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">{label}</p>
-      <p className="mt-2 truncate text-2xl font-semibold tracking-[-0.04em]">{value}</p>
-      {hint ? <p className="mt-1 text-xs font-medium text-white/55">{hint}</p> : null}
-    </article>
+    <div className={`${DASHBOARD_METRIC_CELL} min-w-[10.5rem] flex-none`}>
+      <span className={DASHBOARD_METRIC_LABEL}>{label}</span>
+      <span className={`${DASHBOARD_METRIC_VALUE} truncate`} title={value}>
+        {value}
+      </span>
+      {hint ? <span className="truncate text-[13px] text-muted">{hint}</span> : null}
+    </div>
   );
 }
 
@@ -89,17 +87,14 @@ export function TrendsMobileDestinationRow({
   lead: string;
 }) {
   return (
-    <Link
-      href={href}
-      className="flex min-h-11 items-center gap-3 rounded-2xl border border-card-border bg-card-surface px-3.5 py-2.5 text-gray-950 shadow-sm dark:text-white"
-    >
+    <Link href={href} className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_SEPARATOR}`}>
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-sm font-semibold tracking-tight">{title}</span>
-        <span className="mt-0.5 block truncate text-xs leading-5 text-gray-500 dark:text-gray-400">
-          {lead}
+        <span className="block truncate text-sm font-semibold tracking-tight text-foreground">
+          {title}
         </span>
+        <span className="mt-0.5 block truncate text-[13px] leading-5 text-muted">{lead}</span>
       </span>
-      <TrendsMobileChevron className="h-4 w-4 shrink-0 text-gray-400" />
+      <TrendsMobileChevron className="h-4 w-4 shrink-0 text-muted" />
     </Link>
   );
 }
@@ -117,15 +112,15 @@ export function TrendsMobileActionRow({
     <button
       type="button"
       onClick={onClick}
-      className="flex min-h-11 w-full items-center gap-3 rounded-2xl border border-card-border bg-card-surface px-3.5 py-2.5 text-left text-gray-950 shadow-sm dark:text-white"
+      className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_SEPARATOR} w-full text-left`}
     >
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-sm font-semibold tracking-tight">{title}</span>
-        <span className="mt-0.5 block truncate text-xs leading-5 text-gray-500 dark:text-gray-400">
-          {lead}
+        <span className="block truncate text-sm font-semibold tracking-tight text-foreground">
+          {title}
         </span>
+        <span className="mt-0.5 block truncate text-[13px] leading-5 text-muted">{lead}</span>
       </span>
-      <TrendsMobileChevron className="h-4 w-4 shrink-0 text-gray-400" />
+      <TrendsMobileChevron className="h-4 w-4 shrink-0 text-muted" />
     </button>
   );
 }
@@ -142,16 +137,18 @@ export function TrendsMobileLegendRow({
   meta: string;
 }) {
   return (
-    <div className="flex min-h-11 items-center gap-3 rounded-2xl border border-card-border bg-card-surface px-3.5 py-2.5">
+    <div className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_SEPARATOR}`}>
       <span
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
+        className="h-2.5 w-2.5 shrink-0 rounded-full"
         style={{ backgroundColor: color }}
-      >
+        aria-hidden
+      />
+      <span className="w-6 shrink-0 text-center text-xs font-semibold tabular-nums text-muted">
         {rank}
       </span>
       <span className="min-w-0 flex-1">
         <span className="block truncate text-sm font-semibold text-foreground">{label}</span>
-        <span className="block truncate text-xs text-muted">{meta}</span>
+        <span className="block truncate text-[13px] text-muted">{meta}</span>
       </span>
     </div>
   );
@@ -176,7 +173,7 @@ export function TrendsMobileSheetHeader({
       <button
         type="button"
         onClick={onClose}
-        className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-muted"
+        className={`${DASHBOARD_BTN_GHOST} min-h-11 min-w-11 shrink-0 px-3`}
         aria-label={tCommon("close")}
       >
         {tCommon("close")}
@@ -203,10 +200,10 @@ export function TrendsMobileEmpty({
   leaderboardLead: string;
 }) {
   return (
-    <div className={TRENDS_MOBILE_BLEED}>
+    <div className={`${TRENDS_MOBILE_BLEED} px-4 space-y-6`}>
       <TrendsMobileHero locale={locale} eyebrow={eyebrow} heading={title} />
-      <p className="px-4 text-sm leading-6 text-muted">{lead}</p>
-      <div className="space-y-2 px-4">
+      <p className="text-sm leading-6 text-muted">{lead}</p>
+      <div>
         <TrendsMobileDestinationRow
           href={leaderboardHref}
           title={leaderboardTitle}
@@ -231,63 +228,42 @@ export function TrendsMobileError({
   onRetry: () => void;
 }) {
   const tCommon = useTranslations("common");
-  const { startDate, endDate } = useListenDateRange();
   const isQuota = isGroqDailyQuotaError(error);
 
   return (
-    <div className={TRENDS_MOBILE_BLEED}>
-      <section className={TRENDS_MOBILE_HERO}>
-        <DashboardCinematicHeroBg />
-        <div className="relative space-y-4">
-          <div className="flex items-start justify-between gap-3">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-cyan">
-              {eyebrow}
-            </p>
-            <MusicalProfilePeriodBadge
-              startDate={startDate}
-              endDate={endDate}
-              locale={locale}
-              variant="mobile"
-              className="min-w-0"
-            />
-          </div>
-          <h1 className="text-[1.55rem] font-semibold leading-[1.12] tracking-[-0.05em]">
-            {heading}
-          </h1>
-          {isQuota ? (
-            <GroqQuotaNotice error={error} />
-          ) : (
-            <button
-              type="button"
-              onClick={onRetry}
-              className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25"
-            >
-              {tCommon("retry")}
-            </button>
-          )}
-        </div>
-      </section>
+    <div className={`${TRENDS_MOBILE_BLEED} px-4 space-y-6`}>
+      <TrendsMobileHero locale={locale} eyebrow={eyebrow} heading={heading} />
+      {isQuota ? (
+        <GroqQuotaNotice error={error} />
+      ) : (
+        <button type="button" onClick={onRetry} className={DASHBOARD_BTN_GHOST}>
+          {tCommon("retry")}
+        </button>
+      )}
     </div>
   );
 }
 
 export function TrendsMobileSkeleton() {
   return (
-    <div className={TRENDS_MOBILE_BLEED} aria-busy="true">
-      <div className={`${TRENDS_MOBILE_HERO} min-h-[10rem]`}>
-        <div className="h-3 w-24 animate-shimmer rounded bg-white/15" />
-        <div className="mt-5 h-8 w-48 animate-shimmer rounded bg-white/20" />
-        <div className="mt-3 h-4 w-32 animate-shimmer rounded bg-white/10" />
+    <div className={`${TRENDS_MOBILE_BLEED} px-4 space-y-6`} aria-busy="true">
+      <div className="space-y-3">
+        <div className="h-3 w-24 animate-pulse rounded bg-black/10 dark:bg-white/10" />
+        <div className="h-8 w-48 animate-pulse rounded bg-black/10 dark:bg-white/10" />
+        <div className="h-4 w-32 animate-pulse rounded bg-black/5 dark:bg-white/5" />
       </div>
       <div className={TRENDS_MOBILE_SNAP}>
         {[0, 1, 2].map((item) => (
           <div
             key={item}
-            className="h-24 min-w-[9.75rem] animate-shimmer snap-start rounded-3xl border border-card-border bg-card-surface"
-          />
+            className={`${DASHBOARD_METRIC_CELL} min-w-[10.5rem] flex-none`}
+          >
+            <div className="h-3 w-16 animate-pulse rounded bg-black/10 dark:bg-white/10" />
+            <div className="mt-2 h-7 w-20 animate-pulse rounded bg-black/10 dark:bg-white/10" />
+          </div>
         ))}
       </div>
-      <div className="mx-4 h-28 animate-shimmer rounded-3xl border border-card-border bg-card-surface" />
+      <div className="h-28 animate-pulse rounded bg-black/5 dark:bg-white/5" />
     </div>
   );
 }

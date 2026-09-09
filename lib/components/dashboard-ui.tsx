@@ -56,9 +56,17 @@ export const DASHBOARD_GLASS_SIDEBAR =
 export const DASHBOARD_GLASS_FLOATING_PANE =
   `${DASHBOARD_GLASS_SIDEBAR} rounded-[1.25rem] shadow-[0_8px_40px_rgb(23_19_33_/_0.08)] dark:shadow-[0_12px_40px_rgb(0_0_0_/_0.45)]`;
 
-/** Replay / iOS segmented track: same frost as floating chrome, hairline, no chip-cards. */
+/** Replay / iOS segmented track: same frost as header chrome, hairline, no chip-cards. */
 export const DASHBOARD_SEGMENTED_TRACK =
-  "dashboard-glass-sidebar inline-flex max-w-full items-center gap-0.5 overflow-x-auto rounded-full border border-glass-hairline p-1";
+  "dashboard-glass-chrome inline-flex max-w-full items-center gap-0.5 overflow-x-auto rounded-full border border-glass-hairline p-1";
+
+/**
+ * Desktop chart controls (group-by + cumulative), sticky under the period header.
+ * Horizontal inset matches DateRangeFilter: header `lg:px-3` + filter `px-3` = 24px
+ * against main `lg:p-8` → `lg:-mx-8 lg:px-6`. No chrome bar — pills only, like the period filter.
+ */
+export const DASHBOARD_CHART_CONTROLS_ROW =
+  "sticky top-[var(--dashboard-filter-height)] z-20 hidden flex-wrap items-center gap-2 py-2 lg:-mx-8 lg:flex lg:px-6";
 
 /** Inactive segmented pill. Pair with DASHBOARD_SEGMENTED_PILL_ACTIVE. */
 export const DASHBOARD_SEGMENTED_PILL =

@@ -7,7 +7,6 @@ import {
   useState,
   useRef,
   useEffect,
-  type ReactNode,
 } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
@@ -20,8 +19,6 @@ import {
   useListens,
   useTemporalAnalysis,
 } from "@/lib/hooks/use-listening";
-import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
-import { formatOverviewDateRangeLabel } from "@/lib/utils/overview-date-range-label";
 import { ErrorState } from "@/lib/components/error-state";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
 import { HeatmapDayDetailsPanel } from "@/lib/components/heatmap-day-details-panel";
@@ -36,62 +33,15 @@ import {
 import { MobileBottomSheet } from "@/lib/components/mobile-bottom-sheet";
 import { HeatmapSkeleton } from "@/lib/components/skeleton-loaders";
 import { useIsLgChartViewport } from "@/lib/hooks/use-chart-viewport";
-import { CalendarDays, Github } from "lucide-react";
+import { OverviewHeroFrame } from "@/lib/components/overview-hero";
 import {
-  DASHBOARD_SPOTLIGHT_SHELL,
-  DASHBOARD_SPOTLIGHT_GRADIENT_LIME,
-  DASHBOARD_SPOTLIGHT_HAIRLINE_LIME,
-  DASHBOARD_SPOTLIGHT_INNER_WELL,
-  DASHBOARD_SPOTLIGHT_MUTED,
-  DASHBOARD_SPOTLIGHT_TITLE,
-  DASHBOARD_SPOTLIGHT_HEADER_BOTTOM,
-} from "@/lib/constants/dashboard-spotlight";
-
-/** Aligné hero `/dashboard/timeline` — startup / Vercel */
-const HEATMAP_HERO_SHELL_CLASS =
-  "relative overflow-hidden rounded-[2rem] border border-white/10 bg-gray-950 px-5 py-6 text-white shadow-2xl shadow-violet-500/15 sm:px-8 sm:py-9 lg:px-10 lg:py-10";
-
-const HEATMAP_CALENDAR_SECTION_CLASS = `relative ${DASHBOARD_SPOTLIGHT_SHELL}`;
-
-function HeatmapHeroFrame({ badgeLabel, stats }: { badgeLabel: string; stats: ReactNode }) {
-  const t = useTranslations("heatmap");
-  return (
-    <div className={HEATMAP_HERO_SHELL_CLASS}>
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.26),transparent_30%),radial-gradient(circle_at_80%_12%,rgba(6,182,212,0.2),transparent_32%),linear-gradient(135deg,rgba(3,7,18,0.98),rgba(30,27,75,0.88)_48%,rgba(8,47,73,0.72))]" />
-      <div className="absolute -left-20 top-1/3 h-64 w-64 rounded-full bg-accent-violet/22 blur-3xl" />
-      <div className="absolute -bottom-28 right-10 h-72 w-72 rounded-full bg-accent-cyan/18 blur-3xl" />
-      <div className="relative grid gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-start">
-        <div>
-          <h1 className="flex flex-wrap items-center gap-3 text-3xl font-semibold tracking-[-0.06em] text-white sm:text-5xl lg:text-6xl">
-            <CalendarDays className="h-9 w-9 shrink-0 text-violet-200/90 sm:h-11 sm:w-11" strokeWidth={1.5} aria-hidden />
-            <span className="max-w-4xl text-balance">{t("title")}</span>
-          </h1>
-          <p className="mt-5 max-w-2xl text-base leading-7 text-white/70 sm:text-lg">{t("subtitle")}</p>
-          <div className="mt-6 flex flex-wrap items-center gap-3">
-            <span className="inline-flex items-center rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-white/90 backdrop-blur">
-              {badgeLabel}
-            </span>
-          </div>
-        </div>
-
-        <div className="relative lg:mt-0">
-          <div className="absolute -inset-4 rounded-[2rem] bg-brand-gradient-soft blur-2xl" aria-hidden />
-          <div className="relative overflow-hidden rounded-[1.75rem] border border-white/15 bg-white/10 p-3 shadow-2xl shadow-black/35 backdrop-blur-xl">
-            <div className="rounded-[1.35rem] border border-white/10 bg-slate-950/70 p-4">
-              <div className="flex items-center justify-between border-b border-white/10 pb-4">
-                <p className="font-mono text-[0.66rem] font-semibold uppercase tracking-[0.24em] text-slate-400">{t("heroStatBadge")}</p>
-                <span className="rounded-full border border-violet-300/25 bg-violet-300/10 px-2.5 py-1 text-[0.66rem] font-semibold text-violet-100">{t("heroStatTag")}</span>
-              </div>
-              {stats ?? (
-                <p className="pt-4 text-sm leading-6 text-white/60">{t("heroStatsPlaceholder")}</p>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+  DASHBOARD_METRIC_CELL,
+  DASHBOARD_METRIC_LABEL,
+  DASHBOARD_METRIC_STRIP,
+  DASHBOARD_METRIC_VALUE,
+  DASHBOARD_SECTION_EYEBROW,
+  DASHBOARD_SECTION_TITLE,
+} from "@/lib/components/dashboard-ui";
 
 type HeatmapSummaryStats = {
   totalListens: number;
@@ -116,46 +66,74 @@ type HeatmapComputedStats = HeatmapSummaryStats & {
   } | null;
 };
 
-function HeatmapHeroStats({ stats, locale }: { stats: HeatmapSummaryStats; locale: string }) {
+function HeatmapMetricStrip({
+  stats,
+  locale,
+  loading = false,
+}: {
+  stats?: HeatmapSummaryStats | null;
+  locale: string;
+  loading?: boolean;
+}) {
   const t = useTranslations("heatmap");
   const pct =
-    stats.totalDays > 0
+    stats && stats.totalDays > 0
       ? Math.round((stats.daysWithListens / stats.totalDays) * 100)
-      : 0;
-  return (
-    <div className="grid grid-cols-2 gap-2 pt-4 sm:grid-cols-2 lg:gap-3">
-      <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
-        <p className="text-lg font-semibold tracking-tight text-white tabular-nums sm:text-xl">{stats.totalListens.toLocaleString(locale)}</p>
-        <p className="mt-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">{t("totalListens")}</p>
-      </div>
-      <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
-        <p className="text-lg font-semibold tracking-tight text-white tabular-nums sm:text-xl">
-          {stats.daysWithListens.toLocaleString(locale)} / {stats.totalDays.toLocaleString(locale)}
-        </p>
-        <p className="mt-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">{t("activeDays")}</p>
-        <p className="mt-0.5 text-xs text-white/65">{pct}% {t("ofDays")}</p>
-      </div>
-      <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
-        <p className="text-lg font-semibold tracking-tight text-white tabular-nums sm:text-xl">{stats.averageListens.toLocaleString(locale)}</p>
-        <p className="mt-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">{t("avgDaily")}</p>
-        <p className="mt-0.5 text-xs text-white/65">{t("listensPerDay")}</p>
-      </div>
-      <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-3">
-        <p className="truncate text-lg font-semibold tracking-tight text-white sm:text-xl" title={stats.mostActiveWeekday}>{stats.mostActiveWeekday}</p>
-        <p className="mt-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">{t("favoriteDay")}</p>
-        <p className="mt-0.5 text-xs text-white/65">{t("favoriteDayHint")}</p>
-      </div>
-    </div>
-  );
-}
+      : null;
+  const metrics = [
+    {
+      key: "total",
+      label: t("totalListens"),
+      value: stats ? stats.totalListens.toLocaleString(locale) : null,
+      hint: null as string | null,
+    },
+    {
+      key: "active",
+      label: t("activeDays"),
+      value: stats
+        ? `${stats.daysWithListens.toLocaleString(locale)} / ${stats.totalDays.toLocaleString(locale)}`
+        : null,
+      hint: pct != null ? `${pct}% ${t("ofDays")}` : null,
+    },
+    {
+      key: "avg",
+      label: t("avgDaily"),
+      value: stats ? stats.averageListens.toLocaleString(locale) : null,
+      hint: t("listensPerDay"),
+    },
+    {
+      key: "favorite",
+      label: t("favoriteDay"),
+      value: stats ? stats.mostActiveWeekday : null,
+      hint: t("favoriteDayHint"),
+    },
+  ];
 
-function HeatmapHeroStatsSkeleton() {
   return (
-    <div className="grid grid-cols-2 gap-2 pt-4 lg:gap-3" aria-busy="true">
-      {[0, 1, 2, 3].map((i) => (
-        <div key={i} className="animate-pulse rounded-2xl border border-white/10 bg-white/[0.06] p-3">
-          <div className="mb-2 h-7 w-16 rounded bg-white/20" />
-          <div className="h-3 w-24 rounded bg-white/15" />
+    <div
+      className={`${DASHBOARD_METRIC_STRIP} w-full max-lg:flex-nowrap max-lg:overflow-x-auto`}
+      aria-busy={loading || undefined}
+    >
+      {metrics.map((metric) => (
+        <div
+          key={metric.key}
+          className={`${DASHBOARD_METRIC_CELL} max-lg:min-w-[10.5rem] max-lg:flex-none`}
+        >
+          <span className={DASHBOARD_METRIC_LABEL}>{metric.label}</span>
+          {metric.value == null ? (
+            <span
+              className={`${DASHBOARD_METRIC_VALUE} inline-block h-8 w-20 animate-pulse rounded bg-black/10 dark:bg-white/10`}
+            />
+          ) : (
+            <>
+              <span className={`${DASHBOARD_METRIC_VALUE} truncate`} title={metric.value}>
+                {metric.value}
+              </span>
+              {metric.hint ? (
+                <span className="truncate text-[13px] text-muted">{metric.hint}</span>
+              ) : null}
+            </>
+          )}
         </div>
       ))}
     </div>
@@ -179,25 +157,17 @@ function formatMobileDayLabel(date: string, locale: string, format: "short" | "l
 }
 
 function HeatmapPageFallback() {
-  const tOverview = useTranslations("overview");
-  const badgeLabel = tOverview("allData");
+  const t = useTranslations("heatmap");
+  const locale = useLocale();
   return (
     <>
       <div className="lg:hidden">
         <HeatmapMobileSkeleton />
       </div>
-      <div className="hidden space-y-8 lg:block">
-        <HeatmapHeroFrame
-          badgeLabel={badgeLabel}
-          stats={<HeatmapHeroStatsSkeleton />}
-        />
-        <section className={HEATMAP_CALENDAR_SECTION_CLASS}>
-          <div className={DASHBOARD_SPOTLIGHT_GRADIENT_LIME} aria-hidden />
-          <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_LIME} aria-hidden />
-          <div className="relative p-6 sm:p-8">
-            <HeatmapSkeleton />
-          </div>
-        </section>
+      <div className="hidden space-y-6 lg:block">
+        <OverviewHeroFrame title={t("title")} description={t("subtitle")} />
+        <HeatmapMetricStrip locale={locale} loading />
+        <HeatmapSkeleton />
       </div>
     </>
   );
@@ -212,7 +182,6 @@ function toDateOnly(date: string | Date): string {
 function HeatmapContent() {
   const searchParams = useSearchParams();
   const t = useTranslations("heatmap");
-  const tOverview = useTranslations("overview");
   const locale = useLocale();
   const isLg = useIsLgChartViewport();
   const emptyStatePresets = useEmptyStatePresets();
@@ -234,16 +203,6 @@ function HeatmapContent() {
   const startDate = searchParams.get("startDate") || undefined;
   const endDate = searchParams.get("endDate") || undefined;
   const userId = searchParams.get("userId") ?? undefined;
-
-  const { startDate: badgeStart, endDate: badgeEnd } = useListenDateRange();
-  const badgeRangeLabel = formatOverviewDateRangeLabel(
-    badgeStart,
-    badgeEnd,
-    locale,
-  );
-  const badgeLabel = badgeRangeLabel
-    ? t("dateRangeBadge", { range: badgeRangeLabel })
-    : tOverview("allData");
 
   const {
     data: timelineData,
@@ -464,20 +423,15 @@ function HeatmapContent() {
         <div className="lg:hidden">
           <HeatmapMobileError locale={locale} error={error} onRetry={handleRetry} />
         </div>
-        <div className="hidden space-y-8 lg:block">
-          <HeatmapHeroFrame badgeLabel={badgeLabel} stats={null} />
-          <section className={HEATMAP_CALENDAR_SECTION_CLASS}>
-            <div className={DASHBOARD_SPOTLIGHT_GRADIENT_LIME} aria-hidden />
-            <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_LIME} aria-hidden />
-            <div className="relative p-6 sm:p-8">
-              <ErrorState
-                variant="startup"
-                error={error}
-                message={t("errorLoading")}
-                onRetry={handleRetry}
-              />
-            </div>
-          </section>
+        <div className="hidden space-y-6 lg:block">
+          <OverviewHeroFrame title={t("title")} description={t("subtitle")} />
+          <HeatmapMetricStrip locale={locale} />
+          <ErrorState
+            variant="startup"
+            error={error}
+            message={t("errorLoading")}
+            onRetry={handleRetry}
+          />
         </div>
       </>
     );
@@ -489,8 +443,9 @@ function HeatmapContent() {
         <div className="lg:hidden">
           <HeatmapMobileEmpty />
         </div>
-        <div className="hidden space-y-8 lg:block">
-          <HeatmapHeroFrame badgeLabel={badgeLabel} stats={null} />
+        <div className="hidden space-y-6 lg:block">
+          <OverviewHeroFrame title={t("title")} description={t("subtitle")} />
+          <HeatmapMetricStrip locale={locale} />
           <EmptyState variant="startup" {...emptyStatePresets.importData} />
         </div>
       </>
@@ -516,74 +471,49 @@ function HeatmapContent() {
         ) : null}
       </div>
 
-      <div className="hidden space-y-8 lg:block">
-        <HeatmapHeroFrame
-          badgeLabel={badgeLabel}
+      <div className="hidden space-y-6 lg:block lg:space-y-8">
+        <OverviewHeroFrame title={t("title")} description={t("subtitle")} />
+        <HeatmapMetricStrip
           stats={
-            isLoading ? (
-              <HeatmapHeroStatsSkeleton />
-            ) : stats ? (
-              <HeatmapHeroStats
-                stats={{
+            stats
+              ? {
                   totalListens: stats.totalListens,
                   daysWithListens: stats.daysWithListens,
                   totalDays: stats.totalDays,
                   averageListens: stats.averageListens,
                   mostActiveWeekday: stats.mostActiveWeekday,
-                }}
-                locale={locale}
-              />
-            ) : null
+                }
+              : null
           }
+          locale={locale}
+          loading={isLoading}
         />
 
-        <section
-          className={`${HEATMAP_CALENDAR_SECTION_CLASS} animate-fade-in-up transition-all duration-300`}
-          aria-labelledby="heatmap-spotlight-title"
-        >
-          <div className={DASHBOARD_SPOTLIGHT_GRADIENT_LIME} aria-hidden />
-          <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_LIME} aria-hidden />
-          <div className="relative">
-            <div className={`${DASHBOARD_SPOTLIGHT_HEADER_BOTTOM} px-6 py-5 sm:px-8`}>
-              <div className="flex items-start gap-4">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-slate-200/90 bg-slate-50/90 text-lime-700 shadow-sm dark:border-white/15 dark:bg-white/10 dark:text-lime-300">
-                  <Github className="h-5 w-5" strokeWidth={1.75} aria-hidden />
-                </div>
-                <div>
-                  <h2 id="heatmap-spotlight-title" className={DASHBOARD_SPOTLIGHT_TITLE}>
-                    {t("calendarTitle")}
-                  </h2>
-                  <p className={`mt-1 max-w-2xl ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("calendarHint")}</p>
-                  {heatmapData.length === 0 && (
-                    <p className={`mt-2 text-xs ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("noDataPeriod")}</p>
-                  )}
-                </div>
-              </div>
-            </div>
-            <div className="p-4 sm:p-6 md:p-8">
-              {isLoading ? (
-                <HeatmapSkeleton />
-              ) : heatmapData.length > 0 ? (
-                <div className={`relative ${DASHBOARD_SPOTLIGHT_INNER_WELL}`}>
-                  <div className="pointer-events-none absolute left-1/2 top-10 h-64 w-64 -translate-x-1/2 rounded-full bg-lime-400/10 blur-3xl dark:bg-violet-400/12" aria-hidden />
-                  <div className="relative">
-                    <CalendarHeatmap
-                      data={heatmapData}
-                      startDate={calendarStart}
-                      endDate={calendarEnd}
-                      selectedDate={selectedDate}
-                      onDayClick={handleDayClick}
-                      locale={locale}
-                      colorScheme="aurora"
-                    />
-                  </div>
-                </div>
-              ) : (
-                <div className={`${DASHBOARD_SPOTLIGHT_INNER_WELL} py-12 text-center ${DASHBOARD_SPOTLIGHT_MUTED}`}>
-                  <p>{t("noDataPeriod")}</p>
-                </div>
-              )}
-            </div>
+        <section className="w-full min-w-0" aria-labelledby="heatmap-calendar-title">
+          <p className={DASHBOARD_SECTION_EYEBROW}>{t("heroStatBadge")}</p>
+          <h2 id="heatmap-calendar-title" className={`${DASHBOARD_SECTION_TITLE} mt-1`}>
+            {t("calendarTitle")}
+          </h2>
+          <p className="mt-2 max-w-2xl text-[13px] leading-6 text-muted">{t("calendarHint")}</p>
+          {heatmapData.length === 0 && !isLoading ? (
+            <p className="mt-2 text-[13px] text-muted">{t("noDataPeriod")}</p>
+          ) : null}
+          <div className="mt-8">
+            {isLoading ? (
+              <HeatmapSkeleton />
+            ) : heatmapData.length > 0 ? (
+              <CalendarHeatmap
+                data={heatmapData}
+                startDate={calendarStart}
+                endDate={calendarEnd}
+                selectedDate={selectedDate}
+                onDayClick={handleDayClick}
+                locale={locale}
+                colorScheme="aurora"
+              />
+            ) : (
+              <p className="py-12 text-center text-[13px] text-muted">{t("noDataPeriod")}</p>
+            )}
           </div>
         </section>
       </div>

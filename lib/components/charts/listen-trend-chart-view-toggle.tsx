@@ -32,7 +32,7 @@ export function ListenTrendChartViewToggle({
       aria-label={t("label")}
       className={
         className ??
-        `${DASHBOARD_SEGMENTED_TRACK} w-full sm:w-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden`
+        `${DASHBOARD_SEGMENTED_TRACK} min-w-0 shrink [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden`
       }
     >
       {segments.map((segment) => {
@@ -44,7 +44,7 @@ export function ListenTrendChartViewToggle({
             role="tab"
             aria-selected={selected}
             onClick={() => onChange(segment.value)}
-            className={`${selected ? DASHBOARD_SEGMENTED_PILL_ACTIVE : DASHBOARD_SEGMENTED_PILL} flex-1 sm:flex-none`}
+            className={selected ? DASHBOARD_SEGMENTED_PILL_ACTIVE : DASHBOARD_SEGMENTED_PILL}
           >
             {segment.label}
           </button>

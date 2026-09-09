@@ -24,7 +24,7 @@ Le chrome (sidebar + header) se fait **avant** Overview, sinon chaque section se
 - Tops + pages suivantes : [`replay-ranking-grid.tsx`](../lib/components/replay-ranking-grid.tsx) (grille partagée, `grid-cols-2` + `lg:grid-cols-4`)
 - Charts Overview : [`overview-trends-chart.tsx`](../lib/components/charts/overview-trends-chart.tsx) + [`crystal-chart.ts`](../lib/constants/crystal-chart.ts)
 
-Le plus gros écart **restant** n’est plus Overview ni artists / tracks / genres. **7a–7c livrées.** Restant : musical-profile (7d), `*/trends` + timeline/heatmap (7e), Ask / Duet (7f).
+Le plus gros écart **restant** n’est plus Overview ni artists / tracks / genres. **7a–7c livrées.** Musical-profile = **7d** (prompt prêt). Restant à lancer : **7e** (`*/trends` + timeline + heatmap) et **7f** (Ask / Duet) — prompts complets plus bas.
 
 ---
 
@@ -37,7 +37,7 @@ Le plus gros écart **restant** n’est plus Overview ni artists / tracks / genr
 | Lire / ajuster ce playbook | Agent (ou rien) | Document uniquement |
 | Étapes 0–5 (desktop Crystal) | — | **Livrées.** Ne pas rejouer. |
 | Étape 6 (Overview mobile) | — | **Livrée.** Dual tree `lg:hidden` ; mêmes onglets que le desktop |
-| Étape 7a–7d (artists / tracks / genres / musical-profile) | **Plan**, une session = un prompt **complet** | Pas les one-liners. 7e–7f : étendre avant de lancer |
+| Étape 7a–7f (artists → Ask/Duet) | **Plan**, une session = un prompt **complet** | Pas les one-liners du tableau. Coller le bloc numéroté. |
 
 Règle d’or : **une conversation Plan = un prompt numéroté**. Après implémentation : EN + FR, light + dark, desktop `lg+` **et** mobile ~390×844.
 
@@ -53,7 +53,7 @@ Crystal **desktop Overview est livré**. Mobile = arbre `lg:hidden` dédié. Ne 
 4. Valide le plan, implémente, vérifie au navigateur, commit.
 5. Passe au numéro suivant.
 
-Étapes **7a–7d** : coller le **bloc complet** (sections Étape 7a / 7b / 7c / 7d), pas la cellule du tableau d’ordre. Le tableau n’est qu’un index.
+Étapes **7a–7f** : coller le **bloc complet** (sections Étape 7a … 7f), pas la cellule du tableau d’ordre. Le tableau n’est qu’un index.
 
 Hors scope de chaque prompt sauf mention contraire : landing marketing, e-mail, cookies, auth pages, onboarding wizard, APIs, Prisma.
 
@@ -406,7 +406,7 @@ Un écran par session. **Garder leurs onglets / panneaux.** Un-card + segmented 
 
 Catalogue paginé + recherche (vue ranking, 10–50 lignes) : **pas** des tuiles 3:4. Un-card le chrome (`DASHBOARD_SPOTLIGHT_*`), chercheur = `DASHBOARD_SEARCH_FIELD`. Thumb + nom + métrique, hairline — pas `rounded-2xl` + `shadow-sm` par row.
 
-Les plots Overview + widgets `*-trends-summary-widget.tsx` utilisent **déjà** `OverviewTrendsChart`. Ne pas les restyler. Le **corps** de `/artists/trends` `/tracks/trends` `/genres/trends` = **7e**. Le **4ᵉ onglet** du listing (lien vers ces routes) = 7b / 7c, pas 7e.
+Les plots Overview + widgets `*-trends-summary-widget.tsx` utilisent **déjà** `OverviewTrendsChart`. Ne pas les restyler. Le **corps** de `/artists/trends` `/tracks/trends` `/genres/trends` **et** `/timeline` `/heatmap` = **7e** (chrome + plots `DASHBOARD_CHART_THEME` encore legacy sur les pages dédiées). Le **4ᵉ onglet** du listing (lien vers `*/trends`) = 7b / 7c, pas 7e.
 
 ### Contrat d’onglets artists / tracks (cible produit)
 
@@ -423,7 +423,7 @@ Les deux pages ont **le même modèle d’information** : 4 items dans le sélec
 
 **7a livrée :** 3 onglets locaux (spotlight / leaderboard / ranking) + CTA trends ghost dans le masthead. **Manque :** le 4ᵉ item `trends` dans le switcher (et le même switcher sur `/artists/trends`). 7b aligne `/artists` sur ce contrat **et** livre `/tracks` dessus.
 
-Ordre (index). **7a–7d = blocs complets plus bas.** 7e–7f = encore trop courts : les étendre avant ces sessions.
+Ordre (index). **7a–7f = blocs complets plus bas.**
 
 | # | Route | Session |
 | --- | --- | --- |
@@ -431,8 +431,8 @@ Ordre (index). **7a–7d = blocs complets plus bas.** 7e–7f = encore trop cour
 | **7b** | `/dashboard/tracks` | Même **4 onglets** que la cible artists. 1er = tuiles Top tracks (pas le bar chart). + parité trends sur `/artists`. |
 | **7c** | `/dashboard/genres` | Même contrat 4 onglets (top / chart / ranking / lien trends). `GENRE_SPOTLIGHT_CARD_SHELL` → `ReplayRankingGrid` `kind: "fill"`. |
 | **7d** | `/dashboard/musical-profile` | **Hub empilé** (pas de `view=`). Masthead canvas + strip + tuiles Replay (top 4) + list rows destinations. Dual tree. |
-| 7e | Timeline, heatmap, `*/trends` | Chrome de page sur canvas (plus de hero `rounded-[2rem]`). Plot : `OverviewTrendsChart` / `crystal-chart.ts` s’il reste du `DASHBOARD_CHART_THEME`. Pas de blur sur le SVG. |
-| 7f | Ask / Duet | Chrome seulement. `TopLibraryCard` sur `duet-friend-music-desktop.tsx` hors scope sauf session friend-music. |
+| **7e** | `/timeline`, `/heatmap`, `*/trends` | Chrome canvas + plots Crystal (`OverviewTrendsChart` / `crystal-chart.ts`). Dual tree. |
+| **7f** | Ask + Duet (friends / compare) | Chrome seulement. `TopLibraryCard` friend-music **hors scope** (session dédiée). |
 
 ---
 
@@ -605,7 +605,118 @@ Livre : plus de hero always-dark ni FeaturePillarCard ; hub empilé Crystal ; li
 
 ---
 
-7e–7f : ne pas coller les one-liners du tableau. Avant chaque session, écrire un bloc du calibre 7a (fichiers, aujourd’hui, compose X, interdit Y, dual tree, e2e).
+### Étape 7e — Timeline, heatmap, `*/trends` (après 7a–7d)
+
+Session multi-surfaces, **une** conversation Plan. Même recette chrome partout ; plots = composer `OverviewTrendsChart` / `crystal-chart.ts` (pas une 2ᵉ grammaire SVG). Les widgets `*-trends-summary-widget.tsx` et Overview `view=trends` / heatmap Overview sont **déjà** Crystal — ne pas les retoucher.
+
+```text
+[Préambule]
+
+Étape 7e — Crystal temporal + trends pages. Composer OverviewHeroFrame + DASHBOARD_METRIC_STRIP + OverviewTrendsChart + crystal-chart.ts. Ne pas réécrire la tuile Replay. Ne pas retoucher Overview, listings artists/tracks/genres (sauf régression switcher trends), musical-profile, Ask, Duet.
+
+Contrat (non négociable) :
+- Chrome de page = masthead canvas (light/dark) + metric strip. Plus de *_HERO_SHELL always-dark rounded-[2rem] + glow + KPI mini-cartes verre.
+- Plot = sur le canvas. Plus de DASHBOARD_SPOTLIGHT_SHELL / INNER_WELL / feDropShadow glow autour du SVG. Pas de blur sur le SVG.
+- Lignes / aires multi-séries : OverviewTrendsChart (+ getCrystalSeriesColor). Interdit : DASHBOARD_CHART_THEME, Recharts Legend, ticks X inclinés, .chart-tooltip-accessible (utiliser .crystal-chart-tooltip via OverviewTrendsTooltip).
+- Pickers / période / cumulative : déjà Crystal (PeriodSelector segmented, ListenTrendChartViewToggle, DASHBOARD_FILTER_CHIP, DASHBOARD_SEARCH_FIELD). Ne pas les restyler.
+- Switchers artists/tracks/genres sur les pages */trends : déjà Crystal (7b–7c). Ne pas les restyler ; activeSection="trends" inchangé.
+- IA métier inchangée : period, sélection séries, commentary Groq, day-details heatmap, query params (startDate, endDate, userId, period, artistIds/trackIds/…).
+
+Aujourd’hui (à remplacer) :
+- Desktop timeline : TIMELINE_HERO_SHELL always-dark + KPI-cartes ; chart dans DASHBOARD_SPOTLIGHT_SHELL + DASHBOARD_CHART_THEME LineChart.
+- Desktop heatmap : HEATMAP_HERO_SHELL always-dark + KPI-cartes ; calendrier dans DASHBOARD_SPOTLIGHT_SHELL (lime).
+- Desktop */trends (artists, tracks, genres) : TRENDS_HERO_SHELL always-dark + KPI-cartes + CTA blanc lift « back » ; chart LineChart + Legend + DASHBOARD_CHART_THEME dans DASHBOARD_SPOTLIGHT_* ; titres section font-mono uppercase primary ; souvent OVERVIEW_STARTUP_SURFACE / carte rounded-[2rem] hover-lift pour le panneau commentary IA.
+- Mobile timeline/heatmap : TimelineMobile* / HeatmapMobile* — HERO_SHELL bg-gray-950 + DashboardCinematicHeroBg, SignalTile / rows-cartes.
+- Mobile */trends : trends-mobile-hub.tsx — TRENDS_MOBILE_HERO cinematic, TrendsMobileSignalTile dark, DestinationRow cartes. artist-trends-mobile / track-trends-mobile / genre-trends-mobile composent ce hub.
+
+Fichiers (scope) :
+- Timeline : app/[locale]/dashboard/(main)/timeline/page.tsx, lib/components/timeline-mobile.tsx, lib/components/timeline-mobile-spark.tsx (un-card si carte).
+- Heatmap : app/[locale]/dashboard/(main)/heatmap/page.tsx, lib/components/heatmap-mobile.tsx, lib/components/heatmap-day-details-panel.tsx (flatten chrome fiche / sheet, garder open/close + données). calendar-heatmap.tsx = cellules couleur — ne pas le transformer en tuiles Replay ; sortir seulement le shell parent.
+- Trends artists : app/[locale]/dashboard/(main)/artists/trends/page.tsx, lib/components/artist-trends-mobile.tsx.
+- Trends tracks : app/[locale]/dashboard/(main)/tracks/trends/page.tsx, lib/components/track-trends-mobile.tsx.
+- Trends genres : app/[locale]/dashboard/(main)/genres/trends/page.tsx, lib/components/genre-trends-mobile.tsx.
+- Hub mobile partagé : lib/components/trends-mobile-hub.tsx, lib/components/trends-mobile-spark.tsx — Crystaliser une fois, les 3 mobiles en héritent.
+- Chart : lib/components/charts/overview-trends-chart.tsx, lib/constants/crystal-chart.ts, lib/components/charts/overview-trends-tooltip.tsx, listen-trend-chart-view-toggle.tsx (ne pas restyler).
+- Réutiliser : overview-hero.tsx, dashboard-ui.tsx (metric strip, section titles, search, filter chips, ghost btn). Pickers : artist-trends-artist-picker.tsx / track-trends-track-picker.tsx (déjà chips Crystal).
+- e2e : __tests__/e2e/mobile-dashboard.spec.ts (timeline, heatmap day sheet, artist/track trends FR/EN), __tests__/e2e/dashboard.spec.ts (timeline nav) si le DOM hero change.
+
+HORS SCOPE :
+- Overview (view=trends, view=context heatmap widget OverviewCanvasFrame — déjà Crystal).
+- *-trends-summary-widget.tsx (déjà OverviewTrendsChart).
+- Listings /dashboard/artists|tracks|genres (panneaux locaux).
+- Ask, Duet, musical-profile, onboarding, APIs / hooks / query params métier.
+- Ne pas inventer un view= sur timeline/heatmap (pages empilées, pas un dashboard à onglets locaux).
+- docs/dashboard-design-system.md (Crystal charts) : aligné — 7e = chrome **et** migration des plots legacy des pages dédiées.
+
+Objectif desktop lg+ (chaque page) :
+- Masthead : OverviewHeroFrame (ou même matière). h1 = titre page, subtitle allégé. Light ET dark. Plus de radial glow / orbes / badge période carte (période = header). KPI → DASHBOARD_METRIC_STRIP (scroll-x sous lg si besoin). Empty / error / loading : même masthead sans-carte.
+- Timeline : 1 série listens → OverviewTrendsChart (série unique). Toolbar PeriodSelector + ListenTrendChartViewToggle restent ; sticky OK si hairline, pas une 2ᵉ carte.
+- Heatmap : calendrier sur le canvas (plus de SPOTLIGHT_SHELL). Day details panel : pochette/list visibles, plus de well carte autour de chaque bloc. Lien / CTA ghost vers timeline OK.
+- */trends : back-to-listing = DASHBOARD_BTN_GHOST (pas bouton blanc lift). Switcher 4 items inchangé. Section titles = DASHBOARD_SECTION_*. Chart multi-séries = OverviewTrendsChart ; identité des séries = picker chips (pas Legend). Commentary IA = typo / list rows sur canvas (plus de mega-carte always-dark / startup surface hover-lift). Skeleton chart sans well rounded carte.
+
+Objectif mobile < lg (dual tree — ne pas fusionner avec sm: sur le desktop) :
+- Plus de TRENDS_MOBILE_HERO / DashboardCinematicHeroBg / SignalTile dark. Masthead compact canvas + strip.
+- Timeline : spark / buckets utilisables ; rows destinations = DASHBOARD_LIST_ROW (lien heatmap), pas rounded-2xl marketing. e2e : heading + spark captions + lien calendrier.
+- Heatmap : grille / top days sans cinematic ; sheet day-details conserve open au tap (e2e). Empty / error alignés.
+- */trends : composer le hub Crystal ; spark OK ; legend rows = list rows + color dot ; PeriodSelector compact + picker. e2e artist/track trends FR/EN : heading utilisable, pas de régression dates / userId / switcher trends.
+
+Contraintes : 44px, EN+FR (+ ES si copy touchée), demo ?userId= sur timeline/heatmap/trends (pas Duet), prefers-reduced-transparency sur tooltips glass. Ne pas cloner le JSX chart Overview — importer OverviewTrendsChart. Ne pas mettre de tuiles Replay 3:4 sur timeline/heatmap. Gemini modify_frontend 1 surface (ex. masthead trends ou chart well) si tu t’en sers.
+
+Livre : plus de hero always-dark ni SPOTLIGHT_SHELL autour des plots ; plus de DASHBOARD_CHART_THEME sur timeline + */trends ; light/dark EN/FR ~390×844 + lg+ ; e2e timeline / heatmap sheet / trends mobiles verts.
+```
+
+---
+
+### Étape 7f — Ask + Duet friends / compare (après 7e)
+
+Chrome seulement. **Pas** une refonte chat ni Duet produit. Friend-music `TopLibraryCard` → Replay = **hors scope** (session dédiée plus tard).
+
+```text
+[Préambule]
+
+Étape 7f — Crystal chrome Ask + Duet (friends / compare). Composer OverviewHeroFrame + DASHBOARD_METRIC_STRIP + DASHBOARD_LIST_ROW + (compare) OverviewTrendsChart si le dual-series est encore DASHBOARD_CHART_THEME. Ne pas retoucher Overview, */trends, timeline, heatmap, musical-profile, listings rankings.
+
+Contrat :
+- Ask = surface chat plein écran (déjà hors header filtres sur certaines layouts). Garder IA presets / composer / sheets. Un-card les presets et le chrome empty-state ; ne pas convertir Ask en story Replay ni en onglets view=.
+- Duet friends / compare = masthead canvas + listes / panels sans mega-carte. Auth-only : ne pas brancher ?userId= démo publique.
+- Friend-music (/dashboard/duet/music) : HORS SCOPE sauf régression import partagé (OverviewHeroFrame déjà en place). Ne PAS migrer TopLibraryCard → ReplayRankingGrid ici.
+- Hooks / APIs / consent / shareScope / rate limits inchangés.
+
+Aujourd’hui (à remplacer) :
+- Ask desktop : empty-state déjà assez canvas, mais AskSoundprintSuggestionTile = rounded-2xl border + shadow-sm (mini-cartes) ; period chips bordered ; dialog playbook rounded-3xl OK (interaction). Mobile : AskSoundprintPresetRow = rows-cartes shadow-sm.
+- Duet friends desktop : DuetFriendsHero always-dark rounded-[2rem] + KPI-cartes + CTA blanc lift ; listes / invite dans DASHBOARD_SPOTLIGHT_SHELL (gradients cyan/violet/lime).
+- Duet compare desktop : DuetCompareHero always-dark + « how it works » cartes ; timeline dual + arena dans DASHBOARD_SPOTLIGHT_* + DASHBOARD_CHART_THEME.
+- Duet mobile : duet-friends-mobile / duet-compare-mobile — HERO_SHELL cinematic + DashboardCinematicHeroBg ; compare chart theme legacy.
+- Skeletons compare : DUET_COMPARE_HERO_SHELL + SPOTLIGHT shells.
+
+Fichiers :
+- Ask : app/[locale]/dashboard/(main)/ask-your-soundprint/page.tsx, lib/components/ask-soundprint-chat.tsx (tiles / composer chrome), lib/components/ask-soundprint-mobile.tsx. e2e mobile-dashboard ask presets / sheet / FR.
+- Duet friends : lib/components/duet/duet-friends-client.tsx, lib/components/duet/duet-friends-hero.tsx, lib/components/duet/duet-friends-mobile.tsx, lib/components/duet/duet-friends-skeleton.tsx. Page = thin wrapper.
+- Duet compare : lib/components/duet/duet-compare-client.tsx, lib/components/duet/duet-compare-hero.tsx, lib/components/duet/duet-compare-mobile.tsx, lib/components/duet/duet-compare-skeleton.tsx, lib/components/duet/duet-entity-head-to-head-panel.tsx / duet-entity-duel-blocks.tsx (flatten shells, garder IA), lib/components/duet/duet-shared-artists-panel.tsx (sortir SPOTLIGHT_SHELL ; rows OK). Sub-nav : duet-sub-nav / duet-mobile-sub-nav / duet-compare-section-tabs — segmented si chips-cartes, sinon ne pas fourcher.
+- e2e : __tests__/e2e/mobile-dashboard.spec.ts (ask, duet friends/compare gated), __tests__/e2e/duet-compare.spec.ts (auth redirect — ne pas casser).
+
+HORS SCOPE : duet-friend-music-desktop.tsx / mobile TopLibraryCard → Replay ; account settings share toggles (sauf classes spotlight copiées qui cassent le contraste — alors tokens seulement) ; landing home-ask / home-duet previews ; APIs.
+
+Objectif Ask :
+- Desktop empty : titre + trust sur le canvas (déjà). Presets featured : list rows ou suggestion sans shadow-card / hover lift violet — pattern proche OverviewFeaturePromos / DASHBOARD_LIST_ROW, pas une grille de mini-cartes marketing. Composer : piste discrète (glass chrome OK sur le champ), cibles 44px. Period chip : pill discrète, pas une carte. Playbook dialog = OK (conteneur d’interaction). Ne pas remettre un hero always-dark.
+- Mobile : PresetRow sans shadow-sm carte si list row suffit ; h1 + composer + sheet all-questions intact pour e2e (heading « Ask your Soundprint », boutons « Ask: », #ask-soundprint-composer). Bottom nav non couverte.
+- Gates Groq / backfill / demo : AiUnavailableCta tone default, pas mega-carte.
+
+Objectif Duet friends lg+ :
+- Masthead OverviewHeroFrame : titre + subtitle. Strip = counts friends / pending in / out (DASHBOARD_METRIC_STRIP). CTAs Compare / Invite = DASHBOARD_BTN_GHOST ou primary soft — pas blanc lift hover:-translate-y.
+- Sections invite / pending / list : plus de DASHBOARD_SPOTLIGHT_SHELL + gradients hairline. Headers DASHBOARD_SECTION_* ; rows amis = DASHBOARD_LIST_ROW + hairline ; formulaires invite sur canvas (search/input = DASHBOARD_SEARCH_FIELD si applicable). Empty gated lisible light/dark.
+- Mobile : plus de cinematic hero. Même info ; e2e heading + invite ou empty gated.
+
+Objectif Duet compare lg+ :
+- Masthead canvas (plus de CompareHowItWorks dans une carte always-dark — steps en list rows ou omit si redondant avec trust line). Friend picker + period sur canvas.
+- Timeline dual-series : OverviewTrendsChart (2 séries self/friend, couleurs crystal). Plus de SPOTLIGHT_SHELL / CHART_THEME / Legend.
+- Shared artists / head-to-head : sortir shells ; bars/duel sur canvas ; empty = typo + CTA ghost.
+- Mobile : plus de cinematic ; chart lisible ou sheet ; e2e heading + gated empty FR/EN.
+
+Contraintes : 44px, EN+FR (+ ES labels), prefers-reduced-transparency. Demo Ask ?userId= OK ; Duet reste auth. Ne pas tuer dual tree. Ne pas introduire view= sur Ask. Gemini modify_frontend 1 surface si tu t’en sers.
+
+Livre : Ask presets moins « carte » ; Duet friends/compare sans hero always-dark ni SPOTLIGHT mega-cartes ; compare plot Crystal si legacy ; light/dark EN/FR ~390×844 + lg+ ; e2e ask + duet mobiles + redirect auth verts. Friend-music TopLibraryCard toujours legacy (attendu).
+```
 
 ---
 
@@ -660,6 +771,37 @@ Desktop `lg+` **et** mobile ~390×844, light et dark, EN et FR — par page, apr
 
 ---
 
+## Critères de done (7d)
+
+- [ ] Hub empilé (pas de `view=` / tablist) ; masthead canvas + metric strip + Replay top 4 + destinations list rows
+- [ ] Plus de hero always-dark / FeaturePillarCard / DestinationRow cartes
+- [ ] Dual tree ; e2e hub (h1 + 3 liens, tablist count 0)
+
+---
+
+## Critères de done (7e)
+
+Desktop `lg+` **et** mobile ~390×844, light et dark, EN et FR :
+
+- [x] Timeline + heatmap + `/artists|tracks|genres/trends` : masthead canvas, plus de `*_HERO_SHELL` always-dark
+- [x] KPI = metric strip ; plots **sans** `DASHBOARD_SPOTLIGHT_SHELL`
+- [x] Timeline + `*/trends` : `OverviewTrendsChart` / `crystal-chart.ts` — plus de `DASHBOARD_CHART_THEME` + `Legend` sur ces pages
+- [x] Mobile : plus de `TRENDS_MOBILE_HERO` / cinematic / SignalTile dark ; dual tree
+- [x] Overview + `*-trends-summary-widget` **non** retouchés
+- [x] e2e timeline / heatmap day sheet / trends mobiles OK
+
+---
+
+## Critères de done (7f)
+
+- [ ] Ask : presets / empty chrome sans mini-cartes `shadow-sm` marketing ; composer + e2e presets / sheet OK
+- [ ] Duet friends + compare : plus de hero always-dark ni mega `DASHBOARD_SPOTLIGHT_SHELL` ; strip + list rows
+- [ ] Compare dual-series : plot Crystal si encore legacy ; auth redirect e2e vert
+- [ ] Friend-music `TopLibraryCard` **toujours** legacy (hors scope volontaire)
+- [ ] Light/dark EN/FR desktop + mobile
+
+---
+
 ## Hors scope Crystal
 
 - Transformer Overview (ou l’app) en **story Replay** (scroll unique, tuer les tabs)
@@ -685,3 +827,5 @@ Desktop `lg+` **et** mobile ~390×844, light et dark, EN et FR — par page, apr
 - `lib/components/charts/overview-trends-chart.tsx` — **fait** étape 5
 - `lib/components/top-three-artists-cards.tsx` — legacy `CARD_SHELL` ; **7a** l’a débranché de `/artists`
 - [`lib/components/artists-mobile.tsx`](../lib/components/artists-mobile.tsx) / `tracks-mobile.tsx` / `genres-mobile.tsx` / `musical-profile-mobile.tsx` — dual tree Crystal 7a–7d
+- `lib/components/trends-mobile-hub.tsx` / `timeline-mobile.tsx` / `heatmap-mobile.tsx` — cible **7e**
+- `lib/components/ask-soundprint-*.tsx` / `lib/components/duet/*-hero.tsx` — cible **7f** (chrome)

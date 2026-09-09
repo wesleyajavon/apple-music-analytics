@@ -200,7 +200,7 @@ Swift Charts vocabulary: overlapping `Area` + `Line` (`type="monotone"`) in a `C
 | Toggle | Same segmented track as Overview tabs. Do not restyle with violet chips. |
 | Series chips | `DASHBOARD_FILTER_CHIP` / `_ACTIVE` + color dot. Search: `DASHBOARD_SEARCH_FIELD` (pill 44px). No checkboxes, no bordered chip well. Remote hits: list rows + hairline, not a `shadow-card` panel. |
 
-Do **not** use `DASHBOARD_CHART_THEME` / `Legend` / angled X ticks on Overview trends. Dedicated `/dashboard/*/trends` **plots** already reuse `OverviewTrendsChart` in the summary widgets. Crystal 7e = page chrome (`rounded-[2rem]` hero), not a second chart recipe.
+Do **not** use `DASHBOARD_CHART_THEME` / `Legend` / angled X ticks on Overview trends. Dedicated `/dashboard/*/trends` **summary widgets** already reuse `OverviewTrendsChart`. Crystal **7e** = page chrome **and** migrate remaining legacy `LineChart` + `DASHBOARD_CHART_THEME` on `/timeline` and dedicated `*/trends` pages to `OverviewTrendsChart` / `crystal-chart.ts`.
 
 ---
 

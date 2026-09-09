@@ -5,22 +5,28 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { DashboardMobileImportEmpty } from "@/lib/components/dashboard-mobile-import-empty";
-import { DashboardCinematicHeroBg } from "@/lib/components/dashboard-ui";
+import {
+  DASHBOARD_BTN_GHOST,
+  DASHBOARD_LIST_ROW,
+  DASHBOARD_LIST_SEPARATOR,
+  DASHBOARD_METRIC_CELL,
+  DASHBOARD_METRIC_LABEL,
+  DASHBOARD_METRIC_STRIP,
+  DASHBOARD_METRIC_VALUE,
+  DASHBOARD_SECTION_EYEBROW,
+  DASHBOARD_SECTION_TITLE,
+} from "@/lib/components/dashboard-ui";
 import { GroqQuotaNotice } from "@/lib/components/error-state";
 import { MobileBottomSheet } from "@/lib/components/mobile-bottom-sheet";
-import { MusicalProfilePeriodBadge } from "@/lib/components/musical-profile-period-badge";
+import { OverviewHeroFrame } from "@/lib/components/overview-hero";
 import { PeriodSelector, type PeriodType } from "@/lib/components/period-selector";
 import { TimelineMobileSpark } from "@/lib/components/timeline-mobile-spark";
-import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
 import type { TimelineDataPoint } from "@/lib/hooks/use-listening";
 import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
 import { isGroqDailyQuotaError } from "@/lib/utils/groq-quota-message";
 
 const MOBILE_BLEED =
-  "-mx-4 -mt-4 space-y-4 pb-8 max-lg:pb-[max(2rem,calc(var(--dashboard-bottom-nav-offset,0px)+1rem))] lg:hidden";
-const HERO_SHELL = "relative overflow-hidden bg-gray-950 px-4 pb-5 pt-4 text-white";
-const SNAP_RAIL =
-  "-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden";
+  "-mx-4 -mt-4 space-y-6 px-4 pb-8 max-lg:pb-[max(2rem,calc(var(--dashboard-bottom-nav-offset,0px)+1rem))] lg:hidden";
 
 type TimelineMobileSummary = {
   total: number;
@@ -128,43 +134,32 @@ function HeatmapIcon({ className }: { className?: string }) {
   );
 }
 
-function SignalTile({ label, value }: { label: string; value: string }) {
-  return (
-    <article className="min-w-[9.75rem] snap-start rounded-3xl border border-card-border bg-gray-950 p-4 text-white shadow-lg shadow-black/10">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">{label}</p>
-      <p className="mt-2 truncate text-2xl font-semibold tabular-nums tracking-[-0.04em]">{value}</p>
-    </article>
-  );
-}
-
 export function TimelineMobileSkeleton() {
   return (
     <div className={MOBILE_BLEED} aria-busy="true">
-      <section className={HERO_SHELL}>
-        <DashboardCinematicHeroBg />
-        <div className="relative space-y-3">
-          <div className="ml-auto h-8 w-36 animate-pulse rounded-full bg-white/15" />
-          <div className="h-3 w-20 animate-pulse rounded bg-white/15" />
-          <div className="h-8 w-48 animate-pulse rounded bg-white/20" />
-          <div className="h-3 w-full animate-pulse rounded bg-white/10" />
-          <div className="h-11 animate-pulse rounded-2xl bg-white/15" />
-        </div>
-      </section>
-      <section className="px-4">
-        <div className={SNAP_RAIL}>
-          {[0, 1, 2, 3].map((item) => (
-            <div
-              key={item}
-              className="h-24 min-w-[9.75rem] snap-start animate-pulse rounded-3xl border border-white/10 bg-slate-950/80"
-            />
-          ))}
-        </div>
-      </section>
-      <section className="space-y-2 px-4">
-        {[0, 1, 2, 3, 4].map((item) => (
-          <div key={item} className="h-11 animate-pulse rounded-2xl border border-card-border bg-card-surface" />
+      <div className="space-y-3">
+        <div className="h-3 w-20 animate-pulse rounded bg-black/10 dark:bg-white/10" />
+        <div className="h-8 w-48 animate-pulse rounded bg-black/10 dark:bg-white/10" />
+        <div className="h-4 w-full animate-pulse rounded bg-black/5 dark:bg-white/5" />
+      </div>
+      <div
+        className={`${DASHBOARD_METRIC_STRIP} w-full flex-nowrap overflow-x-auto`}
+      >
+        {[0, 1, 2, 3].map((item) => (
+          <div
+            key={item}
+            className={`${DASHBOARD_METRIC_CELL} min-w-[10.5rem] flex-none`}
+          >
+            <div className="h-3 w-16 animate-pulse rounded bg-black/10 dark:bg-white/10" />
+            <div className="mt-2 h-7 w-20 animate-pulse rounded bg-black/10 dark:bg-white/10" />
+          </div>
         ))}
-      </section>
+      </div>
+      <div className="space-y-2">
+        {[0, 1, 2, 3, 4].map((item) => (
+          <div key={item} className="h-11 animate-pulse rounded bg-black/5 dark:bg-white/5" />
+        ))}
+      </div>
     </div>
   );
 }
@@ -184,7 +179,7 @@ export function TimelineMobileEmpty() {
 }
 
 export function TimelineMobileError({
-  locale,
+  locale: _locale,
   error,
   onRetry,
 }: {
@@ -194,79 +189,19 @@ export function TimelineMobileError({
 }) {
   const t = useTranslations("timeline.mobile");
   const tCommon = useTranslations("common");
-  const { startDate, endDate } = useListenDateRange();
   const isQuota = isGroqDailyQuotaError(error);
 
   return (
     <div className={MOBILE_BLEED}>
-      <section className={HERO_SHELL}>
-        <DashboardCinematicHeroBg />
-        <div className="relative space-y-4">
-          <div className="flex justify-end">
-            <MusicalProfilePeriodBadge
-              startDate={startDate}
-              endDate={endDate}
-              locale={locale}
-              variant="mobile"
-              className="min-w-0"
-            />
-          </div>
-          <h1 className="text-[1.55rem] font-semibold leading-[1.12] tracking-[-0.05em]">
-            {t("errorLead")}
-          </h1>
-          {isQuota ? (
-            <GroqQuotaNotice error={error} />
-          ) : (
-            <button
-              type="button"
-              onClick={onRetry}
-              className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25"
-            >
-              {tCommon("retry")}
-            </button>
-          )}
-        </div>
-      </section>
+      <OverviewHeroFrame title={t("errorLead")} compact />
+      {isQuota ? (
+        <GroqQuotaNotice error={error} />
+      ) : (
+        <button type="button" onClick={onRetry} className={DASHBOARD_BTN_GHOST}>
+          {tCommon("retry")}
+        </button>
+      )}
     </div>
-  );
-}
-
-function TimelineMobileHero({
-  locale,
-  heading,
-  insight,
-}: {
-  locale: string;
-  heading: string;
-  insight: string;
-}) {
-  const t = useTranslations("timeline.mobile");
-  const { startDate, endDate } = useListenDateRange();
-
-  return (
-    <section className={HERO_SHELL}>
-      <DashboardCinematicHeroBg />
-      <div className="relative space-y-3">
-        <div className="flex justify-end">
-          <MusicalProfilePeriodBadge
-            startDate={startDate}
-            endDate={endDate}
-            locale={locale}
-            variant="mobile"
-            className="min-w-0"
-          />
-        </div>
-        <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-cyan">
-            {t("eyebrow")}
-          </p>
-          <h1 className="mt-1 text-[1.55rem] font-semibold leading-[1.12] tracking-[-0.05em]">
-            {heading}
-          </h1>
-          <p className="mt-1.5 text-sm leading-6 text-white/80">{insight}</p>
-        </div>
-      </div>
-    </section>
   );
 }
 
@@ -289,11 +224,11 @@ function TimelineBucketRow({
   return (
     <button
       type="button"
-      className="flex min-h-11 w-full items-center gap-3 rounded-2xl border border-card-border bg-card-surface px-3.5 py-2.5 text-left shadow-sm"
+      className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_SEPARATOR} w-full`}
       onClick={() => onOpen(bucket)}
       aria-label={tm("openBucket", { date: label })}
     >
-      <span className="w-6 shrink-0 text-center text-xs font-bold tabular-nums text-muted">
+      <span className="w-6 shrink-0 text-center text-xs font-semibold tabular-nums text-muted">
         {rank}
       </span>
       <span className="min-w-0 flex-1 truncate text-sm font-semibold text-foreground">{label}</span>
@@ -301,7 +236,7 @@ function TimelineBucketRow({
         {bucket.listens.toLocaleString(locale)}
       </span>
       <span className="sr-only">{t("listens")}</span>
-      <ChevronIcon className="h-4 w-4 shrink-0 text-gray-400" />
+      <ChevronIcon className="h-4 w-4 shrink-0 text-muted" />
     </button>
   );
 }
@@ -348,43 +283,49 @@ export function TimelineMobileExperience({
     ? heatmapHref(searchParams, period === "day" ? selectedBucket.date : undefined)
     : heatmapRowHref;
 
+  const metrics = [
+    { key: "total", label: tm("railTotal"), value: summary.total.toLocaleString(locale) },
+    { key: "peak", label: tm("railPeak"), value: summary.peak.listens.toLocaleString(locale) },
+    {
+      key: "average",
+      label: tm("average"),
+      value: Math.round(summary.average).toLocaleString(locale),
+    },
+    { key: "trend", label: tm("trend"), value: trendLabel },
+  ];
+
   return (
     <div className={MOBILE_BLEED}>
-      <TimelineMobileHero
-        locale={locale}
-        heading={peakDate}
-        insight={tm("storyBody", {
+      <OverviewHeroFrame
+        title={peakDate}
+        description={tm("storyBody", {
           count: summary.peak.listens.toLocaleString(locale),
           streams: t("listens"),
         })}
+        compact
       />
 
-      <section className="px-4" aria-label={tPeriod("label")}>
+      <section aria-label={tPeriod("label")}>
         <PeriodSelector defaultPeriod="month" value={period} variant="compact" />
       </section>
 
-      <section className="px-4" aria-label={tm("signalsLabel")}>
-        <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">
-          {tm("signalsLabel")}
-        </p>
-        <div className={SNAP_RAIL}>
-          <SignalTile label={tm("railTotal")} value={summary.total.toLocaleString(locale)} />
-          <SignalTile
-            label={tm("railPeak")}
-            value={summary.peak.listens.toLocaleString(locale)}
-          />
-          <SignalTile
-            label={tm("average")}
-            value={Math.round(summary.average).toLocaleString(locale)}
-          />
-          <SignalTile label={tm("trend")} value={trendLabel} />
-        </div>
-      </section>
+      <div
+        className={`${DASHBOARD_METRIC_STRIP} w-full flex-nowrap overflow-x-auto`}
+        aria-label={tm("signalsLabel")}
+      >
+        {metrics.map((metric) => (
+          <div
+            key={metric.key}
+            className={`${DASHBOARD_METRIC_CELL} min-w-[10.5rem] flex-none`}
+          >
+            <span className={DASHBOARD_METRIC_LABEL}>{metric.label}</span>
+            <span className={DASHBOARD_METRIC_VALUE}>{metric.value}</span>
+          </div>
+        ))}
+      </div>
 
-      <section className="space-y-2 px-4">
-        <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">
-          {tm("sparkTitle")}
-        </h2>
+      <section className="space-y-3">
+        <h2 className={DASHBOARD_SECTION_EYEBROW}>{tm("sparkTitle")}</h2>
         <TimelineMobileSpark
           data={data}
           ariaLabel={tm("sparkAria")}
@@ -396,10 +337,8 @@ export function TimelineMobileExperience({
         />
       </section>
 
-      <section className="space-y-2 px-4">
-        <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">
-          {tm("bucketsTitle")}
-        </h2>
+      <section>
+        <h2 className={`${DASHBOARD_SECTION_TITLE} mb-2 text-lg`}>{tm("bucketsTitle")}</h2>
         {summary.topBuckets.map((bucket, index) => (
           <TimelineBucketRow
             key={`${bucket.date}-${index}`}
@@ -412,20 +351,20 @@ export function TimelineMobileExperience({
         ))}
         <Link
           href={heatmapRowHref}
-          className="flex min-h-11 w-full items-center gap-3 rounded-2xl border border-card-border bg-card-surface px-3.5 py-2.5 text-left shadow-sm"
+          className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_SEPARATOR}`}
         >
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent-cyan/15 text-accent-cyan">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center text-accent-cyan">
             <HeatmapIcon className="h-5 w-5" />
           </span>
           <span className="min-w-0 flex-1">
             <span className="block truncate text-sm font-semibold tracking-tight text-foreground">
               {tm("heatmapRowTitle")}
             </span>
-            <span className="mt-0.5 block truncate text-xs leading-5 text-muted">
+            <span className="mt-0.5 block truncate text-[13px] leading-5 text-muted">
               {tm("heatmapRowLead")}
             </span>
           </span>
-          <ChevronIcon className="h-4 w-4 shrink-0 text-gray-400" />
+          <ChevronIcon className="h-4 w-4 shrink-0 text-muted" />
         </Link>
       </section>
 
@@ -439,9 +378,7 @@ export function TimelineMobileExperience({
           <div className="px-4 pb-8 pt-1">
             <div className="mb-4 flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
-                  {tm("sheetTitle")}
-                </p>
+                <p className={DASHBOARD_SECTION_EYEBROW}>{tm("sheetTitle")}</p>
                 <h2
                   id="timeline-bucket-sheet-title"
                   className="mt-1 text-lg font-semibold tracking-tight text-foreground"
@@ -452,20 +389,20 @@ export function TimelineMobileExperience({
               <button
                 type="button"
                 onClick={() => setSelectedBucket(null)}
-                className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-muted"
+                className={`${DASHBOARD_BTN_GHOST} min-h-11 min-w-11 shrink-0 px-3`}
                 aria-label={tm("sheetCloseAria")}
               >
                 {tCommon("close")}
               </button>
             </div>
-            <dl className="space-y-2">
-              <div className="flex min-h-11 items-center justify-between gap-3 rounded-2xl border border-card-border bg-card-surface px-3.5">
+            <dl>
+              <div className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_SEPARATOR} justify-between`}>
                 <dt className="text-sm text-muted">{t("listens")}</dt>
                 <dd className="text-sm font-semibold tabular-nums text-foreground">
                   {selectedBucket.listens.toLocaleString(locale)}
                 </dd>
               </div>
-              <div className="flex min-h-11 items-center justify-between gap-3 rounded-2xl border border-card-border bg-card-surface px-3.5">
+              <div className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_SEPARATOR} justify-between`}>
                 <dt className="text-sm text-muted">{tm("average")}</dt>
                 <dd className="text-sm font-semibold tabular-nums text-foreground">
                   {tm("vsAverage", {
@@ -473,7 +410,7 @@ export function TimelineMobileExperience({
                   })}
                 </dd>
               </div>
-              <div className="flex min-h-11 items-center justify-between gap-3 rounded-2xl border border-card-border bg-card-surface px-3.5">
+              <div className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_SEPARATOR} justify-between`}>
                 <dt className="text-sm text-muted">{t("heroStatTotal")}</dt>
                 <dd className="text-sm font-semibold tabular-nums text-foreground">
                   {tm("shareOfTotal", { percent: selectedShare })}
@@ -482,7 +419,7 @@ export function TimelineMobileExperience({
             </dl>
             <Link
               href={sheetHeatmapHref}
-              className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-gray-950 px-4 text-sm font-bold text-white dark:bg-white dark:text-gray-950"
+              className={`${DASHBOARD_BTN_GHOST} mt-4 w-full`}
             >
               {tm("seeOnHeatmap")}
             </Link>

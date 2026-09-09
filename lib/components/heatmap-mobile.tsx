@@ -4,17 +4,23 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import type { HeatmapDataPoint } from "@/lib/components/calendar-heatmap";
 import { DashboardMobileImportEmpty } from "@/lib/components/dashboard-mobile-import-empty";
-import { DashboardCinematicHeroBg } from "@/lib/components/dashboard-ui";
+import {
+  DASHBOARD_BTN_GHOST,
+  DASHBOARD_LIST_ROW,
+  DASHBOARD_LIST_SEPARATOR,
+  DASHBOARD_METRIC_CELL,
+  DASHBOARD_METRIC_LABEL,
+  DASHBOARD_METRIC_STRIP,
+  DASHBOARD_METRIC_VALUE,
+  DASHBOARD_SECTION_EYEBROW,
+} from "@/lib/components/dashboard-ui";
 import { GroqQuotaNotice } from "@/lib/components/error-state";
-import { MusicalProfilePeriodBadge } from "@/lib/components/musical-profile-period-badge";
-import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
+import { OverviewHeroFrame } from "@/lib/components/overview-hero";
 import { useTheme } from "@/lib/providers/theme-provider";
 import { isGroqDailyQuotaError } from "@/lib/utils/groq-quota-message";
 
-const MOBILE_BLEED = "-mx-4 -mt-4 space-y-4 pb-8 lg:hidden";
-const HERO_SHELL = "relative overflow-hidden bg-gray-950 px-4 pb-5 pt-4 text-white";
-const SNAP_RAIL =
-  "-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden";
+const MOBILE_BLEED =
+  "-mx-4 -mt-4 space-y-6 px-4 pb-8 max-lg:pb-[max(2rem,calc(var(--dashboard-bottom-nav-offset,0px)+1rem))] lg:hidden";
 
 const AURORA_DARK = [
   "rgba(255,255,255,0.07)",
@@ -178,119 +184,27 @@ function buildMonthCells(year: number, month: number): MonthCell[] {
   return cells;
 }
 
-function HeatmapMobileHero({
-  locale,
-  heading,
-  insight,
-  peakLabel,
-  peakValue,
-  favoriteLabel,
-  favoriteValue,
-  ctaLabel,
-  onOpenPeak,
-}: {
-  locale: string;
-  heading: string;
-  insight?: string;
-  peakLabel?: string;
-  peakValue?: string;
-  favoriteLabel?: string;
-  favoriteValue?: string;
-  ctaLabel?: string;
-  onOpenPeak?: () => void;
-}) {
-  const t = useTranslations("heatmap.mobile");
-  const { startDate, endDate } = useListenDateRange();
-
-  return (
-    <section className={HERO_SHELL}>
-      <DashboardCinematicHeroBg />
-      <div className="relative space-y-4">
-        <div className="flex justify-end">
-          <MusicalProfilePeriodBadge
-            startDate={startDate}
-            endDate={endDate}
-            locale={locale}
-            variant="mobile"
-            className="min-w-0"
-          />
-        </div>
-        <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-cyan">
-            {t("heroEyebrow")}
-          </p>
-          <h1 className="mt-1 text-[1.55rem] font-semibold leading-[1.12] tracking-[-0.05em]">
-            {heading}
-          </h1>
-          {insight ? <p className="mt-1.5 text-sm leading-6 text-white/80">{insight}</p> : null}
-        </div>
-        {peakValue || favoriteValue ? (
-          <div className="flex items-end justify-between gap-4">
-            <div className="min-w-0">
-              {peakLabel ? (
-                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
-                  {peakLabel}
-                </p>
-              ) : null}
-              {peakValue ? (
-                <p className="mt-1 text-4xl font-semibold tabular-nums tracking-[-0.06em]">{peakValue}</p>
-              ) : null}
-            </div>
-            {favoriteValue ? (
-              <div className="max-w-[9rem] text-right">
-                {favoriteLabel ? (
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
-                    {favoriteLabel}
-                  </p>
-                ) : null}
-                <p className="mt-1 truncate text-sm font-semibold text-cyan-100">{favoriteValue}</p>
-              </div>
-            ) : null}
-          </div>
-        ) : null}
-        {ctaLabel && onOpenPeak ? (
-          <button
-            type="button"
-            onClick={onOpenPeak}
-            className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-white px-4 text-sm font-bold text-gray-950 shadow-lg shadow-black/20"
-          >
-            <FlameIcon className="h-4 w-4" />
-            {ctaLabel}
-          </button>
-        ) : null}
-      </div>
-    </section>
-  );
-}
-
 export function HeatmapMobileSkeleton() {
   return (
     <div className={MOBILE_BLEED} aria-busy="true">
-      <section className={HERO_SHELL}>
-        <DashboardCinematicHeroBg />
-        <div className="relative space-y-3">
-          <div className="ml-auto h-8 w-36 animate-pulse rounded-full bg-white/15" />
-          <div className="h-3 w-20 animate-pulse rounded bg-white/15" />
-          <div className="h-8 w-48 animate-pulse rounded bg-white/20" />
-          <div className="h-3 w-full animate-pulse rounded bg-white/10" />
-          <div className="h-11 animate-pulse rounded-2xl bg-white/15" />
-        </div>
-      </section>
-      <section className="px-4">
-        <div className={SNAP_RAIL}>
-          {[0, 1, 2, 3].map((item) => (
-            <div
-              key={item}
-              className="h-24 min-w-[9.75rem] snap-start animate-pulse rounded-3xl border border-white/10 bg-slate-950/80"
-            />
-          ))}
-        </div>
-      </section>
-      <section className="space-y-2 px-4">
-        {[0, 1, 2, 3, 4].map((item) => (
-          <div key={item} className="h-11 animate-pulse rounded-2xl border border-card-border bg-card-surface" />
+      <div className="space-y-3">
+        <div className="h-3 w-20 animate-pulse rounded bg-black/10 dark:bg-white/10" />
+        <div className="h-8 w-48 animate-pulse rounded bg-black/10 dark:bg-white/10" />
+        <div className="h-4 w-full animate-pulse rounded bg-black/5 dark:bg-white/5" />
+      </div>
+      <div className={`${DASHBOARD_METRIC_STRIP} w-full flex-nowrap overflow-x-auto`}>
+        {[0, 1, 2, 3].map((item) => (
+          <div key={item} className={`${DASHBOARD_METRIC_CELL} min-w-[10.5rem] flex-none`}>
+            <div className="h-3 w-16 animate-pulse rounded bg-black/10 dark:bg-white/10" />
+            <div className="mt-2 h-7 w-20 animate-pulse rounded bg-black/10 dark:bg-white/10" />
+          </div>
         ))}
-      </section>
+      </div>
+      <div className="space-y-2">
+        {[0, 1, 2, 3, 4].map((item) => (
+          <div key={item} className="h-11 animate-pulse rounded bg-black/5 dark:bg-white/5" />
+        ))}
+      </div>
     </div>
   );
 }
@@ -321,7 +235,7 @@ export function HeatmapMobileNoDayDetail() {
 }
 
 export function HeatmapMobileError({
-  locale,
+  locale: _locale,
   error,
   onRetry,
 }: {
@@ -331,52 +245,19 @@ export function HeatmapMobileError({
 }) {
   const t = useTranslations("heatmap.mobile");
   const tCommon = useTranslations("common");
-  const { startDate, endDate } = useListenDateRange();
   const isQuota = isGroqDailyQuotaError(error);
 
   return (
     <div className={MOBILE_BLEED}>
-      <section className={HERO_SHELL}>
-        <DashboardCinematicHeroBg />
-        <div className="relative space-y-4">
-          <div className="flex justify-end">
-            <MusicalProfilePeriodBadge
-              startDate={startDate}
-              endDate={endDate}
-              locale={locale}
-              variant="mobile"
-              className="min-w-0"
-            />
-          </div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-cyan">
-            {t("heroEyebrow")}
-          </p>
-          <h1 className="max-w-[16rem] text-[1.55rem] font-semibold leading-[1.15] tracking-[-0.05em]">
-            {t("errorLead")}
-          </h1>
-          {isQuota ? (
-            <GroqQuotaNotice error={error} />
-          ) : (
-            <button
-              type="button"
-              onClick={onRetry}
-              className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25"
-            >
-              {tCommon("retry")}
-            </button>
-          )}
-        </div>
-      </section>
+      <OverviewHeroFrame title={t("errorLead")} compact />
+      {isQuota ? (
+        <GroqQuotaNotice error={error} />
+      ) : (
+        <button type="button" onClick={onRetry} className={DASHBOARD_BTN_GHOST}>
+          {tCommon("retry")}
+        </button>
+      )}
     </div>
-  );
-}
-
-function SignalTile({ label, value }: { label: string; value: string }) {
-  return (
-    <article className="min-w-[9.75rem] snap-start rounded-3xl border border-card-border bg-gray-950 p-4 text-white shadow-lg shadow-black/10">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">{label}</p>
-      <p className="mt-2 truncate text-2xl font-semibold tabular-nums tracking-[-0.04em]">{value}</p>
-    </article>
   );
 }
 
@@ -397,17 +278,19 @@ function HeatmapMobileDayRow({
   return (
     <button
       type="button"
-      className="flex min-h-11 w-full items-center gap-3 rounded-2xl border border-card-border bg-card-surface px-3.5 py-2.5 text-left shadow-sm"
+      className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_SEPARATOR} w-full`}
       onClick={() => onSelect(day.date, day.listens)}
       aria-label={tm("openDayDetails", { date: day.formatted })}
     >
-      <span className="w-6 shrink-0 text-center text-xs font-bold tabular-nums text-muted">{rank}</span>
+      <span className="w-6 shrink-0 text-center text-xs font-semibold tabular-nums text-muted">
+        {rank}
+      </span>
       <span className="min-w-0 flex-1 truncate text-sm font-semibold text-foreground">{day.formatted}</span>
       <span className="shrink-0 text-sm font-semibold tabular-nums text-foreground">
         {day.listens.toLocaleString(locale)}
       </span>
       <span className="sr-only">{t("listens")}</span>
-      <ChevronIcon className="h-4 w-4 shrink-0 text-gray-400" />
+      <ChevronIcon className="h-4 w-4 shrink-0 text-muted" />
     </button>
   );
 }
@@ -475,13 +358,13 @@ function HeatmapMobileMonthPager({
   const selectedIso = selectedDate ? toDateOnly(selectedDate) : null;
 
   return (
-    <section className="space-y-3 px-4" aria-label={t("monthGridLabel")}>
+    <section className="space-y-3" aria-label={t("monthGridLabel")}>
       <div className="flex items-center gap-2">
         <button
           type="button"
           onClick={() => setView(prevMonth)}
           disabled={!canGoPrev}
-          className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-2xl border border-card-border bg-card-surface text-sm font-semibold text-foreground disabled:cursor-not-allowed disabled:opacity-40"
+          className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-glass-hairline text-sm font-semibold text-foreground disabled:cursor-not-allowed disabled:opacity-40"
           aria-label={t("monthPrev")}
         >
           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
@@ -495,7 +378,7 @@ function HeatmapMobileMonthPager({
           type="button"
           onClick={() => setView(nextMonth)}
           disabled={!canGoNext}
-          className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-2xl border border-card-border bg-card-surface text-sm font-semibold text-foreground disabled:cursor-not-allowed disabled:opacity-40"
+          className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-glass-hairline text-sm font-semibold text-foreground disabled:cursor-not-allowed disabled:opacity-40"
           aria-label={t("monthNext")}
         >
           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
@@ -586,12 +469,18 @@ export function HeatmapMobileExperience({
   const activePct =
     stats.totalDays > 0 ? Math.round((stats.daysWithListens / stats.totalDays) * 100) : 0;
 
+  const metrics = [
+    { key: "total", label: tm("railTotal"), value: stats.totalListens.toLocaleString(locale) },
+    { key: "active", label: tm("railActive"), value: `${activePct}%` },
+    { key: "avg", label: tm("railAvg"), value: stats.averageListens.toLocaleString(locale) },
+    { key: "favorite", label: tm("railFavorite"), value: stats.mostActiveWeekday },
+  ];
+
   return (
     <div className={MOBILE_BLEED}>
-      <HeatmapMobileHero
-        locale={locale}
-        heading={peakDay ? peakDay.shortLabel : t("title")}
-        insight={
+      <OverviewHeroFrame
+        title={peakDay ? peakDay.shortLabel : t("title")}
+        description={
           peakDay
             ? tm("primaryInsightBody", {
                 count: peakDay.listens.toLocaleString(locale),
@@ -599,31 +488,35 @@ export function HeatmapMobileExperience({
               })
             : undefined
         }
-        peakLabel={tm("peakMetric")}
-        peakValue={(peakDay?.listens ?? stats.maxListens).toLocaleString(locale)}
-        favoriteLabel={tm("railFavorite")}
-        favoriteValue={stats.mostActiveWeekday}
-        ctaLabel={peakDay ? tm("openPeakDay") : undefined}
-        onOpenPeak={peakDay ? () => onDayClick(peakDay.date, peakDay.listens) : undefined}
-      />
+        compact
+      >
+        {peakDay ? (
+          <button
+            type="button"
+            onClick={() => onDayClick(peakDay.date, peakDay.listens)}
+            className={`${DASHBOARD_BTN_GHOST} mt-3 gap-2`}
+          >
+            <FlameIcon className="h-4 w-4" />
+            {tm("openPeakDay")}
+          </button>
+        ) : null}
+      </OverviewHeroFrame>
 
-      <section className="px-4" aria-label={tm("signalsLabel")}>
-        <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">
-          {tm("signalsLabel")}
-        </p>
-        <div className={SNAP_RAIL}>
-          <SignalTile label={tm("railTotal")} value={stats.totalListens.toLocaleString(locale)} />
-          <SignalTile label={tm("railActive")} value={`${activePct}%`} />
-          <SignalTile label={tm("railAvg")} value={stats.averageListens.toLocaleString(locale)} />
-          <SignalTile label={tm("railFavorite")} value={stats.mostActiveWeekday} />
-        </div>
-      </section>
+      <div
+        className={`${DASHBOARD_METRIC_STRIP} w-full flex-nowrap overflow-x-auto`}
+        aria-label={tm("signalsLabel")}
+      >
+        {metrics.map((metric) => (
+          <div key={metric.key} className={`${DASHBOARD_METRIC_CELL} min-w-[10.5rem] flex-none`}>
+            <span className={DASHBOARD_METRIC_LABEL}>{metric.label}</span>
+            <span className={DASHBOARD_METRIC_VALUE}>{metric.value}</span>
+          </div>
+        ))}
+      </div>
 
       {topDays.length > 0 ? (
-        <section className="space-y-2 px-4">
-          <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">
-            {tm("topDaysTitle")}
-          </h2>
+        <section>
+          <h2 className={`${DASHBOARD_SECTION_EYEBROW} mb-2`}>{tm("topDaysTitle")}</h2>
           {topDays.map((day, index) => (
             <HeatmapMobileDayRow
               key={day.date}

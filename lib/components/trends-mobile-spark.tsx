@@ -46,7 +46,7 @@ export function TrendsMobileSpark({
   const range = Math.max(max - min, 1);
 
   return (
-    <div className="rounded-3xl border border-card-border bg-card-surface px-3 pb-3 pt-2">
+    <div className="pb-1 pt-0">
       <svg
         className="h-24 w-full"
         viewBox={`0 0 ${TRENDS_MOBILE_SPARK.width} ${TRENDS_MOBILE_SPARK.height}`}

@@ -3,7 +3,12 @@
 import { useSearchParams } from "next/navigation";
 import { useRouter, usePathname } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useId } from "react";
+import {
+  DASHBOARD_SEGMENTED_PILL,
+  DASHBOARD_SEGMENTED_PILL_ACTIVE,
+  DASHBOARD_SEGMENTED_TRACK,
+} from "@/lib/components/dashboard-ui";
 import { useOptimisticFilters } from "@/lib/hooks/use-optimistic-filters";
 
 export type PeriodType = "day" | "week" | "month";
@@ -26,6 +31,7 @@ export interface PeriodSelectorProps {
   value?: PeriodType;
   /** Full-width 44px segments for native mobile trees. Desktop default is unchanged. */
   variant?: "default" | "compact";
+  className?: string;
 }
 
 export function isPeriodType(value: string | null | undefined): value is PeriodType {
@@ -40,59 +46,26 @@ export function getPeriodFromSearchParams(
   return isPeriodType(period) ? period : defaultPeriod;
 }
 
+/**
+ * Group-by (day / week / month). Same Crystal segmented matter as
+ * {@link DateRangeFilter} in the dashboard header — not a brand-gradient track.
+ */
 export function PeriodSelector({
   defaultPeriod = "day",
   value,
   variant = "default",
+  className,
 }: PeriodSelectorProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { prefetchWithOptimisticUpdate } = useOptimisticFilters();
   const t = useTranslations("components.periodSelector");
+  const radiogroupLabelId = useId();
 
   const currentPeriod = value ?? getPeriodFromSearchParams(searchParams, defaultPeriod);
   const startDate = searchParams.get("startDate") || undefined;
   const endDate = searchParams.get("endDate") || undefined;
-
-  const [indicatorStyle, setIndicatorStyle] = useState<{
-    left: number;
-    width: number;
-  } | null>(null);
-  const buttonRefs = useRef<Record<PeriodType, HTMLButtonElement | null>>({
-    day: null,
-    week: null,
-    month: null,
-  });
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const activeButton = buttonRefs.current[currentPeriod];
-    if (activeButton && containerRef.current) {
-      const containerRect = containerRef.current.getBoundingClientRect();
-      const buttonRect = activeButton.getBoundingClientRect();
-      setIndicatorStyle({
-        left: buttonRect.left - containerRect.left,
-        width: buttonRect.width,
-      });
-    }
-  }, [currentPeriod]);
-
-  useEffect(() => {
-    const handleResize = () => {
-      const activeButton = buttonRefs.current[currentPeriod];
-      if (activeButton && containerRef.current) {
-        const containerRect = containerRef.current.getBoundingClientRect();
-        const buttonRect = activeButton.getBoundingClientRect();
-        setIndicatorStyle({
-          left: buttonRect.left - containerRect.left,
-          width: buttonRect.width,
-        });
-      }
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [currentPeriod]);
 
   const updatePeriod = useCallback(
     (period: PeriodType) => {
@@ -126,55 +99,36 @@ export function PeriodSelector({
   } as const;
 
   return (
-    <div className={compact ? "w-full" : "flex items-center gap-4"}>
-      <span
-        className={
-          compact
-            ? "sr-only"
-            : "shrink-0 text-[10px] font-semibold uppercase tracking-wider text-muted"
-        }
-      >
+    <div className={compact ? "w-full min-w-0" : "min-w-0"}>
+      <span id={radiogroupLabelId} className="sr-only">
         {t("label")}
       </span>
       <div
-        ref={containerRef}
+        role="radiogroup"
+        aria-labelledby={radiogroupLabelId}
         className={
-          compact
-            ? "relative flex w-full items-center rounded-2xl border border-card-border bg-surface p-1"
-            : "relative flex items-center rounded-xl border border-card-border bg-surface p-1.5"
+          className ??
+          (compact
+            ? `${DASHBOARD_SEGMENTED_TRACK} w-full`
+            : `${DASHBOARD_SEGMENTED_TRACK} min-w-0 shrink`)
         }
       >
-        {indicatorStyle && (
-          <div
-            className={
-              compact
-                ? "absolute top-1 h-[calc(100%-8px)] rounded-xl bg-brand-gradient shadow-sm transition-all duration-300 ease-out"
-                : "absolute top-1.5 h-[calc(100%-12px)] rounded-lg bg-brand-gradient shadow-sm transition-all duration-300 ease-out"
-            }
-            style={{
-              left: `${indicatorStyle.left}px`,
-              width: `${indicatorStyle.width}px`,
-            }}
-          />
-        )}
         {periods.map((period) => {
           const isActive = currentPeriod === period.value;
           return (
             <button
               key={period.value}
               type="button"
-              ref={(el) => {
-                buttonRefs.current[period.value] = el;
-              }}
+              role="radio"
+              aria-checked={isActive}
+              tabIndex={isActive ? 0 : -1}
               onClick={() => updatePeriod(period.value)}
               className={
                 compact
-                  ? `relative z-10 min-h-11 flex-1 rounded-xl px-2 text-sm font-semibold transition-all duration-200 ${
-                      isActive ? "text-white" : "text-muted hover:text-foreground"
-                    }`
-                  : `relative z-10 rounded-md px-4 py-2 text-sm font-semibold transition-all duration-200 ${
-                      isActive ? "text-white" : "text-muted hover:text-foreground"
-                    }`
+                  ? `${isActive ? DASHBOARD_SEGMENTED_PILL_ACTIVE : DASHBOARD_SEGMENTED_PILL} flex-1`
+                  : isActive
+                    ? DASHBOARD_SEGMENTED_PILL_ACTIVE
+                    : DASHBOARD_SEGMENTED_PILL
               }
             >
               {t(compact ? compactLabelKey[period.labelKey] : period.labelKey)}

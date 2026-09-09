@@ -61,4 +61,27 @@ describe("ReplayRankingGrid", () => {
     fireEvent.click(screen.getByRole("button", { name: "Open streaming insights for Justice" }));
     expect(onSelect).toHaveBeenCalledWith(items[1], 1);
   });
+
+  it("slides to the next page of tiles with the arrow", () => {
+    const manyItems: ReplayRankingItem[] = Array.from({ length: 8 }, (_, i) => ({
+      id: `a${i + 1}`,
+      title: `Artist ${i + 1}`,
+      metric: `${i + 1} streams`,
+      media: { kind: "artist" as const, artistId: `a${i + 1}`, artistName: `Artist ${i + 1}` },
+    }));
+
+    render(
+      <ReplayRankingGrid
+        items={manyItems}
+        pageRangeLabel={(start, end) => `${start}–${end}`}
+        pagesNavLabel="Pages"
+        previousPageLabel="Previous"
+        nextPageLabel="Next"
+      />
+    );
+
+    expect(screen.getByRole("tab", { name: "1–4" })).toHaveAttribute("aria-selected", "true");
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    expect(screen.getByRole("tab", { name: "5–8" })).toHaveAttribute("aria-selected", "true");
+  });
 });

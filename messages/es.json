@@ -2055,22 +2055,22 @@
       },
       "roster": {
         "eyebrow": "Spotlight",
-        "title": "Tus tarjetas de artista",
-        "description": "Podio para el top 3, luego galería del 4.º al 10.º: pulsa una tarjeta para ver las estadísticas.",
+        "title": "Tus artistas más escuchados",
+        "description": "Baldosas retrato de los artistas que más streameas: pulsa uno para ver las estadísticas.",
         "top3Badge": "Podio",
         "gridBadge": "Galería"
       },
       "table": {
         "eyebrow": "Índice completo",
         "title": "Ranking detallado",
-        "description": "Fechas, recuento de títulos y paginación de toda la lista.",
+        "description": "Busca y recorre todos los artistas de este periodo.",
         "badge": "Datos"
       }
     },
     "viewSwitcher": {
       "navLabel": "Secciones de artistas",
       "views": {
-        "spotlight": "Fichas",
+        "spotlight": "Top artistas",
         "leaderboard": "Top 20",
         "ranking": "Ranking completo"
       }
@@ -2080,6 +2080,7 @@
       "emptyTitle": "Aún no hay artistas",
       "emptyLead": "Importa el historial para ver a quién streameas.",
       "emptyCta": "Importar historial",
+      "emptyDemoCta": "Explorar la demo",
       "errorLead": "No se pudo cargar este ranking.",
       "listenCount": "{count} streams",
       "shareLabel": "{share} de streams",

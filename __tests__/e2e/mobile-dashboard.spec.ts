@@ -238,7 +238,7 @@ test.describe("Mobile dashboard UX", () => {
 
     const main = page.getByRole("main");
     await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 20_000 });
-    await expect(page.getByRole("tablist", { name: /artist sections/i })).toHaveCount(0);
+    await expect(page.getByRole("tablist", { name: /artist sections/i })).toBeVisible();
 
     const firstRow = main.getByRole("button", { name: /open streaming insights/i }).first();
     await expect(firstRow).toBeVisible();
@@ -331,7 +331,7 @@ test.describe("Mobile dashboard UX", () => {
 
     const main = page.getByRole("main");
     await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 20_000 });
-    await expect(page.getByRole("tablist", { name: /sections artistes/i })).toHaveCount(0);
+    await expect(page.getByRole("tablist", { name: /sections artistes/i })).toBeVisible();
 
     const firstRow = main.getByRole("button", { name: /analyse d/i }).first();
     await expect(firstRow).toBeVisible({ timeout: 20_000 });

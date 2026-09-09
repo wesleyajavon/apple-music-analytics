@@ -2053,22 +2053,22 @@
       },
       "roster": {
         "eyebrow": "Spotlight",
-        "title": "Your artist cards",
-        "description": "Podium for the top 3, then gallery cards from 4th to 10th — tap a card for streaming insights.",
+        "title": "Your top artists",
+        "description": "Portrait tiles for the artists you stream most — tap one for insights.",
         "top3Badge": "Podium",
         "gridBadge": "Gallery"
       },
       "table": {
         "eyebrow": "Full index",
         "title": "Detailed ranking",
-        "description": "Timestamps, unique tracks, and pagination through the full list.",
+        "description": "Search and page through every artist in this window.",
         "badge": "Dataset"
       }
     },
     "viewSwitcher": {
       "navLabel": "Artist sections",
       "views": {
-        "spotlight": "Artist cards",
+        "spotlight": "Top artists",
         "leaderboard": "Top 20",
         "ranking": "Full ranking"
       }
@@ -2078,6 +2078,7 @@
       "emptyTitle": "No artists yet",
       "emptyLead": "Import history to see who you stream.",
       "emptyCta": "Import history",
+      "emptyDemoCta": "Explore the demo",
       "errorLead": "Couldn't load this ranking.",
       "listenCount": "{count} streams",
       "shareLabel": "{share} of streams",
@@ -2129,7 +2130,7 @@
     "rankingSearchPlaceholder": "Search an artist…",
     "rankingSearchAria": "Search an artist in the ranking",
     "rankingSearchEmpty": "No artists match this search.",
-    "rankingClickHint": "Click a row to open insights.",
+    "rankingClickHint": "Tap a row to open insights.",
     "artistInsightsAriaOpen": "Open streaming insights for {name}",
     "insightsCloseAria": "Close insights panel",
     "insightsEyebrow": "Your streaming",

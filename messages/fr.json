@@ -2055,22 +2055,22 @@
       },
       "roster": {
         "eyebrow": "Spotlight",
-        "title": "Vos artistes en vedette",
-        "description": "Podium pour le top 3, puis galerie du 4e au 10e — touchez un artiste pour ouvrir l’analyse de stream.",
+        "title": "Vos artistes les plus écoutés",
+        "description": "Tuiles portrait des artistes que vous streamez le plus — touchez-en un pour l’analyse.",
         "top3Badge": "Podium",
         "gridBadge": "Galerie"
       },
       "table": {
         "eyebrow": "Index complet",
         "title": "Classement détaillé",
-        "description": "Dates, nombre de titres et pagination de toute la liste.",
+        "description": "Recherchez et parcourez tous les artistes de cette période.",
         "badge": "Jeu de données"
       }
     },
     "viewSwitcher": {
       "navLabel": "Sections artistes",
       "views": {
-        "spotlight": "En vedette",
+        "spotlight": "Top artistes",
         "leaderboard": "Top 20",
         "ranking": "Classement complet"
       }
@@ -2080,6 +2080,7 @@
       "emptyTitle": "Pas encore d’artistes",
       "emptyLead": "Importez l’historique pour voir qui vous streamz.",
       "emptyCta": "Importer l’historique",
+      "emptyDemoCta": "Explorer la démo",
       "errorLead": "Impossible de charger ce classement.",
       "listenCount": "{count} streams",
       "shareLabel": "{share} des streams",

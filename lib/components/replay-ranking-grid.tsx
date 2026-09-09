@@ -234,9 +234,12 @@ export const ReplayRankingGrid = memo(function ReplayRankingGrid({
     });
   }, [pageCount, pageRangeLabel, visibleItems.length]);
 
-  const pageItems = visibleItems.slice(
-    safePage * REPLAY_PAGE_SIZE,
-    safePage * REPLAY_PAGE_SIZE + REPLAY_PAGE_SIZE
+  const slides = useMemo(
+    () =>
+      Array.from({ length: pageCount }, (_, page) =>
+        visibleItems.slice(page * REPLAY_PAGE_SIZE, page * REPLAY_PAGE_SIZE + REPLAY_PAGE_SIZE)
+      ),
+    [pageCount, visibleItems]
   );
 
   const goTo = useCallback(
@@ -303,18 +306,37 @@ export const ReplayRankingGrid = memo(function ReplayRankingGrid({
     <div className="w-full min-w-0">
       {pager}
       <div className="relative">
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
-          {pageItems.map((item, pageOffset) => {
-            const index = safePage * REPLAY_PAGE_SIZE + pageOffset;
-            return (
-              <ReplayRankingTile
-                key={item.id}
-                item={item}
-                index={index}
-                onSelect={onSelect}
-              />
-            );
-          })}
+        <div className="overflow-hidden">
+          <div
+            className="flex w-full transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
+            style={{ transform: `translate3d(-${safePage * 100}%, 0, 0)` }}
+          >
+            {slides.map((slideItems, page) => {
+              const active = page === safePage;
+              return (
+                <div
+                  key={pages[page]?.start ?? page}
+                  className="w-full shrink-0 grow-0 basis-full"
+                  aria-hidden={!active}
+                  {...(!active ? { inert: true } : {})}
+                >
+                  <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
+                    {slideItems.map((item, pageOffset) => {
+                      const index = page * REPLAY_PAGE_SIZE + pageOffset;
+                      return (
+                        <ReplayRankingTile
+                          key={item.id}
+                          item={item}
+                          index={index}
+                          onSelect={onSelect}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         {pageCount > 1 ? (

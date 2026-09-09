@@ -2,6 +2,10 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
+import {
+  GENRE_BACKFILL_OPEN_PROGRESS_EVENT,
+  GENRE_BACKFILL_PROGRESS_PANEL_ID,
+} from "@/lib/constants/genre-backfill-result-notification";
 import { clearGenreBackfillBannerBlockingPrefs } from "@/lib/utils/genre-backfill-banner-prefs";
 
 export type GroqEligibility = {
@@ -100,10 +104,11 @@ export function useGroqGenreBackfillMeta(viewerUserId?: string | null) {
         toast.success(startedToastMessage);
         await refreshMeta();
         window.setTimeout(() => {
-          document.getElementById("genre-backfill-global-badge-panel")?.scrollIntoView({
+          document.getElementById(GENRE_BACKFILL_PROGRESS_PANEL_ID)?.scrollIntoView({
             behavior: "smooth",
-            block: "start",
+            block: "nearest",
           });
+          window.dispatchEvent(new Event(GENRE_BACKFILL_OPEN_PROGRESS_EVENT));
         }, 200);
         return true;
       } catch {

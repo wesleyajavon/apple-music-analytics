@@ -696,20 +696,27 @@ function SidebarContent() {
               <LanguageSwitcher collapsed={displayCollapsed} />
             </Suspense>
           </div>
-          <div className={displayCollapsed ? "flex w-full justify-center pt-1" : "space-y-1 pt-1"}>
+          <div
+            className={
+              displayCollapsed
+                ? "flex w-full justify-center border-t border-glass-hairline pt-2"
+                : "space-y-0.5 border-t border-glass-hairline pt-2"
+            }
+          >
             {authEmail ? (
               displayCollapsed ? (
                 <Link
                   href={withFilters("/dashboard/settings")}
                   prefetch={prefetchDashboardNav}
                   title={accountDisplayName ?? t("items.settings")}
-                  className="inline-flex h-11 w-11 items-center justify-center rounded-full outline-none hover:bg-black/[0.05] focus-visible:ring-2 focus-visible:ring-ring dark:hover:bg-white/[0.08]"
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-full outline-none transition-colors hover:bg-black/[0.05] focus-visible:ring-2 focus-visible:ring-ring dark:hover:bg-white/[0.08]"
                 >
                   <UserAvatar
                     src={profileAvatarUrl}
                     name={profileName}
                     email={authEmail}
                     size="md"
+                    className="!rounded-full !border-glass-hairline !bg-surface-raised !text-foreground !shadow-none"
                   />
                 </Link>
               ) : (
@@ -717,29 +724,34 @@ function SidebarContent() {
                   <Link
                     href={withFilters("/dashboard/settings")}
                     prefetch={prefetchDashboardNav}
-                    className="flex min-h-11 min-w-0 items-center gap-3 rounded-[10px] px-2 py-1.5 transition-colors hover:bg-black/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:hover:bg-white/[0.08]"
+                    className={`${DASHBOARD_NAV_ITEM} min-w-0 gap-3 px-2.5 no-underline`}
                   >
                     <UserAvatar
                       src={profileAvatarUrl}
                       name={profileName}
                       email={authEmail}
                       size="md"
+                      className="!rounded-full !border-glass-hairline !bg-surface-raised !text-foreground !shadow-none"
                     />
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[13px] font-semibold text-foreground">
-                        {accountDisplayName}
-                      </span>
-                      {authEmail ? (
-                        <span className="block truncate text-xs text-muted" title={authEmail}>
-                          {authEmail}
-                        </span>
-                      ) : null}
+                    <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-foreground">
+                      {accountDisplayName}
                     </span>
+                    <svg
+                      className="h-4 w-4 shrink-0 text-muted/70"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      aria-hidden
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                    </svg>
                   </Link>
                   <button
+                    type="button"
                     onClick={handleSignOut}
                     disabled={isSigningOut}
-                    className="min-h-11 w-full rounded-full px-3 text-[13px] font-medium text-muted transition-colors hover:bg-black/[0.05] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60 dark:hover:bg-white/[0.08]"
+                    className="flex min-h-11 w-full items-center rounded-[10px] px-2.5 text-left text-[13px] font-medium text-accent-rose transition-colors hover:bg-black/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60 dark:hover:bg-white/[0.08]"
                   >
                     {isSigningOut ? t("signingOut") : t("signOut")}
                   </button>

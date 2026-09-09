@@ -24,7 +24,7 @@ Le chrome (sidebar + header) se fait **avant** Overview, sinon chaque section se
 - Tops + pages suivantes : [`replay-ranking-grid.tsx`](../lib/components/replay-ranking-grid.tsx) (grille partagée, `grid-cols-2` + `lg:grid-cols-4`)
 - Charts Overview : [`overview-trends-chart.tsx`](../lib/components/charts/overview-trends-chart.tsx) + [`crystal-chart.ts`](../lib/constants/crystal-chart.ts)
 
-Le plus gros écart **restant** n’est plus Overview ni artists / tracks / genres. **7a–7g livrées** (Ask/Duet = 7f ; empty + AI Insights + temporal + palette + settings = 7g).
+Le plus gros écart **restant** n’est plus Overview ni artists / tracks / genres. **7a–7g livrées** (Ask/Duet = 7f ; empty + AI Insights + temporal + palette + settings = 7g). **Reste chrome header :** cloche notifications + menu avatar (`Étape 8`).
 
 ---
 
@@ -37,7 +37,8 @@ Le plus gros écart **restant** n’est plus Overview ni artists / tracks / genr
 | Lire / ajuster ce playbook | Agent (ou rien) | Document uniquement |
 | Étapes 0–5 (desktop Crystal) | — | **Livrées.** Ne pas rejouer. |
 | Étape 6 (Overview mobile) | — | **Livrée.** Dual tree `lg:hidden` ; mêmes onglets que le desktop |
-| Étape 7a–7f (artists → Ask/Duet) | **Plan**, une session = un prompt **complet** | Pas les one-liners du tableau. Coller le bloc numéroté. |
+| Étape 7a–7g (artists → settings) | — | **Livrées.** Ne pas rejouer. |
+| Étape 8a–8b (header actions) | **Plan**, une session = un prompt **complet** | Pas les one-liners du tableau. Coller le bloc numéroté. |
 
 Règle d’or : **une conversation Plan = un prompt numéroté**. Après implémentation : EN + FR, light + dark, desktop `lg+` **et** mobile ~390×844.
 
@@ -53,7 +54,7 @@ Crystal **desktop Overview est livré**. Mobile = arbre `lg:hidden` dédié. Ne 
 4. Valide le plan, implémente, vérifie au navigateur, commit.
 5. Passe au numéro suivant.
 
-Étapes **7a–7f** : coller le **bloc complet** (sections Étape 7a … 7f), pas la cellule du tableau d’ordre. Le tableau n’est qu’un index.
+Étapes **8a–8b** : coller le **bloc complet** (sections Étape 8a … 8b), pas la cellule du tableau d’ordre. Le tableau n’est qu’un index.
 
 Hors scope de chaque prompt sauf mention contraire : landing marketing, e-mail, cookies, auth pages, onboarding wizard, APIs, Prisma.
 
@@ -173,6 +174,7 @@ Fichiers chrome / Overview :
 | Shell | `dashboard-scroll-wrapper.tsx`, `dashboard-main-area.tsx` |
 | Sidebar | `lib/components/sidebar.tsx` |
 | Header / période | `dashboard-sticky-header.tsx`, `date-range-filter.tsx` |
+| Header actions | `notification-center.tsx`, `dashboard-user-menu.tsx` (**étape 8**) |
 | Masthead Overview | `overview-hero.tsx` (`OverviewHeroFrame` + `OverviewMobileHero` compact **faits**) |
 | Onglets Overview | `dashboard-section-switcher.tsx`, `overview-section-switcher.tsx` |
 | Overview desktop | `overview/page.tsx`, `overview-desktop-flow.tsx`, `overview-stats-section.tsx`, `overview-library-replay.tsx`, `replay-ranking-grid.tsx`, `top-three-artists-overview-widget.tsx`, `spotlight-artists-featured-list.tsx`, `charts/overview-trends-chart.tsx` |
@@ -256,6 +258,7 @@ Objectif lg+ :
 - Date range = DASHBOARD_SEGMENTED_* (piste + pills), comme le year selector Replay. Custom accessible (pas enterré).
 - Canvas calme pour que sidebar/header aient quelque chose à flouter.
 - z-index header (z-30) > sidebar (z-20).
+- **Hors scope ici** : `NotificationCenter` + `DashboardUserMenu` (coin droit) — voir **étape 8**.
 
 Contraintes : mêmes query params période ; onboarding sans filtres ; Ask layout plein écran inchangé.
 
@@ -423,7 +426,7 @@ Les deux pages ont **le même modèle d’information** : 4 items dans le sélec
 
 **7a livrée :** 3 onglets locaux (spotlight / leaderboard / ranking) + CTA trends ghost dans le masthead. **Manque :** le 4ᵉ item `trends` dans le switcher (et le même switcher sur `/artists/trends`). 7b aligne `/artists` sur ce contrat **et** livre `/tracks` dessus.
 
-Ordre (index). **7a–7g = blocs complets plus bas.**
+Ordre (index). **7a–7g = blocs complets plus bas.** Puis **étape 8** (header actions).
 
 | # | Route | Session |
 | --- | --- | --- |
@@ -434,6 +437,13 @@ Ordre (index). **7a–7g = blocs complets plus bas.**
 | **7e** | `/timeline`, `/heatmap`, `*/trends` | Chrome canvas + plots Crystal (`OverviewTrendsChart` / `crystal-chart.ts`). Dual tree. |
 | **7f** | Ask + Duet (friends / compare) | Chrome seulement. `TopLibraryCard` friend-music **hors scope** (session dédiée). |
 | **7g** | Empty + AI Insights + temporal + palette + settings | **Faite.** Canvas / list rows ; empty partagés Crystal ; dual tree. |
+
+**Après 7g — chrome header actions (étape 8).** Index :
+
+| # | Surface | Session |
+| --- | --- | --- |
+| **8a** | Centre de notifications (cloche) | **Faite.** Chrome panneau + trigger. IA / polling / sources inchangés. |
+| **8b** | Menu compte (avatar) | **Faite.** Chrome menu + trigger. Settings / sign-out / profil inchangés. |
 
 ---
 
@@ -777,6 +787,80 @@ Livre :
 
 ---
 
+## Étape 8 — Header actions : notifications + menu compte
+
+Complément de l’**étape 2** (header + période). Les deux contrôles du **coin droit** (`headerActions` dans `date-range-filter.tsx`) sont encore du chrome « carte / shadow / hover lift » alors que la période est déjà Crystal.
+
+**Pourquoi après 7g :** pages métier livrées ; ce chrome apparaît sur **toutes** les routes dashboard — un restyle ici a le meilleur ratio impact / risque. Une session Plan = **un** sous-prompt (8a **ou** 8b).
+
+Référence produit : [`NOTIFICATION_CENTER.md`](./NOTIFICATION_CENTER.md) (IA / sources). Crystal = **matière uniquement**.  
+Référence visuelle : Apple Music / iOS — icônes calmes, popover frost, rows hairline ; pas de bouton borduré + shadow soft, pas de menu `shadow-card`.
+
+---
+
+### Étape 8a — Centre de notifications (cloche)
+
+```text
+[Préambule]
+
+Étape 8a — Crystal chrome : NotificationCenter (header). Pas de restyle du menu avatar (8b). Pas de pages métier.
+
+Fichiers : lib/components/notification-center.tsx. Placement déjà OK dans date-range-filter.tsx (headerActions) — ne pas déplacer. Contexte : notification-center-context.tsx + hooks Duet / genre backfill — LIRE, ne pas réécrire.
+Masquage démo : useHideNotificationCenterForPublicDemo inchangé.
+HORS SCOPE : nouvelle API serveur notifications, WebSocket, préférences « mute type », toasts Sonner, sidebar footer, DashboardUserMenu, période / exports.
+
+Aujourd’hui (à remplacer) :
+- Trigger : h-9 w-9 rounded-md border + bg-background/80 + shadow soft (mini-carte).
+- Panneau : rounded-lg border-border bg-card/95 + ombre marketing lourde.
+- Header panneau : uppercase tracking large + boutons mark-all / clear bordurés.
+- Rows : stripe sévérité OK ; look encore « admin card list », pas list rows Crystal.
+- Badge unread : OK fonctionnellement ; calmer le contraste si trop « sticker ».
+
+Objectif lg+ et mobile (même composant — pas de fork sm:) :
+- Trigger = contrôle chrome calme : min 44×44 (garder max-lg:h-11), rounded-full ou radius soft, hairline OU fond glass discret — PAS border+shadow carte, PAS hover:-translate-y.
+- Panneau = DASHBOARD_GLASS_FLOATING_PANE (ou même matière glass + hairline). Light ET dark. prefers-reduced-transparency → opaque.
+- Titre panneau : 13px medium / section eyebrow, PAS uppercase tracking-[0.14em] mono admin.
+- Actions mark all / clear : DASHBOARD_BTN_GHOST ou text button 44px, pas mini-cartes bordurées.
+- Liste : DASHBOARD_LIST_ROW + DASHBOARD_LIST_SEPARATOR (ou hairline équivalent). Empty = typo muted sur le panneau, pas empty-state carte.
+- Garder : open/close, Escape, click outside, aria-expanded / aria-haspopup, unread badge, merge client+Duet server items, markRead / markAllRead / clearAll, CTAs genre Groq nudge / liens href, formatNotificationDisplay.
+- z-index : panneau au-dessus du sticky header (z-50 OK si déjà).
+
+Contraintes : IA notification inchangée (sources, polling Duet, severity). i18n EN/FR (+ ES si copy touchée). Demo ?userId= masque toujours le centre. Gemini modify_frontend 1 surface (panneau OU trigger) si tu t’en sers.
+
+Livre : avant/après classes ; light/dark EN/FR desktop + mobile header ; unread + empty + Duet pending + mark all ; pas de régression e2e Duet badge si asserté.
+```
+
+---
+
+### Étape 8b — Menu compte (avatar)
+
+```text
+[Préambule]
+
+Étape 8b — Crystal chrome : DashboardUserMenu (header). Pas de restyle NotificationCenter sauf régression visuelle du cluster headerActions. Pas de pages métier.
+
+Fichiers : lib/components/dashboard-user-menu.tsx (+ UserAvatar si classes size seulement). Placement déjà OK dans date-range-filter.tsx — ne pas déplacer vers la sidebar.
+Sidebar footer (avatar / thème / langue / sign-out) : HORS SCOPE sauf si tu partages une primitive trigger — alors ne pas fourcher le footer.
+HORS SCOPE : /api/user/me, upload avatar, auth Supabase, settings page chrome (déjà 7g), NotificationCenter produit.
+
+Aujourd’hui (à remplacer) :
+- Trigger : hover:-translate-y-0.5 (lift carte) ; rounded-xl.
+- Menu : rounded-xl border-card-border bg-surface-raised shadow-card (carte marketing).
+- Items : hover:bg-primary/10 hover:text-primary (glow marque).
+
+Objectif lg+ et mobile (même composant) :
+- Trigger = avatar bouton calme, min 44×44 (max-lg déjà h-11), focus ring OK, PLUS de hover:-translate-y. Radius cohérent avec chrome (full ou soft), pas une carte.
+- Menu = DASHBOARD_GLASS_FLOATING_PANE (même matière que 8a). Header identité (nom + email) + hairline ; pas de mega-carte.
+- Items Settings / Sign out = DASHBOARD_LIST_ROW (ou row équivalente min-h-11), hover muted soft — PAS primary/10 violet. Sign-out danger soft OK (text accent-rose), pas bouton carte.
+- Garder : fetch /api/user/me + auth listener, settingsHref avec mergeDashboardSearchParams, sign-out → /sign-in, Escape / click outside, aria-expanded / aria-haspopup="menu", i18n dashboardUserMenu + sidebar.settings.
+
+Contraintes : pas de nouveau menu mobile dédié ; cluster headerActions reste cloche + avatar. Light/dark EN/FR. prefers-reduced-transparency. Gemini modify_frontend 1 surface si tu t’en sers.
+
+Livre : menu lisible light/dark ; settings + sign-out OK ; demo ?userId= (avatar toujours visible) ; pas de régression mobile header 44px.
+```
+
+---
+
 ## Gemini Design MCP
 
 Après l’étape 0. **Pas** de `create_frontend` Overview (casserait hooks / i18n / tabs).
@@ -870,6 +954,17 @@ Desktop `lg+` **et** mobile ~390×844, light et dark, EN et FR :
 
 ---
 
+## Critères de done (8a–8b)
+
+Desktop `lg+` **et** mobile header (~390×844), light et dark, EN et FR :
+
+- [x] 8a : trigger cloche calme (pas mini-carte border+shadow) ; panneau `DASHBOARD_GLASS_FLOATING_PANE` / glass ; rows hairline ; IA notifications inchangée
+- [x] 8b : avatar sans hover-lift ; menu glass floating ; items list rows, pas `shadow-card` / `primary/10`
+- [x] Cluster `headerActions` intact (ordre cloche → avatar) ; masquage démo notifications inchangé
+- [x] Escape / click outside / focus ring / cibles 44px ; `prefers-reduced-transparency`
+
+---
+
 ## Hors scope Crystal
 
 - Transformer Overview (ou l’app) en **story Replay** (scroll unique, tuer les tabs)
@@ -898,3 +993,4 @@ Desktop `lg+` **et** mobile ~390×844, light et dark, EN et FR :
 - `lib/components/trends-mobile-hub.tsx` / `timeline-mobile.tsx` / `heatmap-mobile.tsx` — **7e**
 - `lib/components/ask-soundprint-*.tsx` / `lib/components/duet/*-hero.tsx` — **7f** (chrome)
 - `ai-insights` / `temporal-analysis` / `palette/*` / settings — **7g** (chrome + empty partagés)
+- `notification-center.tsx` / `dashboard-user-menu.tsx` — **étape 8** (header actions)

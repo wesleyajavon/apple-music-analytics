@@ -115,6 +115,9 @@ export function GenreAccuracyChooser({
           <span>{t("groqSessionRunningHint")} </span>
           <a
             href="#genre-backfill-global-badge-panel"
+            onClick={() => {
+              window.dispatchEvent(new Event("soundprint:genre-backfill-open-progress"));
+            }}
             className="font-semibold text-violet-600 underline underline-offset-2 hover:text-violet-800 dark:text-violet-300 dark:hover:text-white"
           >
             {t("groqProgressAnchor")}

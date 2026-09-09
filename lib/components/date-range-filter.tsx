@@ -4,6 +4,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useId, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { DashboardUserMenu } from "@/lib/components/dashboard-user-menu";
 import { DateRangeFilterMobile } from "@/lib/components/date-range-filter-mobile";
+import { GenreBackfillGlobalBadge } from "@/lib/components/genre-backfill-global-badge";
 import { NotificationCenter } from "@/lib/components/notification-center";
 import {
   DASHBOARD_SEGMENTED_PILL,
@@ -150,6 +151,7 @@ export function DateRangeFilter() {
 
   const headerActions = (
     <>
+      {!hideNotificationCenter ? <GenreBackfillGlobalBadge /> : null}
       {!hideNotificationCenter ? <NotificationCenter /> : null}
       <DashboardUserMenu />
     </>

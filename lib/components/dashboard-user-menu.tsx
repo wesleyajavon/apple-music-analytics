@@ -4,9 +4,17 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@/i18n/navigation";
+import {
+  DASHBOARD_GLASS_FLOATING_PANE,
+  DASHBOARD_LIST_ROW,
+  DASHBOARD_LIST_ROW_INTERACTIVE,
+  DASHBOARD_LIST_SEPARATOR,
+} from "@/lib/components/dashboard-ui";
 import { UserAvatar } from "@/lib/components/user-avatar";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
+
+const MENU_ITEM_CLASS = `${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_ROW_INTERACTIVE} ${DASHBOARD_LIST_SEPARATOR} px-4 text-[13px] font-medium text-foreground no-underline`;
 
 export function DashboardUserMenu() {
   const searchParams = useSearchParams();
@@ -124,7 +132,7 @@ export function DashboardUserMenu() {
         aria-haspopup="menu"
         aria-label={t("menuLabel")}
         title={accountDisplayName ?? tSidebar("items.settings")}
-        className="flex h-9 w-9 items-center justify-center rounded-xl outline-none transition-transform hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background max-lg:h-11 max-lg:w-11"
+        className="inline-flex h-11 w-11 min-h-11 min-w-11 shrink-0 items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       >
         <UserAvatar
           src={profileAvatarUrl}
@@ -132,18 +140,19 @@ export function DashboardUserMenu() {
           email={authEmail}
           size="sm"
           alt={accountDisplayName ?? ""}
+          className="!h-9 !w-9 !rounded-full !border-glass-hairline !bg-surface-raised !text-foreground !shadow-none"
         />
       </button>
       {open ? (
         <div
           role="menu"
-          className="absolute right-0 top-[calc(100%+0.35rem)] z-50 w-[min(15rem,calc(100vw-5rem))] overflow-hidden rounded-xl border border-card-border bg-surface-raised py-1 shadow-card"
+          className={`absolute right-0 top-[calc(100%+0.375rem)] z-50 w-[min(15rem,calc(100vw-5rem))] overflow-hidden ${DASHBOARD_GLASS_FLOATING_PANE}`}
         >
           {accountDisplayName ? (
-            <div className="border-b border-card-border px-3 py-2.5">
-              <p className="truncate text-sm font-semibold text-foreground">{accountDisplayName}</p>
+            <div className="border-b border-glass-hairline px-4 py-3">
+              <p className="truncate text-[13px] font-semibold text-foreground">{accountDisplayName}</p>
               {authEmail ? (
-                <p className="truncate text-xs text-muted" title={authEmail}>
+                <p className="truncate text-[12px] text-muted" title={authEmail}>
                   {authEmail}
                 </p>
               ) : null}
@@ -153,7 +162,7 @@ export function DashboardUserMenu() {
             href={settingsHref}
             role="menuitem"
             onClick={() => setOpen(false)}
-            className="flex min-h-10 w-full items-center gap-2 px-3 text-left text-sm font-medium text-foreground transition-colors hover:bg-primary/10 hover:text-primary"
+            className={MENU_ITEM_CLASS}
           >
             <svg className="h-4 w-4 shrink-0 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
               <path
@@ -175,9 +184,9 @@ export function DashboardUserMenu() {
                 setOpen(false);
                 void handleSignOut();
               }}
-              className="flex min-h-10 w-full items-center gap-2 px-3 text-left text-sm font-medium text-foreground transition-colors hover:bg-primary/10 hover:text-primary disabled:cursor-not-allowed disabled:opacity-60"
+              className={`${MENU_ITEM_CLASS} text-accent-rose disabled:cursor-not-allowed disabled:opacity-60`}
             >
-              <svg className="h-4 w-4 shrink-0 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
+              <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -194,7 +203,7 @@ export function DashboardUserMenu() {
               href="/sign-in"
               role="menuitem"
               onClick={() => setOpen(false)}
-              className="flex min-h-10 w-full items-center gap-2 px-3 text-left text-sm font-medium text-foreground transition-colors hover:bg-primary/10 hover:text-primary"
+              className={MENU_ITEM_CLASS}
             >
               <svg className="h-4 w-4 shrink-0 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
                 <path

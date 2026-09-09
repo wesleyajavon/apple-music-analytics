@@ -1250,6 +1250,9 @@
       "dismissAria": "Hide this summary until the next session",
       "progressAria": "Session progress",
       "panelEyebrow": "AI genres",
+      "chipRunning": "Genres",
+      "chipPaused": "Paused",
+      "chipOpenAria": "Open genre classification progress",
       "statTracksShort": "{processed}/{max} tracks",
       "statUnknownShort": "Unknown {ratio}",
       "statTargetShort": "Target ≤ {target}%",
@@ -1260,7 +1263,7 @@
     "interactiveAi": {
       "title": "AI features are paused for a moment",
       "body": "We’re organizing your music by genre in the background. That step uses the same assistant as other AI features here, so those stay on hold until classification finishes.",
-      "pauseHint": "Want AI back right away? Pause classification from the progress banner at the top of the dashboard — you can resume anytime.",
+      "pauseHint": "Want AI back right away? Pause classification from the Genres chip in the header — you can resume anytime.",
       "openProgressCta": "Open classification progress",
       "unsortedCoverage": {
         "title": "This reading is still partial",
@@ -2154,9 +2157,7 @@
     "insightsBusiestMeta": "{date} · {streams} streams",
     "insightsNoSignal": "Not enough patterned data yet",
     "insightsActiveDays": "Days you streamed",
-    "insightsActiveDaysHint": "Distinct days with at least one stream of this artist",
     "insightsSpanDays": "First to last stream",
-    "insightsSpanDaysHint": "Calendar days from your first stream to your most recent",
     "insightsDaysValue": "{count, plural, one {# day} other {# days}}",
     "insightsByHour": "Streaming by hour of day",
     "insightsByWeekday": "Streaming by weekday",
@@ -3050,10 +3051,15 @@
       "panelTitle": "Activity",
       "panelKicker": "Nothing blocking shipping.",
       "unreadSummary": "{count, plural, one {# unread} other {# unread}}",
-      "markAllRead": "Mark activity read",
-      "clearAll": "Clear activity",
+      "markAllRead": "Mark all",
+      "clearAll": "Clear",
       "emptyKicker": "All clear",
       "empty": "Friend requests, imports, and background jobs show up here when something needs a glance.",
+      "liveBackfill": {
+        "running": "Genre classification running",
+        "paused": "Genre classification paused",
+        "openHint": "Open the header chip to pause, resume, or cancel."
+      },
       "importComplete": {
         "title": "Import completed",
         "body": "{count, plural, one {# listen imported} other {# listens imported}}"
@@ -3065,14 +3071,14 @@
         },
         "failed": {
           "title": "Genre backfill failed",
-          "body": "Open the dashboard banner to retry or inspect the job."
+          "body": "Start another session from Genres or Activity when you are ready."
         }
       },
       "genreGroqNudge": {
         "title": "Backfill missing genres",
         "body": "{count, plural, one {# track} other {# tracks}} (~{pct}% of your library) are still “Unknown.” Run a Groq pass to tighten charts and filters.",
         "legacyBody": "A chunk of your library is still unlabeled. Run the Groq pass below to sharpen dashboards.",
-        "privacyHint": "Artist + track titles go to Groq for labels—same data scope as the dashboard banner.",
+        "privacyHint": "Artist + track titles go to Groq for labels—same data scope as the Genres chip controls.",
         "classifyCta": "Run backfill",
         "classifying": "Starting…",
         "startedToast": "Genre backfill queued in the background.",

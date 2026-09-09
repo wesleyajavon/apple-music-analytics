@@ -94,7 +94,7 @@ import { ArtistUserInsightsPanel } from "@/lib/components/artist-user-insights-p
 const previewArtist: ArtistStatsDto = insights.artist;
 
 describe("ArtistUserInsightsPanel charts", () => {
-  it("lets hour and weekday plots fill the card while keeping a compact Y axis", () => {
+  it("keeps hour and weekday Y-axis ticks fully visible inside the card", () => {
     render(
       <ArtistUserInsightsPanel
         open
@@ -112,10 +112,10 @@ describe("ArtistUserInsightsPanel charts", () => {
     const yAxes = screen.getAllByTestId("insights-y-axis");
     expect(yAxes).toHaveLength(2);
     for (const margin of barChartMargins) {
-      expect(margin.left ?? 0).toBeLessThan(0);
+      expect(margin.left ?? 0).toBeGreaterThanOrEqual(0);
     }
     for (const axis of yAxes) {
-      expect(Number(axis.getAttribute("data-width"))).toBeGreaterThanOrEqual(28);
+      expect(Number(axis.getAttribute("data-width"))).toBeGreaterThanOrEqual(36);
     }
   });
 });

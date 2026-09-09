@@ -2,6 +2,10 @@
 
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import {
+  GENRE_BACKFILL_OPEN_PROGRESS_EVENT,
+  GENRE_BACKFILL_PROGRESS_PANEL_ID,
+} from "@/lib/constants/genre-backfill-result-notification";
 import { useInteractiveAiBlockedByGenreBackfill } from "@/lib/hooks/use-interactive-ai-blocked-by-genre-backfill";
 
 type InteractiveAiGenreBackfillNoticeProps = {
@@ -30,7 +34,10 @@ export function InteractiveAiGenreBackfillNotice({
       <p className="mt-2 leading-relaxed text-muted">{t("body")}</p>
       <p className="mt-2 leading-relaxed text-muted">{t("pauseHint")}</p>
       <Link
-        href="#genre-backfill-global-badge-panel"
+        href={`#${GENRE_BACKFILL_PROGRESS_PANEL_ID}`}
+        onClick={() => {
+          window.dispatchEvent(new Event(GENRE_BACKFILL_OPEN_PROGRESS_EVENT));
+        }}
         className="mt-3 inline-flex min-h-11 items-center text-[13px] font-medium text-foreground underline decoration-glass-hairline underline-offset-2 hover:decoration-foreground"
       >
         {t("openProgressCta")}

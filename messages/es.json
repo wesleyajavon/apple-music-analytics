@@ -1252,6 +1252,9 @@
       "dismissAria": "Ocultar este resumen hasta la próxima sesión",
       "progressAria": "Progreso de la sesión",
       "panelEyebrow": "Géneros IA",
+      "chipRunning": "Géneros",
+      "chipPaused": "En pausa",
+      "chipOpenAria": "Abrir el progreso de la clasificación de géneros",
       "statTracksShort": "{processed}/{max} canciones",
       "statUnknownShort": "Unknown {ratio}",
       "statTargetShort": "Meta ≤ {target}%",
@@ -1262,7 +1265,7 @@
     "interactiveAi": {
       "title": "Las funciones de IA están en pausa un momento",
       "body": "Estamos ordenando tu música por género en segundo plano. Ese paso usa la misma capacidad que el resto de funciones de IA, así que estas quedan en espera hasta que termine la clasificación.",
-      "pauseHint": "¿Quieres volver a usar la IA ya? Pausa la clasificación desde el banner de progreso arriba en el panel — puedes reanudarla cuando quieras.",
+      "pauseHint": "¿Quieres volver a usar la IA ya? Pausa la clasificación desde el chip Géneros en la cabecera — puedes reanudarla cuando quieras.",
       "openProgressCta": "Abrir progreso de la clasificación",
       "unsortedCoverage": {
         "title": "Esta lectura sigue siendo parcial",
@@ -2156,9 +2159,7 @@
     "insightsBusiestMeta": "{date} · {listens} streams",
     "insightsNoSignal": "Sin patrón claro en los datos hasta ahora",
     "insightsActiveDays": "Días con streams",
-    "insightsActiveDaysHint": "Días distintos con al menos un stream de este artista",
     "insightsSpanDays": "Del primero al último",
-    "insightsSpanDaysHint": "Días de calendario entre tu primer stream y el más reciente",
     "insightsDaysValue": "{count, plural, one {# día} other {# días}}",
     "insightsByHour": "Streams por hora del día",
     "insightsByWeekday": "streams por día de la semana",
@@ -3052,10 +3053,15 @@
       "panelTitle": "Actividad",
       "panelKicker": "Nada bloque el release.",
       "unreadSummary": "{count, plural, one {# sin leer} other {# sin leer}}",
-      "markAllRead": "Marcar actividad leída",
-      "clearAll": "Borrar actividad",
+      "markAllRead": "Marcar leídas",
+      "clearAll": "Borrar",
       "emptyKicker": "Todo listo",
       "empty": "Las solicitudes de amistad, importaciones y trabajos en segundo plano aparecerán aquí cuando haya algo que revisar.",
+      "liveBackfill": {
+        "running": "Clasificación de géneros en curso",
+        "paused": "Clasificación de géneros en pausa",
+        "openHint": "Abre el chip de la cabecera para pausar, reanudar o cancelar."
+      },
       "importComplete": {
         "title": "Importación completada",
         "body": "{count, plural, one {# escucha importada} other {# escuchas importadas}}"
@@ -3067,14 +3073,14 @@
         },
         "failed": {
           "title": "Falló el backfill de géneros",
-          "body": "Abre el banner del panel para reintentar o revisar el trabajo."
+          "body": "Inicia otra sesión desde Géneros o Actividad cuando quieras."
         }
       },
       "genreGroqNudge": {
         "title": "Rellenar géneros faltantes",
         "body": "{count, plural, one {# pista} other {# pistas}} (~{pct}% de la biblioteca) siguen como «Desconocido». Un pase con Groq afina gráficos y filtros.",
         "legacyBody": "Parte de la biblioteca sigue sin etiquetar. Ejecuta el pase Groq de abajo para endurecer el panel.",
-        "privacyHint": "Artista + título van a Groq para etiquetar — mismo alcance que el banner del dashboard.",
+        "privacyHint": "Artista + título van a Groq para etiquetar — mismo alcance que los controles del chip Géneros.",
         "classifyCta": "Ejecutar backfill",
         "classifying": "Iniciando…",
         "startedToast": "Backfill de géneros encolado en segundo plano.",

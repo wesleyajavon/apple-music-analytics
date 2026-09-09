@@ -1252,6 +1252,9 @@
       "dismissAria": "Masquer ce résumé jusqu’à la prochaine session",
       "progressAria": "Progression de la session",
       "panelEyebrow": "Genres IA",
+      "chipRunning": "Genres",
+      "chipPaused": "En pause",
+      "chipOpenAria": "Ouvrir la progression de la classification des genres",
       "statTracksShort": "{processed}/{max} morceaux",
       "statUnknownShort": "Unknown {ratio}",
       "statTargetShort": "Cible ≤ {target} %",
@@ -1262,7 +1265,7 @@
     "interactiveAi": {
       "title": "Les fonctions IA font une petite pause",
       "body": "Nous classons vos morceaux par genre en arrière-plan. Cette étape utilise la même capacité que les autres expériences IA : elles restent en attente jusqu’à la fin de la classification.",
-      "pauseHint": "Vous voulez retrouver l’IA tout de suite ? Mettez la classification en pause depuis la bannière de progression en haut du tableau de bord — vous pourrez la reprendre quand vous voulez.",
+      "pauseHint": "Vous voulez retrouver l’IA tout de suite ? Mettez la classification en pause depuis le chip Genres dans l’en-tête — vous pourrez la reprendre quand vous voulez.",
       "openProgressCta": "Voir la progression de la classification",
       "unsortedCoverage": {
         "title": "Lecture encore partielle",
@@ -2156,9 +2159,7 @@
     "insightsBusiestMeta": "{date} · {listens} streams",
     "insightsNoSignal": "Pas assez de données pour dégager une tendance",
     "insightsActiveDays": "Jours d'écoute",
-    "insightsActiveDaysHint": "Jours distincts avec au moins un stream de cet artiste",
     "insightsSpanDays": "Du premier au dernier",
-    "insightsSpanDaysHint": "Jours calendaires entre votre premier et votre dernier stream",
     "insightsDaysValue": "{count, plural, one {# jour} other {# jours}}",
     "insightsByHour": "Streams par heure de la journée",
     "insightsByWeekday": "Streams par jour de la semaine",
@@ -3052,10 +3053,15 @@
       "panelTitle": "Activité",
       "panelKicker": "Rien ne bloque l’envoi.",
       "unreadSummary": "{count, plural, one {# non lu} other {# non lus}}",
-      "markAllRead": "Marquer l’activité",
-      "clearAll": "Effacer l’activité",
+      "markAllRead": "Tout lire",
+      "clearAll": "Effacer",
       "emptyKicker": "Aucun point bloquant",
       "empty": "Les demandes d’ami, les imports et les tâches en arrière-plan apparaîtront ici quand un coup d’œil sera utile.",
+      "liveBackfill": {
+        "running": "Classification des genres en cours",
+        "paused": "Classification des genres en pause",
+        "openHint": "Ouvrez le chip dans l’en-tête pour pause, reprise ou annulation."
+      },
       "importComplete": {
         "title": "Import terminé",
         "body": "{count, plural, one {# écoute importée} other {# écoutes importées}}"
@@ -3067,14 +3073,14 @@
         },
         "failed": {
           "title": "Échec du backfill genres",
-          "body": "Ouvrez la bannière du dashboard pour réessayer ou inspecter la tâche."
+          "body": "Relancez une session depuis Genres ou Activité quand vous êtes prêt."
         }
       },
       "genreGroqNudge": {
         "title": "Compléter les genres manquants",
         "body": "{count, plural, one {# titre} other {# titres}} (~{pct}% de la bibliothèque) sont encore « Inconnus ». Un passage Groq resserre graphiques et filtres.",
         "legacyBody": "Une partie de la bibliothèque n’est pas étiquetée. Lance le passage Groq ci-dessous pour affiner le dashboard.",
-        "privacyHint": "Artistes + titres partent vers Groq pour les labels — même périmètre que la bannière du dashboard.",
+        "privacyHint": "Artistes + titres partent vers Groq pour les labels — même périmètre que les contrôles du chip Genres.",
         "classifyCta": "Lancer le backfill",
         "classifying": "Démarrage…",
         "startedToast": "Backfill genres mis en file d’attente.",

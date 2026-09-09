@@ -39,11 +39,11 @@ const TOP_TRACKS_LIMIT = 12;
 
 const INSIGHTS_CHART_OVERFLOW =
   "overflow-visible [&_.recharts-wrapper]:overflow-visible [&_.recharts-surface]:overflow-visible";
-const INSIGHTS_Y_AXIS_WIDTH = 32;
+const INSIGHTS_Y_AXIS_WIDTH = 36;
 const INSIGHTS_BAR_CHART_MARGIN = {
   top: 4,
-  right: 2,
-  left: -INSIGHTS_Y_AXIS_WIDTH,
+  right: 4,
+  left: 0,
   bottom: 0,
 } as const;
 
@@ -367,13 +367,13 @@ export const ArtistUserInsightsPanel = memo(
                   <div className={`${DASHBOARD_METRIC_STRIP} w-full flex-wrap`}>
                     <div className={DASHBOARD_METRIC_CELL}>
                       <span className={DASHBOARD_METRIC_LABEL}>{t("insightsFirstListenLabel")}</span>
-                      <span className="text-[13px] font-semibold capitalize text-foreground">
+                      <span className={`${DASHBOARD_METRIC_VALUE} capitalize`}>
                         {formatListenDate(displayArtist.firstListenDate)}
                       </span>
                     </div>
                     <div className={DASHBOARD_METRIC_CELL}>
                       <span className={DASHBOARD_METRIC_LABEL}>{t("insightsMostRecentListenLabel")}</span>
-                      <span className="text-[13px] font-semibold capitalize text-foreground">
+                      <span className={`${DASHBOARD_METRIC_VALUE} capitalize`}>
                         {formatListenDate(displayArtist.lastListenDate)}
                       </span>
                     </div>
@@ -413,7 +413,7 @@ export const ArtistUserInsightsPanel = memo(
                     <div className={`${DASHBOARD_METRIC_STRIP} w-full flex-wrap`}>
                       <div className={DASHBOARD_METRIC_CELL}>
                         <span className={DASHBOARD_METRIC_LABEL}>{t("insightsBusiestCalendarDay")}</span>
-                        <span className="text-[13px] font-semibold capitalize text-foreground">
+                        <span className={`${DASHBOARD_METRIC_VALUE} capitalize`}>
                           {busiestDayLabel ?? t("insightsNoSignal")}
                         </span>
                       </div>
@@ -423,7 +423,7 @@ export const ArtistUserInsightsPanel = memo(
                       </div>
                       <div className={DASHBOARD_METRIC_CELL}>
                         <span className={DASHBOARD_METRIC_LABEL}>{t("insightsPeakWeekday")}</span>
-                        <span className="text-[13px] font-semibold capitalize text-foreground">
+                        <span className={`${DASHBOARD_METRIC_VALUE} capitalize`}>
                           {peakWeekdayLabel ?? t("insightsNoSignal")}
                         </span>
                       </div>
@@ -432,14 +432,12 @@ export const ArtistUserInsightsPanel = memo(
                         <span className={DASHBOARD_METRIC_VALUE}>
                           {t("insightsDaysValue", { count: query.data.activeListeningDays })}
                         </span>
-                        <span className="text-[13px] text-muted">{t("insightsActiveDaysHint")}</span>
                       </div>
                       <div className={DASHBOARD_METRIC_CELL}>
                         <span className={DASHBOARD_METRIC_LABEL}>{t("insightsSpanDays")}</span>
                         <span className={DASHBOARD_METRIC_VALUE}>
                           {t("insightsDaysValue", { count: query.data.listeningSpanDays })}
                         </span>
-                        <span className="text-[13px] text-muted">{t("insightsSpanDaysHint")}</span>
                       </div>
                     </div>
                   </section>

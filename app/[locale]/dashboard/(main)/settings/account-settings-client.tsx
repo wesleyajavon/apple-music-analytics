@@ -36,6 +36,7 @@ import {
   SettingsPageSkeleton,
   SettingsPreferencesSection,
   SettingsProfileSection,
+  SettingsSpotifySection,
   SettingsViewNav,
   SettingsYourDataSection,
 } from "./settings-sections";
@@ -723,6 +724,10 @@ function AccountSettingsContent({ gdprContactEmail = null }: AccountSettingsClie
               void runExport();
             }}
           />
+        </DashboardSectionPanel>
+
+        <DashboardSectionPanel view="spotify" activeView={activeView} idPrefix="settings">
+          <SettingsSpotifySection />
         </DashboardSectionPanel>
 
         <DashboardSectionPanel view="danger" activeView={activeView} idPrefix="settings">

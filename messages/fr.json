@@ -21,10 +21,9 @@
   },
   "aiMasterToggle": {
     "label": "IA",
-    "dragHandleAriaLabel": "Déplacer le bouton IA",
     "ariaLabel": "Activer ou désactiver les fonctionnalités IA pour ce navigateur",
     "lockedHint": "L’IA est coupée côté serveur (AI_MASTER_ENABLED=false). Ce bouton ne peut pas la réactiver.",
-    "widgetHint": "L’IA est désactivée pour ce navigateur. Activez-la via le menu Plus (mobile) ou le bouton « IA » en bas à droite (bureau).",
+    "widgetHint": "L’IA est désactivée pour ce navigateur. Activez-la via le menu du compte (bureau) ou le menu Plus (mobile).",
     "widgetHintEnvLocked": "L’IA est désactivée côté serveur. Ce contenu ne peut pas être généré ici.",
     "widgetHintConsentRequired": "Activez l’IA Groq ci-dessous pour utiliser cette fonctionnalité.",
     "consentRequiredHint": "Activez d’abord l’IA Groq dans Paramètres → Préférences.",
@@ -33,7 +32,7 @@
     "unavailableTitleClient": "L’IA est en pause sur ce navigateur",
     "unavailableTitleEnv": "L’IA n’est pas disponible",
     "unavailableDescriptionConsent": "Votre historique d’écoute est déjà chargé. Activez l’IA Groq pour générer les insights, le chat et les synthèses — aucun nouvel import n’est nécessaire.",
-    "unavailableDescriptionClient": "Votre historique d’écoute est déjà chargé. Réactivez le bouton IA (menu Plus sur mobile, bas à droite sur bureau) pour utiliser cette fonctionnalité.",
+    "unavailableDescriptionClient": "Votre historique d’écoute est déjà chargé. Réactivez le bouton IA (menu du compte sur bureau, menu Plus sur mobile) pour utiliser cette fonctionnalité.",
     "unavailableDescriptionEnv": "L’IA est désactivée côté serveur : insights et chat ne peuvent pas être générés ici.",
     "unavailableEyebrow": "IA Groq",
     "unavailableAside": "Consentement · off"
@@ -801,7 +800,7 @@
     "groqConsentLabel": "Autoriser Groq à traiter mes données de streams pour les fonctionnalités IA",
     "groqConsentError": "Impossible de mettre à jour la préférence Groq. Réessayez.",
     "groqConsentSaving": "Enregistrement…",
-    "groqConsentBrowserToggleHint": "Une fois activé, vous pouvez mettre l’IA en pause sur ce navigateur via le bouton IA (en bas à droite sur bureau, menu Plus sur mobile) sans retirer ce consentement.",
+    "groqConsentBrowserToggleHint": "Une fois activé, vous pouvez mettre l’IA en pause sur ce navigateur via le bouton IA du menu du compte (bureau) ou du menu Plus (mobile) sans retirer ce consentement.",
     "publicProfileTitle": "Démo publique du tableau de bord",
     "publicProfileDescription": "Si activé, les visiteurs sans compte peuvent consulter vos analytics via le lien de démo publique. Vous pouvez désactiver à tout moment.",
     "publicProfileLabel": "Autoriser l’affichage de mon profil dans la démo publique",
@@ -826,6 +825,12 @@
     "heroTrust3Title": "Ce qui reste ou part",
     "sectionYourData": "Vos données",
     "sectionYourDataLead": "Importez votre historique, téléchargez des rapports ou exportez tout ce que nous stockons.",
+    "sectionSpotify": "Réservé Spotify",
+    "sectionSpotifyLead": "Outils de l’API Spotify en direct — aperçu de ce que Spotify renvoie aujourd’hui, et playground JSON brut.",
+    "spotifySnapshotBody": "Consultez votre profil Spotify, tops titres et artistes, et lectures récentes via l’API Web en direct.",
+    "spotifySnapshotCta": "Ouvrir Spotify snapshot",
+    "spotifyPlaygroundBody": "Inspectez les mêmes endpoints Spotify en JSON brut — utile pour les scopes et le debug.",
+    "spotifyPlaygroundCta": "Ouvrir le playground API",
     "sectionDanger": "Zone sensible",
     "sectionDangerLead": "Actions permanentes. Effacer les données garde votre connexion ; supprimer le compte tout efface.",
     "genreBannerHint": "Masquer le bandeau optionnel de classification des genres.",
@@ -3046,7 +3051,8 @@
     },
     "dashboardUserMenu": {
       "menuLabel": "Menu du compte",
-      "signIn": "Se connecter"
+      "signIn": "Se connecter",
+      "aiHint": "Contrôle les synthèses et widgets IA sur ce navigateur."
     },
     "notificationCenter": {
       "openLabel": "Ouvrir l’activité",

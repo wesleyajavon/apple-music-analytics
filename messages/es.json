@@ -21,10 +21,9 @@
   },
   "aiMasterToggle": {
     "label": "IA",
-    "dragHandleAriaLabel": "Mover el interruptor de IA",
     "ariaLabel": "Activar o desactivar las funciones de IA en este navegador",
     "lockedHint": "La IA está desactivada en el servidor (AI_MASTER_ENABLED=false). Este control no puede activarla.",
-    "widgetHint": "La IA está desactivada en este navegador. Actívala desde el menú Más (móvil) o el interruptor «IA» abajo a la derecha (escritorio).",
+    "widgetHint": "La IA está desactivada en este navegador. Actívala desde el menú de cuenta (escritorio) o el menú Más (móvil).",
     "widgetHintEnvLocked": "La IA está desactivada en el servidor. Este contenido no puede generarse aquí.",
     "widgetHintConsentRequired": "Activa la IA Groq abajo para usar esta función.",
     "consentRequiredHint": "Activa primero la IA Groq en Ajustes → Preferencias.",
@@ -33,7 +32,7 @@
     "unavailableTitleClient": "La IA está en pausa en este navegador",
     "unavailableTitleEnv": "La IA no está disponible",
     "unavailableDescriptionConsent": "Tu historial de escucha ya está cargado. Activa la IA Groq para generar insights, chat y resúmenes: no hace falta importar de nuevo.",
-    "unavailableDescriptionClient": "Tu historial de escucha ya está cargado. Vuelve a activar el interruptor IA (menú Más en móvil, abajo a la derecha en escritorio) para usar esta función.",
+    "unavailableDescriptionClient": "Tu historial de escucha ya está cargado. Vuelve a activar el interruptor IA (menú de cuenta en escritorio, menú Más en móvil) para usar esta función.",
     "unavailableDescriptionEnv": "La IA está desactivada en el servidor, así que no se pueden generar insights ni chat aquí.",
     "unavailableEyebrow": "IA Groq",
     "unavailableAside": "Consentimiento · off"
@@ -805,7 +804,7 @@
     "groqConsentLabel": "Permitir que Groq procese mis datos de streams para funciones de IA",
     "groqConsentError": "No se pudo actualizar la preferencia de privacidad de Groq. Inténtalo de nuevo.",
     "groqConsentSaving": "Guardando…",
-    "groqConsentBrowserToggleHint": "Una vez activada, puedes pausar la IA en este navegador con el botón IA (abajo a la derecha en escritorio, menú Plus en móvil) sin revocar este consentimiento.",
+    "groqConsentBrowserToggleHint": "Una vez activada, puedes pausar la IA en este navegador con el interruptor IA del menú de cuenta (escritorio) o del menú Más (móvil) sin revocar este consentimiento.",
     "publicProfileTitle": "Demo pública del panel",
     "publicProfileDescription": "Si está activado, los visitantes sin cuenta pueden ver tus analíticas mediante el enlace de demo pública. Puedes desactivarlo en cualquier momento.",
     "publicProfileLabel": "Permitir que mi perfil se muestre en la demo pública",
@@ -826,6 +825,12 @@
     },
     "sectionYourData": "Tus datos",
     "sectionYourDataLead": "Importa historial, descarga informes o exporta todo lo que guardamos.",
+    "sectionSpotify": "Solo usuarios de Spotify",
+    "sectionSpotifyLead": "Herramientas de la API de Spotify en vivo — instantánea de lo que Spotify devuelve hoy, y playground JSON en bruto.",
+    "spotifySnapshotBody": "Consulta tu perfil de Spotify, tops de temas y artistas, y reproducciones recientes desde la Web API en vivo.",
+    "spotifySnapshotCta": "Abrir Spotify snapshot",
+    "spotifyPlaygroundBody": "Inspecciona los mismos endpoints de Spotify en JSON bruto — útil para scopes y depuración.",
+    "spotifyPlaygroundCta": "Abrir playground API",
     "sectionDanger": "Zona sensible",
     "sectionDangerLead": "Acciones permanentes. Borrar datos mantiene tu sesión; eliminar la cuenta lo borra todo.",
     "genreBannerHint": "Ocultar el aviso opcional de clasificación de géneros.",
@@ -3046,7 +3051,8 @@
     },
     "dashboardUserMenu": {
       "menuLabel": "Menú de cuenta",
-      "signIn": "Iniciar sesión"
+      "signIn": "Iniciar sesión",
+      "aiHint": "Controla los resúmenes y widgets de IA en este navegador."
     },
     "notificationCenter": {
       "openLabel": "Abrir actividad",

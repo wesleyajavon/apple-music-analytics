@@ -21,10 +21,9 @@
   },
   "aiMasterToggle": {
     "label": "AI",
-    "dragHandleAriaLabel": "Move AI toggle",
     "ariaLabel": "Enable or disable AI features for this browser",
     "lockedHint": "AI is off server-side (AI_MASTER_ENABLED=false). This toggle cannot enable it.",
-    "widgetHint": "AI is turned off for this browser. Use the AI switch in the Plus menu (mobile) or bottom-right (desktop) to load this content.",
+    "widgetHint": "AI is turned off for this browser. Use the AI switch in the account menu (desktop) or Plus menu (mobile) to load this content.",
     "widgetHintEnvLocked": "AI is disabled on the server. This content cannot be generated here.",
     "widgetHintConsentRequired": "Enable Groq AI below to use this feature.",
     "consentRequiredHint": "Enable Groq AI in Settings → Preferences first.",
@@ -33,7 +32,7 @@
     "unavailableTitleClient": "AI is paused on this browser",
     "unavailableTitleEnv": "AI is unavailable",
     "unavailableDescriptionConsent": "Your listening history is already loaded. Enable Groq AI to generate insights, chat, and summaries — you do not need to import again.",
-    "unavailableDescriptionClient": "Your listening history is already loaded. Turn the AI switch back on (Plus menu on mobile, bottom-right on desktop) to use this feature.",
+    "unavailableDescriptionClient": "Your listening history is already loaded. Turn the AI switch back on (account menu on desktop, Plus menu on mobile) to use this feature.",
     "unavailableDescriptionEnv": "AI is disabled on this server, so insights and chat cannot be generated here.",
     "unavailableEyebrow": "Groq AI",
     "unavailableAside": "Consent · off"
@@ -729,6 +728,12 @@
     "sectionPreferencesLead": "Optional prompts, AI features, and Duet sharing — flip what you need.",
     "sectionYourData": "Your data",
     "sectionYourDataLead": "Bring streaming history in, download reports, or export everything we store.",
+    "sectionSpotify": "Spotify users only",
+    "sectionSpotifyLead": "Live Spotify API tools — snapshot of what Spotify returns today, and the raw JSON playground.",
+    "spotifySnapshotBody": "See your Spotify profile, top tracks and artists, and recent plays from the live Web API.",
+    "spotifySnapshotCta": "Open Spotify snapshot",
+    "spotifyPlaygroundBody": "Inspect the same Spotify endpoints as raw JSON — useful for scopes and debugging.",
+    "spotifyPlaygroundCta": "Open API playground",
     "sectionDanger": "Danger zone",
     "sectionDangerLead": "Permanent actions. Clearing data keeps your sign-in; deleting the account removes everything.",
     "genreBannerHint": "Hide the optional genre-classification banner on the dashboard.",
@@ -813,7 +818,7 @@
     "groqConsentLabel": "Allow Groq to process my streaming data for AI features",
     "groqConsentError": "Could not update Groq privacy preference. Please try again.",
     "groqConsentSaving": "Saving…",
-    "groqConsentBrowserToggleHint": "Once enabled, you can pause AI for this browser with the AI button (bottom-right on desktop, Plus menu on mobile) without revoking this consent.",
+    "groqConsentBrowserToggleHint": "Once enabled, you can pause AI for this browser with the AI switch in the account menu (desktop) or Plus menu (mobile) without revoking this consent.",
     "publicProfileTitle": "Public dashboard demo",
     "publicProfileDescription": "When enabled, visitors without an account can view your streaming analytics via the public demo link. You can turn this off anytime.",
     "publicProfileLabel": "Allow my profile to be shown in the public demo",
@@ -3044,7 +3049,8 @@
     },
     "dashboardUserMenu": {
       "menuLabel": "Account menu",
-      "signIn": "Sign in"
+      "signIn": "Sign in",
+      "aiHint": "Controls AI summaries and widgets in this browser."
     },
     "notificationCenter": {
       "openLabel": "Open activity",

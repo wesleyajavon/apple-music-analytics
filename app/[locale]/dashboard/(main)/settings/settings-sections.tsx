@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef, type ReactNode } from "react";
+import { useMemo, useRef, type ReactNode } from "react";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Download, FileJson, Upload } from "lucide-react";
+import { Code2, Download, FileJson, Radio, Upload } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { LiveStatusDot } from "@/lib/components/live-status-dot";
 import { UserAvatar } from "@/lib/components/user-avatar";
@@ -21,6 +22,8 @@ import {
 import { OverviewHeroFrame } from "@/lib/components/overview-hero";
 import { DUET_SHARE_SETTINGS_HASH } from "@/lib/constants/duet-settings";
 import { GROQ_AI_CONSENT_SETTINGS_HASH } from "@/lib/constants/groq-ai-settings";
+import { usePublicDemoViewer } from "@/lib/hooks/use-public-demo-viewer";
+import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
 import { DASHBOARD_ONBOARDING_REIMPORT_PATH } from "@/lib/utils/onboarding-route";
 import {
   SETTINGS_INPUT_CLASS,
@@ -31,7 +34,7 @@ import {
   SettingsToggleRow,
 } from "./settings-shared";
 
-export const SETTINGS_VIEWS = ["profile", "preferences", "data", "danger"] as const;
+export const SETTINGS_VIEWS = ["profile", "preferences", "data", "spotify", "danger"] as const;
 export type SettingsView = (typeof SETTINGS_VIEWS)[number];
 
 const SUBNAV_STICKY_TOP = "top-[calc(var(--dashboard-filter-height,4.5rem)+0.5rem)]";
@@ -147,6 +150,7 @@ export function SettingsViewNav({
     { id: "profile", label: t("sectionProfile") },
     { id: "preferences", label: t("sectionPreferences") },
     { id: "data", label: t("sectionYourData") },
+    { id: "spotify", label: t("sectionSpotify") },
     { id: "danger", label: t("sectionDanger") },
   ];
 
@@ -480,6 +484,55 @@ export function SettingsYourDataSection({
         </SettingsDataCard>
       </div>
     </section>
+  );
+}
+
+export function SettingsSpotifySection() {
+  const t = useTranslations("settings");
+  const tSidebar = useTranslations("sidebar");
+  const searchParams = useSearchParams();
+  const isPublicDemoViewer = usePublicDemoViewer(searchParams.get("userId"));
+  const withFilters = useMemo(
+    () => (href: string) => mergeDashboardSearchParams(href, searchParams),
+    [searchParams]
+  );
+
+  return (
+    <SettingsCanvasSection
+      titleId="settings-spotify-heading"
+      heading={t("sectionSpotify")}
+      lead={t("sectionSpotifyLead")}
+    >
+      <div>
+        <SettingsDataCard
+          icon={<Radio className="h-5 w-5" aria-hidden />}
+          title={tSidebar("items.spotifySnapshot")}
+          body={t("spotifySnapshotBody")}
+        >
+          <Link
+            href={withFilters("/dashboard/spotify-snapshot")}
+            className={`${DASHBOARD_BTN_OUTLINE} inline-flex w-full no-underline sm:w-auto`}
+          >
+            {t("spotifySnapshotCta")}
+          </Link>
+        </SettingsDataCard>
+
+        {isPublicDemoViewer ? null : (
+          <SettingsDataCard
+            icon={<Code2 className="h-5 w-5" aria-hidden />}
+            title={tSidebar("items.spotifyPlayground")}
+            body={t("spotifyPlaygroundBody")}
+          >
+            <Link
+              href={withFilters("/dashboard/spotify-playground")}
+              className={`${DASHBOARD_BTN_OUTLINE} inline-flex w-full no-underline sm:w-auto`}
+            >
+              {t("spotifyPlaygroundCta")}
+            </Link>
+          </SettingsDataCard>
+        )}
+      </div>
+    </SettingsCanvasSection>
   );
 }
 

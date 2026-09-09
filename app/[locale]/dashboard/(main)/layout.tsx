@@ -1,7 +1,6 @@
 import { redirect } from "@/i18n/navigation";
 import { getCurrentUserId } from "@/lib/auth/get-current-user-id";
 import { prisma } from "@/lib/prisma";
-import { AiMasterToggle } from "@/lib/components/ai-master-toggle";
 
 type Props = {
   children: React.ReactNode;
@@ -28,10 +27,5 @@ export default async function DashboardMainLayout({ children, params }: Props) {
     }
   }
 
-  return (
-    <>
-      {children}
-      <AiMasterToggle />
-    </>
-  );
+  return children;
 }

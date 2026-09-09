@@ -41,6 +41,7 @@ export const SETTINGS_MOBILE_GROUP_IDS = {
   account: "settings-mobile-account",
   appearance: "settings-mobile-appearance",
   data: "settings-mobile-data",
+  spotify: "settings-mobile-spotify",
   ai: "settings-mobile-ai",
   demo: "settings-mobile-demo",
   danger: "settings-mobile-danger",
@@ -313,7 +314,7 @@ export function SettingsMobileSignedOut() {
         </OverviewHeroFrame>
       </div>
       <SettingsMobileAppearanceGroup />
-      <SettingsMobileGroup id={SETTINGS_MOBILE_GROUP_IDS.data} title={t("mobile.groupDataPrivacy")}>
+      <SettingsMobileGroup id={SETTINGS_MOBILE_GROUP_IDS.spotify} title={t("sectionSpotify")}>
         <SettingsMobileSpotifyRows withFilters={withFilters} />
       </SettingsMobileGroup>
     </div>
@@ -518,7 +519,6 @@ export function SettingsMobileExperience(props: SettingsMobileExperienceProps) {
           <span className="min-w-0 truncate">{t("importExportsTitle")}</span>
           <ChevronIcon className="h-4 w-4 shrink-0 text-muted" />
         </Link>
-        <SettingsMobileSpotifyRows withFilters={props.withFilters} />
         <SettingsMobileExportRows
           exportError={props.exportError}
           exporting={props.exporting}
@@ -533,6 +533,10 @@ export function SettingsMobileExperience(props: SettingsMobileExperienceProps) {
         <div id={DUET_SHARE_SETTINGS_HASH} className="scroll-mt-24">
           <SettingsMobileDuetRows />
         </div>
+      </SettingsMobileGroup>
+
+      <SettingsMobileGroup id={SETTINGS_MOBILE_GROUP_IDS.spotify} title={t("sectionSpotify")}>
+        <SettingsMobileSpotifyRows withFilters={props.withFilters} />
       </SettingsMobileGroup>
 
       <SettingsMobileGroup id={SETTINGS_MOBILE_GROUP_IDS.ai} title={t("mobile.groupAi")}>

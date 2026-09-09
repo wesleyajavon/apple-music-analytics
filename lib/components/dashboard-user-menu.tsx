@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@/i18n/navigation";
+import { AiMasterToggleSwitch } from "@/lib/components/ai-master-toggle-switch";
 import {
   DASHBOARD_GLASS_FLOATING_PANE,
   DASHBOARD_LIST_ROW,
@@ -20,6 +21,7 @@ export function DashboardUserMenu() {
   const searchParams = useSearchParams();
   const t = useTranslations("components.dashboardUserMenu");
   const tSidebar = useTranslations("sidebar");
+  const tAi = useTranslations("aiMasterToggle");
 
   const [open, setOpen] = useState(false);
   const [authEmail, setAuthEmail] = useState<string | null>(null);
@@ -146,7 +148,7 @@ export function DashboardUserMenu() {
       {open ? (
         <div
           role="menu"
-          className={`absolute right-0 top-[calc(100%+0.375rem)] z-50 w-[min(15rem,calc(100vw-5rem))] overflow-hidden ${DASHBOARD_GLASS_FLOATING_PANE}`}
+          className={`absolute right-0 top-[calc(100%+0.375rem)] z-50 w-[min(16rem,calc(100vw-5rem))] overflow-hidden ${DASHBOARD_GLASS_FLOATING_PANE}`}
         >
           {accountDisplayName ? (
             <div className="border-b border-glass-hairline px-4 py-3">
@@ -158,6 +160,17 @@ export function DashboardUserMenu() {
               ) : null}
             </div>
           ) : null}
+          <div
+            className="flex items-center justify-between gap-3 border-b border-glass-hairline px-4 py-3"
+            role="none"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="min-w-0">
+              <p className="text-[13px] font-semibold text-foreground">{tAi("label")}</p>
+              <p className="text-[11px] leading-snug text-muted">{t("aiHint")}</p>
+            </div>
+            <AiMasterToggleSwitch showLabel={false} />
+          </div>
           <Link
             href={settingsHref}
             role="menuitem"

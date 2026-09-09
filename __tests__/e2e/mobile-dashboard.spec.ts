@@ -158,6 +158,7 @@ test.describe("Mobile dashboard UX", () => {
   });
 
   test("genres ranking shows a tappable first row and keeps dates", async ({ page }) => {
+    test.setTimeout(60_000);
     await page.goto(`/en/dashboard/genres${publicDemoQuery}`);
 
     await page.getByRole("button", { name: /period:/i }).click();
@@ -169,10 +170,12 @@ test.describe("Mobile dashboard UX", () => {
 
     const main = page.getByRole("main");
     await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 20_000 });
-    await expect(page.getByRole("tablist", { name: /genre sections/i })).toHaveCount(0);
+    await expect(page.getByRole("tablist", { name: /genre sections/i })).toBeVisible({ timeout: 20_000 });
+    const genreTabs = page.getByRole("tablist", { name: /genre sections/i }).getByRole("tab");
+    await expect(genreTabs).toHaveCount(4);
 
     const firstRow = main.getByRole("button", { name: /open mix details/i }).first();
-    await expect(firstRow).toBeVisible();
+    await expect(firstRow).toBeVisible({ timeout: 20_000 });
     await firstRow.click();
     await expect(page.getByRole("dialog")).toBeVisible();
     await expect(page).toHaveURL(/preset=30d/);
@@ -181,7 +184,7 @@ test.describe("Mobile dashboard UX", () => {
     await page.getByRole("button", { name: /close genre details/i }).click();
     await expect(page.getByRole("dialog")).toHaveCount(0);
 
-    await main.getByRole("link", { name: /genre trends/i }).click();
+    await page.getByRole("tablist", { name: /genre sections/i }).getByRole("tab", { name: /^trends$/i }).click();
     await expect(page).toHaveURL(/\/en\/dashboard\/genres\/trends/);
     await expect(page).toHaveURL(/preset=30d/);
     await expect(page).toHaveURL(/startDate=/);
@@ -190,11 +193,13 @@ test.describe("Mobile dashboard UX", () => {
   });
 
   test("genres ranking is usable in French", async ({ page }) => {
+    test.setTimeout(60_000);
     await page.goto(`/fr/dashboard/genres${publicDemoQuery}`);
 
     const main = page.getByRole("main");
     await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 20_000 });
-    await expect(page.getByRole("tablist", { name: /sections genres/i })).toHaveCount(0);
+    await expect(page.getByRole("tablist", { name: /sections genres/i })).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByRole("tablist", { name: /sections genres/i }).getByRole("tab")).toHaveCount(4);
 
     const firstRow = main.getByRole("button", { name: /voir le détail/i }).first();
     await expect(firstRow).toBeVisible({ timeout: 20_000 });

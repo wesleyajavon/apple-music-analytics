@@ -30,6 +30,7 @@ import { isGroqDailyQuotaError } from "@/lib/utils/groq-quota-message";
 import { EmptyState, useEmptyStatePresets } from "@/lib/components/empty-state";
 import { AiUnavailableCta } from "@/lib/components/ai-unavailable-cta";
 import { GenreAccuracyChooser } from "@/lib/components/palette/genre-accuracy-chooser";
+import { GenresSectionSwitcher } from "@/lib/components/genres-section-switcher";
 import {
   GenreTrendsMobileEmpty,
   GenreTrendsMobileError,
@@ -624,6 +625,7 @@ function TrendsContent() {
             badgeLabel={badgeLabel}
             panel={<GenreTrendsHeroPanel period={period} selectedCount={selectedGenres.length} />}
           />
+          <GenresSectionSwitcher idPrefix="genre-trends-desktop" activeSection="trends" />
           <ErrorState
             variant="startup"
             error={error}
@@ -654,6 +656,7 @@ function TrendsContent() {
             badgeLabel={badgeLabel}
             panel={<GenreTrendsHeroPanel period={period} selectedCount={selectedGenres.length} />}
           />
+          <GenresSectionSwitcher idPrefix="genre-trends-desktop-empty" activeSection="trends" />
           <EmptyState
             variant="startup"
             {...emptyStatePresets.changeDates(pathname)}
@@ -711,6 +714,7 @@ function TrendsContent() {
           badgeLabel={badgeLabel}
           panel={heroPanel}
         />
+        <GenresSectionSwitcher idPrefix="genre-trends-desktop" activeSection="trends" />
         {!isPublicDemoViewer ? <GenreAccuracyChooser viewerUserId={userId} className="max-w-3xl" /> : null}
 
         <div className="space-y-12">
@@ -1088,6 +1092,7 @@ function GenreTrendsFallback() {
           badgeLabel={badgeLabel}
           panel={<GenreTrendsHeroPanel period={period} selectedCount={0} />}
         />
+        <GenresSectionSwitcher idPrefix="genre-trends-desktop-fallback" activeSection="trends" />
         <GenreTrendsSkeleton />
       </div>
     </>

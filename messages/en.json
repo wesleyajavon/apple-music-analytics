@@ -1746,9 +1746,10 @@
     "viewSwitcher": {
       "navLabel": "Genre sections",
       "views": {
-        "spotlight": "Genre cards",
+        "spotlight": "Top genres",
         "distribution": "Breakdown",
-        "ranking": "Full ranking"
+        "ranking": "Full ranking",
+        "trends": "Trends"
       }
     },
     "rankingSearchPlaceholder": "Search a genre…",
@@ -1764,6 +1765,7 @@
       "emptyTitle": "No genres yet",
       "emptyLead": "Import history to see your mix.",
       "emptyCta": "Import history",
+      "emptyDemoCta": "Explore the demo",
       "errorLead": "Couldn't load this ranking.",
       "listenCount": "{count} streams",
       "shareLabel": "{share} of streams",

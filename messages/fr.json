@@ -2506,7 +2506,7 @@
   },
   "musical-profile": {
     "title": "Profil musical",
-    "subtitle": "Un replay premium de votre identité musicale, enrichi par l'IA.",
+    "subtitle": "Commencez ici — une lecture de qui vous avez streamé.",
     "heroTitle": "Retrouvez-vous dans la musique que vous aimez.",
     "heroSignature": "Signature sonore",
     "heroSignatureHint": "Ancrée dans {genre}",
@@ -2544,6 +2544,12 @@
     "identityTitle": "Votre identité soundprint",
     "identitySubtitle": "Vos vrais artistes, genres et titres — pas de poésie générique. Ce que vous lisez ici, c'est ce que vous streamez vraiment.",
     "identityWelcome": "Import terminé — voici votre première lecture.",
+    "signature": {
+      "eyebrow": "Signature",
+      "title": "Les artistes qui définissent cette période",
+      "description": "Tuiles portrait des artistes qui ancrent cette plage.",
+      "seeAll": "Voir tous les artistes"
+    },
     "features": {
       "badge": "Et maintenant",
       "title": "Trois façons d'explorer votre bibliothèque",

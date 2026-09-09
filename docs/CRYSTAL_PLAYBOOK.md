@@ -24,7 +24,7 @@ Le chrome (sidebar + header) se fait **avant** Overview, sinon chaque section se
 - Tops + pages suivantes : [`replay-ranking-grid.tsx`](../lib/components/replay-ranking-grid.tsx) (grille partagée, `grid-cols-2` + `lg:grid-cols-4`)
 - Charts Overview : [`overview-trends-chart.tsx`](../lib/components/charts/overview-trends-chart.tsx) + [`crystal-chart.ts`](../lib/constants/crystal-chart.ts)
 
-Le plus gros écart **restant** n’est plus Overview. **7a (`/artists`) est livrée** (masthead canvas + tuiles Replay + chart/table un-card). Restant : Tracks / Genres (7b–7c : encore `TRACKS_HERO_SHELL` / `GENRE_SPOTLIGHT_CARD_SHELL` / `rounded-[2rem]`).
+Le plus gros écart **restant** n’est plus Overview ni artists / tracks / genres. **7a–7c livrées.** Restant : musical-profile (7d), `*/trends` + timeline/heatmap (7e), Ask / Duet (7f).
 
 ---
 
@@ -37,7 +37,7 @@ Le plus gros écart **restant** n’est plus Overview. **7a (`/artists`) est liv
 | Lire / ajuster ce playbook | Agent (ou rien) | Document uniquement |
 | Étapes 0–5 (desktop Crystal) | — | **Livrées.** Ne pas rejouer. |
 | Étape 6 (Overview mobile) | — | **Livrée.** Dual tree `lg:hidden` ; mêmes onglets que le desktop |
-| Étape 7a–7c (artists / tracks / genres) | **Plan**, une session = un prompt **complet** | Pas les one-liners. 7d–7f : étendre avant de lancer |
+| Étape 7a–7d (artists / tracks / genres / musical-profile) | **Plan**, une session = un prompt **complet** | Pas les one-liners. 7e–7f : étendre avant de lancer |
 
 Règle d’or : **une conversation Plan = un prompt numéroté**. Après implémentation : EN + FR, light + dark, desktop `lg+` **et** mobile ~390×844.
 
@@ -53,7 +53,7 @@ Crystal **desktop Overview est livré**. Mobile = arbre `lg:hidden` dédié. Ne 
 4. Valide le plan, implémente, vérifie au navigateur, commit.
 5. Passe au numéro suivant.
 
-Étapes **7a–7c** : coller le **bloc complet** (sections Étape 7a / 7b / 7c), pas la cellule du tableau d’ordre. Le tableau n’est qu’un index.
+Étapes **7a–7d** : coller le **bloc complet** (sections Étape 7a / 7b / 7c / 7d), pas la cellule du tableau d’ordre. Le tableau n’est qu’un index.
 
 Hors scope de chaque prompt sauf mention contraire : landing marketing, e-mail, cookies, auth pages, onboarding wizard, APIs, Prisma.
 
@@ -423,14 +423,14 @@ Les deux pages ont **le même modèle d’information** : 4 items dans le sélec
 
 **7a livrée :** 3 onglets locaux (spotlight / leaderboard / ranking) + CTA trends ghost dans le masthead. **Manque :** le 4ᵉ item `trends` dans le switcher (et le même switcher sur `/artists/trends`). 7b aligne `/artists` sur ce contrat **et** livre `/tracks` dessus.
 
-Ordre (index). **7a–7c = blocs complets plus bas.** 7d–7f = encore trop courts : les étendre avant ces sessions.
+Ordre (index). **7a–7d = blocs complets plus bas.** 7e–7f = encore trop courts : les étendre avant ces sessions.
 
 | # | Route | Session |
 | --- | --- | --- |
 | **7a** | `/dashboard/artists` | **Faite** (visuel). Recette : masthead + strip + `ReplayRankingGrid` + un-card chart/table. Dual tree. 4ᵉ onglet trends = 7b. |
 | **7b** | `/dashboard/tracks` | Même **4 onglets** que la cible artists. 1er = tuiles Top tracks (pas le bar chart). + parité trends sur `/artists`. |
 | **7c** | `/dashboard/genres` | Même contrat 4 onglets (top / chart / ranking / lien trends). `GENRE_SPOTLIGHT_CARD_SHELL` → `ReplayRankingGrid` `kind: "fill"`. |
-| 7d | `/dashboard/musical-profile` | Matière Crystal, **garder** arbre mobile. Hub à onglets, pas un Replay story. Média = tuiles ; hub chrome = verre. |
+| **7d** | `/dashboard/musical-profile` | **Hub empilé** (pas de `view=`). Masthead canvas + strip + tuiles Replay (top 4) + list rows destinations. Dual tree. |
 | 7e | Timeline, heatmap, `*/trends` | Chrome de page sur canvas (plus de hero `rounded-[2rem]`). Plot : `OverviewTrendsChart` / `crystal-chart.ts` s’il reste du `DASHBOARD_CHART_THEME`. Pas de blur sur le SVG. |
 | 7f | Ask / Duet | Chrome seulement. `TopLibraryCard` sur `duet-friend-music-desktop.tsx` hors scope sauf session friend-music. |
 
@@ -567,7 +567,45 @@ Livre : plus de GENRE_SPOTLIGHT_CARD_SHELL ni hero always-dark, 4 onglets (top /
 
 ---
 
-7d–7f : ne pas coller les one-liners du tableau. Avant chaque session, écrire un bloc du calibre 7a (fichiers, aujourd’hui, compose X, interdit Y, dual tree, e2e).
+### Étape 7d — `/dashboard/musical-profile` (après 7a–7c)
+
+Hub d’accueil dashboard. **Pas** de `view=` / switcher (validé) : rester empilé, un écran. **Pas** un récit Replay. Dual tree conservé.
+
+```text
+[Préambule]
+
+Étape 7d — Crystal /dashboard/musical-profile. Hub empilé (PAS de view= / PAS de tablist). Composer OverviewHeroFrame + DASHBOARD_METRIC_STRIP + ReplayRankingGrid + DASHBOARD_LIST_ROW. Ne pas réécrire la tuile. Ne pas toucher Ask / Duet / timeline / heatmap / onboarding / MusicalProfilePeriodBadge sur les autres pages.
+
+Aujourd’hui (à remplacer) :
+- Desktop : hero rounded-[2rem] always-dark + ParallaxHero + grain/orbes/sweep. Period badge dans le hero (déjà dans le header). Cockpit : avatar well + KPI mini-cartes + rythme cartes imbriquées. CTA blanc lift « Open Your Music » ET 3 FeaturePillarCard (rounded-3xl + shadow-card + hover lift). Identité IA = 2e mega-carte always-dark (carte dans la carte).
+- Mobile : musical-profile-mobile.tsx — bleed bg-gray-950 cinématique, h1 = nom d’artiste, rail KPI rounded-3xl dark, DestinationRow cartes, quote dans un well dark. e2e : h1 + liens Your Music / Soundprint chat / Duet. PAS de tablist — ne pas en ajouter.
+
+Fichiers : app/[locale]/dashboard/(main)/musical-profile/page.tsx, lib/components/musical-profile-mobile.tsx. Nouveau : lib/components/musical-profile-chrome.tsx (masthead, strip, destinations, identité) + lib/components/musical-profile-spotlight.tsx si le mapping Replay encombre. Réutiliser SANS copier le JSX tuile : replay-ranking-grid.tsx, artists-spotlight.tsx (toArtistReplayItems), overview-hero.tsx, dashboard-ui.tsx, overview-feature-promos.tsx (pattern list row). e2e : __tests__/e2e/mobile-dashboard.spec.ts. Ne PAS supprimer musical-profile-cinematic.tsx (onboarding). HORS SCOPE : APIs / hooks / query params (startDate, endDate, userId) ; 7e–7f.
+
+IA — garder le hub empilé, même ordre desktop ET mobile : masthead → metric strip → tuiles Replay top 4 → destinations list rows → citation IA. Un écran, pas un panneau à la fois. Ne pas inventer un contrat rankings 4 onglets.
+
+Desktop lg+ :
+- Masthead : OverviewHeroFrame, h1 = musical-profile.title, subtitle allégé (plus « premium replay »). Light ET dark. Plus de ParallaxHero / cinematic / wordmark / period badge / CTA lift masthead.
+- Strip : DASHBOARD_METRIC_STRIP (streams / temps / artistes / titres + peak day / hour). Scroll-x sous lg. PAS de mini-cartes rythme.
+- Spotlight : ReplayRankingSection + ReplayRankingGrid jusqu’à 4 artistes (kind: "artist"), 1 page, PAS de pager. Loading = ReplayRankingSkeleton. See all ghost → /dashboard/artists (dates / userId). TOP_LIMIT = 6 reste pour l’input IA ; slice(0, 4) pour l’affichage.
+- Destinations : DASHBOARD_LIST_ROW + hairline (Your Music, Chat, Duet). Plus de FeaturePillarCard / hover lift.
+- Identité : citation en typo canvas. Quota / backfill / AiUnavailableCta (tone default). Plus de rounded-3xl dark.
+- Empty / error / loading : même masthead sans-carte.
+- Retirer SoundprintBrandDividerSection.
+
+Mobile < lg (musical-profile-mobile.tsx, dual tree — ne pas fusionner avec sm:) :
+- Même ordre de sections. Masthead compact. Plus de cinematic bleed / period badge / h1 = nom d’artiste.
+- Strip scroll-x. Spotlight Replay 2×2. Destinations = list rows (aria-label = titre pour e2e Your Music / Chat / Duet). Quote canvas.
+- Empty / error : OverviewHeroFrame compact + CTAs (pas DashboardMobileImportEmpty cinématique).
+
+Contraintes : 44px, EN+FR (+ ES copy), demo ?userId=, frost reduced-transparency. Ne pas cloner le JSX tuile. Ne pas tuer le dual tree. Ne pas introduire view=. Gemini modify_frontend 1 surface si tu t’en sers.
+
+Livre : plus de hero always-dark ni FeaturePillarCard ; hub empilé Crystal ; light/dark EN/FR ~390×844 + lg+ ; e2e hub (h1 + 3 liens, tablist count 0).
+```
+
+---
+
+7e–7f : ne pas coller les one-liners du tableau. Avant chaque session, écrire un bloc du calibre 7a (fichiers, aujourd’hui, compose X, interdit Y, dual tree, e2e).
 
 ---
 
@@ -646,4 +684,4 @@ Desktop `lg+` **et** mobile ~390×844, light et dark, EN et FR — par page, apr
 - `lib/components/spotlight-artists-featured-list.tsx` — **fait** étape 4
 - `lib/components/charts/overview-trends-chart.tsx` — **fait** étape 5
 - `lib/components/top-three-artists-cards.tsx` — legacy `CARD_SHELL` ; **7a** l’a débranché de `/artists`
-- `lib/components/artists-mobile.tsx` / `tracks-mobile.tsx` / `genres-mobile.tsx` — dual tree jusqu’à 7a–7c
+- [`lib/components/artists-mobile.tsx`](../lib/components/artists-mobile.tsx) / `tracks-mobile.tsx` / `genres-mobile.tsx` / `musical-profile-mobile.tsx` — dual tree Crystal 7a–7d

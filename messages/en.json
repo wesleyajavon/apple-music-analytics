@@ -2504,7 +2504,7 @@
   },
   "musical-profile": {
     "title": "Musical Profile",
-    "subtitle": "A premium, AI-assisted replay of your streaming identity.",
+    "subtitle": "Start here — a read on who you’ve been streaming.",
     "heroTitle": "See yourself through the music you love.",
     "heroSignature": "Signature sound",
     "heroSignatureHint": "Anchored in {genre}",
@@ -2542,6 +2542,12 @@
     "identityTitle": "Your soundprint identity",
     "identitySubtitle": "Your real top artists, genres, and tracks — not random poetry. What you read here is what you actually stream.",
     "identityWelcome": "Import complete — here's your first read.",
+    "signature": {
+      "eyebrow": "Signature",
+      "title": "Artists who define this period",
+      "description": "Portrait tiles for the artists that anchor this range.",
+      "seeAll": "See all artists"
+    },
     "features": {
       "badge": "What's next",
       "title": "Three ways to explore your library",
@@ -2589,7 +2595,7 @@
     "metrics": {
       "totalListens": "Streams",
       "totalListensHint": "streams in this profile",
-      "listeningTime": "streaming time",
+      "listeningTime": "Streaming time",
       "listeningTimeHint": "Estimated from track durations",
       "uniqueArtists": "Artists",
       "uniqueArtistsHint": "Distinct artists explored",

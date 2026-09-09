@@ -142,6 +142,7 @@ test.describe("Mobile dashboard UX", () => {
 
     const main = page.getByRole("main");
     await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 20_000 });
+    await expect(main.getByRole("tablist")).toHaveCount(0);
     await expect(main.getByRole("link", { name: /^your music$/i })).toBeVisible();
     await expect(main.getByRole("link", { name: /soundprint chat/i })).toBeVisible();
     await expect(main.getByRole("link", { name: /^duet$/i })).toBeVisible();
@@ -152,6 +153,7 @@ test.describe("Mobile dashboard UX", () => {
 
     const main = page.getByRole("main");
     await expect(main.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 20_000 });
+    await expect(main.getByRole("tablist")).toHaveCount(0);
     await expect(main.getByRole("link", { name: /^your music$/i })).toBeVisible();
     await expect(main.getByRole("link", { name: /soundprint chat/i })).toBeVisible();
     await expect(main.getByRole("link", { name: /^duet$/i })).toBeVisible();

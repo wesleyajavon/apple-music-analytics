@@ -11,7 +11,6 @@ import { GenreBackfillResultNotifier } from "@/lib/components/genre-backfill-res
 import { GenreGroqClassificationNudgeNotifier } from "@/lib/components/genre-groq-classification-nudge-notifier";
 import { GenreBackfillJobProvider } from "@/lib/context/genre-backfill-job-context";
 import { NotificationCenterProvider } from "@/lib/context/notification-center-context";
-import { ScrollProgressBar } from "@/lib/components/overview-bis";
 import { DashboardMobileBottomNav } from "@/lib/components/dashboard-mobile-bottom-nav";
 
 export function DashboardScrollWrapper({ children }: { children: React.ReactNode }) {
@@ -86,7 +85,6 @@ export function DashboardScrollWrapper({ children }: { children: React.ReactNode
 
   return (
     <div className="dashboard-shell flex min-h-screen" style={dashboardStyle}>
-        <ScrollProgressBar />
         <Sidebar />
         <NotificationCenterProvider>
         <GenreBackfillJobProvider>

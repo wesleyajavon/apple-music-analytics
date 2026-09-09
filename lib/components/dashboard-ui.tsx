@@ -5,7 +5,7 @@ import { Loader2 } from "lucide-react";
 
 /**
  * Legacy Crystal: cinematic hero card (glow, rounded-[2rem], ring).
- * Forbidden on Overview Crystal. Keep for onboarding / musical-profile / other pages.
+ * Forbidden on Overview Crystal. Keep for onboarding and remaining non-Crystal pages.
  */
 export const DASHBOARD_CINEMATIC_HERO_SHELL =
   "relative overflow-hidden rounded-[2rem] border border-accent-violet/30 bg-gray-950 text-white shadow-2xl shadow-accent-violet/25 ring-1 ring-accent-violet/15";

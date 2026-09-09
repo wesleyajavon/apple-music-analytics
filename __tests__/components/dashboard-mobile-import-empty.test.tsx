@@ -22,7 +22,7 @@ vi.mock("@/i18n/navigation", () => ({
 }));
 
 describe("DashboardMobileImportEmpty", () => {
-  it("fills the viewport and shows import, demo, and unlock preview", () => {
+  it("fills the viewport and shows import and demo CTAs", () => {
     render(
       <PublicDemoProvider publicProfileUserId={null}>
         <DashboardMobileImportEmpty
@@ -37,6 +37,7 @@ describe("DashboardMobileImportEmpty", () => {
 
     const heading = screen.getByRole("heading", { name: "Import your streams" });
     expect(heading).toBeInTheDocument();
+    expect(screen.getByText("Your music")).toBeInTheDocument();
     expect(screen.getByText("No history yet.")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Import history" })).toHaveAttribute(
       "href",
@@ -46,9 +47,6 @@ describe("DashboardMobileImportEmpty", () => {
       "href",
       "/dashboard/demo",
     );
-    expect(screen.getByText("components.emptyState.mobileUnlock.hours")).toBeInTheDocument();
-    expect(screen.getByText("components.emptyState.mobileUnlock.catalog")).toBeInTheDocument();
-    expect(screen.getByText("components.emptyState.mobileUnlock.taste")).toBeInTheDocument();
 
     const shell = heading.closest("section")?.parentElement;
     expect(shell?.className).toContain("min-h-[calc(100dvh-");

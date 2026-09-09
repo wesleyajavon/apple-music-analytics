@@ -43,8 +43,27 @@ vi.mock("@/lib/hooks/use-listen-date-range", () => ({
   }),
 }));
 
-vi.mock("@/lib/components/dashboard-ui", () => ({
-  DashboardCinematicHeroBg: () => null,
+vi.mock("@/lib/components/dashboard-ui", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/components/dashboard-ui")>();
+  return {
+    ...actual,
+    DashboardCinematicHeroBg: () => null,
+  };
+});
+
+vi.mock("@/lib/components/overview-hero", () => ({
+  OverviewHeroFrame: ({
+    title,
+    children,
+  }: {
+    title: string;
+    children?: React.ReactNode;
+  }) => (
+    <div>
+      <h1>{title}</h1>
+      {children}
+    </div>
+  ),
 }));
 
 vi.mock("@/lib/components/musical-profile-period-badge", () => ({

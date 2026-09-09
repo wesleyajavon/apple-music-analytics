@@ -12,7 +12,7 @@ type GroqGenreBackfillCtaProps = {
 };
 
 const DEFAULT_BUTTON_CLASS =
-  "group relative inline-flex min-h-[42px] items-center justify-center overflow-hidden rounded-xl border border-white/20 bg-brand-gradient px-5 py-2.5 text-xs font-semibold text-white shadow-brand-glow transition-all duration-300 hover:-translate-y-0.5 hover:opacity-[0.98] hover:shadow-card-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/45 disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-60";
+  "group relative inline-flex min-h-[42px] items-center justify-center overflow-hidden rounded-xl border border-white/20 bg-brand-gradient px-5 py-2.5 text-xs font-semibold text-white shadow-brand-glow transition-opacity duration-300 hover:opacity-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/45 disabled:cursor-not-allowed disabled:opacity-60";
 
 export function GroqGenreBackfillCta({
   viewerUserId,

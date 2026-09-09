@@ -21,10 +21,10 @@ const PALETTE_CARD_CLASS =
   "flex h-full flex-col rounded-2xl border border-slate-200/80 bg-white/88 p-4 shadow-sm ring-1 ring-slate-900/[0.03] dark:border-white/[0.06] dark:bg-[#0f111a]";
 
 const GROQ_BUTTON_CLASS =
-  "group mt-auto inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border border-white/20 bg-brand-gradient px-4 py-2.5 text-sm font-semibold text-white shadow-brand-glow transition-all duration-300 hover:-translate-y-0.5 hover:opacity-[0.98] hover:shadow-card-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/50 disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-60";
+  "group mt-auto inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border border-white/20 bg-brand-gradient px-4 py-2.5 text-sm font-semibold text-white shadow-brand-glow transition-opacity duration-300 hover:opacity-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/50 disabled:cursor-not-allowed disabled:opacity-60";
 
 const PALETTE_BUTTON_CLASS =
-  "mt-auto inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border border-slate-200/90 bg-slate-50/90 px-4 py-2.5 text-sm font-semibold text-slate-800 transition-all hover:-translate-y-0.5 hover:border-violet-300/45 hover:bg-white hover:text-violet-950 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-100 dark:hover:border-violet-400/30 dark:hover:bg-white/[0.08]";
+  "mt-auto inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border border-slate-200/90 bg-slate-50/90 px-4 py-2.5 text-sm font-semibold text-slate-800 transition-colors hover:border-violet-300/45 hover:bg-white hover:text-violet-950 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-100 dark:hover:border-violet-400/30 dark:hover:bg-white/[0.08]";
 
 function ChooserBackground() {
   return (

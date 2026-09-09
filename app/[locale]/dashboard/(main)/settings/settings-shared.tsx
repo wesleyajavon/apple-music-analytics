@@ -2,13 +2,17 @@
 
 import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
-import { DASHBOARD_SPOTLIGHT_INNER_WELL, DASHBOARD_SPOTLIGHT_MUTED } from "@/lib/constants/dashboard-spotlight";
+import {
+  DASHBOARD_LIST_ROW,
+  DASHBOARD_LIST_SEPARATOR,
+  DASHBOARD_SECTION_TITLE,
+} from "@/lib/components/dashboard-ui";
 
 export const SETTINGS_INPUT_CLASS =
-  "mt-2 w-full rounded-xl border border-slate-200/90 bg-white px-3 py-2.5 text-base text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-400/15 sm:text-sm dark:border-white/10 dark:bg-black/30 dark:text-white dark:placeholder:text-slate-500";
+  "mt-2 w-full rounded-xl border border-glass-hairline bg-surface-raised px-3 py-2.5 text-base text-foreground placeholder:text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:text-sm";
 
 export const SETTINGS_PRIMARY_SAVE_CLASS =
-  "inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-2xl bg-slate-950 px-5 text-sm font-semibold text-white shadow-xl shadow-slate-950/20 transition hover:-translate-y-0.5 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 dark:bg-white dark:text-slate-950 dark:shadow-black/25 dark:hover:bg-slate-100 sm:w-auto";
+  "inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-2xl bg-foreground px-5 text-sm font-semibold text-background transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto";
 
 export function SettingsSwitch({
   id,
@@ -35,9 +39,9 @@ export function SettingsSwitch({
       aria-label={ariaLabel}
       disabled={disabled}
       onClick={() => !disabled && onChange(!checked)}
-      className={`relative inline-flex shrink-0 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950 ${
+      className={`relative inline-flex shrink-0 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
         isTouch ? "h-11 w-16 items-center" : "h-7 w-12"
-      } ${checked ? "bg-accent-emerald" : isTouch ? "bg-slate-300 dark:bg-white/20" : "bg-white/20"} ${
+      } ${checked ? "bg-accent-emerald" : "bg-black/15 dark:bg-white/20"} ${
         disabled ? "cursor-not-allowed opacity-50" : ""
       }`}
     >
@@ -66,20 +70,16 @@ export function SettingsSectionHeader({
   children?: ReactNode;
 }) {
   const titleClass =
-    tone === "danger"
-      ? "text-red-950 dark:text-red-200"
-      : "text-slate-900 dark:text-white";
+    tone === "danger" ? "text-red-700 dark:text-red-300" : "text-foreground";
   const leadClass =
-    tone === "danger"
-      ? "text-red-900/85 dark:text-red-200/85"
-      : DASHBOARD_SPOTLIGHT_MUTED;
+    tone === "danger" ? "text-red-800/80 dark:text-red-200/80" : "text-muted";
 
   return (
-    <header className="mb-5">
-      <h2 id={id} className={`text-xl font-semibold tracking-[-0.03em] ${titleClass}`}>
+    <header className="mb-5 border-b border-glass-hairline pb-4">
+      <h2 id={id} className={`${DASHBOARD_SECTION_TITLE} ${titleClass}`}>
         {title}
       </h2>
-      <p className={`mt-1.5 max-w-3xl text-sm leading-relaxed ${leadClass}`}>{lead}</p>
+      <p className={`mt-2 max-w-3xl text-[13px] leading-6 ${leadClass}`}>{lead}</p>
       {children}
     </header>
   );
@@ -107,15 +107,13 @@ export function SettingsToggleRow({
   id?: string;
 }) {
   return (
-    <div className="flex min-h-[60px] items-center justify-between gap-4 rounded-2xl border border-slate-200/80 bg-slate-50/80 px-4 py-3.5 dark:border-white/10 dark:bg-black/20">
+    <div className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_SEPARATOR} justify-between gap-4`}>
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-medium text-slate-900 dark:text-white">{title}</p>
-        {hint ? <p className={`mt-1 text-xs leading-relaxed ${DASHBOARD_SPOTLIGHT_MUTED}`}>{hint}</p> : null}
+        <p className="text-sm font-medium text-foreground">{title}</p>
+        {hint ? <p className="mt-1 text-[13px] leading-relaxed text-muted">{hint}</p> : null}
       </div>
       <div className="flex shrink-0 items-center gap-2">
-        {saving && savingLabel ? (
-          <span className={`text-xs ${DASHBOARD_SPOTLIGHT_MUTED}`}>{savingLabel}</span>
-        ) : null}
+        {saving && savingLabel ? <span className="text-xs text-muted">{savingLabel}</span> : null}
         <SettingsSwitch id={id} aria-label={ariaLabel} checked={checked} disabled={disabled} onChange={onChange} />
       </div>
     </div>
@@ -134,17 +132,17 @@ export function SettingsDataCard({
   children: ReactNode;
 }) {
   return (
-    <article className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 shadow-lg shadow-slate-900/[0.04] dark:border-white/10 dark:bg-slate-950 sm:p-6">
-      <div className="flex gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200/80 bg-slate-50 dark:border-white/10 dark:bg-white/10">
+    <article className={`${DASHBOARD_LIST_SEPARATOR} py-4`}>
+      <div className={`${DASHBOARD_LIST_ROW} items-start`}>
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center text-muted" aria-hidden>
           {icon}
         </span>
         <div className="min-w-0 flex-1">
-          <h3 className="text-base font-semibold text-slate-900 dark:text-white">{title}</h3>
-          <p className={`mt-1.5 text-sm leading-relaxed ${DASHBOARD_SPOTLIGHT_MUTED}`}>{body}</p>
+          <h3 className="text-base font-semibold text-foreground">{title}</h3>
+          <p className="mt-1.5 text-[13px] leading-relaxed text-muted">{body}</p>
         </div>
       </div>
-      <div className="mt-5">{children}</div>
+      <div className="mt-4">{children}</div>
     </article>
   );
 }
@@ -163,8 +161,8 @@ export function SettingsSubsection({
   return (
     <div className={`space-y-3 ${className}`}>
       <div>
-        <h3 className="text-sm font-semibold text-slate-900 dark:text-white">{title}</h3>
-        {hint ? <p className={`mt-1 text-xs leading-relaxed ${DASHBOARD_SPOTLIGHT_MUTED}`}>{hint}</p> : null}
+        <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+        {hint ? <p className="mt-1 text-[13px] leading-relaxed text-muted">{hint}</p> : null}
       </div>
       {children}
     </div>
@@ -189,26 +187,24 @@ export function DangerPhraseFields({
 
   if (phraseLoadError) {
     return (
-      <p className="text-sm font-medium text-red-800 dark:text-red-300" role="alert">
+      <p className="text-sm font-medium text-red-700 dark:text-red-300" role="alert">
         {phraseLoadError}
       </p>
     );
   }
 
   if (!expectedPhrase) {
-    return <p className={DASHBOARD_SPOTLIGHT_MUTED}>{tCommon("pleaseWait")}</p>;
+    return <p className="text-sm text-muted">{tCommon("pleaseWait")}</p>;
   }
 
   return (
     <div className="space-y-3">
-      <p className="text-sm text-slate-800 dark:text-slate-200">{t("phraseInstruction")}</p>
-      <div
-        className={`${DASHBOARD_SPOTLIGHT_INNER_WELL} font-mono text-base font-semibold tracking-wide text-slate-900 dark:text-white`}
-      >
+      <p className="text-sm text-foreground">{t("phraseInstruction")}</p>
+      <div className="border-y border-glass-hairline py-3 font-mono text-base font-semibold tracking-wide text-foreground">
         {expectedPhrase}
       </div>
       <div>
-        <label className="text-sm font-medium text-slate-900 dark:text-white" htmlFor={inputId}>
+        <label className="text-sm font-medium text-foreground" htmlFor={inputId}>
           {t("phraseLabel")}
         </label>
         <input
@@ -222,7 +218,7 @@ export function DangerPhraseFields({
           placeholder={t("phrasePlaceholder")}
           className={`${SETTINGS_INPUT_CLASS} font-mono`}
         />
-        <p className={`mt-2 text-xs ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("phraseHint")}</p>
+        <p className="mt-2 text-xs text-muted">{t("phraseHint")}</p>
       </div>
     </div>
   );

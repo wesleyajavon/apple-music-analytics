@@ -16,6 +16,10 @@ import {
   AskSoundprintComposer,
   AskSoundprintMark,
 } from "@/lib/components/ask-soundprint-chat";
+import {
+  DASHBOARD_LIST_ROW,
+  DASHBOARD_LIST_SEPARATOR,
+} from "@/lib/components/dashboard-ui";
 import { InteractiveAiGenreBackfillNotice } from "@/lib/components/interactive-ai-genre-backfill-notice";
 import { MobileBottomSheet } from "@/lib/components/mobile-bottom-sheet";
 import { DASHBOARD_BOTTOM_NAV_OFFSET_VAR } from "@/lib/constants/dashboard-chrome";
@@ -45,22 +49,18 @@ export function AskSoundprintPresetRow({
       disabled={disabled}
       onClick={onSelect}
       aria-label={ariaLabel}
-      className="flex min-h-11 w-full items-center gap-3 rounded-2xl border border-slate-200/90 bg-white px-4 py-3 text-left shadow-sm transition active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/[0.04] dark:text-white"
+      className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_SEPARATOR} w-full text-foreground transition-colors hover:bg-black/[0.04] disabled:cursor-not-allowed disabled:opacity-60 dark:hover:bg-white/[0.06]`}
     >
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-xs font-medium text-violet-700 dark:text-violet-200">
-          {label}
-        </span>
-        <span className="mt-0.5 block text-sm font-medium leading-5 text-slate-900 dark:text-white">
+        <span className="block truncate text-[13px] font-medium text-muted">{label}</span>
+        <span className="mt-0.5 block text-[15px] font-semibold leading-5 tracking-tight">
           {question}
         </span>
         {hint ? (
-          <span className="mt-1 block text-xs leading-5 text-slate-500 dark:text-slate-400">
-            {hint}
-          </span>
+          <span className="mt-0.5 block text-[13px] leading-5 text-muted">{hint}</span>
         ) : null}
       </span>
-      <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />
+      <ChevronRight className="h-4 w-4 shrink-0 text-muted" aria-hidden />
     </button>
   );
 }
@@ -81,9 +81,9 @@ function AskSoundprintMobilePeriodChip({
   if (!parts) return null;
 
   return (
-    <span className="inline-flex min-h-8 max-w-full items-center gap-1.5 rounded-full border border-slate-200/90 bg-white px-3 py-1 text-xs font-semibold text-slate-700 dark:border-white/10 dark:bg-white/10 dark:text-white/90">
+    <span className="inline-flex min-h-8 max-w-full items-center gap-1.5 rounded-full border border-glass-hairline bg-surface-raised/80 px-3 py-1 text-[13px] font-medium text-muted dark:bg-white/[0.06]">
       <CalendarRange className="h-3.5 w-3.5 shrink-0" aria-hidden />
-      <span className="truncate">
+      <span className="truncate text-foreground">
         {isAll
           ? t("periodChipAll", { range: parts.compactLabel })
           : t("periodChip", { range: parts.compactLabel })}
@@ -234,7 +234,7 @@ export function AskSoundprintMobileExperience({
           )}
           <div className="flex shrink-0 items-center gap-2">
             {isPublicDemoViewer && !hasUserMessages ? (
-              <span className="inline-flex min-h-8 items-center rounded-full border border-slate-200/90 bg-white px-3 text-xs font-semibold text-slate-700 dark:border-white/10 dark:bg-white/10 dark:text-white/90">
+              <span className="inline-flex min-h-8 items-center rounded-full border border-glass-hairline bg-surface-raised/80 px-3 text-[13px] font-medium text-muted dark:bg-white/[0.06]">
                 {t("heroDemoPill")}
               </span>
             ) : null}
@@ -249,7 +249,7 @@ export function AskSoundprintMobileExperience({
                 type="button"
                 onClick={() => setPresetSheetOpen(true)}
                 disabled={presetsDisabled}
-                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200/90 bg-white text-slate-700 disabled:opacity-60 dark:border-white/10 dark:bg-white/10 dark:text-white"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-glass-hairline bg-surface-raised/80 text-foreground disabled:opacity-60 dark:bg-white/[0.06]"
                 aria-label={t("mobile.allQuestionsAria")}
               >
                 <ListTree className="h-5 w-5" aria-hidden />
@@ -284,24 +284,24 @@ export function AskSoundprintMobileExperience({
                 {t("publicDemoMode")}
               </p>
             ) : null}
-            <div className="mt-8 w-full space-y-2">
+            <div className="mt-8 w-full">
               {featuredRow}
               {hideComposer ? null : (
               <button
                 type="button"
                 onClick={() => setPresetSheetOpen(true)}
                 disabled={presetsDisabled}
-                className="flex min-h-11 w-full items-center gap-3 rounded-2xl border border-slate-200/90 bg-white px-4 py-3 text-left shadow-sm disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/[0.04] dark:text-white"
+                className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_SEPARATOR} w-full text-foreground transition-colors hover:bg-black/[0.04] disabled:cursor-not-allowed disabled:opacity-60 dark:hover:bg-white/[0.06]`}
               >
                 <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-semibold tracking-tight">
+                  <span className="block text-[15px] font-semibold tracking-tight">
                     {t("allQuestions")}
                   </span>
-                  <span className="mt-0.5 block truncate text-xs leading-5 text-slate-500 dark:text-slate-400">
+                  <span className="mt-0.5 block truncate text-[13px] leading-5 text-muted">
                     {t("mobile.allQuestionsRowLead")}
                   </span>
                 </span>
-                <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />
+                <ChevronRight className="h-4 w-4 shrink-0 text-muted" aria-hidden />
               </button>
               )}
             </div>

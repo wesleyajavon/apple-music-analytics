@@ -66,22 +66,9 @@ import {
   resolveAuthAvatarUrl,
 } from "@/lib/components/duet/duet-utils";
 import {
-  DASHBOARD_SPOTLIGHT_SHELL,
-  DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY,
-  DASHBOARD_SPOTLIGHT_GRADIENT_LIME,
-  DASHBOARD_SPOTLIGHT_GRADIENT_CYAN,
-  DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET,
-  DASHBOARD_SPOTLIGHT_HAIRLINE_LIME,
-  DASHBOARD_SPOTLIGHT_HAIRLINE_CYAN,
-  DASHBOARD_SPOTLIGHT_HEADER_BOTTOM,
-  DASHBOARD_SPOTLIGHT_INNER_WELL,
-  DASHBOARD_SPOTLIGHT_MUTED,
-  DASHBOARD_SPOTLIGHT_BADGE_VIOLET,
-  DASHBOARD_SPOTLIGHT_BADGE_DOT_VIOLET,
-  DASHBOARD_SPOTLIGHT_BADGE_LIME,
-  DASHBOARD_SPOTLIGHT_BADGE_DOT_LIME,
-  DASHBOARD_CHART_THEME,
-} from "@/lib/constants/dashboard-spotlight";
+  DASHBOARD_SECTION_EYEBROW,
+  DASHBOARD_SECTION_TITLE,
+} from "@/lib/components/dashboard-ui";
 import { useTheme } from "@/lib/providers/theme-provider";
 import {
   useDuetCompareEntity,
@@ -110,35 +97,24 @@ function SpotlightSectionHeader({
   eyebrow,
   title,
   description,
-  badge,
-  badgeVariant = "violet",
   action,
 }: {
   eyebrow: string;
   title: string;
   description: string;
-  badge: string;
+  badge?: string;
   badgeVariant?: "violet" | "lime";
   action?: ReactNode;
 }) {
-  const badgeClass = badgeVariant === "lime" ? DASHBOARD_SPOTLIGHT_BADGE_LIME : DASHBOARD_SPOTLIGHT_BADGE_VIOLET;
-  const dotClass = badgeVariant === "lime" ? DASHBOARD_SPOTLIGHT_BADGE_DOT_LIME : DASHBOARD_SPOTLIGHT_BADGE_DOT_VIOLET;
-
   return (
-    <div className={`relative px-5 pb-5 pt-6 sm:px-8 ${DASHBOARD_SPOTLIGHT_HEADER_BOTTOM}`}>
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div className="pb-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="font-mono text-xs font-semibold uppercase tracking-[0.24em] text-primary">{eyebrow}</p>
-          <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-foreground sm:text-3xl">{title}</h2>
-          <p className={`mt-2 max-w-2xl text-sm leading-6 ${DASHBOARD_SPOTLIGHT_MUTED}`}>{description}</p>
+          <p className={DASHBOARD_SECTION_EYEBROW}>{eyebrow}</p>
+          <h2 className={`mt-1 ${DASHBOARD_SECTION_TITLE}`}>{title}</h2>
+          <p className="mt-2 max-w-2xl text-[13px] leading-6 text-muted">{description}</p>
         </div>
-        <div className="flex shrink-0 flex-col items-start gap-3 sm:items-end">
-          <span className={badgeClass}>
-            <span className={dotClass} aria-hidden />
-            {badge}
-          </span>
-          {action}
-        </div>
+        {action ? <div className="shrink-0">{action}</div> : null}
       </div>
     </div>
   );
@@ -178,11 +154,10 @@ function CompareContent() {
   const t = useTranslations("duet.compare");
   const tPeriod = useTranslations("components.periodSelector");
   const locale = useLocale();
+  const { resolvedTheme } = useTheme();
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  const { resolvedTheme } = useTheme();
-  const chartTheme = DASHBOARD_CHART_THEME[resolvedTheme === "dark" ? "dark" : "light"];
 
   const friendUserId = searchParams.get("friendUserId") ?? undefined;
   const activeSection = resolveCompareSection(searchParams);
@@ -595,25 +570,13 @@ function CompareContent() {
         };
 
   const renderTargetSection = () => (
-    <section className={DASHBOARD_SPOTLIGHT_SHELL}>
-      <div
-        className={
-          arenaMode === "track" ? DASHBOARD_SPOTLIGHT_GRADIENT_CYAN : DASHBOARD_SPOTLIGHT_GRADIENT_LIME
-        }
-      />
-      <div
-        className={
-          arenaMode === "track" ? DASHBOARD_SPOTLIGHT_HAIRLINE_CYAN : DASHBOARD_SPOTLIGHT_HAIRLINE_LIME
-        }
-      />
+    <section>
       <SpotlightSectionHeader
         eyebrow={t("arenaEyebrow")}
         title={t("arenaTitle")}
         description={t("arenaDescription")}
-        badge={t("arenaBadge")}
-        badgeVariant={arenaMode === "track" ? "violet" : "lime"}
       />
-      <div className="space-y-5 px-5 pb-6 sm:px-8">
+      <div className="space-y-5">
         {!arenaMode ? (
           <DuetArenaModePicker onSelect={setArenaMode} />
         ) : (
@@ -667,8 +630,6 @@ function CompareContent() {
                 locale={locale}
                 period={period}
                 t={t}
-                chartTheme={chartTheme}
-                resolvedTheme={resolvedTheme}
                 chartView={chartView}
                 onChartViewChange={setChartView}
               />
@@ -719,8 +680,6 @@ function CompareContent() {
                 locale={locale}
                 period={period}
                 t={t}
-                chartTheme={chartTheme}
-                resolvedTheme={resolvedTheme}
                 chartView={chartView}
                 onChartViewChange={setChartView}
               />
@@ -736,14 +695,10 @@ function CompareContent() {
       <DuetMetadataBanner friendName={friendName} metadata={metadata} />
 
       {timeline?.rangeClamped ? (
-        <p className={`rounded-2xl border border-slate-200/80 bg-slate-50/80 px-4 py-3 text-sm ${DASHBOARD_SPOTLIGHT_MUTED} dark:border-white/10 dark:bg-white/5`}>
-          {t("rangeClamped")}
-        </p>
+        <p className="text-sm text-muted">{t("rangeClamped")}</p>
       ) : null}
 
-      <section className={DASHBOARD_SPOTLIGHT_SHELL}>
-        <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} />
-        <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} />
+      <section>
         <SpotlightSectionHeader
           eyebrow={t("timelineEyebrow")}
           title={t("chartTitle", { friendName })}
@@ -752,20 +707,17 @@ function CompareContent() {
               ? t("chartDescriptionCumulative")
               : t(getPeriodChartDescriptionKey(period))
           }
-          badge={t("timelineBadge")}
         />
-        <div className="space-y-4 px-5 pb-6 sm:px-8">
+        <div className="space-y-4">
           {chartData.length === 0 ? (
             <EmptyState variant="startup" message={t("noDataTitle")} description={t("noDataDescription")} />
           ) : (
             <>
-              <div className={DASHBOARD_SPOTLIGHT_INNER_WELL}>
+              <div>
                 <DuetDualLineChart
                   data={timelineDisplayChartData}
                   period={period}
                   locale={locale}
-                  chartTheme={chartTheme}
-                  resolvedTheme={resolvedTheme}
                   selfLabel={t("seriesSelf")}
                   friendLabel={t("seriesFriend", { friendName })}
                 />
@@ -883,16 +835,13 @@ function CompareContent() {
                 actions={[{ label: t("goToFriends"), href: "/dashboard/duet/friends" }]}
               />
             ) : (
-              <section className={DASHBOARD_SPOTLIGHT_SHELL}>
-                <div className={DASHBOARD_SPOTLIGHT_GRADIENT_PRIMARY} />
-                <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_VIOLET} />
+              <section>
                 <SpotlightSectionHeader
                   eyebrow={t("pickerEyebrow")}
                   title={t("selectFriendTitle")}
                   description={t("selectFriendDescription")}
-                  badge={t("pickerBadge")}
                 />
-                <div className="grid gap-3 px-5 pb-6 sm:grid-cols-2 sm:px-8 lg:grid-cols-3">
+                <div className="grid gap-1 sm:grid-cols-2 lg:grid-cols-3">
                   {acceptedFriends.map((friendship, index) => {
                     const peer =
                       friendship.requester.id === viewer.id
@@ -908,10 +857,9 @@ function CompareContent() {
                       >
                         <Link
                           href={`/dashboard/duet/compare?friendUserId=${encodeURIComponent(peer.id)}&section=overview`}
-                          className="group relative flex min-h-[9.5rem] flex-col items-center justify-center gap-3 overflow-hidden rounded-[1.35rem] border border-slate-200/80 bg-white p-5 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-violet-300/60 hover:shadow-lg hover:shadow-violet-500/10 dark:border-white/10 dark:bg-slate-950/60 dark:hover:border-violet-400/30"
+                          className="flex min-h-11 flex-col items-start gap-2 border-b border-glass-hairline py-4 no-underline last:border-b-0 sm:border sm:border-glass-hairline sm:rounded-2xl sm:px-4 sm:last:border-b"
                         >
-                          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-violet-500/0 via-transparent to-cyan-500/0 opacity-0 transition-opacity duration-300 group-hover:from-violet-500/5 group-hover:to-cyan-500/8 group-hover:opacity-100" />
-                          <UserAvatar name={displayName} src={peer.avatarUrl} size="lg" />
+                          <UserAvatar name={displayName} src={peer.avatarUrl} size="md" />
                           <div className="relative">
                             <p className="truncate font-semibold text-slate-900 dark:text-white">{displayName}</p>
                             <p className="mt-1 text-xs font-bold uppercase tracking-[0.16em] text-violet-600 transition-colors group-hover:text-violet-500 dark:text-violet-300">

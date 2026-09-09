@@ -5,7 +5,20 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { DashboardMobileImportEmpty } from "@/lib/components/dashboard-mobile-import-empty";
-import { DashboardCinematicHeroBg } from "@/lib/components/dashboard-ui";
+import {
+  DASHBOARD_BTN_OUTLINE,
+  DASHBOARD_LIST_ROW,
+  DASHBOARD_LIST_ROW_INTERACTIVE,
+  DASHBOARD_LIST_SEPARATOR,
+  DASHBOARD_METRIC_CELL,
+  DASHBOARD_METRIC_LABEL,
+  DASHBOARD_METRIC_STRIP,
+  DASHBOARD_METRIC_VALUE,
+  DASHBOARD_SEGMENTED_PILL,
+  DASHBOARD_SEGMENTED_PILL_ACTIVE,
+  DASHBOARD_SEGMENTED_TRACK,
+} from "@/lib/components/dashboard-ui";
+import { OverviewHeroFrame } from "@/lib/components/overview-hero";
 import { GroqQuotaNotice } from "@/lib/components/error-state";
 import { MobileBottomSheet } from "@/lib/components/mobile-bottom-sheet";
 import type {
@@ -24,11 +37,8 @@ import {
   type TemporalDayPartId,
 } from "@/lib/utils/temporal-analysis-display";
 
-const MOBILE_BLEED =
-  "-mx-4 -mt-4 space-y-4 pb-8 max-lg:pb-[max(2rem,calc(var(--dashboard-bottom-nav-offset,0px)+1rem))] lg:hidden";
-const HERO_SHELL = "relative overflow-hidden bg-gray-950 px-4 pb-5 pt-4 text-white";
-const SNAP_RAIL =
-  "-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden";
+const MOBILE_CANVAS =
+  "space-y-8 pb-8 max-lg:pb-[max(2rem,calc(var(--dashboard-bottom-nav-offset,0px)+1rem))] lg:hidden";
 
 const CLOCK_COLORS = {
   start: "#60a5fa",
@@ -83,19 +93,10 @@ function HeatmapIcon({ className }: { className?: string }) {
   );
 }
 
-function SignalTile({ label, value }: { label: string; value: string }) {
-  return (
-    <article className="min-w-[9.75rem] snap-start rounded-3xl border border-card-border bg-gray-950 p-4 text-white shadow-lg shadow-black/10">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">{label}</p>
-      <p className="mt-2 truncate text-2xl font-semibold tabular-nums tracking-[-0.04em]">{value}</p>
-    </article>
-  );
-}
-
 function MiniClock({ hour }: { hour: number }) {
   const angle = getClockHandAngle(hour);
   return (
-    <div className="h-[5.5rem] w-[5.5rem] shrink-0 rounded-full bg-blue-400/10 p-1.5 shadow-[0_0_45px_-22px_rgb(96_165_250)]">
+    <div className="h-[5.5rem] w-[5.5rem] shrink-0 rounded-full bg-blue-400/10 p-1.5">
       <svg viewBox="0 0 100 100" className="h-full w-full" aria-hidden>
         <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="2" className="text-blue-300/35" />
         <circle
@@ -135,7 +136,7 @@ function MiniClock({ hour }: { hour: number }) {
 
 function RelativeBar({ percent }: { percent: number }) {
   return (
-    <span className="h-1.5 min-w-[3rem] flex-1 overflow-hidden rounded-full bg-slate-200 dark:bg-white/10">
+    <span className="h-1.5 min-w-[3rem] flex-1 overflow-hidden rounded-full bg-black/5 dark:bg-white/10">
       <span
         className="block h-full rounded-full bg-brand-gradient"
         style={{ width: `${Math.max(percent, 0)}%` }}
@@ -157,34 +158,65 @@ function aggregateDayParts(hours: HourOfDayAggregationDto[]): DayPartRow[] {
   });
 }
 
-export function TemporalMobileSkeleton() {
+function TemporalMobileHero({
+  heading,
+  insight,
+  rhythmLabel,
+  peakHour,
+  badge,
+}: {
+  heading: string;
+  insight: string;
+  rhythmLabel?: string;
+  peakHour?: number;
+  badge?: string;
+}) {
+  const t = useTranslations("temporal-analysis.mobile");
+
   return (
-    <div className={MOBILE_BLEED} aria-busy="true">
-      <section className={HERO_SHELL}>
-        <DashboardCinematicHeroBg />
-        <div className="relative space-y-3">
-          <div className="ml-auto h-8 w-28 animate-pulse rounded-full bg-white/15" />
-          <div className="h-3 w-16 animate-pulse rounded bg-white/15" />
-          <div className="h-8 w-52 animate-pulse rounded bg-white/20" />
-          <div className="h-3 w-full animate-pulse rounded bg-white/10" />
+    <OverviewHeroFrame compact title={heading} description={insight}>
+      <p className="mt-1 text-[13px] font-medium text-muted">{t("eyebrow")}</p>
+      {badge ? <p className="mt-1 text-[13px] font-medium text-muted">{badge}</p> : null}
+      <div className="mt-4 flex items-start gap-3.5">
+        {peakHour != null ? <MiniClock hour={peakHour} /> : null}
+        {rhythmLabel ? (
+          <span className="inline-flex min-h-8 items-center rounded-full border border-glass-hairline bg-surface-raised px-3 text-xs font-medium text-foreground">
+            {rhythmLabel}
+          </span>
+        ) : null}
+      </div>
+    </OverviewHeroFrame>
+  );
+}
+
+export function TemporalMobileSkeleton() {
+  const t = useTranslations("temporal-analysis");
+  const tm = useTranslations("temporal-analysis.mobile");
+
+  return (
+    <div className={MOBILE_CANVAS} aria-busy="true">
+      <OverviewHeroFrame compact title={t("title")} description={tm("eyebrow")}>
+        <div className="mt-4 space-y-2">
+          <div className="h-4 w-full animate-pulse rounded bg-black/10 dark:bg-white/10" />
+          <div className="h-4 w-10/12 animate-pulse rounded bg-black/10 dark:bg-white/10" />
         </div>
-      </section>
-      <section className="px-4">
-        <div className={SNAP_RAIL}>
-          {[0, 1, 2].map((item) => (
-            <div
-              key={item}
-              className="h-24 min-w-[9.75rem] snap-start animate-pulse rounded-3xl border border-white/10 bg-slate-950/80"
-            />
-          ))}
-        </div>
-      </section>
-      <section className="space-y-2 px-4">
-        <div className="h-11 animate-pulse rounded-2xl border border-card-border bg-card-surface" />
-        {[0, 1, 2, 3, 4, 5, 6].map((item) => (
-          <div key={item} className="h-11 animate-pulse rounded-2xl border border-card-border bg-card-surface" />
+      </OverviewHeroFrame>
+      <div className={`${DASHBOARD_METRIC_STRIP} w-full flex-nowrap overflow-x-auto`}>
+        {[0, 1, 2].map((item) => (
+          <div key={item} className={`${DASHBOARD_METRIC_CELL} min-w-[10.5rem] flex-none`}>
+            <span className="h-3 w-16 animate-pulse rounded bg-black/10 dark:bg-white/10" />
+            <span className="mt-2 h-7 w-12 animate-pulse rounded bg-black/10 dark:bg-white/10" />
+          </div>
         ))}
-      </section>
+      </div>
+      <div className="space-y-0">
+        <div className="mb-3 h-11 animate-pulse rounded-full bg-black/10 dark:bg-white/10" />
+        {[0, 1, 2, 3, 4, 5, 6].map((item) => (
+          <div key={item} className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_SEPARATOR}`}>
+            <div className="h-4 w-full animate-pulse rounded bg-black/10 dark:bg-white/10" />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -215,74 +247,19 @@ export function TemporalMobileError({
   const isQuota = isGroqDailyQuotaError(error);
 
   return (
-    <div className={MOBILE_BLEED}>
-      <section className={HERO_SHELL}>
-        <DashboardCinematicHeroBg />
-        <div className="relative space-y-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-cyan">
-            {t("eyebrow")}
-          </p>
-          <h1 className="text-[1.55rem] font-semibold leading-[1.12] tracking-[-0.05em]">
-            {t("errorLead")}
-          </h1>
+    <div className={MOBILE_CANVAS}>
+      <OverviewHeroFrame compact title={t("errorLead")} description={t("eyebrow")}>
+        <div className="mt-4">
           {isQuota ? (
             <GroqQuotaNotice error={error} />
           ) : (
-            <button
-              type="button"
-              onClick={onRetry}
-              className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25"
-            >
+            <button type="button" onClick={onRetry} className={DASHBOARD_BTN_OUTLINE}>
               {tCommon("retry")}
             </button>
           )}
         </div>
-      </section>
+      </OverviewHeroFrame>
     </div>
-  );
-}
-
-function TemporalMobileHero({
-  heading,
-  insight,
-  rhythmLabel,
-  peakHour,
-}: {
-  heading: string;
-  insight: string;
-  rhythmLabel?: string;
-  peakHour?: number;
-}) {
-  const t = useTranslations("temporal-analysis.mobile");
-
-  return (
-    <section className={HERO_SHELL}>
-      <DashboardCinematicHeroBg />
-      <div className="relative space-y-3">
-        <div className="flex justify-end">
-          <span className="inline-flex min-h-8 items-center rounded-full border border-white/15 bg-white/10 px-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/90">
-            {t("allTimeBadge")}
-          </span>
-        </div>
-        <div className="flex items-center gap-3.5">
-          {peakHour != null ? <MiniClock hour={peakHour} /> : null}
-          <div className="min-w-0">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-cyan">
-              {t("eyebrow")}
-            </p>
-            <h1 className="mt-1 text-[1.55rem] font-semibold leading-[1.12] tracking-[-0.05em]">
-              {heading}
-            </h1>
-            <p className="mt-1.5 text-sm leading-6 text-white/80">{insight}</p>
-            {rhythmLabel ? (
-              <span className="mt-2 inline-flex min-h-8 items-center rounded-full border border-blue-300/25 bg-white/10 px-3 text-xs font-medium text-blue-100">
-                {rhythmLabel}
-              </span>
-            ) : null}
-          </div>
-        </div>
-      </div>
-    </section>
   );
 }
 
@@ -300,7 +277,7 @@ function TemporalSegmentControl({
     <div
       role="tablist"
       aria-label={t("segmentLabel")}
-      className="flex w-full items-center rounded-2xl border border-card-border bg-surface p-1"
+      className={`${DASHBOARD_SEGMENTED_TRACK} w-full`}
     >
       {items.map((id) => {
         const isActive = value === id;
@@ -313,9 +290,7 @@ function TemporalSegmentControl({
             aria-selected={isActive}
             aria-controls={`temporal-mobile-panel-${id}`}
             tabIndex={isActive ? 0 : -1}
-            className={`relative z-10 min-h-11 flex-1 rounded-xl px-2 text-sm font-semibold transition-all duration-200 ${
-              isActive ? "bg-brand-gradient text-white shadow-sm" : "text-muted hover:text-foreground"
-            }`}
+            className={`flex-1 ${isActive ? DASHBOARD_SEGMENTED_PILL_ACTIVE : DASHBOARD_SEGMENTED_PILL}`}
             onClick={() => onChange(id)}
           >
             {t(id)}
@@ -344,7 +319,7 @@ function MetricRow({
   return (
     <button
       type="button"
-      className="flex min-h-11 w-full items-center gap-3 rounded-2xl border border-card-border bg-card-surface px-3.5 py-2.5 text-left shadow-sm"
+      className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_ROW_INTERACTIVE} ${DASHBOARD_LIST_SEPARATOR} w-full text-left`}
       onClick={onOpen}
       aria-label={ariaLabel}
     >
@@ -353,7 +328,7 @@ function MetricRow({
       <span className="w-12 shrink-0 text-right text-sm font-semibold tabular-nums text-foreground">
         {listens.toLocaleString(locale)}
       </span>
-      <ChevronIcon className="h-4 w-4 shrink-0 text-gray-400" />
+      <ChevronIcon className="h-4 w-4 shrink-0 text-muted" />
     </button>
   );
 }
@@ -372,16 +347,16 @@ function DestinationRow({
   return (
     <Link
       href={href}
-      className="flex min-h-11 w-full items-center gap-3 rounded-2xl border border-card-border bg-card-surface px-3.5 py-2.5 text-left shadow-sm"
+      className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_ROW_INTERACTIVE} ${DASHBOARD_LIST_SEPARATOR} no-underline text-foreground`}
     >
-      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent-cyan/15 text-accent-cyan">
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface-raised text-foreground">
         {icon}
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-sm font-semibold tracking-tight text-foreground">{title}</span>
-        <span className="mt-0.5 block truncate text-xs leading-5 text-muted">{lead}</span>
+        <span className="block truncate text-sm font-semibold tracking-tight">{title}</span>
+        <span className="mt-0.5 block truncate text-[13px] leading-5 text-muted">{lead}</span>
       </span>
-      <ChevronIcon className="h-4 w-4 shrink-0 text-gray-400" />
+      <ChevronIcon className="h-4 w-4 shrink-0 text-muted" />
     </Link>
   );
 }
@@ -445,27 +420,35 @@ export function TemporalMobileExperience({
         )
       : 0;
 
+  const signalMetrics = [
+    { key: "total", label: tm("railTotal"), value: totalListens.toLocaleString(locale) },
+    { key: "peakDay", label: tm("railPeakDay"), value: peakDayLabel },
+    { key: "peakHour", label: tm("railPeakHour"), value: peakHourLabel },
+  ];
+
   return (
-    <div className={MOBILE_BLEED}>
+    <div className={MOBILE_CANVAS}>
       <TemporalMobileHero
         heading={heading}
         insight={insight}
         rhythmLabel={rhythmLabel}
         peakHour={data.peakHour?.hour}
+        badge={tm("allTimeBadge")}
       />
 
-      <section className="px-4" aria-label={tm("signalsLabel")}>
-        <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">
-          {tm("signalsLabel")}
-        </p>
-        <div className={SNAP_RAIL}>
-          <SignalTile label={tm("railTotal")} value={totalListens.toLocaleString(locale)} />
-          <SignalTile label={tm("railPeakDay")} value={peakDayLabel} />
-          <SignalTile label={tm("railPeakHour")} value={peakHourLabel} />
+      <section aria-label={tm("signalsLabel")}>
+        <p className="mb-2 text-[13px] font-medium text-muted">{tm("signalsLabel")}</p>
+        <div className={`${DASHBOARD_METRIC_STRIP} w-full flex-nowrap overflow-x-auto`}>
+          {signalMetrics.map((metric) => (
+            <div key={metric.key} className={`${DASHBOARD_METRIC_CELL} min-w-[10.5rem] flex-none`}>
+              <span className={DASHBOARD_METRIC_LABEL}>{metric.label}</span>
+              <span className={`${DASHBOARD_METRIC_VALUE} truncate`}>{metric.value}</span>
+            </div>
+          ))}
         </div>
       </section>
 
-      <section className="space-y-2 px-4">
+      <section className="space-y-3">
         <TemporalSegmentControl value={segment} onChange={setSegment} />
 
         <div
@@ -474,7 +457,7 @@ export function TemporalMobileExperience({
           aria-labelledby="temporal-mobile-tab-days"
           hidden={segment !== "days"}
         >
-          <div className="space-y-2">
+          <div className="space-y-0">
             {dayRows.map((row) => (
               <MetricRow
                 key={row.day.dayOfWeek}
@@ -495,7 +478,7 @@ export function TemporalMobileExperience({
           aria-labelledby="temporal-mobile-tab-hours"
           hidden={segment !== "hours"}
         >
-          <div className="space-y-2">
+          <div className="space-y-0">
             {dayParts.map((part) => {
               const label = tm(`dayParts.${part.id}`);
               return (
@@ -514,7 +497,7 @@ export function TemporalMobileExperience({
         </div>
       </section>
 
-      <section className="space-y-2 px-4">
+      <section className="space-y-0">
         <DestinationRow
           href={timelineHref}
           title={tm("timelineRowTitle")}
@@ -555,8 +538,8 @@ export function TemporalMobileExperience({
                 {tCommon("close")}
               </button>
             </div>
-            <dl className="space-y-2">
-              <div className="flex min-h-11 items-center justify-between gap-3 rounded-2xl border border-card-border bg-card-surface px-3.5">
+            <dl className="space-y-0">
+              <div className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_SEPARATOR} justify-between`}>
                 <dt className="text-sm text-muted">{t("listens")}</dt>
                 <dd className="text-sm font-semibold tabular-nums text-foreground">
                   {(sheet.kind === "day" ? sheet.day.listens : sheet.part.listens).toLocaleString(
@@ -566,13 +549,13 @@ export function TemporalMobileExperience({
               </div>
               {sheet.kind === "day" ? (
                 <>
-                  <div className="flex min-h-11 items-center justify-between gap-3 rounded-2xl border border-card-border bg-card-surface px-3.5">
+                  <div className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_SEPARATOR} justify-between`}>
                     <dt className="text-sm text-muted">{t("tracks")}</dt>
                     <dd className="text-sm font-semibold tabular-nums text-foreground">
                       {sheet.day.uniqueTracks.toLocaleString(locale)}
                     </dd>
                   </div>
-                  <div className="flex min-h-11 items-center justify-between gap-3 rounded-2xl border border-card-border bg-card-surface px-3.5">
+                  <div className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_SEPARATOR} justify-between`}>
                     <dt className="text-sm text-muted">{t("artists")}</dt>
                     <dd className="text-sm font-semibold tabular-nums text-foreground">
                       {sheet.day.uniqueArtists.toLocaleString(locale)}
@@ -580,7 +563,7 @@ export function TemporalMobileExperience({
                   </div>
                 </>
               ) : null}
-              <div className="flex min-h-11 items-center justify-between gap-3 rounded-2xl border border-card-border bg-card-surface px-3.5">
+              <div className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_SEPARATOR} justify-between`}>
                 <dt className="text-sm text-muted">{t("heroStatTotal")}</dt>
                 <dd className="text-sm font-semibold tabular-nums text-foreground">
                   {tm("shareOfTotal", { percent: selectedShare })}
@@ -588,11 +571,11 @@ export function TemporalMobileExperience({
               </div>
             </dl>
             {sheet.kind === "part" ? (
-              <ul className="mt-4 space-y-2">
+              <ul className="mt-4 space-y-0">
                 {sheet.part.hours.map((hour) => (
                   <li
                     key={hour.hour}
-                    className="flex min-h-11 items-center justify-between gap-3 rounded-2xl border border-card-border bg-card-surface px-3.5"
+                    className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_SEPARATOR} justify-between`}
                   >
                     <span className="text-sm font-semibold text-foreground">
                       {formatHourForDisplay(hour.hour, locale)}

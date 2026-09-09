@@ -3,7 +3,21 @@
 import { useEffect, useId, useState, type FormEvent, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { DashboardCinematicHeroBg } from "@/lib/components/dashboard-ui";
+import {
+  DASHBOARD_BTN_GHOST,
+  DASHBOARD_LIST_ROW,
+  DASHBOARD_LIST_SEPARATOR,
+  DASHBOARD_METRIC_CELL,
+  DASHBOARD_METRIC_LABEL,
+  DASHBOARD_METRIC_STRIP,
+  DASHBOARD_METRIC_VALUE,
+  DASHBOARD_SEARCH_FIELD,
+  DASHBOARD_SECTION_EYEBROW,
+  DASHBOARD_SEGMENTED_PILL,
+  DASHBOARD_SEGMENTED_PILL_ACTIVE,
+  DASHBOARD_SEGMENTED_TRACK,
+} from "@/lib/components/dashboard-ui";
+import { OverviewHeroFrame } from "@/lib/components/overview-hero";
 import { MobileBottomSheet } from "@/lib/components/mobile-bottom-sheet";
 import { MusicalProfilePeriodBadge } from "@/lib/components/musical-profile-period-badge";
 import { UserAvatar } from "@/lib/components/user-avatar";
@@ -16,10 +30,7 @@ import type { DuetShareScopeOption } from "@/lib/hooks/use-duet";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
 
 const MOBILE_BLEED =
-  "-mx-4 -mt-4 space-y-4 lg:hidden max-lg:pb-[max(2rem,calc(var(--dashboard-bottom-nav-offset,0px)+5.75rem))]";
-const HERO_SHELL = "relative overflow-hidden bg-gray-950 px-4 pb-5 pt-4 text-white";
-const SNAP_RAIL =
-  "-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden";
+  "space-y-6 pb-8 lg:hidden max-lg:pb-[max(2rem,calc(var(--dashboard-bottom-nav-offset,0px)+5.75rem))]";
 
 type PaginatedFriends = {
   items: FriendshipDto[];
@@ -49,7 +60,7 @@ function getPeer(friendship: FriendshipDto, viewerId: string) {
   return friendship.requester.id === viewerId ? friendship.addressee : friendship.requester;
 }
 
-function SignalTile({
+function SignalCell({
   label,
   value,
   selected,
@@ -65,12 +76,12 @@ function SignalTile({
       type="button"
       onClick={onSelect}
       aria-pressed={selected}
-      className={`min-w-[9.75rem] snap-start rounded-3xl border p-4 text-left text-white shadow-lg shadow-black/10 ${
-        selected ? "border-white/40 bg-gray-900" : "border-card-border bg-gray-950"
+      className={`${DASHBOARD_METRIC_CELL} min-w-0 text-left transition-colors ${
+        selected ? "text-foreground" : "text-muted"
       }`}
     >
-      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">{label}</p>
-      <p className="mt-2 text-2xl font-semibold tabular-nums tracking-[-0.04em]">{value}</p>
+      <p className={`${DASHBOARD_METRIC_VALUE} text-xl`}>{value}</p>
+      <p className={DASHBOARD_METRIC_LABEL}>{label}</p>
     </button>
   );
 }
@@ -78,39 +89,31 @@ function SignalTile({
 function HeroFrame({
   locale,
   heading,
+  description,
   children,
 }: {
   locale: string;
   heading: string;
+  description?: string;
   children?: ReactNode;
 }) {
-  const t = useTranslations("duet.friends.mobile");
   const { startDate, endDate } = useListenDateRange();
 
   return (
-    <section className={HERO_SHELL}>
-      <DashboardCinematicHeroBg />
-      <div className="relative space-y-4">
-        <div className="flex justify-end">
-          <MusicalProfilePeriodBadge
-            startDate={startDate}
-            endDate={endDate}
-            locale={locale}
-            variant="mobile"
-            className="min-w-0"
-          />
-        </div>
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-cyan">
-            {t("eyebrow")}
-          </p>
-          <h1 className="mt-1 max-w-[16rem] text-[1.55rem] font-semibold leading-[1.12] tracking-[-0.05em]">
-            {heading}
-          </h1>
-        </div>
-        {children}
+    <div className="space-y-4">
+      <div className="flex justify-end">
+        <MusicalProfilePeriodBadge
+          startDate={startDate}
+          endDate={endDate}
+          locale={locale}
+          variant="mobile"
+          className="min-w-0"
+        />
       </div>
-    </section>
+      <OverviewHeroFrame compact title={heading} description={description}>
+        {children}
+      </OverviewHeroFrame>
+    </div>
   );
 }
 
@@ -140,17 +143,15 @@ function ShareScopePicker({
   ];
 
   return (
-    <fieldset disabled={disabled} className="space-y-2">
+    <fieldset disabled={disabled} className="space-y-1">
       <legend className="mb-2 text-sm font-semibold text-foreground">{tAccept("sharePrompt")}</legend>
       {options.map((option) => {
         const selected = value === option.value;
         return (
           <label
             key={option.value}
-            className={`flex min-h-11 cursor-pointer items-start gap-3 rounded-2xl border px-3 py-3 ${
-              selected
-                ? "border-violet-400/80 bg-violet-50 dark:bg-violet-950/55"
-                : "border-card-border bg-card-surface"
+            className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_SEPARATOR} cursor-pointer ${
+              selected ? "text-foreground" : "text-muted"
             }`}
           >
             <input
@@ -161,9 +162,9 @@ function ShareScopePicker({
               onChange={() => onChange(option.value)}
               className="sr-only"
             />
-            <span className="min-w-0">
-              <span className="block text-sm font-semibold text-foreground">{option.label}</span>
-              <span className="mt-0.5 block text-xs leading-5 text-muted">{option.description}</span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-[15px] font-semibold text-foreground">{option.label}</span>
+              <span className="mt-0.5 block text-[13px] leading-5 text-muted">{option.description}</span>
             </span>
           </label>
         );
@@ -178,21 +179,19 @@ export function DuetFriendsMobileSkeleton({ locale }: { locale: string }) {
   return (
     <div className={MOBILE_BLEED} aria-busy="true">
       <HeroFrame locale={locale} heading={t("title")}>
-        <div className="h-11 animate-pulse rounded-xl bg-white/15" />
+        <div className="mt-4 h-11 animate-pulse rounded-2xl bg-slate-200/80 dark:bg-white/10" />
       </HeroFrame>
-      <section className="px-4">
-        <div className={SNAP_RAIL}>
-          {[0, 1, 2].map((item) => (
-            <div
-              key={item}
-              className="h-24 min-w-[9.75rem] snap-start animate-pulse rounded-3xl border border-white/10 bg-slate-950/80"
-            />
-          ))}
-        </div>
-      </section>
-      <section className="space-y-2 px-4">
+      <section className={`${DASHBOARD_METRIC_STRIP} px-1`} aria-hidden>
         {[0, 1, 2].map((item) => (
-          <div key={item} className="h-11 animate-pulse rounded-2xl border border-card-border bg-card-surface" />
+          <div key={item} className={DASHBOARD_METRIC_CELL}>
+            <div className="h-7 w-10 animate-pulse rounded bg-slate-200/80 dark:bg-white/10" />
+            <div className="mt-2 h-3 w-14 animate-pulse rounded bg-slate-200/60 dark:bg-white/5" />
+          </div>
+        ))}
+      </section>
+      <section aria-hidden>
+        {[0, 1, 2].map((item) => (
+          <div key={item} className={`h-11 animate-pulse bg-slate-200/70 dark:bg-white/10 ${DASHBOARD_LIST_SEPARATOR}`} />
         ))}
       </section>
     </div>
@@ -211,13 +210,8 @@ export function DuetFriendsMobileError({
 
   return (
     <div className={MOBILE_BLEED}>
-      <HeroFrame locale={locale} heading={t("title")}>
-        <p className="text-sm leading-6 text-white/70">{t("errorLead")}</p>
-        <button
-          type="button"
-          onClick={onRetry}
-          className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25"
-        >
+      <HeroFrame locale={locale} heading={t("title")} description={t("errorLead")}>
+        <button type="button" onClick={onRetry} className={`${DASHBOARD_BTN_GHOST} mt-4 w-full text-foreground`}>
           {tCommon("retry")}
         </button>
       </HeroFrame>
@@ -235,16 +229,14 @@ export function DuetFriendsMobileGated({
   const t = useTranslations("duet.friends.mobile");
 
   return (
-    <div className="-mx-4 -mt-4 space-y-4 pb-8 lg:hidden">
-      <HeroFrame locale={locale} heading={t("gatedTitle")}>
-        <DuetMobileSubNav current="friends" withFilters={withFilters} />
-        <p className="max-w-sm text-sm leading-6 text-white/70">{t("gatedLead")}</p>
-        <Link
-          href="/sign-in"
-          className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25 no-underline"
-        >
-          {t("gatedCta")}
-        </Link>
+    <div className={MOBILE_BLEED}>
+      <HeroFrame locale={locale} heading={t("gatedTitle")} description={t("gatedLead")}>
+        <div className="mt-4 space-y-4">
+          <DuetMobileSubNav current="friends" withFilters={withFilters} />
+          <Link href="/sign-in" className={`${DASHBOARD_BTN_GHOST} w-full no-underline text-foreground`}>
+            {t("gatedCta")}
+          </Link>
+        </div>
       </HeroFrame>
     </div>
   );
@@ -326,37 +318,37 @@ export function DuetFriendsMobileExperience({
   return (
     <div className={MOBILE_BLEED}>
       <HeroFrame locale={locale} heading={tm("title")}>
-        <DuetMobileSubNav current="friends" withFilters={withFilters} />
+        <div className="mt-4">
+          <DuetMobileSubNav current="friends" withFilters={withFilters} />
+        </div>
       </HeroFrame>
 
-      <section className="px-4" aria-label={tm("railLabel")}>
-        <div className={SNAP_RAIL}>
-          <SignalTile
-            label={tm("railFriends")}
-            value={String(counts.friends)}
-            selected={listSection === "friends"}
-            onSelect={() => onSectionChange("friends")}
-          />
-          <SignalTile
-            label={tm("railIncoming")}
-            value={String(counts.pendingIncoming)}
-            selected={listSection === "incoming"}
-            onSelect={() => onSectionChange("incoming")}
-          />
-          <SignalTile
-            label={tm("railOutgoing")}
-            value={String(counts.pendingOutgoing)}
-            selected={listSection === "outgoing"}
-            onSelect={() => onSectionChange("outgoing")}
-          />
-        </div>
+      <section className={DASHBOARD_METRIC_STRIP} aria-label={tm("railLabel")}>
+        <SignalCell
+          label={tm("railFriends")}
+          value={String(counts.friends)}
+          selected={listSection === "friends"}
+          onSelect={() => onSectionChange("friends")}
+        />
+        <SignalCell
+          label={tm("railIncoming")}
+          value={String(counts.pendingIncoming)}
+          selected={listSection === "incoming"}
+          onSelect={() => onSectionChange("incoming")}
+        />
+        <SignalCell
+          label={tm("railOutgoing")}
+          value={String(counts.pendingOutgoing)}
+          selected={listSection === "outgoing"}
+          onSelect={() => onSectionChange("outgoing")}
+        />
       </section>
 
-      <section className="px-4">
+      <section>
         <div
           role="tablist"
           aria-label={tm("listNavLabel")}
-          className="flex gap-1 overflow-x-auto rounded-2xl border border-card-border bg-card-surface p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className={`${DASHBOARD_SEGMENTED_TRACK} w-full [scrollbar-width:none] [&::-webkit-scrollbar]:hidden`}
         >
           {(
             [
@@ -373,20 +365,18 @@ export function DuetFriendsMobileExperience({
                 role="tab"
                 aria-selected={selected}
                 onClick={() => onSectionChange(value)}
-                className={`inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold ${
-                  selected ? "bg-gray-950 text-white dark:bg-white dark:text-gray-950" : "text-muted"
-                }`}
+                className={`${selected ? DASHBOARD_SEGMENTED_PILL_ACTIVE : DASHBOARD_SEGMENTED_PILL} gap-2`}
               >
                 {label}
-                {count > 0 ? <span className="tabular-nums">{count > 99 ? "99+" : count}</span> : null}
+                {count > 0 ? <span className="tabular-nums text-[12px]">{count > 99 ? "99+" : count}</span> : null}
               </button>
             );
           })}
         </div>
       </section>
 
-      <section className="space-y-2 px-4">
-        <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
+      <section>
+        <h2 className={`${DASHBOARD_SECTION_EYEBROW} mb-2`}>
           {listSection === "incoming"
             ? tm("listTitleIncoming")
             : listSection === "outgoing"
@@ -394,7 +384,7 @@ export function DuetFriendsMobileExperience({
               : tm("listTitleFriends")}
         </h2>
         {list.total === 0 ? (
-          <p className="rounded-2xl border border-card-border bg-card-surface px-3.5 py-4 text-sm leading-6 text-muted">
+          <p className="py-4 text-sm leading-6 text-muted">
             {listSection === "incoming"
               ? t("emptyIncoming")
               : listSection === "outgoing"
@@ -402,15 +392,15 @@ export function DuetFriendsMobileExperience({
                 : tm("emptyLead")}
           </p>
         ) : (
-          <ul className="space-y-2">
+          <ul>
             {list.items.map((friendship) => {
               const peer = getPeer(friendship, viewerId);
               const displayName = getDuetDisplayName(peer);
               const isIncoming = friendship.direction === "incoming" && friendship.status === "pending";
               const isOutgoing = friendship.direction === "outgoing" && friendship.status === "pending";
               return (
-                <li key={friendship.id}>
-                  <div className="flex min-h-11 items-center gap-3 rounded-2xl border border-card-border bg-card-surface px-3 py-2">
+                <li key={friendship.id} className={DASHBOARD_LIST_SEPARATOR}>
+                  <div className={`${DASHBOARD_LIST_ROW}`}>
                     <UserAvatar name={displayName} src={peer.avatarUrl} size="md" />
                     <button
                       type="button"
@@ -424,8 +414,8 @@ export function DuetFriendsMobileExperience({
                         setActionTarget(friendship);
                       }}
                     >
-                      <span className="block truncate text-sm font-semibold text-foreground">{displayName}</span>
-                      <span className="mt-0.5 block truncate text-xs text-muted">
+                      <span className="block truncate text-[15px] font-semibold text-foreground">{displayName}</span>
+                      <span className="mt-0.5 block truncate text-[13px] text-muted">
                         {isIncoming
                           ? t("statusIncoming")
                           : isOutgoing
@@ -442,7 +432,7 @@ export function DuetFriendsMobileExperience({
                             setPendingScope("aggregates");
                             setAcceptTarget(friendship);
                           }}
-                          className="inline-flex min-h-11 items-center justify-center rounded-xl bg-gray-950 px-3 text-xs font-semibold text-white disabled:opacity-50 dark:bg-white dark:text-gray-950"
+                          className={`${DASHBOARD_BTN_GHOST} px-3 text-foreground disabled:opacity-50`}
                         >
                           {t("accept")}
                         </button>
@@ -450,7 +440,7 @@ export function DuetFriendsMobileExperience({
                           type="button"
                           disabled={busy}
                           onClick={() => mutations.onDecline(friendship.id)}
-                          className="inline-flex min-h-11 items-center justify-center rounded-xl border border-card-border px-3 text-xs font-semibold text-foreground disabled:opacity-50"
+                          className={`${DASHBOARD_BTN_GHOST} px-3 disabled:opacity-50`}
                         >
                           {t("decline")}
                         </button>
@@ -472,12 +462,12 @@ export function DuetFriendsMobileExperience({
           </ul>
         )}
         {list.totalPages > 1 ? (
-          <div className="flex gap-2 pt-1">
+          <div className="flex gap-2 pt-2">
             <button
               type="button"
               disabled={list.page === 1}
               onClick={() => onPageChange(list.page - 1)}
-              className="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl border border-card-border text-sm font-semibold disabled:opacity-40"
+              className={`${DASHBOARD_BTN_GHOST} flex-1 disabled:opacity-40`}
             >
               {t("paginationPrevious")}
             </button>
@@ -485,7 +475,7 @@ export function DuetFriendsMobileExperience({
               type="button"
               disabled={!list.hasMore}
               onClick={() => onPageChange(list.page + 1)}
-              className="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl border border-card-border text-sm font-semibold disabled:opacity-40"
+              className={`${DASHBOARD_BTN_GHOST} flex-1 disabled:opacity-40`}
             >
               {t("paginationNext")}
             </button>
@@ -494,13 +484,13 @@ export function DuetFriendsMobileExperience({
       </section>
 
       <div
-        className="fixed inset-x-0 z-[19] border-t border-card-border bg-background/95 px-4 py-3 backdrop-blur-xl lg:hidden"
+        className="fixed inset-x-0 z-[19] border-t border-glass-hairline bg-background/95 px-4 py-3 backdrop-blur-xl lg:hidden"
         style={{ bottom: `var(${DASHBOARD_BOTTOM_NAV_OFFSET_VAR}, 0px)` }}
       >
         <button
           type="button"
           onClick={openInvite}
-          className="inline-flex min-h-12 w-full items-center justify-center rounded-2xl bg-slate-950 px-4 text-sm font-bold text-white shadow-xl shadow-slate-900/15 dark:bg-white dark:text-slate-950"
+          className={`${DASHBOARD_BTN_GHOST} w-full text-foreground`}
         >
           {tm("inviteCta")}
         </button>
@@ -523,12 +513,12 @@ export function DuetFriendsMobileExperience({
               value={email}
               onChange={(event) => onEmailChange(event.target.value)}
               placeholder={t("invitePlaceholder")}
-              className="min-h-11 w-full rounded-xl border border-card-border bg-card-surface px-3 text-sm text-foreground"
+              className={DASHBOARD_SEARCH_FIELD}
             />
             <button
               type="submit"
               disabled={busy || !email.trim()}
-              className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-gray-950 text-sm font-bold text-white disabled:opacity-50 dark:bg-white dark:text-gray-950"
+              className={`${DASHBOARD_BTN_GHOST} w-full text-foreground disabled:opacity-50`}
             >
               {t("inviteSubmit")}
             </button>
@@ -538,14 +528,14 @@ export function DuetFriendsMobileExperience({
               {inviteFeedback}
             </p>
           ) : null}
-          <div className="mt-5 border-t border-card-border pt-4">
+          <div className="mt-5 border-t border-glass-hairline pt-4">
             <p className="text-sm leading-6 text-muted">{t("inviteLinkDescription")}</p>
             <div className="mt-3 flex flex-col gap-2">
               <button
                 type="button"
                 disabled={busy}
                 onClick={onCreateInviteLink}
-                className="inline-flex min-h-11 items-center justify-center rounded-xl border border-card-border text-sm font-semibold disabled:opacity-50"
+                className={`${DASHBOARD_BTN_GHOST} w-full disabled:opacity-50`}
               >
                 {t("inviteLinkGenerate")}
               </button>
@@ -554,7 +544,7 @@ export function DuetFriendsMobileExperience({
                   type="button"
                   disabled={busy}
                   onClick={onCopyInviteLink}
-                  className="inline-flex min-h-11 items-center justify-center rounded-xl bg-gray-950 text-sm font-semibold text-white disabled:opacity-50 dark:bg-white dark:text-gray-950"
+                  className={`${DASHBOARD_BTN_GHOST} w-full text-foreground disabled:opacity-50`}
                 >
                   {t("inviteLinkCopy")}
                 </button>
@@ -603,7 +593,7 @@ export function DuetFriendsMobileExperience({
                   mutations.onAccept(acceptTarget.id, pendingScope);
                   setAcceptTarget(null);
                 }}
-                className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-gray-950 text-sm font-bold text-white disabled:opacity-50 dark:bg-white dark:text-gray-950"
+                className={`${DASHBOARD_BTN_GHOST} w-full text-foreground disabled:opacity-50`}
               >
                 {t("accept")}
               </button>
@@ -644,13 +634,13 @@ export function DuetFriendsMobileExperience({
                     href={withFilters(
                       `/dashboard/duet/compare?friendUserId=${encodeURIComponent(getPeer(actionTarget, viewerId).id)}`
                     )}
-                    className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-gray-950 text-sm font-bold text-white no-underline dark:bg-white dark:text-gray-950"
+                    className={`${DASHBOARD_BTN_GHOST} w-full no-underline text-foreground`}
                   >
                     {t("compare")}
                   </Link>
                   <Link
                     href={hrefForMusic(getPeer(actionTarget, viewerId).id)}
-                    className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-card-border text-sm font-semibold text-foreground no-underline"
+                    className={`${DASHBOARD_BTN_GHOST} w-full no-underline`}
                   >
                     {t("seeMusic")}
                   </Link>
@@ -661,7 +651,7 @@ export function DuetFriendsMobileExperience({
                       mutations.onRevoke(actionTarget.id);
                       setActionTarget(null);
                     }}
-                    className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-card-border text-sm font-semibold disabled:opacity-50"
+                    className={`${DASHBOARD_BTN_GHOST} w-full disabled:opacity-50`}
                   >
                     {t("revoke")}
                   </button>

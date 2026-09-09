@@ -4,17 +4,28 @@ import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { DashboardMobileImportEmpty } from "@/lib/components/dashboard-mobile-import-empty";
-import { DashboardCinematicHeroBg } from "@/lib/components/dashboard-ui";
+import {
+  DASHBOARD_BTN_OUTLINE,
+  DASHBOARD_LIST_ROW,
+  DASHBOARD_LIST_ROW_INTERACTIVE,
+  DASHBOARD_LIST_SEPARATOR,
+  DASHBOARD_METRIC_CELL,
+  DASHBOARD_METRIC_LABEL,
+  DASHBOARD_METRIC_STRIP,
+  DASHBOARD_METRIC_VALUE,
+  DASHBOARD_SECTION_EYEBROW,
+  DASHBOARD_SECTION_TITLE,
+  DASHBOARD_SEGMENTED_PILL,
+  DASHBOARD_SEGMENTED_PILL_ACTIVE,
+  DASHBOARD_SEGMENTED_TRACK,
+} from "@/lib/components/dashboard-ui";
+import { OverviewHeroFrame } from "@/lib/components/overview-hero";
 import { GroqQuotaNotice } from "@/lib/components/error-state";
 import { AiUnavailableCta } from "@/lib/components/ai-unavailable-cta";
 import { InteractiveAiGenreBackfillNotice } from "@/lib/components/interactive-ai-genre-backfill-notice";
-import { MusicalProfilePeriodBadge } from "@/lib/components/musical-profile-period-badge";
 import type { AiInsightMoment, AiInsightsStyle, AiUnavailableReason } from "@/lib/dto/ai-insights";
 
-const MOBILE_BLEED = "-mx-4 -mt-4 space-y-4 pb-8 lg:hidden";
-const HERO_SHELL = "relative overflow-hidden bg-gray-950 px-4 pb-5 pt-4 text-white";
-const SNAP_RAIL =
-  "-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden";
+const MOBILE_CANVAS = "space-y-8 pb-8 lg:hidden";
 
 function ChevronIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
@@ -36,15 +47,6 @@ function ChatIcon({ className }: { className?: string }) {
   );
 }
 
-function SignalTile({ label, value }: { label: string; value: string }) {
-  return (
-    <article className="min-w-[9.75rem] snap-start rounded-3xl border border-card-border bg-gray-950 p-4 text-white shadow-lg shadow-black/10">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">{label}</p>
-      <p className="mt-2 truncate text-2xl font-semibold tabular-nums tracking-[-0.04em]">{value}</p>
-    </article>
-  );
-}
-
 function MobileStyleToggle({
   insightStyle,
   onStyleChange,
@@ -56,10 +58,8 @@ function MobileStyleToggle({
 
   return (
     <div className="flex flex-col gap-2" role="group" aria-label={t("styleToggle.ariaLabel")}>
-      <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/55">
-        {t("styleToggle.label")}
-      </span>
-      <div className="inline-flex w-full gap-1 rounded-xl border border-white/15 bg-white/10 p-1">
+      <span className="text-[13px] font-medium text-muted">{t("styleToggle.label")}</span>
+      <div className={`${DASHBOARD_SEGMENTED_TRACK} w-full`}>
         {(["human", "technical"] as const).map((style) => {
           const isActive = insightStyle === style;
           return (
@@ -68,9 +68,7 @@ function MobileStyleToggle({
               type="button"
               aria-pressed={isActive}
               onClick={() => onStyleChange(style)}
-              className={`min-h-11 flex-1 rounded-lg px-3 text-sm font-semibold ${
-                isActive ? "bg-white text-gray-950 shadow-sm" : "text-white/70"
-              }`}
+              className={`flex-1 ${isActive ? DASHBOARD_SEGMENTED_PILL_ACTIVE : DASHBOARD_SEGMENTED_PILL}`}
             >
               {t(`styleToggle.${style}`)}
             </button>
@@ -87,27 +85,27 @@ function AskDestinationRow({ href }: { href: string }) {
   return (
     <Link
       href={href}
-      className="flex min-h-11 items-center gap-3 rounded-2xl bg-white px-3.5 py-3 text-gray-950 shadow-lg shadow-black/20"
+      className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_ROW_INTERACTIVE} ${DASHBOARD_LIST_SEPARATOR} no-underline text-foreground`}
     >
-      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gray-950 text-white">
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface-raised text-foreground">
         <ChatIcon className="h-5 w-5" />
       </span>
       <span className="min-w-0 flex-1">
         <span className="block truncate text-sm font-semibold tracking-tight">{t("ctaAskSoundprint")}</span>
-        <span className="mt-0.5 block truncate text-xs leading-5 text-gray-600">{t("mobile.askLead")}</span>
+        <span className="mt-0.5 block truncate text-[13px] leading-5 text-muted">{t("mobile.askLead")}</span>
       </span>
-      <ChevronIcon className="h-4 w-4 shrink-0 text-gray-500" />
+      <ChevronIcon className="h-4 w-4 shrink-0 text-muted" />
     </Link>
   );
 }
 
 function InsightRow({ index, text }: { index: number; text: string }) {
   return (
-    <article className="flex min-h-11 items-start gap-3 rounded-2xl border border-card-border bg-card-surface px-3.5 py-2.5 shadow-sm">
-      <span className="mt-0.5 w-6 shrink-0 text-center text-xs font-bold tabular-nums text-muted">
+    <article className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_SEPARATOR} items-start`}>
+      <span className="mt-0.5 w-6 shrink-0 text-center text-[13px] font-semibold tabular-nums text-muted">
         {index}
       </span>
-      <p className="min-w-0 flex-1 text-sm leading-5 text-foreground line-clamp-3">{text}</p>
+      <p className="min-w-0 flex-1 text-[13px] leading-5 text-foreground line-clamp-3">{text}</p>
     </article>
   );
 }
@@ -122,28 +120,27 @@ function MomentRow({
   onOpenArtist?: (moment: AiInsightMoment) => void;
 }) {
   const t = useTranslations("ai-insights");
-  const className =
-    "flex min-h-11 items-start gap-3 rounded-2xl border border-card-border bg-card-surface px-3.5 py-2.5 shadow-sm";
+  const className = `${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_ROW_INTERACTIVE} ${DASHBOARD_LIST_SEPARATOR} items-start w-full text-left`;
   const inner = (
     <>
-      <span className="mt-0.5 shrink-0 rounded-full bg-gray-950 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
+      <span className="mt-0.5 shrink-0 text-[11px] font-semibold uppercase tracking-wide text-muted">
         {t(`kinds.${moment.kind}`)}
       </span>
       <span className="min-w-0 flex-1">
         {moment.title ? (
           <span className="block text-sm font-semibold tracking-tight text-foreground">{moment.title}</span>
         ) : null}
-        <span className="mt-0.5 block text-sm leading-5 text-foreground line-clamp-3">{moment.body}</span>
+        <span className="mt-0.5 block text-[13px] leading-5 text-foreground line-clamp-3">{moment.body}</span>
         {moment.metric ? (
-          <span className="mt-1 block text-xs font-semibold tabular-nums text-muted">{moment.metric}</span>
+          <span className="mt-1 block text-[13px] font-semibold tabular-nums text-muted">{moment.metric}</span>
         ) : null}
       </span>
-      <ChevronIcon className="mt-1 h-4 w-4 shrink-0 text-gray-500" />
+      <ChevronIcon className="mt-1 h-4 w-4 shrink-0 text-muted" />
     </>
   );
   if (moment.artistId && onOpenArtist) {
     return (
-      <button type="button" onClick={() => onOpenArtist(moment)} className={`${className} w-full text-left`}>
+      <button type="button" onClick={() => onOpenArtist(moment)} className={className}>
         {inner}
       </button>
     );
@@ -155,52 +152,28 @@ function MomentRow({
   );
 }
 
-function MobileHeroFrame({
-  locale,
-  startDate,
-  endDate,
+function MobileMasthead({
   heading,
+  description,
   children,
 }: {
-  locale: string;
-  startDate?: string;
-  endDate?: string;
   heading: string;
+  description?: string;
   children?: ReactNode;
 }) {
   const t = useTranslations("ai-insights");
-
   return (
-    <section className={HERO_SHELL}>
-      <DashboardCinematicHeroBg />
-      <div className="relative space-y-4">
-        <div className="flex justify-end">
-          <MusicalProfilePeriodBadge
-            startDate={startDate}
-            endDate={endDate}
-            locale={locale}
-            variant="mobile"
-            className="min-w-0"
-          />
-        </div>
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-cyan">
-            {t("mobile.eyebrow")}
-          </p>
-          <h1 className="mt-1 max-w-[16rem] text-[1.55rem] font-semibold leading-[1.12] tracking-[-0.05em]">
-            {heading}
-          </h1>
-        </div>
-        {children}
-      </div>
-    </section>
+    <OverviewHeroFrame compact title={heading} description={description}>
+      <p className="mt-1 text-[13px] font-medium text-muted">{t("mobile.eyebrow")}</p>
+      {children}
+    </OverviewHeroFrame>
   );
 }
 
 export function AiInsightsMobileSkeleton({
-  locale,
-  startDate,
-  endDate,
+  locale: _locale,
+  startDate: _startDate,
+  endDate: _endDate,
 }: {
   locale: string;
   startDate?: string;
@@ -209,31 +182,30 @@ export function AiInsightsMobileSkeleton({
   const t = useTranslations("ai-insights");
 
   return (
-    <div className={MOBILE_BLEED} aria-busy="true">
-      <MobileHeroFrame locale={locale} startDate={startDate} endDate={endDate} heading={t("title")}>
-        <p className="text-sm leading-6 text-white/65">{t("mobile.generatingLead")}</p>
-        <div className="space-y-2">
-          <div className="h-4 w-full animate-pulse rounded-full bg-white/15" />
-          <div className="h-4 w-10/12 animate-pulse rounded-full bg-white/15" />
-          <div className="h-4 w-2/3 animate-pulse rounded-full bg-white/15" />
+    <div className={MOBILE_CANVAS} aria-busy="true">
+      <MobileMasthead heading={t("title")} description={t("mobile.generatingLead")}>
+        <div className="mt-4 space-y-2">
+          <div className="h-4 w-full animate-pulse rounded bg-black/10 dark:bg-white/10" />
+          <div className="h-4 w-10/12 animate-pulse rounded bg-black/10 dark:bg-white/10" />
+          <div className="h-4 w-2/3 animate-pulse rounded bg-black/10 dark:bg-white/10" />
         </div>
-        <div className="h-11 animate-pulse rounded-xl bg-white/15" />
-      </MobileHeroFrame>
-      <section className="px-4">
-        <div className={SNAP_RAIL}>
-          {[0, 1, 2].map((item) => (
-            <div
-              key={item}
-              className="h-24 min-w-[9.75rem] snap-start animate-pulse rounded-3xl border border-white/10 bg-slate-950/80"
-            />
-          ))}
-        </div>
-      </section>
-      <section className="space-y-2 px-4">
+        <div className="mt-4 h-11 animate-pulse rounded-full bg-black/10 dark:bg-white/10" />
+      </MobileMasthead>
+      <div className={`${DASHBOARD_METRIC_STRIP} w-full flex-nowrap overflow-x-auto`}>
         {[0, 1, 2].map((item) => (
-          <div key={item} className="h-11 animate-pulse rounded-2xl border border-card-border bg-card-surface" />
+          <div key={item} className={`${DASHBOARD_METRIC_CELL} min-w-[10.5rem] flex-none`}>
+            <span className="h-3 w-16 animate-pulse rounded bg-black/10 dark:bg-white/10" />
+            <span className="mt-2 h-7 w-12 animate-pulse rounded bg-black/10 dark:bg-white/10" />
+          </div>
         ))}
-      </section>
+      </div>
+      <div className="space-y-0">
+        {[0, 1, 2].map((item) => (
+          <div key={item} className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_SEPARATOR}`}>
+            <div className="h-4 w-full animate-pulse rounded bg-black/10 dark:bg-white/10" />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -248,6 +220,9 @@ export function AiInsightsMobileEmpty({
   endDate?: string;
 }) {
   const t = useTranslations("ai-insights");
+  void locale;
+  void startDate;
+  void endDate;
 
   return (
     <DashboardMobileImportEmpty
@@ -256,26 +231,15 @@ export function AiInsightsMobileEmpty({
       lead={t("mobile.emptyLead")}
       demoPath="/dashboard/ai-insights"
       importLabel={t("mobile.emptyCta")}
-      header={
-        <div className="flex justify-end">
-          <MusicalProfilePeriodBadge
-            startDate={startDate}
-            endDate={endDate}
-            locale={locale}
-            variant="mobile"
-            className="min-w-0"
-          />
-        </div>
-      }
     />
   );
 }
 
 export function AiInsightsMobileQuota({
   error,
-  locale,
-  startDate,
-  endDate,
+  locale: _locale,
+  startDate: _startDate,
+  endDate: _endDate,
 }: {
   error: Error;
   locale: string;
@@ -285,20 +249,21 @@ export function AiInsightsMobileQuota({
   const t = useTranslations("ai-insights");
 
   return (
-    <div className={MOBILE_BLEED}>
-      <MobileHeroFrame locale={locale} startDate={startDate} endDate={endDate} heading={t("title")}>
-        <p className="text-sm leading-6 text-white/70">{t("mobile.quotaLead")}</p>
-        <GroqQuotaNotice error={error} />
-      </MobileHeroFrame>
+    <div className={MOBILE_CANVAS}>
+      <MobileMasthead heading={t("title")} description={t("mobile.quotaLead")}>
+        <div className="mt-4">
+          <GroqQuotaNotice error={error} />
+        </div>
+      </MobileMasthead>
     </div>
   );
 }
 
 export function AiInsightsMobileUnavailable({
-  locale,
+  locale: _locale,
   reason,
-  startDate,
-  endDate,
+  startDate: _startDate,
+  endDate: _endDate,
 }: {
   locale: string;
   reason?: AiUnavailableReason;
@@ -309,19 +274,20 @@ export function AiInsightsMobileUnavailable({
   const copyReason = reason ?? "consent";
 
   return (
-    <div className={MOBILE_BLEED}>
-      <MobileHeroFrame locale={locale} startDate={startDate} endDate={endDate} heading={t("title")}>
-        <p className="text-sm leading-6 text-white/70">{t("mobile.unavailableLead")}</p>
-        <AiUnavailableCta reason={copyReason} tone="onDark" />
-      </MobileHeroFrame>
+    <div className={MOBILE_CANVAS}>
+      <MobileMasthead heading={t("title")} description={t("mobile.unavailableLead")}>
+        <div className="mt-4">
+          <AiUnavailableCta reason={copyReason} />
+        </div>
+      </MobileMasthead>
     </div>
   );
 }
 
 export function AiInsightsMobileBackfill({
-  locale,
-  startDate,
-  endDate,
+  locale: _locale,
+  startDate: _startDate,
+  endDate: _endDate,
   force = false,
 }: {
   locale: string;
@@ -332,19 +298,17 @@ export function AiInsightsMobileBackfill({
   const t = useTranslations("ai-insights");
 
   return (
-    <div className={MOBILE_BLEED}>
-      <MobileHeroFrame locale={locale} startDate={startDate} endDate={endDate} heading={t("title")} />
-      <div className="px-4">
-        <InteractiveAiGenreBackfillNotice force={force} />
-      </div>
+    <div className={MOBILE_CANVAS}>
+      <MobileMasthead heading={t("title")} />
+      <InteractiveAiGenreBackfillNotice force={force} />
     </div>
   );
 }
 
 export function AiInsightsMobileError({
-  locale,
-  startDate,
-  endDate,
+  locale: _locale,
+  startDate: _startDate,
+  endDate: _endDate,
   onRetry,
 }: {
   locale: string;
@@ -356,17 +320,12 @@ export function AiInsightsMobileError({
   const tCommon = useTranslations("common");
 
   return (
-    <div className={MOBILE_BLEED}>
-      <MobileHeroFrame locale={locale} startDate={startDate} endDate={endDate} heading={t("title")}>
-        <p className="text-sm leading-6 text-white/70">{t("mobile.errorLead")}</p>
-        <button
-          type="button"
-          onClick={onRetry}
-          className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25"
-        >
+    <div className={MOBILE_CANVAS}>
+      <MobileMasthead heading={t("title")} description={t("mobile.errorLead")}>
+        <button type="button" onClick={onRetry} className={`${DASHBOARD_BTN_OUTLINE} mt-4 w-full`}>
           {tCommon("retry")}
         </button>
-      </MobileHeroFrame>
+      </MobileMasthead>
     </div>
   );
 }
@@ -374,15 +333,15 @@ export function AiInsightsMobileError({
 export function AiInsightsMobileExperience({
   askHref,
   cached,
-  endDate,
+  endDate: _endDate,
   insightStyle,
   insights,
-  locale,
+  locale: _locale,
   moments,
   onOpenArtist,
   onStyleChange,
   rateLimitRemaining,
-  startDate,
+  startDate: _startDate,
   withFilters,
 }: {
   askHref: string;
@@ -413,94 +372,101 @@ export function AiInsightsMobileExperience({
   const resolveHref = withFilters ?? ((href: string) => href);
 
   return (
-    <div className={MOBILE_BLEED}>
-      <MobileHeroFrame locale={locale} startDate={startDate} endDate={endDate} heading={t("title")}>
+    <div className={MOBILE_CANVAS}>
+      <MobileMasthead heading={t("title")}>
         {featuredMoment ? (
           featuredMoment.artistId && onOpenArtist ? (
-            <button type="button" onClick={() => onOpenArtist(featuredMoment)} className="block w-full space-y-2 text-left">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/55">
+            <button type="button" onClick={() => onOpenArtist(featuredMoment)} className="mt-4 block w-full space-y-2 text-left">
+              <p className="text-[13px] font-medium text-muted">
                 {t(`kinds.${featuredMoment.kind}`)}
                 {featuredMoment.metric ? ` · ${featuredMoment.metric}` : ""}
               </p>
-              <blockquote className="text-base font-semibold leading-6 tracking-tight text-white">
+              <blockquote className="text-base font-semibold leading-6 tracking-tight text-foreground">
                 {featuredMoment.title || featuredMoment.body}
               </blockquote>
               {featuredMoment.title ? (
-                <p className="text-sm leading-5 text-white/75">{featuredMoment.body}</p>
+                <p className="text-[13px] leading-5 text-muted">{featuredMoment.body}</p>
               ) : null}
-              <span className="inline-flex items-center gap-1 text-xs font-semibold text-white/80">
+              <span className="inline-flex items-center gap-1 text-[13px] font-medium text-foreground">
                 {t("openMoment")}
                 <ChevronIcon className="h-3.5 w-3.5" />
               </span>
             </button>
           ) : (
-            <Link href={resolveHref(featuredMoment.href)} className="block space-y-2">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/55">
+            <Link href={resolveHref(featuredMoment.href)} className="mt-4 block space-y-2">
+              <p className="text-[13px] font-medium text-muted">
                 {t(`kinds.${featuredMoment.kind}`)}
                 {featuredMoment.metric ? ` · ${featuredMoment.metric}` : ""}
               </p>
-              <blockquote className="text-base font-semibold leading-6 tracking-tight text-white">
+              <blockquote className="text-base font-semibold leading-6 tracking-tight text-foreground">
                 {featuredMoment.title || featuredMoment.body}
               </blockquote>
               {featuredMoment.title ? (
-                <p className="text-sm leading-5 text-white/75">{featuredMoment.body}</p>
+                <p className="text-[13px] leading-5 text-muted">{featuredMoment.body}</p>
               ) : null}
-              <span className="inline-flex items-center gap-1 text-xs font-semibold text-white/80">
+              <span className="inline-flex items-center gap-1 text-[13px] font-medium text-foreground">
                 {t("openMoment")}
                 <ChevronIcon className="h-3.5 w-3.5" />
               </span>
             </Link>
           )
         ) : featured ? (
-          <blockquote className="text-base font-semibold leading-6 tracking-tight text-white">
+          <blockquote className="mt-4 text-base font-semibold leading-6 tracking-tight text-foreground">
             {featured}
           </blockquote>
         ) : null}
-        <MobileStyleToggle insightStyle={insightStyle} onStyleChange={onStyleChange} />
-      </MobileHeroFrame>
+        <div className="mt-5">
+          <MobileStyleToggle insightStyle={insightStyle} onStyleChange={onStyleChange} />
+        </div>
+      </MobileMasthead>
 
-      <section className="px-4" aria-label={t("mobile.railLabel")}>
-        <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">
-          {t("mobile.railLabel")}
-        </p>
-        <div className={SNAP_RAIL}>
-          <SignalTile
-            label={t("mobile.railCount")}
-            value={String((typedMoments ?? insights).length)}
-          />
-          <SignalTile label={t("mobile.railTone")} value={t(`styleToggle.${insightStyle}`)} />
-          <SignalTile label={t("mobile.railStatus")} value={statusText} />
+      <section aria-label={t("mobile.railLabel")}>
+        <p className={DASHBOARD_SECTION_EYEBROW}>{t("mobile.railLabel")}</p>
+        <div className={`mt-3 ${DASHBOARD_METRIC_STRIP} w-full flex-nowrap overflow-x-auto`}>
+          <div className={`${DASHBOARD_METRIC_CELL} min-w-[10.5rem] flex-none`}>
+            <span className={DASHBOARD_METRIC_LABEL}>{t("mobile.railCount")}</span>
+            <span className={DASHBOARD_METRIC_VALUE}>{String((typedMoments ?? insights).length)}</span>
+          </div>
+          <div className={`${DASHBOARD_METRIC_CELL} min-w-[10.5rem] flex-none`}>
+            <span className={DASHBOARD_METRIC_LABEL}>{t("mobile.railTone")}</span>
+            <span className={DASHBOARD_METRIC_VALUE}>{t(`styleToggle.${insightStyle}`)}</span>
+          </div>
+          <div className={`${DASHBOARD_METRIC_CELL} min-w-[10.5rem] flex-none`}>
+            <span className={DASHBOARD_METRIC_LABEL}>{t("mobile.railStatus")}</span>
+            <span className={`${DASHBOARD_METRIC_VALUE} text-base`}>{statusText}</span>
+          </div>
         </div>
       </section>
 
       {restMoments.length > 0 ? (
-        <section className="space-y-2 px-4">
-          <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">
-            {t("mobile.moreTitle")}
-          </h2>
-          {restMoments.map((moment) => (
-            <MomentRow
-              key={moment.id}
-              moment={moment}
-              href={resolveHref(moment.href)}
-              onOpenArtist={onOpenArtist}
-            />
-          ))}
+        <section>
+          <p className={DASHBOARD_SECTION_EYEBROW}>{t("mobile.moreTitle")}</p>
+          <h2 className={`${DASHBOARD_SECTION_TITLE} mt-1 sr-only`}>{t("mobile.moreTitle")}</h2>
+          <div className="mt-4">
+            {restMoments.map((moment) => (
+              <MomentRow
+                key={moment.id}
+                moment={moment}
+                href={resolveHref(moment.href)}
+                onOpenArtist={onOpenArtist}
+              />
+            ))}
+          </div>
         </section>
       ) : null}
 
       {rest.length > 0 ? (
-        <section className="space-y-2 px-4">
-          <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">
-            {t("mobile.moreTitle")}
-          </h2>
-          {rest.map((insight, index) => (
-            <InsightRow key={index} index={index + 2} text={insight} />
-          ))}
+        <section>
+          <p className={DASHBOARD_SECTION_EYEBROW}>{t("mobile.moreTitle")}</p>
+          <div className="mt-4">
+            {rest.map((insight, index) => (
+              <InsightRow key={index} index={index + 2} text={insight} />
+            ))}
+          </div>
         </section>
       ) : null}
 
-      <section className="px-4">
+      <section>
         <AskDestinationRow href={askHref} />
       </section>
     </div>

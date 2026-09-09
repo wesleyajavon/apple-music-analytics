@@ -8,8 +8,12 @@ import {
   type ReactNode,
 } from "react";
 import { useTranslations } from "next-intl";
-import { Send } from "lucide-react";
+import { ChevronRight, Send } from "lucide-react";
 import { AssistantChatMessageBody } from "@/lib/components/assistant-chat-message-body";
+import {
+  DASHBOARD_LIST_ROW,
+  DASHBOARD_LIST_SEPARATOR,
+} from "@/lib/components/dashboard-ui";
 import { SoundprintLogo } from "@/lib/components/soundprint-logo";
 import { useAssistantMessageReveal } from "@/lib/hooks/use-assistant-message-reveal";
 import type { MusicChatMessage } from "@/lib/dto/music-chat";
@@ -183,7 +187,7 @@ export function AskSoundprintComposer({
       <label className="sr-only" htmlFor={isMobile ? "ask-soundprint-input-mobile" : "ask-soundprint-input"}>
         {t("inputLabel")}
       </label>
-      <div className="flex items-end gap-1.5 rounded-[1.75rem] border border-slate-200/90 bg-white px-2 py-2 shadow-[0_8px_28px_rgba(15,23,42,0.08)] focus-within:border-violet-300/80 focus-within:shadow-[0_10px_32px_rgba(139,92,246,0.12)] dark:border-white/10 dark:bg-slate-950/80 dark:shadow-black/30 dark:focus-within:border-violet-400/40">
+      <div className="flex items-end gap-1.5 rounded-full border border-glass-hairline bg-surface-raised/90 px-2 py-1.5 backdrop-blur-md supports-[backdrop-filter]:bg-surface-raised/75 focus-within:border-foreground/20 focus-within:ring-2 focus-within:ring-ring dark:bg-white/[0.06] motion-reduce:backdrop-blur-none [@media(prefers-reduced-transparency:reduce)]:bg-surface-raised [@media(prefers-reduced-transparency:reduce)]:backdrop-blur-none">
         {leadingAction}
         <textarea
           ref={textareaRef}
@@ -194,14 +198,14 @@ export function AskSoundprintComposer({
           disabled={disabled}
           placeholder={placeholder}
           rows={1}
-          className={`min-h-11 flex-1 resize-none bg-transparent px-2 py-2.5 text-slate-900 outline-none placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-60 dark:text-white dark:placeholder:text-slate-500 ${
+          className={`min-h-11 flex-1 resize-none bg-transparent px-2 py-2.5 text-foreground outline-none placeholder:text-muted disabled:cursor-not-allowed disabled:opacity-60 ${
             isMobile ? "text-base" : "text-[15px] leading-6"
           }`}
         />
         <button
           type="submit"
           disabled={disabled || !input.trim()}
-          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-cyan-500 text-white shadow-sm shadow-violet-500/25 transition enabled:hover:brightness-110 enabled:active:scale-95 disabled:cursor-not-allowed disabled:opacity-35"
+          className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-foreground text-background transition enabled:hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-35"
           aria-label={t("send")}
         >
           <Send className="h-4 w-4" aria-hidden />
@@ -217,31 +221,33 @@ export function AskSoundprintSuggestionTile({
   hint,
   disabled,
   onSelect,
+  ariaLabel,
 }: {
   label: ReactNode;
   question: string;
   hint?: string;
   disabled: boolean;
   onSelect: () => void;
+  ariaLabel?: string;
 }) {
   return (
     <button
       type="button"
       disabled={disabled}
       onClick={onSelect}
-      className="flex min-h-[5.5rem] flex-col items-start rounded-2xl border border-slate-200/90 bg-white px-4 py-3.5 text-left shadow-sm transition hover:border-violet-300/70 hover:bg-violet-50/40 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/[0.03] dark:hover:border-violet-400/35 dark:hover:bg-white/[0.06]"
+      aria-label={ariaLabel}
+      className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_SEPARATOR} text-foreground transition-colors hover:bg-black/[0.04] disabled:cursor-not-allowed disabled:opacity-60 dark:hover:bg-white/[0.06]`}
     >
-      <span className="line-clamp-1 text-xs font-medium text-violet-700 dark:text-violet-200">
-        {label}
-      </span>
-      <span className="mt-1 line-clamp-3 text-sm font-medium leading-5 text-slate-800 dark:text-slate-100">
-        {question}
-      </span>
-      {hint ? (
-        <span className="mt-1.5 line-clamp-2 text-xs leading-5 text-slate-500 dark:text-slate-400">
-          {hint}
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-[13px] font-medium text-muted">{label}</span>
+        <span className="mt-0.5 block text-[15px] font-semibold leading-5 tracking-tight">
+          {question}
         </span>
-      ) : null}
+        {hint ? (
+          <span className="mt-0.5 block text-[13px] leading-5 text-muted">{hint}</span>
+        ) : null}
+      </span>
+      <ChevronRight className="h-4 w-4 shrink-0 text-muted" aria-hidden />
     </button>
   );
 }

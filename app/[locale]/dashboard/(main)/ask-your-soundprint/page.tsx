@@ -160,10 +160,10 @@ function AskSoundprintPeriodChip({
 
   return (
     <span
-      className={`inline-flex min-h-8 max-w-full items-center gap-1.5 rounded-full border border-slate-200/90 bg-white/80 px-3 py-1 text-xs font-semibold text-slate-700 backdrop-blur dark:border-white/10 dark:bg-white/10 dark:text-white/90 ${className}`}
+      className={`inline-flex min-h-8 max-w-full items-center gap-1.5 rounded-full border border-glass-hairline bg-surface-raised/80 px-3 py-1 text-[13px] font-medium text-muted dark:bg-white/[0.06] ${className}`}
     >
       <CalendarRange className="h-3.5 w-3.5 shrink-0" aria-hidden />
-      <span className="truncate">
+      <span className="truncate text-foreground">
         {isAll
           ? t("periodChipAll", { range: parts.compactLabel })
           : t("periodChip", { range: parts.compactLabel })}
@@ -364,41 +364,14 @@ function PresetExampleButton({
   ctx,
   disabled,
   onSelect,
-  variant = "full",
 }: {
   example: PresetExample;
   ctx: PresetDisplayContext;
   disabled: boolean;
   onSelect: (presetQuestionId: MusicChatPresetQuestionId) => void;
-  variant?: "full" | "chip";
 }) {
   const t = useTranslations("askSoundprint");
   const { label, question, hint } = usePresetExampleContent(example, ctx);
-
-  if (variant === "chip") {
-    return (
-      <div className="inline-flex shrink-0 snap-start flex-col">
-        <button
-          type="button"
-          disabled={disabled}
-          onClick={() => onSelect(example.presetQuestionId)}
-          className="inline-flex min-h-11 flex-col items-start justify-center rounded-2xl border border-slate-200/90 bg-white px-4 py-3 text-left shadow-sm transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-slate-950/80"
-        >
-          <span className="text-[0.66rem] font-semibold uppercase tracking-[0.14em] text-violet-700 dark:text-violet-200">
-            {example.id === "artist-deep-dive" ? label : t(`examples.${example.id}.label`)}
-          </span>
-          <span className="mt-1 line-clamp-2 max-w-[12.5rem] text-sm font-medium leading-snug text-slate-900 dark:text-white">
-            {question}
-          </span>
-          {hint ? (
-            <span className="mt-1.5 line-clamp-2 max-w-[12.5rem] text-[0.65rem] leading-snug text-slate-500 dark:text-slate-400">
-              {hint}
-            </span>
-          ) : null}
-        </button>
-      </div>
-    );
-  }
 
   return (
     <AskSoundprintSuggestionTile
@@ -407,6 +380,7 @@ function PresetExampleButton({
       hint={hint}
       disabled={disabled}
       onSelect={() => onSelect(example.presetQuestionId)}
+      ariaLabel={t("mobile.featuredAskAria", { question })}
     />
   );
 }
@@ -415,13 +389,11 @@ function PresetPlaybookSections({
   ctx,
   disabled,
   onSelect,
-  variant = "full",
   filterIds,
 }: {
   ctx: PresetDisplayContext;
   disabled: boolean;
   onSelect: (presetQuestionId: MusicChatPresetQuestionId) => void;
-  variant?: "full" | "chip";
   filterIds?: QuickQuestionId[];
 }) {
   const t = useTranslations("askSoundprint");
@@ -435,12 +407,10 @@ function PresetPlaybookSections({
         if (examples.length === 0) return null;
 
         return (
-          <div key={section.titleKey} className="space-y-3">
-            {variant === "full" ? (
-              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
-                {t(`presetSections.${section.titleKey}`)}
-              </p>
-            ) : null}
+          <div key={section.titleKey}>
+            <p className="pb-1 pt-2 text-[13px] font-medium text-muted">
+              {t(`presetSections.${section.titleKey}`)}
+            </p>
             {examples.map((example) => (
               <AskSoundprintBoundPresetRow
                 key={example.id}
@@ -472,7 +442,7 @@ function FeaturedPresetSuggestions({
   );
 
   return (
-    <div className="grid w-full gap-3 sm:grid-cols-2">
+    <div className="w-full">
       {featuredExamples.map((example) => (
         <PresetExampleButton
           key={example.id}
@@ -953,7 +923,7 @@ function MusicChatContent() {
           ) : null}
           <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
             {isPublicDemoViewer ? (
-              <span className="inline-flex items-center rounded-full border border-slate-200/90 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 dark:border-white/10 dark:bg-white/10 dark:text-white/90">
+              <span className="inline-flex items-center rounded-full border border-glass-hairline bg-surface-raised/80 px-3 py-1.5 text-[13px] font-medium text-muted dark:bg-white/[0.06]">
                 {t("heroDemoPill")}
               </span>
             ) : null}

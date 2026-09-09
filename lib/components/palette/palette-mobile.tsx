@@ -5,9 +5,19 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { ArtistAvatarHydrated } from "@/lib/components/artist-avatar-hydrated";
-import { DASHBOARD_MOBILE_EMPTY_BLEED } from "@/lib/components/dashboard-mobile-import-empty";
-import { DashboardCinematicHeroBg } from "@/lib/components/dashboard-ui";
+import { OverviewHeroFrame } from "@/lib/components/overview-hero";
 import { MobileBottomSheet } from "@/lib/components/mobile-bottom-sheet";
+import {
+  DASHBOARD_BTN_GHOST,
+  DASHBOARD_BTN_OUTLINE,
+  DASHBOARD_METRIC_CELL,
+  DASHBOARD_METRIC_LABEL,
+  DASHBOARD_METRIC_STRIP,
+  DASHBOARD_METRIC_VALUE,
+  DASHBOARD_SEGMENTED_PILL,
+  DASHBOARD_SEGMENTED_PILL_ACTIVE,
+  DASHBOARD_SEGMENTED_TRACK,
+} from "@/lib/components/dashboard-ui";
 import { DASHBOARD_BOTTOM_NAV_OFFSET_VAR } from "@/lib/constants/dashboard-chrome";
 import type {
   PaletteMode,
@@ -16,13 +26,10 @@ import type {
 } from "@/lib/dto/palette";
 import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
 
-const MOBILE_BLEED =
-  "-mx-4 -mt-4 space-y-4 lg:hidden max-lg:pb-[max(2rem,calc(var(--dashboard-bottom-nav-offset,0px)+5.75rem))]";
-const HERO_SHELL = "relative overflow-hidden bg-gray-950 px-4 pb-5 pt-4 text-white";
-const SNAP_RAIL =
-  "-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden";
+const MOBILE_CANVAS =
+  "space-y-8 pb-8 lg:hidden max-lg:pb-[max(2rem,calc(var(--dashboard-bottom-nav-offset,0px)+5.75rem))]";
 const GENRE_INPUT_CLASS =
-  "min-h-11 w-full rounded-2xl border border-card-border bg-card-surface px-3.5 text-base text-foreground outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-400/25";
+  "min-h-11 w-full rounded-2xl border border-glass-hairline bg-surface-raised px-3.5 text-base text-foreground outline-none placeholder:text-muted focus-visible:ring-2 focus-visible:ring-ring";
 
 function ChevronIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
@@ -48,15 +55,6 @@ function isUnknownGenreLabel(value: string): boolean {
   return /^(unknown|inconnu|desconocido)$/i.test(value.trim());
 }
 
-function SignalTile({ label, value }: { label: string; value: string }) {
-  return (
-    <article className="min-w-[9.75rem] snap-start rounded-3xl border border-card-border bg-gray-950 p-4 text-white shadow-lg shadow-black/10">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">{label}</p>
-      <p className="mt-2 text-2xl font-semibold tabular-nums tracking-[-0.04em]">{value}</p>
-    </article>
-  );
-}
-
 function ActionRow({
   title,
   lead,
@@ -72,18 +70,16 @@ function ActionRow({
     <button
       type="button"
       onClick={onClick}
-      className="flex min-h-11 w-full items-center gap-3 rounded-2xl border border-card-border bg-card-surface px-3.5 py-2.5 text-left text-gray-950 shadow-sm dark:text-white"
+      className="flex min-h-11 w-full items-center gap-3 border-b border-glass-hairline py-2.5 text-left text-foreground last:border-b-0"
     >
-      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent-violet/15 text-accent-violet">
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-black/[0.05] text-foreground dark:bg-white/10">
         {icon}
       </span>
       <span className="min-w-0 flex-1">
         <span className="block truncate text-sm font-semibold tracking-tight">{title}</span>
-        <span className="mt-0.5 block truncate text-xs leading-5 text-gray-500 dark:text-gray-400">
-          {lead}
-        </span>
+        <span className="mt-0.5 block truncate text-xs leading-5 text-muted">{lead}</span>
       </span>
-      <ChevronIcon className="h-4 w-4 shrink-0 text-gray-400" />
+      <ChevronIcon className="h-4 w-4 shrink-0 text-muted" />
     </button>
   );
 }
@@ -102,18 +98,16 @@ function DestinationRow({
   return (
     <Link
       href={href}
-      className="flex min-h-11 items-center gap-3 rounded-2xl border border-card-border bg-card-surface px-3.5 py-2.5 text-gray-950 shadow-sm dark:text-white"
+      className="flex min-h-11 items-center gap-3 border-b border-glass-hairline py-2.5 text-foreground last:border-b-0"
     >
-      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent-violet/15 text-accent-violet">
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-black/[0.05] text-foreground dark:bg-white/10">
         {icon}
       </span>
       <span className="min-w-0 flex-1">
         <span className="block truncate text-sm font-semibold tracking-tight">{title}</span>
-        <span className="mt-0.5 block truncate text-xs leading-5 text-gray-500 dark:text-gray-400">
-          {lead}
-        </span>
+        <span className="mt-0.5 block truncate text-xs leading-5 text-muted">{lead}</span>
       </span>
-      <ChevronIcon className="h-4 w-4 shrink-0 text-gray-400" />
+      <ChevronIcon className="h-4 w-4 shrink-0 text-muted" />
     </Link>
   );
 }
@@ -128,15 +122,17 @@ function ModeSwitcher({
   const t = useTranslations("palette");
   return (
     <div
-      className="grid grid-cols-2 gap-1 rounded-2xl border border-white/15 bg-white/10 p-1"
+      className={`${DASHBOARD_SEGMENTED_TRACK} w-full`}
       role="group"
       aria-label={t("modeAriaLabel")}
     >
       <button
         type="button"
         onClick={() => setPaletteMode("artists")}
-        className={`min-h-11 rounded-xl px-3 py-2 text-sm font-semibold transition-colors ${
-          paletteMode === "artists" ? "bg-white text-violet-950" : "text-white/75"
+        className={`flex-1 ${
+          paletteMode === "artists"
+            ? DASHBOARD_SEGMENTED_PILL_ACTIVE
+            : DASHBOARD_SEGMENTED_PILL
         }`}
       >
         {t("modeArtists")}
@@ -144,8 +140,10 @@ function ModeSwitcher({
       <button
         type="button"
         onClick={() => setPaletteMode("tracks")}
-        className={`min-h-11 rounded-xl px-3 py-2 text-sm font-semibold transition-colors ${
-          paletteMode === "tracks" ? "bg-white text-violet-950" : "text-white/75"
+        className={`flex-1 ${
+          paletteMode === "tracks"
+            ? DASHBOARD_SEGMENTED_PILL_ACTIVE
+            : DASHBOARD_SEGMENTED_PILL
         }`}
       >
         {t("modeTracks")}
@@ -155,64 +153,45 @@ function ModeSwitcher({
 }
 
 export function PaletteMobileSkeleton() {
+  const t = useTranslations("palette");
+
   return (
-    <div className={MOBILE_BLEED} aria-busy="true">
-      <section className={HERO_SHELL}>
-        <DashboardCinematicHeroBg />
-        <div className="relative space-y-3">
-          <div className="h-8 w-24 animate-pulse rounded-full bg-white/15" />
-          <div className="flex items-center gap-3">
-            <div className="h-12 w-12 animate-pulse rounded-full bg-white/15" />
-            <div className="min-w-0 flex-1 space-y-2">
-              <div className="h-3 w-16 animate-pulse rounded bg-white/15" />
-              <div className="h-7 w-40 animate-pulse rounded bg-white/20" />
-            </div>
+    <div className={MOBILE_CANVAS} aria-busy="true">
+      <OverviewHeroFrame compact title={t("title")} description="…">
+        <div className="mt-4 h-11 animate-pulse rounded-full bg-black/10 dark:bg-white/10" />
+      </OverviewHeroFrame>
+      <div className={`${DASHBOARD_METRIC_STRIP} w-full flex-nowrap overflow-x-auto`}>
+        {[0, 1, 2].map((item) => (
+          <div key={item} className={`${DASHBOARD_METRIC_CELL} min-w-[9.75rem] flex-none`}>
+            <span className={`${DASHBOARD_METRIC_LABEL} inline-block h-3 w-16 animate-pulse rounded bg-black/10 dark:bg-white/10`} />
+            <span className={`${DASHBOARD_METRIC_VALUE} mt-2 inline-block h-7 w-14 animate-pulse rounded bg-black/10 dark:bg-white/10`} />
           </div>
-          <div className="h-11 animate-pulse rounded-2xl bg-white/10" />
-        </div>
-      </section>
-      <section className="px-4">
-        <div className={SNAP_RAIL}>
-          {[0, 1, 2].map((item) => (
-            <div
-              key={item}
-              className="h-24 min-w-[9.75rem] snap-start animate-pulse rounded-3xl border border-white/10 bg-slate-950/80"
-            />
-          ))}
-        </div>
-      </section>
-      <section className="space-y-2 px-4">
-        <div className="h-11 animate-pulse rounded-2xl border border-card-border bg-card-surface" />
-        <div className="h-11 animate-pulse rounded-2xl border border-card-border bg-card-surface" />
+        ))}
+      </div>
+      <section className="space-y-2">
+        <div className="h-11 animate-pulse rounded-2xl border border-glass-hairline bg-surface-raised" />
+        <div className="h-11 animate-pulse rounded-2xl border border-glass-hairline bg-surface-raised" />
       </section>
     </div>
   );
 }
 
 export function PaletteMobileError({ onRetry }: { onRetry: () => void }) {
+  const t = useTranslations("palette");
   const tm = useTranslations("palette.mobile");
   const tCommon = useTranslations("common");
 
   return (
-    <div className={MOBILE_BLEED}>
-      <section className={HERO_SHELL}>
-        <DashboardCinematicHeroBg />
-        <div className="relative space-y-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-cyan">
-            {tm("eyebrow")}
-          </p>
-          <h1 className="max-w-[16rem] text-[1.55rem] font-semibold leading-[1.15] tracking-[-0.05em]">
-            {tm("errorTitle")}
-          </h1>
-          <button
-            type="button"
-            onClick={onRetry}
-            className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25"
-          >
-            {tCommon("retry")}
-          </button>
-        </div>
-      </section>
+    <div className={MOBILE_CANVAS}>
+      <OverviewHeroFrame compact title={tm("errorTitle")} description={t("loadError")}>
+        <button
+          type="button"
+          onClick={onRetry}
+          className={`${DASHBOARD_BTN_OUTLINE} mt-4 w-full`}
+        >
+          {tCommon("retry")}
+        </button>
+      </OverviewHeroFrame>
     </div>
   );
 }
@@ -223,25 +202,12 @@ export function PaletteMobileEmpty() {
   const genresHref = mergeDashboardSearchParams("/dashboard/genres", searchParams);
 
   return (
-    <div className={DASHBOARD_MOBILE_EMPTY_BLEED}>
-      <section className={`${HERO_SHELL} flex min-h-0 flex-1 flex-col`}>
-        <DashboardCinematicHeroBg />
-        <div className="relative flex min-h-0 flex-1 flex-col space-y-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-cyan">
-            {tm("eyebrow")}
-          </p>
-          <h1 className="max-w-[16rem] text-[1.55rem] font-semibold leading-[1.15] tracking-[-0.05em]">
-            {tm("emptyTitle")}
-          </h1>
-          <p className="max-w-sm text-sm leading-6 text-white/70">{tm("emptyLead")}</p>
-          <Link
-            href={genresHref}
-            className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25"
-          >
-            {tm("emptyCta")}
-          </Link>
-        </div>
-      </section>
+    <div className={MOBILE_CANVAS}>
+      <OverviewHeroFrame compact title={tm("emptyTitle")} description={tm("emptyLead")}>
+        <Link href={genresHref} className={`${DASHBOARD_BTN_OUTLINE} mt-6 w-full`}>
+          {tm("emptyCta")}
+        </Link>
+      </OverviewHeroFrame>
     </div>
   );
 }
@@ -323,67 +289,63 @@ export function PaletteMobileExperience({
   }
 
   return (
-    <div className={MOBILE_BLEED}>
-      <section className={HERO_SHELL}>
-        <DashboardCinematicHeroBg />
-        <div className="relative space-y-4">
-          <div className="flex items-center justify-between gap-3">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-cyan">
-              {tm("eyebrow")}
-            </p>
-            <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold tabular-nums">
-              {progressPct}%
-            </span>
-          </div>
-
-          <div className="flex items-center gap-3.5">
-            {artistId ? (
-              <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full ring-1 ring-white/15">
-                <ArtistAvatarHydrated
-                  artistId={artistId}
-                  artistName={avatarName}
-                  imageUrl={imageUrl}
-                  avatarApiSize={96}
-                  alt=""
-                  width={48}
-                  height={48}
-                  className="h-full w-full object-cover"
-                  loading="eager"
-                />
-              </div>
-            ) : null}
-            <div className="min-w-0">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/55">
-                {activeSubtitle}
-              </p>
-              <h1 className="mt-1 truncate text-[1.55rem] font-semibold leading-[1.12] tracking-[-0.05em]">
-                {activeTitle}
-              </h1>
-              <p className="mt-1 text-sm font-semibold tabular-nums text-white/75">
-                {t("listensImpacted", { count: impactedListens.toLocaleString(locale) })}
-              </p>
+    <div className={MOBILE_CANVAS}>
+      <OverviewHeroFrame compact title={t("title")} description={activeSubtitle}>
+        <div className="mt-4 flex items-center gap-3.5">
+          {artistId ? (
+            <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full ring-1 ring-glass-hairline">
+              <ArtistAvatarHydrated
+                artistId={artistId}
+                artistName={avatarName}
+                imageUrl={imageUrl}
+                avatarApiSize={96}
+                alt=""
+                width={48}
+                height={48}
+                className="h-full w-full object-cover"
+                loading="eager"
+              />
             </div>
+          ) : null}
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-lg font-semibold tracking-tight text-foreground">
+              {activeTitle}
+            </p>
+            <p className="mt-0.5 text-sm tabular-nums text-muted">
+              {t("listensImpacted", { count: impactedListens.toLocaleString(locale) })}
+            </p>
           </div>
-
+          <span className="shrink-0 text-[13px] font-semibold tabular-nums text-muted">
+            {progressPct}%
+          </span>
+        </div>
+        <div className="mt-4">
           <ModeSwitcher paletteMode={paletteMode} setPaletteMode={setPaletteMode} />
         </div>
-      </section>
+      </OverviewHeroFrame>
 
-      <section className="px-4" aria-label={tm("signalsLabel")}>
-        <div className={SNAP_RAIL}>
-          <SignalTile label={tm("impactSignal")} value={impactedListens.toLocaleString(locale)} />
-          <SignalTile
-            label={tm("remainingSignal")}
-            value={data.progress.remaining.toLocaleString(locale)}
-          />
-          <SignalTile
-            label={tm("mappedSignal")}
-            value={data.mappedListensTotal.toLocaleString(locale)}
-          />
+      <section aria-label={tm("signalsLabel")}>
+        <div className={`${DASHBOARD_METRIC_STRIP} w-full flex-nowrap overflow-x-auto`}>
+          <div className={`${DASHBOARD_METRIC_CELL} min-w-[9.75rem] flex-none`}>
+            <span className={DASHBOARD_METRIC_LABEL}>{tm("impactSignal")}</span>
+            <span className={DASHBOARD_METRIC_VALUE}>{impactedListens.toLocaleString(locale)}</span>
+          </div>
+          <div className={`${DASHBOARD_METRIC_CELL} min-w-[9.75rem] flex-none`}>
+            <span className={DASHBOARD_METRIC_LABEL}>{tm("remainingSignal")}</span>
+            <span className={DASHBOARD_METRIC_VALUE}>
+              {data.progress.remaining.toLocaleString(locale)}
+            </span>
+          </div>
+          <div className={`${DASHBOARD_METRIC_CELL} min-w-[9.75rem] flex-none`}>
+            <span className={DASHBOARD_METRIC_LABEL}>{tm("mappedSignal")}</span>
+            <span className={DASHBOARD_METRIC_VALUE}>
+              {data.mappedListensTotal.toLocaleString(locale)}
+            </span>
+          </div>
         </div>
       </section>
 
-      <section className="space-y-3 px-4">
+      <section className="space-y-3">
         <label className="block text-sm font-semibold text-foreground" htmlFor="palette-mobile-genre">
           {tm("pickGenre")}
         </label>
@@ -408,32 +370,34 @@ export function PaletteMobileExperience({
           <p className="text-sm text-red-600 dark:text-red-300">{tm("unknownRejected")}</p>
         ) : null}
 
-        {suggestions.length > 0 ? (
+        <div className="border-t border-glass-hairline pt-1">
+          {suggestions.length > 0 ? (
+            <ActionRow
+              title={tm("suggestionsRowTitle")}
+              lead={tm("suggestionsRowLead", { count: suggestions.length })}
+              icon={<span className="text-sm font-bold">{suggestions.length}</span>}
+              onClick={() => setSheet("suggestions")}
+            />
+          ) : null}
+
           <ActionRow
-            title={tm("suggestionsRowTitle")}
-            lead={tm("suggestionsRowLead", { count: suggestions.length })}
-            icon={<span className="text-sm font-bold">{suggestions.length}</span>}
-            onClick={() => setSheet("suggestions")}
+            title={tm("customRowTitle")}
+            lead={customGenre.trim() || tm("customRowLead")}
+            icon={<ChevronIcon className="h-5 w-5" />}
+            onClick={() => setSheet("custom")}
           />
-        ) : null}
 
-        <ActionRow
-          title={tm("customRowTitle")}
-          lead={customGenre.trim() || tm("customRowLead")}
-          icon={<ChevronIcon className="h-5 w-5" />}
-          onClick={() => setSheet("custom")}
-        />
-
-        <DestinationRow
-          href={genresHref}
-          title={tm("genresRowTitle")}
-          lead={tm("genresRowLead")}
-          icon={<GenresIcon className="h-5 w-5" />}
-        />
+          <DestinationRow
+            href={genresHref}
+            title={tm("genresRowTitle")}
+            lead={tm("genresRowLead")}
+            icon={<GenresIcon className="h-5 w-5" />}
+          />
+        </div>
       </section>
 
       <div
-        className="fixed inset-x-0 z-[19] border-t border-card-border bg-background/95 px-4 py-3 backdrop-blur-xl lg:hidden"
+        className="fixed inset-x-0 z-[19] border-t border-glass-hairline bg-background/95 px-4 py-3 backdrop-blur-xl lg:hidden"
         style={{ bottom: `var(${DASHBOARD_BOTTOM_NAV_OFFSET_VAR}, 0px)` }}
       >
         <div className="flex gap-2">
@@ -442,7 +406,7 @@ export function PaletteMobileExperience({
             onClick={onMap}
             disabled={!applyEnabled}
             aria-label={tm("apply")}
-            className="inline-flex min-h-12 min-w-0 flex-1 items-center justify-center rounded-2xl bg-slate-950 px-4 text-sm font-bold text-white shadow-xl shadow-slate-900/15 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-white dark:text-slate-950"
+            className={`${DASHBOARD_BTN_OUTLINE} min-h-12 min-w-0 flex-1 disabled:cursor-not-allowed disabled:opacity-40`}
           >
             {applyLabel}
           </button>
@@ -450,7 +414,7 @@ export function PaletteMobileExperience({
             type="button"
             onClick={onSkip}
             disabled={isBusy}
-            className="inline-flex min-h-12 shrink-0 items-center justify-center rounded-2xl border border-card-border bg-card-surface px-4 text-sm font-semibold text-foreground disabled:opacity-40"
+            className={`${DASHBOARD_BTN_GHOST} min-h-12 shrink-0 disabled:opacity-40`}
           >
             {tm("skip")}
           </button>
@@ -490,13 +454,13 @@ export function PaletteMobileExperience({
                     onClick={() => pickSuggestion(suggestion)}
                     className={`flex min-h-11 w-full items-center justify-between gap-3 rounded-2xl border px-3.5 py-2.5 text-left ${
                       selected
-                        ? "border-violet-600 bg-violet-600 text-white"
-                        : "border-card-border bg-card-surface text-foreground"
+                        ? "border-foreground bg-foreground text-background"
+                        : "border-glass-hairline bg-surface-raised text-foreground"
                     }`}
                   >
                     <span className="min-w-0">
                       <span className="block truncate text-sm font-semibold">{suggestion.genre}</span>
-                      <span className={`mt-0.5 block truncate text-xs ${selected ? "text-white/80" : "text-muted"}`}>
+                      <span className={`mt-0.5 block truncate text-xs ${selected ? "text-background/80" : "text-muted"}`}>
                         {Math.round(suggestion.confidence * 100)}% · {suggestion.reason}
                       </span>
                     </span>
@@ -544,7 +508,7 @@ export function PaletteMobileExperience({
           <button
             type="button"
             onClick={() => setSheet(null)}
-            className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-slate-950 px-4 text-sm font-bold text-white dark:bg-white dark:text-slate-950"
+            className={`${DASHBOARD_BTN_OUTLINE} mt-4 w-full`}
           >
             {tm("customDone")}
           </button>

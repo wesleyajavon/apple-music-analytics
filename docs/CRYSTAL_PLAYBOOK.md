@@ -24,7 +24,7 @@ Le chrome (sidebar + header) se fait **avant** Overview, sinon chaque section se
 - Tops + pages suivantes : [`replay-ranking-grid.tsx`](../lib/components/replay-ranking-grid.tsx) (grille partagée, `grid-cols-2` + `lg:grid-cols-4`)
 - Charts Overview : [`overview-trends-chart.tsx`](../lib/components/charts/overview-trends-chart.tsx) + [`crystal-chart.ts`](../lib/constants/crystal-chart.ts)
 
-Le plus gros écart **restant** n’est plus Overview ni artists / tracks / genres. **7a–7c livrées.** Musical-profile = **7d** (prompt prêt). Restant à lancer : **7e** (`*/trends` + timeline + heatmap) et **7f** (Ask / Duet) — prompts complets plus bas.
+Le plus gros écart **restant** n’est plus Overview ni artists / tracks / genres. **7a–7g livrées** (Ask/Duet = 7f ; empty + AI Insights + temporal + palette + settings = 7g).
 
 ---
 
@@ -423,7 +423,7 @@ Les deux pages ont **le même modèle d’information** : 4 items dans le sélec
 
 **7a livrée :** 3 onglets locaux (spotlight / leaderboard / ranking) + CTA trends ghost dans le masthead. **Manque :** le 4ᵉ item `trends` dans le switcher (et le même switcher sur `/artists/trends`). 7b aligne `/artists` sur ce contrat **et** livre `/tracks` dessus.
 
-Ordre (index). **7a–7f = blocs complets plus bas.**
+Ordre (index). **7a–7g = blocs complets plus bas.**
 
 | # | Route | Session |
 | --- | --- | --- |
@@ -433,6 +433,7 @@ Ordre (index). **7a–7f = blocs complets plus bas.**
 | **7d** | `/dashboard/musical-profile` | **Hub empilé** (pas de `view=`). Masthead canvas + strip + tuiles Replay (top 4) + list rows destinations. Dual tree. |
 | **7e** | `/timeline`, `/heatmap`, `*/trends` | Chrome canvas + plots Crystal (`OverviewTrendsChart` / `crystal-chart.ts`). Dual tree. |
 | **7f** | Ask + Duet (friends / compare) | Chrome seulement. `TopLibraryCard` friend-music **hors scope** (session dédiée). |
+| **7g** | Empty + AI Insights + temporal + palette + settings | **Faite.** Canvas / list rows ; empty partagés Crystal ; dual tree. |
 
 ---
 
@@ -720,6 +721,62 @@ Livre : Ask presets moins « carte » ; Duet friends/compare sans hero always-da
 
 ---
 
+### Étape 7g — Empty + AI Insight + Temporal + Genre Palette + Settings (**FAITE** — après 7f)
+
+Chrome seulement. **Livré.** **Pas** de changement de logique produit, scoring IA, auth, ni routes. Objectif : supprimer le rendu “collection de cartes” résiduel.
+
+```text
+[Préambule]
+
+Étape 7g — Crystal cleanup des pages encore card-oriented. Composer OverviewHeroFrame + DASHBOARD_METRIC_STRIP + DASHBOARD_LIST_ROW + sections canvas (hairlines / spacing) sans mega-shell.
+
+Contrat :
+- Empty states (dont « Empty library ») = message lisible sur canvas avec CTA utile ; pas de bloc carte marketing isolé au centre.
+- /dashboard/ai-insights, /dashboard/temporal-analysis, /dashboard/genres/palette, /dashboard/settings : conserver les fonctionnalités, réduire le chrome carte, harmoniser headers/sections avec Crystal.
+- Ne pas toucher APIs, hooks de données, permissions, feature flags ni instrumentation analytics.
+- Garder la dual tree mobile si ces pages ont des composants mobiles dédiés ; sinon responsive sans fork produit.
+
+Aujourd’hui (à remplacer) :
+- Empty « Empty library » encore rendu dans des shells carte (rounded + border + shadow) sur certaines vues et états gate/backfill.
+- AI Insight : sections encapsulées dans des cards épaisses (background contrasté + lift) au lieu de blocs canvas.
+- Temporal Analysis : widgets/plots parfois dans des wrappers spotlight/carte hérités.
+- Genres Palette : panneaux palette / légende / détails encore structurés en card stacks.
+- Settings : groupes/toggles dans des containers carte trop lourds visuellement pour le système Crystal.
+
+Fichiers :
+- AI Insights : app/[locale]/dashboard/(main)/ai-insights/page.tsx + `lib/components/ai-insights-mobile.tsx`.
+- Temporal Analysis : app/[locale]/dashboard/(main)/temporal-analysis/page.tsx + `lib/components/temporal-analysis-mobile.tsx`.
+- Genres Palette : app/[locale]/dashboard/(main)/genres/palette/page.tsx + `lib/components/palette/*`.
+- Settings : app/[locale]/dashboard/(main)/settings/* + `lib/components/settings-mobile.tsx`.
+- Empty states partagés : `empty-state.tsx`, `dashboard-mobile-import-empty.tsx`, `error-state.tsx` (startup).
+
+Objectif desktop lg+ :
+- Masthead canvas (titre + subtitle/trust line), pas de hero always-dark ni carte parent.
+- Sections : titres `DASHBOARD_SECTION_*`, contenu directement sur canvas ; si regroupement requis, utiliser hairline soft plutôt qu’un shell plein.
+- KPI courts éventuels via `DASHBOARD_METRIC_STRIP` (pas mini-cartes empilées).
+- Visualisations : plus de `DASHBOARD_SPOTLIGHT_SHELL`/CARD_SHELL autour des plots ; conserver lisibilité light/dark.
+- Empty library : état vide unifié Crystal (copy + CTA + éventuellement hint), sans icône géante dans une carte flottante.
+
+Objectif mobile < lg :
+- Plus de hero cinématique/carte lourde ; header compact + sections empilées lisibles.
+- Rows actions/settings = `DASHBOARD_LIST_ROW` ou pattern équivalent sans shadow-card.
+- Empty states compacts : heading + message + CTA 44px, sans panneau modal-like permanent.
+- Aucune régression navigation, sheets, toggles, ni accès auth.
+
+Contraintes :
+- 44px touch targets, EN+FR (+ ES si copy touchée), light/dark.
+- `prefers-reduced-transparency` respecté pour glass/frost.
+- Pas de réintroduction `CARD_SHELL`, `*_HERO_SHELL`, `DASHBOARD_SPOTLIGHT_SHELL` sur ces surfaces.
+- Gemini `modify_frontend` 1 surface max si utilisé, puis adaptation manuelle.
+
+Livre :
+- Empty states (incluant « Empty library ») alignés Crystal.
+- Pages AI Insight / Temporal Analysis / Genres Palette / Settings visuellement cohérentes avec Overview/7e/7f.
+- Plus de “mur de cartes” résiduel desktop/mobile ; UX et données inchangées.
+```
+
+---
+
 ## Gemini Design MCP
 
 Après l’étape 0. **Pas** de `create_frontend` Overview (casserait hooks / i18n / tabs).
@@ -802,6 +859,17 @@ Desktop `lg+` **et** mobile ~390×844, light et dark, EN et FR :
 
 ---
 
+## Critères de done (7g)
+
+- [x] Empty states (dont « Empty library ») sans shell carte marketing ; copy + CTA Crystal lisibles
+- [x] `/dashboard/ai-insights` : sections et insights un-card, sans hero always-dark ni card stacks
+- [x] `/dashboard/temporal-analysis` : plots/insights sortis des wrappers spotlight/card legacy
+- [x] `/dashboard/genres/palette` : palette, légende, détails en layout canvas/list rows plutôt qu’en cartes empilées
+- [x] `/dashboard/settings` : groupes/actions harmonisés Crystal (rows, separators, cibles 44px), sans conteneurs carte lourds
+- [x] Light/dark EN/FR (et ES si copy touchée) desktop + mobile, sans régression de logique produit
+
+---
+
 ## Hors scope Crystal
 
 - Transformer Overview (ou l’app) en **story Replay** (scroll unique, tuer les tabs)
@@ -827,5 +895,6 @@ Desktop `lg+` **et** mobile ~390×844, light et dark, EN et FR :
 - `lib/components/charts/overview-trends-chart.tsx` — **fait** étape 5
 - `lib/components/top-three-artists-cards.tsx` — legacy `CARD_SHELL` ; **7a** l’a débranché de `/artists`
 - [`lib/components/artists-mobile.tsx`](../lib/components/artists-mobile.tsx) / `tracks-mobile.tsx` / `genres-mobile.tsx` / `musical-profile-mobile.tsx` — dual tree Crystal 7a–7d
-- `lib/components/trends-mobile-hub.tsx` / `timeline-mobile.tsx` / `heatmap-mobile.tsx` — cible **7e**
-- `lib/components/ask-soundprint-*.tsx` / `lib/components/duet/*-hero.tsx` — cible **7f** (chrome)
+- `lib/components/trends-mobile-hub.tsx` / `timeline-mobile.tsx` / `heatmap-mobile.tsx` — **7e**
+- `lib/components/ask-soundprint-*.tsx` / `lib/components/duet/*-hero.tsx` — **7f** (chrome)
+- `ai-insights` / `temporal-analysis` / `palette/*` / settings — **7g** (chrome + empty partagés)

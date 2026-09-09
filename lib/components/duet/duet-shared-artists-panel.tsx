@@ -7,16 +7,10 @@ import { ArtistAvatarHydrated } from "@/lib/components/artist-avatar-hydrated";
 import { DuetSharedArtistsEmpty } from "@/lib/components/duet/duet-shared-artists-empty";
 import { ErrorState } from "@/lib/components/error-state";
 import {
-  DASHBOARD_SPOTLIGHT_SHELL,
-  DASHBOARD_SPOTLIGHT_GRADIENT_LIME,
-  DASHBOARD_SPOTLIGHT_HAIRLINE_LIME,
-  DASHBOARD_SPOTLIGHT_INNER_WELL,
-  DASHBOARD_SPOTLIGHT_MUTED,
-  DASHBOARD_SPOTLIGHT_BADGE_LIME,
-  DASHBOARD_SPOTLIGHT_BADGE_DOT_LIME,
-  DASHBOARD_SPOTLIGHT_PILL_MUTED,
-  DASHBOARD_SPOTLIGHT_HEADER_BOTTOM,
-} from "@/lib/constants/dashboard-spotlight";
+  DASHBOARD_LIST_SEPARATOR,
+  DASHBOARD_SECTION_EYEBROW,
+  DASHBOARD_SECTION_TITLE,
+} from "@/lib/components/dashboard-ui";
 import type { CompareSharedArtistsResponse } from "@/lib/dto/duet";
 
 const VISIBLE_ARTISTS_COUNT = 5;
@@ -65,7 +59,7 @@ function SharedArtistStatChip({
       </p>
       <p className="mt-0.5 text-lg font-bold tabular-nums leading-none text-slate-900 dark:text-white">
         {listenCount.toLocaleString(locale)}
-        <span className={`ml-1 text-[0.65rem] font-medium normal-case tracking-normal ${DASHBOARD_SPOTLIGHT_MUTED}`}>
+        <span className={`ml-1 text-[0.65rem] font-medium normal-case tracking-normal text-muted`}>
           {listensLabel}
         </span>
       </p>
@@ -105,20 +99,19 @@ function SharedArtistsHeader({
   totalLabel?: string;
 }) {
   return (
-    <div className={`relative px-5 pb-5 pt-6 sm:px-8 ${DASHBOARD_SPOTLIGHT_HEADER_BOTTOM}`}>
+    <div className="pb-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="font-mono text-xs font-semibold uppercase tracking-[0.24em] text-primary">{eyebrow}</p>
+          <p className="text-[13px] font-medium text-muted">{eyebrow}</p>
           <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-foreground sm:text-3xl">{title}</h2>
-          <p className={`mt-2 max-w-2xl text-sm leading-6 ${DASHBOARD_SPOTLIGHT_MUTED}`}>{description}</p>
+          <p className={`mt-2 max-w-2xl text-sm leading-6 text-muted`}>{description}</p>
           {totalLabel ? (
-            <p className={`mt-2 text-xs font-semibold uppercase tracking-[0.14em] ${DASHBOARD_SPOTLIGHT_MUTED}`}>
+            <p className={`mt-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted`}>
               {totalLabel}
             </p>
           ) : null}
         </div>
-        <span className={badgeMuted ? DASHBOARD_SPOTLIGHT_PILL_MUTED : DASHBOARD_SPOTLIGHT_BADGE_LIME}>
-          {badgeMuted ? null : <span className={DASHBOARD_SPOTLIGHT_BADGE_DOT_LIME} aria-hidden />}
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-glass-hairline px-2.5 py-1 text-[12px] font-medium text-muted">
           {badge}
         </span>
       </div>
@@ -149,9 +142,7 @@ export function DuetSharedArtistsPanel({
   const isEmpty = !isLoading && !error && !data?.artists.length;
 
   return (
-    <section className={DASHBOARD_SPOTLIGHT_SHELL}>
-      <div className={DASHBOARD_SPOTLIGHT_GRADIENT_LIME} />
-      <div className={DASHBOARD_SPOTLIGHT_HAIRLINE_LIME} />
+    <section>
       <SharedArtistsHeader
         eyebrow={t("sharedArtistsEyebrow")}
         title={t("sharedArtistsTitle", { friendName })}
@@ -164,24 +155,24 @@ export function DuetSharedArtistsPanel({
             : undefined
         }
       />
-      <div className="space-y-4 px-5 pb-6 sm:px-8">
+      <div className="space-y-4">
         {isLoading ? (
-          <p className={`text-sm ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("sharedArtistsLoading")}</p>
+          <p className={`text-sm text-muted`}>{t("sharedArtistsLoading")}</p>
         ) : error ? (
           <ErrorState variant="startup" error={error} message={t("sharedArtistsError")} onRetry={onRetry} />
         ) : !data || data.artists.length === 0 ? (
           <DuetSharedArtistsEmpty
-            className={`${DASHBOARD_SPOTLIGHT_INNER_WELL} px-5 py-10 sm:px-8 sm:py-12`}
+            className="py-8"
             eyebrow={t("sharedArtistsEmptyEyebrow")}
             title={t("sharedArtistsEmptyTitle")}
             description={t("sharedArtistsEmptyDescription")}
           />
         ) : (
           <>
-            <ul className={`space-y-2 ${DASHBOARD_SPOTLIGHT_INNER_WELL} p-3 sm:p-4`}>
+            <ul>
               {visibleArtists.map((artist, index) => (
                 <li key={artist.artistId}>
-                  <div className="group flex w-full gap-3 rounded-xl border border-slate-200/80 bg-white/80 px-3 py-3 transition-all sm:items-start dark:border-white/10 dark:bg-slate-950/40">
+                  <div className="group flex w-full gap-3 border-b border-glass-hairline py-3 sm:items-start">
                     <div className="relative shrink-0 self-start overflow-hidden rounded-xl ring-1 ring-slate-200/90 shadow-sm dark:ring-white/10">
                       <ArtistAvatarHydrated
                         artistId={artist.artistId}

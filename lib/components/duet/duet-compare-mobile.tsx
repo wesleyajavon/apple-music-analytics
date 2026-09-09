@@ -3,7 +3,17 @@
 import { useId, useMemo, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { DashboardCinematicHeroBg } from "@/lib/components/dashboard-ui";
+import {
+  DASHBOARD_BTN_GHOST,
+  DASHBOARD_LIST_ROW,
+  DASHBOARD_LIST_SEPARATOR,
+  DASHBOARD_METRIC_CELL,
+  DASHBOARD_METRIC_LABEL,
+  DASHBOARD_METRIC_STRIP,
+  DASHBOARD_METRIC_VALUE,
+  DASHBOARD_SEGMENTED_TRACK,
+} from "@/lib/components/dashboard-ui";
+import { OverviewHeroFrame } from "@/lib/components/overview-hero";
 import { MobileBottomSheet } from "@/lib/components/mobile-bottom-sheet";
 import { MusicalProfilePeriodBadge } from "@/lib/components/musical-profile-period-badge";
 import { UserAvatar } from "@/lib/components/user-avatar";
@@ -24,7 +34,6 @@ import type { DuetCompareSection } from "@/lib/components/duet/duet-compare-sect
 import { getDuetDisplayName } from "@/lib/components/duet/duet-utils";
 import { duetShareHeadlineKey } from "@/lib/utils/duet-share-headline";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
-import { DASHBOARD_CHART_THEME } from "@/lib/constants/dashboard-spotlight";
 import type {
   CompareEntityResponse,
   CompareSharedArtistItem,
@@ -32,14 +41,9 @@ import type {
 } from "@/lib/dto/duet";
 
 const MOBILE_BLEED =
-  "-mx-4 -mt-4 space-y-4 lg:hidden max-lg:pb-[max(2rem,calc(var(--dashboard-bottom-nav-offset,0px)+5.75rem))]";
-const HERO_SHELL = "relative overflow-hidden bg-gray-950 px-4 pb-5 pt-4 text-white";
-const SNAP_RAIL =
-  "-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden";
-const ROW_CLASS =
-  "flex min-h-11 w-full items-center gap-3 rounded-2xl border border-card-border bg-card-surface px-3 py-2 text-left no-underline";
-const SEGMENT_SHELL =
-  "flex gap-1 overflow-x-auto rounded-2xl border border-card-border bg-card-surface p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden";
+  "space-y-6 pb-8 lg:hidden max-lg:pb-[max(2rem,calc(var(--dashboard-bottom-nav-offset,0px)+5.75rem))]";
+const ROW_CLASS = `${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_SEPARATOR} no-underline text-foreground`;
+const SEGMENT_SHELL = `${DASHBOARD_SEGMENTED_TRACK} w-full [scrollbar-width:none] [&::-webkit-scrollbar]:hidden`;
 
 type Suggestion = { id: string; label: string; subtitle?: string };
 
@@ -68,47 +72,39 @@ function formatCount(value: number, locale: string) {
 function HeroFrame({
   locale,
   heading,
+  description,
   children,
 }: {
   locale: string;
   heading: string;
+  description?: string;
   children?: ReactNode;
 }) {
-  const tm = useTranslations("duet.compare.mobile");
   const { startDate, endDate } = useListenDateRange();
 
   return (
-    <section className={HERO_SHELL}>
-      <DashboardCinematicHeroBg />
-      <div className="relative space-y-4">
-        <div className="flex justify-end">
-          <MusicalProfilePeriodBadge
-            startDate={startDate}
-            endDate={endDate}
-            locale={locale}
-            variant="mobile"
-            className="min-w-0"
-          />
-        </div>
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-cyan">
-            {tm("eyebrow")}
-          </p>
-          <h1 className="mt-1 max-w-[18rem] text-[1.55rem] font-semibold leading-[1.12] tracking-[-0.05em]">
-            {heading}
-          </h1>
-        </div>
-        {children}
+    <div className="space-y-4">
+      <div className="flex justify-end">
+        <MusicalProfilePeriodBadge
+          startDate={startDate}
+          endDate={endDate}
+          locale={locale}
+          variant="mobile"
+          className="min-w-0"
+        />
       </div>
-    </section>
+      <OverviewHeroFrame compact title={heading} description={description}>
+        {children}
+      </OverviewHeroFrame>
+    </div>
   );
 }
 
-function SignalTile({ label, value }: { label: string; value: string }) {
+function SignalCell({ label, value }: { label: string; value: string }) {
   return (
-    <div className="min-w-[9.75rem] snap-start rounded-3xl border border-white/15 bg-gray-950 p-4 text-white shadow-lg shadow-black/10">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">{label}</p>
-      <p className="mt-2 text-2xl font-semibold tabular-nums tracking-[-0.04em]">{value}</p>
+    <div className={DASHBOARD_METRIC_CELL}>
+      <p className={`${DASHBOARD_METRIC_VALUE} text-xl`}>{value}</p>
+      <p className={DASHBOARD_METRIC_LABEL}>{label}</p>
     </div>
   );
 }
@@ -237,7 +233,6 @@ function MobileChart({
   selfLabel: string;
   friendLabel: string;
 }) {
-  const chartTheme = DASHBOARD_CHART_THEME[resolvedTheme === "dark" ? "dark" : "light"];
   const displayed = useMemo(() => applyDuetChartView(data, chartView), [data, chartView]);
 
   return (
@@ -246,8 +241,6 @@ function MobileChart({
         data={displayed}
         period={period}
         locale={locale}
-        chartTheme={chartTheme}
-        resolvedTheme={resolvedTheme}
         selfLabel={selfLabel}
         friendLabel={friendLabel}
       />
@@ -288,7 +281,7 @@ export function DuetCompareMobileGated({
         <p className="max-w-sm text-sm leading-6 text-white/70">{tm("gatedLead")}</p>
         <Link
           href="/sign-in"
-          className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25 no-underline"
+          className={`${DASHBOARD_BTN_GHOST} w-full no-underline text-foreground`}
         >
           {tm("gatedCta")}
         </Link>
@@ -317,7 +310,7 @@ export function DuetCompareMobileError({
         <button
           type="button"
           onClick={onRetry}
-          className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25"
+          className={`${DASHBOARD_BTN_GHOST} w-full text-foreground`}
         >
           {tCommon("retry")}
         </button>
@@ -348,7 +341,7 @@ export function DuetCompareMobileUnavailable({
         <p className="text-sm leading-6 text-white/70">{description}</p>
         <Link
           href={withFilters("/dashboard/duet/friends")}
-          className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-bold text-gray-950 shadow-2xl shadow-black/25 no-underline"
+          className={`${DASHBOARD_BTN_GHOST} w-full no-underline text-foreground`}
         >
           {t("goToFriends")}
         </Link>
@@ -527,9 +520,9 @@ export function DuetCompareMobileExperience({
       </HeroFrame>
 
       <section className="px-4" aria-label={tm("railLabel")}>
-        <div className={SNAP_RAIL}>
-          <SignalTile label={youLabel} value={formatCount(selfTotal, locale)} />
-          <SignalTile label={friendName} value={formatCount(friendTotal, locale)} />
+        <div className={DASHBOARD_METRIC_STRIP}>
+          <SignalCell label={youLabel} value={formatCount(selfTotal, locale)} />
+          <SignalCell label={friendName} value={formatCount(friendTotal, locale)} />
         </div>
       </section>
 

@@ -2,24 +2,16 @@
 
 import { useMemo } from "react";
 import { motion } from "motion/react";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-} from "recharts";
 import { Crown, Swords, Trophy } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { ChartResponsiveContainer } from "@/lib/components/chart-responsive-container";
+import { OverviewTrendsChart } from "@/lib/components/charts/overview-trends-chart";
 import { DuetShareCardActions } from "@/lib/components/duet/duet-share-card-actions";
 import type { DuetArenaMode } from "@/lib/components/duet/duet-battle-arena-ui";
 import { generateDuetBattleSharePng } from "@/lib/utils/duet-battle-share-image";
 import { duetShareHeadlineKey, duetShareLeadKey } from "@/lib/utils/duet-share-headline";
 import type { PeriodType } from "@/lib/components/period-selector";
-import { DASHBOARD_CHART_THEME } from "@/lib/constants/dashboard-spotlight";
+import { getCrystalSeriesColor } from "@/lib/constants/crystal-chart";
+import { useTheme } from "@/lib/providers/theme-provider";
 import type { DualLineChartPoint } from "@/lib/utils/listen-trend-chart-view";
 import { formatTrendDate } from "@/lib/utils/genre-trends-pivot";
 
@@ -59,19 +51,24 @@ export function DuetDualLineChart({
   data,
   period,
   locale,
-  chartTheme,
-  resolvedTheme,
   selfLabel,
   friendLabel,
+  chartTheme: _chartTheme,
+  resolvedTheme: _resolvedTheme,
 }: {
   data: DualLineChartPoint[];
   period: PeriodType;
   locale: string;
-  chartTheme: (typeof DASHBOARD_CHART_THEME)[keyof typeof DASHBOARD_CHART_THEME];
-  resolvedTheme: string;
   selfLabel: string;
   friendLabel: string;
+  /** @deprecated Crystal chart ignores legacy theme tokens. */
+  chartTheme?: unknown;
+  /** @deprecated Crystal chart uses ThemeProvider. */
+  resolvedTheme?: string;
 }) {
+  const { resolvedTheme } = useTheme();
+  const chartThemeName = resolvedTheme === "dark" ? "dark" : "light";
+
   const chartData = useMemo<DuetDualLineChartRow[]>(
     () =>
       data.map((row) => ({
@@ -81,28 +78,30 @@ export function DuetDualLineChart({
     [data, period, locale]
   );
 
+  const series = useMemo(
+    () => [
+      {
+        dataKey: "self",
+        name: selfLabel,
+        color: getCrystalSeriesColor(0, chartThemeName),
+      },
+      {
+        dataKey: "friend",
+        name: friendLabel,
+        color: getCrystalSeriesColor(1, chartThemeName),
+      },
+    ],
+    [chartThemeName, friendLabel, selfLabel]
+  );
+
+  const formatValue = useMemo(
+    () => (value: number) =>
+      new Intl.NumberFormat(locale, { notation: "compact", maximumFractionDigits: 1 }).format(value),
+    [locale]
+  );
+
   return (
-    <ChartResponsiveContainer token="trendsLine">
-      <LineChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: 40 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} />
-        <XAxis
-          dataKey="formattedDate"
-          tick={{ fill: chartTheme.tick, fontSize: 12 }}
-          stroke={chartTheme.axisStroke}
-        />
-        <YAxis tick={{ fill: chartTheme.tick, fontSize: 12 }} stroke={chartTheme.axisStroke} />
-        <Tooltip
-          contentStyle={{
-            backgroundColor: resolvedTheme === "dark" ? "#0f172a" : "#fff",
-            border: `1px solid ${chartTheme.grid}`,
-            borderRadius: 12,
-          }}
-        />
-        <Legend wrapperStyle={{ color: chartTheme.legend }} />
-        <Line type="monotone" dataKey="self" name={selfLabel} stroke="#8b5cf6" strokeWidth={2.5} dot={false} />
-        <Line type="monotone" dataKey="friend" name={friendLabel} stroke="#22d3ee" strokeWidth={2.5} dot={false} />
-      </LineChart>
-    </ChartResponsiveContainer>
+    <OverviewTrendsChart data={chartData} series={series} formatValue={formatValue} />
   );
 }
 

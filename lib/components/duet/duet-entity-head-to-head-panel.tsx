@@ -22,11 +22,6 @@ import type { PeriodType } from "@/lib/components/period-selector";
 import { EmptyState } from "@/lib/components/empty-state";
 import { ErrorState } from "@/lib/components/error-state";
 import type { DuetArenaMode } from "@/lib/components/duet/duet-battle-arena-ui";
-import {
-  DASHBOARD_CHART_THEME,
-  DASHBOARD_SPOTLIGHT_INNER_WELL,
-  DASHBOARD_SPOTLIGHT_MUTED,
-} from "@/lib/constants/dashboard-spotlight";
 import type { CompareEntityResponse } from "@/lib/dto/duet";
 import { ApiError } from "@/lib/api-client";
 
@@ -66,8 +61,8 @@ export function EntityHeadToHeadPanel({
   locale,
   period,
   t,
-  chartTheme,
-  resolvedTheme,
+  chartTheme: _chartTheme,
+  resolvedTheme: _resolvedTheme,
   chartView,
   onChartViewChange,
 }: {
@@ -104,8 +99,8 @@ export function EntityHeadToHeadPanel({
   locale: string;
   period: PeriodType;
   t: ReturnType<typeof useTranslations<"duet.compare">>;
-  chartTheme: (typeof DASHBOARD_CHART_THEME)[keyof typeof DASHBOARD_CHART_THEME];
-  resolvedTheme: string;
+  chartTheme?: unknown;
+  resolvedTheme?: string;
   chartView: DuetChartViewMode;
   onChartViewChange: (mode: DuetChartViewMode) => void;
 }) {
@@ -195,7 +190,7 @@ export function EntityHeadToHeadPanel({
 
   return (
     <div className="space-y-4">
-      <div className={`relative ${DASHBOARD_SPOTLIGHT_INNER_WELL}`}>
+      <div className={`relative `}>
         <Search
           className="pointer-events-none absolute left-8 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 sm:left-10"
           aria-hidden
@@ -280,7 +275,7 @@ export function EntityHeadToHeadPanel({
       ) : null}
 
       {selectedEntityId && (isEntityLoading || isEntityFetching) ? (
-        <p className={`text-sm ${DASHBOARD_SPOTLIGHT_MUTED}`}>{loadingLabel}</p>
+        <p className={`text-sm text-muted`}>{loadingLabel}</p>
       ) : null}
 
       {selectedEntityId && entityError ? (
@@ -326,13 +321,13 @@ export function EntityHeadToHeadPanel({
           />
 
           {entityCompare.rangeClamped ? (
-            <p className={`text-sm ${DASHBOARD_SPOTLIGHT_MUTED}`}>{t("rangeClamped")}</p>
+            <p className={`text-sm text-muted`}>{t("rangeClamped")}</p>
           ) : null}
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <h3 className="text-base font-semibold text-slate-900 dark:text-white">{chartTitle}</h3>
-              <p className={`mt-1 text-sm ${DASHBOARD_SPOTLIGHT_MUTED}`}>
+              <p className={`mt-1 text-sm text-muted`}>
                 {chartView === "cumulative" ? chartDescriptionCumulative : chartDescription}
               </p>
             </div>
@@ -342,13 +337,11 @@ export function EntityHeadToHeadPanel({
           {chartData.length === 0 ? (
             <EmptyState variant="startup" message={noDataTitle} description={noDataDescription} />
           ) : (
-            <div className={DASHBOARD_SPOTLIGHT_INNER_WELL}>
+            <div>
               <DuetDualLineChart
                 data={displayChartData}
                 period={period}
                 locale={locale}
-                chartTheme={chartTheme}
-                resolvedTheme={resolvedTheme}
                 selfLabel={t("seriesSelf")}
                 friendLabel={t("seriesFriend", { friendName })}
               />

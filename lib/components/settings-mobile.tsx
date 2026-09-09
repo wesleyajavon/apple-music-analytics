@@ -12,8 +12,15 @@ import {
   SETTINGS_PRIMARY_SAVE_CLASS,
   SettingsSwitch,
 } from "@/app/[locale]/dashboard/(main)/settings/settings-shared";
-import { DashboardCinematicHeroBg } from "@/lib/components/dashboard-ui";
+import {
+  DASHBOARD_BTN_OUTLINE,
+  DASHBOARD_LIST_ROW,
+  DASHBOARD_LIST_ROW_INTERACTIVE,
+  DASHBOARD_LIST_SEPARATOR,
+  DASHBOARD_SECTION_EYEBROW,
+} from "@/lib/components/dashboard-ui";
 import { MobileBottomSheet } from "@/lib/components/mobile-bottom-sheet";
+import { OverviewHeroFrame } from "@/lib/components/overview-hero";
 import { UserAvatar } from "@/lib/components/user-avatar";
 import { DASHBOARD_BOTTOM_NAV_OFFSET_VAR } from "@/lib/constants/dashboard-chrome";
 import { DUET_SHARE_SETTINGS_HASH } from "@/lib/constants/duet-settings";
@@ -26,11 +33,9 @@ import { DASHBOARD_ONBOARDING_REIMPORT_PATH } from "@/lib/utils/onboarding-route
 import type { DuetShareScope } from "@prisma/client";
 
 const MOBILE_BLEED =
-  `-mx-4 -mt-4 space-y-5 lg:hidden max-lg:pb-[max(2rem,calc(var(${DASHBOARD_BOTTOM_NAV_OFFSET_VAR},0px)+1.5rem))]`;
-const HERO_SHELL = "relative overflow-hidden bg-gray-950 px-4 pb-5 pt-4 text-white";
-const GROUP_SHELL = "divide-y divide-card-border overflow-hidden rounded-2xl border border-card-border bg-card-surface";
-const ROW_CLASS =
-  "flex min-h-11 w-full items-center justify-between gap-3 px-3.5 py-2.5 text-left text-sm font-medium text-foreground";
+  `-mx-4 -mt-4 space-y-8 lg:hidden max-lg:pb-[max(2rem,calc(var(${DASHBOARD_BOTTOM_NAV_OFFSET_VAR},0px)+1.5rem))]`;
+
+const ROW_CLASS = `${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_ROW_INTERACTIVE} ${DASHBOARD_LIST_SEPARATOR} justify-between px-1 text-sm font-medium text-foreground`;
 
 export const SETTINGS_MOBILE_GROUP_IDS = {
   account: "settings-mobile-account",
@@ -65,21 +70,13 @@ function SettingsMobileGroup({
     <section id={id} className="scroll-mt-24 px-4" aria-labelledby={labelId}>
       <h2
         id={labelId}
-        className={`px-1 pb-2 text-[11px] font-semibold uppercase tracking-[0.16em] ${
-          tone === "danger" ? "text-red-700 dark:text-red-300" : "text-muted"
+        className={`${DASHBOARD_SECTION_EYEBROW} border-b border-glass-hairline px-1 pb-2 ${
+          tone === "danger" ? "text-red-700 dark:text-red-300" : ""
         }`}
       >
         {title}
       </h2>
-      <div
-        className={
-          tone === "danger"
-            ? "divide-y divide-red-200/80 overflow-hidden rounded-2xl border border-red-200/80 bg-red-50/90 dark:divide-red-900/40 dark:border-red-900/50 dark:bg-red-950/35"
-            : GROUP_SHELL
-        }
-      >
-        {children}
-      </div>
+      <div>{children}</div>
     </section>
   );
 }
@@ -89,11 +86,11 @@ function SettingsMobileAppearanceGroup() {
 
   return (
     <SettingsMobileGroup id={SETTINGS_MOBILE_GROUP_IDS.appearance} title={t("mobile.groupAppearance")}>
-      <div className="px-2 py-1.5">
+      <div className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_SEPARATOR} px-1`}>
         <ThemeSwitcher placement="bottom" />
       </div>
-      <div className="px-2 py-1.5">
-        <Suspense fallback={<div className="h-11 animate-pulse rounded-xl bg-background" />}>
+      <div className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_SEPARATOR} px-1`}>
+        <Suspense fallback={<div className="h-11 w-full animate-pulse rounded-xl bg-black/5 dark:bg-white/10" />}>
           <LanguageSwitcher placement="bottom" />
         </Suspense>
       </div>
@@ -144,10 +141,10 @@ function SettingsMobileToggleRow({
   id?: string;
 }) {
   return (
-    <div className="flex min-h-11 items-center justify-between gap-3 px-3.5 py-2.5">
+    <div className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_SEPARATOR} justify-between gap-3 px-1`}>
       <div className="min-w-0 flex-1">
         <p className="text-sm font-medium text-foreground">{title}</p>
-        {hint ? <p className="mt-0.5 text-xs leading-5 text-muted">{hint}</p> : null}
+        {hint ? <p className="mt-0.5 text-[13px] leading-5 text-muted">{hint}</p> : null}
         {saving && savingLabel ? <p className="mt-0.5 text-xs text-muted">{savingLabel}</p> : null}
       </div>
       <SettingsSwitch
@@ -200,7 +197,7 @@ function SettingsMobileDuetRows() {
 
   if (error) {
     return (
-      <p className="px-3.5 py-2.5 text-sm text-red-600 dark:text-red-300" role="alert">
+      <p className="px-1 py-2.5 text-sm text-red-600 dark:text-red-300" role="alert">
         {t("error")}
       </p>
     );
@@ -215,7 +212,7 @@ function SettingsMobileDuetRows() {
         ariaLabel={t("allowRequests")}
         onChange={(next) => updateSettings.mutate({ allowFriendRequests: next })}
       />
-      <div className="flex min-h-11 items-center justify-between gap-3 px-3.5 py-2.5">
+      <div className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_SEPARATOR} justify-between gap-3 px-1`}>
         <label htmlFor="settings-mobile-duet-scope" className="min-w-0 flex-1 text-sm font-medium text-foreground">
           {t("defaultScope")}
         </label>
@@ -224,13 +221,13 @@ function SettingsMobileDuetRows() {
           disabled={busy}
           value={data?.defaultShareScope ?? "aggregates"}
           onChange={(e) => updateSettings.mutate({ defaultShareScope: e.target.value as DuetShareScope })}
-          className="min-h-11 max-w-[11rem] rounded-xl border border-card-border bg-background px-2.5 text-sm text-foreground"
+          className="min-h-11 max-w-[11rem] rounded-xl border border-glass-hairline bg-surface-raised px-2.5 text-sm text-foreground"
         >
           <option value="aggregates">{t("scopeAggregates")}</option>
           <option value="full">{t("scopeFull")}</option>
         </select>
       </div>
-      <p className="px-3.5 py-2.5 text-xs leading-5 text-muted">{t("friendMusicHint")}</p>
+      <p className="px-1 py-2.5 text-[13px] leading-5 text-muted">{t("friendMusicHint")}</p>
     </>
   );
 }
@@ -276,7 +273,7 @@ function SettingsMobileExportRows({
         <ChevronIcon className="h-4 w-4 shrink-0 text-muted" />
       </button>
       {exportError ? (
-        <p className="px-3.5 py-2 text-sm font-medium text-red-600 dark:text-red-400" role="alert">
+        <p className="px-1 py-2 text-sm font-medium text-red-600 dark:text-red-400" role="alert">
           {exportError}
         </p>
       ) : null}
@@ -287,11 +284,14 @@ function SettingsMobileExportRows({
 export function SettingsMobileSkeleton() {
   return (
     <div className={MOBILE_BLEED} aria-busy="true">
-      <div className="h-36 animate-pulse bg-gray-950" />
-      <div className="space-y-4 px-4">
-        <div className="h-36 animate-pulse rounded-2xl border border-card-border bg-card-surface" />
-        <div className="h-28 animate-pulse rounded-2xl border border-card-border bg-card-surface" />
-        <div className="h-24 animate-pulse rounded-2xl border border-card-border bg-card-surface" />
+      <div className="space-y-3 px-4 pt-4">
+        <div className="h-8 w-40 animate-pulse rounded bg-black/10 dark:bg-white/10" />
+        <div className="h-4 w-10/12 animate-pulse rounded bg-black/10 dark:bg-white/10" />
+      </div>
+      <div className="space-y-6 px-4">
+        <div className="h-28 animate-pulse rounded-xl bg-black/5 dark:bg-white/5" />
+        <div className="h-24 animate-pulse rounded-xl bg-black/5 dark:bg-white/5" />
+        <div className="h-20 animate-pulse rounded-xl bg-black/5 dark:bg-white/5" />
       </div>
     </div>
   );
@@ -304,24 +304,14 @@ export function SettingsMobileSignedOut() {
 
   return (
     <div className={MOBILE_BLEED}>
-      <section className={HERO_SHELL}>
-        <DashboardCinematicHeroBg />
-        <div className="relative space-y-3">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-cyan">
-            {t("mobile.eyebrow")}
-          </p>
-          <h1 className="max-w-[16rem] text-[1.55rem] font-semibold leading-[1.12] tracking-[-0.05em]">
-            {t("mobile.signedOutTitle")}
-          </h1>
-          <p className="max-w-sm text-sm leading-6 text-white/70">{t("mobile.signedOutBody")}</p>
-          <Link
-            href="/sign-in"
-            className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-white px-5 text-sm font-bold text-gray-950 no-underline shadow-2xl shadow-black/25"
-          >
+      <div className="px-4 pt-4">
+        <OverviewHeroFrame compact title={t("mobile.signedOutTitle")} description={t("mobile.signedOutBody")}>
+          <p className={`mt-3 ${DASHBOARD_SECTION_EYEBROW}`}>{t("mobile.eyebrow")}</p>
+          <Link href="/sign-in" className={`${DASHBOARD_BTN_OUTLINE} mt-5 w-full no-underline`}>
             {t("signInCta")}
           </Link>
-        </div>
-      </section>
+        </OverviewHeroFrame>
+      </div>
       <SettingsMobileAppearanceGroup />
       <SettingsMobileGroup id={SETTINGS_MOBILE_GROUP_IDS.data} title={t("mobile.groupDataPrivacy")}>
         <SettingsMobileSpotifyRows withFilters={withFilters} />
@@ -395,38 +385,25 @@ export function SettingsMobileExperience(props: SettingsMobileExperienceProps) {
   return (
     <div className={MOBILE_BLEED}>
       <SettingsMobileDeepLink />
-      <section className={HERO_SHELL}>
-        <DashboardCinematicHeroBg />
-        <div className="relative flex items-center gap-3">
-          <UserAvatar
-            src={props.avatarUrl}
-            name={props.nameInput}
-            email={props.accountEmail}
-            size="lg"
-            alt={t("profileImageAlt")}
-          />
-          <div className="min-w-0 flex-1">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-cyan">
-              {t("mobile.eyebrow")}
-            </p>
-            <h1 className="mt-1 truncate text-[1.45rem] font-semibold leading-[1.12] tracking-[-0.05em]">
-              {displayName || t("mobile.unnamedAccount")}
-            </h1>
-            {props.accountEmail ? (
-              <p className="mt-0.5 truncate text-sm text-white/60">{props.accountEmail}</p>
-            ) : null}
-          </div>
-        </div>
-      </section>
+      <div className="px-4 pt-4">
+        <OverviewHeroFrame
+          compact
+          title={displayName || t("mobile.unnamedAccount")}
+          description={props.accountEmail ?? undefined}
+          avatarUrl={props.avatarUrl}
+        >
+          <p className={`mt-3 ${DASHBOARD_SECTION_EYEBROW}`}>{t("mobile.eyebrow")}</p>
+        </OverviewHeroFrame>
+      </div>
 
       <SettingsMobileGroup id={SETTINGS_MOBILE_GROUP_IDS.account} title={t("mobile.groupAccount")}>
         {props.profileLoadError ? (
-          <p className="px-3.5 py-3 text-sm font-medium text-red-600 dark:text-red-400" role="alert">
+          <p className="px-1 py-3 text-sm font-medium text-red-600 dark:text-red-400" role="alert">
             {props.profileLoadError}
           </p>
         ) : (
           <form
-            className="space-y-4 px-3.5 py-3.5"
+            className="space-y-4 px-1 py-3.5"
             onSubmit={(e) => {
               e.preventDefault();
               props.onSaveProfile();
@@ -456,7 +433,7 @@ export function SettingsMobileExperience(props: SettingsMobileExperienceProps) {
                 <div className="mt-2 flex flex-wrap gap-2">
                   <button
                     type="button"
-                    className="inline-flex min-h-11 items-center justify-center rounded-xl border border-card-border bg-background px-3 text-sm font-semibold"
+                    className={`${DASHBOARD_BTN_OUTLINE} px-3`}
                     disabled={props.avatarUploading || props.avatarDeleting}
                     onClick={() => avatarInputRef.current?.click()}
                   >
@@ -469,7 +446,7 @@ export function SettingsMobileExperience(props: SettingsMobileExperienceProps) {
                   {props.avatarUrl ? (
                     <button
                       type="button"
-                      className="inline-flex min-h-11 items-center justify-center rounded-xl border border-red-200 px-3 text-sm font-semibold text-red-700 dark:border-red-800 dark:text-red-200"
+                      className="inline-flex min-h-11 items-center justify-center rounded-2xl px-3 text-sm font-semibold text-red-700 dark:text-red-200"
                       disabled={props.avatarUploading || props.avatarDeleting}
                       onClick={props.onAvatarDelete}
                     >
@@ -579,7 +556,7 @@ export function SettingsMobileExperience(props: SettingsMobileExperienceProps) {
           onChange={props.onHideGenreBannerChange}
         />
         {props.privacyError ? (
-          <p className="px-3.5 py-2 text-sm font-medium text-red-600 dark:text-red-400" role="alert">
+          <p className="px-1 py-2 text-sm font-medium text-red-600 dark:text-red-400" role="alert">
             {props.privacyError}
           </p>
         ) : null}
@@ -601,7 +578,11 @@ export function SettingsMobileExperience(props: SettingsMobileExperienceProps) {
       ) : null}
 
       <SettingsMobileGroup id={SETTINGS_MOBILE_GROUP_IDS.danger} title={t("mobile.groupDanger")} tone="danger">
-        <button type="button" className={`${ROW_CLASS} text-red-800 dark:text-red-200`} onClick={() => setDangerSheet("clear")}>
+        <button
+          type="button"
+          className={`${ROW_CLASS} text-red-800 dark:text-red-200`}
+          onClick={() => setDangerSheet("clear")}
+        >
           <span className="min-w-0 truncate">{t("dangerTitle")}</span>
           <ChevronIcon className="h-4 w-4 shrink-0" />
         </button>
@@ -650,13 +631,13 @@ export function SettingsMobileExperience(props: SettingsMobileExperienceProps) {
               inputId="settings-mobile-deletion-confirmation-phrase"
             />
             <label
-              className={`flex min-h-11 cursor-pointer items-start gap-3 rounded-xl border border-card-border px-3 py-3 ${
+              className={`flex min-h-11 cursor-pointer items-start gap-3 py-3 ${
                 phraseDisabled ? "cursor-not-allowed opacity-60" : ""
               }`}
             >
               <input
                 type="checkbox"
-                className="mt-0.5 h-5 w-5 shrink-0 rounded border-slate-300 text-violet-600"
+                className="mt-0.5 h-5 w-5 shrink-0 rounded border-glass-hairline text-foreground"
                 checked={props.understood}
                 onChange={(e) => props.onUnderstoodChange(e.target.checked)}
                 disabled={phraseDisabled}
@@ -673,7 +654,7 @@ export function SettingsMobileExperience(props: SettingsMobileExperienceProps) {
               type="button"
               onClick={props.onRunClear}
               disabled={!props.understood || !props.phraseOk || props.clearing || phraseDisabled}
-              className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl border border-red-300 bg-white px-5 text-sm font-semibold text-red-700 disabled:cursor-not-allowed disabled:opacity-50 dark:border-red-800 dark:bg-red-950/50 dark:text-red-200"
+              className={`${DASHBOARD_BTN_OUTLINE} w-full border-red-300 text-red-700 dark:border-red-800 dark:text-red-200`}
             >
               {props.clearing ? t("clearing") : t("clearDataButton")}
             </button>
@@ -718,13 +699,13 @@ export function SettingsMobileExperience(props: SettingsMobileExperienceProps) {
               inputId="settings-mobile-delete-account-confirmation-phrase"
             />
             <label
-              className={`flex min-h-11 cursor-pointer items-start gap-3 rounded-xl border border-card-border px-3 py-3 ${
+              className={`flex min-h-11 cursor-pointer items-start gap-3 py-3 ${
                 phraseDisabled ? "cursor-not-allowed opacity-60" : ""
               }`}
             >
               <input
                 type="checkbox"
-                className="mt-0.5 h-5 w-5 shrink-0 rounded border-slate-300 text-violet-600"
+                className="mt-0.5 h-5 w-5 shrink-0 rounded border-glass-hairline text-foreground"
                 checked={props.deleteAccountUnderstood}
                 onChange={(e) => props.onDeleteAccountUnderstoodChange(e.target.checked)}
                 disabled={phraseDisabled}
@@ -745,7 +726,7 @@ export function SettingsMobileExperience(props: SettingsMobileExperienceProps) {
                 props.deletingAccount ||
                 phraseDisabled
               }
-              className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl border border-red-400 bg-red-700 px-5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-red-700 px-5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
             >
               {props.deletingAccount ? t("deletingAccount") : t("deleteAccountButton")}
             </button>

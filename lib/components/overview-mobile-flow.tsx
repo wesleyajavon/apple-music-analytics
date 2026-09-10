@@ -189,11 +189,6 @@ export function MobileOverviewFlow({
 
       <OverviewViewPanel idPrefix="overview-mobile" view="context" activeView={activeView}>
         <section className="relative">
-          <OverviewSectionHeader
-            eyebrow={t("sections.intelligence.eyebrow")}
-            title={t("sections.intelligence.title")}
-            description={t("sections.intelligence.description")}
-          />
           <div className="grid grid-cols-1 gap-10">
             <div className="flex min-h-[280px] w-full min-w-0">
               <AiInsightsSummaryWidget />

@@ -14,11 +14,31 @@ import { PublicDemoAiSignupCta } from "@/lib/components/public-demo-ai-signup-ct
 import { useInteractiveAiBlockedByGenreBackfill } from "@/lib/hooks/use-interactive-ai-blocked-by-genre-backfill";
 import { isGroqGenreClassificationBlockingError } from "@/lib/utils/groq-quota-message";
 import { AiSummaryUnsortedGenresNotice } from "@/lib/components/ai-summary-unsorted-genres-notice";
+import { ArtistAvatarHydrated } from "@/lib/components/artist-avatar-hydrated";
 import { OverviewCanvasFrame } from "@/lib/components/overview-section";
 import { DASHBOARD_LIST_ROW, DASHBOARD_LIST_SEPARATOR } from "@/lib/components/dashboard-ui";
 import { AiUnavailableConsentActions, useAiUnavailableCopy } from "@/lib/components/ai-unavailable-cta";
+import type { AiInsightMoment } from "@/lib/dto/ai-insights";
 
 const PREVIEW_INSIGHTS_COUNT = 3;
+
+function MomentArtistAvatar({ moment }: { moment: AiInsightMoment }) {
+  if (!moment.artistId || !moment.artistName) return null;
+  return (
+    <div className="mt-0.5 h-10 w-10 shrink-0 overflow-hidden rounded-full">
+      <ArtistAvatarHydrated
+        artistId={moment.artistId}
+        artistName={moment.artistName}
+        imageUrl={moment.imageUrl}
+        avatarApiSize={80}
+        alt=""
+        width={40}
+        height={40}
+        className="h-full w-full object-cover"
+      />
+    </div>
+  );
+}
 
 function AiInsightsPublicDemoTeaser() {
   const t = useTranslations("ai-insights");
@@ -37,12 +57,12 @@ function AiInsightsPublicDemoTeaser() {
       <OverviewCanvasFrame
         eyebrow={t("overviewWidget.eyebrow")}
         title={t("overviewWidget.title")}
-        description={t("overviewWidget.description")}
         titleId="overview-ai-insights-title"
       >
         <div role="status" aria-label={t("loading")} className="space-y-1">
           {[0, 1, 2].map((i) => (
             <div key={i} className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_SEPARATOR}`}>
+              <div className="h-10 w-10 shrink-0 animate-shimmer rounded-full bg-black/10 dark:bg-white/10" />
               <div className="h-4 w-full rounded bg-black/10 animate-shimmer dark:bg-white/10" />
             </div>
           ))}
@@ -59,7 +79,6 @@ function AiInsightsPublicDemoTeaser() {
     <OverviewCanvasFrame
       eyebrow={t("overviewWidget.eyebrow")}
       title={t("overviewWidget.title")}
-      description={t("overviewWidget.description")}
       titleId="overview-ai-insights-title"
     >
       {demoInsights.map((insight, index) => (
@@ -99,7 +118,6 @@ export function AiInsightsSummaryWidget() {
   const chrome = {
     eyebrow: t("overviewWidget.eyebrow"),
     title: t("overviewWidget.title"),
-    description: t("overviewWidget.description"),
     titleId: "overview-ai-insights-title",
     seeMoreHref,
     seeMoreLabel: t("seeMore"),
@@ -123,6 +141,7 @@ export function AiInsightsSummaryWidget() {
         <div role="status" aria-label={t("loading")} className="space-y-1">
           {[0, 1, 2].map((i) => (
             <div key={i} className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_SEPARATOR}`}>
+              <div className="h-10 w-10 shrink-0 animate-shimmer rounded-full bg-black/10 dark:bg-white/10" />
               <div className="h-4 w-full rounded bg-black/10 animate-shimmer dark:bg-white/10" />
             </div>
           ))}
@@ -176,9 +195,12 @@ export function AiInsightsSummaryWidget() {
       {previewMoments.length > 0
         ? previewMoments.map((moment, index) => (
             <div key={moment.id} className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_SEPARATOR} items-start`}>
-              <span className="w-8 shrink-0 text-[13px] tabular-nums text-muted">
-                {moment.metric || index + 1}
-              </span>
+              <MomentArtistAvatar moment={moment} />
+              {!moment.artistId || !moment.artistName ? (
+                <span className="mt-0.5 w-8 shrink-0 text-[13px] tabular-nums text-muted">
+                  {moment.metric || index + 1}
+                </span>
+              ) : null}
               <span className="min-w-0 flex-1 text-[13px] leading-6 text-foreground">
                 {moment.title ? `${moment.title} — ` : ""}
                 {moment.body}

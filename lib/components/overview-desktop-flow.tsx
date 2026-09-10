@@ -180,11 +180,6 @@ export function OverviewDesktopFlow({
 
       <OverviewViewPanel idPrefix="overview-desktop" view="context" activeView={activeView}>
         <section className="relative">
-          <OverviewSectionHeader
-            eyebrow={t("sections.intelligence.eyebrow")}
-            title={t("sections.intelligence.title")}
-            description={t("sections.intelligence.description")}
-          />
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-8">
             <div className="flex min-h-[280px] w-full min-w-0">
               <AiInsightsSummaryWidget />

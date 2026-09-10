@@ -92,7 +92,6 @@ export function HeatmapCalendarOverviewWidget({
   const chrome = {
     eyebrow: tHeatmap("heroEyebrow"),
     title: tHeatmap("calendarTitle"),
-    description: tHeatmap("overviewCalendarHint"),
     titleId: "overview-heatmap-calendar-title",
     seeMoreHref: heatmapPageHref,
     seeMoreLabel: tOverview("seeMore"),

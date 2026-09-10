@@ -47,6 +47,8 @@ export function OverviewDesktopFlow({
   duetHref,
   startDate,
   endDate,
+  avatarUrl,
+  avatarName,
   onOpenArtistInsights,
 }: {
   title: string;
@@ -65,6 +67,8 @@ export function OverviewDesktopFlow({
   duetHref: string;
   startDate?: string;
   endDate?: string;
+  avatarUrl?: string | null;
+  avatarName?: string | null;
   onOpenArtistInsights?: (artist: ArtistStatsDto, avatarColorIndex: number) => void;
 }) {
   const t = useTranslations("overview");
@@ -109,7 +113,12 @@ export function OverviewDesktopFlow({
 
   return (
     <div className="hidden space-y-8 lg:block">
-      <OverviewHeroFrame title={title} insight={primaryInsight} />
+      <OverviewHeroFrame
+        title={title}
+        avatarUrl={avatarUrl}
+        avatarName={avatarName}
+        insight={primaryInsight}
+      />
 
       <OverviewSectionSwitcher
         idPrefix="overview-desktop"

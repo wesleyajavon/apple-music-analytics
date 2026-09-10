@@ -55,6 +55,7 @@ export function MobileOverviewFlow({
   startDate,
   endDate,
   avatarUrl,
+  avatarName,
   onOpenArtistInsights,
 }: {
   title: string;
@@ -75,6 +76,7 @@ export function MobileOverviewFlow({
   startDate?: string;
   endDate?: string;
   avatarUrl?: string | null;
+  avatarName?: string | null;
   onOpenArtistInsights?: (artist: ArtistStatsDto, avatarColorIndex: number) => void;
 }) {
   const t = useTranslations("overview");
@@ -119,7 +121,12 @@ export function MobileOverviewFlow({
 
   return (
     <div className="space-y-8 pb-8 lg:hidden">
-      <OverviewMobileHero title={title} avatarUrl={avatarUrl} insight={primaryInsight} />
+      <OverviewMobileHero
+        title={title}
+        avatarUrl={avatarUrl}
+        avatarName={avatarName}
+        insight={primaryInsight}
+      />
 
       <OverviewSectionSwitcher
         idPrefix="overview-mobile"

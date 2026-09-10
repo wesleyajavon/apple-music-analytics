@@ -44,6 +44,8 @@ export function MobileMusicalProfileView({
   uniqueArtists,
   uniqueTracks,
   withFilters,
+  avatarUrl,
+  avatarName,
   onOpenArtistInsights,
 }: {
   aiCached?: boolean;
@@ -64,11 +66,13 @@ export function MobileMusicalProfileView({
   uniqueArtists?: number;
   uniqueTracks?: number;
   withFilters: (href: string) => string;
+  avatarUrl?: string | null;
+  avatarName?: string | null;
   onOpenArtistInsights: (artist: ArtistStatsDto, avatarColorIndex: number) => void;
 }) {
   return (
     <div className={MOBILE_CANVAS}>
-      <MusicalProfileMasthead compact>
+      <MusicalProfileMasthead compact avatarUrl={avatarUrl} avatarName={avatarName}>
         <MusicalProfileIdentity
           titleId="musical-profile-mobile-identity-title"
           dense
@@ -121,9 +125,13 @@ export function MusicalProfileMobileSkeleton({ locale }: { locale: string }) {
 export function MusicalProfileMobileError({
   error,
   onRetry,
+  avatarUrl,
+  avatarName,
 }: {
   error?: Error | null;
   onRetry: () => void;
+  avatarUrl?: string | null;
+  avatarName?: string | null;
 }) {
   const t = useTranslations("musical-profile");
   const tCommon = useTranslations("common");
@@ -131,7 +139,13 @@ export function MusicalProfileMobileError({
 
   return (
     <div className={MOBILE_CANVAS}>
-      <OverviewHeroFrame compact title={t("title")} description={t("mobile.errorLead")}>
+      <OverviewHeroFrame
+        compact
+        title={t("title")}
+        description={t("mobile.errorLead")}
+        avatarUrl={avatarUrl}
+        avatarName={avatarName}
+      >
         {isQuota ? (
           <div className="mt-4">
             <GroqQuotaNotice error={error} />
@@ -146,13 +160,25 @@ export function MusicalProfileMobileError({
   );
 }
 
-export function MusicalProfileNoDataMobileView() {
+export function MusicalProfileNoDataMobileView({
+  avatarUrl,
+  avatarName,
+}: {
+  avatarUrl?: string | null;
+  avatarName?: string | null;
+}) {
   const t = useTranslations("musical-profile");
   const demoHref = useWaitingForImportDemoHref("/dashboard/musical-profile");
 
   return (
     <div className={MOBILE_CANVAS}>
-      <OverviewHeroFrame compact title={t("mobile.emptyTitle")} description={t("mobile.emptyLead")}>
+      <OverviewHeroFrame
+        compact
+        title={t("mobile.emptyTitle")}
+        description={t("mobile.emptyLead")}
+        avatarUrl={avatarUrl}
+        avatarName={avatarName}
+      >
         <div className="mt-6 flex flex-col gap-3">
           <Link href={DASHBOARD_ONBOARDING_REIMPORT_PATH} className={`${DASHBOARD_BTN_OUTLINE} w-full`}>
             {t("mobile.emptyCta")}

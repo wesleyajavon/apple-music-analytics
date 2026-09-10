@@ -53,15 +53,25 @@ function formatPeakHour(hour: number, locale: string): string {
 
 export function MusicalProfileMasthead({
   compact = false,
+  avatarUrl,
+  avatarName,
   children,
 }: {
   compact?: boolean;
+  avatarUrl?: string | null;
+  avatarName?: string | null;
   children?: ReactNode;
 }) {
   const t = useTranslations("musical-profile");
 
   return (
-    <OverviewHeroFrame title={t("title")} description={t("subtitle")} compact={compact}>
+    <OverviewHeroFrame
+      title={t("title")}
+      description={t("subtitle")}
+      compact={compact}
+      avatarUrl={avatarUrl}
+      avatarName={avatarName}
+    >
       {children}
     </OverviewHeroFrame>
   );

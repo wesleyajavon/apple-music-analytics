@@ -160,12 +160,14 @@ export function MobileOverviewUnavailable({
   title,
   description,
   avatarUrl,
+  avatarName,
   error,
   onRetry,
 }: {
   title: string;
   description?: string;
   avatarUrl?: string | null;
+  avatarName?: string | null;
   error?: Error | null;
   onRetry: () => void;
 }) {
@@ -174,7 +176,12 @@ export function MobileOverviewUnavailable({
 
   return (
     <div className={MOBILE_CANVAS}>
-      <OverviewMobileHero title={title} avatarUrl={avatarUrl} description={description}>
+      <OverviewMobileHero
+        title={title}
+        avatarUrl={avatarUrl}
+        avatarName={avatarName}
+        description={description}
+      >
         {isQuota ? (
           <div className="mt-4">
             <GroqQuotaNotice error={error} />
@@ -193,13 +200,24 @@ export function MobileOverviewUnavailable({
   );
 }
 
-export function MobileOverviewEmptyView({ avatarUrl }: { avatarUrl?: string | null }) {
+export function MobileOverviewEmptyView({
+  avatarUrl,
+  avatarName,
+}: {
+  avatarUrl?: string | null;
+  avatarName?: string | null;
+}) {
   const t = useTranslations("overview.mobile");
   const demoHref = useWaitingForImportDemoHref("/dashboard/overview");
 
   return (
     <div className={MOBILE_CANVAS}>
-      <OverviewMobileHero title={t("emptyTitle")} avatarUrl={avatarUrl} description={t("emptyLead")}>
+      <OverviewMobileHero
+        title={t("emptyTitle")}
+        avatarUrl={avatarUrl}
+        avatarName={avatarName}
+        description={t("emptyLead")}
+      >
         <div className="mt-6 flex flex-col gap-3">
           <Link href={DASHBOARD_ONBOARDING_REIMPORT_PATH} className={`${DASHBOARD_BTN_OUTLINE} w-full`}>
             {t("emptyCta")}

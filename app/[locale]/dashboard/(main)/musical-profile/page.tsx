@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
@@ -158,6 +158,35 @@ function MusicalProfileContent() {
 
   const interactiveAiBlockedByGenreBackfill = useInteractiveAiBlockedByGenreBackfill();
 
+  const [avatarName, setAvatarName] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  useEffect(() => {
+    let mounted = true;
+    setAvatarName(null);
+    setAvatarUrl(null);
+
+    async function hydrateDashboardSubjectAvatar() {
+      const params = new URLSearchParams();
+      if (userId) params.set("userId", userId);
+      const qs = params.toString();
+      const url = qs ? `/api/user/dashboard-subject?${qs}` : "/api/user/dashboard-subject";
+      const response = await fetch(url, { method: "GET" });
+      if (!response.ok) return;
+      const payload = (await response.json()) as {
+        user?: { name?: string | null; avatarUrl?: string | null } | null;
+      };
+      if (!mounted) return;
+      setAvatarName(payload.user?.name?.trim() || null);
+      setAvatarUrl(payload.user?.avatarUrl ?? null);
+    }
+
+    void hydrateDashboardSubjectAvatar();
+
+    return () => {
+      mounted = false;
+    };
+  }, [userId]);
+
   const { startDate, endDate, isLoading: isRangeLoading } = useListenDateRange();
   const { data: overview, isLoading: overviewLoading, error: overviewError, refetch } =
     useOverviewStats(startDate, endDate, userId);
@@ -217,13 +246,18 @@ function MusicalProfileContent() {
   const dataError = overviewError ?? artistsError ?? genresError ?? temporalError;
   const hasListeningData = (overview?.totalListens ?? 0) > 0 || topArtists.length > 0;
   const seeAllArtistsHref = withFilters("/dashboard/artists");
+  const subjectAvatar = { avatarUrl, avatarName };
 
   if (!isLoading && dataError && !hasListeningData) {
     return (
       <>
-        <MusicalProfileMobileError error={dataError} onRetry={() => void refetch()} />
+        <MusicalProfileMobileError
+          error={dataError}
+          onRetry={() => void refetch()}
+          {...subjectAvatar}
+        />
         <div className={DESKTOP_CANVAS}>
-          <MusicalProfileMasthead />
+          <MusicalProfileMasthead {...subjectAvatar} />
           <ErrorState
             variant="startup"
             error={dataError}
@@ -238,9 +272,9 @@ function MusicalProfileContent() {
   if (!isLoading && !hasListeningData) {
     return (
       <>
-        <MusicalProfileNoDataMobileView />
+        <MusicalProfileNoDataMobileView {...subjectAvatar} />
         <div className={DESKTOP_CANVAS}>
-          <MusicalProfileMasthead />
+          <MusicalProfileMasthead {...subjectAvatar} />
           <EmptyState
             variant="startup"
             {...emptyStatePresets.importData}
@@ -279,6 +313,7 @@ function MusicalProfileContent() {
     <>
       <MobileMusicalProfileView
         {...identityProps}
+        {...subjectAvatar}
         artistsLoading={isLoading}
         locale={locale}
         peakDay={temporalData?.peakDay ?? null}
@@ -294,7 +329,7 @@ function MusicalProfileContent() {
       />
 
       <div className={DESKTOP_CANVAS}>
-        <MusicalProfileMasthead>{mastheadIdentity}</MusicalProfileMasthead>
+        <MusicalProfileMasthead {...subjectAvatar}>{mastheadIdentity}</MusicalProfileMasthead>
         <MusicalProfileMetricStrip
           locale={locale}
           loading={isLoading}

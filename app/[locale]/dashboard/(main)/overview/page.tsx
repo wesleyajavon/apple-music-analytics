@@ -40,10 +40,12 @@ function OverviewContent() {
   const userId = searchParams.get("userId") ?? undefined;
 
   const [firstName, setFirstName] = useState<string | null>(null);
+  const [avatarName, setAvatarName] = useState<string | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   useEffect(() => {
     let mounted = true;
     setFirstName(null);
+    setAvatarName(null);
     setAvatarUrl(null);
 
     function extractFirstName(rawName?: string | null) {
@@ -64,7 +66,9 @@ function OverviewContent() {
         user?: { name?: string | null; avatarUrl?: string | null } | null;
       };
       if (!mounted) return;
-      setFirstName(extractFirstName(payload.user?.name ?? null));
+      const rawName = payload.user?.name?.trim() || null;
+      setFirstName(extractFirstName(rawName));
+      setAvatarName(rawName);
       setAvatarUrl(payload.user?.avatarUrl ?? null);
     }
 
@@ -278,6 +282,7 @@ function OverviewContent() {
           title={overviewTitle}
           description={t("mobile.errorLead")}
           avatarUrl={avatarUrl}
+          avatarName={avatarName}
           error={error}
           onRetry={handleRetry}
         />
@@ -285,6 +290,8 @@ function OverviewContent() {
           <OverviewHeroFrame
             title={overviewTitle}
             description={t("errorStateHint")}
+            avatarUrl={avatarUrl}
+            avatarName={avatarName}
           />
           <ErrorState
             variant="startup"
@@ -302,11 +309,13 @@ function OverviewContent() {
     const empty = emptyStatePresets.importData;
     return (
       <div className="space-y-8">
-        <MobileOverviewEmptyView avatarUrl={avatarUrl} />
+        <MobileOverviewEmptyView avatarUrl={avatarUrl} avatarName={avatarName} />
         <div className="hidden space-y-8 lg:block">
           <OverviewHeroFrame
             title={overviewTitle}
             description={t("emptyStateHeroDescription")}
+            avatarUrl={avatarUrl}
+            avatarName={avatarName}
           />
           <EmptyState
             variant="startup"
@@ -329,11 +338,14 @@ function OverviewContent() {
         showComparison={!!previousPeriod}
         musicalProfileHref={musicalProfileHref}
         avatarUrl={avatarUrl}
+        avatarName={avatarName}
       />
       <OverviewDesktopFlow
         {...sharedFlowProps}
         data={data}
         showComparison={!!previousPeriod}
+        avatarUrl={avatarUrl}
+        avatarName={avatarName}
       />
 
       <ArtistUserInsightsPanel

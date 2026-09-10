@@ -1,20 +1,15 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useCallback, useMemo, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Eye, Swords } from "lucide-react";
-import { Area, AreaChart, CartesianGrid, Tooltip, XAxis, YAxis } from "recharts";
-import { ChartResponsiveContainer } from "@/lib/components/chart-responsive-container";
+import { OverviewTrendsChart } from "@/lib/components/charts/overview-trends-chart";
 import { ListenTrendChartViewToggle } from "@/lib/components/charts/listen-trend-chart-view-toggle";
 import { DuetSubNav } from "@/lib/components/duet/duet-sub-nav";
 import type { FriendMusicChartPoint, FriendMusicLeaderItem } from "@/lib/components/duet/duet-friend-music-mobile";
+import { FriendMusicReplayTopsSections } from "@/lib/components/duet/duet-friend-music-replay-tops";
 import { OverviewHeroFrame } from "@/lib/components/overview-hero";
-import { OverviewSectionHeader } from "@/lib/components/overview-section";
-import {
-  LIBRARY_LEADER_ACCENTS,
-  TopLibraryCard,
-} from "@/lib/components/overview-library-rankings";
 import {
   DashboardSectionPanel,
   DashboardSectionSwitcher,
@@ -22,8 +17,9 @@ import {
   type DashboardSectionItem,
 } from "@/lib/components/dashboard-section-switcher";
 import { DASHBOARD_BTN_GHOST } from "@/lib/components/dashboard-ui";
-import { CHART_TOOLTIP_STYLES } from "@/lib/constants/config";
-import { DUET_SHARE_SETTINGS_PATH } from "@/lib/constants/duet-settings";
+import { getCrystalSeriesColor } from "@/lib/constants/crystal-chart";
+import { useTheme } from "@/lib/providers/theme-provider";
+import type { ArtistStatsDto } from "@/lib/dto/artist";
 import type { OverviewPrimaryInsight } from "@/lib/utils/overview-page";
 import {
   applyListenTrendChartViewSingle,
@@ -48,66 +44,52 @@ function FriendMusicTimelinePanel({
   locale: string;
   listensLabel: string;
 }) {
+  const { resolvedTheme } = useTheme();
+  const chartThemeMode = resolvedTheme === "dark" ? "dark" : "light";
   const [chartView, setChartView] = useState<ListenTrendChartViewMode>("period");
   const displayChartData = useMemo(
     () => applyListenTrendChartViewSingle(chartData, chartView, "listens"),
     [chartData, chartView]
   );
 
+  const formatValue = useCallback(
+    (value: number) => `${value.toLocaleString(locale)} ${listensLabel}`,
+    [locale, listensLabel]
+  );
+
+  const series = useMemo(
+    () => [
+      {
+        dataKey: "listens",
+        name: listensLabel,
+        color: getCrystalSeriesColor(2, chartThemeMode),
+      },
+    ],
+    [chartThemeMode, listensLabel]
+  );
+
   if (chartData.length === 0) return null;
 
   return (
-    <section className="relative">
-      <OverviewSectionHeader eyebrow={eyebrow} title={title} description={description} />
-      <div className="rounded-[1.75rem] border border-card-border bg-surface-glass/60 p-4 backdrop-blur-sm sm:p-6">
-        <div className="mb-4 flex justify-end">
-          <ListenTrendChartViewToggle value={chartView} onChange={setChartView} />
+    <section className="relative min-h-[240px] w-full min-w-0 sm:min-h-[280px] lg:min-h-[320px]">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <p className="text-[13px] font-medium text-muted">{eyebrow}</p>
+          <h2 className="mt-1 text-[1.75rem] font-semibold leading-tight tracking-tight text-foreground">
+            {title}
+          </h2>
+          <p className="mt-2 max-w-2xl text-[13px] leading-6 text-muted">{description}</p>
         </div>
-        <div className="rounded-[1.5rem] border border-slate-200/80 bg-slate-50/80 p-3 dark:border-white/10 dark:bg-black/20 sm:p-5">
-          <ChartResponsiveContainer
-            token="overviewArea"
-            minWidth={chartData.length > 8 ? Math.max(300, chartData.length * 28) : undefined}
-          >
-            <AreaChart data={displayChartData} margin={{ top: 10, right: 14, left: 0, bottom: 0 }}>
-              <defs>
-                <linearGradient id="friendMusicDesktopArea" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#67e8f9" stopOpacity={0.34} />
-                  <stop offset="48%" stopColor="#a78bfa" stopOpacity={0.16} />
-                  <stop offset="100%" stopColor="#67e8f9" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.2)" vertical={false} />
-              <XAxis
-                dataKey="formattedDate"
-                tick={{ fill: "#94a3b8", fontSize: 11 }}
-                axisLine={false}
-                tickLine={false}
-                angle={-45}
-                textAnchor="end"
-                height={50}
-              />
-              <YAxis tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} width={35} />
-              <Tooltip
-                contentStyle={CHART_TOOLTIP_STYLES.contentStyle}
-                labelStyle={CHART_TOOLTIP_STYLES.labelStyle}
-                itemStyle={CHART_TOOLTIP_STYLES.itemStyle}
-                formatter={(value: number) => [
-                  `${value.toLocaleString(locale)} ${listensLabel}`,
-                  listensLabel,
-                ]}
-              />
-              <Area
-                type="monotone"
-                dataKey="listens"
-                stroke="#67e8f9"
-                strokeWidth={3}
-                fill="url(#friendMusicDesktopArea)"
-                animationDuration={600}
-                animationEasing="ease-out"
-              />
-            </AreaChart>
-          </ChartResponsiveContainer>
-        </div>
+        <ListenTrendChartViewToggle value={chartView} onChange={setChartView} />
+      </div>
+      <div className="mt-6">
+        <OverviewTrendsChart
+          data={displayChartData}
+          series={series}
+          formatValue={formatValue}
+          heightToken="overviewArea"
+          minWidth={chartData.length > 8 ? Math.max(300, chartData.length * 28) : undefined}
+        />
       </div>
     </section>
   );
@@ -127,6 +109,7 @@ export function DuetFriendMusicDesktopExperience({
   emptyStats,
   showAggregatesHint,
   emptyNode,
+  onOpenArtistInsights,
 }: {
   locale: string;
   compareHref: string;
@@ -141,6 +124,7 @@ export function DuetFriendMusicDesktopExperience({
   emptyStats: boolean;
   showAggregatesHint: boolean;
   emptyNode: ReactNode;
+  onOpenArtistInsights?: (artist: ArtistStatsDto, avatarColorIndex: number) => void;
 }) {
   const t = useTranslations("duet.friendMusic");
   const hasTops =
@@ -162,29 +146,6 @@ export function DuetFriendMusicDesktopExperience({
     id,
     label: t(`viewSwitcher.views.${id}`),
   }));
-
-  const libraryItems = {
-    tracks: (topTracks ?? []).map((track) => ({
-      id: track.id,
-      title: track.title,
-      subtitle: track.subtitle,
-      count: track.count,
-      percentage: track.percentage ?? 0,
-    })),
-    artists: topArtists.map((artist) => ({
-      id: artist.id,
-      title: artist.title,
-      count: artist.count,
-      percentage: artist.percentage ?? 0,
-      imageUrl: artist.imageUrl,
-    })),
-    genres: topGenres.map((genre) => ({
-      id: genre.id,
-      title: genre.title,
-      count: genre.count,
-      percentage: genre.percentage ?? 0,
-    })),
-  };
 
   return (
     <div className="space-y-8">
@@ -237,71 +198,16 @@ export function DuetFriendMusicDesktopExperience({
               activeView={activeView}
               idPrefix="friend-music-desktop"
             >
-              <section className="relative">
-                <OverviewSectionHeader
-                  eyebrow={t("sections.tops.eyebrow")}
-                  title={t("sections.tops.title")}
-                  description={t("sections.tops.description", { name: subjectName })}
-                />
-                <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-                  {libraryItems.artists.length > 0 ? (
-                    <TopLibraryCard
-                      title={t("topArtistsTitle")}
-                      description={t("topArtistsDescription", { name: subjectName })}
-                      accent={LIBRARY_LEADER_ACCENTS.artists}
-                      items={libraryItems.artists}
-                      locale={locale}
-                      listensLabel={t("listens")}
-                      showArtistAvatars
-                    />
-                  ) : null}
-                  {libraryItems.tracks.length > 0 ? (
-                    <div data-testid="duet-friend-music-top-tracks">
-                      <TopLibraryCard
-                        title={t("topTracksTitle")}
-                        description={t("topTracksDescription", { name: subjectName })}
-                        accent={LIBRARY_LEADER_ACCENTS.tracks}
-                        items={libraryItems.tracks}
-                        locale={locale}
-                        listensLabel={t("listens")}
-                      />
-                    </div>
-                  ) : null}
-                  {libraryItems.genres.length > 0 ? (
-                    <TopLibraryCard
-                      title={t("topGenresTitle")}
-                      description={t("topGenresDescription", { name: subjectName })}
-                      accent={LIBRARY_LEADER_ACCENTS.genres}
-                      items={libraryItems.genres}
-                      locale={locale}
-                      listensLabel={t("listens")}
-                      showPercentage
-                    />
-                  ) : null}
-                </div>
-                {showAggregatesHint ? (
-                  <p
-                    role="status"
-                    className="mt-5 rounded-[1.35rem] border border-slate-200/80 bg-white px-5 py-4 text-sm leading-6 text-muted dark:border-white/10 dark:bg-slate-950/60"
-                  >
-                    {t("aggregatesTracksHint")}{" "}
-                    <Link
-                      href={DUET_SHARE_SETTINGS_PATH}
-                      className="font-semibold text-violet-600 no-underline underline-offset-2 hover:underline dark:text-violet-300"
-                    >
-                      {t("aggregatesTracksHintCta")}
-                    </Link>
-                  </p>
-                ) : null}
-                {topTracks !== null && topTracks.length === 0 ? (
-                  <p
-                    className="mt-5 rounded-[1.35rem] border border-slate-200/80 bg-white px-5 py-4 text-sm text-muted dark:border-white/10 dark:bg-slate-950/60"
-                    data-testid="duet-friend-music-top-tracks"
-                  >
-                    {t("emptyStatsDescription", { name: subjectName })}
-                  </p>
-                ) : null}
-              </section>
+              <FriendMusicReplayTopsSections
+                locale={locale}
+                subjectName={subjectName}
+                topArtists={topArtists}
+                topGenres={topGenres}
+                topTracks={topTracks}
+                showAggregatesHint={showAggregatesHint}
+                emptyTracksMessage={t("emptyStatsDescription", { name: subjectName })}
+                onOpenArtistInsights={onOpenArtistInsights}
+              />
             </DashboardSectionPanel>
           ) : null}
 

@@ -22,6 +22,14 @@ import type { PeriodType } from "@/lib/components/period-selector";
 import { EmptyState } from "@/lib/components/empty-state";
 import { ErrorState } from "@/lib/components/error-state";
 import type { DuetArenaMode } from "@/lib/components/duet/duet-battle-arena-ui";
+import {
+  DASHBOARD_LIST_ROW,
+  DASHBOARD_LIST_ROW_INTERACTIVE,
+  DASHBOARD_LIST_SEPARATOR,
+  DASHBOARD_SEARCH_FIELD,
+  DASHBOARD_SECTION_EYEBROW,
+  DASHBOARD_SECTION_TITLE,
+} from "@/lib/components/dashboard-ui";
 import type { CompareEntityResponse } from "@/lib/dto/duet";
 import { ApiError } from "@/lib/api-client";
 
@@ -190,9 +198,9 @@ export function EntityHeadToHeadPanel({
 
   return (
     <div className="space-y-4">
-      <div className={`relative `}>
+      <div className="relative">
         <Search
-          className="pointer-events-none absolute left-8 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 sm:left-10"
+          className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted"
           aria-hidden
         />
         <input
@@ -211,13 +219,13 @@ export function EntityHeadToHeadPanel({
           placeholder={searchPlaceholder}
           autoComplete="off"
           spellCheck={false}
-          className="w-full rounded-xl border border-slate-200/80 bg-white py-3 pl-10 pr-10 text-sm text-slate-900 shadow-sm focus:border-violet-300 focus:outline-none focus:ring-2 focus:ring-violet-200/60 dark:border-white/10 dark:bg-black/30 dark:text-white dark:focus:border-violet-400/40 dark:focus:ring-violet-400/20"
+          className={`${DASHBOARD_SEARCH_FIELD} pr-10`}
         />
         {selectedEntityId || query ? (
           <button
             type="button"
             onClick={onClear}
-            className="absolute right-8 top-1/2 -translate-y-1/2 rounded-lg p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-white/10 dark:hover:text-slate-200 sm:right-10"
+            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1 text-muted transition-colors hover:text-foreground"
             aria-label={clearLabel}
           >
             <X className="h-4 w-4" />
@@ -226,8 +234,8 @@ export function EntityHeadToHeadPanel({
       </div>
 
       {showSuggestions ? (
-        <div className="overflow-hidden rounded-[1.35rem] border border-slate-200/80 bg-white shadow-sm dark:border-white/10 dark:bg-slate-950/80">
-          <p className="border-b border-slate-100 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:border-white/5 dark:text-slate-400">
+        <div>
+          <p className={`${DASHBOARD_SECTION_EYEBROW} mb-1`}>
             {t("searchResultsCount", { count: suggestions.length })}
           </p>
           <ul
@@ -239,7 +247,7 @@ export function EntityHeadToHeadPanel({
             {suggestions.map((item, index) => {
               const highlighted = index === clampedHighlight;
               return (
-                <li key={item.id} className="border-b border-slate-100 last:border-0 dark:border-white/5">
+                <li key={item.id}>
                   <button
                     type="button"
                     id={`${suggestionListId}-${item.id}`}
@@ -248,23 +256,16 @@ export function EntityHeadToHeadPanel({
                     aria-selected={highlighted}
                     onMouseEnter={() => setHighlightIndex(index)}
                     onClick={() => onSelectEntity(item.id, item.label)}
-                    className={`flex w-full flex-col items-start gap-0.5 px-4 py-3 text-left text-sm transition-colors ${
-                      highlighted
-                        ? "bg-violet-50 dark:bg-violet-500/15"
-                        : "hover:bg-violet-50 dark:hover:bg-violet-500/10"
+                    className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_SEPARATOR} ${DASHBOARD_LIST_ROW_INTERACTIVE} flex-col items-start gap-0.5 ${
+                      highlighted ? "bg-black/[0.04] dark:bg-white/[0.06]" : ""
                     }`}
                   >
-                    <span className="flex items-start gap-3 font-medium text-slate-900 dark:text-white">
-                      <Swords
-                        className="mt-0.5 h-4 w-4 shrink-0 text-violet-500 dark:text-violet-300"
-                        aria-hidden
-                      />
+                    <span className="flex items-start gap-3 text-sm font-medium text-foreground">
+                      <Swords className="mt-0.5 h-4 w-4 shrink-0 text-muted" aria-hidden />
                       <span className="min-w-0 break-words">{item.label}</span>
                     </span>
                     {item.subtitle ? (
-                      <span className="pl-7 text-xs text-slate-500 dark:text-slate-400">
-                        {item.subtitle}
-                      </span>
+                      <span className="pl-7 text-[13px] text-muted">{item.subtitle}</span>
                     ) : null}
                   </button>
                 </li>
@@ -275,7 +276,7 @@ export function EntityHeadToHeadPanel({
       ) : null}
 
       {selectedEntityId && (isEntityLoading || isEntityFetching) ? (
-        <p className={`text-sm text-muted`}>{loadingLabel}</p>
+        <p className="text-[13px] text-muted">{loadingLabel}</p>
       ) : null}
 
       {selectedEntityId && entityError ? (
@@ -321,13 +322,13 @@ export function EntityHeadToHeadPanel({
           />
 
           {entityCompare.rangeClamped ? (
-            <p className={`text-sm text-muted`}>{t("rangeClamped")}</p>
+            <p className="text-[13px] text-muted">{t("rangeClamped")}</p>
           ) : null}
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <h3 className="text-base font-semibold text-slate-900 dark:text-white">{chartTitle}</h3>
-              <p className={`mt-1 text-sm text-muted`}>
+              <h3 className={`${DASHBOARD_SECTION_TITLE} text-xl`}>{chartTitle}</h3>
+              <p className="mt-1 text-[13px] text-muted">
                 {chartView === "cumulative" ? chartDescriptionCumulative : chartDescription}
               </p>
             </div>

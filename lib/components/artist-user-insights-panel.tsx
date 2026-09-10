@@ -109,6 +109,7 @@ export const ArtistUserInsightsPanel = memo(
     locale,
     onClose,
     colorIndex,
+    subjectName,
   }: {
     open: boolean;
     artistId: string | null;
@@ -120,6 +121,8 @@ export const ArtistUserInsightsPanel = memo(
     onClose: () => void;
     /** Index pour teinte d’avatar fallback (liste « All your artists »). */
     colorIndex: number;
+    /** When set (e.g. Duet friend music), eyebrow uses this listener’s name instead of “Your streaming”. */
+    subjectName?: string;
   }) => {
     const t = useTranslations("artists");
     const headingId = useId();
@@ -295,7 +298,11 @@ export const ArtistUserInsightsPanel = memo(
               <X className="h-4 w-4" strokeWidth={2} aria-hidden />
             </button>
             <div className="absolute inset-x-0 bottom-0 z-10 px-5 pb-4 pt-10 sm:px-6">
-              <p className="text-[13px] font-medium text-white/80">{t("insightsEyebrow")}</p>
+              <p className="text-[13px] font-medium text-white/80">
+                {subjectName
+                  ? t("insightsEyebrowForSubject", { name: subjectName })
+                  : t("insightsEyebrow")}
+              </p>
               <h2
                 id={headingId}
                 className="truncate text-xl font-semibold tracking-tight text-white sm:text-2xl"

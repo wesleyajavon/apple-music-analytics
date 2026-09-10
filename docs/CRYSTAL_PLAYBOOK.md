@@ -24,7 +24,7 @@ Le chrome (sidebar + header) se fait **avant** Overview, sinon chaque section se
 - Tops + pages suivantes : [`replay-ranking-grid.tsx`](../lib/components/replay-ranking-grid.tsx) (grille partagée, `grid-cols-2` + `lg:grid-cols-4`)
 - Charts Overview : [`overview-trends-chart.tsx`](../lib/components/charts/overview-trends-chart.tsx) + [`crystal-chart.ts`](../lib/constants/crystal-chart.ts)
 
-Le plus gros écart **restant** n’est plus Overview ni artists / tracks / genres. **7a–7g livrées** (Ask/Duet = 7f ; empty + AI Insights + temporal + palette + settings = 7g). **Reste chrome header :** cloche notifications + menu avatar (`Étape 8`).
+Le plus gros écart **restant** n’est plus Overview, artists / tracks / genres, ni le chrome header (**8a–8b faites**). **7f** a livré le chrome Ask + Duet friends / compare, mais a **volontairement laissé** friend-music en `TopLibraryCard`. **Prochaine vague : Étape 9** — surfaces Duet produit (music / compare / friends) alignées sur Overview (tuiles Replay + overlay ami).
 
 ---
 
@@ -38,7 +38,8 @@ Le plus gros écart **restant** n’est plus Overview ni artists / tracks / genr
 | Étapes 0–5 (desktop Crystal) | — | **Livrées.** Ne pas rejouer. |
 | Étape 6 (Overview mobile) | — | **Livrée.** Dual tree `lg:hidden` ; mêmes onglets que le desktop |
 | Étape 7a–7g (artists → settings) | — | **Livrées.** Ne pas rejouer. |
-| Étape 8a–8b (header actions) | **Plan**, une session = un prompt **complet** | Pas les one-liners du tableau. Coller le bloc numéroté. |
+| Étape 8a–8b (header actions) | — | **Livrées.** Ne pas rejouer. |
+| Étape 9a–9d (Duet produit) | **Plan**, une session = un prompt **complet** | Pas les one-liners du tableau. Coller le bloc numéroté. |
 
 Règle d’or : **une conversation Plan = un prompt numéroté**. Après implémentation : EN + FR, light + dark, desktop `lg+` **et** mobile ~390×844.
 
@@ -54,7 +55,7 @@ Crystal **desktop Overview est livré**. Mobile = arbre `lg:hidden` dédié. Ne 
 4. Valide le plan, implémente, vérifie au navigateur, commit.
 5. Passe au numéro suivant.
 
-Étapes **8a–8b** : coller le **bloc complet** (sections Étape 8a … 8b), pas la cellule du tableau d’ordre. Le tableau n’est qu’un index.
+Étapes **9a–9d** : coller le **bloc complet** (sections Étape 9a … 9d), pas la cellule du tableau d’ordre. Le tableau n’est qu’un index.
 
 Hors scope de chaque prompt sauf mention contraire : landing marketing, e-mail, cookies, auth pages, onboarding wizard, APIs, Prisma.
 
@@ -135,7 +136,7 @@ Overview **fait** (étapes 2.5–6). Restant :
 | --- | --- | --- |
 | `/artists` | 7a **faite** (tuiles Replay + 3 panneaux) | 4ᵉ onglet trends = 7b |
 | `/tracks` `/genres` | shells page `rounded-[2rem]` | Hero/widget jusqu’à 7b–7c |
-| `TopLibraryCard` | `overview-library-rankings.tsx` | Legacy ; encore Duet friend-music |
+| `TopLibraryCard` | `overview-library-rankings.tsx` | Legacy ; encore Duet friend-music → **9a** |
 
 Remplacement type Apple :
 
@@ -435,7 +436,7 @@ Ordre (index). **7a–7g = blocs complets plus bas.** Puis **étape 8** (header 
 | **7c** | `/dashboard/genres` | Même contrat 4 onglets (top / chart / ranking / lien trends). `GENRE_SPOTLIGHT_CARD_SHELL` → `ReplayRankingGrid` `kind: "fill"`. |
 | **7d** | `/dashboard/musical-profile` | **Hub empilé** (pas de `view=`). Masthead canvas + strip + tuiles Replay (top 4) + list rows destinations. Dual tree. |
 | **7e** | `/timeline`, `/heatmap`, `*/trends` | Chrome canvas + plots Crystal (`OverviewTrendsChart` / `crystal-chart.ts`). Dual tree. |
-| **7f** | Ask + Duet (friends / compare) | Chrome seulement. `TopLibraryCard` friend-music **hors scope** (session dédiée). |
+| **7f** | Ask + Duet (friends / compare) | Chrome seulement. `TopLibraryCard` friend-music **hors scope** → **étape 9a**. |
 | **7g** | Empty + AI Insights + temporal + palette + settings | **Faite.** Canvas / list rows ; empty partagés Crystal ; dual tree. |
 
 **Après 7g — chrome header actions (étape 8).** Index :
@@ -444,6 +445,15 @@ Ordre (index). **7a–7g = blocs complets plus bas.** Puis **étape 8** (header 
 | --- | --- | --- |
 | **8a** | Centre de notifications (cloche) | **Faite.** Chrome panneau + trigger. IA / polling / sources inchangés. |
 | **8b** | Menu compte (avatar) | **Faite.** Chrome menu + trigger. Settings / sign-out / profil inchangés. |
+
+**Après 8 — Duet produit (étape 9).** Index :
+
+| # | Route / surface | Session |
+| --- | --- | --- |
+| **9a** | `/dashboard/duet/music?friendUserId` · `view=tops` | Média : `TopLibraryCard` / rows → tuiles Replay + overlay insights **ami**. |
+| **9b** | Friend-music chrome + `view=trends` | **Faite** — picker / gated / skeleton Crystal ; chart `OverviewTrendsChart`. |
+| **9c** | `/dashboard/duet/compare` · `section=` | Cohérence overview / shared / target + empty picker. |
+| **9d** | `/dashboard/duet/friends` · `section=` | Polish residual + sub-nav Duet cross-routes. |
 
 ---
 
@@ -861,6 +871,184 @@ Livre : menu lisible light/dark ; settings + sign-out OK ; demo ?userId= (avatar
 
 ---
 
+## Étape 9 — Duet produit (music / compare / friends)
+
+**Pourquoi après 8 :** chrome header livré ; Overview + Your Music listings Crystal. Duet friends / compare ont déjà le **masthead canvas** (7f), mais friend-music reste le dernier îlot `TopLibraryCard` / hero always-dark. L’utilisateur attend la **même matière média** que `/dashboard/overview` — notamment le carrousel artistes + overlay — sur la bibliothèque de l’ami.
+
+**Contrat produit Duet (ne pas casser) :**
+
+| Route | Params | Modèle |
+| --- | --- | --- |
+| `/dashboard/duet/music` | `friendUserId` requis pour le contenu ; `view=tops` \| `trends` | Dashboard à onglets (comme Overview). Auth-only. |
+| `/dashboard/duet/compare` | `friendUserId` optionnel (picker si absent) ; `section=overview` \| `shared` \| `target` ; `arenaMode` | Segmented sections, pas `view=`. |
+| `/dashboard/duet/friends` | `section=invite` \| amis / incoming / outgoing | Listes non-média + invite. |
+
+Auth-only : **ne pas** brancher `?userId=` démo publique sur Duet. Consent / shareScope / rate limits / APIs inchangés sauf si 9a doit passer `friendUserId` dans `ArtistUserInsightsPanel` (déjà supporté via prop `userId`).
+
+Une session Plan = **un** sous-prompt (9a **ou** 9b **ou** 9c **ou** 9d).
+
+Référence visuelle : Overview `view=spotlight` / `view=tops` — [`spotlight-artists-featured-list.tsx`](../lib/components/spotlight-artists-featured-list.tsx), [`overview-library-replay.tsx`](../lib/components/overview-library-replay.tsx), [`ArtistUserInsightsPanel`](../lib/components/artist-user-insights-panel.tsx).
+
+---
+
+### Étape 9a — Friend music `view=tops` : tuiles Replay + overlay ami
+
+Session **média**. C’est le gap volontaire de 7f. Objectif : `/dashboard/duet/music?friendUserId&view=tops` lit comme Overview tops / spotlight artistes.
+
+```text
+[Préambule]
+
+Étape 9a — Crystal Duet friend-music view=tops. Composer ReplayRankingGrid + (artistes) même carrousel Overview. Brancher ArtistUserInsightsPanel avec userId = friendUserId. Pas de refonte compare/friends (9c–9d). Pas de restyle trends chart (9b).
+
+Contrat :
+- Routes : /dashboard/duet/music (+ ?friendUserId). Garder view=tops|trends + DashboardSectionSwitcher / DashboardSectionPanel (idPrefix friend-music-desktop / mobile). Un panneau à la fois, y compris mobile.
+- Auth-only Duet. Ne pas brancher ?userId= démo. Hooks friend-overview / friends / consent inchangés.
+- Clic tuile artiste → overlay insights de CET ami (pas du viewer). Même drawer qu’Overview (ArtistUserInsightsPanel), prop userId={friendUserId}, subjectName={nom ami} pour l’eyebrow (« {name}'s streaming » / pas « Your streaming »).
+
+Aujourd’hui (à remplacer) :
+- Desktop duet-friend-music-desktop.tsx : grille 3× TopLibraryCard (artists / tracks / genres) — legacy overview-library-rankings. Pas d’overlay insights.
+- Mobile duet-friend-music-mobile.tsx view=tops : LeaderRows listes (pas tuiles Replay), hero HERO_SHELL always-dark encore possible sur d’autres états (picker = 9b).
+- Client : pas d’état artistInsightsTarget.
+
+Fichiers :
+- lib/components/duet/duet-friend-music-desktop.tsx, duet-friend-music-mobile.tsx, duet-friend-music-client.tsx
+- Réutiliser SANS copier le JSX tuile : replay-ranking-grid.tsx (ReplayRankingSection + ReplayRankingGrid + ReplayRankingSkeleton), spotlight-artists-featured-list.tsx OU le mapping overview-library-replay.tsx (kind artist / track / genre)
+- Overlay : artist-user-insights-panel.tsx + useArtistUserInsights (déjà accepte userId)
+- Mapper FriendMusicLeaderItem → ReplayRankingItem / preview ArtistStatsDto (artistId = id, artistName = title, listenCount = count, imageUrl)
+- i18n : réutiliser overview.replayPager.* ou duet.friendMusic.replayPager ; aria artistInsightsAriaOpen avec nom artiste
+- Tests : composants friend-music / e2e Duet music si assertés ; ne pas casser data-testid duet-friend-music-top-tracks
+
+HORS SCOPE : compare sections, friends invite, APIs Prisma, share settings page, landing home-duet, trends AreaChart legacy (9b), MUSIC_HERO_SHELL picker/gated (9b).
+
+Objectif desktop lg+ view=tops :
+- Plus de TopLibraryCard / grille 3 cartes widget. Sections canvas : comme Overview tops — `ReplayRankingSection` (eyebrow Tops + Top artists/tracks/genres) sans header page « What stood out » au-dessus (évite le doublon Tops).
+- Artistes : même look carrousel / grille Replay qu’Overview (pager 4-up, frost, rang visible). Préférer SpotlightArtistsFeaturedList si les items sont mappables en ArtistStatsDto ; sinon ReplayRankingGrid media.kind="artist". Limite ≈ SPOTLIGHT_ARTISTS_CAROUSEL_LIMIT / REPLAY_TOPS_LIMIT — ne pas inventer une 2e primitive tuile.
+- Tracks + genres : ReplayRankingGrid comme overview-library-replay (tracks : subtitle = artiste si dispo ; genres : kind fill + %).
+- onOpenArtistInsights → setState + ArtistUserInsightsPanel open (monté dans client ou desktop+mobile parents). userId = friendUserId. startDate/endDate = période dashboard actuelle. previewArtist + colorIndex comme Overview.
+- Hints aggregates / empty tracks : typo + lien ghost sur canvas, PAS rounded-[1.35rem] carte marketing.
+- Masthead OverviewHeroFrame déjà OK — ne pas le refourcher.
+
+Objectif mobile < lg view=tops :
+- Même view= + switcher. Remplacer LeaderRows artistes/tracks/genres par ReplayRankingGrid 2×2 (pageSize 4). Clic → même overlay (sheet/drawer existant du panel).
+- Plus de list-row « admin » pour le top média. Dual tree : ne pas fusionner sm: sur le desktop.
+
+Contraintes : 44px, EN+FR (+ ES si copy), prefers-reduced-transparency sur frost. Ne pas réintroduire CARD_SHELL / TopLibraryCard / hover overlay qui cache le nom. Ne pas tuer view=. Ne pas changer consent / shareScope. Gemini modify_frontend 1 surface max si utile.
+
+Livre : avant/après tops sans TopLibraryCard ; clic artiste ouvre insights ami (vérifier que les métriques / période correspondent à friendUserId) ; light/dark EN/FR lg+ + ~390×844 ; testids tops tracks OK.
+```
+
+---
+
+### Étape 9b — Friend music chrome résiduel + `view=trends` (**FAITE**)
+
+Après 9a. **Livré.** Ne pas recoller ce prompt. Picker / gated / skeleton / mobile hero = `OverviewHeroFrame` ; trends desktop = `OverviewTrendsChart` 1 série.
+
+```text
+[Préambule]
+
+Étape 9b — Crystal Duet friend-music chrome + view=trends. Composer OverviewHeroFrame + OverviewTrendsChart. Ne pas retoucher les tuiles tops (9a). Ne pas refondre compare/friends.
+
+Contrat :
+- Garder états : no friendUserId (picker), gated 403, unavailable, empty stats, loading skeleton, dual tree.
+- view=trends inchangé (query param). Chart = série unique « ami » (pas dual compare).
+- Auth-only. APIs / hooks inchangés.
+
+Aujourd’hui (à remplacer) :
+- duet-friend-music-client.tsx : MUSIC_HERO_SHELL always-dark rounded-[2rem] + DASHBOARD_SPOTLIGHT_* sur picker / gated / skeleton desktop.
+- duet-friend-music-mobile.tsx : HERO_SHELL bg-gray-950 cinématique sur frames mobile.
+- FriendMusicTimelinePanel (desktop) : AreaChart Recharts maison + wells rounded-[1.75rem] / CHART_TOOLTIP_STYLES legacy (pas OverviewTrendsChart / crystal-chart).
+- Mobile trends : résumé Signal-like / listes — sortir carte lourde si encore présente.
+
+Fichiers : duet-friend-music-client.tsx, duet-friend-music-desktop.tsx (FriendMusicTimelinePanel), duet-friend-music-mobile.tsx. Réutiliser overview-hero, OverviewTrendsChart, ListenTrendChartViewToggle si encore pertinent (ou le toggle déjà branché sur OverviewTrendsChart ailleurs). e2e Duet music / mobile-dashboard si gated asserté.
+
+HORS SCOPE : 9a tuiles, compare arena, friends invite, settings share toggles, APIs.
+
+Objectif :
+- Picker / gated / unavailable / skeleton : masthead canvas (OverviewHeroFrame) + list rows amis (DASHBOARD_LIST_ROW) pour choisir un ami ; empty Crystal ; plus de MUSIC_HERO_SHELL / SPOTLIGHT_SHELL / radial violet.
+- Mobile : plus de HERO_SHELL always-dark ; compact OverviewHeroFrame.
+- view=trends : plot sur canvas via OverviewTrendsChart (1 série), plus de double well border+glass autour du chart. Toggle période si déjà là — garder IA, calmer chrome.
+- Hints / empty : typo muted + CTA ghost, pas carte.
+
+Contraintes : 44px, EN+FR, prefers-reduced-transparency. Ne pas introduire view=spotlight. Gemini 1 surface si utile.
+
+Livre : picker/gated lisibles light/dark ; trends Crystal ; pas de régression deep-link friendUserId + view= ; e2e gated OK.
+```
+
+---
+
+### Étape 9c — Compare : sections `overview` / `shared` / `target`
+
+Chrome + plots déjà partiellement Crystal (7f). Cette session **ferme la cohérence** de toutes les sections et du empty picker.
+
+```text
+[Préambule]
+
+Étape 9c — Crystal Duet compare (toutes sections). Composer OverviewHeroFrame + DASHBOARD_METRIC_STRIP + DASHBOARD_LIST_ROW + OverviewTrendsChart. Ne pas retoucher friend-music (9a–9b) ni friends invite (9d) sauf sub-nav partagé si classe legacy.
+
+Contrat :
+- /dashboard/duet/compare sans friendUserId = picker amis (list rows).
+- Avec friendUserId : section=overview|shared|target (DuetCompareSectionTabs / mobile sub-nav). Ne pas renommer les sections. arenaMode inchangé.
+- Auth-only. Hooks compare timeline / shared-artists / entity / metadata inchangés.
+
+Aujourd’hui (écarts résiduels à auditer puis fixer) :
+- section=overview : timeline dual-series — vérifier plus aucun DASHBOARD_SPOTLIGHT_SHELL / DASHBOARD_CHART_THEME / Legend legacy ; doit être OverviewTrendsChart 2 séries.
+- section=shared : DuetSharedArtistsPanel — rows OK ; sortir shells / empty carte si restants ; pas de tuiles Replay 3:4 sauf décision produit explicite (défaut = list rows head-to-head).
+- section=target (arena) : DuetEntityHeadToHead / duel blocks / battle arena UI — flatten shells ; search = DASHBOARD_SEARCH_FIELD ; plots Crystal si encore legacy.
+- Empty picker + skeletons : déjà OverviewHeroFrame — calmer tout residual rounded-[2rem] / how-it-works cartes.
+- Sub-nav : duet-sub-nav / duet-mobile-sub-nav / duet-compare-section-tabs — segmented Crystal si encore chips-cartes ; sinon ne pas fourcher.
+
+Fichiers : duet-compare-client.tsx, duet-compare-hero.tsx, duet-compare-mobile.tsx, duet-compare-skeleton.tsx, duet-shared-artists-panel.tsx, duet-shared-artists-empty.tsx, duet-entity-head-to-head-panel.tsx, duet-entity-duel-blocks.tsx, duet-battle-arena-ui.tsx, duet-compare-context-bar.tsx, duet-metadata-banner.tsx, duet-chart-view-toggle.tsx. e2e : duet-compare.spec.ts (auth redirect), mobile-dashboard compare gated.
+
+HORS SCOPE : friend-music médias, friends CRUD métier, APIs, share image pipeline (sauf classes shell qui cassent le contraste — tokens seulement).
+
+Objectif par section :
+- overview : masthead + context bar canvas ; dual timeline Crystal ; CTAs See music / share = ghost / primary soft, pas lift carte.
+- shared : header section canvas ; liste / empty un-carded.
+- target : mode artist|track sur canvas ; duel lisible light/dark ; empty search = typo.
+- Mobile : mêmes sections ; plus de cinematic ; charts lisibles ou sheet.
+
+Contraintes : 44px, EN+FR (+ ES labels), prefers-reduced-transparency. Ne pas introduire view= à la place de section=. Gemini 1 surface si utile.
+
+Livre : 3 sections light/dark EN/FR lg+ + mobile ; picker sans ami ; redirect auth e2e vert ; deep-link ?friendUserId&section=overview OK.
+```
+
+---
+
+### Étape 9d — Friends + cohérence sub-nav Duet
+
+Dernière passe Duet. Listes non-média + invite ; aligner le chrome commun des 3 routes.
+
+```text
+[Préambule]
+
+Étape 9d — Crystal Duet friends + sub-nav cross-routes. Composer OverviewHeroFrame + DASHBOARD_METRIC_STRIP + DASHBOARD_LIST_ROW. Ne pas retoucher friend-music tuiles/trends (9a–9b) ni compare panels (9c) sauf imports sub-nav partagés.
+
+Contrat :
+- /dashboard/duet/friends?section=invite|… — garder sections existantes (invite / list / pending in / out). Pas de view= média.
+- Mutations invite / accept / decline / block / invite-link inchangées.
+- Auth-only.
+
+Aujourd’hui (à auditer) :
+- 7f a déjà masthead + strip + rows sur friends desktop/mobile — chercher residual : gradients SPOTLIGHT, badges mono uppercase tracking large, CTA blanc lift, empty carte, forms invite en mini-cartes.
+- duet-sub-nav / duet-mobile-sub-nav : doit être le même langage segmented / tabs que compare (pas une 3e esthétique).
+- Share settings snippet dans friends si présent : tokens seulement.
+
+Fichiers : duet-friends-client.tsx, duet-friends-hero.tsx, duet-friends-mobile.tsx, duet-friends-skeleton.tsx, duet-sub-nav.tsx, duet-mobile-sub-nav.tsx, éventuellement duet-share-settings-section.tsx (classes muted seulement). e2e mobile-dashboard friends gated + heading.
+
+HORS SCOPE : APIs friendship, tokens invite, page /duet/accept marketing, landing home-duet, notification center (8a).
+
+Objectif :
+- Friends : rows 44px + hairline ; invite form sur canvas (DASHBOARD_SEARCH_FIELD / inputs calmes) ; metric strip counts ; empty gated Crystal.
+- Sub-nav Music | Compare | Friends : une seule matière sur les 3 routes (active state segmented, pas chips-cartes).
+- Mobile : compact hero + sections ; pas cinematic.
+
+Contraintes : 44px, EN+FR, light/dark. Gemini 1 surface si utile.
+
+Livre : friends invite + list OK ; sub-nav cohérent music/compare/friends ; e2e friends mobile vert.
+```
+
+---
+
 ## Gemini Design MCP
 
 Après l’étape 0. **Pas** de `create_frontend` Overview (casserait hooks / i18n / tabs).
@@ -938,7 +1126,7 @@ Desktop `lg+` **et** mobile ~390×844, light et dark, EN et FR :
 - [ ] Ask : presets / empty chrome sans mini-cartes `shadow-sm` marketing ; composer + e2e presets / sheet OK
 - [ ] Duet friends + compare : plus de hero always-dark ni mega `DASHBOARD_SPOTLIGHT_SHELL` ; strip + list rows
 - [ ] Compare dual-series : plot Crystal si encore legacy ; auth redirect e2e vert
-- [ ] Friend-music `TopLibraryCard` **toujours** legacy (hors scope volontaire)
+- [ ] Friend-music `TopLibraryCard` → **reporté à 9a** (hors scope 7f volontaire)
 - [ ] Light/dark EN/FR desktop + mobile
 
 ---
@@ -962,6 +1150,19 @@ Desktop `lg+` **et** mobile header (~390×844), light et dark, EN et FR :
 - [x] 8b : avatar sans hover-lift ; menu glass floating ; items list rows, pas `shadow-card` / `primary/10`
 - [x] Cluster `headerActions` intact (ordre cloche → avatar) ; masquage démo notifications inchangé
 - [x] Escape / click outside / focus ring / cibles 44px ; `prefers-reduced-transparency`
+
+---
+
+## Critères de done (9a–9d)
+
+Desktop `lg+` **et** mobile ~390×844, light et dark, EN et FR :
+
+- [ ] **9a** `/dashboard/duet/music?friendUserId&view=tops` : plus de `TopLibraryCard` ; artistes = carrousel / grille Replay comme Overview ; tracks + genres = `ReplayRankingGrid` ; clic artiste → `ArtistUserInsightsPanel` avec `userId=friendUserId`
+- [x] **9b** Friend-music : picker / gated / skeleton sans `MUSIC_HERO_SHELL` / `DASHBOARD_SPOTLIGHT_SHELL` ; mobile sans `HERO_SHELL` always-dark ; `view=trends` = `OverviewTrendsChart` (1 série)
+- [ ] **9c** Compare : `section=overview|shared|target` sans mega-shells ; dual timeline Crystal ; picker sans `friendUserId` en list rows ; deep-links OK ; e2e auth redirect vert
+- [x] **9d** Friends : rows + invite canvas ; sub-nav Music / Compare / Friends cohérent sur les 3 routes ; empty gated Crystal
+- [ ] Auth-only Duet (pas de démo `?userId=`) ; `view=` music et `section=` compare/friends inchangés sémantiquement
+- [ ] `prefers-reduced-transparency` sur frost / glass
 
 ---
 
@@ -994,3 +1195,4 @@ Desktop `lg+` **et** mobile header (~390×844), light et dark, EN et FR :
 - `lib/components/ask-soundprint-*.tsx` / `lib/components/duet/*-hero.tsx` — **7f** (chrome)
 - `ai-insights` / `temporal-analysis` / `palette/*` / settings — **7g** (chrome + empty partagés)
 - `notification-center.tsx` / `dashboard-user-menu.tsx` — **étape 8** (header actions)
+- `duet-friend-music-*.tsx` / `duet-compare-*.tsx` / `duet-friends-*.tsx` — **étape 9** (Duet produit)

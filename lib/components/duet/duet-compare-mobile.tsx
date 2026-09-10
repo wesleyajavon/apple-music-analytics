@@ -11,6 +11,10 @@ import {
   DASHBOARD_METRIC_LABEL,
   DASHBOARD_METRIC_STRIP,
   DASHBOARD_METRIC_VALUE,
+  DASHBOARD_SEARCH_FIELD,
+  DASHBOARD_SECTION_EYEBROW,
+  DASHBOARD_SEGMENTED_PILL,
+  DASHBOARD_SEGMENTED_PILL_ACTIVE,
   DASHBOARD_SEGMENTED_TRACK,
 } from "@/lib/components/dashboard-ui";
 import { OverviewHeroFrame } from "@/lib/components/overview-hero";
@@ -131,9 +135,7 @@ function SegmentedControl<T extends string>({
             role="tab"
             aria-selected={selected}
             onClick={() => onChange(option.value)}
-            className={`inline-flex min-h-11 flex-1 items-center justify-center whitespace-nowrap rounded-xl px-3 text-sm font-semibold ${
-              selected ? "bg-gray-950 text-white dark:bg-white dark:text-gray-950" : "text-muted"
-            }`}
+            className={selected ? `${DASHBOARD_SEGMENTED_PILL_ACTIVE} flex-1` : `${DASHBOARD_SEGMENTED_PILL} flex-1`}
           >
             {option.label}
           </button>
@@ -155,14 +157,14 @@ function FaceOffRow({
   rightValue: string;
 }) {
   return (
-    <div className="flex min-h-11 items-center gap-3 rounded-2xl border border-card-border bg-card-surface px-3 py-2">
-      <div className="min-w-0 flex-1">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">{leftLabel}</p>
-        <p className="mt-0.5 text-base font-semibold tabular-nums text-foreground">{leftValue}</p>
+    <div className={DASHBOARD_METRIC_STRIP}>
+      <div className={DASHBOARD_METRIC_CELL}>
+        <p className={DASHBOARD_METRIC_LABEL}>{leftLabel}</p>
+        <p className={`${DASHBOARD_METRIC_VALUE} text-xl`}>{leftValue}</p>
       </div>
-      <div className="min-w-0 flex-1 text-right">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">{rightLabel}</p>
-        <p className="mt-0.5 text-base font-semibold tabular-nums text-foreground">{rightValue}</p>
+      <div className={DASHBOARD_METRIC_CELL}>
+        <p className={DASHBOARD_METRIC_LABEL}>{rightLabel}</p>
+        <p className={`${DASHBOARD_METRIC_VALUE} text-xl`}>{rightValue}</p>
       </div>
     </div>
   );
@@ -236,7 +238,7 @@ function MobileChart({
   const displayed = useMemo(() => applyDuetChartView(data, chartView), [data, chartView]);
 
   return (
-    <div className="h-56 overflow-hidden rounded-2xl border border-card-border bg-card-surface p-2">
+    <div className="h-56">
       <DuetDualLineChart
         data={displayed}
         period={period}
@@ -254,11 +256,11 @@ export function DuetCompareMobileSkeleton({ locale }: { locale: string }) {
   return (
     <div className={MOBILE_BLEED} aria-busy="true">
       <HeroFrame locale={locale} heading={tm("title")}>
-        <div className="h-11 animate-pulse rounded-xl bg-white/15" />
+        <div className="h-11 animate-pulse rounded-full bg-surface-raised" />
       </HeroFrame>
       <section className="space-y-2 px-4">
         {[0, 1, 2].map((item) => (
-          <div key={item} className="h-11 animate-pulse rounded-2xl border border-card-border bg-card-surface" />
+          <div key={item} className="h-11 animate-pulse rounded-xl bg-surface-raised" />
         ))}
       </section>
     </div>
@@ -278,7 +280,7 @@ export function DuetCompareMobileGated({
     <div className={MOBILE_BLEED}>
       <HeroFrame locale={locale} heading={tm("gatedTitle")}>
         <DuetMobileSubNav current="compare" withFilters={withFilters} />
-        <p className="max-w-sm text-sm leading-6 text-white/70">{tm("gatedLead")}</p>
+        <p className="max-w-sm text-[13px] leading-6 text-muted">{tm("gatedLead")}</p>
         <Link
           href="/sign-in"
           className={`${DASHBOARD_BTN_GHOST} w-full no-underline text-foreground`}
@@ -306,7 +308,7 @@ export function DuetCompareMobileError({
     <div className={MOBILE_BLEED}>
       <HeroFrame locale={locale} heading={tm("title")}>
         <DuetMobileSubNav current="compare" withFilters={withFilters} />
-        <p className="text-sm leading-6 text-white/70">{tm("errorLead")}</p>
+        <p className="text-[13px] leading-6 text-muted">{tm("errorLead")}</p>
         <button
           type="button"
           onClick={onRetry}
@@ -337,8 +339,8 @@ export function DuetCompareMobileUnavailable({
     <div className={MOBILE_BLEED}>
       <HeroFrame locale={locale} heading={tm("title")}>
         <DuetMobileSubNav current="compare" withFilters={withFilters} />
-        <p className="text-sm font-semibold leading-6 text-white">{title}</p>
-        <p className="text-sm leading-6 text-white/70">{description}</p>
+        <p className="text-sm font-semibold leading-6 text-foreground">{title}</p>
+        <p className="text-[13px] leading-6 text-muted">{description}</p>
         <Link
           href={withFilters("/dashboard/duet/friends")}
           className={`${DASHBOARD_BTN_GHOST} w-full no-underline text-foreground`}
@@ -372,9 +374,7 @@ export function DuetCompareMobilePicker({
         <DuetMobileSubNav current="compare" withFilters={withFilters} />
       </HeroFrame>
       <section className="space-y-2 px-4" aria-label={tm("friendsListLabel")}>
-        <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
-          {tm("pickFriendTitle")}
-        </h2>
+        <h2 className={DASHBOARD_SECTION_EYEBROW}>{tm("pickFriendTitle")}</h2>
         <FriendList
           friends={friends}
           viewerId={viewerId}
@@ -382,12 +382,10 @@ export function DuetCompareMobilePicker({
           trailing={t("challengeCta")}
           empty={
             <div className="space-y-3">
-              <p className="rounded-2xl border border-card-border bg-card-surface px-3.5 py-4 text-sm leading-6 text-muted">
-                {tm("emptyLead")}
-              </p>
+              <p className="text-[13px] leading-6 text-muted">{tm("emptyLead")}</p>
               <Link
                 href={withFilters("/dashboard/duet/friends")}
-                className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-gray-950 px-4 text-sm font-bold text-white no-underline dark:bg-white dark:text-gray-950"
+                className={`${DASHBOARD_BTN_GHOST} w-full no-underline text-foreground`}
               >
                 {t("goToFriends")}
               </Link>
@@ -514,7 +512,7 @@ export function DuetCompareMobileExperience({
         <DuetMobileSubNav current="compare" withFilters={withFilters} />
         <div className="flex items-center gap-3">
           <UserAvatar name={viewer.name} src={viewer.avatarUrl} size="md" />
-          <span className="text-xs font-bold uppercase tracking-[0.16em] text-white/50">vs</span>
+          <span className="text-[13px] font-medium text-muted">vs</span>
           <UserAvatar name={friendName} src={friendAvatarUrl} size="md" />
         </div>
       </HeroFrame>
@@ -530,14 +528,14 @@ export function DuetCompareMobileExperience({
         <button
           type="button"
           onClick={() => setFriendSheetOpen(true)}
-          className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl border border-card-border bg-card-surface text-sm font-semibold text-foreground"
+          className={`${DASHBOARD_BTN_GHOST} w-full text-foreground`}
         >
           {t("changeFriend")}
         </button>
         {seeMusicHref ? (
           <Link
             href={seeMusicHref}
-            className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl border border-card-border bg-card-surface text-sm font-semibold text-foreground no-underline"
+            className={`${DASHBOARD_BTN_GHOST} w-full no-underline text-foreground`}
           >
             {t("seeMusic")}
           </Link>
@@ -564,16 +562,10 @@ export function DuetCompareMobileExperience({
             {rangeClamped ? <p className="text-sm leading-6 text-muted">{t("rangeClamped")}</p> : null}
             {metadataBanner}
             {chartData.length === 0 ? (
-              <p className="rounded-2xl border border-card-border bg-card-surface px-3.5 py-4 text-sm leading-6 text-muted">
-                {t("noDataTitle")}
-              </p>
+              <p className="text-[13px] leading-6 text-muted">{t("noDataTitle")}</p>
             ) : (
               <>
-                <DuetChartViewToggle
-                  value={chartView}
-                  onChange={onChartViewChange}
-                  className="inline-flex w-full gap-1 rounded-2xl border border-card-border bg-card-surface p-1"
-                />
+                <DuetChartViewToggle value={chartView} onChange={onChartViewChange} />
                 <MobileChart
                   data={chartData}
                   chartView={chartView}
@@ -596,13 +588,13 @@ export function DuetCompareMobileExperience({
             <button
               type="button"
               onClick={onRetryShared}
-              className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-card-border text-sm font-semibold"
+              className={`${DASHBOARD_BTN_GHOST} w-full text-foreground`}
             >
               {tCommon("retry")}
             </button>
           ) : !sharedArtists?.length ? (
             <DuetSharedArtistsEmpty
-              className="rounded-2xl border border-card-border bg-card-surface px-4 py-6"
+              className="py-6"
               eyebrow={t("sharedArtistsEmptyEyebrow")}
               title={t("sharedArtistsEmptyTitle")}
               description={t("sharedArtistsEmptyDescription")}
@@ -670,7 +662,7 @@ export function DuetCompareMobileExperience({
               <button
                 type="button"
                 onClick={onRetryEntity}
-                className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-card-border text-sm font-semibold"
+                className={`${DASHBOARD_BTN_GHOST} w-full text-foreground`}
               >
                 {tCommon("retry")}
               </button>
@@ -712,11 +704,7 @@ export function DuetCompareMobileExperience({
                 ) : null}
                 {entityChartData.length > 0 ? (
                   <>
-                    <DuetChartViewToggle
-                      value={chartView}
-                      onChange={onChartViewChange}
-                      className="inline-flex w-full gap-1 rounded-2xl border border-card-border bg-card-surface p-1"
-                    />
+                    <DuetChartViewToggle value={chartView} onChange={onChartViewChange} />
                     <MobileChart
                       data={entityChartData}
                       chartView={chartView}
@@ -728,9 +716,7 @@ export function DuetCompareMobileExperience({
                     />
                   </>
                 ) : (
-                  <p className="rounded-2xl border border-card-border bg-card-surface px-3.5 py-4 text-sm leading-6 text-muted">
-                    {t("noDataTitle")}
-                  </p>
+                  <p className="text-[13px] leading-6 text-muted">{t("noDataTitle")}</p>
                 )}
               </>
             ) : null}
@@ -760,7 +746,7 @@ export function DuetCompareMobileExperience({
               empty={
                 <Link
                   href={withFilters("/dashboard/duet/friends")}
-                  className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-card-border text-sm font-semibold no-underline"
+                  className={`${DASHBOARD_BTN_GHOST} w-full no-underline text-foreground`}
                 >
                   {t("goToFriends")}
                 </Link>
@@ -786,7 +772,7 @@ export function DuetCompareMobileExperience({
               value={searchQuery}
               onChange={(event) => onSearchQueryChange(event.target.value)}
               placeholder={entityPlaceholder}
-              className="min-h-11 w-full rounded-xl border border-card-border bg-card-surface px-3 text-sm text-foreground"
+              className={DASHBOARD_SEARCH_FIELD}
             />
             {selectedEntityLabel ? (
               <button type="button" onClick={onClearEntity} className="text-sm font-semibold text-muted">

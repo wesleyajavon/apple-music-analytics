@@ -4,7 +4,6 @@ import { useMemo } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import type { CompareMetadataResponse } from "@/lib/dto/duet";
 import { DUET_COVERAGE_SPAN_RATIO } from "@/lib/constants/duet-compare";
-import { DASHBOARD_SPOTLIGHT_MUTED } from "@/lib/constants/dashboard-spotlight";
 
 type Props = {
   friendName: string;
@@ -59,10 +58,7 @@ export function DuetMetadataBanner({ friendName, metadata, compact = false }: Pr
   }
 
   return (
-    <p
-      role="status"
-      className={`rounded-2xl border border-slate-200/80 bg-slate-50/80 px-4 py-3 text-sm leading-6 ${DASHBOARD_SPOTLIGHT_MUTED} dark:border-white/10 dark:bg-white/5`}
-    >
+    <p role="status" className="text-[13px] leading-6 text-muted">
       {note}
     </p>
   );

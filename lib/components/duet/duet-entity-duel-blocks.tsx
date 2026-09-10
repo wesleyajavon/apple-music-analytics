@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo } from "react";
-import { motion } from "motion/react";
 import { Crown, Swords, Trophy } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { OverviewTrendsChart } from "@/lib/components/charts/overview-trends-chart";
@@ -10,6 +9,13 @@ import type { DuetArenaMode } from "@/lib/components/duet/duet-battle-arena-ui";
 import { generateDuetBattleSharePng } from "@/lib/utils/duet-battle-share-image";
 import { duetShareHeadlineKey, duetShareLeadKey } from "@/lib/utils/duet-share-headline";
 import type { PeriodType } from "@/lib/components/period-selector";
+import {
+  DASHBOARD_METRIC_CELL,
+  DASHBOARD_METRIC_LABEL,
+  DASHBOARD_METRIC_STRIP,
+  DASHBOARD_METRIC_VALUE,
+  DASHBOARD_SECTION_EYEBROW,
+} from "@/lib/components/dashboard-ui";
 import { getCrystalSeriesColor } from "@/lib/constants/crystal-chart";
 import { useTheme } from "@/lib/providers/theme-provider";
 import type { DualLineChartPoint } from "@/lib/utils/listen-trend-chart-view";
@@ -223,6 +229,11 @@ export function EntityBattleScorecard({
   locale,
   t,
 }: Omit<EntityBattleShareActionsProps, "variant">) {
+  const { resolvedTheme } = useTheme();
+  const chartThemeName = resolvedTheme === "dark" ? "dark" : "light";
+  const selfColor = getCrystalSeriesColor(0, chartThemeName);
+  const friendColor = getCrystalSeriesColor(1, chartThemeName);
+
   const total = selfCount + friendCount;
   const selfPct = total > 0 ? (selfCount / total) * 100 : 50;
   const friendPct = total > 0 ? 100 - selfPct : 50;
@@ -235,25 +246,14 @@ export function EntityBattleScorecard({
   });
 
   return (
-    <motion.div
-      key={`${winner}-${selfCount}-${friendCount}`}
-      initial={{ opacity: 0, y: 16, scale: 0.98 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.45, ease: "easeOut" }}
-      className="relative overflow-hidden rounded-[1.35rem] border border-slate-200/80 bg-gradient-to-br from-violet-50/80 via-white to-cyan-50/60 p-5 shadow-inner dark:border-white/10 dark:from-violet-950/40 dark:via-slate-950/60 dark:to-cyan-950/30"
-    >
-      <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-violet-400/10 blur-2xl dark:bg-violet-400/20" />
-      <div className="pointer-events-none absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-cyan-400/10 blur-2xl dark:bg-cyan-400/15" />
-
-      <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="space-y-5">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
-          <motion.div
-            animate={winner !== "tie" && !artistPhotoUrl ? { rotate: [0, -8, 8, 0], scale: [1, 1.08, 1] } : undefined}
-            transition={{ duration: 0.55, delay: 0.15 }}
+          <div
             className={
               artistPhotoUrl
-                ? "h-12 w-12 shrink-0 overflow-hidden rounded-2xl border border-slate-200/80 shadow-sm dark:border-white/15"
-                : "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-amber-200/80 bg-amber-50 text-amber-600 dark:border-amber-400/25 dark:bg-amber-400/10 dark:text-amber-200"
+                ? "h-12 w-12 shrink-0 overflow-hidden rounded-xl"
+                : "flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-muted"
             }
           >
             {artistPhotoUrl ? (
@@ -273,21 +273,21 @@ export function EntityBattleScorecard({
             ) : (
               <Trophy className="h-5 w-5" aria-hidden />
             )}
-          </motion.div>
+          </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
-              {entityName}
-            </p>
+            <p className={DASHBOARD_SECTION_EYEBROW}>{entityName}</p>
             {entitySubtitle ? (
-              <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{entitySubtitle}</p>
+              <p className="mt-0.5 text-[13px] text-muted">{entitySubtitle}</p>
             ) : null}
-            <p className="mt-1 text-lg font-bold leading-snug text-slate-900 dark:text-white">{winnerLabel}</p>
+            <p className="mt-1 text-lg font-semibold leading-snug tracking-tight text-foreground">
+              {winnerLabel}
+            </p>
           </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           {winner !== "tie" ? (
-            <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-amber-200/90 bg-amber-50/90 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-amber-800 dark:border-amber-400/25 dark:bg-amber-400/10 dark:text-amber-100">
+            <span className="inline-flex w-fit items-center gap-1.5 text-[13px] font-medium text-muted">
               <Crown className="h-3.5 w-3.5" aria-hidden />
               {winner === "self" ? t("seriesSelf") : friendName}
             </span>
@@ -312,35 +312,27 @@ export function EntityBattleScorecard({
         </div>
       </div>
 
-      <div className="relative mt-5 grid gap-3 sm:grid-cols-2">
-        <div className="rounded-xl border border-violet-200/70 bg-white/80 p-3 dark:border-violet-400/20 dark:bg-white/5">
-          <p className="text-xs font-semibold uppercase tracking-wider text-violet-700 dark:text-violet-200">
-            {t("seriesSelf")}
-          </p>
-          <p className="mt-1 text-2xl font-bold tabular-nums text-slate-900 dark:text-white">
-            {selfCount.toLocaleString(locale)}
-          </p>
+      <div className={DASHBOARD_METRIC_STRIP}>
+        <div className={DASHBOARD_METRIC_CELL}>
+          <p className={DASHBOARD_METRIC_LABEL}>{t("seriesSelf")}</p>
+          <p className={DASHBOARD_METRIC_VALUE}>{selfCount.toLocaleString(locale)}</p>
         </div>
-        <div className="rounded-xl border border-cyan-200/70 bg-white/80 p-3 dark:border-cyan-400/20 dark:bg-white/5">
-          <p className="text-xs font-semibold uppercase tracking-wider text-cyan-700 dark:text-cyan-200">
-            {t("seriesFriend", { friendName })}
-          </p>
-          <p className="mt-1 text-2xl font-bold tabular-nums text-slate-900 dark:text-white">
-            {friendCount.toLocaleString(locale)}
-          </p>
+        <div className={DASHBOARD_METRIC_CELL}>
+          <p className={DASHBOARD_METRIC_LABEL}>{t("seriesFriend", { friendName })}</p>
+          <p className={DASHBOARD_METRIC_VALUE}>{friendCount.toLocaleString(locale)}</p>
         </div>
       </div>
 
-      <div className="relative mt-4 flex h-4 overflow-hidden rounded-full bg-slate-200/80 dark:bg-white/10">
+      <div className="flex h-2 overflow-hidden rounded-full bg-surface-raised">
         <div
-          className="bg-gradient-to-r from-violet-500 to-violet-400 transition-all duration-700"
-          style={{ width: `${selfPct}%` }}
+          className="transition-all duration-500"
+          style={{ width: `${selfPct}%`, backgroundColor: selfColor }}
         />
         <div
-          className="bg-gradient-to-r from-cyan-400 to-cyan-300 transition-all duration-700"
-          style={{ width: `${friendPct}%` }}
+          className="transition-all duration-500"
+          style={{ width: `${friendPct}%`, backgroundColor: friendColor }}
         />
       </div>
-    </motion.div>
+    </div>
   );
 }

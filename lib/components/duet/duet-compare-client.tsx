@@ -12,7 +12,7 @@ import { useSearchParams } from "next/navigation";
 import { useRouter, usePathname } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { motion } from "motion/react";
+import { ChevronRight } from "lucide-react";
 import {
   DuetDualLineChart,
   applyDuetChartView,
@@ -66,6 +66,9 @@ import {
   resolveAuthAvatarUrl,
 } from "@/lib/components/duet/duet-utils";
 import {
+  DASHBOARD_LIST_ROW,
+  DASHBOARD_LIST_ROW_INTERACTIVE,
+  DASHBOARD_LIST_SEPARATOR,
   DASHBOARD_SECTION_EYEBROW,
   DASHBOARD_SECTION_TITLE,
 } from "@/lib/components/dashboard-ui";
@@ -93,7 +96,7 @@ type ViewerProfile = {
   avatarUrl: string | null;
 };
 
-function SpotlightSectionHeader({
+function CanvasSectionHeader({
   eyebrow,
   title,
   description,
@@ -102,8 +105,6 @@ function SpotlightSectionHeader({
   eyebrow: string;
   title: string;
   description: string;
-  badge?: string;
-  badgeVariant?: "violet" | "lime";
   action?: ReactNode;
 }) {
   return (
@@ -571,7 +572,7 @@ function CompareContent() {
 
   const renderTargetSection = () => (
     <section>
-      <SpotlightSectionHeader
+      <CanvasSectionHeader
         eyebrow={t("arenaEyebrow")}
         title={t("arenaTitle")}
         description={t("arenaDescription")}
@@ -699,7 +700,7 @@ function CompareContent() {
       ) : null}
 
       <section>
-        <SpotlightSectionHeader
+        <CanvasSectionHeader
           eyebrow={t("timelineEyebrow")}
           title={t("chartTitle", { friendName })}
           description={
@@ -835,42 +836,38 @@ function CompareContent() {
                 actions={[{ label: t("goToFriends"), href: "/dashboard/duet/friends" }]}
               />
             ) : (
-              <section>
-                <SpotlightSectionHeader
+              <section className="space-y-3" aria-label={t("selectFriendTitle")}>
+                <CanvasSectionHeader
                   eyebrow={t("pickerEyebrow")}
                   title={t("selectFriendTitle")}
                   description={t("selectFriendDescription")}
                 />
-                <div className="grid gap-1 sm:grid-cols-2 lg:grid-cols-3">
-                  {acceptedFriends.map((friendship, index) => {
+                <ul>
+                  {acceptedFriends.map((friendship) => {
                     const peer =
                       friendship.requester.id === viewer.id
                         ? friendship.addressee
                         : friendship.requester;
                     const displayName = getDuetDisplayName(peer);
                     return (
-                      <motion.div
-                        key={friendship.id}
-                        initial={{ opacity: 0, y: 16 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3, delay: index * 0.05 }}
-                      >
+                      <li key={friendship.id}>
                         <Link
                           href={`/dashboard/duet/compare?friendUserId=${encodeURIComponent(peer.id)}&section=overview`}
-                          className="flex min-h-11 flex-col items-start gap-2 border-b border-glass-hairline py-4 no-underline last:border-b-0 sm:border sm:border-glass-hairline sm:rounded-2xl sm:px-4 sm:last:border-b"
+                          className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_SEPARATOR} ${DASHBOARD_LIST_ROW_INTERACTIVE} no-underline text-foreground`}
                         >
-                          <UserAvatar name={displayName} src={peer.avatarUrl} size="md" />
-                          <div className="relative">
-                            <p className="truncate font-semibold text-slate-900 dark:text-white">{displayName}</p>
-                            <p className="mt-1 text-xs font-bold uppercase tracking-[0.16em] text-violet-600 transition-colors group-hover:text-violet-500 dark:text-violet-300">
-                              {t("challengeCta")}
-                            </p>
-                          </div>
+                          <UserAvatar name={displayName} src={peer.avatarUrl} size="sm" />
+                          <span className="min-w-0 flex-1 truncate text-sm font-semibold">
+                            {displayName}
+                          </span>
+                          <span className="shrink-0 text-[13px] font-medium text-muted">
+                            {t("challengeCta")}
+                          </span>
+                          <ChevronRight className="h-4 w-4 shrink-0 text-muted" aria-hidden />
                         </Link>
-                      </motion.div>
+                      </li>
                     );
                   })}
-                </div>
+                </ul>
               </section>
             )}
           </div>

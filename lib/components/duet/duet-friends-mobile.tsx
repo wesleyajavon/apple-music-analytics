@@ -23,6 +23,7 @@ import { MusicalProfilePeriodBadge } from "@/lib/components/musical-profile-peri
 import { UserAvatar } from "@/lib/components/user-avatar";
 import { getDuetDisplayName } from "@/lib/components/duet/duet-utils";
 import { DuetMobileSubNav } from "@/lib/components/duet/duet-mobile-sub-nav";
+import { DuetShareScopePicker } from "@/lib/components/duet/duet-share-scope-picker";
 import type { DuetFriendsSection } from "@/lib/constants/duet-friends";
 import { DASHBOARD_BOTTOM_NAV_OFFSET_VAR } from "@/lib/constants/dashboard-chrome";
 import type { FriendshipDto } from "@/lib/dto/duet";
@@ -114,62 +115,6 @@ function HeroFrame({
         {children}
       </OverviewHeroFrame>
     </div>
-  );
-}
-
-function ShareScopePicker({
-  groupName,
-  value,
-  onChange,
-  disabled,
-}: {
-  groupName: string;
-  value: DuetShareScopeOption;
-  onChange: (scope: DuetShareScopeOption) => void;
-  disabled?: boolean;
-}) {
-  const tAccept = useTranslations("duet.inviteAccept");
-  const options = [
-    {
-      value: "aggregates" as const,
-      label: tAccept("scopeAggregates.label"),
-      description: tAccept("scopeAggregates.description"),
-    },
-    {
-      value: "full" as const,
-      label: tAccept("scopeFull.label"),
-      description: tAccept("scopeFull.description"),
-    },
-  ];
-
-  return (
-    <fieldset disabled={disabled} className="space-y-1">
-      <legend className="mb-2 text-sm font-semibold text-foreground">{tAccept("sharePrompt")}</legend>
-      {options.map((option) => {
-        const selected = value === option.value;
-        return (
-          <label
-            key={option.value}
-            className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_SEPARATOR} cursor-pointer ${
-              selected ? "text-foreground" : "text-muted"
-            }`}
-          >
-            <input
-              type="radio"
-              name={groupName}
-              value={option.value}
-              checked={selected}
-              onChange={() => onChange(option.value)}
-              className="sr-only"
-            />
-            <span className="min-w-0 flex-1">
-              <span className="block text-[15px] font-semibold text-foreground">{option.label}</span>
-              <span className="mt-0.5 block text-[13px] leading-5 text-muted">{option.description}</span>
-            </span>
-          </label>
-        );
-      })}
-    </fieldset>
   );
 }
 
@@ -580,7 +525,7 @@ export function DuetFriendsMobileExperience({
           </h2>
           {acceptTarget ? (
             <div className="mt-4 space-y-4">
-              <ShareScopePicker
+              <DuetShareScopePicker
                 groupName={`mobile-accept-${acceptTarget.id}`}
                 value={pendingScope}
                 onChange={setPendingScope}
@@ -616,7 +561,7 @@ export function DuetFriendsMobileExperience({
             <div className="mt-4 space-y-3">
               {actionTarget.status === "accepted" ? (
                 <>
-                  <ShareScopePicker
+                  <DuetShareScopePicker
                     groupName={`mobile-friend-${actionTarget.id}`}
                     value={
                       actionTarget.shareScope === "full" || actionTarget.shareScope === "aggregates"

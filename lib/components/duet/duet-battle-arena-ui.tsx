@@ -1,8 +1,17 @@
 "use client";
 
-import { motion } from "motion/react";
 import { Mic2, Music2, Swords } from "lucide-react";
 import { useTranslations } from "next-intl";
+import {
+  DASHBOARD_LIST_ROW,
+  DASHBOARD_LIST_ROW_INTERACTIVE,
+  DASHBOARD_LIST_SEPARATOR,
+  DASHBOARD_SECTION_EYEBROW,
+  DASHBOARD_SECTION_TITLE,
+  DASHBOARD_SEGMENTED_PILL,
+  DASHBOARD_SEGMENTED_PILL_ACTIVE,
+  DASHBOARD_SEGMENTED_TRACK,
+} from "@/lib/components/dashboard-ui";
 import {
   downloadShareCardImage,
   shareCardWithCaption,
@@ -36,66 +45,50 @@ export function DuetArenaModePicker({ onSelect }: { onSelect: (mode: DuetArenaMo
       icon: Mic2,
       title: t("arenaModeArtist"),
       hint: t("arenaModeArtistHint"),
-      accent:
-        "border-lime-200/90 bg-gradient-to-br from-lime-50/95 via-white to-violet-50/70 hover:border-lime-300 dark:border-lime-400/30 dark:from-lime-950/40 dark:via-slate-950/70 dark:to-violet-950/30",
-      iconClass: "text-lime-600 dark:text-lime-300",
     },
     {
       mode: "track" as const,
       icon: Music2,
       title: t("arenaModeTrack"),
       hint: t("arenaModeTrackHint"),
-      accent:
-        "border-cyan-200/90 bg-gradient-to-br from-cyan-50/95 via-white to-violet-50/70 hover:border-cyan-300 dark:border-cyan-400/30 dark:from-cyan-950/40 dark:via-slate-950/70 dark:to-violet-950/30",
-      iconClass: "text-cyan-600 dark:text-cyan-300",
     },
   ];
 
   return (
     <div className="space-y-4">
-      <div className="rounded-[1.35rem] border border-dashed border-violet-300/70 bg-violet-50/50 px-4 py-4 text-center dark:border-violet-400/25 dark:bg-violet-950/25">
-        <p className="flex items-center justify-center gap-2 text-sm font-bold uppercase tracking-[0.16em] text-violet-700 dark:text-violet-200">
-          <Swords className="h-4 w-4" aria-hidden />
+      <div>
+        <p className={`${DASHBOARD_SECTION_EYEBROW} flex items-center gap-2`}>
+          <Swords className="h-3.5 w-3.5" aria-hidden />
           {t("arenaPickTitle")}
         </p>
-        <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+        <h2 className={`mt-1 ${DASHBOARD_SECTION_TITLE} text-xl sm:text-2xl`}>
           {t("arenaPickDescription")}
-        </p>
+        </h2>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2">
-        {options.map((option, index) => {
+      <ul>
+        {options.map((option) => {
           const Icon = option.icon;
           return (
-            <motion.button
-              key={option.mode}
-              type="button"
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: index * 0.06 }}
-              whileHover={{ y: -3 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => onSelect(option.mode)}
-              className={`group flex flex-col items-start gap-3 rounded-[1.35rem] border p-5 text-left shadow-sm transition-shadow hover:shadow-md ${option.accent}`}
-            >
-              <span
-                className={`flex h-12 w-12 items-center justify-center rounded-2xl border border-white/80 bg-white/90 shadow-sm dark:border-white/10 dark:bg-white/10 ${option.iconClass}`}
+            <li key={option.mode}>
+              <button
+                type="button"
+                onClick={() => onSelect(option.mode)}
+                className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_SEPARATOR} ${DASHBOARD_LIST_ROW_INTERACTIVE} w-full`}
               >
-                <Icon className="h-6 w-6" aria-hidden />
-              </span>
-              <span>
-                <span className="block text-lg font-bold text-slate-900 dark:text-white">{option.title}</span>
-                <span className="mt-1 block text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-                  {option.hint}
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center text-muted">
+                  <Icon className="h-5 w-5" aria-hidden />
                 </span>
-              </span>
-              <span className="text-xs font-bold uppercase tracking-[0.14em] text-violet-600 transition-colors group-hover:text-violet-500 dark:text-violet-300">
-                {t("arenaPickCta")}
-              </span>
-            </motion.button>
+                <span className="min-w-0 flex-1 text-left">
+                  <span className="block text-sm font-semibold text-foreground">{option.title}</span>
+                  <span className="mt-0.5 block text-[13px] leading-5 text-muted">{option.hint}</span>
+                </span>
+                <span className="shrink-0 text-[13px] font-medium text-muted">{t("arenaPickCta")}</span>
+              </button>
+            </li>
           );
         })}
-      </div>
+      </ul>
     </div>
   );
 }
@@ -118,7 +111,7 @@ export function DuetArenaModeToggle({
     <div
       role="tablist"
       aria-label={t("arenaToggleLabel")}
-      className="inline-flex w-full flex-wrap gap-1 rounded-2xl border border-slate-200/80 bg-slate-100/80 p-1 dark:border-white/10 dark:bg-black/30 sm:w-auto"
+      className={`${DASHBOARD_SEGMENTED_TRACK} w-full sm:w-auto`}
     >
       {segments.map((segment) => {
         const Icon = segment.icon;
@@ -130,11 +123,7 @@ export function DuetArenaModeToggle({
             role="tab"
             aria-selected={selected}
             onClick={() => onChange(segment.value)}
-            className={`inline-flex min-h-10 flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all sm:flex-none ${
-              selected
-                ? "bg-white text-violet-800 shadow-sm dark:bg-violet-500/20 dark:text-violet-100"
-                : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
-            }`}
+            className={`${selected ? DASHBOARD_SEGMENTED_PILL_ACTIVE : DASHBOARD_SEGMENTED_PILL} flex-1 gap-2 sm:flex-none`}
           >
             <Icon className="h-4 w-4" aria-hidden />
             {segment.label}

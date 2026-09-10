@@ -118,4 +118,21 @@ describe("ArtistUserInsightsPanel charts", () => {
       expect(Number(axis.getAttribute("data-width"))).toBeGreaterThanOrEqual(36);
     }
   });
+
+  it("uses subject eyebrow when subjectName is provided", () => {
+    render(
+      <ArtistUserInsightsPanel
+        open
+        artistId="a1"
+        previewArtist={previewArtist}
+        locale="en"
+        onClose={() => undefined}
+        colorIndex={0}
+        subjectName="Alex"
+      />
+    );
+
+    expect(screen.getByText("insightsEyebrowForSubject")).toBeInTheDocument();
+    expect(screen.queryByText("insightsEyebrow")).not.toBeInTheDocument();
+  });
 });

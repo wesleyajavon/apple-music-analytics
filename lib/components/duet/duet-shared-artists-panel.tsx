@@ -7,6 +7,7 @@ import { ArtistAvatarHydrated } from "@/lib/components/artist-avatar-hydrated";
 import { DuetSharedArtistsEmpty } from "@/lib/components/duet/duet-shared-artists-empty";
 import { ErrorState } from "@/lib/components/error-state";
 import {
+  DASHBOARD_BTN_GHOST,
   DASHBOARD_LIST_SEPARATOR,
   DASHBOARD_SECTION_EYEBROW,
   DASHBOARD_SECTION_TITLE,
@@ -20,7 +21,6 @@ type SharedArtistStatChipProps = {
   listenCount: number;
   rankLabel: string;
   listensLabel: string;
-  variant: "self" | "friend";
   isWinner: boolean;
   locale: string;
 };
@@ -30,46 +30,20 @@ function SharedArtistStatChip({
   listenCount,
   rankLabel,
   listensLabel,
-  variant,
   isWinner,
   locale,
 }: SharedArtistStatChipProps) {
-  const isSelf = variant === "self";
-
   return (
-    <div
-      className={`relative rounded-lg border px-2.5 py-2 transition-colors ${
-        isSelf
-          ? "border-violet-200/80 bg-violet-50/70 dark:border-violet-400/25 dark:bg-violet-400/10"
-          : "border-cyan-200/80 bg-cyan-50/70 dark:border-cyan-400/25 dark:bg-cyan-400/10"
-      } ${isWinner ? "ring-1 ring-amber-400/60 dark:ring-amber-400/40" : ""}`}
-    >
+    <div className="relative min-w-0 border-r border-glass-hairline px-2.5 py-1 last:border-r-0 first:pl-0 last:pr-0">
       {isWinner ? (
-        <Crown
-          className="absolute right-2 top-2 h-3 w-3 text-amber-500 dark:text-amber-300"
-          aria-hidden
-        />
+        <Crown className="absolute right-1 top-1 h-3 w-3 text-muted" aria-hidden />
       ) : null}
-      <p
-        className={`truncate pr-4 text-[0.65rem] font-semibold uppercase tracking-wider ${
-          isSelf ? "text-violet-700 dark:text-violet-200" : "text-cyan-700 dark:text-cyan-200"
-        }`}
-      >
-        {label}
-      </p>
-      <p className="mt-0.5 text-lg font-bold tabular-nums leading-none text-slate-900 dark:text-white">
+      <p className="truncate pr-4 text-[13px] font-medium text-muted">{label}</p>
+      <p className="mt-0.5 text-lg font-semibold tabular-nums leading-none text-foreground">
         {listenCount.toLocaleString(locale)}
-        <span className={`ml-1 text-[0.65rem] font-medium normal-case tracking-normal text-muted`}>
-          {listensLabel}
-        </span>
+        <span className="ml-1 text-[13px] font-medium text-muted">{listensLabel}</span>
       </p>
-      <p
-        className={`mt-1 text-[0.65rem] font-medium leading-snug ${
-          isSelf ? "text-violet-600/90 dark:text-violet-300/90" : "text-cyan-600/90 dark:text-cyan-300/90"
-        }`}
-      >
-        {rankLabel}
-      </p>
+      <p className="mt-1 text-[13px] font-medium leading-snug text-muted">{rankLabel}</p>
     </div>
   );
 }
@@ -88,30 +62,26 @@ function SharedArtistsHeader({
   title,
   description,
   badge,
-  badgeMuted = false,
   totalLabel,
 }: {
   eyebrow: string;
   title: string;
   description: string;
   badge: string;
-  badgeMuted?: boolean;
   totalLabel?: string;
 }) {
   return (
     <div className="pb-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="text-[13px] font-medium text-muted">{eyebrow}</p>
-          <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-foreground sm:text-3xl">{title}</h2>
-          <p className={`mt-2 max-w-2xl text-sm leading-6 text-muted`}>{description}</p>
+          <p className={DASHBOARD_SECTION_EYEBROW}>{eyebrow}</p>
+          <h2 className={`mt-1 ${DASHBOARD_SECTION_TITLE}`}>{title}</h2>
+          <p className="mt-2 max-w-2xl text-[13px] leading-6 text-muted">{description}</p>
           {totalLabel ? (
-            <p className={`mt-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted`}>
-              {totalLabel}
-            </p>
+            <p className="mt-2 text-[13px] font-medium text-muted">{totalLabel}</p>
           ) : null}
         </div>
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-glass-hairline px-2.5 py-1 text-[12px] font-medium text-muted">
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-glass-hairline px-2.5 py-1 text-[13px] font-medium text-muted">
           {badge}
         </span>
       </div>
@@ -148,7 +118,6 @@ export function DuetSharedArtistsPanel({
         title={t("sharedArtistsTitle", { friendName })}
         description={t("sharedArtistsDescription")}
         badge={isEmpty ? t("sharedArtistsEmptyEyebrow") : t("sharedArtistsBadge")}
-        badgeMuted={isEmpty}
         totalLabel={
           data && data.totalShared > 0
             ? t("sharedArtistsTotal", { count: data.totalShared })
@@ -157,7 +126,7 @@ export function DuetSharedArtistsPanel({
       />
       <div className="space-y-4">
         {isLoading ? (
-          <p className={`text-sm text-muted`}>{t("sharedArtistsLoading")}</p>
+          <p className="text-[13px] text-muted">{t("sharedArtistsLoading")}</p>
         ) : error ? (
           <ErrorState variant="startup" error={error} message={t("sharedArtistsError")} onRetry={onRetry} />
         ) : !data || data.artists.length === 0 ? (
@@ -172,8 +141,10 @@ export function DuetSharedArtistsPanel({
             <ul>
               {visibleArtists.map((artist, index) => (
                 <li key={artist.artistId}>
-                  <div className="group flex w-full gap-3 border-b border-glass-hairline py-3 sm:items-start">
-                    <div className="relative shrink-0 self-start overflow-hidden rounded-xl ring-1 ring-slate-200/90 shadow-sm dark:ring-white/10">
+                  <div
+                    className={`group flex w-full gap-3 py-3 sm:items-start ${DASHBOARD_LIST_SEPARATOR}`}
+                  >
+                    <div className="relative shrink-0 self-start overflow-hidden rounded-xl">
                       <ArtistAvatarHydrated
                         artistId={artist.artistId}
                         artistName={artist.artistName}
@@ -189,17 +160,17 @@ export function DuetSharedArtistsPanel({
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-start justify-between gap-2">
-                        <p className="truncate font-semibold text-slate-900 dark:text-white">{artist.artistName}</p>
+                        <p className="truncate font-semibold text-foreground">{artist.artistName}</p>
                         <button
                           type="button"
                           onClick={() => onCompareArtist(artist.artistId, artist.artistName)}
-                          className="hidden shrink-0 items-center gap-1 rounded-full border border-lime-200/80 bg-lime-50 px-2.5 py-1 text-[0.65rem] font-black uppercase tracking-widest text-lime-700 transition-colors hover:border-lime-300 hover:bg-lime-100 dark:border-lime-400/25 dark:bg-lime-400/10 dark:text-lime-200 dark:hover:bg-lime-400/15 sm:inline-flex"
+                          className={`${DASHBOARD_BTN_GHOST} hidden min-h-11 shrink-0 gap-1.5 px-3 text-[13px] sm:inline-flex`}
                         >
-                          <Search className="h-3 w-3" aria-hidden />
+                          <Search className="h-3.5 w-3.5" aria-hidden />
                           {t("sharedArtistsDuelCta")}
                         </button>
                       </div>
-                      <div className="mt-2.5 grid grid-cols-2 gap-2">
+                      <div className="mt-2.5 grid grid-cols-2">
                         <SharedArtistStatChip
                           label={t("seriesSelf")}
                           listenCount={artist.selfCount}
@@ -208,7 +179,6 @@ export function DuetSharedArtistsPanel({
                             rank: artist.selfRank,
                             topPool: data.topPool,
                           })}
-                          variant="self"
                           isWinner={artist.winner === "self"}
                           locale={locale}
                         />
@@ -221,7 +191,6 @@ export function DuetSharedArtistsPanel({
                             friendName,
                             topPool: data.topPool,
                           })}
-                          variant="friend"
                           isWinner={artist.winner === "friend"}
                           locale={locale}
                         />
@@ -230,9 +199,9 @@ export function DuetSharedArtistsPanel({
                         <button
                           type="button"
                           onClick={() => onCompareArtist(artist.artistId, artist.artistName)}
-                          className="inline-flex items-center gap-1 rounded-full border border-lime-200/80 bg-lime-50 px-2.5 py-1 text-[0.65rem] font-black uppercase tracking-widest text-lime-700 dark:border-lime-400/25 dark:bg-lime-400/10 dark:text-lime-200"
+                          className={`${DASHBOARD_BTN_GHOST} min-h-11 gap-1.5 px-3 text-[13px]`}
                         >
-                          <Search className="h-3 w-3" aria-hidden />
+                          <Search className="h-3.5 w-3.5" aria-hidden />
                           {t("sharedArtistsDuelCta")}
                         </button>
                       </div>
@@ -247,7 +216,7 @@ export function DuetSharedArtistsPanel({
                 type="button"
                 onClick={() => setListExpanded((prev) => !prev)}
                 aria-expanded={listExpanded}
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-lime-300/50 bg-lime-50/30 px-4 py-3 text-sm font-semibold text-lime-800 transition-colors hover:border-lime-400/60 hover:bg-lime-50/60 dark:border-lime-400/25 dark:bg-lime-400/5 dark:text-lime-200 dark:hover:bg-lime-400/10"
+                className={`${DASHBOARD_BTN_GHOST} w-full min-h-11 gap-2 text-[13px]`}
               >
                 <ChevronDown
                   className={`h-4 w-4 transition-transform duration-200 ${listExpanded ? "rotate-180" : ""}`}

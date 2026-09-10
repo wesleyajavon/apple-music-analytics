@@ -13,6 +13,8 @@ import {
 } from "@/lib/components/dashboard-ui";
 import { OverviewHeroFrame } from "@/lib/components/overview-hero";
 import { UserAvatar } from "@/lib/components/user-avatar";
+import { getCrystalSeriesColor } from "@/lib/constants/crystal-chart";
+import { useTheme } from "@/lib/providers/theme-provider";
 
 type BattleHeroProps = {
   mode: "picker" | "battle";
@@ -42,6 +44,10 @@ export function DuetCompareHero({
   seeMusicHref,
 }: BattleHeroProps) {
   const t = useTranslations("duet.compare");
+  const { resolvedTheme } = useTheme();
+  const chartThemeMode = resolvedTheme === "dark" ? "dark" : "light";
+  const selfColor = getCrystalSeriesColor(0, chartThemeMode);
+  const friendColor = getCrystalSeriesColor(1, chartThemeMode);
 
   const total = selfTotal + friendTotal;
   const selfPct = total > 0 ? Math.round((selfTotal / total) * 100) : 50;
@@ -95,6 +101,11 @@ export function DuetCompareHero({
             <div className={DASHBOARD_METRIC_CELL}>
               <div className="mb-2 flex items-center gap-2">
                 <UserAvatar name={viewerName} src={viewerAvatar} size="sm" />
+                <span
+                  className="h-2 w-2 shrink-0 rounded-full"
+                  style={{ backgroundColor: selfColor }}
+                  aria-hidden
+                />
                 <p className="truncate text-[13px] font-medium text-foreground">{viewerName}</p>
               </div>
               <p className={DASHBOARD_METRIC_VALUE}>{selfTotal.toLocaleString(locale)}</p>
@@ -105,6 +116,11 @@ export function DuetCompareHero({
             <div className={DASHBOARD_METRIC_CELL}>
               <div className="mb-2 flex items-center gap-2">
                 <UserAvatar name={friendName} src={friendAvatar} size="sm" />
+                <span
+                  className="h-2 w-2 shrink-0 rounded-full"
+                  style={{ backgroundColor: friendColor }}
+                  aria-hidden
+                />
                 <p className="truncate text-[13px] font-medium text-foreground">{friendName}</p>
               </div>
               <p className={DASHBOARD_METRIC_VALUE}>{friendTotal.toLocaleString(locale)}</p>
@@ -121,12 +137,12 @@ export function DuetCompareHero({
           <div className="space-y-2">
             <div className="flex h-2 overflow-hidden rounded-full bg-surface-raised">
               <div
-                className="bg-foreground/80 transition-all duration-700"
-                style={{ width: `${selfPct}%` }}
+                className="transition-all duration-700"
+                style={{ width: `${selfPct}%`, backgroundColor: selfColor }}
               />
               <div
-                className="bg-muted transition-all duration-700"
-                style={{ width: `${friendPct}%` }}
+                className="transition-all duration-700"
+                style={{ width: `${friendPct}%`, backgroundColor: friendColor }}
               />
             </div>
             {margin > 0 && leader !== "tie" ? (

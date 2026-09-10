@@ -85,7 +85,7 @@ describe("DuetFriendMusicMobileExperience shareScope", () => {
       "true"
     );
     expect(screen.queryByTestId("duet-friend-music-top-tracks")).not.toBeInTheDocument();
-    expect(screen.queryByText("tracksLabel")).not.toBeInTheDocument();
+    expect(screen.queryByText("topTracksTitle")).not.toBeInTheDocument();
     expect(screen.getByText("aggregatesTracksHint")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "aggregatesTracksHintCta" })).toHaveAttribute(
       "href",
@@ -158,8 +158,8 @@ describe("DuetFriendMusicMobileExperience shareScope", () => {
       />
     );
 
-    const tracks = screen.getByText("tracksLabel");
-    const genres = screen.getByText("genresLabel");
+    const tracks = screen.getByText("topTracksTitle");
+    const genres = screen.getByText("topGenresTitle");
     expect(tracks.compareDocumentPosition(genres) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 

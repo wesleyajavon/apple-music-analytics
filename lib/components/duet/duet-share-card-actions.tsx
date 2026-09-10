@@ -60,15 +60,15 @@ export function DuetShareCardActions({
     variant === "hero"
       ? "inline-flex min-h-9 items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-white/15 disabled:opacity-60"
       : variant === "mobile"
-        ? "inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-2xl border border-violet-200/90 bg-white px-3 text-sm font-semibold text-violet-800 shadow-sm transition-colors hover:bg-violet-50 disabled:opacity-60 dark:border-violet-400/25 dark:bg-violet-500/10 dark:text-violet-100 dark:hover:bg-violet-500/20"
-        : "inline-flex min-h-9 items-center gap-1.5 rounded-full border border-violet-200/90 bg-white/90 px-3 py-1.5 text-xs font-semibold text-violet-800 shadow-sm transition-colors hover:bg-violet-50 disabled:opacity-60 dark:border-violet-400/25 dark:bg-violet-500/10 dark:text-violet-100 dark:hover:bg-violet-500/20";
+        ? "inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-2xl border border-glass-hairline px-3 text-sm font-medium text-foreground transition-colors hover:bg-black/[0.04] disabled:opacity-60 dark:hover:bg-white/[0.06]"
+        : "inline-flex min-h-11 items-center gap-1.5 rounded-full border border-glass-hairline px-3 py-1.5 text-[13px] font-medium text-foreground transition-colors hover:bg-black/[0.04] disabled:opacity-60 dark:hover:bg-white/[0.06]";
 
   const downloadButtonClass =
     variant === "hero"
       ? "inline-flex min-h-9 items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-semibold text-white/90 shadow-sm transition-colors hover:bg-white/10 disabled:opacity-60"
       : variant === "mobile"
-        ? "inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-2xl border border-card-border bg-card-surface px-3 text-sm font-semibold text-foreground shadow-sm transition-colors hover:bg-slate-50 disabled:opacity-60 dark:hover:bg-white/10"
-        : "inline-flex min-h-9 items-center gap-1.5 rounded-full border border-slate-200/90 bg-white/90 px-3 py-1.5 text-xs font-semibold text-slate-800 shadow-sm transition-colors hover:bg-slate-50 disabled:opacity-60 dark:border-white/15 dark:bg-white/10 dark:text-slate-100 dark:hover:bg-white/15";
+        ? "inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-2xl border border-glass-hairline px-3 text-sm font-medium text-muted transition-colors hover:text-foreground disabled:opacity-60"
+        : "inline-flex min-h-11 items-center gap-1.5 rounded-full border border-glass-hairline px-3 py-1.5 text-[13px] font-medium text-muted transition-colors hover:text-foreground disabled:opacity-60";
 
   async function handleShare() {
     setBusyAction("share");

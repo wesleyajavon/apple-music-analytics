@@ -240,9 +240,9 @@
       "heroEyebrow": "Duet",
       "heroTitle": "Qui stream le plus ?",
       "heroTitleBattle": "Le face-à-face",
-      "heroSubtitle": "Choisissez un ami, comparez vos streams sur la période, découvrez vos artistes en commun et tranchez en duel — artiste ou morceau.",
-      "heroSubtitleBattle": "Vous et {friendName} sur la même timeline. Même période. Pas d'excuses.",
-      "heroStatBadge": "Comment ça marche",
+      "heroSubtitle": "Choisis un ami et tranchez le score.",
+      "heroSubtitleBattle": "Toi vs {friendName}",
+      "heroStatBadge": "Score",
       "heroStatTag": "3 étapes",
       "heroTrustPanelHint": "Même période, mêmes règles — vous et votre ami côte à côte.",
       "heroStep1Title": "Choisissez un ami",
@@ -292,7 +292,7 @@
       "sharedArtistsCloseDuel": "Fermer le duel",
       "sharedArtistsTotal": "{count, plural, one {# artiste en commun} other {# artistes en commun}}",
       "arenaEyebrow": "Le face-à-face",
-      "arenaTitle": "Comparer un élément précis",
+      "arenaTitle": "Duel artiste ou morceau",
       "arenaDescription": "Recherchez un artiste ou un morceau pour voir qui stream le plus sur la période.",
       "arenaBadge": "Head-to-head",
       "arenaPickTitle": "Sur quoi vous battez-vous ?",
@@ -436,9 +436,6 @@
         "arenaGenre": "Genre",
         "noResults": "Aucun résultat"
       }
-    },
-    "metadataBanner": {
-      "coverageNote": "Toi et {friendName} n’avez pas la même couverture ({friendFrom} – {friendTo} vs {selfFrom} – {selfTo}). Les totaux « tout l’historique » ne sont pas comparables 1:1."
     },
     "friendMusic": {
       "readOnlyBadge": "Lecture seule",

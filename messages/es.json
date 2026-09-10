@@ -240,9 +240,9 @@
       "heroEyebrow": "Duet",
       "heroTitle": "¿Quién stream más?",
       "heroTitleBattle": "El enfrentamiento",
-      "heroSubtitle": "Elige un amigo, compara streams en el periodo, descubre artistas en común y decide en duelo — artista o pista.",
-      "heroSubtitleBattle": "Tú y {friendName} en la misma timeline. Mismo periodo. Sin excusas.",
-      "heroStatBadge": "Cómo funciona",
+      "heroSubtitle": "Elige un amigo y salda el marcador.",
+      "heroSubtitleBattle": "Tú vs {friendName}",
+      "heroStatBadge": "Marcador",
       "heroStatTag": "3 pasos",
       "heroTrustPanelHint": "Mismo periodo, mismas reglas — tú y tu amigo lado a lado.",
       "heroStep1Title": "Elige un amigo",
@@ -292,7 +292,7 @@
       "sharedArtistsCloseDuel": "Cerrar duelo",
       "sharedArtistsTotal": "{count, plural, one {# artista en común} other {# artistas en común}}",
       "arenaEyebrow": "El enfrentamiento",
-      "arenaTitle": "Comparar un elemento concreto",
+      "arenaTitle": "Duelo de artista o pista",
       "arenaDescription": "Busca un artista o una canción para ver quién ha streameado más en el periodo.",
       "arenaBadge": "Head-to-head",
       "arenaPickTitle": "¿Por qué os batís?",
@@ -436,9 +436,6 @@
         "arenaGenre": "Género",
         "noResults": "Sin resultados"
       }
-    },
-    "metadataBanner": {
-      "coverageNote": "Tú y {friendName} no cubren los mismos años ({friendFrom} – {friendTo} vs {selfFrom} – {selfTo}). Los totales de todo el historial no son 1:1."
     },
     "friendMusic": {
       "readOnlyBadge": "Solo lectura",

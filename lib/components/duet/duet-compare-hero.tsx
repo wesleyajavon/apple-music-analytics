@@ -3,7 +3,7 @@
 import { type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { ArrowLeft, Music2, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import {
   DASHBOARD_BTN_GHOST,
   DASHBOARD_METRIC_CELL,
@@ -25,9 +25,7 @@ type BattleHeroProps = {
   selfTotal?: number;
   friendTotal?: number;
   locale: string;
-  friendsReadyCount?: number;
   shareActions?: ReactNode;
-  seeMusicHref?: string | null;
 };
 
 export function DuetCompareHero({
@@ -39,9 +37,7 @@ export function DuetCompareHero({
   selfTotal = 0,
   friendTotal = 0,
   locale,
-  friendsReadyCount,
   shareActions,
-  seeMusicHref,
 }: BattleHeroProps) {
   const t = useTranslations("duet.compare");
   const { resolvedTheme } = useTheme();
@@ -64,27 +60,8 @@ export function DuetCompareHero({
 
   return (
     <OverviewHeroFrame title={title} description={description}>
-      {mode === "battle" && friendName ? (
-        <div className="mt-4 flex flex-wrap items-center gap-2">
-          <Link href="/dashboard/duet/compare" className={`${DASHBOARD_BTN_GHOST} gap-2 no-underline`}>
-            <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
-            {t("changeFriend")}
-          </Link>
-          {seeMusicHref ? (
-            <Link href={seeMusicHref} className={`${DASHBOARD_BTN_GHOST} gap-2 no-underline`}>
-              <Music2 className="h-3.5 w-3.5" aria-hidden />
-              {t("seeMusic")}
-            </Link>
-          ) : null}
-        </div>
-      ) : null}
-
       {mode === "picker" ? (
-        <div className="mt-6 space-y-4">
-          {friendsReadyCount != null && friendsReadyCount > 0 ? (
-            <p className="text-[13px] text-muted">{t("pickerReadyCount", { count: friendsReadyCount })}</p>
-          ) : null}
-          <p className="max-w-2xl text-[13px] leading-6 text-muted">{t("heroPrivacyNote")}</p>
+        <div className="mt-6">
           <Link
             href="/dashboard/duet/friends"
             className={`${DASHBOARD_BTN_GHOST} gap-2 no-underline text-foreground`}

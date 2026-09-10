@@ -9,7 +9,6 @@ import { ErrorState } from "@/lib/components/error-state";
 import {
   DASHBOARD_BTN_GHOST,
   DASHBOARD_LIST_SEPARATOR,
-  DASHBOARD_SECTION_EYEBROW,
   DASHBOARD_SECTION_TITLE,
 } from "@/lib/components/dashboard-ui";
 import type { CompareSharedArtistsResponse } from "@/lib/dto/duet";
@@ -58,33 +57,18 @@ type DuetSharedArtistsPanelProps = {
 };
 
 function SharedArtistsHeader({
-  eyebrow,
   title,
-  description,
-  badge,
   totalLabel,
 }: {
-  eyebrow: string;
   title: string;
-  description: string;
-  badge: string;
   totalLabel?: string;
 }) {
   return (
     <div className="pb-4">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <p className={DASHBOARD_SECTION_EYEBROW}>{eyebrow}</p>
-          <h2 className={`mt-1 ${DASHBOARD_SECTION_TITLE}`}>{title}</h2>
-          <p className="mt-2 max-w-2xl text-[13px] leading-6 text-muted">{description}</p>
-          {totalLabel ? (
-            <p className="mt-2 text-[13px] font-medium text-muted">{totalLabel}</p>
-          ) : null}
-        </div>
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-glass-hairline px-2.5 py-1 text-[13px] font-medium text-muted">
-          {badge}
-        </span>
-      </div>
+      <h2 className={DASHBOARD_SECTION_TITLE}>{title}</h2>
+      {totalLabel ? (
+        <p className="mt-1 text-[13px] font-medium text-muted">{totalLabel}</p>
+      ) : null}
     </div>
   );
 }
@@ -109,15 +93,11 @@ export function DuetSharedArtistsPanel({
 
   const hiddenCount = Math.max(0, (data?.artists.length ?? 0) - VISIBLE_ARTISTS_COUNT);
   const hasMore = hiddenCount > 0;
-  const isEmpty = !isLoading && !error && !data?.artists.length;
 
   return (
     <section>
       <SharedArtistsHeader
-        eyebrow={t("sharedArtistsEyebrow")}
         title={t("sharedArtistsTitle", { friendName })}
-        description={t("sharedArtistsDescription")}
-        badge={isEmpty ? t("sharedArtistsEmptyEyebrow") : t("sharedArtistsBadge")}
         totalLabel={
           data && data.totalShared > 0
             ? t("sharedArtistsTotal", { count: data.totalShared })

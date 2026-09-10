@@ -19,11 +19,10 @@ import {
   type DuetChartViewMode,
 } from "@/lib/components/duet/duet-entity-duel-blocks";
 import { EntityHeadToHeadPanel } from "@/lib/components/duet/duet-entity-head-to-head-panel";
-import { getPeriodFromSearchParams, type PeriodType } from "@/lib/components/period-selector";
+import { getPeriodFromSearchParams } from "@/lib/components/period-selector";
 import { EmptyState } from "@/lib/components/empty-state";
 import { ErrorState } from "@/lib/components/error-state";
 import { UserAvatar } from "@/lib/components/user-avatar";
-import { DuetMetadataBanner } from "@/lib/components/duet/duet-metadata-banner";
 import { DuetSharedArtistsPanel } from "@/lib/components/duet/duet-shared-artists-panel";
 import { DuetCompareHero } from "@/lib/components/duet/duet-compare-hero";
 import { DuetCompareContextBar } from "@/lib/components/duet/duet-compare-context-bar";
@@ -49,10 +48,10 @@ import {
   DuetComparePickerSkeleton,
 } from "@/lib/components/duet/duet-compare-skeleton";
 import {
-  DuetArenaModePicker,
   DuetArenaModeToggle,
   type DuetArenaMode,
 } from "@/lib/components/duet/duet-battle-arena-ui";
+import { DuetChartViewToggle } from "@/lib/components/duet/duet-chart-view-toggle";
 import { DuetShareCardActions } from "@/lib/components/duet/duet-share-card-actions";
 import {
   generateDuetTimelineSharePng,
@@ -69,13 +68,11 @@ import {
   DASHBOARD_LIST_ROW,
   DASHBOARD_LIST_ROW_INTERACTIVE,
   DASHBOARD_LIST_SEPARATOR,
-  DASHBOARD_SECTION_EYEBROW,
   DASHBOARD_SECTION_TITLE,
 } from "@/lib/components/dashboard-ui";
 import { useTheme } from "@/lib/providers/theme-provider";
 import {
   useDuetCompareEntity,
-  useDuetCompareMetadata,
   useDuetCompareSharedArtists,
   useDuetCompareTimeline,
   useDuetFriends,
@@ -97,24 +94,16 @@ type ViewerProfile = {
 };
 
 function CanvasSectionHeader({
-  eyebrow,
   title,
-  description,
   action,
 }: {
-  eyebrow: string;
   title: string;
-  description: string;
   action?: ReactNode;
 }) {
   return (
     <div className="pb-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <p className={DASHBOARD_SECTION_EYEBROW}>{eyebrow}</p>
-          <h2 className={`mt-1 ${DASHBOARD_SECTION_TITLE}`}>{title}</h2>
-          <p className="mt-2 max-w-2xl text-[13px] leading-6 text-muted">{description}</p>
-        </div>
+        <h2 className={DASHBOARD_SECTION_TITLE}>{title}</h2>
         {action ? <div className="shrink-0">{action}</div> : null}
       </div>
     </div>
@@ -134,12 +123,6 @@ function formatShareDateRange(
   if (!startIso || !endIso) return "";
   const fmt = new Intl.DateTimeFormat(locale, { dateStyle: "medium" });
   return `${fmt.format(new Date(startIso))} – ${fmt.format(new Date(endIso))}`;
-}
-
-function getPeriodChartDescriptionKey(period: PeriodType) {
-  if (period === "day") return "chartDescriptionDaily";
-  if (period === "week") return "chartDescriptionWeekly";
-  return "chartDescriptionMonthly";
 }
 
 function CompareSplit({ mobile, desktop }: { mobile: ReactNode; desktop: ReactNode }) {
@@ -268,7 +251,6 @@ function CompareContent() {
     endDate,
     period,
   });
-  const { data: metadata } = useDuetCompareMetadata(friendUserId);
   const {
     data: sharedArtists,
     isLoading: isSharedArtistsLoading,
@@ -570,20 +552,17 @@ function CompareContent() {
           },
         };
 
-  const renderTargetSection = () => (
+  const renderTargetSection = () => {
+    const activeArenaMode = arenaMode ?? "artist";
+    return (
     <section>
-      <CanvasSectionHeader
-        eyebrow={t("arenaEyebrow")}
-        title={t("arenaTitle")}
-        description={t("arenaDescription")}
-      />
+      <CanvasSectionHeader title={t("arenaTitle")} />
       <div className="space-y-5">
-        {!arenaMode ? (
-          <DuetArenaModePicker onSelect={setArenaMode} />
-        ) : (
-          <>
-            <DuetArenaModeToggle mode={arenaMode} onChange={setArenaMode} />
-            {arenaMode === "artist" ? (
+        <DuetArenaModeToggle
+          mode={activeArenaMode}
+          onChange={setArenaMode}
+        />
+        {activeArenaMode === "artist" ? (
               <EntityHeadToHeadPanel
                 searchPlaceholder={t("artistSearchPlaceholder")}
                 clearLabel={t("artistClear")}
@@ -685,28 +664,24 @@ function CompareContent() {
                 onChartViewChange={setChartView}
               />
             )}
-          </>
-        )}
       </div>
     </section>
-  );
+    );
+  };
 
   const renderOverviewSection = () => (
     <>
-      <DuetMetadataBanner friendName={friendName} metadata={metadata} />
-
       {timeline?.rangeClamped ? (
         <p className="text-sm text-muted">{t("rangeClamped")}</p>
       ) : null}
 
       <section>
         <CanvasSectionHeader
-          eyebrow={t("timelineEyebrow")}
           title={t("chartTitle", { friendName })}
-          description={
-            chartView === "cumulative"
-              ? t("chartDescriptionCumulative")
-              : t(getPeriodChartDescriptionKey(period))
+          action={
+            chartData.length > 0 ? (
+              <DuetChartViewToggle value={chartView} onChange={setChartView} />
+            ) : undefined
           }
         />
         <div className="space-y-4">
@@ -825,7 +800,6 @@ function CompareContent() {
               viewerName={viewer.name}
               viewerAvatar={viewer.avatarUrl}
               locale={locale}
-              friendsReadyCount={acceptedFriends.length}
             />
 
             {acceptedFriends.length === 0 ? (
@@ -837,11 +811,6 @@ function CompareContent() {
               />
             ) : (
               <section className="space-y-3" aria-label={t("selectFriendTitle")}>
-                <CanvasSectionHeader
-                  eyebrow={t("pickerEyebrow")}
-                  title={t("selectFriendTitle")}
-                  description={t("selectFriendDescription")}
-                />
                 <ul>
                   {acceptedFriends.map((friendship) => {
                     const peer =
@@ -890,7 +859,6 @@ function CompareContent() {
               friendName={friendName}
               friendAvatar={friendUser?.avatarUrl}
               locale={locale}
-              seeMusicHref={seeMusicHref}
             />
             <DuetCompareBattleSkeleton />
           </div>
@@ -975,9 +943,6 @@ function CompareContent() {
           selfTotal={periodTotals.selfTotal}
           friendTotal={periodTotals.friendTotal}
           rangeClamped={Boolean(timeline?.rangeClamped)}
-          metadataBanner={
-            <DuetMetadataBanner friendName={friendName} metadata={metadata} compact />
-          }
           chartData={chartData}
           period={period}
           resolvedTheme={resolvedTheme}
@@ -1018,19 +983,11 @@ function CompareContent() {
             selfTotal={periodTotals.selfTotal}
             friendTotal={periodTotals.friendTotal}
             locale={locale}
-            seeMusicHref={seeMusicHref}
           />
 
           <DuetCompareContextBar
             id="duet-compare-context-bar"
-            viewerName={viewer?.name ?? t("seriesSelf")}
-            viewerAvatar={viewer?.avatarUrl}
-            friendName={friendName}
-            friendAvatar={friendUser?.avatarUrl}
             dateRangeLabel={dateRangeLabel}
-            period={period}
-            chartView={chartView}
-            onChartViewChange={setChartView}
             seeMusicHref={seeMusicHref}
           />
 

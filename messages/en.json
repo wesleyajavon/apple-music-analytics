@@ -240,9 +240,9 @@
       "heroEyebrow": "Duet",
       "heroTitle": "Who streams harder?",
       "heroTitleBattle": "The showdown",
-      "heroSubtitle": "Pick a friend, compare streams over the period, explore shared artists, and settle duels — by artist or track.",
-      "heroSubtitleBattle": "You and {friendName} on the same timeline. Same period. No excuses.",
-      "heroStatBadge": "How it works",
+      "heroSubtitle": "Pick a friend and settle the score.",
+      "heroSubtitleBattle": "You vs {friendName}",
+      "heroStatBadge": "Scoreboard",
       "heroStatTag": "3 steps",
       "heroTrustPanelHint": "Same period, same rules — you and your friend side by side.",
       "heroStep1Title": "Pick a friend",
@@ -292,7 +292,7 @@
       "sharedArtistsCloseDuel": "Close duel",
       "sharedArtistsTotal": "{count, plural, one {# artist in common} other {# artists in common}}",
       "arenaEyebrow": "The showdown",
-      "arenaTitle": "Compare something specific",
+      "arenaTitle": "Artist or track duel",
       "arenaDescription": "Search for an artist or track to see who streamed more on this period.",
       "arenaBadge": "Head-to-head",
       "arenaPickTitle": "What are you battling over?",
@@ -436,9 +436,6 @@
         "arenaGenre": "Genre",
         "noResults": "No matches"
       }
-    },
-    "metadataBanner": {
-      "coverageNote": "You and {friendName} don’t cover the same years ({friendFrom} – {friendTo} vs {selfFrom} – {selfTo}). All-time totals aren’t a 1:1 match."
     },
     "friendMusic": {
       "readOnlyBadge": "Read only",

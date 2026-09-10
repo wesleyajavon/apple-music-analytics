@@ -325,13 +325,8 @@ export function EntityHeadToHeadPanel({
             <p className="text-[13px] text-muted">{t("rangeClamped")}</p>
           ) : null}
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <h3 className={`${DASHBOARD_SECTION_TITLE} text-xl`}>{chartTitle}</h3>
-              <p className="mt-1 text-[13px] text-muted">
-                {chartView === "cumulative" ? chartDescriptionCumulative : chartDescription}
-              </p>
-            </div>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h3 className={`${DASHBOARD_SECTION_TITLE} text-xl`}>{chartTitle}</h3>
             <DuetChartViewToggle value={chartView} onChange={onChartViewChange} />
           </div>
 

@@ -85,7 +85,7 @@ ICU MessageFormat est utilisé (ex. `sidebar.pendingFriendRequestsBadge` avec `{
 | `askSoundprint` | Chat « Ask your Soundprint » |
 | `ai-insights` | Insight cards |
 | `taste-evolution` / `taste-profile` | Évolution et profil de goûts |
-| `duet` | `friends`, `compare`, `friendMusic`, `inviteAccept`, `settings`, `metadataBanner` |
+| `duet` | `friends`, `compare`, `friendMusic`, `inviteAccept`, `settings` |
 
 ### Marketing, aide, légal
 

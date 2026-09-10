@@ -412,7 +412,6 @@ export function DuetCompareMobileExperience({
   selfTotal,
   friendTotal,
   rangeClamped,
-  metadataBanner,
   chartData,
   period,
   resolvedTheme,
@@ -454,7 +453,6 @@ export function DuetCompareMobileExperience({
   selfTotal: number;
   friendTotal: number;
   rangeClamped: boolean;
-  metadataBanner?: ReactNode;
   chartData: DualLineChartPoint[];
   period: PeriodType;
   resolvedTheme: string;
@@ -510,11 +508,16 @@ export function DuetCompareMobileExperience({
     <div className={MOBILE_BLEED}>
       <HeroFrame locale={locale} heading={tm("titleBattle", { friendName })}>
         <DuetMobileSubNav current="compare" withFilters={withFilters} />
-        <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={() => setFriendSheetOpen(true)}
+          className="flex items-center gap-3 rounded-xl text-left"
+          aria-label={t("changeFriend")}
+        >
           <UserAvatar name={viewer.name} src={viewer.avatarUrl} size="md" />
           <span className="text-[13px] font-medium text-muted">vs</span>
           <UserAvatar name={friendName} src={friendAvatarUrl} size="md" />
-        </div>
+        </button>
       </HeroFrame>
 
       <section className="px-4" aria-label={tm("railLabel")}>
@@ -524,23 +527,16 @@ export function DuetCompareMobileExperience({
         </div>
       </section>
 
-      <div className="space-y-2 px-4">
-        <button
-          type="button"
-          onClick={() => setFriendSheetOpen(true)}
-          className={`${DASHBOARD_BTN_GHOST} w-full text-foreground`}
-        >
-          {t("changeFriend")}
-        </button>
-        {seeMusicHref ? (
+      {seeMusicHref ? (
+        <div className="px-4">
           <Link
             href={seeMusicHref}
             className={`${DASHBOARD_BTN_GHOST} w-full no-underline text-foreground`}
           >
             {t("seeMusic")}
           </Link>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
 
       <div className="px-4">
         <SegmentedControl
@@ -560,7 +556,6 @@ export function DuetCompareMobileExperience({
           <>
             <p className="text-sm font-semibold text-foreground">{leaderLabel}</p>
             {rangeClamped ? <p className="text-sm leading-6 text-muted">{t("rangeClamped")}</p> : null}
-            {metadataBanner}
             {chartData.length === 0 ? (
               <p className="text-[13px] leading-6 text-muted">{t("noDataTitle")}</p>
             ) : (

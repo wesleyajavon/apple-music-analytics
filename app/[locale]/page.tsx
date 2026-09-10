@@ -175,26 +175,29 @@ export default function Home() {
               >
                 <LanguageSwitcher placement="bottom" compactOnMobile tone="onDark" />
               </Suspense>
-              <Link
-                href={isAuthenticated ? "/dashboard" : "/sign-in"}
-                className="inline-flex min-h-11 max-w-[8.5rem] items-center justify-center gap-2 truncate rounded-xl border border-white/15 bg-white/5 px-2.5 text-xs font-semibold text-white shadow-[0_18px_50px_-28px_rgba(0,0,0,0.55)] backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-white/10 sm:max-w-none sm:px-4 sm:text-sm"
-                title={isAuthenticated ? t("goToDashboard") : tAuth("signIn")}
-              >
-                {isAuthenticated ? (
+              {isAuthenticated ? (
+                <Link
+                  href="/dashboard"
+                  className="inline-flex size-11 items-center justify-center rounded-full border border-white/15 bg-white/5 shadow-[0_18px_50px_-28px_rgba(0,0,0,0.55)] backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:ring-offset-2 focus-visible:ring-offset-[#050508]"
+                  title={t("goToDashboard")}
+                  aria-label={t("goToDashboard")}
+                >
                   <UserAvatar
                     src={avatarUrl}
                     name={profileName}
                     email={profileEmail}
                     size="sm"
                   />
-                ) : null}
-                <span className="md:hidden">
-                  {isAuthenticated ? t("goToDashboardShort") : tAuth("signIn")}
-                </span>
-                <span className="hidden md:inline">
-                  {isAuthenticated ? t("goToDashboard") : tAuth("signIn")}
-                </span>
-              </Link>
+                </Link>
+              ) : (
+                <Link
+                  href="/sign-in"
+                  className="inline-flex min-h-11 max-w-[8.5rem] items-center justify-center truncate rounded-xl border border-white/15 bg-white/5 px-2.5 text-xs font-semibold text-white shadow-[0_18px_50px_-28px_rgba(0,0,0,0.55)] backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-white/10 sm:max-w-none sm:px-4 sm:text-sm"
+                  title={tAuth("signIn")}
+                >
+                  {tAuth("signIn")}
+                </Link>
+              )}
             </div>
           </div>
         </header>

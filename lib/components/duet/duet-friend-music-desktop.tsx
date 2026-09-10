@@ -3,7 +3,7 @@
 import { useCallback, useMemo, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { Eye, Swords } from "lucide-react";
+import { Swords } from "lucide-react";
 import { OverviewTrendsChart } from "@/lib/components/charts/overview-trends-chart";
 import { ListenTrendChartViewToggle } from "@/lib/components/charts/listen-trend-chart-view-toggle";
 import { DuetSubNav } from "@/lib/components/duet/duet-sub-nav";
@@ -107,7 +107,6 @@ export function DuetFriendMusicDesktopExperience({
   topTracks,
   chartData,
   emptyStats,
-  showAggregatesHint,
   emptyNode,
   onOpenArtistInsights,
 }: {
@@ -119,16 +118,15 @@ export function DuetFriendMusicDesktopExperience({
   insight?: OverviewPrimaryInsight;
   topArtists: FriendMusicLeaderItem[];
   topGenres: FriendMusicLeaderItem[];
-  topTracks: FriendMusicLeaderItem[] | null;
+  topTracks: FriendMusicLeaderItem[];
   chartData: FriendMusicChartPoint[];
   emptyStats: boolean;
-  showAggregatesHint: boolean;
   emptyNode: ReactNode;
   onOpenArtistInsights?: (artist: ArtistStatsDto, avatarColorIndex: number) => void;
 }) {
   const t = useTranslations("duet.friendMusic");
   const hasTops =
-    topArtists.length > 0 || topGenres.length > 0 || (topTracks !== null && topTracks.length > 0);
+    topArtists.length > 0 || topGenres.length > 0 || topTracks.length > 0;
   const hasTrends = chartData.length > 0;
 
   const availableViews = useMemo((): FriendMusicView[] => {
@@ -154,6 +152,7 @@ export function DuetFriendMusicDesktopExperience({
         title={t("bannerTitle", { name: subjectName })}
         description={bannerLead}
         avatarUrl={subjectAvatar}
+        avatarName={subjectName}
         insight={
           insight
             ? {
@@ -167,13 +166,13 @@ export function DuetFriendMusicDesktopExperience({
         }
       >
         <div className="mt-6 flex flex-wrap items-center gap-3">
-          <span className="inline-flex min-h-11 items-center gap-2 text-[13px] font-medium text-muted">
-            <Eye className="h-3.5 w-3.5" aria-hidden />
-            {t("readOnlyBadge")}
-          </span>
-          <Link href={compareHref} className={`${DASHBOARD_BTN_GHOST} gap-2 no-underline`}>
+          <Link
+            href={compareHref}
+            className={`${DASHBOARD_BTN_GHOST} gap-2 no-underline`}
+            aria-label={t("compareWithAria", { name: subjectName })}
+          >
             <Swords className="h-4 w-4" aria-hidden />
-            {t("compareCta")}
+            {t("compareCta", { name: subjectName })}
           </Link>
         </div>
       </OverviewHeroFrame>
@@ -204,7 +203,6 @@ export function DuetFriendMusicDesktopExperience({
                 topArtists={topArtists}
                 topGenres={topGenres}
                 topTracks={topTracks}
-                showAggregatesHint={showAggregatesHint}
                 emptyTracksMessage={t("emptyStatsDescription", { name: subjectName })}
                 onOpenArtistInsights={onOpenArtistInsights}
               />

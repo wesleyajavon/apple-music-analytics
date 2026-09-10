@@ -164,6 +164,7 @@
       "pendingOutgoingStatus": "Esperando respuesta",
       "friendsList": "Amigos",
       "shareScopeLabel": "Lo que compartes con este amigo",
+      "acceptShareHint": "Al aceptar, compartes tus estadísticas de escucha con este amigo (timeline, tops y duelos). Puedes quitarlo en cualquier momento.",
       "accept": "Aceptar",
       "decline": "Rechazar",
       "revoke": "Quitar amigo",
@@ -214,22 +215,15 @@
       }
     },
     "inviteAccept": {
-      "sharePrompt": "¿Qué quieres compartir con este amigo?",
-      "scopeAggregates": {
-        "label": "Estadísticas agregadas",
-        "description": "Tendencias, tops de artistas y géneros: un amigo aceptado puede compararlos con los suyos y consultarlos en solo lectura. Sin lista de canciones."
-      },
-      "scopeFull": {
-        "label": "Comparaciones detalladas",
-        "description": "Todo lo anterior, más tus tops de canciones y los retos « quién escuchó más » por artista o canción."
-      }
+      "sharePrompt": "Al aceptar, compartes tus estadísticas de escucha con este amigo."
     },
     "accept": {
       "title": "Invitación de amistad",
-      "subtitle": "Acepta para comparar estadísticas y dejar que un amigo consulte tu panel en solo lectura. No se muestran datos analíticos hasta que confirmes.",
+      "subtitle": "Acepta para comparar estadísticas y dejar que un amigo consulte tu música en solo lectura. Nada se comparte hasta que confirmes.",
       "fromLabel": "Invitación de",
       "expiresLabel": "El enlace caduca el {date}",
-      "acceptCta": "Aceptar y conectar",
+      "shareHint": "Compartirás tus estadísticas de escucha (timeline, tops y duelos). Quita al amigo en cualquier momento para dejar de compartir.",
+      "acceptCta": "Aceptar y compartir",
       "accepting": "Aceptando…",
       "acceptError": "No se pudo aceptar la invitación.",
       "loading": "Comprobando invitación…",
@@ -237,7 +231,7 @@
       "invalidTitle": "Invitación no disponible",
       "invalidDescription": "Este enlace puede haber caducado, ya haberse usado o ser inválido.",
       "goToFriends": "Ir a amigos",
-      "privacyNote": "Al aceptar, aceptas compartir datos de streams según tu elección. Consulta nuestra",
+      "privacyNote": "Al aceptar, aceptas compartir datos de streams con este amigo. Consulta nuestra",
       "privacyLink": "política de privacidad"
     },
     "compare": {
@@ -448,9 +442,10 @@
     },
     "friendMusic": {
       "readOnlyBadge": "Solo lectura",
-      "bannerTitle": "Estás viendo la música de {name}",
+      "bannerTitle": "{name}",
       "bannerLead": "Estas estadísticas son de {name}. Míralas y luego compara en el mismo periodo.",
-      "compareCta": "Comparar",
+      "compareCta": "Comparar con {name}",
+      "compareWithAria": "Iniciar una comparación con {name}",
       "pickerEyebrow": "Duet",
       "pickerTitle": "¿La música de quién quieres abrir?",
       "pickerDescription": "Elige un amigo aceptado para ver sus estadísticas. Solo lectura — no es un duelo.",
@@ -502,9 +497,9 @@
         }
       },
       "insight": {
-        "topTrackEyebrow": "Canción top del periodo",
+        "topTrackEyebrow": "Sonido firma de {name}",
         "topTrackBody": "La más reproducida en esta ventana, de {artist}.",
-        "topArtistEyebrow": "Artista top del periodo",
+        "topArtistEyebrow": "Artista top de {name}",
         "topArtistBody": "El artista que más reprodujo en esta ventana.",
         "libraryEyebrow": "Este periodo",
         "libraryBody": "Volumen y variedad de este amigo."
@@ -542,13 +537,11 @@
     },
     "settings": {
       "title": "Compartir Duet",
-      "description": "Controla solicitudes de amistad y el nivel de compartir por defecto.",
+      "description": "Controla si otros pueden enviarte solicitudes de amistad. El compartir se activa al aceptar y se corta al quitar al amigo.",
       "allowRequests": "Permitir solicitudes de amistad",
-      "defaultScope": "Compartir predeterminado para nuevos amigos",
-      "scopeAggregates": "Estadísticas agregadas",
-      "scopeFull": "Comparaciones detalladas",
-      "consentHint": "Al activar Duet, aceptas que tus estadísticas agregadas puedan ser visibles para los amigos que autorices — en comparación y en consulta de solo lectura, según el nivel elegido. Revocable en cualquier momento.",
-      "friendMusicHint": "Los amigos que autorices pueden abrir tu Your Music, al nivel que elijas.",
+      "consentHint": "Cuando aceptas a un amigo, puede comparar con tus estadísticas de escucha y ver tu Your Music en solo lectura. Revocable en cualquier momento quitando al amigo.",
+      "friendMusicHint": "Los amigos que autorices pueden abrir tu Your Music (solo lectura).",
+      "revokeHint": "Para dejar de compartir, abre Amigos y elige Quitar amigo.",
       "error": "No se pudieron cargar los ajustes Duet."
     }
   },

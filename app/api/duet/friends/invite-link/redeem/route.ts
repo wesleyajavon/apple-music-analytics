@@ -22,7 +22,8 @@ const RATE = DUET_RATE_LIMITS.friendsInviteLinkRedeem;
 
 const RedeemSchema = z.object({
   token: z.string().min(10),
-  shareScope: z.enum(["aggregates", "full"]),
+  /** @deprecated Ignored — redeem always enables full sharing. Kept for older clients. */
+  shareScope: z.enum(["aggregates", "full"]).optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -51,11 +52,7 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-      const friendship = await redeemInviteLink(
-        parsed.data.token,
-        userId,
-        parsed.data.shareScope
-      );
+      const friendship = await redeemInviteLink(parsed.data.token, userId);
       await grantDuetSharingConsent(userId, request);
       return NextResponse.json({
         ok: true,

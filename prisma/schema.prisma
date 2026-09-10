@@ -152,7 +152,7 @@ model Friendship {
 model DuetShareSettings {
   userId              String         @id
   allowFriendRequests Boolean        @default(true)
-  defaultShareScope   DuetShareScope @default(aggregates)
+  defaultShareScope   DuetShareScope @default(full)
   user                User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 

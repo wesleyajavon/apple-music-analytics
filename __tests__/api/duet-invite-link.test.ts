@@ -90,11 +90,11 @@ describe("Duet invite link API", () => {
     expect(response.status).toBe(404);
   });
 
-  it("POST redeem accepts invite with share scope", async () => {
+  it("POST redeem accepts invite and enables sharing", async () => {
     vi.mocked(redeemInviteLink).mockResolvedValue({
       id: "friendship-1",
       status: "accepted",
-      shareScope: "aggregates",
+      shareScope: "full",
       createdAt: new Date(),
       respondedAt: new Date(),
       requester: { id: "req-1", email: null, name: "Alice", avatarUrl: null },
@@ -105,12 +105,12 @@ describe("Duet invite link API", () => {
     const response = await POSTRedeem(
       new NextRequest("http://localhost/api/duet/friends/invite-link/redeem", {
         method: "POST",
-        body: JSON.stringify({ token: TOKEN, shareScope: "aggregates" }),
+        body: JSON.stringify({ token: TOKEN }),
       })
     );
 
     expect(response.status).toBe(200);
-    expect(redeemInviteLink).toHaveBeenCalledWith(TOKEN, USER_ID, "aggregates");
+    expect(redeemInviteLink).toHaveBeenCalledWith(TOKEN, USER_ID);
     expect(grantDuetSharingConsent).toHaveBeenCalledWith(USER_ID, expect.any(NextRequest));
   });
 });

@@ -14,7 +14,7 @@ const ROUTE = "/api/duet/friend-overview";
 
 export async function GET(request: NextRequest) {
   try {
-    const access = await requireDuetFriendAccess(request, ROUTE, "aggregates");
+    const access = await requireDuetFriendAccess(request, ROUTE);
     if (!access.ok) return access.response;
 
     if (access.viewerId === access.friendUserId) {
@@ -24,7 +24,6 @@ export async function GET(request: NextRequest) {
     const { startDate, endDate } = extractOptionalDateRange(request);
     const result = await getFriendOverview({
       friendUserId: access.friendUserId,
-      shareScope: access.shareScope,
       startDate,
       endDate,
     });

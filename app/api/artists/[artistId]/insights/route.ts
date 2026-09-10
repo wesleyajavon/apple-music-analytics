@@ -66,7 +66,6 @@ async function resolveInsightsDataUserId(
       const access = await assertFriendDataAccess({
         viewerId: sessionUserId,
         targetUserId: requested,
-        requiredScope: "aggregates",
       });
       if (!access.ok) {
         return { ok: false, response: friendAccessDeniedResponse(access.status) };

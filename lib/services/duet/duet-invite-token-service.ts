@@ -1,5 +1,4 @@
 import { createHmac, timingSafeEqual } from "crypto";
-import type { DuetShareScope } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { DUET_INVITE_LINK_TTL_MS } from "@/lib/constants/duet-invite";
 import { DUET_MAX_FRIENDS, DUET_MAX_INVITES_PER_DAY } from "@/lib/constants/duet-limits";
@@ -184,8 +183,7 @@ async function assertRedeemableFriendship(
 
 export async function redeemInviteLink(
   rawToken: string,
-  addresseeId: string,
-  shareScope: DuetShareScope
+  addresseeId: string
 ): Promise<FriendshipDto> {
   const row = await loadVerifiedToken(rawToken);
   await assertRedeemableFriendship(row.requesterId, addresseeId);
@@ -237,5 +235,5 @@ export async function redeemInviteLink(
     return friendship.id;
   });
 
-  return acceptFriendship(friendshipId, addresseeId, shareScope);
+  return acceptFriendship(friendshipId, addresseeId);
 }

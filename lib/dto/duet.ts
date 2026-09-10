@@ -30,7 +30,6 @@ export type FriendshipsListResponse = {
 export type DuetShareSettingsDto = {
   userId: string;
   allowFriendRequests: boolean;
-  defaultShareScope: DuetShareScope;
 };
 
 export type CompareTimelinePoint = {
@@ -130,11 +129,11 @@ export type FriendOverviewSubjectDto = {
 
 export type FriendOverviewResponse = {
   friendUserId: string;
-  shareScope: "aggregates" | "full";
+  shareScope: "full";
   subject: FriendOverviewSubjectDto;
   stats: OverviewStatsDto;
   topArtists: TopArtistDto[];
   topGenres: GenreDistributionDto[];
   timeline: CompareTimelinePoint[];
-  topTracks?: TrackStatsDto[];
+  topTracks: TrackStatsDto[];
 };

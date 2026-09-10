@@ -7,14 +7,12 @@ import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import {
   Ban,
   Check,
-  ChevronDown,
   Clock,
   Copy,
   Link2,
   Mail,
   Music2,
   Send,
-  Shield,
   Swords,
   UserMinus,
   X,
@@ -47,7 +45,6 @@ import {
   resolveDefaultDuetFriendsSection,
   type DuetFriendsSection,
 } from "@/lib/constants/duet-friends";
-import { DuetShareScopePicker } from "@/lib/components/duet/duet-share-scope-picker";
 import { DuetSubNav } from "@/lib/components/duet/duet-sub-nav";
 import {
   DuetFriendsMobileError,
@@ -55,7 +52,7 @@ import {
   DuetFriendsMobileGated,
   DuetFriendsMobileSkeleton,
 } from "@/lib/components/duet/duet-friends-mobile";
-import { useDuetFriends, useDuetMutations, type DuetShareScopeOption } from "@/lib/hooks/use-duet";
+import { useDuetFriends, useDuetMutations } from "@/lib/hooks/use-duet";
 import { usePublicDemoViewer, useSupabaseAuthUserId } from "@/lib/hooks/use-public-demo-viewer";
 import type { FriendshipDto } from "@/lib/dto/duet";
 import { getDuetDisplayName } from "@/lib/components/duet/duet-utils";
@@ -225,31 +222,23 @@ function FriendRow({
   onAccept,
   onDecline,
   onRevoke,
-  onUpdateShareScope,
   onBlock,
   busy,
 }: {
   friendship: FriendshipDto;
   viewerId: string;
-  onAccept: (id: string, scope: DuetShareScopeOption) => void;
+  onAccept: (id: string) => void;
   onDecline: (id: string) => void;
   onRevoke: (id: string) => void;
-  onUpdateShareScope: (id: string, scope: DuetShareScopeOption) => void;
   onBlock: (id: string) => void;
   busy: boolean;
 }) {
   const t = useTranslations("duet.friends");
-  const tAccept = useTranslations("duet.inviteAccept");
   const searchParams = useSearchParams();
   const peer =
     friendship.requester.id === viewerId ? friendship.addressee : friendship.requester;
   const displayName = getDuetDisplayName(peer);
   const musicHref = buildFriendMusicHref(searchParams, peer.id);
-  const [pendingShareScope, setPendingShareScope] = useState<DuetShareScopeOption>("aggregates");
-  const activeShareScope =
-    friendship.status === "accepted" && friendship.shareScope !== "none"
-      ? (friendship.shareScope as DuetShareScopeOption)
-      : pendingShareScope;
 
   const isIncoming = friendship.direction === "incoming" && friendship.status === "pending";
   const isOutgoing = friendship.direction === "outgoing" && friendship.status === "pending";
@@ -285,6 +274,9 @@ function FriendRow({
             {peer.email ? (
               <p className="mt-0.5 truncate text-[13px] text-muted">{peer.email}</p>
             ) : null}
+            {isIncoming ? (
+              <p className="mt-1 text-[13px] leading-5 text-muted">{t("acceptShareHint")}</p>
+            ) : null}
           </div>
         </div>
 
@@ -298,7 +290,7 @@ function FriendRow({
               <button
                 type="button"
                 disabled={busy}
-                onClick={() => onAccept(friendship.id, pendingShareScope)}
+                onClick={() => onAccept(friendship.id)}
                 className={`${DASHBOARD_BTN_GHOST} gap-1.5 text-foreground disabled:opacity-50`}
               >
                 <Check className="h-4 w-4" aria-hidden />
@@ -355,54 +347,6 @@ function FriendRow({
           </button>
         </div>
       </div>
-
-      {isIncoming ? (
-        <div className="pb-3 sm:max-w-md">
-          <DuetShareScopePicker
-            groupName={`duet-share-scope-accept-${friendship.id}`}
-            legend={tAccept("sharePrompt")}
-            value={pendingShareScope}
-            onChange={setPendingShareScope}
-            disabled={busy}
-          />
-        </div>
-      ) : null}
-
-      {isAccepted ? (
-        <details className="group w-full border-t border-glass-hairline sm:max-w-md">
-          <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 py-2.5 text-left">
-            <div className="min-w-0">
-              <p className="flex items-center gap-1.5 text-[13px] font-semibold text-foreground">
-                <Shield className="h-3.5 w-3.5 shrink-0 text-muted" aria-hidden />
-                {t("shareScopeLabel")}
-              </p>
-              <p className="mt-0.5 truncate text-[13px] text-muted">
-                {activeShareScope === "full"
-                  ? tAccept("scopeFull.label")
-                  : tAccept("scopeAggregates.label")}
-              </p>
-            </div>
-            <ChevronDown
-              className="h-4 w-4 shrink-0 text-muted transition-transform duration-200 group-open:rotate-180"
-              aria-hidden
-            />
-          </summary>
-          <div className="pb-3">
-            <DuetShareScopePicker
-              groupName={`duet-share-scope-friend-${friendship.id}`}
-              legend={t("shareScopeLabel")}
-              value={activeShareScope}
-              onChange={(scope) => {
-                if (scope !== friendship.shareScope) {
-                  onUpdateShareScope(friendship.id, scope);
-                }
-              }}
-              disabled={busy}
-              showLegend={false}
-            />
-          </div>
-        </details>
-      ) : null}
     </li>
   );
 }
@@ -416,7 +360,6 @@ function FriendsListSection({
   onAccept,
   onDecline,
   onRevoke,
-  onUpdateShareScope,
   onBlock,
   pagination,
   onPageChange,
@@ -427,10 +370,9 @@ function FriendsListSection({
   friendships: FriendshipDto[];
   viewerId: string;
   busy: boolean;
-  onAccept: (id: string, scope: DuetShareScopeOption) => void;
+  onAccept: (id: string) => void;
   onDecline: (id: string) => void;
   onRevoke: (id: string) => void;
-  onUpdateShareScope: (id: string, scope: DuetShareScopeOption) => void;
   onBlock: (id: string) => void;
   pagination?: {
     page: number;
@@ -459,7 +401,6 @@ function FriendsListSection({
             onAccept={onAccept}
             onDecline={onDecline}
             onRevoke={onRevoke}
-            onUpdateShareScope={onUpdateShareScope}
             onBlock={onBlock}
           />
         ))}
@@ -720,12 +661,9 @@ function DuetFriendsContent() {
   const hasAny = friendsCount + pendingIncomingCount + pendingOutgoingCount > 0;
 
   const mutationHandlers = {
-    onAccept: (id: string, scope: DuetShareScopeOption) =>
-      patchFriendship.mutate({ id, action: "accept", shareScope: scope }),
+    onAccept: (id: string) => patchFriendship.mutate({ id, action: "accept" }),
     onDecline: (id: string) => patchFriendship.mutate({ id, action: "decline" }),
     onRevoke: (id: string) => patchFriendship.mutate({ id, action: "revoke" }),
-    onUpdateShareScope: (id: string, scope: DuetShareScopeOption) =>
-      patchFriendship.mutate({ id, action: "updateShareScope", shareScope: scope }),
     onBlock: (id: string) => blockFriendship.mutate(id),
   };
 

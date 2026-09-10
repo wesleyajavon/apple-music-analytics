@@ -4,7 +4,7 @@ import { Suspense, useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { Check, Shield, UserPlus } from "lucide-react";
+import { Check, UserPlus } from "lucide-react";
 import { UserAvatar } from "@/lib/components/user-avatar";
 import { EmptyState } from "@/lib/components/empty-state";
 import { ErrorState } from "@/lib/components/error-state";
@@ -14,7 +14,7 @@ import {
   AUTH_MAIN_CLASS,
   AUTH_PRIMARY_BUTTON_CLASS,
 } from "@/lib/constants/auth-form-styles";
-import { useDuetMutations, type DuetShareScopeOption } from "@/lib/hooks/use-duet";
+import { useDuetMutations } from "@/lib/hooks/use-duet";
 import { apiClient, ApiError } from "@/lib/api-client";
 
 type InvitePreview = {
@@ -24,11 +24,9 @@ type InvitePreview = {
 
 function AcceptContent({ token }: { token: string }) {
   const t = useTranslations("duet.accept");
-  const tAccept = useTranslations("duet.inviteAccept");
   const locale = useLocale();
   const router = useRouter();
   const { redeemInviteLink } = useDuetMutations();
-  const [shareScope, setShareScope] = useState<DuetShareScopeOption>("aggregates");
   const [preview, setPreview] = useState<InvitePreview | null>(null);
   const [loadError, setLoadError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -62,7 +60,7 @@ function AcceptContent({ token }: { token: string }) {
     e.preventDefault();
     setFeedback(null);
     try {
-      await redeemInviteLink.mutateAsync({ token, shareScope });
+      await redeemInviteLink.mutateAsync({ token });
       router.push("/dashboard/duet/friends");
     } catch {
       setFeedback(t("acceptError"));
@@ -136,55 +134,7 @@ function AcceptContent({ token }: { token: string }) {
         </div>
 
         <form onSubmit={(e) => void handleSubmit(e)} className="space-y-5">
-          <fieldset>
-            <legend className="mb-3 flex items-center gap-1.5 text-sm font-semibold text-foreground">
-              <Shield className="h-4 w-4 text-violet-500" aria-hidden />
-              {tAccept("sharePrompt")}
-            </legend>
-            <div className="space-y-2">
-              {(
-                [
-                  {
-                    value: "aggregates" as const,
-                    label: tAccept("scopeAggregates.label"),
-                    description: tAccept("scopeAggregates.description"),
-                  },
-                  {
-                    value: "full" as const,
-                    label: tAccept("scopeFull.label"),
-                    description: tAccept("scopeFull.description"),
-                  },
-                ] as const
-              ).map((option) => {
-                const selected = shareScope === option.value;
-                return (
-                  <label
-                    key={option.value}
-                    className={`flex cursor-pointer items-start gap-3 rounded-xl border px-3 py-3 ${
-                      selected
-                        ? "border-violet-400/80 bg-violet-50 dark:border-violet-400/45 dark:bg-violet-950/55"
-                        : "border-card-border bg-surface/50"
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="shareScope"
-                      value={option.value}
-                      checked={selected}
-                      onChange={() => setShareScope(option.value)}
-                      className="sr-only"
-                    />
-                    <span className="min-w-0">
-                      <span className="block text-sm font-semibold text-foreground">{option.label}</span>
-                      <span className="mt-0.5 block text-xs leading-relaxed text-muted">
-                        {option.description}
-                      </span>
-                    </span>
-                  </label>
-                );
-              })}
-            </div>
-          </fieldset>
+          <p className="text-sm leading-6 text-muted">{t("shareHint")}</p>
 
           <button
             type="submit"

@@ -10,7 +10,7 @@ function friendship(peerId: string, peerName: string | null): FriendshipDto {
   return {
     id: `f-${peerId}`,
     status: "accepted",
-    shareScope: "aggregates",
+    shareScope: "full",
     createdAt: "2026-01-01T00:00:00.000Z",
     respondedAt: "2026-01-02T00:00:00.000Z",
     requester: friendUser("viewer", "Me"),

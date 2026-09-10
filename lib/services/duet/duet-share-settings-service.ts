@@ -1,30 +1,27 @@
-import type { DuetShareScope } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
 export type DuetShareSettingsDto = {
   userId: string;
   allowFriendRequests: boolean;
-  defaultShareScope: DuetShareScope;
 };
 
 export type UpdateDuetShareSettingsInput = {
   allowFriendRequests?: boolean;
-  defaultShareScope?: DuetShareScope;
 };
 
 export async function getOrCreateDuetShareSettings(
   userId: string
 ): Promise<DuetShareSettingsDto> {
-  return prisma.duetShareSettings.upsert({
+  const row = await prisma.duetShareSettings.upsert({
     where: { userId },
     create: { userId },
     update: {},
     select: {
       userId: true,
       allowFriendRequests: true,
-      defaultShareScope: true,
     },
   });
+  return row;
 }
 
 export async function updateDuetShareSettings(
@@ -38,14 +35,10 @@ export async function updateDuetShareSettings(
       ...(input.allowFriendRequests !== undefined && {
         allowFriendRequests: input.allowFriendRequests,
       }),
-      ...(input.defaultShareScope !== undefined && {
-        defaultShareScope: input.defaultShareScope,
-      }),
     },
     select: {
       userId: true,
       allowFriendRequests: true,
-      defaultShareScope: true,
     },
   });
 }

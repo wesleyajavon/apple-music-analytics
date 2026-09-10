@@ -14,7 +14,7 @@ import {
   DASHBOARD_METRIC_VALUE,
 } from "@/lib/components/dashboard-ui";
 import { MusicalProfilePeriodBadge } from "@/lib/components/musical-profile-period-badge";
-import { OverviewHeroFrame, OverviewMobileHero } from "@/lib/components/overview-hero";
+import { OverviewHeroFrame, OverviewMobileHero, OverviewPrimaryInsightBlock } from "@/lib/components/overview-hero";
 import { UserAvatar } from "@/lib/components/user-avatar";
 import { DuetMobileSubNav } from "@/lib/components/duet/duet-mobile-sub-nav";
 import { FriendMusicReplayTopsSections } from "@/lib/components/duet/duet-friend-music-replay-tops";
@@ -330,7 +330,6 @@ export function DuetFriendMusicMobileExperience({
   topTracks,
   chartData,
   emptyStats,
-  showAggregatesHint,
   onOpenArtistInsights,
 }: {
   locale: string;
@@ -343,18 +342,22 @@ export function DuetFriendMusicMobileExperience({
   genreName?: string;
   topArtists: FriendMusicLeaderItem[];
   topGenres: FriendMusicLeaderItem[];
-  topTracks: FriendMusicLeaderItem[] | null;
+  topTracks: FriendMusicLeaderItem[];
   chartData: FriendMusicChartPoint[];
   emptyStats: boolean;
-  showAggregatesHint: boolean;
   onOpenArtistInsights?: (artist: ArtistStatsDto, avatarColorIndex: number) => void;
 }) {
   const t = useTranslations("duet.friendMusic");
   const tm = useTranslations("duet.friendMusic.mobile");
+  const tOverview = useTranslations("overview");
   const trendSummary = useMemo(() => getFriendMusicTrendSummary(chartData), [chartData]);
+  const resolvedInsight =
+    insight && genreName && !insight.subtitle
+      ? { ...insight, subtitle: `${tOverview("libraryLeaders.topGenre")} · ${genreName}` }
+      : insight;
 
   const hasTops =
-    topArtists.length > 0 || topGenres.length > 0 || (topTracks !== null && topTracks.length > 0);
+    topArtists.length > 0 || topGenres.length > 0 || topTracks.length > 0;
   const hasTrends = chartData.length > 0 && trendSummary != null;
   const availableViews = useMemo((): FriendMusicView[] => {
     const views: FriendMusicView[] = [];
@@ -383,20 +386,20 @@ export function DuetFriendMusicMobileExperience({
       <OverviewMobileHero
         title={subjectName}
         avatarUrl={subjectAvatar}
-        insight={insight}
-        genreName={genreName}
+        avatarName={subjectName}
       >
         <div className="mt-3 space-y-3">
           <DuetMobileSubNav current="music" withFilters={withFilters} />
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
-            {t("readOnlyBadge")}
-          </p>
           <p className="text-sm leading-5 text-muted">{bannerLead}</p>
+          {resolvedInsight ? (
+            <OverviewPrimaryInsightBlock insight={resolvedInsight} compact />
+          ) : null}
           <Link
             href={compareHref}
             className={`${DASHBOARD_BTN_OUTLINE} w-full no-underline`}
+            aria-label={t("compareWithAria", { name: subjectName })}
           >
-            {tm("compareCta")}
+            {t("compareCta", { name: subjectName })}
           </Link>
         </div>
       </OverviewMobileHero>
@@ -432,7 +435,6 @@ export function DuetFriendMusicMobileExperience({
                   topArtists={topArtists}
                   topGenres={topGenres}
                   topTracks={topTracks}
-                  showAggregatesHint={showAggregatesHint}
                   emptyTracksMessage={t("emptyStatsDescription", { name: subjectName })}
                   onOpenArtistInsights={onOpenArtistInsights}
                   className="space-y-8"

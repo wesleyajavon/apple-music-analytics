@@ -98,22 +98,9 @@ describe("getFriendOverview", () => {
     } as never);
   });
 
-  it("omits topTracks and does not query titles when shareScope is aggregates", async () => {
+  it("always includes topTracks and queries titles", async () => {
     const result = await getFriendOverview({
       friendUserId: FRIEND_ID,
-      shareScope: "aggregates",
-    });
-
-    expect(getTrackStats).not.toHaveBeenCalled();
-    expect(result.topTracks).toBeUndefined();
-    expect(result.shareScope).toBe("aggregates");
-    expect(result.stats.uniqueTracks).toBe(12);
-  });
-
-  it("includes populated topTracks when shareScope is full", async () => {
-    const result = await getFriendOverview({
-      friendUserId: FRIEND_ID,
-      shareScope: "full",
     });
 
     expect(getTrackStats).toHaveBeenCalledWith(
@@ -125,12 +112,12 @@ describe("getFriendOverview", () => {
     );
     expect(result.topTracks).toEqual(tracksStub);
     expect(result.shareScope).toBe("full");
+    expect(result.stats.uniqueTracks).toBe(12);
   });
 
   it("calls listening services with the friend user id, never the viewer", async () => {
     await getFriendOverview({
       friendUserId: FRIEND_ID,
-      shareScope: "full",
       startDate: new Date("2026-01-01T00:00:00.000Z"),
       endDate: new Date("2026-06-01T00:00:00.000Z"),
     });
@@ -189,7 +176,6 @@ describe("getFriendOverview", () => {
 
     const result = await getFriendOverview({
       friendUserId: FRIEND_ID,
-      shareScope: "aggregates",
     });
 
     expect(result.topGenres).toEqual([
@@ -216,7 +202,6 @@ describe("getFriendOverview", () => {
 
     const result = await getFriendOverview({
       friendUserId: FRIEND_ID,
-      shareScope: "aggregates",
     });
 
     expect(result.timeline).toEqual([]);

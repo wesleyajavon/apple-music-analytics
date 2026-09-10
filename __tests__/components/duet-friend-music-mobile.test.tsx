@@ -67,45 +67,54 @@ const baseProps = {
   topGenres: [{ id: "electronic", title: "Electronic", count: 6 }],
   chartData: [] as { formattedDate: string; listens: number }[],
   emptyStats: false,
+  topTracks: [{ id: "t1", title: "One More Time", subtitle: "Daft Punk", count: 4 }],
 };
 
-describe("DuetFriendMusicMobileExperience shareScope", () => {
-  it("hides top tracks and shows the aggregates hint", () => {
+describe("DuetFriendMusicMobileExperience", () => {
+  it("renders top tracks", () => {
     searchParams.delete("view");
-    render(
-      <DuetFriendMusicMobileExperience
-        {...baseProps}
-        topTracks={null}
-        showAggregatesHint
-      />
-    );
+    render(<DuetFriendMusicMobileExperience {...baseProps} />);
 
     expect(screen.getByRole("tab", { name: /viewSwitcher\.views\.tops/i })).toHaveAttribute(
       "aria-selected",
       "true"
     );
-    expect(screen.queryByTestId("duet-friend-music-top-tracks")).not.toBeInTheDocument();
-    expect(screen.queryByText("topTracksTitle")).not.toBeInTheDocument();
-    expect(screen.getByText("aggregatesTracksHint")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "aggregatesTracksHintCta" })).toHaveAttribute(
-      "href",
-      "/dashboard/settings?view=preferences#settings-duet-sharing"
-    );
+    expect(screen.getByTestId("duet-friend-music-top-tracks")).toBeInTheDocument();
+    expect(screen.getByText("One More Time")).toBeInTheDocument();
+    expect(screen.queryByText("aggregatesTracksHint")).not.toBeInTheDocument();
   });
 
-  it("renders top tracks for full scope and omits the aggregates hint", () => {
+  it("labels the hero insight under the banner lead", () => {
     searchParams.delete("view");
     render(
       <DuetFriendMusicMobileExperience
         {...baseProps}
-        topTracks={[{ id: "t1", title: "One More Time", subtitle: "Daft Punk", count: 4 }]}
-        showAggregatesHint={false}
+        insight={{
+          eyebrow: "Alex’s signature sound",
+          title: "One More Time",
+          subtitle: "Daft Punk",
+          metric: "4",
+          metricLabel: "streams",
+        }}
       />
     );
 
-    expect(screen.getByTestId("duet-friend-music-top-tracks")).toBeInTheDocument();
-    expect(screen.getByText("One More Time")).toBeInTheDocument();
-    expect(screen.queryByText("aggregatesTracksHint")).not.toBeInTheDocument();
+    expect(screen.getByText("Alex’s signature sound")).toBeInTheDocument();
+    const banner = screen.getByText("bannerLead");
+    const label = screen.getByText("Alex’s signature sound");
+    expect(
+      banner.compareDocumentPosition(label) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+  });
+
+  it("shows the friend name as title with an initials avatar", () => {
+    searchParams.delete("view");
+    render(
+      <DuetFriendMusicMobileExperience {...baseProps} subjectAvatar={null} />
+    );
+
+    expect(screen.getByRole("heading", { name: "Alex" })).toBeInTheDocument();
+    expect(screen.getByText("A")).toBeInTheDocument();
   });
 
   it("uses the dedicated period empty, not an import CTA", () => {
@@ -115,15 +124,13 @@ describe("DuetFriendMusicMobileExperience shareScope", () => {
         {...baseProps}
         topArtists={[]}
         topGenres={[]}
-        topTracks={null}
+        topTracks={[]}
         emptyStats
-        showAggregatesHint={false}
       />
     );
 
     expect(screen.getByText("emptyStatsDescription")).toBeInTheDocument();
     expect(screen.queryByText("aggregatesTracksHint")).not.toBeInTheDocument();
-    expect(screen.queryByTestId("duet-friend-music-top-tracks")).not.toBeInTheDocument();
     expect(screen.queryByText(/import/i)).not.toBeInTheDocument();
   });
 
@@ -132,12 +139,10 @@ describe("DuetFriendMusicMobileExperience shareScope", () => {
     render(
       <DuetFriendMusicMobileExperience
         {...baseProps}
-        topTracks={[{ id: "t1", title: "One More Time", subtitle: "Daft Punk", count: 4 }]}
         chartData={[
           { formattedDate: "Jan 2026", listens: 10 },
           { formattedDate: "Feb 2026", listens: 40 },
         ]}
-        showAggregatesHint={false}
       />
     );
 
@@ -150,13 +155,7 @@ describe("DuetFriendMusicMobileExperience shareScope", () => {
 
   it("renders top genres after top tracks", () => {
     searchParams.delete("view");
-    render(
-      <DuetFriendMusicMobileExperience
-        {...baseProps}
-        topTracks={[{ id: "t1", title: "One More Time", subtitle: "Daft Punk", count: 4 }]}
-        showAggregatesHint={false}
-      />
-    );
+    render(<DuetFriendMusicMobileExperience {...baseProps} />);
 
     const tracks = screen.getByText("topTracksTitle");
     const genres = screen.getByText("topGenresTitle");
@@ -168,12 +167,10 @@ describe("DuetFriendMusicMobileExperience shareScope", () => {
     render(
       <DuetFriendMusicMobileExperience
         {...baseProps}
-        topTracks={[{ id: "t1", title: "One More Time", subtitle: "Daft Punk", count: 4 }]}
         chartData={[
           { formattedDate: "Jan 2026", listens: 10 },
           { formattedDate: "Feb 2026", listens: 40 },
         ]}
-        showAggregatesHint={false}
       />
     );
 

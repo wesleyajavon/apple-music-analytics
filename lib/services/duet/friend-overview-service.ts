@@ -1,4 +1,3 @@
-import type { DuetShareScope } from "@prisma/client";
 import type { FriendOverviewResponse } from "@/lib/dto/duet";
 import { prisma } from "@/lib/prisma";
 import { getMonthlyAggregatedListens } from "@/lib/services/listening/listening-aggregation";
@@ -14,14 +13,9 @@ export const FRIEND_OVERVIEW_TOP_LIMIT = 6;
 
 export type GetFriendOverviewArgs = {
   friendUserId: string;
-  shareScope: DuetShareScope;
   startDate?: Date;
   endDate?: Date;
 };
-
-function toResponseShareScope(shareScope: DuetShareScope): "aggregates" | "full" {
-  return shareScope === "full" ? "full" : "aggregates";
-}
 
 async function loadFriendTimeline(
   friendUserId: string,
@@ -71,8 +65,7 @@ async function loadFriendSubject(
 export async function getFriendOverview(
   args: GetFriendOverviewArgs
 ): Promise<FriendOverviewResponse> {
-  const { friendUserId, shareScope, startDate, endDate } = args;
-  const includeTracks = shareScope === "full";
+  const { friendUserId, startDate, endDate } = args;
 
   const [stats, topArtists, genreCounts, timeline, subject, topTracks] =
     await Promise.all([
@@ -81,15 +74,13 @@ export async function getFriendOverview(
       getGenreDistribution(startDate, endDate, friendUserId),
       loadFriendTimeline(friendUserId, startDate, endDate),
       loadFriendSubject(friendUserId),
-      includeTracks
-        ? getTrackStats(
-            startDate,
-            endDate,
-            friendUserId,
-            FRIEND_OVERVIEW_TOP_LIMIT,
-            0
-          )
-        : Promise.resolve(undefined),
+      getTrackStats(
+        startDate,
+        endDate,
+        friendUserId,
+        FRIEND_OVERVIEW_TOP_LIMIT,
+        0
+      ),
     ]);
 
   const totalListens = genreCounts.reduce((sum, item) => sum + item.count, 0);
@@ -99,19 +90,14 @@ export async function getFriendOverview(
     percentage: totalListens > 0 ? (item.count / totalListens) * 100 : 0,
   }));
 
-  const payload: FriendOverviewResponse = {
+  return {
     friendUserId,
-    shareScope: toResponseShareScope(shareScope),
+    shareScope: "full",
     subject,
     stats,
     topArtists,
     topGenres,
     timeline,
+    topTracks: topTracks ?? [],
   };
-
-  if (includeTracks) {
-    payload.topTracks = topTracks ?? [];
-  }
-
-  return payload;
 }

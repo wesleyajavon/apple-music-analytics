@@ -1,24 +1,15 @@
 import type { DuetShareScope } from "@prisma/client";
 import { findFriendshipBetween } from "@/lib/services/duet/friendship-service";
 
-export type FriendDataAccessRequiredScope = "aggregates" | "full";
+/** Sharing is on when scope is anything other than `none` (legacy `aggregates` counts as on). */
+export type FriendDataAccessRequiredScope = "sharing";
 
 export type FriendDataAccessResult =
   | { ok: true; shareScope: DuetShareScope }
   | { ok: false; status: 403 | 404 };
 
-const SCOPE_RANK: Record<DuetShareScope, number> = {
-  none: 0,
-  aggregates: 1,
-  full: 2,
-};
-
-function meetsRequiredScope(
-  actual: DuetShareScope,
-  required: FriendDataAccessRequiredScope
-): boolean {
-  const requiredRank = SCOPE_RANK[required];
-  return SCOPE_RANK[actual] >= requiredRank;
+function isSharingOn(scope: DuetShareScope): boolean {
+  return scope === "full" || scope === "aggregates";
 }
 
 /**
@@ -28,9 +19,9 @@ function meetsRequiredScope(
 export async function assertFriendDataAccess(args: {
   viewerId: string;
   targetUserId: string;
-  requiredScope: FriendDataAccessRequiredScope;
+  requiredScope?: FriendDataAccessRequiredScope;
 }): Promise<FriendDataAccessResult> {
-  const { viewerId, targetUserId, requiredScope } = args;
+  const { viewerId, targetUserId } = args;
 
   if (viewerId === targetUserId) {
     return { ok: true, shareScope: "full" };
@@ -41,7 +32,7 @@ export async function assertFriendDataAccess(args: {
     return { ok: false, status: 404 };
   }
 
-  if (!meetsRequiredScope(friendship.shareScope, requiredScope)) {
+  if (!isSharingOn(friendship.shareScope)) {
     return { ok: false, status: 403 };
   }
 

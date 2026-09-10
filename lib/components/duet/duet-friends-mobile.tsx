@@ -23,11 +23,9 @@ import { MusicalProfilePeriodBadge } from "@/lib/components/musical-profile-peri
 import { UserAvatar } from "@/lib/components/user-avatar";
 import { getDuetDisplayName } from "@/lib/components/duet/duet-utils";
 import { DuetMobileSubNav } from "@/lib/components/duet/duet-mobile-sub-nav";
-import { DuetShareScopePicker } from "@/lib/components/duet/duet-share-scope-picker";
 import type { DuetFriendsSection } from "@/lib/constants/duet-friends";
 import { DASHBOARD_BOTTOM_NAV_OFFSET_VAR } from "@/lib/constants/dashboard-chrome";
 import type { FriendshipDto } from "@/lib/dto/duet";
-import type { DuetShareScopeOption } from "@/lib/hooks/use-duet";
 import { useListenDateRange } from "@/lib/hooks/use-listen-date-range";
 
 const MOBILE_BLEED =
@@ -42,10 +40,9 @@ type PaginatedFriends = {
 };
 
 type MutationHandlers = {
-  onAccept: (id: string, scope: DuetShareScopeOption) => void;
+  onAccept: (id: string) => void;
   onDecline: (id: string) => void;
   onRevoke: (id: string) => void;
-  onUpdateShareScope: (id: string, scope: DuetShareScopeOption) => void;
   onBlock: (id: string) => void;
 };
 
@@ -243,7 +240,6 @@ export function DuetFriendsMobileExperience({
   const actionsTitleId = useId();
   const [inviteOpen, setInviteOpen] = useState(activeSection === "invite");
   const [acceptTarget, setAcceptTarget] = useState<FriendshipDto | null>(null);
-  const [pendingScope, setPendingScope] = useState<DuetShareScopeOption>("aggregates");
   const [actionTarget, setActionTarget] = useState<FriendshipDto | null>(null);
 
   useEffect(() => {
@@ -352,7 +348,6 @@ export function DuetFriendsMobileExperience({
                       className="min-w-0 flex-1 text-left"
                       onClick={() => {
                         if (isIncoming) {
-                          setPendingScope("aggregates");
                           setAcceptTarget(friendship);
                           return;
                         }
@@ -374,7 +369,6 @@ export function DuetFriendsMobileExperience({
                           type="button"
                           disabled={busy}
                           onClick={() => {
-                            setPendingScope("aggregates");
                             setAcceptTarget(friendship);
                           }}
                           className={`${DASHBOARD_BTN_GHOST} px-3 text-foreground disabled:opacity-50`}
@@ -525,17 +519,12 @@ export function DuetFriendsMobileExperience({
           </h2>
           {acceptTarget ? (
             <div className="mt-4 space-y-4">
-              <DuetShareScopePicker
-                groupName={`mobile-accept-${acceptTarget.id}`}
-                value={pendingScope}
-                onChange={setPendingScope}
-                disabled={busy}
-              />
+              <p className="text-[13px] leading-5 text-muted">{t("acceptShareHint")}</p>
               <button
                 type="button"
                 disabled={busy}
                 onClick={() => {
-                  mutations.onAccept(acceptTarget.id, pendingScope);
+                  mutations.onAccept(acceptTarget.id);
                   setAcceptTarget(null);
                 }}
                 className={`${DASHBOARD_BTN_GHOST} w-full text-foreground disabled:opacity-50`}
@@ -561,20 +550,6 @@ export function DuetFriendsMobileExperience({
             <div className="mt-4 space-y-3">
               {actionTarget.status === "accepted" ? (
                 <>
-                  <DuetShareScopePicker
-                    groupName={`mobile-friend-${actionTarget.id}`}
-                    value={
-                      actionTarget.shareScope === "full" || actionTarget.shareScope === "aggregates"
-                        ? actionTarget.shareScope
-                        : "aggregates"
-                    }
-                    onChange={(scope) => {
-                      if (scope !== actionTarget.shareScope) {
-                        mutations.onUpdateShareScope(actionTarget.id, scope);
-                      }
-                    }}
-                    disabled={busy}
-                  />
                   <Link
                     href={withFilters(
                       `/dashboard/duet/compare?friendUserId=${encodeURIComponent(getPeer(actionTarget, viewerId).id)}`

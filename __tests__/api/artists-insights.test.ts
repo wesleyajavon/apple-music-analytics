@@ -110,8 +110,8 @@ describe("GET /api/artists/[artistId]/insights", () => {
     expect(getArtistUserInsights).not.toHaveBeenCalled();
   });
 
-  it("honors friend userId when Duet aggregates access is granted", async () => {
-    vi.mocked(assertFriendDataAccess).mockResolvedValue({ ok: true, shareScope: "aggregates" });
+  it("honors friend userId when Duet sharing access is granted", async () => {
+    vi.mocked(assertFriendDataAccess).mockResolvedValue({ ok: true, shareScope: "full" });
 
     const request = new NextRequest(
       `http://localhost/api/artists/a1/insights?userId=${FRIEND_ID}`
@@ -122,7 +122,6 @@ describe("GET /api/artists/[artistId]/insights", () => {
     expect(assertFriendDataAccess).toHaveBeenCalledWith({
       viewerId: VIEWER_ID,
       targetUserId: FRIEND_ID,
-      requiredScope: "aggregates",
     });
     expect(getArtistUserInsights).toHaveBeenCalledWith("a1", undefined, undefined, FRIEND_ID);
     expect(resolveAuthorizedDataUserId).not.toHaveBeenCalled();

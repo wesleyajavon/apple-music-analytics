@@ -386,18 +386,15 @@ function FriendMusicContent() {
     count: genre.count,
     percentage: genre.percentage,
   }));
-  const topTracks: FriendMusicLeaderItem[] | null =
-    data.shareScope === "full"
-      ? (data.topTracks ?? []).map((track) => ({
-          id: track.trackId,
-          title: track.trackTitle,
-          subtitle: track.artistName,
-          artistId: track.artistId,
-          count: track.listenCount,
-          percentage:
-            data.stats.totalListens > 0 ? (track.listenCount / data.stats.totalListens) * 100 : 0,
-        }))
-      : null;
+  const topTracks: FriendMusicLeaderItem[] = (data.topTracks ?? []).map((track) => ({
+    id: track.trackId,
+    title: track.trackTitle,
+    subtitle: track.artistName,
+    artistId: track.artistId,
+    count: track.listenCount,
+    percentage:
+      data.stats.totalListens > 0 ? (track.listenCount / data.stats.totalListens) * 100 : 0,
+  }));
 
   const topTrackLeader = topTracks?.[0];
   const topArtistLeader = topArtists[0];
@@ -405,7 +402,7 @@ function FriendMusicContent() {
     ? undefined
     : topTrackLeader
       ? {
-          eyebrow: t("insight.topTrackEyebrow"),
+          eyebrow: t("insight.topTrackEyebrow", { name: subjectName }),
           title: topTrackLeader.title,
           subtitle: t("insight.topTrackBody", {
             artist: topTrackLeader.subtitle ?? "",
@@ -415,7 +412,7 @@ function FriendMusicContent() {
         }
       : topArtistLeader
         ? {
-            eyebrow: t("insight.topArtistEyebrow"),
+            eyebrow: t("insight.topArtistEyebrow", { name: subjectName }),
             title: topArtistLeader.title,
             subtitle: t("insight.topArtistBody"),
             metric: topArtistLeader.count.toLocaleString(locale),
@@ -456,7 +453,6 @@ function FriendMusicContent() {
             topTracks={topTracks}
             chartData={chartData}
             emptyStats={emptyStats}
-            showAggregatesHint={!emptyStats && data.shareScope === "aggregates"}
             onOpenArtistInsights={handleOpenArtistInsights}
           />
         }
@@ -473,7 +469,6 @@ function FriendMusicContent() {
             topTracks={topTracks}
             chartData={chartData}
             emptyStats={emptyStats}
-            showAggregatesHint={!emptyStats && data.shareScope === "aggregates"}
             emptyNode={emptyNode}
             onOpenArtistInsights={handleOpenArtistInsights}
           />

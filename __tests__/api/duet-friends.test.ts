@@ -26,7 +26,6 @@ vi.mock("@/lib/services/duet/friendship-service", () => ({
   acceptFriendship: vi.fn(),
   declineFriendship: vi.fn(),
   revokeFriendship: vi.fn(),
-  updateFriendshipShareScope: vi.fn(),
   blockUser: vi.fn(),
 }));
 
@@ -54,7 +53,6 @@ import {
   acceptFriendship,
   declineFriendship,
   revokeFriendship,
-  updateFriendshipShareScope,
   blockUser,
 } from "@/lib/services/duet/friendship-service";
 import {
@@ -174,20 +172,20 @@ describe("Duet friends API", () => {
     vi.mocked(acceptFriendship).mockResolvedValue({
       ...mockFriendship,
       status: "accepted",
-      shareScope: "aggregates",
+      shareScope: "full",
     });
 
     const response = await PATCHFriend(
       new NextRequest(`http://localhost/api/duet/friends/${FRIENDSHIP_ID}`, {
         method: "PATCH",
-        body: JSON.stringify({ action: "accept", shareScope: "aggregates" }),
+        body: JSON.stringify({ action: "accept" }),
       }),
       { params: Promise.resolve({ id: FRIENDSHIP_ID }) }
     );
 
     expect(response.status).toBe(200);
     expect(grantDuetSharingConsent).toHaveBeenCalledWith(FRIEND_ID, expect.any(NextRequest));
-    expect(acceptFriendship).toHaveBeenCalledWith(FRIENDSHIP_ID, FRIEND_ID, "aggregates");
+    expect(acceptFriendship).toHaveBeenCalledWith(FRIENDSHIP_ID, FRIEND_ID);
   });
 
   it("PATCH decline returns friendship", async () => {
@@ -209,14 +207,7 @@ describe("Duet friends API", () => {
     expect(data.friendship.status).toBe("declined");
   });
 
-  it("PATCH updateShareScope records duet sharing consent", async () => {
-    vi.mocked(updateFriendshipShareScope).mockResolvedValue({
-      ...mockFriendship,
-      status: "accepted",
-      shareScope: "full",
-      direction: "friend",
-    });
-
+  it("PATCH updateShareScope is rejected", async () => {
     const response = await PATCHFriend(
       new NextRequest(`http://localhost/api/duet/friends/${FRIENDSHIP_ID}`, {
         method: "PATCH",
@@ -225,9 +216,7 @@ describe("Duet friends API", () => {
       { params: Promise.resolve({ id: FRIENDSHIP_ID }) }
     );
 
-    expect(response.status).toBe(200);
-    expect(updateFriendshipShareScope).toHaveBeenCalledWith(FRIENDSHIP_ID, USER_ID, "full");
-    expect(grantDuetSharingConsent).toHaveBeenCalledWith(USER_ID, expect.any(NextRequest));
+    expect(response.status).toBe(400);
   });
 
   it("PATCH revoke returns ok", async () => {
@@ -281,20 +270,19 @@ describe("Duet friends API", () => {
     vi.mocked(getOrCreateDuetShareSettings).mockResolvedValue({
       userId: USER_ID,
       allowFriendRequests: true,
-      defaultShareScope: "aggregates",
     });
 
     const response = await GETSettings(new NextRequest("http://localhost/api/duet/settings"));
     expect(response.status).toBe(200);
     const data = await response.json();
-    expect(data.defaultShareScope).toBe("aggregates");
+    expect(data.allowFriendRequests).toBe(true);
+    expect(data.defaultShareScope).toBeUndefined();
   });
 
   it("PATCH /api/duet/settings updates settings", async () => {
     vi.mocked(updateDuetShareSettings).mockResolvedValue({
       userId: USER_ID,
       allowFriendRequests: false,
-      defaultShareScope: "full",
     });
 
     const response = await PATCHSettings(

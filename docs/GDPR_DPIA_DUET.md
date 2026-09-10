@@ -25,9 +25,9 @@ Documents associés : [GDPR_ROPA.md](./GDPR_ROPA.md), [DUET_PLAYBOOK.md](./DUET_
 |---------|--------|
 | Invitations | Par email (lookup compte existant uniquement) ; message uniforme anti-énumération |
 | Relation | Demande → acceptation / refus ; statut `Friendship` ; blocage |
-| Partage | Opt-in **par ami** à l’acceptation ; scopes `aggregates` ou `full` (mapping D2, pas de nouvel enum) |
-| Comparaisons | Timeline dual, tops/genres agrégés ; head-to-head artiste / titre / genre (scope `full`) |
-| Consultation Your Music ami | Lecture seule du hub analytics de l’ami (`/dashboard/duet/music`, **pas** Overview) : KPIs, timeline, tops artistes et genres si `aggregates` ; + tops titres si `full`. Pas de heatmap, pas d’IA. Toujours entre amis `accepted`. |
+| Partage | Opt-in **par ami** à l’acceptation (on = partage complet) ; révocation / blocage = off |
+| Comparaisons | Timeline dual, tops artistes/genres/titres, head-to-head artiste / titre / genre |
+| Consultation Your Music ami | Lecture seule du hub analytics de l’ami (`/dashboard/duet/music`, **pas** Overview) : KPIs, timeline, tops artistes, genres et titres. Pas de heatmap, pas d’IA. Toujours entre amis `accepted`. |
 | Exclusions MVP | Pas de découverte publique, pas de fil, pas de follow, pas de profil public, pas de « view as » dashboard, pas de démo anonyme, pas de chat, pas de groupes |
 
 ### Données traitées
@@ -36,7 +36,7 @@ Documents associés : [GDPR_ROPA.md](./GDPR_ROPA.md), [DUET_PLAYBOOK.md](./DUET_
 |-----------|----------|---------------------|
 | Relation | IDs, statut, `shareScope`, date | Non (métadonnée interne) |
 | Profil minimal | Nom, avatar | Oui (identification de l’ami) |
-| Stats d’écoute | Agrégats timeline, tops, genres ; détail artiste/titre selon scope. Le hub Your Music ami **réutilise ces catégories** (présentation en lecture seule, pas un nouveau jeu de données). | Oui, selon scope choisi par la personne qui partage |
+| Stats d’écoute | Agrégats timeline, tops artistes/genres/titres ; détail artiste/titre. Le hub Your Music ami **réutilise ces catégories** (présentation en lecture seule, pas un nouveau jeu de données). | Oui, après acceptation (partage on) |
 | Email (invitation) | Lookup `User.email` | Non exposé à l’ami |
 
 ---
@@ -45,24 +45,24 @@ Documents associés : [GDPR_ROPA.md](./GDPR_ROPA.md), [DUET_PLAYBOOK.md](./DUET_
 
 ### Finalités
 
-Permettre à des utilisateurs de **comparer** leurs habitudes d’écoute **et de consulter en lecture seule** le hub analytics (Your Music) d’un ami qui a **accepté explicitement** le partage, selon le `shareScope` de la relation, dans le cadre du tableau de bord analytics.
+Permettre à des utilisateurs de **comparer** leurs habitudes d’écoute **et de consulter en lecture seule** le hub analytics (Your Music) d’un ami qui a **accepté explicitement** le partage, dans le cadre du tableau de bord analytics.
 
 ### Base légale retenue (auto-évaluation)
 
 **Consentement explicite** (Art. 6(1)(a) RGPD) :
 
 - enregistré à l’**acceptation** de la demande d’ami (`UserConsent`, type `duet_sharing`, version `DUET_SHARING_CONSENT_VERSION`) ;
-- granularité par relation (`shareScope`) ;
-- retrait à tout moment (révocation ami, modification scope, Paramètres → Partage Duet).
+- granularité par relation (opt-in ami ; on/off via accept / revoke) ;
+- retrait à tout moment (révocation ami, blocage, Paramètres → demandes d’ami).
 
-L’inviteur ne voit les stats de l’invité que si celui-ci accepte et choisit un niveau de partage. Pas de partage par défaut.
+L’inviteur ne voit les stats de l’invité que si celui-ci accepte. Pas de partage par défaut.
 
 ### Proportionnalité
 
 | Mesure | Justification |
 |--------|---------------|
 | Opt-in par ami (pas global forcé) | Minimisation ; pas de partage implicite |
-| Scope `aggregates` par défaut recommandé | Niveau le moins intrusif pour comparaisons générales |
+| Accept = partage complet ; revoke = off | Consentement clair sans dual scope ambigu |
 | Pas de découverte / profil public Duet | Réduit exposition et abus |
 | Plafonds (50 amis, 10 invitations/jour) | Limite spam et surface de fuite |
 | Auth obligatoire | Pas d’accès anonyme aux données d’autrui |
@@ -153,6 +153,13 @@ L’inviteur ne voit les stats de l’invité que si celui-ci accepte et choisit
 |---------|------|------------|
 | 0.1 | 2026-06-09 | Création — auto-évaluation Duet MVP |
 | 0.2 | 2026-08-25 | Périmètre : consultation lecture seule du hub Your Music ami selon `shareScope` (D2 inchangé). Pas de bump `DUET_SHARING_CONSENT_VERSION`. Copy acceptation + privacy alignés. |
+| 0.3 | 2026-09-10 | D2 simplifié on/off (accept = partage complet ; revoke = off). Enum `aggregates` déprécié / migré. Pas de bump consent. |
+
+**Ce qui change pour l’utilisateur (0.3)**
+
+- **Aujourd’hui :** à l’acceptation, partage complet (timeline, tops y compris titres, duels). Plus de choix Aggregated / Detailed. Retirer l’ami coupe le partage.
+- **Inchangé :** opt-in par ami, pas de découverte d’inconnus, Overview = ta musique.
+- **Pas de re-consentement :** version `2026-06-09` inchangée ; mêmes catégories qu’avant sous `full`.
 
 **Ce qui change pour l’utilisateur (0.2)**
 

@@ -83,12 +83,6 @@ async function countAcceptedFriendships(userId: string): Promise<number> {
   });
 }
 
-function assertAcceptableShareScope(shareScope: DuetShareScope): void {
-  if (shareScope !== "aggregates" && shareScope !== "full") {
-    throw new DuetServiceError(DUET_ERROR_CODES.INVALID_SHARE_SCOPE);
-  }
-}
-
 export async function inviteFriendByEmail(
   requesterId: string,
   rawEmail: string
@@ -171,11 +165,8 @@ export async function inviteFriendByEmail(
 
 export async function acceptFriendship(
   friendshipId: string,
-  addresseeId: string,
-  shareScope: DuetShareScope
+  addresseeId: string
 ): Promise<FriendshipDto> {
-  assertAcceptableShareScope(shareScope);
-
   const row = await prisma.friendship.findUnique({
     where: { id: friendshipId },
     include: friendshipInclude,
@@ -196,7 +187,7 @@ export async function acceptFriendship(
     where: { id: friendshipId },
     data: {
       status: "accepted",
-      shareScope,
+      shareScope: "full",
       respondedAt: new Date(),
     },
     include: friendshipInclude,
@@ -229,38 +220,6 @@ export async function declineFriendship(
     include: friendshipInclude,
   });
   return toFriendshipDto(updated, addresseeId);
-}
-
-export async function updateFriendshipShareScope(
-  friendshipId: string,
-  userId: string,
-  shareScope: DuetShareScope
-): Promise<FriendshipDto> {
-  assertAcceptableShareScope(shareScope);
-
-  const row = await prisma.friendship.findUnique({
-    where: { id: friendshipId },
-    include: friendshipInclude,
-  });
-  if (!row) {
-    throw new DuetServiceError(DUET_ERROR_CODES.FRIENDSHIP_NOT_FOUND);
-  }
-  if (row.requesterId !== userId && row.addresseeId !== userId) {
-    throw new DuetServiceError(DUET_ERROR_CODES.FORBIDDEN);
-  }
-  if (row.status !== "accepted") {
-    throw new DuetServiceError(DUET_ERROR_CODES.FORBIDDEN);
-  }
-  if (row.shareScope === shareScope) {
-    return toFriendshipDto(row, userId);
-  }
-
-  const updated = await prisma.friendship.update({
-    where: { id: friendshipId },
-    data: { shareScope },
-    include: friendshipInclude,
-  });
-  return toFriendshipDto(updated, userId);
 }
 
 export async function revokeFriendship(

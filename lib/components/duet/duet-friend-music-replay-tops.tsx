@@ -2,16 +2,13 @@
 
 import { useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
 import {
   ReplayRankingGrid,
   ReplayRankingSection,
   REPLAY_TOPS_LIMIT,
   type ReplayRankingItem,
 } from "@/lib/components/replay-ranking-grid";
-import { DASHBOARD_BTN_GHOST } from "@/lib/components/dashboard-ui";
 import type { FriendMusicLeaderItem } from "@/lib/components/duet/duet-friend-music-mobile";
-import { DUET_SHARE_SETTINGS_PATH } from "@/lib/constants/duet-settings";
 import type { ArtistStatsDto } from "@/lib/dto/artist";
 import { overviewArtistLeaderToPreview } from "@/lib/utils/overview-page";
 
@@ -21,7 +18,6 @@ export function FriendMusicReplayTopsSections({
   topArtists,
   topGenres,
   topTracks,
-  showAggregatesHint,
   emptyTracksMessage,
   onOpenArtistInsights,
   className = "space-y-12",
@@ -30,8 +26,7 @@ export function FriendMusicReplayTopsSections({
   subjectName: string;
   topArtists: FriendMusicLeaderItem[];
   topGenres: FriendMusicLeaderItem[];
-  topTracks: FriendMusicLeaderItem[] | null;
-  showAggregatesHint: boolean;
+  topTracks: FriendMusicLeaderItem[];
   emptyTracksMessage: string;
   onOpenArtistInsights?: (artist: ArtistStatsDto, avatarColorIndex: number) => void;
   className?: string;
@@ -65,7 +60,7 @@ export function FriendMusicReplayTopsSections({
     [locale, t, tArtists, topArtists]
   );
 
-  const visibleTracks = (topTracks ?? []).slice(0, REPLAY_TOPS_LIMIT);
+  const visibleTracks = topTracks.slice(0, REPLAY_TOPS_LIMIT);
 
   const trackItems = useMemo(
     (): ReplayRankingItem[] =>
@@ -139,72 +134,58 @@ export function FriendMusicReplayTopsSections({
         </ReplayRankingSection>
       ) : null}
 
-      {showAggregatesHint ? (
-        <p role="status" className="text-[13px] leading-6 text-muted">
-          {t("aggregatesTracksHint")}{" "}
-          <Link
-            href={DUET_SHARE_SETTINGS_PATH}
-            className={`${DASHBOARD_BTN_GHOST} inline min-h-0 px-0 py-0 align-baseline font-semibold text-foreground no-underline underline-offset-2 hover:underline`}
+      <div data-testid="duet-friend-music-top-tracks">
+        {trackItems.length > 0 ? (
+          <ReplayRankingSection
+            titleId="friend-music-tops-tracks-title"
+            eyebrow={t("sections.tops.eyebrow")}
+            title={t("topTracksTitle")}
+            description={t("topTracksDescription", { name: subjectName })}
           >
-            {t("aggregatesTracksHintCta")}
-          </Link>
-        </p>
-      ) : null}
-
-      {topTracks !== null ? (
-        <div data-testid="duet-friend-music-top-tracks">
-          {trackItems.length > 0 ? (
-            <ReplayRankingSection
-              titleId="friend-music-tops-tracks-title"
-              eyebrow={t("sections.tops.eyebrow")}
-              title={t("topTracksTitle")}
-              description={t("topTracksDescription", { name: subjectName })}
-            >
-              <ReplayRankingGrid
-                items={trackItems}
-                maxItems={REPLAY_TOPS_LIMIT}
-                onSelect={
-                  onOpenArtistInsights
-                    ? (item, index) => {
-                        const track = visibleTracks[index];
-                        if (!track || track.id !== item.id) return;
-                        const artistId = track.artistId;
-                        if (!artistId) return;
-                        const known = topArtists.find((artist) => artist.id === artistId);
-                        onOpenArtistInsights(
-                          known
-                            ? overviewArtistLeaderToPreview(
-                                {
-                                  artistId: known.id,
-                                  name: known.title,
-                                  count: known.count,
-                                  percentage: known.percentage ?? 0,
-                                  imageUrl: known.imageUrl,
-                                },
-                                index + 1
-                              )
-                            : overviewArtistLeaderToPreview(
-                                {
-                                  artistId,
-                                  name: track.subtitle ?? track.title,
-                                  count: track.count,
-                                  percentage: track.percentage ?? 0,
-                                },
-                                index + 1
-                              ),
-                          index
-                        );
-                      }
-                    : undefined
-                }
-                {...pager}
-              />
-            </ReplayRankingSection>
-          ) : (
-            <p className="text-[13px] leading-6 text-muted">{emptyTracksMessage}</p>
-          )}
-        </div>
-      ) : null}
+            <ReplayRankingGrid
+              items={trackItems}
+              maxItems={REPLAY_TOPS_LIMIT}
+              onSelect={
+                onOpenArtistInsights
+                  ? (item, index) => {
+                      const track = visibleTracks[index];
+                      if (!track || track.id !== item.id) return;
+                      const artistId = track.artistId;
+                      if (!artistId) return;
+                      const known = topArtists.find((artist) => artist.id === artistId);
+                      onOpenArtistInsights(
+                        known
+                          ? overviewArtistLeaderToPreview(
+                              {
+                                artistId: known.id,
+                                name: known.title,
+                                count: known.count,
+                                percentage: known.percentage ?? 0,
+                                imageUrl: known.imageUrl,
+                              },
+                              index + 1
+                            )
+                          : overviewArtistLeaderToPreview(
+                              {
+                                artistId,
+                                name: track.subtitle ?? track.title,
+                                count: track.count,
+                                percentage: track.percentage ?? 0,
+                              },
+                              index + 1
+                            ),
+                        index
+                      );
+                    }
+                  : undefined
+              }
+              {...pager}
+            />
+          </ReplayRankingSection>
+        ) : (
+          <p className="text-[13px] leading-6 text-muted">{emptyTracksMessage}</p>
+        )}
+      </div>
 
       {genreItems.length > 0 ? (
         <ReplayRankingSection

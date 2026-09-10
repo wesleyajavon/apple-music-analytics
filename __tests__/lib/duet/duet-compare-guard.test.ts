@@ -62,8 +62,7 @@ describe("duet-compare-guard", () => {
       new NextRequest(
         `http://localhost/api/duet/compare/timeline?friendUserId=${FRIEND_ID}`
       ),
-      "/api/duet/compare/timeline",
-      "aggregates"
+      "/api/duet/compare/timeline"
     );
 
     expect(result.ok).toBe(false);
@@ -77,8 +76,7 @@ describe("duet-compare-guard", () => {
       new NextRequest(
         `http://localhost/api/duet/compare/timeline?friendUserId=${FRIEND_ID}`
       ),
-      "/api/duet/compare/timeline",
-      "aggregates"
+      "/api/duet/compare/timeline"
     );
 
     expect(result.ok).toBe(true);
@@ -99,8 +97,7 @@ describe("duet-compare-guard", () => {
       new NextRequest(
         `http://localhost/api/duet/friend-overview?friendUserId=${FRIEND_ID}`
       ),
-      "/api/duet/friend-overview",
-      "aggregates"
+      "/api/duet/friend-overview"
     );
 
     expect(result.ok).toBe(true);

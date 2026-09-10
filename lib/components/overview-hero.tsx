@@ -3,12 +3,13 @@
 import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { UserAvatarPhoto } from "@/lib/components/user-avatar";
+import { UserAvatar, UserAvatarPhoto } from "@/lib/components/user-avatar";
 import {
   DASHBOARD_BTN_GHOST,
   DASHBOARD_BTN_OUTLINE,
   DASHBOARD_METRIC_LABEL,
   DASHBOARD_METRIC_VALUE,
+  DASHBOARD_SECTION_EYEBROW,
 } from "@/lib/components/dashboard-ui";
 import { GroqQuotaNotice } from "@/lib/components/error-state";
 import { isGroqDailyQuotaError } from "@/lib/utils/groq-quota-message";
@@ -21,7 +22,7 @@ export const OVERVIEW_DESKTOP_HERO_SHELL = "text-foreground";
 
 const MOBILE_CANVAS = "space-y-8 pb-8 lg:hidden";
 
-function OverviewPrimaryInsightBlock({
+export function OverviewPrimaryInsightBlock({
   insight,
   compact = false,
 }: {
@@ -30,6 +31,9 @@ function OverviewPrimaryInsightBlock({
 }) {
   return (
     <div className={`${compact ? "mt-3" : "mt-6"} max-w-2xl`}>
+      {insight.eyebrow ? (
+        <p className={`${DASHBOARD_SECTION_EYEBROW} mb-2`}>{insight.eyebrow}</p>
+      ) : null}
       <p className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
         <span className={DASHBOARD_METRIC_VALUE}>{insight.metric}</span>
         <span className={DASHBOARD_METRIC_LABEL}>{insight.metricLabel}</span>
@@ -50,6 +54,7 @@ export function OverviewHeroFrame({
   title,
   description,
   avatarUrl,
+  avatarName,
   insight,
   compact = false,
   children,
@@ -57,16 +62,28 @@ export function OverviewHeroFrame({
   title: string;
   description?: string;
   avatarUrl?: string | null;
+  /** When set, always show an avatar (photo or initials). */
+  avatarName?: string | null;
   insight?: OverviewPrimaryInsight;
   compact?: boolean;
   children?: ReactNode;
 }) {
-  const showAvatar = Boolean(avatarUrl);
+  const namedAvatar = Boolean(avatarName?.trim());
+  const showAvatar = namedAvatar || Boolean(avatarUrl);
 
   return (
     <div className={OVERVIEW_DESKTOP_HERO_SHELL}>
       <div className={showAvatar ? "flex items-start gap-4" : undefined}>
-        {showAvatar ? <UserAvatarPhoto src={avatarUrl} size="sm" /> : null}
+        {namedAvatar ? (
+          <UserAvatar
+            name={avatarName}
+            src={avatarUrl}
+            size={compact ? "md" : "lg"}
+            alt=""
+          />
+        ) : showAvatar ? (
+          <UserAvatarPhoto src={avatarUrl} size="sm" />
+        ) : null}
         <div className="min-w-0 flex-1">
           <h1
             className={
@@ -91,6 +108,7 @@ export function OverviewHeroFrame({
 export function OverviewMobileHero({
   title,
   avatarUrl,
+  avatarName,
   insight,
   genreName,
   description,
@@ -98,6 +116,7 @@ export function OverviewMobileHero({
 }: {
   title: string;
   avatarUrl?: string | null;
+  avatarName?: string | null;
   insight?: OverviewPrimaryInsight;
   genreName?: string;
   description?: string;
@@ -115,6 +134,7 @@ export function OverviewMobileHero({
       title={title}
       description={description}
       avatarUrl={avatarUrl}
+      avatarName={avatarName}
       insight={resolvedInsight}
     >
       {children}

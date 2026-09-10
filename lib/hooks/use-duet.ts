@@ -1,7 +1,6 @@
 "use client";
 
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { DuetShareScope } from "@prisma/client";
 import { apiClient } from "@/lib/api-client";
 import { duetKeys } from "@/lib/hooks/query-keys";
 import type {
@@ -171,14 +170,11 @@ export function useDuetMutations() {
   const patchFriendship = useMutation({
     mutationFn: (input: {
       id: string;
-      action: "accept" | "decline" | "revoke" | "updateShareScope";
-      shareScope?: "aggregates" | "full";
+      action: "accept" | "decline" | "revoke";
     }) =>
       apiClient.patch<{ friendship?: FriendshipDto; ok?: boolean }>(
         `/duet/friends/${input.id}`,
-        input.action === "accept" || input.action === "updateShareScope"
-          ? { action: input.action, shareScope: input.shareScope }
-          : { action: input.action }
+        { action: input.action }
       ),
     onSuccess: () => {
       void invalidateFriends();
@@ -193,7 +189,7 @@ export function useDuetMutations() {
   });
 
   const updateSettings = useMutation({
-    mutationFn: (input: Partial<Pick<DuetShareSettingsDto, "allowFriendRequests" | "defaultShareScope">>) =>
+    mutationFn: (input: Pick<DuetShareSettingsDto, "allowFriendRequests">) =>
       apiClient.patch<DuetShareSettingsDto>("/duet/settings", input),
     onSuccess: (data) => {
       queryClient.setQueryData(duetKeys.settings(), data);
@@ -212,7 +208,7 @@ export function useDuetMutations() {
   });
 
   const redeemInviteLink = useMutation({
-    mutationFn: (input: { token: string; shareScope: DuetShareScopeOption }) =>
+    mutationFn: (input: { token: string }) =>
       apiClient.post<{ ok: boolean }>("/duet/friends/invite-link/redeem", input),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: duetKeys.all });
@@ -221,5 +217,3 @@ export function useDuetMutations() {
 
   return { invite, patchFriendship, blockFriendship, updateSettings, createInviteLink, redeemInviteLink };
 }
-
-export type DuetShareScopeOption = Extract<DuetShareScope, "aggregates" | "full">;

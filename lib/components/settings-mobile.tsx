@@ -30,7 +30,6 @@ import { useDuetMutations, useDuetSettings } from "@/lib/hooks/use-duet";
 import { usePublicDemoViewer } from "@/lib/hooks/use-public-demo-viewer";
 import { mergeDashboardSearchParams } from "@/lib/utils/dashboard-search-params";
 import { DASHBOARD_ONBOARDING_REIMPORT_PATH } from "@/lib/utils/onboarding-route";
-import type { DuetShareScope } from "@prisma/client";
 
 const MOBILE_BLEED =
   `-mx-4 -mt-4 space-y-8 lg:hidden max-lg:pb-[max(2rem,calc(var(${DASHBOARD_BOTTOM_NAV_OFFSET_VAR},0px)+1.5rem))]`;
@@ -213,22 +212,9 @@ function SettingsMobileDuetRows() {
         ariaLabel={t("allowRequests")}
         onChange={(next) => updateSettings.mutate({ allowFriendRequests: next })}
       />
-      <div className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_SEPARATOR} justify-between gap-3 px-1`}>
-        <label htmlFor="settings-mobile-duet-scope" className="min-w-0 flex-1 text-sm font-medium text-foreground">
-          {t("defaultScope")}
-        </label>
-        <select
-          id="settings-mobile-duet-scope"
-          disabled={busy}
-          value={data?.defaultShareScope ?? "aggregates"}
-          onChange={(e) => updateSettings.mutate({ defaultShareScope: e.target.value as DuetShareScope })}
-          className="min-h-11 max-w-[11rem] rounded-xl border border-glass-hairline bg-surface-raised px-2.5 text-sm text-foreground"
-        >
-          <option value="aggregates">{t("scopeAggregates")}</option>
-          <option value="full">{t("scopeFull")}</option>
-        </select>
-      </div>
+      <p className="px-1 py-2.5 text-[13px] leading-5 text-muted">{t("consentHint")}</p>
       <p className="px-1 py-2.5 text-[13px] leading-5 text-muted">{t("friendMusicHint")}</p>
+      <p className="px-1 py-2.5 text-[13px] leading-5 text-muted">{t("revokeHint")}</p>
     </>
   );
 }

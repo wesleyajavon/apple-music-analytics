@@ -50,7 +50,7 @@ export function friendAccessDeniedResponse(status: 403 | 404) {
 export async function requireDuetCompareAccess(
   request: NextRequest,
   route: string,
-  requiredScope: FriendDataAccessRequiredScope
+  requiredScope: FriendDataAccessRequiredScope = "sharing"
 ): Promise<DuetCompareAccess> {
   const viewerId = await requireAuthenticatedUserId(request);
   if (!viewerId) {

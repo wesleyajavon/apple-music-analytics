@@ -3,7 +3,6 @@
 import { useTranslations } from "next-intl";
 import { SettingsSwitch } from "@/app/[locale]/dashboard/(main)/settings/settings-shared";
 import { useDuetMutations, useDuetSettings } from "@/lib/hooks/use-duet";
-import type { DuetShareScope } from "@prisma/client";
 
 export function DuetShareSettingsSection() {
   const t = useTranslations("duet.settings");
@@ -35,26 +34,9 @@ export function DuetShareSettingsSection() {
         />
       </div>
 
-      <div className="flex flex-col gap-3 border-t border-glass-hairline pt-4">
-        <label htmlFor="duet-default-scope" className="text-sm font-medium text-foreground">
-          {t("defaultScope")}
-        </label>
-        <select
-          id="duet-default-scope"
-          disabled={isLoading || updateSettings.isPending}
-          value={data?.defaultShareScope ?? "aggregates"}
-          onChange={(e) =>
-            updateSettings.mutate({ defaultShareScope: e.target.value as DuetShareScope })
-          }
-          className="max-w-xs min-h-11 rounded-full border border-glass-hairline bg-surface-raised px-3 text-[13px] text-foreground"
-        >
-          <option value="aggregates">{t("scopeAggregates")}</option>
-          <option value="full">{t("scopeFull")}</option>
-        </select>
-      </div>
-
       <p className="text-xs leading-relaxed text-muted">{t("consentHint")}</p>
       <p className="text-xs leading-relaxed text-muted">{t("friendMusicHint")}</p>
+      <p className="text-xs leading-relaxed text-muted">{t("revokeHint")}</p>
     </div>
   );
 }

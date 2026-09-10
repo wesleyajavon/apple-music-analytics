@@ -17,7 +17,6 @@ describe("assertFriendDataAccess", () => {
     const result = await assertFriendDataAccess({
       viewerId: "user-a",
       targetUserId: "user-a",
-      requiredScope: "full",
     });
     expect(result).toEqual({ ok: true, shareScope: "full" });
     expect(findFriendshipBetween).not.toHaveBeenCalled();
@@ -29,19 +28,18 @@ describe("assertFriendDataAccess", () => {
     const result = await assertFriendDataAccess({
       viewerId: "user-a",
       targetUserId: "user-b",
-      requiredScope: "aggregates",
     });
 
     expect(result).toEqual({ ok: false, status: 404 });
   });
 
-  it("returns 403 when share scope is insufficient", async () => {
+  it("returns 403 when sharing is off (none)", async () => {
     vi.mocked(findFriendshipBetween).mockResolvedValue({
       id: "f1",
       requesterId: "user-a",
       addresseeId: "user-b",
       status: "accepted",
-      shareScope: "aggregates" as DuetShareScope,
+      shareScope: "none" as DuetShareScope,
       createdAt: new Date(),
       respondedAt: new Date(),
     });
@@ -49,13 +47,12 @@ describe("assertFriendDataAccess", () => {
     const result = await assertFriendDataAccess({
       viewerId: "user-a",
       targetUserId: "user-b",
-      requiredScope: "full",
     });
 
     expect(result).toEqual({ ok: false, status: 403 });
   });
 
-  it("allows access when scope meets requirement", async () => {
+  it("allows access for full sharing", async () => {
     vi.mocked(findFriendshipBetween).mockResolvedValue({
       id: "f1",
       requesterId: "user-a",
@@ -69,10 +66,28 @@ describe("assertFriendDataAccess", () => {
     const result = await assertFriendDataAccess({
       viewerId: "user-a",
       targetUserId: "user-b",
-      requiredScope: "aggregates",
     });
 
     expect(result).toEqual({ ok: true, shareScope: "full" });
+  });
+
+  it("allows access for legacy aggregates (treated as on)", async () => {
+    vi.mocked(findFriendshipBetween).mockResolvedValue({
+      id: "f1",
+      requesterId: "user-a",
+      addresseeId: "user-b",
+      status: "accepted",
+      shareScope: "aggregates" as DuetShareScope,
+      createdAt: new Date(),
+      respondedAt: new Date(),
+    });
+
+    const result = await assertFriendDataAccess({
+      viewerId: "user-a",
+      targetUserId: "user-b",
+    });
+
+    expect(result).toEqual({ ok: true, shareScope: "aggregates" });
   });
 
   it("returns 404 when friendship is pending", async () => {
@@ -89,7 +104,6 @@ describe("assertFriendDataAccess", () => {
     const result = await assertFriendDataAccess({
       viewerId: "user-a",
       targetUserId: "user-b",
-      requiredScope: "aggregates",
     });
 
     expect(result).toEqual({ ok: false, status: 404 });
@@ -109,7 +123,6 @@ describe("assertFriendDataAccess", () => {
     const result = await assertFriendDataAccess({
       viewerId: "user-a",
       targetUserId: "user-b",
-      requiredScope: "aggregates",
     });
 
     expect(result).toEqual({ ok: false, status: 404 });

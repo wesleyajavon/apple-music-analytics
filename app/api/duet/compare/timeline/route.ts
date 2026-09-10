@@ -10,7 +10,7 @@ const ROUTE = "/api/duet/compare/timeline";
 
 export async function GET(request: NextRequest) {
   try {
-    const access = await requireDuetCompareAccess(request, ROUTE, "aggregates");
+    const access = await requireDuetCompareAccess(request, ROUTE);
     if (!access.ok) return access.response;
 
     const result = await getCompareTimeline(

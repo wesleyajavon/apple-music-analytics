@@ -24,7 +24,7 @@ const FRIEND_ID = "22222222-2222-4222-8222-222222222222";
 
 const overviewPayload = {
   friendUserId: FRIEND_ID,
-  shareScope: "aggregates" as const,
+  shareScope: "full" as const,
   subject: { name: "Ada", avatarUrl: null },
   stats: {
     totalListens: 10,
@@ -35,6 +35,7 @@ const overviewPayload = {
   topArtists: [],
   topGenres: [],
   timeline: [],
+  topTracks: [],
 };
 
 describe("GET /api/duet/friend-overview", () => {
@@ -44,7 +45,7 @@ describe("GET /api/duet/friend-overview", () => {
       ok: true,
       viewerId: VIEWER_ID,
       friendUserId: FRIEND_ID,
-      shareScope: "aggregates",
+      shareScope: "full",
     });
     vi.mocked(getFriendOverview).mockResolvedValue(overviewPayload);
   });
@@ -139,7 +140,7 @@ describe("GET /api/duet/friend-overview", () => {
     expect(getFriendOverview).not.toHaveBeenCalled();
   });
 
-  it("calls the guard with friend-overview route and aggregates scope", async () => {
+  it("calls the guard with friend-overview route", async () => {
     const response = await GET(
       new NextRequest(
         `http://localhost/api/duet/friend-overview?friendUserId=${FRIEND_ID}`
@@ -149,8 +150,7 @@ describe("GET /api/duet/friend-overview", () => {
     expect(response.status).toBe(200);
     expect(requireDuetFriendAccess).toHaveBeenCalledWith(
       expect.any(NextRequest),
-      "/api/duet/friend-overview",
-      "aggregates"
+      "/api/duet/friend-overview"
     );
   });
 
@@ -166,7 +166,6 @@ describe("GET /api/duet/friend-overview", () => {
     expect(data.friendUserId).toBe(FRIEND_ID);
     expect(getFriendOverview).toHaveBeenCalledWith({
       friendUserId: FRIEND_ID,
-      shareScope: "aggregates",
       startDate: expect.any(Date),
       endDate: expect.any(Date),
     });

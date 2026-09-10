@@ -114,12 +114,11 @@ describe("Duet compare API", () => {
     expect(data.merged).toEqual([{ date: "2026-05-01", self: 10, friend: 7 }]);
     expect(requireDuetCompareAccess).toHaveBeenCalledWith(
       expect.any(NextRequest),
-      "/api/duet/compare/timeline",
-      "aggregates"
+      "/api/duet/compare/timeline"
     );
   });
 
-  it("GET entity requires aggregates scope", async () => {
+  it("GET entity requires sharing access", async () => {
     vi.mocked(getCompareEntity).mockResolvedValue({
       type: "artist",
       entityId: "artist-1",
@@ -147,8 +146,7 @@ describe("Duet compare API", () => {
     expect(response.status).toBe(200);
     expect(requireDuetCompareAccess).toHaveBeenCalledWith(
       expect.any(NextRequest),
-      "/api/duet/compare/entity",
-      "aggregates"
+      "/api/duet/compare/entity"
     );
     expect(getCompareEntity).toHaveBeenCalledWith(
       expect.any(NextRequest),
@@ -267,12 +265,11 @@ describe("Duet compare API", () => {
     expect(data.friend.sources).toEqual(["apple_music_replay"]);
     expect(requireDuetCompareAccess).toHaveBeenCalledWith(
       expect.any(NextRequest),
-      "/api/duet/compare/metadata",
-      "aggregates"
+      "/api/duet/compare/metadata"
     );
   });
 
-  it("GET shared-artists requires aggregates scope", async () => {
+  it("GET shared-artists requires sharing access", async () => {
     vi.mocked(getCompareSharedArtists).mockResolvedValue({
       startDate: timelinePayload.startDate,
       endDate: timelinePayload.endDate,
@@ -306,8 +303,7 @@ describe("Duet compare API", () => {
     expect(data.artists[0].artistName).toBe("Radiohead");
     expect(requireDuetCompareAccess).toHaveBeenCalledWith(
       expect.any(NextRequest),
-      "/api/duet/compare/shared-artists",
-      "aggregates"
+      "/api/duet/compare/shared-artists"
     );
   });
 });

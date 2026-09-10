@@ -17,16 +17,9 @@ export const runtime = "nodejs";
 
 const RATE = DUET_RATE_LIMITS.settings;
 
-const PatchSchema = z
-  .object({
-    allowFriendRequests: z.boolean().optional(),
-    defaultShareScope: z.enum(["none", "aggregates", "full"]).optional(),
-  })
-  .refine(
-    (body) =>
-      body.allowFriendRequests !== undefined || body.defaultShareScope !== undefined,
-    { message: "At least one setting must be provided" }
-  );
+const PatchSchema = z.object({
+  allowFriendRequests: z.boolean(),
+});
 
 export async function GET(request: NextRequest) {
   try {

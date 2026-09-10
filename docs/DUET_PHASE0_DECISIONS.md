@@ -14,7 +14,7 @@ Cocher ou remplir la colonne **Décision finale** une fois tranché. Les valeurs
 | # | Question | Recommandation par défaut | Décision finale |
 |---|----------|---------------------------|-----------------|
 | D1 | Opt-in par ami ou global seul ? | **Par ami** — `shareScope` sur chaque `Friendship`, complété par des settings globales (`DuetShareSettings`) | ✅ Par ami + settings globales |
-| D2 | Niveaux de partage | **`aggregates`** (timeline, tops, genres) et **`full`** (comparaisons ciblées artiste / titre / genre) | ✅ `aggregates` + `full` |
+| D2 | Niveaux de partage | **on/off** — accepter = partage complet (`full`) ; révoquer / bloquer = off (`none`). L’ancien dual `aggregates` / `full` est déprécié (données migrées vers `full`) | ✅ on/off (2026-09-10) ; enum conservé pour compat |
 | D3 | Canal invitation MVP | **Email** uniquement (lookup `User.email`) | ✅ Email uniquement |
 | D4 | Réponse si email inconnu | **Message uniforme** — pas de « compte introuvable » (anti-énumération) | ✅ Message uniforme |
 | D5 | Invitations si compte absent | **v2** — MVP : invitation uniquement si un `User` existe déjà | ✅ MVP : User existant seulement |
@@ -26,10 +26,11 @@ Cocher ou remplir la colonne **Décision finale** une fois tranché. Les valeurs
 
 ### Notes de cadrage (rappel)
 
-- **D1 + D2** : à l’acceptation, l’utilisateur choisit le niveau de partage pour *cette* relation. Il peut le modifier ou révoquer plus tard dans Paramètres → Partage Duet.
-- **D2 (note 2026-08-25)** : pas de nouvel enum. `aggregates` = timeline / tops artistes-genres **en compare et en hub Your Music ami lecture seule** (KPIs, pas de liste de titres). `full` = + tops titres sur le hub **et** défis entité (déjà livrés). Toujours pas de heatmap / Maestro / insights IA sur données ami. La consultation du hub n’élargit pas le traitement : mêmes catégories, autre présentation (route Duet, pas Overview).
+- **D1 + D2** : à l’acceptation, l’utilisateur active le partage pour *cette* relation (on). Il peut le couper en retirant l’ami (révocation) ou via blocage. Plus de choix de niveau à l’acceptation.
+- **D2 (note 2026-09-10)** : simplification produit **on/off**. Accept → `shareScope = full` (timeline, tops artistes/genres/titres, head-to-head). Revoke/block → off. Les amitiés `aggregates` existantes sont migrées vers `full`. Toujours pas de heatmap / Maestro / insights IA sur données ami. Pas de bump `DUET_SHARING_CONSENT_VERSION` (mêmes catégories qu’avant sous `full`).
+- **D2 (note 2026-08-25, historique)** : `aggregates` = timeline / tops artistes-genres ; `full` = + tops titres et défis entité — remplacé par on/off ci-dessus.
 - **D4 + D5** : l’API renvoie toujours « invitation traitée » ; pas de distinction visible entre email inconnu et invitation envoyée.
-- **D10** : texte §2.3 aligné avec la section Duet de la politique de confidentialité ; version `DUET_SHARING_CONSENT_VERSION` = `2026-06-09` (pas de bump pour le hub ami : mapping D2 inchangé).
+- **D10** : texte §2.3 aligné avec la section Duet de la politique de confidentialité ; version `DUET_SHARING_CONSENT_VERSION` = `2026-06-09` (pas de bump pour on/off : mêmes catégories qu’avant sous `full`).
 
 ### Checklist validation
 

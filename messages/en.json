@@ -164,6 +164,7 @@
       "pendingOutgoingStatus": "Waiting for response",
       "friendsList": "Friends",
       "shareScopeLabel": "What you share with this friend",
+      "acceptShareHint": "Accepting shares your listening stats with this friend (timeline, tops, and head-to-head). You can remove them anytime.",
       "accept": "Accept",
       "decline": "Decline",
       "revoke": "Remove friend",
@@ -214,22 +215,15 @@
       }
     },
     "inviteAccept": {
-      "sharePrompt": "What would you like to share with this friend?",
-      "scopeAggregates": {
-        "label": "Aggregated stats",
-        "description": "Trends, top artists and genres: an accepted friend can compare them with their own and view them read-only. No track list."
-      },
-      "scopeFull": {
-        "label": "Detailed comparisons",
-        "description": "Everything above, plus your top tracks and head-to-head « who listened more » for an artist or track."
-      }
+      "sharePrompt": "Accepting shares your listening stats with this friend."
     },
     "accept": {
       "title": "Friend invite",
-      "subtitle": "Accept to compare streaming stats and let a friend view your dashboard read-only. No analytics are shown until you confirm.",
+      "subtitle": "Accept to compare streaming stats and let a friend view your music read-only. Nothing is shared until you confirm.",
       "fromLabel": "Invitation from",
       "expiresLabel": "Link expires {date}",
-      "acceptCta": "Accept and connect",
+      "shareHint": "You will share your listening stats (timeline, tops, and head-to-head). Remove the friend anytime to stop sharing.",
+      "acceptCta": "Accept and share",
       "accepting": "Accepting…",
       "acceptError": "Could not accept this invite.",
       "loading": "Checking invite…",
@@ -237,7 +231,7 @@
       "invalidTitle": "Invite unavailable",
       "invalidDescription": "This link may have expired, already been used, or is invalid.",
       "goToFriends": "Go to friends",
-      "privacyNote": "By accepting, you agree to share streaming data as selected. See our",
+      "privacyNote": "By accepting, you agree to share streaming data with this friend. See our",
       "privacyLink": "privacy policy"
     },
     "compare": {
@@ -448,9 +442,10 @@
     },
     "friendMusic": {
       "readOnlyBadge": "Read only",
-      "bannerTitle": "You’re viewing {name}’s music",
+      "bannerTitle": "{name}",
       "bannerLead": "These stats belong to {name}. Look around, then compare on the same period.",
-      "compareCta": "Compare",
+      "compareCta": "Compare with {name}",
+      "compareWithAria": "Start a comparison with {name}",
       "pickerEyebrow": "Duet",
       "pickerTitle": "Whose music do you want to open?",
       "pickerDescription": "Pick an accepted friend to view their listening stats. Read only — not a duel.",
@@ -502,9 +497,9 @@
         }
       },
       "insight": {
-        "topTrackEyebrow": "Top track this period",
+        "topTrackEyebrow": "{name}’s signature sound",
         "topTrackBody": "Most streamed in this window, by {artist}.",
-        "topArtistEyebrow": "Top artist this period",
+        "topArtistEyebrow": "{name}’s top artist",
         "topArtistBody": "The artist they streamed most in this window.",
         "libraryEyebrow": "This period",
         "libraryBody": "Volume and variety for this friend."
@@ -542,13 +537,11 @@
     },
     "settings": {
       "title": "Duet sharing",
-      "description": "Control friend requests and your default sharing level for new friendships.",
+      "description": "Control whether others can send you friend requests. Sharing turns on when you accept a friend, and off when you remove them.",
       "allowRequests": "Allow friend requests",
-      "defaultScope": "Default sharing for new friends",
-      "scopeAggregates": "Aggregated stats",
-      "scopeFull": "Detailed comparisons",
-      "consentHint": "By enabling Duet sharing, you agree that aggregated streaming statistics may be visible to friends you authorize — in comparison and as read-only consultation, at the level you choose. You can revoke access anytime.",
-      "friendMusicHint": "Friends you authorize can open your Your Music (read-only) at the sharing level you choose.",
+      "consentHint": "When you accept a friend, they can compare with your listening stats and view your Your Music read-only. You can revoke access anytime by removing the friend.",
+      "friendMusicHint": "Friends you authorize can open your Your Music (read-only).",
+      "revokeHint": "To stop sharing with someone, open Friends and choose Remove friend.",
       "error": "Could not load Duet settings."
     }
   },

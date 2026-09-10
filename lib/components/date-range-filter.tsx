@@ -185,36 +185,36 @@ export function DateRangeFilter() {
           <span id={radiogroupLabelId} className="sr-only">
             {t("period")}
           </span>
-          <div
-            role="radiogroup"
-            aria-labelledby={radiogroupLabelId}
-            onKeyDown={onRadiogroupKeyDown}
-            className={`${DASHBOARD_SEGMENTED_TRACK} min-w-0 shrink`}
-          >
-            {FIXED_DATE_RANGE_PRESETS.map((key) => {
-              const isActive = currentPreset === key;
-              return (
-                <button
-                  key={key}
-                  ref={(el) => {
-                    buttonRefs.current[key] = el;
-                  }}
-                  type="button"
-                  role="radio"
-                  aria-checked={isActive}
-                  tabIndex={isActive ? 0 : -1}
-                  onClick={() => {
-                    void updateDateRange(key);
-                  }}
-                  title={t(`presetsFull.${key}`)}
-                  aria-label={t(`presetsFull.${key}`)}
-                  className={isActive ? DASHBOARD_SEGMENTED_PILL_ACTIVE : DASHBOARD_SEGMENTED_PILL}
-                >
-                  {t(`presets.${key}`)}
-                </button>
-              );
-            })}
-            <div ref={customWrapRef} className="relative">
+          <div ref={customWrapRef} className="relative min-w-0 shrink">
+            <div
+              role="radiogroup"
+              aria-labelledby={radiogroupLabelId}
+              onKeyDown={onRadiogroupKeyDown}
+              className={`${DASHBOARD_SEGMENTED_TRACK} min-w-0`}
+            >
+              {FIXED_DATE_RANGE_PRESETS.map((key) => {
+                const isActive = currentPreset === key;
+                return (
+                  <button
+                    key={key}
+                    ref={(el) => {
+                      buttonRefs.current[key] = el;
+                    }}
+                    type="button"
+                    role="radio"
+                    aria-checked={isActive}
+                    tabIndex={isActive ? 0 : -1}
+                    onClick={() => {
+                      void updateDateRange(key);
+                    }}
+                    title={t(`presetsFull.${key}`)}
+                    aria-label={t(`presetsFull.${key}`)}
+                    className={isActive ? DASHBOARD_SEGMENTED_PILL_ACTIVE : DASHBOARD_SEGMENTED_PILL}
+                  >
+                    {t(`presets.${key}`)}
+                  </button>
+                );
+              })}
               <button
                 type="button"
                 ref={customButtonRef}
@@ -232,54 +232,54 @@ export function DateRangeFilter() {
               >
                 {t("presets.custom")}
               </button>
-              {customOpen ? (
-                <div
-                  role="dialog"
-                  aria-label={t("customDialogLabel")}
-                  className="absolute left-0 top-[calc(100%+0.5rem)] z-50 min-w-[18rem] rounded-[12px] border border-glass-hairline bg-surface-raised p-4"
-                >
-                  <div className="flex flex-col gap-3">
-                    <label className="flex flex-col gap-1.5 text-[13px] font-medium text-muted">
-                      {t("customStart")}
-                      <input
-                        ref={customStartInputRef}
-                        type="date"
-                        value={customStart}
-                        onChange={(event) => setCustomStart(event.target.value)}
-                        className="min-h-11 rounded-[12px] border border-glass-hairline bg-surface px-2 text-[13px] text-foreground"
-                      />
-                    </label>
-                    <label className="flex flex-col gap-1.5 text-[13px] font-medium text-muted">
-                      {t("customEnd")}
-                      <input
-                        type="date"
-                        value={customEnd}
-                        onChange={(event) => setCustomEnd(event.target.value)}
-                        className="min-h-11 rounded-[12px] border border-glass-hairline bg-surface px-2 text-[13px] text-foreground"
-                      />
-                    </label>
-                    <div className="flex justify-end gap-2 pt-1">
-                      <button
-                        type="button"
-                        onClick={closeCustom}
-                        className="inline-flex min-h-11 items-center rounded-full px-3.5 text-[13px] font-medium text-muted hover:text-foreground"
-                      >
-                        {t("customCancel")}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (applyCustomRange()) closeCustom();
-                        }}
-                        className="inline-flex min-h-11 items-center rounded-full border border-glass-hairline bg-surface-raised px-3.5 text-[13px] font-semibold text-foreground hover:bg-surface"
-                      >
-                        {t("customApply")}
-                      </button>
-                    </div>
+            </div>
+            {customOpen ? (
+              <div
+                role="dialog"
+                aria-label={t("customDialogLabel")}
+                className="absolute left-0 top-[calc(100%+0.5rem)] z-50 min-w-[18rem] rounded-[12px] border border-glass-hairline bg-surface-raised p-4 shadow-[0_12px_40px_rgb(23_19_33_/_0.12)] dark:shadow-[0_12px_40px_rgb(0_0_0_/_0.45)]"
+              >
+                <div className="flex flex-col gap-3">
+                  <label className="flex flex-col gap-1.5 text-[13px] font-medium text-muted">
+                    {t("customStart")}
+                    <input
+                      ref={customStartInputRef}
+                      type="date"
+                      value={customStart}
+                      onChange={(event) => setCustomStart(event.target.value)}
+                      className="min-h-11 rounded-[12px] border border-glass-hairline bg-surface px-2 text-[13px] text-foreground"
+                    />
+                  </label>
+                  <label className="flex flex-col gap-1.5 text-[13px] font-medium text-muted">
+                    {t("customEnd")}
+                    <input
+                      type="date"
+                      value={customEnd}
+                      onChange={(event) => setCustomEnd(event.target.value)}
+                      className="min-h-11 rounded-[12px] border border-glass-hairline bg-surface px-2 text-[13px] text-foreground"
+                    />
+                  </label>
+                  <div className="flex justify-end gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={closeCustom}
+                      className="inline-flex min-h-11 items-center rounded-full px-3.5 text-[13px] font-medium text-muted hover:text-foreground"
+                    >
+                      {t("customCancel")}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (applyCustomRange()) closeCustom();
+                      }}
+                      className="inline-flex min-h-11 items-center rounded-full border border-glass-hairline bg-surface-raised px-3.5 text-[13px] font-semibold text-foreground hover:bg-surface"
+                    >
+                      {t("customApply")}
+                    </button>
                   </div>
                 </div>
-              ) : null}
-            </div>
+              </div>
+            ) : null}
           </div>
           {customRangeLabel ? (
             <span className="max-w-[14rem] shrink-0 truncate text-[13px] tabular-nums text-muted">

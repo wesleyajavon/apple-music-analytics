@@ -9,7 +9,8 @@ import {
 } from "@/lib/services/listening/listening-stats";
 import { getTrackStats } from "@/lib/services/track/track-service";
 
-export const FRIEND_OVERVIEW_TOP_LIMIT = 6;
+/** Align with /dashboard/artists spotlight (`ARTISTS_SPOTLIGHT_LIMIT`). */
+export const FRIEND_OVERVIEW_TOP_LIMIT = 20;
 
 export type GetFriendOverviewArgs = {
   friendUserId: string;

@@ -5,12 +5,15 @@ import { useTranslations } from "next-intl";
 import {
   ReplayRankingGrid,
   ReplayRankingSection,
-  REPLAY_TOPS_LIMIT,
   type ReplayRankingItem,
 } from "@/lib/components/replay-ranking-grid";
+import { ARTISTS_SPOTLIGHT_LIMIT } from "@/lib/components/artists-spotlight";
 import type { FriendMusicLeaderItem } from "@/lib/components/duet/duet-friend-music-mobile";
 import type { ArtistStatsDto } from "@/lib/dto/artist";
 import { overviewArtistLeaderToPreview } from "@/lib/utils/overview-page";
+
+/** Same cap as /dashboard/artists roster spotlight. */
+const FRIEND_MUSIC_TOPS_LIMIT = ARTISTS_SPOTLIGHT_LIMIT;
 
 export function FriendMusicReplayTopsSections({
   locale,
@@ -45,7 +48,7 @@ export function FriendMusicReplayTopsSections({
 
   const artistItems = useMemo(
     (): ReplayRankingItem[] =>
-      topArtists.slice(0, REPLAY_TOPS_LIMIT).map((artist) => ({
+      topArtists.slice(0, FRIEND_MUSIC_TOPS_LIMIT).map((artist) => ({
         id: artist.id,
         title: artist.title,
         metric: `${artist.count.toLocaleString(locale)} ${t("listens")}`,
@@ -60,7 +63,7 @@ export function FriendMusicReplayTopsSections({
     [locale, t, tArtists, topArtists]
   );
 
-  const visibleTracks = topTracks.slice(0, REPLAY_TOPS_LIMIT);
+  const visibleTracks = topTracks.slice(0, FRIEND_MUSIC_TOPS_LIMIT);
 
   const trackItems = useMemo(
     (): ReplayRankingItem[] =>
@@ -85,7 +88,7 @@ export function FriendMusicReplayTopsSections({
 
   const genreItems = useMemo(
     (): ReplayRankingItem[] =>
-      topGenres.slice(0, REPLAY_TOPS_LIMIT).map((genre) => ({
+      topGenres.slice(0, FRIEND_MUSIC_TOPS_LIMIT).map((genre) => ({
         id: genre.id,
         title: genre.title,
         metric: `${genre.count.toLocaleString(locale)} ${t("listens")}`,
@@ -107,7 +110,7 @@ export function FriendMusicReplayTopsSections({
         >
           <ReplayRankingGrid
             items={artistItems}
-            maxItems={REPLAY_TOPS_LIMIT}
+            maxItems={FRIEND_MUSIC_TOPS_LIMIT}
             onSelect={
               onOpenArtistInsights
                 ? (item, index) => {
@@ -144,7 +147,7 @@ export function FriendMusicReplayTopsSections({
           >
             <ReplayRankingGrid
               items={trackItems}
-              maxItems={REPLAY_TOPS_LIMIT}
+              maxItems={FRIEND_MUSIC_TOPS_LIMIT}
               onSelect={
                 onOpenArtistInsights
                   ? (item, index) => {
@@ -194,7 +197,7 @@ export function FriendMusicReplayTopsSections({
           title={t("topGenresTitle")}
           description={t("topGenresDescription", { name: subjectName })}
         >
-          <ReplayRankingGrid items={genreItems} maxItems={REPLAY_TOPS_LIMIT} {...pager} />
+          <ReplayRankingGrid items={genreItems} maxItems={FRIEND_MUSIC_TOPS_LIMIT} {...pager} />
         </ReplayRankingSection>
       ) : null}
     </div>

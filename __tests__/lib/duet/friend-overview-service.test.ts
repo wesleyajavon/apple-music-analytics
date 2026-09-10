@@ -107,7 +107,7 @@ describe("getFriendOverview", () => {
       undefined,
       undefined,
       FRIEND_ID,
-      6,
+      20,
       0
     );
     expect(result.topTracks).toEqual(tracksStub);
@@ -131,7 +131,7 @@ describe("getFriendOverview", () => {
       expect.any(Date),
       expect.any(Date),
       FRIEND_ID,
-      6
+      20
     );
     expect(getGenreDistribution).toHaveBeenCalledWith(
       expect.any(Date),
@@ -147,7 +147,7 @@ describe("getFriendOverview", () => {
       expect.any(Date),
       expect.any(Date),
       FRIEND_ID,
-      6,
+      20,
       0
     );
     expect(getListenDateRange).not.toHaveBeenCalled();
@@ -167,7 +167,7 @@ describe("getFriendOverview", () => {
     expect(listeningUserIds).not.toContain(VIEWER_ID);
   });
 
-  it("maps top genres with percentages and a hub limit of 6", async () => {
+  it("maps top genres with percentages and a hub limit of 20", async () => {
     vi.mocked(getGenreDistribution).mockResolvedValue([
       { genre: "Rock", count: 50 },
       { genre: "Jazz", count: 30 },

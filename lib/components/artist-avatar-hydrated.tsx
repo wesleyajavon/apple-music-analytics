@@ -4,6 +4,7 @@ import { memo } from "react";
 import type { ImgHTMLAttributes } from "react";
 import { useArtistSpotifyImageResolution } from "@/lib/hooks/use-artist-spotify-image-resolution";
 import { getAvatarUrl } from "@/lib/components/artist-avatar-utils";
+import { useDashboardViewerUserId } from "@/lib/context/dashboard-viewer-context";
 
 export type ArtistAvatarHydratedProps = {
   artistId: string;
@@ -24,6 +25,7 @@ export type ArtistAvatarHydratedProps = {
 /**
  * Portrait artiste : `imageUrl` serveur puis, si vide, hydrate via `POST /api/artists/[id]/image`
  * (dédoublonnage par hook / onglet). Fallback initiales ui-avatars.
+ * Sur le dashboard public, propage le `userId` viewer pour autoriser l’hydratation.
  */
 export const ArtistAvatarHydrated = memo(function ArtistAvatarHydrated({
   artistId,
@@ -39,7 +41,8 @@ export const ArtistAvatarHydrated = memo(function ArtistAvatarHydrated({
   decoding = "async",
   referrerPolicy = "no-referrer",
 }: ArtistAvatarHydratedProps) {
-  const hydrated = useArtistSpotifyImageResolution(artistId, imageUrl);
+  const viewerUserId = useDashboardViewerUserId();
+  const hydrated = useArtistSpotifyImageResolution(artistId, imageUrl, viewerUserId);
   const fallbackAvatar = getAvatarUrl(artistName, avatarApiSize, colorIndex);
   const src = hydrated?.trim() || fallbackAvatar;
 

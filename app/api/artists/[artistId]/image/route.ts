@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { resolveAuthorizedDataUserId } from "@/lib/auth/resolve-authorized-data-user-id";
 import {
-  requireAuthenticatedUserId,
+  forbiddenResponse,
   unauthorizedResponse,
 } from "@/lib/auth/require-auth-user-id";
 import { assertRateLimit } from "@/lib/security/rate-limit";
@@ -21,14 +22,20 @@ const RATE = {
   softLimitRatio: 0.9,
 } as const;
 
-/** Hydratation paresseuse : une tentative Spotify par artiste (si pas d’image en base et credentials OK). */
+/**
+ * Hydratation paresseuse : une tentative Spotify par artiste (si pas d’image en base et credentials OK).
+ * Self + profil public via `resolveAuthorizedDataUserId` (même modèle que les routes overview).
+ */
 export async function POST(
   request: NextRequest,
   context: { params: { artistId: string } }
 ) {
   try {
-    const userId = await requireAuthenticatedUserId(request);
-    if (!userId) return unauthorizedResponse();
+    const resolved = await resolveAuthorizedDataUserId(request);
+    if (!resolved.ok) {
+      return resolved.status === 403 ? forbiddenResponse() : unauthorizedResponse();
+    }
+    const { userId } = resolved;
 
     await assertRateLimit(request, { ...RATE, userId });
 

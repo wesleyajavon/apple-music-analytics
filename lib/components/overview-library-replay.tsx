@@ -62,6 +62,14 @@ export function OverviewLibraryReplaySections({
 
   const visibleTracks = topTracks.slice(0, REPLAY_TOPS_LIMIT);
 
+  const artistImageById = useMemo(() => {
+    const map = new Map<string, string | null>();
+    for (const artist of topArtists) {
+      map.set(artist.artistId, artist.imageUrl ?? null);
+    }
+    return map;
+  }, [topArtists]);
+
   const trackItems = useMemo(
     (): ReplayRankingItem[] =>
       visibleTracks.map((track) => ({
@@ -74,9 +82,10 @@ export function OverviewLibraryReplaySections({
           kind: "artist",
           artistId: track.artistId,
           artistName: track.artistName,
+          imageUrl: artistImageById.get(track.artistId) ?? null,
         },
       })),
-    [locale, t, tArtists, visibleTracks]
+    [artistImageById, locale, t, tArtists, visibleTracks]
   );
 
   const artistItems = useMemo(

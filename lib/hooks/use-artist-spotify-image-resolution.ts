@@ -7,15 +7,23 @@ const inflight = new Map<string, Promise<string | null>>();
 /**
  * Hydratation ponctuelle d’Artist.imageUrl (API Spotify côté serveur), avec dédoublonnage
  * lorsque plusieurs cartes montent en même temps pour le même artiste.
+ * `dataUserId` (ex. profil public) est passé en query pour autoriser l’accès read-only.
  */
-async function hydrateArtistImageOnce(artistId: string): Promise<string | null> {
+async function hydrateArtistImageOnce(
+  artistId: string,
+  dataUserId?: string | null
+): Promise<string | null> {
   const hit = inflight.get(artistId);
   if (hit) return hit;
 
   const p = (async () => {
     try {
+      const params = new URLSearchParams();
+      const uid = dataUserId?.trim();
+      if (uid) params.set("userId", uid);
+      const qs = params.toString();
       const res = await fetch(
-        `/api/artists/${encodeURIComponent(artistId)}/image`,
+        `/api/artists/${encodeURIComponent(artistId)}/image${qs ? `?${qs}` : ""}`,
         {
           method: "POST",
           credentials: "same-origin",
@@ -39,7 +47,8 @@ async function hydrateArtistImageOnce(artistId: string): Promise<string | null> 
 /** URL affichable : valeur initiale depuis l’API produit puis, si absente, résultat de POST hydrate. */
 export function useArtistSpotifyImageResolution(
   artistDbId: string | undefined | null,
-  initialImageUrl: string | null | undefined
+  initialImageUrl: string | null | undefined,
+  dataUserId?: string | null
 ): string | null {
   const id = artistDbId?.trim() ?? "";
 
@@ -53,14 +62,14 @@ export function useArtistSpotifyImageResolution(
     if (initialImageUrl?.trim()) return;
     if (!id) return;
     let alive = true;
-    void hydrateArtistImageOnce(id).then((url) => {
+    void hydrateArtistImageOnce(id, dataUserId).then((url) => {
       if (!alive || !url) return;
       setResolvedFromApi(url);
     });
     return () => {
       alive = false;
     };
-  }, [id, initialImageUrl]);
+  }, [id, initialImageUrl, dataUserId]);
 
   return initialImageUrl?.trim() || resolvedFromApi;
 }

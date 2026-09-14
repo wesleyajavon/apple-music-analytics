@@ -4,9 +4,9 @@ import type { ReactNode } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { FileArchive, FileSpreadsheet } from "lucide-react";
-import { Link } from "@/i18n/navigation";
 import { HOME_JOURNEY_SECTION_SCROLL_MT } from "@/lib/constants/home-journey-nav";
-import { HomeBlurFadeReveal } from "@/lib/components/home-animations";
+import { HomeBlurFadeReveal, HomeKineticText } from "@/lib/components/home-animations";
+import { HomeMagneticLink } from "@/lib/components/home-magnetic-link";
 
 const SPOTIFY_LOGO_SRC = "/brand/providers/spotify-icon.svg";
 const APPLE_MUSIC_LOGO_SRC = "/brand/providers/apple-music-icon.svg";
@@ -142,37 +142,47 @@ export function HomeJourneyImportSection({
               <p className="font-mono text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-white/70 sm:text-xs">
                 {t("eyebrow")}
               </p>
-              <h2 className="mt-3 max-w-xl text-[1.65rem] font-semibold leading-[1.15] tracking-[-0.045em] text-white min-[380px]:text-[1.85rem] sm:text-4xl sm:leading-[1.08] sm:tracking-[-0.055em]">
-                {t("title")}
-              </h2>
+              <HomeKineticText
+                as="h2"
+                onScroll
+                scramble={false}
+                stagger={0.03}
+                className="mt-3 max-w-xl text-[1.65rem] font-semibold leading-[1.15] tracking-[-0.045em] text-white min-[380px]:text-[1.85rem] sm:text-4xl sm:leading-[1.08] sm:tracking-[-0.055em]"
+                text={t("title")}
+              />
               <p className="mt-3 max-w-xl text-base leading-7 text-white/68 sm:text-lg sm:leading-8">
                 {t("description")}
               </p>
             </div>
 
             <div className="flex w-full shrink-0 flex-col items-center gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:justify-center lg:justify-end">
-              <Link
+              <HomeMagneticLink
                 href={primaryHref}
-                className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-7 py-3 text-sm font-semibold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:opacity-95 sm:w-auto"
+                strength={0.36}
+                className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-7 py-3 text-sm font-semibold text-white shadow-brand-glow transition-[opacity,box-shadow] hover:opacity-95 sm:w-auto"
               >
                 {primaryLabel}
                 <ArrowRightIcon />
-              </Link>
+              </HomeMagneticLink>
               {publicDemoPath ? (
-                <Link
+                <HomeMagneticLink
                   href={publicDemoPath}
-                  className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_50px_-28px_rgba(0,0,0,0.55)] backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-white/10 sm:w-auto"
+                  strength={0.26}
+                  maxDistance={10}
+                  className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_50px_-28px_rgba(0,0,0,0.55)] backdrop-blur-sm transition-colors hover:bg-white/10 sm:w-auto"
                 >
                   {t("ctaDemo")}
-                </Link>
+                </HomeMagneticLink>
               ) : null}
               {isAuthenticated ? (
-                <Link
+                <HomeMagneticLink
                   href="/dashboard"
-                  className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_50px_-28px_rgba(0,0,0,0.55)] backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-white/10 sm:w-auto"
+                  strength={0.26}
+                  maxDistance={10}
+                  className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_50px_-28px_rgba(0,0,0,0.55)] backdrop-blur-sm transition-colors hover:bg-white/10 sm:w-auto"
                 >
                   {tHome("goToDashboardShort")}
-                </Link>
+                </HomeMagneticLink>
               ) : null}
             </div>
           </div>

@@ -21,9 +21,11 @@ import { usePublicDemo } from "@/lib/providers/public-demo-provider";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import {
   HomeBlurFadeReveal,
-  HomeTextRevealLines,
+  HomeKineticText,
 } from "@/lib/components/home-animations";
 import { HomeHeroAlbumField } from "@/lib/components/home-hero-album-field";
+import { HomeMagneticLink } from "@/lib/components/home-magnetic-link";
+import { HomeSmoothScroll } from "@/lib/components/home-smooth-scroll";
 
 function ArrowRightIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
@@ -138,12 +140,13 @@ export default function Home() {
   }, [firstName, t]);
 
   return (
-    <div className="flex min-h-screen flex-col overflow-x-hidden bg-[#050508] text-white">
-      <main className="relative flex flex-1 flex-col bg-[#050508]">
-        <header
-          className="sticky top-0 z-30 border-b border-white/10 bg-black/40 backdrop-blur-xl"
-          style={{ paddingTop: "max(0px, env(safe-area-inset-top))" }}
-        >
+    <HomeSmoothScroll>
+      <div className="flex min-h-screen flex-col overflow-x-hidden bg-[#050508] text-white">
+        <main className="relative flex flex-1 flex-col bg-[#050508]">
+          <header
+            className="sticky top-0 z-30 border-b border-white/10 bg-black/40 backdrop-blur-xl"
+            style={{ paddingTop: "max(0px, env(safe-area-inset-top))" }}
+          >
           <div className="relative mx-auto flex w-full max-w-7xl items-center justify-between gap-2 px-4 py-3 sm:gap-4 sm:px-6 sm:py-4 lg:px-8">
             <Link
               href="/"
@@ -240,14 +243,13 @@ export default function Home() {
                 </HomeBlurFadeReveal>
               ) : null}
 
-              <HomeTextRevealLines
+              <HomeKineticText
                 as="h1"
+                scramble
+                stagger={0.032}
+                delay={0.08}
                 className="w-full min-w-0 max-w-full text-center text-[1.85rem] font-semibold leading-[1.15] tracking-[-0.045em] text-white min-[380px]:text-[2.05rem] sm:max-w-xl sm:text-balance sm:text-5xl sm:leading-[1.08] sm:tracking-[-0.055em] lg:text-left lg:text-[3.35rem] lg:leading-[1.06]"
-                lines={[
-                  <span key="headline" className="block w-full max-w-full">
-                    {t("heroHeadline")}
-                  </span>,
-                ]}
+                text={t("heroHeadline")}
               />
 
               <HomeBlurFadeReveal delay={0.18} className="mx-auto mt-5 w-full min-w-0 max-w-lg lg:mx-0">
@@ -258,30 +260,34 @@ export default function Home() {
 
               <HomeBlurFadeReveal delay={0.32} className="mt-8 flex w-full min-w-0 flex-col items-center gap-3 sm:flex-row sm:flex-wrap sm:justify-center lg:items-start lg:justify-start">
                 {isAuthenticated ? (
-                  <Link
+                  <HomeMagneticLink
                     href="/dashboard"
-                    className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,var(--brand-pink)_0%,var(--brand-cyan)_100%)] px-7 py-3 text-sm font-semibold text-white shadow-[0_22px_70px_-24px_rgb(224_64_136_/_0.55),0_22px_70px_-24px_rgb(79_144_224_/_0.5)] transition-all hover:-translate-y-0.5 hover:opacity-95 sm:w-auto"
+                    strength={0.38}
+                    className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,var(--brand-pink)_0%,var(--brand-cyan)_100%)] px-7 py-3 text-sm font-semibold text-white shadow-[0_22px_70px_-24px_rgb(224_64_136_/_0.55),0_22px_70px_-24px_rgb(79_144_224_/_0.5)] transition-[opacity,box-shadow] hover:opacity-95 sm:w-auto"
                   >
                     {t("goToDashboard")}
                     <ArrowRightIcon />
-                  </Link>
+                  </HomeMagneticLink>
                 ) : (
-                  <Link
+                  <HomeMagneticLink
                     href="/sign-up"
-                    className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-7 py-3 text-sm font-semibold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:opacity-95 sm:w-auto"
+                    strength={0.38}
+                    className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-7 py-3 text-sm font-semibold text-white shadow-brand-glow transition-[opacity,box-shadow] hover:opacity-95 sm:w-auto"
                   >
                     {t("heroPrimaryCta")}
                     <ArrowRightIcon />
-                  </Link>
+                  </HomeMagneticLink>
                 )}
                 {!isAuthenticated && publicDemoPath ? (
-                  <Link
+                  <HomeMagneticLink
                     href={publicDemoPath}
-                    className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-7 py-3 text-sm font-semibold text-white shadow-[0_18px_50px_-28px_rgba(0,0,0,0.55)] backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-white/10 sm:w-auto"
+                    strength={0.28}
+                    maxDistance={10}
+                    className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-7 py-3 text-sm font-semibold text-white shadow-[0_18px_50px_-28px_rgba(0,0,0,0.55)] backdrop-blur-sm transition-colors hover:bg-white/10 sm:w-auto"
                   >
                     {t("accessDashboard")}
                     <ArrowRightIcon />
-                  </Link>
+                  </HomeMagneticLink>
                 ) : null}
               </HomeBlurFadeReveal>
 
@@ -316,6 +322,7 @@ export default function Home() {
         </div>
       </main>
       <Footer variant="home" />
-    </div>
+      </div>
+    </HomeSmoothScroll>
   );
 }

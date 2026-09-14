@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { HomeAskSoundprintPreview } from "@/lib/components/home-ask-soundprint-preview";
 import { HomeDuetPreview } from "@/lib/components/home-duet-preview";
-import { HomeBlurFadeReveal, HomeClipReveal, HomeTextReveal } from "@/lib/components/home-animations";
+import { HomeBlurFadeReveal, HomeClipReveal, HomeKineticText } from "@/lib/components/home-animations";
 import { HOME_JOURNEY_SECTION_SCROLL_MT } from "@/lib/constants/home-journey-nav";
 
 export function HomeJourneyInteractSection() {
@@ -22,12 +22,13 @@ export function HomeJourneyInteractSection() {
               {t("askLabel")}
             </p>
           </HomeBlurFadeReveal>
-          <HomeTextReveal
+          <HomeKineticText
             as="h2"
             onScroll
+            scramble={false}
+            stagger={0.03}
             className="mx-auto mt-3 block max-w-xl text-[1.85rem] font-semibold leading-[1.15] tracking-[-0.045em] text-white min-[380px]:text-[2.05rem] sm:text-4xl sm:leading-[1.08] sm:tracking-[-0.055em] lg:mx-0 lg:text-[2.55rem]"
             text={t("askTitle")}
-            stagger={0.05}
           />
           <HomeBlurFadeReveal delay={0.1} className="mx-auto mt-4 max-w-xl lg:mx-0">
             <p className="text-base leading-7 text-white/68 sm:text-lg sm:leading-8">{t("askDescription")}</p>
@@ -39,12 +40,13 @@ export function HomeJourneyInteractSection() {
               {t("duetLabel")}
             </p>
           </HomeBlurFadeReveal>
-          <HomeTextReveal
+          <HomeKineticText
             as="h2"
             onScroll
+            scramble={false}
+            stagger={0.03}
             className="mx-auto mt-3 block max-w-xl text-[1.85rem] font-semibold leading-[1.15] tracking-[-0.045em] text-white min-[380px]:text-[2.05rem] sm:text-4xl sm:leading-[1.08] sm:tracking-[-0.055em] lg:mx-0 lg:text-[2.55rem]"
             text={t("duetTitle")}
-            stagger={0.05}
           />
           <HomeBlurFadeReveal delay={0.16} className="mx-auto mt-4 max-w-xl lg:mx-0">
             <p className="text-base leading-7 text-white/68 sm:text-lg sm:leading-8">{t("duetDescription")}</p>

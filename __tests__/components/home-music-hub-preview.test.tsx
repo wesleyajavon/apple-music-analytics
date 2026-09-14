@@ -26,6 +26,7 @@ vi.mock("motion/react", () => ({
     ),
   },
   useReducedMotion: () => true,
+  useInView: () => false,
 }));
 
 describe("HomeMusicHubPreview", () => {

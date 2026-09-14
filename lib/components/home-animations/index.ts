@@ -1,4 +1,5 @@
 export { HomeTextReveal, HomeTextRevealLines } from "./home-text-reveal";
+export { HomeKineticText } from "./home-kinetic-text";
 export { HomeClipReveal, HomeClipRevealStagger } from "./home-clip-reveal";
 export {
   HomePerspectiveReveal,

@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { HomeBlurFadeReveal, HomeTextReveal } from "@/lib/components/home-animations";
+import { HomeBlurFadeReveal, HomeKineticText } from "@/lib/components/home-animations";
 
 const FAQ_KEYS = ["export", "deepdive", "privacy", "pricing"] as const;
 
@@ -24,12 +24,13 @@ export function HomeClosingSection() {
             {t("eyebrow")}
           </p>
         </HomeBlurFadeReveal>
-        <HomeTextReveal
+        <HomeKineticText
           as="h2"
           onScroll
+          scramble={false}
+          stagger={0.028}
           className="mx-auto mt-3 block max-w-2xl text-[1.85rem] font-semibold leading-[1.15] tracking-[-0.045em] text-white min-[380px]:text-[2.05rem] sm:text-4xl sm:leading-[1.08] lg:mx-0"
           text={t("title")}
-          stagger={0.04}
         />
       </div>
 

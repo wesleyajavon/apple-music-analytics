@@ -3336,6 +3336,7 @@
     "musicHub": {
       "label": "Vista previa del hub Your Music",
       "liveBadge": "Vista interactiva",
+      "autoDemoBadge": "Demo auto",
       "navAria": "Páginas del dashboard",
       "tabsAria": "Secciones de Your Music",
       "periodAria": "Periodo de escucha",

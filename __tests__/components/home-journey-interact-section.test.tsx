@@ -21,7 +21,7 @@ vi.mock("next/image", () => ({
 vi.mock("@/lib/components/home-animations", () => ({
   HomeBlurFadeReveal: ({ children }: { children: React.ReactNode }) => children,
   HomeClipReveal: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  HomeTextReveal: ({
+  HomeKineticText: ({
     text,
     as: Tag = "h2",
     className,

@@ -2,14 +2,16 @@
 
 import {
   useCallback,
+  useEffect,
   useId,
   useMemo,
+  useRef,
   useState,
   type KeyboardEvent,
   type ReactNode,
   type SVGProps,
 } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, motion, useInView, useReducedMotion } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
 import {
   CalendarDays,
@@ -49,6 +51,32 @@ const PANEL_TRANSITION = {
   damping: 38,
   mass: 0.85,
 };
+
+const DEMO_RESUME_MS = 10_000;
+
+type HubDemoStep = {
+  page: HomeHubPage;
+  tab?: HomeHubOverviewTab;
+  period: HomeHubPeriod;
+  trendView?: HomeHubTrendView;
+  artistIndex?: number;
+  albumIndex?: number;
+  durationMs: number;
+};
+
+/** Cinematic autoplay tour — pauses on user interaction, resumes after idle. */
+const HUB_DEMO_TOUR: readonly HubDemoStep[] = [
+  { page: "overview", tab: "spotlight", period: "30d", artistIndex: 0, durationMs: 2600 },
+  { page: "overview", tab: "spotlight", period: "30d", artistIndex: 1, durationMs: 2000 },
+  { page: "overview", tab: "tops", period: "30d", albumIndex: 0, durationMs: 2400 },
+  { page: "overview", tab: "trends", period: "30d", trendView: "genres", durationMs: 2600 },
+  { page: "overview", tab: "trends", period: "7d", trendView: "pulse", durationMs: 2400 },
+  { page: "overview", tab: "context", period: "7d", durationMs: 2400 },
+  { page: "artists", period: "ytd", artistIndex: 0, durationMs: 2400 },
+  { page: "genres", period: "ytd", durationMs: 2200 },
+  { page: "timeline", period: "all", durationMs: 2400 },
+  { page: "heatmap", period: "all", durationMs: 2600 },
+];
 
 const sidebarIcons = {
   overview: (props: SVGProps<SVGSVGElement>) => (
@@ -251,6 +279,9 @@ export function HomeMusicHubPreview() {
   const tabsId = useId();
   const periodId = useId();
   const trendsId = useId();
+  const rootRef = useRef<HTMLDivElement>(null);
+  const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const inView = useInView(rootRef, { amount: 0.28, margin: "0px 0px -10% 0px" });
 
   const [page, setPage] = useState<HomeHubPage>("overview");
   const [tab, setTab] = useState<HomeHubOverviewTab>("spotlight");
@@ -261,8 +292,55 @@ export function HomeMusicHubPreview() {
   );
   const [selectedArtist, setSelectedArtist] = useState<string | null>(null);
   const [selectedAlbum, setSelectedAlbum] = useState<string | null>(null);
+  const [demoStep, setDemoStep] = useState(0);
+  const [demoPaused, setDemoPaused] = useState(false);
 
   const snapshot = useMemo(() => getHomeHubSnapshot(period), [period]);
+  const autoDemoActive = !reducedMotion && inView && !demoPaused;
+
+  const pauseDemo = useCallback(() => {
+    if (reducedMotion) return;
+    setDemoPaused(true);
+    if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
+    resumeTimerRef.current = setTimeout(() => {
+      setDemoPaused(false);
+    }, DEMO_RESUME_MS);
+  }, [reducedMotion]);
+
+  useEffect(() => {
+    return () => {
+      if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (reducedMotion || !autoDemoActive) return;
+
+    const step = HUB_DEMO_TOUR[demoStep] ?? HUB_DEMO_TOUR[0]!;
+    const snap = getHomeHubSnapshot(step.period);
+
+    setPeriod(step.period);
+    setPage(step.page);
+    if (step.tab) setTab(step.tab);
+    if (step.trendView) setTrendView(step.trendView);
+    if (step.artistIndex != null) {
+      setSelectedArtist(snap.artists[step.artistIndex]?.name ?? null);
+    }
+    if (step.albumIndex != null) {
+      setSelectedAlbum(snap.albums[step.albumIndex]?.name ?? null);
+    }
+  }, [autoDemoActive, demoStep, reducedMotion]);
+
+  useEffect(() => {
+    if (!autoDemoActive) return;
+
+    const step = HUB_DEMO_TOUR[demoStep] ?? HUB_DEMO_TOUR[0]!;
+    const timer = setTimeout(() => {
+      setDemoStep((current) => (current + 1) % HUB_DEMO_TOUR.length);
+    }, step.durationMs);
+
+    return () => clearTimeout(timer);
+  }, [autoDemoActive, demoStep]);
   const selectedArtistData =
     snapshot.artists.find((artist) => artist.name === selectedArtist) ?? snapshot.artists[0];
   const selectedAlbumData =
@@ -456,9 +534,12 @@ export function HomeMusicHubPreview() {
 
   return (
     <div
+      ref={rootRef}
       className="relative w-full"
       role="region"
       aria-label={t("label")}
+      onPointerDown={pauseDemo}
+      onFocusCapture={pauseDemo}
     >
       <div
         className="pointer-events-none absolute -inset-10 rounded-[2.4rem] bg-[radial-gradient(ellipse_at_center,rgb(152_80_208_/_0.2),transparent_68%)] blur-3xl"
@@ -487,8 +568,8 @@ export function HomeMusicHubPreview() {
             />
           </div>
           <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-white/70">
-            <LiveStatusDot tone="emerald" />
-            {t("liveBadge")}
+            <LiveStatusDot tone={autoDemoActive ? "violet" : "emerald"} />
+            {autoDemoActive ? t("autoDemoBadge") : t("liveBadge")}
           </span>
         </div>
 

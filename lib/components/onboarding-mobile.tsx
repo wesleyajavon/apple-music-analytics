@@ -6,15 +6,19 @@ import { useTranslations } from "next-intl";
 import { CheckCircle2, ChevronRight, Loader2, Sparkles, UploadCloud } from "lucide-react";
 import { MobileBottomSheet } from "@/lib/components/mobile-bottom-sheet";
 import {
+  GenreAiPanelChrome,
+  ONBOARDING_GENRE_AI_ACCEPT_BTN,
   OnboardingGenreLlmConsentCard,
   OnboardingGroqEnableCard,
 } from "@/lib/components/onboarding-finish-invites";
 import { OnboardingMobileStickyActions } from "@/lib/components/onboarding-mobile-sticky-actions";
+import { OverviewMobileHero } from "@/lib/components/overview-hero";
 import {
-  CinematicFilmGrain,
-  CinematicFloatingOrbs,
-  CinematicLightSweep,
-} from "@/lib/components/musical-profile-cinematic";
+  DASHBOARD_LIST_ROW,
+  DASHBOARD_LIST_ROW_INTERACTIVE,
+  DASHBOARD_LIST_SEPARATOR,
+  DASHBOARD_SECTION_EYEBROW,
+} from "@/lib/components/dashboard-ui";
 import type { OnboardingImportMode } from "@/lib/services/listening/onboarding-import-mode";
 
 const SPOTIFY_LOGO_SRC = "/brand/providers/spotify-icon.svg";
@@ -22,11 +26,11 @@ const APPLE_MUSIC_LOGO_SRC = "/brand/providers/apple-music-icon.svg";
 
 const MOBILE_BLEED =
   "-mx-4 -mt-4 flex min-h-[70dvh] flex-col lg:hidden pb-[calc(8.5rem+env(safe-area-inset-bottom))]";
-const HERO_SHELL = "relative overflow-hidden bg-gray-950 px-4 pb-5 pt-4 text-white";
-const GROUP_SHELL =
-  "divide-y divide-card-border overflow-hidden rounded-2xl border border-card-border bg-card-surface";
-const ROW_CLASS =
-  "flex min-h-11 w-full items-center gap-3 px-3.5 py-2.5 text-left text-sm font-medium text-foreground";
+
+const LIST_ROW = `${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_ROW_INTERACTIVE} ${DASHBOARD_LIST_SEPARATOR} min-h-11 w-full text-foreground`;
+
+const GUIDE_FIGURE =
+  "overflow-hidden rounded-2xl border border-glass-hairline bg-muted/10";
 
 export type OnboardingMobilePhase = "welcome" | "pick" | "guide" | "import" | "finish";
 export type OnboardingMobileProvider = "spotify" | "apple";
@@ -143,18 +147,16 @@ function MobileProgress({
   percent,
   stepLabel,
   ariaLabel,
-  onDark,
 }: {
   percent: number;
   stepLabel: string;
   ariaLabel: string;
-  onDark?: boolean;
 }) {
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between gap-3 text-[11px] font-semibold uppercase tracking-[0.16em]">
-        <span className={onDark ? "text-white/70" : "text-muted"}>{stepLabel}</span>
-        <span className={`tabular-nums ${onDark ? "text-white/55" : "text-muted"}`}>{percent}%</span>
+      <div className="flex items-center justify-between gap-3">
+        <span className={DASHBOARD_SECTION_EYEBROW}>{stepLabel}</span>
+        <span className="text-[13px] tabular-nums text-muted">{percent}%</span>
       </div>
       <div
         role="progressbar"
@@ -162,10 +164,10 @@ function MobileProgress({
         aria-valuemin={0}
         aria-valuemax={100}
         aria-label={ariaLabel}
-        className={`h-1.5 overflow-hidden rounded-full ${onDark ? "bg-white/15" : "bg-border"}`}
+        className="h-1.5 overflow-hidden rounded-full bg-border dark:bg-foreground/[0.08]"
       >
         <div
-          className="h-full rounded-full bg-brand-gradient shadow-glow transition-[width] duration-500 ease-out"
+          className="h-full rounded-full bg-brand-gradient transition-[width] duration-500 ease-out"
           style={{ width: `${percent}%` }}
         />
       </div>
@@ -202,27 +204,15 @@ export function OnboardingMobile(props: OnboardingMobileProps) {
     <div className={MOBILE_BLEED}>
       {props.phase === "welcome" ? (
         <>
-          <section className={HERO_SHELL}>
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_12%_0%,rgba(240,64,104,0.32),transparent_36%),radial-gradient(circle_at_88%_18%,rgba(6,182,212,0.22),transparent_34%),linear-gradient(165deg,rgba(3,7,18,0.98),rgba(30,27,75,0.92)_55%,rgba(8,47,73,0.78))]" />
-            <CinematicFloatingOrbs />
-            <CinematicFilmGrain />
-            <CinematicLightSweep />
-            <div className="relative space-y-4">
-              <MobileProgress
-                percent={props.flowProgressPercent}
-                stepLabel={props.flowStepLabel}
-                ariaLabel={props.flowProgressAria}
-                onDark
-              />
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-cyan">
-                {t("welcomeEyebrow")}
-              </p>
-              <h1 className="text-[1.55rem] font-semibold leading-[1.12] tracking-[-0.05em]">
-                {t("welcomeTitle")}
-              </h1>
-              <p className="text-sm leading-5 text-white/70">{t("welcomeBody")}</p>
-            </div>
-          </section>
+          <div className="space-y-6 px-4 pt-4">
+            <MobileProgress
+              percent={props.flowProgressPercent}
+              stepLabel={props.flowStepLabel}
+              ariaLabel={props.flowProgressAria}
+            />
+            <p className={DASHBOARD_SECTION_EYEBROW}>{t("welcomeEyebrow")}</p>
+            <OverviewMobileHero title={t("welcomeTitle")} description={t("welcomeBody")} />
+          </div>
           <OnboardingMobileStickyActions
             mode="welcome"
             hideBack
@@ -238,54 +228,66 @@ export function OnboardingMobile(props: OnboardingMobileProps) {
 
       {props.phase === "pick" ? (
         <>
-          <section className={HERO_SHELL}>
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_12%_0%,rgba(240,64,104,0.28),transparent_36%),linear-gradient(165deg,rgba(3,7,18,0.98),rgba(30,27,75,0.9)_60%,rgba(8,47,73,0.8))]" />
-            <CinematicFilmGrain />
-            <div className="relative space-y-3">
-              <MobileProgress
-                percent={props.flowProgressPercent}
-                stepLabel={props.flowStepLabel}
-                ariaLabel={props.flowProgressAria}
-                onDark
-              />
-              <h1 className="text-[1.45rem] font-semibold leading-[1.12] tracking-[-0.04em]">
-                {t("pickTitle")}
-              </h1>
-              <p className="text-sm leading-5 text-white/70">{t("pickSubtitle")}</p>
-            </div>
-          </section>
-          <div className="space-y-3 px-4 pt-4">
-            <div className={GROUP_SHELL}>
-              <button type="button" className={ROW_CLASS} onClick={() => props.onSelectProvider("spotify")}>
-                <Image src={SPOTIFY_LOGO_SRC} alt="" width={28} height={28} className="h-7 w-7 object-contain" unoptimized />
-                <span className="min-w-0 flex-1">
-                  <span className="block">{t("pickSpotify")}</span>
-                  <span className="block text-xs font-normal text-muted">{t("pickSpotifyHint")}</span>
-                </span>
-                <span className="rounded-full bg-muted/40 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted">
-                  {t("pickBadgeSpotify")}
-                </span>
-                <ChevronIcon />
-              </button>
-              <button type="button" className={ROW_CLASS} onClick={() => props.onSelectProvider("apple")}>
-                <Image
-                  src={APPLE_MUSIC_LOGO_SRC}
-                  alt=""
-                  width={28}
-                  height={28}
-                  className="h-7 w-7 object-contain"
-                  unoptimized
-                />
-                <span className="min-w-0 flex-1">
-                  <span className="block">{t("pickApple")}</span>
-                  <span className="block text-xs font-normal text-muted">{t("pickAppleHint")}</span>
-                </span>
-                <span className="rounded-full bg-muted/40 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted">
-                  {t("pickBadgeApple")}
-                </span>
-                <ChevronIcon />
-              </button>
-            </div>
+          <div className="space-y-6 px-4 pt-4">
+            <MobileProgress
+              percent={props.flowProgressPercent}
+              stepLabel={props.flowStepLabel}
+              ariaLabel={props.flowProgressAria}
+            />
+            <OverviewMobileHero title={t("pickTitle")} description={t("pickSubtitle")} />
+            <p className={DASHBOARD_SECTION_EYEBROW}>{t("flowRail.choose")}</p>
+            <ul className="space-y-0">
+              <li>
+                <button
+                  type="button"
+                  className={LIST_ROW}
+                  onClick={() => props.onSelectProvider("spotify")}
+                >
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-surface">
+                    <Image
+                      src={SPOTIFY_LOGO_SRC}
+                      alt=""
+                      width={40}
+                      height={40}
+                      className="h-8 w-8 object-contain"
+                      unoptimized
+                    />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-base font-semibold text-foreground">
+                      {t("pickSpotify")}
+                    </span>
+                    <span className="mt-0.5 block text-[13px] text-muted">{t("pickSpotifyHint")}</span>
+                  </span>
+                  <ChevronIcon />
+                </button>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  className={LIST_ROW}
+                  onClick={() => props.onSelectProvider("apple")}
+                >
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-surface">
+                    <Image
+                      src={APPLE_MUSIC_LOGO_SRC}
+                      alt=""
+                      width={40}
+                      height={40}
+                      className="h-8 w-8 object-contain"
+                      unoptimized
+                    />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-base font-semibold text-foreground">
+                      {t("pickApple")}
+                    </span>
+                    <span className="mt-0.5 block text-[13px] text-muted">{t("pickAppleHint")}</span>
+                  </span>
+                  <ChevronIcon />
+                </button>
+              </li>
+            </ul>
           </div>
           <OnboardingMobileStickyActions
             mode="pick"
@@ -301,44 +303,56 @@ export function OnboardingMobile(props: OnboardingMobileProps) {
 
       {props.phase === "guide" && props.provider ? (
         <>
-          <section className="relative overflow-hidden bg-gray-950 text-white">
-            <figure className="relative overflow-hidden">
-              <Image
-                src={props.guideImageSrc}
-                alt={props.guideImageAlt}
-                width={1280}
-                height={720}
-                className="h-[40dvh] w-full object-contain object-top"
-                sizes="100vw"
-                priority={props.guideIndex === 0}
-              />
-            </figure>
-          </section>
           <div className="space-y-4 px-4 pt-4">
             <MobileProgress
               percent={props.flowProgressPercent}
               stepLabel={props.flowStepLabel}
               ariaLabel={props.flowProgressAria}
             />
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
-              {t("guideStepCounterLabel", { current: props.guideIndex + 1, total: props.guideTotal })}
-            </p>
-            <h1 className="text-xl font-semibold tracking-tight text-foreground">{props.guideTitle}</h1>
-            <p className="line-clamp-3 text-sm leading-5 text-muted">{props.guideBody}</p>
-            <div className={GROUP_SHELL}>
+            <div className="flex items-center justify-between gap-3">
+              <p className={DASHBOARD_SECTION_EYEBROW}>{t("guidePhaseLabel")}</p>
+              <span className="text-[13px] tabular-nums text-muted" aria-live="polite">
+                {t("guideStepCounterLabel", {
+                  current: props.guideIndex + 1,
+                  total: props.guideTotal,
+                })}
+              </span>
+            </div>
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+              {props.guideTitle}
+            </h1>
+            <p className="text-sm leading-relaxed text-muted">{props.guideBody}</p>
+            <figure className={GUIDE_FIGURE}>
+              <Image
+                src={props.guideImageSrc}
+                alt={props.guideImageAlt}
+                width={1280}
+                height={720}
+                className="h-auto w-full object-contain"
+                sizes="100vw"
+                priority={props.guideIndex === 0}
+              />
+            </figure>
+            <div className="space-y-0">
               <a
                 href={props.privacyHref}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={ROW_CLASS}
+                className={LIST_ROW}
                 aria-label={`${props.privacyLabel} (${t("externalLinkAria")})`}
               >
-                <span className="flex-1">{props.privacyLabel}</span>
+                <span className="min-w-0 flex-1 text-sm font-medium">{props.privacyLabel}</span>
                 <ChevronIcon />
               </a>
               {props.guideImageSrc2 && props.guideImageAlt2 ? (
-                <button type="button" className={ROW_CLASS} onClick={() => setSecondShotSheetOpen(true)}>
-                  <span className="flex-1">{t("mobile.extraScreenshotRow")}</span>
+                <button
+                  type="button"
+                  className={LIST_ROW}
+                  onClick={() => setSecondShotSheetOpen(true)}
+                >
+                  <span className="min-w-0 flex-1 text-sm font-medium">
+                    {t("mobile.extraScreenshotRow")}
+                  </span>
                   <ChevronIcon />
                 </button>
               ) : null}
@@ -360,15 +374,17 @@ export function OnboardingMobile(props: OnboardingMobileProps) {
                 <h2 id={secondShotTitleId} className="text-base font-semibold text-foreground">
                   {t("mobile.extraScreenshotTitle")}
                 </h2>
-                <Image
-                  src={props.guideImageSrc2}
-                  alt={props.guideImageAlt2}
-                  width={1280}
-                  height={720}
-                  className="h-auto w-full rounded-xl object-contain"
-                  sizes="100vw"
-                  unoptimized
-                />
+                <figure className={GUIDE_FIGURE}>
+                  <Image
+                    src={props.guideImageSrc2}
+                    alt={props.guideImageAlt2}
+                    width={1280}
+                    height={720}
+                    className="h-auto w-full object-contain"
+                    sizes="100vw"
+                    unoptimized
+                  />
+                </figure>
               </div>
             </MobileBottomSheet>
           ) : null}
@@ -384,10 +400,15 @@ export function OnboardingMobile(props: OnboardingMobileProps) {
               aria-live="polite"
               aria-busy="true"
             >
-              <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-primary/20">
-                <div className="absolute inset-2 animate-spin rounded-full border-4 border-border border-t-primary" aria-hidden />
-                <span className="text-sm font-bold tabular-nums text-primary">
-                  {props.importProgress?.isDeterminate ? `${Math.round(props.importProgress.percent)}%` : "…"}
+              <div className="relative mb-1 flex h-16 w-16 items-center justify-center">
+                <div
+                  className="absolute inset-0 animate-spin rounded-full border-2 border-border border-t-primary motion-reduce:animate-none"
+                  aria-hidden
+                />
+                <span className="text-sm font-semibold tabular-nums text-primary">
+                  {props.importProgress?.isDeterminate
+                    ? `${Math.round(props.importProgress.percent)}%`
+                    : "…"}
                 </span>
               </div>
               <h1 className="text-lg font-semibold text-foreground">
@@ -403,106 +424,107 @@ export function OnboardingMobile(props: OnboardingMobileProps) {
                     : t("import.importingOverlayHint")}
               </p>
               {props.importFile && props.importOverlayKind === "file" ? (
-                <p className="max-w-full truncate text-xs font-medium text-primary">{props.importFile.name}</p>
+                <p className="max-w-full truncate text-[13px] font-medium text-primary">
+                  {props.importFile.name}
+                </p>
               ) : null}
             </section>
           ) : (
-            <>
-              <section className={HERO_SHELL}>
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_88%_0%,rgba(6,182,212,0.2),transparent_40%),linear-gradient(165deg,rgba(3,7,18,0.98),rgba(15,23,42,0.92))]" />
-                <div className="relative space-y-3">
-                  <MobileProgress
-                    percent={props.flowProgressPercent}
-                    stepLabel={props.flowStepLabel}
-                    ariaLabel={props.flowProgressAria}
-                    onDark
-                  />
-                  <h1 className="text-[1.35rem] font-semibold leading-[1.15] tracking-[-0.04em]">
-                    {props.provider === "spotify" ? t("import.spotifyTitle") : t("import.appleTitle")}
-                  </h1>
-                  <p className="text-sm leading-5 text-white/70">
-                    {props.providerHasExistingData
-                      ? t("import.outcomeExistingKept", { count: props.listenCount.toLocaleString() })
-                      : t("import.outcomeFirstImportTitle", { provider: props.providerLabel })}
-                  </p>
-                </div>
-              </section>
-              <div className="space-y-3 px-4 pt-4">
-                {props.importInlineError ? (
-                  <p
-                    className="rounded-xl border border-accent-rose/40 bg-accent-rose/10 px-3.5 py-3 text-sm leading-5 text-foreground"
-                    role="alert"
-                  >
-                    {props.importInlineError}
-                  </p>
-                ) : null}
-                <input
-                  ref={props.fileInputRef as RefObject<HTMLInputElement>}
-                  type="file"
-                  className="sr-only"
-                  accept={props.provider === "spotify" ? ".zip,application/zip" : ".csv,text/csv"}
-                  onChange={(e) => props.onImportFile(e.target.files?.[0] ?? null)}
-                />
-                <button
-                  type="button"
-                  className="flex min-h-24 w-full flex-col items-center justify-center gap-1.5 rounded-2xl border border-dashed border-card-border bg-muted/5 px-4 py-5 text-center"
-                  onClick={() => props.fileInputRef.current?.click()}
-                >
-                  <UploadCloud className="h-6 w-6 text-muted" strokeWidth={1.75} aria-hidden />
-                  <span className="text-sm font-medium text-foreground">{t("mobile.chooseFile")}</span>
-                  <span className="text-xs text-muted">
-                    {props.provider === "spotify" ? t("import.dropSubSpotify") : t("import.dropSubApple")}
+            <div className="space-y-4 px-4 pt-4">
+              <MobileProgress
+                percent={props.flowProgressPercent}
+                stepLabel={props.flowStepLabel}
+                ariaLabel={props.flowProgressAria}
+              />
+              <OverviewMobileHero
+                title={
+                  props.provider === "spotify" ? t("import.spotifyTitle") : t("import.appleTitle")
+                }
+                description={
+                  props.providerHasExistingData
+                    ? t("import.outcomeExistingKept", {
+                        count: props.listenCount.toLocaleString(),
+                      })
+                    : t("import.outcomeFirstImportTitle", { provider: props.providerLabel })
+                }
+              />
+              {props.importInlineError ? (
+                <p className="text-sm leading-relaxed text-accent-rose" role="alert">
+                  {props.importInlineError}
+                </p>
+              ) : null}
+              <input
+                ref={props.fileInputRef as RefObject<HTMLInputElement>}
+                type="file"
+                className="sr-only"
+                accept={props.provider === "spotify" ? ".zip,application/zip" : ".csv,text/csv"}
+                onChange={(e) => props.onImportFile(e.target.files?.[0] ?? null)}
+              />
+              <button
+                type="button"
+                className="flex min-h-24 w-full flex-col items-center justify-center gap-1.5 border border-dashed border-glass-hairline px-4 py-5 text-center"
+                onClick={() => props.fileInputRef.current?.click()}
+              >
+                <UploadCloud className="h-6 w-6 text-muted" strokeWidth={1.75} aria-hidden />
+                <span className="text-sm font-medium text-foreground">{t("mobile.chooseFile")}</span>
+                <span className="text-[13px] text-muted">
+                  {props.provider === "spotify" ? t("import.dropSubSpotify") : t("import.dropSubApple")}
+                </span>
+                {props.importFile ? (
+                  <span className="mt-1 text-[13px] font-medium text-primary">
+                    {t("import.selectedFile", { name: props.importFile.name })}
                   </span>
-                  {props.importFile ? (
-                    <span className="mt-1 text-xs font-medium text-primary">
-                      {t("import.selectedFile", { name: props.importFile.name })}
-                    </span>
-                  ) : null}
-                </button>
-                <div className={GROUP_SHELL}>
-                  {props.providerHasExistingData ? (
-                    <button type="button" className={ROW_CLASS} onClick={() => setModeSheetOpen(true)}>
-                      <span className="min-w-0 flex-1">
-                        <span className="block">{t("mobile.modeRow")}</span>
-                        <span className="block text-xs font-normal text-muted">
-                          {props.importMode === "incremental"
-                            ? t("mobile.modeHintIncremental")
-                            : t("mobile.modeHintFull")}
-                        </span>
+                ) : null}
+              </button>
+              <div className="space-y-0">
+                {props.providerHasExistingData ? (
+                  <button type="button" className={LIST_ROW} onClick={() => setModeSheetOpen(true)}>
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-sm font-medium text-foreground">
+                        {t("mobile.modeRow")}
                       </span>
-                      <ChevronIcon />
-                    </button>
-                  ) : null}
-                  {props.provider === "spotify" && props.hasSpotifyWebConnection ? (
-                    <button
-                      type="button"
-                      className={ROW_CLASS}
-                      onClick={props.onVerifySpotifyWeb}
-                      disabled={props.isImporting}
-                    >
-                      <span className="min-w-0 flex-1">{t("mobile.spotifyWebRow")}</span>
-                      <ChevronIcon />
-                    </button>
-                  ) : null}
-                  <button type="button" className={ROW_CLASS} onClick={() => setHelpSheetOpen(true)}>
-                    <span className="flex-1">{t("mobile.fileHelpRow")}</span>
+                      <span className="mt-0.5 block text-[13px] text-muted">
+                        {props.importMode === "incremental"
+                          ? t("mobile.modeHintIncremental")
+                          : t("mobile.modeHintFull")}
+                      </span>
+                    </span>
                     <ChevronIcon />
                   </button>
-                  {props.provider === "apple" ? (
-                    <a
-                      href={props.appleArchiveUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={ROW_CLASS}
-                      aria-label={`${t("import.openAppleDownloads")} (${t("externalLinkAria")})`}
-                    >
-                      <span className="flex-1">{t("import.openAppleDownloads")}</span>
-                      <ChevronIcon />
-                    </a>
-                  ) : null}
-                </div>
+                ) : null}
+                {props.provider === "spotify" && props.hasSpotifyWebConnection ? (
+                  <button
+                    type="button"
+                    className={LIST_ROW}
+                    onClick={props.onVerifySpotifyWeb}
+                    disabled={props.isImporting}
+                  >
+                    <span className="min-w-0 flex-1 text-sm font-medium">
+                      {t("mobile.spotifyWebRow")}
+                    </span>
+                    <ChevronIcon />
+                  </button>
+                ) : null}
+                <button type="button" className={LIST_ROW} onClick={() => setHelpSheetOpen(true)}>
+                  <span className="min-w-0 flex-1 text-sm font-medium">{t("mobile.fileHelpRow")}</span>
+                  <ChevronIcon />
+                </button>
+                {props.provider === "apple" ? (
+                  <a
+                    href={props.appleArchiveUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={LIST_ROW}
+                    aria-label={`${t("import.openAppleDownloads")} (${t("externalLinkAria")})`}
+                  >
+                    <span className="min-w-0 flex-1 text-sm font-medium">
+                      {t("import.openAppleDownloads")}
+                    </span>
+                    <ChevronIcon />
+                  </a>
+                ) : null}
               </div>
-            </>
+            </div>
           )}
           <OnboardingMobileStickyActions
             mode="import"
@@ -520,8 +542,8 @@ export function OnboardingMobile(props: OnboardingMobileProps) {
               <legend id={modeTitleId} className="text-base font-semibold text-foreground">
                 {t("import.modeTitle")}
               </legend>
-              <p className="text-xs leading-relaxed text-muted">{t("import.modeIntro")}</p>
-              <label className="flex min-h-11 cursor-pointer gap-3 rounded-xl border border-card-border bg-surface p-3 has-[:checked]:border-primary/40">
+              <p className="text-[13px] leading-relaxed text-muted">{t("import.modeIntro")}</p>
+              <label className={`${LIST_ROW} cursor-pointer items-start`}>
                 <input
                   type="radio"
                   name="onboarding-mobile-import-mode"
@@ -532,9 +554,9 @@ export function OnboardingMobile(props: OnboardingMobileProps) {
                     setModeSheetOpen(false);
                   }}
                 />
-                <span className="space-y-1 text-sm">
-                  <span className="block font-medium">{t("import.modeIncremental")}</span>
-                  <span className="block text-xs text-muted">
+                <span className="min-w-0 flex-1 space-y-1 text-sm">
+                  <span className="block font-medium text-foreground">{t("import.modeIncremental")}</span>
+                  <span className="block text-[13px] text-muted">
                     {props.importCursorDateLabel
                       ? t("import.modeIncrementalHint", {
                           date: props.importCursorDateLabel,
@@ -544,7 +566,7 @@ export function OnboardingMobile(props: OnboardingMobileProps) {
                   </span>
                 </span>
               </label>
-              <label className="flex min-h-11 cursor-pointer gap-3 rounded-xl border border-card-border bg-surface p-3 has-[:checked]:border-primary/40">
+              <label className={`${LIST_ROW} cursor-pointer items-start`}>
                 <input
                   type="radio"
                   name="onboarding-mobile-import-mode"
@@ -555,9 +577,9 @@ export function OnboardingMobile(props: OnboardingMobileProps) {
                     setModeSheetOpen(false);
                   }}
                 />
-                <span className="space-y-1 text-sm">
-                  <span className="block font-medium">{t("import.modeFull")}</span>
-                  <span className="block text-xs text-muted">{t("import.modeFullHint")}</span>
+                <span className="min-w-0 flex-1 space-y-1 text-sm">
+                  <span className="block font-medium text-foreground">{t("import.modeFull")}</span>
+                  <span className="block text-[13px] text-muted">{t("import.modeFullHint")}</span>
                 </span>
               </label>
             </fieldset>
@@ -569,22 +591,26 @@ export function OnboardingMobile(props: OnboardingMobileProps) {
               </h2>
               {props.provider === "spotify" ? (
                 <>
-                  <Image
-                    src="/onboarding/spotify-email-download.png"
-                    alt={t("imageAltSpotifyEmail")}
-                    width={1280}
-                    height={720}
-                    className="h-auto w-full rounded-xl object-contain"
-                    sizes="100vw"
-                  />
-                  <Image
-                    src="/onboarding/spotify-download-zip-file.png"
-                    alt={t("imageAltSpotifyDownloadZip")}
-                    width={1280}
-                    height={720}
-                    className="h-auto w-full rounded-xl object-contain"
-                    sizes="100vw"
-                  />
+                  <figure className={GUIDE_FIGURE}>
+                    <Image
+                      src="/onboarding/spotify-email-download.png"
+                      alt={t("imageAltSpotifyEmail")}
+                      width={1280}
+                      height={720}
+                      className="h-auto w-full object-contain"
+                      sizes="100vw"
+                    />
+                  </figure>
+                  <figure className={GUIDE_FIGURE}>
+                    <Image
+                      src="/onboarding/spotify-download-zip-file.png"
+                      alt={t("imageAltSpotifyDownloadZip")}
+                      width={1280}
+                      height={720}
+                      className="h-auto w-full object-contain"
+                      sizes="100vw"
+                    />
+                  </figure>
                 </>
               ) : (
                 <p className="text-sm leading-relaxed text-muted">{t("import.appleBody")}</p>
@@ -596,60 +622,47 @@ export function OnboardingMobile(props: OnboardingMobileProps) {
 
       {props.phase === "finish" ? (
         <>
-          {props.importSummary ? (
-            <section className={HERO_SHELL}>
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(16,185,129,0.28),transparent_40%),linear-gradient(165deg,rgba(3,7,18,0.98),rgba(6,78,59,0.55))]" />
-              <CinematicFilmGrain />
-              <div className="relative space-y-4">
-                <MobileProgress
-                  percent={props.flowProgressPercent}
-                  stepLabel={props.flowStepLabel}
-                  ariaLabel={props.flowProgressAria}
-                  onDark
-                />
-                <CheckCircle2 className="h-8 w-8 text-accent-emerald" strokeWidth={1.8} aria-hidden />
-                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-emerald">
+          <div className="space-y-6 px-4 pt-4">
+            <MobileProgress
+              percent={props.flowProgressPercent}
+              stepLabel={props.flowStepLabel}
+              ariaLabel={props.flowProgressAria}
+            />
+            {props.importSummary ? (
+              <div className="space-y-4">
+                <div
+                  className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent-emerald/15"
+                  aria-hidden
+                >
+                  <CheckCircle2 className="h-7 w-7 text-accent-emerald" strokeWidth={1.8} />
+                </div>
+                <p className={`${DASHBOARD_SECTION_EYEBROW} text-accent-emerald`}>
                   {t("finishSuccessEyebrow")}
                 </p>
-                <h1 className="text-[1.45rem] font-semibold leading-[1.12] tracking-[-0.04em]">
-                  {t("finishSuccessTitle")}
-                </h1>
-                <p className="text-2xl font-semibold tabular-nums text-white">
-                  {props.importSummary.imported.toLocaleString()}
-                </p>
-                <p className="text-sm leading-5 text-white/70">
-                  {props.importSummary.mode === "incremental"
-                    ? t("finishSuccessBodyAppend", {
-                        imported: props.importSummary.imported.toLocaleString(),
-                        skipped: props.importSummary.skippedDuplicates.toLocaleString(),
-                      })
-                    : t("finishSuccessBody", {
-                        imported: props.importSummary.imported.toLocaleString(),
-                        skipped: props.importSummary.skippedDuplicates.toLocaleString(),
-                      })}
-                </p>
-              </div>
-            </section>
-          ) : (
-            <section className={HERO_SHELL}>
-              <div className="absolute inset-0 bg-[linear-gradient(165deg,rgba(3,7,18,0.98),rgba(30,27,75,0.88))]" />
-              <div className="relative space-y-3">
-                <MobileProgress
-                  percent={props.flowProgressPercent}
-                  stepLabel={props.flowStepLabel}
-                  ariaLabel={props.flowProgressAria}
-                  onDark
+                <OverviewMobileHero
+                  title={t("finishSuccessTitle")}
+                  description={
+                    props.importSummary.mode === "incremental"
+                      ? t("finishSuccessBodyAppend", {
+                          imported: props.importSummary.imported.toLocaleString(),
+                          skipped: props.importSummary.skippedDuplicates.toLocaleString(),
+                        })
+                      : t("finishSuccessBody", {
+                          imported: props.importSummary.imported.toLocaleString(),
+                          skipped: props.importSummary.skippedDuplicates.toLocaleString(),
+                        })
+                  }
                 />
-                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-cyan">
-                  {t("finishSkippedEyebrow")}
-                </p>
-                <h1 className="text-[1.45rem] font-semibold leading-[1.12]">{t("finishTitle")}</h1>
-                <p className="text-sm leading-5 text-white/70">{t("finishBody")}</p>
               </div>
-            </section>
-          )}
-          {finishHasExtras ? (
-              <div className="space-y-3 px-4 pt-4">
+            ) : (
+              <div className="space-y-3">
+                <p className={DASHBOARD_SECTION_EYEBROW}>{t("finishSkippedEyebrow")}</p>
+                <OverviewMobileHero title={t("finishTitle")} description={t("finishBody")} />
+              </div>
+            )}
+
+            {finishHasExtras ? (
+              <div className="space-y-6">
                 {showGenreConsent && props.genreLlmAfterImport ? (
                   <OnboardingGenreLlmConsentCard
                     unknownTrackCount={props.genreLlmAfterImport.unknownTrackCount}
@@ -662,60 +675,94 @@ export function OnboardingMobile(props: OnboardingMobileProps) {
                   />
                 ) : null}
                 {props.effectiveBackfill ? (
-                  <div className="space-y-3 rounded-2xl border border-card-border bg-card-surface px-3.5 py-4">
-                    <p className="text-sm font-semibold text-foreground">{t("genreBackfill.title")}</p>
-                    <p className="text-xs text-muted">
-                      {props.hasBackfillInProgress
-                        ? props.effectiveBackfill.status === "paused"
-                          ? t("genreBackfill.paused")
-                          : t("genreBackfill.running")
-                        : props.effectiveBackfill.status === "completed"
-                          ? t("genreBackfill.completed")
-                          : props.effectiveBackfill.status === "cancelled"
-                            ? t("genreBackfill.cancelled")
-                            : t("genreBackfill.failed")}
-                    </p>
-                    <div className="h-2 overflow-hidden rounded-full bg-muted/25">
-                      <div
-                        className="h-full rounded-full bg-brand-gradient"
-                        style={{ width: `${Math.round(props.backfillProgressRatio * 100)}%` }}
-                      />
-                    </div>
-                    <div className="flex gap-2 overflow-x-auto pb-1 snap-x snap-mandatory">
-                      {[
-                        t("genreBackfill.artistsProcessed", { count: props.effectiveBackfill.artistsProcessed }),
-                        t("genreBackfill.artistsMapped", { count: props.effectiveBackfill.artistsMapped }),
-                        t("genreBackfill.tracksUpdated", { count: props.effectiveBackfill.tracksUpdated }),
-                      ].map((label) => (
-                        <p
-                          key={label}
-                          className="snap-start shrink-0 rounded-xl border border-card-border px-3 py-2 text-xs font-medium text-foreground"
-                        >
-                          {label}
-                        </p>
-                      ))}
-                    </div>
-                    {props.effectiveBackfill.errorMessage ? (
-                      <p className="rounded-xl border border-accent-rose/40 bg-accent-rose/10 px-3 py-2 text-xs" role="alert">
-                        {t("genreBackfill.error", { message: props.effectiveBackfill.errorMessage })}
-                      </p>
-                    ) : null}
-                    {props.shouldOfferNextLlmSession || props.shouldOfferRetryLlmSession ? (
-                      <button
-                        type="button"
-                        className={`${ROW_CLASS} rounded-xl border border-card-border`}
-                        disabled={props.isStartingLlmBackfill || props.hasActiveGroqJobShared}
-                        onClick={props.onStartGenreLlm}
-                      >
-                        {props.isStartingLlmBackfill ? (
-                          <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-                        ) : (
-                          <Sparkles className="h-4 w-4" aria-hidden />
-                        )}
-                        <span className="flex-1">{t("genreLlmConsent.startNextSession")}</span>
-                      </button>
-                    ) : null}
-                  </div>
+                  <section aria-label={t("genreBackfill.title")}>
+                    <GenreAiPanelChrome>
+                      <div className="space-y-5">
+                        <div className="flex gap-3">
+                          <div
+                            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/14"
+                            aria-hidden
+                          >
+                            {props.hasBackfillInProgress ? (
+                              <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                            ) : (
+                              <Sparkles className="h-5 w-5 text-accent-cyan" />
+                            )}
+                          </div>
+                          <div className="min-w-0 flex-1 space-y-2">
+                            <p className="text-base font-semibold leading-snug text-foreground">
+                              {t("genreBackfill.title")}
+                            </p>
+                            <p className="text-[13px] leading-relaxed text-muted">
+                              {props.hasBackfillInProgress
+                                ? props.effectiveBackfill.status === "paused"
+                                  ? t("genreBackfill.paused")
+                                  : t("genreBackfill.running")
+                                : props.effectiveBackfill.status === "completed"
+                                  ? t("genreBackfill.completed")
+                                  : props.effectiveBackfill.status === "cancelled"
+                                    ? t("genreBackfill.cancelled")
+                                    : t("genreBackfill.failed")}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="h-1.5 w-full overflow-hidden rounded-full bg-border dark:bg-foreground/[0.08]">
+                          <div
+                            className="h-full rounded-full bg-brand-gradient transition-[width] duration-500 ease-out"
+                            style={{
+                              width: `${Math.round(props.backfillProgressRatio * 100)}%`,
+                            }}
+                          />
+                        </div>
+                        <div className="grid gap-3">
+                          <p className="text-[13px] font-medium text-accent-emerald">
+                            {t("genreBackfill.artistsProcessed", {
+                              count: props.effectiveBackfill.artistsProcessed,
+                            })}
+                          </p>
+                          <p className="text-[13px] font-medium text-primary">
+                            {t("genreBackfill.artistsMapped", {
+                              count: props.effectiveBackfill.artistsMapped,
+                            })}
+                          </p>
+                          <p className="text-[13px] font-medium text-accent-cyan">
+                            {t("genreBackfill.tracksUpdated", {
+                              count: props.effectiveBackfill.tracksUpdated,
+                            })}
+                          </p>
+                        </div>
+                        {props.effectiveBackfill.errorMessage ? (
+                          <p className="text-[13px] leading-relaxed text-accent-rose" role="alert">
+                            {t("genreBackfill.error", {
+                              message: props.effectiveBackfill.errorMessage,
+                            })}
+                          </p>
+                        ) : null}
+                        {props.shouldOfferNextLlmSession || props.shouldOfferRetryLlmSession ? (
+                          <div className="space-y-3 border-t border-glass-hairline pt-4">
+                            <button
+                              type="button"
+                              className={`${ONBOARDING_GENRE_AI_ACCEPT_BTN} w-full`}
+                              disabled={props.isStartingLlmBackfill || props.hasActiveGroqJobShared}
+                              onClick={props.onStartGenreLlm}
+                            >
+                              {props.isStartingLlmBackfill ? (
+                                <>
+                                  <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+                                  <span>{t("genreLlmConsent.starting")}</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Sparkles className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
+                                  <span>{t("genreLlmConsent.startNextSession")}</span>
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        ) : null}
+                      </div>
+                    </GenreAiPanelChrome>
+                  </section>
                 ) : null}
                 {props.showGroqEnableInvite ? (
                   <OnboardingGroqEnableCard
@@ -727,18 +774,19 @@ export function OnboardingMobile(props: OnboardingMobileProps) {
                 {props.paletteInvitation?.shouldInvite ? (
                   <button
                     type="button"
-                    className={`${GROUP_SHELL} ${ROW_CLASS}`}
+                    className={LIST_ROW}
                     onClick={props.onGoToPalette}
                     disabled={props.isSubmitting}
                   >
-                    <span className="flex-1">
+                    <span className="min-w-0 flex-1 text-left text-sm font-medium">
                       {t("finishPaletteCta", { count: props.paletteInvitation.unknownArtists })}
                     </span>
                     <ChevronIcon />
                   </button>
                 ) : null}
               </div>
-          ) : null}
+            ) : null}
+          </div>
           <OnboardingMobileStickyActions
             mode="finish"
             hideBack

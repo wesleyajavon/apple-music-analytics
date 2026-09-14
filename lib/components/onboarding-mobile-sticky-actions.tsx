@@ -5,6 +5,7 @@ import {
   DASHBOARD_BTN_GHOST,
   DASHBOARD_BTN_GRADIENT,
   DASHBOARD_BTN_OUTLINE,
+  DASHBOARD_GLASS_CHROME,
 } from "@/lib/components/dashboard-ui";
 
 export type OnboardingMobileStickyMode =
@@ -67,7 +68,9 @@ export function OnboardingMobileStickyActions({
       role="region"
       aria-label={regionLabel}
     >
-      <div className="pointer-events-auto border-t border-card-border bg-surface-glass/95 px-4 py-3 shadow-[0_-12px_40px_rgb(0_0_0_/0.12)] backdrop-blur-xl">
+      <div
+        className={`${DASHBOARD_GLASS_CHROME} pointer-events-auto border-t px-4 py-3`}
+      >
         <div className="mx-auto flex max-w-4xl flex-col gap-2">
           {showPrimary ? (
             <button

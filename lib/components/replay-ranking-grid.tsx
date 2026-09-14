@@ -10,6 +10,7 @@ import {
   DASHBOARD_SECTION_EYEBROW,
   DASHBOARD_SECTION_TITLE,
 } from "@/lib/components/dashboard-ui";
+import { usePagedCarouselGestures } from "@/lib/hooks/use-paged-carousel-gestures";
 
 export const REPLAY_PAGE_SIZE = 4;
 export const REPLAY_TOPS_LIMIT = 8;
@@ -259,6 +260,13 @@ export const ReplayRankingGrid = memo(function ReplayRankingGrid({
     [pageCount]
   );
 
+  const { viewportRef, dragOffsetPx, isDragging, viewportProps } = usePagedCarouselGestures({
+    pageCount,
+    safePage,
+    goTo,
+    resetKey: itemKey,
+  });
+
   const onKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
       if (pageCount <= 1) return;
@@ -312,14 +320,28 @@ export const ReplayRankingGrid = memo(function ReplayRankingGrid({
       </div>
     ) : null;
 
+  const trackTransform =
+    dragOffsetPx === 0
+      ? `translate3d(-${safePage * 100}%, 0, 0)`
+      : `translate3d(calc(-${safePage * 100}% + ${dragOffsetPx}px), 0, 0)`;
+
   return (
     <div className="w-full min-w-0">
       {pager}
       <div className="relative">
-        <div className="overflow-hidden">
+        <div
+          ref={viewportRef}
+          data-testid="replay-ranking-viewport"
+          className={`overflow-hidden overscroll-x-contain touch-pan-y ${
+            pageCount > 1 ? "cursor-grab active:cursor-grabbing" : ""
+          }`}
+          {...viewportProps}
+        >
           <div
-            className="flex w-full transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
-            style={{ transform: `translate3d(-${safePage * 100}%, 0, 0)` }}
+            className={`flex w-full ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+              isDragging ? "transition-none" : "transition-transform duration-500"
+            }`}
+            style={{ transform: trackTransform }}
           >
             {slides.map((slideItems, page) => {
               const active = page === safePage;

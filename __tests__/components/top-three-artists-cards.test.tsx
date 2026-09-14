@@ -2,7 +2,7 @@
 
 import { describe, expect, it, vi } from "vitest";
 import React from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import type { ArtistStatsDto } from "@/lib/dto/artist";
 import { TopThreeArtists } from "@/lib/components/top-three-artists-cards";
 import {
@@ -71,24 +71,50 @@ describe("SpotlightArtistsFeaturedList", () => {
 
     expect(screen.getByText("Artist 1")).toBeInTheDocument();
     expect(screen.getByText("Artist 4")).toBeInTheDocument();
-    expect(screen.queryByText("Artist 5")).toBeNull();
-    expect(screen.queryByText("Artist 11")).toBeNull();
-    expect(document.querySelectorAll("[data-spotlight-artist-tile]")).toHaveLength(4);
+    expect(screen.getByRole("tab", { name: "1–4" })).toHaveAttribute("aria-selected", "true");
     expect(document.querySelector("[data-spotlight-artist-card]")).toBeNull();
     expect(document.querySelector("[data-spotlight-featured]")).toBeNull();
 
     fireEvent.click(screen.getByRole("tab", { name: "5–8" }));
+    expect(screen.getByRole("tab", { name: "5–8" })).toHaveAttribute("aria-selected", "true");
     expect(screen.getByText("Artist 5")).toBeInTheDocument();
     expect(screen.getByText("Artist 8")).toBeInTheDocument();
-    expect(screen.queryByText("Artist 1")).toBeNull();
 
     fireEvent.click(screen.getByRole("tab", { name: "9–10" }));
+    expect(screen.getByRole("tab", { name: "9–10" })).toHaveAttribute("aria-selected", "true");
     expect(screen.getByText("Artist 9")).toBeInTheDocument();
     expect(screen.getByText("Artist 10")).toBeInTheDocument();
     expect(screen.queryByText("Artist 11")).toBeNull();
-    expect(document.querySelectorAll("[data-spotlight-artist-tile]")).toHaveLength(2);
 
     fireEvent.click(screen.getByRole("button", { name: "Open insights for Artist 9" }));
     expect(onArtistSelect).toHaveBeenCalledWith(expect.objectContaining({ artistId: "artist-9" }), 8);
+  });
+
+  it("pages with horizontal trackpad wheel", () => {
+    render(
+      <SpotlightArtistsFeaturedList
+        artists={Array.from({ length: 8 }, (_, index) => makeArtist(index + 1))}
+        t={t}
+        locale="en-US"
+        pageRangeLabel={(start, end) => `${start}–${end}`}
+        pagesNavLabel="Artist pages"
+        previousPageLabel="Previous artists"
+        nextPageLabel="Next artists"
+      />
+    );
+
+    const viewport = screen.getByTestId("spotlight-artists-viewport");
+    const wheel = new WheelEvent("wheel", {
+      deltaX: 80,
+      deltaY: 10,
+      cancelable: true,
+      bubbles: true,
+    });
+    act(() => {
+      viewport.dispatchEvent(wheel);
+    });
+
+    expect(wheel.defaultPrevented).toBe(true);
+    expect(screen.getByRole("tab", { name: "5–8" })).toHaveAttribute("aria-selected", "true");
   });
 });

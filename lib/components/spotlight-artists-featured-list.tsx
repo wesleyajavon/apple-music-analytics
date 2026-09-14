@@ -4,6 +4,7 @@ import { memo, useCallback, useEffect, useMemo, useState, type KeyboardEvent } f
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { ArtistStatsDto } from "@/lib/dto/artist";
 import { ArtistAvatarHydrated } from "@/lib/components/artist-avatar-hydrated";
+import { usePagedCarouselGestures } from "@/lib/hooks/use-paged-carousel-gestures";
 
 export const SPOTLIGHT_FEATURED_LIMIT = 10;
 export const SPOTLIGHT_ARTISTS_CAROUSEL_LIMIT = SPOTLIGHT_FEATURED_LIMIT;
@@ -148,9 +149,12 @@ export const SpotlightArtistsFeaturedList = memo(function SpotlightArtistsFeatur
     });
   }, [pageCount, pageRangeLabel, visibleArtists.length]);
 
-  const pageArtists = visibleArtists.slice(
-    safePage * SPOTLIGHT_PAGE_SIZE,
-    safePage * SPOTLIGHT_PAGE_SIZE + SPOTLIGHT_PAGE_SIZE
+  const slides = useMemo(
+    () =>
+      Array.from({ length: pageCount }, (_, page) =>
+        visibleArtists.slice(page * SPOTLIGHT_PAGE_SIZE, page * SPOTLIGHT_PAGE_SIZE + SPOTLIGHT_PAGE_SIZE)
+      ),
+    [pageCount, visibleArtists]
   );
 
   const goTo = useCallback(
@@ -159,6 +163,13 @@ export const SpotlightArtistsFeaturedList = memo(function SpotlightArtistsFeatur
     },
     [pageCount]
   );
+
+  const { viewportRef, dragOffsetPx, isDragging, viewportProps } = usePagedCarouselGestures({
+    pageCount,
+    safePage,
+    goTo,
+    resetKey: artistKey,
+  });
 
   const onKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
@@ -213,24 +224,57 @@ export const SpotlightArtistsFeaturedList = memo(function SpotlightArtistsFeatur
       </div>
     ) : null;
 
+  const trackTransform =
+    dragOffsetPx === 0
+      ? `translate3d(-${safePage * 100}%, 0, 0)`
+      : `translate3d(calc(-${safePage * 100}% + ${dragOffsetPx}px), 0, 0)`;
+
   return (
     <div className="w-full min-w-0">
       {pager}
       <div className="relative">
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
-          {pageArtists.map((artist, pageOffset) => {
-            const index = safePage * SPOTLIGHT_PAGE_SIZE + pageOffset;
-            return (
-              <SpotlightArtistTile
-                key={artist.artistId}
-                artist={artist}
-                index={index}
-                t={t}
-                locale={locale}
-                onArtistSelect={onArtistSelect}
-              />
-            );
-          })}
+        <div
+          ref={viewportRef}
+          data-testid="spotlight-artists-viewport"
+          className={`overflow-hidden overscroll-x-contain touch-pan-y ${
+            pageCount > 1 ? "cursor-grab active:cursor-grabbing" : ""
+          }`}
+          {...viewportProps}
+        >
+          <div
+            className={`flex w-full ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+              isDragging ? "transition-none" : "transition-transform duration-500"
+            }`}
+            style={{ transform: trackTransform }}
+          >
+            {slides.map((slideArtists, page) => {
+              const active = page === safePage;
+              return (
+                <div
+                  key={pages[page]?.start ?? page}
+                  className="w-full shrink-0 grow-0 basis-full"
+                  aria-hidden={!active}
+                  {...(!active ? { inert: true } : {})}
+                >
+                  <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
+                    {slideArtists.map((artist, pageOffset) => {
+                      const index = page * SPOTLIGHT_PAGE_SIZE + pageOffset;
+                      return (
+                        <SpotlightArtistTile
+                          key={artist.artistId}
+                          artist={artist}
+                          index={index}
+                          t={t}
+                          locale={locale}
+                          onArtistSelect={onArtistSelect}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         {pageCount > 1 ? (

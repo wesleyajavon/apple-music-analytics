@@ -27,13 +27,15 @@ import {
   DASHBOARD_METRIC_CELL,
   DASHBOARD_METRIC_LABEL,
   DASHBOARD_METRIC_STRIP,
-  DASHBOARD_METRIC_VALUE,
 } from "@/lib/components/dashboard-ui";
 
 const PANEL_DRAWER_SHELL =
   "relative flex min-h-0 w-full flex-col overflow-hidden border-slate-200/90 bg-white text-slate-900 ring-1 ring-black/[0.04] dark:border-white/10 dark:bg-slate-950 dark:text-white dark:ring-0 max-lg:max-h-[min(92dvh,720px)] max-lg:overflow-y-auto max-lg:rounded-t-[1.75rem] max-lg:border-t max-lg:shadow-[0_-16px_48px_rgba(15,23,42,0.12)] lg:h-full lg:max-w-lg lg:border-l lg:shadow-[-28px_0_80px_rgba(15,23,42,0.1)] lg:rounded-l-[1.75rem] dark:max-lg:shadow-[0_-16px_48px_rgba(0,0,0,0.35)] dark:lg:shadow-[-32px_0_96px_rgba(0,0,0,0.45)]";
 
 const INSIGHT_SECTION_TITLE = "text-sm font-semibold text-foreground";
+/** Detail values — sized with captions, not KPI display scale. */
+const INSIGHT_METRIC_VALUE =
+  "text-[13px] font-medium leading-snug tracking-tight tabular-nums text-foreground";
 
 const TOP_TRACKS_LIMIT = 12;
 
@@ -374,25 +376,25 @@ export const ArtistUserInsightsPanel = memo(
                   <div className={`${DASHBOARD_METRIC_STRIP} w-full flex-wrap`}>
                     <div className={DASHBOARD_METRIC_CELL}>
                       <span className={DASHBOARD_METRIC_LABEL}>{t("insightsFirstListenLabel")}</span>
-                      <span className={`${DASHBOARD_METRIC_VALUE} capitalize`}>
+                      <span className={`${INSIGHT_METRIC_VALUE} capitalize`}>
                         {formatListenDate(displayArtist.firstListenDate)}
                       </span>
                     </div>
                     <div className={DASHBOARD_METRIC_CELL}>
                       <span className={DASHBOARD_METRIC_LABEL}>{t("insightsMostRecentListenLabel")}</span>
-                      <span className={`${DASHBOARD_METRIC_VALUE} capitalize`}>
+                      <span className={`${INSIGHT_METRIC_VALUE} capitalize`}>
                         {formatListenDate(displayArtist.lastListenDate)}
                       </span>
                     </div>
                     <div className={DASHBOARD_METRIC_CELL}>
                       <span className={DASHBOARD_METRIC_LABEL}>{t("insightsUniqueTracksShort")}</span>
-                      <span className={DASHBOARD_METRIC_VALUE}>
+                      <span className={INSIGHT_METRIC_VALUE}>
                         {displayArtist.uniqueTracks.toLocaleString(locale)}
                       </span>
                     </div>
                     <div className={DASHBOARD_METRIC_CELL}>
                       <span className={DASHBOARD_METRIC_LABEL}>{t("insightsEstPlayTimeShort")}</span>
-                      <span className={DASHBOARD_METRIC_VALUE}>
+                      <span className={INSIGHT_METRIC_VALUE}>
                         ≈ {formatPlaySeconds(displayArtist.totalPlayTime, t("insightsEstPlayTimeUnavailable"))}
                       </span>
                     </div>
@@ -420,29 +422,29 @@ export const ArtistUserInsightsPanel = memo(
                     <div className={`${DASHBOARD_METRIC_STRIP} w-full flex-wrap`}>
                       <div className={DASHBOARD_METRIC_CELL}>
                         <span className={DASHBOARD_METRIC_LABEL}>{t("insightsBusiestCalendarDay")}</span>
-                        <span className={`${DASHBOARD_METRIC_VALUE} capitalize`}>
+                        <span className={`${INSIGHT_METRIC_VALUE} capitalize`}>
                           {busiestDayLabel ?? t("insightsNoSignal")}
                         </span>
                       </div>
                       <div className={DASHBOARD_METRIC_CELL}>
                         <span className={DASHBOARD_METRIC_LABEL}>{t("insightsPeakHour")}</span>
-                        <span className={DASHBOARD_METRIC_VALUE}>{peakHourLabel ?? t("insightsNoSignal")}</span>
+                        <span className={INSIGHT_METRIC_VALUE}>{peakHourLabel ?? t("insightsNoSignal")}</span>
                       </div>
                       <div className={DASHBOARD_METRIC_CELL}>
                         <span className={DASHBOARD_METRIC_LABEL}>{t("insightsPeakWeekday")}</span>
-                        <span className={`${DASHBOARD_METRIC_VALUE} capitalize`}>
+                        <span className={`${INSIGHT_METRIC_VALUE} capitalize`}>
                           {peakWeekdayLabel ?? t("insightsNoSignal")}
                         </span>
                       </div>
                       <div className={DASHBOARD_METRIC_CELL}>
                         <span className={DASHBOARD_METRIC_LABEL}>{t("insightsActiveDays")}</span>
-                        <span className={DASHBOARD_METRIC_VALUE}>
+                        <span className={INSIGHT_METRIC_VALUE}>
                           {t("insightsDaysValue", { count: query.data.activeListeningDays })}
                         </span>
                       </div>
                       <div className={DASHBOARD_METRIC_CELL}>
                         <span className={DASHBOARD_METRIC_LABEL}>{t("insightsSpanDays")}</span>
-                        <span className={DASHBOARD_METRIC_VALUE}>
+                        <span className={INSIGHT_METRIC_VALUE}>
                           {t("insightsDaysValue", { count: query.data.listeningSpanDays })}
                         </span>
                       </div>

@@ -36,6 +36,12 @@ function trackSharePercent(trackStreams: number, artistStreams: number): number 
   return Math.min(100, Math.round(raw));
 }
 
+const METRIC_LABEL =
+  "text-[11px] font-medium uppercase tracking-[0.08em] text-white/40";
+/** Detail values — sized to sit with captions, not shout over them. */
+const METRIC_VALUE =
+  "mt-0.5 text-[13px] font-medium leading-snug tracking-tight text-white/85";
+
 /**
  * Fake in-hub artist insights drawer — mirrors the real dashboard overlay UX.
  */
@@ -204,36 +210,26 @@ export function HomeHubArtistDeepDiveOverlay({
             <section aria-label={tArtists("insightsTimelineTitle")}>
               <div className="flex flex-wrap gap-x-5 gap-y-3 rounded-2xl border border-white/[0.08] bg-white/[0.03] px-4 py-3">
                 <div className="min-w-[6.5rem]">
-                  <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-white/40">
-                    {tArtists("insightsFirstListenLabel")}
-                  </p>
-                  <p className="mt-1 text-sm font-semibold capitalize text-white">
+                  <p className={METRIC_LABEL}>{tArtists("insightsFirstListenLabel")}</p>
+                  <p className={`${METRIC_VALUE} capitalize`}>
                     {formatStreamDate(deepDive.firstStreamAt, locale)}
                   </p>
                 </div>
                 <div className="min-w-[6.5rem]">
-                  <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-white/40">
-                    {tArtists("insightsMostRecentListenLabel")}
-                  </p>
-                  <p className="mt-1 text-sm font-semibold capitalize text-white">
+                  <p className={METRIC_LABEL}>{tArtists("insightsMostRecentListenLabel")}</p>
+                  <p className={`${METRIC_VALUE} capitalize`}>
                     {formatStreamDate(deepDive.lastStreamAt, locale)}
                   </p>
                 </div>
                 <div className="min-w-[6.5rem]">
-                  <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-white/40">
-                    {tArtists("insightsUniqueTracksShort")}
-                  </p>
-                  <p className="mt-1 text-sm font-semibold tabular-nums text-white">
+                  <p className={METRIC_LABEL}>{tArtists("insightsUniqueTracksShort")}</p>
+                  <p className={`${METRIC_VALUE} tabular-nums`}>
                     {deepDive.uniqueTracks.toLocaleString(locale)}
                   </p>
                 </div>
                 <div className="min-w-[6.5rem]">
-                  <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-white/40">
-                    {tArtists("insightsEstPlayTimeShort")}
-                  </p>
-                  <p className="mt-1 text-sm font-semibold tabular-nums text-white">
-                    ≈ {deepDive.estHours}h
-                  </p>
+                  <p className={METRIC_LABEL}>{tArtists("insightsEstPlayTimeShort")}</p>
+                  <p className={`${METRIC_VALUE} tabular-nums`}>≈ {deepDive.estHours}h</p>
                 </div>
               </div>
             </section>
@@ -244,28 +240,20 @@ export function HomeHubArtistDeepDiveOverlay({
               </h4>
               <div className="flex flex-wrap gap-x-5 gap-y-3 rounded-2xl border border-white/[0.08] bg-white/[0.03] px-4 py-3">
                 <div className="min-w-[6.5rem]">
-                  <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-white/40">
-                    {tArtists("insightsBusiestCalendarDay")}
-                  </p>
-                  <p className="mt-1 text-sm font-semibold capitalize text-white">{busiestDayLabel}</p>
+                  <p className={METRIC_LABEL}>{tArtists("insightsBusiestCalendarDay")}</p>
+                  <p className={`${METRIC_VALUE} capitalize`}>{busiestDayLabel}</p>
                 </div>
                 <div className="min-w-[6.5rem]">
-                  <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-white/40">
-                    {tArtists("insightsPeakHour")}
-                  </p>
-                  <p className="mt-1 text-sm font-semibold tabular-nums text-white">{peakHourLabel}</p>
+                  <p className={METRIC_LABEL}>{tArtists("insightsPeakHour")}</p>
+                  <p className={`${METRIC_VALUE} tabular-nums`}>{peakHourLabel}</p>
                 </div>
                 <div className="min-w-[6.5rem]">
-                  <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-white/40">
-                    {tArtists("insightsPeakWeekday")}
-                  </p>
-                  <p className="mt-1 text-sm font-semibold capitalize text-white">{peakWeekdayLabel}</p>
+                  <p className={METRIC_LABEL}>{tArtists("insightsPeakWeekday")}</p>
+                  <p className={`${METRIC_VALUE} capitalize`}>{peakWeekdayLabel}</p>
                 </div>
                 <div className="min-w-[6.5rem]">
-                  <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-white/40">
-                    {tArtists("insightsActiveDays")}
-                  </p>
-                  <p className="mt-1 text-sm font-semibold tabular-nums text-white">
+                  <p className={METRIC_LABEL}>{tArtists("insightsActiveDays")}</p>
+                  <p className={`${METRIC_VALUE} tabular-nums`}>
                     {tArtists("insightsDaysValue", { count: deepDive.activeDays })}
                   </p>
                 </div>

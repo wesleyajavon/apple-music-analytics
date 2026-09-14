@@ -3319,7 +3319,8 @@
         "description": "Un calendario estilo GitHub de tu intensidad de stream. Los cuadros más oscuros significan más rotación."
       },
       "topArtists": {
-        "description": "Tu podio de artistas con streams reales y barras de participación — las mismas tarjetas del dashboard."
+        "title": "Tus top artistas",
+        "description": "Toca un artista para abrir su deepdive — tops, primer stream y cuánto pesa en tu biblioteca."
       },
       "timeline": {
         "description": "Tu actividad de escucha a lo largo del tiempo — detecta picos, caídas y cambios de momentum de un vistazo."
@@ -3347,7 +3348,15 @@
       "selectAlbumAria": "Seleccionar {name}",
       "trendsInnerAria": "Vistas de tendencias",
       "trendsGenres": "Géneros",
-      "trendsPulse": "Pulso"
+      "trendsPulse": "Pulso",
+      "deepDive": {
+        "rank": "#{rank} en tu biblioteca",
+        "whenYouStream": "Cuando haces stream",
+        "footnote": "Vista previa de lo que desbloquea el deepdive.",
+        "closeAria": "Cerrar deepdive de artista",
+        "dismissAria": "Cerrar deepdive de artista",
+        "openAria": "Abrir deepdive de {name}"
+      }
     },
     "featuresEyebrow": "Por qué se siente distinto",
     "featuresTitle": "Una capa de analytics personal para amantes de la música.",

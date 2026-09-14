@@ -89,6 +89,7 @@ export type HomeHubArtist = {
   imageSrc: string;
   listens: number;
   share: number;
+  signatureTrack: string;
 };
 
 export type HomeHubAlbum = {
@@ -128,6 +129,7 @@ export function getHomeHubSnapshot(period: HomeHubPeriod): HomeHubSnapshot {
       ...artist,
       listens: snapshot.artistListens[index],
       share: Math.round((snapshot.artistListens[index] / topArtistListens) * 100),
+      signatureTrack: ARTIST_DEEP_DIVE_SEEDS[artist.name]?.topTracks[0]?.title ?? "",
     })),
     albums: HOME_PREVIEW_ALBUMS.slice(0, 5).map((album, index) => ({
       ...album,
@@ -150,4 +152,133 @@ export function isHomeHubOverviewTab(value: string): value is HomeHubOverviewTab
 
 export function formatHubDuration(hours: number, minutes: number): string {
   return `${hours}h ${minutes}min`;
+}
+
+const PERIOD_DEEP_DIVE_SCALE: Record<HomeHubPeriod, number> = {
+  "7d": 0.28,
+  "30d": 1,
+  ytd: 2.6,
+  all: 4.1,
+};
+
+type HomeHubArtistDeepDiveSeed = {
+  uniqueTracks: number;
+  firstStreamAt: string;
+  lastStreamAt: string;
+  estHours: number;
+  peakHour: number;
+  peakWeekdayIndex: number;
+  busiestDay: string;
+  activeDays: number;
+  spanDays: number;
+  topTracks: readonly { title: string; baseStreams: number }[];
+};
+
+const ARTIST_DEEP_DIVE_SEEDS: Record<string, HomeHubArtistDeepDiveSeed> = {
+  "The Weeknd": {
+    uniqueTracks: 52,
+    firstStreamAt: "2019-03-14",
+    lastStreamAt: "2026-09-08",
+    estHours: 38,
+    peakHour: 22,
+    peakWeekdayIndex: 5,
+    busiestDay: "2025-11-14",
+    activeDays: 214,
+    spanDays: 2735,
+    topTracks: [
+      { title: "Blinding Lights", baseStreams: 86 },
+      { title: "Starboy", baseStreams: 64 },
+      { title: "Save Your Tears", baseStreams: 51 },
+      { title: "The Hills", baseStreams: 42 },
+      { title: "Die For You", baseStreams: 37 },
+    ],
+  },
+  "Bad Bunny": {
+    uniqueTracks: 41,
+    firstStreamAt: "2020-08-02",
+    lastStreamAt: "2026-09-06",
+    estHours: 29,
+    peakHour: 23,
+    peakWeekdayIndex: 6,
+    busiestDay: "2025-07-04",
+    activeDays: 168,
+    spanDays: 2226,
+    topTracks: [
+      { title: "Tití Me Preguntó", baseStreams: 71 },
+      { title: "Moscow Mule", baseStreams: 58 },
+      { title: "Me Porto Bonito", baseStreams: 49 },
+      { title: "Ojitos Lindos", baseStreams: 40 },
+      { title: "Después de la Playa", baseStreams: 33 },
+    ],
+  },
+  GIMS: {
+    uniqueTracks: 34,
+    firstStreamAt: "2018-11-21",
+    lastStreamAt: "2026-08-29",
+    estHours: 22,
+    peakHour: 20,
+    peakWeekdayIndex: 4,
+    busiestDay: "2024-12-31",
+    activeDays: 142,
+    spanDays: 2838,
+    topTracks: [
+      { title: "Est-ce que tu m'aimes ?", baseStreams: 58 },
+      { title: "Bella", baseStreams: 47 },
+      { title: "J'me Tire", baseStreams: 39 },
+      { title: "Sapés comme jamais", baseStreams: 34 },
+      { title: "La Même", baseStreams: 28 },
+    ],
+  },
+};
+
+export type HomeHubArtistDeepDive = {
+  name: string;
+  imageSrc: string;
+  streams: number;
+  share: number;
+  rank: number;
+  uniqueTracks: number;
+  firstStreamAt: string;
+  lastStreamAt: string;
+  estHours: number;
+  peakHour: number;
+  peakWeekdayIndex: number;
+  busiestDay: string;
+  activeDays: number;
+  spanDays: number;
+  topTracks: { title: string; streamCount: number }[];
+};
+
+export function getHomeHubArtistDeepDive(
+  artistName: string,
+  period: HomeHubPeriod,
+): HomeHubArtistDeepDive | null {
+  const snapshot = getHomeHubSnapshot(period);
+  const artistIndex = snapshot.artists.findIndex((artist) => artist.name === artistName);
+  const artist = artistIndex >= 0 ? snapshot.artists[artistIndex] : undefined;
+  const seed = ARTIST_DEEP_DIVE_SEEDS[artistName];
+  if (!artist || !seed) return null;
+
+  const scale = PERIOD_DEEP_DIVE_SCALE[period];
+
+  return {
+    name: artist.name,
+    imageSrc: artist.imageSrc,
+    streams: artist.listens,
+    share: artist.share,
+    rank: artistIndex + 1,
+    uniqueTracks: Math.max(8, Math.round(seed.uniqueTracks * Math.min(1, 0.45 + scale * 0.35))),
+    firstStreamAt: seed.firstStreamAt,
+    lastStreamAt: seed.lastStreamAt,
+    estHours: Math.max(2, Math.round(seed.estHours * scale)),
+    peakHour: seed.peakHour,
+    peakWeekdayIndex: seed.peakWeekdayIndex,
+    busiestDay: seed.busiestDay,
+    activeDays: Math.max(4, Math.round(seed.activeDays * Math.min(1, 0.2 + scale * 0.35))),
+    spanDays: Math.max(7, Math.round(seed.spanDays * Math.min(1, 0.15 + scale * 0.3))),
+    topTracks: seed.topTracks.map((track) => ({
+      title: track.title,
+      streamCount: Math.max(3, Math.round(track.baseStreams * scale)),
+    })),
+  };
 }

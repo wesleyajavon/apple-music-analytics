@@ -321,8 +321,8 @@ export function MiniTopArtistsChart({
   const tArtists = useTranslations("artists");
 
   return (
-    <div className="overflow-hidden rounded-[1.35rem] border border-white/[0.08] bg-[#0c0e18] p-3 ring-1 ring-white/[0.05]">
-      <div className="space-y-3">
+    <div className="w-full min-w-0">
+      <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
         {artists.map((artist, index) => {
           const isSelected = selectedName === artist.name;
           return (
@@ -332,41 +332,43 @@ export function MiniTopArtistsChart({
               aria-pressed={isSelected}
               aria-label={selectAria(artist.name)}
               onClick={() => onSelect(artist.name)}
-              className={`w-full rounded-2xl border p-3 text-left transition-colors ${
-                isSelected
-                  ? "border-violet-400/35 bg-violet-500/10"
-                  : "border-white/[0.06] bg-black/20 hover:border-white/12 hover:bg-white/[0.04]"
+              data-spotlight-artist-tile=""
+              className={`group min-h-11 w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#080913] ${
+                isSelected ? "rounded-[22px] ring-2 ring-violet-300/50 ring-offset-2 ring-offset-[#080913]" : ""
               }`}
             >
-              <div className="flex items-center gap-3">
-                <div className="relative h-11 w-11 shrink-0">
-                  <div className="relative h-full w-full overflow-hidden rounded-full border border-white/10 bg-slate-900 shadow-lg shadow-black/30">
-                    <Image
-                      src={artist.imageSrc}
-                      alt=""
-                      fill
-                      className="object-cover"
-                      sizes="44px"
-                    />
-                  </div>
-                  <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full border border-white/20 bg-slate-950 text-[0.55rem] font-black text-white">
-                    {index + 1}
-                  </span>
+              <div className="relative aspect-[3/4] w-full overflow-hidden rounded-[22px] bg-black">
+                <div className="absolute inset-0 origin-center transition-transform duration-500 ease-out motion-reduce:transform-none motion-reduce:transition-none group-hover:scale-[1.045] group-focus-visible:scale-[1.045]">
+                  <Image
+                    src={artist.imageSrc}
+                    alt=""
+                    fill
+                    className="object-cover object-top"
+                    sizes="(max-width: 640px) 33vw, 160px"
+                  />
                 </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="truncate text-sm font-semibold text-white">{artist.name}</p>
-                    <p className="shrink-0 text-xs font-semibold text-cyan-200">
-                      {artist.listens.toLocaleString(locale)}
+                <span
+                  className="pointer-events-none absolute inset-0 z-[5] bg-white/0 transition-colors duration-300 motion-reduce:transition-none group-hover:bg-white/[0.08] group-focus-visible:bg-white/[0.08]"
+                  aria-hidden
+                />
+                <span className="absolute left-3 top-2.5 z-20 text-[1.35rem] font-semibold leading-none tracking-tight text-white sm:left-4 sm:top-3 sm:text-[1.75rem]">
+                  {index + 1}
+                </span>
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[46%]" aria-hidden>
+                  <div className="dashboard-replay-card-frost absolute inset-0" />
+                </div>
+                <div className="absolute inset-x-0 bottom-0 z-20 px-2 pb-3 pt-10 text-center text-white sm:px-3 sm:pb-4 sm:pt-12">
+                  <h3 className="truncate text-[12px] font-semibold leading-tight tracking-tight sm:text-[15px]">
+                    {artist.name}
+                  </h3>
+                  <p className="mt-0.5 text-[11px] font-medium tabular-nums text-white/70 sm:text-[13px]">
+                    {artist.listens.toLocaleString(locale)} {tArtists("listensCount")}
+                  </p>
+                  {artist.signatureTrack ? (
+                    <p className="mt-0.5 truncate text-[10px] text-white/55 sm:text-[12px]">
+                      {artist.signatureTrack}
                     </p>
-                  </div>
-                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/[0.06]">
-                    <div
-                      className="h-full rounded-full bg-gradient-to-r from-accent-violet via-accent-cyan to-white/80"
-                      style={{ width: `${artist.share}%` }}
-                      aria-hidden
-                    />
-                  </div>
+                  ) : null}
                 </div>
               </div>
             </button>

@@ -15,9 +15,6 @@ import { AnimatePresence, motion, useInView, useReducedMotion } from "motion/rea
 import { useLocale, useTranslations } from "next-intl";
 import {
   CalendarDays,
-  Clock3,
-  Disc3,
-  Headphones,
   ListMusic,
   TrendingUp,
   Users,
@@ -25,6 +22,7 @@ import {
 } from "lucide-react";
 import { LiveStatusDot } from "@/lib/components/live-status-dot";
 import { SoundprintBrandMark } from "@/lib/components/soundprint-brand-mark";
+import { HomeHubArtistDeepDiveOverlay } from "@/lib/components/home-hub-artist-deep-dive";
 import {
   HUB_PREVIEW_GENRES,
   MiniAlbumSpotlightGrid,
@@ -38,6 +36,7 @@ import {
   HOME_HUB_OVERVIEW_TABS,
   HOME_HUB_PERIODS,
   formatHubDuration,
+  getHomeHubArtistDeepDive,
   getHomeHubSnapshot,
   type HomeHubOverviewTab,
   type HomeHubPage,
@@ -184,37 +183,6 @@ const TAB_ICONS: Record<HomeHubOverviewTab, LucideIcon> = {
   context: CalendarDays,
 };
 
-const KPI_META = [
-  {
-    id: "listens" as const,
-    tab: "trends" as const,
-    icon: Headphones,
-    accent: "from-rose-400/20 to-transparent",
-    iconClass: "text-rose-100",
-  },
-  {
-    id: "artists" as const,
-    tab: "spotlight" as const,
-    icon: Users,
-    accent: "from-violet-400/20 to-transparent",
-    iconClass: "text-violet-100",
-  },
-  {
-    id: "tracks" as const,
-    tab: "tops" as const,
-    icon: Disc3,
-    accent: "from-cyan-400/20 to-transparent",
-    iconClass: "text-cyan-100",
-  },
-  {
-    id: "time" as const,
-    tab: "context" as const,
-    icon: Clock3,
-    accent: "from-emerald-400/20 to-transparent",
-    iconClass: "text-emerald-100",
-  },
-];
-
 function useTabListKeyDown<T extends string>(
   items: readonly T[],
   active: T,
@@ -272,7 +240,6 @@ export function HomeMusicHubPreview() {
   const tOverview = useTranslations("overview");
   const tNav = useTranslations("sidebar");
   const tPeriod = useTranslations("components.dateRangeFilter");
-  const tHomeStats = useTranslations("home.heroDashboardPreview.screen.stats");
   const tPreviews = useTranslations("home.dashboardPreviews");
   const locale = useLocale();
   const reducedMotion = useReducedMotion();
@@ -292,11 +259,16 @@ export function HomeMusicHubPreview() {
   );
   const [selectedArtist, setSelectedArtist] = useState<string | null>(null);
   const [selectedAlbum, setSelectedAlbum] = useState<string | null>(null);
+  const [deepDiveArtist, setDeepDiveArtist] = useState<string | null>(null);
   const [demoStep, setDemoStep] = useState(0);
   const [demoPaused, setDemoPaused] = useState(false);
 
   const snapshot = useMemo(() => getHomeHubSnapshot(period), [period]);
-  const autoDemoActive = !reducedMotion && inView && !demoPaused;
+  const deepDive = useMemo(
+    () => (deepDiveArtist ? getHomeHubArtistDeepDive(deepDiveArtist, period) : null),
+    [deepDiveArtist, period],
+  );
+  const autoDemoActive = !reducedMotion && inView && !demoPaused && !deepDiveArtist;
 
   const pauseDemo = useCallback(() => {
     if (reducedMotion) return;
@@ -356,6 +328,19 @@ export function HomeMusicHubPreview() {
     setTab(nextTab);
   }, []);
 
+  const openArtistDeepDive = useCallback(
+    (name: string) => {
+      setSelectedArtist(name);
+      setDeepDiveArtist(name);
+      pauseDemo();
+    },
+    [pauseDemo],
+  );
+
+  const closeArtistDeepDive = useCallback(() => {
+    setDeepDiveArtist(null);
+  }, []);
+
   const onTabKeyDown = useTabListKeyDown(HOME_HUB_OVERVIEW_TABS, tab, goToOverviewTab);
   const onPeriodKeyDown = useTabListKeyDown(HOME_HUB_PERIODS, period, setPeriod);
   const onTrendKeyDown = useTabListKeyDown(
@@ -386,14 +371,14 @@ export function HomeMusicHubPreview() {
     <>
       <HubSectionHeader
         eyebrow={tOverview("viewSwitcher.views.spotlight")}
-        title={tOverview("sections.library.title")}
+        title={tPreviews("topArtists.title")}
         description={tPreviews("topArtists.description")}
       />
       <MiniTopArtistsChart
         artists={snapshot.artists}
         selectedName={selectedArtistData.name}
-        onSelect={setSelectedArtist}
-        selectAria={(name) => t("selectArtistAria", { name })}
+        onSelect={openArtistDeepDive}
+        selectAria={(name) => t("deepDive.openAria", { name })}
         locale={locale}
       />
     </>
@@ -552,6 +537,17 @@ export function HomeMusicHubPreview() {
           aria-hidden
         />
 
+        <AnimatePresence>
+          {deepDive ? (
+            <HomeHubArtistDeepDiveOverlay
+              key={deepDive.name}
+              deepDive={deepDive}
+              locale={locale}
+              onClose={closeArtistDeepDive}
+            />
+          ) : null}
+        </AnimatePresence>
+
         <div className="relative flex items-center justify-between gap-3 border-b border-white/10 px-4 py-2.5 sm:px-5">
           <div className="flex min-w-0 items-center gap-3">
             <div className="hidden items-center gap-1.5 sm:flex" aria-hidden>
@@ -647,81 +643,99 @@ export function HomeMusicHubPreview() {
 
             <div className="min-w-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6 sm:py-6">
               {page === "overview" ? (
-                <div className="mb-6 overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/[0.04] p-5 sm:p-6">
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/45">
+                <div className="mb-8 space-y-8">
+                  <header className="min-w-0">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <h2 className="max-w-3xl text-balance text-3xl font-semibold tracking-tight text-white lg:text-4xl">
+                        {tOverview("title")}
+                      </h2>
+                      <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-white/65">
+                        {tPeriod(`mobile.presets.${period}`)}
+                      </span>
+                    </div>
+
+                    <div className="mt-6 max-w-2xl">
+                      <p className="mb-2 text-[13px] font-medium text-white/50">
                         {insightIsArtist
                           ? tOverview("mobile.primaryInsight.topArtistEyebrow")
                           : tOverview("mobile.primaryInsight.topTrackEyebrow")}
                       </p>
-                      <h2 className="mt-2 text-3xl font-semibold tracking-[-0.06em] text-white sm:text-4xl">
-                        {tOverview("title")}
-                      </h2>
-                    </div>
-                    <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-white/70">
-                      {tPeriod(`mobile.presets.${period}`)}
-                    </span>
-                  </div>
-
-                  <div className="mt-5 flex items-end justify-between gap-4 rounded-3xl border border-white/10 bg-white/[0.07] p-4 sm:p-5">
-                    <div className="min-w-0">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                        {tOverview("listens")}
-                      </p>
-                      <p className="mt-1 text-3xl font-semibold tabular-nums tracking-[-0.06em] sm:text-4xl">
-                        {(insightIsArtist
-                          ? selectedArtistData.listens
-                          : selectedAlbumData.listens
-                        ).toLocaleString(locale)}
+                      <p className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                        <span className="text-2xl font-semibold tracking-tight tabular-nums text-white">
+                          {(insightIsArtist
+                            ? selectedArtistData.listens
+                            : selectedAlbumData.listens
+                          ).toLocaleString(locale)}
+                        </span>
+                        <span className="text-[13px] font-medium text-white/45">
+                          {tOverview("listens")}
+                        </span>
                       </p>
                       <p className="mt-2 truncate text-sm font-semibold text-white">
                         {insightIsArtist ? selectedArtistData.name : selectedAlbumData.name}
                       </p>
-                      {!insightIsArtist ? (
-                        <p className="truncate text-xs text-white/45">{selectedAlbumData.artist}</p>
-                      ) : null}
-                    </div>
-                    <div className="max-w-[8.5rem] shrink-0 text-right">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                        {tOverview("libraryLeaders.topGenre")}
-                      </p>
-                      <p className="mt-1 truncate text-sm font-semibold text-cyan-100">
-                        {topGenreName}
+                      <p className="mt-1 truncate text-[13px] text-white/45">
+                        {insightIsArtist
+                          ? `${tOverview("libraryLeaders.topGenre")} · ${topGenreName}`
+                          : selectedAlbumData.artist}
                       </p>
                     </div>
-                  </div>
+                  </header>
 
-                  <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                    {KPI_META.map((kpi) => {
-                      const Icon = kpi.icon;
-                      return (
-                        <button
-                          key={kpi.id}
-                          type="button"
-                          onClick={() => goToOverviewTab(kpi.tab)}
-                          className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-3 text-left transition-colors hover:border-white/20 hover:bg-white/[0.06]"
+                  <section aria-labelledby={`${tabsId}-stats-heading`}>
+                    <p className="text-[13px] font-medium text-white/50">
+                      {tOverview("statsSectionBadge")}
+                    </p>
+                    <h3
+                      id={`${tabsId}-stats-heading`}
+                      className="mt-1 text-[1.35rem] font-semibold leading-tight tracking-tight text-white sm:text-[1.75rem]"
+                    >
+                      {tOverview("statsSectionTitle")}
+                    </h3>
+                    <p className="mt-2 max-w-2xl text-[13px] leading-6 text-white/45">
+                      {tOverview("statsSectionDescription")}
+                    </p>
+
+                    <div className="mt-6 flex w-full flex-wrap border-y border-white/[0.08] py-3">
+                      {(
+                        [
+                          {
+                            key: "listens",
+                            label: tOverview("stats.totalListens"),
+                            value: kpiValues.listens,
+                          },
+                          {
+                            key: "artists",
+                            label: tOverview("stats.uniqueArtists"),
+                            value: kpiValues.artists,
+                          },
+                          {
+                            key: "tracks",
+                            label: tOverview("stats.uniqueTracks"),
+                            value: kpiValues.tracks,
+                          },
+                          {
+                            key: "time",
+                            label: tOverview("statsSectionTimeLabel"),
+                            value: kpiValues.time,
+                          },
+                        ] as const
+                      ).map((metric) => (
+                        <div
+                          key={metric.key}
+                          className="flex min-w-[7.5rem] flex-1 flex-col gap-1 border-r border-white/[0.08] px-4 py-1 first:pl-0 last:border-r-0 last:pr-0 sm:min-w-0 sm:px-5"
                         >
-                          <div
-                            className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${kpi.accent}`}
-                            aria-hidden
-                          />
-                          <div className="relative flex items-center gap-2">
-                            <Icon className={`h-3.5 w-3.5 ${kpi.iconClass}`} aria-hidden />
-                            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/45">
-                              {tHomeStats(kpi.id)}
-                            </p>
-                          </div>
-                          <p className="relative mt-2 text-lg font-semibold tabular-nums tracking-[-0.04em] text-white">
-                            {kpiValues[kpi.id]}
-                          </p>
-                          <p className="relative mt-1 text-[10px] font-semibold text-emerald-200">
-                            +{snapshot.delta}% {t("vsPrevious")}
-                          </p>
-                        </button>
-                      );
-                    })}
-                  </div>
+                          <span className="text-[13px] font-medium text-white/45">{metric.label}</span>
+                          <span className="text-2xl font-semibold tracking-tight tabular-nums text-white">
+                            {metric.value}
+                          </span>
+                          <span className="text-[13px] tabular-nums text-white/40">
+                            +{snapshot.delta}% · {tOverview("vsPreviousPeriod")}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
                 </div>
               ) : null}
 

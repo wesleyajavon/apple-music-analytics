@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   formatHubDuration,
+  getHomeHubArtistDeepDive,
   getHomeHubSnapshot,
   isHomeHubOverviewTab,
   isHomeHubPage,
@@ -43,5 +44,21 @@ describe("home music hub guards", () => {
 
   it("formats hub duration", () => {
     expect(formatHubDuration(68, 12)).toBe("68h 12min");
+  });
+});
+
+describe("getHomeHubArtistDeepDive", () => {
+  it("returns scaled top tracks and relationship stats for preview artists", () => {
+    const dive = getHomeHubArtistDeepDive("The Weeknd", "30d");
+
+    expect(dive?.name).toBe("The Weeknd");
+    expect(dive?.rank).toBe(1);
+    expect(dive?.topTracks[0]?.title).toBe("Blinding Lights");
+    expect(dive?.topTracks.length).toBe(5);
+    expect(dive?.uniqueTracks).toBeGreaterThan(0);
+  });
+
+  it("returns null for unknown artists", () => {
+    expect(getHomeHubArtistDeepDive("Unknown", "30d")).toBeNull();
   });
 });

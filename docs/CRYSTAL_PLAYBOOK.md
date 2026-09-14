@@ -24,7 +24,7 @@ Le chrome (sidebar + header) se fait **avant** Overview, sinon chaque section se
 - Tops + pages suivantes : [`replay-ranking-grid.tsx`](../lib/components/replay-ranking-grid.tsx) (grille partagée, `grid-cols-2` + `lg:grid-cols-4`)
 - Charts Overview : [`overview-trends-chart.tsx`](../lib/components/charts/overview-trends-chart.tsx) + [`crystal-chart.ts`](../lib/constants/crystal-chart.ts)
 
-Le plus gros écart **restant** n’est plus Overview, artists / tracks / genres, ni le chrome header (**8a–8b faites**). **7f** a livré le chrome Ask + Duet friends / compare, mais a **volontairement laissé** friend-music en `TopLibraryCard`. **Prochaine vague : Étape 9** — surfaces Duet produit (music / compare / friends) alignées sur Overview (tuiles Replay + overlay ami).
+Le plus gros écart **restant** n’est plus Overview, artists / tracks / genres, ni le chrome header (**8a–8b faites**). **7f** a livré le chrome Ask + Duet friends / compare, mais a **volontairement laissé** friend-music en `TopLibraryCard`. **Vague en cours : Étape 9** — surfaces Duet produit (music / compare / friends) alignées sur Overview (tuiles Replay + overlay ami). **Après 9 : Étape 10** — wizard onboarding (`/dashboard/onboarding`), encore en hero cinématique + cartes verre alors que le reste du dashboard est Crystal.
 
 ---
 
@@ -40,6 +40,7 @@ Le plus gros écart **restant** n’est plus Overview, artists / tracks / genres
 | Étape 7a–7g (artists → settings) | — | **Livrées.** Ne pas rejouer. |
 | Étape 8a–8b (header actions) | — | **Livrées.** Ne pas rejouer. |
 | Étape 9a–9d (Duet produit) | **Plan**, une session = un prompt **complet** | Pas les one-liners du tableau. Coller le bloc numéroté. |
+| Étape 10a–10b (onboarding wizard) | **Plan**, une session = un prompt **complet** | Après 9. Coller le bloc 10a ou 10b. |
 
 Règle d’or : **une conversation Plan = un prompt numéroté**. Après implémentation : EN + FR, light + dark, desktop `lg+` **et** mobile ~390×844.
 
@@ -55,9 +56,10 @@ Crystal **desktop Overview est livré**. Mobile = arbre `lg:hidden` dédié. Ne 
 4. Valide le plan, implémente, vérifie au navigateur, commit.
 5. Passe au numéro suivant.
 
-Étapes **9a–9d** : coller le **bloc complet** (sections Étape 9a … 9d), pas la cellule du tableau d’ordre. Le tableau n’est qu’un index.
+Étapes **9a–9d** et **10a–10b** : coller le **bloc complet** (sections Étape 9a … / 10a …), pas la cellule du tableau d’ordre. Le tableau n’est qu’un index.
 
-Hors scope de chaque prompt sauf mention contraire : landing marketing, e-mail, cookies, auth pages, onboarding wizard, APIs, Prisma.
+Hors scope de chaque prompt sauf mention contraire : landing marketing, e-mail, cookies, auth pages, APIs, Prisma.  
+**Exception Étape 10** : le wizard onboarding **est** le scope (chrome seulement). Les prompts 0–9 gardent l’onboarding hors scope.
 
 ---
 
@@ -1049,6 +1051,118 @@ Livre : friends invite + list OK ; sub-nav cohérent music/compare/friends ; e2e
 
 ---
 
+## Étape 10 — Onboarding wizard (import Apple / Spotify)
+
+**Pourquoi après 9 :** le dashboard métier + Duet sont Crystal ; le **premier contact produit** (`/dashboard/onboarding`) est encore l’îlot legacy — hero cinématique always-dark, `DASHBOARD_GLASS_CARD_SHELL`, Genre AI en carte marketing. L’utilisateur quitte un funnel « carte 2024 » pour atterrir sur un Overview Apple-product : écart trop visible.
+
+**Contrat produit onboarding (ne pas casser) :**
+
+| Élément | Règle |
+| --- | --- |
+| Phases | `welcome` → `pick` → `guide` → `import` → `finish` (état client inchangé) |
+| Route | `/dashboard/onboarding` ; re-entry `?addData=1` ; landing consent genre AI via query existante |
+| Providers | Spotify ZIP / Apple CSV — guides et images inchangés sémantiquement |
+| Import | multipart + JSON batch, genre backfill, skip / complete — **APIs hors scope** |
+| Mobile | Dual tree `lg:hidden` (`OnboardingMobile`) ; **pas** de bottom nav dashboard |
+
+Chrome only. Une session Plan = **un** sous-prompt (**10a** **ou** **10b**).
+
+Référence visuelle : masthead Overview (`OverviewHeroFrame`), list rows settings / friends (7g / 9d), empty Crystal (7g). **Pas** de tuiles Replay média ici (wizard, pas library).
+
+---
+
+### Étape 10a — Desktop onboarding + finish / Genre AI
+
+Session **desktop `lg+`**. Restyle le shell et les surfaces dans `DataExportOnboarding` + panneaux finish / consent. Ne pas retoucher l’arbre mobile (10b).
+
+```text
+[Préambule]
+
+Étape 10a — Crystal onboarding desktop (wizard import). Composer OverviewHeroFrame + DASHBOARD_SECTION_TITLE + DASHBOARD_LIST_ROW + DASHBOARD_BTN_* . Pas de refonte mobile (10b). Pas d’APIs / parsers / Prisma.
+
+Contrat :
+- Route : /dashboard/onboarding (+ ?addData=1, consent genre AI query existante). Page : app/[locale]/dashboard/onboarding/page.tsx — LIRE, ne pas changer gates redirect.
+- Phases : welcome | pick | guide | import | finish. Progress % + stepIndex / provider inchangés.
+- Auth-only. Skip / complete / import / genre backfill / Spotify connect : comportement inchangé.
+- Dual tree : desktop visible lg+ ; ne pas fusionner avec onboarding-mobile.tsx.
+
+Aujourd’hui (à remplacer) :
+- ONBOARDING_SHELL_CLASS = DASHBOARD_CINEMATIC_HERO_SHELL + DashboardCinematicHeroBg (always-dark).
+- ONBOARDING_SURFACE_CLASS = DASHBOARD_GLASS_CARD_SHELL autour des phases.
+- DashboardHeroTitle variant="hero" (welcome / pick / finish).
+- Dropzone / guide figures / Spotify connect / Genre AI : rounded-2xl + border + shadow-card / ring marketing ; CTAs hover:-translate-y + shadow-brand-glow (onboarding-finish-invites).
+- Progress bar variant="hero" pensé pour fond sombre.
+
+Fichiers :
+- lib/components/data-export-onboarding.tsx (principale — ~2k lignes : chrome seulement, ne pas réécrire l’upload)
+- lib/components/onboarding-finish-invites.tsx (GenreAiPanelChrome, consent CTAs, invites finish)
+- Réutiliser : overview-hero.tsx (OverviewHeroFrame), dashboard-ui.tsx (LIST_ROW, SECTION_TITLE, BTN_*), éventuellement empty-state patterns 7g
+- i18n : namespace onboarding — copy OK ; ne pas inventer de nouvelles clés sauf aria si manquant
+- Tests : ne pas casser e2e mobile-dashboard onboarding (10b) ; unit finish-invites / import parsers hors scope sauf snapshot classes si assertées
+
+HORS SCOPE : app/api/user/onboarding/**, prepare-onboarding-import-rows, onboarding-import-* services, onboarding-mobile.tsx, onboarding-mobile-sticky-actions.tsx, musical-profile-cinematic.tsx (ne pas supprimer), landing auth, cookies.
+
+Objectif desktop lg+ :
+- Masthead canvas : large title + body / eyebrow 13px sur le fond de page — plus de OnboardingShell cinématique ni DashboardCinematicHeroBg.
+- Progress : barre fine + label step sur canvas (trough light/dark), pas dans un hero sombre.
+- Pick : deux rows provider (logo + titre + hint + chevron) en groupe hairline / DASHBOARD_LIST_ROW — pas une carte glass parent.
+- Guide : titre + body canvas ; screenshots en <figure> calmes (border soft OK) — pas mega DASHBOARD_GLASS_CARD_SHELL autour du step entier.
+- Import : dropzone dashed sur canvas ; états progress / erreurs typo Crystal ; pas shadow-card.
+- Finish + Genre AI : panel canvas (hairline / spacing) ; CTAs DASHBOARD_BTN_GRADIENT / OUTLINE / GHOST sans hover-lift ni shadow-brand-glow ; invites Duet en list rows si présentes.
+- Interdit : DASHBOARD_CINEMATIC_HERO_SHELL, DASHBOARD_GLASS_CARD_SHELL comme shell de phase, CARD_SHELL, orbs/grain, badges mono tracking large marketing.
+
+Contraintes : 44px, EN+FR (+ ES si copy touchée), light/dark, prefers-reduced-transparency. Gemini modify_frontend 1 surface max si utile (ex. pick rows), puis adaptation manuelle.
+
+Livre : welcome → pick → guide (Spotify + Apple) → import → finish lisibles light/dark EN/FR ; plus de hero always-dark desktop ; flux import / skip / complete verts manuellement.
+```
+
+---
+
+### Étape 10b — Mobile onboarding dual tree + sticky actions
+
+Session **mobile ~390×844**. Aligner `OnboardingMobile` + barre sticky sur Crystal après 10a. Ne pas rouvrir le chrome desktop sauf tokens partagés (finish-invites déjà Crystal en 10a).
+
+```text
+[Préambule]
+
+Étape 10b — Crystal onboarding mobile. Composer masthead canvas compact + DASHBOARD_LIST_ROW + sticky glass bas. Ne pas retoucher le flux desktop data-export-onboarding (10a) sauf props déjà partagées. Pas d’APIs.
+
+Contrat :
+- Même phases welcome | pick | guide | import | finish via props depuis DataExportOnboarding.
+- Pas de bottom nav dashboard sur /dashboard/onboarding (e2e existant).
+- Dual tree : lg:hidden only. Ne pas compresser le desktop avec sm:.
+- Query addData / consent / skip / import inchangés.
+
+Aujourd’hui (à remplacer) :
+- HERO_SHELL always-dark + CinematicFloatingOrbs / FilmGrain / LightSweep (musical-profile-cinematic) sur welcome / pick / guide / import / finish.
+- GROUP_SHELL = rounded-2xl border + bg-card-surface (pick rows en carte).
+- Import dropzone / finish Genre AI : rounded-2xl card surfaces.
+- Sticky : déjà glass — calmer shadow lourde si encore marketing.
+
+Fichiers :
+- lib/components/onboarding-mobile.tsx
+- lib/components/onboarding-mobile-sticky-actions.tsx
+- Imports cinematic : débrancher de l’onboarding ; NE PAS supprimer musical-profile-cinematic.tsx (autres usages / legacy)
+- Réutiliser patterns 10a / OverviewMobileHero compact / DASHBOARD_LIST_ROW
+- e2e : __tests__/e2e/mobile-dashboard.spec.ts — « onboarding mobile has no bottom nav and continue opens pick » + « usable in French »
+
+HORS SCOPE : APIs import, data-export-onboarding logique métier, landing, 9a–9d Duet.
+
+Objectif mobile < lg :
+- Plus de hero cinématique bleed / orbs / grain / always-dark. Masthead compact canvas (suit light/dark) + progress + step label.
+- Pick : list rows hairline (pas GROUP_SHELL carte).
+- Guide : titre + body + image(s) sur canvas ; compteur step discret.
+- Import : dropzone / progress calmes ; cibles 44px.
+- Finish : consent / CTA sans carte marketing ; sticky primary/secondary Crystal.
+- Sticky bar : DASHBOARD_GLASS_CHROME ou équivalent bas d’écran ; hairline ; pas shadow violette / lift.
+
+Contraintes : 44px, EN+FR, light/dark, prefers-reduced-transparency / reduced-motion. Gemini 1 surface si utile.
+
+Livre : e2e onboarding mobile verts ; continue → pick ; FR OK ; light/dark sans hero always-dark.
+```
+
+---
+
 ## Gemini Design MCP
 
 Après l’étape 0. **Pas** de `create_frontend` Overview (casserait hooks / i18n / tabs).
@@ -1166,6 +1280,18 @@ Desktop `lg+` **et** mobile ~390×844, light et dark, EN et FR :
 
 ---
 
+## Critères de done (10a–10b)
+
+Desktop `lg+` **et** mobile ~390×844, light et dark, EN et FR :
+
+- [ ] **10a** `/dashboard/onboarding` desktop : plus de `DASHBOARD_CINEMATIC_HERO_SHELL` / `DashboardCinematicHeroBg` / `DASHBOARD_GLASS_CARD_SHELL` comme shell de phase ; masthead canvas ; pick / guide / import / finish + Genre AI sans cartes marketing ni CTAs hover-lift
+- [ ] **10b** Mobile : plus de `HERO_SHELL` cinematic / orbs / grain ; pick en list rows ; sticky glass calme ; **pas** de bottom nav
+- [ ] Phases `welcome → pick → guide → import → finish` et query `addData` / consent / skip / complete / import **inchangés**
+- [ ] e2e `mobile-dashboard` onboarding (continue → pick, FR) verts
+- [ ] `prefers-reduced-transparency` ; cibles 44px
+
+---
+
 ## Hors scope Crystal
 
 - Transformer Overview (ou l’app) en **story Replay** (scroll unique, tuer les tabs)
@@ -1174,6 +1300,7 @@ Desktop `lg+` **et** mobile ~390×844, light et dark, EN et FR :
 - Nouvelle page `/dashboard/replay` — [Encore](./ENCORE_REPLAY_PLAYBOOK.md)
 - Refonte landing (`design-system.md`)
 - Changer le graphe de nav sans décision produit
+- APIs / parsers onboarding (Étape 10 = **chrome UI** seulement)
 
 ---
 
@@ -1196,3 +1323,4 @@ Desktop `lg+` **et** mobile ~390×844, light et dark, EN et FR :
 - `ai-insights` / `temporal-analysis` / `palette/*` / settings — **7g** (chrome + empty partagés)
 - `notification-center.tsx` / `dashboard-user-menu.tsx` — **étape 8** (header actions)
 - `duet-friend-music-*.tsx` / `duet-compare-*.tsx` / `duet-friends-*.tsx` — **étape 9** (Duet produit)
+- `data-export-onboarding.tsx` / `onboarding-mobile.tsx` / `onboarding-finish-invites.tsx` / `onboarding-mobile-sticky-actions.tsx` — **étape 10** (wizard import Crystal)

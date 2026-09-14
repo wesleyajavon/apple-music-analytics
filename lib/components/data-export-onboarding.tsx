@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useQueryClient } from "@tanstack/react-query";
 import { getPathname, useRouter } from "@/i18n/navigation";
@@ -10,12 +10,10 @@ import {
   ArrowRight,
   CheckCircle2,
   Loader2,
-  Music2,
   Palette,
   Sparkles,
   UploadCloud,
 } from "lucide-react";
-import { DashboardHeroTitle } from "@/lib/components/dashboard-hero-title";
 import {
   GenreAiPanelChrome,
   ONBOARDING_GENRE_AI_ACCEPT_BTN,
@@ -23,17 +21,19 @@ import {
   OnboardingGroqEnableCard,
 } from "@/lib/components/onboarding-finish-invites";
 import { OnboardingMobile } from "@/lib/components/onboarding-mobile";
+import { OverviewHeroFrame } from "@/lib/components/overview-hero";
 import { AI_MASTER_QUERY_KEY } from "@/lib/hooks/use-ai-master-toggle";
 import { SoundprintBrandMark } from "@/lib/components/soundprint-brand-mark";
 import {
   DASHBOARD_BTN_GHOST,
   DASHBOARD_BTN_GRADIENT,
   DASHBOARD_BTN_OUTLINE,
-  DASHBOARD_CINEMATIC_HERO_SHELL,
-  DASHBOARD_GLASS_CARD_SHELL,
-  DashboardCinematicHeroBg,
+  DASHBOARD_LIST_ROW,
+  DASHBOARD_LIST_ROW_INTERACTIVE,
+  DASHBOARD_LIST_SEPARATOR,
+  DASHBOARD_SECTION_EYEBROW,
+  DASHBOARD_SECTION_TITLE,
   DashboardGradientButton,
-  DashboardOnboardingProviderCard,
   DashboardOutlineButton,
 } from "@/lib/components/dashboard-ui";
 import { useGenreBackfillJobSafe } from "@/lib/context/genre-backfill-job-context";
@@ -215,17 +215,6 @@ const VERCEL_SAFE_MULTIPART_MAX_BYTES = 4 * 1024 * 1024;
 
 /** Trait / remplissage brand (s’aligne sur --brand-* en clair et sombre). */
 const ONBOARDING_RAIL_CLASS = "bg-brand-gradient";
-const ONBOARDING_SHELL_CLASS = DASHBOARD_CINEMATIC_HERO_SHELL;
-const ONBOARDING_SURFACE_CLASS = DASHBOARD_GLASS_CARD_SHELL;
-
-function OnboardingShell({ children }: { children: ReactNode }) {
-  return (
-    <div className={`${ONBOARDING_SHELL_CLASS} px-6 py-8 text-white sm:px-8 sm:py-10`}>
-      <DashboardCinematicHeroBg />
-      <div className="relative">{children}</div>
-    </div>
-  );
-}
 
 function chunkArray<T>(arr: T[], size: number): T[][] {
   const out: T[][] = [];
@@ -277,17 +266,11 @@ function getOnboardingFlowProgressPercent(
 
 function OnboardingFlowProgressBar({
   percent,
-  variant,
   ariaLabel,
 }: {
   percent: number;
-  variant: "hero" | "surface";
   ariaLabel: string;
 }) {
-  const trough =
-    variant === "hero"
-      ? "bg-muted/30 ring-1 ring-inset ring-primary/10 dark:bg-foreground/[0.08] dark:ring-white/[0.08]"
-      : "bg-border";
   return (
     <div
       role="progressbar"
@@ -295,10 +278,10 @@ function OnboardingFlowProgressBar({
       aria-valuemin={0}
       aria-valuemax={100}
       aria-label={ariaLabel}
-      className={`h-1.5 w-full max-w-md overflow-hidden rounded-full ${trough}`}
+      className="h-1.5 w-full max-w-md overflow-hidden rounded-full bg-border dark:bg-foreground/[0.08]"
     >
       <div
-        className={`h-full rounded-full ${ONBOARDING_RAIL_CLASS} shadow-glow transition-[width] duration-500 ease-out`}
+        className={`h-full rounded-full ${ONBOARDING_RAIL_CLASS} transition-[width] duration-500 ease-out`}
         style={{ width: `${percent}%` }}
       />
     </div>
@@ -318,12 +301,10 @@ function OnboardingTopProgress({
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-3">
         <SoundprintBrandMark size="sm" showWordmarkOnMobile={false} interactive={false} />
-        <span className="text-xs tabular-nums text-muted">{percent}%</span>
+        <span className="text-[13px] tabular-nums text-muted">{percent}%</span>
       </div>
-      <div className="flex items-center justify-between gap-3 text-xs text-muted">
-        <span className="font-medium">{stepLabel}</span>
-      </div>
-      <OnboardingFlowProgressBar percent={percent} variant="hero" ariaLabel={ariaLabel} />
+      <p className={`${DASHBOARD_SECTION_EYEBROW}`}>{stepLabel}</p>
+      <OnboardingFlowProgressBar percent={percent} ariaLabel={ariaLabel} />
     </div>
   );
 }
@@ -1140,8 +1121,6 @@ export function DataExportOnboarding({
     }
   }, [queryClient, tGroqPrompt]);
 
-  const surfaceShellClass = ONBOARDING_SURFACE_CLASS;
-
   const primaryBtn = `${DASHBOARD_BTN_GRADIENT} min-h-11 px-5 py-2.5 lg:w-auto`;
 
   const secondaryBtn = `${DASHBOARD_BTN_OUTLINE} min-h-11 lg:w-auto`;
@@ -1304,77 +1283,55 @@ export function DataExportOnboarding({
       />
 
       {phase === "welcome" && (
-        <OnboardingShell>
-          <div className="space-y-8">
-            <div className="flex flex-col gap-4 sm:gap-5">
-              <DashboardHeroTitle icon={Music2} variant="hero" className="!mt-0">
-                {t("welcomeTitle")}
-              </DashboardHeroTitle>
-              <p className="max-w-lg text-base leading-relaxed text-white/70">{t("welcomeBody")}</p>
-            </div>
+        <div className="space-y-8">
+          <OverviewHeroFrame title={t("welcomeTitle")} description={t("welcomeBody")} />
 
-            <div className="rounded-[1.35rem] border border-white/12 bg-white/[0.06] p-5 backdrop-blur-sm">
-              <p className="font-mono text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-accent-cyan">
-                {t("welcomePlanTitle")}
-              </p>
-              <ul className="mt-4 space-y-3">
-                {[t("welcomeBullet1"), t("welcomeBullet2"), t("welcomeBullet3")].map((bullet) => (
-                  <li key={bullet} className="flex gap-3 text-sm leading-6 text-white/75">
-                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-gradient shadow-brand-glow" />
-                    {bullet}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <DashboardGradientButton onClick={() => setPhase("pick")}>
-                <span>{t("continue")}</span>
-                <ArrowRight
-                  className="h-4 w-4 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5"
-                  aria-hidden
-                />
-              </DashboardGradientButton>
-              <button
-                type="button"
-                className={`${skipBtn} text-white/60 hover:text-white`}
-                onClick={() => void completeOnboarding()}
-                disabled={isSubmitting}
-              >
-                {t("skipForNow")}
-              </button>
-            </div>
-            <p className="text-xs text-white/45">{t("skipHint")}</p>
+          <div className="space-y-4">
+            <p className={DASHBOARD_SECTION_EYEBROW}>{t("welcomePlanTitle")}</p>
+            <ul className="space-y-3">
+              {[t("welcomeBullet1"), t("welcomeBullet2"), t("welcomeBullet3")].map((bullet) => (
+                <li key={bullet} className="flex gap-3 text-sm leading-6 text-muted">
+                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-gradient" />
+                  {bullet}
+                </li>
+              ))}
+            </ul>
           </div>
-        </OnboardingShell>
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <DashboardGradientButton onClick={() => setPhase("pick")}>
+              <span>{t("continue")}</span>
+              <ArrowRight
+                className="h-4 w-4 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5"
+                aria-hidden
+              />
+            </DashboardGradientButton>
+            <button
+              type="button"
+              className={skipBtn}
+              onClick={() => void completeOnboarding()}
+              disabled={isSubmitting}
+            >
+              {t("skipForNow")}
+            </button>
+          </div>
+          <p className="text-[13px] text-muted">{t("skipHint")}</p>
+        </div>
       )}
 
       {phase === "pick" && (
-        <div className="space-y-6">
-          <OnboardingShell>
-            <div className="flex flex-col gap-5 sm:gap-6">
-              <p className="font-mono text-xs font-semibold uppercase tracking-[0.24em] text-accent-cyan">
-                {t("flowRail.choose")}
-              </p>
-              <div className="flex flex-col gap-3 sm:gap-4">
-                <DashboardHeroTitle icon={Music2} variant="hero" className="!mt-0">
-                  {t("pickTitle")}
-                </DashboardHeroTitle>
-                <p className="max-w-lg text-base leading-relaxed text-white/70">
-                  {t("pickSubtitle")}
-                </p>
-              </div>
-            </div>
-          </OnboardingShell>
+        <div className="space-y-8">
+          <OverviewHeroFrame title={t("pickTitle")} description={t("pickSubtitle")} />
+          <p className={DASHBOARD_SECTION_EYEBROW}>{t("flowRail.choose")}</p>
 
-          <div className={`${surfaceShellClass} space-y-3`}>
-            <DashboardOnboardingProviderCard
+          <div className="space-y-0" role="list">
+            <button
+              type="button"
+              role="listitem"
               onClick={() => selectProvider("spotify")}
-              badge={t("pickBadgeSpotify")}
-              title={t("pickSpotify")}
-              hint={t("pickSpotifyHint")}
-              hoverAccentClass="hover:border-[#1DB954]/40"
-              logo={
+              className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_ROW_INTERACTIVE} ${DASHBOARD_LIST_SEPARATOR} min-h-11 w-full`}
+            >
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-surface">
                 <Image
                   src={SPOTIFY_LOGO_SRC}
                   alt=""
@@ -1383,16 +1340,29 @@ export function DataExportOnboarding({
                   className="h-8 w-8 object-contain"
                   unoptimized
                 />
-              }
-            />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-base font-semibold text-foreground">{t("pickSpotify")}</span>
+                <span className="mt-0.5 block text-[13px] text-muted">{t("pickSpotifyHint")}</span>
+              </span>
+              <svg
+                className="h-4 w-4 shrink-0 text-muted"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                aria-hidden
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
 
-            <DashboardOnboardingProviderCard
+            <button
+              type="button"
+              role="listitem"
               onClick={() => selectProvider("apple")}
-              badge={t("pickBadgeApple")}
-              title={t("pickApple")}
-              hint={t("pickAppleHint")}
-              hoverAccentClass="hover:border-primary/35"
-              logo={
+              className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_ROW_INTERACTIVE} ${DASHBOARD_LIST_SEPARATOR} min-h-11 w-full`}
+            >
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-surface">
                 <Image
                   src={APPLE_MUSIC_LOGO_SRC}
                   alt=""
@@ -1401,31 +1371,44 @@ export function DataExportOnboarding({
                   className="h-8 w-8 object-contain"
                   unoptimized
                 />
-              }
-            />
-
-            <div className="flex flex-col gap-3 border-t border-card-border pt-6 sm:flex-row sm:items-center sm:justify-between">
-              <DashboardOutlineButton onClick={() => setPhase("welcome")}>
-                {t("back")}
-              </DashboardOutlineButton>
-              <button
-                type="button"
-                className={pickSkipBtn}
-                onClick={() => void completeOnboarding()}
-                disabled={isSubmitting}
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-base font-semibold text-foreground">{t("pickApple")}</span>
+                <span className="mt-0.5 block text-[13px] text-muted">{t("pickAppleHint")}</span>
+              </span>
+              <svg
+                className="h-4 w-4 shrink-0 text-muted"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                aria-hidden
               >
-                {t("skipForNow")}
-              </button>
-            </div>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+
+          <div className="flex flex-col gap-3 border-t border-glass-hairline pt-6 sm:flex-row sm:items-center sm:justify-between">
+            <DashboardOutlineButton onClick={() => setPhase("welcome")}>
+              {t("back")}
+            </DashboardOutlineButton>
+            <button
+              type="button"
+              className={pickSkipBtn}
+              onClick={() => void completeOnboarding()}
+              disabled={isSubmitting}
+            >
+              {t("skipForNow")}
+            </button>
           </div>
         </div>
       )}
 
       {phase === "guide" && provider && steps[stepIndex] && (
-        <div className={`${surfaceShellClass} space-y-6`}>
+        <div className="space-y-6">
           <div className="flex items-center justify-between gap-3">
-            <p className="text-sm font-medium text-muted">{t("guidePhaseLabel")}</p>
-            <span className="text-sm tabular-nums text-muted" aria-live="polite">
+            <p className={DASHBOARD_SECTION_EYEBROW}>{t("guidePhaseLabel")}</p>
+            <span className="text-[13px] tabular-nums text-muted" aria-live="polite">
               {t("guideStepCounterLabel", {
                 current: stepIndex + 1,
                 total: steps.length,
@@ -1437,7 +1420,7 @@ export function DataExportOnboarding({
           </span>
 
           <div className="space-y-3">
-            <h2 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
+            <h2 className={DASHBOARD_SECTION_TITLE}>
               {t(`${provider}.${steps[stepIndex].titleKey}` as Parameters<typeof t>[0])}
             </h2>
             <p className="text-sm leading-relaxed text-muted sm:text-base">
@@ -1456,7 +1439,7 @@ export function DataExportOnboarding({
           </a>
 
           <div className="space-y-4">
-            <figure className="overflow-hidden rounded-2xl border border-card-border bg-muted/10">
+            <figure className="overflow-hidden rounded-2xl border border-glass-hairline bg-muted/10">
               <Image
                 src={steps[stepIndex].imageSrc}
                 alt={t(steps[stepIndex].altKey)}
@@ -1468,7 +1451,7 @@ export function DataExportOnboarding({
               />
             </figure>
             {steps[stepIndex].imageSrc2 && steps[stepIndex].altKey2 ? (
-              <figure className="overflow-hidden rounded-2xl border border-card-border bg-muted/10">
+              <figure className="overflow-hidden rounded-2xl border border-glass-hairline bg-muted/10">
                 <Image
                   src={steps[stepIndex].imageSrc2}
                   alt={t(steps[stepIndex].altKey2)}
@@ -1482,7 +1465,7 @@ export function DataExportOnboarding({
             ) : null}
           </div>
 
-          <div className="hidden flex-col-reverse gap-3 border-t border-card-border pt-6 lg:flex lg:flex-row lg:justify-between">
+          <div className="hidden flex-col-reverse gap-3 border-t border-glass-hairline pt-6 lg:flex lg:flex-row lg:justify-between">
             <button type="button" className={secondaryBtn} onClick={goBackGuide}>
               {t("back")}
             </button>
@@ -1495,23 +1478,23 @@ export function DataExportOnboarding({
 
       {phase === "import" && provider && (
         <div
-          className={`relative space-y-6 ${surfaceShellClass} ${
+          className={`relative space-y-6 ${
             isImporting ? "min-h-[22rem] sm:min-h-[26rem]" : ""
           }`}
         >
           {isImporting ? (
             <div
-              className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 rounded-2xl bg-surface-glass px-6 py-8 text-center shadow-inner backdrop-blur-md"
+              className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 bg-background/90 px-6 py-8 text-center backdrop-blur-sm motion-reduce:backdrop-blur-none"
               role="status"
               aria-live="polite"
               aria-busy="true"
             >
-              <div className="relative mb-1 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/[0.1] ring-1 ring-primary/20">
+              <div className="relative mb-1 flex h-16 w-16 items-center justify-center">
                 <div
-                  className="absolute inset-2 animate-spin rounded-full border-4 border-border border-t-primary"
+                  className="absolute inset-0 animate-spin rounded-full border-2 border-border border-t-primary"
                   aria-hidden
                 />
-                <span className="text-sm font-bold tabular-nums text-primary">
+                <span className="text-sm font-semibold tabular-nums text-primary">
                   {importProgress?.isDeterminate
                     ? `${clampProgressPercent(importProgress.percent)}%`
                     : "…"}
@@ -1533,7 +1516,7 @@ export function DataExportOnboarding({
               </div>
               {importOverlayKind === "file" && importFile ? (
                 <p
-                  className="mt-1 max-w-full truncate px-2 text-xs font-medium text-primary"
+                  className="mt-1 max-w-full truncate px-2 text-[13px] font-medium text-primary"
                   title={importFile.name}
                 >
                   {importFile.name}
@@ -1541,7 +1524,7 @@ export function DataExportOnboarding({
               ) : null}
               <div className="mt-2 w-full max-w-sm space-y-3">
                 <div
-                  className="h-2.5 w-full overflow-hidden rounded-full bg-border shadow-inner"
+                  className="h-1.5 w-full overflow-hidden rounded-full bg-border"
                   role="progressbar"
                   aria-valuemin={0}
                   aria-valuemax={100}
@@ -1554,15 +1537,17 @@ export function DataExportOnboarding({
                 >
                   {importProgress?.isDeterminate ? (
                     <div
-                      className="h-full rounded-full bg-primary shadow-glow transition-[width] duration-300 ease-out"
+                      className={`h-full rounded-full ${ONBOARDING_RAIL_CLASS} transition-[width] duration-300 ease-out`}
                       style={{ width: `${clampProgressPercent(importProgress.percent)}%` }}
                     />
                   ) : (
-                    <div className="h-full w-1/3 rounded-full bg-primary shadow-glow animate-onboarding-import-indeterminate" />
+                    <div
+                      className={`h-full w-1/3 rounded-full ${ONBOARDING_RAIL_CLASS} animate-onboarding-import-indeterminate`}
+                    />
                   )}
                 </div>
                 {importProgress ? (
-                  <div className="flex flex-col gap-1 text-xs leading-relaxed text-muted sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex flex-col gap-1 text-[13px] leading-relaxed text-muted sm:flex-row sm:items-center sm:justify-between">
                     <span className="font-semibold tabular-nums text-foreground">
                       {importProgress.totalRows !== undefined &&
                       importProgress.processedRows !== undefined
@@ -1592,8 +1577,8 @@ export function DataExportOnboarding({
           ) : null}
 
           <div className="space-y-3">
-            <p className="text-sm font-medium text-muted">{t("import.eyebrow", { step: steps.length + 1 })}</p>
-            <h2 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
+            <p className={DASHBOARD_SECTION_EYEBROW}>{t("import.eyebrow", { step: steps.length + 1 })}</p>
+            <h2 className={DASHBOARD_SECTION_TITLE}>
               {provider === "spotify" ? t("import.spotifyTitle") : t("import.appleTitle")}
             </h2>
             <p className="text-sm leading-relaxed text-muted sm:text-base">
@@ -1604,16 +1589,16 @@ export function DataExportOnboarding({
           {providerHasExistingData ? (
             <div className="space-y-4">
               <div
-                className="rounded-2xl border-2 border-primary/25 bg-primary/[0.06] p-4 sm:p-5"
+                className="space-y-4 border-y border-glass-hairline py-5"
                 role="status"
                 aria-live="polite"
               >
                 <p className="text-sm font-semibold text-foreground">
                   {t("import.outcomeTitle")}
                 </p>
-                <dl className="mt-4 grid gap-4 sm:grid-cols-3">
-                  <div className="space-y-1 rounded-xl bg-surface/80 p-3 ring-1 ring-card-border">
-                    <dt className="text-[11px] font-semibold uppercase tracking-wide text-muted">
+                <dl className="grid gap-4 sm:grid-cols-3">
+                  <div className="space-y-1">
+                    <dt className={DASHBOARD_SECTION_EYEBROW}>
                       {t("import.outcomeExistingLabel")}
                     </dt>
                     <dd className="text-sm font-medium leading-snug text-foreground">
@@ -1622,8 +1607,8 @@ export function DataExportOnboarding({
                       })}
                     </dd>
                   </div>
-                  <div className="space-y-1 rounded-xl bg-surface/80 p-3 ring-1 ring-card-border">
-                    <dt className="text-[11px] font-semibold uppercase tracking-wide text-muted">
+                  <div className="space-y-1">
+                    <dt className={DASHBOARD_SECTION_EYEBROW}>
                       {t("import.outcomeFileLabel")}
                     </dt>
                     <dd className="text-sm font-medium leading-snug text-foreground">
@@ -1632,8 +1617,8 @@ export function DataExportOnboarding({
                         : t("import.outcomeFileFull")}
                     </dd>
                   </div>
-                  <div className="space-y-1 rounded-xl bg-surface/80 p-3 ring-1 ring-card-border">
-                    <dt className="text-[11px] font-semibold uppercase tracking-wide text-muted">
+                  <div className="space-y-1">
+                    <dt className={DASHBOARD_SECTION_EYEBROW}>
                       {t("import.outcomeResultLabel")}
                     </dt>
                     <dd className="text-sm font-medium leading-snug text-foreground">
@@ -1645,32 +1630,31 @@ export function DataExportOnboarding({
                 </dl>
               </div>
 
-              <fieldset
-                className="space-y-3 rounded-2xl border border-card-border bg-muted/5 p-4 sm:p-5"
-                disabled={isImporting}
-              >
-                <legend className="px-1 text-sm font-semibold text-foreground">
+              <fieldset className="space-y-3" disabled={isImporting}>
+                <legend className="text-sm font-semibold text-foreground">
                   {t("import.modeTitle")}
                 </legend>
-                <p className="text-xs leading-relaxed text-muted">{t("import.modeIntro")}</p>
-                <label className="flex cursor-pointer gap-3 rounded-xl border border-card-border bg-surface p-3 has-[:checked]:border-primary/40 has-[:checked]:ring-1 has-[:checked]:ring-primary/25">
+                <p className="text-[13px] leading-relaxed text-muted">{t("import.modeIntro")}</p>
+                <label
+                  className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_SEPARATOR} ${DASHBOARD_LIST_ROW_INTERACTIVE} cursor-pointer items-start`}
+                >
                   <input
                     type="radio"
                     name="importMode"
-                    className="mt-0.5"
+                    className="mt-1"
                     checked={importMode === "incremental"}
                     onChange={() => setImportMode("incremental")}
                   />
-                  <span className="space-y-1 text-sm">
+                  <span className="min-w-0 flex-1 space-y-1 text-sm">
                     <span className="flex flex-wrap items-center gap-2">
                       <span className="font-medium text-foreground">
                         {t("import.modeIncremental")}
                       </span>
-                      <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">
+                      <span className={`${DASHBOARD_SECTION_EYEBROW} text-primary`}>
                         {t("import.modeIncrementalBadge")}
                       </span>
                     </span>
-                    <span className="block text-xs leading-relaxed text-muted">
+                    <span className="block text-[13px] leading-relaxed text-muted">
                       {importCursorDateLabel
                         ? t("import.modeIncrementalHint", {
                             date: importCursorDateLabel,
@@ -1680,19 +1664,21 @@ export function DataExportOnboarding({
                     </span>
                   </span>
                 </label>
-                <label className="flex cursor-pointer gap-3 rounded-xl border border-card-border bg-surface p-3 has-[:checked]:border-primary/40 has-[:checked]:ring-1 has-[:checked]:ring-primary/25">
+                <label
+                  className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_SEPARATOR} ${DASHBOARD_LIST_ROW_INTERACTIVE} cursor-pointer items-start`}
+                >
                   <input
                     type="radio"
                     name="importMode"
-                    className="mt-0.5"
+                    className="mt-1"
                     checked={importMode === "full"}
                     onChange={() => setImportMode("full")}
                   />
-                  <span className="space-y-1 text-sm">
+                  <span className="min-w-0 flex-1 space-y-1 text-sm">
                     <span className="block font-medium text-foreground">
                       {t("import.modeFull")}
                     </span>
-                    <span className="block text-xs leading-relaxed text-muted">
+                    <span className="block text-[13px] leading-relaxed text-muted">
                       {t("import.modeFullHint")}
                     </span>
                   </span>
@@ -1700,24 +1686,18 @@ export function DataExportOnboarding({
               </fieldset>
             </div>
           ) : (
-            <div
-              className="space-y-2 rounded-2xl border-2 border-primary/25 bg-primary/[0.06] px-4 py-4 sm:px-5"
-              role="status"
-            >
+            <div className="space-y-2 border-y border-glass-hairline py-4" role="status">
               <p className="text-sm font-semibold text-foreground">
                 {t("import.outcomeFirstImportTitle", { provider: providerLabel })}
               </p>
-              <p className="text-xs leading-relaxed text-muted sm:text-sm">
+              <p className="text-[13px] leading-relaxed text-muted sm:text-sm">
                 {t("import.outcomeFirstImportBody")}
               </p>
             </div>
           )}
 
           {importFile ? (
-            <p
-              className="rounded-xl border border-card-border bg-surface px-4 py-3 text-sm leading-relaxed text-foreground"
-              aria-live="polite"
-            >
+            <p className="text-sm leading-relaxed text-foreground" aria-live="polite">
               {providerHasExistingData
                 ? importMode === "incremental"
                   ? t("import.confirmAppend", { name: importFile.name })
@@ -1727,11 +1707,11 @@ export function DataExportOnboarding({
           ) : null}
 
           {provider === "spotify" && hasSpotifyWebConnection ? (
-            <div className="space-y-4 rounded-2xl border border-card-border bg-surface p-5 shadow-inner ring-1 ring-[#169c46]/35 dark:bg-[#1DB954]/[0.08] dark:ring-[#1ed760]/30">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#047857] dark:text-[#86efac]">
+            <div className="space-y-4 border-y border-glass-hairline py-5">
+              <p className={DASHBOARD_SECTION_EYEBROW}>
                 {t("import.spotifyWebEyebrow")}
               </p>
-              <h3 className="text-lg font-bold tracking-tight text-foreground">
+              <h3 className="text-lg font-semibold tracking-tight text-foreground">
                 {t("import.spotifyWebTitle")}
               </h3>
               <p className="text-sm leading-relaxed text-muted">{t("import.spotifyWebBody")}</p>
@@ -1754,18 +1734,18 @@ export function DataExportOnboarding({
                 )}
               </button>
               <div className="flex items-center gap-3 pt-2">
-                <div className="h-px flex-1 bg-border" />
-                <span className="text-xs font-medium uppercase tracking-wide text-muted">
+                <div className="h-px flex-1 bg-glass-hairline" />
+                <span className={DASHBOARD_SECTION_EYEBROW}>
                   {t("import.spotifyWebDivider")}
                 </span>
-                <div className="h-px flex-1 bg-border" />
+                <div className="h-px flex-1 bg-glass-hairline" />
               </div>
             </div>
           ) : null}
 
           {provider === "spotify" && (
             <div className="flex flex-col gap-3">
-              <figure className="overflow-hidden rounded-xl border border-card-border bg-surface shadow-inner">
+              <figure className="overflow-hidden rounded-2xl border border-glass-hairline bg-muted/10">
                 <Image
                   src="/onboarding/spotify-email-download.png"
                   alt={t("imageAltSpotifyEmail")}
@@ -1775,7 +1755,7 @@ export function DataExportOnboarding({
                   sizes="(max-width: 768px) 100vw, 42rem"
                 />
               </figure>
-              <figure className="overflow-hidden rounded-xl border border-card-border bg-surface shadow-inner">
+              <figure className="overflow-hidden rounded-2xl border border-glass-hairline bg-muted/10">
                 <Image
                   src="/onboarding/spotify-download-zip-file.png"
                   alt={t("imageAltSpotifyDownloadZip")}
@@ -1812,7 +1792,7 @@ export function DataExportOnboarding({
           />
           <button
             type="button"
-            className="group flex min-h-40 w-full flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-card-border bg-muted/5 px-5 py-8 text-center transition-colors hover:border-primary/35 hover:bg-primary/[0.03] disabled:pointer-events-none disabled:opacity-50"
+            className="group flex min-h-40 w-full flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-glass-hairline bg-transparent px-5 py-8 text-center transition-colors hover:border-primary/35 hover:bg-primary/[0.03] disabled:pointer-events-none disabled:opacity-50"
             disabled={isImporting}
             onClick={() => fileInputRef.current?.click()}
             onDragOver={(e) => e.preventDefault()}
@@ -1825,17 +1805,17 @@ export function DataExportOnboarding({
           >
             <UploadCloud className="h-8 w-8 text-muted transition-colors group-hover:text-primary" strokeWidth={1.75} aria-hidden />
             <span className="font-medium text-foreground">{t("import.dropTitle")}</span>
-            <span className="max-w-xs text-xs text-muted">
+            <span className="max-w-xs text-[13px] text-muted">
               {provider === "spotify" ? t("import.dropSubSpotify") : t("import.dropSubApple")}
             </span>
             {importFile ? (
-              <span className="mt-1 text-xs font-medium text-primary">
+              <span className="mt-1 text-[13px] font-medium text-primary">
                 {t("import.selectedFile", { name: importFile.name })}
               </span>
             ) : null}
           </button>
 
-          <div className="hidden flex-col-reverse gap-3 border-t border-card-border pt-6 lg:flex lg:flex-row lg:justify-between">
+          <div className="hidden flex-col-reverse gap-3 border-t border-glass-hairline pt-6 lg:flex lg:flex-row lg:justify-between">
             <button type="button" className={secondaryBtn} onClick={goBackImport} disabled={isImporting}>
               {t("back")}
             </button>
@@ -1875,241 +1855,232 @@ export function DataExportOnboarding({
         </div>
       )}
 
-
       {phase === "finish" && (
-        <div className="space-y-6">
-            {importSummary ? (
-            <OnboardingShell>
-              <div className="space-y-8 text-center">
-                <div
-                  className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-accent-emerald/25 bg-accent-emerald/15"
-                  aria-hidden
-                >
-                  <CheckCircle2 className="h-7 w-7 text-accent-emerald" strokeWidth={1.8} />
-                </div>
-                <div className="space-y-3">
-                  <p className="text-sm font-medium text-accent-emerald">{t("finishSuccessEyebrow")}</p>
-                  <h1 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-                    {t("finishSuccessTitle")}
-                  </h1>
-                  <p className="mx-auto max-w-md text-base leading-relaxed text-white/70">
-                    {importSummary.mode === "incremental"
-                      ? t("finishSuccessBodyAppend", {
+        <div className="space-y-8">
+          {importSummary ? (
+            <div className="space-y-4">
+              <div
+                className="flex h-14 w-14 items-center justify-center rounded-2xl bg-accent-emerald/15"
+                aria-hidden
+              >
+                <CheckCircle2 className="h-7 w-7 text-accent-emerald" strokeWidth={1.8} />
+              </div>
+              <p className={`${DASHBOARD_SECTION_EYEBROW} text-accent-emerald`}>
+                {t("finishSuccessEyebrow")}
+              </p>
+              <OverviewHeroFrame
+                title={t("finishSuccessTitle")}
+                description={
+                  importSummary.mode === "incremental"
+                    ? t("finishSuccessBodyAppend", {
+                        imported: importSummary.imported.toLocaleString(),
+                        skipped: importSummary.skippedDuplicates.toLocaleString(),
+                      })
+                    : importSummary.mode === "full" && providerImportStatus?.hasData
+                      ? t("finishSuccessBodyReprocess", {
                           imported: importSummary.imported.toLocaleString(),
                           skipped: importSummary.skippedDuplicates.toLocaleString(),
                         })
-                      : importSummary.mode === "full" && providerImportStatus?.hasData
-                        ? t("finishSuccessBodyReprocess", {
-                            imported: importSummary.imported.toLocaleString(),
-                            skipped: importSummary.skippedDuplicates.toLocaleString(),
-                          })
-                        : t("finishSuccessBody", {
-                            imported: importSummary.imported.toLocaleString(),
-                            skipped: importSummary.skippedDuplicates.toLocaleString(),
-                          })}
-                  </p>
-                </div>
-                <p className="sr-only">
-                  {t("finishAfterImport", {
-                    imported: importSummary.imported,
-                    skipped: importSummary.skippedDuplicates,
-                  })}
-                </p>
-              </div>
-            </OnboardingShell>
-            ) : (
-            <OnboardingShell>
-              <div className="space-y-4">
-                <p className="font-mono text-xs font-semibold uppercase tracking-[0.24em] text-accent-cyan">
-                  {t("finishSkippedEyebrow")}
-                </p>
-                <DashboardHeroTitle icon={Music2} variant="hero" className="!mt-0">
-                  {t("finishTitle")}
-                </DashboardHeroTitle>
-                <p className="text-base leading-relaxed text-white/70">{t("finishBody")}</p>
-              </div>
-            </OnboardingShell>
-            )}
+                      : t("finishSuccessBody", {
+                          imported: importSummary.imported.toLocaleString(),
+                          skipped: importSummary.skippedDuplicates.toLocaleString(),
+                        })
+                }
+              />
+              <p className="sr-only">
+                {t("finishAfterImport", {
+                  imported: importSummary.imported,
+                  skipped: importSummary.skippedDuplicates,
+                })}
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <p className={DASHBOARD_SECTION_EYEBROW}>{t("finishSkippedEyebrow")}</p>
+              <OverviewHeroFrame title={t("finishTitle")} description={t("finishBody")} />
+            </div>
+          )}
 
-          <div className={`${surfaceShellClass} space-y-6`}>
-          {showGenreConsent && genreLlmAfterImport ? (
-            <OnboardingGenreLlmConsentCard
-              unknownTrackCount={genreLlmAfterImport.unknownTrackCount}
-              unknownRatio={genreLlmAfterImport.unknownRatio}
-              groqConfigured={genreLlmAfterImport.groqConfigured}
-              isStarting={isStartingLlmBackfill}
-              hasActiveGroqJob={hasActiveGroqJobShared}
-              onAccept={() => void startLlmGenreBackfill()}
-              onDecline={() => {
-                setGenreLlmDeclined(true);
-                setGenreBackfillBannerOptOut(true);
-              }}
-            />
-          ) : null}
-          {effectiveBackfill ? (
-            <section aria-label={t("genreBackfill.title")}>
-              <GenreAiPanelChrome className="p-5 sm:p-6">
-                <div className="space-y-5">
-                  <div className="flex gap-3 sm:gap-4">
-                    <div
-                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/14 shadow-[inset_0_1px_0_0_rgb(255_255_255_/0.08)] ring-1 ring-primary/25 dark:bg-primary/20"
-                      aria-hidden
-                    >
-                      {hasBackfillInProgress ? (
-                        <Loader2 className="h-5 w-5 animate-spin text-primary" />
-                      ) : (
-                        <Sparkles className="h-5 w-5 text-accent-cyan" />
-                      )}
+          <div className="space-y-6">
+            {showGenreConsent && genreLlmAfterImport ? (
+              <OnboardingGenreLlmConsentCard
+                unknownTrackCount={genreLlmAfterImport.unknownTrackCount}
+                unknownRatio={genreLlmAfterImport.unknownRatio}
+                groqConfigured={genreLlmAfterImport.groqConfigured}
+                isStarting={isStartingLlmBackfill}
+                hasActiveGroqJob={hasActiveGroqJobShared}
+                onAccept={() => void startLlmGenreBackfill()}
+                onDecline={() => {
+                  setGenreLlmDeclined(true);
+                  setGenreBackfillBannerOptOut(true);
+                }}
+              />
+            ) : null}
+            {effectiveBackfill ? (
+              <section aria-label={t("genreBackfill.title")}>
+                <GenreAiPanelChrome>
+                  <div className="space-y-5">
+                    <div className="flex gap-3 sm:gap-4">
+                      <div
+                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/14"
+                        aria-hidden
+                      >
+                        {hasBackfillInProgress ? (
+                          <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                        ) : (
+                          <Sparkles className="h-5 w-5 text-accent-cyan" />
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1 space-y-2">
+                        <p className="text-base font-semibold leading-snug text-foreground sm:text-[1.05rem]">
+                          {t("genreBackfill.title")}
+                        </p>
+                        <p className="text-[13px] leading-relaxed text-muted sm:text-sm">
+                          {hasBackfillInProgress
+                            ? effectiveBackfill.status === "paused"
+                              ? t("genreBackfill.paused")
+                              : t("genreBackfill.running")
+                            : effectiveBackfill.status === "completed"
+                              ? t("genreBackfill.completed")
+                              : effectiveBackfill.status === "cancelled"
+                                ? t("genreBackfill.cancelled")
+                                : t("genreBackfill.failed")}
+                        </p>
+                      </div>
                     </div>
-                    <div className="min-w-0 flex-1 space-y-2">
-                      <p className="text-base font-semibold leading-snug text-foreground sm:text-[1.05rem]">
-                        {t("genreBackfill.title")}
-                      </p>
-                      <p className="text-xs leading-relaxed text-muted sm:text-sm">
-                        {hasBackfillInProgress
-                          ? effectiveBackfill.status === "paused"
-                            ? t("genreBackfill.paused")
-                            : t("genreBackfill.running")
-                          : effectiveBackfill.status === "completed"
-                            ? t("genreBackfill.completed")
-                            : effectiveBackfill.status === "cancelled"
-                              ? t("genreBackfill.cancelled")
-                              : t("genreBackfill.failed")}
-                      </p>
+                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-border dark:bg-foreground/[0.08]">
+                      <div
+                        className={`h-full rounded-full ${ONBOARDING_RAIL_CLASS} transition-[width] duration-500 ease-out`}
+                        style={{ width: `${Math.round(backfillProgressRatio * 100)}%` }}
+                      />
                     </div>
-                  </div>
-                  <div className="h-2 w-full overflow-hidden rounded-full bg-muted/25 ring-1 ring-inset ring-border dark:bg-white/[0.08] dark:ring-white/[0.06]">
-                    <div
-                      className={`h-full rounded-full ${ONBOARDING_RAIL_CLASS} shadow-glow transition-[width] duration-500 ease-out`}
-                      style={{ width: `${Math.round(backfillProgressRatio * 100)}%` }}
-                    />
-                  </div>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="rounded-xl border border-accent-emerald/28 bg-accent-emerald/[0.08] px-4 py-3 shadow-inner dark:bg-accent-emerald/[0.11]">
-                      <p className="text-xs font-medium text-accent-emerald">
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <p className="text-[13px] font-medium text-accent-emerald">
                         {t("genreBackfill.artistsProcessed", { count: effectiveBackfill.artistsProcessed })}
                       </p>
-                    </div>
-                    <div className="rounded-xl border border-primary/28 bg-primary/[0.08] px-4 py-3 shadow-inner dark:bg-primary/[0.12]">
-                      <p className="text-xs font-medium text-primary">
+                      <p className="text-[13px] font-medium text-primary">
                         {t("genreBackfill.artistsMapped", { count: effectiveBackfill.artistsMapped })}
                       </p>
-                    </div>
-                    <div className="rounded-xl border border-accent-cyan/28 bg-accent-cyan/[0.07] px-4 py-3 shadow-inner dark:bg-accent-cyan/[0.1]">
-                      <p className="text-xs font-medium text-accent-cyan">
+                      <p className="text-[13px] font-medium text-accent-cyan">
                         {t("genreBackfill.tracksUpdated", { count: effectiveBackfill.tracksUpdated })}
                       </p>
-                    </div>
-                    <div className="rounded-xl border border-border bg-muted/12 px-4 py-3 shadow-inner dark:bg-white/[0.04]">
-                      <p className="text-xs font-medium text-muted">
+                      <p className="text-[13px] font-medium text-muted">
                         {t("genreBackfill.requestsUsed", { count: effectiveBackfill.apiRequestsUsed })}
                       </p>
                     </div>
-                  </div>
-                  {effectiveBackfill.initialUnknownPct != null &&
-                  effectiveBackfill.currentUnknownPct != null ? (
-                    <p className="text-xs leading-relaxed text-muted">
-                      {t("genreBackfill.ratio", {
-                        initial: effectiveBackfill.initialUnknownPct.toFixed(1),
-                        current: effectiveBackfill.currentUnknownPct.toFixed(1),
-                        target: effectiveBackfill.targetUnknownPct.toFixed(1),
-                      })}
-                    </p>
-                  ) : null}
-                  {effectiveBackfill.errorMessage ? (
-                    <p className="rounded-xl border border-accent-rose/40 bg-accent-rose/[0.1] px-4 py-3 text-xs leading-relaxed text-foreground dark:bg-accent-rose/[0.12] dark:text-foreground">
-                      {t("genreBackfill.error", { message: effectiveBackfill.errorMessage })}
-                    </p>
-                  ) : null}
-                  {shouldOfferNextLlmSession || shouldOfferRetryLlmSession ? (
-                    <div className="space-y-3 rounded-xl border border-card-border bg-surface px-4 py-4 shadow-inner ring-1 ring-primary/10 dark:bg-surface-raised/60">
-                      <p className="text-sm leading-relaxed text-muted">
-                        {shouldOfferRetryLlmSession
-                          ? t("genreLlmConsent.nextSessionAfterError")
-                          : t("genreLlmConsent.nextSessionPrompt", {
-                              current: effectiveBackfill.currentUnknownPct?.toFixed(1) ?? "0.0",
-                              target: effectiveBackfill.targetUnknownPct.toFixed(1),
-                            })}
+                    {effectiveBackfill.initialUnknownPct != null &&
+                    effectiveBackfill.currentUnknownPct != null ? (
+                      <p className="text-[13px] leading-relaxed text-muted">
+                        {t("genreBackfill.ratio", {
+                          initial: effectiveBackfill.initialUnknownPct.toFixed(1),
+                          current: effectiveBackfill.currentUnknownPct.toFixed(1),
+                          target: effectiveBackfill.targetUnknownPct.toFixed(1),
+                        })}
                       </p>
-                      <button
-                        type="button"
-                        className={`${ONBOARDING_GENRE_AI_ACCEPT_BTN} w-full sm:w-auto`}
-                        disabled={isStartingLlmBackfill || hasActiveGroqJobShared}
-                        onClick={() => void startLlmGenreBackfill()}
-                      >
-                        {isStartingLlmBackfill ? (
-                          <>
-                            <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
-                            <span>{t("genreLlmConsent.starting")}</span>
-                          </>
-                        ) : (
-                          <>
-                            <Sparkles className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
-                            <span>{t("genreLlmConsent.startNextSession")}</span>
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  ) : null}
-                </div>
-              </GenreAiPanelChrome>
-            </section>
-          ) : null}
-          {showGroqEnableInvite ? (
-            <OnboardingGroqEnableCard
-              isEnabling={isEnablingGroq}
-              onAccept={() => void enableGroqAi()}
-              onDecline={() => setGroqEnableDeclined(true)}
-            />
-          ) : null}
-          <div
-            className={
-              finishSurfaceHasExtras
-                ? "flex flex-col gap-3 border-t border-card-border pt-6"
-                : "flex flex-col gap-3 pt-2"
-            }
-          >
-            <button
-              type="button"
-              className={`${continueBtn} disabled:pointer-events-none disabled:opacity-60`}
-              onClick={() =>
-                void completeOnboarding(importSummary ? "/dashboard/musical-profile" : "/dashboard/overview")
+                    ) : null}
+                    {effectiveBackfill.errorMessage ? (
+                      <p className="text-[13px] leading-relaxed text-accent-rose">
+                        {t("genreBackfill.error", { message: effectiveBackfill.errorMessage })}
+                      </p>
+                    ) : null}
+                    {shouldOfferNextLlmSession || shouldOfferRetryLlmSession ? (
+                      <div className="space-y-3 border-t border-glass-hairline pt-4">
+                        <p className="text-sm leading-relaxed text-muted">
+                          {shouldOfferRetryLlmSession
+                            ? t("genreLlmConsent.nextSessionAfterError")
+                            : t("genreLlmConsent.nextSessionPrompt", {
+                                current: effectiveBackfill.currentUnknownPct?.toFixed(1) ?? "0.0",
+                                target: effectiveBackfill.targetUnknownPct.toFixed(1),
+                              })}
+                        </p>
+                        <button
+                          type="button"
+                          className={`${ONBOARDING_GENRE_AI_ACCEPT_BTN} w-full sm:w-auto`}
+                          disabled={isStartingLlmBackfill || hasActiveGroqJobShared}
+                          onClick={() => void startLlmGenreBackfill()}
+                        >
+                          {isStartingLlmBackfill ? (
+                            <>
+                              <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+                              <span>{t("genreLlmConsent.starting")}</span>
+                            </>
+                          ) : (
+                            <>
+                              <Sparkles className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
+                              <span>{t("genreLlmConsent.startNextSession")}</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    ) : null}
+                  </div>
+                </GenreAiPanelChrome>
+              </section>
+            ) : null}
+            {showGroqEnableInvite ? (
+              <OnboardingGroqEnableCard
+                isEnabling={isEnablingGroq}
+                onAccept={() => void enableGroqAi()}
+                onDecline={() => setGroqEnableDeclined(true)}
+              />
+            ) : null}
+            <div
+              className={
+                finishSurfaceHasExtras
+                  ? "flex flex-col gap-3 border-t border-glass-hairline pt-6"
+                  : "flex flex-col gap-3 pt-2"
               }
-              disabled={isSubmitting}
             >
-              <span>
-                {isSubmitting
-                  ? t("finishing")
-                  : importSummary
-                    ? t("goToMusicalProfile")
-                    : t("goToDashboard")}
-              </span>
-              {!isSubmitting ? (
-                <ArrowRight
-                  className="h-[1.125rem] w-[1.125rem] shrink-0 transition-transform duration-200 group-hover:translate-x-0.5"
-                  aria-hidden
-                />
-              ) : (
-                <span
-                  className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-white/40 border-t-white"
-                  aria-hidden
-                />
-              )}
-            </button>
-            {paletteInvitation?.shouldInvite ? (
               <button
                 type="button"
-                className={`${secondaryBtn} inline-flex w-full items-center justify-center gap-2 sm:w-auto sm:self-center`}
-                onClick={() => void completeOnboarding("/dashboard/genres/palette")}
+                className={`${continueBtn} disabled:pointer-events-none disabled:opacity-60`}
+                onClick={() =>
+                  void completeOnboarding(importSummary ? "/dashboard/musical-profile" : "/dashboard/overview")
+                }
                 disabled={isSubmitting}
               >
-                <Palette className="h-4 w-4 shrink-0 text-primary opacity-90" aria-hidden />
                 <span>
-                  {t("finishPaletteCta", { count: paletteInvitation.unknownArtists })}
+                  {isSubmitting
+                    ? t("finishing")
+                    : importSummary
+                      ? t("goToMusicalProfile")
+                      : t("goToDashboard")}
                 </span>
+                {!isSubmitting ? (
+                  <ArrowRight
+                    className="h-[1.125rem] w-[1.125rem] shrink-0 transition-transform duration-200 group-hover:translate-x-0.5"
+                    aria-hidden
+                  />
+                ) : (
+                  <span
+                    className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-white/40 border-t-white"
+                    aria-hidden
+                  />
+                )}
               </button>
-            ) : null}
-          </div>
+              {paletteInvitation?.shouldInvite ? (
+                <button
+                  type="button"
+                  className={`${DASHBOARD_LIST_ROW} ${DASHBOARD_LIST_ROW_INTERACTIVE} ${DASHBOARD_LIST_SEPARATOR} min-h-11 w-full text-foreground`}
+                  onClick={() => void completeOnboarding("/dashboard/genres/palette")}
+                  disabled={isSubmitting}
+                >
+                  <Palette className="h-5 w-5 shrink-0 text-primary" aria-hidden />
+                  <span className="min-w-0 flex-1 text-left text-sm font-medium">
+                    {t("finishPaletteCta", { count: paletteInvitation.unknownArtists })}
+                  </span>
+                  <svg
+                    className="h-4 w-4 shrink-0 text-muted"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    aria-hidden
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              ) : null}
+            </div>
           </div>
         </div>
       )}

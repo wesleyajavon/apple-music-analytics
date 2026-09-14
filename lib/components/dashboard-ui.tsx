@@ -137,10 +137,10 @@ export const DASHBOARD_METRIC_LABEL =
   "text-[13px] text-muted";
 
 export const DASHBOARD_BTN_GRADIENT =
-  "group inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-6 py-3 text-sm font-semibold text-white shadow-brand-glow transition-all hover:-translate-y-0.5 hover:opacity-[0.98] hover:shadow-card-hover active:translate-y-0 disabled:pointer-events-none disabled:opacity-60 disabled:hover:translate-y-0";
+  "group inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-[0.98] disabled:pointer-events-none disabled:opacity-60";
 
 export const DASHBOARD_BTN_OUTLINE =
-  "inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-card-border bg-surface-raised px-5 py-2.5 text-sm font-semibold text-foreground shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/28 hover:bg-primary/[0.05] hover:shadow-card disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/12 dark:bg-white/[0.06] dark:hover:border-white/22 dark:hover:bg-white/[0.1]";
+  "inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-card-border bg-surface-raised px-5 py-2.5 text-sm font-semibold text-foreground transition-colors hover:border-primary/28 hover:bg-primary/[0.05] disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/12 dark:bg-white/[0.06] dark:hover:border-white/22 dark:hover:bg-white/[0.1]";
 
 export const DASHBOARD_BTN_GHOST =
   "inline-flex min-h-11 items-center justify-center rounded-2xl px-5 py-2.5 text-sm font-medium text-muted transition-colors hover:text-foreground disabled:opacity-55";

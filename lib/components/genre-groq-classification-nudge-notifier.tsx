@@ -9,7 +9,10 @@ import {
   GENRE_AI_NUDGE_LAST_PROMPT_STORAGE_KEY,
   GENRE_AI_NUDGE_NOTIFICATION_SOURCE,
 } from "@/lib/constants/genre-ai-nudge-notification";
-import { useHideNotificationCenterForPublicDemo } from "@/lib/hooks/use-public-demo-viewer";
+import {
+  useHideNotificationCenterForPublicDemo,
+  useSupabaseAuthUserId,
+} from "@/lib/hooks/use-public-demo-viewer";
 import { isGroqGenreNudgeEligible } from "@/lib/utils/genre-ai-nudge-eligibility";
 import { getGenreBackfillBannerOptOut } from "@/lib/utils/genre-backfill-banner-prefs";
 
@@ -33,13 +36,14 @@ type StatusResponse = {
 export function GenreGroqClassificationNudgeNotifier() {
   const searchParams = useSearchParams();
   const hideForDemo = useHideNotificationCenterForPublicDemo(searchParams.get("userId"));
+  const authUserId = useSupabaseAuthUserId();
   const { addNotification, items, hydrated } = useNotifications();
   const t = useTranslations("components.notificationCenter");
   const itemsRef = useRef(items);
   itemsRef.current = items;
 
   useEffect(() => {
-    if (!hydrated || hideForDemo) return;
+    if (!hydrated || hideForDemo || !authUserId) return;
 
     let cancelled = false;
 
@@ -101,7 +105,7 @@ export function GenreGroqClassificationNudgeNotifier() {
     return () => {
       cancelled = true;
     };
-  }, [hydrated, hideForDemo, addNotification, t]);
+  }, [hydrated, hideForDemo, authUserId, addNotification, t]);
 
   return null;
 }

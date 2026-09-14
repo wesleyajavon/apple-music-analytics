@@ -441,7 +441,7 @@ function DuetFriendsContent() {
     [searchParams]
   );
   const { data, isLoading, error, refetch } = useDuetFriends({
-    enabled: authUserId !== undefined && !isPublicDemoViewer,
+    enabled: Boolean(authUserId) && !isPublicDemoViewer,
   });
   const { invite, patchFriendship, blockFriendship, createInviteLink } = useDuetMutations();
   const [email, setEmail] = useState("");

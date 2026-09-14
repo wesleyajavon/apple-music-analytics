@@ -180,7 +180,7 @@ function CompareContent() {
   const period = getPeriodFromSearchParams(searchParams, "month");
 
   const { data: friendsData, isLoading: friendsLoading } = useDuetFriends({
-    enabled: authUserId !== undefined && !isPublicDemoViewer,
+    enabled: Boolean(authUserId) && !isPublicDemoViewer,
   });
   const [viewer, setViewer] = useState<ViewerProfile | null>(null);
 

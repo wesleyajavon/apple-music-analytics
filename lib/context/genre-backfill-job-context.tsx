@@ -10,6 +10,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { useSupabaseAuthUserId } from "@/lib/hooks/use-public-demo-viewer";
 
 /** Forme renvoyée par GET `/api/user/onboarding/import/genre-backfill/status` (job dashboard). */
 export type GroqBackfillDashboardJob = {
@@ -37,10 +38,13 @@ const POLL_MS_TERMINAL = 60_000;
 const POLL_MS_NO_JOB = 5000;
 
 export function GenreBackfillJobProvider({ children }: { children: ReactNode }) {
+  const authUserId = useSupabaseAuthUserId();
+  const canPoll = Boolean(authUserId);
   const [job, setJob] = useState<GroqBackfillDashboardJob | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
   const refreshStatus = useCallback(async () => {
+    if (!canPoll) return;
     if (typeof document !== "undefined" && document.visibilityState === "hidden") return;
     abortRef.current?.abort();
     const ac = new AbortController();
@@ -57,13 +61,19 @@ export function GenreBackfillJobProvider({ children }: { children: ReactNode }) 
     } catch (e) {
       if (e instanceof DOMException && e.name === "AbortError") return;
     }
-  }, []);
+  }, [canPoll]);
 
   useEffect(() => {
+    if (!canPoll) {
+      setJob(null);
+      abortRef.current?.abort();
+      return;
+    }
     void refreshStatus();
-  }, [refreshStatus]);
+  }, [canPoll, refreshStatus]);
 
   useEffect(() => {
+    if (!canPoll) return;
     const status = job?.status;
     const active = status === "pending" || status === "running" || status === "paused";
     const pollMs =
@@ -80,7 +90,7 @@ export function GenreBackfillJobProvider({ children }: { children: ReactNode }) 
       document.removeEventListener("visibilitychange", onVis);
       abortRef.current?.abort();
     };
-  }, [job?.status, refreshStatus]);
+  }, [canPoll, job?.status, refreshStatus]);
 
   const hasActiveGroqJob = useMemo(
     () =>

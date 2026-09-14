@@ -66,6 +66,11 @@ vi.mock("@/lib/hooks/use-duet-pending-incoming", () => ({
   }),
 }));
 
+vi.mock("@/lib/hooks/use-public-demo-viewer", () => ({
+  useSupabaseAuthUserId: () => "test-user-id",
+  useHideNotificationCenterForPublicDemo: () => false,
+}));
+
 function renderCenter() {
   return render(
     <GenreBackfillJobProvider>

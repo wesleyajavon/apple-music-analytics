@@ -3,7 +3,6 @@
 import { Suspense, useCallback, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
-import { usePathname } from "@/i18n/navigation";
 import { useTimeline, type TimelineDataPoint } from "@/lib/hooks/use-listening";
 import { OverviewTrendsChart } from "@/lib/components/charts/overview-trends-chart";
 import { ErrorState } from "@/lib/components/error-state";
@@ -175,7 +174,6 @@ function TimelineChartSkeleton() {
 }
 
 function TimelineContent() {
-  const pathname = usePathname();
   const searchParams = useSearchParams();
   const t = useTranslations("timeline");
   const locale = useLocale();
@@ -225,7 +223,9 @@ function TimelineContent() {
     [chartThemeName, t],
   );
 
-  const emptyStatePresets = useEmptyStatePresets();
+  const emptyStatePresets = useEmptyStatePresets({
+    demoPath: "/dashboard/timeline",
+  });
 
   return (
     <>
@@ -263,7 +263,7 @@ function TimelineContent() {
             onRetry={() => refetch()}
           />
         ) : !isLoading && (!data || data.length === 0) ? (
-          <EmptyState variant="startup" {...emptyStatePresets.changeDates(pathname)} />
+          <EmptyState variant="startup" {...emptyStatePresets.importData} />
         ) : (
           <section className="w-full min-w-0" aria-labelledby="timeline-chart-title">
             <p className={DASHBOARD_SECTION_EYEBROW}>{t("heroStatBadge")}</p>

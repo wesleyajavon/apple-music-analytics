@@ -81,7 +81,7 @@ export function usePagedCarouselGestures({
   /** When this changes (e.g. item ids), wipe in-flight gesture state. */
   resetKey: string;
 }): {
-  viewportRef: RefObject<HTMLDivElement | null>;
+  viewportRef: RefObject<HTMLDivElement>;
   dragOffsetPx: number;
   isDragging: boolean;
   viewportProps: {

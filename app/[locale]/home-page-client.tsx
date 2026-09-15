@@ -21,7 +21,6 @@ import { usePublicDemo } from "@/lib/providers/public-demo-provider";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import {
   HomeBlurFadeReveal,
-  HomeKineticText,
 } from "@/lib/components/home-animations";
 import { HomeHeroAlbumField } from "@/lib/components/home-hero-album-field";
 import { HomeMagneticLink } from "@/lib/components/home-magnetic-link";
@@ -243,14 +242,11 @@ export default function HomePageClient() {
                 </HomeBlurFadeReveal>
               ) : null}
 
-              <HomeKineticText
-                as="h1"
-                scramble
-                stagger={0.032}
-                delay={0.08}
-                className="w-full min-w-0 max-w-full text-center text-[1.85rem] font-semibold leading-[1.15] tracking-[-0.045em] text-white min-[380px]:text-[2.05rem] sm:max-w-xl sm:text-balance sm:text-5xl sm:leading-[1.08] sm:tracking-[-0.055em] lg:text-left lg:text-[3.35rem] lg:leading-[1.06]"
-                text={t("heroHeadline")}
-              />
+              <HomeBlurFadeReveal delay={0.08} immediate>
+                <h1 className="w-full min-w-0 max-w-full text-center text-[1.85rem] font-semibold leading-[1.15] tracking-[-0.045em] text-white min-[380px]:text-[2.05rem] sm:max-w-xl sm:text-balance sm:text-5xl sm:leading-[1.08] sm:tracking-[-0.055em] lg:text-left lg:text-[3.35rem] lg:leading-[1.06]">
+                  {t("heroHeadline")}
+                </h1>
+              </HomeBlurFadeReveal>
 
               <HomeBlurFadeReveal delay={0.18} className="mx-auto mt-5 w-full min-w-0 max-w-lg lg:mx-0">
                 <p className="text-center text-base leading-7 text-white/68 sm:text-lg sm:leading-8 lg:text-left">

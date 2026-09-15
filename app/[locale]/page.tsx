@@ -4,6 +4,10 @@ import { getTranslations } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { getOgImage } from "@/lib/seo/og-image";
 import { languageAlternates } from "@/lib/seo/public-paths";
+import {
+  buildSoftwareApplicationJsonLd,
+  serializeJsonLd,
+} from "@/lib/seo/software-application-json-ld";
 import HomePageClient from "./home-page-client";
 
 type Props = {
@@ -50,6 +54,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default function HomePage() {
-  return <HomePageClient />;
+export default async function HomePage({ params }: Props) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "metadata" });
+  const jsonLd = buildSoftwareApplicationJsonLd({
+    locale,
+    description: t("description"),
+  });
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
+      />
+      <HomePageClient />
+    </>
+  );
 }

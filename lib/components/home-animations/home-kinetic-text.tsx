@@ -47,21 +47,31 @@ type HomeKineticTextProps = {
 };
 
 type KineticToken =
-  | { type: "char"; value: string; key: string }
+  | { type: "word"; chars: string[]; key: string }
   | { type: "space"; key: string };
 
+/**
+ * Split on whitespace only so animated inline-block letters cannot wrap
+ * mid-word (e.g. "S" / "potify").
+ */
 function tokenize(text: string): KineticToken[] {
   const tokens: KineticToken[] = [];
-  let charIndex = 0;
+  const parts = text.split(/(\s+)/);
 
-  for (let i = 0; i < text.length; i += 1) {
-    const value = text[i]!;
-    if (/\s/.test(value)) {
+  for (let i = 0; i < parts.length; i += 1) {
+    const part = parts[i];
+    if (!part) continue;
+
+    if (/^\s+$/.test(part)) {
       tokens.push({ type: "space", key: `space-${i}` });
       continue;
     }
-    tokens.push({ type: "char", value, key: `char-${charIndex}-${value}` });
-    charIndex += 1;
+
+    tokens.push({
+      type: "word",
+      chars: Array.from(part),
+      key: `word-${i}-${part}`,
+    });
   }
 
   return tokens;
@@ -181,29 +191,40 @@ export function HomeKineticText({
             );
           }
 
-          const index = letterIndex;
-          letterIndex += 1;
-          const scrambleDelayMs = Math.round((delay + index * stagger) * 1000);
-
           return (
             <span
               key={token.key}
-              className="inline-block overflow-hidden pb-[0.12em] align-bottom"
+              className="inline-block whitespace-nowrap"
             >
-              <motion.span
-                className="inline-block origin-bottom will-change-transform"
-                variants={letterVariants}
-              >
-                {scramble ? (
-                  <ScrambleLetter
-                    char={token.value}
-                    delayMs={scrambleDelayMs}
-                    active={shouldAnimate}
-                  />
-                ) : (
-                  token.value
-                )}
-              </motion.span>
+              {token.chars.map((char, charOffset) => {
+                const index = letterIndex;
+                letterIndex += 1;
+                const scrambleDelayMs = Math.round(
+                  (delay + index * stagger) * 1000
+                );
+
+                return (
+                  <span
+                    key={`${token.key}-${charOffset}-${char}`}
+                    className="inline-block overflow-hidden pb-[0.12em] align-bottom"
+                  >
+                    <motion.span
+                      className="inline-block origin-bottom will-change-transform"
+                      variants={letterVariants}
+                    >
+                      {scramble ? (
+                        <ScrambleLetter
+                          char={char}
+                          delayMs={scrambleDelayMs}
+                          active={shouldAnimate}
+                        />
+                      ) : (
+                        char
+                      )}
+                    </motion.span>
+                  </span>
+                );
+              })}
             </span>
           );
         })}

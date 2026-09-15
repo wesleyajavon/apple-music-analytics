@@ -3681,9 +3681,9 @@
     }
   },
   "metadata": {
-    "title": "Soundprint-AI — Mira la música que te formó",
+    "title": "Soundprint-AI — Stats de streaming Apple Music & Spotify",
     "titleTemplate": "%s · Soundprint-AI",
-    "description": "Importa tu historial de Apple Music o Spotify. Explora tendencias, habla con tus datos y compara streams con amigos.",
-    "ogImageAlt": "Vista previa del producto Soundprint-AI"
+    "description": "Importa tu historial de Apple Music o Spotify y explora stats de streaming, tendencias, insights de IA y comparaciones con amigos. Privado por diseño.",
+    "ogImageAlt": "Vista previa de stats de streaming Soundprint-AI"
   }
 }

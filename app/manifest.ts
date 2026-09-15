@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "Soundprint-AI",
     short_name: "Soundprint",
     description:
-      "Import Apple Music or Spotify listening history. Explore trends, chat with your data, and compare streams with friends.",
+      "Import your Apple Music or Spotify history and explore streaming stats, trends, AI insights, and friend comparisons.",
     start_url: "/en/dashboard/overview",
     scope: "/",
     display: "standalone",

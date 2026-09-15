@@ -1280,6 +1280,9 @@
     "privacy": "Privacy",
     "terms": "Terms",
     "cookies": "Cookies",
+    "guidesAppleMusic": "Apple Music stats",
+    "guidesSpotify": "Spotify analytics",
+    "guidesVsReplay": "Beyond Replay",
     "copyright": "Soundprint-AI. All rights reserved.",
     "madeWith": "Made with care for music lovers",
     "creatorCredit": "Wesley Ajavon made this",
@@ -3427,6 +3430,10 @@
       "eyebrow": "Questions?",
       "title": "Everything you need to know before you start",
       "legalLinksAria": "Legal",
+      "guidesLinksAria": "Guides",
+      "guidesAppleMusic": "Apple Music streaming stats",
+      "guidesSpotify": "Spotify listening analytics",
+      "guidesVsReplay": "Beyond Replay & Wrapped",
       "faq": {
         "what": {
           "question": "What is Soundprint-AI?",
@@ -3684,5 +3691,126 @@
     "titleTemplate": "%s · Soundprint-AI",
     "description": "Import your Apple Music or Spotify history and explore streaming stats, trends, AI insights, and friend comparisons. Private by design.",
     "ogImageAlt": "Soundprint-AI streaming stats preview"
+  },
+  "guides": {
+    "nav": {
+      "appleMusic": "Apple Music stats",
+      "spotify": "Spotify analytics",
+      "vsReplay": "Beyond Replay",
+      "relatedTitle": "More guides",
+      "relatedAria": "Related guides",
+      "hubLabel": "Guides"
+    },
+    "cta": {
+      "title": "Ready to see your streaming stats?",
+      "body": "Import your Apple Music or Spotify history into Soundprint-AI and explore trends, AI insights, and friend comparisons—privately.",
+      "primary": "Create my account",
+      "secondary": "Back to home"
+    },
+    "pages": {
+      "appleMusic": {
+        "eyebrow": "Guide",
+        "title": "Apple Music streaming stats with Soundprint-AI",
+        "description": "Turn your Apple Music listening history into private streaming stats: trends, artist deepdives, AI insights, and more.",
+        "intro": "Apple Music shows you playlists and a yearly Replay. Soundprint-AI is for listeners who want ongoing streaming stats from their full export—not just a once-a-year wrap.",
+        "sections": [
+          {
+            "title": "What you can see",
+            "paragraphs": [
+              "After you import your official Apple Music history export, Soundprint-AI builds a private dashboard from your streams.",
+              "That includes tops over any period, genre mix, listening calendars, taste shifts, and an AI chat grounded in your data."
+            ],
+            "bullets": [
+              "Period-based streaming stats (not locked to one calendar year)",
+              "Artist and track trends with real counts from your file",
+              "Optional AI insights when you opt in"
+            ]
+          },
+          {
+            "title": "How import works",
+            "paragraphs": [
+              "Apple does not offer a full personal history API for third-party apps. The supported path is requesting your data archive, then uploading the listening file into Soundprint-AI.",
+              "Onboarding walks you through the request. Apple’s export can take a few days; once you have the file, import usually finishes in minutes."
+            ]
+          },
+          {
+            "title": "Privacy first",
+            "paragraphs": [
+              "Your streaming history stays on your account. Soundprint-AI is built for personal analytics—not to sell your listening data.",
+              "You can export or delete your data from Settings anytime."
+            ]
+          }
+        ]
+      },
+      "spotify": {
+        "eyebrow": "Guide",
+        "title": "Spotify listening history analytics with Soundprint-AI",
+        "description": "Analyze your Spotify Extended Streaming History with Soundprint-AI: long-range stats, trends, AI insights, and friend comparisons.",
+        "intro": "Spotify Wrapped is fun—and brief. If you want listening history analytics year-round, Soundprint-AI turns your Spotify export into a private streaming-stats dashboard.",
+        "sections": [
+          {
+            "title": "Beyond Wrapped",
+            "paragraphs": [
+              "Wrapped summarizes a year. Soundprint-AI keeps your imported history available so you can explore any window: last 30 days, a season, or multi-year patterns.",
+              "You get tops, genre distribution, heatmaps, musical profile reads, and chat answers based on your streams."
+            ],
+            "bullets": [
+              "Works from your Extended Streaming History export",
+              "Compare streams with friends in Duet when both of you opt in",
+              "Ask questions about your history in Soundprint chat"
+            ]
+          },
+          {
+            "title": "How import works",
+            "paragraphs": [
+              "Request your Extended Streaming History from Spotify’s privacy tools, then upload the ZIP during Soundprint onboarding.",
+              "Spotify’s delivery time varies; after the files arrive, most imports complete quickly."
+            ]
+          },
+          {
+            "title": "What Soundprint-AI is not",
+            "paragraphs": [
+              "It does not replace Spotify itself. It does not edit playlists or write back to your Spotify library.",
+              "Live Spotify API features (when linked) are separate from the long history you import—and the deepest stats still come from the export."
+            ]
+          }
+        ]
+      },
+      "vsReplay": {
+        "eyebrow": "Guide",
+        "title": "Soundprint-AI vs Apple Music Replay and Spotify Wrapped",
+        "description": "How Soundprint-AI differs from yearly Replay or Wrapped—and when you want ongoing streaming stats instead.",
+        "intro": "Replay and Wrapped are polished yearly highlights. Soundprint-AI is a personal streaming-stats app for people who want to keep exploring their history after the annual drop.",
+        "sections": [
+          {
+            "title": "What Replay and Wrapped do well",
+            "paragraphs": [
+              "They are official, shareable, and easy. Once a year you get a story: top artists, minutes listened, a few memorable stats.",
+              "If that is all you want, you may not need another tool."
+            ]
+          },
+          {
+            "title": "Where Soundprint-AI is different",
+            "paragraphs": [
+              "Soundprint-AI starts from your imported history file and keeps the dashboard available anytime—not only in December.",
+              "You choose the date range, dig into artists, watch taste shift over time, and compare streams with friends."
+            ],
+            "bullets": [
+              "On-demand streaming stats, not a single annual card",
+              "Apple Music and Spotify in one private account",
+              "AI insights and chat grounded in your data (opt-in)",
+              "Friend comparisons with explicit sharing controls"
+            ]
+          },
+          {
+            "title": "Who it is for",
+            "paragraphs": [
+              "Curious listeners who already request their data exports—or are willing to—and want a clearer picture of how they actually stream.",
+              "If you only care about the yearly wrap, stay with Replay or Wrapped. If you want ongoing analytics, Soundprint-AI is built for that."
+            ]
+          }
+        ]
+      }
+    }
   }
 }

@@ -44,12 +44,15 @@ describe("public SEO paths", () => {
     expect(languages["x-default"]).toBe("https://www.soundprint-ai.com/fr");
   });
 
-  it("lists only marketing and legal surfaces as indexable", () => {
+  it("lists marketing, legal, and guide surfaces as indexable", () => {
     expect(INDEXABLE_PATHS).toEqual([
       "",
       "/legal/privacy",
       "/legal/terms",
       "/legal/cookies",
+      "/guides/apple-music-streaming-stats",
+      "/guides/spotify-listening-history",
+      "/guides/soundprint-vs-replay",
     ]);
   });
 });

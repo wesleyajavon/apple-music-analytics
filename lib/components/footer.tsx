@@ -42,9 +42,28 @@ export function Footer({ variant = "dashboard" }: { variant?: FooterVariant }) {
     { href: "/legal/cookies", label: t("cookies") },
   ];
 
+  const guideLinks = [
+    {
+      href: "/guides/apple-music-streaming-stats",
+      label: t("guidesAppleMusic"),
+    },
+    {
+      href: "/guides/spotify-listening-history",
+      label: t("guidesSpotify"),
+    },
+    {
+      href: "/guides/soundprint-vs-replay",
+      label: t("guidesVsReplay"),
+    },
+  ];
+
   const isHome = variant === "home";
   const links = isHome
-    ? [...legalLinks, ...productLinks.filter((l) => l.label === t("demo") || l.label === t("about"))]
+    ? [
+        ...guideLinks,
+        ...legalLinks,
+        ...productLinks.filter((l) => l.label === t("demo") || l.label === t("about")),
+      ]
     : [...productLinks, ...legalLinks];
 
   return (

@@ -1,12 +1,14 @@
 import { routing } from "@/i18n/routing";
+import { GUIDE_INDEXABLE_PATHS } from "@/lib/seo/guide-slugs";
 import { getSiteUrl } from "@/lib/seo/site-url";
 
-/** Public marketing / legal routes (no locale prefix). Empty string = home. */
+/** Public marketing / legal / guide routes (no locale prefix). Empty string = home. */
 export const INDEXABLE_PATHS = [
   "",
   "/legal/privacy",
   "/legal/terms",
   "/legal/cookies",
+  ...GUIDE_INDEXABLE_PATHS,
 ] as const;
 
 export type IndexablePath = (typeof INDEXABLE_PATHS)[number];

@@ -74,7 +74,30 @@ export function HomeClosingSection() {
         ))}
       </div>
 
-      <HomeBlurFadeReveal delay={0.28} className="mx-auto mt-8 max-w-2xl lg:mx-0">
+      <HomeBlurFadeReveal delay={0.28} className="mx-auto mt-8 max-w-2xl space-y-4 lg:mx-0">
+        <nav
+          className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm text-white/45 lg:justify-start"
+          aria-label={t("guidesLinksAria")}
+        >
+          <Link
+            href="/guides/apple-music-streaming-stats"
+            className="transition-colors hover:text-white"
+          >
+            {t("guidesAppleMusic")}
+          </Link>
+          <Link
+            href="/guides/spotify-listening-history"
+            className="transition-colors hover:text-white"
+          >
+            {t("guidesSpotify")}
+          </Link>
+          <Link
+            href="/guides/soundprint-vs-replay"
+            className="transition-colors hover:text-white"
+          >
+            {t("guidesVsReplay")}
+          </Link>
+        </nav>
         <nav
           className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm text-white/45 lg:justify-start"
           aria-label={t("legalLinksAria")}

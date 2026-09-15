@@ -36,6 +36,15 @@ const STAGE_SLOTS: Array<{
 /** Mobile backdrop only needs a short strip — fewer requests on LCP path. */
 const BACKDROP_ALBUMS = HOME_PREVIEW_ALBUMS.slice(0, 6);
 
+/**
+ * Covers that sit in the first viewport of the mobile marquee.
+ * Midnights is the measured LCP element on PageSpeed mobile.
+ */
+const BACKDROP_LCP_PRIORITY_SRCS = new Set<string>([
+  HOME_PREVIEW_ALBUMS[0]!.imageSrc,
+  HOME_PREVIEW_ALBUMS[2]!.imageSrc, // midnights.webp
+]);
+
 function usePrefersReducedMotion(): boolean {
   const [reduced, setReduced] = useState(false);
 
@@ -84,7 +93,9 @@ function AlbumCover({
           sizes={sizes}
           quality={quality}
           priority={priority}
+          // Next sets fetchPriority=high when priority is true; keep lazy off the LCP path.
           loading={priority ? undefined : "lazy"}
+          fetchPriority={priority ? "high" : undefined}
           className="object-cover"
           onError={() => setFailed(true)}
         />
@@ -97,10 +108,13 @@ function MarqueeColumn({
   albums,
   direction,
   reducedMotion,
+  prioritySrcs,
 }: {
   albums: readonly HomeAlbum[];
   direction: "up" | "down";
   reducedMotion: boolean;
+  /** First-copy covers that may be LCP on mobile — eager + high fetch priority. */
+  prioritySrcs?: ReadonlySet<string>;
 }) {
   const loop = [...albums, ...albums];
   const animationClass = reducedMotion
@@ -112,15 +126,22 @@ function MarqueeColumn({
   return (
     <div className="relative h-full overflow-hidden">
       <div className={["flex flex-col gap-3 py-1", animationClass].filter(Boolean).join(" ")}>
-        {loop.map((album, index) => (
-          <AlbumCover
-            key={`${album.imageSrc}-${index}`}
-            album={album}
-            sizes="(max-width: 640px) 42vw, 28vw"
-            quality={60}
-            className="aspect-square w-full"
-          />
-        ))}
+        {loop.map((album, index) => {
+          const isFirstCopy = index < albums.length;
+          const priority =
+            isFirstCopy && Boolean(prioritySrcs?.has(album.imageSrc));
+
+          return (
+            <AlbumCover
+              key={`${album.imageSrc}-${index}`}
+              album={album}
+              sizes="(max-width: 640px) 42vw, 28vw"
+              quality={60}
+              priority={priority}
+              className="aspect-square w-full"
+            />
+          );
+        })}
       </div>
     </div>
   );
@@ -149,11 +170,13 @@ export function HomeHeroAlbumField({
             albums={leftColumn}
             direction="up"
             reducedMotion={reducedMotion}
+            prioritySrcs={BACKDROP_LCP_PRIORITY_SRCS}
           />
           <MarqueeColumn
             albums={rightColumn}
             direction="down"
             reducedMotion={reducedMotion}
+            prioritySrcs={BACKDROP_LCP_PRIORITY_SRCS}
           />
         </div>
         <div

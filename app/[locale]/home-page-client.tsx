@@ -111,11 +111,16 @@ function DesktopHeroAlbumStage() {
   return <HomeHeroAlbumField variant="stage" />;
 }
 
-/** Mobile backdrop only below lg — avoid competing with desktop LCP/network. */
+/**
+ * Keep the mobile album backdrop in the initial HTML (CSS-hidden on lg+).
+ * A JS media-query gate delayed discovery and forced `loading=lazy` on the LCP image.
+ */
 function MobileHeroAlbumBackdrop() {
-  const matches = useMinWidth(1024);
-  if (matches === null || matches) return null;
-  return <HomeHeroAlbumField variant="backdrop" />;
+  return (
+    <div className="lg:hidden" aria-hidden>
+      <HomeHeroAlbumField variant="backdrop" />
+    </div>
+  );
 }
 
 export default function HomePageClient() {

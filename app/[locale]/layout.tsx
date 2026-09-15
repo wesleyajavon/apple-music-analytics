@@ -3,6 +3,7 @@ import { hasLocale } from "next-intl";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { routing } from "@/i18n/routing";
+import { getOgImage, OG_IMAGE_PATH } from "@/lib/seo/og-image";
 import { getSiteUrl } from "@/lib/seo/site-url";
 
 type Props = {
@@ -19,7 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const t = await getTranslations({ locale, namespace: "metadata" });
   const siteUrl = getSiteUrl();
-  const ogImage = "/brand/dashboard-preview.png";
+  const ogImage = getOgImage(t("ogImageAlt"));
   const faviconUrl = "/brand/favicon.png";
 
   return {
@@ -48,20 +49,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       siteName: "Soundprint-AI",
       title: t("title"),
       description: t("description"),
-      images: [
-        {
-          url: ogImage,
-          width: 2880,
-          height: 1556,
-          alt: t("ogImageAlt"),
-        },
-      ],
+      images: [ogImage],
     },
     twitter: {
       card: "summary_large_image",
       title: t("title"),
       description: t("description"),
-      images: [ogImage],
+      images: [OG_IMAGE_PATH],
     },
   };
 }

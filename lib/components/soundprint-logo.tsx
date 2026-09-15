@@ -26,8 +26,9 @@ export function SoundprintLogo({
       <Image
         src={src}
         alt={alt ?? (showText ? "" : "Soundprint-AI")}
-        width={256}
-        height={256}
+        width={64}
+        height={64}
+        sizes="44px"
         className={`object-cover ${imageClassName}`}
         priority={priority}
       />

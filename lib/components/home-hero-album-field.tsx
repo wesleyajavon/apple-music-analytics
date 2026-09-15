@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
-import { useReducedMotion } from "motion/react";
 import { HOME_PREVIEW_ALBUMS } from "@/lib/constants/home-album-preview";
 
 type HomeAlbum = (typeof HOME_PREVIEW_ALBUMS)[number];
@@ -34,16 +33,35 @@ const STAGE_SLOTS: Array<{
   { top: 66, left: 64, size: 22, rotate: "13deg", delay: "1.4s", z: 3 },
 ];
 
+/** Mobile backdrop only needs a short strip — fewer requests on LCP path. */
+const BACKDROP_ALBUMS = HOME_PREVIEW_ALBUMS.slice(0, 6);
+
+function usePrefersReducedMotion(): boolean {
+  const [reduced, setReduced] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const sync = () => setReduced(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  return reduced;
+}
+
 function AlbumCover({
   album,
   sizes,
   className = "",
   priority = false,
+  quality = 70,
 }: {
   album: HomeAlbum;
   sizes: string;
   className?: string;
   priority?: boolean;
+  quality?: number;
 }) {
   const [failed, setFailed] = useState(false);
 
@@ -57,17 +75,16 @@ function AlbumCover({
         .join(" ")}
     >
       {failed ? (
-        <div
-          className="absolute inset-0 bg-brand-gradient"
-          aria-hidden
-        />
+        <div className="absolute inset-0 bg-brand-gradient" aria-hidden />
       ) : (
         <Image
           src={album.imageSrc}
           alt=""
           fill
           sizes={sizes}
+          quality={quality}
           priority={priority}
+          loading={priority ? undefined : "lazy"}
           className="object-cover"
           onError={() => setFailed(true)}
         />
@@ -99,7 +116,8 @@ function MarqueeColumn({
           <AlbumCover
             key={`${album.imageSrc}-${index}`}
             album={album}
-            sizes="40vw"
+            sizes="(max-width: 640px) 42vw, 28vw"
+            quality={60}
             className="aspect-square w-full"
           />
         ))}
@@ -113,12 +131,11 @@ export function HomeHeroAlbumField({
   variant,
   overlayClassName,
 }: HomeHeroAlbumFieldProps) {
-  const prefersReducedMotion = useReducedMotion();
-  const reducedMotion = Boolean(prefersReducedMotion);
+  const reducedMotion = usePrefersReducedMotion();
 
   if (variant === "backdrop") {
-    const leftColumn = HOME_PREVIEW_ALBUMS.filter((_, i) => i % 2 === 0);
-    const rightColumn = HOME_PREVIEW_ALBUMS.filter((_, i) => i % 2 === 1);
+    const leftColumn = BACKDROP_ALBUMS.filter((_, i) => i % 2 === 0);
+    const rightColumn = BACKDROP_ALBUMS.filter((_, i) => i % 2 === 1);
 
     return (
       <div
@@ -128,8 +145,16 @@ export function HomeHeroAlbumField({
         aria-hidden
       >
         <div className="absolute inset-0 grid grid-cols-2 gap-3 px-4 opacity-[0.38] sm:gap-4 sm:px-8">
-          <MarqueeColumn albums={leftColumn} direction="up" reducedMotion={reducedMotion} />
-          <MarqueeColumn albums={rightColumn} direction="down" reducedMotion={reducedMotion} />
+          <MarqueeColumn
+            albums={leftColumn}
+            direction="up"
+            reducedMotion={reducedMotion}
+          />
+          <MarqueeColumn
+            albums={rightColumn}
+            direction="down"
+            reducedMotion={reducedMotion}
+          />
         </div>
         <div
           className={[
@@ -180,7 +205,9 @@ export function HomeHeroAlbumField({
                 <AlbumCover
                   album={album}
                   sizes="(min-width: 1024px) 16vw, 220px"
-                  priority={index < 4}
+                  quality={70}
+                  // Never priority here: this tree is CSS-hidden on mobile but still
+                  // mounts, and priority would steal bandwidth from the mobile LCP.
                   className="h-full w-full"
                 />
               </div>

@@ -44,6 +44,8 @@ const nextConfig = {
       'react-force-graph-2d',
       '@sentry/nextjs',
       'sonner',
+      'motion',
+      'lenis',
     ],
     // Active le hook d'instrumentation pour Sentry
     instrumentationHook: true,

@@ -1,30 +1,75 @@
 "use client";
 
-import { Suspense } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { LanguageSwitcher } from "@/lib/components/language-switcher";
-import { Footer } from "@/lib/components/footer";
 import { SoundprintBrandMark } from "@/lib/components/soundprint-brand-mark";
-import { HomeJourneyExploreSection } from "@/lib/components/home-journey-explore-section";
-import { HomeJourneyImportSection } from "@/lib/components/home-journey-import-section";
-import { HomeJourneyInteractSection } from "@/lib/components/home-journey-interact-section";
-import { HomeClosingSection } from "@/lib/components/home-closing-section";
 import { HomeMobileNav } from "@/lib/components/home-mobile-nav";
 import { UserAvatar } from "@/lib/components/user-avatar";
-import {
-  HOME_JOURNEY_NAV_ITEMS,
-} from "@/lib/constants/home-journey-nav";
+import { HOME_JOURNEY_NAV_ITEMS } from "@/lib/constants/home-journey-nav";
 import { usePublicDemo } from "@/lib/providers/public-demo-provider";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import {
-  HomeBlurFadeReveal,
-} from "@/lib/components/home-animations";
+import { HomeBlurFadeReveal } from "@/lib/components/home-animations";
 import { HomeHeroAlbumField } from "@/lib/components/home-hero-album-field";
 import { HomeMagneticLink } from "@/lib/components/home-magnetic-link";
-import { HomeSmoothScroll } from "@/lib/components/home-smooth-scroll";
+
+const HomeSmoothScroll = dynamic(
+  () =>
+    import("@/lib/components/home-smooth-scroll").then((m) => m.HomeSmoothScroll),
+  { ssr: true },
+);
+
+const HomeJourneyExploreSection = dynamic(
+  () =>
+    import("@/lib/components/home-journey-explore-section").then(
+      (m) => m.HomeJourneyExploreSection,
+    ),
+  {
+    ssr: true,
+    loading: () => <section className="min-h-[50vh]" aria-hidden />,
+  },
+);
+
+const HomeJourneyInteractSection = dynamic(
+  () =>
+    import("@/lib/components/home-journey-interact-section").then(
+      (m) => m.HomeJourneyInteractSection,
+    ),
+  {
+    ssr: true,
+    loading: () => <section className="min-h-[40vh]" aria-hidden />,
+  },
+);
+
+const HomeJourneyImportSection = dynamic(
+  () =>
+    import("@/lib/components/home-journey-import-section").then(
+      (m) => m.HomeJourneyImportSection,
+    ),
+  {
+    ssr: true,
+    loading: () => <section className="min-h-[40vh]" aria-hidden />,
+  },
+);
+
+const HomeClosingSection = dynamic(
+  () =>
+    import("@/lib/components/home-closing-section").then(
+      (m) => m.HomeClosingSection,
+    ),
+  {
+    ssr: true,
+    loading: () => <section className="min-h-[30vh]" aria-hidden />,
+  },
+);
+
+const Footer = dynamic(
+  () => import("@/lib/components/footer").then((m) => m.Footer),
+  { ssr: true },
+);
 
 function ArrowRightIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
@@ -45,6 +90,34 @@ function ArrowRightIcon({ className = "h-4 w-4" }: { className?: string }) {
   );
 }
 
+function useMinWidth(minWidthPx: number) {
+  const [matches, setMatches] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const mq = window.matchMedia(`(min-width: ${minWidthPx}px)`);
+    const sync = () => setMatches(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, [minWidthPx]);
+
+  return matches;
+}
+
+/** Mount desktop album stage only at lg+ so mobile never downloads those images. */
+function DesktopHeroAlbumStage() {
+  const matches = useMinWidth(1024);
+  if (!matches) return null;
+  return <HomeHeroAlbumField variant="stage" />;
+}
+
+/** Mobile backdrop only below lg — avoid competing with desktop LCP/network. */
+function MobileHeroAlbumBackdrop() {
+  const matches = useMinWidth(1024);
+  if (matches === null || matches) return null;
+  return <HomeHeroAlbumField variant="backdrop" />;
+}
+
 export default function HomePageClient() {
   const t = useTranslations("home");
   const tAuth = useTranslations("auth");
@@ -57,6 +130,8 @@ export default function HomePageClient() {
 
   useEffect(() => {
     let mounted = true;
+    let idleId: number | undefined;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
     const supabase = createSupabaseBrowserClient();
 
     function extractFirstName(rawName?: string | null) {
@@ -111,7 +186,19 @@ export default function HomePageClient() {
       }
     }
 
-    hydrateUserName();
+    // Defer auth hydration so it does not contend with LCP on mobile.
+    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+      idleId = window.requestIdleCallback(
+        () => {
+          if (mounted) void hydrateUserName();
+        },
+        { timeout: 1800 },
+      );
+    } else {
+      timeoutId = setTimeout(() => {
+        if (mounted) void hydrateUserName();
+      }, 200);
+    }
 
     const {
       data: { subscription },
@@ -129,6 +216,10 @@ export default function HomePageClient() {
 
     return () => {
       mounted = false;
+      if (idleId !== undefined && "cancelIdleCallback" in window) {
+        window.cancelIdleCallback(idleId);
+      }
+      if (timeoutId !== undefined) clearTimeout(timeoutId);
       subscription.unsubscribe();
     };
   }, []);
@@ -146,178 +237,176 @@ export default function HomePageClient() {
             className="sticky top-0 z-30 border-b border-white/10 bg-black/40 backdrop-blur-xl"
             style={{ paddingTop: "max(0px, env(safe-area-inset-top))" }}
           >
-          <div className="relative mx-auto flex w-full max-w-7xl items-center justify-between gap-2 px-4 py-3 sm:gap-4 sm:px-6 sm:py-4 lg:px-8">
-            <Link
-              href="/"
-              className="group inline-flex min-w-0 shrink items-center gap-2 rounded-full py-1.5 pr-1 outline-none transition-all hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:ring-offset-2 focus-visible:ring-offset-[#050508] sm:gap-3 sm:pr-3"
-              aria-label="Soundprint-AI"
-            >
-              <SoundprintBrandMark priority showWordmarkOnMobile={false} tone="onDark" />
-            </Link>
-
-            <nav
-              className="hidden items-center gap-6 text-sm font-medium text-white/70 md:flex"
-              aria-label={t("journey.navAriaLabel")}
-            >
-              {HOME_JOURNEY_NAV_ITEMS.map((item) => (
-                <a
-                  key={item.href}
-                  href={item.href}
-                  className="transition-colors hover:text-white"
-                >
-                  {t(`journey.nav.${item.labelKey}`)}
-                </a>
-              ))}
-            </nav>
-
-            <div className="flex shrink-0 items-center gap-1 sm:gap-3">
-              <HomeMobileNav />
-              <Suspense
-                fallback={<div className="h-10 w-10 animate-pulse rounded-xl bg-white/10 sm:w-28" />}
+            <div className="relative mx-auto flex w-full max-w-7xl items-center justify-between gap-2 px-4 py-3 sm:gap-4 sm:px-6 sm:py-4 lg:px-8">
+              <Link
+                href="/"
+                className="group inline-flex min-w-0 shrink items-center gap-2 rounded-full py-1.5 pr-1 outline-none transition-all hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:ring-offset-2 focus-visible:ring-offset-[#050508] sm:gap-3 sm:pr-3"
+                aria-label="Soundprint-AI"
               >
-                <LanguageSwitcher placement="bottom" compactOnMobile tone="onDark" />
-              </Suspense>
-              {isAuthenticated ? (
-                <Link
-                  href="/dashboard"
-                  className="inline-flex size-11 items-center justify-center rounded-full border border-white/15 bg-white/5 shadow-[0_18px_50px_-28px_rgba(0,0,0,0.55)] backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:ring-offset-2 focus-visible:ring-offset-[#050508]"
-                  title={t("goToDashboard")}
-                  aria-label={t("goToDashboard")}
+                <SoundprintBrandMark priority showWordmarkOnMobile={false} tone="onDark" />
+              </Link>
+
+              <nav
+                className="hidden items-center gap-6 text-sm font-medium text-white/70 md:flex"
+                aria-label={t("journey.navAriaLabel")}
+              >
+                {HOME_JOURNEY_NAV_ITEMS.map((item) => (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    className="transition-colors hover:text-white"
+                  >
+                    {t(`journey.nav.${item.labelKey}`)}
+                  </a>
+                ))}
+              </nav>
+
+              <div className="flex shrink-0 items-center gap-1 sm:gap-3">
+                <HomeMobileNav />
+                <Suspense
+                  fallback={<div className="h-10 w-10 animate-pulse rounded-xl bg-white/10 sm:w-28" />}
                 >
-                  <UserAvatar
-                    src={avatarUrl}
-                    name={profileName}
-                    email={profileEmail}
-                    size="sm"
-                  />
-                </Link>
-              ) : (
-                <Link
-                  href="/sign-in"
-                  className="inline-flex min-h-11 max-w-[8.5rem] items-center justify-center truncate rounded-xl border border-white/15 bg-white/5 px-2.5 text-xs font-semibold text-white shadow-[0_18px_50px_-28px_rgba(0,0,0,0.55)] backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-white/10 sm:max-w-none sm:px-4 sm:text-sm"
-                  title={tAuth("signIn")}
-                >
-                  {tAuth("signIn")}
-                </Link>
-              )}
+                  <LanguageSwitcher placement="bottom" compactOnMobile tone="onDark" />
+                </Suspense>
+                {isAuthenticated ? (
+                  <Link
+                    href="/dashboard"
+                    className="inline-flex size-11 items-center justify-center rounded-full border border-white/15 bg-white/5 shadow-[0_18px_50px_-28px_rgba(0,0,0,0.55)] backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:ring-offset-2 focus-visible:ring-offset-[#050508]"
+                    title={t("goToDashboard")}
+                    aria-label={t("goToDashboard")}
+                  >
+                    <UserAvatar
+                      src={avatarUrl}
+                      name={profileName}
+                      email={profileEmail}
+                      size="sm"
+                    />
+                  </Link>
+                ) : (
+                  <Link
+                    href="/sign-in"
+                    className="inline-flex min-h-11 max-w-[8.5rem] items-center justify-center truncate rounded-xl border border-white/15 bg-white/5 px-2.5 text-xs font-semibold text-white shadow-[0_18px_50px_-28px_rgba(0,0,0,0.55)] backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-white/10 sm:max-w-none sm:px-4 sm:text-sm"
+                    title={tAuth("signIn")}
+                  >
+                    {tAuth("signIn")}
+                  </Link>
+                )}
+              </div>
             </div>
-          </div>
-        </header>
+          </header>
 
-        <div className="relative flex-1 overflow-x-hidden">
-        <section className="relative isolate overflow-hidden bg-[#050508] text-white">
-          <HomeHeroAlbumField variant="backdrop" className="lg:hidden" />
+          <div className="relative flex-1 overflow-x-hidden">
+            <section className="relative isolate overflow-hidden bg-[#050508] text-white">
+              <MobileHeroAlbumBackdrop />
 
-          <div className="relative mx-auto grid w-full min-w-0 max-w-7xl items-center gap-10 px-4 pb-20 pt-12 sm:gap-12 sm:px-6 sm:pb-24 sm:pt-16 lg:grid-cols-[minmax(0,0.5fr)_minmax(0,0.5fr)] lg:gap-8 lg:px-8 lg:pb-28 lg:pt-20">
-            <div className="relative z-10 flex min-w-0 w-full flex-col items-stretch text-center lg:items-start lg:text-left">
-              <HomeBlurFadeReveal delay={0} immediate className="flex justify-center lg:justify-start">
-                <div className="mb-6 inline-flex max-w-full items-center gap-2.5">
-                  <Image
-                    src="/brand/providers/apple-music-icon.svg"
-                    alt=""
-                    width={22}
-                    height={22}
-                    className="h-[1.35rem] w-[1.35rem] object-contain"
-                    unoptimized
-                  />
-                  <Image
-                    src="/brand/providers/spotify-icon.svg"
-                    alt=""
-                    width={22}
-                    height={22}
-                    className="h-[1.35rem] w-[1.35rem] object-contain"
-                    unoptimized
-                  />
-                  <p className="font-mono text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-white/70 sm:text-xs">
-                    {t("heroEyebrow")}
+              <div className="relative mx-auto grid w-full min-w-0 max-w-7xl items-center gap-10 px-4 pb-20 pt-12 sm:gap-12 sm:px-6 sm:pb-24 sm:pt-16 lg:grid-cols-[minmax(0,0.5fr)_minmax(0,0.5fr)] lg:gap-8 lg:px-8 lg:pb-28 lg:pt-20">
+                <div className="relative z-10 flex min-w-0 w-full flex-col items-stretch text-center lg:items-start lg:text-left">
+                  <div className="mb-6 flex justify-center lg:justify-start">
+                    <div className="inline-flex max-w-full items-center gap-2.5">
+                      <Image
+                        src="/brand/providers/apple-music-icon.svg"
+                        alt=""
+                        width={22}
+                        height={22}
+                        className="h-[1.35rem] w-[1.35rem] object-contain"
+                        unoptimized
+                      />
+                      <Image
+                        src="/brand/providers/spotify-icon.svg"
+                        alt=""
+                        width={22}
+                        height={22}
+                        className="h-[1.35rem] w-[1.35rem] object-contain"
+                        unoptimized
+                      />
+                      <p className="font-mono text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-white/70 sm:text-xs">
+                        {t("heroEyebrow")}
+                      </p>
+                    </div>
+                  </div>
+
+                  {isAuthenticated ? (
+                    <p className="mb-4 text-sm font-medium text-white/70 lg:text-left">
+                      {welcomeMessage}
+                    </p>
+                  ) : null}
+
+                  {/* LCP candidate: paint at full opacity without waiting for Motion. */}
+                  <h1 className="w-full min-w-0 max-w-full text-center text-[1.85rem] font-semibold leading-[1.15] tracking-[-0.045em] text-white min-[380px]:text-[2.05rem] sm:max-w-xl sm:text-balance sm:text-5xl sm:leading-[1.08] sm:tracking-[-0.055em] lg:text-left lg:text-[3.35rem] lg:leading-[1.06]">
+                    {t("heroHeadline")}
+                  </h1>
+
+                  <HomeBlurFadeReveal delay={0.08} className="mx-auto mt-5 w-full min-w-0 max-w-lg lg:mx-0">
+                    <p className="text-center text-base leading-7 text-white/68 sm:text-lg sm:leading-8 lg:text-left">
+                      {t("heroSub")}
+                    </p>
+                  </HomeBlurFadeReveal>
+
+                  <HomeBlurFadeReveal
+                    delay={0.16}
+                    className="mt-8 flex w-full min-w-0 flex-col items-center gap-3 sm:flex-row sm:flex-wrap sm:justify-center lg:items-start lg:justify-start"
+                  >
+                    {isAuthenticated ? (
+                      <HomeMagneticLink
+                        href="/dashboard"
+                        strength={0.38}
+                        className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,var(--brand-pink)_0%,var(--brand-cyan)_100%)] px-7 py-3 text-sm font-semibold text-white shadow-[0_22px_70px_-24px_rgb(224_64_136_/_0.55),0_22px_70px_-24px_rgb(79_144_224_/_0.5)] transition-[opacity,box-shadow] hover:opacity-95 sm:w-auto"
+                      >
+                        {t("goToDashboard")}
+                        <ArrowRightIcon />
+                      </HomeMagneticLink>
+                    ) : (
+                      <HomeMagneticLink
+                        href="/sign-up"
+                        strength={0.38}
+                        className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-7 py-3 text-sm font-semibold text-white shadow-brand-glow transition-[opacity,box-shadow] hover:opacity-95 sm:w-auto"
+                      >
+                        {t("heroPrimaryCta")}
+                        <ArrowRightIcon />
+                      </HomeMagneticLink>
+                    )}
+                    {!isAuthenticated && publicDemoPath ? (
+                      <HomeMagneticLink
+                        href={publicDemoPath}
+                        strength={0.28}
+                        maxDistance={10}
+                        className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-7 py-3 text-sm font-semibold text-white shadow-[0_18px_50px_-28px_rgba(0,0,0,0.55)] backdrop-blur-sm transition-colors hover:bg-white/10 sm:w-auto"
+                      >
+                        {t("accessDashboard")}
+                        <ArrowRightIcon />
+                      </HomeMagneticLink>
+                    ) : null}
+                  </HomeBlurFadeReveal>
+
+                  <p className="mt-6 w-full min-w-0 text-center text-xs font-medium tracking-[0.01em] text-white/45 lg:text-left">
+                    {t("heroTrust")}
                   </p>
                 </div>
-              </HomeBlurFadeReveal>
 
-              {isAuthenticated ? (
-                <HomeBlurFadeReveal delay={0.04} immediate>
-                  <p className="mb-4 text-sm font-medium text-white/70 lg:text-left">
-                    {welcomeMessage}
-                  </p>
-                </HomeBlurFadeReveal>
-              ) : null}
+                <div className="relative z-10 hidden min-h-[min(70vw,28rem)] overflow-visible lg:block">
+                  <DesktopHeroAlbumStage />
+                </div>
+              </div>
 
-              <HomeBlurFadeReveal delay={0.08} immediate>
-                <h1 className="w-full min-w-0 max-w-full text-center text-[1.85rem] font-semibold leading-[1.15] tracking-[-0.045em] text-white min-[380px]:text-[2.05rem] sm:max-w-xl sm:text-balance sm:text-5xl sm:leading-[1.08] sm:tracking-[-0.055em] lg:text-left lg:text-[3.35rem] lg:leading-[1.06]">
-                  {t("heroHeadline")}
-                </h1>
-              </HomeBlurFadeReveal>
+              <div
+                className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-[#050508]"
+                aria-hidden
+              />
+            </section>
 
-              <HomeBlurFadeReveal delay={0.18} className="mx-auto mt-5 w-full min-w-0 max-w-lg lg:mx-0">
-                <p className="text-center text-base leading-7 text-white/68 sm:text-lg sm:leading-8 lg:text-left">
-                  {t("heroSub")}
-                </p>
-              </HomeBlurFadeReveal>
+            <HomeJourneyExploreSection />
 
-              <HomeBlurFadeReveal delay={0.32} className="mt-8 flex w-full min-w-0 flex-col items-center gap-3 sm:flex-row sm:flex-wrap sm:justify-center lg:items-start lg:justify-start">
-                {isAuthenticated ? (
-                  <HomeMagneticLink
-                    href="/dashboard"
-                    strength={0.38}
-                    className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,var(--brand-pink)_0%,var(--brand-cyan)_100%)] px-7 py-3 text-sm font-semibold text-white shadow-[0_22px_70px_-24px_rgb(224_64_136_/_0.55),0_22px_70px_-24px_rgb(79_144_224_/_0.5)] transition-[opacity,box-shadow] hover:opacity-95 sm:w-auto"
-                  >
-                    {t("goToDashboard")}
-                    <ArrowRightIcon />
-                  </HomeMagneticLink>
-                ) : (
-                  <HomeMagneticLink
-                    href="/sign-up"
-                    strength={0.38}
-                    className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-7 py-3 text-sm font-semibold text-white shadow-brand-glow transition-[opacity,box-shadow] hover:opacity-95 sm:w-auto"
-                  >
-                    {t("heroPrimaryCta")}
-                    <ArrowRightIcon />
-                  </HomeMagneticLink>
-                )}
-                {!isAuthenticated && publicDemoPath ? (
-                  <HomeMagneticLink
-                    href={publicDemoPath}
-                    strength={0.28}
-                    maxDistance={10}
-                    className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-7 py-3 text-sm font-semibold text-white shadow-[0_18px_50px_-28px_rgba(0,0,0,0.55)] backdrop-blur-sm transition-colors hover:bg-white/10 sm:w-auto"
-                  >
-                    {t("accessDashboard")}
-                    <ArrowRightIcon />
-                  </HomeMagneticLink>
-                ) : null}
-              </HomeBlurFadeReveal>
+            <HomeJourneyInteractSection />
 
-              <HomeBlurFadeReveal delay={0.42} className="mt-6 w-full min-w-0">
-                <p className="text-center text-xs font-medium tracking-[0.01em] text-white/45 lg:text-left">
-                  {t("heroTrust")}
-                </p>
-              </HomeBlurFadeReveal>
-            </div>
+            <HomeJourneyImportSection
+              isAuthenticated={isAuthenticated}
+              publicDemoPath={publicDemoPath}
+            />
 
-            <div className="relative z-10 hidden overflow-visible lg:block">
-              <HomeHeroAlbumField variant="stage" />
-            </div>
+            <HomeClosingSection />
           </div>
-
-          <div
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-[#050508]"
-            aria-hidden
-          />
-        </section>
-
-        <HomeJourneyExploreSection />
-
-        <HomeJourneyInteractSection />
-
-        <HomeJourneyImportSection
-          isAuthenticated={isAuthenticated}
-          publicDemoPath={publicDemoPath}
-        />
-
-        <HomeClosingSection />
-        </div>
-      </main>
-      <Footer variant="home" />
+        </main>
+        <Footer variant="home" />
       </div>
     </HomeSmoothScroll>
   );

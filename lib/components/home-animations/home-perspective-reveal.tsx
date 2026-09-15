@@ -89,6 +89,7 @@ const directionOffset = {
 
 /**
  * Fade + blur + slide — révélation douce pour blocs de contenu.
+ * `immediate` keeps opacity visible from first paint (safer near LCP).
  */
 export function HomeBlurFadeReveal({
   children,
@@ -111,15 +112,25 @@ export function HomeBlurFadeReveal({
     filter: "blur(0px)",
   };
 
-  return (
-    <motion.div
-      className={className}
-      initial={{
+  // Above-the-fold: never start at opacity 0 (blocks LCP until hydration).
+  const initial = immediate
+    ? {
+        opacity: 1,
+        x: offset.x * 0.35,
+        y: offset.y * 0.35,
+        filter: "blur(6px)",
+      }
+    : {
         opacity: 0,
         x: offset.x,
         y: offset.y,
         filter: "blur(16px)",
-      }}
+      };
+
+  return (
+    <motion.div
+      className={className}
+      initial={initial}
       {...(immediate
         ? { animate: animateTo }
         : {
@@ -127,7 +138,7 @@ export function HomeBlurFadeReveal({
             viewport: { once: true, amount: 0.05, margin: "0px 0px 100px 0px" },
           })}
       transition={{
-        duration: 0.75,
+        duration: immediate ? 0.55 : 0.75,
         ease: EASE_OUT_EXPO,
         delay,
       }}

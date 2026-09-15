@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
+import { hasLocale } from "next-intl";
 import { notFound } from "next/navigation";
-import { getLocale, getTranslations } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
+import { routing } from "@/i18n/routing";
 import { GuideArticle } from "@/lib/components/guide-article";
 import {
   GUIDE_MESSAGE_KEYS,
-  GUIDE_SLUGS,
   guidePath,
   isGuideSlug,
   type GuideSlug,
@@ -15,17 +16,15 @@ type Props = {
   params: Promise<{ locale: string; slug: string }>;
 };
 
-export function generateStaticParams() {
-  return GUIDE_SLUGS.map((slug) => ({ slug }));
-}
-
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params;
-  if (!isGuideSlug(slug)) return {};
+  const { locale, slug } = await params;
+  if (!hasLocale(routing.locales, locale) || !isGuideSlug(slug)) return {};
 
-  const locale = await getLocale();
   const messageKey = GUIDE_MESSAGE_KEYS[slug];
-  const t = await getTranslations(`guides.pages.${messageKey}`);
+  const t = await getTranslations({
+    locale,
+    namespace: `guides.pages.${messageKey}`,
+  });
   const path = guidePath(slug);
 
   return {

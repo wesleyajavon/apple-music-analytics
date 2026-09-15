@@ -1,15 +1,22 @@
+import { hasLocale } from "next-intl";
+import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { Footer } from "@/lib/components/footer";
 import { SoundprintBrandMark } from "@/lib/components/soundprint-brand-mark";
 import { Link } from "@/i18n/navigation";
-import { getTranslations } from "next-intl/server";
+import { routing } from "@/i18n/routing";
 import { GUIDE_MESSAGE_KEYS, GUIDE_SLUGS, guidePath } from "@/lib/seo/guide-slugs";
 
-export default async function GuidesLayout({
-  children,
-}: {
+type Props = {
   children: React.ReactNode;
-}) {
-  const tNav = await getTranslations("guides.nav");
+  params: Promise<{ locale: string }>;
+};
+
+export default async function GuidesLayout({ children, params }: Props) {
+  const { locale } = await params;
+  if (!hasLocale(routing.locales, locale)) notFound();
+
+  const tNav = await getTranslations({ locale, namespace: "guides.nav" });
 
   return (
     <div className="flex min-h-screen flex-col bg-background">

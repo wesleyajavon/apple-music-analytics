@@ -3,6 +3,7 @@ import { hasLocale } from "next-intl";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { routing } from "@/i18n/routing";
+import { getSiteUrl } from "@/lib/seo/site-url";
 
 type Props = {
   children: React.ReactNode;
@@ -17,13 +18,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   const t = await getTranslations({ locale, namespace: "metadata" });
-
-  const ogImage = "/brand/soundprint-ai-logo.png";
+  const siteUrl = getSiteUrl();
+  const ogImage = "/brand/dashboard-preview.png";
   const faviconUrl = "/brand/favicon.png";
 
   return {
-    title: t("title"),
+    metadataBase: new URL(siteUrl),
+    title: {
+      default: t("title"),
+      template: t("titleTemplate"),
+    },
     description: t("description"),
+    applicationName: "Soundprint-AI",
+    authors: [{ name: "Soundprint-AI" }],
+    creator: "Soundprint-AI",
     manifest: "/manifest.webmanifest",
     appleWebApp: {
       capable: true,
@@ -35,19 +43,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       apple: [{ url: faviconUrl, sizes: "180x180", type: "image/png" }],
     },
     openGraph: {
+      type: "website",
+      locale,
+      siteName: "Soundprint-AI",
       title: t("title"),
       description: t("description"),
       images: [
         {
           url: ogImage,
-          width: 512,
-          height: 512,
-          alt: "Soundprint-AI",
+          width: 2880,
+          height: 1556,
+          alt: t("ogImageAlt"),
         },
       ],
     },
     twitter: {
-      card: "summary",
+      card: "summary_large_image",
       title: t("title"),
       description: t("description"),
       images: [ogImage],

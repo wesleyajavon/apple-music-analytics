@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { redirect } from "@/i18n/navigation";
 import { getCurrentUserId } from "@/lib/auth/get-current-user-id";
 import { DuetAcceptClient } from "@/lib/components/duet/duet-accept-client";
@@ -8,6 +9,10 @@ type Props = {
 };
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 export default async function DuetAcceptPage({ params, searchParams }: Props) {
   const { locale } = await params;

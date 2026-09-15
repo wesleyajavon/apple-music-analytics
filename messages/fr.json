@@ -3681,7 +3681,9 @@
     }
   },
   "metadata": {
-    "title": "Soundprint-AI Dashboard",
-    "description": "Tableau de bord personnel pour analyser vos habitudes de streaming Apple Music"
+    "title": "Soundprint-AI — Voyez la musique qui vous a façonné",
+    "titleTemplate": "%s · Soundprint-AI",
+    "description": "Importez votre historique Apple Music ou Spotify. Explorez vos tendances, discutez avec vos données, et comparez vos streams entre amis.",
+    "ogImageAlt": "Aperçu produit Soundprint-AI"
   }
 }

@@ -25,7 +25,7 @@ export function Footer({ variant = "dashboard" }: { variant?: FooterVariant }) {
   const hrefWithDemo = (href: string) =>
     publicProfileUserId ? withPublicDemoUserId(href, publicProfileUserId) : href;
 
-  const links = [
+  const productLinks = [
     { href: hrefWithDemo("/dashboard/overview"), label: t("overview") },
     { href: hrefWithDemo("/dashboard/about"), label: t("about") },
     {
@@ -34,12 +34,18 @@ export function Footer({ variant = "dashboard" }: { variant?: FooterVariant }) {
     },
     { href: hrefWithDemo("/dashboard/insights"), label: t("methodology") },
     { href: "/api-docs", label: t("apiDocs") },
+  ];
+
+  const legalLinks = [
     { href: "/legal/privacy", label: t("privacy") },
     { href: "/legal/terms", label: t("terms") },
     { href: "/legal/cookies", label: t("cookies") },
   ];
 
   const isHome = variant === "home";
+  const links = isHome
+    ? [...legalLinks, ...productLinks.filter((l) => l.label === t("demo") || l.label === t("about"))]
+    : [...productLinks, ...legalLinks];
 
   return (
     <footer

@@ -3185,8 +3185,8 @@
   "home": {
     "title": "Soundprint-AI",
     "heroEyebrow": "Apple Music · Spotify",
-    "heroHeadline": "Voyez la musique qui vous a façonné.",
-    "heroSub": "Laissez l’IA vous en dire plus sur votre historique d’écoute.",
+    "heroHeadline": "Vos stats de streaming Apple Music & Spotify.",
+    "heroSub": "Soundprint-AI s’adresse aux auditeurs qui veulent de vraies stats de streaming à partir de leur historique — tendances, insights IA et comparaisons entre amis. Privé par conception.",
     "heroTrust": "Privé par conception · Vos fichiers, votre compte",
     "heroGradient": "Tout sur vos streams",
     "welcome": "Bienvenue sur Soundprint-AI",
@@ -3428,22 +3428,23 @@
     "closingSection": {
       "eyebrow": "Des questions ?",
       "title": "Tout ce qu'il faut savoir avant de commencer",
+      "legalLinksAria": "Mentions légales",
       "faq": {
+        "what": {
+          "question": "Qu’est-ce que Soundprint-AI ?",
+          "answer": "Soundprint-AI est une app de stats de streaming personnelles pour Apple Music et Spotify. Importez votre historique d’écoute pour explorer tendances, insights IA, deepdives artiste et comparaisons entre amis — sans vendre vos données."
+        },
         "export": {
-          "question": "Comment importer mon historique Apple Music ou Spotify ?",
-          "answer": "Après création de compte, l'onboarding guidé vous accompagne pour demander l'export de votre historique de streams depuis Apple Music ou Spotify, puis le télécharger. La demande d'historique peut prendre quelques jours côté Apple ou Spotify ; une fois le fichier reçu, la plupart des imports se terminent en quelques minutes."
+          "question": "Comment importer mon historique de streaming Apple Music ou Spotify ?",
+          "answer": "Après création de compte, l’onboarding guidé vous accompagne pour demander l’export officiel de votre historique depuis Apple Music ou Spotify, puis le téléverser. La demande peut prendre quelques jours côté Apple ou Spotify ; une fois le fichier reçu, la plupart des imports se terminent en quelques minutes."
         },
         "privacy": {
-          "question": "Mes données de streams sont-elles privées ?",
-          "answer": "Oui. Vos données vous appartiennent. Nous ne vendons pas votre historique de streams, et vous pouvez tout exporter ou supprimer à tout moment depuis les paramètres de votre compte."
+          "question": "Mes stats de streaming sont-elles privées ?",
+          "answer": "Oui. Vos données vous appartiennent — nous ne vendons pas votre historique, et vous pouvez tout exporter ou supprimer à tout moment dans les paramètres. Lisez notre <privacy>Politique de confidentialité</privacy> et nos <terms>Conditions d’utilisation</terms>."
         },
         "pricing": {
-          "question": "Soundprint est-il gratuit ?",
-          "answer": "Oui, Soundprint est gratuit. Créez un compte, importez votre historique et explorez votre dashboard sans frais."
-        },
-        "deepdive": {
-          "question": "Qu'est-ce qu'un deepdive artiste ?",
-          "answer": "Choisissez n'importe quel artiste de votre historique — ou tapez son nom suivi de deepdive dans le chat Soundprint. Soundprint récupère vos streams avec cet artiste et affiche totaux, top titres, détail année par année et un résumé clair de votre histoire avec cet artiste."
+          "question": "Soundprint-AI est-il gratuit ?",
+          "answer": "Oui. Créez un compte, importez votre historique de streaming et explorez votre tableau de stats sans frais."
         }
       }
     }

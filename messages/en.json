@@ -3183,8 +3183,8 @@
   "home": {
     "title": "Soundprint-AI",
     "heroEyebrow": "Apple Music · Spotify",
-    "heroHeadline": "See the music that made you.",
-    "heroSub": "Let AI tell you more about your listening history.",
+    "heroHeadline": "Your Apple Music & Spotify streaming stats.",
+    "heroSub": "Soundprint-AI is for listeners who want real streaming stats from their history—trends, AI insights, and friend comparisons. Private by design.",
     "heroTrust": "Private by design · Your files, your account",
     "heroGradient": "Everything on your streams",
     "welcome": "Welcome to Soundprint-AI",
@@ -3426,22 +3426,23 @@
     "closingSection": {
       "eyebrow": "Questions?",
       "title": "Everything you need to know before you start",
+      "legalLinksAria": "Legal",
       "faq": {
+        "what": {
+          "question": "What is Soundprint-AI?",
+          "answer": "Soundprint-AI is a personal streaming stats app for Apple Music and Spotify. Import your listening history to explore trends, AI insights, artist deepdives, and friend comparisons—without selling your data."
+        },
         "export": {
-          "question": "How do I import my Apple Music or Spotify history?",
-          "answer": "After creating an account, guided onboarding walks you through requesting your streaming history export from Apple Music or Spotify and uploading it. The history request itself can take a few days from Apple or Spotify; once you have the file, most imports complete in minutes."
+          "question": "How do I import my Apple Music or Spotify streaming history?",
+          "answer": "After creating an account, guided onboarding walks you through requesting your official streaming history export from Apple Music or Spotify and uploading it. The request can take a few days from Apple or Spotify; once you have the file, most imports complete in minutes."
         },
         "privacy": {
-          "question": "Is my streaming data private?",
-          "answer": "Yes. Your data is yours. We don't sell your streaming history, and you can export or delete everything at any time from your account settings."
+          "question": "Are my streaming stats private?",
+          "answer": "Yes. Your data is yours—we don't sell your streaming history, and you can export or delete everything anytime in Settings. Read our <privacy>Privacy Policy</privacy> and <terms>Terms of Service</terms>."
         },
         "pricing": {
-          "question": "Is Soundprint free?",
-          "answer": "Yes, Soundprint is free to use. Create an account, import your history, and explore your dashboard at no cost."
-        },
-        "deepdive": {
-          "question": "What's an artist deepdive?",
-          "answer": "Pick any artist from your history—or type their name plus deepdive in Soundprint chat. Soundprint fetches your streams with that artist and shows totals, top tracks, a year-by-year breakdown, and a clear written summary of your history with that artist."
+          "question": "Is Soundprint-AI free?",
+          "answer": "Yes. Create an account, import your streaming history, and explore your stats dashboard at no cost."
         }
       }
     }

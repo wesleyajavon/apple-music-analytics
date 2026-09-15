@@ -58,10 +58,12 @@ export function Footer({ variant = "dashboard" }: { variant?: FooterVariant }) {
   ];
 
   const isHome = variant === "home";
+  const onGuides = pathname.includes("/guides");
+  const onLegal = pathname.includes("/legal");
   const links = isHome
     ? [
-        ...guideLinks,
-        ...legalLinks,
+        ...(onGuides ? [] : guideLinks),
+        ...(onLegal ? [] : legalLinks),
         ...productLinks.filter((l) => l.label === t("demo") || l.label === t("about")),
       ]
     : [...productLinks, ...legalLinks];

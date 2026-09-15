@@ -25,7 +25,6 @@ function legalLinkClassName(className?: string) {
 
 export function HomeClosingSection() {
   const t = useTranslations("home.closingSection");
-  const tLegal = useTranslations("legal.nav");
 
   return (
     <section id="faq" className="scroll-mt-28 mx-auto w-full max-w-7xl px-4 pb-16 sm:px-6 sm:pb-24 lg:px-8">
@@ -73,49 +72,6 @@ export function HomeClosingSection() {
           </HomeBlurFadeReveal>
         ))}
       </div>
-
-      <HomeBlurFadeReveal delay={0.28} className="mx-auto mt-8 max-w-2xl space-y-4 lg:mx-0">
-        <nav
-          className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm text-white/45 lg:justify-start"
-          aria-label={t("guidesLinksAria")}
-        >
-          <Link
-            href="/guides/apple-music-streaming-stats"
-            className="transition-colors hover:text-white"
-          >
-            {t("guidesAppleMusic")}
-          </Link>
-          <Link
-            href="/guides/spotify-listening-history"
-            className="transition-colors hover:text-white"
-          >
-            {t("guidesSpotify")}
-          </Link>
-          <Link
-            href="/guides/soundprint-vs-replay"
-            className="transition-colors hover:text-white"
-          >
-            {t("guidesVsReplay")}
-          </Link>
-        </nav>
-        <nav
-          className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm text-white/45 lg:justify-start"
-          aria-label={t("legalLinksAria")}
-        >
-          <Link
-            href="/legal/privacy"
-            className="transition-colors hover:text-white"
-          >
-            {tLegal("privacy")}
-          </Link>
-          <Link href="/legal/terms" className="transition-colors hover:text-white">
-            {tLegal("terms")}
-          </Link>
-          <Link href="/legal/cookies" className="transition-colors hover:text-white">
-            {tLegal("cookies")}
-          </Link>
-        </nav>
-      </HomeBlurFadeReveal>
     </section>
   );
 }
